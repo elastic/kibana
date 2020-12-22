@@ -20,6 +20,7 @@ export declare class IndexPattern implements IIndexPattern
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
+|  [allowNoIndex](./kibana-plugin-plugins-data-server.indexpattern.allownoindex.md) |  | <code>boolean</code> | prevents errors when index pattern exists before indices |
 |  [deleteFieldFormat](./kibana-plugin-plugins-data-server.indexpattern.deletefieldformat.md) |  | <code>(fieldName: string) =&gt; void</code> |  |
 |  [fieldAttrs](./kibana-plugin-plugins-data-server.indexpattern.fieldattrs.md) |  | <code>FieldAttrs</code> |  |
 |  [fieldFormatMap](./kibana-plugin-plugins-data-server.indexpattern.fieldformatmap.md) |  | <code>Record&lt;string, any&gt;</code> |  |

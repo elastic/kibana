@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Alert, SanitizedAlert } from '../../../alerts/common';
+import { Alert, AlertTypeParams, SanitizedAlert } from '../../../alerts/common';
 import { AlertParamType, AlertMessageTokenType, AlertSeverity } from '../enums';
 
-export type CommonAlert = Alert | SanitizedAlert;
+export type CommonAlert = Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 
 export interface CommonAlertStatus {
   states: CommonAlertState[];
-  rawAlert: Alert | SanitizedAlert;
+  rawAlert: Alert<AlertTypeParams> | SanitizedAlert<AlertTypeParams>;
 }
 
 export interface CommonAlertState {
@@ -22,6 +22,7 @@ export interface CommonAlertState {
 
 export interface CommonAlertFilter {
   nodeUuid?: string;
+  shardId?: string;
 }
 
 export interface CommonAlertParamDetail {
@@ -103,6 +104,7 @@ export interface AlertUiState {
 
 export interface AlertMessage {
   text: string; // Do this. #link this is a link #link
+  code?: string;
   nextSteps?: AlertMessage[];
   tokens?: AlertMessageToken[];
 }
@@ -164,6 +166,20 @@ export interface AlertMemoryUsageNodeStats extends AlertNodeStats {
 
 export interface AlertMissingData extends AlertNodeStats {
   gapDuration: number;
+}
+export interface CCRReadExceptionsStats {
+  remoteCluster: string;
+  followerIndex: string;
+  shardId: number;
+  leaderIndex: string;
+  lastReadException: { type: string; reason: string };
+  clusterUuid: string;
+  ccs: string;
+}
+
+export interface CCRReadExceptionsUIMeta extends CCRReadExceptionsStats {
+  instanceId: string;
+  itemLabel: string;
 }
 
 export interface AlertData {

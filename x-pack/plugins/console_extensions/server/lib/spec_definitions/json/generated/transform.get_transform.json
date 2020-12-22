@@ -3,7 +3,8 @@
     "url_params": {
       "from": 0,
       "size": 0,
-      "allow_no_match": "__flag__"
+      "allow_no_match": "__flag__",
+      "exclude_generated": "__flag__"
     },
     "methods": [
       "GET"

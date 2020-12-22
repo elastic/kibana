@@ -60,7 +60,7 @@ const wrapError = (error: any): CustomHttpResponseOptions<ResponseError> => {
   const boom = Boom.isBoom(error) ? error : Boom.boomify(error, options);
   return {
     body: boom,
-    headers: boom.output.headers,
+    headers: boom.output.headers as { [key: string]: string },
     statusCode: boom.output.statusCode,
   };
 };
@@ -338,6 +338,7 @@ export class Plugin {
               }
             },
             server: {
+              route: () => {},
               config: legacyConfigWrapper,
               newPlatform: {
                 setup: {

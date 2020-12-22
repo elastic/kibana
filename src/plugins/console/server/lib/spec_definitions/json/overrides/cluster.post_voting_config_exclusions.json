@@ -1,0 +1,12 @@
+{
+  "cluster.post_voting_config_exclusions": {
+    "url_params": {
+      "wait_for_removal": {
+        "__one_of": [
+          false,
+          true
+        ]
+      }
+    }
+  }
+}

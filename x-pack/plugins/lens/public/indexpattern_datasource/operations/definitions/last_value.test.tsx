@@ -13,7 +13,7 @@ import { dataPluginMock } from '../../../../../../../src/plugins/data/public/moc
 import { createMockedIndexPattern } from '../../mocks';
 import { LastValueIndexPatternColumn } from './last_value';
 import { lastValueOperation } from './index';
-import { IndexPatternPrivateState, IndexPattern, IndexPatternLayer } from '../../types';
+import type { IndexPattern, IndexPatternLayer } from '../../types';
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
@@ -22,52 +22,41 @@ const defaultProps = {
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
+  indexPattern: {
+    ...createMockedIndexPattern(),
+    hasRestrictions: false,
+  } as IndexPattern,
 };
 
 describe('last_value', () => {
-  let state: IndexPatternPrivateState;
+  let layer: IndexPatternLayer;
   const InlineOptions = lastValueOperation.paramEditor!;
 
   beforeEach(() => {
-    const indexPattern = createMockedIndexPattern();
-    state = {
-      indexPatternRefs: [],
-      indexPatterns: {
-        '1': {
-          ...indexPattern,
-          hasRestrictions: false,
-        } as IndexPattern,
-      },
-      existingFields: {},
-      currentIndexPatternId: '1',
-      isFirstExistenceFetch: false,
-      layers: {
-        first: {
-          indexPatternId: '1',
-          columnOrder: ['col1', 'col2'],
-          columns: {
-            col1: {
-              label: 'Top value of category',
-              dataType: 'string',
-              isBucketed: true,
-              operationType: 'terms',
-              params: {
-                orderBy: { type: 'alphabetical' },
-                size: 3,
-                orderDirection: 'asc',
-              },
-              sourceField: 'category',
-            },
-            col2: {
-              label: 'Last value of a',
-              dataType: 'number',
-              isBucketed: false,
-              sourceField: 'a',
-              operationType: 'last_value',
-              params: {
-                sortField: 'datefield',
-              },
-            },
+    layer = {
+      indexPatternId: '1',
+      columnOrder: ['col1', 'col2'],
+      columns: {
+        col1: {
+          label: 'Top value of category',
+          dataType: 'string',
+          isBucketed: true,
+          operationType: 'terms',
+          params: {
+            orderBy: { type: 'alphabetical' },
+            size: 3,
+            orderDirection: 'asc',
+          },
+          sourceField: 'category',
+        },
+        col2: {
+          label: 'Last value of a',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'a',
+          operationType: 'last_value',
+          params: {
+            sortField: 'datefield',
           },
         },
       },
@@ -76,7 +65,7 @@ describe('last_value', () => {
 
   describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
-      const lastValueColumn = state.layers.first.columns.col2 as LastValueIndexPatternColumn;
+      const lastValueColumn = layer.columns.col2 as LastValueIndexPatternColumn;
       const esAggsFn = lastValueOperation.toEsAggsFn(
         { ...lastValueColumn, params: { ...lastValueColumn.params } },
         'col1',
@@ -345,15 +334,14 @@ describe('last_value', () => {
 
   describe('param editor', () => {
     it('should render current sortField', () => {
-      const setStateSpy = jest.fn();
+      const updateLayerSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
-          state={state}
-          setState={setStateSpy}
+          layer={layer}
+          updateLayer={updateLayerSpy}
           columnId="col1"
-          currentColumn={state.layers.first.columns.col2 as LastValueIndexPatternColumn}
-          layerId="first"
+          currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
         />
       );
 
@@ -363,15 +351,14 @@ describe('last_value', () => {
     });
 
     it('should update state when changing sortField', () => {
-      const setStateSpy = jest.fn();
+      const updateLayerSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
-          state={state}
-          setState={setStateSpy}
-          columnId="col1"
-          currentColumn={state.layers.first.columns.col2 as LastValueIndexPatternColumn}
-          layerId="first"
+          layer={layer}
+          updateLayer={updateLayerSpy}
+          columnId="col2"
+          currentColumn={layer.columns.col2 as LastValueIndexPatternColumn}
         />
       );
 
@@ -380,20 +367,15 @@ describe('last_value', () => {
         .find(EuiComboBox)
         .prop('onChange')!([{ label: 'datefield2', value: 'datefield2' }]);
 
-      expect(setStateSpy).toHaveBeenCalledWith({
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col2: {
-                ...state.layers.first.columns.col2,
-                params: {
-                  ...(state.layers.first.columns.col2 as LastValueIndexPatternColumn).params,
-                  sortField: 'datefield2',
-                },
-              },
+      expect(updateLayerSpy).toHaveBeenCalledWith({
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col2: {
+            ...layer.columns.col2,
+            params: {
+              ...(layer.columns.col2 as LastValueIndexPatternColumn).params,
+              sortField: 'datefield2',
             },
           },
         },
@@ -403,10 +385,10 @@ describe('last_value', () => {
 
   describe('getErrorMessage', () => {
     let indexPattern: IndexPattern;
-    let layer: IndexPatternLayer;
+    let errorLayer: IndexPatternLayer;
     beforeEach(() => {
       indexPattern = createMockedIndexPattern();
-      layer = {
+      errorLayer = {
         columns: {
           col1: {
             dataType: 'boolean',
@@ -423,53 +405,55 @@ describe('last_value', () => {
       };
     });
     it('returns undefined if sourceField exists and sortField is of type date ', () => {
-      expect(lastValueOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual(undefined);
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual(
+        undefined
+      );
     });
     it('shows error message if the sourceField does not exist in index pattern', () => {
-      layer = {
-        ...layer,
+      errorLayer = {
+        ...errorLayer,
         columns: {
           col1: {
-            ...layer.columns.col1,
+            ...errorLayer.columns.col1,
             sourceField: 'notExisting',
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
         'Field notExisting was not found',
       ]);
     });
     it('shows error message  if the sortField does not exist in index pattern', () => {
-      layer = {
-        ...layer,
+      errorLayer = {
+        ...errorLayer,
         columns: {
           col1: {
-            ...layer.columns.col1,
+            ...errorLayer.columns.col1,
             params: {
-              ...layer.columns.col1.params,
+              ...errorLayer.columns.col1.params,
               sortField: 'notExisting',
             },
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
         'Field notExisting was not found',
       ]);
     });
     it('shows error message if the sortField is not date', () => {
-      layer = {
-        ...layer,
+      errorLayer = {
+        ...errorLayer,
         columns: {
           col1: {
-            ...layer.columns.col1,
+            ...errorLayer.columns.col1,
             params: {
-              ...layer.columns.col1.params,
+              ...errorLayer.columns.col1.params,
               sortField: 'bytes',
             },
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(layer, 'col1', indexPattern)).toEqual([
+      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
         'Field bytes is not a date field and cannot be used for sorting',
       ]);
     });
