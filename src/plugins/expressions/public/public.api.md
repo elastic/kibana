@@ -12,7 +12,6 @@ import { EventEmitter } from 'events';
 import { KibanaRequest } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
-import { PersistedState } from 'src/plugins/visualizations/public';
 import { Plugin as Plugin_2 } from 'src/core/public';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/public';
 import React from 'react';
@@ -924,8 +923,7 @@ export interface IInterpreterRenderHandlers {
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
-    // (undocumented)
-    uiState?: PersistedState;
+    uiState?: unknown;
     // (undocumented)
     update: (params: any) => void;
 }
@@ -1095,6 +1093,18 @@ export interface SerializedFieldFormat<TParams = Record<string, any>> {
 //
 // @public (undocumented)
 export type Style = ExpressionTypeStyle;
+
+// Warning: (ae-missing-release-tag) "TablesAdapter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export class TablesAdapter extends EventEmitter {
+    // (undocumented)
+    logDatatable(name: string, datatable: Datatable): void;
+    // (undocumented)
+    get tables(): {
+        [key: string]: Datatable;
+    };
+    }
 
 // Warning: (ae-missing-release-tag) "TextAlignment" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //

@@ -139,6 +139,9 @@ a| <<index-patterns, Index Patterns>>
 | Copy, edit, delete, import, and export your saved objects.
 These include dashboards, visualizations, maps, index patterns, Canvas workpads, and more.
 
+| <<managing-tags, Tags>>
+|Create, manage, and assign tags to your saved objects.
+
 | <<xpack-spaces, Spaces>>
 | Create spaces to organize your dashboards and other saved objects into categories.
 A space is isolated from all other spaces,
@@ -195,6 +198,8 @@ include::{kib-repo-dir}/management/numeral.asciidoc[]
 include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-tags.asciidoc[]
 
 include::security/index.asciidoc[]
 

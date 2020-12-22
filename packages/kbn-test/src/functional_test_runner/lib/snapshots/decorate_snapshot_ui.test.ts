@@ -28,7 +28,7 @@ describe('decorateSnapshotUi', () => {
     let lifecycle: Lifecycle;
     beforeEach(() => {
       lifecycle = new Lifecycle();
-      decorateSnapshotUi(lifecycle, false);
+      decorateSnapshotUi({ lifecycle, updateSnapshots: false, isCi: false });
     });
 
     it('passes when the snapshot matches the actual value', async () => {
@@ -109,7 +109,7 @@ describe('decorateSnapshotUi', () => {
     let lifecycle: Lifecycle;
     beforeEach(() => {
       lifecycle = new Lifecycle();
-      decorateSnapshotUi(lifecycle, true);
+      decorateSnapshotUi({ lifecycle, updateSnapshots: true, isCi: false });
     });
 
     it("doesn't throw if the value does not match", async () => {
@@ -128,6 +128,32 @@ describe('decorateSnapshotUi', () => {
       expect(() => {
         expectSnapshot('bar').toMatchInline(`"foo"`);
       }).not.toThrow();
+    });
+  });
+
+  describe('when running on ci', () => {
+    let lifecycle: Lifecycle;
+    beforeEach(() => {
+      lifecycle = new Lifecycle();
+      decorateSnapshotUi({ lifecycle, updateSnapshots: false, isCi: true });
+    });
+
+    it('throws on new snapshots', async () => {
+      const test: Test = {
+        title: 'Test',
+        file: 'foo.ts',
+        parent: {
+          file: 'foo.ts',
+          tests: [],
+          suites: [],
+        },
+      } as any;
+
+      await lifecycle.beforeEachTest.trigger(test);
+
+      expect(() => {
+        expectSnapshot('bar').toMatchInline();
+      }).toThrow();
     });
   });
 });

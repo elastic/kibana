@@ -14,8 +14,7 @@ import { urlSearch } from '../../test_utilities/url_search';
 // the resolver component instance ID, used by the react code to distinguish piece of global state from those used by other resolver instances
 const resolverComponentInstanceID = 'resolverComponentInstanceID';
 
-// FLAKY: https://github.com/elastic/kibana/issues/85714
-describe.skip(`Resolver: when analyzing a tree with only the origin and paginated related events, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
+describe(`Resolver: when analyzing a tree with only the origin and paginated related events, and when the component instance ID is ${resolverComponentInstanceID}`, () => {
   /**
    * Get (or lazily create and get) the simulator.
    */
@@ -41,6 +40,8 @@ describe.skip(`Resolver: when analyzing a tree with only the origin and paginate
           resolverComponentInstanceID,
           history: memoryHistory,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
         return simulatorInstance;
       }
@@ -53,6 +54,7 @@ describe.skip(`Resolver: when analyzing a tree with only the origin and paginate
 
   describe(`when the URL query string is showing a resolver with nodeID origin, panel view nodeEventsInCategory, and eventCategory registry`, () => {
     beforeEach(() => {
+      simulator(); // Initialize simulator in beforeEach to use instance in tests
       memoryHistory.push({
         search: urlSearch(resolverComponentInstanceID, {
           panelParameters: { nodeID: 'origin', eventCategory: 'registry' },
@@ -75,6 +77,7 @@ describe.skip(`Resolver: when analyzing a tree with only the origin and paginate
     });
     describe('when the user clicks the load more button', () => {
       beforeEach(async () => {
+        simulator(); // Initialize simulator in beforeEach to use instance in tests
         const loadMore = await simulator().resolve('resolver:nodeEventsInCategory:loadMore');
         if (loadMore) {
           loadMore.simulate('click', { button: 0 });

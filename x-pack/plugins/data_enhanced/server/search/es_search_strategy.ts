@@ -33,6 +33,7 @@ import {
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
 import { AsyncSearchResponse } from './types';
+import { KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -98,9 +99,13 @@ export const enhancedEsSearchStrategyProvider = (
     search: (request, options: IAsyncSearchOptions, deps) => {
       logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
 
-      return request.indexType !== 'rollup'
-        ? asyncSearch(request, options, deps)
-        : from(rollupSearch(request, options, deps));
+      if (request.indexType === undefined) {
+        return asyncSearch(request, options, deps);
+      } else if (request.indexType === 'rollup') {
+        return from(rollupSearch(request, options, deps));
+      } else {
+        throw new KbnServerError('Unknown indexType', 400);
+      }
     },
     cancel: async (id, options, { esClient }) => {
       logger.debug(`cancel ${id}`);

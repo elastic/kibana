@@ -21,6 +21,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { IUiSettingsClient } from 'kibana/public';
+import type { PersistedState } from '../../visualizations/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { TimeseriesRenderValue, TimeseriesVisParams } from './metrics_fn';
@@ -63,7 +64,7 @@ export const getTimeseriesVisRenderer: (deps: {
           handlers={handlers}
           model={config.visParams}
           visData={config.visData as TimeseriesVisData}
-          uiState={handlers.uiState!}
+          uiState={handlers.uiState! as PersistedState}
         />
       </VisualizationContainer>,
       domNode

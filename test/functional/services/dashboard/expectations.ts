@@ -238,7 +238,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       });
     }
 
-    async dataTableNoResult(expectedCount: number) {
+    async dataTableNoResult() {
       log.debug(`DashboardExpect.dataTableNoResult`);
       await retry.try(async () => {
         await PageObjects.visChart.getTableVisNoResult();

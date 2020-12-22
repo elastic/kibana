@@ -12,16 +12,23 @@ import {
 } from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
+import { injectActionParams } from './inject_action_params';
 import {
   AlertAction,
+  AlertTypeParams,
+  AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertType,
-  AlertTypeParams,
   RawAlert,
 } from '../types';
+import { NormalizedAlertType } from '../alert_type_registry';
 
-interface CreateExecutionHandlerOptions {
+export interface CreateExecutionHandlerOptions<
+  Params extends AlertTypeParams,
+  State extends AlertTypeState,
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+> {
   alertId: string;
   alertName: string;
   tags?: string[];
@@ -29,7 +36,7 @@ interface CreateExecutionHandlerOptions {
   actions: AlertAction[];
   spaceId: string;
   apiKey: RawAlert['apiKey'];
-  alertType: AlertType;
+  alertType: NormalizedAlertType<Params, State, InstanceState, InstanceContext>;
   logger: Logger;
   eventLogger: IEventLogger;
   request: KibanaRequest;
@@ -44,7 +51,12 @@ interface ExecutionHandlerOptions {
   state: AlertInstanceState;
 }
 
-export function createExecutionHandler({
+export function createExecutionHandler<
+  Params extends AlertTypeParams,
+  State extends AlertTypeState,
+  InstanceState extends AlertInstanceState,
+  InstanceContext extends AlertInstanceContext
+>({
   logger,
   alertId,
   alertName,
@@ -57,7 +69,7 @@ export function createExecutionHandler({
   eventLogger,
   request,
   alertParams,
-}: CreateExecutionHandlerOptions) {
+}: CreateExecutionHandlerOptions<Params, State, InstanceState, InstanceContext>) {
   const alertTypeActionGroups = new Map(
     alertType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
@@ -94,7 +106,15 @@ export function createExecutionHandler({
             alertParams,
           }),
         };
-      });
+      })
+      .map((action) => ({
+        ...action,
+        params: injectActionParams({
+          alertId,
+          actionParams: action.params,
+          actionTypeId: action.actionTypeId,
+        }),
+      }));
 
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
