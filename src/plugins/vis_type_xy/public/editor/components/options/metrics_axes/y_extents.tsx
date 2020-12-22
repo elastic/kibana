@@ -21,7 +21,7 @@ import React, { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NumberInputOption } from '../../../../../../charts/public';
+import { NumberInputOption } from '../../../../../../vis_default_editor/public';
 
 import { Scale, ScaleType } from '../../../../types';
 import { SetScale } from './value_axis_options';

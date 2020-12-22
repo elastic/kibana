@@ -21,7 +21,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { SelectOption, SwitchOption } from '../../../../../../charts/public';
+import { SelectOption, SwitchOption } from '../../../../../../vis_default_editor/public';
 
 import { ChartType } from '../../../../../common';
 import { VisParams } from '../../../../types';

@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TmsLayer } from '../index';
 import { Vis } from '../../../visualizations/public';
-import { SelectOption, SwitchOption } from '../../../charts/public';
+import { SelectOption, SwitchOption } from '../../../vis_default_editor/public';
 import { WmsInternalOptions } from './wms_internal_options';
 import { WMSOptions } from '../common/types';
 
