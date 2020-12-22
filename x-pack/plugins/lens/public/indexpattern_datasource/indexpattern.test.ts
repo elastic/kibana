@@ -577,6 +577,9 @@ describe('IndexPattern Data Source', () => {
           "outputColumnId": Array [
             "col1",
           ],
+          "outputColumnName": Array [
+            "Count of records",
+          ],
           "targetUnit": Array [
             "h",
           ],

@@ -11,7 +11,7 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { percentileOperation } from './index';
-import { IndexPatternPrivateState, IndexPattern } from '../../types';
+import { IndexPattern, IndexPatternLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
 import { EuiFieldNumber } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
@@ -24,52 +24,41 @@ const defaultProps = {
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
   http: {} as HttpSetup,
+  indexPattern: {
+    ...createMockedIndexPattern(),
+    hasRestrictions: false,
+  } as IndexPattern,
 };
 
 describe('percentile', () => {
-  let state: IndexPatternPrivateState;
+  let layer: IndexPatternLayer;
   const InlineOptions = percentileOperation.paramEditor!;
 
   beforeEach(() => {
-    const indexPattern = createMockedIndexPattern();
-    state = {
-      indexPatternRefs: [],
-      indexPatterns: {
-        '1': {
-          ...indexPattern,
-          hasRestrictions: false,
-        } as IndexPattern,
-      },
-      existingFields: {},
-      currentIndexPatternId: '1',
-      isFirstExistenceFetch: false,
-      layers: {
-        first: {
-          indexPatternId: '1',
-          columnOrder: ['col1', 'col2'],
-          columns: {
-            col1: {
-              label: 'Top value of category',
-              dataType: 'string',
-              isBucketed: true,
-              operationType: 'terms',
-              params: {
-                orderBy: { type: 'alphabetical' },
-                size: 3,
-                orderDirection: 'asc',
-              },
-              sourceField: 'category',
-            },
-            col2: {
-              label: '23rd percentile of a',
-              dataType: 'number',
-              isBucketed: false,
-              sourceField: 'a',
-              operationType: 'percentile',
-              params: {
-                percentile: 23,
-              },
-            },
+    layer = {
+      indexPatternId: '1',
+      columnOrder: ['col1', 'col2'],
+      columns: {
+        col1: {
+          label: 'Top value of category',
+          dataType: 'string',
+          isBucketed: true,
+          operationType: 'terms',
+          params: {
+            orderBy: { type: 'alphabetical' },
+            size: 3,
+            orderDirection: 'asc',
+          },
+          sourceField: 'category',
+        },
+        col2: {
+          label: '23rd percentile of a',
+          dataType: 'number',
+          isBucketed: false,
+          sourceField: 'a',
+          operationType: 'percentile',
+          params: {
+            percentile: 23,
           },
         },
       },
@@ -78,12 +67,12 @@ describe('percentile', () => {
 
   describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
-      const percentileColumn = state.layers.first.columns.col2 as PercentileIndexPatternColumn;
+      const percentileColumn = layer.columns.col2 as PercentileIndexPatternColumn;
       const esAggsFn = percentileOperation.toEsAggsFn(
         percentileColumn,
         'col1',
         {} as IndexPattern,
-        state.layers.first
+        layer
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -146,15 +135,14 @@ describe('percentile', () => {
 
   describe('param editor', () => {
     it('should render current percentile', () => {
-      const setStateSpy = jest.fn();
+      const updateLayerSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
           {...defaultProps}
-          state={state}
-          setState={setStateSpy}
+          layer={layer}
+          updateLayer={updateLayerSpy}
           columnId="col2"
-          currentColumn={state.layers.first.columns.col2 as PercentileIndexPatternColumn}
-          layerId="first"
+          currentColumn={layer.columns.col2 as PercentileIndexPatternColumn}
         />
       );
 
@@ -165,15 +153,14 @@ describe('percentile', () => {
 
     it('should update state on change', async () => {
       jest.useFakeTimers();
-      const setStateSpy = jest.fn();
+      const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
           {...defaultProps}
-          state={state}
-          setState={setStateSpy}
+          layer={layer}
+          updateLayer={updateLayerSpy}
           columnId="col2"
-          currentColumn={state.layers.first.columns.col2 as PercentileIndexPatternColumn}
-          layerId="first"
+          currentColumn={layer.columns.col2 as PercentileIndexPatternColumn}
         />
       );
 
@@ -189,36 +176,30 @@ describe('percentile', () => {
 
       jest.runAllTimers();
 
-      expect(setStateSpy).toHaveBeenCalledWith({
-        ...state,
-        layers: {
-          first: {
-            ...state.layers.first,
-            columns: {
-              ...state.layers.first.columns,
-              col2: {
-                ...state.layers.first.columns.col2,
-                params: {
-                  percentile: 27,
-                },
-                label: '27th percentile of a',
-              },
+      expect(updateLayerSpy).toHaveBeenCalledWith({
+        ...layer,
+        columns: {
+          ...layer.columns,
+          col2: {
+            ...layer.columns.col2,
+            params: {
+              percentile: 27,
             },
+            label: '27th percentile of a',
           },
         },
       });
     });
 
     it('should not update on invalid input, but show invalid value locally', async () => {
-      const setStateSpy = jest.fn();
+      const updateLayerSpy = jest.fn();
       const instance = mount(
         <InlineOptions
           {...defaultProps}
-          state={state}
-          setState={setStateSpy}
+          layer={layer}
+          updateLayer={updateLayerSpy}
           columnId="col2"
-          currentColumn={state.layers.first.columns.col2 as PercentileIndexPatternColumn}
-          layerId="first"
+          currentColumn={layer.columns.col2 as PercentileIndexPatternColumn}
         />
       );
 
@@ -236,7 +217,7 @@ describe('percentile', () => {
 
       jest.runAllTimers();
 
-      expect(setStateSpy).not.toHaveBeenCalled();
+      expect(updateLayerSpy).not.toHaveBeenCalled();
 
       expect(
         instance

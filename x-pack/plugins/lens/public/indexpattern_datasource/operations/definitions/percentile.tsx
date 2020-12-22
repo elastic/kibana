@@ -13,7 +13,6 @@ import { buildExpressionFunction } from '../../../../../../../src/plugins/expres
 import { OperationDefinition } from './index';
 import { getInvalidFieldMessage } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
-import { mergeLayer } from '../../state_helpers';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: 'percentile';
@@ -109,18 +108,19 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   paramEditor: function PercentileParamEditor({
-    state,
-    setState,
+    layer,
+    updateLayer,
     currentColumn,
-    layerId,
     columnId,
+    indexPattern,
   }) {
-    const currentIndexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
-    const layer = state.layers[layerId];
     const [inputValue, setInputValue] = useState(String(currentColumn.params.percentile));
 
     const inputValueAsNumber = Number(inputValue);
+    // an input is value if it's not an empty string, parses to a valid number, is between 0 and 100 (inclusive)
+    // and is an integer
     const inputValueIsValid =
+      inputValue !== '' &&
       !Number.isNaN(inputValueAsNumber) &&
       inputValueAsNumber >= 0 &&
       inputValueAsNumber <= 100 &&
@@ -129,31 +129,26 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     useDebounce(
       () => {
         if (!inputValueIsValid) return;
-        setState(
-          mergeLayer({
-            state,
-            layerId,
-            newLayer: {
-              columns: {
-                ...layer.columns,
-                [columnId]: {
-                  ...currentColumn,
-                  label: currentColumn.customLabel
-                    ? currentColumn.label
-                    : ofName(
-                        currentIndexPattern.getFieldByName(currentColumn.sourceField)
-                          ?.displayName || currentColumn.sourceField,
-                        inputValueAsNumber
-                      ),
-                  params: {
-                    ...currentColumn.params,
-                    percentile: inputValueAsNumber,
-                  },
-                },
+        updateLayer({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            [columnId]: {
+              ...currentColumn,
+              label: currentColumn.customLabel
+                ? currentColumn.label
+                : ofName(
+                    indexPattern.getFieldByName(currentColumn.sourceField)?.displayName ||
+                      currentColumn.sourceField,
+                    inputValueAsNumber
+                  ),
+              params: {
+                ...currentColumn.params,
+                percentile: inputValueAsNumber,
               },
             },
-          })
-        );
+          },
+        });
       },
       256,
       [inputValue]

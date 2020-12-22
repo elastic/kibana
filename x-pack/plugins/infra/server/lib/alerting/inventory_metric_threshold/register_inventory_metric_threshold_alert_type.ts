@@ -5,7 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { AlertType } from '../../../../../alerts/server';
+import { AlertType, AlertInstanceState, AlertInstanceContext } from '../../../../../alerts/server';
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -40,7 +40,17 @@ const condition = schema.object({
   ),
 });
 
-export const registerMetricInventoryThresholdAlertType = (libs: InfraBackendLibs): AlertType => ({
+export const registerMetricInventoryThresholdAlertType = (
+  libs: InfraBackendLibs
+): AlertType<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
+  Record<string, any>,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext
+> => ({
   id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
     defaultMessage: 'Inventory',

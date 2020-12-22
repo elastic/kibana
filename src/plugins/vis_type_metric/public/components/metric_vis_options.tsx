@@ -29,16 +29,16 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import {
-  ColorMode,
   ColorRanges,
-  ColorSchemaOptions,
-  SwitchOption,
-  RangeOption,
-  SetColorSchemaOptionsValue,
   SetColorRangeValue,
-} from '../../../charts/public';
+  VisOptionsProps,
+  SwitchOption,
+  SetColorSchemaOptionsValue,
+  ColorSchemaOptions,
+  RangeOption,
+} from '../../../vis_default_editor/public';
+import { ColorMode } from '../../../charts/public';
 import { MetricVisParam, VisParams } from '../types';
 
 function MetricVisOptions({
