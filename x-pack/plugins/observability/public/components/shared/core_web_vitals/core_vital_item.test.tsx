@@ -55,7 +55,7 @@ describe('CoreVitalItem', () => {
         <KibanaReactContext.Provider>
           <CoreVitalItem
             title={title}
-            value={''}
+            value={value}
             ranks={[85, 10, 5]}
             loading={true}
             thresholds={thresholds}
@@ -75,7 +75,7 @@ describe('CoreVitalItem', () => {
         <KibanaReactContext.Provider>
           <CoreVitalItem
             title={title}
-            value={''}
+            value={null}
             ranks={[85, 10, 5]}
             loading={loading}
             thresholds={thresholds}
