@@ -82,7 +82,7 @@ export function insertNewColumn({
       // access to the operationSupportMatrix, we should validate the metadata against
       // the possible fields
       const validOperations = Object.values(operationDefinitionMap).filter(({ type }) =>
-        isOperationAllowedAsReference({ validation, operationType: type })
+        isOperationAllowedAsReference({ validation, operationType: type, indexPattern })
       );
 
       if (!validOperations.length) {
@@ -127,31 +127,23 @@ export function insertNewColumn({
       return newId;
     });
 
-    const possibleOperation = operationDefinition.getPossibleOperation();
-    const isBucketed = Boolean(possibleOperation.isBucketed);
-    if (isBucketed) {
-      tempLayer = addBucket(
-        tempLayer,
-        operationDefinition.buildColumn({
-          ...baseOptions,
-          layer: tempLayer,
-          referenceIds,
-        }),
-        columnId
-      );
-    } else {
-      tempLayer = addMetric(
-        tempLayer,
-        operationDefinition.buildColumn({
-          ...baseOptions,
-          layer: tempLayer,
-          referenceIds,
-        }),
-        columnId
+    const possibleOperation = operationDefinition.getPossibleOperation(indexPattern);
+    if (!possibleOperation) {
+      throw new Error(
+        `Can't create operation ${op} because it's incompatible with the index pattern`
       );
     }
+    const isBucketed = Boolean(possibleOperation.isBucketed);
 
-    return updateDefaultLabels(tempLayer, indexPattern);
+    const addOperationFn = isBucketed ? addBucket : addMetric;
+    return updateDefaultLabels(
+      addOperationFn(
+        tempLayer,
+        operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, referenceIds }),
+        columnId
+      ),
+      indexPattern
+    );
   }
 
   const invalidFieldName = (layer.incompleteColumns ?? {})[columnId]?.sourceField;
@@ -206,17 +198,15 @@ export function insertNewColumn({
     };
   }
   const isBucketed = Boolean(possibleOperation.isBucketed);
-  if (isBucketed) {
-    return updateDefaultLabels(
-      addBucket(layer, operationDefinition.buildColumn({ ...baseOptions, layer, field }), columnId),
-      indexPattern
-    );
-  } else {
-    return updateDefaultLabels(
-      addMetric(layer, operationDefinition.buildColumn({ ...baseOptions, layer, field }), columnId),
-      indexPattern
-    );
-  }
+  const addOperationFn = isBucketed ? addBucket : addMetric;
+  return updateDefaultLabels(
+    addOperationFn(
+      layer,
+      operationDefinition.buildColumn({ ...baseOptions, layer, field }),
+      columnId
+    ),
+    indexPattern
+  );
 }
 
 export function replaceColumn({
@@ -311,7 +301,6 @@ export function replaceColumn({
     let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
     newColumn = adjustLabel(newColumn, previousColumn);
 
-    // const newColumns = { ...tempLayer.columns, [columnId]: newColumn };
     const newLayer = { ...tempLayer, columns: { ...tempLayer.columns, [columnId]: newColumn } };
     return updateDefaultLabels(
       {
@@ -618,9 +607,11 @@ export function isOperationAllowedAsReference({
   operationType,
   validation,
   field,
+  indexPattern,
 }: {
   operationType: OperationType;
   validation: RequiredReference;
+  indexPattern: IndexPattern;
   field?: IndexPatternField;
 }): boolean {
   const operationDefinition = operationDefinitionMap[operationType];
@@ -629,8 +620,11 @@ export function isOperationAllowedAsReference({
   if (field && operationDefinition.input === 'field') {
     const metadata = operationDefinition.getPossibleOperationForField(field);
     hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
-  } else if (operationDefinition.input !== 'field') {
+  } else if (operationDefinition.input === 'none') {
     const metadata = operationDefinition.getPossibleOperation();
+    hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
+  } else if (operationDefinition.input === 'fullReference') {
+    const metadata = operationDefinition.getPossibleOperation(indexPattern);
     hasValidMetadata = Boolean(metadata) && validation.validateMetadata(metadata!);
   } else {
     // TODO: How can we validate the metadata without a specific field?

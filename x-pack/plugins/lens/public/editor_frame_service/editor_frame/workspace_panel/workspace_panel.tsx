@@ -400,13 +400,17 @@ export const InnerVisualizationWrapper = ({
         showExtraErrors = localState.configurationValidationError
           .slice(1)
           .map(({ longMessage }) => (
-            <EuiFlexItem key={longMessage} className="eui-textBreakAll">
+            <EuiFlexItem
+              key={longMessage}
+              className="eui-textBreakAll"
+              data-test-subj="configuration-failure-error"
+            >
               {longMessage}
             </EuiFlexItem>
           ));
       } else {
         showExtraErrors = (
-          <EuiFlexItem data-test-subj="configuration-failure-more-errors">
+          <EuiFlexItem>
             <EuiButtonEmpty
               onClick={() => {
                 setLocalState((prevState: WorkspaceState) => ({
@@ -414,6 +418,7 @@ export const InnerVisualizationWrapper = ({
                   expandError: !prevState.expandError,
                 }));
               }}
+              data-test-subj="configuration-failure-more-errors"
             >
               {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
                 defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
@@ -445,7 +450,7 @@ export const InnerVisualizationWrapper = ({
             </EuiTextColor>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem className="eui-textBreakAll">
+        <EuiFlexItem className="eui-textBreakAll" data-test-subj="configuration-failure-error">
           {localState.configurationValidationError[0].longMessage}
         </EuiFlexItem>
         {showExtraErrors}

@@ -310,6 +310,7 @@ describe('reference editor', () => {
     expect(fieldSelect.prop('selectedField')).toEqual('bytes');
     expect(fieldSelect.prop('selectedOperationType')).toEqual('avg');
     expect(fieldSelect.prop('incompleteOperation')).toEqual('max');
+    expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(false);
   });
 
   it('should pass the incomplete field info to FieldSelect', () => {
@@ -363,6 +364,7 @@ describe('reference editor', () => {
     expect(fieldSelect.prop('selectedField')).toBeUndefined();
     expect(fieldSelect.prop('selectedOperationType')).toBeUndefined();
     expect(fieldSelect.prop('incompleteOperation')).toBeUndefined();
+    expect(fieldSelect.prop('markAllFieldsCompatible')).toEqual(true);
   });
 
   it('should show the ParamEditor for functions that offer one', () => {

@@ -1581,4 +1581,64 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     expect(wrapper.find('ReferenceEditor')).toHaveLength(0);
   });
+
+  it('should show a warning when the current dimension is no longer configurable', () => {
+    const stateWithInvalidCol: IndexPatternPrivateState = getStateWithColumns({
+      col1: {
+        label: 'Invalid derivative',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'derivative',
+        references: ['ref1'],
+      },
+    });
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithInvalidCol} />
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="lns-indexPatternDimension-derivative incompatible"]')
+        .find('EuiText[color="danger"]')
+        .first()
+    ).toBeTruthy();
+  });
+
+  it('should remove options to select references when there are no time fields', () => {
+    const stateWithoutTime: IndexPatternPrivateState = {
+      ...getStateWithColumns({
+        col1: {
+          label: 'Avg',
+          dataType: 'number',
+          isBucketed: false,
+          operationType: 'avg',
+          sourceField: 'bytes',
+        },
+      }),
+      indexPatterns: {
+        1: {
+          id: '1',
+          title: 'my-fake-index-pattern',
+          hasRestrictions: false,
+          fields,
+          getFieldByName: getFieldByNameFactory([
+            {
+              name: 'bytes',
+              displayName: 'bytes',
+              type: 'number',
+              aggregatable: true,
+              searchable: true,
+            },
+          ]),
+        },
+      },
+    };
+
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent {...defaultProps} state={stateWithoutTime} />
+    );
+
+    expect(wrapper.find('[data-test-subj="lns-indexPatternDimension-derivative"]')).toHaveLength(0);
+  });
 });

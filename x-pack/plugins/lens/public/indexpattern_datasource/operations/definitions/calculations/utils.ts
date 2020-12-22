@@ -60,9 +60,11 @@ export function checkReferences(layer: IndexPatternLayer, columnId: string) {
       );
     } else {
       const referenceColumn = layer.columns[referenceId]!;
-      const requirements =
-        // @ts-expect-error not statically analyzed
-        operationDefinitionMap[column.operationType].requiredReferences[index];
+      const definition = operationDefinitionMap[column.operationType];
+      if (definition.input !== 'fullReference') {
+        throw new Error('inconsistent state - column is not a reference operation');
+      }
+      const requirements = definition.requiredReferences[index];
       const isValid = isColumnValidAsReference({
         validation: requirements,
         column: referenceColumn,

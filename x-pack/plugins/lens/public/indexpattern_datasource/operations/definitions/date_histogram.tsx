@@ -28,7 +28,7 @@ import {
   search,
 } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { getInvalidFieldMessage } from './helpers';
+import { getInvalidFieldMessage, getSafeName } from './helpers';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -67,11 +67,7 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, indexPattern) =>
-    indexPattern.getFieldByName(column.sourceField)?.displayName ??
-    i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
-      defaultMessage: 'Missing field',
-    }),
+  getDefaultLabel: (column, indexPattern) => getSafeName(column.sourceField, indexPattern),
   buildColumn({ field }) {
     let interval = autoInterval;
     let timeZone: string | undefined;

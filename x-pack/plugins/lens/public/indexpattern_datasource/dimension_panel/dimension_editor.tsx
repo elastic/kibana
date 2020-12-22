@@ -16,6 +16,7 @@ import {
   EuiListGroupItemProps,
   EuiFormLabel,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { IndexPatternDimensionEditorProps } from './dimension_panel';
 import { OperationSupportMatrix } from './operation_support';
@@ -184,7 +185,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
       }
 
       let label: EuiListGroupItemProps['label'] = operationPanels[operationType].displayName;
-      if (disabledStatus) {
+      if (isActive && disabledStatus) {
+        label = (
+          <EuiToolTip content={disabledStatus} display="block" position="left">
+            <EuiText color="danger" size="s">
+              <strong>{operationPanels[operationType].displayName}</strong>
+            </EuiText>
+          </EuiToolTip>
+        );
+      } else if (disabledStatus) {
         label = (
           <EuiToolTip content={disabledStatus} display="block" position="left">
             <span>{operationPanels[operationType].displayName}</span>

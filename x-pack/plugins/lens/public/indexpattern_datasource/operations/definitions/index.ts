@@ -315,9 +315,9 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
   ) => ReferenceBasedIndexPatternColumn & C;
   /**
    * Returns the meta data of the operation if applied. Undefined
-   * if the field is not applicable.
+   * if the operation can't be added with these fields.
    */
-  getPossibleOperation: () => OperationMetadata;
+  getPossibleOperation: (indexPattern: IndexPattern) => OperationMetadata | undefined;
   /**
    * A chain of expression functions which will transform the table
    */

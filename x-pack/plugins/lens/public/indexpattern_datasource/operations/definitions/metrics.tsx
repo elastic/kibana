@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { getInvalidFieldMessage } from './helpers';
+import { getInvalidFieldMessage, getSafeName } from './helpers';
 import {
   FormattedIndexPatternColumn,
   FieldBasedIndexPatternColumn,
@@ -44,17 +44,12 @@ function buildMetricOperation<T extends MetricColumn<string>>({
   priority?: number;
   optionalTimeScaling?: boolean;
 }) {
-  const labelLookup = (name?: string, column?: BaseIndexPatternColumn) => {
-    const rawLabel = ofName(
-      name ??
-        i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
-          defaultMessage: 'Missing field',
-        })
-    );
+  const labelLookup = (name: string, column?: BaseIndexPatternColumn) => {
+    const label = ofName(name);
     if (!optionalTimeScaling) {
-      return rawLabel;
+      return label;
     }
-    return adjustTimeScaleLabelSuffix(rawLabel, undefined, column?.timeScale);
+    return adjustTimeScaleLabelSuffix(label, undefined, column?.timeScale);
   };
 
   return {
@@ -91,7 +86,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         ? adjustTimeScaleOnOtherColumnChange(layer, thisColumnId, changedColumnId)
         : layer.columns[thisColumnId],
     getDefaultLabel: (column, indexPattern, columns) =>
-      labelLookup(indexPattern.getFieldByName(column.sourceField)?.displayName, column),
+      labelLookup(getSafeName(column.sourceField, indexPattern), column),
     buildColumn: ({ field, previousColumn }) => ({
       label: labelLookup(field.displayName, previousColumn),
       dataType: 'number',

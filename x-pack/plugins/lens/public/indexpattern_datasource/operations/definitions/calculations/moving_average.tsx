@@ -61,12 +61,14 @@ export const movingAverageOperation: OperationDefinition<
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
-  getPossibleOperation: () => {
-    return {
-      dataType: 'number',
-      isBucketed: false,
-      scale: 'ratio',
-    };
+  getPossibleOperation: (indexPattern) => {
+    if (hasDateField(indexPattern)) {
+      return {
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      };
+    }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
     return ofName(columns[column.references[0]]?.label, column.timeScale);
@@ -120,6 +122,19 @@ export const movingAverageOperation: OperationDefinition<
   timeScalingMode: 'optional',
 };
 
+function isValidNumber(input: string) {
+  if (input === '') return false;
+  try {
+    const val = parseFloat(input);
+    if (isNaN(val)) return false;
+    if (val < 1) return false;
+    if (val.toString().includes('.')) return false;
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
 function MovingAverageParamEditor({
   layer,
   updateLayer,
@@ -130,10 +145,8 @@ function MovingAverageParamEditor({
 
   useDebounceWithOptions(
     () => {
-      if (inputValue === '') {
-        return;
-      }
-      const inputNumber = Number(inputValue);
+      if (!isValidNumber(inputValue)) return;
+      const inputNumber = parseInt(inputValue, 10);
       updateLayer(
         updateColumnParam({
           layer,
@@ -147,6 +160,7 @@ function MovingAverageParamEditor({
     256,
     [inputValue]
   );
+
   return (
     <EuiFormRow
       label={i18n.translate('xpack.lens.indexPattern.movingAverage.window', {
@@ -154,12 +168,15 @@ function MovingAverageParamEditor({
       })}
       display="columnCompressed"
       fullWidth
+      isInvalid={!isValidNumber(inputValue)}
     >
       <EuiFieldNumber
         compressed
         value={inputValue}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
         min={1}
+        step={1}
+        isInvalid={!isValidNumber(inputValue)}
       />
     </EuiFormRow>
   );

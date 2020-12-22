@@ -86,7 +86,12 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
       .forEach((op) => {
         if (op.input === 'field') {
           const allFields = currentIndexPattern.fields.filter((field) =>
-            isOperationAllowedAsReference({ operationType: op.type, validation, field })
+            isOperationAllowedAsReference({
+              operationType: op.type,
+              validation,
+              field,
+              indexPattern: currentIndexPattern,
+            })
           );
           if (allFields.length) {
             operationTypes.add(op.type);
@@ -98,7 +103,13 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               operationByField[field.name]?.add(op.type);
             });
           }
-        } else if (isOperationAllowedAsReference({ operationType: op.type, validation })) {
+        } else if (
+          isOperationAllowedAsReference({
+            operationType: op.type,
+            validation,
+            indexPattern: currentIndexPattern,
+          })
+        ) {
           operationTypes.add(op.type);
           operationWithoutField.add(op.type);
         }
@@ -111,8 +122,9 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     };
   }, [currentIndexPattern, validation]);
 
-  const functionOptions: Array<EuiComboBoxOptionOption<OperationType>> = [];
-  operationSupportMatrix.operationTypes.forEach((operationType) => {
+  const functionOptions: Array<EuiComboBoxOptionOption<OperationType>> = Array.from(
+    operationSupportMatrix.operationTypes
+  ).map((operationType) => {
     const def = operationDefinitionMap[operationType];
     const label = operationPanels[operationType].displayName;
     const isCompatible =
@@ -123,14 +135,14 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
         operationSupportMatrix.fieldByOperation[operationType]?.has(column.sourceField)) ||
       (column && !hasField(column) && def.input !== 'field');
 
-    functionOptions.push({
+    return {
       label,
       value: operationType,
       className: 'lnsIndexPatternDimensionEditor__operation',
       'data-test-subj': `lns-indexPatternDimension-${operationType}${
         isCompatible ? '' : ' incompatible'
       }`,
-    });
+    };
   });
 
   function onChooseFunction(operationType: OperationType) {
@@ -256,6 +268,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
                   : (column as FieldBasedIndexPatternColumn)?.sourceField
               }
               incompleteOperation={incompleteOperation}
+              markAllFieldsCompatible={selectionStyle === 'field'}
               onDeleteColumn={() => {
                 updateLayer(deleteColumn({ layer, columnId, indexPattern: currentIndexPattern }));
               }}

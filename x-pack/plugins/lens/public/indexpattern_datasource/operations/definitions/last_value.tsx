@@ -13,17 +13,13 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
 import { updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
-import { getInvalidFieldMessage } from './helpers';
+import { getInvalidFieldMessage, getSafeName } from './helpers';
 
-function ofName(name?: string) {
+function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.lastValueOf', {
     defaultMessage: 'Last value of {name}',
     values: {
-      name:
-        name ??
-        i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
-          defaultMessage: 'Missing field',
-        }),
+      name,
     },
   });
 }
@@ -93,8 +89,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
   displayName: i18n.translate('xpack.lens.indexPattern.lastValue', {
     defaultMessage: 'Last value',
   }),
-  getDefaultLabel: (column, indexPattern) =>
-    ofName(indexPattern.getFieldByName(column.sourceField)?.displayName),
+  getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
   input: 'field',
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
