@@ -29,6 +29,7 @@ export interface ExpressionWrapperProps {
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => void;
   renderMode?: RenderMode;
+  syncColors?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
 }
 
@@ -41,6 +42,7 @@ export function ExpressionWrapper({
   searchSessionId,
   onData$,
   renderMode,
+  syncColors,
   hasCompatibleActions,
 }: ExpressionWrapperProps) {
   return (
@@ -70,6 +72,7 @@ export function ExpressionWrapper({
             searchSessionId={searchSessionId}
             onData$={onData$}
             renderMode={renderMode}
+            syncColors={syncColors}
             renderError={(errorMessage, error) => (
               <div data-test-subj="expression-renderer-error">
                 <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
