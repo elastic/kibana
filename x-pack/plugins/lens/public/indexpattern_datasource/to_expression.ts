@@ -121,6 +121,7 @@ function getExpressionForLayer(
             dateColumnId: [firstDateHistogramColumn![0]],
             inputColumnId: [id],
             outputColumnId: [id],
+            outputColumnName: [col.label],
             targetUnit: [col.timeScale!],
           },
         };
