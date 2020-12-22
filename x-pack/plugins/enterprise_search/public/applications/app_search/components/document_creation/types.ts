@@ -11,3 +11,19 @@ export enum DocumentCreationStep {
   AddDocuments,
   ShowSummary,
 }
+
+export interface DocumentCreationSummary {
+  errors: string[];
+  validDocuments: {
+    total: number;
+    examples: object[];
+  };
+  invalidDocuments: {
+    total: number;
+    examples: Array<{
+      document: object;
+      errors: string[];
+    }>;
+  };
+  newSchemaFields: string[];
+}
