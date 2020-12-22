@@ -40,7 +40,6 @@ interface Props {
   thresholds: Thresholds;
   isCls?: boolean;
   helpLabel: string;
-  hasVitals?: boolean;
 }
 
 export function getCoreVitalTooltipMessage(
