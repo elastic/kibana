@@ -27,7 +27,9 @@ export interface CreateExecutionHandlerOptions<
   Params extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 > {
   alertId: string;
   alertName: string;
@@ -36,26 +38,39 @@ export interface CreateExecutionHandlerOptions<
   actions: AlertAction[];
   spaceId: string;
   apiKey: RawAlert['apiKey'];
-  alertType: NormalizedAlertType<Params, State, InstanceState, InstanceContext>;
+  alertType: NormalizedAlertType<
+    Params,
+    State,
+    InstanceState,
+    InstanceContext,
+    ActionGroupIds,
+    RecoveryActionGroupId
+  >;
   logger: Logger;
   eventLogger: IEventLogger;
   request: KibanaRequest;
   alertParams: AlertTypeParams;
 }
 
-interface ExecutionHandlerOptions {
-  actionGroup: string;
+interface ExecutionHandlerOptions<ActionGroupIds extends string> {
+  actionGroup: ActionGroupIds;
   actionSubgroup?: string;
   alertInstanceId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
 }
 
+export type ExecutionHandler<ActionGroupIds extends string> = (
+  options: ExecutionHandlerOptions<ActionGroupIds>
+) => Promise<void>;
+
 export function createExecutionHandler<
   Params extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext
+  InstanceContext extends AlertInstanceContext,
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
 >({
   logger,
   alertId,
@@ -69,7 +84,14 @@ export function createExecutionHandler<
   eventLogger,
   request,
   alertParams,
-}: CreateExecutionHandlerOptions<Params, State, InstanceState, InstanceContext>) {
+}: CreateExecutionHandlerOptions<
+  Params,
+  State,
+  InstanceState,
+  InstanceContext,
+  ActionGroupIds,
+  RecoveryActionGroupId
+>): ExecutionHandler<ActionGroupIds | RecoveryActionGroupId> {
   const alertTypeActionGroups = new Map(
     alertType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
@@ -79,7 +101,7 @@ export function createExecutionHandler<
     context,
     state,
     alertInstanceId,
-  }: ExecutionHandlerOptions) => {
+  }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
     if (!alertTypeActionGroups.has(actionGroup)) {
       logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
       return;

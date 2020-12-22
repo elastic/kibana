@@ -7,6 +7,7 @@
 import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
+import { ActionGroupIdsOf } from '../../../../alerts/common';
 import { updateState } from './common';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
@@ -20,6 +21,7 @@ import { getLatestMonitor } from '../requests/get_latest_monitor';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
 
 const { DURATION_ANOMALY } = ACTION_GROUP_DEFINITIONS;
+export type ActionGroupIds = ActionGroupIdsOf<typeof DURATION_ANOMALY>;
 
 export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Ping) => {
   return {
@@ -61,8 +63,12 @@ const getAnomalies = async (
   );
 };
 
-export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _libs, plugins) =>
-  uptimeAlertWrapper({
+export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
+  _server,
+  _libs,
+  plugins
+) =>
+  uptimeAlertWrapper<ActionGroupIds>({
     id: 'xpack.uptime.alerts.durationAnomaly',
     name: durationAnomalyTranslations.alertFactoryName,
     validate: {

@@ -12,7 +12,11 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { singleSearchAfter } from './single_search_after';
 
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { SignalSearchResponse } from './types';
 import { BuildRuleMessage } from './rule_messages';
@@ -21,7 +25,7 @@ interface FindThresholdSignalsParams {
   from: string;
   to: string;
   inputIndexPattern: string[];
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   filter: unknown;
   threshold: Threshold;

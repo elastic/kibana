@@ -100,7 +100,8 @@ export function getActiveEntriesAndGenerateAlerts(
   currLocationMap: Map<string, LatestEntityLocation>,
   alertInstanceFactory: AlertServices<
     GeoContainmentInstanceState,
-    GeoContainmentInstanceContext
+    GeoContainmentInstanceContext,
+    typeof ActionGroupId
   >['alertInstanceFactory'],
   shapesIdsNamesMap: Record<string, unknown>,
   currIntervalEndTime: Date

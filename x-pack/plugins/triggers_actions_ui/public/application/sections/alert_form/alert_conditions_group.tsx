@@ -9,8 +9,8 @@ import { EuiFormRow, EuiButtonIcon, EuiTitle } from '@elastic/eui';
 import { AlertConditionsProps, ActionGroupWithCondition } from './alert_conditions';
 
 export type AlertConditionsGroupProps<ConditionProps> = {
-  actionGroup?: ActionGroupWithCondition<ConditionProps>;
-} & Pick<AlertConditionsProps<ConditionProps>, 'onResetConditionsFor'>;
+  actionGroup?: ActionGroupWithCondition<ConditionProps, string>;
+} & Pick<AlertConditionsProps<ConditionProps, string>, 'onResetConditionsFor'>;
 
 export const AlertConditionsGroup = <ConditionProps extends unknown>({
   actionGroup,

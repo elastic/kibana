@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ValuesType } from 'utility-types';
+import { ActionGroup } from '../../alerts/common';
 import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../../ml/common';
 
 export enum AlertType {
@@ -15,20 +16,31 @@ export enum AlertType {
   TransactionDurationAnomaly = 'apm.transaction_duration_anomaly',
 }
 
-const THRESHOLD_MET_GROUP = {
-  id: 'threshold_met',
+export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
+export type ThresholdMetActionGroupId = typeof THRESHOLD_MET_GROUP_ID;
+const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
+  id: THRESHOLD_MET_GROUP_ID,
   name: i18n.translate('xpack.apm.a.thresholdMet', {
     defaultMessage: 'Threshold met',
   }),
 };
 
-export const ALERT_TYPES_CONFIG = {
+export const ALERT_TYPES_CONFIG: Record<
+  AlertType,
+  {
+    name: string;
+    actionGroups: Array<ActionGroup<ThresholdMetActionGroupId>>;
+    defaultActionGroupId: ThresholdMetActionGroupId;
+    minimumLicenseRequired: string;
+    producer: string;
+  }
+> = {
   [AlertType.ErrorCount]: {
     name: i18n.translate('xpack.apm.errorCountAlert.name', {
       defaultMessage: 'Error count threshold',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
-    defaultActionGroupId: 'threshold_met',
+    defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
     producer: 'apm',
   },
@@ -37,7 +49,7 @@ export const ALERT_TYPES_CONFIG = {
       defaultMessage: 'Transaction duration threshold',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
-    defaultActionGroupId: 'threshold_met',
+    defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
     producer: 'apm',
   },
@@ -46,7 +58,7 @@ export const ALERT_TYPES_CONFIG = {
       defaultMessage: 'Transaction duration anomaly',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
-    defaultActionGroupId: 'threshold_met',
+    defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
     producer: 'apm',
   },
@@ -55,7 +67,7 @@ export const ALERT_TYPES_CONFIG = {
       defaultMessage: 'Transaction error rate threshold',
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
-    defaultActionGroupId: 'threshold_met',
+    defaultActionGroupId: THRESHOLD_MET_GROUP_ID,
     minimumLicenseRequired: 'basic',
     producer: 'apm',
   },

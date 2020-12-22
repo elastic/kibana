@@ -9,6 +9,7 @@ import { AlertType, AlertInstanceState, AlertInstanceContext } from '../../../..
 import {
   createInventoryMetricThresholdExecutor,
   FIRED_ACTIONS,
+  FIRED_ACTIONS_ID,
 } from './inventory_metric_threshold_executor';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
@@ -22,6 +23,7 @@ import {
   metricActionVariableDescription,
   thresholdActionVariableDescription,
 } from '../common/messages';
+import { RecoveredActionGroupId } from '../../../../../alerts/common';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
@@ -40,6 +42,8 @@ const condition = schema.object({
   ),
 });
 
+export type InventoryMetricThresholdAllowedActionGroups = typeof FIRED_ACTIONS_ID;
+
 export const registerMetricInventoryThresholdAlertType = (
   libs: InfraBackendLibs
 ): AlertType<
@@ -49,7 +53,9 @@ export const registerMetricInventoryThresholdAlertType = (
   Record<string, any>,
   Record<string, any>,
   AlertInstanceState,
-  AlertInstanceContext
+  AlertInstanceContext,
+  InventoryMetricThresholdAllowedActionGroups,
+  RecoveredActionGroupId
 > => ({
   id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
@@ -69,7 +75,7 @@ export const registerMetricInventoryThresholdAlertType = (
       { unknowns: 'allow' }
     ),
   },
-  defaultActionGroupId: FIRED_ACTIONS.id,
+  defaultActionGroupId: FIRED_ACTIONS_ID,
   actionGroups: [FIRED_ACTIONS],
   producer: 'infrastructure',
   minimumLicenseRequired: 'basic',

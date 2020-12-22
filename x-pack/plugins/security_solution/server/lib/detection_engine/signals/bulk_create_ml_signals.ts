@@ -8,7 +8,11 @@ import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
 import { Logger } from '../../../../../../../src/core/server';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
@@ -20,7 +24,7 @@ interface BulkCreateMlSignalsParams {
   actions: RuleAlertAction[];
   someResult: AnomalyResults;
   ruleParams: RuleTypeParams;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;
