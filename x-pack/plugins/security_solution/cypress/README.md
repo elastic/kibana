@@ -187,49 +187,20 @@ taken into consideration until another solution is implemented:
 
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
 
-## Reporting
+## Test Artifacts
 
-When Cypress tests are run on the command line via non visual mode
-reporting artifacts are generated under the `target` directory in the root
-of the Kibana, as detailed for each artifact type in the sections below.
+When Cypress tests are run headless on the command line, artifacts
+are generated under the `target` directory in the root of Kibana as follows:
 
-### HTML Reports
-
-An HTML report (e.g. for email notifications) is output to:
-
-```
-target/kibana-security-solution/cypress/results/output.html
-```
-
-### Screenshots
-
-Screenshots of failed tests are output to:
-
-```
-target/kibana-security-solution/cypress/screenshots
-```
-
-### `junit` Reports
-
-The Kibana CI process reports `junit` test results from the `target/junit` directory.
-
-Cypress `junit` reports are generated in `target/kibana-security-solution/cypress/results`
-and copied to the `target/junit` directory.
-
-### Videos (optional)
-
-Videos are disabled by default, but can optionally be enabled by setting the
-`CYPRESS_video=true` environment variable:
-
-```
-CYPRESS_video=true yarn cypress:run
-```
-
-Videos are (optionally) output to:
-
-```
-target/kibana-security-solution/cypress/videos
-```
+- HTML Reports
+  - location: `target/kibana-security-solution/cypress/results/output.html`
+- `junit` Reports
+  - location: `target/kibana-security-solution/cypress/results`
+- Screenshots (of failed tests)
+  - location: `target/kibana-security-solution/cypress/screenshots`
+- Videos
+  - disabled by default, can be enabled by setting env var `CYPRESS_video=true`
+  - location: `target/kibana-security-solution/cypress/videos`
 
 ## Linting
 
