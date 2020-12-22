@@ -112,15 +112,13 @@ const AlertAdd = ({
   } as IErrorObject;
   const hasErrors = !isValidAlert(alert, errors);
 
-  const actionsErrors: Array<{
-    errors: IErrorObject;
-  }> = alert.actions.map((alertAction: AlertAction) =>
+  const actionsErrors = alert.actions.map((alertAction: AlertAction) =>
     actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
   );
 
   const hasActionErrors =
     actionsErrors.find(
-      (errorObj: { errors: IErrorObject }) =>
+      (errorObj) =>
         errorObj &&
         !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
     ) !== undefined;

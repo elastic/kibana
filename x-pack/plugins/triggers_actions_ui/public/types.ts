@@ -190,12 +190,12 @@ export interface AlertTypeParamsExpressionProps<
   data: DataPublicPluginStart;
 }
 
-export interface AlertTypeModel<AlertParamsType = any> {
+export interface AlertTypeModel<AlertParamsType = unknown> {
   id: string;
   description: string;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
-  validate: (alertParams: AlertParamsType) => ValidationResult<AlertParamsType>;
+  validate: (alertParams: AlertParamsType) => ValidationResult<Partial<AlertParamsType>>;
   alertParamsExpression:
     | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<AlertParamsType>>>;

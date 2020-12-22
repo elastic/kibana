@@ -36,6 +36,7 @@ import {
 } from '../../../../../actions/common';
 import './connector_edit_flyout.scss';
 import { useKibana } from '../../../common/lib/kibana';
+import { getConnectorWithNullFields } from '../../lib/value_validators';
 
 export interface ConnectorEditFlyoutProps {
   initialConnector: ActionConnector;
@@ -115,11 +116,11 @@ export const ConnectorEditFlyout = ({
   const secretsErrors = (connectorValidationResult.secrets
     ? connectorValidationResult.secrets.errors
     : {}) as IErrorObject;
-  const baseValidationResult = validateBaseProperties(connector);
+  const baseConnectorErrors = validateBaseProperties(connector).errors;
   const errors = {
     ...configErrors,
     ...secretsErrors,
-    ...baseValidationResult.errors,
+    ...baseConnectorErrors,
   } as IErrorObject;
 
   const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
@@ -216,22 +217,16 @@ export const ConnectorEditFlyout = ({
 
   const onSaveClicked = async (closeAfterSave: boolean = true) => {
     if (hasErrors) {
-      Object.keys(configErrors).forEach((errorKey) => {
-        if (errors[errorKey].length >= 1) {
-          connector.config[errorKey] = null;
-        }
-      });
-      Object.keys(secretsErrors).forEach((errorKey) => {
-        if (errors[errorKey].length >= 1) {
-          connector.secrets[errorKey] = null;
-        }
-      });
-      Object.keys(baseValidationResult.errors).forEach((errorKey) => {
-        if (errors[errorKey].length >= 1) {
-          connector[errorKey] = null;
-        }
-      });
-      setConnector('connector', connector);
+      setConnector(
+        'connector',
+        getConnectorWithNullFields(
+          connector,
+          configErrors,
+          secretsErrors,
+          baseConnectorErrors,
+          errors
+        )
+      );
       return;
     }
     setIsSaving(true);

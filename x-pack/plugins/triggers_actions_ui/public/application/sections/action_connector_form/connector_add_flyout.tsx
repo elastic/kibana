@@ -29,14 +29,13 @@ import {
   ActionConnector,
   IErrorObject,
   ActionTypeRegistryContract,
-  ConnectorValidationResult,
-  ValidationResult,
 } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
+import { getConnectorWithNullFields } from '../../lib/value_validators';
 
 export interface ConnectorAddFlyoutProps {
   onClose: () => void;
@@ -96,7 +95,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   let errors: IErrorObject;
   let configErrors: IErrorObject;
   let secretsErrors: IErrorObject;
-  let baseValidationResult: ValidationResult<unknown>;
+  let baseValidationResult: IErrorObject;
   if (!actionType) {
     currentForm = (
       <ActionTypeMenu
@@ -116,11 +115,11 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
     secretsErrors = (connectorValidationResult.secrets
       ? connectorValidationResult.secrets.errors
       : {}) as IErrorObject;
-    baseValidationResult = validateBaseProperties(connector);
+    baseValidationResult = validateBaseProperties(connector).errors;
     errors = {
       ...configErrors,
       ...secretsErrors,
-      ...baseValidationResult.errors,
+      ...baseValidationResult,
     };
     hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
@@ -166,22 +165,15 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
 
   const onSaveClicked = async () => {
     if (hasErrors) {
-      Object.keys(configErrors).forEach((errorKey) => {
-        if (errors[errorKey].length >= 1) {
-          connector.config[errorKey] = null;
-        }
-      });
-      Object.keys(secretsErrors).forEach((errorKey) => {
-        if (errors[errorKey].length >= 1) {
-          connector.secrets[errorKey] = null;
-        }
-      });
-      Object.keys(baseValidationResult.errors).forEach((errorKey) => {
-        if (errors[errorKey].length >= 1) {
-          connector[errorKey] = null;
-        }
-      });
-      setConnector(connector);
+      setConnector(
+        getConnectorWithNullFields(
+          connector,
+          configErrors,
+          secretsErrors,
+          baseValidationResult,
+          errors
+        )
+      );
       return;
     }
     setIsSaving(true);

@@ -5,6 +5,7 @@
  */
 
 import { constant } from 'lodash';
+import { UserConfiguredActionConnector, IErrorObject } from '../../types';
 
 export function throwIfAbsent<T>(message: string) {
   return (value: T | undefined): T => {
@@ -43,3 +44,34 @@ export const isValidUrl = (urlString: string, protocol?: string) => {
     return false;
   }
 };
+
+export function getConnectorWithNullFields(
+  connector: UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>,
+  configErrors: IErrorObject,
+  secretsErrors: IErrorObject,
+  baseConnectorErrors: IErrorObject,
+  errors: IErrorObject
+) {
+  let validatedConnector = {
+    ...connector,
+  };
+  Object.keys(configErrors).forEach((errorKey) => {
+    if (errors[errorKey].length >= 1) {
+      validatedConnector.config[errorKey] = null;
+    }
+  });
+  Object.keys(secretsErrors).forEach((errorKey) => {
+    if (errors[errorKey].length >= 1) {
+      validatedConnector.secrets[errorKey] = null;
+    }
+  });
+  Object.keys(baseConnectorErrors).forEach((errorKey) => {
+    if (errors[errorKey].length >= 1) {
+      validatedConnector = {
+        ...validatedConnector,
+        [errorKey]: null,
+      };
+    }
+  });
+  return validatedConnector;
+}
