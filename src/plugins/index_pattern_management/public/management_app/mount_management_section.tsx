@@ -53,7 +53,7 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
-    { data },
+    { data, indexPatternFieldEditor },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
@@ -61,6 +61,8 @@ export async function mountManagementSection(
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
   }
+
+  indexPatternFieldEditor.loadEditor();
 
   const deps: IndexPatternManagmentContext = {
     chrome,
