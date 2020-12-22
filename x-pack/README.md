@@ -88,7 +88,7 @@ An example test exists at [test_utils/jest/integration_tests/example_integration
 
 #### Running Reporting functional tests
 
-See [here](test/reporting/README.md) for more information on running reporting tests.
+See [here](./test/functional/apps/dashboard/reporting/README.md) for more information on running reporting tests.
 
 #### Running Security Solution Cypress E2E/integration tests
 See [here](./plugins/security_solution/cypress/README.md) for information on running this test suite.
