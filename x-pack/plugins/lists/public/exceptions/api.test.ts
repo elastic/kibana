@@ -11,12 +11,7 @@ import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/reque
 import { getFoundExceptionListItemSchemaMock } from '../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
 import { getUpdateExceptionListSchemaMock } from '../../common/schemas/request/update_exception_list_schema.mock';
-import {
-  CreateExceptionListItemSchema,
-  CreateExceptionListSchema,
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-} from '../../common/schemas';
+import { CreateExceptionListItemSchema, ExceptionListItemSchema } from '../../common/schemas';
 import { getFoundExceptionListSchemaMock } from '../../common/schemas/response/found_exception_list_schema.mock';
 
 import {
@@ -78,36 +73,6 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
-    });
-
-    test('it returns error and does not make request if request payload fails decode', async () => {
-      const payload: Omit<CreateExceptionListSchema, 'description'> & {
-        description?: string[];
-      } = { ...getCreateExceptionListSchemaMock(), description: ['123'] };
-
-      await expect(
-        addExceptionList({
-          http: httpMock,
-          list: (payload as unknown) as ExceptionListSchema,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual('Invalid value "["123"]" supplied to "description"');
-    });
-
-    test('it returns error if response payload fails decode', async () => {
-      const payload = getCreateExceptionListSchemaMock();
-      const badPayload = getExceptionListSchemaMock();
-      // @ts-expect-error
-      delete badPayload.id;
-      httpMock.fetch.mockResolvedValue(badPayload);
-
-      await expect(
-        addExceptionList({
-          http: httpMock,
-          list: payload,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
     });
   });
 
