@@ -7,7 +7,8 @@
         "runtime_customer_ssn": {
           "type": "keyword",
           "script": {
-            "source": "emit(doc['customer_ssn'].value + ' calculated at runtime')"
+            "lang": "painless",
+            "source": "if (doc['customer_ssn'].size() !== 0) { return emit(doc['customer_ssn'].value + ' calculated at runtime') }"
           }
         }
       },
@@ -37,7 +38,8 @@
               "type": "keyword"
             }
           },
-          "type": "text"
+          "type": "text",
+          "fielddata": true
         }
       }
     },
