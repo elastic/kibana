@@ -190,7 +190,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [selectedCells, setSelectedCells] = useSelectedCells(
     appState,
     setAppState,
-    explorerState?.swimlaneBucketInterval
+    explorerState?.swimlaneBucketInterval?.asSeconds()
   );
 
   useEffect(() => {
