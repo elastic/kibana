@@ -8,7 +8,6 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
-import { ROW_CLICK_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -21,8 +20,8 @@ import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
 import { TriggerContext, VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
-import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import type { LensProps } from './editor_frame_service/embeddable/embeddable_component';
+import { ROW_CLICK_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
