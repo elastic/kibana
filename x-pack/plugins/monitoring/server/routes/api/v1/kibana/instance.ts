@@ -6,11 +6,16 @@
 
 import { schema } from '@kbn/config-schema';
 import { getKibanaInfo } from '../../../../lib/kibana/get_kibana_info';
+// @ts-ignore
 import { handleError } from '../../../../lib/errors';
+// @ts-ignore
 import { getMetrics } from '../../../../lib/details/get_metrics';
+// @ts-ignore
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+// @ts-ignore
 import { metricSet } from './metric_set_instance';
 import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
+import { LegacyRequest, LegacyServer } from '../../../../types';
 
 /**
  * Kibana instance: This will fetch all data required to display a Kibana
@@ -18,7 +23,7 @@ import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
  * - Kibana Instance Summary (Status)
  * - Metrics
  */
-export function kibanaInstanceRoute(server) {
+export function kibanaInstanceRoute(server: LegacyServer) {
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/kibana/{kibanaUuid}',
@@ -37,7 +42,7 @@ export function kibanaInstanceRoute(server) {
         }),
       },
     },
-    async handler(req) {
+    async handler(req: LegacyRequest) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
