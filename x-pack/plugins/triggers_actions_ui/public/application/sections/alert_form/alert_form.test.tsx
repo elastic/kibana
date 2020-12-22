@@ -185,7 +185,7 @@ describe('alert_form', () => {
         <AlertForm
           alert={initialAlert}
           dispatch={() => {}}
-          errors={{ name: [], interval: [] }}
+          errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           alertTypeRegistry={alertTypeRegistry}
@@ -357,7 +357,7 @@ describe('alert_form', () => {
         <AlertForm
           alert={initialAlert}
           dispatch={() => {}}
-          errors={{ name: [], interval: [] }}
+          errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           alertTypeRegistry={alertTypeRegistry}
@@ -374,7 +374,6 @@ describe('alert_form', () => {
 
     it('renders alert type options which producer correspond to the alert consumer', async () => {
       await setup();
-      expect(wrapper).toMatchSnapshot();
       const alertTypeSelectOptions = wrapper.find(
         '[data-test-subj="same-consumer-producer-alert-type-SelectOption"]'
       );
@@ -420,7 +419,7 @@ describe('alert_form', () => {
         <AlertForm
           alert={initialAlert}
           dispatch={() => {}}
-          errors={{ name: [], interval: [] }}
+          errors={{ name: [], interval: [], alertTypeId: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           alertTypeRegistry={alertTypeRegistry}
