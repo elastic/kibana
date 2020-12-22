@@ -11,7 +11,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
+import { MLSingleMetricLink } from '../../Links/MachineLearningLinks/MLSingleMetricLink';
 
 interface Props {
   hasValidMlLicense?: boolean;
@@ -78,7 +78,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
             }
           )}{' '}
         </span>
-        <MLJobLink
+        <MLSingleMetricLink
           jobId={mlJobId}
           serviceName={serviceName}
           transactionType={transactionType}
@@ -86,7 +86,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
           {i18n.translate('xpack.apm.metrics.transactionChart.viewJob', {
             defaultMessage: 'View Job',
           })}
-        </MLJobLink>
+        </MLSingleMetricLink>
       </ShiftedEuiText>
     </EuiFlexItem>
   );

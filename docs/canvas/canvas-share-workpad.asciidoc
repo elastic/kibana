@@ -36,7 +36,7 @@ For more information, refer to <<reporting-getting-started, Reporting from Kiban
 
 If you have a subscription that supports the {report-features}, you can create a POST URL that you can use to automatically generate PDF reports using <<watcher-ui,Watcher>> or a script.
 
-To begin, click *Share > PDF reports > Copy POST URL*.
+To begin, click *Share > PDF reports > Advanced options > Copy POST URL*.
 
 [role="screenshot"]
 image::images/canvas-create-URL.gif[Image showing how to create POST URL]

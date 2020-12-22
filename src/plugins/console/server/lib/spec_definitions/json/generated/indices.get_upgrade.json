@@ -11,13 +11,8 @@
         "all"
       ]
     },
-    "methods": [
-      "GET"
-    ],
-    "patterns": [
-      "_upgrade",
-      "{indices}/_upgrade"
-    ],
+    "methods": [],
+    "patterns": [],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-upgrade.html"
   }
 }

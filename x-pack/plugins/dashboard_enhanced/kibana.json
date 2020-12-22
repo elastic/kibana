@@ -9,7 +9,6 @@
     "embeddable",
     "kibanaUtils",
     "embeddableEnhanced",
-    "kibanaReact",
-    "uiActions"
+    "kibanaReact"
   ]
 }

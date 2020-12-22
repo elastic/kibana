@@ -21,9 +21,10 @@ import angular from 'angular';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../ui_actions/public';
+import { UiActionsStart } from '../../../../ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../../inspector/public';
 import {
+  APPLY_FILTER_TRIGGER,
   esFilters,
   Filter,
   TimeRange,
