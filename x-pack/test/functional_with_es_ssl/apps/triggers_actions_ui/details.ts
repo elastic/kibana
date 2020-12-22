@@ -189,12 +189,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Edit alert button', function () {
-      let alert;
-      const testRunUuid = uuid.v4();
+      const alertName = uuid.v4();
+      const updatedAlertName = `Changed Alert Name ${alertName}`;
 
       before(async () => {
-        alert = await createAlert({
-          name: testRunUuid,
+        await createAlert({
+          name: alertName,
           alertTypeId: '.index-threshold',
           params: {
             aggType: 'count',
@@ -233,13 +233,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('alertsList');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alertName);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
 
-        const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
         await testSubjects.setValue('alertNameInput', updatedAlertName, {
           clearWithKeyboard: true,
         });
@@ -265,13 +264,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('alertsList');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(updatedAlertName);
 
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
         await editButton.click();
 
-        const updatedAlertName = `Changed Alert Name ${uuid.v4()}`;
-        await testSubjects.setValue('alertNameInput', updatedAlertName, {
+        await testSubjects.setValue('alertNameInput', alertName, {
           clearWithKeyboard: true,
         });
 
@@ -282,58 +280,64 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const nameInputAfterCancel = await testSubjects.find('alertNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
-        expect(textAfterCancel).to.eql(alert.name);
+        expect(textAfterCancel).to.eql(updatedAlertName);
       });
     });
 
-    // describe('View In App', function () {
-    //   const testRunUuid = uuid.v4();
+    describe('View In App', function () {
+      const alertName = uuid.v4();
 
-    //   beforeEach(async () => {
-    //     await pageObjects.common.navigateToApp('triggersActions');
-    //   });
+      beforeEach(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+      });
 
-    //   it('renders the alert details view in app button', async () => {
-    //     const alert = await alerting.alerts.createNoOp(`test-alert-${testRunUuid}`);
+      afterEach(async () => {
+        await objectRemover.removeAll();
+      });
 
-    //     // refresh to see alert
-    //     await browser.refresh();
+      it('renders the alert details view in app button', async () => {
+        const alert = await createAlert({
+          name: alertName,
+          alertTypeId: 'test.noop',
+        });
 
-    //     await pageObjects.header.waitUntilLoadingHasFinished();
+        // refresh to see alert
+        await browser.refresh();
 
-    //     // Verify content
-    //     await testSubjects.existOrFail('alertsList');
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
-    //     // click on first alert
-    //     await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
 
-    //     expect(await pageObjects.alertDetailsUI.isViewInAppEnabled()).to.be(true);
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
-    //     await pageObjects.alertDetailsUI.clickViewInApp();
+        expect(await pageObjects.alertDetailsUI.isViewInAppEnabled()).to.be(true);
 
-    //     expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Alert ${alert.id}`);
-    //   });
+        await pageObjects.alertDetailsUI.clickViewInApp();
 
-    //   it('renders a disabled alert details view in app button', async () => {
-    //     const alert = await alerting.alerts.createAlwaysFiringWithActions(
-    //       `test-alert-disabled-nav`,
-    //       []
-    //     );
+        expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Alert ${alert.id}`);
+      });
 
-    //     // refresh to see alert
-    //     await browser.refresh();
+      it('renders a disabled alert details view in app button', async () => {
+        const alert = await createAlert({
+          name: `test-alert-disabled-nav`,
+        });
 
-    //     await pageObjects.header.waitUntilLoadingHasFinished();
+        // refresh to see alert
+        await browser.refresh();
 
-    //     // Verify content
-    //     await testSubjects.existOrFail('alertsList');
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
-    //     // click on first alert
-    //     await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
 
-    //     expect(await pageObjects.alertDetailsUI.isViewInAppDisabled()).to.be(true);
-    //   });
-    // });
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        expect(await pageObjects.alertDetailsUI.isViewInAppDisabled()).to.be(true);
+      });
+    });
 
     // describe('Alert Instances', function () {
     //   const testRunUuid = uuid.v4();

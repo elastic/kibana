@@ -15,7 +15,6 @@ function generateUniqueKey() {
 }
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const alerting = getService('alerting');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
@@ -54,6 +53,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const createdAlert = await createAlertManualCleanup(overwrites);
     objectRemover.add(createdAlert.id, 'alert', 'alerts');
     return createdAlert;
+  }
+
+  async function createAction(overwrites: Record<string, any> = {}) {
+    const { body: createdAction } = await supertest
+      .post(`/api/actions/action`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name: `slack-${Date.now()}`,
+        actionTypeId: '.slack',
+        config: {},
+        secrets: {
+          webhookUrl: 'https://test',
+        },
+        ...overwrites,
+      })
+      .expect(200);
+    objectRemover.add(createdAction.id, 'action', 'actions');
+    return createdAction;
   }
 
   async function refreshAlertsList() {
@@ -451,14 +468,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should filter alerts by the action type', async () => {
       await createAlert();
-      const action = await alerting.actions.createAction({
-        name: `slack-${Date.now()}`,
-        actionTypeId: '.slack',
-        config: {},
-        secrets: {
-          webhookUrl: 'https://test',
-        },
-      });
+      const action = await createAction();
       const noopAlertWithAction = await createAlert({
         actions: [
           {
