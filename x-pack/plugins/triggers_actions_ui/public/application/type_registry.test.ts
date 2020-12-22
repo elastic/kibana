@@ -74,7 +74,12 @@ describe('get()', () => {
     expect(actionType).toMatchInlineSnapshot(`
       Object {
         "actionConnectorFields": null,
-        "actionParamsFields": null,
+        "actionParamsFields": Object {
+          "$$typeof": Symbol(react.lazy),
+          "_ctor": [Function],
+          "_result": null,
+          "_status": -1,
+        },
         "iconClass": "test",
         "id": "my-action-type-snapshot",
         "selectMessage": "test",
@@ -97,7 +102,8 @@ describe('get()', () => {
 describe('list()', () => {
   test('returns list of action types', () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-    actionTypeRegistry.register(getTestActionType());
+    const actionType = getTestActionType();
+    actionTypeRegistry.register(actionType);
     const actionTypes = actionTypeRegistry.list();
     expect(actionTypes).toEqual([
       {
@@ -105,7 +111,7 @@ describe('list()', () => {
         iconClass: 'test',
         selectMessage: 'test',
         actionConnectorFields: null,
-        actionParamsFields: null,
+        actionParamsFields: actionType.actionParamsFields,
         validateConnector: actionTypes[0].validateConnector,
         validateParams: actionTypes[0].validateParams,
       },
