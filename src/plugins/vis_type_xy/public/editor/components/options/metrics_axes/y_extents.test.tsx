@@ -20,10 +20,9 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import { NumberInputOption } from '../../../../../../charts/public';
-
 import { ScaleType } from '../../../../types';
 import { YExtents, YExtentsProps } from './y_extents';
+import { NumberInputOption } from '../../../../../../vis_default_editor/public';
 
 describe('YExtents component', () => {
   let setMultipleValidity: jest.Mock;

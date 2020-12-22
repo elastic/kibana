@@ -36,7 +36,7 @@ import {
   setTrackUiMetric,
 } from './services';
 import { visTypesDefinitions } from './vis_types';
-import { CHARTS_LIBRARY } from '../common';
+import { LEGACY_CHARTS_LIBRARY } from '../common';
 import { xyVisRenderer } from './vis_renderer';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -74,7 +74,7 @@ export class VisTypeXyPlugin
     core: VisTypeXyCoreSetup,
     { expressions, visualizations, charts, usageCollection }: VisTypeXyPluginSetupDependencies
   ) {
-    if (core.uiSettings.get(CHARTS_LIBRARY, false)) {
+    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, true)) {
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
       setColorsService(charts.legacyColors);

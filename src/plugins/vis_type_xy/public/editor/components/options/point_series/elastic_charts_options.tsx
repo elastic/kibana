@@ -22,7 +22,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { SelectOption, SwitchOption } from '../../../../../../charts/public';
+import { SelectOption, SwitchOption } from '../../../../../../vis_default_editor/public';
 
 import { ChartType } from '../../../../../common';
 import { VisParams } from '../../../../types';
