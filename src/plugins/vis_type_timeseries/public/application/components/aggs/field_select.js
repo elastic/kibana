@@ -24,7 +24,7 @@ import { EuiComboBox } from '@elastic/eui';
 
 import { METRIC_TYPES } from '../../../../common/metric_types';
 import { isFieldEnabled } from '../../lib/check_ui_restrictions';
-import { extractTimefieldName } from '../../../../common/timefield_utils';
+import { extractTimefieldLabel } from '../../../../common/timefield_utils';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
@@ -70,7 +70,7 @@ export function FieldSelect({
           };
         }
 
-        if (extractTimefieldName(value) === item.value) {
+        if (extractTimefieldLabel(value) === item.label) {
           selectedOptions.push(item);
         }
       }
