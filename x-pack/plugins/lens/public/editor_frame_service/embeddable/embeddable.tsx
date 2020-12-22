@@ -53,11 +53,17 @@ import { LensAttributeService } from '../../lens_attribute_service';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
+interface LensBaseEmbeddableInput extends EmbeddableInput {
+  filters?: Filter[];
+  query?: Query;
+  timeRange?: TimeRange;
+}
+
 export type LensByValueInput = {
   attributes: LensSavedObjectAttributes;
-} & EmbeddableInput;
+} & LensBaseEmbeddableInput;
 
-export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
+export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
 export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
   palette?: PaletteOutput;
   renderMode?: RenderMode;
@@ -254,6 +260,7 @@ export class Embeddable
         handleEvent={this.handleEvent}
         onData$={this.updateActiveData}
         renderMode={input.renderMode}
+        syncColors={input.syncColors}
         hasCompatibleActions={this.hasCompatibleActions}
       />,
       domNode

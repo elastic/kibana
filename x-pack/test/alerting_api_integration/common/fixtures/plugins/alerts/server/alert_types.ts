@@ -13,6 +13,8 @@ import {
   AlertType,
   AlertInstanceState,
   AlertInstanceContext,
+  AlertTypeState,
+  AlertTypeParams,
 } from '../../../../../../../plugins/alerts/server';
 
 export const EscapableStrings = {
@@ -50,7 +52,7 @@ function getAlwaysFiringAlertType() {
     groupsToScheduleActionsInSeries: schema.maybe(schema.arrayOf(schema.nullable(schema.string()))),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State {
+  interface State extends AlertTypeState {
     groupInSeriesIndex?: number;
   }
   interface InstanceState extends AlertInstanceState {
@@ -59,7 +61,7 @@ function getAlwaysFiringAlertType() {
   interface InstanceContext extends AlertInstanceContext {
     instanceContextValue: boolean;
   }
-  const result: AlertType<ParamsType, State, InstanceState, InstanceContext> = {
+  const result: AlertType<ParamsType & AlertTypeParams, State, InstanceState, InstanceContext> = {
     id: 'test.always-firing',
     name: 'Test: Always Firing',
     actionGroups: [
@@ -141,7 +143,7 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
 }
 
 function getCumulativeFiringAlertType() {
-  interface State {
+  interface State extends AlertTypeState {
     runCount?: number;
   }
   interface InstanceState extends AlertInstanceState {
@@ -175,7 +177,7 @@ function getCumulativeFiringAlertType() {
       };
     },
   };
-  return result as AlertType;
+  return result;
 }
 
 function getNeverFiringAlertType() {
@@ -184,7 +186,7 @@ function getNeverFiringAlertType() {
     reference: schema.string(),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State {
+  interface State extends AlertTypeState {
     globalStateValue: boolean;
   }
   const result: AlertType<ParamsType, State, {}, {}> = {
@@ -385,7 +387,7 @@ function getPatternFiringAlertType() {
     reference: schema.maybe(schema.string()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
-  interface State {
+  interface State extends AlertTypeState {
     patternIndex?: number;
   }
   const result: AlertType<ParamsType, State, {}, {}> = {

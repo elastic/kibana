@@ -1541,7 +1541,7 @@ export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 
 };
 
 // @public
-export interface LegacyElasticsearchError extends Boom {
+export interface LegacyElasticsearchError extends Boom.Boom {
     // (undocumented)
     [code]?: string;
 }

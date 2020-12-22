@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
 import { FileLayerField, VectorLayer, IServiceSettings } from '../../../maps_legacy/public';
-import { NumberInputOption, SelectOption, SwitchOption } from '../../../charts/public';
+import { SelectOption, SwitchOption, NumberInputOption } from '../../../vis_default_editor/public';
 import { RegionMapVisParams, WmsOptions } from '../../../maps_legacy/public';
 
 const mapLayerForOption = ({ layerId, name }: VectorLayer) => ({

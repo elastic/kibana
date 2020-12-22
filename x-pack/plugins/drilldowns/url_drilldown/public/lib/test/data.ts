@@ -5,6 +5,7 @@
  */
 
 import { DatatableColumnType } from '../../../../../../../src/plugins/expressions/common';
+import { Query, Filter, TimeRange } from '../../../../../../../src/plugins/data/public';
 import {
   Embeddable,
   EmbeddableInput,
@@ -159,6 +160,9 @@ export const rowClickData = {
 
 interface TestInput extends EmbeddableInput {
   savedObjectId?: string;
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
 }
 
 interface TestOutput extends EmbeddableOutput {
