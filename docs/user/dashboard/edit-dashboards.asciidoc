@@ -85,15 +85,16 @@ visualization or saved search from the panel is still available in Kibana.
 [[sync-colors]]
 === Synchronize colors
 
-By default, Kibana attempts to keep colors for series consistent across panels, making sure the same series name always uses the same color.
+By default, dashboard panels that share a non-gradient based color palette will synchronize their color assignment to improve readability.
+Color assignment is based on the series name, and the total number of colors is based on the number of unique series names.
 
-In some cases this can lead to lots of different colors in a single dashboard which can be undesirable. It is possible to disable this behavior:
+The color synchronizing logic can make the dashboard less readable when there are too many unique series names. It is possible to disable the synchronization behavior:
 
 . Put the dashboard in *Edit* mode. 
 
 . Click the "Options" button in the top navigation bar.
 
-. Disable "Sync colors across panels".
+. Disable "Sync color palettes across panels".
 
 [float]
 [[clone-panels]]

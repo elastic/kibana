@@ -94,7 +94,7 @@ export class OptionsMenu extends Component<Props, State> {
         <EuiFormRow>
           <EuiSwitch
             label={i18n.translate('dashboard.topNav.options.syncColorsBetweenPanelsSwitchLabel', {
-              defaultMessage: 'Sync colors across panels',
+              defaultMessage: 'Sync color palettes across panels',
             })}
             checked={this.state.syncColors}
             onChange={this.handleSyncColorsChange}
