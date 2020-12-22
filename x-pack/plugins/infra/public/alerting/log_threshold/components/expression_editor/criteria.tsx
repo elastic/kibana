@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { IFieldType } from 'src/plugins/data/public';
 import { Criterion } from './criterion';
 import {
-  AlertParams,
+  PartialAlertParams,
   PartialCountCriteria as PartialCountCriteriaType,
   PartialCriteria as PartialCriteriaType,
   PartialCriterion as PartialCriterionType,
@@ -37,7 +37,7 @@ interface SharedProps {
   criteria?: PartialCriteriaType;
   defaultCriterion: PartialCriterionType;
   errors: Errors['criteria'];
-  alertParams: Partial<AlertParams>;
+  alertParams: PartialAlertParams;
   sourceId: string;
   updateCriteria: (criteria: PartialCriteriaType) => void;
 }

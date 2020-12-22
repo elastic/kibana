@@ -130,13 +130,13 @@ export type PartialRatioCriteria = rt.TypeOf<typeof partialRatioCriteriaRT>;
 export const partialCriteriaRT = rt.union([partialCountCriteriaRT, partialRatioCriteriaRT]);
 export type PartialCriteria = rt.TypeOf<typeof partialCriteriaRT>;
 
-export const TimeUnitRT = rt.union([
+export const timeUnitRT = rt.union([
   rt.literal('s'),
   rt.literal('m'),
   rt.literal('h'),
   rt.literal('d'),
 ]);
-export type TimeUnit = rt.TypeOf<typeof TimeUnitRT>;
+export type TimeUnit = rt.TypeOf<typeof timeUnitRT>;
 
 export const timeSizeRT = rt.number;
 export const groupByRT = rt.array(rt.string);
@@ -145,7 +145,7 @@ const RequiredAlertParamsRT = rt.type({
   // NOTE: "count" would be better named as "threshold", but this would require a
   // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
   count: ThresholdRT,
-  timeUnit: TimeUnitRT,
+  timeUnit: timeUnitRT,
   timeSize: timeSizeRT,
 });
 
@@ -167,6 +167,17 @@ export const countAlertParamsRT = rt.intersection([
 ]);
 export type CountAlertParams = rt.TypeOf<typeof countAlertParamsRT>;
 
+export const partialCountAlertParamsRT = rt.intersection([
+  rt.type({
+    criteria: partialCountCriteriaRT,
+    ...RequiredAlertParamsRT.props,
+  }),
+  rt.partial({
+    ...OptionalAlertParamsRT.props,
+  }),
+]);
+export type PartialCountAlertParams = rt.TypeOf<typeof partialCountAlertParamsRT>;
+
 export const ratioAlertParamsRT = rt.intersection([
   rt.type({
     criteria: ratioCriteriaRT,
@@ -178,8 +189,25 @@ export const ratioAlertParamsRT = rt.intersection([
 ]);
 export type RatioAlertParams = rt.TypeOf<typeof ratioAlertParamsRT>;
 
+export const partialRatioAlertParamsRT = rt.intersection([
+  rt.type({
+    criteria: partialRatioCriteriaRT,
+    ...RequiredAlertParamsRT.props,
+  }),
+  rt.partial({
+    ...OptionalAlertParamsRT.props,
+  }),
+]);
+export type PartialRatioAlertParams = rt.TypeOf<typeof partialRatioAlertParamsRT>;
+
 export const alertParamsRT = rt.union([countAlertParamsRT, ratioAlertParamsRT]);
 export type AlertParams = rt.TypeOf<typeof alertParamsRT>;
+
+export const partialAlertParamsRT = rt.union([
+  partialCountAlertParamsRT,
+  partialRatioAlertParamsRT,
+]);
+export type PartialAlertParams = rt.TypeOf<typeof partialAlertParamsRT>;
 
 export const isRatioAlert = (criteria: PartialCriteria): criteria is PartialRatioCriteria => {
   return criteria.length > 0 && Array.isArray(criteria[0]) ? true : false;

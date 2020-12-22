@@ -7,7 +7,7 @@
 import * as rt from 'io-ts';
 import {
   countCriteriaRT,
-  TimeUnitRT,
+  timeUnitRT,
   timeSizeRT,
   groupByRT,
 } from '../../alerting/logs/log_threshold/types';
@@ -43,7 +43,7 @@ export type GetLogAlertsChartPreviewDataSuccessResponsePayload = rt.TypeOf<
 export const getLogAlertsChartPreviewDataAlertParamsSubsetRT = rt.intersection([
   rt.type({
     criteria: countCriteriaRT,
-    timeUnit: TimeUnitRT,
+    timeUnit: timeUnitRT,
     timeSize: timeSizeRT,
   }),
   rt.partial({

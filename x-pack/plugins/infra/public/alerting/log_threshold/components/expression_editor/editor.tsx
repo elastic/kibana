@@ -14,13 +14,15 @@ import {
   ForLastExpression,
 } from '../../../../../../triggers_actions_ui/public';
 import {
-  AlertParams,
+  PartialAlertParams,
   Comparator,
   isRatioAlert,
   PartialCriteria as PartialCriteriaType,
   ThresholdType,
+  timeUnitRT,
 } from '../../../../../common/alerting/logs/log_threshold/types';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { ObjectEntries } from '../../../../../common/utility_types';
 import {
   LogIndexField,
   LogSourceProvider,
@@ -80,7 +82,7 @@ const createDefaultRatioAlertParams = (availableFields: LogIndexField[]) => ({
 });
 
 export const ExpressionEditor: React.FC<
-  AlertTypeParamsExpressionProps<AlertParams, LogsContextMeta>
+  AlertTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>
 > = (props) => {
   const isInternal = props.metadata?.isInternal ?? false;
   const [sourceId] = useSourceId();
@@ -145,9 +147,9 @@ export const SourceStatusWrapper: React.FC = ({ children }) => {
   );
 };
 
-export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsContextMeta>> = (
-  props
-) => {
+export const Editor: React.FC<
+  AlertTypeParamsExpressionProps<PartialAlertParams, LogsContextMeta>
+> = (props) => {
   const { setAlertParams, alertParams, errors } = props;
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { sourceId, sourceStatus } = useLogSourceContext();
@@ -203,7 +205,9 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
 
   const updateTimeUnit = useCallback(
     (tu: string) => {
-      setAlertParams('timeUnit', tu);
+      if (timeUnitRT.is(tu)) {
+        setAlertParams('timeUnit', tu);
+      }
     },
     [setAlertParams]
   );
@@ -224,19 +228,17 @@ export const Editor: React.FC<AlertTypeParamsExpressionProps<AlertParams, LogsCo
       const defaults =
         type === 'count' ? defaultCountAlertParams : createDefaultRatioAlertParams(supportedFields);
       // Reset properties that don't make sense switching from one context to the other
-      for (const [key, value] of Object.entries({
-        criteria: defaults.criteria,
-        count: defaults.count,
-      })) {
-        setAlertParams(key, value);
-      }
+      setAlertParams('count', defaults.count);
+      setAlertParams('criteria', defaults.criteria);
     },
     [defaultCountAlertParams, setAlertParams, supportedFields]
   );
 
   useMount(() => {
-    const defaultAlertParams = defaultCountAlertParams;
-    for (const [key, value] of Object.entries({ ...defaultAlertParams, ...alertParams })) {
+    const newAlertParams = { ...defaultCountAlertParams, ...alertParams };
+    for (const [key, value] of Object.entries(newAlertParams) as ObjectEntries<
+      typeof newAlertParams
+    >) {
       setAlertParams(key, value);
     }
     setHasSetDefaults(true);
