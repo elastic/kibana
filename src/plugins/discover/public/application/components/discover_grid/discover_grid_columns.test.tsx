@@ -38,7 +38,7 @@ describe('Discover grid columns ', function () {
           "display": undefined,
           "id": "extension",
           "isSortable": undefined,
-          "schema": "json",
+          "schema": "unknown",
         },
         Object {
           "actions": Object {
@@ -53,7 +53,7 @@ describe('Discover grid columns ', function () {
           "display": undefined,
           "id": "message",
           "isSortable": undefined,
-          "schema": "json",
+          "schema": "unknown",
         },
       ]
     `);
@@ -78,7 +78,7 @@ describe('Discover grid columns ', function () {
           "display": undefined,
           "id": "extension",
           "isSortable": undefined,
-          "schema": "json",
+          "schema": "unknown",
         },
         Object {
           "actions": Object {
@@ -90,7 +90,7 @@ describe('Discover grid columns ', function () {
           "display": undefined,
           "id": "message",
           "isSortable": undefined,
-          "schema": "json",
+          "schema": "unknown",
         },
       ]
     `);
@@ -116,7 +116,7 @@ describe('Discover grid columns ', function () {
           "id": "timestamp",
           "initialWidth": 180,
           "isSortable": undefined,
-          "schema": "json",
+          "schema": "unknown",
         },
         Object {
           "actions": Object {
@@ -131,7 +131,7 @@ describe('Discover grid columns ', function () {
           "display": undefined,
           "id": "extension",
           "isSortable": undefined,
-          "schema": "json",
+          "schema": "unknown",
         },
         Object {
           "actions": Object {
@@ -146,7 +146,7 @@ describe('Discover grid columns ', function () {
           "display": undefined,
           "id": "message",
           "isSortable": undefined,
-          "schema": "json",
+          "schema": "unknown",
         },
       ]
     `);

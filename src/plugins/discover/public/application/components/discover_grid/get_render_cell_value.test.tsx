@@ -32,7 +32,11 @@ const rows = [
 
 describe('Discover grid cell rendering', function () {
   it('renders bytes column correctly', () => {
-    const DiscoverGridCellValue = getRenderCellValueFn(indexPatternMock, rows);
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rows,
+      rows.map((row) => indexPatternMock.flattenHit(row))
+    );
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
@@ -46,7 +50,11 @@ describe('Discover grid cell rendering', function () {
     expect(component.html()).toMatchInlineSnapshot(`"<span>100</span>"`);
   });
   it('renders _source column correctly', () => {
-    const DiscoverGridCellValue = getRenderCellValueFn(indexPatternMock, rows);
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rows,
+      rows.map((row) => indexPatternMock.flattenHit(row))
+    );
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
@@ -63,7 +71,11 @@ describe('Discover grid cell rendering', function () {
   });
 
   it('renders _source column correctly when isDetails is set to true', () => {
-    const DiscoverGridCellValue = getRenderCellValueFn(indexPatternMock, rows);
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rows,
+      rows.map((row) => indexPatternMock.flattenHit(row))
+    );
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}
@@ -82,7 +94,11 @@ describe('Discover grid cell rendering', function () {
   });
 
   it('renders correctly when invalid row is given', () => {
-    const DiscoverGridCellValue = getRenderCellValueFn(indexPatternMock, rows);
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rows,
+      rows.map((row) => indexPatternMock.flattenHit(row))
+    );
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={1}
@@ -96,7 +112,11 @@ describe('Discover grid cell rendering', function () {
     expect(component.html()).toMatchInlineSnapshot(`"<span>-</span>"`);
   });
   it('renders correctly when invalid column is given', () => {
-    const DiscoverGridCellValue = getRenderCellValueFn(indexPatternMock, rows);
+    const DiscoverGridCellValue = getRenderCellValueFn(
+      indexPatternMock,
+      rows,
+      rows.map((row) => indexPatternMock.flattenHit(row))
+    );
     const component = shallow(
       <DiscoverGridCellValue
         rowIndex={0}

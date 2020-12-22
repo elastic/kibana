@@ -197,10 +197,15 @@ export const DiscoverGrid = ({
   /**
    * Cell rendering
    */
-  const renderCellValue = useMemo(() => getRenderCellValueFn(indexPattern, rows), [
-    rows,
-    indexPattern,
-  ]);
+  const renderCellValue = useMemo(
+    () =>
+      getRenderCellValueFn(
+        indexPattern,
+        rows,
+        rows ? rows.map((hit) => indexPattern.flattenHit(hit)) : []
+      ),
+    [rows, indexPattern]
+  );
 
   /**
    * Render variables

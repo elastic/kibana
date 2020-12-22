@@ -18,7 +18,7 @@
  */
 import React, { ReactNode } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
-import { geoPoint, kibanaJSON } from './constants';
+import { geoPoint, kibanaJSON, unknownType } from './constants';
 import { KBN_FIELD_TYPES } from '../../../../../data/common';
 
 export function getSchemaByKbnType(kbnType: string | undefined) {
@@ -39,7 +39,7 @@ export function getSchemaByKbnType(kbnType: string | undefined) {
     case KBN_FIELD_TYPES.GEO_POINT:
       return geoPoint;
     default:
-      return 'json';
+      return unknownType;
   }
 }
 
@@ -47,6 +47,16 @@ export function getSchemaDetectors() {
   return [
     {
       type: kibanaJSON,
+      detector() {
+        return 0; // this schema is always explicitly defined
+      },
+      sortTextAsc: '',
+      sortTextDesc: '',
+      icon: '',
+      color: '',
+    },
+    {
+      type: unknownType,
       detector() {
         return 0; // this schema is always explicitly defined
       },
@@ -74,6 +84,13 @@ export function getPopoverContents() {
   return {
     [geoPoint]: ({ children }: { children: ReactNode }) => {
       return <span className="geo-point">{children}</span>;
+    },
+    [unknownType]: ({ children }: { children: ReactNode }) => {
+      return (
+        <EuiCodeBlock isCopyable language="json" paddingSize="none" transparentBackground={true}>
+          {children}
+        </EuiCodeBlock>
+      );
     },
     [kibanaJSON]: ({ children }: { children: ReactNode }) => {
       return (
