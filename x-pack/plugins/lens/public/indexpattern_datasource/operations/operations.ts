@@ -167,10 +167,13 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
         operationDefinition.getPossibleOperation()
       );
     } else if (operationDefinition.input === 'fullReference') {
-      addToMap(
-        { type: 'fullReference', operationType: operationDefinition.type },
-        operationDefinition.getPossibleOperation()
-      );
+      const validOperation = operationDefinition.getPossibleOperation(indexPattern);
+      if (validOperation) {
+        addToMap(
+          { type: 'fullReference', operationType: operationDefinition.type },
+          validOperation
+        );
+      }
     }
   });
 

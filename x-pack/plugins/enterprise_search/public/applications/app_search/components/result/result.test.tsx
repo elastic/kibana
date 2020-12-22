@@ -18,6 +18,7 @@ import { Result } from './result';
 
 describe('Result', () => {
   const props = {
+    isMetaEngine: false,
     result: {
       id: {
         raw: '1',
@@ -33,7 +34,6 @@ describe('Result', () => {
       },
       _meta: {
         id: '1',
-        scopedId: '1',
         score: 100,
         engine: 'my-engine',
       },
@@ -60,14 +60,16 @@ describe('Result', () => {
     ]);
   });
 
-  it('passes through showScore and resultMeta to ResultHeader', () => {
-    const wrapper = shallow(<Result {...props} showScore={true} />);
-    expect(wrapper.find(ResultHeader).prop('showScore')).toBe(true);
-    expect(wrapper.find(ResultHeader).prop('resultMeta')).toEqual({
-      id: '1',
-      scopedId: '1',
-      score: 100,
-      engine: 'my-engine',
+  it('passes showScore, resultMeta, and isMetaEngine to ResultHeader', () => {
+    const wrapper = shallow(<Result {...props} showScore={true} isMetaEngine={true} />);
+    expect(wrapper.find(ResultHeader).props()).toEqual({
+      isMetaEngine: true,
+      showScore: true,
+      resultMeta: {
+        id: '1',
+        score: 100,
+        engine: 'my-engine',
+      },
     });
   });
 
@@ -100,6 +102,7 @@ describe('Result', () => {
 
   describe('when there are more than 5 fields', () => {
     const propsWithMoreFields = {
+      isMetaEngine: false,
       result: {
         id: {
           raw: '1',
@@ -124,7 +127,6 @@ describe('Result', () => {
         },
         _meta: {
           id: '1',
-          scopedId: '1',
           score: 100,
           engine: 'my-engine',
         },
