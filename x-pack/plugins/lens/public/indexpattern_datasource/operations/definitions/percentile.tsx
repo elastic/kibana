@@ -11,7 +11,7 @@ import { AggFunctionsMapping } from 'src/plugins/data/public';
 import useDebounce from 'react-use/lib/useDebounce';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { getInvalidFieldMessage } from './helpers';
+import { getInvalidFieldMessage, getSafeName, isValidNumber } from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
@@ -63,8 +63,8 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     );
   },
   getDefaultLabel: (column, indexPattern, columns) =>
-    ofName(indexPattern.getFieldByName(column.sourceField)!.displayName, column.params.percentile),
-  buildColumn: ({ field, previousColumn }) => {
+    ofName(getSafeName(column.sourceField, indexPattern), column.params.percentile),
+  buildColumn: ({ field, previousColumn, indexPattern }) => {
     const existingFormat =
       previousColumn?.params && 'format' in previousColumn?.params
         ? previousColumn?.params?.format
@@ -73,7 +73,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       previousColumn?.operationType === 'percentile' && previousColumn?.params.percentile;
     const newPercentileParam = existingPercentileParam || DEFAULT_PERCENTILE_VALUE;
     return {
-      label: ofName(field.displayName, newPercentileParam),
+      label: ofName(getSafeName(field.name, indexPattern), newPercentileParam),
       dataType: 'number',
       operationType: 'percentile',
       sourceField: field.name,
@@ -119,12 +119,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     const inputValueAsNumber = Number(inputValue);
     // an input is value if it's not an empty string, parses to a valid number, is between 0 and 100 (inclusive)
     // and is an integer
-    const inputValueIsValid =
-      inputValue !== '' &&
-      !Number.isNaN(inputValueAsNumber) &&
-      inputValueAsNumber >= 0 &&
-      inputValueAsNumber <= 100 &&
-      inputValueAsNumber % 1 === 0;
+    const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
 
     useDebounce(
       () => {
@@ -171,7 +166,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
           error={
             !inputValueIsValid &&
             i18n.translate('xpack.lens.indexPattern.percentile.errorMessage', {
-              defaultMessage: 'Percentile has to be an integer between 0 and 100',
+              defaultMessage: 'Percentile has to be an integer between 1 and 99',
             })
           }
         >
@@ -179,8 +174,9 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
             data-test-subj="lns-indexPattern-percentile-input"
             compressed
             value={inputValue}
-            min={0}
-            max={100}
+            min={1}
+            max={99}
+            step={1}
             onChange={handleInputChange}
           />
         </EuiFormRow>

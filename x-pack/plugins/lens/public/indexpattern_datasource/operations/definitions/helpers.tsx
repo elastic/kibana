@@ -78,3 +78,24 @@ export function getSafeName(name: string, indexPattern: IndexPattern): string {
         defaultMessage: 'Missing field',
       });
 }
+
+export function isValidNumber(
+  inputValue: string | number | null | undefined,
+  integer?: boolean,
+  upperBound?: number,
+  lowerBound?: number
+) {
+  const inputValueAsNumber = Number(inputValue);
+  // an input is value if it's not an empty string, parses to a valid number, is between 0 and 100 (inclusive)
+  // and is an integer
+  return (
+    inputValue !== '' &&
+    inputValue !== null &&
+    inputValue !== undefined &&
+    !Number.isNaN(inputValueAsNumber) &&
+    Number.isFinite(inputValueAsNumber) &&
+    (!integer || Number.isInteger(inputValueAsNumber)) &&
+    (upperBound === undefined || inputValueAsNumber <= upperBound) &&
+    (lowerBound === undefined || inputValueAsNumber >= lowerBound)
+  );
+}
