@@ -23,7 +23,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { CoreStart } from 'kibana/public';
 import { isEmpty } from 'lodash';
 import { Alert, AlertTaskState, BASE_ALERT_API_PATH } from '../../../../plugins/alerts/common';
-import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
+import { ALERTING_EXAMPLE_APP_ID, AlwaysFiringParams } from '../../common/constants';
 
 type Props = RouteComponentProps & {
   http: CoreStart['http'];
@@ -34,7 +34,7 @@ function hasCraft(state: any): state is { craft: string } {
   return state && state.craft;
 }
 export const ViewPeopleInSpaceAlertPage = withRouter(({ http, id }: Props) => {
-  const [alert, setAlert] = useState<Alert | null>(null);
+  const [alert, setAlert] = useState<Alert<AlwaysFiringParams> | null>(null);
   const [alertState, setAlertState] = useState<AlertTaskState | null>(null);
 
   useEffect(() => {

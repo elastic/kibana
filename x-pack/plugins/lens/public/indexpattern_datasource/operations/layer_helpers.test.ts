@@ -18,7 +18,7 @@ import { operationDefinitionMap, OperationType } from '../operations';
 import { TermsIndexPatternColumn } from './definitions/terms';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 import { AvgIndexPatternColumn } from './definitions/metrics';
-import type { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from '../types';
+import type { IndexPattern, IndexPatternLayer } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../id_generator';
@@ -1266,31 +1266,19 @@ describe('state_helpers', () => {
         sourceField: 'timestamp',
       };
 
-      const state: IndexPatternPrivateState = {
-        indexPatternRefs: [],
-        existingFields: {},
-        indexPatterns: {},
-        currentIndexPatternId: '1',
-        isFirstExistenceFetch: false,
-        layers: {
-          first: {
+      expect(
+        updateColumnParam({
+          layer: {
             indexPatternId: '1',
             columnOrder: ['col1'],
             columns: {
               col1: currentColumn,
             },
           },
-        },
-      };
-
-      expect(
-        updateColumnParam({
-          state,
-          layerId: 'first',
-          currentColumn,
+          columnId: 'col1',
           paramName: 'interval',
           value: 'M',
-        }).layers.first.columns.col1
+        }).columns.col1
       ).toEqual({
         ...currentColumn,
         params: { interval: 'M' },
@@ -1307,31 +1295,19 @@ describe('state_helpers', () => {
         sourceField: 'bytes',
       };
 
-      const state: IndexPatternPrivateState = {
-        indexPatternRefs: [],
-        existingFields: {},
-        indexPatterns: {},
-        currentIndexPatternId: '1',
-        isFirstExistenceFetch: false,
-        layers: {
-          first: {
+      expect(
+        updateColumnParam({
+          layer: {
             indexPatternId: '1',
             columnOrder: ['col1'],
             columns: {
               col1: currentColumn,
             },
           },
-        },
-      };
-
-      expect(
-        updateColumnParam({
-          state,
-          layerId: 'first',
-          currentColumn,
+          columnId: 'col1',
           paramName: 'format',
           value: { id: 'bytes' },
-        }).layers.first.columns.col1
+        }).columns.col1
       ).toEqual({
         ...currentColumn,
         params: { format: { id: 'bytes' } },

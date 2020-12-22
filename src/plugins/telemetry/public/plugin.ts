@@ -104,6 +104,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.telemetryService.userCanChangeSettings = this.canUserChangeSettings;
 
     this.telemetryNotifications = new TelemetryNotifications({
+      http,
       overlays,
       telemetryService: this.telemetryService,
     });
