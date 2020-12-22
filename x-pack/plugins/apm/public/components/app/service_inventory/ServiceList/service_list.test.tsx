@@ -8,12 +8,9 @@ import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { mockMoment, renderWithTheme } from '../../../../utils/testHelpers';
 import { getServiceColumns, ServiceList } from './';
-import props from './__fixtures__/props.json';
-
-type ServiceListAPIResponse = APIReturnType<'GET /api/apm/services'>;
+import { items } from './__fixtures__/service_api_mock_data';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -36,10 +33,7 @@ describe('ServiceList', () => {
 
   it('renders with data', () => {
     expect(() =>
-      renderWithTheme(
-        <ServiceList items={props.items as ServiceListAPIResponse['items']} />,
-        { wrapper: Wrapper }
-      )
+      renderWithTheme(<ServiceList items={items} />, { wrapper: Wrapper })
     ).not.toThrowError();
   });
 
@@ -74,24 +68,18 @@ describe('ServiceList', () => {
 
   describe('without ML data', () => {
     it('does not render the health column', () => {
-      const { queryByText } = renderWithTheme(
-        <ServiceList items={props.items as ServiceListAPIResponse['items']} />,
-        {
-          wrapper: Wrapper,
-        }
-      );
+      const { queryByText } = renderWithTheme(<ServiceList items={items} />, {
+        wrapper: Wrapper,
+      });
       const healthHeading = queryByText('Health');
 
       expect(healthHeading).toBeNull();
     });
 
     it('sorts by transactions per minute', async () => {
-      const { findByTitle } = renderWithTheme(
-        <ServiceList items={props.items as ServiceListAPIResponse['items']} />,
-        {
-          wrapper: Wrapper,
-        }
-      );
+      const { findByTitle } = renderWithTheme(<ServiceList items={items} />, {
+        wrapper: Wrapper,
+      });
 
       expect(
         await findByTitle('Trans. per minute; Sorted in descending order')
@@ -103,12 +91,10 @@ describe('ServiceList', () => {
     it('renders the health column', async () => {
       const { findByTitle } = renderWithTheme(
         <ServiceList
-          items={(props.items as ServiceListAPIResponse['items']).map(
-            (item) => ({
-              ...item,
-              healthStatus: ServiceHealthStatus.warning,
-            })
-          )}
+          items={items.map((item) => ({
+            ...item,
+            healthStatus: ServiceHealthStatus.warning,
+          }))}
         />,
         { wrapper: Wrapper }
       );
