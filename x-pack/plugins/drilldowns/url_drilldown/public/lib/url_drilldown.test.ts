@@ -6,14 +6,11 @@
 
 import { IExternalUrl } from 'src/core/public';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
-import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public/lib/embeddables';
+import { IEmbeddable, VALUE_CLICK_TRIGGER } from '../../../../../../src/plugins/embeddable/public';
 import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
 import { of } from '../../../../../../src/plugins/kibana_utils';
 import { createPoint, rowClickData, TestEmbeddable } from './test/data';
-import {
-  VALUE_CLICK_TRIGGER,
-  ROW_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/ui_actions/public';
+import { ROW_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 
 const mockDataPoints = [
   {

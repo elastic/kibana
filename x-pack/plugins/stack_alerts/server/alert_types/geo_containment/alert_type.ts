@@ -9,7 +9,13 @@ import { schema } from '@kbn/config-schema';
 import { Logger } from 'src/core/server';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { getGeoContainmentExecutor } from './geo_containment';
-import { AlertType } from '../../../../alerts/server';
+import {
+  AlertType,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  AlertTypeParams,
+} from '../../../../alerts/server';
 import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
@@ -96,7 +102,7 @@ export const ParamsSchema = schema.object({
   boundaryIndexQuery: schema.maybe(schema.any({})),
 });
 
-export interface GeoContainmentParams {
+export interface GeoContainmentParams extends AlertTypeParams {
   index: string;
   indexId: string;
   geoField: string;
@@ -111,10 +117,36 @@ export interface GeoContainmentParams {
   indexQuery?: Query;
   boundaryIndexQuery?: Query;
 }
+export interface GeoContainmentState extends AlertTypeState {
+  shapesFilters: Record<string, unknown>;
+  shapesIdsNamesMap: Record<string, unknown>;
+}
+export interface GeoContainmentInstanceState extends AlertInstanceState {
+  location: number[];
+  shapeLocationId: string;
+  dateInShape: string | null;
+  docId: string;
+}
+export interface GeoContainmentInstanceContext extends AlertInstanceContext {
+  entityId: string;
+  entityDateTime: string | null;
+  entityDocumentId: string;
+  detectionDateTime: string;
+  entityLocation: string;
+  containingBoundaryId: string;
+  containingBoundaryName: unknown;
+}
 
-export function getAlertType(logger: Logger): AlertType<GeoContainmentParams> {
+export type GeoContainmentAlertType = AlertType<
+  GeoContainmentParams,
+  GeoContainmentState,
+  GeoContainmentInstanceState,
+  GeoContainmentInstanceContext
+>;
+
+export function getAlertType(logger: Logger): GeoContainmentAlertType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoContainment.alertTypeTitle', {
-    defaultMessage: 'Geo tracking containment',
+    defaultMessage: 'Tracking containment',
   });
 
   const actionGroupName = i18n.translate(

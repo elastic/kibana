@@ -17,7 +17,7 @@ import { AlertTypeRegistry, GetServicesFunction, SpaceIdToNamespaceFunction } fr
 import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
 import { AlertsClient } from '../alerts_client';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { UntypedNormalizedAlertType } from '../alert_type_registry';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -44,7 +44,7 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create(alertType: NormalizedAlertType, { taskInstance }: RunContext) {
+  public create(alertType: UntypedNormalizedAlertType, { taskInstance }: RunContext) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }

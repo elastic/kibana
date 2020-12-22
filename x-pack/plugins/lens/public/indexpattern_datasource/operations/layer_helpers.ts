@@ -13,14 +13,8 @@ import {
   IndexPatternColumn,
   RequiredReference,
 } from './definitions';
-import type {
-  IndexPattern,
-  IndexPatternField,
-  IndexPatternLayer,
-  IndexPatternPrivateState,
-} from '../types';
+import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
 import { getSortScoreByPriority } from './operations';
-import { mergeLayer } from '../state_helpers';
 import { generateId } from '../../id_generator';
 import { ReferenceBasedIndexPatternColumn } from './definitions/column_types';
 
@@ -390,40 +384,29 @@ export function getMetricOperationTypes(field: IndexPatternField) {
 }
 
 export function updateColumnParam<C extends IndexPatternColumn>({
-  state,
-  layerId,
-  currentColumn,
+  layer,
+  columnId,
   paramName,
   value,
 }: {
-  state: IndexPatternPrivateState;
-  layerId: string;
-  currentColumn: C;
+  layer: IndexPatternLayer;
+  columnId: string;
   paramName: string;
   value: unknown;
-}): IndexPatternPrivateState {
-  const columnId = Object.entries(state.layers[layerId].columns).find(
-    ([_columnId, column]) => column === currentColumn
-  )![0];
-
-  const layer = state.layers[layerId];
-
-  return mergeLayer({
-    state,
-    layerId,
-    newLayer: {
-      columns: {
-        ...layer.columns,
-        [columnId]: {
-          ...currentColumn,
-          params: {
-            ...currentColumn.params,
-            [paramName]: value,
-          },
+}): IndexPatternLayer {
+  return {
+    ...layer,
+    columns: {
+      ...layer.columns,
+      [columnId]: {
+        ...layer.columns[columnId],
+        params: {
+          ...layer.columns[columnId].params,
+          [paramName]: value,
         },
       },
-    },
-  });
+    } as Record<string, IndexPatternColumn>,
+  };
 }
 
 function adjustColumnReferencesForChangedColumn(
