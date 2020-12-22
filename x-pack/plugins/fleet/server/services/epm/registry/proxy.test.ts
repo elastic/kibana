@@ -68,7 +68,7 @@ describe('getProxyAgentOptions', () => {
     });
   });
   describe('auth property', () => {
-    describe('if given username and password', () => {
+    describe('present & correct if given username and password', () => {
       test('proxy url is http', () => {
         const httpProxyWithAuth = {
           proxyUrl: 'http://user:pass@example.com:8080/p/a/t/h',
@@ -99,7 +99,7 @@ describe('getProxyAgentOptions', () => {
       });
     });
 
-    describe('if not given username and password', () => {
+    describe('missing if not given username and password', () => {
       test('proxy url is http', () => {
         const httpProxyWithout = {
           proxyUrl: 'http://example.com:8080/p/a/t/h',
