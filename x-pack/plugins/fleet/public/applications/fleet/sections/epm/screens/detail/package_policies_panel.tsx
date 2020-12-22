@@ -142,6 +142,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
               count={agentPolicy?.agents ?? 0}
               agentPolicyId={packagePolicy.policy_id}
               className="eui-textTruncate"
+              data-test-subj="rowAgentCount"
             />
           );
         },

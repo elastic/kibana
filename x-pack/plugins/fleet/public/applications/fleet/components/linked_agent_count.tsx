@@ -26,6 +26,11 @@ export const LinkedAgentCount = memo<
       {count}
     </EuiLink>
   ) : (
-    <>{count}</>
+    <span
+      data-test-subj={otherEuiLinkProps['data-test-subj']}
+      className={otherEuiLinkProps.className}
+    >
+      {count}
+    </span>
   );
 });
