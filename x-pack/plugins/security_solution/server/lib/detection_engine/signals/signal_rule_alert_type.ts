@@ -7,6 +7,7 @@
 /* eslint-disable complexity */
 
 import { Logger, KibanaRequest } from 'src/core/server';
+import { partition } from 'lodash';
 
 import {
   SIGNALS_ID,
@@ -183,15 +184,34 @@ export const signalRulesAlertType = ({
         const privileges = await checkPrivileges(services, inputIndex);
 
         const indexNames = Object.keys(privileges.index);
-        const everyIndexHasReadPrivileges = indexNames.every(
+        const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
+          indexNames,
           (indexName) => privileges.index[indexName].read
         );
-        if (!everyIndexHasReadPrivileges) {
+
+        if (
+          indexesWithReadPrivileges.length > 0 &&
+          indexesWithNoReadPrivileges.length >= indexesWithReadPrivileges.length
+        ) {
+          // some indices have read privileges others do not.
+          // set a partial failure status
           const errorString = `Missing required read permissions on indexes: ${JSON.stringify(
-            indexNames.filter((indexName) => privileges.index[indexName].read !== true)
+            indexesWithNoReadPrivileges
           )}`;
           logger.debug(buildRuleMessage(errorString));
           await ruleStatusService.partialFailure(errorString);
+          wroteStatus = true;
+        } else if (
+          indexesWithReadPrivileges.length === 0 &&
+          indexesWithNoReadPrivileges.length === indexNames.length
+        ) {
+          // none of the indices had read privileges so set the status to failed
+          // since we can't search on any indices we do not have read privileges on
+          const errorString = `The rule does not have read privileges to any of the following indices: ${JSON.stringify(
+            indexesWithNoReadPrivileges
+          )}`;
+          logger.debug(buildRuleMessage(errorString));
+          await ruleStatusService.error(errorString);
           wroteStatus = true;
         }
       } catch (exc) {

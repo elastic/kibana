@@ -188,7 +188,7 @@ describe('rules_notification_alert_type', () => {
       });
     });
 
-    it('should set a partial failure for when rules cannot read all provided indices', async () => {
+    it('should set a partial failure for when rules cannot read ALL provided indices', async () => {
       (checkPrivileges as jest.Mock).mockResolvedValueOnce({
         username: 'elastic',
         has_all_requested: false,
@@ -208,6 +208,29 @@ describe('rules_notification_alert_type', () => {
       expect(ruleStatusService.partialFailure).toHaveBeenCalled();
       expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
         'Missing required read permissions on indexes: ["some*"]'
+      );
+    });
+
+    it('should set a failure status for when rules cannot read ANY provided indices', async () => {
+      (checkPrivileges as jest.Mock).mockResolvedValueOnce({
+        username: 'elastic',
+        has_all_requested: false,
+        cluster: {},
+        index: {
+          'myfa*': {
+            read: false,
+          },
+          'some*': {
+            read: false,
+          },
+        },
+        application: {},
+      });
+      payload.params.index = ['some*', 'myfa*'];
+      await alert.executor(payload);
+      expect(ruleStatusService.error).toHaveBeenCalled();
+      expect(ruleStatusService.error.mock.calls[0][0]).toContain(
+        'The rule does not have read privileges to any of the following indices: ["myfa*","some*"]'
       );
     });
 
