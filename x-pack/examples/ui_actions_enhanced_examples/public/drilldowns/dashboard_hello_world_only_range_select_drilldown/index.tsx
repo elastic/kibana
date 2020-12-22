@@ -8,9 +8,11 @@ import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import { UiActionsEnhancedDrilldownDefinition as Drilldown } from '../../../../../plugins/ui_actions_enhanced/public';
-import { RangeSelectContext } from '../../../../../../src/plugins/embeddable/public';
+import {
+  RangeSelectContext,
+  SELECT_RANGE_TRIGGER,
+} from '../../../../../../src/plugins/embeddable/public';
 import { CollectConfigProps } from '../../../../../../src/plugins/kibana_utils/public';
-import { SELECT_RANGE_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
 import { BaseActionFactoryContext } from '../../../../../plugins/ui_actions_enhanced/public/dynamic_actions';
 
 export type Config = {

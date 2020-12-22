@@ -330,6 +330,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 id={timelineId}
                 refetch={refetch}
                 sort={sort}
+                tabType={TimelineTabs.query}
                 totalPages={calculateTotalPages({
                   itemsCount: totalCount,
                   itemsPerPage,
