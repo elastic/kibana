@@ -91,7 +91,12 @@ export const ReactExpressionRenderer = ({
   );
   const [debouncedExpression, setDebouncedExpression] = useState(expression);
   const [waitingForDebounceToComplete, setDebouncePending] = useState(false);
+  const firstRender = useRef(true);
   useShallowCompareEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
     if (debounce === undefined) {
       return;
     }
