@@ -18,6 +18,9 @@ export const FLYOUT_CONTINUE_BUTTON = i18n.translate(
 );
 
 export const DOCUMENT_CREATION_ERRORS = {
+  TITLE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.errorsTitle', {
+    defaultMessage: 'Something went wrong. Please address the errors and try again.',
+  }),
   NO_FILE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.noFileFound', {
     defaultMessage: 'No file found.',
   }),
@@ -29,6 +32,9 @@ export const DOCUMENT_CREATION_ERRORS = {
   }),
 };
 export const DOCUMENT_CREATION_WARNINGS = {
+  TITLE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.warningsTitle', {
+    defaultMessage: 'Warning!',
+  }),
   LARGE_FILE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.largeFile', {
     defaultMessage:
       "You're uploading an extremely large file. This could potentially lock your browser, or take a very long time to process. If possible, try splitting your data up into multiple smaller files.",
