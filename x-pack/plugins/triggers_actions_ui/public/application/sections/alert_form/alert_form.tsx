@@ -31,6 +31,7 @@ import {
   EuiNotificationBadge,
   EuiErrorBoundary,
   EuiToolTip,
+  EuiCallOut,
 } from '@elastic/eui';
 import { capitalize, isObject } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
@@ -107,17 +108,23 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
   return validationResult;
 }
 
-const hasErrors: (errors: IErrorObject) => boolean = (errors) =>
+export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
   !!Object.values(errors).find((errorList) => {
-    if (isObject(errorList)) return hasErrors(errorList as IErrorObject);
+    if (isObject(errorList)) return hasObjectErrors(errorList as IErrorObject);
     return errorList.length >= 1;
   });
 
 export function isValidAlert(
   alertObject: InitialAlert | Alert,
-  validationResult: IErrorObject
+  validationResult: IErrorObject,
+  actionsErrors: Record<string, IErrorObject>
 ): alertObject is Alert {
-  return !hasErrors(validationResult);
+  return (
+    !hasObjectErrors(validationResult) &&
+    Object.keys(actionsErrors).find((actionErrorsKey) =>
+      hasObjectErrors(actionsErrors[actionErrorsKey])
+    ) === undefined
+  );
 }
 
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
@@ -801,6 +808,13 @@ export const AlertForm = ({
             </EuiFlexGroup>
           </EuiFormRow>
           <EuiSpacer />
+          {errors.alertTypeId.length >= 1 && alert.alertTypeId !== undefined ? (
+            <Fragment>
+              <EuiSpacer />
+              <EuiCallOut color="danger" size="s" title={errors.alertTypeId} />
+              <EuiSpacer />
+            </Fragment>
+          ) : null}
           {alertTypeNodes}
         </Fragment>
       ) : alertTypesIndex ? (

@@ -6,7 +6,11 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import teamsSvg from './teams.svg';
-import { ActionTypeModel, ValidationResult, ConnectorValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import { TeamsActionParams, TeamsSecrets, TeamsActionConnector } from '../types';
 import { isValidUrl } from '../../../lib/value_validators';
 
@@ -65,7 +69,9 @@ export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsAct
       }
       return validationResult;
     },
-    validateParams: (actionParams: TeamsActionParams): ValidationResult<TeamsActionParams> => {
+    validateParams: (
+      actionParams: TeamsActionParams
+    ): GenericValidationResult<TeamsActionParams> => {
       const errors = {
         message: new Array<string>(),
       };

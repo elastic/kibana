@@ -6,7 +6,11 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { ActionTypeModel, ValidationResult, ConnectorValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import {
   PagerDutyActionConnector,
   PagerDutyConfig,
@@ -60,7 +64,9 @@ export function getActionType(): ActionTypeModel<
     },
     validateParams: (
       actionParams: PagerDutyActionParams
-    ): ValidationResult<Pick<PagerDutyActionParams, 'summary' | 'timestamp' | 'dedupKey'>> => {
+    ): GenericValidationResult<
+      Pick<PagerDutyActionParams, 'summary' | 'timestamp' | 'dedupKey'>
+    > => {
       const errors = {
         summary: new Array<string>(),
         timestamp: new Array<string>(),

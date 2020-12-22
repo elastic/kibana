@@ -253,7 +253,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           fullWidth
           name="thresholdTimeField"
           data-test-subj="thresholdAlertTimeFieldSelect"
-          value={timeField}
+          value={timeField || ''}
           onChange={(e) => {
             setAlertParams('timeField', e.target.value);
           }}

@@ -5,7 +5,11 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, ValidationResult, ConnectorValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import {
   WebhookActionParams,
   WebhookConfig,
@@ -122,11 +126,15 @@ export function getActionType(): ActionTypeModel<
       }
       return validationResult;
     },
-    validateParams: (actionParams: WebhookActionParams): ValidationResult<WebhookActionParams> => {
+    validateParams: (
+      actionParams: WebhookActionParams
+    ): GenericValidationResult<WebhookActionParams> => {
       const errors = {
         body: new Array<string>(),
+        sdfdf: new Array<string>(),
       };
       const validationResult = { errors };
+      validationResult.errors = errors;
       if (!actionParams.body?.length) {
         errors.body.push(
           i18n.translate(

@@ -5,7 +5,11 @@
  */
 
 import { lazy } from 'react';
-import { ValidationResult, ActionTypeModel, ConnectorValidationResult } from '../../../../types';
+import {
+  GenericValidationResult,
+  ActionTypeModel,
+  ConnectorValidationResult,
+} from '../../../../types';
 import { connectorConfiguration } from './config';
 import logo from './logo.svg';
 import {
@@ -68,25 +72,20 @@ export function getActionType(): ActionTypeModel<
     actionTypeTitle: connectorConfiguration.name,
     validateConnector,
     actionConnectorFields: lazy(() => import('./servicenow_connectors')),
-    validateParams: (
-      actionParams: ServiceNowActionParams
-    ): ValidationResult<Pick<ServiceNowActionParams, 'subActionParams'>> => {
+    validateParams: (actionParams: ServiceNowActionParams): GenericValidationResult<unknown> => {
       const errors = {
-        short_description: new Array<string>(),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'subActionParams.incident.short_description': new Array<string>(),
       };
       const validationResult = {
-        errors: {
-          subActionParams: {
-            incident: errors,
-          },
-        },
+        errors,
       };
       if (
         actionParams.subActionParams &&
         actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.short_description?.length
       ) {
-        errors.short_description.push(i18n.TITLE_REQUIRED);
+        errors['subActionParams.incident.short_description'].push(i18n.TITLE_REQUIRED);
       }
       return validationResult;
     },

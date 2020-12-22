@@ -5,7 +5,11 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, ValidationResult, ConnectorValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import { SlackActionParams, SlackSecrets, SlackActionConnector } from '../types';
 import { isValidUrl } from '../../../lib/value_validators';
 
@@ -64,7 +68,9 @@ export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackAct
       }
       return validationResult;
     },
-    validateParams: (actionParams: SlackActionParams): ValidationResult<SlackActionParams> => {
+    validateParams: (
+      actionParams: SlackActionParams
+    ): GenericValidationResult<SlackActionParams> => {
       const errors = {
         message: new Array<string>(),
       };

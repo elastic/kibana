@@ -5,7 +5,11 @@
  */
 
 import { lazy } from 'react';
-import { ValidationResult, ActionTypeModel, ConnectorValidationResult } from '../../../../types';
+import {
+  GenericValidationResult,
+  ActionTypeModel,
+  ConnectorValidationResult,
+} from '../../../../types';
 import { connectorConfiguration } from './config';
 import logo from './logo.svg';
 import { JiraActionConnector, JiraConfig, JiraSecrets, JiraActionParams } from './types';
@@ -64,25 +68,19 @@ export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraAc
     actionTypeTitle: connectorConfiguration.name,
     validateConnector,
     actionConnectorFields: lazy(() => import('./jira_connectors')),
-    validateParams: (
-      actionParams: JiraActionParams
-    ): ValidationResult<Pick<JiraActionParams, 'subActionParams'>> => {
+    validateParams: (actionParams: JiraActionParams): GenericValidationResult<unknown> => {
       const errors = {
-        summary: new Array<string>(),
+        'subActionParams.incident.summary': new Array<string>(),
       };
       const validationResult = {
-        errors: {
-          subActionParams: {
-            incident: errors,
-          },
-        },
+        errors,
       };
       if (
         actionParams.subActionParams &&
         actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.summary?.length
       ) {
-        errors.summary.push(i18n.SUMMARY_REQUIRED);
+        errors['subActionParams.incident.summary'].push(i18n.SUMMARY_REQUIRED);
       }
       return validationResult;
     },

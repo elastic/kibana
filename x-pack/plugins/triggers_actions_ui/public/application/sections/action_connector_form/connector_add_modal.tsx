@@ -182,8 +182,7 @@ export const ConnectorAddModal = ({
                       connector,
                       configErrors,
                       secretsErrors,
-                      baseConnectorErrors,
-                      errors
+                      baseConnectorErrors
                     )
                   );
                   return;

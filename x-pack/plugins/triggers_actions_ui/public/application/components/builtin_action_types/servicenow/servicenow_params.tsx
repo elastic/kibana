@@ -180,8 +180,11 @@ const ServiceNowParamsFields: React.FunctionComponent<
       <EuiSpacer size="m" />
       <EuiFormRow
         fullWidth
-        error={errors.short_description}
-        isInvalid={errors.short_description.length > 0 && incident.short_description !== undefined}
+        error={errors['subActionParams.incident.short_description']}
+        isInvalid={
+          errors['subActionParams.incident.short_description'].length > 0 &&
+          incident.short_description !== undefined
+        }
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.titleFieldLabel',
           { defaultMessage: 'Short description (required)' }
@@ -193,7 +196,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
           messageVariables={messageVariables}
           paramsProperty={'short_description'}
           inputTargetValue={incident?.short_description ?? undefined}
-          errors={errors.short_description as string[]}
+          errors={errors['subActionParams.incident.short_description'] as string[]}
         />
       </EuiFormRow>
       <TextAreaWithMessageVariables
@@ -206,7 +209,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.descriptionTextAreaFieldLabel',
           { defaultMessage: 'Description' }
         )}
-        errors={errors.description as string[]}
       />
       <TextAreaWithMessageVariables
         index={index}
@@ -218,7 +220,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
           'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.commentsTextAreaFieldLabel',
           { defaultMessage: 'Additional comments' }
         )}
-        errors={errors.comments as string[]}
       />
     </Fragment>
   );

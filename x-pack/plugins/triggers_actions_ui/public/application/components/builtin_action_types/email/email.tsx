@@ -5,7 +5,11 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, ConnectorValidationResult, ValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../../types';
 import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
 
 export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, EmailActionParams> {
@@ -124,7 +128,9 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
       }
       return validationResult;
     },
-    validateParams: (actionParams: EmailActionParams): ValidationResult<EmailActionParams> => {
+    validateParams: (
+      actionParams: EmailActionParams
+    ): GenericValidationResult<EmailActionParams> => {
       const errors = {
         to: new Array<string>(),
         cc: new Array<string>(),
@@ -133,7 +139,6 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         subject: new Array<string>(),
       };
       const validationResult = { errors };
-      validationResult.errors = errors;
       if (
         (!(actionParams.to instanceof Array) || actionParams.to.length === 0) &&
         (!(actionParams.cc instanceof Array) || actionParams.cc.length === 0) &&

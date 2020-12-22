@@ -166,13 +166,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   const onSaveClicked = async () => {
     if (hasErrors) {
       setConnector(
-        getConnectorWithNullFields(
-          connector,
-          configErrors,
-          secretsErrors,
-          baseValidationResult,
-          errors
-        )
+        getConnectorWithNullFields(connector, configErrors, secretsErrors, baseValidationResult)
       );
       return;
     }

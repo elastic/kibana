@@ -219,13 +219,7 @@ export const ConnectorEditFlyout = ({
     if (hasErrors) {
       setConnector(
         'connector',
-        getConnectorWithNullFields(
-          connector,
-          configErrors,
-          secretsErrors,
-          baseConnectorErrors,
-          errors
-        )
+        getConnectorWithNullFields(connector, configErrors, secretsErrors, baseConnectorErrors)
       );
       return;
     }

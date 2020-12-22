@@ -5,7 +5,11 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, ValidationResult, ConnectorValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import { ServerLogActionParams } from '../types';
 
 export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActionParams> {
@@ -29,7 +33,7 @@ export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActi
     },
     validateParams: (
       actionParams: ServerLogActionParams
-    ): ValidationResult<Pick<ServerLogActionParams, 'message'>> => {
+    ): GenericValidationResult<Pick<ServerLogActionParams, 'message'>> => {
       const errors = {
         message: new Array<string>(),
       };

@@ -5,7 +5,11 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, ValidationResult, ConnectorValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import { EsIndexActionConnector, EsIndexConfig, IndexActionParams } from '../types';
 
 export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexActionParams> {
@@ -45,7 +49,9 @@ export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexAc
     },
     actionConnectorFields: lazy(() => import('./es_index_connector')),
     actionParamsFields: lazy(() => import('./es_index_params')),
-    validateParams: (actionParams: IndexActionParams): ValidationResult<IndexActionParams> => {
+    validateParams: (
+      actionParams: IndexActionParams
+    ): GenericValidationResult<IndexActionParams> => {
       const errors = {
         documents: new Array<string>(),
       };

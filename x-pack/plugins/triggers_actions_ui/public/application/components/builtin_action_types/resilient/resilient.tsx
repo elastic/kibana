@@ -5,7 +5,11 @@
  */
 
 import { lazy } from 'react';
-import { ValidationResult, ActionTypeModel, ConnectorValidationResult } from '../../../../types';
+import {
+  GenericValidationResult,
+  ActionTypeModel,
+  ConnectorValidationResult,
+} from '../../../../types';
 import { connectorConfiguration } from './config';
 import logo from './logo.svg';
 import {
@@ -73,25 +77,19 @@ export function getActionType(): ActionTypeModel<
     actionTypeTitle: connectorConfiguration.name,
     validateConnector,
     actionConnectorFields: lazy(() => import('./resilient_connectors')),
-    validateParams: (
-      actionParams: ResilientActionParams
-    ): ValidationResult<Pick<ResilientActionParams, 'subActionParams'>> => {
+    validateParams: (actionParams: ResilientActionParams): GenericValidationResult<unknown> => {
       const errors = {
-        name: new Array<string>(),
+        'subActionParams.incident.name': new Array<string>(),
       };
       const validationResult = {
-        errors: {
-          subActionParams: {
-            incident: errors,
-          },
-        },
+        errors,
       };
       if (
         actionParams.subActionParams &&
         actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.name?.length
       ) {
-        errors.name.push(i18n.NAME_REQUIRED);
+        errors['subActionParams.incident.name'].push(i18n.NAME_REQUIRED);
       }
       return validationResult;
     },

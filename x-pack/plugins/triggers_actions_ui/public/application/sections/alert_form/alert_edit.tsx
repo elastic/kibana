@@ -27,12 +27,13 @@ import {
   AlertTypeRegistryContract,
   IErrorObject,
 } from '../../../types';
-import { AlertForm, validateBaseProperties } from './alert_form';
+import { AlertForm, isValidAlert, validateBaseProperties } from './alert_form';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
+import { getAlertWithNullFields } from '../../lib/value_validators';
 
 export interface AlertEditProps<MetaData = Record<string, any>> {
   initialAlert: Alert;
@@ -64,40 +65,46 @@ export const AlertEdit = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const setAlert = (value: Alert) => {
+    dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
+  };
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
 
+  const paramsErrors = (alertType ? alertType.validate(alert.params).errors : []) as IErrorObject;
+  const baseAlertErrors = validateBaseProperties(alert).errors as IErrorObject;
   const errors = {
-    ...(alertType ? alertType.validate(alert.params).errors : []),
-    ...validateBaseProperties(alert).errors,
+    ...paramsErrors,
+    ...baseAlertErrors,
   } as IErrorObject;
-  const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
-  const actionsErrors: Array<{
-    errors: IErrorObject;
-  }> = alert.actions.map((alertAction: AlertAction) =>
-    actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
-  );
-
-  const hasActionErrors =
-    actionsErrors.find(
-      (errorObj: { errors: IErrorObject }) =>
-        errorObj &&
-        !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
-    ) !== undefined;
+  const actionsErrors = alert.actions.reduce((prev, alertAction: AlertAction) => {
+    return {
+      ...prev,
+      [alertAction.id]: actionTypeRegistry
+        .get(alertAction.actionTypeId)
+        ?.validateParams(alertAction.params).errors,
+    };
+  }, {}) as Record<string, IErrorObject>;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      const newAlert = await updateAlert({ http, alert, id: alert.id });
-      toasts.addSuccess(
-        i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
-          defaultMessage: "Updated '{alertName}'",
-          values: {
-            alertName: newAlert.name,
-          },
-        })
-      );
-      return newAlert;
+      if (isValidAlert(alert, errors, actionsErrors) && !hasActionsWithBrokenConnector) {
+        const newAlert = await updateAlert({ http, alert, id: alert.id });
+        toasts.addSuccess(
+          i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
+            defaultMessage: "Updated '{alertName}'",
+            values: {
+              alertName: newAlert.name,
+            },
+          })
+        );
+        return newAlert;
+      } else {
+        setAlert(
+          getAlertWithNullFields(alert as Alert, paramsErrors, baseAlertErrors, actionsErrors)
+        );
+      }
     } catch (errorRes) {
       toasts.addDanger(
         errorRes.body?.message ??

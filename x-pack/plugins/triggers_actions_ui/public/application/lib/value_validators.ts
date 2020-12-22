@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { constant } from 'lodash';
-import { UserConfiguredActionConnector, IErrorObject } from '../../types';
+import { constant, set } from 'lodash';
+import { UserConfiguredActionConnector, IErrorObject, Alert } from '../../types';
 
 export function throwIfAbsent<T>(message: string) {
   return (value: T | undefined): T => {
@@ -49,24 +49,23 @@ export function getConnectorWithNullFields(
   connector: UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>,
   configErrors: IErrorObject,
   secretsErrors: IErrorObject,
-  baseConnectorErrors: IErrorObject,
-  errors: IErrorObject
+  baseConnectorErrors: IErrorObject
 ) {
   let validatedConnector = {
     ...connector,
   };
   Object.keys(configErrors).forEach((errorKey) => {
-    if (errors[errorKey].length >= 1) {
+    if (configErrors[errorKey].length >= 1) {
       validatedConnector.config[errorKey] = null;
     }
   });
   Object.keys(secretsErrors).forEach((errorKey) => {
-    if (errors[errorKey].length >= 1) {
+    if (secretsErrors[errorKey].length >= 1) {
       validatedConnector.secrets[errorKey] = null;
     }
   });
   Object.keys(baseConnectorErrors).forEach((errorKey) => {
-    if (errors[errorKey].length >= 1) {
+    if (baseConnectorErrors[errorKey].length >= 1) {
       validatedConnector = {
         ...validatedConnector,
         [errorKey]: null,
@@ -74,4 +73,37 @@ export function getConnectorWithNullFields(
     }
   });
   return validatedConnector;
+}
+
+export function getAlertWithNullFields(
+  alert: Alert,
+  paramsErrors: IErrorObject,
+  baseAlertErrors: IErrorObject,
+  actionsErrors: Record<string, IErrorObject>
+) {
+  let validatedAlert = {
+    ...alert,
+  };
+  Object.keys(paramsErrors).forEach((errorKey) => {
+    if (paramsErrors[errorKey].length >= 1) {
+      validatedAlert.params[errorKey] = null;
+    }
+  });
+  Object.keys(baseAlertErrors).forEach((errorKey) => {
+    if (baseAlertErrors[errorKey].length >= 1) {
+      validatedAlert = {
+        ...validatedAlert,
+        [errorKey]: null,
+      };
+    }
+  });
+  Object.keys(actionsErrors).forEach((actionId) => {
+    const actionToValidate = validatedAlert.actions.find((action) => action.id === actionId);
+    Object.keys(actionsErrors[actionId]).forEach((errorKey) => {
+      if (actionsErrors[actionId][errorKey].length >= 1) {
+        set(actionToValidate!.params, errorKey, null);
+      }
+    });
+  });
+  return validatedAlert;
 }

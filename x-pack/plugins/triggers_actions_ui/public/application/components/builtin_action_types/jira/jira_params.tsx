@@ -249,8 +249,11 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           <EuiFormRow
             data-test-subj="summary-row"
             fullWidth
-            error={errors.summary}
-            isInvalid={errors.summary.length > 0 && incident.summary !== undefined}
+            error={errors['subActionParams.incident.summary']}
+            isInvalid={
+              errors['subActionParams.incident.summary'].length > 0 &&
+              incident.summary !== undefined
+            }
             label={i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.jira.summaryFieldLabel',
               {
@@ -264,7 +267,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               messageVariables={messageVariables}
               paramsProperty={'summary'}
               inputTargetValue={incident.summary ?? undefined}
-              errors={errors.summary as string[]}
+              errors={errors['subActionParams.incident.summary'] as string[]}
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
@@ -327,7 +330,6 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                   defaultMessage: 'Description',
                 }
               )}
-              errors={errors.description as string[]}
             />
           )}
           <TextAreaWithMessageVariables
@@ -342,7 +344,6 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
                 defaultMessage: 'Additional comments',
               }
             )}
-            errors={errors.comments as string[]}
           />
         </>
       </>
