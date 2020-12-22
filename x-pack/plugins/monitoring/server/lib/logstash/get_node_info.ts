@@ -4,24 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, merge } from 'lodash';
+import { merge } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
-import { calculateAvailability } from './../calculate_availability';
+// @ts-ignore
+import { calculateAvailability } from '../calculate_availability';
+import { LegacyRequest, ElasticsearchResponse } from '../../types';
 
-export function handleResponse(resp) {
-  const source = get(resp, 'hits.hits[0]._source.logstash_stats');
-  const logstash = get(source, 'logstash');
+export function handleResponse(resp: ElasticsearchResponse) {
+  const source = resp.hits?.hits[0]?._source?.logstash_stats;
+  const logstash = source?.logstash;
   const info = merge(logstash, {
-    availability: calculateAvailability(get(source, 'timestamp')),
-    events: get(source, 'events'),
-    reloads: get(source, 'reloads'),
-    queue_type: get(source, 'queue.type'),
-    uptime: get(source, 'jvm.uptime_in_millis'),
+    availability: calculateAvailability(source?.timestamp),
+    events: source?.events,
+    reloads: source?.reloads,
+    queue_type: source?.queue?.type,
+    uptime: source?.jvm?.uptime_in_millis,
   });
   return info;
 }
 
-export function getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }) {
+export function getNodeInfo(
+  req: LegacyRequest,
+  lsIndexPattern: string,
+  { clusterUuid, logstashUuid }: { clusterUuid: string; logstashUuid: string }
+) {
   checkParam(lsIndexPattern, 'lsIndexPattern in getNodeInfo');
 
   const params = {

@@ -6,16 +6,24 @@
 
 import boom from '@hapi/boom';
 import { get } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
 import { getPipelineStateDocument } from './get_pipeline_state_document';
+// @ts-ignore
 import { getPipelineStatsAggregation } from './get_pipeline_stats_aggregation';
+// @ts-ignore
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
+import { LegacyRequest } from '../../types';
+import {
+  ElasticsearchSource,
+  ElasticsearchSourceLogstashPipelineVertex,
+} from '../../../common/types/es';
 
 export function _vertexStats(
-  vertex,
-  vertexStatsBucket,
-  totalProcessorsDurationInMillis,
-  timeseriesIntervalInSeconds
+  vertex: ElasticsearchSourceLogstashPipelineVertex,
+  vertexStatsBucket: any,
+  totalProcessorsDurationInMillis: number,
+  timeseriesIntervalInSeconds: number
 ) {
   const isInput = vertex.plugin_type === 'input';
   const isProcessor = vertex.plugin_type === 'filter' || vertex.plugin_type === 'output';
@@ -27,8 +35,11 @@ export function _vertexStats(
 
   const durationInMillis = vertexStatsBucket.duration_in_millis_total.value;
 
-  const processorStats = {};
-  const eventsProcessedStats = {
+  const processorStats: any = {};
+  const eventsProcessedStats: {
+    events_out_per_millisecond: number;
+    events_in_per_millisecond?: number;
+  } = {
     events_out_per_millisecond: eventsOutTotal / timeseriesIntervalInMillis,
   };
 
@@ -63,14 +74,14 @@ export function _vertexStats(
  * @param {Integer} timeseriesIntervalInSeconds The size of each timeseries bucket, in seconds
  */
 export function _enrichStateWithStatsAggregation(
-  stateDocument,
-  statsAggregation,
-  timeseriesIntervalInSeconds
+  stateDocument: ElasticsearchSource,
+  statsAggregation: any,
+  timeseriesIntervalInSeconds: number
 ) {
   const logstashState = stateDocument.logstash_state;
-  const vertices = logstashState.pipeline.representation.graph.vertices;
+  const vertices = logstashState?.pipeline?.representation?.graph?.vertices ?? [];
 
-  const verticesById = {};
+  const verticesById: any = {};
   vertices.forEach((vertex) => {
     verticesById[vertex.id] = vertex;
     vertex.stats = {};
@@ -82,7 +93,7 @@ export function _enrichStateWithStatsAggregation(
 
   const verticesWithStatsBuckets =
     statsAggregation.aggregations.pipelines.scoped.vertices.vertex_id.buckets;
-  verticesWithStatsBuckets.forEach((vertexStatsBucket) => {
+  verticesWithStatsBuckets.forEach((vertexStatsBucket: any) => {
     // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval
     const vertexId = vertexStatsBucket.key;
     const vertex = verticesById[vertexId];
@@ -98,13 +109,20 @@ export function _enrichStateWithStatsAggregation(
     }
   });
 
-  return stateDocument.logstash_state.pipeline;
+  return stateDocument.logstash_state?.pipeline;
 }
 
-export async function getPipeline(req, config, lsIndexPattern, clusterUuid, pipelineId, version) {
+export async function getPipeline(
+  req: LegacyRequest,
+  config: { get: (key: string) => string | undefined },
+  lsIndexPattern: string,
+  clusterUuid: string,
+  pipelineId: string,
+  version: { firstSeen: string; lastSeen: string; hash: string }
+) {
   checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
 
-  const options = {
+  const options: any = {
     clusterUuid,
     pipelineId,
     version,

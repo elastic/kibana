@@ -4,16 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import { createQuery } from '../create_query';
+// @ts-ignore
 import { LogstashMetric } from '../metrics';
-import { get } from 'lodash';
+import { LegacyRequest, ElasticsearchResponse } from '../../types';
 
 export async function getPipelineStateDocument(
-  req,
-  logstashIndexPattern,
-  { clusterUuid, pipelineId, version }
+  req: LegacyRequest,
+  logstashIndexPattern: string,
+  {
+    clusterUuid,
+    pipelineId,
+    version,
+  }: { clusterUuid: string; pipelineId: string; version: { hash: string } }
 ) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+  const { callWithRequest } = req.server.plugins?.elasticsearch.getCluster('monitoring');
   const filters = [
     { term: { 'logstash_state.pipeline.id': pipelineId } },
     { term: { 'logstash_state.pipeline.hash': version.hash } },
@@ -43,8 +49,8 @@ export async function getPipelineStateDocument(
     },
   };
 
-  const resp = await callWithRequest(req, 'search', params);
+  const resp = (await callWithRequest(req, 'search', params)) as ElasticsearchResponse;
 
   // Return null if doc not found
-  return get(resp, 'hits.hits[0]._source', null);
+  return resp.hits?.hits[0]?._source ?? null;
 }
