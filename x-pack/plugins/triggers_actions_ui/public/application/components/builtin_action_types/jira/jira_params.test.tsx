@@ -48,7 +48,7 @@ const defaultProps = {
   actionConnector: connector,
   actionParams,
   editAction,
-  errors: { summary: [] },
+  errors: { 'subActionParams.incident.summary': [] },
   index: 0,
   messageVariables: [],
 };
@@ -244,7 +244,7 @@ describe('JiraParamsFields renders', () => {
   test('If summary has errors, form row is invalid', () => {
     const newProps = {
       ...defaultProps,
-      errors: { summary: ['error'] },
+      errors: { 'subActionParams.incident.summary': ['error'] },
     };
     const wrapper = mount(<JiraParamsFields {...newProps} />);
     const summary = wrapper.find('[data-test-subj="summary-row"]').first();

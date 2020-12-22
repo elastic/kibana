@@ -43,10 +43,16 @@ describe('servicenow connector validation', () => {
     } as ServiceNowActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: [],
-        username: [],
-        password: [],
+      config: {
+        errors: {
+          apiUrl: [],
+        },
+      },
+      secrets: {
+        errors: {
+          username: [],
+          password: [],
+        },
       },
     });
   });
@@ -63,10 +69,16 @@ describe('servicenow connector validation', () => {
     } as unknown) as ServiceNowActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: ['URL is required.'],
-        username: [],
-        password: ['Password is required.'],
+      config: {
+        errors: {
+          apiUrl: ['URL is required.'],
+        },
+      },
+      secrets: {
+        errors: {
+          username: [],
+          password: ['Password is required.'],
+        },
       },
     });
   });
@@ -79,7 +91,8 @@ describe('servicenow action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { short_description: [] },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      errors: { 'subActionParams.incident.short_description': [] },
     });
   });
 
@@ -90,7 +103,8 @@ describe('servicenow action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        short_description: ['Short description is required.'],
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'subActionParams.incident.short_description': ['Short description is required.'],
       },
     });
   });

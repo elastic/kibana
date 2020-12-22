@@ -38,7 +38,12 @@ describe('server-log connector validation', () => {
     };
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {},
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {},
+      },
     });
   });
 });

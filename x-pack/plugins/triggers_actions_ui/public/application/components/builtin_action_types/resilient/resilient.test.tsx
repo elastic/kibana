@@ -44,11 +44,17 @@ describe('resilient connector validation', () => {
     } as ResilientActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: [],
-        apiKeyId: [],
-        apiKeySecret: [],
-        orgId: [],
+      config: {
+        errors: {
+          apiUrl: [],
+          orgId: [],
+        },
+      },
+      secrets: {
+        errors: {
+          apiKeySecret: [],
+          apiKeyId: [],
+        },
       },
     });
   });
@@ -65,11 +71,17 @@ describe('resilient connector validation', () => {
     } as unknown) as ResilientActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        apiUrl: ['URL is required.'],
-        apiKeyId: [],
-        apiKeySecret: ['Secret is required'],
-        orgId: ['Organization ID is required'],
+      config: {
+        errors: {
+          apiUrl: ['URL is required.'],
+          orgId: ['Organization ID is required'],
+        },
+      },
+      secrets: {
+        errors: {
+          apiKeySecret: ['Secret is required'],
+          apiKeyId: [],
+        },
       },
     });
   });
@@ -82,7 +94,7 @@ describe('resilient action params validation', () => {
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { name: [] },
+      errors: { 'subActionParams.incident.name': [] },
     });
   });
 
@@ -93,7 +105,7 @@ describe('resilient action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        name: ['Name is required.'],
+        'subActionParams.incident.name': ['Name is required.'],
       },
     });
   });

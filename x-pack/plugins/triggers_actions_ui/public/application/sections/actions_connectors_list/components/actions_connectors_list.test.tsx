@@ -14,7 +14,11 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
-import { ActionConnector } from '../../../../types';
+import {
+  ActionConnector,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../../types';
 import { times } from 'lodash';
 
 jest.mock('../../../lib/action_connector_api', () => ({
@@ -137,6 +141,20 @@ describe('actions_connectors_list component with items', () => {
       },
     ] = await mocks.getStartServices();
 
+    actionTypeRegistry.get.mockReturnValue({
+      id: 'test',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
+      },
+      validateParams: (): GenericValidationResult<unknown> => {
+        const validationResult = { errors: {} };
+        return validationResult;
+      },
+      actionConnectorFields: null,
+      actionParamsFields: null,
+    });
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
     // eslint-disable-next-line react-hooks/rules-of-hooks

@@ -39,8 +39,13 @@ describe('teams connector validation', () => {
     } as TeamsActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: [],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: [],
+        },
       },
     });
   });
@@ -55,8 +60,13 @@ describe('teams connector validation', () => {
     } as TeamsActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: ['Webhook URL is required.'],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: ['Webhook URL is required.'],
+        },
       },
     });
   });
@@ -73,8 +83,13 @@ describe('teams connector validation', () => {
     } as TeamsActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: ['Webhook URL is invalid.'],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: ['Webhook URL is invalid.'],
+        },
       },
     });
   });
@@ -91,8 +106,13 @@ describe('teams connector validation', () => {
     } as TeamsActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        webhookUrl: ['Webhook URL must start with https://.'],
+      config: {
+        errors: {},
+      },
+      secrets: {
+        errors: {
+          webhookUrl: ['Webhook URL must start with https://.'],
+        },
       },
     });
   });

@@ -5,7 +5,13 @@
  */
 
 import { TypeRegistry } from './type_registry';
-import { ValidationResult, AlertTypeModel, ActionTypeModel } from '../types';
+import {
+  ValidationResult,
+  AlertTypeModel,
+  ActionTypeModel,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../types';
 
 export const ExpressionComponent: React.FunctionComponent = () => {
   return null;
@@ -34,10 +40,10 @@ const getTestActionType = (
     id: id || 'my-action-type',
     iconClass: iconClass || 'test',
     selectMessage: selectedMessage || 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): GenericValidationResult<unknown> => {
       const validationResult = { errors: {} };
       return validationResult;
     },

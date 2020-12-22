@@ -35,7 +35,8 @@ const editAction = jest.fn();
 const defaultProps = {
   actionConnector: connector,
   actionParams,
-  errors: { short_description: [] },
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  errors: { 'subActionParams.incident.short_description': [] },
   editAction,
   index: 0,
   messageVariables: [],
@@ -58,7 +59,8 @@ describe('ServiceNowParamsFields renders', () => {
   test('If short_description has errors, form row is invalid', () => {
     const newProps = {
       ...defaultProps,
-      errors: { short_description: ['error'] },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      errors: { 'subActionParams.incident.short_description': ['error'] },
     };
     const wrapper = mount(<ServiceNowParamsFields {...newProps} />);
     const title = wrapper.find('[data-test-subj="short_descriptionInput"]').first();

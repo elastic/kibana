@@ -7,7 +7,11 @@ import React, { lazy } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import TestConnectorForm from './test_connector_form';
 import { none, some } from 'fp-ts/lib/Option';
-import { ActionConnector, ValidationResult } from '../../../types';
+import {
+  ActionConnector,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
@@ -47,10 +51,10 @@ const actionType = {
   id: 'my-action-type',
   iconClass: 'test',
   selectMessage: 'test',
-  validateConnector: (): ValidationResult => {
-    return { errors: {} };
+  validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+    return {};
   },
-  validateParams: (): ValidationResult => {
+  validateParams: (): GenericValidationResult<unknown> => {
     const validationResult = { errors: {} };
     return validationResult;
   },

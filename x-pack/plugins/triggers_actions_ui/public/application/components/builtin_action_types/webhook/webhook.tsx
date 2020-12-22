@@ -131,7 +131,6 @@ export function getActionType(): ActionTypeModel<
     ): GenericValidationResult<WebhookActionParams> => {
       const errors = {
         body: new Array<string>(),
-        sdfdf: new Array<string>(),
       };
       const validationResult = { errors };
       validationResult.errors = errors;
