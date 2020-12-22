@@ -152,8 +152,9 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * return an updated column. If not implemented, the `id` function is used instead.
    */
   onOtherColumnChanged?: (
-    currentColumn: C,
-    columns: Partial<Record<string, IndexPatternColumn>>
+    layer: IndexPatternLayer,
+    thisColumnId: string,
+    changedColumnId: string
   ) => C;
   /**
    * React component for operation specific settings shown in the popover editor
@@ -176,7 +177,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * but disable it from usage, this function returns the string describing
    * the status. Otherwise it returns undefined
    */
-  getDisabledStatus?: (indexPattern: IndexPattern) => string | undefined;
+  getDisabledStatus?: (indexPattern: IndexPattern, layer: IndexPatternLayer) => string | undefined;
   /**
    * Validate that the operation has the right preconditions in the state. For example:
    *
@@ -314,9 +315,9 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
   ) => ReferenceBasedIndexPatternColumn & C;
   /**
    * Returns the meta data of the operation if applied. Undefined
-   * if the field is not applicable.
+   * if the operation can't be added with these fields.
    */
-  getPossibleOperation: () => OperationMetadata;
+  getPossibleOperation: (indexPattern: IndexPattern) => OperationMetadata | undefined;
   /**
    * A chain of expression functions which will transform the table
    */
