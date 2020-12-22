@@ -34,11 +34,11 @@ describe('Platform assets', function () {
   });
 
   it('exposes static assets', async () => {
-    await kbnTestServer.request.get(root, '/ui/favicons/favicon.ico').expect(200);
+    await kbnTestServer.request.get(root, '/ui/favicons/favicon.svg').expect(200);
   });
 
   it('returns 404 if not found', async function () {
-    await kbnTestServer.request.get(root, '/ui/favicons/not-a-favicon.ico').expect(404);
+    await kbnTestServer.request.get(root, '/ui/favicons/not-a-favicon.svg').expect(404);
   });
 
   it('does not expose folder content', async function () {
