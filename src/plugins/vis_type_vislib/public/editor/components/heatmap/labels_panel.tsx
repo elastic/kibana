@@ -23,8 +23,7 @@ import { EuiColorPicker, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elas
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../../../vis_default_editor/public';
-import { SwitchOption } from '../../../../../charts/public';
+import { VisOptionsProps, SwitchOption } from '../../../../../vis_default_editor/public';
 import { ValueAxis } from '../../../../../vis_type_xy/public';
 
 import { HeatmapVisParams } from '../../../heatmap';
