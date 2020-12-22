@@ -49,7 +49,7 @@ function RangeOption<ParamName extends string>({
   const [stateValue, setStateValue] = useState(value);
   const [isValidState, setIsValidState] = useState(true);
 
-  const error = i18n.translate('charts.controls.rangeErrorMessage', {
+  const error = i18n.translate('visDefaultEditor.options.rangeErrorMessage', {
     defaultMessage: 'Values must be on or between {min} and {max}',
     values: { min, max },
   });
