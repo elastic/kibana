@@ -33,10 +33,14 @@ describe('interpreter/functions#pie', () => {
     addLegend: true,
     legendPosition: 'right',
     isDonut: true,
+    nestedLegend: true,
+    palette: 'kibana_palette',
     labels: {
       show: false,
       values: true,
       last_level: true,
+      position: 'default',
+      valuesFormat: 'percent',
       truncate: 100,
     },
     dimensions: {

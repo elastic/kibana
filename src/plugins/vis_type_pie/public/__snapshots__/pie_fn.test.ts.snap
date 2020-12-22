@@ -24,11 +24,15 @@ Object {
       "isDonut": true,
       "labels": Object {
         "last_level": true,
+        "position": "default",
         "show": false,
         "truncate": 100,
         "values": true,
+        "valuesFormat": "percent",
       },
       "legendPosition": "right",
+      "nestedLegend": true,
+      "palette": "kibana_palette",
       "type": "pie",
     },
     "visData": Object {

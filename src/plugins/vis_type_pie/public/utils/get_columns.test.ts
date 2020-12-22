@@ -163,7 +163,7 @@ describe('getColumns', () => {
     expect(metricColumn).toEqual(visData.columns[0]);
   });
 
-  it('should return anwith the name of the metric if no buckets specified', () => {
+  it('should return an object with the name of the metric if no buckets specified', () => {
     const visParamsNoDimensions = ({
       addLegend: true,
       addTooltip: true,

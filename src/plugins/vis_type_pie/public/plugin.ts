@@ -53,7 +53,6 @@ export class VisTypePiePlugin {
     if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, true)) {
       const getStartDeps = async () => {
         const [coreStart, deps] = await core.getStartServices();
-        // return deps.data;
         return {
           data: deps.data,
           docLinks: coreStart.docLinks,
