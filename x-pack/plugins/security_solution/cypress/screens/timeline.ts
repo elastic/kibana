@@ -132,9 +132,9 @@ export const TIMELINE_FILTER_VALUE =
 
 export const TIMELINE_FLYOUT = '[data-test-subj="eui-flyout"]';
 
-export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="eui-flyout-header"]';
+export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"]';
 
-export const TIMELINE_FLYOUT_BODY = '[data-test-subj="eui-flyout-body"]';
+export const TIMELINE_FLYOUT_BODY = '[data-test-subj="query-tab-flyout-body"]';
 
 export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-icon-button"]`;
 

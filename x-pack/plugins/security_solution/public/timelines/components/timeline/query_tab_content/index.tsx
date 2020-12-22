@@ -292,7 +292,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       <FullWidthFlexGroup>
         <ScrollableFlexItem grow={2}>
           <HideShowContainer $isVisible={!timelineFullScreen}>
-            <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
+            <StyledEuiFlyoutHeader
+              data-test-subj={`${activeTab}-tab-flyout-header`}
+              hasBorder={false}
+            >
               <EuiFlexGroup gutterSize="s" data-test-subj="timeline-date-picker-container">
                 <DatePicker grow={1}>
                   <SuperDatePicker id="timeline" timelineId={timelineId} />
