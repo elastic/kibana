@@ -27,7 +27,6 @@ const mockedActionParamsFields = lazy(async () => ({
 const createMockActionTypeModel = (actionType: Partial<ActionTypeModel> = {}): ActionTypeModel => {
   const id = uuid.v4();
   return {
-    ...actionType,
     id,
     iconClass: `iconClass-${id}`,
     selectMessage: `selectMessage-${id}`,
@@ -35,6 +34,7 @@ const createMockActionTypeModel = (actionType: Partial<ActionTypeModel> = {}): A
     validateParams: jest.fn(),
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,
+    ...actionType,
   };
 };
 
