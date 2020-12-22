@@ -95,7 +95,7 @@ export function CoreVitalItem({
   return (
     <>
       <EuiStat
-        aria-label={`${title} ${value}`}
+        aria-label={`${title} ${value}`} // aria-label is required when passing a component, instead of a string, as the description
         titleSize="s"
         title={value ?? ''}
         description={
