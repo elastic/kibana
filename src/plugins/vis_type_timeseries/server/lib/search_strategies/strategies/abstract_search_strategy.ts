@@ -91,10 +91,12 @@ export abstract class AbstractSearchStrategy {
   ): Promise<IFieldType[]> {
     const { indexPatternsFetcher } = req.pre;
     const indexPatternsService = await req.getIndexPatternsService();
-    const kibanaIndexPattern = await indexPatternsService.find(indexPattern, 2);
+    const kibanaIndexPattern = (await indexPatternsService.find(indexPattern)).find(
+      (index) => index.title === indexPattern
+    );
 
-    if (kibanaIndexPattern.length === 1) {
-      return kibanaIndexPattern[0].fields.getAll();
+    if (kibanaIndexPattern) {
+      return kibanaIndexPattern.fields.getAll();
     }
 
     return await indexPatternsFetcher!.getFieldsForWildcard({

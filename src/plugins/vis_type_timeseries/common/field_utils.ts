@@ -17,16 +17,14 @@
  * under the License.
  */
 
-import { TimeFieldObject } from './types';
+import { FieldObject } from './types';
 
-const isTimefieldObject = (
-  timeField: TimeFieldObject
-): timeField is { name: string; label: string } => {
+const isFieldObject = (timeField: FieldObject): timeField is { name: string; label: string } => {
   return Boolean(timeField && typeof timeField !== 'string' && timeField.name);
 };
 
-export const extractTimefieldName = (timeField: TimeFieldObject) =>
-  isTimefieldObject(timeField) ? timeField.name : timeField;
+export const extractFieldName = (timeField: FieldObject) =>
+  isFieldObject(timeField) ? timeField.name : timeField;
 
-export const extractTimefieldLabel = (timeField: TimeFieldObject) =>
-  isTimefieldObject(timeField) ? timeField.label : timeField;
+export const extractFieldLabel = (timeField: FieldObject) =>
+  isFieldObject(timeField) ? timeField.label : timeField;

@@ -21,13 +21,13 @@ import { overwrite } from '../../helpers';
 import { basicAggs } from '../../../../../common/basic_aggs';
 import { getBucketsPath } from '../../helpers/get_buckets_path';
 import { bucketTransform } from '../../helpers/bucket_transform';
-import { extractTimefieldName } from '../../../../../common/timefield_utils';
+import { extractFieldName } from '../../../../../common/field_utils';
 
 export function splitByTerms(req, panel, series) {
   return (next) => (doc) => {
     if (series.split_mode === 'terms' && series.terms_field) {
-      const termsField = extractTimefieldName(series.terms_field);
-      const orderByTerms = extractTimefieldName(series.terms_order_by);
+      const termsField = extractFieldName(series.terms_field);
+      const orderByTerms = extractFieldName(series.terms_order_by);
 
       const direction = series.terms_direction || 'desc';
       const metric = series.metrics.find((item) => item.id === orderByTerms);

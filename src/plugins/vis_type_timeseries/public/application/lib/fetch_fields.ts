@@ -34,10 +34,12 @@ export async function fetchFields(
     const defaultIndexPattern = await dataStart.indexPatterns.getDefault();
     const indexFields = await Promise.all(
       patterns.map(async (pattern) => {
-        const kibanaIndexPattern = await dataStart.indexPatterns.find(pattern, 2);
+        const kibanaIndexPattern = (await dataStart.indexPatterns.find(pattern)).find(
+          (index) => index.title === pattern
+        );
 
-        if (kibanaIndexPattern.length === 1) {
-          const fields = kibanaIndexPattern[0].fields.getAll();
+        if (kibanaIndexPattern) {
+          const fields = kibanaIndexPattern.fields.getAll();
 
           return fields
             .filter((field) => field.aggregatable && !indexPatterns.isNestedField(field))
@@ -66,9 +68,8 @@ export async function fetchFields(
     );
 
     if (defaultIndexPattern?.title && patterns.includes(defaultIndexPattern.title)) {
-      fields[''] = fields[defaultIndexPattern?.title];
+      fields[''] = fields[defaultIndexPattern.title];
     }
-
     return fields;
   } catch (error) {
     if (error.name !== 'AbortError') {

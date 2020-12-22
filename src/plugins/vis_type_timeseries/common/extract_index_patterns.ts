@@ -21,6 +21,7 @@ import { PanelSchema } from '../common/types';
 
 export function extractIndexPatterns(
   panel: PanelSchema,
+  defaultIndex: string,
   excludedFields: Record<string, string[]> = {}
 ) {
   const patterns: string[] = [];
@@ -45,8 +46,8 @@ export function extractIndexPatterns(
     });
   }
 
-  if (patterns.length === 0 && panel.default_index_pattern) {
-    patterns.push(panel.default_index_pattern);
+  if (patterns.length === 0 && defaultIndex) {
+    patterns.push(defaultIndex);
   }
 
   return uniq<string>(patterns).sort();

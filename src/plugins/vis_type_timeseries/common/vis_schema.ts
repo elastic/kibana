@@ -47,7 +47,7 @@ const numberOptionalOrEmptyString = schema.maybe(
   schema.oneOf([numberOptional, schema.literal('')])
 );
 
-export const timeFieldObject = schema.maybe(
+export const fieldObject = schema.maybe(
   schema.nullable(
     schema.oneOf([
       schema.string(),
@@ -70,7 +70,7 @@ const annotationsItems = schema.object({
   index_pattern: stringOptionalNullable,
   query_string: schema.maybe(queryObject),
   template: stringOptionalNullable,
-  time_field: timeFieldObject,
+  time_field: fieldObject,
 });
 
 const backgroundColorRulesItems = schema.object({
@@ -89,7 +89,7 @@ const gaugeColorRulesItems = schema.object({
   value: schema.maybe(schema.nullable(schema.number())),
 });
 export const metricsItems = schema.object({
-  field: timeFieldObject,
+  field: fieldObject,
   id: stringRequired,
   metric_agg: stringOptionalNullable,
   numerator: schema.maybe(queryObject),
@@ -110,7 +110,7 @@ export const metricsItems = schema.object({
   variables: schema.maybe(
     schema.arrayOf(
       schema.object({
-        field: timeFieldObject,
+        field: fieldObject,
         id: stringRequired,
         name: stringOptionalNullable,
       })
@@ -121,7 +121,7 @@ export const metricsItems = schema.object({
     schema.arrayOf(
       schema.object({
         id: stringRequired,
-        field: timeFieldObject,
+        field: fieldObject,
         mode: schema.oneOf([schema.literal('line'), schema.literal('band')]),
         shade: schema.oneOf([numberOptional, stringOptionalNullable]),
         value: schema.maybe(schema.oneOf([numberOptional, stringOptionalNullable])),
@@ -135,7 +135,7 @@ export const metricsItems = schema.object({
   size: stringOrNumberOptionalNullable,
   agg_with: stringOptionalNullable,
   order: stringOptionalNullable,
-  order_by: timeFieldObject,
+  order_by: fieldObject,
 });
 
 const splitFiltersItems = schema.object({
@@ -146,7 +146,7 @@ const splitFiltersItems = schema.object({
 });
 
 export const seriesItems = schema.object({
-  aggregate_by: timeFieldObject,
+  aggregate_by: fieldObject,
   aggregate_function: stringOptionalNullable,
   axis_position: stringRequired,
   axis_max: stringOrNumberOptionalNullable,
@@ -188,7 +188,7 @@ export const seriesItems = schema.object({
   seperate_axis: numberIntegerOptional,
   series_index_pattern: stringOptionalNullable,
   series_max_bars: numberIntegerOptional,
-  series_time_field: timeFieldObject,
+  series_time_field: fieldObject,
   series_interval: stringOptionalNullable,
   series_drop_last_bucket: numberIntegerOptional,
   split_color_mode: stringOptionalNullable,
@@ -196,7 +196,7 @@ export const seriesItems = schema.object({
   split_mode: stringRequired,
   stacked: stringRequired,
   steps: numberIntegerOptional,
-  terms_field: timeFieldObject,
+  terms_field: fieldObject,
   terms_order_by: stringOptionalNullable,
   terms_size: stringOptionalNullable,
   terms_direction: stringOptionalNullable,
@@ -253,7 +253,7 @@ export const panel = schema.object({
   markdown_vertical_align: stringOptionalNullable,
   markdown_less: stringOptionalNullable,
   markdown_css: stringOptionalNullable,
-  pivot_id: timeFieldObject,
+  pivot_id: fieldObject,
   pivot_label: stringOptionalNullable,
   pivot_type: stringOptionalNullable,
   pivot_rows: stringOptionalNullable,
@@ -263,7 +263,7 @@ export const panel = schema.object({
   tooltip_mode: schema.maybe(
     schema.oneOf([schema.literal('show_all'), schema.literal('show_focused')])
   ),
-  time_field: timeFieldObject,
+  time_field: fieldObject,
   time_range_mode: stringOptionalNullable,
   type: schema.oneOf([
     schema.literal('table'),

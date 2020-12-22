@@ -19,10 +19,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { fetchFields } from './lib/fetch_fields';
-import { getSavedObjectsClient, getUISettings, getI18n } from '../services';
+import { getUISettings, getI18n } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
-import { extractIndexPatterns } from '../../common/extract_index_patterns';
 
 export class EditorController {
   constructor(el, vis, eventEmitter, embeddableHandler) {
@@ -32,43 +30,18 @@ export class EditorController {
     this.eventEmitter = eventEmitter;
 
     this.state = {
-      fields: [],
       vis: vis,
-      isLoaded: false,
     };
   }
 
-  fetchDefaultIndexPattern = async () => {
-    const indexPattern = await getSavedObjectsClient().client.get(
-      'index-pattern',
-      getUISettings().get('defaultIndex')
-    );
-
-    return indexPattern.attributes;
-  };
-
-  fetchDefaultParams = async () => {
-    const { title, timeFieldName } = await this.fetchDefaultIndexPattern();
-    const indexPatterns = extractIndexPatterns(this.state.vis.params, this.state.vis.fields ?? {});
-
-    this.state.vis.params.default_index_pattern = title;
-    this.state.vis.params.default_timefield = timeFieldName;
-    this.state.fields = await fetchFields(indexPatterns);
-
-    this.state.isLoaded = true;
-  };
-
   async render(params) {
     const I18nContext = getI18n().Context;
-
-    !this.state.isLoaded && (await this.fetchDefaultParams());
 
     render(
       <I18nContext>
         <VisEditor
           config={getUISettings()}
           vis={this.state.vis}
-          visFields={this.state.fields}
           visParams={this.state.vis.params}
           timeRange={params.timeRange}
           renderComplete={() => {}}

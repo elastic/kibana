@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { extractTimefieldName } from '../../../../../common/timefield_utils';
+import { extractFieldName } from '../../../../../common/field_utils';
 
 const filter = (metric) => metric.type === 'filter_ratio';
 import { bucketTransform } from '../../helpers/bucket_transform';
@@ -47,7 +47,7 @@ export function ratios(req, panel, series, esQueryConfig, indexPatternObject) {
           try {
             metricAgg = bucketTransform[metric.metric_agg]({
               type: metric.metric_agg,
-              field: extractTimefieldName(metric.field),
+              field: extractFieldName(metric.field),
             });
           } catch (e) {
             metricAgg = {};
