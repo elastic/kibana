@@ -94,6 +94,7 @@ const valueLabelsOptions: Array<{
   id: string;
   value: 'hide' | 'inside' | 'outside';
   label: string;
+  'data-test-subj': string;
 }> = [
   {
     id: `value_labels_hide`,
@@ -101,6 +102,7 @@ const valueLabelsOptions: Array<{
     label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.auto', {
       defaultMessage: 'Hide',
     }),
+    'data-test-subj': 'lnsXY_valueLabels_hide',
   },
   {
     id: `value_labels_inside`,
@@ -108,6 +110,7 @@ const valueLabelsOptions: Array<{
     label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.inside', {
       defaultMessage: 'Show',
     }),
+    'data-test-subj': 'lnsXY_valueLabels_inside',
   },
 ];
 
