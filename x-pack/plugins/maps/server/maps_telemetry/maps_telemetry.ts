@@ -219,11 +219,12 @@ export function getLayerLists(mapSavedObjects: MapSavedObject[]): LayerDescripto
 export async function buildMapsIndexPatternsTelemetry(
   layerLists: LayerDescriptor[][]
 ): Promise<GeoIndexPatternsUsage> {
-  console.log('######################## BEFORE GET');
+  console.log('######################## BEFORE MAPS TELEMETRY GET');
   const indexPatternsService = await getIndexPatternsService();
   // console.log('typeof', indexPatternsService);
   const indexPattern = await indexPatternsService.get('ff959d40-b880-11e8-a6d9-e546fe2bba5f');
-  console.log('************************* AFTER GET');
+  console.log('************************* AFTER MAPS TELEMETRY GET');
+  console.log(JSON.stringify(indexPattern));
   console.log(indexPattern.fields.length);
   // console.log('*************************');
   // const fieldsForIndexPattern = await indexPatternsService.getFieldsForIndexPattern(indexPattern);

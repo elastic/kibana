@@ -214,6 +214,7 @@ export class MapsPlugin implements Plugin {
   // @ts-ignore
   start(core: CoreStart, plugins: StartDeps) {
     setInternalRepository(core.savedObjects.createInternalRepository);
+    console.log('********************************************');
     console.log('START START START');
     core.elasticsearch.client.asInternalUser
       .fieldCaps({
