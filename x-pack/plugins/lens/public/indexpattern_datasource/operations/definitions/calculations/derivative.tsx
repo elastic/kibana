@@ -10,6 +10,7 @@ import { IndexPatternLayer } from '../../../types';
 import {
   buildLabelFunction,
   checkForDateHistogram,
+  getErrorsForDateReference,
   dateBasedOperationToExpression,
   hasDateField,
 } from './utils';
@@ -51,23 +52,29 @@ export const derivativeOperation: OperationDefinition<
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
-  getPossibleOperation: () => {
-    return {
-      dataType: 'number',
-      isBucketed: false,
-      scale: 'ratio',
-    };
+  getPossibleOperation: (indexPattern) => {
+    if (hasDateField(indexPattern)) {
+      return {
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      };
+    }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale);
+    const ref = columns[column.references[0]];
+    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined, column.timeScale);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'derivative');
   },
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
-    const metric = layer.columns[referenceIds[0]];
+    const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(metric?.label, previousColumn?.timeScale),
+      label: ofName(
+        ref && 'sourceField' in ref ? ref.sourceField : undefined,
+        previousColumn?.timeScale
+      ),
       dataType: 'number',
       operationType: 'derivative',
       isBucketed: false,
@@ -87,13 +94,22 @@ export const derivativeOperation: OperationDefinition<
     return hasDateField(newIndexPattern);
   },
   onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
-  getErrorMessage: (layer: IndexPatternLayer) => {
+  getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
+    return getErrorsForDateReference(
+      layer,
+      columnId,
+      i18n.translate('xpack.lens.indexPattern.derivative', {
+        defaultMessage: 'Differences',
+      })
+    );
+  },
+  getDisabledStatus(indexPattern, layer) {
     return checkForDateHistogram(
       layer,
       i18n.translate('xpack.lens.indexPattern.derivative', {
         defaultMessage: 'Differences',
       })
-    );
+    )?.join(', ');
   },
   timeScalingMode: 'optional',
 };
