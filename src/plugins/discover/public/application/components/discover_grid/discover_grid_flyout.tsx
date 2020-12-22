@@ -124,16 +124,16 @@ export function DiscoverGridFlyout({
             columns={columns}
             indexPattern={indexPattern}
             filter={(mapping, value, mode) => {
-              onClose();
               onFilter(mapping, value, mode);
+              onClose();
             }}
             onRemoveColumn={(columnName: string) => {
-              onClose();
               onRemoveColumn(columnName);
+              onClose();
             }}
             onAddColumn={(columnName: string) => {
-              onClose();
               onAddColumn(columnName);
+              onClose();
             }}
           />
         </EuiFlyoutBody>

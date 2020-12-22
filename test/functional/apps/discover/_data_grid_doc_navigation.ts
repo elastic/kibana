@@ -79,7 +79,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         expect(hasInclusiveFilter).to.be(true);
 
-        await dataGrid.removeInclusiveFilter(details, 'referer');
+        await dataGrid.clickRowToggle({ rowIndex: 0 });
+        const detailsExcluding = await dataGrid.getDetailsRow();
+        await dataGrid.removeInclusiveFilter(detailsExcluding, 'referer');
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const hasExcludeFilter = await filterBar.hasFilter('referer', 'exists', true, false, false);
         expect(hasExcludeFilter).to.be(true);
