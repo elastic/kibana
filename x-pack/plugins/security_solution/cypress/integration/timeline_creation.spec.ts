@@ -25,7 +25,6 @@ import {
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../screens/timelines';
-import { deleteTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPage } from '../tasks/login';
