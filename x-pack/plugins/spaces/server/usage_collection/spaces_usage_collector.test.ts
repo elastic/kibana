@@ -74,6 +74,25 @@ function setup({
   };
 }
 
+const defaultEsClientMock = jest.fn().mockResolvedValue({
+  body: {
+    hits: {
+      total: {
+        value: 2,
+      },
+    },
+    aggregations: {
+      disabledFeatures: {
+        buckets: [
+          {
+            key: 'feature1',
+            doc_count: 1,
+          },
+        ],
+      },
+    },
+  },
+});
 const defaultCallClusterMock = jest.fn().mockResolvedValue({
   hits: {
     total: {
@@ -92,10 +111,10 @@ const defaultCallClusterMock = jest.fn().mockResolvedValue({
   },
 });
 
-const getMockFetchContext = (mockedCallCluster: jest.Mock) => {
+const getMockFetchContext = (mockedEsClient: jest.Mock) => {
   return {
     ...createCollectorFetchContextMock(),
-    callCluster: mockedCallCluster,
+    esClient: mockedEsClient,
   };
 };
 
