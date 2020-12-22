@@ -475,7 +475,8 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = defaultFindTimeout
     ) {
       log.debug(`Find.waitForDeletedByCssSelector('${selector}') with timeout=${timeout}`);
-      await this._withTimeout(10);
+      // await this._withTimeout(10);
+      await this._withTimeout(POLLING_TIME);
       await driver.wait(
         async () => {
           const found = await driver.findElements(By.css(selector));
