@@ -46,33 +46,12 @@ export function ResetSessionPage({
           <link href={path} rel="stylesheet" key={path} />
         ))}
         <Fonts url={uiPublicUrl} />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href={`${uiPublicUrl}/favicons/apple-touch-icon.png`}
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href={`${uiPublicUrl}/favicons/favicon-32x32.png`}
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href={`${uiPublicUrl}/favicons/favicon-16x16.png`}
-        />
-        <link rel="manifest" href={`${uiPublicUrl}/favicons/manifest.json`} />
-        <link
-          rel="mask-icon"
-          color="#e8488b"
-          href={`${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
-        />
-        <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon.ico`} />
+        {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
+        <link rel="alternate icon" type="image/png" href={`${uiPublicUrl}/favicons/favicon.png`} />
+        <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />
         <script src={`${basePath}/internal/security/reset_session_page.js`} />
-        <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
         <meta name="theme-color" content="#ffffff" />
+        <meta name="color-scheme" content="light dark" />
       </head>
       <body>
         <I18nProvider>

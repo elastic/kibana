@@ -68,6 +68,9 @@ export const Template: FunctionComponent<Props> = ({
       </g>
     </svg>
   );
+
+  const faviconFile = injectedMetadata.env.mode.prod ? 'favicon' : 'favicon_dev';
+
   return (
     <html lang={locale}>
       <head>
@@ -76,33 +79,15 @@ export const Template: FunctionComponent<Props> = ({
         <meta name="viewport" content="width=device-width" />
         <title>Elastic</title>
         <Fonts url={uiPublicUrl} />
-        {/* Favicons (generated from http://realfavicongenerator.net/) */}
+        {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
         <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href={`${uiPublicUrl}/favicons/apple-touch-icon.png`}
-        />
-        <link
-          rel="icon"
+          rel="alternate icon"
           type="image/png"
-          sizes="32x32"
-          href={`${uiPublicUrl}/favicons/favicon-32x32.png`}
+          href={`${uiPublicUrl}/favicons/${faviconFile}.png`}
         />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href={`${uiPublicUrl}/favicons/favicon-16x16.png`}
-        />
-        <link rel="manifest" href={`${uiPublicUrl}/favicons/manifest.json`} />
-        <link
-          rel="mask-icon"
-          color="#e8488b"
-          href={`${uiPublicUrl}/favicons/safari-pinned-tab.svg`}
-        />
-        <link rel="shortcut icon" href={`${uiPublicUrl}/favicons/favicon.ico`} />
-        <meta name="msapplication-config" content={`${uiPublicUrl}/favicons/browserconfig.xml`} />
+        <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/${faviconFile}.svg`} />
         <meta name="theme-color" content="#ffffff" />
+        <meta name="color-scheme" content="light dark" />
         <Styles darkMode={darkMode} />
 
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
