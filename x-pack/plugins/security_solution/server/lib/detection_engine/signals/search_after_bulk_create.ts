@@ -128,6 +128,7 @@ export const searchAfterAndBulkCreate = async ({
           } else {
             // if no sort id on backup search and the initial search result was also empty
             logger.debug(buildRuleMessage('backupSortIds was empty on searchResultB'));
+            backupSortId = undefined;
           }
 
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResultB]);
@@ -167,6 +168,8 @@ export const searchAfterAndBulkCreate = async ({
         const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
         if (lastSortId != null && lastSortId.length !== 0) {
           sortId = lastSortId[0];
+        } else {
+          sortId = undefined;
         }
 
         // determine if there are any candidate signals to be processed
