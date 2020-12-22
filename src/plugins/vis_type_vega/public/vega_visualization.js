@@ -17,48 +17,14 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { getNotifications, getData, getSavedObjects } from './services';
+import { getNotifications, getData } from './services';
 
 export const createVegaVisualization = ({ getServiceSettings }) =>
   class VegaVisualization {
     constructor(el, vis) {
       this._el = el;
       this._vis = vis;
-
-      this.savedObjectsClient = getSavedObjects();
       this.dataPlugin = getData();
-    }
-
-    /**
-     * Find index pattern by its title, of if not given, gets default
-     * @param {string} [index]
-     * @returns {Promise<string>} index id
-     */
-    async findIndex(index) {
-      const { indexPatterns } = this.dataPlugin;
-      let idxObj;
-
-      if (index) {
-        idxObj = indexPatterns.findByTitle(this.savedObjectsClient, index);
-        if (!idxObj) {
-          throw new Error(
-            i18n.translate('visTypeVega.visualization.indexNotFoundErrorMessage', {
-              defaultMessage: 'Index {index} not found',
-              values: { index: `"${index}"` },
-            })
-          );
-        }
-      } else {
-        idxObj = await indexPatterns.getDefault();
-        if (!idxObj) {
-          throw new Error(
-            i18n.translate('visTypeVega.visualization.unableToFindDefaultIndexErrorMessage', {
-              defaultMessage: 'Unable to find default index',
-            })
-          );
-        }
-      }
-      return idxObj.id;
     }
 
     /**
@@ -112,7 +78,6 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
           serviceSettings,
           filterManager,
           timefilter,
-          findIndex: this.findIndex.bind(this),
         };
 
         if (vegaParser.useMap) {

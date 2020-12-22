@@ -981,10 +981,7 @@ export class DashboardAppController {
       if (!factory) {
         throw new EmbeddableFactoryNotFoundError(type);
       }
-      const explicitInput = await factory.getExplicitInput();
-      if (dashboardContainer) {
-        await dashboardContainer.addNewEmbeddable(type, explicitInput);
-      }
+      await factory.create({} as EmbeddableInput, dashboardContainer);
     };
 
     navActions[TopNavIds.OPTIONS] = (anchorElement) => {

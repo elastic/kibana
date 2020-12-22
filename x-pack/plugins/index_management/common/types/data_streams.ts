@@ -21,6 +21,7 @@ export interface DataStreamFromEs {
   template: string;
   ilm_policy?: string;
   store_size?: string;
+  store_size_bytes?: number;
   maximum_timestamp?: number;
 }
 
@@ -40,6 +41,7 @@ export interface DataStream {
   indexTemplateName: string;
   ilmPolicyName?: string;
   storageSize?: string;
+  storageSizeBytes?: number;
   maxTimeStamp?: number;
 }
 

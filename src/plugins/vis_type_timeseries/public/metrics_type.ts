@@ -26,6 +26,7 @@ import { EditorController } from './application';
 import { PANEL_TYPES } from '../common/panel_types';
 import { VisEditor } from './application/components/vis_editor_lazy';
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { getDataStart } from './services';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -83,5 +84,10 @@ export const metricsVisDefinition = {
     return [VIS_EVENT_TO_TRIGGER.applyFilter];
   },
   inspectorAdapters: {},
+  getUsedIndexPattern: async (params: any) => {
+    const { indexPatterns } = getDataStart();
+
+    return params.index_pattern ? await indexPatterns.find(params.index_pattern) : [];
+  },
   responseHandler: 'none',
 };

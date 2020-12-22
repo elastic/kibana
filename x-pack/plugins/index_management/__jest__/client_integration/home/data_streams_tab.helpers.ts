@@ -23,6 +23,7 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     goToDataStreamsList: () => void;
     clickEmptyPromptIndexTemplateLink: () => void;
     clickIncludeStatsSwitch: () => void;
+    sortTableOnStorageSize: () => void;
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
@@ -78,6 +79,14 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
   const clickIncludeStatsSwitch = () => {
     const { find } = testBed;
     find('includeStatsSwitch').simulate('click');
+  };
+
+  const sortTableOnStorageSize = () => {
+    const { find, component } = testBed;
+    act(() => {
+      find('tableHeaderCell_storageSizeBytes_3.tableHeaderSortButton').simulate('click');
+    });
+    component.update();
   };
 
   const clickReloadButton = () => {
@@ -156,6 +165,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       goToDataStreamsList,
       clickEmptyPromptIndexTemplateLink,
       clickIncludeStatsSwitch,
+      sortTableOnStorageSize,
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
@@ -171,7 +181,11 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
   };
 };
 
-export const createDataStreamPayload = (name: string): DataStream => ({
+export const createDataStreamPayload = (
+  name: string,
+  storageSize: string = '1b',
+  storageSizeBytes: number = 1
+): DataStream => ({
   name,
   timeStampField: { name: '@timestamp' },
   indices: [
@@ -183,6 +197,7 @@ export const createDataStreamPayload = (name: string): DataStream => ({
   generation: 1,
   health: 'green',
   indexTemplateName: 'indexTemplate',
-  storageSize: '1b',
+  storageSize,
+  storageSizeBytes,
   maxTimeStamp: 420,
 });
