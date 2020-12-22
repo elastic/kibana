@@ -132,7 +132,7 @@ export async function getWebCoreVitals({
 
   return {
     coreVitalPages: coreVitalPages?.doc_count ?? 0,
-    cls: cls?.values[pkey]?.toFixed(3) || null,
+    cls: cls?.values[pkey],
     fid: fid?.values[pkey],
     lcp: lcp?.values[pkey],
     tbt: tbt?.values[pkey] ?? 0,

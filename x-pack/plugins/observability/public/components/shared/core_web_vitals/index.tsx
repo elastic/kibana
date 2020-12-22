@@ -18,7 +18,7 @@ import { WebCoreVitalsTitle } from './web_core_vitals_title';
 import { ServiceName } from './service_name';
 
 export interface UXMetrics {
-  cls: string | null;
+  cls: number | null;
   fid?: number | null;
   lcp?: number | null;
   tbt: number;
@@ -38,6 +38,20 @@ export function formatToSec(value?: number | string, fromUnit = 'MicroSec'): str
   return (valueInMs / 1000).toFixed(2) + ' s';
 }
 
+function formatToMilliseconds(value?: number | null) {
+  if (typeof value === 'undefined' || value === null) {
+    return null;
+  }
+  return formatToSec(value, 'ms');
+}
+
+function formatToFixed3(value?: number | null) {
+  if (typeof value === 'undefined' || value === null || typeof value !== 'number') {
+    return null;
+  }
+  return value.toFixed(3);
+}
+
 const CoreVitalsThresholds = {
   LCP: { good: '2.5s', bad: '4.0s' },
   FID: { good: '100ms', bad: '300ms' },
@@ -51,13 +65,6 @@ interface Props {
   serviceName?: string;
   totalPageViews?: number;
   displayTrafficMetric?: boolean;
-}
-
-function formatValue(value?: number | null) {
-  if (typeof value === 'undefined' || value === null) {
-    return null;
-  }
-  return formatToSec(value, 'ms');
 }
 
 export function CoreVitals({
@@ -85,35 +92,32 @@ export function CoreVitals({
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={LCP_LABEL}
-            value={formatValue(lcp)}
+            value={formatToMilliseconds(lcp)}
             ranks={lcpRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.LCP}
             helpLabel={LCP_HELP_LABEL}
-            hasVitals={Boolean(coreVitalPages)}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={FID_LABEL}
-            value={formatValue(fid)}
+            value={formatToMilliseconds(fid)}
             ranks={fidRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.FID}
             helpLabel={FID_HELP_LABEL}
-            hasVitals={Boolean(coreVitalPages)}
           />
         </EuiFlexItem>
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={CLS_LABEL}
-            value={cls ?? null}
+            value={formatToFixed3(cls)}
             ranks={clsRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.CLS}
             isCls={true}
             helpLabel={CLS_HELP_LABEL}
-            hasVitals={Boolean(coreVitalPages)}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

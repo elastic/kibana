@@ -26,7 +26,7 @@ describe('CoreVitalItem', () => {
   const loading = false;
   const helpLabel = 'sample help label';
 
-  it('renders if value is truthy but hasVitals is falsey', () => {
+  it('renders if value is truthy', () => {
     const { getByText } = render(
       <IntlProvider locale="en">
         <KibanaReactContext.Provider>
@@ -37,7 +37,6 @@ describe('CoreVitalItem', () => {
             loading={loading}
             thresholds={thresholds}
             helpLabel={helpLabel}
-            hasVitals={false}
           />
         </KibanaReactContext.Provider>
       </IntlProvider>
@@ -50,31 +49,7 @@ describe('CoreVitalItem', () => {
     expect(getByText('Poor (5%)')).toBeInTheDocument();
   });
 
-  it('renders if hasVitals is truthy but value is falsey', () => {
-    const { getByText, queryByText } = render(
-      <IntlProvider locale="en">
-        <KibanaReactContext.Provider>
-          <CoreVitalItem
-            title={title}
-            value={''}
-            ranks={[85, 10, 5]}
-            loading={loading}
-            thresholds={thresholds}
-            helpLabel={helpLabel}
-            hasVitals={true}
-          />
-        </KibanaReactContext.Provider>
-      </IntlProvider>
-    );
-
-    expect(getByText(title)).toBeInTheDocument();
-    expect(queryByText(value)).not.toBeInTheDocument();
-    expect(getByText('Good (85%)')).toBeInTheDocument();
-    expect(getByText('Needs improvement (10%)')).toBeInTheDocument();
-    expect(getByText('Poor (5%)')).toBeInTheDocument();
-  });
-
-  it('renders loading state', () => {
+  it('renders loading state when loading is truthy', () => {
     const { queryByText, getByText } = render(
       <IntlProvider locale="en">
         <KibanaReactContext.Provider>
@@ -85,7 +60,6 @@ describe('CoreVitalItem', () => {
             loading={true}
             thresholds={thresholds}
             helpLabel={helpLabel}
-            hasVitals={false}
           />
         </KibanaReactContext.Provider>
       </IntlProvider>
@@ -95,7 +69,7 @@ describe('CoreVitalItem', () => {
     expect(getByText('--')).toBeInTheDocument();
   });
 
-  it('renders no data if value is falsey, hasVitals is falsey, and loading is falsey', () => {
+  it('renders no data UI if value is falsey and loading is falsey', () => {
     const { getByText } = render(
       <IntlProvider locale="en">
         <KibanaReactContext.Provider>
@@ -106,7 +80,6 @@ describe('CoreVitalItem', () => {
             loading={loading}
             thresholds={thresholds}
             helpLabel={helpLabel}
-            hasVitals={false}
           />
         </KibanaReactContext.Provider>
       </IntlProvider>

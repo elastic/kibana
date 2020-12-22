@@ -82,7 +82,6 @@ export function CoreVitalItem({
   ranks = [100, 0, 0],
   isCls,
   helpLabel,
-  hasVitals = false,
 }: Props) {
   const palette = euiPaletteForStatus(3);
 
@@ -90,7 +89,7 @@ export function CoreVitalItem({
 
   const biggestValIndex = ranks.indexOf(Math.max(...ranks));
 
-  if (!value && !hasVitals && !loading) {
+  if (!value && !loading) {
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
 
