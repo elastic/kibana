@@ -5,25 +5,27 @@
  */
 
 import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../common/transaction_types';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { EventOutcome } from '../../../../common/event_outcome';
-import {
   AGENT_NAME,
-  EVENT_OUTCOME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
+import {
+  TRANSACTION_PAGE_LOAD,
+  TRANSACTION_REQUEST,
+} from '../../../../common/transaction_types';
 import { rangeFilter } from '../../../../common/utils/range_filter';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
   getTransactionDurationFieldForAggregatedTransactions,
 } from '../../helpers/aggregated_transactions';
 import { getBucketSize } from '../../helpers/get_bucket_size';
+import {
+  calculateTransactionErrorPercentage,
+  getOutcomeAggregation,
+} from '../../helpers/transaction_error_rate';
 import { ServicesItemsSetup } from './get_services_items';
 
 interface AggregationParams {
@@ -32,16 +34,6 @@ interface AggregationParams {
 }
 
 const MAX_NUMBER_OF_SERVICES = 500;
-
-function calculateErrorRate({
-  success,
-  failure,
-}: {
-  success: number;
-  failure: number;
-}) {
-  return failure / (failure + success);
-}
 
 function calculateAvgDuration({
   value,
@@ -67,6 +59,8 @@ export async function getServiceTransactionStats({
     },
   };
 
+  const outcomes = getOutcomeAggregation({ searchAggregatedTransactions });
+
   const metrics = {
     count,
     avg_duration: {
@@ -76,14 +70,7 @@ export async function getServiceTransactionStats({
         ),
       },
     },
-    failure: {
-      filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
-      aggs: { count },
-    },
-    successful: {
-      filter: { term: { [EVENT_OUTCOME]: EventOutcome.success } },
-      aggs: { count },
-    },
+    outcomes,
   };
 
   const response = await apmEventClient.search({
@@ -183,17 +170,13 @@ export async function getServiceTransactionStats({
           ),
         },
         transactionErrorRate: {
-          value: calculateErrorRate({
-            success: topTransactionTypeBucket.successful.count.value,
-            failure: topTransactionTypeBucket.failure.count.value,
-          }),
+          value: calculateTransactionErrorPercentage(
+            topTransactionTypeBucket.outcomes
+          ),
           timeseries: topTransactionTypeBucket.timeseries.buckets.map(
             (dateBucket) => ({
               x: dateBucket.key,
-              y: calculateErrorRate({
-                success: dateBucket.successful.count.value,
-                failure: dateBucket.failure.count.value,
-              }),
+              y: calculateTransactionErrorPercentage(dateBucket.outcomes),
             })
           ),
         },

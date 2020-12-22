@@ -126,7 +126,7 @@ Array [
                     "missing": "",
                   },
                 },
-                "failure": Object {
+                "outcomes": Object {
                   "aggs": Object {
                     "count": Object {
                       "value_count": Object {
@@ -134,24 +134,12 @@ Array [
                       },
                     },
                   },
-                  "filter": Object {
-                    "term": Object {
-                      "event.outcome": "failure",
-                    },
-                  },
-                },
-                "successful": Object {
-                  "aggs": Object {
-                    "count": Object {
-                      "value_count": Object {
-                        "field": "transaction.duration.us",
-                      },
-                    },
-                  },
-                  "filter": Object {
-                    "term": Object {
-                      "event.outcome": "success",
-                    },
+                  "terms": Object {
+                    "field": "event.outcome",
+                    "include": Array [
+                      "failure",
+                      "success",
+                    ],
                   },
                 },
                 "timeseries": Object {
@@ -166,7 +154,7 @@ Array [
                         "field": "transaction.duration.us",
                       },
                     },
-                    "failure": Object {
+                    "outcomes": Object {
                       "aggs": Object {
                         "count": Object {
                           "value_count": Object {
@@ -174,24 +162,12 @@ Array [
                           },
                         },
                       },
-                      "filter": Object {
-                        "term": Object {
-                          "event.outcome": "failure",
-                        },
-                      },
-                    },
-                    "successful": Object {
-                      "aggs": Object {
-                        "count": Object {
-                          "value_count": Object {
-                            "field": "transaction.duration.us",
-                          },
-                        },
-                      },
-                      "filter": Object {
-                        "term": Object {
-                          "event.outcome": "success",
-                        },
+                      "terms": Object {
+                        "field": "event.outcome",
+                        "include": Array [
+                          "failure",
+                          "success",
+                        ],
                       },
                     },
                   },
