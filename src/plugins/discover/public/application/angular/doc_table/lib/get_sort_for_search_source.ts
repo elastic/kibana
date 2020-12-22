@@ -33,8 +33,12 @@ export function getSortForSearchSource(
   defaultDirection: string = 'desc'
 ): EsQuerySortValue[] {
   if (!sort || !indexPattern || (Array.isArray(sort) && sort.length === 0)) {
-    // sorting by index order
-    return [{ _doc: defaultDirection } as EsQuerySortValue];
+    if (indexPattern?.timeFieldName) {
+      // sorting by index order
+      return [{ _doc: defaultDirection } as EsQuerySortValue];
+    } else {
+      return [{ _score: defaultDirection } as EsQuerySortValue];
+    }
   }
   const { timeFieldName } = indexPattern;
   return getSort(sort, indexPattern).map((sortPair: Record<string, string>) => {

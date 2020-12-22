@@ -21,7 +21,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { NumberInputOption, SwitchOption } from '../../../../../../charts/public';
+import { NumberInputOption, SwitchOption } from '../../../../../../vis_default_editor/public';
 
 import { ValueAxis } from '../../../../types';
 import { YExtents } from './y_extents';

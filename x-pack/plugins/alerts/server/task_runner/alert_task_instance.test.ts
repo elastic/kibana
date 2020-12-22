@@ -9,7 +9,9 @@ import { AlertTaskInstance, taskInstanceToAlertTaskInstance } from './alert_task
 import uuid from 'uuid';
 import { SanitizedAlert } from '../types';
 
-const alert: SanitizedAlert = {
+const alert: SanitizedAlert<{
+  bar: boolean;
+}> = {
   id: 'alert-123',
   alertTypeId: '123',
   schedule: { interval: '10s' },
