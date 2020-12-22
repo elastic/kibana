@@ -6,6 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+export * from '../translations';
+
 export const ERROR_TITLE = i18n.translate('xpack.securitySolution.containers.case.errorTitle', {
   defaultMessage: 'Error fetching data',
 });

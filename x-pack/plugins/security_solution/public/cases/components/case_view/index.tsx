@@ -90,6 +90,8 @@ interface Signal {
   rule: {
     id: string;
     name: string;
+    to: string;
+    from: string;
   };
 }
 
@@ -97,6 +99,7 @@ interface SignalHit {
   _id: string;
   _index: string;
   _source: {
+    '@timestamp': string;
     signal: Signal;
   };
 }
@@ -104,6 +107,7 @@ interface SignalHit {
 export type Alert = {
   _id: string;
   _index: string;
+  '@timestamp': string;
 } & Signal;
 
 export const CaseComponent = React.memo<CaseProps>(
@@ -153,6 +157,7 @@ export const CaseComponent = React.memo<CaseProps>(
             [_id]: {
               _id,
               _index,
+              '@timestamp': _source['@timestamp'],
               ..._source.signal,
             },
           }),
@@ -291,6 +296,7 @@ export const CaseComponent = React.memo<CaseProps>(
       updateCase: handleUpdateCase,
       userCanCrud,
       isValidConnector,
+      alerts,
     });
 
     const onSubmitConnector = useCallback(
