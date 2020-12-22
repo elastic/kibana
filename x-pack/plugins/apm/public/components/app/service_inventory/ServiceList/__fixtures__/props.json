@@ -7,11 +7,17 @@
         "value": 0,
         "timeseries": []
       },
-      "errorsPerMinute": {
+      "transactionErrorRate": {
         "value": 46.06666666666667,
         "timeseries": []
       },
-      "environments": ["test"]
+      "avgResponseTime": {
+        "value": null,
+        "timeseries": []
+      },
+      "environments": [
+        "test"
+      ]
     },
     {
       "serviceName": "opbeans-python",
@@ -20,7 +26,7 @@
         "value": 86.93333333333334,
         "timeseries": []
       },
-      "errorsPerMinute": {
+      "transactionErrorRate": {
         "value": 12.6,
         "timeseries": []
       },

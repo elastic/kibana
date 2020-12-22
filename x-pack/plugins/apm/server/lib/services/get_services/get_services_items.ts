@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Logger } from '@kbn/logging';
+import { ServiceHealthStatus } from '../../../../common/service_health_status';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { getServicesProjection } from '../../../projections/services';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -13,6 +15,25 @@ import { getServiceTransactionStats } from './get_service_transaction_stats';
 export type ServicesItemsSetup = Setup & SetupTimeRange;
 export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
+interface TimeSeries {
+  value: number | null;
+  timeseries: Array<{
+    x: number;
+    y: number | null;
+  }>;
+}
+
+interface ServiceItem {
+  serviceName: string;
+  transactionType?: string;
+  environments?: string[];
+  agentName?: AgentName;
+  avgResponseTime?: TimeSeries;
+  transactionsPerMinute?: TimeSeries;
+  transactionErrorRate?: TimeSeries;
+  healthStatus?: ServiceHealthStatus;
+}
+
 export async function getServicesItems({
   setup,
   searchAggregatedTransactions,
@@ -21,7 +42,7 @@ export async function getServicesItems({
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
   logger: Logger;
-}) {
+}): Promise<ServiceItem[]> {
   const params = {
     projection: getServicesProjection({
       setup,
@@ -43,7 +64,6 @@ export async function getServicesItems({
 
   // make sure to exclude health statuses from services
   // that are not found in APM data
-
   const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
     apmServices.includes(serviceName)
   );

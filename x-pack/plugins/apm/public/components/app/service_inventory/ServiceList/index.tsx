@@ -6,7 +6,7 @@
 
 import { EuiFlexItem, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
@@ -68,16 +68,12 @@ const SERVICE_HEALTH_STATUS_ORDER = [
   ServiceHealthStatus.critical,
 ];
 
-export function ServiceList({ items, noItemsMessage }: Props) {
-  const displayHealthStatus = items.some((item) => 'healthStatus' in item);
-
-  const showTransactionTypeColumn = items.some(
-    ({ transactionType }) =>
-      transactionType !== TRANSACTION_REQUEST &&
-      transactionType !== TRANSACTION_PAGE_LOAD
-  );
-
-  const SERVICE_COLUMNS: Array<ITableColumn<ServiceListItem>> = [
+export function getServiceColumns({
+  showTransactionTypeColumn,
+}: {
+  showTransactionTypeColumn: boolean;
+}): Array<ITableColumn<ServiceListItem>> {
+  return [
     {
       field: 'healthStatus',
       name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
@@ -214,10 +210,25 @@ export function ServiceList({ items, noItemsMessage }: Props) {
       width: px(unit * 10),
     },
   ];
+}
+
+export function ServiceList({ items, noItemsMessage }: Props) {
+  const displayHealthStatus = items.some((item) => 'healthStatus' in item);
+
+  const showTransactionTypeColumn = items.some(
+    ({ transactionType }) =>
+      transactionType !== TRANSACTION_REQUEST &&
+      transactionType !== TRANSACTION_PAGE_LOAD
+  );
+
+  const serviceColumns = useMemo(
+    () => getServiceColumns({ showTransactionTypeColumn }),
+    [showTransactionTypeColumn]
+  );
 
   const columns = displayHealthStatus
-    ? SERVICE_COLUMNS
-    : SERVICE_COLUMNS.filter((column) => column.field !== 'healthStatus');
+    ? serviceColumns
+    : serviceColumns.filter((column) => column.field !== 'healthStatus');
   const initialSortField = displayHealthStatus
     ? 'healthStatus'
     : 'transactionsPerMinute';
