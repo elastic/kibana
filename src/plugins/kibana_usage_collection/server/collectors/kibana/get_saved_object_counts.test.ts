@@ -16,14 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
+
+export function mockGetSavedObjectsCounts(params: any) {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient.search.mockResolvedValue(
+    // @ts-ignore we only care about the response body
+    {
+      body: { ...params },
+    }
+  );
+  return esClient;
+}
 
 describe('getSavedObjectsCounts', () => {
   test('Get all the saved objects equal to 0 because no results were found', async () => {
-    const callCluster = jest.fn(() => ({}));
+    const esClient = mockGetSavedObjectsCounts({});
 
-    const results = await getSavedObjectsCounts(callCluster as any, '.kibana');
+    const results = await getSavedObjectsCounts(esClient, '.kibana');
     expect(results).toStrictEqual({
       dashboard: { total: 0 },
       visualization: { total: 0 },
@@ -35,7 +46,7 @@ describe('getSavedObjectsCounts', () => {
   });
 
   test('Merge the zeros with the results', async () => {
-    const callCluster = jest.fn(() => ({
+    const esClient = mockGetSavedObjectsCounts({
       aggregations: {
         types: {
           buckets: [
@@ -46,9 +57,9 @@ describe('getSavedObjectsCounts', () => {
           ],
         },
       },
-    }));
+    });
 
-    const results = await getSavedObjectsCounts(callCluster as any, '.kibana');
+    const results = await getSavedObjectsCounts(esClient, '.kibana');
     expect(results).toStrictEqual({
       dashboard: { total: 1 },
       visualization: { total: 0 },

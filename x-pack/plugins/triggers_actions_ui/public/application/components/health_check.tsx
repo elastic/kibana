@@ -9,7 +9,7 @@ import { Option, none, some, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
@@ -19,6 +19,7 @@ import { health } from '../lib/alert_api';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
+import { CenterJustifiedSpinner } from './center_justified_spinner';
 
 interface Props {
   inFlyout?: boolean;
@@ -47,7 +48,15 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
   return pipe(
     alertingHealth,
     fold(
-      () => (waitForCheck ? <EuiLoadingSpinner size="m" /> : <Fragment>{children}</Fragment>),
+      () =>
+        waitForCheck ? (
+          <Fragment>
+            <EuiSpacer size="m" />
+            <CenterJustifiedSpinner />
+          </Fragment>
+        ) : (
+          <Fragment>{children}</Fragment>
+        ),
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
           <Fragment>{children}</Fragment>

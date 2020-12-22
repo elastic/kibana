@@ -21,6 +21,18 @@ export const DEFAULT_TIMELINE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const EVENTS_TABLE_ARIA_LABEL = ({
+  activePage,
+  totalPages,
+}: {
+  activePage: number;
+  totalPages: number;
+}) =>
+  i18n.translate('xpack.securitySolution.timeline.eventsTableAriaLabel', {
+    values: { activePage, totalPages },
+    defaultMessage: 'events; Page {activePage} of {totalPages}',
+  });
+
 export const SEARCH_BOX_TIMELINE_PLACEHOLDER = (timelineType: TimelineTypeLiteral) =>
   i18n.translate('xpack.securitySolution.timeline.searchBoxPlaceholder', {
     values: { timeline: timelineType === TimelineType.template ? 'Timeline template' : 'Timeline' },

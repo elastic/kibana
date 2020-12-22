@@ -170,6 +170,20 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       expectForbidden: expect403,
       expectResponse: expect200,
     },
+    {
+      req: {
+        url: `/api/apm/services/foo/metadata/details?start=${start}&end=${end}&uiFilters=%7B%7D`,
+      },
+      expectForbidden: expect403,
+      expectResponse: expect200,
+    },
+    {
+      req: {
+        url: `/api/apm/services/foo/metadata/icons?start=${start}&end=${end}&uiFilters=%7B%7D`,
+      },
+      expectForbidden: expect403,
+      expectResponse: expect200,
+    },
   ];
 
   const elasticsearchPrivileges = {
