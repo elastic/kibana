@@ -182,7 +182,7 @@ const FieldLogColumnConfigurationPanel: React.FunctionComponent<{
   );
   return (
     <EuiPanel data-test-subj={`logColumnPanel fieldLogColumnPanel fieldLogColumnPanel:${field}`}>
-      <EuiFlexGroup alignItems='center'>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <div data-test-subj="moveLogColumnHandle" {...dragHandleProps}>
             <EuiIcon type="grab" />
@@ -212,7 +212,7 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   <EuiPanel
     data-test-subj={`logColumnPanel systemLogColumnPanel systemLogColumnPanel:${fieldName}`}
   >
-    <EuiFlexGroup alignItems='center'>
+    <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={false}>
         <div data-test-subj="moveLogColumnHandle" {...dragHandleProps}>
           <EuiIcon type="grab" />
