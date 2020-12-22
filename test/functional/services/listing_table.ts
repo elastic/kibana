@@ -210,8 +210,14 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
 
     public async onListingPage(appName: AppName) {
       return await testSubjects.exists(`${appName}LandingPage`, {
-        timeout: 10,
+        timeout: 5000,
       });
+    }
+
+    public async notOnListingPage(appName: AppName) {
+      return !(await testSubjects.exists(`${appName}LandingPage`, {
+        timeout: 10,
+      }));
     }
   }
 

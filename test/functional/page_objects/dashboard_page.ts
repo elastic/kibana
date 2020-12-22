@@ -130,6 +130,11 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
       return await listingTable.onListingPage('dashboard');
     }
 
+    public async notOnDashboardLandingPage() {
+      log.debug(`notOnDashboardLandingPage`);
+      return await listingTable.notOnListingPage('dashboard');
+    }
+
     public async expectExistsDashboardLandingPage() {
       log.debug(`expectExistsDashboardLandingPage`);
       await testSubjects.existOrFail('dashboardLandingPage');
@@ -142,19 +147,19 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
       log.debug('gotoDashboardLandingPage');
-      const onPage = await this.onDashboardLandingPage();
-      if (!onPage) {
-        await this.clickDashboardBreadcrumbLink();
-        await retry.try(async () => {
+      await retry.try(async () => {
+        const offPage = await this.notOnDashboardLandingPage();
+        if (offPage) {
+          await this.clickDashboardBreadcrumbLink();
           const warning = await testSubjects.exists('confirmModalTitleText');
           if (warning) {
             await testSubjects.click(
               ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
             );
           }
-        });
-        await this.expectExistsDashboardLandingPage();
-      }
+        }
+      });
+      await this.expectExistsDashboardLandingPage();
     }
 
     public async clickClone() {

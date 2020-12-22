@@ -216,6 +216,11 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       return await listingTable.onListingPage('map');
     }
 
+    async offMapListingPage() {
+      log.debug(`offMapListingPage`);
+      return await listingTable.notOnListingPage('map');
+    }
+
     async searchForMapWithName(name: string) {
       log.debug(`searchForMapWithName: ${name}`);
 
@@ -237,8 +242,8 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
 
     async gotoMapListingPage() {
       log.debug('gotoMapListingPage');
-      const onPage = await this.onMapListingPage();
-      if (!onPage) {
+      const offPage = await this.offMapListingPage();
+      if (offPage) {
         await retry.try(async () => {
           await PageObjects.common.navigateToUrlWithBrowserHistory(APP_ID, '/');
           const onMapListingPage = await this.onMapListingPage();
