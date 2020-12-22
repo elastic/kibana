@@ -5,7 +5,9 @@
  */
 
 import { resetContext } from 'kea';
+import dedent from 'dedent';
 
+import { DOCUMENTS_API_JSON_EXAMPLE } from './constants';
 import { DocumentCreationStep } from './types';
 import { DocumentCreationLogic } from './';
 
@@ -14,7 +16,10 @@ describe('DocumentCreationLogic', () => {
     isDocumentCreationOpen: false,
     creationMode: 'text',
     creationStep: DocumentCreationStep.AddDocuments,
+    textInput: dedent(DOCUMENTS_API_JSON_EXAMPLE),
+    fileInput: null,
   };
+  const mockFile = new File(['mockFile'], 'mockFile.json');
 
   const mount = () => {
     resetContext({});
@@ -126,6 +131,34 @@ describe('DocumentCreationLogic', () => {
           expect(DocumentCreationLogic.values).toEqual({
             ...DEFAULT_VALUES,
             creationStep: 3,
+          });
+        });
+      });
+    });
+
+    describe('setTextInput', () => {
+      describe('textInput', () => {
+        it('should be set to the provided value', () => {
+          mount();
+          DocumentCreationLogic.actions.setTextInput('hello world');
+
+          expect(DocumentCreationLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            textInput: 'hello world',
+          });
+        });
+      });
+    });
+
+    describe('setFileInput', () => {
+      describe('fileInput', () => {
+        it('should be set to the provided value', () => {
+          mount();
+          DocumentCreationLogic.actions.setFileInput(mockFile);
+
+          expect(DocumentCreationLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            fileInput: mockFile,
           });
         });
       });

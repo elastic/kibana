@@ -8,12 +8,18 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 
 import { LastUpdatedAt } from './';
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn();
+  FormattedRelative.mockImplementation(() => '2 minutes ago');
+
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 
 describe('LastUpdatedAt', () => {
-  beforeEach(() => {
-    Date.now = jest.fn().mockReturnValue(1603995369774);
-  });
-
   test('it renders correct relative time', () => {
     const wrapper = mount(
       <I18nProvider>
