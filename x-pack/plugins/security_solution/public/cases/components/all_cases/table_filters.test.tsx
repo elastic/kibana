@@ -152,7 +152,7 @@ describe('CasesTableFilters ', () => {
     expect(onFilterChanged).toHaveBeenCalledWith({ reporters: [{ username: 'casetester' }] });
   });
 
-  it('StatusFilterWrapper should have a fixed width', () => {
+  it('StatusFilterWrapper should have a fixed width of 180px', () => {
     const wrapper = mount(
       <TestProviders>
         <CasesTableFilters {...props} />
