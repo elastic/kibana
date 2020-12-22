@@ -246,7 +246,7 @@ const TopHitAggUi = (props) => {
             <FieldSelect
               restrict={ORDER_DATE_RESTRICT_FIELDS}
               value={model.order_by}
-              onChange={handleSelectChange('order_by')}
+              onChange={handleFieldsChange('order_by')}
               indexPattern={indexPattern}
               fields={fields}
             />

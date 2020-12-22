@@ -45,6 +45,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { createCustomLabelSelectHandler } from './lib/create_select_handler';
 
 function newAnnotation() {
   return {
@@ -74,6 +75,7 @@ export class AnnotationsEditor extends Component {
       handleChange(_.assign({}, item, part));
     };
   }
+
   handleQueryChange = (model, filter) => {
     const part = { query_string: filter };
     collectionActions.handleChange(this.props, {
@@ -101,6 +103,7 @@ export class AnnotationsEditor extends Component {
     const htmlId = htmlIdGenerator(model.id);
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
+    const handleFieldsChange = createCustomLabelSelectHandler(handleChange);
     const defaultIndexPattern = this.props.model.default_index_pattern;
 
     return (
@@ -157,7 +160,7 @@ export class AnnotationsEditor extends Component {
                   <FieldSelect
                     restrict={RESTRICT_FIELDS}
                     value={model.time_field}
-                    onChange={this.handleChange(model, 'time_field')}
+                    onChange={handleFieldsChange('time_field')}
                     indexPattern={model.index_pattern}
                     fields={this.props.fields}
                     fullWidth

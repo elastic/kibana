@@ -21,7 +21,10 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import uuid from 'uuid';
 import { DataFormatPicker } from '../../data_format_picker';
-import { createSelectHandler } from '../../lib/create_select_handler';
+import {
+  createCustomLabelSelectHandler,
+  createSelectHandler,
+} from '../../lib/create_select_handler';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FieldSelect } from '../../aggs/field_select';
 import { YesNo } from '../../yes_no';
@@ -58,6 +61,7 @@ class TableSeriesConfigUI extends Component {
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
+    const handleFieldsChange = createCustomLabelSelectHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
     const { intl } = this.props;
 
@@ -218,7 +222,7 @@ class TableSeriesConfigUI extends Component {
                 fields={this.props.fields}
                 indexPattern={this.props.panel.index_pattern}
                 value={model.aggregate_by}
-                onChange={handleSelectChange('aggregate_by')}
+                onChange={handleFieldsChange('aggregate_by')}
                 fullWidth
               />
             </EuiFormRow>
