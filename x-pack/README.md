@@ -84,8 +84,6 @@ Jest integration tests can be used to test behavior with Elasticsearch and the K
 yarn test:jest_integration
 ```
 
-An example test exists at [test_utils/jest/integration_tests/example_integration.test.ts](test_utils/jest/integration_tests/example_integration.test.ts)
-
 #### Running Reporting functional tests
 
 See [here](./test/functional/apps/dashboard/reporting/README.md) for more information on running reporting tests.
