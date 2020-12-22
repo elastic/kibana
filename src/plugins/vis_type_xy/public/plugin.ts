@@ -63,7 +63,7 @@ export class VisTypeXyPlugin
     core: VisTypeXyCoreSetup,
     { expressions, visualizations, charts, usageCollection }: VisTypeXyPluginSetupDependencies
   ) {
-    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, true)) {
+    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, false)) {
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
       setPalettesService(charts.palettes);
