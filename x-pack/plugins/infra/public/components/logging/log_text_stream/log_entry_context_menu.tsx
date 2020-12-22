@@ -79,7 +79,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   return (
     <LogEntryContextMenuContent>
       <AbsoluteWrapper>
-        <EuiPopover closePopover={onClose} isOpen={isOpen} button={button} ownFocus={true}>
+        <EuiPopover panelPaddingSize='none' closePopover={onClose} isOpen={isOpen} button={button} ownFocus={true}>
           <EuiContextMenuPanel items={wrappedItems} />
         </EuiPopover>
       </AbsoluteWrapper>
