@@ -25,7 +25,8 @@ import {
   markInProgressFirstAlert,
   goToInProgressAlerts,
 } from '../tasks/alerts';
-import { removeSignalsIndex } from '../tasks/api_calls';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
@@ -34,12 +35,13 @@ import { DETECTIONS_URL } from '../urls/navigation';
 describe('Alerts', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
+      cleanKibana();
+      removeSignalsIndex();
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
     });
 
     afterEach(() => {
-      removeSignalsIndex();
       esArchiverUnload('alerts');
     });
 
@@ -117,10 +119,7 @@ describe('Alerts', () => {
             `Showing ${expectedNumberOfOpenedAlerts.toString()} alerts`
           );
 
-          cy.get('[data-test-subj="server-side-event-count"]').should(
-            'have.text',
-            expectedNumberOfOpenedAlerts.toString()
-          );
+          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfOpenedAlerts.toString());
         });
     });
 
@@ -164,12 +163,13 @@ describe('Alerts', () => {
 
   context('Opening alerts', () => {
     beforeEach(() => {
+      cleanKibana();
+      removeSignalsIndex();
       esArchiverLoad('closed_alerts');
       loginAndWaitForPage(DETECTIONS_URL);
     });
 
     afterEach(() => {
-      removeSignalsIndex();
       esArchiverUnload('closed_alerts');
     });
 
@@ -216,13 +216,15 @@ describe('Alerts', () => {
 
   context('Marking alerts as in-progress', () => {
     beforeEach(() => {
+      cleanKibana();
+      removeSignalsIndex();
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
     });
 
     afterEach(() => {
-      removeSignalsIndex();
       esArchiverUnload('alerts');
+      removeSignalsIndex();
     });
 
     it('Mark one alert in progress when more than one open alerts are selected', () => {

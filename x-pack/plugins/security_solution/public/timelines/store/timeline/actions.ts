@@ -35,9 +35,9 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-interface ToggleExpandedEvent {
+export interface ToggleExpandedEvent {
   timelineId: string;
-  event: TimelineExpandedEvent;
+  event?: TimelineExpandedEvent;
 }
 export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
 
@@ -72,7 +72,7 @@ export interface TimelineInput {
     filterQuery: SerializedFilterQuery | null;
   };
   show?: boolean;
-  sort?: Sort;
+  sort?: Sort[];
   showCheckboxes?: boolean;
   timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string | null;
@@ -216,7 +216,7 @@ export const updateRange = actionCreator<{ id: string; start: string; end: strin
   'UPDATE_RANGE'
 );
 
-export const updateSort = actionCreator<{ id: string; sort: Sort }>('UPDATE_SORT');
+export const updateSort = actionCreator<{ id: string; sort: Sort[] }>('UPDATE_SORT');
 
 export const updateAutoSaveMsg = actionCreator<{
   timelineId: string | null;
@@ -284,3 +284,8 @@ export const setActiveTabTimeline = actionCreator<{
   id: string;
   activeTab: TimelineTabs;
 }>('SET_ACTIVE_TAB_TIMELINE');
+
+export const toggleModalSaveTimeline = actionCreator<{
+  id: string;
+  showModalSaveTimeline: boolean;
+}>('TOGGLE_MODAL_SAVE_TIMELINE');

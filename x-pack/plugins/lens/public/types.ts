@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
+import { ROW_CLICK_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
+  ExpressionAstExpression,
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
   Datatable,
@@ -19,13 +20,17 @@ import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
+import { TriggerContext, VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
+import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
+import type { LensProps } from './editor_frame_service/embeddable/embeddable_component';
 import {
   SELECT_RANGE_TRIGGER,
-  TriggerContext,
   VALUE_CLICK_TRIGGER,
-  VisualizeFieldContext,
-} from '../../../../src/plugins/ui_actions/public';
-import type { LensProps } from './editor_frame_service/embeddable/embeddable_component';
+} from '../../../../src/plugins/embeddable/public';
+import type {
+  LensSortActionData,
+  LENS_EDIT_SORT_ACTION,
+} from './datatable_visualization/expression';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -175,7 +180,7 @@ export interface Datasource<T = unknown, P = unknown> {
     state: T;
   }) => T | undefined;
 
-  toExpression: (state: T, layerId: string) => Ast | string | null;
+  toExpression: (state: T, layerId: string) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
@@ -588,7 +593,7 @@ export interface Visualization<T = unknown> {
     state: T,
     datasourceLayers: Record<string, DatasourcePublicAPI>,
     attributes?: Partial<{ title: string; description: string }>
-  ) => Ast | string | null;
+  ) => ExpressionAstExpression | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.
    * If there is no expression provided, the preview icon is used.
@@ -596,7 +601,7 @@ export interface Visualization<T = unknown> {
   toPreviewExpression?: (
     state: T,
     datasourceLayers: Record<string, DatasourcePublicAPI>
-  ) => Ast | string | null;
+  ) => ExpressionAstExpression | string | null;
   /**
    * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
    * to provide more context to the error and show it to the user
@@ -610,15 +615,42 @@ export interface Visualization<T = unknown> {
    * The frame calls this function to display warnings about visualization
    */
   getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
+
+  /**
+   * On Edit events the frame will call this to know what's going to be the next visualization state
+   */
+  onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
 }
 
 export interface LensFilterEvent {
   name: 'filter';
   data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data'];
 }
+
 export interface LensBrushEvent {
   name: 'brush';
   data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
+}
+
+// Use same technique as TriggerContext
+interface LensEditContextMapping {
+  [LENS_EDIT_SORT_ACTION]: LensSortActionData;
+}
+type LensEditSupportedActions = keyof LensEditContextMapping;
+
+export type LensEditPayload<T extends LensEditSupportedActions> = {
+  action: T;
+} & LensEditContextMapping[T];
+
+type EditPayloadContext<T> = T extends LensEditSupportedActions ? LensEditPayload<T> : never;
+
+export interface LensEditEvent<T> {
+  name: 'edit';
+  data: EditPayloadContext<T>;
+}
+export interface LensTableRowContextMenuEvent {
+  name: 'tableRowContextMenuClick';
+  data: TriggerContext<typeof ROW_CLICK_TRIGGER>['data'];
 }
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {
@@ -629,11 +661,29 @@ export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensB
   return event.name === 'brush';
 }
 
+export function isLensEditEvent<T extends LensEditSupportedActions>(
+  event: ExpressionRendererEvent
+): event is LensEditEvent<T> {
+  return event.name === 'edit';
+}
+
+export function isLensTableRowContextMenuClickEvent(
+  event: ExpressionRendererEvent
+): event is LensBrushEvent {
+  return event.name === 'tableRowContextMenuClick';
+}
+
 /**
  * Expression renderer handlers specifically for lens renderers. This is a narrowed down
  * version of the general render handlers, specifying supported event types. If this type is
  * used, dispatched events will be handled correctly.
  */
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
-  event: (event: LensFilterEvent | LensBrushEvent) => void;
+  event: (
+    event:
+      | LensFilterEvent
+      | LensBrushEvent
+      | LensEditEvent<LensEditSupportedActions>
+      | LensTableRowContextMenuEvent
+  ) => void;
 }

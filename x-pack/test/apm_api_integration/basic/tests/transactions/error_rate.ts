@@ -5,6 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
+import { format } from 'url';
 import archives_metadata from '../../../common/archives_metadata';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -13,19 +14,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   const archiveName = 'apm_8.0.0';
-  const metadata = archives_metadata[archiveName];
 
   // url parameters
-  const start = encodeURIComponent(metadata.start);
-  const end = encodeURIComponent(metadata.end);
-  const uiFilters = encodeURIComponent(JSON.stringify({}));
+  const { start, end } = archives_metadata[archiveName];
+  const uiFilters = '{}';
+  const transactionType = 'request';
 
   describe('Error rate', () => {
+    const url = format({
+      pathname: '/api/apm/services/opbeans-java/transactions/charts/error_rate',
+      query: { start, end, uiFilters, transactionType },
+    });
+
     describe('when data is not loaded', () => {
       it('handles the empty state', async () => {
-        const response = await supertest.get(
-          `/api/apm/services/opbeans-java/transactions/charts/error_rate?start=${start}&end=${end}&uiFilters=${uiFilters}`
-        );
+        const response = await supertest.get(url);
         expect(response.status).to.be(200);
 
         expect(response.body.noHits).to.be(true);
@@ -34,6 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(response.body.average).to.be(null);
       });
     });
+
     describe('when data is loaded', () => {
       before(() => esArchiver.load(archiveName));
       after(() => esArchiver.unload(archiveName));
@@ -43,10 +47,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           transactionErrorRate: Array<{ x: number; y: number | null }>;
           average: number;
         };
+
         before(async () => {
-          const response = await supertest.get(
-            `/api/apm/services/opbeans-java/transactions/charts/error_rate?start=${start}&end=${end}&uiFilters=${uiFilters}`
-          );
+          const response = await supertest.get(url);
           errorRateResponse = response.body;
         });
 
@@ -65,13 +68,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         it('has the correct start date', () => {
           expectSnapshot(
             new Date(first(errorRateResponse.transactionErrorRate)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2020-09-29T14:30:00.000Z"`);
+          ).toMatchInline(`"2020-12-08T13:57:30.000Z"`);
         });
 
         it('has the correct end date', () => {
           expectSnapshot(
             new Date(last(errorRateResponse.transactionErrorRate)?.x ?? NaN).toISOString()
-          ).toMatchInline(`"2020-09-29T15:00:00.000Z"`);
+          ).toMatchInline(`"2020-12-08T14:27:30.000Z"`);
         });
 
         it('has the correct number of buckets', () => {
@@ -79,7 +82,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('has the correct calculation for average', () => {
-          expectSnapshot(errorRateResponse.average).toMatchInline(`0.152173913043478`);
+          expectSnapshot(errorRateResponse.average).toMatchInline(`0.16`);
         });
 
         it('has the correct error rate', () => {

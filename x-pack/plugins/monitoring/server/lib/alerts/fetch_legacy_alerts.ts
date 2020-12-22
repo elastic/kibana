@@ -28,6 +28,7 @@ export async function fetchLegacyAlerts(
         {
           timestamp: {
             order: 'desc',
+            unmapped_type: 'long',
           },
         },
       ],
@@ -86,6 +87,7 @@ export async function fetchLegacyAlerts(
       message: get(hit, '_source.message'),
       resolved_timestamp: get(hit, '_source.resolved_timestamp'),
       nodes: get(hit, '_source.nodes'),
+      nodeName: '', // This is set by BaseAlert
       metadata: get(hit, '_source.metadata') as LegacyAlertMetadata,
     };
     return legacyAlert;

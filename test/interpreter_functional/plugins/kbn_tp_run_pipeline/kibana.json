@@ -8,7 +8,7 @@
     "kibanaUtils",
     "expressions"
   ],
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredBundles": [
     "inspector"

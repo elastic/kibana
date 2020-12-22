@@ -11,6 +11,8 @@ import { RulesSchema } from '../../../../common/detection_engine/schemas/respons
 import {
   AlertType,
   AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerts/server';
@@ -123,23 +125,32 @@ export interface GetResponse {
 export type EventSearchResponse = SearchResponse<EventSource>;
 export type SignalSearchResponse = SearchResponse<SignalSource>;
 export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
+export type WrappedSignalHit = BaseHit<SignalHit>;
 export type BaseSignalHit = BaseHit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
-export type RuleExecutorOptions = Omit<AlertExecutorOptions, 'params'> & {
-  params: RuleTypeParams;
-};
+export type RuleExecutorOptions = AlertExecutorOptions<
+  RuleTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
 
 // This returns true because by default a RuleAlertTypeDefinition is an AlertType
 // since we are only increasing the strictness of params.
-export const isAlertExecutor = (obj: SignalRuleAlertTypeDefinition): obj is AlertType => {
+export const isAlertExecutor = (
+  obj: SignalRuleAlertTypeDefinition
+): obj is AlertType<RuleTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext> => {
   return true;
 };
 
-export type SignalRuleAlertTypeDefinition = Omit<AlertType, 'executor'> & {
-  executor: ({ services, params, state }: RuleExecutorOptions) => Promise<AlertTypeState | void>;
-};
+export type SignalRuleAlertTypeDefinition = AlertType<
+  RuleTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
 
 export interface Ancestor {
   rule?: string;
@@ -150,6 +161,9 @@ export interface Ancestor {
 }
 
 export interface Signal {
+  _meta?: {
+    version: number;
+  };
   rule: RulesSchema;
   // DEPRECATED: use parents instead of parent
   parent?: Ancestor;
@@ -171,6 +185,7 @@ export interface SignalHit {
   '@timestamp': string;
   event: object;
   signal: Signal;
+  [key: string]: SearchTypes;
 }
 
 export interface AlertAttributes {
@@ -239,6 +254,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
+  createdSignals: SignalHit[];
   errors: string[];
 }
 

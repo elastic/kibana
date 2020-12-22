@@ -21,7 +21,7 @@ import {
 import { useTheme } from '../../../../hooks/use_theme';
 import { fontSize, px } from '../../../../style/variables';
 import { asInteger, asDuration } from '../../../../../common/utils/formatters';
-import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
+import { MLSingleMetricLink } from '../../../shared/Links/MachineLearningLinks/MLSingleMetricLink';
 import { popoverWidth } from '../cytoscape_options';
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
 import {
@@ -108,14 +108,14 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
       )}
       {mlJobId && (
         <ContentLine>
-          <MLJobLink
+          <MLSingleMetricLink
             external
             jobId={mlJobId}
             serviceName={serviceName}
             transactionType={transactionType}
           >
             {ANOMALY_DETECTION_LINK}
-          </MLJobLink>
+          </MLSingleMetricLink>
         </ContentLine>
       )}
     </>
