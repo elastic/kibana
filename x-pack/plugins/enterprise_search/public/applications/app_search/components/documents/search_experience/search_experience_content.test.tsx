@@ -46,30 +46,32 @@ describe('SearchExperienceContent', () => {
     expect(wrapper.isEmptyRender()).toBe(false);
   });
 
-  it('passes engineName and schema to the result view', () => {
-    const props = {
-      result: {
-        id: {
-          raw: '1',
-        },
-        _meta: {
-          id: '1',
-          scopedId: '1',
-          score: 100,
-          engine: 'my-engine',
-        },
-        foo: {
-          raw: 'bar',
-        },
+  it('passes result, schema, and isMetaEngine to the result view', () => {
+    const result = {
+      id: {
+        raw: '1',
       },
-      schemaForTypeHighlights: {
-        title: 'string' as SchemaTypes,
+      _meta: {
+        id: '1',
+        score: 100,
+        engine: 'my-engine',
+      },
+      foo: {
+        raw: 'bar',
       },
     };
 
     const wrapper = shallow(<SearchExperienceContent />);
     const resultView: any = wrapper.find(Results).prop('resultView');
-    expect(resultView(props)).toEqual(<ResultView {...props} />);
+    expect(resultView({ result })).toEqual(
+      <ResultView
+        {...{
+          isMetaEngine: values.isMetaEngine,
+          result,
+          schemaForTypeHighlights: values.engine.schema,
+        }}
+      />
+    );
   });
 
   it('renders pagination', () => {
