@@ -21,7 +21,8 @@ import {
   EuiCode,
   EuiIcon,
 } from '@elastic/eui';
-import { IFieldFormat } from 'src/plugins/data/public';
+import type { IFieldFormat } from 'src/plugins/data/public';
+import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
 import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
@@ -76,7 +77,7 @@ const GranularityHelpPopover = () => {
                   the same. The minimum granularity is 1, and the maximum is 
                   {setting} as defined in the Kibana advanced settings.`}
                   values={{
-                    setting: <EuiCode>histogram:maxBars</EuiCode>,
+                    setting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
                   }}
                 />
               </p>
