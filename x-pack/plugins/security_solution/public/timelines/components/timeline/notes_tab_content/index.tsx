@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { filter, pick, uniqBy } from 'lodash/fp';
+import { filter, uniqBy } from 'lodash/fp';
 import {
   EuiAvatar,
   EuiFlexGroup,
@@ -21,17 +21,21 @@ import styled from 'styled-components';
 
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineActions } from '../../../store/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineStatus } from '../../../../../common/types/timeline';
+import {
+  TimelineExpandedEventType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../../../common/types/timeline';
 import { appSelectors } from '../../../../common/store/app';
-import { timelineDefaults } from '../../../store/timeline/defaults';
 import { AddNote } from '../../notes/add_note';
 import { CREATED_BY, NOTES } from '../../notes/translations';
 import { PARTICIPANTS } from '../../../../cases/translations';
 import { NotePreviews } from '../../open_timeline/note_previews';
 import { TimelineResultNote } from '../../open_timeline/types';
 import { EventDetails } from '../event_details';
+import { getTimelineNoteSelector } from './selectors';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
@@ -121,18 +125,13 @@ interface NotesTabContentProps {
 
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getTimelineNotes = useMemo(() => getTimelineNoteSelector(), []);
   const {
     createdBy,
     expandedEvent,
     eventIdToNoteIds,
     status: timelineStatus,
-  } = useDeepEqualSelector((state) =>
-    pick(
-      ['createdBy', 'expandedEvent', 'eventIdToNoteIds', 'status'],
-      getTimeline(state, timelineId) ?? timelineDefaults
-    )
-  );
+  } = useDeepEqualSelector((state) => getTimelineNotes(state, timelineId));
 
   const { browserFields, docValueFields } = useSourcererScope(SourcererScopeName.timeline);
 
@@ -153,20 +152,21 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   );
 
   const handleOnEventClosed = useCallback(() => {
-    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
+    dispatch(timelineActions.toggleExpandedEvent({ tabType: TimelineTabs.notes, timelineId }));
   }, [dispatch, timelineId]);
 
   const EventDetailsContent = useMemo(
     () =>
-      expandedEvent.eventId ? (
+      ((expandedEvent as unknown) as TimelineExpandedEventType)?.eventId ? (
         <EventDetails
           browserFields={browserFields}
           docValueFields={docValueFields}
           handleOnEventClosed={handleOnEventClosed}
+          tabType={TimelineTabs.notes}
           timelineId={timelineId}
         />
       ) : null,
-    [browserFields, docValueFields, expandedEvent.eventId, handleOnEventClosed, timelineId]
+    [browserFields, docValueFields, expandedEvent, handleOnEventClosed, timelineId]
   );
 
   const SidebarContent = useMemo(

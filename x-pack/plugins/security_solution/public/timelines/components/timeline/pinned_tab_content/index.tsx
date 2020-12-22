@@ -167,7 +167,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   });
 
   const handleOnEventClosed = useCallback(() => {
-    onEventClosed({ timelineId });
+    onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
   }, [timelineId, onEventClosed]);
 
   return (
@@ -218,6 +218,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
               <EventDetails
                 browserFields={browserFields}
                 docValueFields={docValueFields}
+                tabType={TimelineTabs.pinned}
                 timelineId={timelineId}
                 handleOnEventClosed={handleOnEventClosed}
               />
@@ -248,7 +249,7 @@ const makeMapStateToProps = () => {
       itemsPerPage,
       itemsPerPageOptions,
       pinnedEventIds,
-      showEventDetails: !!expandedEvent.eventId,
+      showEventDetails: !!expandedEvent[TimelineTabs.pinned]?.eventId,
       sort,
     };
   };

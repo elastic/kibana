@@ -19,9 +19,10 @@ import { KqlMode, TimelineModel, ColumnHeaderOptions, TimelineTabs } from './mod
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
-  TimelineExpandedEvent,
+  TimelineExpandedEventType,
   TimelineTypeLiteral,
   RowRendererId,
+  TimelineExpandedEvent,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
 
@@ -36,8 +37,9 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
 );
 
 export interface ToggleExpandedEvent {
+  event?: TimelineExpandedEventType;
+  tabType?: TimelineTabs;
   timelineId: string;
-  event?: TimelineExpandedEvent;
 }
 export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
 

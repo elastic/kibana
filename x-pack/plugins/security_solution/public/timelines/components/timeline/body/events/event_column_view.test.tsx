@@ -13,6 +13,7 @@ import * as i18n from '../translations';
 import { EventColumnView } from './event_column_view';
 import { TimelineType } from '../../../../../../common/types/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { TimelineTabs } from '../../../../store/timeline/model';
 
 jest.mock('../../../../../common/hooks/use_selector');
 
@@ -48,6 +49,7 @@ describe('EventColumnView', () => {
     selectedEventIds: {},
     showCheckboxes: false,
     showNotes: false,
+    tabType: TimelineTabs.query,
     timelineId: 'timeline-test',
     toggleShowNotes: jest.fn(),
     updateNote: jest.fn(),

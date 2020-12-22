@@ -20,7 +20,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { TimelineExpandedEvent } from '../../../../../common/types/timeline';
+import { TimelineExpandedEventType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
   EventDetails,
@@ -30,14 +30,16 @@ import {
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { LineClamp } from '../../../../common/components/line_clamp';
 import * as i18n from './translations';
+import { TimelineTabs } from '../../../store/timeline/model';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
-  event: TimelineExpandedEvent;
+  event: TimelineExpandedEventType;
   isAlert: boolean;
   loading: boolean;
+  timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
 }
 
@@ -71,7 +73,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
 ExpandableEventTitle.displayName = 'ExpandableEventTitle';
 
 export const ExpandableEvent = React.memo<Props>(
-  ({ browserFields, event, timelineId, isAlert, loading, detailsData }) => {
+  ({ browserFields, event, timelineId, timelineTabType, isAlert, loading, detailsData }) => {
     const [view, setView] = useState<View>(EventsViewType.summaryView);
 
     const message = useMemo(() => {
@@ -116,6 +118,7 @@ export const ExpandableEvent = React.memo<Props>(
           id={event.eventId!}
           isAlert={isAlert}
           onViewSelected={setView}
+          timelineTabType={timelineTabType}
           timelineId={timelineId}
           view={view}
         />

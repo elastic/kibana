@@ -25,6 +25,7 @@ import * as i18n from './translations';
 import { TabsContent } from './tabs_content';
 import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
+import { TimelineTabs } from '../../store/timeline/model';
 
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
@@ -68,7 +69,9 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
           id: timelineId,
           columns: defaultHeaders,
           indexNames: selectedPatterns,
-          expandedEvent: activeTimeline.getExpandedEvent(),
+          expandedEvent: {
+            [TimelineTabs.query]: activeTimeline.getExpandedEvent(),
+          },
           show: false,
         })
       );

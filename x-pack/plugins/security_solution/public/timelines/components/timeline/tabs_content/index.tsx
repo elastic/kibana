@@ -146,28 +146,24 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
   const numberOfNotes = useShallowEqualSelector((state) => getNumberOfNotes(state));
 
   const setQueryAsActiveTab = useCallback(() => {
-    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
     dispatch(
       timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.query })
     );
   }, [dispatch, timelineId]);
 
   const setGraphAsActiveTab = useCallback(() => {
-    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
     dispatch(
       timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph })
     );
   }, [dispatch, timelineId]);
 
   const setNotesAsActiveTab = useCallback(() => {
-    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
     dispatch(
       timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.notes })
     );
   }, [dispatch, timelineId]);
 
   const setPinnedAsActiveTab = useCallback(() => {
-    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
     dispatch(
       timelineActions.setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.pinned })
     );
