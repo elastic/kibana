@@ -40,7 +40,6 @@ describe('export_exception_list_schema', () => {
 
   test('it should default namespace_type to "single" if an undefined given for namespacetype', () => {
     const payload = getExportExceptionListQuerySchemaMock();
-    // @ts-expect-error
     delete payload.namespace_type;
     const decoded = exportExceptionListQuerySchema.decode(payload);
     const checked = exactCheck(payload, decoded);

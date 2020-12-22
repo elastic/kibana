@@ -60,7 +60,7 @@ export const exportExceptionListRoute = (router: IRouter): void => {
           ];
 
           // TODO: Allow the API to override the name of the file to export
-          const fileName = exceptionList.name;
+          const fileName = exceptionList.list_id;
           return response.ok({
             body: transformDataToNdjson(responseBody),
             headers: {

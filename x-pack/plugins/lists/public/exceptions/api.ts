@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpStart } from 'kibana/public';
-
 import {
   ENDPOINT_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
@@ -25,7 +23,6 @@ import {
   deleteExceptionListSchema,
   exceptionListItemSchema,
   exceptionListSchema,
-  exportExceptionListQuerySchema,
   findExceptionListItemSchema,
   findExceptionListSchema,
   foundExceptionListItemSchema,
@@ -44,7 +41,7 @@ import {
   ApiCallByIdProps,
   ApiCallByListIdProps,
   ApiCallFetchExceptionListsProps,
-  ApiListExportProps,
+  ExportExceptionListProps,
   UpdateExceptionListItemProps,
   UpdateExceptionListProps,
 } from './types';
@@ -547,6 +544,7 @@ export const addEndpointExceptionList = async ({
  *
  * @param http Kibana http service
  * @param id ExceptionList ID (not list_id)
+ * @param listId ExceptionList LIST_ID (not id)
  * @param namespaceType ExceptionList namespace_type
  * @param signal to cancel request
  *
@@ -558,25 +556,9 @@ export const exportExceptionList = async ({
   listId,
   namespaceType,
   signal,
-}: ApiListExportProps & { http: HttpStart; signal: AbortSignal }): Promise<Blob> => {
-  const [validatedRequest, errorsRequest] = validate(
-    { id, list_id: listId, namespace_type: namespaceType },
-    exportExceptionListQuerySchema
-  );
-
-  if (validatedRequest != null) {
-    try {
-      const response = await http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
-        method: 'GET',
-        query: { id, list_id: listId, namespace_type: namespaceType },
-        signal,
-      });
-
-      return Promise.resolve(response);
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  } else {
-    return Promise.reject(errorsRequest);
-  }
-};
+}: ExportExceptionListProps): Promise<Blob> =>
+  http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
+    method: 'GET',
+    query: { id, list_id: listId, namespace_type: namespaceType },
+    signal,
+  });

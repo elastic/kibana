@@ -7,7 +7,6 @@
 import * as t from 'io-ts';
 
 import { id, list_id, namespace_type } from '../common/schemas';
-import { RequiredKeepUndefined } from '../../types';
 
 export const exportExceptionListQuerySchema = t.exact(
   t.type({
@@ -18,9 +17,4 @@ export const exportExceptionListQuerySchema = t.exact(
   })
 );
 
-export type ExportExceptionListQuerySchema = RequiredKeepUndefined<
-  t.TypeOf<typeof exportExceptionListQuerySchema>
->;
-export type ExportExceptionListQuerySchemaEncoded = t.OutputOf<
-  typeof exportExceptionListQuerySchema
->;
+export type ExportExceptionListQuerySchema = t.OutputOf<typeof exportExceptionListQuerySchema>;

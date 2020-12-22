@@ -90,10 +90,15 @@ export interface ApiCallMemoProps {
   onSuccess: () => void;
 }
 
+// TODO: Switch to use ApiCallMemoProps
+// after cleaning up exceptions/api file to
+// remove unnecessary validation checks
 export interface ApiListExportProps {
   id: string;
   listId: string;
   namespaceType: NamespaceType;
+  onError: (err: Error) => void;
+  onSuccess: (blob: Blob) => void;
 }
 
 export interface ApiCallFindListsItemsMemoProps {
@@ -160,5 +165,13 @@ export interface UpdateExceptionListItemProps {
 
 export interface AddEndpointExceptionListProps {
   http: HttpStart;
+  signal: AbortSignal;
+}
+
+export interface ExportExceptionListProps {
+  http: HttpStart;
+  id: string;
+  listId: string;
+  namespaceType: NamespaceType;
   signal: AbortSignal;
 }

@@ -98,6 +98,20 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       [notifications.toasts]
     );
 
+    const handleExportSuccess = useCallback(
+      (listId: string) => (blob: Blob): void => {
+        setExportDownload({ name: listId, blob });
+      },
+      []
+    );
+
+    const handleExportError = useCallback(
+      (err: Error) => {
+        notifications.toasts.addError(err, { title: i18n.EXCEPTION_EXPORT_ERROR });
+      },
+      [notifications.toasts]
+    );
+
     const handleExport = useCallback(
       ({
         id,
@@ -108,21 +122,16 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
         listId: string;
         namespaceType: NamespaceType;
       }) => async () => {
-        try {
-          setExportingListIds((ids) => [...ids, id]);
-          const blob = await exportExceptionList({
-            id,
-            listId,
-            namespaceType,
-          });
-          setExportDownload({ name: id, blob });
-        } catch (error) {
-          notifications.toasts.addError(error, { title: i18n.EXCEPTION_EXPORT_ERROR });
-        } finally {
-          setExportingListIds((ids) => [...ids.filter((_id) => _id !== id)]);
-        }
+        setExportingListIds((ids) => [...ids, id]);
+        await exportExceptionList({
+          id,
+          listId,
+          namespaceType,
+          onError: handleExportError,
+          onSuccess: handleExportSuccess(listId),
+        });
       },
-      [exportExceptionList, notifications.toasts]
+      [exportExceptionList, handleExportError, handleExportSuccess]
     );
 
     const exceptionsColumns = useMemo((): AllExceptionListsColumns[] => {

@@ -3,8 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HttpStart } from 'kibana/public';
-
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { getExceptionListSchemaMock } from '../../common/schemas/response/exception_list_schema.mock';
 import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
@@ -39,7 +37,7 @@ import {
   ApiCallByIdProps,
   ApiCallByListIdProps,
   ApiCallFetchExceptionListsProps,
-  ApiListExportProps,
+  ExportExceptionListProps,
 } from './types';
 
 const abortCtrl = new AbortController();
@@ -935,11 +933,9 @@ describe('Exceptions Lists API', () => {
       // @ts-expect-error
       delete badRequest.id;
 
-      await expect(
-        exportExceptionList(
-          badRequest as ApiListExportProps & { http: HttpStart; signal: AbortSignal }
-        )
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      await expect(exportExceptionList(badRequest as ExportExceptionListProps)).rejects.toEqual(
+        'Invalid value "undefined" supplied to "id"'
+      );
     });
   });
 });
