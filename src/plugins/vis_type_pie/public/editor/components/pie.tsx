@@ -22,15 +22,15 @@ import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { TruncateLabelsOption } from './truncate_labels';
-import { PalettePicker } from './palette_picker';
 import {
+  VisOptionsProps,
   BasicOptions,
   SwitchOption,
   SelectOption,
-  PaletteRegistry,
-} from '../../../../charts/public';
+} from '../../../../vis_default_editor/public';
+import { TruncateLabelsOption } from './truncate_labels';
+import { PalettePicker } from './palette_picker';
+import { PaletteRegistry } from '../../../../charts/public';
 import { PieVisParams, LabelPositions, ValueFormats } from '../../types';
 import { getLabelPositions, getValuesFormats } from '../collections';
 
