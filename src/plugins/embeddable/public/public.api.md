@@ -34,6 +34,7 @@ import { MaybePromise } from '@kbn/utility-types';
 import { NotificationsStart as NotificationsStart_2 } from 'src/core/public';
 import { Observable } from 'rxjs';
 import { Optional } from '@kbn/utility-types';
+import { OverlayRef as OverlayRef_2 } from 'src/core/public';
 import { OverlayStart as OverlayStart_2 } from 'src/core/public';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
@@ -717,7 +718,7 @@ export function openAddPanelFlyout(options: {
     overlays: OverlayStart_2;
     notifications: NotificationsStart_2;
     SavedObjectFinder: React.ComponentType<any>;
-}): Promise<void>;
+}): OverlayRef_2;
 
 // Warning: (ae-missing-release-tag) "OutputSpec" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
