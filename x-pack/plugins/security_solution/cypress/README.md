@@ -10,7 +10,7 @@ There are currently four ways to run the tests, comprised of two execution modes
 
 #### Interactive mode
 
-When you run the Cypress in interactive mode, an interactive runner is displayed that allows you to see commands as they execute while also viewing the application under test. For more information, please see [cypress documentation](https://docs.cypress.io/guides/core-concepts/test-runner.html#Overview).
+When you run Cypress in interactive mode, an interactive runner is displayed that allows you to see commands as they execute while also viewing the application under test. For more information, please see [cypress documentation](https://docs.cypress.io/guides/core-concepts/test-runner.html#Overview).
 
 #### Headless mode
 
@@ -20,7 +20,7 @@ A headless browser is a browser simulation program that does not have a user int
 
 #### FTR (CI)
 
-This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
+This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
 
 #### Custom Targets
 
