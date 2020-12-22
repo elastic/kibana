@@ -4,21 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, merge } from 'lodash';
+import { merge } from 'lodash';
+// @ts-ignore
 import { checkParam } from '../error_missing_required';
+// @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
+import { LegacyRequest, ElasticsearchResponse } from '../../types';
 
-export function handleResponse(resp) {
-  const source = get(resp, 'hits.hits[0]._source.kibana_stats');
-  const kibana = get(source, 'kibana');
+export function handleResponse(resp: ElasticsearchResponse) {
+  const source = resp.hits?.hits[0]._source.kibana_stats;
+  const kibana = source?.kibana;
   return merge(kibana, {
-    availability: calculateAvailability(get(source, 'timestamp')),
-    os_memory_free: get(source, 'os.memory.free_in_bytes'),
-    uptime: get(source, 'process.uptime_in_millis'),
+    availability: calculateAvailability(source?.timestamp),
+    os_memory_free: source?.os?.memory?.free_in_bytes,
+    uptime: source?.process?.uptime_in_millis,
   });
 }
 
-export function getKibanaInfo(req, kbnIndexPattern, { clusterUuid, kibanaUuid }) {
+export function getKibanaInfo(
+  req: LegacyRequest,
+  kbnIndexPattern: string,
+  { clusterUuid, kibanaUuid }: { clusterUuid: string; kibanaUuid: string }
+) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in getKibanaInfo');
 
   const params = {

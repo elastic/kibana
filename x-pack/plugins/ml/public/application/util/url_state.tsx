@@ -162,7 +162,14 @@ export const useUrlState = (accessor: Accessor) => {
   return [urlState, setUrlState];
 };
 
-type AppStateKey = 'mlSelectSeverity' | 'mlSelectInterval' | 'mlAnomaliesTable' | MlPages;
+type LegacyUrlKeys = 'mlExplorerSwimlane';
+
+type AppStateKey =
+  | 'mlSelectSeverity'
+  | 'mlSelectInterval'
+  | 'mlAnomaliesTable'
+  | MlPages
+  | LegacyUrlKeys;
 
 /**
  * Hook for managing the URL state of the page.

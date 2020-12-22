@@ -20,6 +20,7 @@ import { Schema } from '../../../shared/types';
 
 interface Props {
   result: ResultType;
+  isMetaEngine: boolean;
   showScore?: boolean;
   shouldLinkToDetailPage?: boolean;
   schemaForTypeHighlights?: Schema;
@@ -29,6 +30,7 @@ const RESULT_CUTOFF = 5;
 
 export const Result: React.FC<Props> = ({
   result,
+  isMetaEngine,
   showScore = false,
   shouldLinkToDetailPage = false,
   schemaForTypeHighlights,
@@ -68,7 +70,11 @@ export const Result: React.FC<Props> = ({
     >
       {conditionallyLinkedArticle(
         <>
-          <ResultHeader resultMeta={resultMeta} showScore={!!showScore} />
+          <ResultHeader
+            resultMeta={resultMeta}
+            showScore={!!showScore}
+            isMetaEngine={isMetaEngine}
+          />
           <div className="appSearchResult__body">
             {resultFields
               .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
