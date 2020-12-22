@@ -33,7 +33,6 @@ type CircularDepList = Set<string>;
 const allowedList: CircularDepList = new Set([
   'src/plugins/charts -> src/plugins/discover',
   'src/plugins/vis_default_editor -> src/plugins/visualizations',
-  'src/plugins/vis_default_editor -> src/plugins/visualize',
   'src/plugins/visualizations -> src/plugins/visualize',
   'x-pack/plugins/actions -> x-pack/plugins/case',
   'x-pack/plugins/case -> x-pack/plugins/security_solution',
