@@ -291,7 +291,7 @@ describe('Custom detection rules deletion and edition', () => {
     const expectedEditedIndexPatterns =
       editedRule.index && editedRule.index.length ? editedRule.index : indexPatterns;
 
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
       loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
       goToManageAlertsDetectionRules();
@@ -308,7 +308,7 @@ describe('Custom detection rules deletion and edition', () => {
       // expect define step to populate
       cy.get(CUSTOM_QUERY_INPUT).should('have.value', existingRule.customQuery);
       if (existingRule.index && existingRule.index.length > 0) {
-        cy.get(DEFINE_INDEX_INPUT).should('have.text', 'auditbeat-*');
+        cy.get(DEFINE_INDEX_INPUT).should('have.text', existingRule.index.join(''));
       }
 
       goToAboutStepTab();

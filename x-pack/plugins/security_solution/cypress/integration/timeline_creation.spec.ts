@@ -54,10 +54,6 @@ describe('Timelines', () => {
     cleanKibana();
   });
 
-  after(() => {
-    if (timelineId) deleteTimeline(timelineId);
-  });
-
   it('Creates a timeline', () => {
     cy.intercept('PATCH', '/api/timeline').as('timeline');
 
