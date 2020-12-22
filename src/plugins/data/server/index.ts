@@ -246,6 +246,7 @@ export {
   SearchUsage,
   SessionService,
   ISessionService,
+  ISessionServiceDependencies,
 } from './search';
 
 // Search namespace

@@ -17,19 +17,13 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { CoreStart, KibanaRequest } from 'kibana/server';
-import { ISearchStrategy } from '../types';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../../common/search';
+import { CoreStart, KibanaRequest, Plugin } from 'kibana/server';
+import { ISearchClient } from '../../../common';
 
-export interface IScopedSessionService {
-  search: <Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
-    strategy: ISearchStrategy<Request, Response>,
-    ...args: Parameters<ISearchStrategy<Request, Response>['search']>
-  ) => Observable<Response>;
-  [prop: string]: any;
+export interface ISessionService<T extends ISearchClient = ISearchClient> extends Plugin {
+  asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => T;
 }
 
-export interface ISessionService {
-  asScopedProvider: (core: CoreStart) => (request: KibanaRequest) => IScopedSessionService;
+export interface ISessionServiceDependencies {
+  searchClient: ISearchClient;
 }

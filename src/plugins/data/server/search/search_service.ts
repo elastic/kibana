@@ -72,11 +72,11 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
-import { SessionService, IScopedSessionService, ISessionService } from './session';
+import { SessionService, ISessionService } from './session';
 
 declare module 'src/core/server' {
   interface RequestHandlerContext {
-    search?: ISearchClient & { session: IScopedSessionService };
+    search?: ISearchClient & { session: ISearchClient };
   }
 }
 
@@ -129,6 +129,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
     registerSearchRoute(router);
     registerMsearchRoute(router, routeDependencies);
+
+    this.sessionService.setup(core, {});
 
     core.getStartServices().then(([coreStart]) => {
       this.coreStart = coreStart;
@@ -292,7 +294,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    session: IScopedSessionService,
     request: SearchStrategyRequest,
     options: ISearchOptions,
     deps: SearchStrategyDependencies
@@ -300,7 +301,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
       options.strategy
     );
-    return session.search(strategy, request, options, deps);
+    return strategy.search(request, options, deps);
   };
 
   private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
@@ -326,7 +327,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const getSessionAsScoped = this.sessionService.asScopedProvider(core);
     return (request: KibanaRequest): ISearchClient => {
-      const scopedSession = getSessionAsScoped(request);
       const savedObjectsClient = savedObjects.getScopedClient(request);
       const deps = {
         savedObjectsClient,
@@ -334,9 +334,16 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
       };
       return {
-        search: (searchRequest, options = {}) =>
-          this.search(scopedSession, searchRequest, options, deps),
-        cancel: (id, options = {}) => this.cancel(id, options, deps),
+        search: (searchRequest, options = {}) => {
+          return options.sessionId
+            ? getSessionAsScoped(request).search(searchRequest, options)
+            : this.search(searchRequest, options, deps);
+        },
+        cancel: (id, options = {}) => {
+          return options.sessionId
+            ? getSessionAsScoped(request).cancel(id, options)
+            : this.cancel(id, options, deps);
+        },
       };
     };
   };

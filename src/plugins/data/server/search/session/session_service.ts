@@ -17,27 +17,69 @@
  * under the License.
  */
 
-import { CoreStart, KibanaRequest } from 'kibana/server';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../../../common';
-import { ISearchStrategy } from '../types';
-import { ISessionService } from './types';
+import { CoreSetup, KibanaRequest } from 'kibana/server';
+import { ISessionService, ISessionServiceDependencies } from './types';
+import { DataPluginStart } from '../../plugin';
+import {
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  ISearchClient,
+  ISearchOptions,
+} from '../../../common';
 
 /**
  * The OSS session service. See data_enhanced in X-Pack for the background session service.
  */
 export class SessionService implements ISessionService {
+  protected searchAsScoped!: (request: KibanaRequest) => ISearchClient;
+
   constructor() {}
 
-  public search<Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
-    strategy: ISearchStrategy<Request, Response>,
-    ...args: Parameters<ISearchStrategy<Request, Response>['search']>
-  ) {
-    return strategy.search(...args);
+  public setup(core: CoreSetup<{}, DataPluginStart>) {
+    core.getStartServices().then(([, , dataStart]) => {
+      this.searchAsScoped = dataStart.search.asScoped;
+    });
   }
 
-  public asScopedProvider(core: CoreStart) {
-    return (request: KibanaRequest) => ({
-      search: this.search,
-    });
+  public start() {}
+
+  public stop() {}
+
+  /**
+   * Forward this search request to the search service, removing the sessionId (so the search client
+   * doesn't forward back to this service).
+   */
+  private search<Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
+    { searchClient }: ISessionServiceDependencies,
+    request: Request,
+    { sessionId, ...options }: ISearchOptions
+  ) {
+    return searchClient.search<Request, Response>(request, options);
+  }
+
+  /**
+   * Forward this search request to the search service, removing the sessionId (so the search client
+   * doesn't forward back to this service).
+   */
+  private cancel(
+    { searchClient }: ISessionServiceDependencies,
+    id: string,
+    { sessionId, ...options }: ISearchOptions = {}
+  ) {
+    return searchClient.cancel(id, options);
+  }
+
+  public asScopedProvider() {
+    return (request: KibanaRequest) => {
+      const searchClient = this.searchAsScoped(request);
+      const deps = { searchClient };
+      return {
+        search: <Request extends IKibanaSearchRequest, Response extends IKibanaSearchResponse>(
+          searchRequest: Request,
+          options: ISearchOptions = {}
+        ) => this.search<Request, Response>(deps, searchRequest, options),
+        cancel: this.cancel.bind(this, deps),
+      };
+    };
   }
 }
