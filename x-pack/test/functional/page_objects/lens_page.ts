@@ -191,6 +191,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async toggleToolbarPopover(buttonTestSub: string) {
+      await testSubjects.click(buttonTestSub);
+    },
+
     /**
      * Open the specified dimension.
      *

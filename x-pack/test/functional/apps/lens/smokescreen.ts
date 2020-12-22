@@ -230,6 +230,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('should show value labels on bar charts when enabled', async () => {
+      // enable value labels
+      await PageObjects.lens.toggleToolbarPopover('lnsValuesButton');
+      await testSubjects.click('lnsXY_valueLabels_inside');
+
+      // check for value labels
+      await retry.tryForTime(3000, async () => {
+        const data = await PageObjects.lens.getCurrentChartDebugState();
+        expect(data?.bars?.[0].labels).not.to.eql(0);
+      });
+
+      // switch to stacked bar chart
+      await PageObjects.lens.switchToVisualization('bar_stacked');
+
+      // check for value labels
+      await retry.tryForTime(3000, async () => {
+        const data = await PageObjects.lens.getCurrentChartDebugState();
+        expect(data?.bars?.[0].labels.length).to.eql(0);
+      });
+    });
+
+    it('should override axis title', async () => {
+      const axisTitle = 'overridden axis';
+      await PageObjects.lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
+        clearWithKeyboard: true,
+      });
+
+      await retry.tryForTime(3000, async () => {
+        const data = await PageObjects.lens.getCurrentChartDebugState();
+        expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
+      });
+
+      // hide the gridlines
+      await testSubjects.click('lnsshowyLeftAxisGridlines');
+
+      await retry.tryForTime(3000, async () => {
+        const data = await PageObjects.lens.getCurrentChartDebugState();
+        expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
+      });
+    });
+
     it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
