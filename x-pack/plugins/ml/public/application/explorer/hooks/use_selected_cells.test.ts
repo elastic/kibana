@@ -76,12 +76,10 @@ describe('useSelectedCells', () => {
       viewByFieldName: 'apache2.access.remote_ip',
     });
 
-    expect(setUrlState).toHaveBeenCalledWith({
-      mlExplorerSwimlane: {
-        viewByFieldName: 'apache2.access.remote_ip',
-        viewByFromPage: 1,
-        viewByPerPage: 10,
-      },
+    expect(setUrlState).toHaveBeenCalledWith('mlExplorerSwimlane', {
+      viewByFieldName: 'apache2.access.remote_ip',
+      viewByFromPage: 1,
+      viewByPerPage: 10,
     });
   });
 
@@ -118,16 +116,14 @@ describe('useSelectedCells', () => {
       viewByFieldName: 'apache2.access.remote_ip',
     });
 
-    expect(setUrlState).toHaveBeenCalledWith({
-      mlExplorerSwimlane: {
-        selectedLanes: ['Overall'],
-        selectedTimes: [1500984778, 1502366798],
-        selectedType: 'overall',
-        showTopFieldValues: true,
-        viewByFieldName: 'apache2.access.remote_ip',
-        viewByFromPage: 1,
-        viewByPerPage: 10,
-      },
+    expect(setUrlState).toHaveBeenCalledWith('mlExplorerSwimlane', {
+      selectedLanes: ['Overall'],
+      selectedTimes: [1500984778, 1502366798],
+      selectedType: 'overall',
+      showTopFieldValues: true,
+      viewByFieldName: 'apache2.access.remote_ip',
+      viewByFromPage: 1,
+      viewByPerPage: 10,
     });
   });
 });
