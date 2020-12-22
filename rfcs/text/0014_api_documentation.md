@@ -10,7 +10,7 @@ plugin APIs.
 
 # Screenshots
 
-TODO when I have better screenshots.
+TODO when there are better screenshots.
 
 # Architecture design
 
