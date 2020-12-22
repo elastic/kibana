@@ -8,7 +8,8 @@ import uuid from 'uuid';
 import { times } from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ObjectRemover } from '../../services/alerting/object_remover';
+import { ObjectRemover } from '../../lib/object_remover';
+import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
 
 function generateUniqueKey() {
   return uuid.v4().replace(/-/g, '');
@@ -26,18 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const { body: createdAlert } = await supertest
       .post(`/api/alerts/alert`)
       .set('kbn-xsrf', 'foo')
-      .send({
-        enabled: true,
-        name: generateUniqueKey(),
-        tags: ['foo', 'bar'],
-        alertTypeId: 'test.noop',
-        consumer: 'alerts',
-        schedule: { interval: '1m' },
-        throttle: '1m',
-        actions: [],
-        params: {},
-        ...overwrites,
-      })
+      .send(getTestAlertData(overwrites))
       .expect(200);
     return createdAlert;
   }
@@ -59,15 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const { body: createdAction } = await supertest
       .post(`/api/actions/action`)
       .set('kbn-xsrf', 'foo')
-      .send({
-        name: `slack-${Date.now()}`,
-        actionTypeId: '.slack',
-        config: {},
-        secrets: {
-          webhookUrl: 'https://test',
-        },
-        ...overwrites,
-      })
+      .send(getTestActionData(overwrites))
       .expect(200);
     objectRemover.add(createdAction.id, 'action', 'actions');
     return createdAction;
@@ -382,7 +364,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () => {
         await refreshAlertsList();
         const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
-        expect(refreshResults.map((item) => item.status).sort()).to.eql(['Error', 'Ok']);
+        expect(refreshResults.map((item: any) => item.status).sort()).to.eql(['Error', 'Ok']);
       });
       await testSubjects.click('alertStatusFilterButton');
       await testSubjects.click('alertStatuserrorFilerOption'); // select Error status filter

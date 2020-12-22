@@ -120,6 +120,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         },
       ]);
 
+      // clean up created alert
       const alertsToDelete = await getAlertsByName(alertName);
       await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });

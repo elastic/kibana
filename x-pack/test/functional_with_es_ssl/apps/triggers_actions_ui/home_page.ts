@@ -6,17 +6,24 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { ObjectRemover } from '../../lib/object_remover';
+import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const log = getService('log');
   const browser = getService('browser');
-  const alerting = getService('alerting');
+  const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
 
   describe('Home page', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
+    });
+
+    after(async () => {
+      await objectRemover.removeAll();
     });
 
     it('Loads the app', async () => {
@@ -58,26 +65,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('navigates to an alert details page', async () => {
-        const action = await alerting.actions.createAction({
-          name: `Slack-${Date.now()}`,
-          actionTypeId: '.slack',
-          config: {},
-          secrets: {
-            webhookUrl: 'https://test',
-          },
-        });
+        const { body: createdAction } = await supertest
+          .post(`/api/actions/action`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestActionData())
+          .expect(200);
+        objectRemover.add(createdAction.id, 'action', 'actions');
 
-        const alert = await alerting.alerts.createAlwaysFiringWithAction(
-          `test-alert-${Date.now()}`,
-          {
-            id: action.id,
-            group: 'default',
-            params: {
-              message: 'from alert 1s',
-              level: 'warn',
-            },
-          }
-        );
+        const { body: createdAlert } = await supertest
+          .post(`/api/alerts/alert`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestAlertData())
+          .expect(200);
+        objectRemover.add(createdAlert.id, 'alert', 'alerts');
 
         // refresh to see alert
         await browser.refresh();
@@ -88,12 +88,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('alertsList');
 
         // click on first alert
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdAlert.name);
 
         // Verify url
-        expect(await browser.getCurrentUrl()).to.contain(`/alert/${alert.id}`);
-
-        await alerting.alerts.deleteAlert(alert.id);
+        expect(await browser.getCurrentUrl()).to.contain(`/alert/${createdAlert.id}`);
       });
     });
   });

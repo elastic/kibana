@@ -9,12 +9,9 @@ import uuid from 'uuid';
 import { omit, mapValues, range, flatten } from 'lodash';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ObjectRemover } from '../../services/alerting/object_remover';
+import { ObjectRemover } from '../../lib/object_remover';
 import { alwaysFiringAlertType } from '../../fixtures/plugins/alerts/server/plugin';
-
-function generateUniqueKey() {
-  return uuid.v4().replace(/-/g, '');
-}
+import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -30,15 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const { body: createdAction } = await supertest
       .post(`/api/actions/action`)
       .set('kbn-xsrf', 'foo')
-      .send({
-        name: `slack-${generateUniqueKey()}`,
-        actionTypeId: '.slack',
-        config: {},
-        secrets: {
-          webhookUrl: 'https://test',
-        },
-        ...overwrites,
-      })
+      .send(getTestActionData(overwrites))
       .expect(200);
     objectRemover.add(createdAction.id, 'action', 'actions');
     return createdAction;
@@ -48,21 +37,67 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const { body: createdAlert } = await supertest
       .post(`/api/alerts/alert`)
       .set('kbn-xsrf', 'foo')
-      .send({
-        enabled: true,
-        name: generateUniqueKey(),
-        tags: ['foo', 'bar'],
-        alertTypeId: 'test.always-firing',
-        consumer: 'alerts',
-        schedule: { interval: '1m' },
-        throttle: '1m',
-        actions: [],
-        params: {},
-        ...overwrites,
-      })
+      .send(getTestAlertData(overwrites))
       .expect(200);
     objectRemover.add(createdAlert.id, 'alert', 'alerts');
     return createdAlert;
+  }
+
+  async function createAlwaysFiringAlert(overwrites: Record<string, any> = {}) {
+    const { body: createdAlert } = await supertest
+      .post(`/api/alerts/alert`)
+      .set('kbn-xsrf', 'foo')
+      .send(
+        getTestAlertData({
+          alertTypeId: 'test.always-firing',
+          ...overwrites,
+        })
+      )
+      .expect(200);
+    objectRemover.add(createdAlert.id, 'alert', 'alerts');
+    return createdAlert;
+  }
+
+  async function createActions(testRunUuid: string) {
+    return await Promise.all([
+      createAction({ name: `slack-${testRunUuid}-${0}` }),
+      createAction({ name: `slack-${testRunUuid}-${1}` }),
+    ]);
+  }
+
+  async function createAlertWithActionsAndParams(
+    testRunUuid: string,
+    params: Record<string, any> = {}
+  ) {
+    const actions = await createActions(testRunUuid);
+    return await createAlwaysFiringAlert({
+      name: `test-alert-${testRunUuid}`,
+      actions: actions.map((action) => ({
+        id: action.id,
+        group: 'default',
+        params: {
+          message: 'from alert 1s',
+          level: 'warn',
+        },
+      })),
+      params,
+    });
+  }
+
+  async function getAlertInstanceSummary(alertId: string) {
+    const { body: summary } = await supertest
+      .get(`/api/alerts/alert/${alertId}/_instance_summary`)
+      .expect(200);
+    return summary;
+  }
+
+  async function muteAlertInstance(alertId: string, alertInstanceId: string) {
+    const { body: response } = await supertest
+      .post(`/api/alerts/alert/${alertId}/alert_instance/${alertInstanceId}/_mute`)
+      .set('kbn-xsrf', 'foo')
+      .expect(204);
+
+    return response;
   }
 
   describe('Alert Details', function () {
@@ -70,23 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const testRunUuid = uuid.v4();
       before(async () => {
         await pageObjects.common.navigateToApp('triggersActions');
-
-        const actions = await Promise.all([
-          createAction({ name: `slack-${testRunUuid}-${0}` }),
-          createAction({ name: `slack-${testRunUuid}-${1}` }),
-        ]);
-
-        const alert = await createAlert({
-          name: `test-alert-${testRunUuid}`,
-          actions: actions.map((action) => ({
-            id: action.id,
-            group: 'default',
-            params: {
-              message: 'from alert 1s',
-              level: 'warn',
-            },
-          })),
-        });
+        const alert = await createAlertWithActionsAndParams(testRunUuid);
 
         // refresh to see alert
         await browser.refresh();
@@ -193,7 +212,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const updatedAlertName = `Changed Alert Name ${alertName}`;
 
       before(async () => {
-        await createAlert({
+        await createAlwaysFiringAlert({
           name: alertName,
           alertTypeId: '.index-threshold',
           params: {
@@ -269,7 +288,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditAlertFlyoutButton');
         await editButton.click();
 
-        await testSubjects.setValue('alertNameInput', alertName, {
+        await testSubjects.setValue('alertNameInput', uuid.v4(), {
           clearWithKeyboard: true,
         });
 
@@ -291,19 +310,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('triggersActions');
       });
 
-      afterEach(async () => {
+      after(async () => {
         await objectRemover.removeAll();
       });
 
       it('renders the alert details view in app button', async () => {
         const alert = await createAlert({
           name: alertName,
-          alertTypeId: 'test.noop',
+          consumer: 'alerting_fixture',
         });
 
         // refresh to see alert
         await browser.refresh();
-
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify content
@@ -320,13 +338,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('renders a disabled alert details view in app button', async () => {
-        const alert = await createAlert({
+        const alert = await createAlwaysFiringAlert({
           name: `test-alert-disabled-nav`,
         });
 
         // refresh to see alert
         await browser.refresh();
-
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Verify content
@@ -339,336 +356,275 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // describe('Alert Instances', function () {
-    //   const testRunUuid = uuid.v4();
-    //   let alert: any;
+    describe('Alert Instances', function () {
+      const testRunUuid = uuid.v4();
+      let alert: any;
 
-    //   before(async () => {
-    //     await pageObjects.common.navigateToApp('triggersActions');
+      before(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
 
-    //     const actions = await Promise.all([
-    //       alerting.actions.createAction({
-    //         name: `slack-${testRunUuid}-${0}`,
-    //         actionTypeId: '.slack',
-    //         config: {},
-    //         secrets: {
-    //           webhookUrl: 'https://test',
-    //         },
-    //       }),
-    //       alerting.actions.createAction({
-    //         name: `slack-${testRunUuid}-${1}`,
-    //         actionTypeId: '.slack',
-    //         config: {},
-    //         secrets: {
-    //           webhookUrl: 'https://test',
-    //         },
-    //       }),
-    //     ]);
+        const instances = [{ id: 'us-central' }, { id: 'us-east' }, { id: 'us-west' }];
+        alert = await createAlertWithActionsAndParams(testRunUuid, {
+          instances,
+        });
 
-    //     const instances = [{ id: 'us-central' }, { id: 'us-east' }, { id: 'us-west' }];
-    //     alert = await alerting.alerts.createAlwaysFiringWithActions(
-    //       `test-alert-${testRunUuid}`,
-    //       actions.map((action) => ({
-    //         id: action.id,
-    //         group: 'default',
-    //         params: {
-    //           message: 'from alert 1s',
-    //           level: 'warn',
-    //         },
-    //       })),
-    //       {
-    //         instances,
-    //       }
-    //     );
+        // refresh to see alert
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
-    //     // refresh to see alert
-    //     await browser.refresh();
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
 
-    //     await pageObjects.header.waitUntilLoadingHasFinished();
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
-    //     // Verify content
-    //     await testSubjects.existOrFail('alertsList');
+        // await first run to complete so we have an initial state
+        await retry.try(async () => {
+          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+          expect(Object.keys(alertInstances).length).to.eql(instances.length);
+        });
+      });
 
-    //     // click on first alert
-    //     await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+      after(async () => {
+        await objectRemover.removeAll();
+      });
 
-    //     // await first run to complete so we have an initial state
-    //     await retry.try(async () => {
-    //       const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
-    //         alert.id
-    //       );
-    //       expect(Object.keys(alertInstances).length).to.eql(instances.length);
-    //     });
-    //   });
+      it('renders the active alert instances', async () => {
+        // refresh to ensure Api call and UI are looking at freshest output
+        await browser.refresh();
 
-    //   it('renders the active alert instances', async () => {
-    //     // refresh to ensure Api call and UI are looking at freshest output
-    //     await browser.refresh();
+        // Get action groups
+        const { actionGroups } = alwaysFiringAlertType;
 
-    //     // Get action groups
-    //     const { actionGroups } = alwaysFiringAlertType;
+        // Verify content
+        await testSubjects.existOrFail('alertInstancesList');
 
-    //     // Verify content
-    //     await testSubjects.existOrFail('alertInstancesList');
+        const actionGroupNameFromId = (actionGroupId: string) =>
+          actionGroups.find(
+            (actionGroup: { id: string; name: string }) => actionGroup.id === actionGroupId
+          )?.name;
 
-    //     const actionGroupNameFromId = (actionGroupId: string) =>
-    //       actionGroups.find(
-    //         (actionGroup: { id: string; name: string }) => actionGroup.id === actionGroupId
-    //       )?.name;
+        const summary = await getAlertInstanceSummary(alert.id);
+        const dateOnAllInstancesFromApiResponse: Record<string, string> = mapValues(
+          summary.instances,
+          (instance) => instance.activeStartDate
+        );
 
-    //     const summary = await alerting.alerts.getAlertInstanceSummary(alert.id);
-    //     const dateOnAllInstancesFromApiResponse = mapValues(
-    //       summary.instances,
-    //       (instance) => instance.activeStartDate
-    //     );
+        const actionGroupNameOnAllInstancesFromApiResponse = mapValues(
+          summary.instances,
+          (instance) => {
+            const name = actionGroupNameFromId(instance.actionGroupId);
+            return name ? ` (${name})` : '';
+          }
+        );
 
-    //     const actionGroupNameOnAllInstancesFromApiResponse = mapValues(
-    //       summary.instances,
-    //       (instance) => {
-    //         const name = actionGroupNameFromId(instance.actionGroupId);
-    //         return name ? ` (${name})` : '';
-    //       }
-    //     );
+        log.debug(
+          `API RESULT: ${Object.entries(dateOnAllInstancesFromApiResponse)
+            .map(([id, date]) => `${id}: ${moment(date).utc()}`)
+            .join(', ')}`
+        );
 
-    //     log.debug(
-    //       `API RESULT: ${Object.entries(dateOnAllInstancesFromApiResponse)
-    //         .map(([id, date]) => `${id}: ${moment(date).utc()}`)
-    //         .join(', ')}`
-    //     );
+        const instancesList: any[] = await pageObjects.alertDetailsUI.getAlertInstancesList();
+        expect(instancesList.map((instance) => omit(instance, 'duration'))).to.eql([
+          {
+            instance: 'us-central',
+            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-central']}`,
+            start: moment(dateOnAllInstancesFromApiResponse['us-central'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
+          },
+          {
+            instance: 'us-east',
+            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-east']}`,
+            start: moment(dateOnAllInstancesFromApiResponse['us-east'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
+          },
+          {
+            instance: 'us-west',
+            status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-west']}`,
+            start: moment(dateOnAllInstancesFromApiResponse['us-west'])
+              .utc()
+              .format('D MMM YYYY @ HH:mm:ss'),
+          },
+        ]);
 
-    //     const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
-    //     expect(instancesList.map((instance) => omit(instance, 'duration'))).to.eql([
-    //       {
-    //         instance: 'us-central',
-    //         status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-central']}`,
-    //         start: moment(dateOnAllInstancesFromApiResponse['us-central'])
-    //           .utc()
-    //           .format('D MMM YYYY @ HH:mm:ss'),
-    //       },
-    //       {
-    //         instance: 'us-east',
-    //         status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-east']}`,
-    //         start: moment(dateOnAllInstancesFromApiResponse['us-east'])
-    //           .utc()
-    //           .format('D MMM YYYY @ HH:mm:ss'),
-    //       },
-    //       {
-    //         instance: 'us-west',
-    //         status: `Active${actionGroupNameOnAllInstancesFromApiResponse['us-west']}`,
-    //         start: moment(dateOnAllInstancesFromApiResponse['us-west'])
-    //           .utc()
-    //           .format('D MMM YYYY @ HH:mm:ss'),
-    //       },
-    //     ]);
+        const durationEpoch = moment(
+          await pageObjects.alertDetailsUI.getAlertInstanceDurationEpoch()
+        ).utc();
 
-    //     const durationEpoch = moment(
-    //       await pageObjects.alertDetailsUI.getAlertInstanceDurationEpoch()
-    //     ).utc();
+        log.debug(`DURATION EPOCH is: ${durationEpoch}]`);
 
-    //     log.debug(`DURATION EPOCH is: ${durationEpoch}]`);
+        const durationFromInstanceInApiUntilPageLoad = mapValues(
+          dateOnAllInstancesFromApiResponse,
+          // time from Alert Instance until pageload (AKA durationEpoch)
+          (date) => {
+            const durationFromApiResuiltToEpoch = moment.duration(
+              durationEpoch.diff(moment(date).utc())
+            );
+            // The UI removes milliseconds, so lets do the same in the test so we can compare
+            return moment.duration({
+              hours: durationFromApiResuiltToEpoch.hours(),
+              minutes: durationFromApiResuiltToEpoch.minutes(),
+              seconds: durationFromApiResuiltToEpoch.seconds(),
+            });
+          }
+        );
 
-    //     const durationFromInstanceInApiUntilPageLoad = mapValues(
-    //       dateOnAllInstancesFromApiResponse,
-    //       // time from Alert Instance until pageload (AKA durationEpoch)
-    //       (date) => {
-    //         const durationFromApiResuiltToEpoch = moment.duration(
-    //           durationEpoch.diff(moment(date).utc())
-    //         );
-    //         // The UI removes milliseconds, so lets do the same in the test so we can compare
-    //         return moment.duration({
-    //           hours: durationFromApiResuiltToEpoch.hours(),
-    //           minutes: durationFromApiResuiltToEpoch.minutes(),
-    //           seconds: durationFromApiResuiltToEpoch.seconds(),
-    //         });
-    //       }
-    //     );
+        instancesList
+          .map((alertInstance) => ({
+            id: alertInstance.instance,
+            // time from Alert Instance used to render the list until pageload (AKA durationEpoch)
+            duration: moment.duration(alertInstance.duration),
+          }))
+          .forEach(({ id, duration: durationAsItAppearsOnList }) => {
+            log.debug(
+              `DURATION of ${id} [From UI: ${durationAsItAppearsOnList.as(
+                'seconds'
+              )} seconds] [From API: ${durationFromInstanceInApiUntilPageLoad[id].as(
+                'seconds'
+              )} seconds]`
+            );
 
-    //     instancesList
-    //       .map((alertInstance) => ({
-    //         id: alertInstance.instance,
-    //         // time from Alert Instance used to render the list until pageload (AKA durationEpoch)
-    //         duration: moment.duration(alertInstance.duration),
-    //       }))
-    //       .forEach(({ id, duration: durationAsItAppearsOnList }) => {
-    //         log.debug(
-    //           `DURATION of ${id} [From UI: ${durationAsItAppearsOnList.as(
-    //             'seconds'
-    //           )} seconds] [From API: ${durationFromInstanceInApiUntilPageLoad[id].as(
-    //             'seconds'
-    //           )} seconds]`
-    //         );
+            expect(durationFromInstanceInApiUntilPageLoad[id].as('seconds')).to.equal(
+              durationAsItAppearsOnList.as('seconds')
+            );
+          });
+      });
 
-    //         expect(durationFromInstanceInApiUntilPageLoad[id].as('seconds')).to.equal(
-    //           durationAsItAppearsOnList.as('seconds')
-    //         );
-    //       });
-    //   });
+      it('renders the muted inactive alert instances', async () => {
+        // mute an alert instance that doesn't exist
+        await muteAlertInstance(alert.id, 'eu-east');
 
-    //   it('renders the muted inactive alert instances', async () => {
-    //     // mute an alert instance that doesn't exist
-    //     await alerting.alerts.muteAlertInstance(alert.id, 'eu-east');
+        // refresh to see alert
+        await browser.refresh();
 
-    //     // refresh to see alert
-    //     await browser.refresh();
+        const instancesList: any[] = await pageObjects.alertDetailsUI.getAlertInstancesList();
+        expect(
+          instancesList.filter((alertInstance) => alertInstance.instance === 'eu-east')
+        ).to.eql([
+          {
+            instance: 'eu-east',
+            status: 'OK',
+            start: '',
+            duration: '',
+          },
+        ]);
+      });
 
-    //     const instancesList = await pageObjects.alertDetailsUI.getAlertInstancesList();
-    //     expect(
-    //       instancesList.filter((alertInstance) => alertInstance.instance === 'eu-east')
-    //     ).to.eql([
-    //       {
-    //         instance: 'eu-east',
-    //         status: 'OK',
-    //         start: '',
-    //         duration: '',
-    //       },
-    //     ]);
-    //   });
+      it('allows the user to mute a specific instance', async () => {
+        // Verify content
+        await testSubjects.existOrFail('alertInstancesList');
 
-    //   it('allows the user to mute a specific instance', async () => {
-    //     // Verify content
-    //     await testSubjects.existOrFail('alertInstancesList');
+        log.debug(`Ensuring us-central is not muted`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-central', false);
 
-    //     log.debug(`Ensuring us-central is not muted`);
-    //     await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-central', false);
+        log.debug(`Muting us-central`);
+        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('us-central');
 
-    //     log.debug(`Muting us-central`);
-    //     await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('us-central');
+        log.debug(`Ensuring us-central is muted`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-central', true);
+      });
 
-    //     log.debug(`Ensuring us-central is muted`);
-    //     await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-central', true);
-    //   });
+      it('allows the user to unmute a specific instance', async () => {
+        // Verify content
+        await testSubjects.existOrFail('alertInstancesList');
 
-    //   it('allows the user to unmute a specific instance', async () => {
-    //     // Verify content
-    //     await testSubjects.existOrFail('alertInstancesList');
+        log.debug(`Ensuring us-east is not muted`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-east', false);
 
-    //     log.debug(`Ensuring us-east is not muted`);
-    //     await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-east', false);
+        log.debug(`Muting us-east`);
+        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('us-east');
 
-    //     log.debug(`Muting us-east`);
-    //     await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('us-east');
+        log.debug(`Ensuring us-east is muted`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-east', true);
 
-    //     log.debug(`Ensuring us-east is muted`);
-    //     await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-east', true);
+        log.debug(`Unmuting us-east`);
+        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('us-east');
 
-    //     log.debug(`Unmuting us-east`);
-    //     await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('us-east');
+        log.debug(`Ensuring us-east is not muted`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-east', false);
+      });
 
-    //     log.debug(`Ensuring us-east is not muted`);
-    //     await pageObjects.alertDetailsUI.ensureAlertInstanceMute('us-east', false);
-    //   });
+      it('allows the user unmute an inactive instance', async () => {
+        log.debug(`Ensuring eu-east is muted`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceMute('eu-east', true);
 
-    //   it('allows the user unmute an inactive instance', async () => {
-    //     log.debug(`Ensuring eu-east is muted`);
-    //     await pageObjects.alertDetailsUI.ensureAlertInstanceMute('eu-east', true);
+        log.debug(`Unmuting eu-east`);
+        await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('eu-east');
 
-    //     log.debug(`Unmuting eu-east`);
-    //     await pageObjects.alertDetailsUI.clickAlertInstanceMuteButton('eu-east');
+        log.debug(`Ensuring eu-east is removed from list`);
+        await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu-east', false);
+      });
+    });
 
-    //     log.debug(`Ensuring eu-east is removed from list`);
-    //     await pageObjects.alertDetailsUI.ensureAlertInstanceExistance('eu-east', false);
-    //   });
-    // });
+    describe('Alert Instance Pagination', function () {
+      const testRunUuid = uuid.v4();
+      let alert: any;
 
-    // describe('Alert Instance Pagination', function () {
-    //   const testRunUuid = uuid.v4();
-    //   let alert: any;
+      before(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
 
-    //   before(async () => {
-    //     await pageObjects.common.navigateToApp('triggersActions');
+        const instances = flatten(
+          range(10).map((index) => [
+            { id: `us-central-${index}` },
+            { id: `us-east-${index}` },
+            { id: `us-west-${index}` },
+          ])
+        );
+        alert = await createAlertWithActionsAndParams(testRunUuid, {
+          instances,
+        });
 
-    //     const actions = await Promise.all([
-    //       alerting.actions.createAction({
-    //         name: `slack-${testRunUuid}-${0}`,
-    //         actionTypeId: '.slack',
-    //         config: {},
-    //         secrets: {
-    //           webhookUrl: 'https://test',
-    //         },
-    //       }),
-    //       alerting.actions.createAction({
-    //         name: `slack-${testRunUuid}-${1}`,
-    //         actionTypeId: '.slack',
-    //         config: {},
-    //         secrets: {
-    //           webhookUrl: 'https://test',
-    //         },
-    //       }),
-    //     ]);
+        // await first run to complete so we have an initial state
+        await retry.try(async () => {
+          const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
+          expect(Object.keys(alertInstances).length).to.eql(instances.length);
+        });
 
-    //     const instances = flatten(
-    //       range(10).map((index) => [
-    //         { id: `us-central-${index}` },
-    //         { id: `us-east-${index}` },
-    //         { id: `us-west-${index}` },
-    //       ])
-    //     );
-    //     alert = await alerting.alerts.createAlwaysFiringWithActions(
-    //       `test-alert-${testRunUuid}`,
-    //       actions.map((action) => ({
-    //         id: action.id,
-    //         group: 'default',
-    //         params: {
-    //           message: 'from alert 1s',
-    //           level: 'warn',
-    //         },
-    //       })),
-    //       {
-    //         instances,
-    //       }
-    //     );
+        // refresh to see alert
+        await browser.refresh();
 
-    //     // await first run to complete so we have an initial state
-    //     await retry.try(async () => {
-    //       const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
-    //         alert.id
-    //       );
-    //       expect(Object.keys(alertInstances).length).to.eql(instances.length);
-    //     });
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
-    //     // refresh to see alert
-    //     await browser.refresh();
+        // Verify content
+        await testSubjects.existOrFail('alertsList');
 
-    //     await pageObjects.header.waitUntilLoadingHasFinished();
+        // click on first alert
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+      });
 
-    //     // Verify content
-    //     await testSubjects.existOrFail('alertsList');
+      after(async () => {
+        await objectRemover.removeAll();
+      });
 
-    //     // click on first alert
-    //     await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
-    //   });
+      const PAGE_SIZE = 10;
+      it('renders the first page', async () => {
+        // Verify content
+        await testSubjects.existOrFail('alertInstancesList');
 
-    //   const PAGE_SIZE = 10;
-    //   it('renders the first page', async () => {
-    //     // Verify content
-    //     await testSubjects.existOrFail('alertInstancesList');
+        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
 
-    //     const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
-    //       alert.id
-    //     );
+        const items = await pageObjects.alertDetailsUI.getAlertInstancesList();
+        expect(items.length).to.eql(PAGE_SIZE);
 
-    //     const items = await pageObjects.alertDetailsUI.getAlertInstancesList();
-    //     expect(items.length).to.eql(PAGE_SIZE);
+        const [firstItem] = items;
+        expect(firstItem.instance).to.eql(Object.keys(alertInstances)[0]);
+      });
 
-    //     const [firstItem] = items;
-    //     expect(firstItem.instance).to.eql(Object.keys(alertInstances)[0]);
-    //   });
+      it('navigates to the next page', async () => {
+        // Verify content
+        await testSubjects.existOrFail('alertInstancesList');
 
-    //   it('navigates to the next page', async () => {
-    //     // Verify content
-    //     await testSubjects.existOrFail('alertInstancesList');
+        const { instances: alertInstances } = await getAlertInstanceSummary(alert.id);
 
-    //     const { instances: alertInstances } = await alerting.alerts.getAlertInstanceSummary(
-    //       alert.id
-    //     );
+        await pageObjects.alertDetailsUI.clickPaginationNextPage();
 
-    //     await pageObjects.alertDetailsUI.clickPaginationNextPage();
-
-    //     await retry.try(async () => {
-    //       const [firstItem] = await pageObjects.alertDetailsUI.getAlertInstancesList();
-    //       expect(firstItem.instance).to.eql(Object.keys(alertInstances)[PAGE_SIZE]);
-    //     });
-    //   });
-    // });
+        await retry.try(async () => {
+          const [firstItem] = await pageObjects.alertDetailsUI.getAlertInstancesList();
+          expect(firstItem.instance).to.eql(Object.keys(alertInstances)[PAGE_SIZE]);
+        });
+      });
+    });
   });
 };

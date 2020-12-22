@@ -7,7 +7,8 @@
 import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ObjectRemover } from '../../services/alerting/object_remover';
+import { ObjectRemover } from '../../lib/object_remover';
+import { getTestActionData } from '../../lib/get_test_data';
 
 function generateUniqueKey() {
   return uuid.v4().replace(/-/g, '');
@@ -28,14 +29,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const { body: createdAction } = await supertest
         .post(`/api/actions/action`)
         .set('kbn-xsrf', 'foo')
-        .send({
-          name: `slack-${Date.now()}`,
-          actionTypeId: '.slack',
-          config: {},
-          secrets: {
-            webhookUrl: 'https://test',
-          },
-        })
+        .send(getTestActionData())
         .expect(200);
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('connectorsTab');
