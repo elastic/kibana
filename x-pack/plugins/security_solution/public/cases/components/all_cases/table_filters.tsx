@@ -28,11 +28,7 @@ interface CasesTableFiltersProps {
 
 // Fix the width of the status dropdown to prevent hiding long text items
 const StatusFilterWrapper = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    flex-basis: 180px;
-  }
-
-  &.euiFlexItem.euiFlexItem--flexGrowZero {
+  && {
     flex-basis: 180px;
   }
 `;
@@ -156,7 +152,7 @@ const CasesTableFiltersComponent = ({
               onSearch={handleOnSearch}
             />
           </EuiFlexItem>
-          <StatusFilterWrapper grow={false}>
+          <StatusFilterWrapper grow={false} data-test-subj="status-filter-wrapper">
             <StatusFilter
               selectedStatus={initial.status}
               onStatusChanged={onStatusChanged}
