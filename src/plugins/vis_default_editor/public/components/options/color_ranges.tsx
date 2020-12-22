@@ -22,7 +22,7 @@ import { last } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { RangeValues, RangesParamEditor } from '../../../../vis_default_editor/public';
+import { RangeValues, RangesParamEditor } from '../controls/ranges';
 
 export type SetColorRangeValue = (paramName: string, value: RangeValues[]) => void;
 
@@ -71,7 +71,7 @@ function ColorRanges({
   return (
     <RangesParamEditor
       data-test-subj={dataTestSubj}
-      error={i18n.translate('charts.controls.colorRanges.errorText', {
+      error={i18n.translate('visDefaultEditor.options.colorRanges.errorText', {
         defaultMessage: 'Each range should be greater than previous.',
       })}
       hidePlaceholders={true}
