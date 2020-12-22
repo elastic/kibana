@@ -9,9 +9,10 @@ import { apiService } from './utils';
 import { ActionConnector } from '../alerts/alerts';
 
 import { AlertsResult, MonitorIdParam } from '../actions/types';
-import { Alert, AlertAction } from '../../../../triggers_actions_ui/public';
+import { AlertAction } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
 import { MonitorStatusTranslations } from '../../../common/translations';
+import { Alert, AlertTypeParams } from '../../../../alerts/common';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -21,7 +22,7 @@ export const fetchConnectors = async () => {
   return await apiService.get(API_URLS.ALERT_ACTIONS);
 };
 
-export interface NewAlertParams {
+export interface NewAlertParams extends AlertTypeParams {
   monitorId: string;
   monitorName?: string;
   defaultActions: ActionConnector[];
@@ -80,7 +81,9 @@ export const fetchMonitorAlertRecords = async (): Promise<AlertsResult> => {
   return await apiService.get(API_URLS.ALERTS_FIND, data);
 };
 
-export const fetchAlertRecords = async ({ monitorId }: MonitorIdParam): Promise<Alert> => {
+export const fetchAlertRecords = async ({
+  monitorId,
+}: MonitorIdParam): Promise<Alert<NewAlertParams>> => {
   const data = {
     page: 1,
     per_page: 500,
@@ -90,7 +93,7 @@ export const fetchAlertRecords = async ({ monitorId }: MonitorIdParam): Promise<
     sort_order: 'asc',
   };
   const alerts = await apiService.get(API_URLS.ALERTS_FIND, data);
-  return alerts.data.find((alert: Alert) => alert.params.monitorId === monitorId);
+  return alerts.data.find((alert: Alert<NewAlertParams>) => alert.params.monitorId === monitorId);
 };
 
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {

@@ -50,6 +50,7 @@ import {
   ClickTriggerEvent,
 } from '../../charts/public';
 import { Datatable, IInterpreterRenderHandlers } from '../../expressions/public';
+import type { PersistedState } from '../../visualizations/public';
 
 import { VisParams } from './types';
 import {
@@ -77,7 +78,7 @@ import {
 export interface VisComponentProps {
   visParams: VisParams;
   visData: Datatable;
-  uiState: IInterpreterRenderHandlers['uiState'];
+  uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
 }

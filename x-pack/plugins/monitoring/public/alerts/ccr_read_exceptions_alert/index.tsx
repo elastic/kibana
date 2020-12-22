@@ -9,8 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { Expression, Props } from '../components/duration/expression';
 import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import { ALERT_CCR_READ_EXCEPTIONS, ALERT_DETAILS } from '../../../common/constants';
+import { AlertTypeParams } from '../../../../alerts/common';
 
-interface ValidateOptions {
+interface ValidateOptions extends AlertTypeParams {
   duration: string;
 }
 
@@ -30,10 +31,9 @@ const validate = (inputValues: ValidateOptions): ValidationResult => {
   return validationResult;
 };
 
-export function createCCRReadExceptionsAlertType(): AlertTypeModel {
+export function createCCRReadExceptionsAlertType(): AlertTypeModel<ValidateOptions> {
   return {
     id: ALERT_CCR_READ_EXCEPTIONS,
-    name: ALERT_DETAILS[ALERT_CCR_READ_EXCEPTIONS].label,
     description: ALERT_DETAILS[ALERT_CCR_READ_EXCEPTIONS].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
