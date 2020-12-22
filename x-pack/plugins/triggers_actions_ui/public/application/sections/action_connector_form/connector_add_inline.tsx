@@ -112,6 +112,7 @@ export const AddConnectorInline = ({
                 noConnectorsLabel
               ) : (
                 <EuiCallOut
+                  data-test-subj="alertActionAccordionCallout"
                   title={i18n.translate(
                     'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle',
                     {

@@ -453,6 +453,7 @@ export const ActionForm = ({
                   setActionIdByIndex(savedAction.id, index);
                 }
               });
+              setBrokenActionItemId(undefined);
             }
           }}
           actionTypeRegistry={actionTypeRegistry}
