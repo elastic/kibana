@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { delay } from 'bluebird';
 import expect from '@kbn/expect';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
@@ -21,6 +21,7 @@ export default function ({
   const screenshot = getService('screenshots');
   const find = getService('find');
   const browser = getService('browser');
+  const panningDuration = 1000;
 
   describe('Resolver test app', function () {
     this.tags('ciGroup7');
@@ -103,6 +104,8 @@ export default function ({
             beforeEach(async () => {
               // select the node
               await button.click();
+              // Wait for the pan to center the node
+              await delay(panningDuration);
             });
             it('should render as expected', async () => {
               expect(
@@ -155,6 +158,9 @@ export default function ({
                     beforeEach(async () => {
                       // click the first pill
                       await (await firstPill()).click();
+
+                      // Wait for the pan to center the node
+                      await delay(panningDuration);
                     });
                     it('should render as expected', async () => {
                       expect(
