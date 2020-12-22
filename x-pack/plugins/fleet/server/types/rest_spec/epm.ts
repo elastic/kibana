@@ -32,6 +32,12 @@ export const GetInfoRequestSchema = {
   }),
 };
 
+export const GetSummaryRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+  }),
+};
+
 export const InstallPackageFromRegistryRequestSchema = {
   params: schema.object({
     pkgkey: schema.string(),

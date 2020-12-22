@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
-import { isPackageLimited, installationStatuses } from '../../../../common';
+import { isPackageLimited, installationStatuses, PackageUsageSummary } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   ArchivePackage,
@@ -122,6 +122,19 @@ export async function getPackageInfo(options: {
 
   return createInstallableFrom(updated, savedObject);
 }
+
+export const getPackageUsageSummary = async ({
+  savedObjectsClient,
+  pkgName,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+}): Promise<PackageUsageSummary> => {
+  // FIXME:pt finish service method
+  return {
+    agent_policy_count: 10,
+  };
+};
 
 // gets package from install_source if it exists otherwise gets from registry
 export async function getPackageFromSource(options: {
