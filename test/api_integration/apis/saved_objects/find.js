@@ -195,9 +195,7 @@ export default function ({ getService }) {
                       title: 'Count of requests',
                     },
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                    migrationVersion: {
-                      visualization: '7.11.0',
-                    },
+                    migrationVersion: resp.body.saved_objects[0].migrationVersion,
                     namespaces: ['foo-ns'],
                     references: [
                       {

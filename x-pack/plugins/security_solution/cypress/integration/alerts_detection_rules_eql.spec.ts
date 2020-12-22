@@ -56,14 +56,15 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
-  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import { createTimeline } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -77,7 +78,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Detection rules, EQL', () => {
+describe.skip('Detection rules, EQL', () => {
   const expectedUrls = eqlRule.referenceUrls.join('');
   const expectedFalsePositives = eqlRule.falsePositivesExamples.join('');
   const expectedTags = eqlRule.tags.join('');
@@ -88,14 +89,11 @@ describe('Detection rules, EQL', () => {
   const rule = { ...eqlRule };
 
   before(() => {
+    cleanKibana();
+    removeSignalsIndex();
     createTimeline(eqlRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  after(() => {
-    deleteTimeline(rule.timeline.id!);
-    deleteRule();
   });
 
   it('Creates and activates a new EQL rule', () => {
@@ -183,14 +181,11 @@ describe.skip('Detection rules, sequence EQL', () => {
   const rule = { ...eqlSequenceRule };
 
   before(() => {
+    cleanKibana();
+    removeSignalsIndex();
     createTimeline(eqlSequenceRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  afterEach(() => {
-    deleteTimeline(eqlSequenceRule.timeline.id!);
-    deleteRule();
   });
 
   it('Creates and activates a new EQL rule with a sequence', () => {

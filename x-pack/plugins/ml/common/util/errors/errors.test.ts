@@ -76,8 +76,9 @@ describe('ML - error message utils', () => {
       expect(extractErrorMessage(bodyWithAttributes)).toBe(testMsg);
 
       // boom error
-      const boomError: Boom<any> = {
+      const boomError: Boom.Boom<any> = {
         message: '',
+        typeof: Boom.Boom.constructor,
         reformat: () => '',
         name: '',
         data: [],
