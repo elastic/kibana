@@ -169,8 +169,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     }
     return currentColumn;
   },
-  paramEditor: function ParamEditor({ state, setState, currentColumn, layerId }) {
-    const indexPattern = currentColumn && state.indexPatterns[state.layers[layerId].indexPatternId];
+  paramEditor: function ParamEditor({ layer, updateLayer, currentColumn, columnId, indexPattern }) {
     const hasRestrictions = indexPattern.hasRestrictions;
 
     const [popoverOpen, setPopoverOpen] = useState(false);
@@ -194,11 +193,11 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       };
     }
 
-    const orderOptions = Object.entries(state.layers[layerId].columns)
-      .filter(([_columnId, column]) => isSortableByColumn(column))
-      .map(([columnId, column]) => {
+    const orderOptions = Object.entries(layer.columns)
+      .filter(([sortId, column]) => isSortableByColumn(column))
+      .map(([sortId, column]) => {
         return {
-          value: toValue({ type: 'column', columnId }),
+          value: toValue({ type: 'column', columnId: sortId }),
           text: column.label,
         };
       });
@@ -220,11 +219,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           <ValuesRangeInput
             value={currentColumn.params.size}
             onChange={(value) => {
-              setState(
+              updateLayer(
                 updateColumnParam({
-                  state,
-                  layerId,
-                  currentColumn,
+                  layer,
+                  columnId,
                   paramName: 'size',
                   value,
                 })
@@ -263,11 +261,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 data-test-subj="indexPattern-terms-other-bucket"
                 checked={Boolean(currentColumn.params.otherBucket)}
                 onChange={(e: EuiSwitchEvent) =>
-                  setState(
+                  updateLayer(
                     updateColumnParam({
-                      state,
-                      layerId,
-                      currentColumn,
+                      layer,
+                      columnId,
                       paramName: 'otherBucket',
                       value: e.target.checked,
                     })
@@ -284,11 +281,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 data-test-subj="indexPattern-terms-missing-bucket"
                 checked={Boolean(currentColumn.params.missingBucket)}
                 onChange={(e: EuiSwitchEvent) =>
-                  setState(
+                  updateLayer(
                     updateColumnParam({
-                      state,
-                      layerId,
-                      currentColumn,
+                      layer,
+                      columnId,
                       paramName: 'missingBucket',
                       value: e.target.checked,
                     })
@@ -312,11 +308,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             options={orderOptions}
             value={toValue(currentColumn.params.orderBy)}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setState(
+              updateLayer(
                 updateColumnParam({
-                  state,
-                  layerId,
-                  currentColumn,
+                  layer,
+                  columnId,
                   paramName: 'orderBy',
                   value: fromValue(e.target.value),
                 })
@@ -353,11 +348,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             ]}
             value={currentColumn.params.orderDirection}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setState(
+              updateLayer(
                 updateColumnParam({
-                  state,
-                  layerId,
-                  currentColumn,
+                  layer,
+                  columnId,
                   paramName: 'orderDirection',
                   value: e.target.value as 'asc' | 'desc',
                 })
