@@ -11,9 +11,10 @@ import {
   ElasticsearchClient,
 } from 'kibana/server';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
 import { savedObjectsAdapter } from '../../saved_objects';
-import { UptimeESClient } from '../../lib';
+import { UptimeESClient, isUptimeESClient } from '../../lib';
 
 interface UptimeTelemetryCollector {
   [key: number]: UptimeTelemetry;
@@ -189,8 +190,10 @@ export class KibanaTelemetryAdapter {
         },
       },
     };
-    // @ts-ignore: Union types do not have compatible signatures
-    const { body: result } = await callCluster.search(params);
+
+    const { body: result } = isUptimeESClient(callCluster)
+      ? await callCluster.search(params)
+      : await callCluster.search<ESSearchResponse<unknown, typeof params>>(params);
 
     const numberOfUniqueMonitors: number = result?.aggregations?.unique_monitors?.value ?? 0;
     const numberOfUniqueLocations: number = result?.aggregations?.unique_locations?.value ?? 0;

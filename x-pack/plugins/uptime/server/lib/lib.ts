@@ -105,6 +105,14 @@ export function createUptimeESClient({
   };
 }
 
+export function isUptimeESClient(client: any): client is UptimeESClient {
+  return (
+    'baseESClient' in client &&
+    'getSavedObjectClient' in client &&
+    'search' in client &&
+    'count' in client
+  );
+}
 /* eslint-disable no-console */
 
 function formatObj(obj: Record<string, any>) {
