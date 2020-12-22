@@ -22,7 +22,7 @@ describe('attach timeline to case', () => {
   const myTimeline = { ...timeline };
 
   context('without cases created', () => {
-    beforeEach(() => {
+    before(() => {
       cleanKibana();
       createTimeline(timeline).then((response) => {
         myTimeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
