@@ -16,6 +16,10 @@ export const FLYOUT_CONTINUE_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.appSearch.documentCreation.flyoutContinue',
   { defaultMessage: 'Continue' }
 );
+export const FLYOUT_CLOSE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.documentCreation.modalClose',
+  { defaultMessage: 'Close' }
+);
 
 export const DOCUMENT_CREATION_ERRORS = {
   TITLE: i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.errorsTitle', {

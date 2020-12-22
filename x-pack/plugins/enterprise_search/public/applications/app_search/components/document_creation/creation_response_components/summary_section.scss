@@ -1,0 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+.documentCreationSummarySection {
+  padding: $euiSize $euiSizeM;
+  color: $euiTextSubduedColor;
+  border-top: $euiBorderThin;
+  border-bottom: $euiBorderThin;
+
+  & + & {
+    border-top: 0;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    height: $euiSizeL;
+
+    .euiIcon {
+      margin-right: $euiSizeS;
+    }
+  }
+}
