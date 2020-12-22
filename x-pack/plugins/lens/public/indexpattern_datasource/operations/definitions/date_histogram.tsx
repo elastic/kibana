@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import moment from 'moment';
 
 import {
   EuiFormRow,
@@ -18,6 +19,14 @@ import {
   EuiFlexGroup,
   EuiTextColor,
   EuiSpacer,
+  EuiCode,
+  EuiText,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiIcon,
+  EuiLink,
+  EuiFormHelpText,
+  EuiBasicTable,
 } from '@elastic/eui';
 import { updateColumnParam } from '../layer_helpers';
 import { OperationDefinition } from './index';
@@ -26,9 +35,11 @@ import {
   AggFunctionsMapping,
   IndexPatternAggRestrictions,
   search,
+  UI_SETTINGS,
 } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { getInvalidFieldMessage } from './helpers';
+import './date_histogram.scss';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -54,6 +65,7 @@ export const dateHistogramOperation: OperationDefinition<
   priority: 5, // Highest priority level used
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+  getHelpMessage: () => <AutoDateHistogramPopover />,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'date' &&
@@ -338,4 +350,135 @@ function restrictedInterval(aggregationRestrictions?: Partial<IndexPatternAggRes
     aggregationRestrictions.date_histogram.calendar_interval ||
     aggregationRestrictions.date_histogram.fixed_interval
   );
+}
+
+const AutoDateHistogramPopover = () => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const autoDateHistogramHelpPopoverTitle = i18n.translate(
+    'xpack.lens.indexPattern.dateHistogram.titleHelp',
+    {
+      defaultMessage: 'How does the auto date histogram work?',
+    }
+  );
+  const infiniteBound = i18n.translate('xpack.lens.indexPattern.dateHistogram.moreThanYear', {
+    defaultMessage: 'More than a year',
+  });
+  const upToLabel = i18n.translate('xpack.lens.indexPattern.dateHistogram.upTo', {
+    defaultMessage: 'Up to',
+  });
+
+  return (
+    <EuiPopover
+      ownFocus
+      isOpen={isPopoverOpen}
+      button={
+        <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+          <EuiFormHelpText>
+            {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoHelpText', {
+              defaultMessage: 'How does it work?',
+            })}
+          </EuiFormHelpText>
+        </EuiLink>
+      }
+      closePopover={() => setIsPopoverOpen(false)}
+      anchorPosition="leftCenter"
+      panelClassName="lnsIndexPatternDimensionEditor__dateHistogramHelpPopover"
+    >
+      <EuiPopoverTitle>
+        <EuiIcon type="help" />
+        &nbsp; {autoDateHistogramHelpPopoverTitle}
+      </EuiPopoverTitle>
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.lens.indexPattern.dateHistogram.autoFullDescription"
+          defaultMessage="{shortDescription} {longerDescription} {advancedDescription}"
+          values={{
+            shortDescription: (
+              <p>
+                <FormattedMessage
+                  id="xpack.lens.indexPattern.dateHistogram.autoBasicExplanation"
+                  defaultMessage="Splits a date field into buckets by interval."
+                />
+              </p>
+            ),
+            longerDescription: (
+              <p>
+                <FormattedMessage
+                  id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
+                  defaultMessage={`The Lens editor chooses an automatic interval for you by dividing the selected time range by the 
+                  {targetBarSetting} Kibana advanced setting. The calculation tries to present “nice” time interval buckets. The maximum 
+                  number of bars is set by the {maxBarSetting} value.`}
+                  values={{
+                    maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
+                    targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,
+                  }}
+                />
+              </p>
+            ),
+            advancedDescription: (
+              <p>
+                {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoAdvancedExplanation', {
+                  defaultMessage: 'The specific interval adopted follow the logic in this table:',
+                })}
+              </p>
+            ),
+          }}
+        />
+      </EuiText>
+      <EuiBasicTable
+        items={wrapMomentPrecision(() =>
+          search.aggs.boundsDescendingRaw.map(({ bound, interval }) => ({
+            bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${bound.humanize()}`,
+            interval: interval.humanize(),
+          }))
+        )}
+        columns={[
+          {
+            field: 'bound',
+            name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBoundHeader', {
+              defaultMessage: 'Target Interval measured',
+            }),
+          },
+          {
+            field: 'interval',
+            name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoIntervalHeader', {
+              defaultMessage: 'Interval used',
+            }),
+          },
+        ]}
+      />
+    </EuiPopover>
+  );
+};
+
+// Need to place this thing somewhere else
+// ref: https://github.com/moment/moment/issues/348
+function wrapMomentPrecision<T>(callback: () => T): T {
+  // Save default values
+  const roundingDefault = moment.relativeTimeRounding();
+  const units = [
+    { unit: 'y', value: 365 },
+    { unit: 'M', value: 12 },
+    { unit: 'w', value: 4 },
+    { unit: 'd', value: 31 },
+    { unit: 'h', value: 24 },
+    { unit: 'm', value: 60 },
+    { unit: 's', value: 60 },
+    { unit: 'ss', value: 0 },
+  ];
+  const defaultValues = units.map(({ unit }) => moment.relativeTimeThreshold(unit) as number);
+
+  moment.relativeTimeRounding((t) => {
+    const DIGITS = 2;
+    return Math.round(t * Math.pow(10, DIGITS)) / Math.pow(10, DIGITS);
+  });
+  units.forEach(({ unit, value }) => moment.relativeTimeThreshold(unit, value));
+
+  // Execute the format/humanize call in the callback
+  const result = callback();
+
+  // restore all the default values now in moment to not break it
+  units.forEach(({ unit }, i) => moment.relativeTimeThreshold(unit, defaultValues[i]));
+  moment.relativeTimeRounding(roundingDefault);
+  return result;
 }

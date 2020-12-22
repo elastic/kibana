@@ -19,72 +19,77 @@
 
 import moment from 'moment';
 
-const boundsDescending = [
+export const boundsDescendingRaw = [
   {
     bound: Infinity,
-    interval: Number(moment.duration(1, 'year')),
+    interval: moment.duration(1, 'year'),
   },
   {
-    bound: Number(moment.duration(1, 'year')),
-    interval: Number(moment.duration(1, 'month')),
+    bound: moment.duration(1, 'year'),
+    interval: moment.duration(1, 'month'),
   },
   {
-    bound: Number(moment.duration(3, 'week')),
-    interval: Number(moment.duration(1, 'week')),
+    bound: moment.duration(3, 'week'),
+    interval: moment.duration(1, 'week'),
   },
   {
-    bound: Number(moment.duration(1, 'week')),
-    interval: Number(moment.duration(1, 'd')),
+    bound: moment.duration(1, 'week'),
+    interval: moment.duration(1, 'd'),
   },
   {
-    bound: Number(moment.duration(24, 'hour')),
-    interval: Number(moment.duration(12, 'hour')),
+    bound: moment.duration(24, 'hour'),
+    interval: moment.duration(12, 'hour'),
   },
   {
-    bound: Number(moment.duration(6, 'hour')),
-    interval: Number(moment.duration(3, 'hour')),
+    bound: moment.duration(6, 'hour'),
+    interval: moment.duration(3, 'hour'),
   },
   {
-    bound: Number(moment.duration(2, 'hour')),
-    interval: Number(moment.duration(1, 'hour')),
+    bound: moment.duration(2, 'hour'),
+    interval: moment.duration(1, 'hour'),
   },
   {
-    bound: Number(moment.duration(45, 'minute')),
-    interval: Number(moment.duration(30, 'minute')),
+    bound: moment.duration(45, 'minute'),
+    interval: moment.duration(30, 'minute'),
   },
   {
-    bound: Number(moment.duration(20, 'minute')),
-    interval: Number(moment.duration(10, 'minute')),
+    bound: moment.duration(20, 'minute'),
+    interval: moment.duration(10, 'minute'),
   },
   {
-    bound: Number(moment.duration(9, 'minute')),
-    interval: Number(moment.duration(5, 'minute')),
+    bound: moment.duration(9, 'minute'),
+    interval: moment.duration(5, 'minute'),
   },
   {
-    bound: Number(moment.duration(3, 'minute')),
-    interval: Number(moment.duration(1, 'minute')),
+    bound: moment.duration(3, 'minute'),
+    interval: moment.duration(1, 'minute'),
   },
   {
-    bound: Number(moment.duration(45, 'second')),
-    interval: Number(moment.duration(30, 'second')),
+    bound: moment.duration(45, 'second'),
+    interval: moment.duration(30, 'second'),
   },
   {
-    bound: Number(moment.duration(15, 'second')),
-    interval: Number(moment.duration(10, 'second')),
+    bound: moment.duration(15, 'second'),
+    interval: moment.duration(10, 'second'),
   },
   {
-    bound: Number(moment.duration(7.5, 'second')),
-    interval: Number(moment.duration(5, 'second')),
+    bound: moment.duration(7.5, 'second'),
+    interval: moment.duration(5, 'second'),
   },
   {
-    bound: Number(moment.duration(5, 'second')),
-    interval: Number(moment.duration(1, 'second')),
+    bound: moment.duration(5, 'second'),
+    interval: moment.duration(1, 'second'),
   },
   {
-    bound: Number(moment.duration(500, 'ms')),
-    interval: Number(moment.duration(100, 'ms')),
+    bound: moment.duration(500, 'ms'),
+    interval: moment.duration(100, 'ms'),
   },
 ];
+
+const boundsDescending = boundsDescendingRaw.map(({ bound, interval }) => ({
+  bound: Number(bound),
+  interval: Number(interval),
+}));
 
 function getPerBucketMs(count: number, duration: number) {
   const ms = duration / count;

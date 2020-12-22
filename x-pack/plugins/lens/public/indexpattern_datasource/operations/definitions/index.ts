@@ -201,6 +201,8 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * If set to optional, time scaling won't be enabled by default and can be removed.
    */
   timeScalingMode?: TimeScalingMode;
+
+  getHelpMessage?: () => string | React.ReactNode;
 }
 
 interface BaseBuildColumnArgs {
