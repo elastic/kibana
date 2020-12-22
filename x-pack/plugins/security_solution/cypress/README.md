@@ -2,6 +2,83 @@
 
 The `security_solution/cypress` directory contains functional UI tests that execute using [Cypress](https://www.cypress.io/).
 
+## Running the tests
+
+There are currently four ways to run the tests, comprised of two execution modes and two target environments, which will be detailed below.
+
+### Execution modes
+
+#### Interactive mode
+
+When you run the Cypress in interactive mode, an interactive runner is displayed that allows you to see commands as they execute while also viewing the application under test. For more information, please see [cypress documentation](https://docs.cypress.io/guides/core-concepts/test-runner.html#Overview).
+
+#### Headless mode
+
+A headless browser is a browser simulation program that does not have a user interface. These programs operate like any other browser, but do not display any UI. This is why meanwhile you are executing the tests on this mode you are not going to see the application under test. Just the output of the test is displayed on the terminal once the execution is finished.
+
+### Target environments
+
+#### FTR (CI)
+
+This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
+
+#### Custom Targets
+
+This configuration runs cypress tests against an arbitrary host.
+**WARNING**: When using your own instances you need to take into account that if you already have data on it, the tests may fail, as well as, they can put your instances in an undesired state, since our tests uses es_archive to populate data.
+
+### Test Execution: Examples
+
+#### FTR + Headless
+
+Since this is how tests are run on CI, this will likely be the configuration you want to reproduce failures locally, etc.
+
+```shell
+# bootstrap kibana from the project root
+yarn kbn bootstrap
+
+# build the plugins/assets that cypress will execute against
+node scripts/build_kibana_platform_plugins
+
+# launch the cypress test runner
+cd x-pack/plugins/security_solution
+yarn cypress:run-as-ci
+```
+
+#### FTR + Interactive
+
+This is the preferred mode for developing new tests.
+
+```shell
+# bootstrap kibana from the project root
+yarn kbn bootstrap
+
+# build the plugins/assets that cypress will execute against
+node scripts/build_kibana_platform_plugins
+
+# launch the cypress test runner
+cd x-pack/plugins/security_solution
+yarn cypress:open-as-ci
+```
+
+#### Custom Target + Headless
+
+This mode may be useful for testing a release, e.g. spin up a build candidate
+and point cypress at it to catch regressions.
+
+```shell
+# bootstrap kibana from the project root
+yarn kbn bootstrap
+
+# load auditbeat data needed for test execution (which FTR normally does for us)
+cd x-pack/plugins/security_solution
+node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
+
+# launch the cypress test runner with overridden environment variables
+cd x-pack/plugins/security_solution
+CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=password yarn cypress:run
+```
+
 ## Folder Structure
 
 ### integration/
@@ -86,83 +163,6 @@ node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  -
 ```
 
 Note that the command will create the folder if it does not exist.
-
-## Running the tests
-
-There are currently four ways to run the tests, comprised of two execution modes and two target environments, which will be detailed below.
-
-### Execution modes
-
-#### Interactive mode
-
-When you run the Cypress in interactive mode, an interactive runner is displayed that allows you to see commands as they execute while also viewing the application under test. For more information, please see [cypress documentation](https://docs.cypress.io/guides/core-concepts/test-runner.html#Overview).
-
-#### Headless mode
-
-A headless browser is a browser simulation program that does not have a user interface. These programs operate like any other browser, but do not display any UI. This is why meanwhile you are executing the tests on this mode you are not going to see the application under test. Just the output of the test is displayed on the terminal once the execution is finished.
-
-### Target environments
-
-#### FTR (CI)
-
-This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
-
-#### Custom Targets
-
-This configuration runs cypress tests against an arbitrary host.
-**WARNING**: When using your own instances you need to take into account that if you already have data on it, the tests may fail, as well as, they can put your instances in an undesired state, since our tests uses es_archive to populate data.
-
-### Test Execution: Examples
-
-#### FTR + Headless
-
-Since this is how tests are run on CI, this will likely be the configuration you want to reproduce failures locally, etc.
-
-```shell
-# bootstrap kibana from the project root
-yarn kbn bootstrap
-
-# build the plugins/assets that cypress will execute against
-node scripts/build_kibana_platform_plugins
-
-# launch the cypress test runner
-cd x-pack/plugins/security_solution
-yarn cypress:run-as-ci
-```
-
-#### FTR + Interactive
-
-This is the preferred mode for developing new tests.
-
-```shell
-# bootstrap kibana from the project root
-yarn kbn bootstrap
-
-# build the plugins/assets that cypress will execute against
-node scripts/build_kibana_platform_plugins
-
-# launch the cypress test runner
-cd x-pack/plugins/security_solution
-yarn cypress:open-as-ci
-```
-
-#### Custom Target + Headless
-
-This mode may be useful for testing a release, e.g. spin up a build candidate
-and point cypress at it to catch regressions.
-
-```shell
-# bootstrap kibana from the project root
-yarn kbn bootstrap
-
-# load auditbeat data needed for test execution (which FTR normally does for us)
-cd x-pack/plugins/security_solution
-node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
-
-# launch the cypress test runner with overridden environment variables
-cd x-pack/plugins/security_solution
-CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_URL=http(s)://<username>:<password>@<elsUrl> CYPRESS_ELASTICSEARCH_USERNAME=<username> CYPRESS_ELASTICSEARCH_PASSWORD=password yarn cypress:run
-```
 
 ## Development Best Practices
 
