@@ -4,10 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import uuid from 'uuid';
+
+export function generateUniqueKey() {
+  return uuid.v4().replace(/-/g, '');
+}
+
 export function getTestAlertData(overwrites = {}) {
   return {
     enabled: true,
-    name: 'test',
+    name: generateUniqueKey(),
     tags: ['foo', 'bar'],
     alertTypeId: 'test.noop',
     consumer: 'alerts',
