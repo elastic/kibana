@@ -336,28 +336,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'date_histogram',
         field: '@timestamp',
       });
-
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'moving_average',
         keepOpen: true,
       });
-
       await PageObjects.lens.configureReference({
         operation: 'sum',
         field: 'bytes',
       });
+      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'cumulative_sum',
         keepOpen: true,
       });
-
       await PageObjects.lens.configureReference({
         field: 'Records',
       });
-
       await PageObjects.lens.closeDimensionEditor();
 
       // Two Y axes that are both valid
@@ -399,7 +396,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await PageObjects.lens.switchToVisualization('lnsDatatable');
 
-      expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql(
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics')).to.eql(
         'Cumulative sum of (incomplete)'
       );
     });
