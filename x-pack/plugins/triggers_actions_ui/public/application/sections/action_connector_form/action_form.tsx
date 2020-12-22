@@ -92,6 +92,7 @@ export const ActionForm = ({
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
   );
+  const [brokenActionItemId, setBrokenActionItemId] = useState<string | undefined>(undefined);
   const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const [isLoadingConnectors, setIsLoadingConnectors] = useState<boolean>(false);
@@ -307,7 +308,6 @@ export const ActionForm = ({
                 index={index}
                 key={`action-form-action-at-${index}`}
                 actionTypeRegistry={actionTypeRegistry}
-                defaultActionGroupId={defaultActionGroupId}
                 emptyActionsIds={emptyActionsIds}
                 onDeleteConnector={() => {
                   const updatedActions = actions.filter(
@@ -321,7 +321,11 @@ export const ActionForm = ({
                   setActiveActionItem(undefined);
                 }}
                 onAddConnector={() => {
-                  setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                  setBrokenActionItemId(actionItem.id);
+                  setActiveActionItem({
+                    actionTypeId: actionItem.actionTypeId,
+                    index,
+                  });
                   setAddModalVisibility(true);
                 }}
               />
@@ -443,6 +447,13 @@ export const ActionForm = ({
           postSaveEventHandler={(savedAction: ActionConnector) => {
             connectors.push(savedAction);
             setActionIdByIndex(savedAction.id, activeActionItem.index);
+            if (brokenActionItemId) {
+              actions.forEach((actionItem: AlertAction, index: number) => {
+                if (actionItem.id === brokenActionItemId) {
+                  setActionIdByIndex(savedAction.id, index);
+                }
+              });
+            }
           }}
           actionTypeRegistry={actionTypeRegistry}
         />

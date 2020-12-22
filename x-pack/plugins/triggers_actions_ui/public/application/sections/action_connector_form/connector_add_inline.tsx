@@ -31,7 +31,7 @@ type AddConnectorInFormProps = {
   onAddConnector: () => void;
   onDeleteConnector: () => void;
   emptyActionsIds: string[];
-} & Pick<ActionAccordionFormProps, 'actionTypeRegistry' | 'defaultActionGroupId'>;
+} & Pick<ActionAccordionFormProps, 'actionTypeRegistry'>;
 
 export const AddConnectorInline = ({
   actionTypesIndex,
@@ -41,7 +41,6 @@ export const AddConnectorInline = ({
   onDeleteConnector,
   actionTypeRegistry,
   emptyActionsIds,
-  defaultActionGroupId,
 }: AddConnectorInFormProps) => {
   const {
     application: { capabilities },
@@ -52,7 +51,6 @@ export const AddConnectorInline = ({
     ? actionTypesIndex[actionItem.actionTypeId].name
     : actionItem.actionTypeId;
   const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
-  if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
 
   const noConnectorsLabel = (
     <FormattedMessage
