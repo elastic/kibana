@@ -348,6 +348,10 @@ export function DashboardTopNav({
           onUseMarginsChange: (isChecked: boolean) => {
             dashboardStateManager.setUseMargins(isChecked);
           },
+          syncColors: dashboardStateManager.getSyncColors(),
+          onSyncColorsChange: (isChecked: boolean) => {
+            dashboardStateManager.setSyncColors(isChecked);
+          },
           hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
           onHidePanelTitlesChange: (isChecked: boolean) => {
             dashboardStateManager.setHidePanelTitles(isChecked);
