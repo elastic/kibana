@@ -20,23 +20,40 @@ In the short term, the generated docs will reside inside the kibana repo, inside
 
 They will be hosted online wherever the new docs system ends up. This can temporarily be accessed at https://elasticdocstest.netlify.app/docs/.
 
-## Overview
+## Types
 
-The first stage is to collect the list of plugins using the existing `findPlugins` logic, with [some new fields](#proposed-plugin-changes).
-
-For every plugin, the initial list of api nodes are collected from three "scopes":
- - plugin/public/index.ts
- - plugin/server/index.ts
- - plugin/common/index.ts
-
-Every node in each list is then recursively transformed into a json structure that represents a plugin's public API:
+The primary types used.
 
 ```ts
-
 /**
- * Contains all the information neccessary to build API docs for this particular plugin.
+ * The kinds of typescript types we want to show in the docs. `Unknown` is used if
+ * we aren't accounting for a particular type. See {@link getPropertyTypeKind}
  */
-export interface PluginApiDef {
+export enum TypeKind {
+  ClassKind = 'Class',
+  FunctionKind = 'Function',
+  ObjectKind = 'Object',
+  InterfaceKind = 'Interface',
+  /**
+   * Maps to the typescript syntax kind `TypeReferences`.
+   */
+  TypeKind = 'Type',
+  /**
+   * Unknown is used if a type is encountered that isn't handled.
+   */
+  Unknown = 'Unknown',
+  String = 'string',
+  Number = 'number',
+  Boolean = 'boolean',
+  Array = 'Array',
+
+  /**
+   * This will cover things like string | number, or A & B, for lack of something better to put here.
+   */
+  CompoundType = 'CompoundType',
+}
+
+export interface PluginDocDef {
   id: string;
   serviceFolders?: readonly string[];
   public: ApiDocDef[];
@@ -45,11 +62,41 @@ export interface PluginApiDef {
 }
 
 /**
- * Contains all the information neccessary to render a single API inside the docs system.
+ * This is used for displaying code or comments that may contain reference links. For example, a function
+ * signature that is `(a: import("src/plugin_b").Bar) => void` will be parsed into the following Array:
+ *
+ * ```ts
+ * [
+ *   '(a: ',
+ *   { docId: 'pluginB', section: 'Bar', text: 'Bar' },
+ *   ') => void'
+ * ]
+ * ```
+ *
+ * This is then used to render text with nested DocLinks so it looks like this:
+ *
+ * `(a: => <DocLink docId="pluginB" section="Bar" text="Bar"/>) => void`
+ */
+export type TextWithLinks = Array<string | Reference>;
+
+/**
+ * The information neccessary to build a DocLink.
+ */
+export interface Reference {
+  docId: string;
+  section: string;
+  text: string;
+}
+
+/**
+ * This type should eventually be replaced by something inside elastic-docs.
+ * It's what will be passed to an elastic-docs supplied component to make
+ * the API docs pretty.
  */
 export interface ApiDocDef {
   /**
-   * Used to create an anchor link to this API.
+   * Used for an anchor link to this Api. Can't use label as there can be two labels with the same
+   * text within the Client section and the Server section.
    */
   id?: string;
 
@@ -59,6 +106,11 @@ export interface ApiDocDef {
   label: string;
 
   /**
+   * Should the list be expanded or collapsed initially?
+   */
+  initialIsOpen?: boolean;
+
+  /**
    * The kind of type this API represents, e.g. string, number, Object, Interface, Class.
    */
   type: TypeKind;
@@ -66,10 +118,14 @@ export interface ApiDocDef {
   /**
    * Certain types have children. For instance classes have class members, functions will list
    * their parameters here, classes will list their class members here, and objects and interfaces
-   * will list their properties. The elastic-docs system can use the `type` to potentially render
-   * these children differently.
+   * will list their properties.
    */
   children?: ApiDocDef[];
+
+  /**
+   * TODO
+   */
+  isRequired?: boolean;
 
   /**
    * Api node comment.
@@ -82,16 +138,22 @@ export interface ApiDocDef {
    */
   signature?: TextWithLinks;
 
-  // Relevant for functions with @returns comments.
+  /**
+   * Relevant for functions with @returns comments.
+   */
   returnComment?: TextWithLinks;
 
-  // Will contain the tags on a comment, like `beta` or `deprecated`.
-  // Won't include param or returns tags.
+  /**
+   * Will contain the tags on a comment, like `beta` or `deprecated`.
+   * Won't include param or returns tags.
+   */
   tags?: string[];
 
-  // Every plugn that exposes functionality from their setup and start contract
-  // should have a single exported type for each. These get pulled to the top because
-  // they are accessed differently than other exported functionality and types.
+  /**
+   * Every plugn that exposes functionality from their setup and start contract
+   * should have a single exported type for each. These get pulled to the top because
+   * they are accessed differently than other exported functionality and types.
+   */
   lifecycle?: Lifecycle;
 
   /**
@@ -103,33 +165,39 @@ export interface ApiDocDef {
   };
 }
 
-enum TypeKind {
-  ClassKind = 'Class',
-  FunctionKind = 'Function',
-  VariableKind = 'Variable',
-  ObjectKind = 'Object',
-  InterfaceKind = 'Interface',
-  TypeKind = 'Type',
-  Unknown = 'Unknown',
-  Parameter = 'Parameter',
-  Property = 'Property',
-  String = 'string',
-  Number = 'number',
-  Boolean = 'boolean',
-  Array = 'Array',
-}
-
-/**
- * 
- */
-type TextWithLinks = string | Array<string | Reference>;
-
-interface Reference {
-  docId: string;
-  section: string;
-  text: string;
-}
 ```
+
+## Overview
+
+The first stage is to collect the list of plugins using the existing `findPlugins` logic, with [some new fields](#proposed-plugin-changes).
+
+For every plugin, the initial list of api nodes are collected from three "scopes":
+ - plugin/public/index.ts
+ - plugin/server/index.ts
+ - plugin/common/index.ts
+
+Every node in each list is then recursively transformed into a json structure that represents a plugin's public API with an array of `PluginDocDef`.
+
+This is converted into one or more json files per plugin, depending on the value of `serviceFolders` inside the plugin's manifest files. One mdx
+file per json file is also created, which passes the data inside the json into an elastic-docs component for pretty rendering.
+
+## Manifest file changes
+
+**serviceFolders?: string[]**
+
+Used by the system to group services into sub-pages. Some plugins, like data and core, have such huge APIs they are very slow to contain in a single page. It’s also less usable by developers. The addition of an optional list of services folders will cause the system to automatically create a separate page with every API that is defined within that folder.
+
+**Using a kibana.json file for core**
+
+For the purpose of API infrastructure, core is treated like any other plugin. This means it has to specify serviceFolders section inside a manifest file to be split into sub folders. There are other ways to tackle this - like a hard coded array just for the core folder, but I kept the logic as similar to the other plugins as possible.
+
+**teamOwner: string**
+
+Team owner can be determined via github CODEOWNERS file, but we want to encourage single team ownership per plugin. Requiring a team owner string in the manifest file will help with this and will allow the API doc system to manually add a section to every page that has a link to the team owner. Additional ideas are teamSlackChannel or teamEmail for further contact. 
+
+**summary: string**
+
+A brief description of the plugin can then be displayed in the automatically generated API documentation.
 
 ## Technology: ts-morph vs api-extractor
 
@@ -142,39 +210,18 @@ interface Reference {
 
 I recommend we move ahead with ts-morph, acknowleding the possibility of migrating to api-extractor in the future. If so, the effort shouldn’t be a large one.
 
-
-
-# Drawbacks
-
-Why should we *not* do this? Please consider:
-
-- implementation cost, both in term of code size and complexity
-- the impact on teaching people Kibana development
-- integration of this feature with other existing and planned features
-- cost of migrating existing Kibana plugins (is it a breaking change?)
-
-There are tradeoffs to choosing any path. Attempt to identify them here.
-
-# Alternatives
-
-What other designs have been considered? What is the impact of not doing this?
-
 # Adoption strategy
 
-If we implement this proposal, how will existing Kibana developers adopt it? Is
-this a breaking change? Can we write a codemod? Should we coordinate with
-other projects or libraries?
+In order to generate useful API documentation, we need to approach this by two sides.
 
-# How we teach this
+1. Establish a habit of writing documentation.
+2. Establish a habit of reading documentation.
 
-What names and terminology work best for these concepts and why? How is this
-idea best presented? As a continuation of existing Kibana patterns?
+Currently what often happens is a developer asks another developer a question directly, and it is answered. Every time this happens, ask yourself if
+there is a link you can share instead of a direct answer. If there isn't, file an issue for that documentation to be created. When we start responding
+to questions with links, solution developers will naturally start to look in the documentation _first_, saving everyone time!
 
-Would the acceptance of this proposal mean the Kibana documentation must be
-re-organized or altered? Does it change how Kibana is taught to new developers
-at any level?
-
-How should this feature be taught to existing Kibana developers?
+The APIs also need to be well commented or they are not as useful. We can measure the amount of missing comments and set a goal of reducing this number.
 
 # Unresolved questions
 
