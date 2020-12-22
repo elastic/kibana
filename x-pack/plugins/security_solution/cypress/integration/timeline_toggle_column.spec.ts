@@ -26,7 +26,7 @@ import {
 
 import { HOSTS_URL } from '../urls/navigation';
 
-describe('toggle column in timeline', () => {
+describe.skip('toggle column in timeline', () => {
   before(() => {
     cleanKibana();
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
