@@ -61,7 +61,7 @@ export class VisTypeVislibPlugin
     core: VisTypeVislibCoreSetup,
     { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
   ) {
-    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, true)) {
+    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, false)) {
       // Register only non-replaced vis types
       convertedTypeDefinitions.forEach(visualizations.createBaseVisualization);
       expressions.registerRenderer(getVislibVisRenderer(core, charts));
