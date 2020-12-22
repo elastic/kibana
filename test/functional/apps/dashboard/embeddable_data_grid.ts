@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
 
-  describe('discover data grid dashboard', () => {
+  describe('dashboard embeddable data grid', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('dashboard/current/data');
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('saved search filters', function () {
       it('are added when a cell filter is clicked', async function () {
-        await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
+        await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search-datagrid');
         await find.clickByCssSelector(`[role="gridcell"]:nth-child(2)`);
         await find.clickByCssSelector(`[data-test-subj="filterOutButton"]`);
         await find.clickByCssSelector(`[role="gridcell"]:nth-child(2)`);
