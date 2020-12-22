@@ -3,36 +3,47 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { Logger } from 'kibana/server';
 import { LegacyAPICaller } from 'src/core/server';
 
-async function callMigrationApi(callCluster: LegacyAPICaller) {
-  // return await callCluster('_monitoring/migrate/alerts');
-  return {
-    exporters: [
-      {
-        name: 'thename',
-        type: 'http',
-        migration_complete: true,
-        reason: 'optional - exception',
-      },
-      {
-        name: 'thename2',
-        type: 'local',
-        migration_complete: false,
-        reason: 'optional - exception',
-      },
-    ],
-  };
+interface DisableWatchesResponse {
+  exporters: Array<
+    Array<{
+      name: string;
+      type: string;
+      migration_complete: boolean;
+      reason?: {
+        type: string;
+        reason: string;
+      };
+    }>
+  >;
 }
 
-export async function disableWatcherClusterAlerts(callCluster: LegacyAPICaller) {
-  const response = await callMigrationApi(callCluster);
+async function callMigrationApi(callCluster: LegacyAPICaller) {
+  return await callCluster('monitoring.disableWatches');
+}
+
+export async function disableWatcherClusterAlerts(callCluster: LegacyAPICaller, logger: Logger) {
+  const response: DisableWatchesResponse = await callMigrationApi(callCluster);
   if (!response || response.exporters.length === 0) {
     return true;
   }
-  if (response.exporters.every((exp) => exp.migration_complete)) {
+  const list = response.exporters[0];
+  if (list.length === 0) {
     return true;
   }
-  return false;
+
+  let removedAll = true;
+  for (const exporter of list) {
+    if (!exporter.migration_complete) {
+      if (exporter.reason) {
+        logger.warn(
+          `Unable to remove exporter type=${exporter.type} and name=${exporter.name} because ${exporter.reason.type}: ${exporter.reason.reason}`
+        );
+        removedAll = false;
+      }
+    }
+  }
+  return removedAll;
 }

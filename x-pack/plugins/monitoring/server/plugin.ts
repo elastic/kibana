@@ -215,6 +215,7 @@ export class Plugin {
         router,
         licenseService: this.licenseService,
         encryptedSavedObjects: plugins.encryptedSavedObjects,
+        logger: this.log,
       });
       initInfraSource(config, plugins.infra);
     }

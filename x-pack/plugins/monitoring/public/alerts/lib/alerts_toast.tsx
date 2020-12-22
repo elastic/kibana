@@ -50,7 +50,7 @@ const showTlsAndEncryptionError = () => {
 };
 
 const showUnableToDisableWatcherClusterAlertsError = () => {
-  // const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = Legacy.shims.docLinks;
 
   Legacy.shims.toastNotifications.addWarning({
     title: toMountPoint(
@@ -66,16 +66,16 @@ const showUnableToDisableWatcherClusterAlertsError = () => {
             defaultMessage: `We failed to remove legacy cluster alerts. Please check the Kibana server log for more details, or try again later.`,
           })}
         </p>
-        {/* <EuiSpacer size="xs" /> */}
-        {/* <EuiLink
+        <EuiSpacer size="xs" />
+        <EuiLink
           href={`${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`}
           external
           target="_blank"
         >
           {i18n.translate('xpack.monitoring.healthCheck.encryptionErrorAction', {
-            defaultMessage: 'Learn how.',
+            defaultMessage: 'Learn more.',
           })}
-        </EuiLink> */}
+        </EuiLink>
       </div>
     ),
   });

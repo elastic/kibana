@@ -7,6 +7,7 @@ import { ConfigOptions } from 'elasticsearch';
 import { Logger, ILegacyCustomClusterClient } from 'kibana/server';
 // @ts-ignore
 import { monitoringBulk } from '../kibana_monitoring/lib/monitoring_bulk';
+import { monitoringEndpointDisableWatches } from './monitoring_endpoint_disable_watches';
 import { MonitoringElasticsearchConfig } from '../config';
 
 /* Provide a dedicated Elasticsearch client for Monitoring
@@ -28,7 +29,7 @@ export function instantiateClient(
   const isMonitoringCluster = hasMonitoringCluster(elasticsearchConfig);
   const cluster = createClient('monitoring', {
     ...(isMonitoringCluster ? elasticsearchConfig : {}),
-    plugins: [monitoringBulk],
+    plugins: [monitoringBulk, monitoringEndpointDisableWatches],
     logQueries: Boolean(elasticsearchConfig.logQueries),
   } as ESClusterConfig);
 
