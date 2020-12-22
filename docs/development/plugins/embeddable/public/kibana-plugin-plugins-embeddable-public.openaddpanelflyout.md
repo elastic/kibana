@@ -14,7 +14,7 @@ export declare function openAddPanelFlyout(options: {
     overlays: OverlayStart;
     notifications: NotificationsStart;
     SavedObjectFinder: React.ComponentType<any>;
-}): Promise<void>;
+}): OverlayRef;
 ```
 
 ## Parameters
@@ -25,5 +25,5 @@ export declare function openAddPanelFlyout(options: {
 
 <b>Returns:</b>
 
-`Promise<void>`
+`OverlayRef`
 
