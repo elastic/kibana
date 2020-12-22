@@ -43,6 +43,7 @@ import { getSortForSearchSource } from '../angular/doc_table';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
+  getServices,
   IndexPattern,
   ISearchSource,
 } from '../../kibana_services';
