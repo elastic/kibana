@@ -24,9 +24,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Option, none, some } from 'fp-ts/lib/Option';
-import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
+import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
 import { TestConnectorForm } from './test_connector_form';
-import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import { ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -36,7 +36,7 @@ import {
 } from '../../../../../actions/common';
 import './connector_edit_flyout.scss';
 import { useKibana } from '../../../common/lib/kibana';
-import { getConnectorWithNullFields } from '../../lib/value_validators';
+import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
 export interface ConnectorEditFlyoutProps {
   initialConnector: ActionConnector;
@@ -109,21 +109,14 @@ export const ConnectorEditFlyout = ({
   }, [onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
-  const connectorValidationResult = actionTypeModel?.validateConnector(connector);
-  const configErrors = (connectorValidationResult.config
-    ? connectorValidationResult.config.errors
-    : {}) as IErrorObject;
-  const secretsErrors = (connectorValidationResult.secrets
-    ? connectorValidationResult.secrets.errors
-    : {}) as IErrorObject;
-  const baseConnectorErrors = validateBaseProperties(connector).errors;
-  const errors = {
-    ...configErrors,
-    ...secretsErrors,
-    ...baseConnectorErrors,
-  } as IErrorObject;
+  const { configErrors, connectorBaseErrors, connectorErrors, secretsErrors } = getConnectorErrors(
+    connector,
+    actionTypeModel
+  );
 
-  const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
+  const hasErrors = !!Object.keys(connectorErrors).find(
+    (errorKey) => connectorErrors[errorKey].length >= 1
+  );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await updateActionConnector({ http, connector, id: connector.id })
@@ -219,7 +212,12 @@ export const ConnectorEditFlyout = ({
     if (hasErrors) {
       setConnector(
         'connector',
-        getConnectorWithNullFields(connector, configErrors, secretsErrors, baseConnectorErrors)
+        getConnectorWithInvalidatedFields(
+          connector,
+          configErrors,
+          secretsErrors,
+          connectorBaseErrors
+        )
       );
       return;
     }
@@ -274,7 +272,7 @@ export const ConnectorEditFlyout = ({
           !connector.isPreconfigured ? (
             <ActionConnectorForm
               connector={connector}
-              errors={errors}
+              errors={connectorErrors}
               actionTypeName={connector.actionType}
               dispatch={(changes) => {
                 setHasChanges(true);

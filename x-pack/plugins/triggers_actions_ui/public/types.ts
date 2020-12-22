@@ -98,7 +98,7 @@ export interface GenericValidationResult<T> {
 }
 
 export interface ValidationResult {
-  errors: Record<string, unknown>;
+  errors: Record<string, any>;
 }
 
 export interface ConnectorValidationResult<Config, Secrets> {

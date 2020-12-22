@@ -20,20 +20,14 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeRegistryContract,
-  Alert,
-  AlertAction,
-  AlertTypeRegistryContract,
-  IErrorObject,
-} from '../../../types';
-import { AlertForm, isValidAlert, validateBaseProperties } from './alert_form';
+import { ActionTypeRegistryContract, Alert, AlertTypeRegistryContract } from '../../../types';
+import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, ConcreteAlertReducer } from './alert_reducer';
 import { updateAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
-import { getAlertWithNullFields } from '../../lib/value_validators';
+import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
 export interface AlertEditProps<MetaData = Record<string, any>> {
   initialAlert: Alert;
@@ -71,25 +65,15 @@ export const AlertEdit = ({
 
   const alertType = alertTypeRegistry.get(alert.alertTypeId);
 
-  const paramsErrors = (alertType ? alertType.validate(alert.params).errors : []) as IErrorObject;
-  const baseAlertErrors = validateBaseProperties(alert).errors as IErrorObject;
-  const errors = {
-    ...paramsErrors,
-    ...baseAlertErrors,
-  } as IErrorObject;
-
-  const actionsErrors = alert.actions.reduce((prev, alertAction: AlertAction) => {
-    return {
-      ...prev,
-      [alertAction.id]: actionTypeRegistry
-        .get(alertAction.actionTypeId)
-        ?.validateParams(alertAction.params).errors,
-    };
-  }, {}) as Record<string, IErrorObject>;
+  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+    alert as Alert,
+    actionTypeRegistry,
+    alertType
+  );
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      if (isValidAlert(alert, errors, actionsErrors) && !hasActionsWithBrokenConnector) {
+      if (isValidAlert(alert, alertErrors, alertActionsErrors) && !hasActionsWithBrokenConnector) {
         const newAlert = await updateAlert({ http, alert, id: alert.id });
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
@@ -102,7 +86,12 @@ export const AlertEdit = ({
         return newAlert;
       } else {
         setAlert(
-          getAlertWithNullFields(alert as Alert, paramsErrors, baseAlertErrors, actionsErrors)
+          getAlertWithInvalidatedFields(
+            alert as Alert,
+            alertParamsErrors,
+            alertBaseErrors,
+            alertActionsErrors
+          )
         );
       }
     } catch (errorRes) {
@@ -154,7 +143,7 @@ export const AlertEdit = ({
               <AlertForm
                 alert={alert}
                 dispatch={dispatch}
-                errors={errors}
+                errors={alertErrors}
                 actionTypeRegistry={actionTypeRegistry}
                 alertTypeRegistry={alertTypeRegistry}
                 canChangeTrigger={false}

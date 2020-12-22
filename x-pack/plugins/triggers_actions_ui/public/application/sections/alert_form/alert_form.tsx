@@ -108,6 +108,36 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
   return validationResult;
 }
 
+export function getAlertErrors(
+  alert: Alert,
+  actionTypeRegistry: ActionTypeRegistryContract,
+  alertTypeModel: AlertTypeModel | null
+) {
+  const alertParamsErrors = (alertTypeModel
+    ? alertTypeModel.validate(alert.params).errors
+    : []) as IErrorObject;
+  const alertBaseErrors = validateBaseProperties(alert).errors as IErrorObject;
+  const alertErrors = {
+    ...alertParamsErrors,
+    ...alertBaseErrors,
+  } as IErrorObject;
+
+  const alertActionsErrors = alert.actions.reduce((prev, alertAction: AlertAction) => {
+    return {
+      ...prev,
+      [alertAction.id]: actionTypeRegistry
+        .get(alertAction.actionTypeId)
+        ?.validateParams(alertAction.params).errors,
+    };
+  }, {}) as Record<string, IErrorObject>;
+  return {
+    alertParamsErrors,
+    alertBaseErrors,
+    alertActionsErrors,
+    alertErrors,
+  };
+}
+
 export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
   !!Object.values(errors).find((errorList) => {
     if (isObject(errorList)) return hasObjectErrors(errorList as IErrorObject);

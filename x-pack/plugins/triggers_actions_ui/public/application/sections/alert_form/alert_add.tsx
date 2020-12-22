@@ -7,14 +7,8 @@ import React, { useCallback, useReducer, useMemo, useState, useEffect } from 're
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ActionTypeRegistryContract,
-  Alert,
-  AlertAction,
-  AlertTypeRegistryContract,
-  IErrorObject,
-} from '../../../types';
-import { AlertForm, hasObjectErrors, isValidAlert, validateBaseProperties } from './alert_form';
+import { ActionTypeRegistryContract, Alert, AlertTypeRegistryContract } from '../../../types';
+import { AlertForm, getAlertErrors, hasObjectErrors, isValidAlert } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
@@ -23,7 +17,7 @@ import { hasShowActionsCapability } from '../../lib/capabilities';
 import AlertAddFooter from './alert_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
-import { getAlertWithNullFields } from '../../lib/value_validators';
+import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
@@ -109,34 +103,24 @@ const AlertAdd = ({
   };
 
   const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
-  const paramsErrors = (alertType ? alertType.validate(alert.params).errors : []) as IErrorObject;
-  const baseAlertErrors = validateBaseProperties(alert).errors as IErrorObject;
-  const errors = {
-    ...paramsErrors,
-    ...baseAlertErrors,
-  } as IErrorObject;
+  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+    alert as Alert,
+    actionTypeRegistry,
+    alertType
+  );
 
-  const actionsErrors = alert.actions.reduce((prev, alertAction: AlertAction) => {
-    return {
-      ...prev,
-      [alertAction.id]: actionTypeRegistry
-        .get(alertAction.actionTypeId)
-        ?.validateParams(alertAction.params).errors,
-    };
-  }, {}) as Record<string, IErrorObject>;
-
-  const hasAlertErrors = !isValidAlert(alert, errors, actionsErrors);
+  const hasAlertErrors = !isValidAlert(alert, alertErrors, alertActionsErrors);
 
   const hasActionErrors =
-    Object.keys(actionsErrors).find((actionErrorsKey) =>
-      hasObjectErrors(actionsErrors[actionErrorsKey])
+    Object.keys(alertActionsErrors).find((actionErrorsKey) =>
+      hasObjectErrors(alertActionsErrors[actionErrorsKey])
     ) === undefined;
   // Confirm before saving if user is able to add actions but hasn't added any to this alert
   const shouldConfirmSave = canShowActions && alert.actions?.length === 0;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      if (isValidAlert(alert, errors, actionsErrors)) {
+      if (isValidAlert(alert, alertErrors, alertActionsErrors)) {
         const newAlert = await createAlert({ http, alert });
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
@@ -149,7 +133,12 @@ const AlertAdd = ({
         return newAlert;
       } else {
         setAlert(
-          getAlertWithNullFields(alert as Alert, paramsErrors, baseAlertErrors, actionsErrors)
+          getAlertWithInvalidatedFields(
+            alert as Alert,
+            alertParamsErrors,
+            alertBaseErrors,
+            alertActionsErrors
+          )
         );
       }
     } catch (errorRes) {
@@ -186,7 +175,7 @@ const AlertAdd = ({
               <AlertForm
                 alert={alert}
                 dispatch={dispatch}
-                errors={errors}
+                errors={alertErrors}
                 canChangeTrigger={canChangeTrigger}
                 operation={i18n.translate(
                   'xpack.triggersActionsUI.sections.alertAdd.operationName',

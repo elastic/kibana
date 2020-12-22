@@ -45,7 +45,7 @@ export const isValidUrl = (urlString: string, protocol?: string) => {
   }
 };
 
-export function getConnectorWithNullFields(
+export function getConnectorWithInvalidatedFields(
   connector: UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>,
   configErrors: IErrorObject,
   secretsErrors: IErrorObject,
@@ -75,7 +75,7 @@ export function getConnectorWithNullFields(
   return validatedConnector;
 }
 
-export function getAlertWithNullFields(
+export function getAlertWithInvalidatedFields(
   alert: Alert,
   paramsErrors: IErrorObject,
   baseAlertErrors: IErrorObject,

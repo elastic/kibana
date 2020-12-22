@@ -23,6 +23,7 @@ import {
   IErrorObject,
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
+  ActionTypeModel,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
@@ -45,6 +46,31 @@ export function validateBaseProperties(actionObject: ActionConnector) {
     );
   }
   return validationResult;
+}
+
+export function getConnectorErrors<ConnectorConfig, ConnectorSecrets>(
+  connector: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>,
+  actionTypeModel: ActionTypeModel
+) {
+  const connectorValidationResult = actionTypeModel?.validateConnector(connector);
+  const configErrors = (connectorValidationResult.config
+    ? connectorValidationResult.config.errors
+    : {}) as IErrorObject;
+  const secretsErrors = (connectorValidationResult.secrets
+    ? connectorValidationResult.secrets.errors
+    : {}) as IErrorObject;
+  const connectorBaseErrors = validateBaseProperties(connector).errors;
+  const connectorErrors = {
+    ...configErrors,
+    ...secretsErrors,
+    ...connectorBaseErrors,
+  } as IErrorObject;
+  return {
+    configErrors,
+    secretsErrors,
+    connectorBaseErrors,
+    connectorErrors,
+  };
 }
 
 interface ActionConnectorProps<

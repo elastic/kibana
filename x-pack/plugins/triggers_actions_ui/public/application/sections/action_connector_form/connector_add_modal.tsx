@@ -17,19 +17,14 @@ import {
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
+import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
 import { connectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
 import './connector_add_modal.scss';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import {
-  ActionType,
-  ActionConnector,
-  IErrorObject,
-  ActionTypeRegistryContract,
-} from '../../../types';
+import { ActionType, ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
-import { getConnectorWithNullFields } from '../../lib/value_validators';
+import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
@@ -81,20 +76,13 @@ export const ConnectorAddModal = ({
   }, [initialConnector, onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
-  const connectorValidationResult = actionTypeModel?.validateConnector(connector);
-  const configErrors = (connectorValidationResult.config
-    ? connectorValidationResult.config.errors
-    : {}) as IErrorObject;
-  const secretsErrors = (connectorValidationResult.secrets
-    ? connectorValidationResult.secrets.errors
-    : {}) as IErrorObject;
-  const baseConnectorErrors = validateBaseProperties(connector).errors;
-  const errors = {
-    ...configErrors,
-    ...secretsErrors,
-    ...baseConnectorErrors,
-  } as IErrorObject;
-  hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
+  const { configErrors, connectorBaseErrors, connectorErrors, secretsErrors } = getConnectorErrors(
+    connector,
+    actionTypeModel
+  );
+  hasErrors = !!Object.keys(connectorErrors).find(
+    (errorKey) => connectorErrors[errorKey].length >= 1
+  );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({ http, connector })
@@ -153,7 +141,7 @@ export const ConnectorAddModal = ({
             actionTypeName={actionType.name}
             dispatch={dispatch}
             serverError={serverError}
-            errors={errors}
+            errors={connectorErrors}
             actionTypeRegistry={actionTypeRegistry}
             consumer={consumer}
           />
@@ -178,11 +166,11 @@ export const ConnectorAddModal = ({
               onClick={async () => {
                 if (hasErrors) {
                   setConnector(
-                    getConnectorWithNullFields(
+                    getConnectorWithInvalidatedFields(
                       connector,
                       configErrors,
                       secretsErrors,
-                      baseConnectorErrors
+                      connectorBaseErrors
                     )
                   );
                   return;
