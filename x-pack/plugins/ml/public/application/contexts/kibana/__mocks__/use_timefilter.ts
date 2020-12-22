@@ -10,12 +10,10 @@ import { Observable } from 'rxjs';
 /**
  * Copy from {@link '../../../../../../../../src/plugins/data/public/query/timefilter/timefilter_service.mock'}
  */
+// @ts-ignore
 const timefilterMock: jest.Mocked<TimefilterContract> = {
   isAutoRefreshSelectorEnabled: jest.fn(),
   isTimeRangeSelectorEnabled: jest.fn(),
-  isTimeTouched: jest.fn(),
-  getEnabledUpdated$: jest.fn(),
-  getTimeUpdate$: jest.fn(),
   getRefreshIntervalUpdate$: jest.fn(),
   getAutoRefreshFetch$: jest.fn(() => new Observable<unknown>()),
   getFetch$: jest.fn(),
