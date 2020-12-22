@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useEffect, useCallback, useState, ChangeEvent } from 'react';
+import React, { useMemo, useEffect, useCallback, useState } from 'react';
 import {
   EuiBasicTable,
   EuiEmptyPrompt,
