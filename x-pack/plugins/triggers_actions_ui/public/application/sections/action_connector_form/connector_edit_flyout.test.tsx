@@ -45,7 +45,7 @@ describe('connector_edit_flyout', () => {
       config: {},
     };
 
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'test-action-type-id',
       iconClass: 'test',
       selectMessage: 'test',
@@ -57,8 +57,7 @@ describe('connector_edit_flyout', () => {
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValue(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
@@ -90,7 +89,7 @@ describe('connector_edit_flyout', () => {
       config: {},
     };
 
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'test-action-type-id',
       iconClass: 'test',
       selectMessage: 'test',
@@ -102,8 +101,7 @@ describe('connector_edit_flyout', () => {
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValue(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;

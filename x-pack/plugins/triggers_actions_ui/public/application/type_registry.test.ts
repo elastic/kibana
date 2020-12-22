@@ -6,6 +6,7 @@
 
 import { TypeRegistry } from './type_registry';
 import { ValidationResult, AlertTypeModel, ActionTypeModel } from '../types';
+import { actionTypeRegistryMock } from './action_type_registry.mock';
 
 export const ExpressionComponent: React.FunctionComponent = () => {
   return null;
@@ -30,7 +31,7 @@ const getTestActionType = (
   iconClass?: string,
   selectedMessage?: string
 ): ActionTypeModel<any, any> => {
-  return {
+  return actionTypeRegistryMock.createMockActionTypeModel({
     id: id || 'my-action-type',
     iconClass: iconClass || 'test',
     selectMessage: selectedMessage || 'test',
@@ -42,8 +43,7 @@ const getTestActionType = (
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
-  };
+  });
 };
 
 beforeEach(() => jest.resetAllMocks());

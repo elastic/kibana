@@ -115,7 +115,7 @@ describe('action_form', () => {
     actionParamsFields: mockedActionParamsFields,
   };
 
-  const actionTypeWithoutParams = {
+  const actionTypeWithoutParams = actionTypeRegistryMock.createMockActionTypeModel({
     id: 'my-action-type-without-params',
     iconClass: 'test',
     selectMessage: 'test',
@@ -127,8 +127,7 @@ describe('action_form', () => {
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
-  };
+  });
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('action_form in alert', () => {

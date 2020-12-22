@@ -13,7 +13,7 @@ jest.mock('../../../common/lib/kibana');
 
 describe('action_connector_form', () => {
   it('renders action_connector_form', () => {
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
@@ -24,9 +24,7 @@ describe('action_connector_form', () => {
         const validationResult = { errors: {} };
         return validationResult;
       },
-      actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValue(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
 

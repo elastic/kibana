@@ -51,15 +51,12 @@ describe('stepRuleActions utils', () => {
     const actionTypeRegistry = actionTypeRegistryMock.create();
 
     beforeAll(() => {
-      const actionMock = {
+      const actionMock = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'id',
         iconClass: 'iconClass',
         validateParams: validateParamsMock,
         selectMessage: 'message',
-        validateConnector: jest.fn(),
-        actionConnectorFields: null,
-        actionParamsFields: null,
-      };
+      });
       actionTypeRegistry.get.mockReturnValue(actionMock);
     });
 

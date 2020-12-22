@@ -33,7 +33,7 @@ describe('connector_add_modal', () => {
     };
   });
   it('renders connector modal form if addModalVisible is true', () => {
-    const actionTypeModel = {
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
@@ -45,8 +45,7 @@ describe('connector_add_modal', () => {
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
 

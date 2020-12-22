@@ -34,7 +34,7 @@ describe('connector_add_flyout', () => {
 
   it('renders action type menu with proper EuiCards for registered action types', () => {
     const onActionTypeChange = jest.fn();
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
@@ -46,8 +46,7 @@ describe('connector_add_flyout', () => {
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
@@ -72,7 +71,7 @@ describe('connector_add_flyout', () => {
 
   it(`doesn't renders action types that are disabled via config`, () => {
     const onActionTypeChange = jest.fn();
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
@@ -84,8 +83,7 @@ describe('connector_add_flyout', () => {
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
@@ -110,7 +108,7 @@ describe('connector_add_flyout', () => {
 
   it(`renders action types as disabled when disabled by license`, () => {
     const onActionTypeChange = jest.fn();
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
@@ -122,8 +120,7 @@ describe('connector_add_flyout', () => {
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
