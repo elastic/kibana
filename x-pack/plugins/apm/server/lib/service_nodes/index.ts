@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash';
 import {
   METRIC_JAVA_HEAP_MEMORY_USED,
   METRIC_JAVA_NON_HEAP_MEMORY_USED,
@@ -78,7 +79,10 @@ const getServiceNodes = async ({
     }))
     .filter(
       (item) =>
-        item.cpu || item.heapMemory || item.nonHeapMemory || item.threadCount
+        item.cpu !== null ||
+        item.heapMemory !== null ||
+        item.nonHeapMemory !== null ||
+        item.threadCount != null
     );
 };
 
