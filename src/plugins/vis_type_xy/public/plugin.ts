@@ -83,6 +83,7 @@ export class VisTypeXyPlugin
       expressions.registerRenderer(xyVisRenderer);
       visTypesDefinitions.forEach(visualizations.createBaseVisualization);
     }
+
     setTrackUiMetric(usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_xy'));
 
     return {};
