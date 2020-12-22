@@ -34,6 +34,7 @@ describe('Discover cell actions ', function () {
       rows: esHits,
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
+      isDarkMode: false,
     };
 
     const component = mountWithIntl(
@@ -58,6 +59,7 @@ describe('Discover cell actions ', function () {
       rows: esHits,
       onFilter: jest.fn(),
       indexPattern: indexPatternMock,
+      isDarkMode: false,
     };
 
     const component = mountWithIntl(
