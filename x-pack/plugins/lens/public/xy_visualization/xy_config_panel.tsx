@@ -324,9 +324,29 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               {isFittingEnabled ? (
                 <EuiFormRow
                   display="columnCompressed"
-                  label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                    defaultMessage: 'Missing values',
-                  })}
+                  label={
+                    <EuiToolTip
+                      delay="long"
+                      position="top"
+                      content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
+                        defaultMessage: `Lens provides a set of fitting functions to apply specific behaviour if 
+                        there are missing values in an area or line chart. Missing values are drawn using dotted 
+                        lines, and will not fill missing values at the left side of the chart.`,
+                      })}
+                    >
+                      <span>
+                        {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
+                          defaultMessage: 'Missing values',
+                        })}{' '}
+                        <EuiIcon
+                          type="questionInCircle"
+                          color="subdued"
+                          size="s"
+                          className="eui-alignTop"
+                        />
+                      </span>
+                    </EuiToolTip>
+                  }
                 >
                   <EuiSuperSelect
                     data-test-subj="lnsMissingValuesSelect"
