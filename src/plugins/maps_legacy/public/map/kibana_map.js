@@ -695,8 +695,8 @@ export class KibanaMap extends EventEmitter {
   }
 
   useUiStateFromVisualization(uiState) {
-    const zoomFromUiState = parseInt(uiState.get('mapZoom'));
-    const centerFromUIState = uiState.get('mapCenter');
+    const zoomFromUiState = parseInt(uiState?.get('mapZoom'));
+    const centerFromUIState = uiState?.get('mapCenter');
     if (!isNaN(zoomFromUiState)) {
       this.setZoomLevel(zoomFromUiState);
     }

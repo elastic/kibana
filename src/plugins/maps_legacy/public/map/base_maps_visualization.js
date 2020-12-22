@@ -84,7 +84,7 @@ export function BaseMapsVisualizationProvider() {
     }
 
     resize() {
-      this._kibanaMap.resize();
+      this._kibanaMap?.resize();
     }
 
     /**
@@ -94,8 +94,8 @@ export function BaseMapsVisualizationProvider() {
      */
     async _makeKibanaMap() {
       const options = {};
-      const zoomFromUiState = parseInt(this.handlers.uiState.get('mapZoom'));
-      const centerFromUIState = this.handlers.uiState.get('mapCenter');
+      const zoomFromUiState = parseInt(this.handlers.uiState?.get('mapZoom'));
+      const centerFromUIState = this.handlers.uiState?.get('mapCenter');
       const { mapZoom, mapCenter } = this._getMapsParams();
       options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : mapZoom;
       options.center = centerFromUIState ? centerFromUIState : mapCenter;

@@ -52,7 +52,7 @@ const RegionMapVisualization = ({
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<RegionMapVisController | null>(null);
   const isFirstRender = useRef(true);
-  const uiState = handlers.uiState as PersistedState;
+  const uiState = handlers.uiState as PersistedState | undefined;
 
   useEffect(() => {
     if (chartDiv.current && isFirstRender.current) {
@@ -71,10 +71,10 @@ const RegionMapVisualization = ({
       visController.current?.render().then(handlers.done);
     };
 
-    uiState.on('change', onUiStateChange);
+    uiState?.on('change', onUiStateChange);
 
     return () => {
-      uiState.off('change', onUiStateChange);
+      uiState?.off('change', onUiStateChange);
     };
   }, [uiState, handlers.done]);
 

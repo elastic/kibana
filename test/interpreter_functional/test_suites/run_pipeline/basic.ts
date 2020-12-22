@@ -110,7 +110,7 @@ export default function ({
           await expectExpression('partial_test_2', metricExpr, context).toMatchSnapshot()
         ).toMatchScreenshot();
 
-        const regionMapExpr = `regionmap visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0}}'`;
+        const regionMapExpr = `regionmap visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0},"legendPosition":"bottomright","addTooltip":true,"colorSchema":"Yellow to Red","isDisplayWarning":true,"wms":{},"mapZoom":2,"mapCenter":[0,0],"outlineWeight":1,"showAllShapes":true,"selectedLayer":{},"selectedJoinField":{}}'`;
         await (
           await expectExpression('partial_test_3', regionMapExpr, context).toMatchSnapshot()
         ).toMatchScreenshot();
