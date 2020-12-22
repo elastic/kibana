@@ -52,7 +52,9 @@ export const searchAfterAndBulkCreate = async ({
 
   // sortId tells us where to start our next consecutive search_after query
   let sortId: string | undefined;
+  let hasSortId = true; // default to true so we execute the search on initial run
   let backupSortId: string | undefined;
+  let hasBackupSortId = ruleParams.timestampOverride ? true : false;
 
   // signalsCreatedCount keeps track of how many signals we have created,
   // to ensure we don't exceed maxSignals
@@ -101,7 +103,8 @@ export const searchAfterAndBulkCreate = async ({
         });
 
         // if there is a timestampOverride param we always want to do a secondary search against @timestamp
-        if (ruleParams.timestampOverride != null) {
+        if (ruleParams.timestampOverride != null && hasBackupSortId) {
+          // only execute search if we have something to sort on or if it is the first search
           const singleSearchAfterDefaultTimestamp = singleSearchAfter({
             buildRuleMessage,
             searchAfterSortId: backupSortId,
@@ -125,10 +128,11 @@ export const searchAfterAndBulkCreate = async ({
           const lastSortId = searchResultB?.hits?.hits[searchResultB.hits.hits.length - 1]?.sort;
           if (lastSortId != null && lastSortId.length !== 0) {
             backupSortId = lastSortId[0];
+            hasBackupSortId = true;
           } else {
             // if no sort id on backup search and the initial search result was also empty
             logger.debug(buildRuleMessage('backupSortIds was empty on searchResultB'));
-            backupSortId = undefined;
+            hasBackupSortId = false;
           }
 
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResultB]);
@@ -147,29 +151,33 @@ export const searchAfterAndBulkCreate = async ({
           ]);
         }
 
-        const { searchResult, searchDuration, searchErrors } = await singleSearchAfterPromise;
-        mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
-        toReturn = mergeReturns([
-          toReturn,
-          createSearchAfterReturnTypeFromResponse({
-            searchResult: mergedSearchResults,
-            timestampOverride: ruleParams.timestampOverride,
-          }),
-          createSearchAfterReturnType({
-            searchAfterTimes: [searchDuration],
-            errors: searchErrors,
-          }),
-        ]);
+        if (hasSortId) {
+          // only execute search if we have something to sort on or if it is the first search
+          const { searchResult, searchDuration, searchErrors } = await singleSearchAfterPromise;
+          mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
+          toReturn = mergeReturns([
+            toReturn,
+            createSearchAfterReturnTypeFromResponse({
+              searchResult: mergedSearchResults,
+              timestampOverride: ruleParams.timestampOverride,
+            }),
+            createSearchAfterReturnType({
+              searchAfterTimes: [searchDuration],
+              errors: searchErrors,
+            }),
+          ]);
 
-        // we are guaranteed to have searchResult hits at this point
-        // because we check before if the totalHits or
-        // searchResult.hits.hits.length is 0
-        // call this function setSortIdOrExit()
-        const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
-        if (lastSortId != null && lastSortId.length !== 0) {
-          sortId = lastSortId[0];
-        } else {
-          sortId = undefined;
+          // we are guaranteed to have searchResult hits at this point
+          // because we check before if the totalHits or
+          // searchResult.hits.hits.length is 0
+          // call this function setSortIdOrExit()
+          const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
+          if (lastSortId != null && lastSortId.length !== 0) {
+            sortId = lastSortId[0];
+            hasSortId = true;
+          } else {
+            hasSortId = false;
+          }
         }
 
         // determine if there are any candidate signals to be processed
@@ -273,8 +281,8 @@ export const searchAfterAndBulkCreate = async ({
           );
         }
 
-        if (sortId == null && backupSortId == null) {
-          logger.debug(buildRuleMessage('sortIds was empty on searchResult'));
+        if (!hasSortId && !hasBackupSortId) {
+          logger.debug(buildRuleMessage('ran out of sort ids to sort on'));
           break;
         }
       } catch (exc: unknown) {
