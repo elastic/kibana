@@ -258,6 +258,80 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
+    describe('Edit alert with deleted connector', function () {
+      const testRunUuid = uuid.v4();
+
+      it('should show and update deleted connectors', async () => {
+        const action = await alerting.actions.createAction({
+          name: `slack-${testRunUuid}-${0}`,
+          actionTypeId: '.slack',
+          config: {},
+          secrets: {
+            webhookUrl: 'https://test',
+          },
+        });
+
+        await pageObjects.common.navigateToApp('triggersActions');
+        const alert = await alerting.alerts.createAlertWithActions(
+          testRunUuid,
+          'test.always-firing',
+          {},
+          [
+            {
+              group: 'default',
+              id: action.id,
+              params: { level: 'info', message: ' {{context.message}}' },
+            },
+            {
+              group: 'other',
+              id: action.id,
+              params: { level: 'info', message: ' {{context.message}}' },
+            },
+          ]
+        );
+        // refresh to see alert
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // verify content
+        await testSubjects.existOrFail('alertsList');
+
+        // delete connector
+        await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+        await pageObjects.triggersActionsUI.searchConnectors(action.name);
+        await testSubjects.click('deleteConnector');
+        await testSubjects.existOrFail('deleteIdsConfirmation');
+        await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+        const toastTitle = await pageObjects.common.closeToast();
+        expect(toastTitle).to.eql('Deleted 1 connector');
+
+        // click on first alert
+        await pageObjects.triggersActionsUI.changeTabs('alertsTab');
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
+
+        const editButton = await testSubjects.find('openEditAlertFlyoutButton');
+        await editButton.click();
+        expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
+
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(false);
+        expect(await testSubjects.exists('alertActionAccordion-0')).to.eql(true);
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).to.eql(false);
+        expect(await testSubjects.exists('alertActionAccordion-1')).to.eql(true);
+
+        await testSubjects.click('createActionConnectorButton-0');
+        await testSubjects.existOrFail('connectorAddModal');
+        await testSubjects.setValue('nameInput', 'new connector');
+        await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+        await testSubjects.click('connectorAddModal > saveActionButtonModal');
+        await testSubjects.missingOrFail('deleteIdsConfirmation');
+
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-0')).to.eql(true);
+        expect(await testSubjects.exists('addNewActionConnectorActionGroup-1')).to.eql(true);
+      });
+    });
+
     describe('View In App', function () {
       const testRunUuid = uuid.v4();
 

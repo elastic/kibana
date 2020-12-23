@@ -128,7 +128,7 @@ export const AddConnectorInline = ({
                 color="primary"
                 fill
                 size="s"
-                data-test-subj="createActionConnectorButton"
+                data-test-subj={`createActionConnectorButton-${index}`}
                 onClick={onAddConnector}
               >
                 <FormattedMessage
