@@ -178,11 +178,7 @@ exports[`Storyshots components/WorkpadTemplates default 1`] = `
                 >
                   <span
                     className="euiTableCellContent__text"
-                    title={
-                      <Component
-                        ariaSortValue="ascending"
-                      />
-                    }
+                    title="; Sorted in ascending order"
                   >
                     Template name
                   </span>

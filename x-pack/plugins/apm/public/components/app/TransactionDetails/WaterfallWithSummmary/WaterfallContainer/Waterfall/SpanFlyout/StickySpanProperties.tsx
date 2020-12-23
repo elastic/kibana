@@ -15,7 +15,7 @@ import {
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
-import { TransactionOverviewLink } from '../../../../../../shared/Links/apm/TransactionOverviewLink';
+import { ServiceOrTransactionsOverviewLink } from '../../../../../../shared/Links/apm/service_transactions_overview';
 import { TransactionDetailLink } from '../../../../../../shared/Links/apm/TransactionDetailLink';
 
 interface Props {
@@ -33,9 +33,11 @@ export function StickySpanProperties({ span, transaction }: Props) {
           }),
           fieldName: SERVICE_NAME,
           val: (
-            <TransactionOverviewLink serviceName={transaction.service.name}>
+            <ServiceOrTransactionsOverviewLink
+              serviceName={transaction.service.name}
+            >
               {transaction.service.name}
-            </TransactionOverviewLink>
+            </ServiceOrTransactionsOverviewLink>
           ),
           width: '25%',
         },

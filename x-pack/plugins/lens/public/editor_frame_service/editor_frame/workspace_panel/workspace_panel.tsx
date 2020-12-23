@@ -51,9 +51,9 @@ import {
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
-import { LensInspectorAdapters } from '../../types';
 import { getOriginalRequestErrorMessage } from '../../error_helper';
 import { validateDatasourceAndVisualization } from '../state_helpers';
+import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expressions/common';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -162,7 +162,7 @@ export function WorkspacePanel({
 
   const expression = useMemo(
     () => {
-      if (!configurationValidationError || configurationValidationError.length === 0) {
+      if (!configurationValidationError?.length) {
         try {
           return buildExpression({
             visualization: activeVisualization,
@@ -382,11 +382,11 @@ export const InnerVisualizationWrapper = ({
   );
 
   const onData$ = useCallback(
-    (data: unknown, inspectorAdapters?: LensInspectorAdapters) => {
+    (data: unknown, inspectorAdapters?: Partial<DefaultInspectorAdapters>) => {
       if (inspectorAdapters && inspectorAdapters.tables) {
         dispatch({
           type: 'UPDATE_ACTIVE_DATA',
-          tables: inspectorAdapters.tables,
+          tables: inspectorAdapters.tables.tables,
         });
       }
     },
@@ -400,13 +400,17 @@ export const InnerVisualizationWrapper = ({
         showExtraErrors = localState.configurationValidationError
           .slice(1)
           .map(({ longMessage }) => (
-            <EuiFlexItem key={longMessage} className="eui-textBreakAll">
+            <EuiFlexItem
+              key={longMessage}
+              className="eui-textBreakAll"
+              data-test-subj="configuration-failure-error"
+            >
               {longMessage}
             </EuiFlexItem>
           ));
       } else {
         showExtraErrors = (
-          <EuiFlexItem data-test-subj="configuration-failure-more-errors">
+          <EuiFlexItem>
             <EuiButtonEmpty
               onClick={() => {
                 setLocalState((prevState: WorkspaceState) => ({
@@ -414,6 +418,7 @@ export const InnerVisualizationWrapper = ({
                   expandError: !prevState.expandError,
                 }));
               }}
+              data-test-subj="configuration-failure-more-errors"
             >
               {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
                 defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
@@ -445,7 +450,7 @@ export const InnerVisualizationWrapper = ({
             </EuiTextColor>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem className="eui-textBreakAll">
+        <EuiFlexItem className="eui-textBreakAll" data-test-subj="configuration-failure-error">
           {localState.configurationValidationError[0].longMessage}
         </EuiFlexItem>
         {showExtraErrors}

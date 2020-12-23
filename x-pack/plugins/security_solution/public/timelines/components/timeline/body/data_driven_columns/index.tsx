@@ -11,7 +11,7 @@ import { getOr } from 'lodash/fp';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '../../../../../common/components/drag_and_drop/helpers';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { EventsTd, EVENTS_TD_CLASS_NAME, EventsTdContent, EventsTdGroupData } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -26,6 +26,9 @@ interface Props {
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;
+  hasRowRenderers: boolean;
+  notesCount: number;
+  tabType?: TimelineTabs;
   timelineId: string;
 }
 
@@ -73,12 +76,23 @@ export const onKeyDown = (keyboardEvent: React.KeyboardEvent) => {
 };
 
 export const DataDrivenColumns = React.memo<Props>(
-  ({ _id, ariaRowindex, columnHeaders, columnRenderers, data, ecsData, timelineId }) => (
+  ({
+    _id,
+    ariaRowindex,
+    columnHeaders,
+    columnRenderers,
+    data,
+    ecsData,
+    hasRowRenderers,
+    notesCount,
+    tabType,
+    timelineId,
+  }) => (
     <EventsTdGroupData data-test-subj="data-driven-columns">
       {columnHeaders.map((header, i) => (
         <EventsTd
           $ariaColumnIndex={i + ARIA_COLUMN_INDEX_OFFSET}
-          key={header.id}
+          key={tabType != null ? `${header.id}_${tabType}` : `${header.id}`}
           onKeyDown={onKeyDown}
           role="button"
           tabIndex={0}
@@ -94,7 +108,7 @@ export const DataDrivenColumns = React.memo<Props>(
                 eventId: _id,
                 field: header,
                 linkValues: getOr([], header.linkField ?? '', ecsData),
-                timelineId,
+                timelineId: tabType != null ? `${timelineId}-${tabType}` : timelineId,
                 truncate: true,
                 values: getMappedNonEcsValue({
                   data,
@@ -103,6 +117,17 @@ export const DataDrivenColumns = React.memo<Props>(
               })}
             </>
           </EventsTdContent>
+          {hasRowRenderers ? (
+            <EuiScreenReaderOnly data-test-subj="hasRowRendererScreenReaderOnly">
+              <p>{i18n.EVENT_HAS_AN_EVENT_RENDERER(ariaRowindex)}</p>
+            </EuiScreenReaderOnly>
+          ) : null}
+
+          {notesCount ? (
+            <EuiScreenReaderOnly data-test-subj="hasNotesScreenReaderOnly">
+              <p>{i18n.EVENT_HAS_NOTES({ row: ariaRowindex, notesCount })}</p>
+            </EuiScreenReaderOnly>
+          ) : null}
         </EventsTd>
       ))}
     </EventsTdGroupData>

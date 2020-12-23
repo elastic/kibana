@@ -41,6 +41,7 @@ import {
   ApiCallByIdProps,
   ApiCallByListIdProps,
   ApiCallFetchExceptionListsProps,
+  ExportExceptionListProps,
   UpdateExceptionListItemProps,
   UpdateExceptionListProps,
 } from './types';
@@ -537,3 +538,27 @@ export const addEndpointExceptionList = async ({
     return Promise.reject(error);
   }
 };
+
+/**
+ * Fetch an ExceptionList by providing a ExceptionList ID
+ *
+ * @param http Kibana http service
+ * @param id ExceptionList ID (not list_id)
+ * @param listId ExceptionList LIST_ID (not id)
+ * @param namespaceType ExceptionList namespace_type
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const exportExceptionList = async ({
+  http,
+  id,
+  listId,
+  namespaceType,
+  signal,
+}: ExportExceptionListProps): Promise<Blob> =>
+  http.fetch<Blob>(`${EXCEPTION_LIST_URL}/_export`, {
+    method: 'GET',
+    query: { id, list_id: listId, namespace_type: namespaceType },
+    signal,
+  });

@@ -90,7 +90,7 @@ export interface ExplorerAppState {
   mlExplorerSwimlane: {
     selectedType?: 'overall' | 'viewBy';
     selectedLanes?: string[];
-    selectedTimes?: number[];
+    selectedTimes?: [number, number];
     showTopFieldValues?: boolean;
     viewByFieldName?: string;
     viewByPerPage?: number;
@@ -146,30 +146,28 @@ export interface TimeSeriesExplorerGlobalState {
   refreshInterval?: RefreshInterval;
 }
 
-export interface TimeSeriesExplorerAppState {
-  mlTimeSeriesExplorer?: {
-    forecastId?: string;
-    detectorIndex?: number;
-    entities?: Record<string, string>;
-    zoom?: {
-      from?: string;
-      to?: string;
-    };
-    functionDescription?: string;
+export interface TimeSeriesExplorerParams {
+  forecastId?: string;
+  detectorIndex?: number;
+  entities?: Record<string, string>;
+  zoom?: {
+    from?: string;
+    to?: string;
   };
+  functionDescription?: string;
+}
+export interface TimeSeriesExplorerAppState {
+  mlTimeSeriesExplorer?: TimeSeriesExplorerParams;
   query?: any;
 }
 
 export interface TimeSeriesExplorerPageState
-  extends Pick<TimeSeriesExplorerAppState, 'query'>,
+  extends TimeSeriesExplorerParams,
+    Pick<TimeSeriesExplorerAppState, 'query'>,
     Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
   jobIds?: JobId[];
   timeRange?: TimeRange;
-  detectorIndex?: number;
-  entities?: Record<string, string>;
-  forecastId?: string;
   globalState?: MlCommonGlobalState;
-  functionDescription?: string;
 }
 
 export type TimeSeriesExplorerUrlState = MLPageState<
