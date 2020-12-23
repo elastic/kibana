@@ -81,7 +81,7 @@ describe('Exceptions Lists API', () => {
           list: payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
@@ -129,7 +129,7 @@ describe('Exceptions Lists API', () => {
           listItem: payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
@@ -177,7 +177,7 @@ describe('Exceptions Lists API', () => {
           list: payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
@@ -225,7 +225,7 @@ describe('Exceptions Lists API', () => {
           listItem: payload,
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
@@ -290,7 +290,7 @@ describe('Exceptions Lists API', () => {
           },
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "data,id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "data,id"'));
     });
   });
 
@@ -339,7 +339,7 @@ describe('Exceptions Lists API', () => {
           namespaceType: 'single',
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
@@ -542,7 +542,9 @@ describe('Exceptions Lists API', () => {
           signal: abortCtrl.signal,
         })
       ).rejects.toEqual(
-        'Invalid value "undefined" supplied to "data",Invalid value "undefined" supplied to "page",Invalid value "undefined" supplied to "per_page",Invalid value "undefined" supplied to "total"'
+        new Error(
+          'Invalid value "undefined" supplied to "data",Invalid value "undefined" supplied to "page",Invalid value "undefined" supplied to "per_page",Invalid value "undefined" supplied to "total"'
+        )
       );
     });
   });
@@ -592,7 +594,7 @@ describe('Exceptions Lists API', () => {
           namespaceType: 'single',
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
@@ -641,7 +643,7 @@ describe('Exceptions Lists API', () => {
           namespaceType: 'single',
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
@@ -690,7 +692,7 @@ describe('Exceptions Lists API', () => {
           namespaceType: 'single',
           signal: abortCtrl.signal,
         })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "id"');
+      ).rejects.toEqual(new Error('Invalid value "undefined" supplied to "id"'));
     });
   });
 
