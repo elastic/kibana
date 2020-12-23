@@ -164,7 +164,7 @@ export const usePostPushToService = (): UsePostPushToService => {
 
 export const determineToAndFrom = (alert: Alert) => {
   const ellapsedTimeRule = moment.duration(
-    moment().diff(dateMath.parse(alert.rule?.from != null ? alert.rule?.from : 'now-0s'))
+    moment().diff(dateMath.parse(alert.rule?.from != null ? alert.rule.from : 'now-0s'))
   );
 
   const from = moment(alert['@timestamp'] ?? new Date())
