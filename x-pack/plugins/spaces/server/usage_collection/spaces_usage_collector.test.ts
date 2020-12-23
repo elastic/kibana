@@ -17,6 +17,7 @@ import {
   pluginInitializerContextConfigMock,
 } from 'src/core/server/mocks';
 import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
+import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
 interface SetupOpts {
   license?: Partial<ILicense>;
@@ -99,8 +100,15 @@ const defaultEsClientSearchMock = jest.fn().mockResolvedValue({
 
 const getMockFetchContext = (mockedEsClient: any) => {
   return {
+    ...createCollectorFetchContextMock(),
     esClient: mockedEsClient,
-  } as CollectorFetchContext;
+  };
+};
+
+const getMockedEsClient = (esClientMock: jest.Mock) => {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  esClient.search = esClientMock;
+  return esClient;
 };
 
 describe('error handling', () => {
@@ -130,7 +138,6 @@ describe('error handling', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     const statusCodes = [401, 402, 403, 500];
@@ -155,9 +162,7 @@ describe('with a basic license', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClient.search = defaultEsClientSearchMock;
-
+    const esClient = getMockedEsClient(defaultEsClientSearchMock);
     usageData = await collector.fetch(getMockFetchContext(esClient));
 
     expect(defaultEsClientSearchMock).toHaveBeenCalledWith({
@@ -216,8 +221,7 @@ describe('with no license', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClient.search = defaultEsClientSearchMock;
+    const esClient = getMockedEsClient(defaultEsClientSearchMock);
 
     usageData = await collector.fetch(getMockFetchContext(esClient));
   });
@@ -258,8 +262,7 @@ describe('with platinum license', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    esClient.search = defaultEsClientSearchMock;
+    const esClient = getMockedEsClient(defaultEsClientSearchMock);
 
     usageData = await collector.fetch(getMockFetchContext(esClient));
   });
