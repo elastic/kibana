@@ -35,6 +35,13 @@ search: {
         siblingPipelineType: string;
         termsAggFilter: string[];
         toAbsoluteDates: typeof toAbsoluteDates;
+        boundsDescendingRaw: ({
+            bound: number;
+            interval: import("moment").Duration;
+        } | {
+            bound: import("moment").Duration;
+            interval: import("moment").Duration;
+        })[];
     };
     getRequestInspectorStats: typeof getRequestInspectorStats;
     getResponseInspectorStats: typeof getResponseInspectorStats;
