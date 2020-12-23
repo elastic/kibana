@@ -95,7 +95,14 @@ const onSameGroupDuplicateDrop = ({ columnId, setState, state, layerId, droppedI
     [columnId]: op,
   };
 
-  const newColumnOrder = [...layer.columnOrder, columnId];
+  const newColumnOrder = [...layer.columnOrder];
+  // put a new bucketed dimension just in front of the metric dimensions, a metric dimension in the back of the array
+  // TODO this logic does not take into account groups - we probably need to pass the current
+  // group config to this position to place the column right
+  const insertionIndex = op.isBucketed
+    ? newColumnOrder.findIndex((id) => !newColumns[id].isBucketed)
+    : newColumnOrder.length;
+  newColumnOrder.splice(insertionIndex, 0, columnId);
   // Time to replace
   setState(
     mergeLayer({
@@ -167,7 +174,11 @@ const onMoveDropToNonCompatibleGroup = ({
   const currentIndexPattern = state.indexPatterns[layer.indexPatternId];
 
   const newLayer = insertOrReplaceColumn({
-    layer: deleteColumn({ layer, columnId: droppedItem.columnId }),
+    layer: deleteColumn({
+      layer,
+      columnId: droppedItem.columnId,
+      indexPattern: currentIndexPattern,
+    }),
     columnId,
     indexPattern: currentIndexPattern,
     op: operationsForNewField.values().next().value,
@@ -200,7 +211,6 @@ const onFieldDrop = ({
   droppedItem,
   operationSupportMatrix,
 }) => {
-  
   function hasOperationForField(field: IndexPatternField) {
     return Boolean(operationSupportMatrix.operationByField[field.name]);
   }
@@ -245,7 +255,7 @@ const onFieldDrop = ({
   trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
   setState(mergeLayer({ state, layerId, newLayer }));
   return true;
-}
+};
 
 export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPrivateState>) {
   const operationSupportMatrix = getOperationSupportMatrix(props);
@@ -320,5 +330,5 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     layerId,
     droppedItem,
     operationSupportMatrix,
-  })
+  });
 }

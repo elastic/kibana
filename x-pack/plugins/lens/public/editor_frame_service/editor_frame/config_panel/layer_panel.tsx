@@ -20,7 +20,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { NativeRenderer } from '../../../native_renderer';
 import { StateSetter, isDraggedOperation } from '../../../types';
-import { DragContext, DragDrop, ChildDragDropProvider, ReorderProvider } from '../../../drag_drop';
+import {
+  DragContext,
+  DragDrop,
+  ChildDragDropProvider,
+  ReorderProvider,
+  DropTargetIdentifier,
+} from '../../../drag_drop';
 import { LayerSettings } from './layer_settings';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
 import { generateId } from '../../../id_generator';
@@ -282,8 +288,23 @@ export function LayerPanel(
                           isValueEqual={isSameConfiguration}
                           label={columnLabelMap[accessor]}
                           droppable={dragging && isDroppable}
-                          dropTo={(dropTargetId: string) => {
-                            layerDatasource.onDrop({
+                          dropTo={(target: string | DropTargetIdentifier) => {
+                            const dropTarget = (typeof target === 'string'
+                              ? {
+                                  groupId: group.groupId,
+                                  columnId: target,
+                                  layerId,
+                                }
+                              : {
+                                  ...target,
+                                  columnId: target.isNew ? newId : target.columnId,
+                                }) as {
+                              groupId: string;
+                              columnId: string;
+                              layerId: string;
+                              isNew?: boolean;
+                            };
+                            const dropResult = layerDatasource.onDrop({
                               ...layerDatasourceDropProps,
                               droppedItem: {
                                 columnId: accessor,
@@ -291,14 +312,56 @@ export function LayerPanel(
                                 layerId,
                                 id: accessor,
                               },
-                              dropTarget: {
-                                groupId: group.groupId,
-                                columnId: dropTargetId,
-                                layerId,
-                              },
+                              dropTarget,
                               filterOperations: group.filterOperations,
                             });
+
+                            if (dropResult) {
+                              props.updateVisualization(
+                                activeVisualization.setDimension({
+                                  layerId: dropTarget.layerId,
+                                  groupId: dropTarget.groupId,
+                                  columnId: dropTarget.columnId,
+                                  prevState: props.visualizationState,
+                                })
+                              );
+                            }
                           }}
+                          onNextGroup={
+                            group.supportsMoreColumns
+                              ? () => {
+                                  dragDropContext.setActiveDropTarget({
+                                    layerId,
+                                    groupId: group.groupId,
+                                    isNew: true,
+                                  });
+
+                                  return {
+                                    targetDescription: i18n.translate(
+                                      'xpack.lens.dragDrop.copyDropLabel',
+                                      {
+                                        defaultMessage:
+                                          'Copy as new dimension in {groupName} group.',
+                                        values: {
+                                          groupName: group.groupLabel,
+                                        },
+                                      }
+                                    ),
+                                    actionSuccessMessage: i18n.translate(
+                                      'xpack.lens.dragDrop.copyDropSuccessLabel',
+                                      {
+                                        defaultMessage:
+                                          'Copied {label} to new dimension in {groupName} group.',
+                                        values: {
+                                          label: columnLabelMap[accessor],
+                                          groupName: group.groupLabel,
+                                        },
+                                      }
+                                    ),
+                                  };
+                                }
+                              : undefined
+                          }
                           onDrop={(droppedItem) => {
                             const dropResult = layerDatasource.onDrop({
                               ...layerDatasourceDropProps,
@@ -411,6 +474,11 @@ export function LayerPanel(
                           (isDraggedOperation(dragDropContext.dragging) &&
                             dragDropContext.dragging.groupId === group.groupId)
                         }
+                        dropTargetIdentifier={{
+                          groupId: group.groupId,
+                          layerId,
+                          isNew: true,
+                        }}
                         onDrop={(droppedItem) => {
                           const dropResult = layerDatasource.onDrop({
                             ...layerDatasourceDropProps,

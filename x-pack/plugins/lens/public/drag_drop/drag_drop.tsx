@@ -7,9 +7,16 @@
 import './drag_drop.scss';
 import React, { useState, useContext, useEffect } from 'react';
 import classNames from 'classnames';
-import { keys, EuiScreenReaderOnly, EuiBottomBar } from '@elastic/eui';
+import { keys, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DragContext, DragContextState, ReorderContext, ReorderState } from './providers';
+import { isEqual } from 'lodash';
+import {
+  DragContext,
+  DragContextState,
+  DropTargetIdentifier,
+  ReorderContext,
+  ReorderState,
+} from './providers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 
 export type DroppableEvent = React.DragEvent<HTMLElement>;
@@ -22,7 +29,12 @@ export type DropHandler = (item: unknown) => void;
 /**
  * A function that handles a dropTo event.
  */
-export type DropToHandler = (dropTargetId: string) => void;
+export type DropToHandler = (dropTarget: string | DropTargetIdentifier) => void;
+
+export interface GroupMoveResult {
+  targetDescription: string;
+  actionSuccessMessage: string;
+}
 
 /**
  * The base props to the DragDrop component.
@@ -93,6 +105,11 @@ interface BaseProps {
    * replace something that is existing or add a new one
    */
   dropType?: 'add' | 'replace' | 'reorder';
+  /**
+   * identifier for this drop target - if it matches the current active drop target context,
+   * it will behave as drop is active right now
+   */
+  dropTargetIdentifier?: DropTargetIdentifier;
 }
 
 /**
@@ -108,6 +125,11 @@ interface DraggableProps extends BaseProps {
    * be used if the element will be dropped into a text field.
    */
   label: string;
+  /**
+   * The event handler that fires when the user navigates to the next group
+   * with the current draggable picked up
+   */
+  onNextGroup?: () => GroupMoveResult;
 }
 
 /**
@@ -130,13 +152,15 @@ type Props = DraggableProps | NonDraggableProps;
  */
 
 export const DragDrop = (props: Props) => {
-  const { dragging, setDragging } = useContext(DragContext);
+  const { dragging, setDragging, activeDropTarget, setActiveDropTarget } = useContext(DragContext);
   const { value, draggable, droppable, isValueEqual } = props;
 
   return (
     <DragDropInner
       {...props}
       dragging={droppable ? dragging : undefined}
+      activeDropTarget={activeDropTarget}
+      setActiveDropTarget={setActiveDropTarget}
       setDragging={setDragging}
       isDragging={
         !!(draggable && ((isValueEqual && isValueEqual(value, dragging)) || value === dragging))
@@ -171,13 +195,19 @@ const DragDropInner = React.memo(function DragDropInner(
     draggable,
     dragging,
     setDragging,
+    setActiveDropTarget,
     isDragging,
     isNotDroppable,
     dragType = 'copy',
     dropType = 'add',
     dropTo,
     itemsInGroup,
+    dropTargetIdentifier,
+    activeDropTarget,
   } = props;
+
+  const activeDropTargetMatches =
+    activeDropTarget && isEqual(dropTargetIdentifier, activeDropTarget);
 
   const isMoveDragging = isDragging && dragType === 'move';
 
@@ -186,27 +216,31 @@ const DragDropInner = React.memo(function DragDropInner(
     {
       'lnsDragDrop-isDraggable': draggable,
       'lnsDragDrop-isDragging': isDragging,
-      'lnsDragDrop-isHidden': isMoveDragging,
+      'lnsDragDrop-isHidden': isMoveDragging && !activeDropTarget,
       'lnsDragDrop-isDroppable': !draggable,
-      'lnsDragDrop-isDropTarget': droppable && dragType !== 'reorder',
-      'lnsDragDrop-isActiveDropTarget': droppable && state.isActive && dragType !== 'reorder',
+      'lnsDragDrop-isDropTarget':
+        // (!activeDropTarget || activeDropTargetMatches) makes sure only the currently active drop target is highlighted, not all of them
+        // because this part is not implemented yet
+        droppable && (!activeDropTarget || activeDropTargetMatches) && dragType !== 'reorder',
+      'lnsDragDrop-isActiveDropTarget':
+        droppable && (state.isActive || activeDropTargetMatches) && dragType !== 'reorder',
       'lnsDragDrop-isNotDroppable': !isMoveDragging && isNotDroppable,
       'lnsDragDrop-isReplacing': droppable && state.isActive && dropType === 'replace',
     },
     state.dragEnterClassNames
   );
 
-  const dragStart = (e: DroppableEvent) => {
+  const dragStart = (e?: DroppableEvent) => {
     // Setting stopPropgagation causes Chrome failures, so
     // we are manually checking if we've already handled this
     // in a nested child, and doing nothing if so...
-    if (e.dataTransfer.getData('text')) {
+    if (e?.dataTransfer.getData('text')) {
       return;
     }
 
     // We only can reach the dragStart method if the element is draggable,
     // so we know we have DraggableProps if we reach this code.
-    e.dataTransfer.setData('text', (props as DraggableProps).label);
+    e?.dataTransfer.setData('text', (props as DraggableProps).label);
 
     // Chrome causes issues if you try to render from within a
     // dragStart event, so we drop a setTimeout to avoid that.
@@ -214,9 +248,10 @@ const DragDropInner = React.memo(function DragDropInner(
     setTimeout(() => setDragging(value));
   };
 
-  const dragEnd = (e: DroppableEvent) => {
-    e.stopPropagation();
+  const dragEnd = (e?: DroppableEvent) => {
+    e?.stopPropagation();
     setDragging(undefined);
+    setActiveDropTarget(undefined);
   };
 
   const dragOver = (e: DroppableEvent) => {
@@ -260,7 +295,7 @@ const DragDropInner = React.memo(function DragDropInner(
   if (
     draggable &&
     itemsInGroup?.length &&
-    itemsInGroup.length > 1 &&
+    (itemsInGroup.length > 1 || (props.draggable && props.onNextGroup)) &&
     value?.id &&
     dropTo &&
     (!dragging || isReorderDragging)
@@ -278,6 +313,7 @@ const DragDropInner = React.memo(function DragDropInner(
             draggable,
             onDragEnd: dragEnd,
             onDragStart: dragStart,
+            onNextGroup: props.draggable ? props.onNextGroup : undefined,
             isReorderDragging,
           }}
           dropProps={{
@@ -293,7 +329,6 @@ const DragDropInner = React.memo(function DragDropInner(
         >
           {children}
         </ReorderableDragDrop>
-        {dragging && <EuiBottomBar>Message is displayed</EuiBottomBar>}
       </>
     );
   }
@@ -309,7 +344,6 @@ const DragDropInner = React.memo(function DragDropInner(
         onDragEnd: dragEnd,
         onDragStart: dragStart,
       })}
-      {dragging && <EuiBottomBar>Message is displayed</EuiBottomBar>}
     </>
   );
 });
@@ -351,8 +385,9 @@ export const ReorderableDragDrop = ({
   draggingProps: {
     className: string;
     draggable: Props['draggable'];
-    onDragEnd: (e: DroppableEvent) => void;
-    onDragStart: (e: DroppableEvent) => void;
+    onDragEnd: (e?: DroppableEvent) => void;
+    onDragStart: (e?: DroppableEvent) => void;
+    onNextGroup?: () => GroupMoveResult;
     isReorderDragging: boolean;
   };
   dropProps: {
@@ -374,6 +409,9 @@ export const ReorderableDragDrop = ({
   const { itemsInGroup, dragging, id, droppable } = dropProps;
   const { reorderState, setReorderState } = useContext(ReorderContext);
 
+  const { activeDropTarget } = useContext(DragContext);
+  const dragInProgress = Boolean(useContext(DragContext).dragging);
+
   const { isReorderOn, reorderedItems, draggingHeight, direction, groupId } = reorderState;
   const currentIndex = itemsInGroup.indexOf(id);
 
@@ -393,7 +431,14 @@ export const ReorderableDragDrop = ({
     >
       <EuiScreenReaderOnly showOnFocus>
         <button
-          aria-label={label}
+          aria-label={
+            draggingProps.onNextGroup
+              ? i18n.translate('xpack.lens.dragDrop.arrowRightMovementLabel', {
+                  defaultMessage: '{label} - Use right arrow key to move dimension to other groups',
+                  values: { label },
+                })
+              : label
+          }
           aria-describedby={`lnsDragDrop-reorderInstructions-${groupId}`}
           className="lnsDragDrop__keyboardHandler"
           data-test-subj="lnsDragDrop-keyboardHandler"
@@ -403,6 +448,9 @@ export const ReorderableDragDrop = ({
               isReorderOn: false,
               keyboardReorderMessage: '',
             }));
+            if (dragInProgress) {
+              draggingProps.onDragEnd();
+            }
           }}
           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
             if (e.key === keys.ENTER || e.key === keys.SPACE) {
@@ -413,11 +461,36 @@ export const ReorderableDragDrop = ({
                   ? ''
                   : getKeyboardReorderMessageLifted(label, currentIndex + 1),
               }));
+              if (dragInProgress && e.key === keys.ENTER && activeDropTarget) {
+                dropTo(activeDropTarget);
+                setReorderState((s: ReorderState) => ({
+                  ...s,
+                  keyboardReorderMessage: s.pendingActionSuccessMessage || '',
+                  pendingActionSuccessMessage: undefined,
+                }));
+              }
+              if (dragInProgress) {
+                draggingProps.onDragEnd();
+              }
             } else if (e.key === keys.ESCAPE) {
               setReorderState((s: ReorderState) => ({
                 ...s,
                 isReorderOn: false,
                 keyboardReorderMessage: '',
+              }));
+              if (dragInProgress) {
+                draggingProps.onDragEnd();
+              }
+            } else if (keys.ARROW_RIGHT === e.key && draggingProps.onNextGroup) {
+              draggingProps.onDragStart();
+              const { targetDescription, actionSuccessMessage } = draggingProps.onNextGroup();
+              setReorderState((s: ReorderState) => ({
+                ...s,
+                keyboardReorderMessage: i18n.translate('xpack.lens.dragDrop.commitOrAbortLabel', {
+                  defaultMessage: '{targetDescription} Press enter to commit or escape to abort.',
+                  values: { targetDescription },
+                }),
+                pendingActionSuccessMessage: actionSuccessMessage,
               }));
             }
             if (isReorderOn) {
@@ -448,9 +521,6 @@ export const ReorderableDragDrop = ({
                   }));
                   dropTo(itemsInGroup[currentIndex - 1]);
                 }
-              // } else if (keys.ARROW_RIGHT === e.key) {
-              //   // setActiveDrop as a new field, focus the element and display extra drops
-              //   dropTo('new');
               }
             }
           }}

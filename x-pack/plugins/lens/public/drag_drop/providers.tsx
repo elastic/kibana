@@ -15,6 +15,8 @@ export type Dragging =
     })
   | undefined;
 
+export type DropTargetIdentifier = Record<string, unknown>;
+
 /**
  * The shape of the drag / drop context.
  */
@@ -28,6 +30,10 @@ export interface DragContextState {
    * Set the item being dragged.
    */
   setDragging: (dragging: Dragging) => void;
+
+  activeDropTarget?: DropTargetIdentifier;
+
+  setActiveDropTarget: (newTarget?: DropTargetIdentifier) => void;
 }
 
 /**
@@ -38,6 +44,8 @@ export interface DragContextState {
 export const DragContext = React.createContext<DragContextState>({
   dragging: undefined,
   setDragging: () => {},
+  activeDropTarget: undefined,
+  setActiveDropTarget: () => {},
 });
 
 /**
@@ -56,6 +64,10 @@ export interface ProviderProps {
    */
   setDragging: (dragging: Dragging) => void;
 
+  activeDropTarget?: DropTargetIdentifier;
+
+  setActiveDropTarget: (newTarget?: DropTargetIdentifier) => void;
+
   /**
    * The React children.
    */
@@ -70,13 +82,30 @@ export interface ProviderProps {
  * @param props
  */
 export function RootDragDropProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<{ dragging: Dragging }>({
+  const [draggingState, setDraggingState] = useState<{ dragging: Dragging }>({
     dragging: undefined,
   });
-  const setDragging = useMemo(() => (dragging: Dragging) => setState({ dragging }), [setState]);
+  const [activeDropTargetState, setActiveDropTargetState] = useState<{
+    activeDropTarget?: DropTargetIdentifier;
+  }>({
+    activeDropTarget: undefined,
+  });
+  const setDragging = useMemo(() => (dragging: Dragging) => setDraggingState({ dragging }), [
+    setDraggingState,
+  ]);
+  const setActiveDropTarget = useMemo(
+    () => (activeDropTarget?: DropTargetIdentifier) =>
+      setActiveDropTargetState({ activeDropTarget }),
+    [setActiveDropTargetState]
+  );
 
   return (
-    <ChildDragDropProvider dragging={state.dragging} setDragging={setDragging}>
+    <ChildDragDropProvider
+      dragging={draggingState.dragging}
+      setDragging={setDragging}
+      activeDropTarget={activeDropTargetState.activeDropTarget}
+      setActiveDropTarget={setActiveDropTarget}
+    >
       {children}
     </ChildDragDropProvider>
   );
@@ -89,8 +118,19 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
  *
  * @param props
  */
-export function ChildDragDropProvider({ dragging, setDragging, children }: ProviderProps) {
-  const value = useMemo(() => ({ dragging, setDragging }), [setDragging, dragging]);
+export function ChildDragDropProvider({
+  dragging,
+  setDragging,
+  activeDropTarget,
+  setActiveDropTarget,
+  children,
+}: ProviderProps) {
+  const value = useMemo(() => ({ dragging, setDragging, activeDropTarget, setActiveDropTarget }), [
+    setDragging,
+    dragging,
+    activeDropTarget,
+    setActiveDropTarget,
+  ]);
   return <DragContext.Provider value={value}>{children}</DragContext.Provider>;
 }
 
@@ -116,6 +156,10 @@ export interface ReorderState {
    * aria-live message for changes in reordering
    */
   keyboardReorderMessage: string;
+  /**
+   * aria-live message to use once the current action is comitted
+   */
+  pendingActionSuccessMessage?: string;
   /**
    * reorder group needed for screen reader aria-described-by attribute
    */
