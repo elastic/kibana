@@ -31,7 +31,6 @@ import {
   SavedObjectsClientContract,
   SavedObjectsClient,
   CoreStart,
-  // ILegacyCustomClusterClient,
   ICustomClusterClient,
 } from '../../../core/server';
 import {
@@ -66,7 +65,6 @@ export class FetcherTask {
   private isSending = false;
   private internalRepository?: SavedObjectsClientContract;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
-  // private legacyElasticsearchClient?: ILegacyCustomClusterClient;
   private elasticsearchClient?: ICustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
@@ -81,7 +79,6 @@ export class FetcherTask {
   ) {
     this.internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
     this.telemetryCollectionManager = telemetryCollectionManager;
-    // this.legacyElasticsearchClient = elasticsearch.legacy.createClient('telemetry-fetcher');
     this.elasticsearchClient = elasticsearch.createClient('telemetry-fetcher');
 
     this.intervalId = timer(this.initialCheckDelayMs, this.checkIntervalMs).subscribe(() =>
@@ -93,9 +90,6 @@ export class FetcherTask {
     if (this.intervalId) {
       this.intervalId.unsubscribe();
     }
-    // if (this.legacyElasticsearchClient) {
-    //   this.legacyElasticsearchClient.close();
-    // }
     if (this.elasticsearchClient) {
       this.elasticsearchClient.close();
     }
