@@ -11,8 +11,22 @@ export const logEntryCursorRT = rt.type({
   time: rt.number,
   tiebreaker: rt.number,
 });
-
 export type LogEntryCursor = rt.TypeOf<typeof logEntryCursorRT>;
+
+export const logEntryBeforeCursorRT = rt.type({
+  before: rt.union([logEntryCursorRT, rt.literal('last')]),
+});
+export type LogEntryBeforeCursor = rt.TypeOf<typeof logEntryBeforeCursorRT>;
+
+export const logEntryAfterCursorRT = rt.type({
+  after: rt.union([logEntryCursorRT, rt.literal('first')]),
+});
+export type LogEntryAfterCursor = rt.TypeOf<typeof logEntryAfterCursorRT>;
+
+export const logEntryAroundCursorRT = rt.type({
+  center: logEntryCursorRT,
+});
+export type LogEntryAroundCursor = rt.TypeOf<typeof logEntryAroundCursorRT>;
 
 export const getLogEntryCursorFromHit = (hit: { sort: [number, number] }) =>
   decodeOrThrow(logEntryCursorRT)({

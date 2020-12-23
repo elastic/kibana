@@ -6,12 +6,18 @@
 
 import * as rt from 'io-ts';
 import { logSourceColumnConfigurationRT } from '../../http_api/log_sources';
-import { logEntryCursorRT, logEntryRT } from '../../log_entry';
+import {
+  logEntryAfterCursorRT,
+  logEntryAroundCursorRT,
+  logEntryBeforeCursorRT,
+  logEntryCursorRT,
+  logEntryRT,
+} from '../../log_entry';
 import { searchStrategyErrorRT } from '../common/errors';
 
 export const LOG_ENTRIES_SEARCH_STRATEGY = 'infra-log-entries';
 
-export const logEntriesBaseSearchRequestParamsRT = rt.intersection([
+const logEntriesBaseSearchRequestParamsRT = rt.intersection([
   rt.type({
     sourceId: rt.string,
     startTimestamp: rt.number,
@@ -26,17 +32,17 @@ export const logEntriesBaseSearchRequestParamsRT = rt.intersection([
 
 export const logEntriesBeforeSearchRequestParamsRT = rt.intersection([
   logEntriesBaseSearchRequestParamsRT,
-  rt.type({ before: rt.union([logEntryCursorRT, rt.literal('last')]) }),
+  logEntryBeforeCursorRT,
 ]);
 
 export const logEntriesAfterSearchRequestParamsRT = rt.intersection([
   logEntriesBaseSearchRequestParamsRT,
-  rt.type({ after: rt.union([logEntryCursorRT, rt.literal('first')]) }),
+  logEntryAfterCursorRT,
 ]);
 
 export const logEntriesCenteredSearchRequestParamsRT = rt.intersection([
   logEntriesBaseSearchRequestParamsRT,
-  rt.type({ center: logEntryCursorRT }),
+  logEntryAroundCursorRT,
 ]);
 
 export const logEntriesSearchRequestParamsRT = rt.union([
