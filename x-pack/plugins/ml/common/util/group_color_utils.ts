@@ -13,7 +13,7 @@ const COLORS = [
   euiVars.euiColorVis1,
   euiVars.euiColorVis2,
   euiVars.euiColorVis3,
-  // euiVars.euiColorVis4, // light pink, too hard to read with white text
+  euiVars.euiColorVis4,
   euiVars.euiColorVis5,
   euiVars.euiColorVis6,
   euiVars.euiColorVis7,

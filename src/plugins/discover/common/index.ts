@@ -27,5 +27,6 @@ export const FIELDS_LIMIT_SETTING = 'fields:popularLimit';
 export const CONTEXT_DEFAULT_SIZE_SETTING = 'context:defaultSize';
 export const CONTEXT_STEP_SETTING = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
+export const DOC_TABLE_LEGACY = 'doc_table:legacy';
 export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
 export const SEARCH_FIELDS_FROM_SOURCE = 'discover:searchFieldsFromSource';

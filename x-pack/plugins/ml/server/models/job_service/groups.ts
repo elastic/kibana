@@ -72,7 +72,9 @@ export function groupsProvider(mlClient: MlClient) {
       });
     }
 
-    return Object.keys(groups).map((g) => groups[g]);
+    return Object.keys(groups)
+      .sort()
+      .map((g) => groups[g]);
   }
 
   async function updateGroups(jobs: Job[]) {

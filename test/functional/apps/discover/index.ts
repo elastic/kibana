@@ -53,5 +53,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_date_nanos_mixed'));
     loadTestFile(require.resolve('./_indexpattern_without_timefield'));
     loadTestFile(require.resolve('./_discover_fields_api'));
+    loadTestFile(require.resolve('./_data_grid'));
+    loadTestFile(require.resolve('./_data_grid_context'));
+    loadTestFile(require.resolve('./_data_grid_field_data'));
+    loadTestFile(require.resolve('./_data_grid_doc_navigation'));
+    loadTestFile(require.resolve('./_data_grid_doc_table'));
   });
 }
