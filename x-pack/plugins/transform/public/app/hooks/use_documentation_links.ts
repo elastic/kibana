@@ -8,9 +8,8 @@ import { useAppDependencies } from '../app_dependencies';
 
 export const useDocumentationLinks = () => {
   const deps = useAppDependencies();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION, ELASTICSEARCH_DOCS } = deps.docLinks;
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = deps.docLinks;
   return {
-    esDocBasePath: `${ELASTICSEARCH_DOCS}`,
     esIndicesCreateIndex: deps.docLinks.links.apis.createIndex,
     esPluginDocBasePath: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`,
     esQueryDsl: deps.docLinks.links.query.queryDsl,
