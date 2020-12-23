@@ -299,7 +299,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
               selectedOperationDefinition?.input,
               currentFieldIsInvalid
             )}
-            helpText={selectedOperationDefinition?.getHelpMessage?.()}
+            helpText={selectedOperationDefinition?.getHelpMessage?.({
+              data: props.data,
+              uiSettings: props.uiSettings,
+              currentColumn: state.layers[layerId].columns[columnId],
+            })}
           >
             <FieldSelect
               fieldIsInvalid={currentFieldIsInvalid}

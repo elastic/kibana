@@ -127,6 +127,12 @@ export interface ParamEditorProps<C> {
   data: DataPublicPluginStart;
 }
 
+export interface HelpProps<C> {
+  currentColumn: C;
+  uiSettings: IUiSettingsClient;
+  data: DataPublicPluginStart;
+}
+
 export type TimeScalingMode = 'disabled' | 'mandatory' | 'optional';
 
 interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
@@ -202,7 +208,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    */
   timeScalingMode?: TimeScalingMode;
 
-  getHelpMessage?: () => string | React.ReactNode;
+  getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
 }
 
 interface BaseBuildColumnArgs {

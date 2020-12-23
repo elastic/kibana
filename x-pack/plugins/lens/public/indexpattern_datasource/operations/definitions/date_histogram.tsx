@@ -33,6 +33,7 @@ import { OperationDefinition } from './index';
 import { FieldBasedIndexPatternColumn } from './column_types';
 import {
   AggFunctionsMapping,
+  DataPublicPluginStart,
   IndexPatternAggRestrictions,
   search,
   UI_SETTINGS,
@@ -65,7 +66,7 @@ export const dateHistogramOperation: OperationDefinition<
   priority: 5, // Highest priority level used
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
-  getHelpMessage: () => <AutoDateHistogramPopover />,
+  getHelpMessage: (props) => <AutoDateHistogramPopover {...props} />,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       type === 'date' &&
@@ -352,7 +353,7 @@ function restrictedInterval(aggregationRestrictions?: Partial<IndexPatternAggRes
   );
 }
 
-const AutoDateHistogramPopover = () => {
+const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const autoDateHistogramHelpPopoverTitle = i18n.translate(
     'xpack.lens.indexPattern.dateHistogram.titleHelp',
@@ -365,6 +366,15 @@ const AutoDateHistogramPopover = () => {
   });
   const upToLabel = i18n.translate('xpack.lens.indexPattern.dateHistogram.upTo', {
     defaultMessage: 'Up to',
+  });
+
+  const formatterOptions = {
+    inputFormat: 'milliseconds',
+  };
+
+  const humanDurationFormatter = data.fieldFormats.deserialize({
+    id: 'duration',
+    params: formatterOptions,
   });
 
   return (
@@ -428,8 +438,11 @@ const AutoDateHistogramPopover = () => {
       <EuiBasicTable
         items={wrapMomentPrecision(() =>
           search.aggs.boundsDescendingRaw.map(({ bound, interval }) => ({
-            bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${bound.humanize()}`,
-            interval: interval.humanize(),
+            bound:
+              typeof bound === 'number'
+                ? infiniteBound
+                : `${upToLabel} ${humanDurationFormatter.convert(bound)}`,
+            interval: humanDurationFormatter.convert(interval),
           }))
         )}
         columns={[
@@ -451,21 +464,13 @@ const AutoDateHistogramPopover = () => {
   );
 };
 
-// Need to place this thing somewhere else
+// Below 5 seconds the "humanize" call returns the "few seconds" sentence, which is not ok for ms
+// This special config rewrite makes it sure to have precision also for sub-seconds durations
 // ref: https://github.com/moment/moment/issues/348
 function wrapMomentPrecision<T>(callback: () => T): T {
   // Save default values
   const roundingDefault = moment.relativeTimeRounding();
-  const units = [
-    { unit: 'y', value: 365 },
-    { unit: 'M', value: 12 },
-    { unit: 'w', value: 4 },
-    { unit: 'd', value: 31 },
-    { unit: 'h', value: 24 },
-    { unit: 'm', value: 60 },
-    { unit: 's', value: 60 },
-    { unit: 'ss', value: 0 },
-  ];
+  const units = [{ unit: 'ss', value: 0 }];
   const defaultValues = units.map(({ unit }) => moment.relativeTimeThreshold(unit) as number);
 
   moment.relativeTimeRounding((t) => {
