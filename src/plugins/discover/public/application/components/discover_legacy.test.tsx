@@ -67,7 +67,6 @@ function getProps(indexPattern: IndexPattern) {
   } as unknown) as DiscoverServices;
 
   return {
-    addColumn: jest.fn(),
     fetch: jest.fn(),
     fetchCounter: 0,
     fetchError: undefined,
@@ -75,6 +74,7 @@ function getProps(indexPattern: IndexPattern) {
     hits: esHits.length,
     indexPattern,
     minimumVisibleRows: 10,
+    onAddColumn: jest.fn(),
     onAddFilter: jest.fn(),
     onChangeInterval: jest.fn(),
     onMoveColumn: jest.fn(),
