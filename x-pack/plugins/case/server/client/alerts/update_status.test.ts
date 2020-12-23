@@ -27,7 +27,7 @@ describe('updateAlertsStatus', () => {
         ids: ['alert-id-1'],
         index: '.siem-signals',
         request: {},
-        status: 'closed',
+        status: CaseStatuses.closed,
       });
     });
 
