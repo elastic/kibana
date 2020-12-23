@@ -17,22 +17,18 @@
  * under the License.
  */
 import React from 'react';
-import { render } from 'enzyme';
-import { FieldName } from './field_name';
+import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { IndexPattern } from '../../../kibana_services';
 
-// Note that it currently provides just 2 basic tests, there should be more, but
-// the components involved will soon change
-test('FieldName renders a string field by providing fieldType and fieldName', () => {
-  const component = render(<FieldName fieldType="string" fieldName="test" />);
-  expect(component).toMatchSnapshot();
-});
+export interface GridContext {
+  expanded: ElasticSearchHit | undefined;
+  setExpanded: (hit: ElasticSearchHit | undefined) => void;
+  rows: ElasticSearchHit[];
+  onFilter: DocViewFilterFn;
+  indexPattern: IndexPattern;
+  isDarkMode: boolean;
+}
 
-test('FieldName renders a number field by providing a field record', () => {
-  const component = render(<FieldName fieldName={'test.test.test'} fieldType={'number'} />);
-  expect(component).toMatchSnapshot();
-});
+const defaultContext = ({} as unknown) as GridContext;
 
-test('FieldName renders a geo field', () => {
-  const component = render(<FieldName fieldName={'test.test.test'} fieldType={'geo_point'} />);
-  expect(component).toMatchSnapshot();
-});
+export const DiscoverGridContext = React.createContext<GridContext>(defaultContext);
