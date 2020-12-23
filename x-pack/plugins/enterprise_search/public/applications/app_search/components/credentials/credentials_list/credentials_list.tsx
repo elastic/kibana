@@ -40,6 +40,7 @@ export const CredentialsList: React.FC = () => {
     {
       name: 'Key',
       width: '36%',
+      className: 'eui-textBreakAll',
       render: (token: ApiToken) => {
         const { key } = token;
         if (!key) return null;
@@ -59,6 +60,10 @@ export const CredentialsList: React.FC = () => {
             )}
           </EuiCopy>
         );
+      },
+      mobileOptions: {
+        // @ts-ignore - EUI's type definitions need to be updated
+        width: '100%',
       },
     },
     {

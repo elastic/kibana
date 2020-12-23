@@ -73,7 +73,9 @@ export const urlStateStore = createContext<UrlState>({
   searchString: '',
   setUrlState: () => {},
 });
+
 const { Provider } = urlStateStore;
+
 export const UrlStateProvider: FC = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
@@ -164,7 +166,7 @@ export const useUrlState = (accessor: Accessor) => {
 
 type LegacyUrlKeys = 'mlExplorerSwimlane';
 
-type AppStateKey =
+export type AppStateKey =
   | 'mlSelectSeverity'
   | 'mlSelectInterval'
   | 'mlAnomaliesTable'
