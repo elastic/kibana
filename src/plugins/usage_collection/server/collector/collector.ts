@@ -19,7 +19,6 @@
 
 import {
   Logger,
-  LegacyAPICaller,
   ElasticsearchClient,
   ISavedObjectsRepository,
   SavedObjectsClientContract,
@@ -54,10 +53,6 @@ export type MakeSchemaFrom<Base> = {
  * @remark Bear in mind when testing your collector that your user has the same privileges as the Kibana Internal user to ensure the expected data is sent to the remote cluster.
  */
 export type CollectorFetchContext<WithKibanaRequest extends boolean | undefined = false> = {
-  /**
-   * @deprecated Scoped Legacy Elasticsearch client: use esClient instead
-   */
-  callCluster: LegacyAPICaller;
   /**
    * Request-scoped Elasticsearch client
    * @remark Bear in mind when testing your collector that your user has the same privileges as the Kibana Internal user to ensure the expected data is sent to the remote cluster (more info: {@link CollectorFetchContext})

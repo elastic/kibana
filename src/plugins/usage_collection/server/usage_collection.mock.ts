@@ -50,7 +50,6 @@ export const createUsageCollectionSetupMock = () => {
 
 export function createCollectorFetchContextMock(): jest.Mocked<CollectorFetchContext<false>> {
   const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext<false>> = {
-    callCluster: elasticsearchServiceMock.createLegacyClusterClient().callAsInternalUser,
     esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
     soClient: savedObjectsRepositoryMock.create(),
   };
@@ -61,7 +60,6 @@ export function createCollectorFetchContextWithKibanaMock(): jest.Mocked<
   CollectorFetchContext<true>
 > {
   const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext<true>> = {
-    callCluster: elasticsearchServiceMock.createLegacyClusterClient().callAsInternalUser,
     esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
     soClient: savedObjectsRepositoryMock.create(),
     kibanaRequest: httpServerMock.createKibanaRequest(),
