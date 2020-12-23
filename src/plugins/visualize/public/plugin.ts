@@ -44,7 +44,7 @@ import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/pub
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { VisualizeServices } from './application/types';
+import { VisEditorConstructor, VisualizeServices } from './application/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
@@ -57,6 +57,7 @@ import {
   setIndexPatterns,
   setQueryService,
   setShareService,
+  setDefaultEditor,
 } from './services';
 import { visualizeFieldAction } from './actions/visualize_field_action';
 import { createVisualizeUrlGenerator } from './url_generator';
@@ -81,9 +82,18 @@ export interface VisualizePluginSetupDependencies {
   uiActions: UiActionsSetup;
 }
 
+export interface VisualizePluginSetup {
+  setDefaultEditor: (editor: VisEditorConstructor) => void;
+}
+
 export class VisualizePlugin
   implements
-    Plugin<void, void, VisualizePluginSetupDependencies, VisualizePluginStartDependencies> {
+    Plugin<
+      VisualizePluginSetup,
+      void,
+      VisualizePluginSetupDependencies,
+      VisualizePluginStartDependencies
+    > {
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
@@ -231,6 +241,12 @@ export class VisualizePlugin
         category: FeatureCatalogueCategory.DATA,
       });
     }
+
+    return {
+      setDefaultEditor: (editor) => {
+        setDefaultEditor(editor);
+      },
+    } as VisualizePluginSetup;
   }
 
   public start(core: CoreStart, plugins: VisualizePluginStartDependencies) {

@@ -160,26 +160,6 @@ export class CategorizationJobCreator extends JobCreator {
     return this._categorizationAnalyzer;
   }
 
-  public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
-    this._overrideConfigs(job, datafeed);
-    this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
-    const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
-
-    const dtr = detectors[0];
-    if (detectors.length && dtr.agg !== null && dtr.field !== null) {
-      this._detectorType =
-        dtr.agg.id === ML_JOB_AGGREGATION.COUNT
-          ? ML_JOB_AGGREGATION.COUNT
-          : ML_JOB_AGGREGATION.RARE;
-
-      const bs = job.analysis_config.bucket_span;
-      this.setDetectorType(this._detectorType);
-      // set the bucketspan back to the original value
-      // as setDetectorType applies a default
-      this.bucketSpan = bs;
-    }
-  }
-
   public get categorizationPerPartitionField() {
     return this._partitionFieldName;
   }
@@ -202,6 +182,45 @@ export class CategorizationJobCreator extends JobCreator {
           detector.partition_field_name = fieldName;
         });
       }
+    }
+  }
+
+  // override the setter and getter for the per-partition toggle
+  // so we can remove the partition field in the wizard when
+  // per-partition categorization is disabled.
+  public get perPartitionCategorization() {
+    return this._job_config.analysis_config.per_partition_categorization?.enabled === true;
+  }
+
+  public set perPartitionCategorization(enabled: boolean) {
+    this._initPerPartitionCategorization();
+    this._job_config.analysis_config.per_partition_categorization!.enabled = enabled;
+    if (enabled === false) {
+      this.categorizationPerPartitionField = null;
+    }
+  }
+
+  public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
+    this._overrideConfigs(job, datafeed);
+    this.createdBy = CREATED_BY_LABEL.CATEGORIZATION;
+    const detectors = getRichDetectors(job, datafeed, this.additionalFields, false);
+
+    const dtr = detectors[0];
+    if (dtr !== undefined && dtr.agg !== null && dtr.field !== null) {
+      const detectorType =
+        dtr.agg.id === ML_JOB_AGGREGATION.COUNT
+          ? ML_JOB_AGGREGATION.COUNT
+          : ML_JOB_AGGREGATION.RARE;
+
+      const bs = job.analysis_config.bucket_span;
+      this.setDetectorType(detectorType);
+      if (dtr.partitionField !== null) {
+        this.categorizationPerPartitionField = dtr.partitionField.id;
+      }
+
+      // set the bucketspan back to the original value
+      // as setDetectorType applies a default
+      this.bucketSpan = bs;
     }
   }
 }

@@ -118,17 +118,17 @@ export const DataDrivenColumns = React.memo<Props>(
               })}
             </>
           </EventsTdContent>
-          {hasRowRenderers && (
+          {hasRowRenderers ? (
             <EuiScreenReaderOnly data-test-subj="hasRowRendererScreenReaderOnly">
               <p>{i18n.EVENT_HAS_AN_EVENT_RENDERER(ariaRowindex)}</p>
             </EuiScreenReaderOnly>
-          )}
+          ) : null}
 
-          {notesCount && (
+          {notesCount ? (
             <EuiScreenReaderOnly data-test-subj="hasNotesScreenReaderOnly">
               <p>{i18n.EVENT_HAS_NOTES({ row: ariaRowindex, notesCount })}</p>
             </EuiScreenReaderOnly>
-          )}
+          ) : null}
         </EventsTd>
       ))}
     </EventsTdGroupData>
