@@ -10,11 +10,14 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicySOAttributes } from '../
 import { getPackageUsageSummary } from './get';
 
 describe('When using EPM `get` services', () => {
-  describe('and invoking getPackageUsageSummary()', () => {
-    let soClient: jest.Mocked<SavedObjectsClientContract>;
+  let soClient: jest.Mocked<SavedObjectsClientContract>;
 
+  beforeEach(() => {
+    soClient = savedObjectsClientMock.create();
+  });
+
+  describe('and invoking getPackageUsageSummary()', () => {
     beforeEach(() => {
-      soClient = savedObjectsClientMock.create();
       const savedObjects: Array<SavedObjectsFindResult<PackagePolicySOAttributes>> = [
         {
           type: 'ingest-package-policies',
