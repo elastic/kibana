@@ -25,6 +25,7 @@ import {
   addExceptionListItem,
   deleteExceptionListById,
   deleteExceptionListItemById,
+  exportExceptionList,
   fetchExceptionListById,
   fetchExceptionListItemById,
   fetchExceptionLists,
@@ -868,6 +869,52 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual({});
+    });
+  });
+
+  describe('#exportExceptionList', () => {
+    const blob: Blob = {
+      arrayBuffer: jest.fn(),
+      size: 89,
+      slice: jest.fn(),
+      stream: jest.fn(),
+      text: jest.fn(),
+      type: 'json',
+    } as Blob;
+
+    beforeEach(() => {
+      httpMock.fetch.mockResolvedValue(blob);
+    });
+
+    test('it invokes "exportExceptionList" with expected url and body values', async () => {
+      await exportExceptionList({
+        http: httpMock,
+        id: 'some-id',
+        listId: 'list-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+
+      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_export', {
+        method: 'GET',
+        query: {
+          id: 'some-id',
+          list_id: 'list-id',
+          namespace_type: 'single',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('it returns expected list to export on success', async () => {
+      const exceptionResponse = await exportExceptionList({
+        http: httpMock,
+        id: 'some-id',
+        listId: 'list-id',
+        namespaceType: 'single',
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse).toEqual(blob);
     });
   });
 });
