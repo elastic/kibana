@@ -7,10 +7,8 @@
 import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import {
-  LogEntry,
-  LogEntryField,
-} from '../../../../common/search_strategies/log_entries/log_entry';
+import { LogEntryField } from '../../../../common/log_entry';
+import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { FieldValue } from '../log_text_stream/field_value';
 
@@ -22,7 +20,7 @@ export const LogEntryFieldsTable: React.FC<{
     () =>
       onSetFieldFilter
         ? (field: LogEntryField) => () => {
-            onSetFieldFilter?.(`${field.field}:"${field.value}"`, logEntry.id, logEntry.key);
+            onSetFieldFilter?.(`${field.field}:"${field.value}"`, logEntry.id, logEntry.cursor);
           }
         : undefined,
     [logEntry, onSetFieldFilter]
