@@ -127,7 +127,7 @@ export const DatePickerWrapper: FC = () => {
           <EuiSuperDatePicker
             start={time.from}
             end={time.to}
-            isPaused={refreshInterval.pause}
+            isPaused={refreshInterval.pause || (!refreshInterval.pause && !refreshInterval.value)}
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
