@@ -38,7 +38,6 @@ import { IUiSettingsClient } from 'src/core/server';
 import { IUiSettingsClient as IUiSettingsClient_3 } from 'kibana/server';
 import { KibanaRequest } from 'kibana/server';
 import { KibanaRequest as KibanaRequest_2 } from 'src/core/server';
-import { LegacyAPICaller } from 'src/core/server';
 import { Logger } from 'src/core/server';
 import { Logger as Logger_2 } from 'kibana/server';
 import { LoggerFactory } from '@kbn/logging';
