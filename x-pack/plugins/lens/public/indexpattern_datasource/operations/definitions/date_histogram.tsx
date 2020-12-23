@@ -407,7 +407,7 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
         </p>
         <p>
           {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoAdvancedExplanation', {
-            defaultMessage: 'The specific interval adopted follow the logic:',
+            defaultMessage: 'The specific interval follows this logic:',
           })}
         </p>
         <EuiBasicTable
