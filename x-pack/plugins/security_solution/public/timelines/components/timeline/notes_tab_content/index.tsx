@@ -23,11 +23,7 @@ import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineActions } from '../../../store/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import {
-  TimelineExpandedEventType,
-  TimelineStatus,
-  TimelineTabs,
-} from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
 import { appSelectors } from '../../../../common/store/app';
 import { AddNote } from '../../notes/add_note';
 import { CREATED_BY, NOTES } from '../../notes/translations';
