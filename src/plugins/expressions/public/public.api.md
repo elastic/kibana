@@ -531,7 +531,7 @@ export interface ExpressionRenderError extends Error {
 // @public (undocumented)
 export class ExpressionRenderHandler {
     // Warning: (ae-forgotten-export) The symbol "ExpressionRenderHandlerParams" needs to be exported by the entry point index.d.ts
-    constructor(element: HTMLElement, { onRenderError, renderMode, hasCompatibleActions, }?: ExpressionRenderHandlerParams);
+    constructor(element: HTMLElement, { onRenderError, renderMode, syncColors, hasCompatibleActions, }?: ExpressionRenderHandlerParams);
     // (undocumented)
     destroy: () => void;
     // (undocumented)
@@ -903,6 +903,8 @@ export interface IExpressionLoaderParams {
     // (undocumented)
     searchSessionId?: string;
     // (undocumented)
+    syncColors?: boolean;
+    // (undocumented)
     uiState?: unknown;
     // (undocumented)
     variables?: Record<string, any>;
@@ -919,6 +921,8 @@ export interface IInterpreterRenderHandlers {
     getRenderMode: () => RenderMode;
     // (undocumented)
     hasCompatibleActions?: (event: any) => Promise<boolean>;
+    // (undocumented)
+    isSyncColorsEnabled: () => boolean;
     // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)
