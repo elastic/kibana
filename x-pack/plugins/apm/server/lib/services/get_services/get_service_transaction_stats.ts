@@ -51,18 +51,16 @@ export async function getServiceTransactionStats({
 }: AggregationParams) {
   const { apmEventClient, start, end, esFilter } = setup;
 
-  const count = {
-    value_count: {
-      field: getTransactionDurationFieldForAggregatedTransactions(
-        searchAggregatedTransactions
-      ),
-    },
-  };
-
   const outcomes = getOutcomeAggregation({ searchAggregatedTransactions });
 
   const metrics = {
-    count,
+    real_document_count: {
+      value_count: {
+        field: getTransactionDurationFieldForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      },
+    },
     avg_duration: {
       avg: {
         field: getTransactionDurationFieldForAggregatedTransactions(
@@ -104,7 +102,7 @@ export async function getServiceTransactionStats({
             transactionType: {
               terms: {
                 field: TRANSACTION_TYPE,
-                order: { count: 'desc' },
+                order: { real_document_count: 'desc' },
               },
               aggs: {
                 ...metrics,
@@ -182,14 +180,14 @@ export async function getServiceTransactionStats({
         },
         transactionsPerMinute: {
           value: calculateAvgDuration({
-            value: topTransactionTypeBucket.count.value,
+            value: topTransactionTypeBucket.real_document_count.value,
             deltaAsMinutes,
           }),
           timeseries: topTransactionTypeBucket.timeseries.buckets.map(
             (dateBucket) => ({
               x: dateBucket.key,
               y: calculateAvgDuration({
-                value: dateBucket.count.value,
+                value: dateBucket.real_document_count.value,
                 deltaAsMinutes,
               }),
             })
