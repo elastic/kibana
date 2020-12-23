@@ -17,6 +17,10 @@ import {
   EuiTextArea,
   EuiSelectableOption,
   EuiSwitch,
+  EuiAccordion,
+  EuiSpacer,
+  EuiPanel,
+  EuiTextColor,
 } from '@elastic/eui';
 import { UrlDrilldownConfig } from '../../types';
 import './index.scss';
@@ -28,6 +32,9 @@ import {
   txtUrlTemplateLabel,
   txtUrlTemplateOpenInNewTab,
   txtUrlTemplatePlaceholder,
+  txtUrlTemplateAdditionalOptions,
+  txtUrlTemplateEncodeUrl,
+  txtUrlTemplateEncodeDescription,
 } from './i18n';
 
 export interface UrlDrilldownCollectConfig {
@@ -110,15 +117,39 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
           inputRef={textAreaRef}
         />
       </EuiFormRow>
-      <EuiFormRow hasChildLabel={false}>
-        <EuiSwitch
-          id="openInNewTab"
-          name="openInNewTab"
-          label={txtUrlTemplateOpenInNewTab}
-          checked={config.openInNewTab}
-          onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
-        />
-      </EuiFormRow>
+      <EuiSpacer size={'l'} />
+      <EuiAccordion
+        id="accordion_url_drilldown_additional_options"
+        buttonContent={txtUrlTemplateAdditionalOptions}
+      >
+        <EuiSpacer size={'s'} />
+        <EuiPanel color="subdued" borderRadius="none" hasShadow={false} style={{ border: 'none' }}>
+          <EuiFormRow hasChildLabel={false}>
+            <EuiSwitch
+              id="openInNewTab"
+              name="openInNewTab"
+              label={txtUrlTemplateOpenInNewTab}
+              checked={config.openInNewTab}
+              onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
+            />
+          </EuiFormRow>
+          <EuiFormRow hasChildLabel={false} fullWidth>
+            <EuiSwitch
+              id="encodeUrl"
+              name="encodeUrl"
+              label={
+                <>
+                  {txtUrlTemplateEncodeUrl}
+                  <EuiSpacer size={'s'} />
+                  <EuiTextColor color="subdued">{txtUrlTemplateEncodeDescription}</EuiTextColor>
+                </>
+              }
+              checked={config.encodeUrl ?? true}
+              onChange={() => onConfig({ ...config, encodeUrl: !(config.encodeUrl ?? true) })}
+            />
+          </EuiFormRow>
+        </EuiPanel>
+      </EuiAccordion>
     </>
   );
 };

@@ -105,6 +105,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   public readonly createConfig = () => ({
     url: { template: '' },
     openInNewTab: false,
+    encodeUrl: true,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
