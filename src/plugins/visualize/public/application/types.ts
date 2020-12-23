@@ -128,6 +128,7 @@ export interface SavedVisInstance {
 
 export interface ByValueVisInstance {
   vis: Vis;
+  savedVis: VisSavedObject;
   savedSearch?: SavedObject;
   embeddableHandler: VisualizeEmbeddableContract;
 }

@@ -44,6 +44,7 @@ export const useSavedVisInstance = (
     savedVisInstance?: SavedVisInstance;
     visEditorController?: IEditorController;
   }>({});
+
   const visEditorRef = useRef<HTMLDivElement | null>(null);
   const visId = useRef('');
 
@@ -115,7 +116,6 @@ export const useSavedVisInstance = (
             embeddableHandler.render(visEditorRef.current);
           }
         }
-
         setState({
           savedVisInstance,
           visEditorController,
@@ -172,12 +172,12 @@ export const useSavedVisInstance = (
       getSavedVisInstance();
     }
   }, [
+    services,
     eventEmitter,
     isChromeVisible,
-    services,
+    visualizationIdFromUrl,
     state.savedVisInstance,
     state.visEditorController,
-    visualizationIdFromUrl,
   ]);
 
   useEffect(() => {
