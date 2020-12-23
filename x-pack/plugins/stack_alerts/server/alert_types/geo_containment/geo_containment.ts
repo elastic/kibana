@@ -78,23 +78,6 @@ export function transformResults(
   return orderedResults;
 }
 
-function getOffsetTime(delayOffsetWithUnits: string, oldTime: Date): Date {
-  const timeUnit = delayOffsetWithUnits.slice(-1);
-  const time: number = +delayOffsetWithUnits.slice(0, -1);
-
-  const adjustedDate = new Date(oldTime.getTime());
-  if (timeUnit === 's') {
-    adjustedDate.setSeconds(adjustedDate.getSeconds() - time);
-  } else if (timeUnit === 'm') {
-    adjustedDate.setMinutes(adjustedDate.getMinutes() - time);
-  } else if (timeUnit === 'h') {
-    adjustedDate.setHours(adjustedDate.getHours() - time);
-  } else if (timeUnit === 'd') {
-    adjustedDate.setDate(adjustedDate.getDate() - time);
-  }
-  return adjustedDate;
-}
-
 export function getActiveEntriesAndGenerateAlerts(
   prevLocationMap: Record<string, LatestEntityLocation>,
   currLocationMap: Map<string, LatestEntityLocation>,
@@ -130,7 +113,14 @@ export function getActiveEntriesAndGenerateAlerts(
   return allActiveEntriesMap;
 }
 export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType['executor'] =>
-  async function ({ previousStartedAt, startedAt, services, params, alertId, state }) {
+  async function ({
+    previousStartedAt: currIntervalStartTime,
+    startedAt: currIntervalEndTime,
+    services,
+    params,
+    alertId,
+    state,
+  }) {
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
       : await getShapesFilters(
@@ -145,15 +135,6 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
         );
 
     const executeEsQuery = await executeEsQueryFactory(params, services, log, shapesFilters);
-
-    let currIntervalStartTime = previousStartedAt;
-    let currIntervalEndTime = startedAt;
-    if (params.delayOffsetWithUnits) {
-      if (currIntervalStartTime) {
-        currIntervalStartTime = getOffsetTime(params.delayOffsetWithUnits, currIntervalStartTime);
-      }
-      currIntervalEndTime = getOffsetTime(params.delayOffsetWithUnits, currIntervalEndTime);
-    }
 
     // Start collecting data only on the first cycle
     let currentIntervalResults: SearchResponse<unknown> | undefined;

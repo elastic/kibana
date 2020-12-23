@@ -34,7 +34,6 @@ describe('alertType', () => {
       boundaryIndexId: 'testIndex',
       boundaryGeoField: 'testField',
       boundaryNameField: 'testField',
-      delayOffsetWithUnits: 'testOffset',
     };
 
     expect(alertType.validate?.params?.validate(params)).toBeTruthy();
