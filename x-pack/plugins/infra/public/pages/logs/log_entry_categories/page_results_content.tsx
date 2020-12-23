@@ -178,21 +178,19 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
       <ResultsContentPage>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="m">
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiFlexItem />
-                <EuiFlexItem grow={false}>
-                  <EuiSuperDatePicker
-                    start={selectedTimeRange.startTime}
-                    end={selectedTimeRange.endTime}
-                    onTimeChange={handleSelectedTimeRangeChange}
-                    isPaused={autoRefresh.isPaused}
-                    refreshInterval={autoRefresh.interval}
-                    onRefreshChange={handleAutoRefreshChange}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                <EuiSuperDatePicker
+                  start={selectedTimeRange.startTime}
+                  end={selectedTimeRange.endTime}
+                  onTimeChange={handleSelectedTimeRangeChange}
+                  isPaused={autoRefresh.isPaused}
+                  refreshInterval={autoRefresh.interval}
+                  onRefreshChange={handleAutoRefreshChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <CategoryJobNoticesSection
