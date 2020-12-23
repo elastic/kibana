@@ -15,9 +15,24 @@ import { CoreVitalItem } from './core_vital_item';
 
 import { NO_DATA } from './translations';
 
-const KibanaReactContext = createKibanaReactContext(({
-  uiSettings: { get: () => {}, get$: () => new Observable() },
-} as unknown) as Partial<CoreStart>);
+/* HOC to wrap components in KibanaReact context as well as in18 context.
+ * is not opinionated and can be used with enzyme, react testing library or
+ * react test renderer */
+function withKibanaIntl(WrappedComponent: React.ComponentType<any>) {
+  const KibanaReactContext = createKibanaReactContext(({
+    uiSettings: { get: () => {}, get$: () => new Observable() },
+  } as unknown) as Partial<CoreStart>);
+
+  return (props: any) => (
+    <IntlProvider locale="en">
+      <KibanaReactContext.Provider>
+        <WrappedComponent {...props} />
+      </KibanaReactContext.Provider>
+    </IntlProvider>
+  );
+}
+
+const ConnectedCoreVitalItem = withKibanaIntl(CoreVitalItem);
 
 describe('CoreVitalItem', () => {
   const value = '0.005';
@@ -28,18 +43,14 @@ describe('CoreVitalItem', () => {
 
   it('renders if value is truthy', () => {
     const { getByText } = render(
-      <IntlProvider locale="en">
-        <KibanaReactContext.Provider>
-          <CoreVitalItem
-            title={title}
-            value={value}
-            ranks={[85, 10, 5]}
-            loading={loading}
-            thresholds={thresholds}
-            helpLabel={helpLabel}
-          />
-        </KibanaReactContext.Provider>
-      </IntlProvider>
+      <ConnectedCoreVitalItem
+        title={title}
+        value={value}
+        ranks={[85, 10, 5]}
+        loading={loading}
+        thresholds={thresholds}
+        helpLabel={helpLabel}
+      />
     );
 
     expect(getByText(title)).toBeInTheDocument();
@@ -51,18 +62,14 @@ describe('CoreVitalItem', () => {
 
   it('renders loading state when loading is truthy', () => {
     const { queryByText, getByText } = render(
-      <IntlProvider locale="en">
-        <KibanaReactContext.Provider>
-          <CoreVitalItem
-            title={title}
-            value={value}
-            ranks={[85, 10, 5]}
-            loading={true}
-            thresholds={thresholds}
-            helpLabel={helpLabel}
-          />
-        </KibanaReactContext.Provider>
-      </IntlProvider>
+      <ConnectedCoreVitalItem
+        title={title}
+        value={value}
+        ranks={[85, 10, 5]}
+        loading={true}
+        thresholds={thresholds}
+        helpLabel={helpLabel}
+      />
     );
 
     expect(queryByText(value)).not.toBeInTheDocument();
@@ -71,18 +78,14 @@ describe('CoreVitalItem', () => {
 
   it('renders no data UI if value is falsey and loading is falsey', () => {
     const { getByText } = render(
-      <IntlProvider locale="en">
-        <KibanaReactContext.Provider>
-          <CoreVitalItem
-            title={title}
-            value={null}
-            ranks={[85, 10, 5]}
-            loading={loading}
-            thresholds={thresholds}
-            helpLabel={helpLabel}
-          />
-        </KibanaReactContext.Provider>
-      </IntlProvider>
+      <ConnectedCoreVitalItem
+        title={title}
+        value={null}
+        ranks={[85, 10, 5]}
+        loading={loading}
+        thresholds={thresholds}
+        helpLabel={helpLabel}
+      />
     );
 
     expect(getByText(NO_DATA)).toBeInTheDocument();
