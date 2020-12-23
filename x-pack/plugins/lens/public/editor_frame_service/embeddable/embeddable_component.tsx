@@ -8,13 +8,13 @@ import {
   EmbeddableRenderer,
   EmbeddableStart,
 } from '../../../../../../src/plugins/embeddable/public';
-import { LensByReferenceInput, LensByValueInput } from './embeddable';
-import { Document } from '../../persistence';
-import { IndexPatternPersistedState } from '../../indexpattern_datasource/types';
-import { XYState } from '../../xy_visualization/types';
-import { PieVisualizationState } from '../../pie_visualization/types';
-import { DatatableVisualizationState } from '../../datatable_visualization/visualization';
-import { State as MetricState } from '../../metric_visualization/types';
+import type { LensByReferenceInput, LensByValueInput } from './embeddable';
+import type { Document } from '../../persistence';
+import type { IndexPatternPersistedState } from '../../indexpattern_datasource/types';
+import type { XYState } from '../../xy_visualization/types';
+import type { PieVisualizationState } from '../../pie_visualization/types';
+import type { DatatableVisualizationState } from '../../datatable_visualization/visualization';
+import type { State as MetricState } from '../../metric_visualization/types';
 
 type LensAttributes<TVisType, TVisState> = Omit<
   Document,
