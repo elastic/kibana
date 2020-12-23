@@ -26,24 +26,29 @@ interface ChartSplitterProps {
   sort?: GroupBySort;
 }
 
-export const ChartSplitter = (props: ChartSplitterProps) => (
-  <>
-    <GroupBy
-      id="__chart_splitter__"
-      by={(spec, datum) => {
-        const splitTypeAccessor = props.splitColumnAccessor || props.splitRowAccessor;
-        if (splitTypeAccessor) {
-          return typeof splitTypeAccessor === 'function'
-            ? splitTypeAccessor(datum)
-            : datum[splitTypeAccessor];
-        }
-        return spec.id;
-      }}
-      sort={props.sort || 'dataIndex'}
-    />
-    <SmallMultiples
-      splitVertically={props.splitRowAccessor ? '__chart_splitter__' : undefined}
-      splitHorizontally={props.splitColumnAccessor ? '__chart_splitter__' : undefined}
-    />
-  </>
-);
+export const ChartSplitter = ({
+  splitColumnAccessor,
+  splitRowAccessor,
+  sort,
+}: ChartSplitterProps) =>
+  splitColumnAccessor || splitRowAccessor ? (
+    <>
+      <GroupBy
+        id="__chart_splitter__"
+        by={(spec, datum) => {
+          const splitTypeAccessor = splitColumnAccessor || splitRowAccessor;
+          if (splitTypeAccessor) {
+            return typeof splitTypeAccessor === 'function'
+              ? splitTypeAccessor(datum)
+              : datum[splitTypeAccessor];
+          }
+          return spec.id;
+        }}
+        sort={sort || 'dataIndex'}
+      />
+      <SmallMultiples
+        splitVertically={splitRowAccessor ? '__chart_splitter__' : undefined}
+        splitHorizontally={splitColumnAccessor ? '__chart_splitter__' : undefined}
+      />
+    </>
+  ) : null;

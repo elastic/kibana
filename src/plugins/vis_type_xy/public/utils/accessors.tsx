@@ -37,11 +37,15 @@ const getFieldName = (fieldName: string, index?: number) => {
   return `${fieldName}${indexStr}`;
 };
 
+export const isRangeAggType = (type: string | null) =>
+  type === BUCKET_TYPES.DATE_RANGE || type === BUCKET_TYPES.RANGE;
+
 /**
  * Returns accessor function for complex accessor types
  * @param aspect
+ * @param isComplex - forces to be functional/complex accessor
  */
-export const getComplexAccessor = (fieldName: string) => (
+export const getComplexAccessor = (fieldName: string, isComplex: boolean = false) => (
   aspect: Aspect,
   index?: number
 ): Accessor | AccessorFn | undefined => {
@@ -49,12 +53,7 @@ export const getComplexAccessor = (fieldName: string) => (
     return;
   }
 
-  if (
-    !(
-      (aspect.aggType === BUCKET_TYPES.DATE_RANGE || aspect.aggType === BUCKET_TYPES.RANGE) &&
-      aspect.formatter
-    )
-  ) {
+  if (!((isComplex || isRangeAggType(aspect.aggType)) && aspect.formatter)) {
     return aspect.accessor;
   }
 

@@ -267,10 +267,10 @@ const VisComponent = (props: VisComponentProps) => {
     ? compact(config.aspects.series.map(getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)))
     : [];
   const splitChartColumnAccessor = config.aspects.splitColumn
-    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(config.aspects.splitColumn, 0)
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitColumn)
     : undefined;
   const splitChartRowAccessor = config.aspects.splitRow
-    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR)(config.aspects.splitRow, 0)
+    ? getComplexAccessor(COMPLEX_SPLIT_ACCESSOR, true)(config.aspects.splitRow)
     : undefined;
 
   return (
@@ -281,12 +281,10 @@ const VisComponent = (props: VisComponentProps) => {
         legendPosition={legendPosition}
       />
       <Chart size="100%">
-        {(splitChartColumnAccessor || splitChartRowAccessor) && (
-          <ChartSplitter
-            splitColumnAccessor={splitChartColumnAccessor}
-            splitRowAccessor={splitChartRowAccessor}
-          />
-        )}
+        <ChartSplitter
+          splitColumnAccessor={splitChartColumnAccessor}
+          splitRowAccessor={splitChartRowAccessor}
+        />
         <XYSettings
           {...config}
           showLegend={showLegend}
