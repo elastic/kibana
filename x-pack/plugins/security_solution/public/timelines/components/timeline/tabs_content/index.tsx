@@ -10,14 +10,19 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import {
+  useShallowEqualSelector,
+  useDeepEqualSelector,
+} from '../../../../common/hooks/use_selector';
 import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
 import {
   getActiveTabSelector,
+  getNoteIdsSelector,
   getNotesSelector,
   getPinnedEventSelector,
   getShowTimelineSelector,
+  getEventIdToNoteIdsSelector,
 } from './selectors';
 import * as i18n from './translations';
 
@@ -137,13 +142,35 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({ timelineId, graphEve
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
   const getNumberOfPinnedEvents = useMemo(() => getPinnedEventSelector(), []);
-  const getNumberOfNotes = useMemo(() => getNotesSelector(), []);
+  const getAppNotes = useMemo(() => getNotesSelector(), []);
+  const getTimelineNoteIds = useMemo(() => getNoteIdsSelector(), []);
+  const getTimelinePinnedEventNotes = useMemo(() => getEventIdToNoteIdsSelector(), []);
+
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
   const numberOfPinnedEvents = useShallowEqualSelector((state) =>
     getNumberOfPinnedEvents(state, timelineId)
   );
-  const numberOfNotes = useShallowEqualSelector((state) => getNumberOfNotes(state));
+  const globalTimelineNoteIds = useDeepEqualSelector((state) =>
+    getTimelineNoteIds(state, timelineId)
+  );
+  const eventIdToNoteIds = useDeepEqualSelector((state) =>
+    getTimelinePinnedEventNotes(state, timelineId)
+  );
+  const appNotes = useDeepEqualSelector((state) => getAppNotes(state));
+
+  const allTimelineNoteIds = useMemo(() => {
+    const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
+      (acc, v) => [...acc, ...v],
+      []
+    );
+    return [...globalTimelineNoteIds, ...eventNoteIds];
+  }, [globalTimelineNoteIds, eventIdToNoteIds]);
+
+  const numberOfNotes = useMemo(
+    () => appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote.id)).length,
+    [appNotes, allTimelineNoteIds]
+  );
 
   const setQueryAsActiveTab = useCallback(() => {
     dispatch(

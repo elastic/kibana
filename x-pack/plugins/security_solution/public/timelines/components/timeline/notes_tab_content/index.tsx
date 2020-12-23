@@ -130,6 +130,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     createdBy,
     expandedEvent,
     eventIdToNoteIds,
+    noteIds,
     status: timelineStatus,
   } = useDeepEqualSelector((state) => getTimelineNotes(state, timelineId));
 
@@ -141,7 +142,20 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
   );
   const [newNote, setNewNote] = useState('');
   const isImmutable = timelineStatus === TimelineStatus.immutable;
-  const notes: TimelineResultNote[] = useDeepEqualSelector(getNotesAsCommentsList);
+  const appNotes: TimelineResultNote[] = useDeepEqualSelector(getNotesAsCommentsList);
+
+  const allTimelineNoteIds = useMemo(() => {
+    const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
+      (acc, v) => [...acc, ...v],
+      []
+    );
+    return [...noteIds, ...eventNoteIds];
+  }, [noteIds, eventIdToNoteIds]);
+
+  const notes = useMemo(
+    () => appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote?.noteId ?? '-1')),
+    [appNotes, allTimelineNoteIds]
+  );
 
   // filter for savedObjectId to make sure we don't display `elastic` user while saving the note
   const participants = useMemo(() => uniqBy('updatedBy', filter('savedObjectId', notes)), [notes]);
@@ -157,7 +171,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
 
   const EventDetailsContent = useMemo(
     () =>
-      ((expandedEvent as unknown) as TimelineExpandedEventType)?.eventId ? (
+      expandedEvent?.eventId != null ? (
         <EventDetails
           browserFields={browserFields}
           docValueFields={docValueFields}

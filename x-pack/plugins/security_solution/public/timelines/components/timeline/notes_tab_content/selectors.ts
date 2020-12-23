@@ -14,6 +14,7 @@ export const getTimelineNoteSelector = () =>
       createdBy: timeline.createdBy,
       expandedEvent: timeline.expandedEvent?.notes ?? {},
       eventIdToNoteIds: timeline?.eventIdToNoteIds ?? {},
+      noteIds: timeline.noteIds,
       status: timeline.status,
     };
   });
