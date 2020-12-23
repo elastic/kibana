@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('the search term should be highlighted in the field data', async function () {
         // marks is the style that highlights the text in yellow
         const marks = await PageObjects.discover.getMarks();
-        expect(marks.length).to.be(25);
+        expect(marks.length).to.be(50);
         expect(marks.indexOf('php')).to.be(0);
       });
 
