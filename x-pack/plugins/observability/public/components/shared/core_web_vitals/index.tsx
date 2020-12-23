@@ -45,13 +45,6 @@ function formatToMilliseconds(value?: number | null) {
   return formatToSec(value, 'ms');
 }
 
-function formatToFixed3(value?: number | null) {
-  if (typeof value === 'undefined' || value === null || typeof value !== 'number') {
-    return null;
-  }
-  return value.toFixed(3);
-}
-
 const CoreVitalsThresholds = {
   LCP: { good: '2.5s', bad: '4.0s' },
   FID: { good: '100ms', bad: '300ms' },
@@ -112,7 +105,7 @@ export function CoreVitals({
         <EuiFlexItem style={{ flexBasis: 380 }}>
           <CoreVitalItem
             title={CLS_LABEL}
-            value={formatToFixed3(cls)}
+            value={cls?.toFixed(3) ?? null}
             ranks={clsRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.CLS}
