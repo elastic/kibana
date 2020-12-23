@@ -21,32 +21,28 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 import execa from 'execa';
-import grunt from 'grunt';
 import { safeLoad } from 'js-yaml';
 
-const JOBS_YAML = readFileSync(resolve(__dirname, '../.ci/jobs.yml'), 'utf8');
+import { run } from '@kbn/dev-utils';
+
+const JOBS_YAML = readFileSync(resolve(__dirname, '../../.ci/jobs.yml'), 'utf8');
 const TEST_TAGS = safeLoad(JOBS_YAML)
   .JOB.filter((id) => id.startsWith('kibana-ciGroup'))
   .map((id) => id.replace(/^kibana-/, ''));
 
-grunt.registerTask(
-  'functionalTests:ensureAllTestsInCiGroup',
-  'Check that all of the functional tests are in a CI group',
-  async function () {
-    const done = this.async();
+run(async ({ log }) => {
+  try {
+    const result = await execa(process.execPath, [
+      'scripts/functional_test_runner',
+      ...TEST_TAGS.map((tag) => `--include-tag=${tag}`),
+      '--config',
+      'test/functional/config.js',
+      '--test-stats',
+    ]);
+    const stats = JSON.parse(result.stderr);
 
-    try {
-      const result = await execa(process.execPath, [
-        'scripts/functional_test_runner',
-        ...TEST_TAGS.map((tag) => `--include-tag=${tag}`),
-        '--config',
-        'test/functional/config.js',
-        '--test-stats',
-      ]);
-      const stats = JSON.parse(result.stderr);
-
-      if (stats.excludedTests.length > 0) {
-        grunt.fail.fatal(`
+    if (stats.excludedTests.length > 0) {
+      log.error(`
           ${stats.excludedTests.length} tests are excluded by the ciGroup tags, make sure that
           all test suites have a "ciGroup{X}" tag and that "tasks/functional_test_groups.js"
           knows about the tag that you are using.
@@ -55,12 +51,11 @@ grunt.registerTask(
 
           - ${stats.excludedTests.join('\n          - ')}
         `);
-        return;
-      }
-
-      done();
-    } catch (error) {
-      grunt.fail.fatal(error.stack);
+      process.exitCode = 1;
+      return;
     }
+  } catch (error) {
+    log.error(error.stack);
+    process.exitCode = 1;
   }
-);
+});

@@ -18,23 +18,36 @@ import {
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
-import { IndexPatternColumn } from '../../../indexpattern';
 import { updateColumnParam, isReferenced } from '../../layer_helpers';
 import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesRangeInput } from './values_range_input';
 import { getInvalidFieldMessage } from '../helpers';
+import type { IndexPatternLayer } from '../../../types';
 
-function ofName(name: string) {
+function ofName(name?: string) {
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
     defaultMessage: 'Top values of {name}',
-    values: { name },
+    values: {
+      name:
+        name ??
+        i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+          defaultMessage: 'Missing field',
+        }),
+    },
   });
 }
 
-function isSortableByColumn(column: IndexPatternColumn) {
-  return !column.isBucketed && column.operationType !== 'last_value';
+function isSortableByColumn(layer: IndexPatternLayer, columnId: string) {
+  const column = layer.columns[columnId];
+  return (
+    column &&
+    !column.isBucketed &&
+    column.operationType !== 'last_value' &&
+    !('references' in column) &&
+    !isReferenced(layer, columnId)
+  );
 }
 
 const DEFAULT_SIZE = 3;
@@ -89,10 +102,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   },
   buildColumn({ layer, field, indexPattern }) {
     const existingMetricColumn = Object.entries(layer.columns)
-      .filter(
-        ([columnId, column]) =>
-          column && !isReferenced(layer, columnId) && isSortableByColumn(column)
-      )
+      .filter(([columnId]) => isSortableByColumn(layer, columnId))
       .map(([id]) => id)[0];
 
     const previousBucketsLength = Object.values(layer.columns).filter(
@@ -138,7 +148,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     }).toAst();
   },
   getDefaultLabel: (column, indexPattern) =>
-    ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
+    ofName(indexPattern.getFieldByName(column.sourceField)?.displayName),
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
     if ('format' in newParams && field.type !== 'number') {
@@ -152,11 +162,13 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       params: newParams,
     };
   },
-  onOtherColumnChanged: (currentColumn, columns) => {
+  onOtherColumnChanged: (layer, thisColumnId, changedColumnId) => {
+    const columns = layer.columns;
+    const currentColumn = columns[thisColumnId] as TermsIndexPatternColumn;
     if (currentColumn.params.orderBy.type === 'column') {
       // check whether the column is still there and still a metric
       const columnSortedBy = columns[currentColumn.params.orderBy.columnId];
-      if (!columnSortedBy || !isSortableByColumn(columnSortedBy)) {
+      if (!columnSortedBy || !isSortableByColumn(layer, changedColumnId)) {
         return {
           ...currentColumn,
           params: {
@@ -194,7 +206,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     }
 
     const orderOptions = Object.entries(layer.columns)
-      .filter(([sortId, column]) => isSortableByColumn(column))
+      .filter(([sortId]) => isSortableByColumn(layer, sortId))
       .map(([sortId, column]) => {
         return {
           value: toValue({ type: 'column', columnId: sortId }),

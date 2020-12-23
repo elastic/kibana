@@ -62,6 +62,7 @@ export class DashboardContainerFactoryDefinition
       isEmbeddedExternally: false,
       isFullScreenMode: false,
       useMargins: true,
+      syncColors: true,
     };
   }
 
