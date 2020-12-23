@@ -23,11 +23,12 @@ import { EventDetailsWidthProvider } from '../../../../common/components/events_
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
-import { TimelineModel, TimelineTabs } from '../../../store/timeline/model';
+import { TimelineModel } from '../../../store/timeline/model';
 import { EventDetails } from '../event_details';
 import { ToggleExpandedEvent } from '../../../store/timeline/actions';
 import { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;

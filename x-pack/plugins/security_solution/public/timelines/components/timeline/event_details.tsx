@@ -25,7 +25,7 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useTimelineEventsDetails } from '../../containers/details';
 import { timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../store/timeline/defaults';
-import { TimelineTabs } from '../../store/timeline/model';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 interface EventDetailsProps {
   browserFields: BrowserFields;

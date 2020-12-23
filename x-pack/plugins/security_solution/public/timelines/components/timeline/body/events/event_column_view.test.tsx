@@ -11,9 +11,8 @@ import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import * as i18n from '../translations';
 
 import { EventColumnView } from './event_column_view';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import { TimelineTabs, TimelineType } from '../../../../../../common/types/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import { TimelineTabs } from '../../../../store/timeline/model';
 
 jest.mock('../../../../../common/hooks/use_selector');
 

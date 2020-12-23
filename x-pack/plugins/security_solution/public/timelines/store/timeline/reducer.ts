@@ -103,8 +103,7 @@ import {
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineType } from '../../../../common/types/timeline';
-import { TimelineTabs } from './model';
+import { TimelineType, TimelineTabs } from '../../../../common/types/timeline';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,

@@ -20,7 +20,7 @@ import {
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 
-import { TimelineExpandedEventType } from '../../../../../common/types/timeline';
+import { TimelineExpandedEventType, TimelineTabs } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
 import {
   EventDetails,
@@ -30,7 +30,6 @@ import {
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { LineClamp } from '../../../../common/components/line_clamp';
 import * as i18n from './translations';
-import { TimelineTabs } from '../../../store/timeline/model';
 
 export type HandleOnEventClosed = () => void;
 interface Props {

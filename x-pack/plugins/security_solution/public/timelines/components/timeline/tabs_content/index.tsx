@@ -8,11 +8,11 @@ import { EuiBadge, EuiLoadingContent, EuiTabs, EuiTab } from '@elastic/eui';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store/timeline';
-import { TimelineTabs } from '../../../store/timeline/model';
 import {
   getActiveTabSelector,
   getNotesSelector,

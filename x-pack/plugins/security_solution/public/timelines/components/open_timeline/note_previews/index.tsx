@@ -17,7 +17,7 @@ import { MarkdownRenderer } from '../../../../common/components/markdown_editor'
 import { timelineActions } from '../../../store/timeline';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
-import { TimelineTabs } from '../../../store/timeline/model';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
