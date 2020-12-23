@@ -134,7 +134,12 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   private buildUrl(config: Config, context: ActionContext): string {
-    const url = urlDrilldownCompileUrl(config.url.template, this.getRuntimeVariables(context));
+    const doEncode = config.encodeUrl ?? true;
+    const url = urlDrilldownCompileUrl(
+      config.url.template,
+      this.getRuntimeVariables(context),
+      doEncode
+    );
     return url;
   }
 
