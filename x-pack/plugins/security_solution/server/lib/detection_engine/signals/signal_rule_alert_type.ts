@@ -189,10 +189,7 @@ export const signalRulesAlertType = ({
           (indexName) => privileges.index[indexName].read
         );
 
-        if (
-          indexesWithReadPrivileges.length > 0 &&
-          indexesWithNoReadPrivileges.length >= indexesWithReadPrivileges.length
-        ) {
+        if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
           // some indices have read privileges others do not.
           // set a partial failure status
           const errorString = `Missing required read permissions on indexes: ${JSON.stringify(
