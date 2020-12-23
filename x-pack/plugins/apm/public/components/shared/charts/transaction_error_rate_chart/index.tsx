@@ -36,7 +36,7 @@ export function TransactionErrorRateChart({
   const { start, end, transactionName } = urlParams;
 
   const { data, status } = useFetcher(() => {
-    if (serviceName && start && end) {
+    if (transactionType && serviceName && start && end) {
       return callApmApi({
         endpoint:
           'GET /api/apm/services/{serviceName}/transactions/charts/error_rate',

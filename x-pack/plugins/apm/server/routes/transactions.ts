@@ -35,9 +35,7 @@ export const transactionGroupsRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.type({
-        transactionType: t.string,
-      }),
+      t.type({ transactionType: t.string }),
       uiFiltersRt,
       rangeRt,
     ]),
@@ -199,10 +197,8 @@ export const transactionThroughputChatsRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.partial({
-        transactionType: t.string,
-        transactionName: t.string,
-      }),
+      t.type({ transactionType: t.string }),
+      t.partial({ transactionName: t.string }),
       uiFiltersRt,
       rangeRt,
     ]),
@@ -287,12 +283,8 @@ export const transactionChartsBreakdownRoute = createRoute({
       serviceName: t.string,
     }),
     query: t.intersection([
-      t.type({
-        transactionType: t.string,
-      }),
-      t.partial({
-        transactionName: t.string,
-      }),
+      t.type({ transactionType: t.string }),
+      t.partial({ transactionName: t.string }),
       uiFiltersRt,
       rangeRt,
     ]),
@@ -322,10 +314,8 @@ export const transactionChartsErrorRateRoute = createRoute({
     query: t.intersection([
       uiFiltersRt,
       rangeRt,
-      t.partial({
-        transactionType: t.string,
-        transactionName: t.string,
-      }),
+      t.type({ transactionType: t.string }),
+      t.partial({ transactionName: t.string }),
     ]),
   }),
   options: { tags: ['access:apm'] },
