@@ -4,18 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchClient, LegacyCallAPIOptions } from 'src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { take } from 'rxjs/operators';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { Observable } from 'rxjs';
 import { PluginsSetup } from '../plugin';
 import { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
-
-type CallCluster = <T = unknown>(
-  endpoint: string,
-  clientParams: Record<string, unknown>,
-  options?: LegacyCallAPIOptions
-) => Promise<T>;
 
 interface SpacesAggregationResponse {
   hits: {

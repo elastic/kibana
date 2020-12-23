@@ -16,7 +16,6 @@ import {
   elasticsearchServiceMock,
   pluginInitializerContextConfigMock,
 } from 'src/core/server/mocks';
-import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
 
 interface SetupOpts {
