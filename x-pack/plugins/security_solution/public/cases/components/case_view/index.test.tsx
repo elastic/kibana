@@ -224,7 +224,7 @@ describe('CaseView ', () => {
     });
   });
 
-  it('should dispatch update state when status is changed', async () => {
+  it('should update status', async () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -240,7 +240,11 @@ describe('CaseView ', () => {
         .find('button[data-test-subj="case-view-status-dropdown-closed"]')
         .first()
         .simulate('click');
-      expect(updateCaseProperty).toHaveBeenCalled();
+
+      wrapper.update();
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateObject.updateKey).toEqual('status');
+      expect(updateObject.updateValue).toEqual('closed');
     });
   });
 
@@ -680,6 +684,25 @@ describe('CaseView ', () => {
           .first()
           .text()
       ).toBe('added an alert from Awesome rule');
+    });
+  });
+
+  it('should update settings', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <Router history={mockHistory}>
+          <CaseComponent {...caseProps} />
+        </Router>
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
+
+      wrapper.update();
+      const updateObject = updateCaseProperty.mock.calls[0][0];
+      expect(updateObject.updateKey).toEqual('settings');
+      expect(updateObject.updateValue).toEqual({ syncAlerts: false });
     });
   });
 });
