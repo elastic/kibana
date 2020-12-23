@@ -243,10 +243,6 @@ const VisComponent = (props: VisComponentProps) => {
   const isDarkMode = getThemeService().useDarkMode();
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
 
-  /**
-   * Stores all series labels to compute colors with the new palette
-   */
-  // let allSeries: string[] = useMemo(() => [], []);
   const splitAccessors = config.aspects.series?.map(({ accessor, formatter }) => {
     return { accessor, formatter };
   });
