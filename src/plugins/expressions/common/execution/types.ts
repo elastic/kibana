@@ -83,6 +83,8 @@ export interface ExecutionContext<
     type: string,
     id: string
   ) => Promise<SavedObject<T>>;
+
+  isSyncColorsEnabled?: () => boolean;
 }
 
 /**

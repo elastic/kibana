@@ -183,6 +183,7 @@ export class Execution<
       logDatatable: (name: string, datatable: Datatable) => {
         inspectorAdapters.tables[name] = datatable;
       },
+      isSyncColorsEnabled: () => execution.params.syncColors,
       ...(execution.params as any).extraContext,
     };
   }

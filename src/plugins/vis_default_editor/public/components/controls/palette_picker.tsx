@@ -39,7 +39,7 @@ export function PalettePicker<ParamName extends string>({
   return (
     <EuiFormRow
       fullWidth
-      label={i18n.translate('visTypePie.palettePicker.label', {
+      label={i18n.translate('visDefaultEditor.palettePicker.label', {
         defaultMessage: 'Color palette',
       })}
     >

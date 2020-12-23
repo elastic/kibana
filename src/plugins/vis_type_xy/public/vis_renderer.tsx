@@ -45,9 +45,9 @@ export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
   name: visName,
   displayName: 'XY visualization',
   reuseDomNode: true,
-  render: (domNode, { visData, visConfig, visType }, handlers) => {
+  render: (domNode, { visData, visConfig, visType, syncColors }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData, visType);
-    const isSplitChart = Boolean(visConfig.dimensions.splitRow || visConfig.dimensions.splitRow);
+    const isSplitChart = Boolean(visConfig.dimensions.splitRow);
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
     render(
@@ -61,6 +61,7 @@ export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
               renderComplete={handlers.done}
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}
+              syncColors={syncColors}
             />
           </VisualizationContainer>
         </>

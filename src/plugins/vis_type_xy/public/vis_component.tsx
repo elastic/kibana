@@ -82,6 +82,7 @@ export interface VisComponentProps {
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
+  syncColors: boolean;
 }
 
 export type VisComponentType = typeof VisComponent;
@@ -93,7 +94,6 @@ const VisComponent = (props: VisComponentProps) => {
       props.visParams.addLegend == null ? true : props.visParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
-
   useEffect(() => {
     const fn = () => {
       props?.uiState?.emit?.('reload');
@@ -222,7 +222,7 @@ const VisComponent = (props: VisComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams } = props;
+  const { visData, visParams, syncColors } = props;
 
   const config = getConfig(visData, visParams);
   const timeZone = getTimeZone();
@@ -275,11 +275,11 @@ const VisComponent = (props: VisComponentProps) => {
               totalSeriesAtDepth: allSeries.length,
             },
           ],
-          { maxDepth: 1, totalSeries: allSeries.length, behindText: false }
+          { maxDepth: 1, totalSeries: allSeries.length, behindText: false, syncColors }
         );
       return outputColor || null;
     },
-    [allSeries, getSeriesName, props.uiState, splitAccessors, visParams.palette.name]
+    [allSeries, getSeriesName, props.uiState, splitAccessors, syncColors, visParams.palette.name]
   );
   const xAccessor = getXAccessor(config.aspects.x);
   const splitSeriesAccessors = config.aspects.series
