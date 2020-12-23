@@ -3,14 +3,30 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import React from 'react';
+import { renderWithIntl } from '@kbn/test/jest';
 
 import { DonutChartLegend } from '../donut_chart_legend';
-import { shallowWithIntl } from '@kbn/test/jest';
-import React from 'react';
+
+import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../translations';
 
 describe('DonutChartLegend', () => {
   it('applies valid props as expected', () => {
-    const wrapper = shallowWithIntl(<DonutChartLegend down={23} up={45} />);
-    expect(wrapper).toMatchSnapshot();
+    const up = 45;
+    const down = 23;
+    const component = renderWithIntl(<DonutChartLegend down={down} up={up} />);
+
+    expect(
+      component.find('[data-test-subj="xpack.uptime.snapshot.donutChart.up.label"]').text()
+    ).toBe(STATUS_UP_LABEL);
+    expect(component.find('[data-test-subj="xpack.uptime.snapshot.donutChart.up"]').text()).toBe(
+      `${up}`
+    );
+    expect(
+      component.find('[data-test-subj="xpack.uptime.snapshot.donutChart.down.label"]').text()
+    ).toBe(STATUS_DOWN_LABEL);
+    expect(component.find('[data-test-subj="xpack.uptime.snapshot.donutChart.down"]').text()).toBe(
+      `${down}`
+    );
   });
 });
