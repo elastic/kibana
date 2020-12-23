@@ -152,6 +152,28 @@ describe('DocumentCreationLogic', () => {
           });
         });
       });
+
+      describe('errors & warnings', () => {
+        it('should be cleared', () => {
+          mount({ errors: ['error'], warnings: ['warnings'] });
+          DocumentCreationLogic.actions.closeDocumentCreation();
+
+          expect(DocumentCreationLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            errors: [],
+            warnings: [],
+          });
+        });
+      });
+
+      describe('textInput & fileInput', () => {
+        it('should be reset to default values', () => {
+          mount({ textInput: 'test', fileInput: mockFile });
+          DocumentCreationLogic.actions.closeDocumentCreation();
+
+          expect(DocumentCreationLogic.values).toEqual(DEFAULT_VALUES);
+        });
+      });
     });
 
     describe('setCreationStep', () => {

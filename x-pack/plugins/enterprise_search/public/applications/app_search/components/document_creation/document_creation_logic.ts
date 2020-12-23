@@ -91,12 +91,14 @@ export const DocumentCreationLogic = kea<
       dedent(DOCUMENTS_API_JSON_EXAMPLE),
       {
         setTextInput: (_, { textInput }) => textInput,
+        closeDocumentCreation: () => dedent(DOCUMENTS_API_JSON_EXAMPLE),
       },
     ],
     fileInput: [
       null,
       {
         setFileInput: (_, { fileInput }) => fileInput,
+        closeDocumentCreation: () => null,
       },
     ],
     isUploading: [
@@ -113,6 +115,7 @@ export const DocumentCreationLogic = kea<
       {
         onSubmitJson: () => [],
         setWarnings: (_, { warnings }) => warnings,
+        closeDocumentCreation: () => [],
       },
     ],
     errors: [
@@ -120,6 +123,7 @@ export const DocumentCreationLogic = kea<
       {
         onSubmitJson: () => [],
         setErrors: (_, { errors }) => (Array.isArray(errors) ? errors : [errors]),
+        closeDocumentCreation: () => [],
       },
     ],
     summary: [
