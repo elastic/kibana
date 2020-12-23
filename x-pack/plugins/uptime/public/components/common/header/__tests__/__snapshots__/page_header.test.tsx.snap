@@ -114,6 +114,7 @@ Array [
     >
       <div
         class="euiTabs euiTabs--condensed"
+        data-test-subj="uptimeTabs"
         role="tablist"
         style="padding-left:16px"
       >
@@ -416,6 +417,7 @@ Array [
     >
       <div
         class="euiTabs euiTabs--condensed"
+        data-test-subj="uptimeTabs"
         role="tablist"
         style="padding-left:16px"
       >
@@ -718,6 +720,7 @@ Array [
     >
       <div
         class="euiTabs euiTabs--condensed"
+        data-test-subj="uptimeTabs"
         role="tablist"
         style="padding-left:16px"
       >

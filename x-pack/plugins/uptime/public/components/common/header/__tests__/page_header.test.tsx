@@ -83,9 +83,7 @@ describe('PageHeader', () => {
       history
     );
     expect(component.find('h1').text()).toBe(monitorName);
-    expect(component.find('[data-test-subj="uptimeSettingsToOverviewLink"]').length).toBe(0);
-    expect(component.find('[data-test-subj="uptimeCertificatesLink"]').length).toBe(0);
-    expect(component.find('[data-test-subj="settings-page-link"]').length).toBe(0);
+    expect(component.find('[data-test-subj="uptimeTabs"]').length).toBe(0);
   });
 
   it('renders tabs when not on a monitor or step detail page', () => {
@@ -96,8 +94,6 @@ describe('PageHeader', () => {
       </MountWithReduxProvider>,
       history
     );
-    expect(component.find('[data-test-subj="uptimeSettingsToOverviewLink"]').length).toBe(1);
-    expect(component.find('[data-test-subj="uptimeCertificatesLink"]').length).toBe(1);
-    expect(component.find('[data-test-subj="settings-page-link"]').length).toBe(1);
+    expect(component.find('[data-test-subj="uptimeTabs"]').length).toBe(1);
   });
 });
