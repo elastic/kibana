@@ -8,16 +8,14 @@ import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Logger } from 'src/core/server';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
-import { AlertServices, AlertTypeState } from '../../../../alerts/server';
-import { ActionGroupId, GEO_THRESHOLD_ID, GeoThresholdParams } from './alert_type';
+import {
+  ActionGroupId,
+  GEO_THRESHOLD_ID,
+  GeoThresholdAlertType,
+  GeoThresholdInstanceState,
+} from './alert_type';
 
-interface LatestEntityLocation {
-  location: number[];
-  shapeLocationId: string;
-  entityName: string;
-  dateInShape: string | null;
-  docId: string;
-}
+export type LatestEntityLocation = GeoThresholdInstanceState;
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
@@ -172,22 +170,8 @@ function getOffsetTime(delayOffsetWithUnits: string, oldTime: Date): Date {
   return adjustedDate;
 }
 
-export const getGeoThresholdExecutor = (log: Logger) =>
-  async function ({
-    previousStartedAt,
-    startedAt,
-    services,
-    params,
-    alertId,
-    state,
-  }: {
-    previousStartedAt: Date | null;
-    startedAt: Date;
-    services: AlertServices;
-    params: GeoThresholdParams;
-    alertId: string;
-    state: AlertTypeState;
-  }): Promise<AlertTypeState> {
+export const getGeoThresholdExecutor = (log: Logger): GeoThresholdAlertType['executor'] =>
+  async function ({ previousStartedAt, startedAt, services, params, alertId, state }) {
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
       : await getShapesFilters(

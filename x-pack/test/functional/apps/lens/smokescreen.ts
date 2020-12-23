@@ -407,6 +407,81 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
     });
 
+    it('should create a valid XY chart with references', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'moving_average',
+        keepOpen: true,
+      });
+      await PageObjects.lens.configureReference({
+        operation: 'sum',
+        field: 'bytes',
+      });
+      await PageObjects.lens.closeDimensionEditor();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'cumulative_sum',
+        keepOpen: true,
+      });
+      await PageObjects.lens.configureReference({
+        field: 'Records',
+      });
+      await PageObjects.lens.closeDimensionEditor();
+
+      // Two Y axes that are both valid
+      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(2);
+    });
+
+    /**
+     * The edge cases are:
+     *
+     * 1. Showing errors when creating a partial configuration
+     * 2. Being able to drag in a new field while in partial config
+     * 3. Being able to switch charts while in partial config
+     */
+    it('should handle edge cases in reference-based operations', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'cumulative_sum',
+      });
+      expect(await PageObjects.lens.getErrorCount()).to.eql(1);
+
+      await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
+      expect(await PageObjects.lens.getErrorCount()).to.eql(2);
+
+      await PageObjects.lens.dragFieldToDimensionTrigger(
+        '@timestamp',
+        'lnsXY_xDimensionPanel > lns-empty-dimension'
+      );
+      expect(await PageObjects.lens.getErrorCount()).to.eql(1);
+
+      expect(await PageObjects.lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics')).to.eql(
+        'Cumulative sum of (incomplete)'
+      );
+    });
+
     it('should allow to change index pattern', async () => {
       await PageObjects.lens.switchFirstLayerIndexPattern('log*');
       expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal('log*');

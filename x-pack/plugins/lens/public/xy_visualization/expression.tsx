@@ -85,7 +85,7 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-type XYChartRenderProps = XYChartProps & {
+export type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
@@ -94,6 +94,7 @@ type XYChartRenderProps = XYChartProps & {
   onClickValue: (data: LensFilterEvent['data']) => void;
   onSelectRange: (data: LensBrushEvent['data']) => void;
   renderMode: RenderMode;
+  syncColors: boolean;
 };
 
 export const xyChart: ExpressionFunctionDefinition<
@@ -249,6 +250,7 @@ export const getXyChartRenderer = (dependencies: {
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
           renderMode={handlers.getRenderMode()}
+          syncColors={handlers.isSyncColorsEnabled()}
         />
       </I18nProvider>,
       domNode,
@@ -318,6 +320,7 @@ export function XYChart({
   onClickValue,
   onSelectRange,
   renderMode,
+  syncColors,
 }: XYChartRenderProps) {
   const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -691,6 +694,7 @@ export function XYChart({
                   maxDepth: 1,
                   behindText: false,
                   totalSeries: colorAssignment.totalSeriesCount,
+                  syncColors,
                 },
                 palette.params
               );
