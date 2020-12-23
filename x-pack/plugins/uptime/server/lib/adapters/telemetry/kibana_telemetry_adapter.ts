@@ -197,8 +197,8 @@ export class KibanaTelemetryAdapter {
 
     const numberOfUniqueMonitors: number = result?.aggregations?.unique_monitors?.value ?? 0;
     const numberOfUniqueLocations: number = result?.aggregations?.unique_locations?.value ?? 0;
-    const monitorNameStats: any = result?.aggregations?.monitor_name;
-    const locationNameStats: any = result?.aggregations?.observer_loc_name;
+    const monitorNameStats = result?.aggregations?.monitor_name;
+    const locationNameStats = result?.aggregations?.observer_loc_name;
     const uniqueMonitors: any = result?.aggregations?.monitors.buckets;
 
     const bucketId = this.getBucketToIncrement();
