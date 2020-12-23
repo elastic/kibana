@@ -31,6 +31,7 @@ export type IExpressionRendererExtraHandlers = Record<string, any>;
 export interface ExpressionRenderHandlerParams {
   onRenderError?: RenderErrorHandlerFnType;
   renderMode?: RenderMode;
+  syncColors?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
 }
 
@@ -63,6 +64,7 @@ export class ExpressionRenderHandler {
     {
       onRenderError,
       renderMode,
+      syncColors,
       hasCompatibleActions = async () => false,
     }: ExpressionRenderHandlerParams = {}
   ) {
@@ -100,6 +102,9 @@ export class ExpressionRenderHandler {
       },
       getRenderMode: () => {
         return renderMode || 'display';
+      },
+      isSyncColorsEnabled: () => {
+        return syncColors || false;
       },
       hasCompatibleActions,
     };

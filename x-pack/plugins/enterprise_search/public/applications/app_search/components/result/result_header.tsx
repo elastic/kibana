@@ -13,12 +13,11 @@ import './result_header.scss';
 
 interface Props {
   showScore: boolean;
+  isMetaEngine: boolean;
   resultMeta: ResultMeta;
 }
 
-export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta }) => {
-  const showEngineLabel: boolean = resultMeta.id !== resultMeta.scopedId;
-
+export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta, isMetaEngine }) => {
   return (
     <header className="appSearchResultHeader">
       {showScore && (
@@ -33,7 +32,7 @@ export const ResultHeader: React.FC<Props> = ({ showScore, resultMeta }) => {
       )}
 
       <div className="appSearchResultHeader__column">
-        {showEngineLabel && (
+        {isMetaEngine && (
           <ResultHeaderItem
             data-test-subj="ResultEngine"
             field="engine"

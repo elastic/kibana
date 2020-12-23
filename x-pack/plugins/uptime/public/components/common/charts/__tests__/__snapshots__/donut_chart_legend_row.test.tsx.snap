@@ -15,6 +15,7 @@ exports[`DonutChartLegendRow passes appropriate props 1`] = `
   </Styled(EuiFlexItem)>
   <Styled(EuiFlexItem)
     component="span"
+    data-test-subj="foo.label"
     grow={false}
   >
     Foo

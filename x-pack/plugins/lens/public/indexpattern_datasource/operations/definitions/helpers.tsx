@@ -62,3 +62,12 @@ export function getInvalidFieldMessage(
       ]
     : undefined;
 }
+
+export function getSafeName(name: string, indexPattern: IndexPattern): string {
+  const field = indexPattern.getFieldByName(name);
+  return field
+    ? field.displayName
+    : i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+        defaultMessage: 'Missing field',
+      });
+}

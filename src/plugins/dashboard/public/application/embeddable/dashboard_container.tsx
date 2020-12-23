@@ -59,6 +59,7 @@ export interface DashboardContainerInput extends ContainerInput {
   timeRange: TimeRange;
   description?: string;
   useMargins: boolean;
+  syncColors?: boolean;
   viewMode: ViewMode;
   filters: Filter[];
   title: string;
@@ -93,6 +94,7 @@ export interface InheritedChildInput extends IndexSignature {
   hidePanelTitles?: boolean;
   id: string;
   searchSessionId?: string;
+  syncColors?: boolean;
 }
 
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerServices>;
@@ -269,6 +271,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       filters,
       searchSessionId,
+      syncColors,
     } = this.input;
     return {
       filters,
@@ -279,6 +282,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       viewMode,
       id,
       searchSessionId,
+      syncColors,
     };
   }
 }
