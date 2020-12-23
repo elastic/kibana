@@ -24,7 +24,7 @@ export function transformResults(
   results: SearchResponse<unknown> | undefined,
   dateField: string,
   geoField: string
-): Map<string, LatestEntityLocation> {
+): Map<string, LatestEntityLocation[]> {
   if (!results) {
     return new Map();
   }
@@ -64,13 +64,15 @@ export function transformResults(
     // Get unique
     .reduce(
       (
-        accu: Map<string, LatestEntityLocation>,
+        accu: Map<string, LatestEntityLocation[]>,
         el: LatestEntityLocation & { entityName: string }
       ) => {
         const { entityName, ...locationData } = el;
         if (!accu.has(entityName)) {
-          accu.set(entityName, locationData);
+          accu.set(entityName, []);
         }
+        // @ts-ignore
+        accu.get(entityName).push(locationData);
         return accu;
       },
       new Map()
@@ -79,8 +81,8 @@ export function transformResults(
 }
 
 export function getActiveEntriesAndGenerateAlerts(
-  prevLocationMap: Record<string, LatestEntityLocation>,
-  currLocationMap: Map<string, LatestEntityLocation>,
+  prevLocationMap: Record<string, LatestEntityLocation[]>,
+  currLocationMap: Map<string, LatestEntityLocation[]>,
   alertInstanceFactory: AlertServices<
     GeoContainmentInstanceState,
     GeoContainmentInstanceContext
@@ -88,27 +90,29 @@ export function getActiveEntriesAndGenerateAlerts(
   shapesIdsNamesMap: Record<string, unknown>,
   currIntervalEndTime: Date
 ) {
-  const allActiveEntriesMap: Map<string, LatestEntityLocation> = new Map([
+  const allActiveEntriesMap: Map<string, LatestEntityLocation[]> = new Map([
     ...Object.entries(prevLocationMap || {}),
     ...currLocationMap,
   ]);
-  allActiveEntriesMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
-    const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
-    const context = {
-      entityId: entityName,
-      entityDateTime: dateInShape ? new Date(dateInShape).toISOString() : null,
-      entityDocumentId: docId,
-      detectionDateTime: new Date(currIntervalEndTime).toISOString(),
-      entityLocation: `POINT (${location[0]} ${location[1]})`,
-      containingBoundaryId: shapeLocationId,
-      containingBoundaryName,
-    };
-    const alertInstanceId = `${entityName}-${containingBoundaryName}`;
-    if (shapeLocationId === OTHER_CATEGORY) {
-      allActiveEntriesMap.delete(entityName);
-    } else {
-      alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
-    }
+  allActiveEntriesMap.forEach((locationsArr, entityName) => {
+    locationsArr.forEach(({ location, shapeLocationId, dateInShape, docId }) => {
+      const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
+      const context = {
+        entityId: entityName,
+        entityDateTime: dateInShape ? new Date(dateInShape).toISOString() : null,
+        entityDocumentId: docId,
+        detectionDateTime: new Date(currIntervalEndTime).toISOString(),
+        entityLocation: `POINT (${location[0]} ${location[1]})`,
+        containingBoundaryId: shapeLocationId,
+        containingBoundaryName,
+      };
+      const alertInstanceId = `${entityName}-${containingBoundaryName}`;
+      if (shapeLocationId === OTHER_CATEGORY) {
+        allActiveEntriesMap.delete(entityName);
+      } else {
+        alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
+      }
+    });
   });
   return allActiveEntriesMap;
 }
@@ -149,14 +153,14 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
       currentIntervalResults = await executeEsQuery(currIntervalStartTime, currIntervalEndTime);
     }
 
-    const currLocationMap: Map<string, LatestEntityLocation> = transformResults(
+    const currLocationMap: Map<string, LatestEntityLocation[]> = transformResults(
       currentIntervalResults,
       params.dateField,
       params.geoField
     );
 
     const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
-      state.prevLocationMap as Record<string, LatestEntityLocation>,
+      state.prevLocationMap as Record<string, LatestEntityLocation[]>,
       currLocationMap,
       services.alertInstanceFactory,
       shapesIdsNamesMap,
