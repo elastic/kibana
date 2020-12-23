@@ -16,18 +16,10 @@ interface Props {
   children?: ReactNode;
   jobId: string;
   external?: boolean;
-  serviceName?: string;
-  transactionType?: string;
 }
 
-export function MLSingleMetricLink({
-  jobId,
-  serviceName,
-  transactionType,
-  external,
-  children,
-}: Props) {
-  const href = useSingleMetricHref({ jobId, serviceName, transactionType });
+export function MLExplorerLink({ jobId, external, children }: Props) {
+  const href = useExplorerHref({ jobId });
 
   return (
     <EuiLink
@@ -39,15 +31,7 @@ export function MLSingleMetricLink({
   );
 }
 
-export function useSingleMetricHref({
-  jobId,
-  serviceName,
-  transactionType,
-}: {
-  jobId: string;
-  serviceName?: string;
-  transactionType?: string;
-}) {
+export function useExplorerHref({ jobId }: { jobId: string }) {
   const {
     core,
     plugins: { ml },
@@ -66,23 +50,12 @@ export function useSingleMetricHref({
     refreshPaused = timePickerRefreshIntervalDefaults.pause,
   } = urlParams;
 
-  const entities =
-    serviceName && transactionType
-      ? {
-          entities: {
-            'service.name': serviceName,
-            'transaction.type': transactionType,
-          },
-        }
-      : {};
-
   const href = useMlHref(ml, core.http.basePath.get(), {
-    page: ML_PAGES.SINGLE_METRIC_VIEWER,
+    page: ML_PAGES.ANOMALY_EXPLORER,
     pageState: {
       jobIds: [jobId],
       timeRange: { from: rangeFrom, to: rangeTo },
       refreshInterval: { pause: refreshPaused, value: refreshInterval },
-      ...entities,
     },
   });
 

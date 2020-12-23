@@ -34,8 +34,7 @@ export function MLManageJobsLink({ children, external }: Props) {
     rangeFrom = 'now-1h',
     rangeTo = 'now',
     refreshInterval = timePickerRefreshIntervalDefaults.value,
-    // defaults it to true to avoid infinite loop when refreshInterval is "0"
-    refreshPaused = true,
+    refreshPaused = timePickerRefreshIntervalDefaults.pause,
   } = urlParams;
 
   const mlADLink = useMlHref(ml, core.http.basePath.get(), {
