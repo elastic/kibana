@@ -419,22 +419,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'counter_rate',
-        isPreviousIncompatible: true,
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'cumulative_sum',
-        isPreviousIncompatible: true,
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'derivative',
-        isPreviousIncompatible: true,
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'moving_average',
-        isPreviousIncompatible: true,
       });
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(

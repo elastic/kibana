@@ -416,40 +416,40 @@ export function replaceColumn({
           const otherColumn = layer.columns[unusedReferencesQueue[0]];
           if (otherColumn && 'sourceField' in otherColumn && validation.input.includes('field')) {
             const previousField = indexPattern.getFieldByName(otherColumn.sourceField);
-            if (!previousField) return;
+            if (previousField) {
+              const defIgnoringfield = operationDefinitions
+                .filter(
+                  (def) =>
+                    def.input === 'field' &&
+                    isOperationAllowedAsReference({
+                      validation,
+                      operationType: def.type,
+                      indexPattern,
+                    })
+                )
+                .sort(getSortScoreByPriority);
 
-            const defIgnoringfield = operationDefinitions
-              .filter(
-                (def) =>
-                  def.input === 'field' &&
-                  isOperationAllowedAsReference({
-                    validation,
-                    operationType: def.type,
-                    indexPattern,
-                  })
-              )
-              .sort(getSortScoreByPriority);
-
-            // No exact match found, so let's determine that the current field can be reused
-            const defWithField = defIgnoringfield.filter((def) => {
-              if (def.input !== 'field') return;
-              return isOperationAllowedAsReference({
-                validation,
-                operationType: def.type,
-                field: previousField,
-                indexPattern,
+              // No exact match found, so let's determine that the current field can be reused
+              const defWithField = defIgnoringfield.filter((def) => {
+                if (def.input !== 'field') return;
+                return isOperationAllowedAsReference({
+                  validation,
+                  operationType: def.type,
+                  field: previousField,
+                  indexPattern,
+                });
               });
-            });
 
-            if (defWithField.length > 0) {
-              referenceLayer = insertNewColumn({
-                layer: referenceLayer,
-                columnId: newId,
-                op: defWithField[0].type,
-                indexPattern,
-                field: previousField,
-              });
-              return newId;
+              if (defWithField.length > 0) {
+                referenceLayer = insertNewColumn({
+                  layer: referenceLayer,
+                  columnId: newId,
+                  op: defWithField[0].type,
+                  indexPattern,
+                  field: previousField,
+                });
+                return newId;
+              }
             }
           }
         }

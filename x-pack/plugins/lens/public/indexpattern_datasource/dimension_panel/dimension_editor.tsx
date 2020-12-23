@@ -153,9 +153,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
         !selectedColumn ||
         (selectedColumn &&
           hasField(selectedColumn) &&
-          definition.input === 'field' &&
-          fieldByOperation[operationType]?.has(selectedColumn.sourceField)) ||
-        (selectedColumn && !hasField(selectedColumn) && definition.input === 'none'),
+          // True for now: you can switch from a field to a reference while keeping the field
+          (definition.input === 'fullReference' ||
+            (definition.input === 'field' &&
+              fieldByOperation[operationType]?.has(selectedColumn.sourceField)))) ||
+        (selectedColumn && !hasField(selectedColumn) && definition.input === 'none') ||
+        // Consider all reference-based operations to be fully compatible, which is true for now
+        (selectedColumn && !hasField(selectedColumn) && definition.input === 'fullReference'),
       disabledStatus:
         definition.getDisabledStatus &&
         definition.getDisabledStatus(
