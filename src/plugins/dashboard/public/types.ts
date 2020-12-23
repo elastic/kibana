@@ -78,6 +78,7 @@ export interface DashboardAppState {
   options: {
     hidePanelTitles: boolean;
     useMargins: boolean;
+    syncColors?: boolean;
   };
   query: Query | string;
   filters: Filter[];

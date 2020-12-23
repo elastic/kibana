@@ -30,6 +30,13 @@ jest.mock('../../../timelines/components/graph_overlay', () => ({
   GraphOverlay: jest.fn(() => <div />),
 }));
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useDataGridColumnSorting: jest.fn(),
+  };
+});
 jest.mock('../../../timelines/containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
@@ -84,7 +91,7 @@ const eventsViewerDefaultProps = {
   sort: [
     {
       columnId: 'foo',
-      sortDirection: 'none' as SortDirection,
+      sortDirection: 'asc' as SortDirection,
     },
   ],
   scopeId: SourcererScopeName.timeline,
