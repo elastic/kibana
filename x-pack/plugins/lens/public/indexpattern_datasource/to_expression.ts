@@ -20,6 +20,7 @@ import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
+import { getEsAggsSuffix } from './operations/definitions/helpers';
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,
@@ -41,15 +42,20 @@ function getExpressionForLayer(
         expressions.push(...def.toExpression(layer, colId, indexPattern));
       } else {
         aggs.push(
-          buildExpression({ type: 'expression', chain: [def.toEsAggsFn(col, colId, indexPattern)] })
+          buildExpression({
+            type: 'expression',
+            chain: [def.toEsAggsFn(col, colId, indexPattern, layer)],
+          })
         );
       }
     });
 
     const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
+      const esAggsId = `col-${columnEntries.length === 1 ? 0 : index}-${colId}`;
+      const suffix = getEsAggsSuffix(column);
       return {
         ...currentIdMap,
-        [`col-${columnEntries.length === 1 ? 0 : index}-${colId}`]: {
+        [`${esAggsId}${suffix}`]: {
           ...column,
           id: colId,
         },
