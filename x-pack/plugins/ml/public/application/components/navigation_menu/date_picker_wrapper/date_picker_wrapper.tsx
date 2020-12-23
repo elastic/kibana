@@ -120,6 +120,11 @@ export const DatePickerWrapper: FC = () => {
     setRefreshInterval({ pause, value });
   }
 
+  /**
+   * Enforce pause when it's set to false with 0 refresh interval.
+   */
+  const isPaused = refreshInterval.pause || (!refreshInterval.pause && !refreshInterval.value);
+
   return (
     <Fragment>
       {(isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled) && (
@@ -127,7 +132,7 @@ export const DatePickerWrapper: FC = () => {
           <EuiSuperDatePicker
             start={time.from}
             end={time.to}
-            isPaused={refreshInterval.pause}
+            isPaused={isPaused}
             isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
             refreshInterval={refreshInterval.value}
             onTimeChange={updateFilter}
