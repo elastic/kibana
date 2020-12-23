@@ -187,7 +187,7 @@ export const DocumentCreationLogic = kea<
           invalidDocuments: { total: 0, examples: [] },
           newSchemaFields: [],
         };
-        responses.map((response) => {
+        responses.forEach((response) => {
           if (response.errors?.length > 0) {
             summary.errors = uniq([...summary.errors, ...response.errors]);
             return;
