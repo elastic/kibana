@@ -53,6 +53,9 @@ export async function persistSavedSearch(
 
   savedSearch.columns = state.columns || [];
   savedSearch.sort = (state.sort as SortOrder[]) || [];
+  if (state.grid) {
+    savedSearch.grid = state.grid;
+  }
 
   try {
     const id = await savedSearch.save(saveOptions);
