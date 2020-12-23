@@ -116,6 +116,14 @@ describe('actions_connectors_list component with items', () => {
           isPreconfigured: true,
           config: {},
         },
+        {
+          id: '4',
+          actionTypeId: 'nonexistent',
+          description: 'My invalid connector type',
+          referencedByCount: 1,
+          isPreconfigured: false,
+          config: {},
+        },
       ]
     );
     loadActionTypes.mockResolvedValueOnce([
@@ -162,12 +170,23 @@ describe('actions_connectors_list component with items', () => {
   it('renders table of connectors', async () => {
     await setup();
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
-    expect(wrapper.find('EuiTableRow')).toHaveLength(3);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(4);
   });
 
   it('renders table with preconfigured connectors', async () => {
     await setup();
     expect(wrapper.find('[data-test-subj="preConfiguredTitleMessage"]')).toHaveLength(2);
+  });
+
+  it('renders unknown connector type as disabled', async () => {
+    await setup();
+    expect(wrapper.find('button[data-test-subj="edit4"]').getDOMNode()).toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="deleteConnector"]').last().getDOMNode()
+    ).not.toBeDisabled();
+    expect(
+      wrapper.find('button[data-test-subj="runConnector"]').last().getDOMNode()
+    ).toBeDisabled();
   });
 
   it('supports pagination', async () => {
