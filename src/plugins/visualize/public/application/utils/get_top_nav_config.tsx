@@ -184,11 +184,12 @@ export const getTopNavConfig = (
   };
 
   const saveButtonLabel =
-    embeddableId || (!savedVis?.id && dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables)
+    embeddableId ||
+    (!savedVis.id && dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && originatingApp)
       ? i18n.translate('xpack.lens.app.addToLibrary', {
           defaultMessage: 'Save to library',
         })
-      : originatingApp
+      : originatingApp && (embeddableId || savedVis.id)
       ? i18n.translate('xpack.lens.app.saveAs', {
           defaultMessage: 'Save as',
         })
