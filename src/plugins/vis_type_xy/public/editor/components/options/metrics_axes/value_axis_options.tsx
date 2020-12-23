@@ -22,7 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 
 import { Vis } from '../../../../../../visualizations/public';
-import { SelectOption, SwitchOption, TextInputOption } from '../../../../../../charts/public';
+import {
+  SelectOption,
+  SwitchOption,
+  TextInputOption,
+} from '../../../../../../vis_default_editor/public';
 
 import { ValueAxis } from '../../../../types';
 import { LabelOptions, SetAxisLabel } from './label_options';

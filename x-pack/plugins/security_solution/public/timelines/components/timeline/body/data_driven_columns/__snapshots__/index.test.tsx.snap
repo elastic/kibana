@@ -44,7 +44,6 @@ exports[`Columns it renders the expected columns 1`] = `
         truncate={true}
       />
     </styled.div>
-    0
   </styled.div>
   <styled.div
     $ariaColumnIndex={3}
@@ -75,7 +74,6 @@ exports[`Columns it renders the expected columns 1`] = `
         value="Access"
       />
     </styled.div>
-    0
   </styled.div>
   <styled.div
     $ariaColumnIndex={4}
@@ -106,7 +104,6 @@ exports[`Columns it renders the expected columns 1`] = `
         value="Action"
       />
     </styled.div>
-    0
   </styled.div>
   <styled.div
     $ariaColumnIndex={5}
@@ -137,7 +134,6 @@ exports[`Columns it renders the expected columns 1`] = `
         value="apache"
       />
     </styled.div>
-    0
   </styled.div>
   <styled.div
     $ariaColumnIndex={6}
@@ -168,7 +164,6 @@ exports[`Columns it renders the expected columns 1`] = `
         value="192.168.0.1"
       />
     </styled.div>
-    0
   </styled.div>
   <styled.div
     $ariaColumnIndex={7}
@@ -199,7 +194,6 @@ exports[`Columns it renders the expected columns 1`] = `
         value="192.168.0.3"
       />
     </styled.div>
-    0
   </styled.div>
   <styled.div
     $ariaColumnIndex={8}
@@ -230,7 +224,6 @@ exports[`Columns it renders the expected columns 1`] = `
         value="john.dee"
       />
     </styled.div>
-    0
   </styled.div>
 </styled.div>
 `;

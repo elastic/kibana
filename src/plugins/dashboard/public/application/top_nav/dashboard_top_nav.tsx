@@ -57,10 +57,12 @@ import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
 import { PanelToolbar } from './panel_toolbar';
+import { OverlayRef } from '../../../../../core/public';
 import { DashboardContainer } from '..';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
+  addPanelOverlay?: OverlayRef;
   savedQuery?: SavedQuery;
 }
 
@@ -111,14 +113,17 @@ export function DashboardTopNav({
 
   const addFromLibrary = useCallback(() => {
     if (!isErrorEmbeddable(dashboardContainer)) {
-      openAddPanelFlyout({
-        embeddable: dashboardContainer,
-        getAllFactories: embeddable.getEmbeddableFactories,
-        getFactory: embeddable.getEmbeddableFactory,
-        notifications: core.notifications,
-        overlays: core.overlays,
-        SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
-      });
+      setState((s) => ({
+        ...s,
+        addPanelOverlay: openAddPanelFlyout({
+          embeddable: dashboardContainer,
+          getAllFactories: embeddable.getEmbeddableFactories,
+          getFactory: embeddable.getEmbeddableFactory,
+          notifications: core.notifications,
+          overlays: core.overlays,
+          SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
+        }),
+      }));
     }
   }, [
     embeddable.getEmbeddableFactories,
@@ -139,8 +144,16 @@ export function DashboardTopNav({
     await factory.create({} as EmbeddableInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
 
+  const clearAddPanel = useCallback(() => {
+    if (state.addPanelOverlay) {
+      state.addPanelOverlay.close();
+      setState((s) => ({ ...s, addPanelOverlay: undefined }));
+    }
+  }, [state.addPanelOverlay]);
+
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
+      clearAddPanel();
       const isPageRefresh = newMode === dashboardStateManager.getViewMode();
       const isLeavingEditMode = !isPageRefresh && newMode === ViewMode.VIEW;
       const willLoseChanges = isLeavingEditMode && dashboardStateManager.getIsDirty(timefilter);
@@ -178,7 +191,7 @@ export function DashboardTopNav({
           }
         });
     },
-    [redirectTo, timefilter, core.overlays, savedDashboard.id, dashboardStateManager]
+    [redirectTo, timefilter, core.overlays, savedDashboard.id, dashboardStateManager, clearAddPanel]
   );
 
   /**
@@ -301,8 +314,16 @@ export function DashboardTopNav({
         showCopyOnSave={lastDashboardId ? true : false}
       />
     );
+    clearAddPanel();
     showSaveModal(dashboardSaveModal, core.i18n.Context);
-  }, [save, core.i18n.Context, savedObjectsTagging, dashboardStateManager, lastDashboardId]);
+  }, [
+    save,
+    clearAddPanel,
+    lastDashboardId,
+    core.i18n.Context,
+    savedObjectsTagging,
+    dashboardStateManager,
+  ]);
 
   const runClone = useCallback(() => {
     const currentTitle = dashboardStateManager.getTitle();
@@ -347,6 +368,10 @@ export function DashboardTopNav({
           useMargins: dashboardStateManager.getUseMargins(),
           onUseMarginsChange: (isChecked: boolean) => {
             dashboardStateManager.setUseMargins(isChecked);
+          },
+          syncColors: dashboardStateManager.getSyncColors(),
+          onSyncColorsChange: (isChecked: boolean) => {
+            dashboardStateManager.setSyncColors(isChecked);
           },
           hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
           onHidePanelTitlesChange: (isChecked: boolean) => {

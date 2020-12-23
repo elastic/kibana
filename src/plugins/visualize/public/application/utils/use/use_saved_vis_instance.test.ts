@@ -26,6 +26,7 @@ import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { VisualizeServices } from '../../types';
 import { VisualizeConstants } from '../../visualize_constants';
+import { setDefaultEditor } from '../../../services';
 
 const mockDefaultEditorControllerDestroy = jest.fn();
 const mockEmbeddableHandlerDestroy = jest.fn();
@@ -54,10 +55,14 @@ jest.mock('../breadcrumbs', () => ({
   getEditBreadcrumbs: jest.fn((text) => text),
   getCreateBreadcrumbs: jest.fn((text) => text),
 }));
-jest.mock('../../../../../vis_default_editor/public', () => ({
-  DefaultEditorController: jest.fn(() => ({ destroy: mockDefaultEditorControllerDestroy })),
-}));
-jest.mock('../../../../../kibana_utils/public');
+
+jest.mock('../../../../../kibana_utils/public', () => {
+  const actual = jest.requireActual('../../../../../kibana_utils/public');
+  return {
+    ...actual,
+    redirectWhenMissing: jest.fn(),
+  };
+});
 
 const mockGetVisualizationInstance = jest.requireMock('../get_visualization_instance')
   .getVisualizationInstance;
@@ -69,6 +74,10 @@ describe('useSavedVisInstance', () => {
   const eventEmitter = new EventEmitter();
 
   beforeEach(() => {
+    setDefaultEditor(
+      jest.fn().mockImplementation(() => ({ destroy: mockDefaultEditorControllerDestroy }))
+    );
+
     mockServices = ({
       ...coreStartMock,
       toastNotifications,
