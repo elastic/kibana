@@ -40,6 +40,7 @@ export interface ReferenceEditorProps {
   currentIndexPattern: IndexPattern;
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
+  helpText?: React.ReactNode;
 
   // Services
   uiSettings: IUiSettingsClient;
@@ -59,6 +60,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     validation,
     selectionStyle,
     dateRange,
+    helpText,
     ...services
   } = props;
 
@@ -251,6 +253,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
             })}
             fullWidth
             isInvalid={showFieldInvalid}
+            helpText={helpText}
           >
             <FieldSelect
               fieldIsInvalid={showFieldInvalid}

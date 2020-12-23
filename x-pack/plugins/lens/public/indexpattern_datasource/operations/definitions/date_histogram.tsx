@@ -25,7 +25,6 @@ import {
   EuiPopoverTitle,
   EuiIcon,
   EuiLink,
-  EuiFormHelpText,
   EuiBasicTable,
 } from '@elastic/eui';
 import { updateColumnParam } from '../layer_helpers';
@@ -350,12 +349,6 @@ function restrictedInterval(aggregationRestrictions?: Partial<IndexPatternAggRes
 
 const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const autoDateHistogramHelpPopoverTitle = i18n.translate(
-    'xpack.lens.indexPattern.dateHistogram.titleHelp',
-    {
-      defaultMessage: 'How does the auto date histogram work?',
-    }
-  );
   const infiniteBound = i18n.translate('xpack.lens.indexPattern.dateHistogram.moreThanYear', {
     defaultMessage: 'More than a year',
   });
@@ -363,13 +356,11 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
     defaultMessage: 'Up to',
   });
 
-  const formatterOptions = {
-    inputFormat: 'milliseconds',
-  };
-
   const humanDurationFormatter = data.fieldFormats.deserialize({
     id: 'duration',
-    params: formatterOptions,
+    params: {
+      inputFormat: 'milliseconds',
+    },
   });
 
   return (
@@ -377,13 +368,13 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
       ownFocus
       isOpen={isPopoverOpen}
       button={
-        <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
-          <EuiFormHelpText>
+        <EuiText size="xs" color="default">
+          <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
             {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoHelpText', {
               defaultMessage: 'How does it work?',
             })}
-          </EuiFormHelpText>
-        </EuiLink>
+          </EuiLink>
+        </EuiText>
       }
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="leftCenter"
@@ -391,70 +382,60 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
     >
       <EuiPopoverTitle>
         <EuiIcon type="help" />
-        &nbsp; {autoDateHistogramHelpPopoverTitle}
+        &nbsp;{' '}
+        {i18n.translate('xpack.lens.indexPattern.dateHistogram.titleHelp', {
+          defaultMessage: 'How does the auto date histogram work?',
+        })}
       </EuiPopoverTitle>
-      <EuiText size="s">
-        <FormattedMessage
-          id="xpack.lens.indexPattern.dateHistogram.autoFullDescription"
-          defaultMessage="{shortDescription} {longerDescription} {advancedDescription}"
-          values={{
-            shortDescription: (
-              <p>
-                <FormattedMessage
-                  id="xpack.lens.indexPattern.dateHistogram.autoBasicExplanation"
-                  defaultMessage="Splits a date field into buckets by interval."
-                />
-              </p>
-            ),
-            longerDescription: (
-              <p>
-                <FormattedMessage
-                  id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
-                  defaultMessage="The Lens editor chooses an automatic interval for you by dividing the selected time range by the 
+      <EuiText size="s" style={{ width: 300 }}>
+        <p>
+          {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBasicExplanation', {
+            defaultMessage: 'Splits a date field into buckets by interval.',
+          })}
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
+            defaultMessage="The Lens editor chooses an automatic interval for you by dividing the selected time range by the 
                   {targetBarSetting} Kibana advanced setting. The calculation tries to present “nice” time interval buckets. The maximum 
                   number of bars is set by the {maxBarSetting} value."
-                  values={{
-                    maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
-                    targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,
-                  }}
-                />
-              </p>
-            ),
-            advancedDescription: (
-              <p>
-                {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoAdvancedExplanation', {
-                  defaultMessage: 'The specific interval adopted follow the logic in this table:',
-                })}
-              </p>
-            ),
-          }}
+            values={{
+              maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
+              targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,
+            }}
+          />
+        </p>
+        <p>
+          {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoAdvancedExplanation', {
+            defaultMessage: 'The specific interval adopted follow the logic:',
+          })}
+        </p>
+        <EuiBasicTable
+          items={wrapMomentPrecision(() =>
+            search.aggs.boundsDescendingRaw.map(({ bound, interval }) => ({
+              bound:
+                typeof bound === 'number'
+                  ? infiniteBound
+                  : `${upToLabel} ${humanDurationFormatter.convert(bound)}`,
+              interval: humanDurationFormatter.convert(interval),
+            }))
+          )}
+          columns={[
+            {
+              field: 'bound',
+              name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBoundHeader', {
+                defaultMessage: 'Target interval measured',
+              }),
+            },
+            {
+              field: 'interval',
+              name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoIntervalHeader', {
+                defaultMessage: 'Interval used',
+              }),
+            },
+          ]}
         />
       </EuiText>
-      <EuiBasicTable
-        items={wrapMomentPrecision(() =>
-          search.aggs.boundsDescendingRaw.map(({ bound, interval }) => ({
-            bound:
-              typeof bound === 'number'
-                ? infiniteBound
-                : `${upToLabel} ${humanDurationFormatter.convert(bound)}`,
-            interval: humanDurationFormatter.convert(interval),
-          }))
-        )}
-        columns={[
-          {
-            field: 'bound',
-            name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBoundHeader', {
-              defaultMessage: 'Target Interval measured',
-            }),
-          },
-          {
-            field: 'interval',
-            name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoIntervalHeader', {
-              defaultMessage: 'Interval used',
-            }),
-          },
-        ]}
-      />
     </EuiPopover>
   );
 };
@@ -465,7 +446,11 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
 function wrapMomentPrecision<T>(callback: () => T): T {
   // Save default values
   const roundingDefault = moment.relativeTimeRounding();
-  const units = [{ unit: 'ss', value: 0 }];
+  const units = [
+    { unit: 'm', value: 60 }, // This should prevent to round up 45 minutes to "an hour"
+    { unit: 's', value: 60 }, // this should prevent to round up 45 seconds to "a minute"
+    { unit: 'ss', value: 0 }, // This should prevent to round anything below 5 seconds to "few seconds"
+  ];
   const defaultValues = units.map(({ unit }) => moment.relativeTimeThreshold(unit) as number);
 
   moment.relativeTimeRounding((t) => {
