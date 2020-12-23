@@ -52,8 +52,6 @@ export type UpdateParamsFnType = <K extends keyof RangeColumnParams>(
   value: RangeColumnParams[K]
 ) => void;
 
-// on initialization values can be null (from the Infinity serialization), so handle it correctly
-// or they will be casted to 0 by the editor ( see #78867 )
 export const isRangeWithin = (range: RangeType): boolean => range.from <= range.to;
 const isFullRange = (range: RangeTypeLens): range is FullRangeTypeLens =>
   isValidNumber(range.from) && isValidNumber(range.to);

@@ -8,10 +8,14 @@ import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggFunctionsMapping } from 'src/plugins/data/public';
-import useDebounce from 'react-use/lib/useDebounce';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
-import { getInvalidFieldMessage, getSafeName, isValidNumber } from './helpers';
+import {
+  getInvalidFieldMessage,
+  getSafeName,
+  isValidNumber,
+  useDebounceWithOptions,
+} from './helpers';
 import { FieldBasedIndexPatternColumn } from './column_types';
 
 export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColumn {
@@ -117,11 +121,11 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     const [inputValue, setInputValue] = useState(String(currentColumn.params.percentile));
 
     const inputValueAsNumber = Number(inputValue);
-    // an input is value if it's not an empty string, parses to a valid number, is between 0 and 100 (inclusive)
+    // an input is value if it's not an empty string, parses to a valid number, is between 0 and 100 (exclusive)
     // and is an integer
     const inputValueIsValid = isValidNumber(inputValue, true, 99, 1);
 
-    useDebounce(
+    useDebounceWithOptions(
       () => {
         if (!inputValueIsValid) return;
         updateLayer({
@@ -145,6 +149,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
           },
         });
       },
+      { skipFirstRender: true },
       256,
       [inputValue]
     );
@@ -154,33 +159,31 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       setInputValue(val);
     }, []);
     return (
-      <>
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
-            defaultMessage: 'Percentile',
-          })}
-          data-test-subj="lns-indexPattern-percentile-form"
-          display="columnCompressed"
-          fullWidth
-          isInvalid={!inputValueIsValid}
-          error={
-            !inputValueIsValid &&
-            i18n.translate('xpack.lens.indexPattern.percentile.errorMessage', {
-              defaultMessage: 'Percentile has to be an integer between 1 and 99',
-            })
-          }
-        >
-          <EuiFieldNumber
-            data-test-subj="lns-indexPattern-percentile-input"
-            compressed
-            value={inputValue}
-            min={1}
-            max={99}
-            step={1}
-            onChange={handleInputChange}
-          />
-        </EuiFormRow>
-      </>
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.indexPattern.percentile.percentileValue', {
+          defaultMessage: 'Percentile',
+        })}
+        data-test-subj="lns-indexPattern-percentile-form"
+        display="columnCompressed"
+        fullWidth
+        isInvalid={!inputValueIsValid}
+        error={
+          !inputValueIsValid &&
+          i18n.translate('xpack.lens.indexPattern.percentile.errorMessage', {
+            defaultMessage: 'Percentile has to be an integer between 1 and 99',
+          })
+        }
+      >
+        <EuiFieldNumber
+          data-test-subj="lns-indexPattern-percentile-input"
+          compressed
+          value={inputValue}
+          min={1}
+          max={99}
+          step={1}
+          onChange={handleInputChange}
+        />
+      </EuiFormRow>
     );
   },
 };

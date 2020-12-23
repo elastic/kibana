@@ -86,8 +86,6 @@ export function isValidNumber(
   lowerBound?: number
 ) {
   const inputValueAsNumber = Number(inputValue);
-  // an input is value if it's not an empty string, parses to a valid number, is between 0 and 100 (inclusive)
-  // and is an integer
   return (
     inputValue !== '' &&
     inputValue !== null &&

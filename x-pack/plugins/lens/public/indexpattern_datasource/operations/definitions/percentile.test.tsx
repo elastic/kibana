@@ -161,6 +161,8 @@ describe('percentile', () => {
         />
       );
 
+      jest.runAllTimers();
+
       const input = instance
         .find('[data-test-subj="lns-indexPattern-percentile-input"]')
         .find(EuiFieldNumber);
@@ -199,6 +201,8 @@ describe('percentile', () => {
           currentColumn={layer.columns.col2 as PercentileIndexPatternColumn}
         />
       );
+
+      jest.runAllTimers();
 
       const input = instance
         .find('[data-test-subj="lns-indexPattern-percentile-input"]')
