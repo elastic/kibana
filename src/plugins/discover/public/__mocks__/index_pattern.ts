@@ -23,28 +23,39 @@ import { indexPatterns } from '../../../data/public';
 
 const fields = [
   {
+    name: '_source',
+    type: '_source',
+    scripted: false,
+    filterable: false,
+    aggregatable: false,
+  },
+  {
     name: '_index',
     type: 'string',
     scripted: false,
     filterable: true,
+    aggregatable: false,
   },
   {
     name: 'message',
     type: 'string',
     scripted: false,
     filterable: false,
+    aggregatable: false,
   },
   {
     name: 'extension',
     type: 'string',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'bytes',
     type: 'number',
     scripted: false,
     filterable: true,
+    aggregatable: true,
   },
   {
     name: 'scripted',
@@ -62,16 +73,21 @@ const indexPattern = ({
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
   metaFields: ['_index', '_score'],
+  formatField: jest.fn(),
   flattenHit: undefined,
   formatHit: jest.fn((hit) => hit._source),
   fields,
-  getComputedFields: () => ({}),
+  getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
   getSourceFiltering: () => ({}),
   getFieldByName: () => ({}),
   timeFieldName: '',
+  docvalueFields: [],
 } as unknown) as IndexPattern;
 
 indexPattern.flattenHit = indexPatterns.flattenHitWrapper(indexPattern, indexPattern.metaFields);
 indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
+indexPattern.formatField = (hit: Record<string, any>, fieldName: string) => {
+  return fieldName === '_source' ? hit._source : indexPattern.flattenHit(hit)[fieldName];
+};
 
 export const indexPatternMock = indexPattern;

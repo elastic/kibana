@@ -52,6 +52,20 @@ export const shorthandMap = {
   },
 };
 
+export const checkPrivileges = async (services: AlertServices, indices: string[]) =>
+  services.callCluster('transport.request', {
+    path: '/_security/user/_has_privileges',
+    method: 'POST',
+    body: {
+      index: [
+        {
+          names: indices ?? [],
+          privileges: ['read'],
+        },
+      ],
+    },
+  });
+
 export const getGapMaxCatchupRatio = ({
   logger,
   previousStartedAt,
