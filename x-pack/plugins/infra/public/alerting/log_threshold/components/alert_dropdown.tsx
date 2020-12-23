@@ -50,7 +50,8 @@ export const AlertDropdown = () => {
 
   return (
     <>
-      <EuiPopover panelPaddingSize="none"
+      <EuiPopover
+        panelPaddingSize="none"
         button={
           <EuiButtonEmpty iconSide={'right'} iconType={'arrowDown'} onClick={openPopover}>
             <FormattedMessage id="xpack.infra.alerting.logs.alertsButton" defaultMessage="Alerts" />
