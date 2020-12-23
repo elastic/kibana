@@ -28,7 +28,6 @@ import {
   setDataActions,
   setFormatService,
   setThemeService,
-  setColorsService,
   setTimefilter,
   setUISettings,
   setDocLinks,
@@ -75,7 +74,6 @@ export class VisTypeXyPlugin
     if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, true)) {
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
-      setColorsService(charts.legacyColors);
       charts.palettes.getPalettes().then((palettes) => {
         setPalettesService(palettes);
       });

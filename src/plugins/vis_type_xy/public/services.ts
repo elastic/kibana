@@ -42,10 +42,6 @@ export const [getThemeService, setThemeService] = createGetterSetter<ChartsPlugi
   'xy charts.theme'
 );
 
-export const [getColorsService, setColorsService] = createGetterSetter<
-  ChartsPluginSetup['legacyColors']
->('xy charts.color');
-
 export const [getPalettesService, setPalettesService] = createGetterSetter<PaletteRegistry>(
   'xy charts.palette'
 );

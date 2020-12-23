@@ -62,10 +62,11 @@ import {
   getLegendActions,
   useColorPicker,
   getXAccessor,
+  getAllSeries,
 } from './utils';
 import { XYAxis, XYEndzones, XYCurrentTime, XYSettings, XYThresholdLine } from './components';
 import { getConfig } from './config';
-import { getThemeService, getColorsService, getDataActions, getPalettesService } from './services';
+import { getThemeService, getDataActions, getPalettesService } from './services';
 import { ChartType } from '../common';
 
 import './_chart.scss';
@@ -86,10 +87,6 @@ export interface VisComponentProps {
 export type VisComponentType = typeof VisComponent;
 
 const VisComponent = (props: VisComponentProps) => {
-  /**
-   * Stores all series labels to replicate vislib color map lookup
-   */
-  const allSeries: Array<string | number> = useMemo(() => [], []);
   const [showLegend, setShowLegend] = useState<boolean>(() => {
     // TODO: Check when this bwc can safely be removed
     const bwcLegendStateDefault =
@@ -246,37 +243,47 @@ const VisComponent = (props: VisComponentProps) => {
   const isDarkMode = getThemeService().useDarkMode();
   const getSeriesName = getSeriesNameFn(config.aspects, config.aspects.y.length > 1);
 
+  /**
+   * Stores all series labels to compute colors with the new palette
+   */
+  // let allSeries: string[] = useMemo(() => [], []);
+  const splitAccessors = config.aspects.series?.map(({ accessor, formatter }) => {
+    return { accessor, formatter };
+  });
+
+  const allSeries = useMemo(() => getAllSeries(visData.rows, splitAccessors), [
+    splitAccessors,
+    visData.rows,
+  ]);
+
   const getSeriesColor = useCallback(
     (series: XYChartSeriesIdentifier) => {
-      const seriesName = getSeriesName(series);
+      const seriesName = getSeriesName(series) as string;
       if (!seriesName) {
-        return;
+        return null;
       }
-
       const overwriteColors: Record<string, string> = props.uiState?.get
         ? props.uiState.get('vis.colors', {})
         : {};
 
-      if (allSeries.indexOf(seriesName) === -1) {
-        allSeries.push(seriesName);
+      if (Object.keys(overwriteColors).includes(seriesName)) {
+        return overwriteColors[seriesName];
       }
-
       const outputColor = getPalettesService()
         .get(visParams.palette.name)
         .getColor(
           [
             {
-              name: seriesName as string,
-              rankAtDepth: allSeries.findIndex((name) => name === seriesName),
-              totalSeriesAtDepth: visData.rows.length,
+              name: seriesName,
+              rankAtDepth: splitAccessors ? allSeries.findIndex((name) => name === seriesName) : 0,
+              totalSeriesAtDepth: allSeries.length,
             },
           ],
-          { maxDepth: 1, totalSeries: visData.rows.length }
+          { maxDepth: 1, totalSeries: allSeries.length, behindText: false }
         );
-      return getColorsService().createColorLookupFunction(allSeries, overwriteColors)(seriesName);
-      // return outputColor || undefined;
+      return outputColor || null;
     },
-    [allSeries, getSeriesName, props.uiState, visData.rows.length, visParams.palette.name]
+    [allSeries, getSeriesName, props.uiState, splitAccessors, visParams.palette.name]
   );
   const xAccessor = getXAccessor(config.aspects.x);
   const splitSeriesAccessors = config.aspects.series

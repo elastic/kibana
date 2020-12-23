@@ -30,7 +30,6 @@ import {
   TooltipValueFormatter,
   YDomainRange,
 } from '@elastic/charts';
-import { PaletteOutput } from '../../../charts/public';
 
 import { Dimension, Scale, ThresholdLine } from './param';
 
@@ -127,6 +126,5 @@ export interface VisConfig {
   enableHistogramMode: boolean;
   fittingFunction?: Exclude<Fit, 'explicit'>;
   detailedTooltip?: boolean;
-  palette: PaletteOutput;
   isVislibVis?: boolean;
 }
