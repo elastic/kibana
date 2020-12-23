@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -495,6 +496,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getCurrentChartDebugState() {
       return await elasticChart.getChartDebugData('lnsWorkspace');
+    },
+
+    async getDashboardPanelChartDebugState(panelIndex: number) {
+      return await elasticChart.getChartDebugData(undefined, panelIndex);
     },
 
     /**
