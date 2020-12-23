@@ -31,7 +31,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsClient,
   CoreStart,
-  ILegacyCustomClusterClient,
+  ICustomClusterClient,
 } from '../../../core/server';
 import {
   getTelemetryOptIn,
@@ -65,7 +65,7 @@ export class FetcherTask {
   private isSending = false;
   private internalRepository?: SavedObjectsClientContract;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
-  private elasticsearchClient?: ILegacyCustomClusterClient;
+  private elasticsearchClient?: ICustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.config$ = initializerContext.config.create();
@@ -79,7 +79,7 @@ export class FetcherTask {
   ) {
     this.internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
     this.telemetryCollectionManager = telemetryCollectionManager;
-    this.elasticsearchClient = elasticsearch.legacy.createClient('telemetry-fetcher');
+    this.elasticsearchClient = elasticsearch.createClient('telemetry-fetcher');
 
     this.intervalId = timer(this.initialCheckDelayMs, this.checkIntervalMs).subscribe(() =>
       this.sendIfDue()

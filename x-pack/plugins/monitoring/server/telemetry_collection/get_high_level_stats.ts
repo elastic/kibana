@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { SearchResponse } from 'elasticsearch';
-import { StatsCollectionConfig } from 'src/plugins/telemetry_collection_manager/server';
+import { LegacyAPICaller } from 'kibana/server';
 import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_KIBANA,
@@ -247,7 +247,7 @@ function getIndexPatternForStackProduct(product: string) {
  * Returns an object keyed by the cluster UUIDs to make grouping easier.
  */
 export async function getHighLevelStats(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   start: string,
   end: string,
@@ -268,7 +268,7 @@ export async function getHighLevelStats(
 export async function fetchHighLevelStats<
   T extends { cluster_uuid?: string } = { cluster_uuid?: string }
 >(
-  callCluster: StatsCollectionConfig['callCluster'],
+  callCluster: LegacyAPICaller,
   clusterUuids: string[],
   start: string,
   end: string,

@@ -18,7 +18,6 @@
  */
 
 import {
-  LegacyAPICaller,
   ElasticsearchClient,
   Logger,
   KibanaRequest,
@@ -68,7 +67,6 @@ export interface ClusterDetails {
 
 export interface StatsCollectionConfig {
   usageCollection: UsageCollectionSetup;
-  callCluster: LegacyAPICaller;
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract | ISavedObjectsRepository;
   kibanaRequest: KibanaRequest | undefined; // intentionally `| undefined` to enforce providing the parameter
