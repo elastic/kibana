@@ -11,12 +11,6 @@ import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/reque
 import { getFoundExceptionListItemSchemaMock } from '../../common/schemas/response/found_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
 import { getUpdateExceptionListSchemaMock } from '../../common/schemas/request/update_exception_list_schema.mock';
-import {
-  CreateExceptionListItemSchema,
-  CreateExceptionListSchema,
-  ExceptionListItemSchema,
-  ExceptionListSchema,
-} from '../../common/schemas';
 import { getFoundExceptionListSchemaMock } from '../../common/schemas/response/found_exception_list_schema.mock';
 
 import {
@@ -33,7 +27,6 @@ import {
   updateExceptionList,
   updateExceptionListItem,
 } from './api';
-import { ApiCallByIdProps, ApiCallByListIdProps, ApiCallFetchExceptionListsProps } from './types';
 
 const abortCtrl = new AbortController();
 
@@ -73,20 +66,6 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
-    });
-
-    test('it returns error and does not make request if request payload fails decode', async () => {
-      const payload: Omit<CreateExceptionListSchema, 'description'> & {
-        description?: string[];
-      } = { ...getCreateExceptionListSchemaMock(), description: ['123'] };
-
-      await expect(
-        addExceptionList({
-          http: httpMock,
-          list: (payload as unknown) as ExceptionListSchema,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual('Invalid value "["123"]" supplied to "description"');
     });
 
     test('it returns error if response payload fails decode', async () => {
@@ -137,20 +116,6 @@ describe('Exceptions Lists API', () => {
       expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
     });
 
-    test('it returns error and does not make request if request payload fails decode', async () => {
-      const payload: Omit<CreateExceptionListItemSchema, 'description'> & {
-        description?: string[];
-      } = { ...getCreateExceptionListItemSchemaMock(), description: ['123'] };
-
-      await expect(
-        addExceptionListItem({
-          http: httpMock,
-          listItem: (payload as unknown) as ExceptionListItemSchema,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual('Invalid value "["123"]" supplied to "description"');
-    });
-
     test('it returns error if response payload fails decode', async () => {
       const payload = getCreateExceptionListItemSchemaMock();
       const badPayload = getExceptionListItemSchemaMock();
@@ -199,20 +164,6 @@ describe('Exceptions Lists API', () => {
       expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
     });
 
-    test('it returns error and does not make request if request payload fails decode', async () => {
-      const payload = getUpdateExceptionListSchemaMock();
-      // @ts-expect-error
-      delete payload.description;
-
-      await expect(
-        updateExceptionList({
-          http: httpMock,
-          list: payload,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "description"');
-    });
-
     test('it returns error if response payload fails decode', async () => {
       const payload = getUpdateExceptionListSchemaMock();
       const badPayload = getExceptionListSchemaMock();
@@ -259,20 +210,6 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
-    });
-
-    test('it returns error and does not make request if request payload fails decode', async () => {
-      const payload = getUpdateExceptionListItemSchemaMock();
-      // @ts-expect-error
-      delete payload.description;
-
-      await expect(
-        updateExceptionListItem({
-          http: httpMock,
-          listItem: payload,
-          signal: abortCtrl.signal,
-        })
-      ).rejects.toEqual('Invalid value "undefined" supplied to "description"');
     });
 
     test('it returns error if response payload fails decode', async () => {
@@ -336,22 +273,6 @@ describe('Exceptions Lists API', () => {
       expect(exceptionResponse.data).toEqual([getExceptionListSchemaMock()]);
     });
 
-    test('it returns error and does not make request if request payload fails decode', async () => {
-      const payload = ({
-        filters: 'exception-list.attributes.name: Sample Endpoint',
-        http: httpMock,
-        namespaceTypes: 'notANamespaceType',
-        pagination: {
-          page: 1,
-          perPage: 20,
-        },
-        signal: abortCtrl.signal,
-      } as unknown) as ApiCallFetchExceptionListsProps & { namespaceTypes: string[] };
-      await expect(fetchExceptionLists(payload)).rejects.toEqual(
-        'Invalid value "notANamespaceType" supplied to "namespace_type"'
-      );
-    });
-
     test('it returns error if response payload fails decode', async () => {
       const badPayload = getExceptionListSchemaMock();
       // @ts-expect-error
@@ -403,18 +324,6 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
-    });
-
-    test('it returns error and does not make request if request payload fails decode', async () => {
-      const payload = ({
-        http: httpMock,
-        id: 1,
-        namespaceType: 'single',
-        signal: abortCtrl.signal,
-      } as unknown) as ApiCallByIdProps & { id: number };
-      await expect(fetchExceptionListById(payload)).rejects.toEqual(
-        'Invalid value "1" supplied to "id"'
-      );
     });
 
     test('it returns error if response payload fails decode', async () => {
@@ -614,23 +523,6 @@ describe('Exceptions Lists API', () => {
       expect(exceptionResponse).toEqual(getFoundExceptionListItemSchemaMock());
     });
 
-    test('it returns error and does not make request if request payload fails decode', async () => {
-      const payload = ({
-        filterOptions: [],
-        http: httpMock,
-        listIds: ['myList'],
-        namespaceTypes: ['not a namespace type'],
-        pagination: {
-          page: 1,
-          perPage: 20,
-        },
-        signal: abortCtrl.signal,
-      } as unknown) as ApiCallByListIdProps & { listId: number };
-      await expect(fetchExceptionListsItemsByListIds(payload)).rejects.toEqual(
-        'Invalid value "not a namespace type" supplied to "namespace_type"'
-      );
-    });
-
     test('it returns error if response payload fails decode', async () => {
       const badPayload = getExceptionListItemSchemaMock();
       // @ts-expect-error
@@ -687,18 +579,6 @@ describe('Exceptions Lists API', () => {
       expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
     });
 
-    test('it returns error and does not make request if request payload fails decode', async () => {
-      const payload = ({
-        http: httpMock,
-        id: '1',
-        namespaceType: 'not a namespace type',
-        signal: abortCtrl.signal,
-      } as unknown) as ApiCallByIdProps & { namespaceType: string };
-      await expect(fetchExceptionListItemById(payload)).rejects.toEqual(
-        'Invalid value "not a namespace type" supplied to "namespace_type"'
-      );
-    });
-
     test('it returns error if response payload fails decode', async () => {
       const badPayload = getExceptionListItemSchemaMock();
       // @ts-expect-error
@@ -748,18 +628,6 @@ describe('Exceptions Lists API', () => {
       expect(exceptionResponse).toEqual(getExceptionListSchemaMock());
     });
 
-    test('it returns error and does not make request if request payload fails decode', async () => {
-      const payload = ({
-        http: httpMock,
-        id: 1,
-        namespaceType: 'single',
-        signal: abortCtrl.signal,
-      } as unknown) as ApiCallByIdProps & { id: number };
-      await expect(deleteExceptionListById(payload)).rejects.toEqual(
-        'Invalid value "1" supplied to "id"'
-      );
-    });
-
     test('it returns error if response payload fails decode', async () => {
       const badPayload = getExceptionListSchemaMock();
       // @ts-expect-error
@@ -807,18 +675,6 @@ describe('Exceptions Lists API', () => {
         signal: abortCtrl.signal,
       });
       expect(exceptionResponse).toEqual(getExceptionListItemSchemaMock());
-    });
-
-    test('it returns error and does not make request if request payload fails decode', async () => {
-      const payload = ({
-        http: httpMock,
-        id: 1,
-        namespaceType: 'single',
-        signal: abortCtrl.signal,
-      } as unknown) as ApiCallByIdProps & { id: number };
-      await expect(deleteExceptionListItemById(payload)).rejects.toEqual(
-        'Invalid value "1" supplied to "id"'
-      );
     });
 
     test('it returns error if response payload fails decode', async () => {
