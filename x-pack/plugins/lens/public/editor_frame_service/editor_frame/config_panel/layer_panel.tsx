@@ -49,8 +49,8 @@ function isConfiguration(
   value: unknown
 ): value is { columnId: string; groupId: string; layerId: string } {
   return (
-    Boolean(value) &&
     typeof value === 'object' &&
+    value !== null &&
     'columnId' in value! &&
     'groupId' in value &&
     'layerId' in value
@@ -312,7 +312,7 @@ export function LayerPanel(
                                 layerId,
                                 id: accessor,
                               },
-                              dropTarget,
+                              ...dropTarget,
                               filterOperations: group.filterOperations,
                             });
 
@@ -366,11 +366,9 @@ export function LayerPanel(
                             const dropResult = layerDatasource.onDrop({
                               ...layerDatasourceDropProps,
                               droppedItem,
-                              dropTarget: {
-                                layerId,
-                                groupId: group.groupId,
-                                columnId: accessor,
-                              },
+                              layerId,
+                              groupId: group.groupId,
+                              columnId: accessor,
                               filterOperations: group.filterOperations,
                             });
                             if (typeof dropResult === 'object') {
@@ -483,12 +481,10 @@ export function LayerPanel(
                           const dropResult = layerDatasource.onDrop({
                             ...layerDatasourceDropProps,
                             droppedItem,
-                            dropTarget: {
-                              columnId: newId,
-                              groupId: group.groupId,
-                              layerId,
-                              isNew: true,
-                            },
+                            columnId: newId,
+                            groupId: group.groupId,
+                            layerId,
+                            isNew: true,
                             filterOperations: group.filterOperations,
                           });
                           if (dropResult) {

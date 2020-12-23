@@ -220,7 +220,7 @@ export function ReorderProvider({
             </p>
             <p id={`lnsDragDrop-reorderInstructions-${id}`}>
               {i18n.translate('xpack.lens.dragDrop.reorderInstructions', {
-                defaultMessage: `Press space bar to start a drag. When dragging, use arrow keys to reorder. Press space bar again to finish.`,
+                defaultMessage: `Press space bar to start reordering the dimension group. When dragging, use arrow keys to reorder. Press space bar again to finish.`,
               })}
             </p>
           </div>

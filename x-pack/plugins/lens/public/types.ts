@@ -289,6 +289,8 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
   droppedItem: unknown;
+  groupId: string;
+  isNew?: boolean;
 };
 
 export type DataType = 'document' | 'string' | 'number' | 'date' | 'boolean' | 'ip';
