@@ -17,15 +17,13 @@
  * under the License.
  */
 
-export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
-export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
-export const AGGS_TERMS_SIZE_SETTING = 'discover:aggs:terms:size';
-export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
-export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
-export const DOC_HIDE_TIME_COLUMN_SETTING = 'doc_table:hideTimeColumn';
-export const FIELDS_LIMIT_SETTING = 'fields:popularLimit';
-export const CONTEXT_DEFAULT_SIZE_SETTING = 'context:defaultSize';
-export const CONTEXT_STEP_SETTING = 'context:step';
-export const CONTEXT_TIE_BREAKER_FIELDS_SETTING = 'context:tieBreakerFields';
-export const DOC_TABLE_LEGACY = 'doc_table:legacy';
-export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
+/**
+ * User configurable state of data grid, persisted in saved search
+ */
+export interface DiscoverGridSettings {
+  columns?: Record<string, DiscoverGridSettingsColumn>;
+}
+
+export interface DiscoverGridSettingsColumn {
+  width?: number;
+}

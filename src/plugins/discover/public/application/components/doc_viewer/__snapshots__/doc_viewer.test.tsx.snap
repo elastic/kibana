@@ -6,6 +6,7 @@ exports[`Render <DocViewer/> with 3 different tabs 1`] = `
 >
   <EuiTabbedContent
     autoFocus="initial"
+    size="s"
     tabs={
       Array [
         Object {
