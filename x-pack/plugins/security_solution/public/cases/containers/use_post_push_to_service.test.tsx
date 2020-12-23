@@ -305,6 +305,32 @@ describe('usePostPushToService', () => {
     });
   });
 
+  it('formatServiceRequestData - Alert comment content', () => {
+    formatUrl.mockReturnValue('https://app.com/detections');
+    const caseServices = sampleCaseServices;
+    const result = formatServiceRequestData({
+      myCase: {
+        ...pushedCase,
+        comments: [
+          {
+            ...pushedCase.comments[0],
+            type: CommentType.alert,
+            alertId: 'alert-id-1',
+            index: 'alert-index-1',
+          },
+        ],
+      },
+      connector: samplePush.connector,
+      caseServices,
+      alerts: samplePush.alerts,
+      formatUrl,
+    });
+
+    expect(result.comments![0].comment).toEqual(
+      '[Alert](https://app.com/detections?filters=!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,key:_id,negate:!f,params:(query:alert-id-1),type:phrase),query:(match:(_id:(query:alert-id-1,type:phrase)))))&sourcerer=(default:!())&timerange=(global:(linkTo:!(timeline),timerange:(from:%272020-11-20T15:29:28.373Z%27,kind:absolute,to:%272020-11-20T15:35:28.373Z%27)),timeline:(linkTo:!(global),timerange:(from:%272020-11-20T15:29:28.373Z%27,kind:absolute,to:%272020-11-20T15:35:28.373Z%27)))) added to case.'
+    );
+  });
+
   it('unhappy path', async () => {
     const spyOnPushToService = jest.spyOn(api, 'pushToService');
     spyOnPushToService.mockImplementation(() => {

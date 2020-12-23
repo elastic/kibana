@@ -196,7 +196,7 @@ const getCommentContent = (
 
     return `[${i18n.ALERT}](${ruleDetailsLink}${getAlertFilterUrl(alert)}) ${
       i18n.ALERT_ADDED_TO_CASE
-    }`;
+    }.`;
   }
 
   return '';
