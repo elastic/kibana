@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 
@@ -122,24 +122,25 @@ export const DatePickerWrapper: FC = () => {
     setRefreshInterval({ pause, value });
   }
 
-  return (
-    <Fragment>
-      {(isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled) && (
-        <div className="mlNavigationMenu__datePickerWrapper">
-          <EuiSuperDatePicker
-            start={time.from}
-            end={time.to}
-            isPaused={refreshInterval.pause}
-            isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
-            refreshInterval={refreshInterval.value}
-            onTimeChange={updateFilter}
-            onRefresh={updateLastRefresh}
-            onRefreshChange={updateInterval}
-            recentlyUsedRanges={recentlyUsedRanges}
-            dateFormat={dateFormat}
-          />
-        </div>
-      )}
-    </Fragment>
-  );
+  /**
+   * Enforce pause when it's set to false with 0 refresh interval.
+   */
+  const isPaused = refreshInterval.pause || (!refreshInterval.pause && !refreshInterval.value);
+
+  return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
+    <div className="mlNavigationMenu__datePickerWrapper">
+      <EuiSuperDatePicker
+        start={time.from}
+        end={time.to}
+        isPaused={isPaused}
+        isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
+        refreshInterval={refreshInterval.value}
+        onTimeChange={updateFilter}
+        onRefresh={updateLastRefresh}
+        onRefreshChange={updateInterval}
+        recentlyUsedRanges={recentlyUsedRanges}
+        dateFormat={dateFormat}
+      />
+    </div>
+  ) : null;
 };
