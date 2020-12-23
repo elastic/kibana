@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import React from 'react';
-
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
