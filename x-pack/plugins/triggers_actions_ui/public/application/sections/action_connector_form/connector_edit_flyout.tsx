@@ -109,10 +109,19 @@ export const ConnectorEditFlyout = ({
   }, [onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
-  const { configErrors, connectorBaseErrors, connectorErrors, secretsErrors } = getConnectorErrors(
-    connector,
-    actionTypeModel
-  );
+  const {
+    configErrors,
+    connectorBaseErrors,
+    connectorErrors,
+    secretsErrors,
+  } = !connector.isPreconfigured
+    ? getConnectorErrors(connector, actionTypeModel)
+    : {
+        configErrors: {},
+        connectorBaseErrors: {},
+        connectorErrors: {},
+        secretsErrors: {},
+      };
 
   const hasErrors = !!Object.keys(connectorErrors).find(
     (errorKey) => connectorErrors[errorKey].length >= 1
