@@ -115,11 +115,6 @@ Array [
                     "field": "transaction.duration.us",
                   },
                 },
-                "count": Object {
-                  "value_count": Object {
-                    "field": "transaction.duration.us",
-                  },
-                },
                 "environments": Object {
                   "terms": Object {
                     "field": "service.environment",
@@ -142,15 +137,15 @@ Array [
                     ],
                   },
                 },
+                "real_document_count": Object {
+                  "value_count": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
                 "timeseries": Object {
                   "aggs": Object {
                     "avg_duration": Object {
                       "avg": Object {
-                        "field": "transaction.duration.us",
-                      },
-                    },
-                    "count": Object {
-                      "value_count": Object {
                         "field": "transaction.duration.us",
                       },
                     },
@@ -170,6 +165,11 @@ Array [
                         ],
                       },
                     },
+                    "real_document_count": Object {
+                      "value_count": Object {
+                        "field": "transaction.duration.us",
+                      },
+                    },
                   },
                   "date_histogram": Object {
                     "extended_bounds": Object {
@@ -185,7 +185,7 @@ Array [
               "terms": Object {
                 "field": "transaction.type",
                 "order": Object {
-                  "count": "desc",
+                  "real_document_count": "desc",
                 },
               },
             },
