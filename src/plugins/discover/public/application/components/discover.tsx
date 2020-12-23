@@ -17,7 +17,6 @@
  * under the License.
  */
 import './discover.scss';
-
 import React, { useState, useRef } from 'react';
 import {
   EuiButtonEmpty,
@@ -25,224 +24,51 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHideFor,
+  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { IUiSettingsClient, MountPoint } from 'kibana/public';
 import classNames from 'classnames';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
-import { getServices, IndexPattern } from '../../kibana_services';
+import { getServices } from '../../kibana_services';
 import { DiscoverUninitialized, DiscoverHistogram } from '../angular/directives';
 import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
-import { DocTableLegacy, DocTableLegacyProps } from '../angular/doc_table/create_doc_table_react';
-import { SkipBottomButton } from './skip_bottom_button';
-import {
-  search,
-  ISearchSource,
-  TimeRange,
-  Query,
-  IndexPatternAttributes,
-  DataPublicPluginStart,
-  AggConfigs,
-  FilterManager,
-} from '../../../../data/public';
-import { Chart } from '../angular/helpers/point_series';
-import { AppState } from '../angular/discover_state';
-import { SavedSearch } from '../../saved_searches';
-import { SavedObject } from '../../../../../core/types';
-import { TopNavMenuData } from '../../../../navigation/public';
+import { search } from '../../../../data/public';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
 } from './sidebar/discover_sidebar_responsive';
-import { DocViewFilterFn, ElasticSearchHit } from '../doc_views/doc_views_types';
+import { DiscoverProps } from './discover_legacy';
+import { SortPairArr } from '../angular/doc_table/lib/get_sort';
+import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
 
-export interface DiscoverProps {
-  /**
-   * Function to fetch documents from Elasticsearch
-   */
-  fetch: () => void;
-  /**
-   * Counter how often data was fetched (used for testing)
-   */
-  fetchCounter: number;
-  /**
-   * Error in case of a failing document fetch
-   */
-  fetchError?: Error;
-  /**
-   * Statistics by fields calculated using the fetched documents
-   */
-  fieldCounts: Record<string, number>;
-  /**
-   * Histogram aggregation data
-   */
-  histogramData?: Chart;
-  /**
-   * Number of documents found by recent fetch
-   */
-  hits: number;
-  /**
-   * Current IndexPattern
-   */
-  indexPattern: IndexPattern;
-  /**
-   * Value needed for legacy "infinite" loading functionality
-   * Determins how much records are rendered using the legacy table
-   * Increased when scrolling down
-   */
-  minimumVisibleRows: number;
-  /**
-   * Function to add a column to state
-   */
-  onAddColumn: (column: string) => void;
-  /**
-   * Function to add a filter to state
-   */
-  onAddFilter: DocViewFilterFn;
-  /**
-   * Function to change the used time interval of the date histogram
-   */
-  onChangeInterval: (interval: string) => void;
-  /**
-   * Function to move a given column to a given index, used in legacy table
-   */
-  onMoveColumn: (columns: string, newIdx: number) => void;
-  /**
-   * Function to remove a given column from state
-   */
-  onRemoveColumn: (column: string) => void;
-  /**
-   * Function to replace columns in state
-   */
-  onSetColumns: (columns: string[]) => void;
-  /**
-   * Function to scroll down the legacy table to the bottom
-   */
-  onSkipBottomButtonClick: () => void;
-  /**
-   * Function to change sorting of the table, triggers a fetch
-   */
-  onSort: (sort: string[][]) => void;
-  opts: {
-    /**
-     * Date histogram aggregation config
-     */
-    chartAggConfigs?: AggConfigs;
-    /**
-     * Client of uiSettings
-     */
-    config: IUiSettingsClient;
-    /**
-     * Data plugin
-     */
-    data: DataPublicPluginStart;
-    /**
-     * Data plugin filter manager
-     */
-    filterManager: FilterManager;
-    /**
-     * List of available index patterns
-     */
-    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-    /**
-     * The number of documents that can be displayed in the table/grid
-     */
-    sampleSize: number;
-    /**
-     * Current instance of SavedSearch
-     */
-    savedSearch: SavedSearch;
-    /**
-     * Function to set the header menu
-     */
-    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
-    /**
-     * Timefield of the currently used index pattern
-     */
-    timefield: string;
-    /**
-     * Function to set the current state
-     */
-    setAppState: (state: Partial<AppState>) => void;
-  };
-  /**
-   * Function to reset the current query
-   */
-  resetQuery: () => void;
-  /**
-   * Current state of the actual query, one of 'uninitialized', 'loading' ,'ready', 'none'
-   */
-  resultState: string;
-  /**
-   * Array of document of the recent successful search request
-   */
-  rows: ElasticSearchHit[];
-  /**
-   * Instance of SearchSource, the high level search API
-   */
-  searchSource: ISearchSource;
-  /**
-   * Function to change the current index pattern
-   */
-  setIndexPattern: (id: string) => void;
-  /**
-   * Determines whether the user should be able to use the save query feature
-   */
-  showSaveQuery: boolean;
-  /**
-   * Current app state of URL
-   */
-  state: AppState;
-  /**
-   * Function to update the time filter
-   */
-  timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
-  /**
-   * Currently selected time range
-   */
-  timeRange?: { from: string; to: string };
-  /**
-   * Menu data of top navigation (New, save ...)
-   */
-  topNavMenu: TopNavMenuData[];
-  /**
-   * Function to update the actual query
-   */
-  updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
-  /**
-   * Function to update the actual savedQuery id
-   */
-  updateSavedQueryId: (savedQueryId?: string) => void;
-}
-
-export const DocTableLegacyMemoized = React.memo((props: DocTableLegacyProps) => (
-  <DocTableLegacy {...props} />
-));
 export const SidebarMemoized = React.memo((props: DiscoverSidebarResponsiveProps) => (
   <DiscoverSidebarResponsive {...props} />
 ));
 
-export function DiscoverLegacy({
+export const DataGridMemoized = React.memo((props: DiscoverGridProps) => (
+  <DiscoverGrid {...props} />
+));
+
+export function Discover({
   fetch,
   fetchCounter,
-  fieldCounts,
   fetchError,
+  fieldCounts,
   histogramData,
   hits,
   indexPattern,
-  minimumVisibleRows,
   onAddColumn,
   onAddFilter,
   onChangeInterval,
-  onMoveColumn,
   onRemoveColumn,
-  onSkipBottomButtonClick,
+  onSetColumns,
   onSort,
   opts,
   resetQuery,
@@ -260,23 +86,29 @@ export function DiscoverLegacy({
 }: DiscoverProps) {
   const scrollableDesktop = useRef<HTMLDivElement>(null);
   const collapseIcon = useRef<HTMLButtonElement>(null);
-  const isMobile = () => {
-    // collapse icon isn't displayed in mobile view, use it to detect which view is displayed
-    return collapseIcon && !collapseIcon.current;
-  };
-
   const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const services = getServices();
   const { TopNavMenu } = services.navigation.ui;
   const { trackUiMetric } = services;
-  const { savedSearch, indexPatternList } = opts;
+  const { savedSearch, indexPatternList, config } = opts;
   const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
   const bucketInterval =
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
   const contentCentered = resultState === 'uninitialized';
+  const showTimeCol = !config.get('doc_table:hideTimeColumn', false) && indexPattern.timeFieldName;
+  const columns =
+    state.columns &&
+    state.columns.length > 0 &&
+    // check if all columns where removed except the configured timeField (this can't be removed)
+    !(state.columns.length === 1 && state.columns[0] === indexPattern.timeFieldName)
+      ? state.columns
+      : ['_source'];
+  // if columns include _source this is considered as default view, so you can't remove columns
+  // until you add a column using Discover's sidebar
+  const defaultColumns = columns.includes('_source');
 
   return (
     <I18nProvider>
@@ -327,7 +159,9 @@ export function DiscoverLegacy({
                   data-test-subj="collapseSideBarButton"
                   aria-controls="discover-sidebar"
                   aria-expanded={isSidebarClosed ? 'false' : 'true'}
-                  aria-label="Toggle sidebar"
+                  aria-label={i18n.translate('discover.toggleSidebarAriaLabel', {
+                    defaultMessage: 'Toggle sidebar',
+                  })}
                   buttonRef={collapseIcon}
                 />
               </EuiFlexItem>
@@ -344,7 +178,7 @@ export function DiscoverLegacy({
                 {resultState === 'none' && (
                   <DiscoverNoResults
                     timeFieldName={opts.timefield}
-                    queryLanguage={state.query ? state.query.language : ''}
+                    queryLanguage={state.query?.language || ''}
                     data={opts.data}
                     error={fetchError}
                   />
@@ -383,28 +217,24 @@ export function DiscoverLegacy({
                             />
                           </EuiFlexItem>
                         )}
-                        {opts.timefield && (
-                          <EuiFlexItem className="dscResultCount__toggle" grow={false}>
-                            <EuiButtonEmpty
-                              size="xs"
-                              iconType={toggleOn ? 'eyeClosed' : 'eye'}
-                              onClick={() => {
-                                toggleChart(!toggleOn);
-                              }}
-                              data-test-subj="discoverChartToggle"
-                            >
-                              {toggleOn
-                                ? i18n.translate('discover.hideChart', {
-                                    defaultMessage: 'Hide chart',
-                                  })
-                                : i18n.translate('discover.showChart', {
-                                    defaultMessage: 'Show chart',
-                                  })}
-                            </EuiButtonEmpty>
-                          </EuiFlexItem>
-                        )}
+                        <EuiFlexItem className="dscResultCount__toggle" grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            iconType={toggleOn ? 'eyeClosed' : 'eye'}
+                            onClick={() => {
+                              toggleChart(!toggleOn);
+                            }}
+                          >
+                            {toggleOn
+                              ? i18n.translate('discover.hideChart', {
+                                  defaultMessage: 'Hide chart',
+                                })
+                              : i18n.translate('discover.showChart', {
+                                  defaultMessage: 'Show chart',
+                                })}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
                       </EuiFlexGroup>
-                      <SkipBottomButton onClick={onSkipBottomButtonClick} />
                     </EuiFlexItem>
                     {toggleOn && opts.timefield && (
                       <EuiFlexItem grow={false}>
@@ -417,8 +247,8 @@ export function DiscoverLegacy({
                           )}
                           className="dscTimechart"
                         >
-                          {opts.chartAggConfigs && rows.length !== 0 && histogramData && (
-                            <div className="dscHistogram" data-test-subj="discoverChart">
+                          {opts.chartAggConfigs && histogramData && rows.length !== 0 && (
+                            <div className="dscHistogramGrid" data-test-subj="discoverChart">
                               <DiscoverHistogram
                                 chartData={histogramData}
                                 timefilterUpdateHandler={timefilterUpdateHandler}
@@ -426,8 +256,11 @@ export function DiscoverLegacy({
                             </div>
                           )}
                         </section>
+                        <EuiSpacer size="s" />
                       </EuiFlexItem>
                     )}
+
+                    <EuiHorizontalRule margin="none" />
 
                     <EuiFlexItem className="eui-yScroll">
                       <section
@@ -443,59 +276,35 @@ export function DiscoverLegacy({
                           />
                         </h2>
                         {rows && rows.length && (
-                          <div>
-                            <DocTableLegacyMemoized
-                              columns={state.columns || []}
+                          <div className="dscDiscoverGrid">
+                            <DataGridMemoized
+                              ariaLabelledBy="documentsAriaLabel"
+                              columns={columns}
+                              defaultColumns={defaultColumns}
                               indexPattern={indexPattern}
-                              minimumVisibleRows={minimumVisibleRows}
                               rows={rows}
-                              sort={state.sort || []}
+                              sort={(state.sort as SortPairArr[]) || []}
+                              sampleSize={opts.sampleSize}
                               searchDescription={opts.savedSearch.description}
                               searchTitle={opts.savedSearch.lastSavedTitle}
+                              showTimeCol={Boolean(showTimeCol)}
+                              services={services}
+                              settings={state.grid}
                               onAddColumn={onAddColumn}
                               onFilter={onAddFilter}
-                              onMoveColumn={onMoveColumn}
                               onRemoveColumn={onRemoveColumn}
+                              onSetColumns={onSetColumns}
                               onSort={onSort}
+                              onResize={(colSettings: { columnId: string; width: number }) => {
+                                const grid = { ...state.grid } || {};
+                                const newColumns = { ...grid.columns } || {};
+                                newColumns[colSettings.columnId] = {
+                                  width: colSettings.width,
+                                };
+                                const newGrid = { ...grid, columns: newColumns };
+                                opts.setAppState({ grid: newGrid });
+                              }}
                             />
-                            {rows.length === opts.sampleSize ? (
-                              <div
-                                className="dscTable__footer"
-                                data-test-subj="discoverDocTableFooter"
-                                tabIndex={-1}
-                                id="discoverBottomMarker"
-                              >
-                                <FormattedMessage
-                                  id="discover.howToSeeOtherMatchingDocumentsDescription"
-                                  defaultMessage="These are the first {sampleSize} documents matching
-                  your search, refine your search to see others."
-                                  values={{ sampleSize: opts.sampleSize }}
-                                />
-
-                                <EuiButtonEmpty
-                                  onClick={() => {
-                                    if (scrollableDesktop && scrollableDesktop.current) {
-                                      scrollableDesktop.current.focus();
-                                    }
-                                    // Only the desktop one needs to target a specific container
-                                    if (!isMobile() && scrollableDesktop.current) {
-                                      scrollableDesktop.current.scrollTo(0, 0);
-                                    } else if (window) {
-                                      window.scrollTo(0, 0);
-                                    }
-                                  }}
-                                >
-                                  <FormattedMessage
-                                    id="discover.backToTopLinkText"
-                                    defaultMessage="Back to top."
-                                  />
-                                </EuiButtonEmpty>
-                              </div>
-                            ) : (
-                              <span tabIndex={-1} id="discoverBottomMarker">
-                                &#8203;
-                              </span>
-                            )}
                           </div>
                         )}
                       </section>

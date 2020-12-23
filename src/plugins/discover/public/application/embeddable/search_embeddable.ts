@@ -36,6 +36,7 @@ import {
 import { Container, Embeddable } from '../../../../embeddable/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
 import searchTemplate from './search_template.html';
+import searchTemplateGrid from './search_template_datagrid.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table';
@@ -49,23 +50,29 @@ import {
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import { DiscoverGridSettings } from '../components/discover_grid/types';
+import { DiscoverServices } from '../../build_services';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
 import { getDefaultSort } from '../angular/doc_table/lib/get_default_sort';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
+  settings?: DiscoverGridSettings;
   description?: string;
   sort?: SortOrder[];
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
   setSortOrder?: (sortPair: SortOrder[]) => void;
+  setColumns?: (columns: string[]) => void;
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
   filter?: (field: IFieldType, value: string[], operator: string) => void;
-  hits?: any[];
+  hits?: ElasticSearchHit[];
   indexPattern?: IndexPattern;
   totalHitCount?: number;
   isLoading?: boolean;
+  showTimeCol?: boolean;
 }
 
 interface SearchEmbeddableConfig {
@@ -77,6 +84,7 @@ interface SearchEmbeddableConfig {
   indexPatterns?: IndexPattern[];
   editable: boolean;
   filterManager: FilterManager;
+  services: DiscoverServices;
 }
 
 export class SearchEmbeddable
@@ -95,6 +103,7 @@ export class SearchEmbeddable
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterManager: FilterManager;
   private abortController?: AbortController;
+  private services: DiscoverServices;
 
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
@@ -111,6 +120,7 @@ export class SearchEmbeddable
       indexPatterns,
       editable,
       filterManager,
+      services,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
     private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
@@ -128,7 +138,7 @@ export class SearchEmbeddable
       },
       parent
     );
-
+    this.services = services;
     this.filterManager = filterManager;
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
@@ -138,8 +148,8 @@ export class SearchEmbeddable
     };
     this.initializeSearchScope();
 
-    this.autoRefreshFetchSubscription = getServices()
-      .timefilter.getAutoRefreshFetch$()
+    this.autoRefreshFetchSubscription = this.services.timefilter
+      .getAutoRefreshFetch$()
       .subscribe(this.fetch);
 
     this.subscription = this.getUpdated$().subscribe(() => {
@@ -167,7 +177,9 @@ export class SearchEmbeddable
     if (!this.searchScope) {
       throw new Error('Search scope not defined');
     }
-    this.searchInstance = this.$compile(searchTemplate)(this.searchScope);
+    this.searchInstance = this.$compile(
+      this.services.uiSettings.get('doc_table:legacy', true) ? searchTemplate : searchTemplateGrid
+    )(this.searchScope);
     const rootNode = angular.element(domNode);
     rootNode.append(this.searchInstance);
 
@@ -250,6 +262,15 @@ export class SearchEmbeddable
       this.updateInput({ columns });
     };
 
+    searchScope.setColumns = (columns: string[]) => {
+      this.updateInput({ columns });
+    };
+
+    if (this.savedSearch.grid) {
+      searchScope.settings = this.savedSearch.grid;
+    }
+    searchScope.showTimeCol = !this.services.uiSettings.get('doc_table:hideTimeColumn', false);
+
     searchScope.filter = async (field, value, operator) => {
       let filters = esFilters.generateFilters(
         this.filterManager,
@@ -286,13 +307,13 @@ export class SearchEmbeddable
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
+    searchSource.setField('size', this.services.uiSettings.get(SAMPLE_SIZE_SETTING));
     searchSource.setField(
       'sort',
       getSortForSearchSource(
         this.searchScope.sort,
         this.searchScope.indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
 
