@@ -157,6 +157,7 @@ describe('with a basic license', () => {
     });
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     esClient.search = defaultEsClientSearchMock;
+
     usageData = await collector.fetch(getMockFetchContext(esClient));
 
     expect(defaultEsClientSearchMock).toHaveBeenCalledWith({
@@ -202,7 +203,7 @@ describe('with a basic license', () => {
   });
 });
 
-describe.skip('with no license', () => {
+describe('with no license', () => {
   let usageData: UsageData;
   const { features, licensing, usageCollection, usageStatsService, usageStatsClient } = setup({
     license: { isAvailable: false },
@@ -215,7 +216,10 @@ describe.skip('with no license', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    usageData = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.search = defaultEsClientSearchMock;
+
+    usageData = await collector.fetch(getMockFetchContext(esClient));
   });
 
   test('sets enabled to false', () => {
@@ -241,7 +245,7 @@ describe.skip('with no license', () => {
   });
 });
 
-describe.skip('with platinum license', () => {
+describe('with platinum license', () => {
   let usageData: UsageData;
   const { features, licensing, usageCollection, usageStatsService, usageStatsClient } = setup({
     license: { isAvailable: true, type: 'platinum' },
@@ -254,7 +258,10 @@ describe.skip('with platinum license', () => {
       licensing,
       usageStatsServicePromise: Promise.resolve(usageStatsService),
     });
-    usageData = await collector.fetch(getMockFetchContext(defaultCallClusterMock));
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.search = defaultEsClientSearchMock;
+
+    usageData = await collector.fetch(getMockFetchContext(esClient));
   });
 
   test('sets enabled to true', () => {
