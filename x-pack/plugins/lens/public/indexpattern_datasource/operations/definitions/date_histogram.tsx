@@ -415,9 +415,9 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
               <p>
                 <FormattedMessage
                   id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
-                  defaultMessage={`The Lens editor chooses an automatic interval for you by dividing the selected time range by the 
+                  defaultMessage="The Lens editor chooses an automatic interval for you by dividing the selected time range by the 
                   {targetBarSetting} Kibana advanced setting. The calculation tries to present “nice” time interval buckets. The maximum 
-                  number of bars is set by the {maxBarSetting} value.`}
+                  number of bars is set by the {maxBarSetting} value."
                   values={{
                     maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
                     targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,

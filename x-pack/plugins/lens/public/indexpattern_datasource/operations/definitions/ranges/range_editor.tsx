@@ -72,10 +72,10 @@ const GranularityHelpPopover = () => {
               <p>
                 <FormattedMessage
                   id="xpack.lens.indexPattern.ranges.granularityPopoverExplanation"
-                  defaultMessage={`The size of the interval is chosen to be a "nice" value. It is possible for the chosen
+                  defaultMessage='The size of the interval is chosen to be a "nice" value. It is possible for the chosen
                   interval to stay the same when changing the granularity slider if the "nice" interval is
                   the same. The minimum granularity is 1, and the maximum is 
-                  {setting} as defined in the Kibana advanced settings.`}
+                  {setting} as defined in the Kibana advanced settings.'
                   values={{
                     setting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
                   }}
