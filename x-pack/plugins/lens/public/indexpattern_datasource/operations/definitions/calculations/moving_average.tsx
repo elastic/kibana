@@ -5,10 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useState } from 'react';
-import React from 'react';
-import { EuiFormRow } from '@elastic/eui';
-import { EuiFieldNumber } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiFormRow,
+  EuiPopover,
+  EuiText,
+  EuiLink,
+  EuiFieldNumber,
+  EuiPopoverTitle,
+  EuiIcon,
+} from '@elastic/eui';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
 import {
@@ -111,6 +117,7 @@ export const movingAverageOperation: OperationDefinition<
       })
     );
   },
+  getHelpMessage: () => <MovingAveragePopup />,
   getDisabledStatus(indexPattern, layer) {
     return checkForDateHistogram(
       layer,
@@ -181,3 +188,51 @@ function MovingAverageParamEditor({
     </EuiFormRow>
   );
 }
+
+const MovingAveragePopup = () => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  return (
+    <EuiPopover
+      ownFocus
+      isOpen={isPopoverOpen}
+      button={
+        <EuiText size="xs">
+          <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+            {i18n.translate('xpack.lens.indexPattern.movingAverage.helpText', {
+              defaultMessage: 'How does it work?',
+            })}
+          </EuiLink>
+        </EuiText>
+      }
+      closePopover={() => setIsPopoverOpen(false)}
+      anchorPosition="leftCenter"
+    >
+      <EuiPopoverTitle>
+        <EuiIcon type="help" />
+        &nbsp;{' '}
+        {i18n.translate('xpack.lens.indexPattern.movingAverage.titleHelp', {
+          defaultMessage: 'How does moving average work?',
+        })}
+      </EuiPopoverTitle>
+      <EuiText size="s" style={{ width: 300 }}>
+        <p>
+          {i18n.translate('xpack.lens.indexPattern.movingAverage.basicExplanation', {
+            defaultMessage:
+              'The Moving Average slides a window across the data and emits the average value of that window.',
+          })}
+        </p>
+        <p>
+          {i18n.translate('xpack.lens.indexPattern.movingAverage.longerExplanation', {
+            defaultMessage: `The Lens Moving Average uses a simple arithmetic mean of the window and applies a skip policy for gaps: 
+                this means that for missing values the bucket is skipped and the calculation is performed on the next one.`,
+          })}
+        </p>
+        <p>
+          {i18n.translate('xpack.lens.indexPattern.movingAverage.limitations', {
+            defaultMessage: 'It works only for data histograms.',
+          })}
+        </p>
+      </EuiText>
+    </EuiPopover>
+  );
+};
