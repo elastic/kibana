@@ -54,22 +54,8 @@ export const buildEventsSearchQuery = ({
           {
             range: {
               [sortField]: {
-                gte: from,
-                format: 'strict_date_optional_time',
-              },
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-    {
-      bool: {
-        should: [
-          {
-            range: {
-              [sortField]: {
                 lte: to,
+                gte: from,
                 format: 'strict_date_optional_time',
               },
             },
