@@ -18,12 +18,12 @@ const readOnlyAccessToAlertsMessage: CallOutMessage = {
 };
 
 const ReadOnlyAlertsCallOutComponent = () => {
-  const [{ hasIndexWrite }] = useUserData();
+  const [{ hasIndexUpdateDelete }] = useUserData();
 
   return (
     <CallOutSwitcher
       namespace="detections"
-      condition={hasIndexWrite != null && !hasIndexWrite}
+      condition={hasIndexUpdateDelete != null && !hasIndexUpdateDelete}
       message={readOnlyAccessToAlertsMessage}
     />
   );
