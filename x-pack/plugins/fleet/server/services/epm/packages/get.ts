@@ -146,6 +146,8 @@ export const getPackageUsageSummary = async ({
   let hasMore = true;
 
   while (hasMore) {
+    // using saved Objects client directly, instead of the `list()` method of `package_policy` service
+    // in order to not cause a circular dependency (package policy service imports from this module)
     const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
       type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       perPage: 1000,

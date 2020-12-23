@@ -5,7 +5,6 @@
  */
 
 import React, { memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { useGetPackageSummary } from '../../../../hooks';
 
 /**
@@ -14,11 +13,5 @@ import { useGetPackageSummary } from '../../../../hooks';
 export const IntegrationAgentPolicyCount = memo<{ packageName: string }>(({ packageName }) => {
   const { data } = useGetPackageSummary(packageName);
 
-  return (
-    <FormattedMessage
-      id="xpack.fleet.epm.usedByAgentPoliciesValue"
-      defaultMessage="{count} agent policies"
-      values={{ count: data?.response.agent_policy_count ?? 0 }}
-    />
-  );
+  return <>{data?.response.agent_policy_count ?? 0}</>;
 });

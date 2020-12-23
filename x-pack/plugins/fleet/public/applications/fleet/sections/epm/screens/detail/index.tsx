@@ -245,7 +245,7 @@ export function Detail() {
                     { isDivider: true },
                     {
                       label: i18n.translate('xpack.fleet.epm.usedByLabel', {
-                        defaultMessage: 'Used by',
+                        defaultMessage: 'Agent Policies',
                       }),
                       content: <IntegrationAgentPolicyCount packageName={packageInfo.name} />,
                     },
