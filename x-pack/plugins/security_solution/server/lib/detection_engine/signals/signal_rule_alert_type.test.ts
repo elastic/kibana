@@ -194,13 +194,16 @@ describe('rules_notification_alert_type', () => {
           'myfa*': {
             read: true,
           },
+          'anotherindex*': {
+            read: true,
+          },
           'some*': {
             read: false,
           },
         },
         application: {},
       });
-      payload.params.index = ['some*', 'myfa*'];
+      payload.params.index = ['some*', 'myfa*', 'anotherindex*'];
       await alert.executor(payload);
       expect(ruleStatusService.partialFailure).toHaveBeenCalled();
       expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
