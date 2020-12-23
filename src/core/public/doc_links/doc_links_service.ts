@@ -188,7 +188,9 @@ export class DocLinksService {
           createRoleMapping: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
           createApiKey: `${ELASTICSEARCH_DOCS}security-api-create-api-key.html`,
           createPipeline: `${ELASTICSEARCH_DOCS}put-pipeline-api.html`,
+          createTransformRequest: `${ELASTICSEARCH_DOCS}put-transform.html#put-transform-request-body`,
           openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
+          updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
         },
       },
     });
