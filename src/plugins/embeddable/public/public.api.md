@@ -411,6 +411,7 @@ export type EmbeddableInput = {
     disabledActions?: string[];
     disableTriggers?: boolean;
     searchSessionId?: string;
+    syncColors?: boolean;
 };
 
 // Warning: (ae-missing-release-tag) "EmbeddableInstanceConfiguration" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
