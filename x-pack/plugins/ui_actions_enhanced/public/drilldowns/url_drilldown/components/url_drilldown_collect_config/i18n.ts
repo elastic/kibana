@@ -76,6 +76,6 @@ export const txtUrlTemplatePreviewLinkText = i18n.translate(
 export const txtUrlTemplateOpenInNewTab = i18n.translate(
   'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.openInNewTabLabel',
   {
-    defaultMessage: 'Open in new tab',
+    defaultMessage: 'Open in new window',
   }
 );

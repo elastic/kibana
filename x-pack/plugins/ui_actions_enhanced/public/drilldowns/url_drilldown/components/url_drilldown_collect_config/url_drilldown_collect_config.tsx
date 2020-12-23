@@ -6,7 +6,6 @@
 
 import React, { useRef, useState } from 'react';
 import {
-  EuiCheckbox,
   EuiFormRow,
   EuiIcon,
   EuiLink,
@@ -17,6 +16,7 @@ import {
   EuiText,
   EuiTextArea,
   EuiSelectableOption,
+  EuiSwitch,
 } from '@elastic/eui';
 import { UrlDrilldownConfig } from '../../types';
 import './index.scss';
@@ -111,7 +111,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
         />
       </EuiFormRow>
       <EuiFormRow hasChildLabel={false}>
-        <EuiCheckbox
+        <EuiSwitch
           id="openInNewTab"
           name="openInNewTab"
           label={txtUrlTemplateOpenInNewTab}
