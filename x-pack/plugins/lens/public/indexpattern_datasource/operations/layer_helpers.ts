@@ -59,17 +59,11 @@ export function insertNewColumn({
     }
     const possibleOperation = operationDefinition.getPossibleOperation();
     const isBucketed = Boolean(possibleOperation.isBucketed);
-    if (isBucketed) {
-      return updateDefaultLabels(
-        addBucket(layer, operationDefinition.buildColumn({ ...baseOptions, layer }), columnId),
-        indexPattern
-      );
-    } else {
-      return updateDefaultLabels(
-        addMetric(layer, operationDefinition.buildColumn({ ...baseOptions, layer }), columnId),
-        indexPattern
-      );
-    }
+    const addOperationFn = isBucketed ? addBucket : addMetric;
+    return updateDefaultLabels(
+      addOperationFn(layer, operationDefinition.buildColumn({ ...baseOptions, layer }), columnId),
+      indexPattern
+    );
   }
 
   if (operationDefinition.input === 'fullReference') {
@@ -252,6 +246,7 @@ export function replaceColumn({
         const referencedOperation = operationDefinitionMap[referenceColumn.operationType];
 
         if (referencedOperation.type === op) {
+          // Case a1, case a2
           tempLayer = deleteColumn({
             layer: tempLayer,
             columnId: previousReferenceId,
@@ -280,6 +275,7 @@ export function replaceColumn({
           referencedOperation.input === 'field' &&
           operationDefinition.input === 'field'
         ) {
+          // Case a3
           const matchedField = indexPattern.getFieldByName(referenceColumn.sourceField);
           if (matchedField && operationDefinition.getPossibleOperationForField(matchedField!)) {
             field = matchedField;
@@ -288,18 +284,10 @@ export function replaceColumn({
       }
     }
 
-    if (previousDefinition.input === 'fullReference') {
-      (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
-        tempLayer = deleteColumn({ layer: tempLayer, columnId: id, indexPattern });
-      });
-    }
-
-    // tempLayer = resetIncomplete(tempLayer, columnId);
-
     if (operationDefinition.input === 'fullReference') {
       // This layer is updated during the transition logic, for example by rearranging
       // the columnIds
-      let promotedOutputLayer = resetIncomplete({ ...layer }, columnId);
+      let referenceLayer = { ...tempLayer };
 
       let hasExactMatch = false;
       let hasFieldMatch = false;
@@ -312,7 +300,7 @@ export function replaceColumn({
       const referenceIds = operationDefinition.requiredReferences.map((validation) => {
         const newId = generateId();
 
-        // First priority is to use any references that can be kept
+        // First priority is to use any references that can be kept (case r1)
         if (unusedReferencesQueue.length) {
           const otherColumn = layer.columns[unusedReferencesQueue[0]];
           if (isColumnValidAsReference({ validation, column: otherColumn })) {
@@ -320,35 +308,35 @@ export function replaceColumn({
           }
         }
 
-        // Second priority is to wrap around the previous column
+        // Second priority is to wrap around the previous column (case n1)
         if (!hasExactMatch && isColumnValidAsReference({ validation, column: previousColumn })) {
           hasExactMatch = true;
 
           const newLayer = {
-            ...promotedOutputLayer,
+            ...referenceLayer,
             columns: {
-              ...promotedOutputLayer.columns,
+              ...referenceLayer.columns,
               [newId]: {
                 ...previousColumn,
                 label: previousDefinition.getDefaultLabel(
                   previousColumn,
                   indexPattern,
-                  promotedOutputLayer.columns
+                  referenceLayer.columns
                 ),
                 customLabel: undefined,
               },
             },
           };
 
-          promotedOutputLayer = {
-            ...promotedOutputLayer,
+          referenceLayer = {
+            ...referenceLayer,
             columnOrder: getColumnOrder(newLayer),
             columns: adjustColumnReferencesForChangedColumn(newLayer, newId),
           };
           return newId;
         }
 
-        // Look for any fieldless operations that can be inserted directly
+        // Look for any fieldless operations that can be inserted directly (case n2)
         if (validation.input.includes('none')) {
           const validOperations = operationDefinitions.filter((def) => {
             if (def.input !== 'none') return;
@@ -360,8 +348,8 @@ export function replaceColumn({
           });
 
           if (validOperations.length === 1) {
-            promotedOutputLayer = insertNewColumn({
-              layer: promotedOutputLayer,
+            referenceLayer = insertNewColumn({
+              layer: referenceLayer,
               columnId: newId,
               op: validOperations[0].type,
               indexPattern,
@@ -370,17 +358,20 @@ export function replaceColumn({
           }
         }
 
-        // Try to reuse the previous field by finding a possible operation
+        // Try to reuse the previous field by finding a possible operation. Because we've alredy
+        // checked for an exact operation match, this is guaranteed to be different from previousColumn
         if (
           !hasFieldMatch &&
           'sourceField' in previousColumn &&
           validation.input.includes('field')
         ) {
-          const defIgnoringfield = operationDefinitions.filter(
-            (def) =>
-              def.input === 'field' &&
-              isOperationAllowedAsReference({ validation, operationType: def.type, indexPattern })
-          );
+          const defIgnoringfield = operationDefinitions
+            .filter(
+              (def) =>
+                def.input === 'field' &&
+                isOperationAllowedAsReference({ validation, operationType: def.type, indexPattern })
+            )
+            .sort(getSortScoreByPriority);
 
           // No exact match found, so let's determine that the current field can be reused
           const defWithField = defIgnoringfield.filter((def) => {
@@ -395,11 +386,11 @@ export function replaceColumn({
             });
           });
 
-          if (defWithField.length === 1) {
-            // Found an exact field and operation match,
+          if (defWithField.length > 0) {
+            // Found the best match that keeps the field (case n3)
             hasFieldMatch = true;
-            promotedOutputLayer = insertNewColumn({
-              layer: promotedOutputLayer,
+            referenceLayer = insertNewColumn({
+              layer: referenceLayer,
               columnId: newId,
               op: defWithField[0].type,
               indexPattern,
@@ -407,64 +398,83 @@ export function replaceColumn({
             });
             return newId;
           } else if (defIgnoringfield.length === 1) {
+            // Can't use the field, but there is an exact match on the operation (case n4)
             hasFieldMatch = true;
-            promotedOutputLayer = {
-              ...promotedOutputLayer,
+            referenceLayer = {
+              ...referenceLayer,
               incompleteColumns: {
-                ...promotedOutputLayer.incompleteColumns,
+                ...referenceLayer.incompleteColumns,
                 [newId]: { operationType: defIgnoringfield[0].type },
               },
             };
             return newId;
-          } else if (defWithField.length > 0) {
-            hasFieldMatch = true;
-
-            const newColumns = { ...promotedOutputLayer.columns };
-            delete newColumns[columnId];
-
-            promotedOutputLayer = {
-              ...promotedOutputLayer,
-              // this logic produces the wrong order, but is fixed in the next step
-              columnOrder: [
-                ...promotedOutputLayer.columnOrder.map((id) => (id === columnId ? newId : id)),
-                columnId,
-              ],
-              incompleteColumns: {
-                ...promotedOutputLayer.incompleteColumns,
-                [newId]: { sourceField: previousColumn.sourceField },
-              },
-            };
-            promotedOutputLayer.columnOrder = getColumnOrder(promotedOutputLayer);
-            promotedOutputLayer.columns = adjustColumnReferencesForChangedColumn(
-              promotedOutputLayer,
-              newId
-            );
-            return newId;
           }
         }
 
-        // The reference is too ambiguous at this point, but instead of throwing an error
-        // we will allow the getErrorMessages function to indicate that there is a missing reference
+        // Look for field-based references that we can use to assign a new field-based operation from (case r2)
+        if (unusedReferencesQueue.length) {
+          const otherColumn = layer.columns[unusedReferencesQueue[0]];
+          if (otherColumn && 'sourceField' in otherColumn && validation.input.includes('field')) {
+            const previousField = indexPattern.getFieldByName(otherColumn.sourceField);
+            if (!previousField) return;
+
+            const defIgnoringfield = operationDefinitions
+              .filter(
+                (def) =>
+                  def.input === 'field' &&
+                  isOperationAllowedAsReference({
+                    validation,
+                    operationType: def.type,
+                    indexPattern,
+                  })
+              )
+              .sort(getSortScoreByPriority);
+
+            // No exact match found, so let's determine that the current field can be reused
+            const defWithField = defIgnoringfield.filter((def) => {
+              if (def.input !== 'field') return;
+              return isOperationAllowedAsReference({
+                validation,
+                operationType: def.type,
+                field: previousField,
+                indexPattern,
+              });
+            });
+
+            if (defWithField.length > 0) {
+              referenceLayer = insertNewColumn({
+                layer: referenceLayer,
+                columnId: newId,
+                op: defWithField[0].type,
+                indexPattern,
+                field: previousField,
+              });
+              return newId;
+            }
+          }
+        }
+
+        // The reference is too ambiguous at this point, but instead of throwing an error (case n5)
         return newId;
       });
 
       if (unusedReferencesQueue.length) {
         unusedReferencesQueue.forEach((id: string) => {
-          promotedOutputLayer = deleteColumn({
-            layer: promotedOutputLayer,
+          referenceLayer = deleteColumn({
+            layer: referenceLayer,
             columnId: id,
             indexPattern,
           });
         });
       }
 
-      promotedOutputLayer = {
-        ...promotedOutputLayer,
+      referenceLayer = {
+        ...referenceLayer,
         columns: {
-          ...promotedOutputLayer.columns,
+          ...referenceLayer.columns,
           [columnId]: operationDefinition.buildColumn({
             ...baseOptions,
-            layer: promotedOutputLayer,
+            layer: referenceLayer,
             referenceIds,
             previousColumn,
           }),
@@ -472,12 +482,19 @@ export function replaceColumn({
       };
       return updateDefaultLabels(
         {
-          ...promotedOutputLayer,
-          columnOrder: getColumnOrder(promotedOutputLayer),
-          columns: adjustColumnReferencesForChangedColumn(promotedOutputLayer, columnId),
+          ...referenceLayer,
+          columnOrder: getColumnOrder(referenceLayer),
+          columns: adjustColumnReferencesForChangedColumn(referenceLayer, columnId),
         },
         indexPattern
       );
+    }
+
+    // This logic comes after the transitions because they need to look at previous columns
+    if (previousDefinition.input === 'fullReference') {
+      (previousColumn as ReferenceBasedIndexPatternColumn).references.forEach((id: string) => {
+        tempLayer = deleteColumn({ layer: tempLayer, columnId: id, indexPattern });
+      });
     }
 
     if (operationDefinition.input === 'none') {
