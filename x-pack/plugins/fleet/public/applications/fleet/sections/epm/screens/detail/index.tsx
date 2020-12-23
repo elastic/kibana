@@ -247,6 +247,7 @@ export function Detail() {
                       label: i18n.translate('xpack.fleet.epm.usedByLabel', {
                         defaultMessage: 'Agent Policies',
                       }),
+                      'data-test-subj': 'agentPolicyCount',
                       content: <IntegrationAgentPolicyCount packageName={packageInfo.name} />,
                     },
                   ]
@@ -276,7 +277,7 @@ export function Detail() {
                 ),
               },
             ].map((item, index) => (
-              <EuiFlexItem grow={false} key={index}>
+              <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
                 {item.isDivider ?? false ? (
                   <Divider />
                 ) : item.label ? (
