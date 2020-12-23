@@ -10643,7 +10643,6 @@
     "xpack.lens.indexPattern.ranges.decreaseButtonLabel": "粒度を下げる",
     "xpack.lens.indexPattern.ranges.deleteRange": "範囲を削除",
     "xpack.lens.indexPattern.ranges.granularity": "間隔粒度",
-    "xpack.lens.indexPattern.ranges.granularityDescription": "フィールドを均等な間隔に分割します。",
     "xpack.lens.indexPattern.ranges.increaseButtonLabel": "粒度を上げる",
     "xpack.lens.indexPattern.ranges.lessThanOrEqualAppend": "≤",
     "xpack.lens.indexPattern.ranges.lessThanOrEqualTooltip": "以下",
