@@ -178,9 +178,12 @@ export function createSingleMetricViewerUrl(
   if (entities !== undefined) {
     mlTimeSeriesExplorer.entities = entities;
   }
+  if (zoom !== undefined) {
+    mlTimeSeriesExplorer.zoom = zoom;
+  }
+
   appState.mlTimeSeriesExplorer = mlTimeSeriesExplorer;
 
-  if (zoom) appState.zoom = zoom;
   if (query)
     appState.query = {
       query_string: query,

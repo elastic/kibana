@@ -123,27 +123,26 @@ export interface TimeSeriesExplorerGlobalState {
   refreshInterval?: RefreshInterval;
 }
 
-export interface TimeSeriesExplorerAppState {
+export interface TimeSeriesExplorerParams {
+  forecastId?: string;
+  detectorIndex?: number;
+  entities?: Record<string, string>;
   zoom?: {
     from?: string;
     to?: string;
   };
-  mlTimeSeriesExplorer?: {
-    forecastId?: string;
-    detectorIndex?: number;
-    entities?: Record<string, string>;
-  };
+}
+export interface TimeSeriesExplorerAppState {
+  mlTimeSeriesExplorer?: TimeSeriesExplorerParams;
   query?: any;
 }
 
 export interface TimeSeriesExplorerPageState
-  extends Pick<TimeSeriesExplorerAppState, 'zoom' | 'query'>,
+  extends TimeSeriesExplorerParams,
+    Pick<TimeSeriesExplorerAppState, 'query'>,
     Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
   jobIds?: JobId[];
   timeRange?: TimeRange;
-  detectorIndex?: number;
-  entities?: Record<string, string>;
-  forecastId?: string;
   globalState?: MlCommonGlobalState;
 }
 

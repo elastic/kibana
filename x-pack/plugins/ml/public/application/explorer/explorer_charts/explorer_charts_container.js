@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -56,10 +56,15 @@ function getChartId(series) {
 function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel, mlUrlGenerator }) {
   const redirectToSingleMetricViewer = useCallback(async () => {
     const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
-    addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, singleMetricViewerLink);
+    // need to get the relative link for addItemToRecentlyAccessed
+    // whereas for user to navigate to link it needs the full path
+    const relativeLinkParts = singleMetricViewerLink.split('app/ml');
+    if (Array.isArray(relativeLinkParts) && relativeLinkParts.length === 2) {
+      addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, relativeLinkParts[1]);
+    }
 
     window.open(singleMetricViewerLink, '_blank');
-  }, [mlUrlGenerator]);
+  }, [mlUrlGenerator, series]);
 
   const { detectorLabel, entityFields } = series;
 
@@ -168,14 +173,12 @@ export const ExplorerChartsContainerUI = ({
 }) => {
   const {
     services: {
-      application: { navigateToApp },
-
       share: {
         urlGenerators: { getUrlGenerator },
       },
     },
   } = kibana;
-  const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+  const mlUrlGenerator = useMemo(() => getUrlGenerator(ML_APP_URL_GENERATOR), [getUrlGenerator]);
 
   // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
   // If that's the case we trick it doing that with the following settings:
@@ -198,7 +201,6 @@ export const ExplorerChartsContainerUI = ({
               severity={severity}
               tooManyBuckets={tooManyBuckets}
               wrapLabel={wrapLabel}
-              navigateToApp={navigateToApp}
               mlUrlGenerator={mlUrlGenerator}
             />
           </EuiFlexItem>
