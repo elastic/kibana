@@ -116,15 +116,12 @@ describe('percentile', () => {
 
   describe('buildColumn', () => {
     it('should set default percentile', () => {
+      const indexPattern = createMockedIndexPattern();
+      const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
+      bytesField.displayName = 'test';
       const percentileColumn = percentileOperation.buildColumn({
-        indexPattern: createMockedIndexPattern(),
-        field: {
-          aggregatable: true,
-          searchable: true,
-          type: 'number',
-          name: 'bytes',
-          displayName: 'test',
-        },
+        indexPattern,
+        field: bytesField,
         layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
       expect(percentileColumn.dataType).toEqual('number');
