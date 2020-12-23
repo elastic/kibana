@@ -29,7 +29,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.addComment({
         caseClient: caseClient.client,
         caseId: 'mock-id-1',
@@ -65,7 +65,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.addComment({
         caseClient: caseClient.client,
         caseId: 'mock-id-1',
@@ -103,7 +103,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.addComment({
         caseClient: caseClient.client,
         caseId: 'mock-id-1',
@@ -127,7 +127,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       await caseClient.client.addComment({
         caseClient: caseClient.client,
         caseId: 'mock-id-1',
@@ -175,7 +175,10 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient, true);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({
+        savedObjectsClient,
+        badAuth: true,
+      });
       const res = await caseClient.client.addComment({
         caseClient: caseClient.client,
         caseId: 'mock-id-1',
@@ -213,7 +216,7 @@ describe('addComment', () => {
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         .addComment({
           caseId: 'mock-id-1',
@@ -235,7 +238,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const allRequestAttributes = {
         type: CommentType.user,
         comment: 'a comment',
@@ -267,7 +270,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
 
       ['alertId', 'index'].forEach((attribute) => {
         caseClient.client
@@ -296,7 +299,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const allRequestAttributes = {
         type: CommentType.alert,
         index: 'test-index',
@@ -329,7 +332,7 @@ describe('addComment', () => {
         caseCommentSavedObject: mockCaseComments,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
 
       ['comment'].forEach((attribute) => {
         caseClient.client
@@ -358,7 +361,7 @@ describe('addComment', () => {
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         .addComment({
           caseClient: caseClient.client,
@@ -382,7 +385,7 @@ describe('addComment', () => {
         caseSavedObject: mockCases,
         caseCommentSavedObject: mockCaseComments,
       });
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         .addComment({
           caseClient: caseClient.client,

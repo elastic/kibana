@@ -28,7 +28,7 @@ export const createMockSavedObjectsRepository = ({
   caseCommentSavedObject?: any[];
   caseConfigureSavedObject?: any[];
   caseMappingsSavedObject?: any[];
-}) => {
+} = {}) => {
   const mockSavedObjectsClientContract = ({
     bulkGet: jest.fn((objects: SavedObjectsBulkGetObject[]) => {
       return {

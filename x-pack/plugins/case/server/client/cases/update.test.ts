@@ -37,7 +37,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.update({
         caseClient: caseClient.client,
         cases: patchCases,
@@ -120,7 +120,7 @@ describe('update', () => {
         ],
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.update({
         caseClient: caseClient.client,
         cases: patchCases,
@@ -171,7 +171,7 @@ describe('update', () => {
         caseSavedObject: [mockCaseNoConnectorId],
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.update({
         caseClient: caseClient.client,
         cases: patchCases,
@@ -227,7 +227,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await caseClient.client.update({
         caseClient: caseClient.client,
         cases: patchCases,
@@ -293,7 +293,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         // @ts-expect-error
         .update({ cases: patchCases })
@@ -324,7 +324,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client
         // @ts-expect-error
         .update({ cases: patchCases })
@@ -351,7 +351,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
@@ -381,7 +381,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
@@ -408,7 +408,7 @@ describe('update', () => {
         caseSavedObject: mockCases,
       });
 
-      const caseClient = await createCaseClientWithMockSavedObjectsClient(savedObjectsClient);
+      const caseClient = await createCaseClientWithMockSavedObjectsClient({ savedObjectsClient });
       caseClient.client.update({ caseClient: caseClient.client, cases: patchCases }).catch((e) => {
         expect(e).not.toBeNull();
         expect(e.isBoom).toBe(true);
