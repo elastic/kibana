@@ -149,8 +149,8 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       await PageObjects.visualize.clickAggBasedVisualizations();
       await PageObjects.visualize.clickMetric();
       await find.clickByCssSelector('li.euiListGroupItem:nth-of-type(2)');
-      await testSubjects.exists('visualizeSaveButton');
-      await testSubjects.click('visualizeSaveButton');
+      await testSubjects.exists('visualizesaveAndReturnButton');
+      await testSubjects.click('visualizesaveAndReturnButton');
     }
 
     async createAndEmbedMarkdown({ name, markdown }: { name: string; markdown: string }) {
@@ -163,7 +163,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }: F
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visEditor.setMarkdownTxt(markdown);
       await PageObjects.visEditor.clickGo();
-      await testSubjects.click('visualizeSaveButton');
+      await testSubjects.click('visualizesaveAndReturnButton');
     }
   })();
 }
