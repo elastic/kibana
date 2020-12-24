@@ -22,8 +22,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
-  const docsUrl = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-configuring-aggregation.html`;
+  const docsUrl = docLinks.links.ml.aggregations;
   return (
     <EuiDescribedFormGroup
       title={<h3>{title}</h3>}

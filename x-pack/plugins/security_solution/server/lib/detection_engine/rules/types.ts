@@ -103,9 +103,7 @@ import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
 import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
 
-export interface RuleAlertType extends Alert {
-  params: RuleTypeParams;
-}
+export type RuleAlertType = Alert<RuleTypeParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleStatusSOAttributes extends Record<string, any> {
@@ -173,11 +171,15 @@ export interface Clients {
   alertsClient: AlertsClient;
 }
 
-export const isAlertTypes = (partialAlert: PartialAlert[]): partialAlert is RuleAlertType[] => {
+export const isAlertTypes = (
+  partialAlert: Array<PartialAlert<RuleTypeParams>>
+): partialAlert is RuleAlertType[] => {
   return partialAlert.every((rule) => isAlertType(rule));
 };
 
-export const isAlertType = (partialAlert: PartialAlert): partialAlert is RuleAlertType => {
+export const isAlertType = (
+  partialAlert: PartialAlert<RuleTypeParams>
+): partialAlert is RuleAlertType => {
   return partialAlert.alertTypeId === SIGNALS_ID;
 };
 
@@ -305,7 +307,7 @@ export interface PatchRulesOptions {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
-  rule: SanitizedAlert | null;
+  rule: SanitizedAlert<RuleTypeParams> | null;
 }
 
 export interface ReadRuleOptions {

@@ -22,7 +22,7 @@ import {
   keys,
 } from '@elastic/eui';
 import { IFieldFormat } from '../../../../../../../../src/plugins/data/common';
-import { RangeTypeLens, isValidRange, isValidNumber } from './ranges';
+import { RangeTypeLens, isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import {
   NewBucketButton,
@@ -30,7 +30,7 @@ import {
   DraggableBucketContainer,
   LabelInput,
 } from '../shared_components';
-import { useDebounceWithOptions } from '../helpers';
+import { isValidNumber, useDebounceWithOptions } from '../helpers';
 
 const generateId = htmlIdGenerator();
 
