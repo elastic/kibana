@@ -25,7 +25,6 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
-  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common']);
 
   const defaultFindTimeout = config.get('timeouts.find');
