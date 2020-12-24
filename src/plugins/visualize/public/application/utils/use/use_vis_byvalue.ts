@@ -22,7 +22,7 @@ import { useEffect, useRef, useState } from 'react';
 import { VisualizeInput } from 'src/plugins/visualizations/public';
 import { ByValueVisInstance, IEditorController, VisualizeServices } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
-import { getBreadcrumbsPrefixedWithApp, getEditBreadcrumbs } from '../breadcrumbs';
+import { getEditBreadcrumbs } from '../breadcrumbs';
 import { getDefaultEditor } from '../../../services';
 
 export const useVisByValue = (
@@ -39,7 +39,11 @@ export const useVisByValue = (
   const visEditorRef = useRef<HTMLDivElement>(null);
   const loaded = useRef(false);
   useEffect(() => {
-    const { chrome } = services;
+    const {
+      chrome,
+      application: { navigateToApp },
+      stateTransferService,
+    } = services;
     const getVisInstance = async () => {
       if (!valueInput || loaded.current || !visEditorRef.current) {
         return;
@@ -55,11 +59,13 @@ export const useVisByValue = (
         embeddableHandler
       );
 
-      if (chrome && originatingApp) {
-        chrome.setBreadcrumbs(getBreadcrumbsPrefixedWithApp(originatingApp));
-      } else if (chrome) {
-        chrome.setBreadcrumbs(getEditBreadcrumbs());
-      }
+      const originatingAppName = originatingApp
+        ? stateTransferService.getAppNameFromId(originatingApp)
+        : undefined;
+      const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
+      chrome?.setBreadcrumbs(
+        getEditBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
+      );
 
       loaded.current = true;
       setState({

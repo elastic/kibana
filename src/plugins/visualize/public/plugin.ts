@@ -202,6 +202,7 @@ export class VisualizePlugin
           visualizeCapabilities: coreStart.application.capabilities.visualize,
           visualizations: pluginsStart.visualizations,
           embeddable: pluginsStart.embeddable,
+          stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
           createVisEmbeddableFromObject:
             pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,

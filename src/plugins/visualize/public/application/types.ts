@@ -43,7 +43,7 @@ import {
 } from 'src/plugins/kibana_utils/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
-import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import { EventEmitter } from 'events';
 import { DashboardStart } from '../../../dashboard/public';
@@ -95,6 +95,7 @@ export interface EditorRenderProps {
 }
 
 export interface VisualizeServices extends CoreStart {
+  stateTransferService: EmbeddableStateTransfer;
   embeddable: EmbeddableStart;
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;

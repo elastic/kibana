@@ -80,7 +80,6 @@ const TopNav = ({
     },
     [visInstance.embeddableHandler]
   );
-  const stateTransfer = services.embeddable.getStateTransfer();
   const savedObjectsClient = services.savedObjects.client;
 
   const config = useMemo(() => {
@@ -96,7 +95,7 @@ const TopNav = ({
           visInstance,
           stateContainer,
           visualizationIdFromUrl,
-          stateTransfer,
+          stateTransfer: services.stateTransferService,
           savedObjectsClient,
           embeddableId,
           onAppLeave,
@@ -117,7 +116,6 @@ const TopNav = ({
     visualizationIdFromUrl,
     services,
     embeddableId,
-    stateTransfer,
     savedObjectsClient,
     onAppLeave,
   ]);

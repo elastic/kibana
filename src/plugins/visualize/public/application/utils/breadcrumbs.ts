@@ -21,16 +21,8 @@ import { i18n } from '@kbn/i18n';
 
 import { VisualizeConstants } from '../visualize_constants';
 
-const appPrefixes: Record<string, any> = {
-  dashboards: {
-    text: i18n.translate('visualize.dashboard.prefix.breadcrumb', {
-      defaultMessage: 'Dashboard',
-    }),
-  },
-};
-
 const defaultEditText = i18n.translate('visualize.editor.defaultEditBreadcrumbText', {
-  defaultMessage: 'Edit',
+  defaultMessage: 'Edit visualization',
 });
 
 export function getLandingBreadcrumbs() {
@@ -44,9 +36,18 @@ export function getLandingBreadcrumbs() {
   ];
 }
 
-export function getCreateBreadcrumbs() {
+export function getCreateBreadcrumbs({
+  byValue,
+  originatingAppName,
+  redirectToOrigin,
+}: {
+  byValue?: boolean;
+  originatingAppName?: string;
+  redirectToOrigin?: () => void;
+}) {
   return [
-    ...getLandingBreadcrumbs(),
+    ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
+    ...(!byValue ? getLandingBreadcrumbs() : []),
     {
       text: i18n.translate('visualize.editor.createBreadcrumb', {
         defaultMessage: 'Create',
@@ -55,16 +56,23 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
-export function getBreadcrumbsPrefixedWithApp(originatingApp: string) {
-  const originatingAppBreadcrumb = appPrefixes[originatingApp];
-  return [originatingAppBreadcrumb, ...getLandingBreadcrumbs(), { text: defaultEditText }];
-}
-
-export function getEditBreadcrumbs(text: string = defaultEditText) {
+export function getEditBreadcrumbs(
+  {
+    byValue,
+    originatingAppName,
+    redirectToOrigin,
+  }: {
+    byValue?: boolean;
+    originatingAppName?: string;
+    redirectToOrigin?: () => void;
+  },
+  title: string = defaultEditText
+) {
   return [
-    ...getLandingBreadcrumbs(),
+    ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
+    ...(!byValue ? getLandingBreadcrumbs() : []),
     {
-      text,
+      text: title,
     },
   ];
 }
