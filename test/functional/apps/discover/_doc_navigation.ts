@@ -55,7 +55,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(hasDocHit).to.be(true);
     });
 
-    it('add filter should create an exists filter if value is null (#7189)', async function () {
+    // no longer relevant as null field won't be returned in the Fields API response
+    xit('add filter should create an exists filter if value is null (#7189)', async function () {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // Filter special document
       await filterBar.addFilter('agent', 'is', 'Missing/Fields');
