@@ -87,7 +87,12 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
         palettes={getPalettesService()}
         activePalette={stateParams.palette}
         paramName="palette"
-        setPalette={setValue}
+        setPalette={(paramName, value) => {
+          if (trackUiMetric) {
+            trackUiMetric(METRIC_TYPE.CLICK, 'palette_selected');
+          }
+          setValue(paramName, value);
+        }}
       />
     </>
   );
