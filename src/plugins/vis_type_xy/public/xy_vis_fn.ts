@@ -81,7 +81,7 @@ export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition =>
         visType,
         visConfig,
         visData: context,
-        syncColors: handlers?.isSyncColorsEnabled?.() ?? true,
+        syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
       },
     };
   },

@@ -30,6 +30,7 @@ export const getAllSeries = (
   splitAccessors: SplitAccessors[] | undefined
 ) => {
   const allSeries: string[] = [];
+  if (!splitAccessors) return [];
   rows.forEach((row) => {
     let seriesName = '';
     splitAccessors?.forEach(({ accessor, formatter }) => {

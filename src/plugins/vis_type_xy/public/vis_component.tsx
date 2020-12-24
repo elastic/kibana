@@ -272,10 +272,15 @@ const VisComponent = (props: VisComponentProps) => {
             {
               name: seriesName,
               rankAtDepth: splitAccessors ? allSeries.findIndex((name) => name === seriesName) : 0,
-              totalSeriesAtDepth: allSeries.length,
+              totalSeriesAtDepth: splitAccessors ? allSeries.length : 0,
             },
           ],
-          { maxDepth: 1, totalSeries: allSeries.length, behindText: false, syncColors }
+          {
+            maxDepth: 1,
+            totalSeries: splitAccessors ? allSeries.length : 0,
+            behindText: false,
+            syncColors,
+          }
         );
       return outputColor || null;
     },
