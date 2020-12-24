@@ -38,6 +38,7 @@ import {
 } from '../types';
 
 import { ViewMode } from '../services/embeddable';
+import { Storage } from '../../../kibana_utils/public';
 import { UsageCollectionSetup } from '../services/usage_collection';
 import { Filter, Query, TimefilterContract as Timefilter } from '../services/data';
 import type { SavedObjectTagDecoratorTypeGuard } from '../services/saved_objects_tagging_oss';
@@ -48,6 +49,9 @@ import {
   ReduxLikeStateContainer,
   syncState,
 } from '../services/kibana_utils';
+
+const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';
+const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -84,8 +88,10 @@ export class DashboardStateManager {
   private readonly stateContainerChangeSub: Subscription;
   private readonly STATE_STORAGE_KEY = '_a';
   private readonly kbnUrlStateStorage: IKbnUrlStateStorage;
+  private readonly sessionStorage: Storage;
   private readonly stateSyncRef: ISyncStateRef;
-  private readonly history: History;
+  private readonly allowByValueEmbeddables: boolean;
+
   private readonly usageCollection: UsageCollectionSetup | undefined;
   public readonly hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard;
 
@@ -103,6 +109,7 @@ export class DashboardStateManager {
     kbnUrlStateStorage,
     history,
     usageCollection,
+    allowByValueEmbeddables,
     hasTaggingCapabilities,
   }: {
     savedDashboard: DashboardSavedObject;
@@ -111,14 +118,15 @@ export class DashboardStateManager {
     kbnUrlStateStorage: IKbnUrlStateStorage;
     history: History;
     usageCollection?: UsageCollectionSetup;
+    allowByValueEmbeddables: boolean;
     hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard;
   }) {
-    this.history = history;
     this.kibanaVersion = kibanaVersion;
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
     this.usageCollection = usageCollection;
     this.hasTaggingCapabilities = hasTaggingCapabilities;
+    this.allowByValueEmbeddables = allowByValueEmbeddables;
 
     // get state defaults from saved dashboard, make sure it is migrated
     this.stateDefaults = migrateAppState(
@@ -126,7 +134,7 @@ export class DashboardStateManager {
       kibanaVersion,
       usageCollection
     );
-
+    this.sessionStorage = new Storage(sessionStorage);
     this.kbnUrlStateStorage = kbnUrlStateStorage;
 
     // setup initial state by merging defaults with state from url
@@ -134,6 +142,7 @@ export class DashboardStateManager {
     const initialState = migrateAppState(
       {
         ...this.stateDefaults,
+        ...this.getUnsavedPanelState(),
         ...this.kbnUrlStateStorage.get<DashboardAppState>(this.STATE_STORAGE_KEY),
       },
       kibanaVersion,
@@ -176,10 +185,10 @@ export class DashboardStateManager {
       stateContainer: {
         ...this.stateContainer,
         get: () => this.toUrlState(this.stateContainer.get()),
-        set: (state: DashboardAppStateInUrl | null) => {
+        set: (stateFromUrl: DashboardAppStateInUrl | null) => {
           // sync state required state container to be able to handle null
           // overriding set() so it could handle null coming from url
-          if (state) {
+          if (stateFromUrl) {
             // Skip this update if current dashboardId in the url is different from what we have in the current instance of state manager
             // As dashboard is driven by angular at the moment, the destroy cycle happens async,
             // If the dashboardId has changed it means this instance
@@ -190,7 +199,8 @@ export class DashboardStateManager {
 
             this.stateContainer.set({
               ...this.stateDefaults,
-              ...state,
+              ...(this.getUnsavedPanelState() || {}),
+              ...stateFromUrl,
             });
           } else {
             // Do nothing in case when state from url is empty,
@@ -263,6 +273,8 @@ export class DashboardStateManager {
 
     if (dirty) {
       this.stateContainer.transitions.set('panels', Object.values(convertedPanelStateMap));
+      this.setUnsavedPanels(this.getPanels());
+
       if (dirtyBecauseOfInitialStateMigration) {
         this.saveState({ replace: true });
       }
@@ -477,7 +489,14 @@ export class DashboardStateManager {
   }
 
   public getViewMode() {
-    return this.hideWriteControls ? ViewMode.VIEW : this.appState.viewMode;
+    if (this.hideWriteControls) {
+      return ViewMode.VIEW;
+    }
+    // get viewMode should work properly even before the state container is created
+    return this.stateContainer
+      ? this.appState.viewMode
+      : this.kbnUrlStateStorage.get<DashboardAppState>(this.STATE_STORAGE_KEY)?.viewMode ??
+          ViewMode.VIEW;
   }
 
   public getIsViewMode() {
@@ -593,22 +612,6 @@ export class DashboardStateManager {
     return this.kbnUrlStateStorage.flush({ replace });
   }
 
-  // TODO: find nicer solution for this
-  // this function helps to make just 1 browser history update, when we imperatively changing the dashboard url
-  // It could be that there is pending *dashboardStateManager* updates, which aren't flushed yet to the url.
-  // So to prevent 2 browser updates:
-  // 1. Force flush any pending state updates (syncing state to query)
-  // 2. If url was updated, then apply path change with replace
-  public changeDashboardUrl(pathname: string) {
-    // synchronously persist current state to url with push()
-    const updated = this.saveState({ replace: false });
-    // change pathname
-    this.history[updated ? 'replace' : 'push']({
-      ...this.history.location,
-      pathname,
-    });
-  }
-
   public setQuery(query: Query) {
     this.stateContainer.transitions.set('query', query);
   }
@@ -638,6 +641,60 @@ export class DashboardStateManager {
     }
   }
 
+  public hydrateUnsavedPanels() {
+    const unsavedState = this.getUnsavedPanelState();
+    if (!unsavedState || unsavedState.panels?.length === 0) {
+      return;
+    }
+    this.stateContainer.set(
+      migrateAppState(
+        {
+          ...this.stateDefaults,
+          ...unsavedState,
+          ...this.kbnUrlStateStorage.get<DashboardAppState>(this.STATE_STORAGE_KEY),
+        },
+        this.kibanaVersion,
+        this.usageCollection
+      )
+    );
+  }
+
+  public clearUnsavedPanels() {
+    if (!this.allowByValueEmbeddables) {
+      return;
+    }
+    const sessionStoragePanels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
+    sessionStoragePanels[this.savedDashboard.id || DASHBOARD_PANELS_UNSAVED_ID] = undefined;
+    this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStoragePanels);
+  }
+
+  private getUnsavedPanelState(): { panels?: SavedDashboardPanel[] } {
+    if (!this.allowByValueEmbeddables || this.getIsViewMode()) {
+      return {};
+    }
+    const panels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[
+      this.savedDashboard.id || DASHBOARD_PANELS_UNSAVED_ID
+    ];
+    return panels ? { panels } : {};
+  }
+
+  private setUnsavedPanels(newPanels: SavedDashboardPanel[]) {
+    if (!this.allowByValueEmbeddables || this.getIsViewMode() || !this.getIsDirty()) {
+      return;
+    }
+    const sessionStoragePanels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
+    sessionStoragePanels[this.savedDashboard.id || DASHBOARD_PANELS_UNSAVED_ID] = newPanels;
+    this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStoragePanels);
+  }
+
+  private toUrlState(state: DashboardAppState): DashboardAppStateInUrl {
+    if (this.getIsEditMode() && !this.allowByValueEmbeddables) {
+      return state;
+    }
+    const { panels, ...stateWithoutPanels } = state;
+    return stateWithoutPanels;
+  }
+
   private checkIsDirty() {
     // Filters need to be compared manually because they sometimes have a $$hashkey stored on the object.
     // Query needs to be compared manually because saved legacy queries get migrated in app state automatically
@@ -646,14 +703,5 @@ export class DashboardStateManager {
     const initial = _.omit(this.stateDefaults, propsToIgnore);
     const current = _.omit(this.stateContainer.get(), propsToIgnore);
     return !_.isEqual(initial, current);
-  }
-
-  private toUrlState(state: DashboardAppState): DashboardAppStateInUrl {
-    if (state.viewMode === ViewMode.VIEW) {
-      const { panels, ...stateWithoutPanels } = state;
-      return stateWithoutPanels;
-    }
-
-    return state;
   }
 }

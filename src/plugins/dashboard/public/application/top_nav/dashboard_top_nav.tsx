@@ -147,6 +147,9 @@ export function DashboardTopNav({
 
       if (!willLoseChanges) {
         dashboardStateManager.switchViewMode(newMode);
+        if (newMode === ViewMode.EDIT) {
+          dashboardStateManager.hydrateUnsavedPanels();
+        }
         return;
       }
 
@@ -154,6 +157,7 @@ export function DashboardTopNav({
         dashboardStateManager.resetState();
         // This is only necessary for new dashboards, which will default to Edit mode.
         dashboardStateManager.switchViewMode(ViewMode.VIEW);
+        dashboardStateManager.clearUnsavedPanels();
 
         // We need to do a hard reset of the timepicker. appState will not reload like
         // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
@@ -206,6 +210,7 @@ export function DashboardTopNav({
               'data-test-subj': 'saveDashboardSuccess',
             });
 
+            dashboardStateManager.clearUnsavedPanels();
             if (id !== lastDashboardId) {
               redirectTo({ destination: 'dashboard', id });
             } else {

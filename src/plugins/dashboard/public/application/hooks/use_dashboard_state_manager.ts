@@ -39,6 +39,7 @@ import { createSessionRestorationDataProvider } from '../lib/session_restoration
 import { DashboardStateManager } from '../dashboard_state_manager';
 import { getDashboardTitle } from '../../dashboard_strings';
 import { DashboardAppServices } from '../types';
+import { DashboardFeatureFlagConfig } from '../..';
 
 // TS is picky with type guards, we can't just inline `() => false`
 function defaultTaggingGuard(_obj: SavedObject): _obj is TagDecoratedSavedObject {
@@ -55,8 +56,8 @@ export const useDashboardStateManager = (
     uiSettings,
     usageCollection,
     initializerContext,
-    dashboardCapabilities,
     savedObjectsTagging,
+    dashboardCapabilities,
   } = useKibana<DashboardAppServices>().services;
 
   // Destructure and rename services; makes the Effect hook more specific, makes later
@@ -85,6 +86,8 @@ export const useDashboardStateManager = (
       useHash: uiSettings.get('state:storeInSessionStorage'),
       ...withNotifyOnErrors(toasts),
     });
+    const allowByValueEmbeddables = initializerContext.config.get<DashboardFeatureFlagConfig>()
+      .allowByValueEmbeddables;
 
     const stateManager = new DashboardStateManager({
       hasTaggingCapabilities,
@@ -94,6 +97,7 @@ export const useDashboardStateManager = (
       kibanaVersion,
       savedDashboard,
       usageCollection,
+      allowByValueEmbeddables,
     });
 
     // sync initial app filters from state to filterManager
@@ -183,6 +187,7 @@ export const useDashboardStateManager = (
     dataPlugin,
     filterManager,
     hasTaggingCapabilities,
+    initializerContext.config,
     hideWriteControls,
     history,
     kibanaVersion,

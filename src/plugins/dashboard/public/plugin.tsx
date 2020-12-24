@@ -308,10 +308,10 @@ export class DashboardPlugin
           appUnMounted,
           usageCollection,
           onAppLeave: params.onAppLeave,
-          initializerContext: this.initializerContext,
           restorePreviousUrl,
           element: params.element,
           scopedHistory: this.currentHistory!,
+          initializerContext: this.initializerContext,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
       },

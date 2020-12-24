@@ -49,32 +49,12 @@ export const useDashboardBreadcrumbs = (
       return;
     }
 
-    const {
-      getConfirmButtonText,
-      getCancelButtonText,
-      getLeaveTitle,
-      getLeaveSubtitle,
-    } = leaveConfirmStrings;
-
     setBreadcrumbs([
       {
         text: getDashboardBreadcrumb(),
         'data-test-subj': 'dashboardListingBreadcrumb',
         onClick: () => {
-          if (dashboardStateManager.getIsDirty()) {
-            openConfirm(getLeaveSubtitle(), {
-              confirmButtonText: getConfirmButtonText(),
-              cancelButtonText: getCancelButtonText(),
-              defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-              title: getLeaveTitle(),
-            }).then((isConfirmed) => {
-              if (isConfirmed) {
-                redirectTo({ destination: 'listing' });
-              }
-            });
-          } else {
-            redirectTo({ destination: 'listing' });
-          }
+          redirectTo({ destination: 'listing' });
         },
       },
       {
