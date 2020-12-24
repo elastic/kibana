@@ -11,7 +11,7 @@ import { HostsTableType } from '../../../../hosts/store/model';
 import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { TabNavigationProps } from '../tab_navigation/types';
 import { NetworkRouteType } from '../../../../network/pages/navigation/types';
-import { TimelineTabs } from '../../../../timelines/store/timeline/model';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 const setBreadcrumbsMock = jest.fn();
 const chromeMock = {
