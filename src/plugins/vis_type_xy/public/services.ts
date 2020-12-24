@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { UiCounterMetricType } from '@kbn/analytics';
 import { CoreSetup, DocLinksStart } from '../../../core/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
@@ -47,3 +48,7 @@ export const [getPalettesService, setPalettesService] = createGetterSetter<Palet
 );
 
 export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('DocLinks');
+
+export const [getTrackUiMetric, setTrackUiMetric] = createGetterSetter<
+  (metricType: UiCounterMetricType, eventName: string | string[]) => void
+>('trackUiMetric');
