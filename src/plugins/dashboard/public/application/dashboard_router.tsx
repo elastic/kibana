@@ -22,7 +22,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom';
+import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
 
 import { DashboardListing } from './listing';
 import { DashboardApp } from './dashboard_app';
@@ -202,6 +202,9 @@ export async function mountApp({
               render={renderDashboard}
             />
             <Route exact path={DashboardConstants.LANDING_PAGE_PATH} render={renderListingPage} />
+            <Route path="/">
+              <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
+            </Route>
           </Switch>
         </HashRouter>
       </KibanaContextProvider>
