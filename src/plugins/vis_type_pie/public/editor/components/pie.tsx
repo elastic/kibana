@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-
+import { UiCounterMetricType, METRIC_TYPE } from '@kbn/analytics';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -37,6 +37,7 @@ import { getLabelPositions, getValuesFormats } from '../collections';
 export interface PieOptionsProps extends VisOptionsProps<PieVisParams> {
   palettes: PaletteRegistry | undefined;
   showElasticChartsOptions: boolean;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 const PieOptions = (props: PieOptionsProps) => {
@@ -74,7 +75,12 @@ const PieOptions = (props: PieOptionsProps) => {
             })}
             paramName="nestedLegend"
             value={stateParams.nestedLegend}
-            setValue={setValue}
+            setValue={(paramName, value) => {
+              if (props.trackUiMetric) {
+                props.trackUiMetric(METRIC_TYPE.CLICK, 'nested_legend_switched');
+              }
+              setValue(paramName, value);
+            }}
             data-test-subj="visTypePieNestedLegendSwitch"
           />
         )}
@@ -83,7 +89,12 @@ const PieOptions = (props: PieOptionsProps) => {
             palettes={props.palettes}
             activePalette={stateParams.palette}
             paramName="palette"
-            setPalette={setValue}
+            setPalette={(paramName, value) => {
+              if (props.trackUiMetric) {
+                props.trackUiMetric(METRIC_TYPE.CLICK, 'palette_selected');
+              }
+              setValue(paramName, value);
+            }}
           />
         )}
       </EuiPanel>
@@ -117,7 +128,12 @@ const PieOptions = (props: PieOptionsProps) => {
             options={getLabelPositions()}
             paramName="position"
             value={stateParams.labels.position || LabelPositions.DEFAULT}
-            setValue={setLabels}
+            setValue={(paramName, value) => {
+              if (props.trackUiMetric) {
+                props.trackUiMetric(METRIC_TYPE.CLICK, 'label_position_selected');
+              }
+              setLabels(paramName, value);
+            }}
             data-test-subj="visTypePieLabelPositionSelect"
           />
         )}
@@ -149,7 +165,12 @@ const PieOptions = (props: PieOptionsProps) => {
             options={getValuesFormats()}
             paramName="valuesFormat"
             value={stateParams.labels.valuesFormat || ValueFormats.PERCENT}
-            setValue={setLabels}
+            setValue={(paramName, value) => {
+              if (props.trackUiMetric) {
+                props.trackUiMetric(METRIC_TYPE.CLICK, 'values_format_selected');
+              }
+              setLabels(paramName, value);
+            }}
             data-test-subj="visTypePieValueFormatsSelect"
           />
         )}

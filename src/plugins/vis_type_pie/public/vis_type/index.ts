@@ -16,9 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { UiCounterMetricType } from '@kbn/analytics';
 import { PaletteRegistry } from '../../../charts/public';
 import { getPieVisTypeDefinition } from './pie';
 
-export const pieVisType = (showElasticChartsOptions?: boolean, palettes?: PaletteRegistry) => {
-  return getPieVisTypeDefinition(showElasticChartsOptions, palettes);
+export const pieVisType = (
+  showElasticChartsOptions?: boolean,
+  palettes?: PaletteRegistry,
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void
+) => {
+  return getPieVisTypeDefinition(showElasticChartsOptions, palettes, trackUiMetric);
 };

@@ -20,6 +20,7 @@ import { CoreSetup, CoreStart, DocLinksStart } from 'src/core/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { ChartsPluginSetup, PaletteRegistry } from '../../charts/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { LEGACY_CHARTS_LIBRARY } from '../common';
 import { createPieVisFn } from './pie_fn';
@@ -31,6 +32,7 @@ export interface VisTypePieSetupDependencies {
   visualizations: VisualizationsSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   charts: ChartsPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 /** @internal */
@@ -48,9 +50,9 @@ export interface VisTypePieDependencies {
 export class VisTypePiePlugin {
   setup(
     core: CoreSetup<VisTypePiePluginStartDependencies>,
-    { expressions, visualizations, charts }: VisTypePieSetupDependencies
+    { expressions, visualizations, charts, usageCollection }: VisTypePieSetupDependencies
   ) {
-    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, true)) {
+    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, false)) {
       const getStartDeps = async () => {
         const [coreStart, deps] = await core.getStartServices();
         return {
@@ -58,13 +60,14 @@ export class VisTypePiePlugin {
           docLinks: coreStart.docLinks,
         };
       };
+      const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'vis_type_pie');
 
       [createPieVisFn].forEach(expressions.registerFunction);
       charts.palettes.getPalettes().then((palettes) => {
         expressions.registerRenderer(
           getPieVisRenderer({ theme: charts.theme, palettes, getStartDeps })
         );
-        visualizations.createBaseVisualization(pieVisType(true, palettes));
+        visualizations.createBaseVisualization(pieVisType(true, palettes, trackUiMetric));
       });
     }
     return {};
