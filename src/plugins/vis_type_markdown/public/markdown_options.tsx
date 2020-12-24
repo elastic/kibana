@@ -22,7 +22,6 @@ import {
   EuiPanel,
   EuiTitle,
   EuiLink,
-  EuiIcon,
   EuiTextArea,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,7 +34,7 @@ import { MarkdownVisParams } from './types';
 
 function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {
   const onMarkdownUpdate = useCallback(
-    (value: MarkdownVisParams['markdown']) => setValue('markdown', value),
+    ({ target: { value } }: React.ChangeEvent<HTMLTextAreaElement>) => setValue('markdown', value),
     [setValue]
   );
 
@@ -61,8 +60,7 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
                   <FormattedMessage
                     id="visTypeMarkdown.params.helpLinkLabel"
                     defaultMessage="Help"
-                  />{' '}
-                  <EuiIcon type="popout" size="s" />
+                  />
                 </EuiLink>
               </EuiText>
             </EuiFlexItem>
@@ -74,7 +72,7 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
             id="markdownVisInput"
             className="visEditor--markdown__textarea"
             value={stateParams.markdown}
-            onChange={({ target: { value } }) => onMarkdownUpdate(value)}
+            onChange={onMarkdownUpdate}
             fullWidth={true}
             data-test-subj="markdownTextarea"
             resize="none"
