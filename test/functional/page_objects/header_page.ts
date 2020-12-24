@@ -42,14 +42,9 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
       await appsMenu.clickLink('Visualize', { category: 'kibana' });
       await this.onAppLeaveWarning(ignoreAppLeaveWarning);
       await this.awaitGlobalLoadingIndicatorHidden();
-      await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
-        const firstBreadcrumb = await globalNav.getFirstBreadcrumb();
-        if (firstBreadcrumb !== 'Visualize') {
-          log.debug('-- first breadcrumb =', firstBreadcrumb);
-          return false;
-        }
-
-        return true;
+      await retry.waitFor('Visualize app to be loaded', async () => {
+        const isNavVisible = await testSubjects.exists('top-nav');
+        return isNavVisible;
       });
     }
 
