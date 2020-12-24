@@ -19,16 +19,11 @@
 
 import { useEffect } from 'react';
 import _ from 'lodash';
-import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 
 import { useKibana } from '../../services/kibana_react';
 
 import { DashboardStateManager } from '../dashboard_state_manager';
-import {
-  getDashboardBreadcrumb,
-  getDashboardTitle,
-  leaveConfirmStrings,
-} from '../../dashboard_strings';
+import { getDashboardBreadcrumb, getDashboardTitle } from '../../dashboard_strings';
 import { DashboardAppServices, DashboardRedirect } from '../types';
 
 export const useDashboardBreadcrumbs = (
