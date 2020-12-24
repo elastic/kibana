@@ -79,14 +79,12 @@ const StatefulTimelineComponent: React.FC<Props> = ({ timelineId }) => {
   }, []);
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     containerElement.current
       ?.querySelector<HTMLButtonElement>('.globalFilterBar__addButton')
       ?.focus();
   }, []);
 
   const onSkipFocusAfterEventsTable = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     containerElement.current
       ?.querySelector<HTMLButtonElement>(`.${EVENTS_COUNT_BUTTON_CLASS_NAME}`)
       ?.focus();
