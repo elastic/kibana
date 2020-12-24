@@ -5,10 +5,10 @@
  */
 
 import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';
-import { TimelineModel, TimelineTabs } from './model';
+import { TimelineModel } from './model';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
