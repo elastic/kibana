@@ -4515,7 +4515,6 @@
     "visualize.createVisualization.failedToLoadErrorMessage": "无法加载可视化",
     "visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage": "必须提供 indexPattern 或 savedSearchId",
     "visualize.createVisualization.noVisTypeErrorMessage": "必须提供有效的可视化类型",
-    "visualize.dashboard.prefix.breadcrumb": "仪表板",
     "visualize.discover.visualizeFieldLabel": "可视化字段",
     "visualize.editor.createBreadcrumb": "创建",
     "visualize.editor.defaultEditBreadcrumbText": "编辑",
