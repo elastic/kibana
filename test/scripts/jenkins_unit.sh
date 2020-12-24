@@ -28,9 +28,8 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   ./test/scripts/checks/test_hardening.sh
 else
   echo " -> Running jest tests with coverage"
-  node scripts/jest --ci --verbose --coverage --config jest.config.oss.js || true;
-  test/scripts/jenkins_unit.sh "oss"
+  node scripts/jest --ci --verbose --maxWorkers=6 --coverage || true;
 
   echo " -> Running jest integration tests with coverage"
-  node --max-old-space-size=8192 scripts/jest_integration --ci --verbose --coverage || true;
+  node scripts/jest_integration --ci --verbose --coverage || true;
 fi

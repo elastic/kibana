@@ -183,6 +183,7 @@ def withGcsArtifactUpload(workerName, closure) {
     'target/test-metrics/*',
     'target/kibana-security-solution/**/*.png',
     'target/junit/**/*',
+    'target/kibana-coverage/**/*',
     'target/test-suites-ci-plan.json',
     'test/**/screenshots/session/*.png',
     'test/**/screenshots/failure/*.png',
