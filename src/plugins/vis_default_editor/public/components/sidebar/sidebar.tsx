@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
+import React, {
+  memo,
+  useMemo,
+  useState,
+  useCallback,
+  KeyboardEventHandler,
+  useEffect,
+} from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -50,7 +57,7 @@ interface DefaultEditorSideBarProps {
   timeRange: TimeRange;
 }
 
-function DefaultEditorSideBar({
+function DefaultEditorSideBarComponent({
   embeddableHandler,
   isCollapsed,
   onClickCollapse,
@@ -246,5 +253,7 @@ function DefaultEditorSideBar({
     </>
   );
 }
+
+const DefaultEditorSideBar = memo(DefaultEditorSideBarComponent);
 
 export { DefaultEditorSideBar };
