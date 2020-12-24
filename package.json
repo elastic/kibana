@@ -821,7 +821,7 @@
     "url-loader": "^2.2.0",
     "use-resize-observer": "^6.0.0",
     "val-loader": "^1.1.1",
-    "vega": "^5.17.1",
+    "vega": "^5.17.3",
     "vega-lite": "^4.17.0",
     "vega-schema-url-parser": "^2.1.0",
     "vega-tooltip": "^0.24.2",
