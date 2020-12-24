@@ -115,6 +115,14 @@ export const getTopNavConfig = (
         });
 
         if (originatingApp && saveOptions.returnToOrigin) {
+          if (!embeddableId) {
+            const appPath = `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(id)}`;
+
+            // Manually insert a new url so the back button will open the saved visualization.
+            history.replace(appPath);
+            setActiveUrl(appPath);
+          }
+
           if (newlyCreated && stateTransfer) {
             stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
               state: {
@@ -395,7 +403,7 @@ export const getTopNavConfig = (
                     originatingApp={originatingApp}
                     returnToOriginSwitchLabel={
                       originatingApp && embeddableId
-                        ? i18n.translate('xpack.lens.app.updatePanel', {
+                        ? i18n.translate('visualize.topNavMenu.updatePanel', {
                             defaultMessage: 'Update panel on {originatingAppName}',
                             values: {
                               originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
