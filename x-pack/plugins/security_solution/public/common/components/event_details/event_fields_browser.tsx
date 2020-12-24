@@ -29,12 +29,14 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { getColumns } from './columns';
 import { EVENT_FIELDS_TABLE_CLASS_NAME, onEventDetailsTabKeyPressed, search } from './helpers';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
   timelineId: string;
+  timelineTabType: TimelineTabs | 'flyout';
 }
 
 const TableWrapper = styled.div`
@@ -87,7 +89,7 @@ const getAriaRowindex = (timelineEventsDetailsItem: TimelineEventsDetailsItem) =
 
 /** Renders a table view or JSON view of the `ECS` `data` */
 export const EventFieldsBrowser = React.memo<Props>(
-  ({ browserFields, data, eventId, timelineId }) => {
+  ({ browserFields, data, eventId, timelineTabType, timelineId }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
     const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -156,7 +158,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           columnHeaders,
           eventId,
           onUpdateColumns,
-          contextId: `event-fields-browser-for-${timelineId}`,
+          contextId: `event-fields-browser-for-${timelineId}-${timelineTabType}`,
           timelineId,
           toggleColumn,
           getLinkValue,
@@ -167,6 +169,7 @@ export const EventFieldsBrowser = React.memo<Props>(
         eventId,
         onUpdateColumns,
         timelineId,
+        timelineTabType,
         toggleColumn,
         getLinkValue,
       ]
@@ -174,11 +177,13 @@ export const EventFieldsBrowser = React.memo<Props>(
 
     const focusSearchInput = useCallback(() => {
       // the selector below is used to focus the input because EuiInMemoryTable does not expose a ref to its built-in search input
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       containerElement.current?.querySelector<HTMLInputElement>('input[type="search"]')?.focus();
     }, []);
 
     const focusAddTimelineButton = useCallback(() => {
       // the document selector below is required because we may be in a flyout or full screen timeline context
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       document.querySelector<HTMLButtonElement>(`.${ADD_TIMELINE_BUTTON_CLASS_NAME}`)?.focus();
     }, []);
 
