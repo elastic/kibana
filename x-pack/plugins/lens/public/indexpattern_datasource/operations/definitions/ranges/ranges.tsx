@@ -16,11 +16,10 @@ import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam } from '../../layer_helpers';
-import { mergeLayer } from '../../../state_helpers';
 import { supportedFormats } from '../../../format_column';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../types';
-import { getInvalidFieldMessage } from '../helpers';
+import { getInvalidFieldMessage, isValidNumber } from '../helpers';
 
 type RangeType = Omit<Range, 'type'>;
 // Try to cover all possible serialized states for ranges
@@ -53,10 +52,6 @@ export type UpdateParamsFnType = <K extends keyof RangeColumnParams>(
   value: RangeColumnParams[K]
 ) => void;
 
-// on initialization values can be null (from the Infinity serialization), so handle it correctly
-// or they will be casted to 0 by the editor ( see #78867 )
-export const isValidNumber = (value: number | '' | null): value is number =>
-  value != null && value !== '' && !isNaN(value) && isFinite(value);
 export const isRangeWithin = (range: RangeType): boolean => range.from <= range.to;
 const isFullRange = (range: RangeTypeLens): range is FullRangeTypeLens =>
   isValidNumber(range.from) && isValidNumber(range.to);
@@ -99,7 +94,10 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     }
   },
   getDefaultLabel: (column, indexPattern) =>
-    indexPattern.getFieldByName(column.sourceField)!.displayName,
+    indexPattern.getFieldByName(column.sourceField)?.displayName ??
+    i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
+      defaultMessage: 'Missing field',
+    }),
   buildColumn({ field }) {
     return {
       label: field.displayName,
@@ -150,10 +148,10 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
             const partialRange: Partial<RangeType> = { label: range.label };
             // be careful with the fields to set on partial ranges
             if (isValidNumber(range.from)) {
-              partialRange.from = range.from;
+              partialRange.from = Number(range.from);
             }
             if (isValidNumber(range.to)) {
-              partialRange.to = range.to;
+              partialRange.to = Number(range.to);
             }
             return partialRange;
           })
@@ -173,8 +171,15 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       extended_bounds: JSON.stringify({ min: '', max: '' }),
     }).toAst();
   },
-  paramEditor: ({ state, setState, currentColumn, layerId, columnId, uiSettings, data }) => {
-    const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
+  paramEditor: ({
+    layer,
+    columnId,
+    currentColumn,
+    updateLayer,
+    indexPattern,
+    uiSettings,
+    data,
+  }) => {
     const currentField = indexPattern.getFieldByName(currentColumn.sourceField);
     const numberFormat = currentColumn.params.format;
     const numberFormatterPattern =
@@ -198,11 +203,10 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
 
     // Used to change one param at the time
     const setParam: UpdateParamsFnType = (paramName, value) => {
-      setState(
+      updateLayer(
         updateColumnParam({
-          state,
-          layerId,
-          currentColumn,
+          layer,
+          columnId,
           paramName,
           value,
         })
@@ -217,29 +221,24 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         newMode === MODES.Range
           ? { id: 'range', params: { template: 'arrow_right', replaceInfinity: true } }
           : undefined;
-      setState(
-        mergeLayer({
-          state,
-          layerId,
-          newLayer: {
-            columns: {
-              ...state.layers[layerId].columns,
-              [columnId]: {
-                ...currentColumn,
-                scale,
-                dataType,
-                params: {
-                  type: newMode,
-                  ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-                  maxBars: maxBarsDefaultValue,
-                  format: currentColumn.params.format,
-                  parentFormat,
-                },
-              },
+      updateLayer({
+        ...layer,
+        columns: {
+          ...layer.columns,
+          [columnId]: {
+            ...currentColumn,
+            scale,
+            dataType,
+            params: {
+              type: newMode,
+              ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
+              maxBars: maxBarsDefaultValue,
+              format: currentColumn.params.format,
+              parentFormat,
             },
           },
-        })
-      );
+        },
+      });
     };
     return (
       <RangeEditor
