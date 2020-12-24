@@ -58,6 +58,14 @@ function DefaultEditor({
     setIsCollapsed((value) => !value);
   }, []);
 
+  /**
+   * The empty callback is in place to prevent resetting the dragging state of the resize button.
+   * The mouseLeave is triggered since a visualization is rendered through another call of "ReactDOM.render()"" in expressions,
+   * using the "visRef" node reference.
+   * Here is the existing React issue: https://github.com/facebook/react/issues/17064
+   */
+  const onEditorMouseLeave = useCallback(() => {}, []);
+
   useEffect(() => {
     if (!visRef.current) {
       return;
@@ -91,7 +99,7 @@ function DefaultEditor({
           ...core,
         }}
       >
-        <EuiResizableContainer className="visEditor--default">
+        <EuiResizableContainer className="visEditor--default" onMouseLeave={onEditorMouseLeave}>
           {(EuiResizablePanel, EuiResizableButton) => (
             <>
               <EuiResizablePanel
