@@ -284,7 +284,7 @@ describe('#httpRequestEvent', () => {
           "path": "/path",
           "port": undefined,
           "query": undefined,
-          "scheme": "http:",
+          "scheme": "http",
         },
       }
     `);
@@ -321,7 +321,7 @@ describe('#httpRequestEvent', () => {
           "path": "/original/path",
           "port": undefined,
           "query": "query=param",
-          "scheme": "http:",
+          "scheme": "http",
         },
       }
     `);

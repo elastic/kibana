@@ -879,7 +879,7 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+        'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
       ]);
     });
 
@@ -918,8 +918,8 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
-        'reason: "some reason 2" type: "some type 2" caused by reason: "some reason 2" caused by type: "some type 2"',
+        'index: "index-123" reason: "some reason" type: "some type" caused by reason: "some reason" caused by type: "some type"',
+        'index: "index-345" reason: "some reason 2" type: "some type 2" caused by reason: "some reason 2" caused by type: "some type 2"',
       ]);
     });
 
@@ -933,7 +933,7 @@ describe('utils', () => {
         },
       ];
       const createdErrors = createErrorsFromShard({ errors });
-      expect(createdErrors).toEqual(['']);
+      expect(createdErrors).toEqual(['index: "index-123"']);
     });
 
     test('You can have a single value for the shard errors and get expected output without extra spaces anywhere', () => {
@@ -948,7 +948,9 @@ describe('utils', () => {
         },
       ];
       const createdErrors = createErrorsFromShard({ errors });
-      expect(createdErrors).toEqual(['reason: "some reason something went wrong"']);
+      expect(createdErrors).toEqual([
+        'index: "index-123" reason: "some reason something went wrong"',
+      ]);
     });
 
     test('You can have two values for the shard errors and get expected output with one space exactly between the two values', () => {
@@ -965,7 +967,7 @@ describe('utils', () => {
       ];
       const createdErrors = createErrorsFromShard({ errors });
       expect(createdErrors).toEqual([
-        'reason: "some reason something went wrong" caused by type: "some type"',
+        'index: "index-123" reason: "some reason something went wrong" caused by type: "some type"',
       ]);
     });
   });

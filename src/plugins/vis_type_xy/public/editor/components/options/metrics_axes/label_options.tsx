@@ -23,7 +23,8 @@ import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SelectOption, SwitchOption, Labels } from '../../../../../../charts/public';
+import { SelectOption, SwitchOption } from '../../../../../../vis_default_editor/public';
+import { Labels } from '../../../../../../charts/public';
 
 import { TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../collections';

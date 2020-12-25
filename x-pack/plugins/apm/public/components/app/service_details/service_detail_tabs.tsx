@@ -15,7 +15,7 @@ import { useMetricOverviewHref } from '../../shared/Links/apm/MetricOverviewLink
 import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
 import { useServiceNodeOverviewHref } from '../../shared/Links/apm/ServiceNodeOverviewLink';
 import { useServiceOverviewHref } from '../../shared/Links/apm/service_overview_link';
-import { useTransactionOverviewHref } from '../../shared/Links/apm/TransactionOverviewLink';
+import { useServiceOrTransactionsOverviewHref } from '../../shared/Links/apm/service_transactions_overview';
 import { MainTabs } from '../../shared/main_tabs';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { ServiceMap } from '../ServiceMap';
@@ -60,7 +60,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   const transactionsTab = {
     key: 'transactions',
-    href: useTransactionOverviewHref(serviceName),
+    href: useServiceOrTransactionsOverviewHref(serviceName),
     text: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
       defaultMessage: 'Transactions',
     }),
