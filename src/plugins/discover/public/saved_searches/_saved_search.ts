@@ -26,6 +26,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
       description: 'text',
       hits: 'integer',
       columns: 'keyword',
+      grid: 'object',
       sort: 'keyword',
       version: 'integer',
     };
@@ -45,6 +46,7 @@ export function createSavedSearchClass(savedObjects: SavedObjectsStart) {
           description: 'text',
           hits: 'integer',
           columns: 'keyword',
+          grid: 'object',
           sort: 'keyword',
           version: 'integer',
         },

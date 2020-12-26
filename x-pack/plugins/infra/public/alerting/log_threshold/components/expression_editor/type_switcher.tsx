@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiPopover, EuiSelect, EuiExpression } from '@elastic/eui';
 import {
-  AlertParams,
+  PartialCriteria,
   ThresholdType,
   isRatioAlert,
 } from '../../../../../common/alerting/logs/log_threshold/types';
@@ -45,11 +45,11 @@ const getOptions = (): Array<{
 };
 
 interface Props {
-  criteria: AlertParams['criteria'];
+  criteria: PartialCriteria;
   updateType: (type: ThresholdType) => void;
 }
 
-const getThresholdType = (criteria: AlertParams['criteria']): ThresholdType => {
+const getThresholdType = (criteria: PartialCriteria): ThresholdType => {
   return isRatioAlert(criteria) ? 'ratio' : 'count';
 };
 

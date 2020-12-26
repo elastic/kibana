@@ -170,7 +170,12 @@ export const ReactExpressionRenderer = ({
 
       errorRenderHandlerRef.current = null;
     };
-  }, [hasCustomRenderErrorHandler, onEvent]);
+  }, [
+    hasCustomRenderErrorHandler,
+    onEvent,
+    expressionLoaderOptions.renderMode,
+    expressionLoaderOptions.syncColors,
+  ]);
 
   useEffect(() => {
     const subscription = reload$?.subscribe(() => {
@@ -206,10 +211,9 @@ export const ReactExpressionRenderer = ({
     }
   }, [state.error]);
 
-  const classes = classNames('expExpressionRenderer', {
+  const classes = classNames('expExpressionRenderer', className, {
     'expExpressionRenderer-isEmpty': state.isEmpty,
     'expExpressionRenderer-hasError': !!state.error,
-    className,
   });
 
   const expressionStyles: React.CSSProperties = {};

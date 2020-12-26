@@ -1,0 +1,19 @@
+{
+    "type": "index",
+    "value": {
+        "index": "myfakeindex-1",
+        "mappings" : {
+            "properties" : {
+              "message" : {
+                "type" : "text",
+                "fields" : {
+                  "keyword" : {
+                    "type" : "keyword",
+                    "ignore_above" : 256
+                  }
+                }
+              }
+            }
+          }
+    }
+}
