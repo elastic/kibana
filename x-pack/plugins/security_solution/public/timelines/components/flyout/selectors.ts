@@ -6,9 +6,8 @@
 
 import { createSelector } from 'reselect';
 
-import { TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { timelineSelectors } from '../../store/timeline';
-import { TimelineTabs } from '../../store/timeline/model';
 
 export const getTimelineShowStatusByIdSelector = () =>
   createSelector(timelineSelectors.selectTimeline, (timeline) => ({
