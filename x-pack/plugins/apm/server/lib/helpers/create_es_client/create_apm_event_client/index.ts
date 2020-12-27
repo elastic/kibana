@@ -5,10 +5,7 @@
  */
 
 import { ValuesType } from 'utility-types';
-import apm from 'elastic-apm-node';
-import { last } from 'lodash';
 import { unwrapEsResponse } from '../../../../../../observability/server';
-import { PromiseReturnType } from '../../../../../../observability/typings/common';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import {
   ElasticsearchClient,
@@ -25,7 +22,6 @@ import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { unpackProcessorEvents } from './unpack_processor_events';
-import { EventOutcome } from '../../../../../common/event_outcome';
 import {
   callAsyncWithDebug,
   getDebugTitle,
@@ -88,86 +84,27 @@ export function createApmEventClient({
         ? addFilterToExcludeLegacyData(withProcessorEventFilter)
         : withProcessorEventFilter;
 
-      let span: ReturnType<typeof apm.startSpan> = null;
+      const searchParams = {
+        ...withPossibleLegacyDataFilter,
+        ignore_throttled: !includeFrozen,
+        ignore_unavailable: true,
+      };
 
-      if (apm.isStarted()) {
-        span = apm.startSpan('apm_event_search', 'apm_event_search');
-        await new Promise((resolve) => {
-          setTimeout(resolve, 0);
-        });
-      }
+      return callAsyncWithDebug({
+        cb: () => {
+          const searchPromise = cancelEsRequestOnAbort(
+            esClient.search(searchParams),
+            request
+          );
 
-      let response: PromiseReturnType<typeof esClient.search>['body'];
-
-      async function endSpan(outcome: EventOutcome) {
-        if (span) {
-          try {
-            const stack: Array<{
-              library_frame: boolean;
-              filename: string;
-              function?: string;
-            }> = await (span as any)._stackObj!;
-
-            const caller = stack.find(
-              (site) =>
-                !site.library_frame &&
-                !site.filename.includes(
-                  'create_es_client/create_apm_event_client'
-                ) &&
-                site.function !== '<anonymous'
-            );
-
-            let name = caller?.function;
-
-            if (!name) {
-              name =
-                last(
-                  caller?.filename.split('x-pack/plugins/apm/server')
-                )?.replace(/\.[a-z]+$/, '') ?? span.name;
-            }
-
-            span.name = name;
-          } catch (error) {
-            // do nothing
-          }
-
-          // @ts-expect-error
-          span.outcome = outcome;
-
-          span.end();
-        }
-      }
-
-      try {
-        const searchParams = {
-          ...withPossibleLegacyDataFilter,
-          ignore_throttled: !includeFrozen,
-          ignore_unavailable: true,
-        };
-
-        response = await callAsyncWithDebug({
-          cb: () => {
-            const searchPromise = cancelEsRequestOnAbort(
-              esClient.search(searchParams),
-              request
-            );
-
-            return unwrapEsResponse(searchPromise);
-          },
-          getMessage: () => ({
-            body: getSearchDebugBody(searchParams),
-            title: getDebugTitle(request),
-          }),
-          debug,
-        });
-
-        process.nextTick(() => endSpan(EventOutcome.success));
-      } catch (err) {
-        process.nextTick(() => endSpan(EventOutcome.failure));
-        throw err;
-      }
-
-      return response as Promise<TypedSearchResponse<TParams>>;
+          return unwrapEsResponse(searchPromise);
+        },
+        getMessage: () => ({
+          body: getSearchDebugBody(searchParams),
+          title: getDebugTitle(request),
+        }),
+        debug,
+      });
     },
   };
 }
