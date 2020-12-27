@@ -199,7 +199,8 @@ describe('date_histogram', () => {
       const esAggsFn = dateHistogramOperation.toEsAggsFn(
         layer.columns.col1 as DateHistogramIndexPatternColumn,
         'col1',
-        indexPattern1
+        indexPattern1,
+        layer
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -250,7 +251,8 @@ describe('date_histogram', () => {
               },
             },
           ]),
-        }
+        },
+        layer
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -687,6 +689,34 @@ describe('date_histogram', () => {
       );
 
       expect(instance.find('[data-test-subj="lensDateHistogramValue"]').exists()).toBeFalsy();
+    });
+  });
+
+  describe('getDefaultLabel', () => {
+    it('should not throw when the source field is not located', () => {
+      expect(
+        dateHistogramOperation.getDefaultLabel(
+          {
+            label: '',
+            dataType: 'date',
+            isBucketed: true,
+            operationType: 'date_histogram',
+            sourceField: 'missing',
+            params: { interval: 'auto' },
+          },
+          indexPattern1,
+          {
+            col1: {
+              label: '',
+              dataType: 'date',
+              isBucketed: true,
+              operationType: 'date_histogram',
+              sourceField: 'missing',
+              params: { interval: 'auto' },
+            },
+          }
+        )
+      ).toEqual('Missing field');
     });
   });
 });
