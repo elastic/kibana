@@ -78,6 +78,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
     uiSettings,
     indexPatternManagementStart,
     docLinks,
+    indexPatternFieldEditor,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -184,6 +185,10 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                   },
                   getFieldInfo: indexPatternManagementStart.list.getFieldInfo,
                 }}
+                newEditField={async (ip, indexPatternField) => {
+                  const editor = await indexPatternFieldEditor.loadEditor();
+                  editor.indexPatternFieldEditorFlyoutContent(ip, indexPatternField);
+                }}
               />
             </Fragment>
           );
@@ -238,6 +243,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       refreshFilters,
       scriptedFieldLanguageFilter,
       saveIndexPattern,
+      indexPatternFieldEditor,
     ]
   );
 

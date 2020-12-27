@@ -20,8 +20,8 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { IndexedFieldItem } from '../../types';
-import { Table } from './table';
+import { IndexedFieldItem } from '../types';
+import { IndexedFieldsTableComponent } from './indexed_fields_table_component';
 
 const indexPattern = {
   timeFieldName: 'timestamp',
@@ -58,7 +58,7 @@ const items: IndexedFieldItem[] = [
 describe('Table', () => {
   test('should render normally', () => {
     const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
+      <IndexedFieldsTableComponent indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     expect(component).toMatchSnapshot();
@@ -66,7 +66,7 @@ describe('Table', () => {
 
   test('should render normal field name', () => {
     const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
+      <IndexedFieldsTableComponent indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[0].render('Elastic', items[0]));
@@ -75,7 +75,7 @@ describe('Table', () => {
 
   test('should render timestamp field name', () => {
     const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
+      <IndexedFieldsTableComponent indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[0].render('timestamp', items[1]));
@@ -84,7 +84,7 @@ describe('Table', () => {
 
   test('should render the boolean template (true)', () => {
     const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
+      <IndexedFieldsTableComponent indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[3].render(true));
@@ -93,7 +93,7 @@ describe('Table', () => {
 
   test('should render the boolean template (false)', () => {
     const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
+      <IndexedFieldsTableComponent indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[3].render(false, items[2]));
@@ -102,7 +102,7 @@ describe('Table', () => {
 
   test('should render normal type', () => {
     const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
+      <IndexedFieldsTableComponent indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[1].render('string'));
@@ -111,7 +111,7 @@ describe('Table', () => {
 
   test('should render conflicting type', () => {
     const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={() => {}} />
+      <IndexedFieldsTableComponent indexPattern={indexPattern} items={items} editField={() => {}} />
     );
 
     const tableCell = shallow(component.prop('columns')[1].render('conflict', true));
@@ -122,7 +122,11 @@ describe('Table', () => {
     const editField = jest.fn();
 
     const component = shallow(
-      <Table indexPattern={indexPattern} items={items} editField={editField} />
+      <IndexedFieldsTableComponent
+        indexPattern={indexPattern}
+        items={items}
+        editField={editField}
+      />
     );
 
     // Click the edit button

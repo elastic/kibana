@@ -20,7 +20,7 @@
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { IndexPatternField, IndexPattern, IFieldType } from '../../../../../../plugins/data/public';
-import { Table } from './components/table';
+import { IndexedFieldsTableComponent } from './components';
 import { IndexedFieldItem } from './types';
 
 interface IndexedFieldsTableProps {
@@ -33,6 +33,7 @@ interface IndexedFieldsTableProps {
     getFieldInfo: (indexPattern: IndexPattern, field: IFieldType) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
+  newEditField: (indexPattern: IndexPattern, indexPatternField: IndexPatternField) => void;
 }
 
 interface IndexedFieldsTableState {
@@ -105,15 +106,16 @@ export class IndexedFieldsTable extends Component<
   );
 
   render() {
-    const { indexPattern } = this.props;
+    const { indexPattern, newEditField } = this.props;
     const fields = this.getFilteredFields(this.state, this.props);
 
     return (
       <div>
-        <Table
+        <IndexedFieldsTableComponent
           indexPattern={indexPattern}
           items={fields}
           editField={(field) => this.props.helpers.redirectToRoute(field)}
+          newEditField={newEditField}
         />
       </div>
     );

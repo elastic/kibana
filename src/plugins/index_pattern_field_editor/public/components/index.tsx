@@ -17,12 +17,11 @@
  * under the License.
  */
 
-export { IndexPatternTableWithRouter } from './index_pattern_table';
-export {
-  EditIndexPattern,
-  EditIndexPatternContainer,
-  CreateEditField,
-  CreateEditFieldContainer,
-  CreateEditFieldContainerB,
-} from './edit_index_pattern';
-export { CreateIndexPatternWizardWithRouter } from './create_index_pattern_wizard';
+import { IndexPattern, IndexPatternField } from '../../../data/public';
+
+export const indexPatternFieldEditorFlyoutContent = (
+  indexPattern: IndexPattern,
+  indexPatternField: IndexPatternField
+) => {
+  console.log('hello from async loaded component', indexPattern, indexPatternField);
+};

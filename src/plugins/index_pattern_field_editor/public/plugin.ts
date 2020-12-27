@@ -18,6 +18,7 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { loadEditor } from './load_editor';
 
 // eslint-disable-next-line
 export interface IndexPatternFieldEditorSetupDependencies {}
@@ -28,8 +29,8 @@ export interface IndexPatternFieldEditorStartDependencies {}
 // eslint-disable-next-line
 interface IndexPatternFieldEditorServiceSetup {}
 
-interface IndexPatternFieldEditorServiceStart {
-  loadEditor: () => Promise<void>;
+export interface IndexPatternFieldEditorServiceStart {
+  loadEditor: typeof loadEditor;
 }
 
 export type IndexPatternFieldEditorSetup = IndexPatternFieldEditorServiceSetup;
@@ -54,9 +55,7 @@ export class IndexPatternFieldEditorPlugin
 
   public start(core: CoreStart) {
     return {
-      loadEditor: async () => {
-        console.log('FIELD EDITOR START');
-      },
+      loadEditor,
     };
   }
 

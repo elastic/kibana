@@ -28,6 +28,7 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { IndexPatternFieldEditorStart } from 'src/plugins/index_pattern_field_editor/public';
 import { ManagementAppMountParams } from '../../management/public';
 import { IndexPatternManagementStart } from './index';
 import { KibanaReactContextValue } from '../../kibana_react/public';
@@ -45,6 +46,7 @@ export interface IndexPatternManagmentContext {
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getMlCardState: () => MlCardState;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export type IndexPatternManagmentContextValue = KibanaReactContextValue<IndexPatternManagmentContext>;

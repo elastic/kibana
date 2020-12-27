@@ -31,6 +31,7 @@ import {
   IndexPatternTableWithRouter,
   EditIndexPatternContainer,
   CreateEditFieldContainer,
+  CreateEditFieldContainerB,
   CreateIndexPatternWizardWithRouter,
 } from '../components';
 import { IndexPatternManagementStartDependencies, IndexPatternManagementStart } from '../plugin';
@@ -62,8 +63,6 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
-  indexPatternFieldEditor.loadEditor();
-
   const deps: IndexPatternManagmentContext = {
     chrome,
     application,
@@ -77,6 +76,7 @@ export async function mountManagementSection(
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     getMlCardState,
+    indexPatternFieldEditor,
   };
 
   ReactDOM.render(
@@ -89,6 +89,9 @@ export async function mountManagementSection(
             </Route>
             <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
               <CreateEditFieldContainer />
+            </Route>
+            <Route path={['/patterns/:id/field-b/:fieldName', '/patterns/:id/create-field-b/']}>
+              <CreateEditFieldContainerB />
             </Route>
             <Route path={['/patterns/:id']}>
               <EditIndexPatternContainer />

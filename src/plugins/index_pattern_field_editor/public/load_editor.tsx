@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export * from './table';
+export const loadEditor = async () => {
+  return import('./components');
+};

@@ -30,8 +30,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IIndexPattern } from '../../../../../../../data/public';
-import { IndexedFieldItem } from '../../types';
+import { IndexPattern, IndexPatternField } from '../../../../../../data/public';
+import { IndexedFieldItem } from '../types';
 
 // localized labels
 const additionalInfoAriaLabel = i18n.translate(
@@ -157,12 +157,13 @@ const labelDescription = i18n.translate(
 );
 
 interface IndexedFieldProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
+  newEditField: (indexPattern: IndexPattern, indexPatternField: IndexPatternField) => void;
 }
 
-export class Table extends PureComponent<IndexedFieldProps> {
+export class IndexedFieldsTableComponent extends PureComponent<IndexedFieldProps> {
   renderBooleanTemplate(value: string, arialLabel: string) {
     return value ? <EuiIcon type="dot" color="secondary" aria-label={arialLabel} /> : <span />;
   }
@@ -232,7 +233,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
   }
 
   render() {
-    const { items, editField } = this.props;
+    const { items, editField, newEditField } = this.props;
 
     const pagination = {
       initialPageSize: 10,
@@ -298,12 +299,28 @@ export class Table extends PureComponent<IndexedFieldProps> {
             name: editLabel,
             description: editDescription,
             icon: 'pencil',
+            onClick: (field) => {
+              const ipField = this.props.indexPattern.getFieldByName(field.name);
+              if (ipField) {
+                newEditField(this.props.indexPattern, ipField);
+              } else {
+                console.log('field not found');
+              }
+            },
+            type: 'icon',
+            'data-test-subj': 'editFieldFormat',
+            color: 'danger',
+          },
+          {
+            name: editLabel,
+            description: editDescription,
+            icon: 'pencil',
             onClick: editField,
             type: 'icon',
             'data-test-subj': 'editFieldFormat',
           },
         ],
-        width: '40px',
+        width: '80px',
       },
     ];
 

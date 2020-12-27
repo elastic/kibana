@@ -17,12 +17,4 @@
  * under the License.
  */
 
-export { IndexPatternTableWithRouter } from './index_pattern_table';
-export {
-  EditIndexPattern,
-  EditIndexPatternContainer,
-  CreateEditField,
-  CreateEditFieldContainer,
-  CreateEditFieldContainerB,
-} from './edit_index_pattern';
-export { CreateIndexPatternWizardWithRouter } from './create_index_pattern_wizard';
+export * from './indexed_fields_table_component';
