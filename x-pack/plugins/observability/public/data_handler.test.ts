@@ -270,7 +270,7 @@ describe('registerDataHandler', () => {
           title: 'User Experience',
           appLink: '/ux',
           coreWebVitals: {
-            cls: '0.01',
+            cls: 0.01,
             fid: 5,
             lcp: 1464.3333333333333,
             tbt: 232.92166666666665,
@@ -298,7 +298,7 @@ describe('registerDataHandler', () => {
         title: 'User Experience',
         appLink: '/ux',
         coreWebVitals: {
-          cls: '0.01',
+          cls: 0.01,
           fid: 5,
           lcp: 1464.3333333333333,
           tbt: 232.92166666666665,
