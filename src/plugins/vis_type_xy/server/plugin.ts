@@ -31,7 +31,7 @@ export const uiSettingsConfig: Record<string, UiSettingsParams<boolean>> = {
     name: i18n.translate('visTypeXy.advancedSettings.visualization.legacyChartsLibrary.name', {
       defaultMessage: 'Legacy charts library',
     }),
-    value: true,
+    value: false,
     description: i18n.translate(
       'visTypeXy.advancedSettings.visualization.legacyChartsLibrary.description',
       {

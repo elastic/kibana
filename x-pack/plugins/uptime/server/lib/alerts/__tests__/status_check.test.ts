@@ -11,7 +11,13 @@ import {
   getStatusMessage,
   getUniqueIdsByLoc,
 } from '../status_check';
-import { AlertType } from '../../../../../alerts/server';
+import {
+  AlertType,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../../alerts/server';
 import { IRouter } from 'kibana/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../../adapters';
@@ -868,7 +874,7 @@ describe('status check alert', () => {
   });
 
   describe('alert factory', () => {
-    let alert: AlertType;
+    let alert: AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext>;
 
     beforeEach(() => {
       const { server, libs, plugins } = bootstrapDependencies();

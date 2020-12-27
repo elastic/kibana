@@ -1,5 +1,4 @@
 .kbnDocViewerTable {
-  margin-top: $euiSizeS;
   @include euiBreakpoint('xs', 's') {
     table-layout: fixed;
   }

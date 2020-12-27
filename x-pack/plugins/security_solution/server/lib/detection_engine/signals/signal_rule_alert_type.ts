@@ -7,6 +7,7 @@
 /* eslint-disable complexity */
 
 import { Logger, KibanaRequest } from 'src/core/server';
+import { partition } from 'lodash';
 
 import {
   SIGNALS_ID,
@@ -41,6 +42,7 @@ import {
   createSearchAfterReturnType,
   mergeReturns,
   createSearchAfterReturnTypeFromResponse,
+  checkPrivileges,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
@@ -66,6 +68,7 @@ import { getIndexVersion } from '../routes/index/get_index_version';
 import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
 import { isOutdated } from '../migrations/helpers';
+import { RuleTypeParams } from '../types';
 
 export const signalRulesAlertType = ({
   logger,
@@ -86,7 +89,16 @@ export const signalRulesAlertType = ({
     actionGroups: siemRuleActionGroups,
     defaultActionGroupId: 'default',
     validate: {
-      params: signalParamsSchema(),
+      /**
+       * TODO: Fix typing inconsistancy between `RuleTypeParams` and `CreateRulesOptions`
+       * Once that's done, you should be able to do:
+       * ```
+       * params: signalParamsSchema(),
+       * ```
+       */
+      params: (signalParamsSchema() as unknown) as {
+        validate: (object: unknown) => RuleTypeParams;
+      },
     },
     producer: SERVER_APP_ID,
     minimumLicenseRequired: 'basic',
@@ -161,7 +173,47 @@ export const signalRulesAlertType = ({
 
       logger.debug(buildRuleMessage('[+] Starting Signal Rule execution'));
       logger.debug(buildRuleMessage(`interval: ${interval}`));
+      let wroteStatus = false;
       await ruleStatusService.goingToRun();
+
+      // check if rule has permissions to access given index pattern
+      // move this collection of lines into a function in utils
+      // so that we can use it in create rules route, bulk, etc.
+      try {
+        const inputIndex = await getInputIndex(services, version, index);
+        const privileges = await checkPrivileges(services, inputIndex);
+
+        const indexNames = Object.keys(privileges.index);
+        const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
+          indexNames,
+          (indexName) => privileges.index[indexName].read
+        );
+
+        if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
+          // some indices have read privileges others do not.
+          // set a partial failure status
+          const errorString = `Missing required read permissions on indexes: ${JSON.stringify(
+            indexesWithNoReadPrivileges
+          )}`;
+          logger.debug(buildRuleMessage(errorString));
+          await ruleStatusService.partialFailure(errorString);
+          wroteStatus = true;
+        } else if (
+          indexesWithReadPrivileges.length === 0 &&
+          indexesWithNoReadPrivileges.length === indexNames.length
+        ) {
+          // none of the indices had read privileges so set the status to failed
+          // since we can't search on any indices we do not have read privileges on
+          const errorString = `The rule does not have read privileges to any of the following indices: ${JSON.stringify(
+            indexesWithNoReadPrivileges
+          )}`;
+          logger.debug(buildRuleMessage(errorString));
+          await ruleStatusService.error(errorString);
+          wroteStatus = true;
+        }
+      } catch (exc) {
+        logger.error(buildRuleMessage(`Check privileges failed to execute ${exc}`));
+      }
 
       const gap = getGapBetweenRuns({ previousStartedAt, interval, from, to });
       if (gap != null && gap.asMilliseconds() > 0) {
@@ -590,7 +642,7 @@ export const signalRulesAlertType = ({
               `[+] Finished indexing ${result.createdSignalsCount} signals into ${outputIndex}`
             )
           );
-          if (!hasError) {
+          if (!hasError && !wroteStatus) {
             await ruleStatusService.success('succeeded', {
               bulkCreateTimeDurations: result.bulkCreateTimes,
               searchAfterTimeDurations: result.searchAfterTimes,

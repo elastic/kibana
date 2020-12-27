@@ -83,5 +83,6 @@ export const findPreviousThresholdSignals = async ({
     filter,
     pageSize: 0,
     buildRuleMessage,
+    excludeDocsWithTimestampOverride: false,
   });
 };
