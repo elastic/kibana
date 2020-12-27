@@ -15,13 +15,12 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 
 import { Sort } from '../body/sort';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { TimelineId } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { PinnedTabContentComponent, Props as PinnedTabContentComponentProps } from '.';
-import { TimelineTabs } from '../../../store/timeline/model';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
