@@ -461,6 +461,7 @@ describe('encoding', () => {
       openInNewTab: false,
     };
     const url = await urlDrilldown.getHref(config, context);
+
     expect(url).toBe('https://elastic.co?foo=head%2526shoulders');
   });
 
@@ -473,6 +474,7 @@ describe('encoding', () => {
       encodeUrl: true,
     };
     const url = await urlDrilldown.getHref(config, context);
+
     expect(url).toBe('https://elastic.co?foo=head%2526shoulders');
   });
 
@@ -485,6 +487,33 @@ describe('encoding', () => {
       encodeUrl: false,
     };
     const url = await urlDrilldown.getHref(config, context);
+
     expect(url).toBe('https://elastic.co?foo=head%26shoulders');
+  });
+
+  test('can encode URI component using "encodeURIComponent" Handlebars helper', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo={{encodeURIComponent "head%26shoulders@gmail.com"}}',
+      },
+      openInNewTab: false,
+      encodeUrl: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders%40gmail.com');
+  });
+
+  test('can encode URI component using "encodeURIQuery" Handlebars helper', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo={{encodeURIQuery "head%26shoulders@gmail.com"}}',
+      },
+      openInNewTab: false,
+      encodeUrl: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders@gmail.com');
   });
 });
