@@ -55,6 +55,11 @@ export interface ChartColorConfiguration {
    * adjust colors for better a11y. Might be ignored depending on the palette.
    */
   behindText?: boolean;
+  /**
+   * Flag whether a color assignment to a given key should be remembered and re-used the next time the key shows up.
+   * This setting might be ignored based on the palette.
+   */
+  syncColors?: boolean;
 }
 
 /**
