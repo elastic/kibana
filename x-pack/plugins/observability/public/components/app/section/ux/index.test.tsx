@@ -67,7 +67,7 @@ describe('UXSection', () => {
     expect(getByText('Largest contentful paint')).toBeInTheDocument();
     expect(getByText('1.94 s')).toBeInTheDocument();
     expect(getByText('14 ms')).toBeInTheDocument();
-    expect(getByText('0.01')).toBeInTheDocument();
+    expect(getByText('0.010')).toBeInTheDocument();
 
     // LCP Rank Values
     expect(getByText('Good (65%)')).toBeInTheDocument();
