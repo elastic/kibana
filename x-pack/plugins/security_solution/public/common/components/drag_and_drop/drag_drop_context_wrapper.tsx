@@ -18,10 +18,13 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { reArrangeProviders } from '../../../timelines/components/timeline/data_providers/helpers';
-import { ADDED_TO_TIMELINE_MESSAGE } from '../../hooks/translations';
+import {
+  ADDED_TO_TIMELINE_MESSAGE,
+  ADDED_TO_TIMELINE_TEMPLATE_MESSAGE,
+} from '../../hooks/translations';
 import { useAddToTimelineSensor } from '../../hooks/use_add_to_timeline';
 import { displaySuccessToast, useStateToaster } from '../toasters';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import {
   addFieldToTimelineColumns,
   addProviderToTimeline,
@@ -112,7 +115,11 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
   const [, dispatchToaster] = useStateToaster();
   const onAddedToTimeline = useCallback(
     (fieldOrValue: string) => {
-      displaySuccessToast(ADDED_TO_TIMELINE_MESSAGE(fieldOrValue, timelineType), dispatchToaster);
+      const message =
+        timelineType === TimelineType.template
+          ? ADDED_TO_TIMELINE_TEMPLATE_MESSAGE(fieldOrValue)
+          : ADDED_TO_TIMELINE_MESSAGE(fieldOrValue);
+      displaySuccessToast(message, dispatchToaster);
     },
     [dispatchToaster, timelineType]
   );

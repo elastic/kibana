@@ -5,15 +5,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TimelineType } from '../../../common/types/timeline';
 
-export const ADDED_TO_TIMELINE_MESSAGE = (fieldOrValue: string, timelineType: TimelineType) =>
+export const ADDED_TO_TIMELINE_MESSAGE = (fieldOrValue: string) =>
   i18n.translate('xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage', {
-    values: { fieldOrValue, timelineType },
-    defaultMessage:
-      timelineType === TimelineType.template
-        ? `Added {fieldOrValue} to timeline template`
-        : `Added {fieldOrValue} to timeline`,
+    values: { fieldOrValue },
+    defaultMessage: `Added {fieldOrValue} to timeline`,
+  });
+
+export const ADDED_TO_TIMELINE_TEMPLATE_MESSAGE = (fieldOrValue: string) =>
+  i18n.translate('xpack.securitySolution.hooks.useAddToTimeline.template.addedFieldMessage', {
+    values: { fieldOrValue },
+    defaultMessage: `Added {fieldOrValue} to timeline template`,
   });
 
 export const STATUS_CODE = i18n.translate(
