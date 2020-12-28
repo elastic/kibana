@@ -179,9 +179,9 @@ CYPRESS_BASE_URL=http(s)://<username>:<password>@<kbnUrl> CYPRESS_ELASTICSEARCH_
 
 ## Best Practices
 
-### Clean up the state between tests
+### Clean up the state 
 
-Remember to clean up the state of the test after its execution.
+Remember to use the `cleanKibana` method before starting the execution of the test
 
 ### Minimize the use of es_archive
 
@@ -192,14 +192,11 @@ When possible, create all the data that you need for executing the tests using t
 Loading the web page takes a big amount of time, in order to minimize that impact, the following points should be
 taken into consideration until another solution is implemented:
 
-- Don't refresh the page for every test to clean the state of it.
-- Instead, group the tests that are similar in different contexts.
+- Group the tests that are similar in different contexts.
 - For every context login only once, clean the state between tests if needed without re-loading the page.
 - All tests in a spec file must be order-independent. 
-    - If you need to reload the page to make the tests order-independent, consider to create a new context.
-
+  
 Remember that minimizing the number of times the web page is loaded, we minimize as well the execution time.
-
 
 ## Reporting
 
