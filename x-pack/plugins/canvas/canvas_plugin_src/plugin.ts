@@ -14,19 +14,6 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 import { functions } from './functions/browser';
 import { typeFunctions } from './expression_types';
 import { renderFunctions, renderFunctionFactories } from './renderers';
-/*
-import { initializeElements } from './elements';
-// @ts-expect-error untyped local
-import { transformSpecs } from './uis/transforms';
-// @ts-expect-error untyped local
-// import { datasourceSpecs } from './uis/datasources';
-// @ts-expect-error untyped local
-import { modelSpecs } from './uis/models';
-import { initializeViews } from './uis/views';
-import { initializeArgs } from './uis/arguments';
-import { tagSpecs } from './uis/tags';
-*/
-
 interface SetupDeps {
   canvas: CanvasSetup;
 }
