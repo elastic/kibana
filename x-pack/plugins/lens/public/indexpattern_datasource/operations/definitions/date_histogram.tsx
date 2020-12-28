@@ -412,12 +412,13 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
         </p>
         <EuiBasicTable
           items={wrapMomentPrecision(() =>
-            search.aggs.boundsDescendingRaw.map(
-              ({ bound, interval, boundLabel, intervalLabel }) => ({
-                bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${boundLabel}`,
-                interval: intervalLabel, // humanDurationFormatter.convert(interval),
-              })
-            )
+            search.aggs.boundsDescendingRaw.map(({ bound, interval }) => ({
+              bound:
+                typeof bound === 'number'
+                  ? infiniteBound
+                  : `${upToLabel} ${humanDurationFormatter.convert(bound)}`,
+              interval: humanDurationFormatter.convert(interval),
+            }))
           )}
           columns={[
             {
