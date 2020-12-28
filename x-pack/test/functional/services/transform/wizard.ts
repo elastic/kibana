@@ -247,6 +247,61 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async selectTransformFunction(transformFunction: 'pivot' | 'latest') {
+      await testSubjects.click(`transformCreation-${transformFunction}-option`);
+      await testSubjects.existOrFail(
+        `transformCreation-${transformFunction}-option selectedFunction`
+      );
+    },
+
+    async assertUniqueKeysInputExists() {
+      await testSubjects.existOrFail('transformWizardUniqueKeysSelector > comboBoxInput');
+    },
+
+    async getUniqueKeyEntries() {
+      return await comboBox.getComboBoxSelectedOptions(
+        'transformWizardUniqueKeysSelector > comboBoxInput'
+      );
+    },
+
+    async assertUniqueKeysInputValue(expectedIdentifier: string[]) {
+      await retry.tryForTime(2000, async () => {
+        const comboBoxSelectedOptions = await this.getUniqueKeyEntries();
+        expect(comboBoxSelectedOptions).to.eql(
+          expectedIdentifier,
+          `Expected unique keys value to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        );
+      });
+    },
+
+    async addUniqueKeyEntry(identified: string, label: string) {
+      await comboBox.set('transformWizardUniqueKeysSelector > comboBoxInput', identified);
+      await this.assertUniqueKeysInputValue([
+        ...new Set([...(await this.getUniqueKeyEntries()), identified]),
+      ]);
+    },
+
+    async assertSortFieldInputExists() {
+      await testSubjects.existOrFail('transformWizardSortFieldSelector > comboBoxInput');
+    },
+
+    async assertSortFieldInputValue(expectedIdentifier: string) {
+      await retry.tryForTime(2000, async () => {
+        const comboBoxSelectedOptions = await comboBox.getComboBoxSelectedOptions(
+          'transformWizardSortFieldSelector > comboBoxInput'
+        );
+        expect(comboBoxSelectedOptions).to.eql(
+          expectedIdentifier === '' ? [] : [expectedIdentifier],
+          `Expected sort field to be '${expectedIdentifier}' (got '${comboBoxSelectedOptions}')`
+        );
+      });
+    },
+
+    async setSortFieldValue(identificator: string, label: string) {
+      await comboBox.set('transformWizardSortFieldSelector > comboBoxInput', identificator);
+      await this.assertSortFieldInputValue(identificator);
+    },
+
     async assertGroupByInputExists() {
       await testSubjects.existOrFail('transformGroupBySelection > comboBoxInput');
     },

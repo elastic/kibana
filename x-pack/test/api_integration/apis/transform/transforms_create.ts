@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
       await transform.api.cleanTransformIndices();
     });
 
-    it('should not allow pivot and latest configs is same transform', async () => {
+    it('should not allow pivot and latest configs in same transform', async () => {
       const transformId = 'test_transform_id';
 
       const { body } = await supertest

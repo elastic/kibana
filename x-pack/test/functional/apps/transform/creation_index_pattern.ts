@@ -8,10 +8,33 @@ import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants'
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-interface GroupByEntry {
+interface ComboboxOption {
   identifier: string;
   label: string;
+}
+
+interface GroupByEntry extends ComboboxOption {
   intervalLabel?: string;
+}
+
+interface BaseTransformTestData {
+  type: 'pivot' | 'latest';
+  suiteTitle: string;
+  source: string;
+  transformId: string;
+  transformDescription: string;
+  expected: any;
+  destinationIndex: string;
+}
+
+interface PivotTransformTestData extends BaseTransformTestData {
+  groupByEntries: GroupByEntry[];
+  aggregationEntries: any[];
+}
+
+interface LatestTransformTestData extends BaseTransformTestData {
+  uniqueKeys: ComboboxOption[];
+  sortField: ComboboxOption;
 }
 
 export default function ({ getService }: FtrProviderContext) {
@@ -31,8 +54,9 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.api.cleanTransformIndices();
     });
 
-    const testDataList = [
+    const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
       {
+        type: 'pivot',
         suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
         source: 'ft_ecommerce',
         groupByEntries: [
@@ -168,8 +192,9 @@ export default function ({ getService }: FtrProviderContext) {
             { chartAvailable: true, id: 'day_of_week', legend: '7 categories' },
           ],
         },
-      },
+      } as PivotTransformTestData,
       {
+        type: 'pivot',
         suiteTitle: 'batch transform with terms group and percentiles agg',
         source: 'ft_ecommerce',
         groupByEntries: [
@@ -251,8 +276,64 @@ export default function ({ getService }: FtrProviderContext) {
           },
           histogramCharts: [],
         },
-      },
+      } as PivotTransformTestData,
+      {
+        type: 'latest',
+        suiteTitle: 'batch transform with the latest function',
+        source: 'ft_ecommerce',
+        uniqueKeys: [
+          {
+            identifier: 'geoip.country_iso_code',
+            label: 'geoip.country_iso_code',
+          },
+        ],
+        sortField: {
+          identifier: 'order_date',
+          label: 'order_date',
+        },
+        transformId: `ec_3_${Date.now()}`,
+
+        transformDescription:
+          'ecommerce batch transform with the latest function config, sort by order_data, country code as unique key',
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          latestPreview: {
+            column: 0,
+            values: [],
+          },
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            mode: 'batch',
+            progress: '100',
+          },
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          histogramCharts: [],
+          pivotPreview: {
+            column: 0,
+            values: [
+              'July 12th 2019, 22:16:19',
+              'July 12th 2019, 22:50:53',
+              'July 12th 2019, 23:06:43',
+              'July 12th 2019, 23:15:22',
+              'July 12th 2019, 23:31:12',
+            ],
+          },
+        },
+      } as LatestTransformTestData,
     ];
+
+    function isPivotTransformTestData(arg: any): arg is PivotTransformTestData {
+      return arg.type === 'pivot';
+    }
+
+    function isLatestTransformTestData(arg: any): arg is LatestTransformTestData {
+      return arg.type === 'latest';
+    }
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
@@ -308,30 +389,50 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.histogramCharts
           );
 
-          await transform.testExecution.logTestStep('adds the group by entries');
-          for (const [index, entry] of testData.groupByEntries.entries()) {
-            await transform.wizard.assertGroupByInputExists();
-            await transform.wizard.assertGroupByInputValue([]);
-            await transform.wizard.addGroupByEntry(
-              index,
-              entry.identifier,
-              entry.label,
-              entry.intervalLabel
+          if (isPivotTransformTestData(testData)) {
+            await transform.testExecution.logTestStep('adds the group by entries');
+            for (const [index, entry] of testData.groupByEntries.entries()) {
+              await transform.wizard.assertGroupByInputExists();
+              await transform.wizard.assertGroupByInputValue([]);
+              await transform.wizard.addGroupByEntry(
+                index,
+                entry.identifier,
+                entry.label,
+                entry.intervalLabel
+              );
+            }
+
+            await transform.testExecution.logTestStep('adds the aggregation entries');
+            await transform.wizard.addAggregationEntries(testData.aggregationEntries);
+
+            await transform.testExecution.logTestStep('displays the advanced pivot editor switch');
+            await transform.wizard.assertAdvancedPivotEditorSwitchExists();
+            await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
+
+            await transform.testExecution.logTestStep('displays the advanced configuration');
+            await transform.wizard.enabledAdvancedPivotEditor();
+            await transform.wizard.assertAdvancedPivotEditorContent(
+              testData.expected.pivotAdvancedEditorValueArr
             );
           }
 
-          await transform.testExecution.logTestStep('adds the aggregation entries');
-          await transform.wizard.addAggregationEntries(testData.aggregationEntries);
-
-          await transform.testExecution.logTestStep('displays the advanced pivot editor switch');
-          await transform.wizard.assertAdvancedPivotEditorSwitchExists();
-          await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
-
-          await transform.testExecution.logTestStep('displays the advanced configuration');
-          await transform.wizard.enabledAdvancedPivotEditor();
-          await transform.wizard.assertAdvancedPivotEditorContent(
-            testData.expected.pivotAdvancedEditorValueArr
-          );
+          if (isLatestTransformTestData(testData)) {
+            await transform.testExecution.logTestStep('sets latest transform method');
+            await transform.wizard.selectTransformFunction('latest');
+            await transform.testExecution.logTestStep('adds unique keys');
+            for (const { identifier, label } of testData.uniqueKeys) {
+              await transform.wizard.assertUniqueKeysInputExists();
+              await transform.wizard.assertUniqueKeysInputValue([]);
+              await transform.wizard.addUniqueKeyEntry(identifier, label);
+            }
+            await transform.testExecution.logTestStep('sets the sort field');
+            await transform.wizard.assertSortFieldInputExists();
+            await transform.wizard.assertSortFieldInputValue('');
+            await transform.wizard.setSortFieldValue(
+              testData.sortField.identifier,
+              testData.sortField.label
+            );
+          }
 
           await transform.testExecution.logTestStep('loads the pivot preview');
           await transform.wizard.assertPivotPreviewLoaded();
