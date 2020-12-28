@@ -105,13 +105,13 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     // control w/ --rpm or --skip-os-packages
     await run(Tasks.CreateRpmPackage);
   }
-  if (options.createDockerPackage) {
+  if (options.createDockerImages) {
     // control w/ --docker or --skip-docker-ubi or --skip-os-packages
-    await run(Tasks.CreateDockerX64Package);
-    await run(Tasks.CreateDockerAArch64Package);
-    if (options.createDockerUbiPackage) {
-      await run(Tasks.CreateDockerUbiPackage);
-    }
+    await run(Tasks.CreateDockerImages);
+  }
+
+  if (options.createDockerBundles) {
+    await run(Tasks.CreateDockerBundles);
   }
 
   /**

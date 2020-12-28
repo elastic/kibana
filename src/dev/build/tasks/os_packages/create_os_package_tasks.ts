@@ -19,7 +19,7 @@
 
 import { Task } from '../../lib';
 import { runFpm } from './run_fpm';
-import { runDockerGenerator, runDockerGeneratorForUBI } from './docker_generator';
+import { runDockerGenerator } from './docker_generator';
 
 export const CreateDebPackage: Task = {
   description: 'Creating deb package',
@@ -60,29 +60,58 @@ export const CreateRpmPackage: Task = {
   },
 };
 
-export const CreateDockerX64Package: Task = {
-  description: 'Creating docker x64 package',
+export const CreateDockerImages: Task = {
+  description: 'Creating docker images',
 
   async run(config, log, build) {
-    // Builds Docker targets for default and oss
-    await runDockerGenerator(config, log, build, false, 'x64');
+    await runDockerGenerator(config, log, build, {
+      ubi: false,
+      context: false,
+      architecture: 'x64',
+      image: true,
+    });
+    await runDockerGenerator(config, log, build, {
+      ubi: false,
+      context: false,
+      architecture: 'aarch64',
+      image: true,
+    });
+
+    if (build.isOss()) {
+      await runDockerGenerator(config, log, build, {
+        ubi: true,
+        context: false,
+        architecture: 'x64',
+        image: true,
+      });
+    }
   },
 };
 
-export const CreateDockerAArch64Package: Task = {
-  description: 'Creating docker aarch64 package',
+export const CreateDockerBundles: Task = {
+  description: 'Creating docker bundles',
 
   async run(config, log, build) {
-    // Builds Docker targets for default and oss
-    await runDockerGenerator(config, log, build, false, 'aarch64');
-  },
-};
+    await runDockerGenerator(config, log, build, {
+      ubi: false,
+      context: true,
+      architecture: 'x64',
+      image: false,
+    });
+    await runDockerGenerator(config, log, build, {
+      ubi: false,
+      context: true,
+      architecture: 'aarch64',
+      image: false,
+    });
 
-export const CreateDockerUbiPackage: Task = {
-  description: 'Creating docker ubi package',
-
-  async run(config, log, build) {
-    // Builds Docker target default with ubi7 base image
-    await runDockerGeneratorForUBI(config, log, build);
+    if (build.isOss()) {
+      await runDockerGenerator(config, log, build, {
+        ubi: true,
+        context: true,
+        architecture: 'x64',
+        image: false,
+      });
+    }
   },
 };

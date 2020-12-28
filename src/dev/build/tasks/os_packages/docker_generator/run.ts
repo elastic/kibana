@@ -37,20 +37,24 @@ export async function runDockerGenerator(
   config: Config,
   log: ToolingLog,
   build: Build,
-  ubi: boolean = false,
-  architecture: 'x64' | 'aarch64'
+  flags: {
+    architecture: string;
+    context: boolean;
+    image: boolean;
+    ubi: boolean;
+  }
 ) {
   // UBI var config
-  const baseOSImage = ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
+  const baseOSImage = flags.ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
   const ubiVersionTag = 'ubi8';
-  const ubiImageFlavor = ubi ? `-${ubiVersionTag}` : '';
+  const ubiImageFlavor = flags.ubi ? `-${ubiVersionTag}` : '';
 
   // General docker var config
   const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
   const imageFlavor = build.isOss() ? '-oss' : '';
   const imageTag = 'docker.elastic.co/kibana/kibana';
   const version = config.getBuildVersion();
-  const artifactArchitecture = architecture === 'x64' ? 'x86_64' : 'aarch64';
+  const artifactArchitecture = flags.architecture === 'x64' ? 'x86_64' : 'aarch64';
   const artifactTarball = `kibana${imageFlavor}-${version}-linux-${artifactArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
   const dockerBuildDate = new Date().toISOString();
@@ -61,7 +65,7 @@ export async function runDockerGenerator(
     build.isOss() ? `oss` : `default${ubiImageFlavor}`
   );
   const dockerTargetFilename = config.resolveFromTarget(
-    `kibana${imageFlavor}${ubiImageFlavor}-${version}-${architecture}-docker-image.tar.gz`
+    `kibana${imageFlavor}${ubiImageFlavor}-${version}-${flags.architecture}-docker-image.tar.gz`
   );
   const scope: TemplateContext = {
     artifactTarball,
@@ -75,8 +79,8 @@ export async function runDockerGenerator(
     baseOSImage,
     ubiImageFlavor,
     dockerBuildDate,
-    ubi,
-    architecture,
+    ubi: flags.ubi,
+    architecture: flags.architecture,
     revision: config.getBuildSha(),
   };
 
@@ -122,7 +126,7 @@ export async function runDockerGenerator(
   await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
 
   // Only build images on native targets
-  const buildImage = process.arch === architecture;
+  const buildImage = process.arch === flags.architecture && flags.image;
   if (buildImage) {
     await exec(log, `./build_docker.sh`, [], {
       cwd: dockerBuildDir,
@@ -131,14 +135,7 @@ export async function runDockerGenerator(
   }
 
   // Pack Dockerfiles and create a target for them
-  await bundleDockerFiles(config, log, scope);
-}
-
-export async function runDockerGeneratorForUBI(config: Config, log: ToolingLog, build: Build) {
-  // Only run ubi docker image build for default distribution
-  if (build.isOss()) {
-    return;
+  if (flags.context) {
+    await bundleDockerFiles(config, log, scope);
   }
-
-  await runDockerGenerator(config, log, build, true, 'x64');
 }
