@@ -95,6 +95,7 @@ export function getActiveEntriesAndGenerateAlerts(
     ...currLocationMap,
   ]);
   allActiveEntriesMap.forEach((locationsArr, entityName) => {
+    // Generate alerts
     locationsArr.forEach(({ location, shapeLocationId, dateInShape, docId }) => {
       const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
       const context = {
@@ -107,15 +108,23 @@ export function getActiveEntriesAndGenerateAlerts(
         containingBoundaryName,
       };
       const alertInstanceId = `${entityName}-${containingBoundaryName}`;
-      if (shapeLocationId === OTHER_CATEGORY) {
-        allActiveEntriesMap.delete(entityName);
-      } else {
+      if (shapeLocationId !== OTHER_CATEGORY) {
         alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
       }
     });
+    // Determine what remains active
+    const latestLocationsArr = locationsArr.filter(
+      (latestEntityLocation) => latestEntityLocation.dateInShape === locationsArr[0].dateInShape
+    );
+    if (latestLocationsArr[0].shapeLocationId === OTHER_CATEGORY) {
+      allActiveEntriesMap.delete(entityName);
+    } else {
+      allActiveEntriesMap.set(entityName, latestLocationsArr);
+    }
   });
   return allActiveEntriesMap;
 }
+
 export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType['executor'] =>
   async function ({
     previousStartedAt: currIntervalStartTime,
