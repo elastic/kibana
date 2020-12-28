@@ -100,7 +100,7 @@
     "@babel/core": "^7.11.6",
     "@babel/runtime": "^7.11.2",
     "@elastic/datemath": "link:packages/elastic-datemath",
-    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@^8.0.0-canary",
+    "@elastic/elasticsearch": "github:elastic/elasticsearch-js#type-definitions",
     "@elastic/ems-client": "7.11.0",
     "@elastic/eui": "31.0.0",
     "@elastic/filesaver": "1.1.2",
