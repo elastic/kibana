@@ -46,10 +46,10 @@ export function ChartPreview({
   const yMax = Math.max(...values, threshold * 1.2);
 
   const style = {
-    fill: theme.eui.euiColorVis9,
+    fill: theme.eui.euiColorVis2,
     line: {
       strokeWidth: 2,
-      stroke: theme.eui.euiColorVis9,
+      stroke: theme.eui.euiColorVis2,
       opacity: 1,
     },
     opacity: thresholdOpacity,
