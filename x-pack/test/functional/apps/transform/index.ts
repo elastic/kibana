@@ -40,3 +40,39 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./feature_controls'));
   });
 }
+export interface ComboboxOption {
+  identifier: string;
+  label: string;
+}
+
+export interface GroupByEntry extends ComboboxOption {
+  intervalLabel?: string;
+}
+
+interface BaseTransformTestData {
+  type: 'pivot' | 'latest';
+  suiteTitle: string;
+  source: string;
+  transformId: string;
+  transformDescription: string;
+  expected: any;
+  destinationIndex: string;
+}
+
+export interface PivotTransformTestData extends BaseTransformTestData {
+  groupByEntries: GroupByEntry[];
+  aggregationEntries: any[];
+}
+
+export interface LatestTransformTestData extends BaseTransformTestData {
+  uniqueKeys: ComboboxOption[];
+  sortField: ComboboxOption;
+}
+
+export function isPivotTransformTestData(arg: any): arg is PivotTransformTestData {
+  return arg.type === 'pivot';
+}
+
+export function isLatestTransformTestData(arg: any): arg is LatestTransformTestData {
+  return arg.type === 'latest';
+}

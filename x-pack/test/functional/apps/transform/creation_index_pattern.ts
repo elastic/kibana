@@ -7,35 +7,13 @@
 import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-interface ComboboxOption {
-  identifier: string;
-  label: string;
-}
-
-interface GroupByEntry extends ComboboxOption {
-  intervalLabel?: string;
-}
-
-interface BaseTransformTestData {
-  type: 'pivot' | 'latest';
-  suiteTitle: string;
-  source: string;
-  transformId: string;
-  transformDescription: string;
-  expected: any;
-  destinationIndex: string;
-}
-
-interface PivotTransformTestData extends BaseTransformTestData {
-  groupByEntries: GroupByEntry[];
-  aggregationEntries: any[];
-}
-
-interface LatestTransformTestData extends BaseTransformTestData {
-  uniqueKeys: ComboboxOption[];
-  sortField: ComboboxOption;
-}
+import {
+  GroupByEntry,
+  isLatestTransformTestData,
+  isPivotTransformTestData,
+  LatestTransformTestData,
+  PivotTransformTestData,
+} from './index';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -162,7 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           },
-          pivotPreview: {
+          transformPreview: {
             column: 0,
             values: [`Men's Accessories`],
           },
@@ -261,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
           },
-          pivotPreview: {
+          transformPreview: {
             column: 0,
             values: ['AE', 'CO', 'EG', 'FR', 'GB'],
           },
@@ -313,7 +291,7 @@ export default function ({ getService }: FtrProviderContext) {
             rows: 5,
           },
           histogramCharts: [],
-          pivotPreview: {
+          transformPreview: {
             column: 0,
             values: [
               'July 12th 2019, 22:16:19',
@@ -326,14 +304,6 @@ export default function ({ getService }: FtrProviderContext) {
         },
       } as LatestTransformTestData,
     ];
-
-    function isPivotTransformTestData(arg: any): arg is PivotTransformTestData {
-      return arg.type === 'pivot';
-    }
-
-    function isLatestTransformTestData(arg: any): arg is LatestTransformTestData {
-      return arg.type === 'latest';
-    }
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
@@ -358,7 +328,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('navigates through the wizard and sets all needed fields', async () => {
-          await transform.testExecution.logTestStep('displays the define pivot step');
+          await transform.testExecution.logTestStep('displays the define step');
           await transform.wizard.assertDefineStepActive();
 
           await transform.testExecution.logTestStep('loads the index preview');
@@ -434,14 +404,14 @@ export default function ({ getService }: FtrProviderContext) {
             );
           }
 
-          await transform.testExecution.logTestStep('loads the pivot preview');
+          await transform.testExecution.logTestStep('loads the transform preview');
           await transform.wizard.assertPivotPreviewLoaded();
 
-          await transform.testExecution.logTestStep('shows the pivot preview');
+          await transform.testExecution.logTestStep('shows the transform preview');
           await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
           await transform.wizard.assertPivotPreviewColumnValues(
-            testData.expected.pivotPreview.column,
-            testData.expected.pivotPreview.values
+            testData.expected.transformPreview.column,
+            testData.expected.transformPreview.values
           );
 
           await transform.testExecution.logTestStep('loads the details step');
