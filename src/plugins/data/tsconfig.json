@@ -1,0 +1,25 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "config.ts"
+  ],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../bfetch/tsconfig.json" },
+    { "path": "../expressions/tsconfig.json" },
+    { "path": "../inspector/tsconfig.json" },
+    { "path": "../share/tsconfig.json" },
+    { "path": "../ui_actions/tsconfig.json" },
+    { "path": "../usage_collection/tsconfig.json" },
+  ]
+}

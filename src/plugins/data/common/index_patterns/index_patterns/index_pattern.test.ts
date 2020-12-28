@@ -23,8 +23,7 @@ import { IndexPattern } from './index_pattern';
 
 import { DuplicateField } from '../../../../kibana_utils/common';
 // @ts-expect-error
-import mockLogStashFields from '../../../../../fixtures/logstash_fields';
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import mockLogstashFields from '../../../../../fixtures/logstash_fields';
 import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
@@ -36,14 +35,15 @@ fieldFormatsMock.getInstance = jest.fn().mockImplementation(() => new MockFieldF
 
 // helper function to create index patterns
 function create(id: string) {
-  const {
-    type,
-    version,
-    attributes: { timeFieldName, fields, title },
-  } = stubbedSavedObjectIndexPattern(id);
-
   return new IndexPattern({
-    spec: { id, type, version, timeFieldName, fields, title },
+    spec: {
+      id,
+      type: 'type-pattern',
+      version: '2',
+      timeFieldName: 'timestamp',
+      fields: mockLogstashFields(),
+      title: 'title',
+    },
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
     metaFields: [],
@@ -81,7 +81,7 @@ describe('IndexPattern', () => {
 
   describe('getScriptedFields', () => {
     test('should return all scripted fields', () => {
-      const scriptedNames = mockLogStashFields()
+      const scriptedNames = mockLogstashFields()
         .filter((item: IndexPatternField) => item.scripted === true)
         .map((item: IndexPatternField) => item.name);
       const respNames = map(indexPattern.getScriptedFields(), 'name');
@@ -125,7 +125,7 @@ describe('IndexPattern', () => {
 
   describe('getNonScriptedFields', () => {
     test('should return all non-scripted fields', () => {
-      const notScriptedNames = mockLogStashFields()
+      const notScriptedNames = mockLogstashFields()
         .filter((item: IndexPatternField) => item.scripted === false)
         .map((item: IndexPatternField) => item.name);
       const respNames = map(indexPattern.getNonScriptedFields(), 'name');

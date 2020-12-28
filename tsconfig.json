@@ -7,7 +7,10 @@
   "exclude": [
     "src/**/__fixtures__/**/*",
     "src/core/**/*",
+    "src/plugins/bfetch/**/*",
+    "src/plugins/data/**/*",
     "src/plugins/dev_tools/**/*",
+    "src/plugins/expressions/**/*",
     "src/plugins/inspector/**/*",
     "src/plugins/kibana_legacy/**/*",
     "src/plugins/kibana_react/**/*",
@@ -18,6 +21,7 @@
     "src/plugins/share/**/*",
     "src/plugins/telemetry/**/*",
     "src/plugins/telemetry_collection_manager/**/*",
+    "src/plugins/ui_actions/**/*",
     "src/plugins/url_forwarding/**/*",
     "src/plugins/usage_collection/**/*",
     // In the build we actually exclude **/public/**/* from this config so that
@@ -28,7 +32,10 @@
   ],
   "references": [
     { "path": "./src/core/tsconfig.json" },
+    { "path": "./src/plugins/bfetch/tsconfig.json" },
+    { "path": "./src/plugins/data/tsconfig.json" },
     { "path": "./src/plugins/dev_tools/tsconfig.json" },
+    { "path": "./src/plugins/expressions/tsconfig.json" },
     { "path": "./src/plugins/inspector/tsconfig.json" },
     { "path": "./src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "./src/plugins/kibana_react/tsconfig.json" },
@@ -39,6 +46,7 @@
     { "path": "./src/plugins/share/tsconfig.json" },
     { "path": "./src/plugins/telemetry/tsconfig.json" },
     { "path": "./src/plugins/telemetry_collection_manager/tsconfig.json" },
+    { "path": "./src/plugins/ui_actions/tsconfig.json" },
     { "path": "./src/plugins/url_forwarding/tsconfig.json" },
     { "path": "./src/plugins/usage_collection/tsconfig.json" },
   ]

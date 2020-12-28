@@ -8,6 +8,9 @@
   "exclude": ["plugin_functional/plugins/**/*", "interpreter_functional/plugins/**/*"],
   "references": [
     { "path": "../src/core/tsconfig.json" },
+    { "path": "../src/plugins/bfetch/tsconfig.json" },
+    { "path": "../src/plugins/data/tsconfig.json" },
+    { "path": "../src/plugins/expressions/tsconfig.json" },
     { "path": "../src/plugins/inspector/tsconfig.json" },
     { "path": "../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../src/plugins/kibana_usage_collection/tsconfig.json" },
@@ -15,6 +18,7 @@
     { "path": "../src/plugins/newsfeed/tsconfig.json" },
     { "path": "../src/plugins/telemetry_collection_manager/tsconfig.json" },
     { "path": "../src/plugins/telemetry/tsconfig.json" },
+    { "path": "../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../src/plugins/usage_collection/tsconfig.json" }
   ]
 }

@@ -20,8 +20,23 @@
 import { defaults } from 'lodash';
 import { IndexPatternsService, IndexPattern } from '.';
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+// @ts-expect-error
+import mockLogstashFields from '../../../../../fixtures/logstash_fields';
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
+
+function stubbedSavedObjectIndexPattern(id: string | null = null) {
+  return {
+    id,
+    type: 'index-pattern',
+    attributes: {
+      timeFieldName: 'timestamp',
+      customFormats: {},
+      fields: mockLogstashFields(),
+      title: 'title',
+    },
+    version: '2',
+  };
+}
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
