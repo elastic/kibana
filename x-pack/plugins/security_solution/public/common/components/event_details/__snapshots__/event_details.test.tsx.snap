@@ -577,6 +577,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
           }
           eventId="Y-6TfmcB0WOhS6qyMv3s"
           timelineId="test"
+          timelineTabType="query"
         />
       </React.Fragment>,
       "id": "table-view",
@@ -1157,6 +1158,7 @@ exports[`EventDetails rendering should match snapshot 1`] = `
             }
             eventId="Y-6TfmcB0WOhS6qyMv3s"
             timelineId="test"
+            timelineTabType="query"
           />
         </React.Fragment>,
         "id": "table-view",
