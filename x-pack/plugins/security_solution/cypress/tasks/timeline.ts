@@ -166,12 +166,7 @@ export const pinFirstEvent = () => {
 
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
-  cy.get(SERVER_SIDE_EVENT_COUNT)
-    .invoke('text')
-    .then((strCount) => {
-      const intCount = +strCount;
-      cy.wrap(intCount).should('be.above', 0);
-    });
+  cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
 };
 
 export const unpinFirstEvent = () => {

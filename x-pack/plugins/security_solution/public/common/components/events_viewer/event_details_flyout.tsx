@@ -39,7 +39,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedEvent = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults)?.expandedEvent ?? {}
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults)?.expandedEvent?.query ?? {}
   );
 
   const handleClearSelection = useCallback(() => {
@@ -75,6 +75,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
           isAlert={isAlert}
           loading={loading}
           timelineId={timelineId}
+          timelineTabType="flyout"
         />
       </EuiFlyoutBody>
     </StyledEuiFlyout>
