@@ -60,13 +60,14 @@ describe('Fields Browser', () => {
     });
 
     it('displays the `default ECS` category (by default)', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).invoke('text').should('eq', 'default ECS');
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).should('have.text', 'default ECS');
     });
 
     it('the `defaultECS` (selected) category count matches the default timeline header count', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT)
-        .invoke('text')
-        .should('eq', `${defaultHeaders.length}`);
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should(
+        'have.text',
+        `${defaultHeaders.length}`
+      );
     });
 
     it('displays a checked checkbox for all of the default timeline columns', () => {
@@ -80,7 +81,7 @@ describe('Fields Browser', () => {
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(FIELDS_BROWSER_CATEGORIES_COUNT).invoke('text').should('eq', '2 categories');
+      cy.get(FIELDS_BROWSER_CATEGORIES_COUNT).should('have.text', '2 categories');
     });
 
     it('displays a search results label with the expected count of fields matching the filter input', () => {
@@ -94,9 +95,10 @@ describe('Fields Browser', () => {
           cy.get(FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT)
             .invoke('text')
             .then((systemCategoriesCount) => {
-              cy.get(FIELDS_BROWSER_FIELDS_COUNT)
-                .invoke('text')
-                .should('eq', `${+hostCategoriesCount + +systemCategoriesCount} fields`);
+              cy.get(FIELDS_BROWSER_FIELDS_COUNT).should(
+                'have.text',
+                `${+hostCategoriesCount + +systemCategoriesCount} fields`
+              );
             });
         });
     });
@@ -106,11 +108,11 @@ describe('Fields Browser', () => {
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).invoke('text').should('eq', '4');
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should('have.text', '4');
     });
   });
 
-  context.skip('Editing the timeline', () => {
+  context('Editing the timeline', () => {
     before(() => {
       cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
@@ -137,7 +139,7 @@ describe('Fields Browser', () => {
       const category = 'host';
       filterFieldsBrowser(category);
 
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).invoke('text').should('eq', category);
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).should('have.text', category);
     });
 
     it('adds a field to the timeline when the user clicks the checkbox', () => {
@@ -151,7 +153,7 @@ describe('Fields Browser', () => {
       cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_HEADER).should('exist');
     });
 
-    it('adds a field to the timeline when the user drags and drops a field', () => {
+    it.skip('adds a field to the timeline when the user drags and drops a field', () => {
       const filterInput = 'host.geo.c';
 
       filterFieldsBrowser(filterInput);

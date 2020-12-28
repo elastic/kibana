@@ -36,7 +36,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
   // abstraction of service dependencies easier.
   const { indexPatterns } = data;
   const { recentlyAccessed: recentlyAccessedPaths, docTitle } = chrome;
-  const { addDanger: showDangerToast, addWarning: showWarningToast } = core.notifications.toasts;
+  const { toasts } = core.notifications;
 
   useEffect(() => {
     (async function loadSavedDashboard() {
@@ -46,7 +46,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
           pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
         });
 
-        showWarningToast(getDashboard60Warning());
+        toasts.addWarning(getDashboard60Warning());
         return;
       }
 
@@ -63,7 +63,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
         setSavedDashboard(dashboard);
       } catch (error) {
         // E.g. a corrupt or deleted dashboard
-        showDangerToast(error.message);
+        toasts.addDanger(error.message);
         history.push(DashboardConstants.LANDING_PAGE_PATH);
       }
     })();
@@ -75,8 +75,7 @@ export const useSavedDashboard = (savedDashboardId: string | undefined, history:
     recentlyAccessedPaths,
     savedDashboardId,
     savedDashboards,
-    showDangerToast,
-    showWarningToast,
+    toasts,
   ]);
 
   return savedDashboard;

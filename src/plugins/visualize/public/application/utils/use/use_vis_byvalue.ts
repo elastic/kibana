@@ -23,7 +23,7 @@ import { VisualizeInput } from 'src/plugins/visualizations/public';
 import { ByValueVisInstance, IEditorController, VisualizeServices } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 import { getBreadcrumbsPrefixedWithApp, getEditBreadcrumbs } from '../breadcrumbs';
-import { DefaultEditorController } from '../../../../../vis_default_editor/public';
+import { getDefaultEditor } from '../../../services';
 
 export const useVisByValue = (
   services: VisualizeServices,
@@ -46,7 +46,8 @@ export const useVisByValue = (
       }
       const byValueVisInstance = await getVisualizationInstanceFromInput(services, valueInput);
       const { embeddableHandler, vis } = byValueVisInstance;
-      const Editor = vis.type.editor || DefaultEditorController;
+
+      const Editor = vis.type.editor || getDefaultEditor();
       const visEditorController = new Editor(
         visEditorRef.current,
         vis,

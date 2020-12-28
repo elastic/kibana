@@ -15,13 +15,15 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { SerializedFilterQuery } from '../../../common/store/types';
 
-import { KqlMode, TimelineModel, ColumnHeaderOptions, TimelineTabs } from './model';
+import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
-  TimelineExpandedEvent,
+  TimelineExpandedEventType,
   TimelineTypeLiteral,
   RowRendererId,
+  TimelineExpandedEvent,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
 
@@ -36,8 +38,9 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
 );
 
 export interface ToggleExpandedEvent {
+  event?: TimelineExpandedEventType;
+  tabType?: TimelineTabs;
   timelineId: string;
-  event?: TimelineExpandedEvent;
 }
 export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
 
