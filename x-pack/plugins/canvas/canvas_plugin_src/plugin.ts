@@ -42,7 +42,6 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
       );
     });
 
-    // REgister datasources async
     plugins.canvas.addDatasourceUIs(async () => {
       // @ts-expect-error
       const { datasourceSpecs } = await import('./canvas_addons');
