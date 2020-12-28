@@ -10,3 +10,6 @@ export * from './plugin_dependencies';
 export * from './plugin_interfaces';
 export * from './fleet_start_services';
 export * from './types';
+export * from './http_handler_mock_factory';
+export * from './epm';
+export * from './setup';

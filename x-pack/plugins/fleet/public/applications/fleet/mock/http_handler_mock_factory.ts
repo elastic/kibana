@@ -5,6 +5,7 @@
  */
 
 import { HttpFetchOptions, HttpFetchOptionsWithPath, HttpStart } from 'kibana/public';
+import { extend } from 'lodash';
 
 class ApiRouteNotMocked extends Error {
   constructor(message: string) {
@@ -125,4 +126,47 @@ const isHttpFetchOptionsWithPath = (
   opt: string | HttpFetchOptions | HttpFetchOptionsWithPath
 ): opt is HttpFetchOptionsWithPath => {
   return 'object' === typeof opt && 'path' in opt;
+};
+
+/**
+ * Compose a new API Handler mock based upon a list of one or more Api Handlers.
+ * Returns a new function (`ApiHandlerMock`) that applies all provided handler mocks to the `core.http`
+ * service while at the same time supporting a `waitForApi()` method that will wait all handlers.
+ *
+ * @example
+ * import { composeApiHandlerMocks } from './http_handler_mock_factory';
+ * import {
+ *   fleetSetupApiMock,
+ *   agentsSetupApiMock,
+ * } from './setup';
+ *
+ * // Create the new interface as an intersection of all other Api Handler Mocks
+ * type ComposedApiHandlerMocks = ReturnType<typeof agentsSetupApiMock> & ReturnType<typeof fleetSetupApiMock>
+ *
+ * const newComposedHandlerMock = composeApiHandlerMocks<
+ *  ComposedApiHandlerMocks
+ * >([fleetSetupApiMock, agentsSetupApiMock]);
+ */
+export const composeApiHandlerMocks = <R extends ResponseProviderMocks = ResponseProviderMocks>(
+  handlerMocks: ApiHandlerMock[]
+): ApiHandlerMock<R> => {
+  return (http: HttpStart) => {
+    const waitForApiHandlers: Array<MockedApi['waitForApi']> = [];
+    const mockedApiInterfaces: MockedApi<R> = {
+      waitForApi() {
+        return Promise.all(
+          waitForApiHandlers.map((handlerWaitFor) => handlerWaitFor())
+        ).then(() => {});
+      },
+      // @ts-ignore
+      responseProvider: {},
+    };
+
+    handlerMocks.forEach((handlerMock) => {
+      const { waitForApi, ...otherInterfaceProps } = handlerMock(http);
+      extend(mockedApiInterfaces, otherInterfaceProps);
+    });
+
+    return mockedApiInterfaces;
+  };
 };

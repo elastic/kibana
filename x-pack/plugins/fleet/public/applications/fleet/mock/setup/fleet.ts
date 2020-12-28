@@ -11,7 +11,11 @@ export const setupResponseMock = (): PostIngestSetupResponse => {
   return { isInitialized: true };
 };
 
-export const fleetSetupApiMock = httpHandlerMockFactory([
+export interface FleetSetupResponseProvidersMock {
+  fleetSetup: jest.MockedFunction<() => PostIngestSetupResponse>;
+}
+
+export const fleetSetupApiMock = httpHandlerMockFactory<FleetSetupResponseProvidersMock>([
   {
     id: 'fleetSetup',
     method: 'post',
