@@ -10,9 +10,10 @@ import { TimelineType } from '../../../common/types/timeline';
 export const ADDED_TO_TIMELINE_MESSAGE = (fieldOrValue: string, timelineType: TimelineType) =>
   i18n.translate('xpack.securitySolution.hooks.useAddToTimeline.addedFieldMessage', {
     values: { fieldOrValue, timelineType },
-    defaultMessage: `Added {fieldOrValue} to ${
-      timelineType === TimelineType.template ? 'timeline template' : 'timeline'
-    }`,
+    defaultMessage:
+      timelineType === TimelineType.template
+        ? `Added {fieldOrValue} to timeline template`
+        : `Added {fieldOrValue} to timeline`,
   });
 
 export const STATUS_CODE = i18n.translate(
