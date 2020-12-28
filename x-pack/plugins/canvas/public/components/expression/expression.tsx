@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FC, MutableRefObject } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiPanel,
@@ -16,19 +16,26 @@ import {
   EuiLink,
   EuiPortal,
 } from '@elastic/eui';
+// @ts-expect-error
 import { Shortcuts } from 'react-shortcuts';
 import { ComponentStrings } from '../../../i18n';
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
+import { ExpressionFunction } from '../../../types';
+import { FormState } from './';
 
 const { Expression: strings } = ComponentStrings;
 
 const { useRef } = React;
 
-const shortcut = (ref, cmd, callback) => (
+const shortcut = (
+  ref: MutableRefObject<ExpressionInput | null>,
+  cmd: string,
+  callback: () => void
+) => (
   <Shortcuts
     name="EXPRESSION"
-    handler={(command) => {
+    handler={(command: string) => {
       const isInputActive = ref.current && ref.current.editor && ref.current.editor.hasTextFocus();
       if (isInputActive && command === cmd) {
         callback();
@@ -40,18 +47,28 @@ const shortcut = (ref, cmd, callback) => (
   />
 );
 
-export const Expression = ({
+interface Props {
+  functionDefinitions: ExpressionFunction[];
+  formState: FormState;
+  updateValue: (expression?: string) => void;
+  setExpression: (expression: string) => void;
+  done: () => void;
+  error?: string;
+  isCompact: boolean;
+  toggleCompactView: () => void;
+}
+
+export const Expression: FC<Props> = ({
   functionDefinitions,
   formState,
   updateValue,
   setExpression,
   done,
   error,
-  fontSize,
   isCompact,
   toggleCompactView,
 }) => {
-  const refExpressionInput = useRef(null);
+  const refExpressionInput = useRef<null | ExpressionInput>(null);
 
   const handleRun = () => {
     setExpression(formState.expression);
@@ -78,7 +95,6 @@ export const Expression = ({
 
       <ExpressionInput
         ref={refExpressionInput}
-        fontSize={fontSize}
         isCompact={isCompact}
         functionDefinitions={functionDefinitions}
         error={error ? error : `\u00A0`}
