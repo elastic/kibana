@@ -27,7 +27,7 @@ import { formatKey } from './format_key';
 const getTimeSeries = (resp, series) =>
   _.get(resp, `aggregations.timeseries`) || _.get(resp, `aggregations.${series.id}.timeseries`);
 
-export function getSplits(resp, panel, series, meta) {
+export async function getSplits(resp, panel, series, meta, extractFieldLabel) {
   if (!meta) {
     meta = _.get(resp, `aggregations.${series.id}.meta`);
   }
@@ -75,7 +75,7 @@ export function getSplits(resp, panel, series, meta) {
   return [
     {
       id: series.id,
-      label: series.label || calculateLabel(metric, series.metrics),
+      label: series.label || (await calculateLabel(metric, series.metrics, extractFieldLabel)),
       color: color.string(),
       ...mergeObj,
       meta,

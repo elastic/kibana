@@ -24,7 +24,7 @@ import { getAggValue } from '../../helpers/get_agg_value';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
 export function percentileRank(bucket, panel, series) {
-  return (next) => (results) => {
+  return (next) => async (results) => {
     const metric = getLastMetric(series);
 
     if (metric.type !== METRIC_TYPES.PERCENTILE_RANK) {
@@ -35,7 +35,7 @@ export function percentileRank(bucket, panel, series) {
       aggregations: bucket,
     };
 
-    getSplits(fakeResp, panel, series).forEach((split) => {
+    await getSplits(fakeResp, panel, series).forEach((split) => {
       // table allows only one percentile rank in a series (the last one will be chosen in case of several)
       const lastRankValue = last(metric.values);
       const percentileRank = toPercentileNumber(lastRankValue);

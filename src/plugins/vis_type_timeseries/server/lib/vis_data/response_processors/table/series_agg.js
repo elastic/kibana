@@ -21,8 +21,8 @@ import { SeriesAgg } from './_series_agg';
 import _ from 'lodash';
 import { calculateLabel } from '../../../../../common/calculate_label';
 
-export function seriesAgg(resp, panel, series) {
-  return (next) => (results) => {
+export function seriesAgg(resp, panel, series, meta, extractFieldLabel) {
+  return (next) => async (results) => {
     if (series.aggregate_by && series.aggregate_function) {
       const targetSeries = [];
       // Filter out the seires with the matching metric and store them
@@ -38,7 +38,9 @@ export function seriesAgg(resp, panel, series) {
       const data = fn(targetSeries);
       results.push({
         id: `${series.id}`,
-        label: series.label || calculateLabel(_.last(series.metrics), series.metrics),
+        label:
+          series.label ||
+          (await calculateLabel(_.last(series.metrics), series.metrics, extractFieldLabel)),
         data: _.first(data),
       });
     }

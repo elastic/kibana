@@ -19,4 +19,5 @@
 
 import { FieldObject } from './types';
 
+// todo: to remove
 export const extractFieldLabel = (timeField: FieldObject) => timeField;

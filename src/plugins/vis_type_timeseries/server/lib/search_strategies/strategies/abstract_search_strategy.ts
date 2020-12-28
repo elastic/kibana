@@ -80,7 +80,13 @@ export abstract class AbstractSearchStrategy {
     throw new TypeError('Must override method');
   }
 
-  async getFieldsForWildcard<TPayload = unknown>(
+  protected async extractCustomLabel(fields: IFieldType[], fieldName: string): Promise<string> {
+    const field = fields.find((f) => f.name === fieldName);
+
+    return field?.customLabel ?? fieldName;
+  }
+
+  protected async getFieldsForWildcard<TPayload = unknown>(
     req: ReqFacade<TPayload>,
     indexPattern: string,
     capabilities?: unknown,

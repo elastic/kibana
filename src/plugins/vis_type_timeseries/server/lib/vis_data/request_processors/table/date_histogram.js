@@ -69,6 +69,7 @@ export function dateHistogram(
           timeField,
           intervalString,
           bucketSize,
+          index: indexPatternObject?.title,
         });
       });
     };

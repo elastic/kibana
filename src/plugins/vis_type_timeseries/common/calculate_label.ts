@@ -20,7 +20,6 @@
 import { includes, startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { lookup } from './agg_lookup';
-import { extractFieldLabel } from './field_utils';
 import { MetricsItemsSchema } from './types';
 
 const paths = [
@@ -38,10 +37,11 @@ const paths = [
   'positive_only',
 ];
 
-export function calculateLabel(
+export async function calculateLabel(
   metric: MetricsItemsSchema,
-  metrics: MetricsItemsSchema[] = []
-): string {
+  metrics: MetricsItemsSchema[] = [],
+  extractFieldLabel: (fieldName: string) => Promise<string> = (fieldName) => fieldName
+): Promise<string> {
   if (!metric) {
     return i18n.translate('visTypeTimeseries.calculateLabel.unknownLabel', {
       defaultMessage: 'Unknown',
@@ -78,7 +78,7 @@ export function calculateLabel(
   if (metric.type === 'positive_rate') {
     return i18n.translate('visTypeTimeseries.calculateLabel.positiveRateLabel', {
       defaultMessage: 'Counter Rate of {field}',
-      values: { field: extractFieldLabel(metric.field) },
+      values: { field: await extractFieldLabel(metric.field!) },
     });
   }
   if (metric.type === 'static') {
@@ -90,7 +90,7 @@ export function calculateLabel(
 
   if (includes(paths, metric.type)) {
     const targetMetric = metrics.find((m) => startsWith(metric.field!, m.id));
-    const targetLabel = calculateLabel(targetMetric!, metrics);
+    const targetLabel = await calculateLabel(targetMetric!, metrics, extractFieldLabel);
 
     // For percentiles we need to parse the field id to extract the percentile
     // the user configured in the percentile aggregation and specified in the
@@ -122,7 +122,7 @@ export function calculateLabel(
     defaultMessage: '{lookupMetricType} of {metricField}',
     values: {
       lookupMetricType: lookup[metric.type],
-      metricField: extractFieldLabel(metric.field),
+      metricField: await extractFieldLabel(metric.field!),
     },
   });
 }

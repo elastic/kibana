@@ -58,6 +58,18 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     };
   }
 
+  async findCustomLabelForField<TPayload = unknown>(
+    fieldName: string,
+    req: ReqFacade<TPayload>,
+    indexPattern: string,
+    capabilities?: unknown
+  ): Promise<string> {
+    return this.extractCustomLabel(
+      await this.getFieldsForWildcard(req, indexPattern, capabilities),
+      fieldName
+    );
+  }
+
   async getFieldsForWildcard<TPayload = unknown>(
     req: ReqFacade<TPayload>,
     indexPattern: string,

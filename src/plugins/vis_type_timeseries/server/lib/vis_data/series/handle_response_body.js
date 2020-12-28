@@ -22,7 +22,7 @@ import { processors } from '../response_processors/series';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-export function handleResponseBody(panel) {
+export function handleResponseBody(panel, req, searchStrategy, capabilities) {
   return async (resp) => {
     if (resp.error) {
       const err = new Error(resp.error.type);
@@ -48,7 +48,21 @@ export function handleResponseBody(panel) {
     const [seriesId] = keys;
     const meta = get(resp, `aggregations.${seriesId}.meta`, {});
     const series = panel.series.find((s) => s.id === (meta.seriesId || seriesId));
-    const processor = buildProcessorFunction(processors, resp, panel, series, meta);
+
+    const extractFieldLabel = (fieldName) =>
+      meta.index
+        ? searchStrategy.findCustomLabelForField(fieldName, req, meta.index, capabilities)
+        : fieldName;
+
+    const processor = buildProcessorFunction(
+      processors,
+      resp,
+      panel,
+      series,
+      meta,
+      extractFieldLabel
+    );
+
     return await processor([]);
   };
 }
