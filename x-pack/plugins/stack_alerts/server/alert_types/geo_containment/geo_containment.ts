@@ -81,7 +81,7 @@ export function transformResults(
 }
 
 export function getActiveEntriesAndGenerateAlerts(
-  prevLocationMap: Record<string, LatestEntityLocation[]>,
+  prevLocationMap: Map<string, LatestEntityLocation[]>,
   currLocationMap: Map<string, LatestEntityLocation[]>,
   alertInstanceFactory: AlertServices<
     GeoContainmentInstanceState,
@@ -91,7 +91,7 @@ export function getActiveEntriesAndGenerateAlerts(
   currIntervalEndTime: Date
 ) {
   const allActiveEntriesMap: Map<string, LatestEntityLocation[]> = new Map([
-    ...Object.entries(prevLocationMap || {}),
+    ...prevLocationMap,
     ...currLocationMap,
   ]);
   allActiveEntriesMap.forEach((locationsArr, entityName) => {
@@ -168,8 +168,11 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
       params.geoField
     );
 
+    const prevLocationMap: Map<string, LatestEntityLocation[]> = new Map([
+      ...Object.entries((state.prevLocationMap as Record<string, LatestEntityLocation[]>) || {}),
+    ]);
     const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
-      state.prevLocationMap as Record<string, LatestEntityLocation[]>,
+      prevLocationMap,
       currLocationMap,
       services.alertInstanceFactory,
       shapesIdsNamesMap,
