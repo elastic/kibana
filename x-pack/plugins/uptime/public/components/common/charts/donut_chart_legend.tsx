@@ -34,14 +34,14 @@ export const DonutChartLegend = ({ down, up }: Props) => {
       <DonutChartLegendRow
         color={danger}
         content={down}
-        message={STATUS_UP_LABEL}
+        message={STATUS_DOWN_LABEL}
         data-test-subj={'xpack.uptime.snapshot.donutChart.down'}
       />
       <EuiSpacer size="m" />
       <DonutChartLegendRow
         color={gray}
         content={up}
-        message={STATUS_DOWN_LABEL}
+        message={STATUS_UP_LABEL}
         data-test-subj={'xpack.uptime.snapshot.donutChart.up'}
       />
     </LegendContainer>

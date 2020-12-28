@@ -16,6 +16,7 @@ import {
   getListsClient,
   getExceptions,
   sortExceptionItems,
+  checkPrivileges,
 } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { RuleExecutorOptions, SearchAfterAndBulkCreateReturnType } from './types';
@@ -42,6 +43,7 @@ jest.mock('./utils', () => {
     getListsClient: jest.fn(),
     getExceptions: jest.fn(),
     sortExceptionItems: jest.fn(),
+    checkPrivileges: jest.fn(),
   };
 });
 jest.mock('../notifications/schedule_notification_actions');
@@ -102,6 +104,7 @@ describe('rules_notification_alert_type', () => {
       find: jest.fn(),
       goingToRun: jest.fn(),
       error: jest.fn(),
+      partialFailure: jest.fn(),
     };
     (ruleStatusServiceFactory as jest.Mock).mockReturnValue(ruleStatusService);
     (getGapBetweenRuns as jest.Mock).mockReturnValue(moment.duration(0));
@@ -120,6 +123,21 @@ describe('rules_notification_alert_type', () => {
       success: true,
       searchAfterTimes: [],
       createdSignalsCount: 10,
+    });
+    (checkPrivileges as jest.Mock).mockImplementation((_, indices) => {
+      return {
+        index: indices.reduce(
+          (acc: { index: { [x: string]: { read: boolean } } }, index: string) => {
+            return {
+              [index]: {
+                read: true,
+              },
+              ...acc,
+            };
+          },
+          {}
+        ),
+      };
     });
     alertServices.callCluster.mockResolvedValue({
       hits: {
@@ -165,6 +183,55 @@ describe('rules_notification_alert_type', () => {
       expect(ruleStatusService.error.mock.calls[0][1]).toEqual({
         gap: '2 hours',
       });
+    });
+
+    it('should set a partial failure for when rules cannot read ALL provided indices', async () => {
+      (checkPrivileges as jest.Mock).mockResolvedValueOnce({
+        username: 'elastic',
+        has_all_requested: false,
+        cluster: {},
+        index: {
+          'myfa*': {
+            read: true,
+          },
+          'anotherindex*': {
+            read: true,
+          },
+          'some*': {
+            read: false,
+          },
+        },
+        application: {},
+      });
+      payload.params.index = ['some*', 'myfa*', 'anotherindex*'];
+      await alert.executor(payload);
+      expect(ruleStatusService.partialFailure).toHaveBeenCalled();
+      expect(ruleStatusService.partialFailure.mock.calls[0][0]).toContain(
+        'Missing required read permissions on indexes: ["some*"]'
+      );
+    });
+
+    it('should set a failure status for when rules cannot read ANY provided indices', async () => {
+      (checkPrivileges as jest.Mock).mockResolvedValueOnce({
+        username: 'elastic',
+        has_all_requested: false,
+        cluster: {},
+        index: {
+          'myfa*': {
+            read: false,
+          },
+          'some*': {
+            read: false,
+          },
+        },
+        application: {},
+      });
+      payload.params.index = ['some*', 'myfa*'];
+      await alert.executor(payload);
+      expect(ruleStatusService.error).toHaveBeenCalled();
+      expect(ruleStatusService.error.mock.calls[0][0]).toContain(
+        'The rule does not have read privileges to any of the following indices: ["myfa*","some*"]'
+      );
     });
 
     it('should NOT warn about the gap between runs if gap small', async () => {
