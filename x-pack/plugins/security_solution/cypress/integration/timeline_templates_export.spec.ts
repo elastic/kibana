@@ -19,7 +19,7 @@ describe('Export timelines', () => {
   let templateResponse: Cypress.Response;
   let templateId: string;
 
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     cy.intercept('POST', 'api/timeline/_export?file_name=timelines_export.ndjson').as('export');
     createTimelineTemplate(timelineTemplate).then((response) => {

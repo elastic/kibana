@@ -47,12 +47,13 @@ export function PieComponent(
     paletteService: PaletteRegistry;
     onClickValue: (data: LensFilterEvent['data']) => void;
     renderMode: RenderMode;
+    syncColors: boolean;
   }
 ) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartsThemeService, paletteService, onClickValue } = props;
+  const { chartsThemeService, paletteService, syncColors, onClickValue } = props;
   const {
     shape,
     groups,
@@ -145,6 +146,7 @@ export function PieComponent(
               behindText: categoryDisplay !== 'hide',
               maxDepth: bucketColumns.length,
               totalSeries: totalSeriesCount,
+              syncColors,
             },
             palette.params
           );

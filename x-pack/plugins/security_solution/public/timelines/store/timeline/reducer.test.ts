@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 
 import {
   IS_OPERATOR,
@@ -40,7 +40,7 @@ import {
   updateTimelineTitle,
   upsertTimelineColumn,
 } from './helpers';
-import { ColumnHeaderOptions, TimelineModel, TimelineTabs } from './model';
+import { ColumnHeaderOptions, TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 
