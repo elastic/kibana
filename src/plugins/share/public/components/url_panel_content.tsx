@@ -111,6 +111,7 @@ export class UrlPanelContent extends Component<Props, State> {
           {this.renderExportAsRadioGroup()}
           {this.renderUrlParamExtensions()}
           {this.renderShortUrlSwitch()}
+          {this.renderPublicUrlSwitch()}
 
           <EuiSpacer size="m" />
 
@@ -427,6 +428,32 @@ export class UrlPanelContent extends Component<Props, State> {
 
     return (
       <EuiFormRow helpText={this.state.shortUrlErrorMsg} data-test-subj="createShortUrl">
+        {this.renderWithIconTip(switchComponent, tipContent)}
+      </EuiFormRow>
+    );
+  };
+
+  private renderPublicUrlSwitch = () => {
+    const switchLabel = (
+      <FormattedMessage id="share.urlPanel.publicUrlLabel" defaultMessage="Public URL" />
+    );
+    const switchComponent = (
+      <EuiSwitch
+        label={switchLabel}
+        checked={true}
+        onChange={() => {}}
+        data-test-subj="usePublicUrl"
+      />
+    );
+    const tipContent = (
+      <FormattedMessage
+        id="share.urlPanel.publicUrlHelpText"
+        defaultMessage="Public URL is allows anonymous access to the dashboard to any user without needing to log in."
+      />
+    );
+
+    return (
+      <EuiFormRow data-test-subj="createPublicUrl">
         {this.renderWithIconTip(switchComponent, tipContent)}
       </EuiFormRow>
     );
