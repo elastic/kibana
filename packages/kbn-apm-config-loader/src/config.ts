@@ -153,8 +153,8 @@ export class ApmConfiguration {
 
     return {
       globalLabels: {
-        branch: process.env.ghprbSourceBranch || '',
-        targetBranch: process.env.ghprbTargetBranch || '',
+        branch: process.env.GIT_BRANCH || '',
+        targetBranch: process.env.PR_TARGET_BRANCH || '',
         ciBuildNumber: process.env.BUILD_NUMBER || '',
         isPr: process.env.GITHUB_PR_NUMBER ? true : false,
         prId: process.env.GITHUB_PR_NUMBER || '',

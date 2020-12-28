@@ -65,7 +65,8 @@ describe('terms', () => {
       const esAggsFn = termsOperation.toEsAggsFn(
         { ...termsColumn, params: { ...termsColumn.params, otherBucket: true } },
         'col1',
-        {} as IndexPattern
+        {} as IndexPattern,
+        layer
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -87,13 +88,53 @@ describe('terms', () => {
           params: { ...termsColumn.params, otherBucket: false, missingBucket: true },
         },
         'col1',
-        {} as IndexPattern
+        {} as IndexPattern,
+        layer
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
           arguments: expect.objectContaining({
             otherBucket: [false],
             missingBucket: [false],
+          }),
+        })
+      );
+    });
+
+    it('should include esaggs suffix from other columns in orderby argument', () => {
+      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
+      const esAggsFn = termsOperation.toEsAggsFn(
+        {
+          ...termsColumn,
+          params: {
+            ...termsColumn.params,
+            otherBucket: true,
+            orderBy: { type: 'column', columnId: 'abcde' },
+          },
+        },
+        'col1',
+        {} as IndexPattern,
+        {
+          ...layer,
+          columns: {
+            ...layer.columns,
+            abcde: {
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'percentile',
+              sourceField: 'abc',
+              label: '',
+              params: {
+                percentile: 12,
+              },
+            },
+          },
+        }
+      );
+      expect(esAggsFn).toEqual(
+        expect.objectContaining({
+          arguments: expect.objectContaining({
+            orderBy: ['abcde.12'],
           }),
         })
       );
