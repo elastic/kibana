@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;
+export declare type IEsSearchResponse<Source = any> = IKibanaSearchResponse<estypes.SearchResponse<Source>>;
 ```

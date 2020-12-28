@@ -19,8 +19,6 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { ApiResponse } from '@elastic/elasticsearch';
-import { SearchResponse } from 'elasticsearch';
 import { IUiSettingsClient, IScopedClusterClient, SharedGlobalConfig } from 'src/core/server';
 
 import type { MsearchRequestBody, MsearchResponse } from '../../../common/search/search_source';
@@ -74,7 +72,7 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
 
     const body = convertRequestBody(params.body, timeout);
 
-    const promise = shimAbortSignal(
+    const response = await shimAbortSignal(
       esClient.asCurrentUser.msearch(
         {
           body,
@@ -85,13 +83,12 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
       ),
       params.signal
     );
-    const response = (await promise) as ApiResponse<{ responses: Array<SearchResponse<any>> }>;
 
     return {
       body: {
         ...response,
         body: {
-          responses: response.body.responses?.map((r: SearchResponse<any>) => shimHitsTotal(r)),
+          responses: response.body.responses?.map((r) => shimHitsTotal(r)),
         },
       },
     };

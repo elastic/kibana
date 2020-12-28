@@ -97,7 +97,7 @@ describe('DocViewTable at Discover', () => {
       scripted: 123,
       _underscore: 123,
     },
-  };
+  } as any;
 
   const props = {
     hit,
@@ -187,7 +187,7 @@ describe('DocViewTable at Discover Doc', () => {
       extension: 'html',
       not_mapped: 'yes',
     },
-  };
+  } as any;
   // here no action buttons are rendered
   const props = {
     hit,
@@ -219,7 +219,7 @@ describe('DocViewTable at Discover Context', () => {
         Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. \
         Phasellus ullamcorper ipsum rutrum nunc. Nunc nonummy metus. Vestibulum volutpat pretium libero. Cras id dui. Aenean ut',
     },
-  };
+  } as any;
   const props = {
     hit,
     columns: ['extension'],

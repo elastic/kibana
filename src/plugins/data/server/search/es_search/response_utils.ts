@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 /**
  * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
  * not included as it is already included in `successful`.
  * @internal
  */
-export function getTotalLoaded(response: SearchResponse<unknown>) {
+export function getTotalLoaded(response: estypes.SearchResponse<unknown>) {
   const { total, failed, successful } = response._shards;
   const loaded = failed + successful;
   return { total, loaded };
@@ -34,7 +34,7 @@ export function getTotalLoaded(response: SearchResponse<unknown>) {
  * Get the Kibana representation of this response (see `IKibanaSearchResponse`).
  * @internal
  */
-export function toKibanaSearchResponse(rawResponse: SearchResponse<unknown>) {
+export function toKibanaSearchResponse(rawResponse: estypes.SearchResponse<unknown>) {
   return {
     rawResponse,
     isPartial: false,

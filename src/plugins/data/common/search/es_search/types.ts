@@ -16,8 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchResponse } from 'elasticsearch';
-import { Search } from '@elastic/elasticsearch/api/requestParams';
+import type { estypes } from '@elastic/elasticsearch';
+import type { Search } from '@elastic/elasticsearch/api/requestParams';
+
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
 export const ES_SEARCH_STRATEGY = 'es';
@@ -30,4 +31,4 @@ export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestPar
   indexType?: string;
 }
 
-export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;
+export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<estypes.SearchResponse<Source>>;

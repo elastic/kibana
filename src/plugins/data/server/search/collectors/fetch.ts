@@ -20,18 +20,17 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
 import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import { Usage } from './register';
+
 interface SearchTelemetry {
   'search-telemetry': Usage;
 }
-type ESResponse = SearchResponse<SearchTelemetry>;
 
 export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
   return async ({ esClient }: CollectorFetchContext): Promise<Usage> => {
     const config = await config$.pipe(first()).toPromise();
-    const { body: esResponse } = await esClient.search<ESResponse>(
+    const { body: esResponse } = await esClient.search<SearchTelemetry>(
       {
         index: config.kibana.index,
         body: {

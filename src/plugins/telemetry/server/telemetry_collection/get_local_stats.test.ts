@@ -18,6 +18,7 @@
  */
 
 import { merge, omit } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
 import {
@@ -62,6 +63,7 @@ function mockGetLocalStats(clusterInfo: any, clusterStats: any) {
               search_action: 19,
               nodes_info_action: 36,
             },
+            // @ts-expect-error NodeUsageInformation is missing `aggregations`
             aggregations: {
               terms: {
                 bytes: 2,
@@ -197,7 +199,7 @@ describe('get_local_stats', () => {
   describe('handleLocalStats', () => {
     it('returns expected object without xpack or kibana data', () => {
       const result = handleLocalStats(
-        clusterInfo,
+        clusterInfo as estypes.RootNodeInfoResponse,
         clusterStatsWithNodesUsage,
         void 0,
         void 0,
@@ -214,7 +216,7 @@ describe('get_local_stats', () => {
 
     it('returns expected object with xpack', () => {
       const result = handleLocalStats(
-        clusterInfo,
+        clusterInfo as estypes.RootNodeInfoResponse,
         clusterStatsWithNodesUsage,
         void 0,
         void 0,

@@ -28,6 +28,7 @@ export const getStatsWithXpack: StatsGetter<TelemetryAggregatedStats> = async fu
 
   return clustersLocalStats
     .map((localStats) => {
+      // @ts-expect-error
       const localStatsWithLicense: TelemetryAggregatedStats = {
         ...localStats,
         ...(license && { license }),

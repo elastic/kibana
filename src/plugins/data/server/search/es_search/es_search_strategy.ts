@@ -18,7 +18,6 @@
  */
 import { from, Observable } from 'rxjs';
 import { first, tap } from 'rxjs/operators';
-import type { SearchResponse } from 'elasticsearch';
 import type { Logger, SharedGlobalConfig } from 'kibana/server';
 import type { ISearchStrategy } from '../types';
 import type { SearchUsage } from '../collectors';
@@ -46,7 +45,8 @@ export const esSearchStrategyProvider = (
         ...getShardTimeout(config),
         ...request.params,
       };
-      const promise = esClient.asCurrentUser.search<SearchResponse<unknown>>(params);
+      // @ts-expect-error docvalue_fields should allow string
+      const promise = esClient.asCurrentUser.search(params);
       const { body } = await shimAbortSignal(promise, abortSignal);
       return toKibanaSearchResponse(body);
     };

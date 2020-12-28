@@ -24,6 +24,7 @@ import { ElasticsearchClient as ElasticsearchClient_2 } from 'kibana/server';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
+import { estypes } from '@elastic/elasticsearch';
 import { ExecutionContext } from 'src/plugins/expressions/common';
 import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
@@ -59,7 +60,6 @@ import { SavedObject } from 'src/core/server';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { SavedObjectsClientContract as SavedObjectsClientContract_2 } from 'kibana/server';
 import { Search } from '@elastic/elasticsearch/api/requestParams';
-import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { SharedGlobalConfig as SharedGlobalConfig_2 } from 'kibana/server';
 import { ToastInputFields } from 'src/core/public/notifications';
@@ -568,7 +568,7 @@ export function getTime(indexPattern: IIndexPattern | undefined, timeRange: Time
 }): import("../..").RangeFilter | undefined;
 
 // @internal
-export function getTotalLoaded(response: SearchResponse<unknown>): {
+export function getTotalLoaded(response: estypes.SearchResponse<unknown>): {
     total: number;
     loaded: number;
 };
@@ -603,7 +603,7 @@ export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestPar
 // Warning: (ae-missing-release-tag) "IEsSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;
+export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<estypes.SearchResponse<Source>>;
 
 // Warning: (ae-missing-release-tag) "IFieldFormatsRegistry" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1273,30 +1273,27 @@ export class SessionService implements ISessionService {
 export const shimAbortSignal: <T>(promise: TransportRequestPromise<T>, signal?: AbortSignal | undefined) => TransportRequestPromise<T>;
 
 // @internal
-export function shimHitsTotal(response: SearchResponse<any>): {
+export function shimHitsTotal(response: estypes.SearchResponse<any>): {
     hits: {
         total: any;
+        hits: estypes.Hit<any>[];
         max_score: number;
-        hits: {
-            _index: string;
-            _type: string;
-            _id: string;
-            _score: number;
-            _source: any;
-            _version?: number | undefined;
-            _explanation?: import("elasticsearch").Explanation | undefined;
-            fields?: any;
-            highlight?: any;
-            inner_hits?: any;
-            matched_queries?: string[] | undefined;
-            sort?: string[] | undefined;
-        }[];
     };
-    took: number;
+    aggregations: Record<string, estypes.Aggregate>;
+    _clusters: estypes.ClusterStatistics;
+    documents: any[];
+    fields: Record<string, estypes.LazyDocument>;
+    max_score: number;
+    num_reduce_phases: number;
+    profile: estypes.Profile;
+    pit_id: string;
+    _scroll_id: string;
+    _shards: estypes.ShardStatistics;
+    suggest: estypes.SuggestDictionary<any>;
+    terminated_early: boolean;
     timed_out: boolean;
-    _scroll_id?: string | undefined;
-    _shards: import("elasticsearch").ShardsResponse;
-    aggregations?: any;
+    took: number;
+    total: number;
 };
 
 // Warning: (ae-missing-release-tag) "shouldReadFieldFromDocValues" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -1335,10 +1332,10 @@ export type TimeRange = {
 };
 
 // @internal
-export function toKibanaSearchResponse(rawResponse: SearchResponse<unknown>): {
+export function toKibanaSearchResponse(rawResponse: estypes.SearchResponse<unknown>): {
     total: number;
     loaded: number;
-    rawResponse: SearchResponse<unknown>;
+    rawResponse: estypes.SearchResponse<unknown>;
     isPartial: boolean;
     isRunning: boolean;
 };

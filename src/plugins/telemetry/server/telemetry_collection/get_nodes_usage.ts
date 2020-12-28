@@ -59,6 +59,7 @@ export async function fetchNodesUsage(
   const { body } = await esClient.nodes.usage<NodesFeatureUsageResponse>({
     timeout: TIMEOUT,
   });
+  // @ts-expect-error TODO: Does the client parse `timestamp` to a Date object? Expected a number
   return body;
 }
 

@@ -19,17 +19,6 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { convertEsError } from './errors';
-import { FieldCapsResponse } from './field_capabilities';
-
-export interface IndicesAliasResponse {
-  [index: string]: IndexAliasResponse;
-}
-
-export interface IndexAliasResponse {
-  aliases: {
-    [aliasName: string]: Record<string, any>;
-  };
-}
 
 /**
  *  Call the index.getAlias API for a list of indices.
@@ -78,8 +67,9 @@ export async function callFieldCapsApi(
   fieldCapsOptions: { allow_no_indices: boolean } = { allow_no_indices: false }
 ) {
   try {
-    return await callCluster.fieldCaps<FieldCapsResponse>({
+    return await callCluster.fieldCaps({
       index: indices,
+      // @ts-expect-error
       fields: '*',
       ignore_unavailable: true,
       ...fieldCapsOptions,

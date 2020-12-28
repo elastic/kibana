@@ -24,7 +24,7 @@ export interface ESLicense {
 let cachedLicense: ESLicense | undefined;
 
 async function fetchLicense(esClient: ElasticsearchClient, local: boolean) {
-  const { body } = await esClient.license.get<{ license: ESLicense }>({
+  const { body } = await esClient.license.get({
     local,
     // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
     accept_enterprise: true,
@@ -61,6 +61,7 @@ export async function getLicenseFromLocalOrMaster(esClient: ElasticsearchClient)
   });
 
   if (license) {
+    // @ts-expect-error
     cachedLicense = license;
   }
   return license;

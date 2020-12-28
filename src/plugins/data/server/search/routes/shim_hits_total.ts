@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 /**
  * Temporary workaround until https://github.com/elastic/kibana/issues/26356 is addressed.
@@ -26,7 +26,7 @@ import { SearchResponse } from 'elasticsearch';
  *
  * @internal
  */
-export function shimHitsTotal(response: SearchResponse<any>) {
+export function shimHitsTotal(response: estypes.SearchResponse<any>) {
   const total = (response.hits?.total as any)?.value ?? response.hits?.total;
   const hits = { ...response.hits, total };
   return { ...response, hits };
