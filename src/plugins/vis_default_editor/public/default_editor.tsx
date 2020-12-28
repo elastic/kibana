@@ -106,6 +106,12 @@ function DefaultEditor({
                 className="visEditor__visualization"
                 initialSize={100 - editorInitialWidth}
                 minSize="25%"
+                paddingSize="none"
+                wrapperProps={{
+                  className: `visEditor__visualization__wrapper ${
+                    isCollapsed ? 'visEditor__visualization__wrapper-expanded' : ''
+                  }`,
+                }}
               >
                 <div className="visEditor__canvas" ref={visRef} data-shared-items-container />
               </EuiResizablePanel>
@@ -115,11 +121,14 @@ function DefaultEditor({
               />
 
               <EuiResizablePanel
-                className={`visEditor__collapsibleSidebar ${
-                  isCollapsed ? 'visEditor__collapsibleSidebar-isClosed' : ''
-                }`}
                 initialSize={editorInitialWidth}
                 minSize={isCollapsed ? '0' : '350px'}
+                paddingSize="none"
+                wrapperProps={{
+                  className: `visEditor__collapsibleSidebar ${
+                    isCollapsed ? 'visEditor__collapsibleSidebar-isClosed' : ''
+                  }`,
+                }}
               >
                 <DefaultEditorSideBar
                   embeddableHandler={embeddableHandler}
