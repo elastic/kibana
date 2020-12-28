@@ -72,6 +72,7 @@ export class DocLinksService {
         aggs: {
           date_histogram: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-datehistogram-aggregation.html`,
           date_range: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-daterange-aggregation.html`,
+          date_format_pattern: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-daterange-aggregation.html#date-format-pattern`,
           filter: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-filter-aggregation.html`,
           filters: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-filters-aggregation.html`,
           geohash_grid: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-geohashgrid-aggregation.html`,
@@ -158,6 +159,9 @@ export class DocLinksService {
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
         },
+        apis: {
+          createIndex: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/indices-create-index.html`,
+        },
       },
     });
   }
@@ -204,6 +208,7 @@ export interface DocLinksStart {
     readonly aggs: {
       readonly date_histogram: string;
       readonly date_range: string;
+      readonly date_format_pattern: string;
       readonly filter: string;
       readonly filters: string;
       readonly geohash_grid: string;
@@ -264,5 +269,6 @@ export interface DocLinksStart {
     readonly ml: Record<string, string>;
     readonly transforms: Record<string, string>;
     readonly visualize: Record<string, string>;
+    readonly apis: Record<string, string>;
   };
 }
