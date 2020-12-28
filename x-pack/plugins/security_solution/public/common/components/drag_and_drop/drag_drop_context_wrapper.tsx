@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
+import { noop, pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
@@ -98,17 +98,23 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const getDataProviders = useMemo(() => dragAndDropSelectors.getDataProvidersSelector(), []);
 
-  const activeTimelineDataProviders = useDeepEqualSelector(
-    (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults)?.dataProviders
+  const {
+    dataProviders: activeTimelineDataProviders,
+    timelineType,
+  } = useDeepEqualSelector((state) =>
+    pick(
+      ['dataProviders', 'timelineType'],
+      getTimeline(state, TimelineId.active) ?? timelineDefaults
+    )
   );
   const dataProviders = useDeepEqualSelector(getDataProviders);
 
   const [, dispatchToaster] = useStateToaster();
   const onAddedToTimeline = useCallback(
     (fieldOrValue: string) => {
-      displaySuccessToast(ADDED_TO_TIMELINE_MESSAGE(fieldOrValue), dispatchToaster);
+      displaySuccessToast(ADDED_TO_TIMELINE_MESSAGE(fieldOrValue, timelineType), dispatchToaster);
     },
-    [dispatchToaster]
+    [dispatchToaster, timelineType]
   );
 
   const onDragEnd = useCallback(
