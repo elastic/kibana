@@ -16,7 +16,7 @@ import { createTimelineTemplate } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 
 describe('Export timelines', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     cy.intercept('POST', 'api/timeline/_export?file_name=timelines_export.ndjson').as('export');
     createTimelineTemplate(timelineTemplate).then((response) => {

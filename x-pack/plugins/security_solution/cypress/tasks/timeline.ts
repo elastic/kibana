@@ -166,7 +166,7 @@ export const pinFirstEvent = () => {
 
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
-  cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gte(1));
+  cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
 };
 
 export const unpinFirstEvent = () => {

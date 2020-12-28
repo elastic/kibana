@@ -55,7 +55,7 @@ export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-butto
 
 export const NOTES = '[data-test-subj="note-card-body"]';
 
-const NOTE_BY_NOTE_ID = (noteId: string) =>
+export const NOTE_BY_NOTE_ID = (noteId: string) =>
   `[data-test-subj="note-preview-${noteId}"] .euiMarkdownFormat`;
 
 export const NOTE_CONTENT = (noteId: string) => `${NOTE_BY_NOTE_ID(noteId)} p`;
@@ -63,6 +63,8 @@ export const NOTE_CONTENT = (noteId: string) => `${NOTE_BY_NOTE_ID(noteId)} p`;
 export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
 export const NOTES_TAB_BUTTON = '[data-test-subj="timelineTabs-notes"]';
+
+export const NOTES_TEXT = '.euiMarkdownFormat';
 
 export const NOTES_COUNT = '[data-test-subj="timeline-notes-count"]';
 

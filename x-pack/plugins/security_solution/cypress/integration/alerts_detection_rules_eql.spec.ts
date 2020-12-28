@@ -85,7 +85,7 @@ describe('Detection rules, EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfAlerts = 7;
 
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     createTimeline(eqlRule.timeline).then((response) => {
       cy.wrap({
@@ -181,7 +181,7 @@ describe('Detection rules, sequence EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfSequenceAlerts = 1;
 
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     createTimeline(eqlSequenceRule.timeline).then((response) => {
       cy.wrap({

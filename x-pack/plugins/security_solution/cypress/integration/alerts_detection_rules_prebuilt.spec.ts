@@ -30,7 +30,6 @@ import {
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { esArchiverLoadEmptyKibana } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
@@ -39,7 +38,7 @@ import { totalNumberOfPrebuiltRules } from '../objects/rule';
 import { cleanKibana } from '../tasks/common';
 
 describe('Alerts rules, prebuilt rules', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
   });
 
@@ -81,7 +80,6 @@ describe('Deleting prebuilt rules', () => {
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
     cleanKibana();
-    esArchiverLoadEmptyKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();

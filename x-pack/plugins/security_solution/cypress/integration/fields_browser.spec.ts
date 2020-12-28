@@ -95,9 +95,10 @@ describe('Fields Browser', () => {
           cy.get(FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT)
             .invoke('text')
             .then((systemCategoriesCount) => {
-              cy.get(FIELDS_BROWSER_FIELDS_COUNT)
-                .invoke('text')
-                .should('eq', `${+hostCategoriesCount + +systemCategoriesCount} fields`);
+              cy.get(FIELDS_BROWSER_FIELDS_COUNT).should(
+                'have.text',
+                `${+hostCategoriesCount + +systemCategoriesCount} fields`
+              );
             });
         });
     });
@@ -107,7 +108,7 @@ describe('Fields Browser', () => {
 
       filterFieldsBrowser(filterInput);
 
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).invoke('text').should('eq', '4');
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_COUNT).should('have.text', '4');
     });
   });
 

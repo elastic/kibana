@@ -52,17 +52,19 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { CASES_URL } from '../urls/navigation';
 
 describe('Cases', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
-    createTimeline(case1.timeline).then((response) => {
-      cy.wrap({
-        ...case1,
-        timeline: {
-          ...case1.timeline,
-          id: response.body.data.persistTimeline.timeline.savedObjectId,
-        },
-      }).as('mycase');
-    });
+    createTimeline(case1.timeline).then((response) =>
+      cy
+        .wrap({
+          ...case1,
+          timeline: {
+            ...case1.timeline,
+            id: response.body.data.persistTimeline.timeline.savedObjectId,
+          },
+        })
+        .as('mycase')
+    );
   });
 
   it('Creates a new case with timeline and opens the timeline', function () {

@@ -12,11 +12,11 @@ import {
   selectCase,
 } from '../tasks/timeline';
 import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../screens/create_new_case';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
-import { TIMELINE_CASE_ID } from '../objects/case';
-import { caseTimeline, timeline } from '../objects/timeline';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { case1 } from '../objects/case';
+import { timeline } from '../objects/timeline';
+import { createTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
+import { createCase } from '../tasks/api_calls/cases';
 
 describe('attach timeline to case', () => {
   context('without cases created', () => {
@@ -27,12 +27,8 @@ describe('attach timeline to case', () => {
       });
     });
 
-    afterEach(function () {
-      deleteTimeline(this.myTimeline.savedObjectId);
-    });
-
     it('attach timeline to a new case', function () {
-      loginAndWaitForTimeline(this.myTimeline.savedObjectId);
+      loginAndWaitForTimeline(this.myTimeline.id!);
       attachTimelineToNewCase();
 
       cy.location('origin').then((origin) => {
@@ -60,24 +56,21 @@ describe('attach timeline to case', () => {
   context('with cases created', () => {
     before(() => {
       cleanKibana();
-      esArchiverLoad('case_and_timeline');
+      createTimeline(timeline).then((response) =>
+        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
+      );
+      createCase(case1).then((response) => cy.wrap(response.body.id).as('caseId'));
     });
 
-    after(() => {
-      esArchiverUnload('case_and_timeline');
-    });
-
-    it('attach timeline to an existing case', () => {
-      loginAndWaitForTimeline(caseTimeline.id!);
+    it('attach timeline to an existing case', function () {
+      loginAndWaitForTimeline(this.timelineId);
       attachTimelineToExistingCase();
-      selectCase(TIMELINE_CASE_ID);
+      selectCase(this.caseId);
 
       cy.location('origin').then((origin) => {
         cy.get(ADD_COMMENT_INPUT).should(
           'have.text',
-          `[${
-            caseTimeline.title
-          }](${origin}/app/security/timelines?timeline=(id:%27${caseTimeline.id!}%27,isOpen:!t))`
+          `[${timeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.timelineId}%27,isOpen:!t))`
         );
       });
     });

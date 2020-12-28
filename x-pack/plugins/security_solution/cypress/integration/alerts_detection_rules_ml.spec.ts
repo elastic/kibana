@@ -71,7 +71,7 @@ describe.skip('Detection rules, machine learning', () => {
   const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
   const expectedNumberOfRules = 1;
 
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
   });
 

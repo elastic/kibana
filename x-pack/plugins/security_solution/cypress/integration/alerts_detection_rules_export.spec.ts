@@ -18,7 +18,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Export rules', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     cy.intercept(
       'POST',

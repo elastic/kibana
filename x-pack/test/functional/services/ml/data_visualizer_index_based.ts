@@ -33,25 +33,33 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     },
 
     async assertTotalDocCountHeaderExist() {
-      await testSubjects.existOrFail(`mlDataVisualizerTotalDocCountHeader`);
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(`mlDataVisualizerTotalDocCountHeader`);
+      });
     },
 
     async assertTotalDocCountChartExist() {
-      await testSubjects.existOrFail(`mlFieldDataDocumentCountChart`);
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(`mlFieldDataDocumentCountChart`);
+      });
     },
 
     async assertFieldCountPanelExist() {
-      await testSubjects.existOrFail(`mlDataVisualizerFieldCountPanel`);
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(`mlDataVisualizerFieldCountPanel`);
+      });
     },
 
     async assertMetricFieldsSummaryExist() {
-      await testSubjects.existOrFail(`mlDataVisualizerMetricFieldsSummary`);
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(`mlDataVisualizerMetricFieldsSummary`);
+      });
     },
 
     async assertVisibleMetricFieldsCount(count: number) {
       const expectedCount = count.toString();
-      await testSubjects.existOrFail('mlDataVisualizerVisibleMetricFieldsCount');
       await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('mlDataVisualizerVisibleMetricFieldsCount');
         const actualCount = await testSubjects.getVisibleText(
           'mlDataVisualizerVisibleMetricFieldsCount'
         );
@@ -64,8 +72,8 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async assertTotalMetricFieldsCount(count: number) {
       const expectedCount = count.toString();
-      await testSubjects.existOrFail('mlDataVisualizerMetricFieldsCount');
       await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('mlDataVisualizerMetricFieldsCount');
         const actualCount = await testSubjects.getVisibleText(
           'mlDataVisualizerVisibleMetricFieldsCount'
         );
@@ -78,8 +86,8 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async assertVisibleFieldsCount(count: number) {
       const expectedCount = count.toString();
-      await testSubjects.existOrFail('mlDataVisualizerVisibleFieldsCount');
       await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('mlDataVisualizerVisibleFieldsCount');
         const actualCount = await testSubjects.getVisibleText('mlDataVisualizerVisibleFieldsCount');
         expect(expectedCount).to.eql(
           expectedCount,
@@ -90,8 +98,8 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
 
     async assertTotalFieldsCount(count: number) {
       const expectedCount = count.toString();
-      await testSubjects.existOrFail('mlDataVisualizerTotalFieldsCount');
       await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('mlDataVisualizerTotalFieldsCount');
         const actualCount = await testSubjects.getVisibleText('mlDataVisualizerTotalFieldsCount');
         expect(expectedCount).to.contain(
           expectedCount,
@@ -101,11 +109,15 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
     },
 
     async assertFieldsSummaryExist() {
-      await testSubjects.existOrFail(`mlDataVisualizerFieldsSummary`);
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(`mlDataVisualizerFieldsSummary`);
+      });
     },
 
     async assertDataVisualizerTableExist() {
-      await testSubjects.existOrFail(`mlDataVisualizerTable`);
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(`mlDataVisualizerTable`);
+      });
     },
 
     async assertActionsPanelExists() {
