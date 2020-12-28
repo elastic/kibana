@@ -59,7 +59,7 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
       visController.current?.destroy();
       visController.current = null;
     };
-  }, [core, charts, handlers]);
+  }, [core, charts]);
 
   useEffect(updateChart, [updateChart]);
 
