@@ -73,7 +73,9 @@ export const urlStateStore = createContext<UrlState>({
   searchString: '',
   setUrlState: () => {},
 });
+
 const { Provider } = urlStateStore;
+
 export const UrlStateProvider: FC = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
@@ -162,7 +164,14 @@ export const useUrlState = (accessor: Accessor) => {
   return [urlState, setUrlState];
 };
 
-type AppStateKey = 'mlSelectSeverity' | 'mlSelectInterval' | 'mlAnomaliesTable' | MlPages;
+type LegacyUrlKeys = 'mlExplorerSwimlane';
+
+export type AppStateKey =
+  | 'mlSelectSeverity'
+  | 'mlSelectInterval'
+  | 'mlAnomaliesTable'
+  | MlPages
+  | LegacyUrlKeys;
 
 /**
  * Hook for managing the URL state of the page.

@@ -28,7 +28,7 @@ import {
   search,
 } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { getInvalidFieldMessage } from './helpers';
+import { getInvalidFieldMessage, getSafeName } from './helpers';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -67,8 +67,7 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, indexPattern) =>
-    indexPattern.getFieldByName(column.sourceField)!.displayName,
+  getDefaultLabel: (column, indexPattern) => getSafeName(column.sourceField, indexPattern),
   buildColumn({ field }) {
     let interval = autoInterval;
     let timeZone: string | undefined;
@@ -143,12 +142,8 @@ export const dateHistogramOperation: OperationDefinition<
       extended_bounds: JSON.stringify({}),
     }).toAst();
   },
-  paramEditor: ({ state, setState, currentColumn, layerId, dateRange, data }) => {
-    const field =
-      currentColumn &&
-      state.indexPatterns[state.layers[layerId].indexPatternId].getFieldByName(
-        currentColumn.sourceField
-      );
+  paramEditor: ({ layer, columnId, currentColumn, updateLayer, dateRange, data, indexPattern }) => {
+    const field = currentColumn && indexPattern.getFieldByName(currentColumn.sourceField);
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
@@ -167,14 +162,14 @@ export const dateHistogramOperation: OperationDefinition<
       const value = ev.target.checked
         ? data.search.aggs.calculateAutoTimeExpression({ from: fromDate, to: toDate }) || '1h'
         : autoInterval;
-      setState(updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value }));
+      updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
     }
 
     const setInterval = (newInterval: typeof interval) => {
       const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
       const value = `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
 
-      setState(updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value }));
+      updateLayer(updateColumnParam({ layer, columnId, paramName: 'interval', value }));
     };
 
     return (

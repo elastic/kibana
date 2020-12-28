@@ -53,6 +53,7 @@ export const searchSavedObjectType: SavedObjectsType = {
       },
       sort: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
+      grid: { type: 'object', enabled: false },
       version: { type: 'integer' },
     },
   },
