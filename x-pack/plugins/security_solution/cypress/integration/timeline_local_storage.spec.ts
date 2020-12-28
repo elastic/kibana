@@ -15,7 +15,7 @@ import { removeColumn } from '../tasks/timeline';
 
 // Failing: See https://github.com/elastic/kibana/issues/75794
 describe.skip('persistent timeline', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
     openEvents();
