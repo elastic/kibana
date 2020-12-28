@@ -58,14 +58,15 @@ export function FieldSelect({
   const [selectedOptions, setSelectedOptions] = useState<
     EuiComboBoxProps<string>['selectedOptions']
   >([]);
-  const [actualPlaceholder, setActualPlaceholder] = useState<string>(placeholder);
+  const [actualPlaceholder, setActualPlaceholder] = useState<string>();
 
   useEffect(() => {
     const newSelectedOptions: EuiComboBoxProps<string>['selectedOptions'] = [];
+    let newPlaceholder = placeholder;
     const newOptions: EuiComboBoxProps<string>['options'] = Object.values(
       (fields[indexPattern] || []).reduce((acc, field) => {
         if (placeholder === field?.name) {
-          setActualPlaceholder(field.label);
+          newPlaceholder = field.label ?? field.name;
         }
 
         if (
@@ -95,6 +96,7 @@ export function FieldSelect({
       }, {})
     );
     setOptions(newOptions);
+    setActualPlaceholder(newPlaceholder);
     setSelectedOptions(newSelectedOptions);
   }, [type, fields, indexPattern, value, restrict, placeholder, uiRestrictions]);
 
