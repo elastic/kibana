@@ -25,6 +25,7 @@ export const stubIndexPattern: IIndexPattern = {
   fields: stubFields,
   title: 'logstash-*',
   timeFieldName: '@timestamp',
+  getTimeField: () => ({ name: '@timestamp', type: 'date' }),
 };
 
 export const stubIndexPatternWithFields: IIndexPattern = {

@@ -23,18 +23,18 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { VisOptionsProps } from '../../../../../vis_default_editor/public';
 import { ValueAxis } from '../../../../../vis_type_xy/public';
 import {
+  VisOptionsProps,
   BasicOptions,
-  ColorRanges,
-  ColorSchemaOptions,
-  NumberInputOption,
   SelectOption,
   SwitchOption,
-  SetColorSchemaOptionsValue,
+  ColorRanges,
   SetColorRangeValue,
-} from '../../../../../charts/public';
+  SetColorSchemaOptionsValue,
+  ColorSchemaOptions,
+  NumberInputOption,
+} from '../../../../../vis_default_editor/public';
 
 import { HeatmapVisParams } from '../../../heatmap';
 import { LabelsPanel } from './labels_panel';

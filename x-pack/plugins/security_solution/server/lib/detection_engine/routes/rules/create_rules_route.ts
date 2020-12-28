@@ -19,6 +19,8 @@ import { createRulesSchema } from '../../../../../common/detection_engine/schema
 import { newTransformValidate } from './validate';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
+import { RuleTypeParams } from '../../types';
+import { Alert } from '../../../../../../alerts/common';
 
 export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
   router.post(
@@ -85,9 +87,12 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         // This will create the endpoint list if it does not exist yet
         await context.lists?.getExceptionListClient().createEndpointList();
 
-        const createdRule = await alertsClient.create({
+        /**
+         * TODO: Remove this use of `as` by utilizing the proper type
+         */
+        const createdRule = (await alertsClient.create({
           data: internalRule,
-        });
+        })) as Alert<RuleTypeParams>;
 
         const ruleActions = await updateRulesNotifications({
           ruleAlertId: createdRule.id,
