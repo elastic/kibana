@@ -1,0 +1,5 @@
+[role="xpack"]
+[[service-overview]]
+=== Service overview
+
+Selecting a <<services,*service*>> brings you to the *Service overview*.

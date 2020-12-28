@@ -19,13 +19,20 @@ As an example, a transaction could be a request to your server, a batch job, or 
 
 Curated charts and tables display the different types of APM data, which allows you to compare and debug your applications easily.
 
+For a quick, high-level overview of the health and performance of your application,
+start with:
+
 * <<services>>
 * <<traces>>
+* <<service-maps>>
+
+Notice something awry? Dive deeper with:
+
+* <<service-overview>>
 * <<transactions>>
 * <<spans>>
 * <<errors>>
 * <<metrics>>
-* <<service-maps>>
 
 TIP: Want to learn more about the Elastic APM ecosystem?
 See the {apm-get-started-ref}/overview.html[APM Overview].
@@ -34,6 +41,10 @@ include::services.asciidoc[]
 
 include::traces.asciidoc[]
 
+include::service-maps.asciidoc[]
+
+include::service-overview.asciidoc[]
+
 include::transactions.asciidoc[]
 
 include::spans.asciidoc[]
@@ -41,5 +52,3 @@ include::spans.asciidoc[]
 include::errors.asciidoc[]
 
 include::metrics.asciidoc[]
-
-include::service-maps.asciidoc[]

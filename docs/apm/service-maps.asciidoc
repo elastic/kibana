@@ -1,6 +1,6 @@
 [role="xpack"]
 [[service-maps]]
-=== Service maps
+=== Service map
 
 A service map is a real-time visual representation of the instrumented services in your application's architecture.
 It shows you how these services are connected, along with high-level metrics like average transaction duration,

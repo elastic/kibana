@@ -1,6 +1,6 @@
 [role="xpack"]
 [[errors]]
-=== Errors overview
+=== Errors
 
 TIP: {apm-overview-ref-v}/errors.html[Errors] are groups of exceptions with a similar exception or log message.
 

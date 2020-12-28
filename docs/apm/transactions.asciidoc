@@ -1,20 +1,18 @@
 [role="xpack"]
 [[transactions]]
-=== Transaction overview
+=== Transactions
 
 TIP: A {apm-overview-ref-v}/transactions.html[transaction] describes an event captured by an Elastic APM agent instrumenting a service.
 APM agents automatically collect performance metrics on HTTP requests, database queries, and much more.
 
-Selecting a <<services,*service*>> brings you to the *transactions* overview.
-
 [role="screenshot"]
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM app in Kibana]
 
-The *transaction duration*, *transactions per minute*, *transaction error rate*, and *time spent by span type*
+The *Latency*, *transactions per minute*, *Error rate*, and *Average duration by span type*
 charts display information on all transactions associated with the selected service:
 
-*Transaction duration*::
-Response times for this service, broken down into average, 95th, and 99th percentile.
+*Latency*::
+Response times for the service. Options include average, 95th, and 99th percentile.
 If there's a weird spike that you'd like to investigate,
 you can simply zoom in on the graph - this will adjust the specific time range,
 and all of the data on the page will update accordingly.
@@ -24,12 +22,12 @@ Visualize response codes: `2xx`, `3xx`, `4xx`, etc.,
 and is useful for determining if you're serving more of one code than you typically do.
 Like in the Transaction duration graph, you can zoom in on anomalies to further investigate them.
 
-*Transaction error rate*::
+*Error rate*::
 Visualize the total number of transactions with errors divided by the total number of transactions.
 Any unexpected increases, decreases, or irregular patterns can be investigated further
 with the <<errors,errors overview>>.
 
-*Time spent by span type*::
+*Average duration by span type*::
 Visualize where your application is spending most of its time.
 For example, is your app spending time in external calls, database processing, or application code execution?
 +
@@ -112,7 +110,7 @@ image::apm/images/apm-transaction-sample.png[Example view of transactions sample
 
 NOTE: More information on timeline waterfalls is available in <<spans, spans>>.
 
-For a particular transaction sample, we can get even more information in the *metadata* tab:
+For a particular transaction sample, we can get even more information in the *Metadata* tab:
 
 * Labels - Custom labels added by agents
 * HTTP request/response information
@@ -127,3 +125,15 @@ For a particular transaction sample, we can get even more information in the *me
 
 TIP: All of this data is stored in documents in Elasticsearch.
 This means you can select "Actions - View sample document" to see the actual Elasticsearch document under the discover tab.
+
+Finally, use the *Logs* tab to display logs related to the selected trace.
+
+Logs provide detailed information about specific events,
+and are crucial to successfully debugging slow or erroneous transactions.
+
+By correlating your application's logs and traces, you never have to search for relevant data;
+it's all provided on one page. Viewing log and trace data together allows you to quickly diagnose
+and solve problems.
+
+[role="screenshot"]
+image::apm/images/apm-logs-tab.png[APM logs tab]
