@@ -16,7 +16,7 @@ import {
 } from '../tasks/login';
 import { waitForAlertsIndexToBeCreated } from '../tasks/alerts';
 import { goToRuleDetails } from '../tasks/alerts_detection_rules';
-import { createCustomRule, deleteCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
+import { createCustomRule, deleteCustomRule } from '../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown, dismissCallOut } from '../tasks/common/callouts';
 import { cleanKibana } from '../tasks/common';
 
@@ -42,7 +42,6 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
     // First, we have to open the app on behalf of a priviledged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
     cleanKibana();
-    removeSignalsIndex();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL, ROLES.platform_engineer);
     waitForAlertsIndexToBeCreated();
 

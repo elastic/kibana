@@ -39,6 +39,7 @@ export const Key: React.FC<Props> = ({ copy, toggleIsHidden, isHidden, text }) =
         iconType={hideIcon}
         aria-label={hideIconLabel}
         aria-pressed={!isHidden}
+        style={{ marginRight: '0.25em' }}
       />
       {text}
     </>

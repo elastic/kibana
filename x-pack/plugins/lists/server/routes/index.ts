@@ -17,6 +17,7 @@ export * from './delete_exception_list_item_route';
 export * from './delete_list_index_route';
 export * from './delete_list_item_route';
 export * from './delete_list_route';
+export * from './export_exception_list_route';
 export * from './export_list_item_route';
 export * from './find_endpoint_list_item_route';
 export * from './find_exception_list_item_route';
