@@ -387,7 +387,7 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
           defaultMessage: 'How does the auto date histogram work?',
         })}
       </EuiPopoverTitle>
-      <EuiText size="s" style={{ width: 300 }}>
+      <EuiText size="s" className="lnsIndexPatternDimensionEditor__dateHistogramContentPopover">
         <p>
           {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBasicExplanation', {
             defaultMessage: 'Splits a date field into buckets by interval.',
