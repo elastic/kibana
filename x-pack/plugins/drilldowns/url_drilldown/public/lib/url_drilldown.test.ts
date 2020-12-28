@@ -443,3 +443,48 @@ describe('UrlDrilldown', () => {
     });
   });
 });
+
+describe('encoding', () => {
+  const urlDrilldown = createDrilldown();
+  const context: ActionContext = {
+    data: {
+      data: mockDataPoints,
+    },
+    embeddable: mockEmbeddable,
+  };
+
+  test('encodes URL by default', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo=head%26shoulders',
+      },
+      openInNewTab: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders');
+  });
+
+  test('encodes URL when encoding is enabled', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo=head%26shoulders',
+      },
+      openInNewTab: false,
+      encodeUrl: true,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+    expect(url).toBe('https://elastic.co?foo=head%2526shoulders');
+  });
+
+  test('does not encode URL when encoding is not enabled', async () => {
+    const config: Config = {
+      url: {
+        template: 'https://elastic.co?foo=head%26shoulders',
+      },
+      openInNewTab: false,
+      encodeUrl: false,
+    };
+    const url = await urlDrilldown.getHref(config, context);
+    expect(url).toBe('https://elastic.co?foo=head%26shoulders');
+  });
+});
