@@ -18,12 +18,8 @@
  */
 
 import { omit, isObject } from 'lodash';
-import {
-  ElasticsearchClient,
-  DeleteDocumentResponse,
-  GetResponse,
-  SearchResponse,
-} from '../../../elasticsearch/';
+import type { estypes } from '@elastic/elasticsearch';
+import { ElasticsearchClient, DeleteDocumentResponse } from '../../../elasticsearch';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import { createRepositoryEsClient, RepositoryEsClient } from './repository_es_client';
 import { getSearchDsl } from './search_dsl';
@@ -391,6 +387,7 @@ export class SavedObjectsRepository {
       ? await this.client.mget(
           {
             body: {
+              // @ts-expect-error
               docs: bulkGetDocs,
             },
           },
@@ -415,6 +412,7 @@ export class SavedObjectsRepository {
       } = expectedBulkGetResult.value;
       if (esRequestIndex !== undefined) {
         const indexFound = bulkGetResponse?.statusCode !== 404;
+        // @ts-expect-error
         const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
         const docFound = indexFound && actualResult.found === true;
         if (docFound && !this.rawDocExistsInNamespace(actualResult, namespace)) {
@@ -490,7 +488,7 @@ export class SavedObjectsRepository {
 
         const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
         const { error, ...rawResponse } = Object.values(
-          bulkResponse?.body.items[esRequestIndex]
+          bulkResponse?.body.items[esRequestIndex] ?? {}
         )[0] as any;
 
         if (error) {
@@ -560,6 +558,7 @@ export class SavedObjectsRepository {
       ? await this.client.mget(
           {
             body: {
+              // @ts-expect-error
               docs: bulkGetDocs,
             },
           },
@@ -575,6 +574,7 @@ export class SavedObjectsRepository {
       }
 
       const { type, id, esRequestIndex } = expectedResult.value;
+      // @ts-expect-error
       const doc = bulkGetResponse?.body.docs[esRequestIndex];
       if (doc.found) {
         errors.push({
@@ -642,6 +642,7 @@ export class SavedObjectsRepository {
     }
 
     const deleteDocNotFound = body.result === 'not_found';
+    // @ts-expect-error
     const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
     if (deleteDocNotFound || deleteIndexNotFound) {
       // see "404s from missing index" above
@@ -693,6 +694,7 @@ export class SavedObjectsRepository {
             lang: 'painless',
             params: { namespace },
           },
+          // @ts-expect-error
           conflicts: 'proceed',
           ...getSearchDsl(this._mappings, this._registry, {
             namespaces: namespace ? [namespace] : undefined,
@@ -793,15 +795,15 @@ export class SavedObjectsRepository {
       }
     }
 
-    const esOptions = {
+    const esOptions: estypes.SearchRequest = {
       index: this.getIndicesForTypes(allowedTypes),
-      size: perPage,
-      from: perPage * (page - 1),
-      _source: includedFields(type, fields),
       rest_total_hits_as_int: true,
       preference,
       body: {
+        size: perPage,
         seq_no_primary_term: true,
+        from: perPage * (page - 1),
+        _source: includedFields(type, fields),
         ...getSearchDsl(this._mappings, this._registry, {
           search,
           defaultSearchOperator,
@@ -819,7 +821,7 @@ export class SavedObjectsRepository {
       },
     };
 
-    const { body, statusCode } = await this.client.search<SearchResponse<any>>(esOptions, {
+    const { body, statusCode } = await this.client.search<SavedObjectsRawDocSource>(esOptions, {
       ignore: [404],
     });
     if (statusCode === 404) {
@@ -838,9 +840,9 @@ export class SavedObjectsRepository {
       per_page: perPage,
       total: body.hits.total,
       saved_objects: body.hits.hits.map(
-        (hit: SavedObjectsRawDoc): SavedObjectsFindResult => ({
-          ...this._rawToSavedObject(hit),
-          score: (hit as any)._score,
+        (hit): SavedObjectsFindResult => ({
+          ...this._rawToSavedObject(hit as SavedObjectsRawDoc),
+          score: hit._score,
         })
       ),
     } as SavedObjectsFindResponse<T>;
@@ -907,6 +909,7 @@ export class SavedObjectsRepository {
       ? await this.client.mget(
           {
             body: {
+              // @ts-expect-error
               docs: bulkGetDocs,
             },
           },
@@ -921,6 +924,7 @@ export class SavedObjectsRepository {
         }
 
         const { type, id, esRequestIndex } = expectedResult.value;
+        // @ts-expect-error
         const doc = bulkGetResponse?.body.docs[esRequestIndex];
 
         if (!doc.found || !this.rawDocExistsInNamespace(doc, namespace)) {
@@ -974,7 +978,7 @@ export class SavedObjectsRepository {
 
     const namespace = normalizeNamespace(options.namespace);
 
-    const { body, statusCode } = await this.client.get<GetResponse<SavedObjectsRawDocSource>>(
+    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
@@ -1048,7 +1052,7 @@ export class SavedObjectsRepository {
       ...(Array.isArray(references) && { references }),
     };
 
-    const { body, statusCode } = await this.client.update(
+    const { body, statusCode } = await this.client.update<SavedObjectsRawDocSource>(
       {
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
@@ -1058,6 +1062,7 @@ export class SavedObjectsRepository {
         body: {
           doc,
         },
+        // @ts-expect-error
         _source_includes: ['namespace', 'namespaces', 'originId'],
       },
       { ignore: [404] }
@@ -1069,7 +1074,7 @@ export class SavedObjectsRepository {
     }
 
     const { originId } = body.get._source;
-    let namespaces = [];
+    let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
       namespaces = body.get._source.namespaces ?? [
         SavedObjectsUtils.namespaceIdToString(body.get._source.namespace),
@@ -1080,7 +1085,6 @@ export class SavedObjectsRepository {
       id,
       type,
       updated_at: time,
-      // @ts-expect-error update doesn't have _seq_no, _primary_term as Record<string, any> / any in LP
       version: encodeHitVersion(body),
       namespaces,
       ...(originId && { originId }),
@@ -1238,6 +1242,7 @@ export class SavedObjectsRepository {
       }
 
       const deleteDocNotFound = body.result === 'not_found';
+      // @ts-expect-error
       const deleteIndexNotFound = body.error && body.error.type === 'index_not_found_exception';
       if (deleteDocNotFound || deleteIndexNotFound) {
         // see "404s from missing index" above
@@ -1341,6 +1346,7 @@ export class SavedObjectsRepository {
       ? await this.client.mget(
           {
             body: {
+              // @ts-expect-error
               docs: bulkGetDocs,
             },
           },
@@ -1371,6 +1377,7 @@ export class SavedObjectsRepository {
         let versionProperties;
         if (esRequestIndex !== undefined) {
           const indexFound = bulkGetResponse?.statusCode !== 404;
+          // @ts-expect-error
           const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
           const docFound = indexFound && actualResult.found === true;
           if (
@@ -1437,7 +1444,7 @@ export class SavedObjectsRepository {
         }
 
         const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
-        const response = bulkUpdateResponse?.body.items[esRequestIndex];
+        const response = bulkUpdateResponse?.body.items[esRequestIndex] ?? {};
         // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
         // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.
         const { error, _seq_no: seqNo, _primary_term: primaryTerm, get } = Object.values(
@@ -1510,6 +1517,7 @@ export class SavedObjectsRepository {
             },
             lang: 'painless',
           },
+          // @ts-expect-error
           conflicts: 'proceed',
           ...getSearchDsl(this._mappings, this._registry, {
             namespaces: namespace ? [namespace] : undefined,
@@ -1639,7 +1647,7 @@ export class SavedObjectsRepository {
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
 
-    const { body } = await this.client.update({
+    const { body } = await this.client.update<SavedObjectsRawDocSource>({
       id: raw._id,
       index: this.getIndexForType(type),
       refresh,
@@ -1683,8 +1691,7 @@ export class SavedObjectsRepository {
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
       ...(originId && { originId }),
       updated_at: time,
-      references: body.get._source.references,
-      // @ts-expect-error
+      references: body.get._source.references ?? [],
       version: encodeHitVersion(body),
       attributes: body.get._source[type],
     };
@@ -1773,7 +1780,7 @@ export class SavedObjectsRepository {
       throw new Error(`Cannot make preflight get request for non-multi-namespace type '${type}'.`);
     }
 
-    const { body, statusCode } = await this.client.get<GetResponse<SavedObjectsRawDocSource>>(
+    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: this._serializer.generateRawId(undefined, type, id),
         index: this.getIndexForType(type),
@@ -1810,7 +1817,7 @@ export class SavedObjectsRepository {
     }
 
     const rawId = this._serializer.generateRawId(undefined, type, id);
-    const { body, statusCode } = await this.client.get<GetResponse<SavedObjectsRawDocSource>>(
+    const { body, statusCode } = await this.client.get<SavedObjectsRawDocSource>(
       {
         id: rawId,
         index: this.getIndexForType(type),

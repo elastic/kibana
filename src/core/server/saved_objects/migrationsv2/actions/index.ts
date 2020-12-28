@@ -24,9 +24,10 @@ import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { flow } from 'fp-ts/lib/function';
+import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
-import { SavedObjectsRawDoc } from '../../serialization';
+import { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
@@ -67,20 +68,22 @@ export type FetchIndexResponse = Record<
 export const fetchIndices = (
   client: ElasticsearchClient,
   indicesToFetch: string[]
-): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> => () => {
-  return client.indices
-    .get(
-      {
-        index: indicesToFetch,
-        ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
-      },
-      { ignore: [404], maxRetries: 0 }
-    )
-    .then(({ body }) => {
-      return Either.right(body);
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> =>
+  // @ts-expect-error - GetIndicesResponse needs index signature
+  () => {
+    return client.indices
+      .get(
+        {
+          index: indicesToFetch,
+          ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
+        },
+        { ignore: [404], maxRetries: 0 }
+      )
+      .then(({ body }) => {
+        return Either.right(body);
+      })
+      .catch(catchRetryableEsClientErrors);
+  };
 
 /**
  * Sets a write block in place for the given index. If the response includes
@@ -98,34 +101,37 @@ export const setWriteBlock = (
   { type: 'index_not_found_exception' } | RetryableEsClientError,
   'set_write_block_succeeded'
 > => () => {
-  return client.indices
-    .addBlock<{
-      acknowledged: boolean;
-      shards_acknowledged: boolean;
-    }>(
-      {
-        index,
-        block: 'write',
-      },
-      { maxRetries: 0 /** handle retry ourselves for now */ }
-    )
-    .then((res) => {
-      return res.body.acknowledged === true
-        ? Either.right('set_write_block_succeeded' as const)
-        : Either.left({
-            type: 'retryable_es_client_error' as const,
-            message: 'set_write_block_failed',
-          });
-    })
-    .catch((e: ElasticsearchClientError) => {
-      if (e instanceof EsErrors.ResponseError) {
-        if (e.message === 'index_not_found_exception') {
-          return Either.left({ type: 'index_not_found_exception' as const });
+  return (
+    client.indices
+      // @ts-expect-error API missing from types, remove `any` on response type below once fixed
+      .addBlock<{
+        acknowledged: boolean;
+        shards_acknowledged: boolean;
+      }>(
+        {
+          index,
+          block: 'write',
+        },
+        { maxRetries: 0 /** handle retry ourselves for now */ }
+      )
+      .then((res: any) => {
+        return res.body.acknowledged === true
+          ? Either.right('set_write_block_succeeded' as const)
+          : Either.left({
+              type: 'retryable_es_client_error' as const,
+              message: 'set_write_block_failed',
+            });
+      })
+      .catch((e: ElasticsearchClientError) => {
+        if (e instanceof EsErrors.ResponseError) {
+          if (e.message === 'index_not_found_exception') {
+            return Either.left({ type: 'index_not_found_exception' as const });
+          }
         }
-      }
-      throw e;
-    })
-    .catch(catchRetryableEsClientErrors);
+        throw e;
+      })
+      .catch(catchRetryableEsClientErrors)
+  );
 };
 
 /**
@@ -145,6 +151,7 @@ export const removeWriteBlock = (
         // Don't change any existing settings
         preserve_existing: true,
         body: {
+          // @ts-expect-error
           'index.blocks.write': false,
         },
       },
@@ -311,9 +318,11 @@ const waitForTask = (
     })
     .then((res) => {
       const body = res.body;
+      // @ts-expect-error - this could satisfy the types by using `res.context.meta.response`, but not sure if correct
       const failures = body.response?.failures ?? [];
       return Either.right({
         completed: body.completed,
+        // @ts-expect-error - this could satisfy the types by using `res.context.meta.error`, but not sure if correct
         error: Option.fromNullable(body.error),
         failures: failures.length > 0 ? Option.some(failures) : Option.none,
         description: body.task.description,
@@ -387,21 +396,23 @@ export const reindex = (
     .reindex({
       // Require targetIndex to be an alias. Prevents a new index from being
       // created if targetIndex doesn't exist.
-      // @ts-expect-error This API isn't documented
       require_alias: requireAlias,
       body: {
         // Ignore version conflicts from existing documents
         conflicts: 'proceed',
+        // @ts-expect-error
         source: {
           index: sourceIndex,
           // Set reindex batch size
           size: BATCH_SIZE,
         },
+        // @ts-expect-error
         dest: {
           index: targetIndex,
           // Don't override existing documents, only create if missing
           op_type: 'create',
         },
+        // @ts-expect-error
         script: Option.fold<string, undefined | { source: string; lang: 'painless' }>(
           () => undefined,
           (script) => ({
@@ -622,9 +633,10 @@ export const createIndex = (
     AcknowledgeResponse
   > = () => {
     const aliasesObject = (aliases ?? []).reduce((acc, alias) => {
+      // @ts-expect-error
       acc[alias] = {};
       return acc;
-    }, {} as Record<string, {}>);
+    }, {} as Record<string, estypes.Alias>);
 
     return client.indices
       .create(
@@ -637,6 +649,7 @@ export const createIndex = (
           // started
           timeout: DEFAULT_TIMEOUT,
           body: {
+            // @ts-expect-error
             mappings,
             aliases: aliasesObject,
             settings: {
@@ -727,9 +740,10 @@ export const updateAndPickupMappings = (
     'update_mappings_succeeded'
   > = () => {
     return client.indices
-      .putMapping<Record<string, any>, IndexMapping>({
+      .putMapping({
         index,
         timeout: DEFAULT_TIMEOUT,
+        // @ts-expect-error
         body: mappings,
       })
       .then((res) => {
@@ -774,22 +788,16 @@ export const searchForOutdatedDocuments = (
   query: Record<string, unknown>
 ): TaskEither.TaskEither<RetryableEsClientError, SearchResponse> => () => {
   return client
-    .search<{
-      // when `filter_path` is specified, ES doesn't return empty arrays, so if
-      // there are no search results res.body.hits will be undefined.
-      hits?: {
-        hits?: SavedObjectsRawDoc[];
-      };
-    }>({
+    .search<SavedObjectsRawDocSource>({
       index,
-      // Optimize search performance by sorting by the "natural" index order
-      sort: ['_doc'],
       // Return the _seq_no and _primary_term so we can use optimistic
       // concurrency control for updates
       seq_no_primary_term: true,
       size: BATCH_SIZE,
       body: {
         query,
+        // Optimize search performance by sorting by the "natural" index order
+        sort: ['_doc'],
       },
       // Return an error when targeting missing or closed indices
       allow_no_indices: false,
@@ -811,7 +819,9 @@ export const searchForOutdatedDocuments = (
         'hits.hits._primary_term',
       ],
     })
-    .then((res) => Either.right({ outdatedDocuments: res.body.hits?.hits ?? [] }))
+    .then((res) =>
+      Either.right({ outdatedDocuments: (res.body.hits?.hits as SavedObjectsRawDoc[]) ?? [] })
+    )
     .catch(catchRetryableEsClientErrors);
 };
 
@@ -858,6 +868,7 @@ export const bulkOverwriteTransformedDocuments = (
       // field or using a Point In Time as a cursor to go through all documents.
       refresh: 'wait_for',
       filter_path: ['items.*.error'],
+      // @ts-expect-error
       body: transformedDocs.flatMap((doc) => {
         return [
           {

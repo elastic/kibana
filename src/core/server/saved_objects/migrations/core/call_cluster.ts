@@ -23,6 +23,7 @@
  * funcationality contained here.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { IndexMapping } from '../../mappings';
 
 export interface CallCluster {
@@ -154,7 +155,7 @@ export interface IndexSettingsResult {
 }
 
 export interface RawDoc {
-  _id: string;
+  _id: estypes.Id;
   _source: any;
   _type?: string;
 }

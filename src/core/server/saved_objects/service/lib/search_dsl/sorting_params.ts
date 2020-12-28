@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { getProperty, IndexMapping } from '../../../mappings';
 
@@ -26,8 +27,8 @@ export function getSortingParams(
   mappings: IndexMapping,
   type: string | string[],
   sortField?: string,
-  sortOrder?: string
-) {
+  sortOrder?: estypes.SortOrder
+): { sort?: Array<Record<string, estypes.Sort>> } {
   if (!sortField) {
     return {};
   }
@@ -37,6 +38,7 @@ export function getSortingParams(
   if (TOP_LEVEL_FIELDS.includes(sortField)) {
     return {
       sort: [
+        // @ts-expect-error
         {
           [sortField]: {
             order: sortOrder,
@@ -59,6 +61,7 @@ export function getSortingParams(
         {
           [sortField]: {
             order: sortOrder,
+            // @ts-expect-error
             unmapped_type: rootField.type,
           },
         },
@@ -83,6 +86,7 @@ export function getSortingParams(
       {
         [key]: {
           order: sortOrder,
+          // @ts-expect-error
           unmapped_type: field.type,
         },
       },

@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -33,6 +34,7 @@ describe('IndexMigrator', () => {
   beforeEach(() => {
     testOpts = {
       batchSize: 10,
+      // @ts-expect-error
       client: elasticsearchClientMock.createElasticsearchClient(),
       index: '.kibana',
       log: loggingSystemMock.create().get(),
@@ -441,26 +443,32 @@ function withIndex(
     })
   );
   client.reindex.mockReturnValue(
+    // @ts-expect-error
     elasticsearchClientMock.createSuccessTransportRequestPromise({
       task: 'zeid',
       _shards: { successful: 1, total: 1 },
-    })
+    } as estypes.ReindexOnServerResponse)
   );
   client.tasks.get.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ completed: true })
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      completed: true,
+    } as estypes.GetTaskResponse)
   );
   client.search.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult(0))
+    elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult(0) as any)
   );
   client.bulk.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ items: [] })
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      items: [] as any[],
+    } as estypes.BulkResponse)
   );
   client.count.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({
       count: numOutOfDate,
       _shards: { successful: 1, total: 1 },
-    })
+    } as estypes.CountResponse)
   );
+  // @ts-expect-error
   client.scroll.mockImplementation(() => {
     if (scrollCallCounter <= docs.length) {
       const result = searchResult(scrollCallCounter);

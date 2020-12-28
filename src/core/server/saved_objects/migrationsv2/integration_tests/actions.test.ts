@@ -246,9 +246,11 @@ describe('migration actions', () => {
       await client.indices.create({
         index: 'clone_yellow_then_green_index_2',
         body: {
+          // @ts-expect-error
           mappings: { properties: {} },
           settings: {
             // Allocate 1 replica so that this index stays yellow
+            // @ts-expect-error
             number_of_replicas: '1',
           },
         },
@@ -265,6 +267,7 @@ describe('migration actions', () => {
       setTimeout(() => {
         client.indices.putSettings({
           body: {
+            // @ts-expect-error
             index: {
               number_of_replicas: 0,
             },
@@ -509,7 +512,7 @@ describe('migration actions', () => {
 
       // Create an index with incompatible mappings
       await createIndex(client, 'reindex_target_6', {
-        dynamic: 'false',
+        dynamic: false,
         properties: { title: { type: 'integer' } }, // integer is incompatible with string title
       })();
 
@@ -919,9 +922,11 @@ describe('migration actions', () => {
         {
           index: 'yellow_then_green_index',
           body: {
+            // @ts-expect-error
             mappings: { properties: {} },
             settings: {
               // Allocate 1 replica so that this index stays yellow
+              // @ts-expect-error
               number_of_replicas: '1',
             },
           },
@@ -936,6 +941,7 @@ describe('migration actions', () => {
       setTimeout(() => {
         client.indices.putSettings({
           body: {
+            // @ts-expect-error
             index: {
               number_of_replicas: 0,
             },

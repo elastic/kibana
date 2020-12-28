@@ -62,7 +62,8 @@ export interface MigrationEsClient {
   };
   reindex: ElasticsearchClient['reindex'];
   search: ElasticsearchClient['search'];
-  scroll: ElasticsearchClient['scroll'];
+  // scroll: ElasticsearchClient['scroll'];
+  scroll: any;
   tasks: {
     get: ElasticsearchClient['tasks']['get'];
   };

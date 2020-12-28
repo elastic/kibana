@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
@@ -77,7 +78,7 @@ export interface SavedObjectsFindOptions {
   page?: number;
   perPage?: number;
   sortField?: string;
-  sortOrder?: string;
+  sortOrder?: estypes.SortOrder;
   /**
    * An array of fields to include in the results
    * @example

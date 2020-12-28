@@ -50,6 +50,7 @@ import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
 import { EnvironmentMode } from '@kbn/config';
+import { estypes } from '@elastic/elasticsearch';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
@@ -2401,7 +2402,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: string;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;

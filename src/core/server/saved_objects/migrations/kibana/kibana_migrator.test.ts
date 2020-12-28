@@ -17,13 +17,13 @@
  * under the License.
  */
 import { take } from 'rxjs/operators';
+import { estypes, errors as esErrors } from '@elastic/elasticsearch';
 
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { KibanaMigratorOptions, KibanaMigrator } from './kibana_migrator';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
-import { errors as esErrors } from '@elastic/elasticsearch';
 
 const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
   const registry = new SavedObjectTypeRegistry();
@@ -71,7 +71,8 @@ describe('KibanaMigrator', () => {
 
       options.client.cat.templates.mockReturnValue(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
-          { templates: [] },
+          // @ts-expect-error
+          { templates: [] } as CatTemplatesResponse,
           { statusCode: 404 }
         )
       );
@@ -96,7 +97,8 @@ describe('KibanaMigrator', () => {
 
         options.client.cat.templates.mockReturnValue(
           elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { templates: [] },
+            // @ts-expect-error
+            { templates: [] } as CatTemplatesResponse,
             { statusCode: 404 }
           )
         );
@@ -132,7 +134,8 @@ describe('KibanaMigrator', () => {
 
         options.client.cat.templates.mockReturnValue(
           elasticsearchClientMock.createSuccessTransportRequestPromise(
-            { templates: [] },
+            // @ts-expect-error
+            { templates: [] } as CatTemplatesResponse,
             { statusCode: 404 }
           )
         );
@@ -258,7 +261,7 @@ describe('KibanaMigrator', () => {
             completed: true,
             error: { type: 'elatsicsearch_exception', reason: 'task failed with an error' },
             failures: [],
-            task: { description: 'task description' },
+            task: { description: 'task description' } as any,
           })
         );
 
@@ -296,19 +299,23 @@ const mockV2MigrationOptions = () => {
       { statusCode: 200 }
     )
   );
+  // @ts-expect-error
   options.client.indices.addBlock.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({ acknowledged: true })
   );
   options.client.reindex.mockReturnValue(
-    elasticsearchClientMock.createSuccessTransportRequestPromise({ taskId: 'reindex_task_id' })
+    // @ts-expect-error
+    elasticsearchClientMock.createSuccessTransportRequestPromise({
+      taskId: 'reindex_task_id',
+    } as estypes.ReindexOnServerResponse)
   );
   options.client.tasks.get.mockReturnValue(
     elasticsearchClientMock.createSuccessTransportRequestPromise({
       completed: true,
       error: undefined,
       failures: [],
-      task: { description: 'task description' },
-    })
+      task: { description: 'task description' } as any,
+    } as estypes.GetTaskResponse)
   );
 
   return options;

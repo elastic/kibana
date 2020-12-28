@@ -40,7 +40,7 @@ describe('retryCallCluster', () => {
 
     client.asyncSearch.get.mockReturnValue(successReturn);
 
-    const result = await retryCallCluster(() => client.asyncSearch.get());
+    const result = await retryCallCluster(() => client.asyncSearch.get({} as any));
     expect(result.body).toEqual(dummyBody);
   });
 
@@ -55,7 +55,7 @@ describe('retryCallCluster', () => {
       )
       .mockImplementationOnce(() => successReturn);
 
-    const result = await retryCallCluster(() => client.asyncSearch.get());
+    const result = await retryCallCluster(() => client.asyncSearch.get({} as any));
     expect(result.body).toEqual(dummyBody);
   });
 

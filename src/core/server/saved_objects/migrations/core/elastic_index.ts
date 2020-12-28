@@ -80,7 +80,8 @@ export function reader(
 
   const nextBatch = () =>
     scrollId !== undefined
-      ? client.scroll<SearchResponse<SavedObjectsRawDocSource>>({
+      ? // @ts-expect-error
+        client.scroll<SearchResponse<SavedObjectsRawDocSource>>({
           scroll,
           scroll_id: scrollId,
         })
@@ -215,6 +216,7 @@ export async function createIndex(
   mappings?: IndexMapping
 ) {
   await client.indices.create({
+    // @ts-expect-error
     body: { mappings, settings },
     index,
   });
@@ -241,6 +243,7 @@ export async function convertToAlias(
   script?: string
 ) {
   await client.indices.create({
+    // @ts-expect-error
     body: { mappings: info.mappings, settings },
     index: info.indexName,
   });
@@ -340,8 +343,11 @@ async function reindex(
   const pollInterval = 250;
   const { body: reindexBody } = await client.reindex({
     body: {
+      // @ts-expect-error
       dest: { index: dest },
+      // @ts-expect-error
       source: { index: source, size: batchSize },
+      // @ts-expect-error
       script: script
         ? {
             source: script,
@@ -364,7 +370,9 @@ async function reindex(
       task_id: task,
     });
 
+    // @ts-expect-error
     if (body.error) {
+      // @ts-expect-error
       const e = body.error;
       throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
     }

@@ -94,7 +94,7 @@ describe('getSearchDsl', () => {
       const opts = {
         type: 'foo',
         sortField: 'bar',
-        sortOrder: 'baz',
+        sortOrder: 'asc' as const,
       };
 
       getSearchDsl(mappings, registry, opts);

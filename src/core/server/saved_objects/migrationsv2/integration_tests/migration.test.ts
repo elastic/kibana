@@ -149,6 +149,7 @@ describe('migration v2', () => {
         { ignore: [404] }
       );
 
+      // @ts-expect-error
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();
@@ -172,7 +173,9 @@ describe('migration v2', () => {
       const expectedVersions = getExpectedVersionPerType();
       const res = await esClient.search({
         index: migratedIndex,
-        sort: ['_doc'],
+        body: {
+          sort: ['_doc'],
+        },
         size: 10000,
       });
       const allDocuments = res.body.hits.hits as SavedObjectsRawDoc[];
@@ -204,6 +207,7 @@ describe('migration v2', () => {
         { ignore: [404] }
       );
 
+      // @ts-expect-error
       const response = body[migratedIndex];
 
       expect(response).toBeDefined();
@@ -227,7 +231,9 @@ describe('migration v2', () => {
       const expectedVersions = getExpectedVersionPerType();
       const res = await esClient.search({
         index: migratedIndex,
-        sort: ['_doc'],
+        body: {
+          sort: ['_doc'],
+        },
         size: 10000,
       });
       const allDocuments = res.body.hits.hits as SavedObjectsRawDoc[];

@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { EnvironmentMode } from '@kbn/config';
+import { estypes } from '@elastic/elasticsearch';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -1189,7 +1190,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: string;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;

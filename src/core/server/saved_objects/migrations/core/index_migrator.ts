@@ -143,7 +143,9 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
     return;
   }
 
-  const { body: templates } = await client.cat.templates<Array<{ name: string }>>({
+  const {
+    body: { records: templates },
+  } = await client.cat.templates<Array<{ name: string }>>({
     format: 'json',
     name: obsoleteIndexTemplatePattern,
   });
@@ -189,6 +191,7 @@ async function migrateSourceToDest(context: Context) {
       return;
     }
 
+    // @ts-expect-error until `scroll` API is fixed in types, docs will be `any`
     log.debug(`Migrating saved objects ${docs.map((d) => d._id).join(', ')}`);
 
     await Index.write(
