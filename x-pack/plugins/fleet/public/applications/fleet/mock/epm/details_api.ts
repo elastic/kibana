@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { httpHandlerMockFactory } from '../api_handler_mock';
+import { httpHandlerMockFactory } from '../http_handler_mock_factory';
 import {
   agentPolicyRouteService,
   epmRouteService,

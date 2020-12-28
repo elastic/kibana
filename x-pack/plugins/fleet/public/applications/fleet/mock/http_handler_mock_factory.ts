@@ -4,9 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'kibana/public';
+import { HttpFetchOptions, HttpFetchOptionsWithPath, HttpStart } from 'kibana/public';
 
-type ResponseProviderMocks = Record<string, jest.MockedFunction<() => unknown>>;
+class ApiRouteNotMocked extends Error {
+  constructor(message: string) {
+    super(message);
+  }
+}
+
+type ResponseProviderMocks = Record<string, jest.MockedFunction<any>>;
 
 interface MockedApi<R extends ResponseProviderMocks = ResponseProviderMocks> {
   /** Will return a promise that resolves when triggered APIs are complete */
@@ -26,17 +32,11 @@ export type ApiHandlerMock<R extends ResponseProviderMocks = ResponseProviderMoc
   http: jest.Mocked<HttpStart>
 ) => MockedApi<R>;
 
-class ApiRouteNotMocked extends Error {
-  constructor(message: string) {
-    super(message);
-  }
-}
-
 interface RouteMock<R extends ResponseProviderMocks = ResponseProviderMocks> {
   id: keyof R;
   method: HttpMethods;
   path: string;
-  handler: jest.MockedFunction<() => unknown>;
+  handler: jest.MockedFunction<any>;
 }
 
 export type ApiHandlerMockFactoryProps<
@@ -44,6 +44,22 @@ export type ApiHandlerMockFactoryProps<
 > = Array<RouteMock<R>>;
 /**
  * Returns a function that can be used to mock `core.http` methods during testing
+ *
+ * @example
+ *
+ * const mockEpmApi = httpHandlerMockFactory([
+ *  {
+ *    id: 'epmGetInfo',
+ *    method: 'get',
+ *    path: '/api/fleet/epm/something',
+ *    handler: () => 'returnValueHere'
+ *  }
+ * ]);
+ * // In a test - usually in a `beforeEach()`
+ * let mockedApi;
+ * beforeEach(() => {
+ *   mockedApi = mockEpmApi(core.http);
+ * });
  */
 export const httpHandlerMockFactory = <R extends ResponseProviderMocks = ResponseProviderMocks>(
   mocks: ApiHandlerMockFactoryProps<R>
@@ -81,19 +97,17 @@ export const httpHandlerMockFactory = <R extends ResponseProviderMocks = Respons
 
     HTTP_METHODS.forEach((method) => {
       const priorMockedFunction = http[method].getMockImplementation();
+      const methodMocks = mocks.filter((mock) => mock.method === method);
 
       http[method].mockImplementation((...args) => {
-        const path = args[0];
+        const path = isHttpFetchOptionsWithPath(args[0]) ? args[0].path : args[0];
+        const routeMock = methodMocks.find((handler) => handler.path === path);
 
-        if (mocks[method]) {
-          const routeMock = mocks[method].find((handler) => handler.path === path);
-
-          if (routeMock) {
-            markApiCallAsHandled();
-            return routeMock.handler(...args);
-          } else if (priorMockedFunction) {
-            return priorMockedFunction(...args);
-          }
+        if (routeMock) {
+          markApiCallAsHandled();
+          return routeMock.handler(...args);
+        } else if (priorMockedFunction) {
+          return priorMockedFunction(...args);
         }
 
         const err = new ApiRouteNotMocked(`API [${method.toUpperCase()} ${path}] is not MOCKED!`);
@@ -105,4 +119,10 @@ export const httpHandlerMockFactory = <R extends ResponseProviderMocks = Respons
 
     return mockedApiInterface;
   };
+};
+
+const isHttpFetchOptionsWithPath = (
+  opt: string | HttpFetchOptions | HttpFetchOptionsWithPath
+): opt is HttpFetchOptionsWithPath => {
+  return 'object' === typeof opt && 'path' in opt;
 };
