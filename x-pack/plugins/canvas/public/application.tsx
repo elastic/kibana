@@ -103,7 +103,7 @@ export const initializeCanvas = async (
 
   // Init Registries
   initRegistries();
-  populateRegistries(registries);
+  await populateRegistries(registries);
 
   // Set Badge
   coreStart.chrome.setBadge(
