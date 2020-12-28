@@ -39,34 +39,4 @@ describe('createSelectHandler', () => {
       });
     });
   });
-
-  describe('createCustomLabelSelectHandler()', () => {
-    let handleChange: HandleChange;
-    let changeHandler: ReturnType<typeof createSelectHandler>;
-
-    beforeEach(() => {
-      handleChange = jest.fn();
-      changeHandler = createSelectHandler(handleChange);
-    });
-
-    test('should calls handleChange() function with the correct data', () => {
-      const fn = changeHandler('test');
-
-      fn([{ value: 'foo', label: 'foo' }]);
-
-      expect(handleChange).toHaveBeenCalledWith({
-        test: 'foo',
-      });
-    });
-
-    test('should calls handleChange() with the custom label', () => {
-      const fn = changeHandler('test');
-
-      fn([{ value: 'foo', label: 'custom label' }]);
-
-      expect(handleChange).toHaveBeenCalledWith({
-        test: { name: 'foo', label: 'custom label' },
-      });
-    });
-  });
 });
