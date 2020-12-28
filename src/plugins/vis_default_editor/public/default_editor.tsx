@@ -105,6 +105,7 @@ function DefaultEditor({
               <EuiResizablePanel
                 className="visEditor__visualization"
                 initialSize={100 - editorInitialWidth}
+                minSize="25%"
               >
                 <div className="visEditor__canvas" ref={visRef} data-shared-items-container />
               </EuiResizablePanel>

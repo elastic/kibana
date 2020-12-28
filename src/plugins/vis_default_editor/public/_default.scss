@@ -22,10 +22,6 @@
     // If we are on a small screen we force the editor to take 100% width.
     width: 100% !important;
   }
-
-  @include euiBreakpoint('l', 'xl') {
-    max-width: 75%;
-  }
 }
 
 // !importants on width are required to override resizable panel inline widths
