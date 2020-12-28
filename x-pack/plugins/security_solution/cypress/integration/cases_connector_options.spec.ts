@@ -27,7 +27,7 @@ import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../screens/case_details
 import { cleanKibana } from '../tasks/common';
 
 describe('Cases connector incident fields', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     cy.intercept('GET', '/api/cases/configure/connectors/_find', mockConnectorsResponse);
     cy.intercept('POST', `/api/actions/action/${connectorIds.jira}/_execute`, (req) => {

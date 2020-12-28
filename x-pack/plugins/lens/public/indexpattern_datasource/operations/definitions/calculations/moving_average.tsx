@@ -19,7 +19,7 @@ import {
   hasDateField,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import { useDebounceWithOptions } from '../helpers';
+import { isValidNumber, useDebounceWithOptions } from '../helpers';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import type { OperationDefinition, ParamEditorProps } from '..';
 
@@ -122,19 +122,6 @@ export const movingAverageOperation: OperationDefinition<
   timeScalingMode: 'optional',
 };
 
-function isValidNumber(input: string) {
-  if (input === '') return false;
-  try {
-    const val = parseFloat(input);
-    if (isNaN(val)) return false;
-    if (val < 1) return false;
-    if (val.toString().includes('.')) return false;
-  } catch (e) {
-    return false;
-  }
-  return true;
-}
-
 function MovingAverageParamEditor({
   layer,
   updateLayer,
@@ -145,7 +132,7 @@ function MovingAverageParamEditor({
 
   useDebounceWithOptions(
     () => {
-      if (!isValidNumber(inputValue)) return;
+      if (!isValidNumber(inputValue, true, undefined, 1)) return;
       const inputNumber = parseInt(inputValue, 10);
       updateLayer(
         updateColumnParam({

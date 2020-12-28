@@ -14,7 +14,7 @@ import { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
 import { DataProviders } from '../../timeline/data_providers';
 import { FlyoutHeaderPanel } from '../header';
-import { TimelineTabs } from '../../../store/timeline/model';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
 
