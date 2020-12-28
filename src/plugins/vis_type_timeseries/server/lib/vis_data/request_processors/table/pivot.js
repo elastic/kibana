@@ -23,14 +23,13 @@ import { overwrite } from '../../helpers';
 import { basicAggs } from '../../../../../common/basic_aggs';
 import { getBucketsPath } from '../../helpers/get_buckets_path';
 import { bucketTransform } from '../../helpers/bucket_transform';
-import { extractFieldName } from '../../../../../common/field_utils';
 
 export function pivot(req, panel) {
   return (next) => (doc) => {
     const { sort } = req.payload.state;
 
     if (panel.pivot_id) {
-      overwrite(doc, 'aggs.pivot.terms.field', extractFieldName(panel.pivot_id));
+      overwrite(doc, 'aggs.pivot.terms.field', panel.pivot_id);
       overwrite(doc, 'aggs.pivot.terms.size', panel.pivot_rows);
       if (sort) {
         const series = panel.series.find((item) => item.id === sort.column);

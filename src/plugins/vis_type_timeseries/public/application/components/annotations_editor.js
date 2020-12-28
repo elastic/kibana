@@ -45,7 +45,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { createCustomLabelSelectHandler } from './lib/create_select_handler';
+import { createSelectHandler } from './lib/create_select_handler';
 
 function newAnnotation() {
   return {
@@ -103,7 +103,7 @@ export class AnnotationsEditor extends Component {
     const htmlId = htmlIdGenerator(model.id);
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-    const handleFieldsChange = createCustomLabelSelectHandler(handleChange);
+    const handleFieldsChange = createSelectHandler(handleChange);
     const defaultIndexPattern = this.props.model.default_index_pattern;
 
     return (

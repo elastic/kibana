@@ -23,7 +23,7 @@ import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { i18n } from '@kbn/i18n';
 import { createChangeHandler } from '../lib/create_change_handler';
-import { createCustomLabelSelectHandler, createSelectHandler } from '../lib/create_select_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
@@ -37,7 +37,6 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { PANEL_TYPES } from '../../../../common/panel_types';
-import { extractFieldName } from '../../../../common/field_utils';
 
 const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
@@ -126,9 +125,8 @@ const TopHitAggUi = (props) => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
-  const handleFieldsChange = createCustomLabelSelectHandler(handleChange);
 
-  const field = fields[indexPattern].find((f) => f.name === extractFieldName(model.field));
+  const field = fields[indexPattern].find((f) => f.name === model.field);
   const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);
   const orderOptions = getOrderOptions();
 
@@ -181,7 +179,7 @@ const TopHitAggUi = (props) => {
               restrict={aggWithOptionsRestrictFields}
               indexPattern={indexPattern}
               value={model.field}
-              onChange={handleFieldsChange('field')}
+              onChange={handleSelectChange('field')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -246,7 +244,7 @@ const TopHitAggUi = (props) => {
             <FieldSelect
               restrict={ORDER_DATE_RESTRICT_FIELDS}
               value={model.order_by}
-              onChange={handleFieldsChange('order_by')}
+              onChange={handleSelectChange('order_by')}
               indexPattern={indexPattern}
               fields={fields}
             />

@@ -33,7 +33,7 @@ import {
   EuiFormLabel,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
-import { createSelectHandler, createCustomLabelSelectHandler } from './lib/create_select_handler';
+import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
 import { YesNo } from './yes_no';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
@@ -96,7 +96,6 @@ export const IndexPattern = ({
     [onChange, maxBarsName]
   );
 
-  const handleFieldsChange = createCustomLabelSelectHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
   const handleTextChange = createTextHandler(onChange);
 
@@ -208,7 +207,7 @@ export const IndexPattern = ({
               restrict={RESTRICT_FIELDS}
               value={model[timeFieldName]}
               disabled={disabled}
-              onChange={handleFieldsChange(timeFieldName)}
+              onChange={handleSelectChange(timeFieldName)}
               indexPattern={model[indexPatternName]}
               fields={fields}
               placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}

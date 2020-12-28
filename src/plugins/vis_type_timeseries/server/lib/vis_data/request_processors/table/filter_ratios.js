@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { extractFieldName } from '../../../../../common/field_utils';
-
-const filter = (metric) => metric.type === 'filter_ratio';
 import { esQuery } from '../../../../../../data/server';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
 import { calculateAggRoot } from './calculate_agg_root';
+
+const filter = (metric) => metric.type === 'filter_ratio';
 
 export function ratios(req, panel, esQueryConfig, indexPatternObject) {
   return (next) => (doc) => {
@@ -49,7 +48,7 @@ export function ratios(req, panel, esQueryConfig, indexPatternObject) {
             const aggBody = {
               metric: bucketTransform[metric.metric_agg]({
                 type: metric.metric_agg,
-                field: extractFieldName(metric.field),
+                field: metric.field,
               }),
             };
             overwrite(doc, `${aggRoot}.timeseries.aggs.${metric.id}-numerator.aggs`, aggBody);

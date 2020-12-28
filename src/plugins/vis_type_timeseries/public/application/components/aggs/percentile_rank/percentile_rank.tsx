@@ -33,10 +33,7 @@ import { FieldSelect } from '../field_select';
 // @ts-ignore
 import { createChangeHandler } from '../../lib/create_change_handler';
 // @ts-ignore
-import {
-  createCustomLabelSelectHandler,
-  createSelectHandler,
-} from '../../lib/create_select_handler';
+import { createSelectHandler } from '../../lib/create_select_handler';
 // @ts-ignore
 import { createNumberHandler } from '../../lib/create_number_handler';
 
@@ -75,7 +72,6 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleNumberChange = createNumberHandler(handleChange);
-  const handleFieldsChange = createCustomLabelSelectHandler(handleChange);
 
   const handlePercentileRankValuesChange = (values: MetricsItemsSchema['values']) => {
     handleChange({
@@ -126,7 +122,7 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
               restrict={RESTRICT_FIELDS}
               indexPattern={indexPattern}
               value={model.field}
-              onChange={handleFieldsChange('field')}
+              onChange={handleSelectChange('field')}
             />
           </EuiFormRow>
         </EuiFlexItem>

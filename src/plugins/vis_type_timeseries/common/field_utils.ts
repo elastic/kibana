@@ -19,12 +19,4 @@
 
 import { FieldObject } from './types';
 
-const isFieldObject = (timeField: FieldObject): timeField is { name: string; label: string } => {
-  return Boolean(timeField && typeof timeField !== 'string' && timeField.name);
-};
-
-export const extractFieldName = (timeField: FieldObject) =>
-  isFieldObject(timeField) ? timeField.name : timeField;
-
-export const extractFieldLabel = (timeField: FieldObject) =>
-  isFieldObject(timeField) ? timeField.label : timeField;
+export const extractFieldLabel = (timeField: FieldObject) => timeField;

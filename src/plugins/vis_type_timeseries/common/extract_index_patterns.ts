@@ -21,18 +21,17 @@ import { PanelSchema } from '../common/types';
 
 export function extractIndexPatterns(
   panel: PanelSchema,
-  defaultIndex: string,
-  excludedFields: Record<string, string[]> = {}
+  defaultIndex?: PanelSchema['default_index_pattern']
 ) {
   const patterns: string[] = [];
 
-  if (panel.index_pattern && !excludedFields[panel.index_pattern]) {
+  if (panel.index_pattern) {
     patterns.push(panel.index_pattern);
   }
 
   panel.series.forEach((series) => {
     const indexPattern = series.series_index_pattern;
-    if (indexPattern && series.override_index_pattern && !excludedFields[indexPattern]) {
+    if (indexPattern && series.override_index_pattern) {
       patterns.push(indexPattern);
     }
   });
@@ -40,7 +39,7 @@ export function extractIndexPatterns(
   if (panel.annotations) {
     panel.annotations.forEach((item) => {
       const indexPattern = item.index_pattern;
-      if (indexPattern && !excludedFields[indexPattern]) {
+      if (indexPattern) {
         patterns.push(indexPattern);
       }
     });

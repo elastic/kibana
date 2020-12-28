@@ -21,7 +21,6 @@ import { overwrite } from '../../helpers';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
 import { search } from '../../../../../../../plugins/data/server';
-import { extractFieldName } from '../../../../../common/field_utils';
 
 const { dateHistogramInterval } = search.aggs;
 
@@ -35,7 +34,7 @@ export function dateHistogram(
   { barTargetUiSettings }
 ) {
   return (next) => (doc) => {
-    const timeField = extractFieldName(annotation.time_field);
+    const timeField = annotation.time_field;
     const { bucketSize, intervalString } = getBucketSize(
       req,
       'auto',

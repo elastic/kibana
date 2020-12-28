@@ -21,7 +21,6 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
-import { extractFieldName } from '../../../../../common/field_utils';
 
 export const filter = (metric) => metric.type === 'positive_rate';
 
@@ -33,7 +32,7 @@ export const createPositiveRate = (doc, intervalString, aggRoot) => (metric) => 
   const maxMetric = {
     id: `${metric.id}-positive-rate-max`,
     type: 'max',
-    field: extractFieldName(metric.field),
+    field: metric.field,
   };
   const derivativeMetric = {
     id: `${metric.id}-positive-rate-derivative`,

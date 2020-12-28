@@ -47,17 +47,7 @@ const numberOptionalOrEmptyString = schema.maybe(
   schema.oneOf([numberOptional, schema.literal('')])
 );
 
-export const fieldObject = schema.maybe(
-  schema.nullable(
-    schema.oneOf([
-      schema.string(),
-      schema.object({
-        name: schema.string(),
-        label: schema.string(),
-      }),
-    ])
-  )
-);
+export const fieldObject = stringOptionalNullable;
 
 const annotationsItems = schema.object({
   color: stringOptionalNullable,
@@ -91,6 +81,7 @@ const gaugeColorRulesItems = schema.object({
 export const metricsItems = schema.object({
   field: fieldObject,
   id: stringRequired,
+  alias: stringOptionalNullable,
   metric_agg: stringOptionalNullable,
   numerator: schema.maybe(queryObject),
   denominator: schema.maybe(queryObject),

@@ -18,9 +18,10 @@
  */
 
 import { includes, startsWith } from 'lodash';
-import { lookup } from './agg_lookup';
 import { i18n } from '@kbn/i18n';
+import { lookup } from './agg_lookup';
 import { extractFieldLabel } from './field_utils';
+import { MetricsItemsSchema } from './types';
 
 const paths = [
   'cumulative_sum',
@@ -37,7 +38,10 @@ const paths = [
   'positive_only',
 ];
 
-export function calculateLabel(metric, metrics) {
+export function calculateLabel(
+  metric: MetricsItemsSchema,
+  metrics: MetricsItemsSchema[] = []
+): string {
   if (!metric) {
     return i18n.translate('visTypeTimeseries.calculateLabel.unknownLabel', {
       defaultMessage: 'Unknown',
@@ -85,15 +89,15 @@ export function calculateLabel(metric, metrics) {
   }
 
   if (includes(paths, metric.type)) {
-    const targetMetric = metrics.find((m) => startsWith(metric.field, m.id));
-    const targetLabel = calculateLabel(targetMetric, metrics);
+    const targetMetric = metrics.find((m) => startsWith(metric.field!, m.id));
+    const targetLabel = calculateLabel(targetMetric!, metrics);
 
     // For percentiles we need to parse the field id to extract the percentile
     // the user configured in the percentile aggregation and specified in the
     // submetric they selected. This applies only to pipeline aggs.
     if (targetMetric && targetMetric.type === 'percentile') {
       const percentileValueMatch = /\[([0-9\.]+)\]$/;
-      const matches = metric.field.match(percentileValueMatch);
+      const matches = metric.field!.match(percentileValueMatch);
       if (matches) {
         return i18n.translate(
           'visTypeTimeseries.calculateLabel.lookupMetricTypeOfTargetWithAdditionalLabel',
@@ -113,6 +117,7 @@ export function calculateLabel(metric, metrics) {
       values: { lookupMetricType: lookup[metric.type], targetLabel },
     });
   }
+
   return i18n.translate('visTypeTimeseries.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {
     defaultMessage: '{lookupMetricType} of {metricField}',
     values: {

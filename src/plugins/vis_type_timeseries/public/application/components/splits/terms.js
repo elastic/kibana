@@ -22,7 +22,7 @@ import React from 'react';
 import { get, find } from 'lodash';
 import { GroupBySelect } from './group_by_select';
 import { createTextHandler } from '../lib/create_text_handler';
-import { createSelectHandler, createCustomLabelSelectHandler } from '../lib/create_select_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import { isPercentDisabled } from '../lib/stacked';
 import { FieldSelect } from '../aggs/field_select';
 import { MetricSelect } from '../aggs/metric_select';
@@ -38,7 +38,6 @@ import {
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { FIELD_TYPES } from '../../../../common/field_types';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
-import { extractFieldName } from '../../../../common/field_utils';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
 
@@ -54,7 +53,6 @@ export const SplitByTermsUI = ({
   const htmlId = htmlIdGenerator();
   const handleTextChange = createTextHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
-  const handleFieldsChange = createCustomLabelSelectHandler(onChange);
   const model = { ...DEFAULTS, ...seriesModel };
   const { metrics } = model;
   const defaultCount = {
@@ -91,10 +89,7 @@ export const SplitByTermsUI = ({
   const selectedDirectionOption = dirOptions.find((option) => {
     return model.terms_direction === option.value;
   });
-  const selectedField = find(
-    fields[indexPattern],
-    ({ name }) => name === extractFieldName(model.terms_field)
-  );
+  const selectedField = find(fields[indexPattern], ({ name }) => name === model.terms_field);
   const selectedFieldType = get(selectedField, 'type');
 
   if (
@@ -139,7 +134,7 @@ export const SplitByTermsUI = ({
             <FieldSelect
               data-test-subj="groupByField"
               indexPattern={indexPattern}
-              onChange={handleFieldsChange('terms_field')}
+              onChange={handleSelectChange('terms_field')}
               value={model.terms_field}
               fields={fields}
               uiRestrictions={uiRestrictions}

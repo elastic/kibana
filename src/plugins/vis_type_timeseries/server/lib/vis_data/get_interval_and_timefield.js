@@ -18,7 +18,6 @@
  */
 
 import { AUTO_INTERVAL } from '../../../common/constants';
-import { extractFieldName } from '../../../common/field_utils';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 
@@ -26,8 +25,8 @@ export function getIntervalAndTimefield(panel, series = {}, indexPatternObject) 
   const getDefaultTimeField = () => indexPatternObject?.timeFieldName ?? DEFAULT_TIME_FIELD;
 
   const timeField =
-    (series.override_index_pattern && extractFieldName(series.series_time_field)) ||
-    extractFieldName(panel.time_field) ||
+    (series.override_index_pattern && series.series_time_field) ||
+    panel.time_field ||
     getDefaultTimeField();
 
   let interval = panel.interval;

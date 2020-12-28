@@ -23,7 +23,7 @@ import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
-import { createCustomLabelSelectHandler, createSelectHandler } from '../lib/create_select_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -74,7 +74,6 @@ export const PositiveRateAgg = (props) => {
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
-  const handleFieldsChange = createCustomLabelSelectHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
   const indexPattern =
@@ -127,7 +126,7 @@ export const PositiveRateAgg = (props) => {
               restrict={[KBN_FIELD_TYPES.NUMBER]}
               indexPattern={indexPattern}
               value={model.field}
-              onChange={handleFieldsChange('field')}
+              onChange={handleSelectChange('field')}
               uiRestrictions={props.uiRestrictions}
               fullWidth
             />

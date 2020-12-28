@@ -20,7 +20,6 @@
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
 import { esQuery } from '../../../../../../data/server';
-import { extractFieldName } from '../../../../../common/field_utils';
 
 export function query(
   req,
@@ -32,7 +31,7 @@ export function query(
   { barTargetUiSettings }
 ) {
   return (next) => (doc) => {
-    const timeField = extractFieldName(annotation.time_field);
+    const timeField = annotation.time_field;
     const { bucketSize } = getBucketSize(req, 'auto', capabilities, barTargetUiSettings);
     const { from, to } = getTimerange(req);
 

@@ -26,24 +26,3 @@ export const createSelectHandler = (handleChange: HandleChange) => (name: string
   handleChange?.({
     [name]: selected[0]?.value ?? null,
   });
-
-export const createCustomLabelSelectHandler = (handleChange: HandleChange) => (name: string) => (
-  selected: EuiComboBoxOptionOption[] = []
-) => {
-  const firstItem = selected[0];
-  let value = null;
-
-  if (firstItem) {
-    value =
-      firstItem.value === firstItem.label
-        ? firstItem.value
-        : {
-            name: firstItem.value,
-            label: firstItem.label,
-          };
-  }
-
-  handleChange?.({
-    [name]: value,
-  });
-};

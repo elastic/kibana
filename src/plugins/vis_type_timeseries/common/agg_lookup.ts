@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { omit, pick, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { MetricsItemsSchema } from './types';
 
-export const lookup = {
+export const lookup: Record<string, any> = {
   count: i18n.translate('visTypeTimeseries.aggLookup.countLabel', { defaultMessage: 'Count' }),
   calculation: i18n.translate('visTypeTimeseries.aggLookup.calculationLabel', {
     defaultMessage: 'Calculation',
@@ -122,11 +123,11 @@ const pipeline = [
 
 const byType = {
   _all: lookup,
-  pipeline: pipeline,
-  basic: _.omit(lookup, pipeline),
-  metrics: _.pick(lookup, ['count', 'avg', 'min', 'max', 'sum', 'cardinality', 'value_count']),
+  pipeline,
+  basic: omit(lookup, pipeline),
+  metrics: pick(lookup, ['count', 'avg', 'min', 'max', 'sum', 'cardinality', 'value_count']),
 };
 
-export function isBasicAgg(item) {
-  return _.includes(Object.keys(byType.basic), item.type);
+export function isBasicAgg(item: MetricsItemsSchema) {
+  return includes(Object.keys(byType.basic), item.type);
 }

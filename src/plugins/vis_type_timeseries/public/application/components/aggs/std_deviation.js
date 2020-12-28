@@ -23,7 +23,7 @@ import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
-import { createCustomLabelSelectHandler, createSelectHandler } from '../lib/create_select_handler';
+import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
@@ -82,7 +82,6 @@ const StandardDeviationAggUi = (props) => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
-  const handleFieldsChange = createCustomLabelSelectHandler(handleChange);
 
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
@@ -133,7 +132,7 @@ const StandardDeviationAggUi = (props) => {
               restrict={RESTRICT_FIELDS}
               indexPattern={indexPattern}
               value={model.field}
-              onChange={handleFieldsChange('field')}
+              onChange={handleSelectChange('field')}
             />
           </EuiFormRow>
         </EuiFlexItem>

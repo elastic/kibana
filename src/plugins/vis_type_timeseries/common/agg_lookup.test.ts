@@ -18,14 +18,15 @@
  */
 
 import { isBasicAgg } from './agg_lookup';
+import { MetricsItemsSchema } from './types';
 
 describe('aggLookup', () => {
   describe('isBasicAgg(metric)', () => {
     test('returns true for a basic metric (count)', () => {
-      expect(isBasicAgg({ type: 'count' })).toEqual(true);
+      expect(isBasicAgg(({ type: 'count' } as unknown) as MetricsItemsSchema)).toEqual(true);
     });
     test('returns false for a pipeline metric (derivative)', () => {
-      expect(isBasicAgg({ type: 'derivative' })).toEqual(false);
+      expect(isBasicAgg(({ type: 'derivative' } as unknown) as MetricsItemsSchema)).toEqual(false);
     });
   });
 });

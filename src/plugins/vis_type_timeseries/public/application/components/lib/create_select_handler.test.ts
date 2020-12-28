@@ -17,11 +17,7 @@
  * under the License.
  */
 
-import {
-  createCustomLabelSelectHandler,
-  createSelectHandler,
-  HandleChange,
-} from './create_select_handler';
+import { createSelectHandler, HandleChange } from './create_select_handler';
 
 describe('createSelectHandler', () => {
   describe('createSelectHandler()', () => {
@@ -46,11 +42,11 @@ describe('createSelectHandler', () => {
 
   describe('createCustomLabelSelectHandler()', () => {
     let handleChange: HandleChange;
-    let changeHandler: ReturnType<typeof createCustomLabelSelectHandler>;
+    let changeHandler: ReturnType<typeof createSelectHandler>;
 
     beforeEach(() => {
       handleChange = jest.fn();
-      changeHandler = createCustomLabelSelectHandler(handleChange);
+      changeHandler = createSelectHandler(handleChange);
     });
 
     test('should calls handleChange() function with the correct data', () => {
