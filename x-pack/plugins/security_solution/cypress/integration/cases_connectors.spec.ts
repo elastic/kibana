@@ -38,7 +38,7 @@ describe('Cases connectors', () => {
     ],
     version: 'WzEwNCwxXQ==',
   };
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     cy.intercept('POST', '/api/actions/action').as('createConnector');
     cy.intercept('POST', '/api/cases/configure', (req) => {
