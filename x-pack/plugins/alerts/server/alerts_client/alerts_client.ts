@@ -23,13 +23,13 @@ import {
   RawAlert,
   AlertTypeRegistry,
   AlertAction,
-  AlertType,
   IntervalSchedule,
   SanitizedAlert,
   AlertTaskState,
   AlertInstanceSummary,
   AlertExecutionStatusValues,
   AlertNotifyWhenType,
+  AlertTypeParams,
 } from '../types';
 import {
   validateAlertTypeParams,
@@ -44,8 +44,8 @@ import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/se
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { deleteTaskIfItExists } from '../lib/delete_task_if_it_exists';
-import { RegistryAlertType } from '../alert_type_registry';
-import { AlertsAuthorization, WriteOperations, ReadOperations, and } from '../authorization';
+import { RegistryAlertType, UntypedNormalizedAlertType } from '../alert_type_registry';
+import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';
 import { parseIsoOrRelativeDate } from '../lib/iso_or_relative_date';
 import { alertInstanceSummaryFromEventLog } from '../lib/alert_instance_summary_from_event_log';
@@ -56,6 +56,7 @@ import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
 import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 import { alertAuditEvent, AlertAuditAction } from './audit_events';
+import { nodeBuilder } from '../../../../../src/plugins/data/common';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -126,16 +127,16 @@ interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
 }
 
-export interface FindResult {
+export interface FindResult<Params extends AlertTypeParams> {
   page: number;
   perPage: number;
   total: number;
-  data: SanitizedAlert[];
+  data: Array<SanitizedAlert<Params>>;
 }
 
-export interface CreateOptions {
+export interface CreateOptions<Params extends AlertTypeParams> {
   data: Omit<
-    Alert,
+    Alert<Params>,
     | 'id'
     | 'createdBy'
     | 'updatedBy'
@@ -153,14 +154,14 @@ export interface CreateOptions {
   };
 }
 
-interface UpdateOptions {
+interface UpdateOptions<Params extends AlertTypeParams> {
   id: string;
   data: {
     name: string;
     tags: string[];
     schedule: IntervalSchedule;
     actions: NormalizedAlertAction[];
-    params: Record<string, unknown>;
+    params: Params;
     throttle: string | null;
     notifyWhen: AlertNotifyWhenType | null;
   };
@@ -222,7 +223,10 @@ export class AlertsClient {
     this.auditLogger = auditLogger;
   }
 
-  public async create({ data, options }: CreateOptions): Promise<Alert> {
+  public async create<Params extends AlertTypeParams = never>({
+    data,
+    options,
+  }: CreateOptions<Params>): Promise<Alert<Params>> {
     const id = SavedObjectsUtils.generateId();
 
     try {
@@ -242,10 +246,15 @@ export class AlertsClient {
       throw error;
     }
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(data.alertTypeId);
+
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
 
-    const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
+    const validatedAlertTypeParams = validateAlertTypeParams(
+      data.params,
+      alertType.validate?.params
+    );
     const username = await this.getUserName();
 
     const createdAPIKey = data.enabled
@@ -331,10 +340,14 @@ export class AlertsClient {
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
     }
-    return this.getAlertFromRaw(createdAlert.id, createdAlert.attributes, references);
+    return this.getAlertFromRaw<Params>(createdAlert.id, createdAlert.attributes, references);
   }
 
-  public async get({ id }: { id: string }): Promise<SanitizedAlert> {
+  public async get<Params extends AlertTypeParams = never>({
+    id,
+  }: {
+    id: string;
+  }): Promise<SanitizedAlert<Params>> {
     const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     try {
       await this.authorization.ensureAuthorized(
@@ -358,7 +371,7 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
-    return this.getAlertFromRaw(result.id, result.attributes, result.references);
+    return this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
   }
 
   public async getAlertState({ id }: { id: string }): Promise<AlertTaskState | void> {
@@ -423,9 +436,9 @@ export class AlertsClient {
     });
   }
 
-  public async find({
+  public async find<Params extends AlertTypeParams = never>({
     options: { fields, ...options } = {},
-  }: { options?: FindOptions } = {}): Promise<FindResult> {
+  }: { options?: FindOptions } = {}): Promise<FindResult<Params>> {
     let authorizationTuple;
     try {
       authorizationTuple = await this.authorization.getFindAuthorizationFilter();
@@ -453,7 +466,7 @@ export class AlertsClient {
       ...options,
       filter:
         (authorizationFilter && options.filter
-          ? and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
+          ? nodeBuilder.and([esKuery.fromKueryExpression(options.filter), authorizationFilter])
           : authorizationFilter) ?? options.filter,
       fields: fields ? this.includeFieldsRequiredForAuthentication(fields) : fields,
       type: 'alert',
@@ -472,7 +485,7 @@ export class AlertsClient {
         );
         throw error;
       }
-      return this.getAlertFromRaw(
+      return this.getAlertFromRaw<Params>(
         id,
         fields ? (pick(attributes, fields) as RawAlert) : attributes,
         references
@@ -515,7 +528,7 @@ export class AlertsClient {
           ...options,
           filter:
             (authorizationFilter && filter
-              ? and([esKuery.fromKueryExpression(filter), authorizationFilter])
+              ? nodeBuilder.and([esKuery.fromKueryExpression(filter), authorizationFilter])
               : authorizationFilter) ?? filter,
           page: 1,
           perPage: 0,
@@ -602,15 +615,21 @@ export class AlertsClient {
     return removeResult;
   }
 
-  public async update({ id, data }: UpdateOptions): Promise<PartialAlert> {
+  public async update<Params extends AlertTypeParams = never>({
+    id,
+    data,
+  }: UpdateOptions<Params>): Promise<PartialAlert<Params>> {
     return await retryIfConflicts(
       this.logger,
       `alertsClient.update('${id}')`,
-      async () => await this.updateWithOCC({ id, data })
+      async () => await this.updateWithOCC<Params>({ id, data })
     );
   }
 
-  private async updateWithOCC({ id, data }: UpdateOptions): Promise<PartialAlert> {
+  private async updateWithOCC<Params extends AlertTypeParams>({
+    id,
+    data,
+  }: UpdateOptions<Params>): Promise<PartialAlert<Params>> {
     let alertSavedObject: SavedObject<RawAlert>;
 
     try {
@@ -653,7 +672,9 @@ export class AlertsClient {
       })
     );
 
-    const updateResult = await this.updateAlert({ id, data }, alertSavedObject);
+    this.alertTypeRegistry.ensureAlertTypeEnabled(alertSavedObject.attributes.alertTypeId);
+
+    const updateResult = await this.updateAlert<Params>({ id, data }, alertSavedObject);
 
     await Promise.all([
       alertSavedObject.attributes.apiKey
@@ -687,14 +708,17 @@ export class AlertsClient {
     return updateResult;
   }
 
-  private async updateAlert(
-    { id, data }: UpdateOptions,
+  private async updateAlert<Params extends AlertTypeParams>(
+    { id, data }: UpdateOptions<Params>,
     { attributes, version }: SavedObject<RawAlert>
-  ): Promise<PartialAlert> {
+  ): Promise<PartialAlert<Params>> {
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
 
     // Validate
-    const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
+    const validatedAlertTypeParams = validateAlertTypeParams(
+      data.params,
+      alertType.validate?.params
+    );
     this.validateActions(alertType, data.actions);
 
     const { actions, references } = await this.denormalizeActions(data.actions);
@@ -830,6 +854,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     try {
       await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
     } catch (e) {
@@ -912,6 +938,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
@@ -1012,6 +1040,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     if (attributes.enabled === true) {
       await this.unsecuredSavedObjectsClient.update(
         'alert',
@@ -1086,6 +1116,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     const updateAttributes = this.updateMeta({
       muteAll: true,
       mutedInstanceIds: [],
@@ -1145,6 +1177,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     const updateAttributes = this.updateMeta({
       muteAll: false,
       mutedInstanceIds: [],
@@ -1203,6 +1237,8 @@ export class AlertsClient {
         savedObject: { type: 'alert', id: alertId },
       })
     );
+
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
 
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
@@ -1268,6 +1304,8 @@ export class AlertsClient {
       })
     );
 
+    this.alertTypeRegistry.ensureAlertTypeEnabled(attributes.alertTypeId);
+
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
       await this.unsecuredSavedObjectsClient.update<RawAlert>(
@@ -1324,7 +1362,7 @@ export class AlertsClient {
     }) as Alert['actions'];
   }
 
-  private getAlertFromRaw(
+  private getAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
     rawAlert: RawAlert,
     references: SavedObjectReference[] | undefined
@@ -1332,14 +1370,14 @@ export class AlertsClient {
     // In order to support the partial update API of Saved Objects we have to support
     // partial updates of an Alert, but when we receive an actual RawAlert, it is safe
     // to cast the result to an Alert
-    return this.getPartialAlertFromRaw(id, rawAlert, references) as Alert;
+    return this.getPartialAlertFromRaw<Params>(id, rawAlert, references) as Alert;
   }
 
-  private getPartialAlertFromRaw(
+  private getPartialAlertFromRaw<Params extends AlertTypeParams>(
     id: string,
     { createdAt, updatedAt, meta, notifyWhen, scheduledTaskId, ...rawAlert }: Partial<RawAlert>,
     references: SavedObjectReference[] | undefined
-  ): PartialAlert {
+  ): PartialAlert<Params> {
     // Not the prettiest code here, but if we want to use most of the
     // alert fields from the rawAlert using `...rawAlert` kind of access, we
     // need to specifically delete the executionStatus as it's a different type
@@ -1367,7 +1405,10 @@ export class AlertsClient {
     };
   }
 
-  private validateActions(alertType: AlertType, actions: NormalizedAlertAction[]): void {
+  private validateActions(
+    alertType: UntypedNormalizedAlertType,
+    actions: NormalizedAlertAction[]
+  ): void {
     const { actionGroups: alertTypeActionGroups } = alertType;
     const usedAlertActionGroups = actions.map((action) => action.group);
     const availableAlertTypeActionGroups = new Set(map(alertTypeActionGroups, 'id'));

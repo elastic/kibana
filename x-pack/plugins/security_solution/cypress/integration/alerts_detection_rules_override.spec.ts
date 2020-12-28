@@ -63,14 +63,14 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
-  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { createTimeline } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleWithOverrideAndContinue,
@@ -83,9 +83,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/85671
-// FLAKY: https://github.com/elastic/kibana/issues/84020
-describe.skip('Detection rules, override', () => {
+describe('Detection rules, override', () => {
   const expectedUrls = newOverrideRule.referenceUrls.join('');
   const expectedFalsePositives = newOverrideRule.falsePositivesExamples.join('');
   const expectedTags = newOverrideRule.tags.join('');
@@ -94,14 +92,10 @@ describe.skip('Detection rules, override', () => {
   const rule = { ...newOverrideRule };
 
   beforeEach(() => {
+    cleanKibana();
     createTimeline(newOverrideRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  afterEach(() => {
-    deleteTimeline(rule.timeline.id!);
-    deleteRule();
   });
 
   it('Creates and activates a new custom rule with override option', () => {

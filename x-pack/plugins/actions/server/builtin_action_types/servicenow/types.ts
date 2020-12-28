@@ -17,8 +17,6 @@ import {
   ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { ExternalServiceCommentResponse } from '../case/types';
-import { IncidentConfigurationSchema } from '../case/schema';
 import { Logger } from '../../../../../../src/core/server';
 
 export type ServiceNowPublicConfigurationType = TypeOf<
@@ -40,8 +38,6 @@ export interface CreateCommentRequest {
 
 export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
 export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
-
-export type IncidentConfiguration = TypeOf<typeof IncidentConfigurationSchema>;
 
 export interface ExternalServiceCredentials {
   config: Record<string, unknown>;
@@ -73,13 +69,10 @@ export interface ExternalService {
   findIncidents: (params?: Record<string, string>) => Promise<ExternalServiceParams[] | undefined>;
 }
 
-export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
-  externalObject: Record<string, any>;
-}
+export type PushToServiceApiParams = ExecutorSubActionPushParams;
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;
-  mapping: Map<string, any> | null;
 }
 
 export type ExecutorSubActionGetIncidentParams = TypeOf<
@@ -90,12 +83,7 @@ export type ExecutorSubActionHandshakeParams = TypeOf<
   typeof ExecutorSubActionHandshakeParamsSchema
 >;
 
-export type Incident = Pick<
-  ExecutorSubActionPushParams,
-  'description' | 'severity' | 'urgency' | 'impact'
-> & {
-  short_description: string;
-};
+export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
 
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
@@ -112,11 +100,7 @@ export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
 }
 export interface ExternalServiceFields {
   column_label: string;
-  name: string;
-  internal_type: {
-    link: string;
-    value: string;
-  };
+  mandatory: string;
   max_length: string;
   element: string;
 }
@@ -131,4 +115,10 @@ export interface ExternalServiceApi {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
+}
+
+export interface ExternalServiceCommentResponse {
+  commentId: string;
+  pushedDate: string;
+  externalCommentId?: string;
 }

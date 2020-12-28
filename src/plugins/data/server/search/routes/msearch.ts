@@ -23,6 +23,7 @@ import { IRouter } from 'src/core/server';
 import { SearchRouteDependencies } from '../search_service';
 
 import { getCallMsearch } from './call_msearch';
+import { reportServerError } from '../../../../kibana_utils/server';
 
 /**
  * The msearch route takes in an array of searches, each consisting of header
@@ -69,15 +70,7 @@ export function registerMsearchRoute(router: IRouter, deps: SearchRouteDependenc
         const response = await callMsearch({ body: request.body });
         return res.ok(response);
       } catch (err) {
-        return res.customError({
-          statusCode: err.statusCode || 500,
-          body: {
-            message: err.message,
-            attributes: {
-              error: err.body?.error || err.message,
-            },
-          },
-        });
+        return reportServerError(res, err);
       }
     }
   );

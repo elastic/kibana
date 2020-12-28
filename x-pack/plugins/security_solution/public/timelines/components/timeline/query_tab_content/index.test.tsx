@@ -17,7 +17,7 @@ import { QueryTabContentComponent, Props as QueryTabContentComponentProps } from
 import { Sort } from '../body/sort';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import { TimelineId, TimelineStatus } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers/index';
 import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
@@ -111,6 +111,8 @@ describe('Timeline', () => {
       status: TimelineStatus.active,
       timerangeKind: 'absolute',
       updateEventTypeAndIndexesName: jest.fn(),
+      activeTab: TimelineTabs.query,
+      show: true,
     };
   });
 

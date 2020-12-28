@@ -23,6 +23,7 @@ import {
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../screens/timelines';
+import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
@@ -43,7 +44,8 @@ import { openTimeline } from '../tasks/timelines';
 import { OVERVIEW_URL } from '../urls/navigation';
 
 describe('Timeline Templates', () => {
-  before(() => {
+  beforeEach(() => {
+    cleanKibana();
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 

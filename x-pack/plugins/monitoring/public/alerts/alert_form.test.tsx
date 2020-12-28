@@ -71,7 +71,6 @@ describe('alert_form', () => {
   const alertType = {
     id: 'alert-type',
     iconClass: 'test',
-    name: 'test-alert',
     description: 'Testing',
     documentationUrl: 'https://...',
     validate: validationMethod,

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useEffect, Suspense, useCallback } from 'react';
+import React, { Fragment, useState, useEffect, useCallback, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -23,7 +23,6 @@ import {
   EuiIconTip,
   EuiButtonIcon,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiEmptyPrompt,
   EuiListGroupItem,
   EuiListGroup,
@@ -31,6 +30,7 @@ import {
   EuiText,
   EuiNotificationBadge,
   EuiErrorBoundary,
+  EuiToolTip,
 } from '@elastic/eui';
 import { capitalize, isObject } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
@@ -65,7 +65,12 @@ import './alert_form.scss';
 import { useKibana } from '../../../common/lib/kibana';
 import { recoveredActionGroupMessage } from '../../constants';
 import { getDefaultsForActionParams } from '../../lib/get_defaults_for_action_params';
+import { IsEnabledResult, IsDisabledResult } from '../../lib/check_alert_type_enabled';
 import { AlertNotifyWhen } from './alert_notify_when';
+import { checkAlertTypeEnabled } from '../../lib/check_alert_type_enabled';
+import { alertTypeCompare, alertTypeGroupCompare } from '../../lib/alert_type_compare';
+import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { SectionLoading } from '../../components/section_loading';
 
 const ENTER_KEY = 13;
 
@@ -182,6 +187,7 @@ export const AlertForm = ({
   const [inputText, setInputText] = useState<string | undefined>();
   const [solutions, setSolutions] = useState<Map<string, string> | undefined>(undefined);
   const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
+  let hasDisabledByLicenseAlertTypes: boolean = false;
 
   // load alert types
   useEffect(() => {
@@ -283,10 +289,7 @@ export const AlertForm = ({
         )
         .filter((alertTypeItem) =>
           searchValue
-            ? alertTypeItem.alertTypeModel.name
-                .toString()
-                .toLocaleLowerCase()
-                .includes(searchValue) ||
+            ? alertTypeItem.alertType.name.toString().toLocaleLowerCase().includes(searchValue) ||
               alertTypeItem.alertType!.producer.toLocaleLowerCase().includes(searchValue) ||
               alertTypeItem.alertTypeModel.description.toLocaleLowerCase().includes(searchValue)
             : alertTypeItem
@@ -354,17 +357,27 @@ export const AlertForm = ({
 
   const alertTypesByProducer = filteredAlertTypes.reduce(
     (
-      result: Record<string, Array<{ id: string; name: string; alertTypeItem: AlertTypeModel }>>,
+      result: Record<
+        string,
+        Array<{
+          id: string;
+          name: string;
+          checkEnabledResult: IsEnabledResult | IsDisabledResult;
+          alertTypeItem: AlertTypeModel;
+        }>
+      >,
       alertTypeValue
     ) => {
       const producer = alertTypeValue.alertType.producer;
       if (producer) {
+        const checkEnabledResult = checkAlertTypeEnabled(alertTypeValue.alertType);
+        if (!checkEnabledResult.isEnabled) {
+          hasDisabledByLicenseAlertTypes = true;
+        }
         (result[producer] = result[producer] || []).push({
-          name:
-            typeof alertTypeValue.alertTypeModel.name === 'string'
-              ? alertTypeValue.alertTypeModel.name
-              : alertTypeValue.alertTypeModel.name.props.defaultMessage,
+          name: alertTypeValue.alertType.name,
           id: alertTypeValue.alertTypeModel.id,
+          checkEnabledResult,
           alertTypeItem: alertTypeValue.alertTypeModel,
         });
       }
@@ -374,9 +387,7 @@ export const AlertForm = ({
   );
 
   const alertTypeNodes = Object.entries(alertTypesByProducer)
-    .sort(([a], [b]) =>
-      solutions ? solutions.get(a)!.localeCompare(solutions.get(b)!) : a.localeCompare(b)
-    )
+    .sort((a, b) => alertTypeGroupCompare(a, b, solutions))
     .map(([solution, items], groupIndex) => (
       <Fragment key={`group${groupIndex}`}>
         <EuiFlexGroup
@@ -404,32 +415,48 @@ export const AlertForm = ({
         <EuiHorizontalRule size="full" margin="xs" />
         <EuiListGroup flush={true} gutterSize="m" size="l" maxWidth={false}>
           {items
-            .sort((a, b) => a.name.toString().localeCompare(b.name.toString()))
-            .map((item, index) => (
-              <Fragment key={index}>
-                <EuiListGroupItem
-                  data-test-subj={`${item.id}-SelectOption`}
-                  color="primary"
-                  label={
-                    <span>
-                      <strong>{item.name}</strong>
-                      <EuiText color="subdued" size="s">
-                        <p>{item.alertTypeItem.description}</p>
-                      </EuiText>
-                    </span>
-                  }
-                  onClick={() => {
-                    setAlertProperty('alertTypeId', item.id);
-                    setActions([]);
-                    setAlertTypeModel(item.alertTypeItem);
-                    setAlertProperty('params', {});
-                    if (alertTypesIndex && alertTypesIndex.has(item.id)) {
-                      setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+            .sort((a, b) => alertTypeCompare(a, b))
+            .map((item, index) => {
+              const alertTypeListItemHtml = (
+                <span>
+                  <strong>{item.name}</strong>
+                  <EuiText color="subdued" size="s">
+                    <p>{item.alertTypeItem.description}</p>
+                  </EuiText>
+                </span>
+              );
+              return (
+                <Fragment key={index}>
+                  <EuiListGroupItem
+                    data-test-subj={`${item.id}-SelectOption`}
+                    color="primary"
+                    label={
+                      item.checkEnabledResult.isEnabled ? (
+                        alertTypeListItemHtml
+                      ) : (
+                        <EuiToolTip
+                          position="top"
+                          data-test-subj={`${item.id}-disabledTooltip`}
+                          content={item.checkEnabledResult.message}
+                        >
+                          {alertTypeListItemHtml}
+                        </EuiToolTip>
+                      )
                     }
-                  }}
-                />
-              </Fragment>
-            ))}
+                    isDisabled={!item.checkEnabledResult.isEnabled}
+                    onClick={() => {
+                      setAlertProperty('alertTypeId', item.id);
+                      setActions([]);
+                      setAlertTypeModel(item.alertTypeItem);
+                      setAlertProperty('params', {});
+                      if (alertTypesIndex && alertTypesIndex.has(item.id)) {
+                        setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+                      }
+                    }}
+                  />
+                </Fragment>
+              );
+            })}
         </EuiListGroup>
         <EuiSpacer />
       </Fragment>
@@ -442,11 +469,9 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiTitle size="s" data-test-subj="selectedAlertTypeTitle">
             <h5 id="selectedAlertTypeTitle">
-              <FormattedMessage
-                defaultMessage="{alertType}"
-                id="xpack.triggersActionsUI.sections.alertForm.selectedAlertTypeTitle"
-                values={{ alertType: alertTypeModel ? alertTypeModel.name : '' }}
-              />
+              {alert.alertTypeId && alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
+                ? alertTypesIndex.get(alert.alertTypeId)!.name
+                : ''}
             </h5>
           </EuiTitle>
         </EuiFlexItem>
@@ -502,7 +527,16 @@ export const AlertForm = ({
       alert.alertTypeId &&
       selectedAlertType ? (
         <EuiErrorBoundary>
-          <Suspense fallback={<CenterJustifiedSpinner />}>
+          <Suspense
+            fallback={
+              <SectionLoading>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertForm.loadingAlertTypeParamsDescription"
+                  defaultMessage="Loading alert type params…"
+                />
+              </SectionLoading>
+            }
+          >
             <AlertParamsExpressionComponent
               alertParams={alert.params}
               alertInterval={`${alertInterval ?? 1}${alertIntervalUnit}`}
@@ -710,6 +744,23 @@ export const AlertForm = ({
           <EuiHorizontalRule />
           <EuiFormRow
             fullWidth
+            labelAppend={
+              hasDisabledByLicenseAlertTypes && (
+                <EuiTitle size="xxs">
+                  <EuiLink
+                    href={VIEW_LICENSE_OPTIONS_LINK}
+                    target="_blank"
+                    external
+                    className="actActionForm__getMoreActionsLink"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Get more alert types"
+                      id="xpack.triggersActionsUI.sections.actionForm.getMoreAlertTypesTitle"
+                    />
+                  </EuiLink>
+                </EuiTitle>
+              )
+            }
             label={
               <EuiTitle size="xxs">
                 <h5>
@@ -755,19 +806,16 @@ export const AlertForm = ({
       ) : alertTypesIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
       ) : (
-        <CenterJustifiedSpinner />
+        <SectionLoading>
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.alertForm.loadingAlertTypesDescription"
+            defaultMessage="Loading alert types…"
+          />
+        </SectionLoading>
       )}
     </EuiForm>
   );
 };
-
-const CenterJustifiedSpinner = () => (
-  <EuiFlexGroup justifyContent="center">
-    <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="m" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 const NoAuthorizedAlertTypes = ({ operation }: { operation: string }) => (
   <EuiEmptyPrompt

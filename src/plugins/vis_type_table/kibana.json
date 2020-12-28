@@ -11,8 +11,9 @@
   ],
   "requiredBundles": [
     "kibanaUtils",
+    "kibanaReact",
     "share",
-    "charts",
     "visDefaultEditor"
-  ]
+  ],
+  "optionalPlugins": ["usageCollection"]
 }

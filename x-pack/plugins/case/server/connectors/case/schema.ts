@@ -14,13 +14,27 @@ const ContextTypeUserSchema = schema.object({
   comment: schema.string(),
 });
 
-const ContextTypeAlertSchema = schema.object({
-  type: schema.literal('alert'),
-  alertId: schema.string(),
-  index: schema.string(),
-});
+/**
+ * ContextTypeAlertSchema has been deleted.
+ * Comments of type alert need the siem signal index.
+ * Case connector is not being passed the context which contains the
+ * security solution app client which in turn provides the siem signal index.
+ * For that reason, we disable comments of type alert for the case connector until
+ * we figure out how to pass the security solution app client to the connector.
+ * See: x-pack/plugins/case/server/connectors/case/index.ts L76.
+ *
+ * The schema:
+ *
+ * const ContextTypeAlertSchema = schema.object({
+ *  type: schema.literal('alert'),
+ *  alertId: schema.string(),
+ *  index: schema.string(),
+ * });
+ *
+ * Issue: https://github.com/elastic/kibana/issues/85750
+ *  */
 
-export const CommentSchema = schema.oneOf([ContextTypeUserSchema, ContextTypeAlertSchema]);
+export const CommentSchema = schema.oneOf([ContextTypeUserSchema]);
 
 const JiraFieldsSchema = schema.object({
   issueType: schema.string(),
@@ -80,6 +94,7 @@ const CaseBasicProps = {
   title: schema.string(),
   tags: schema.arrayOf(schema.string()),
   connector: schema.object(ConnectorProps, { validate: validateConnector }),
+  settings: schema.object({ syncAlerts: schema.boolean() }),
 };
 
 const CaseUpdateRequestProps = {
@@ -89,6 +104,7 @@ const CaseUpdateRequestProps = {
   title: schema.nullable(CaseBasicProps.title),
   tags: schema.nullable(CaseBasicProps.tags),
   connector: schema.nullable(CaseBasicProps.connector),
+  settings: schema.nullable(CaseBasicProps.settings),
   status: schema.nullable(schema.string()),
 };
 

@@ -30,20 +30,16 @@ import {
   waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { esArchiverLoadEmptyKibana, esArchiverUnloadEmptyKibana } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
 import { totalNumberOfPrebuiltRules } from '../objects/rule';
+import { cleanKibana } from '../tasks/common';
 
 describe('Alerts rules, prebuilt rules', () => {
-  before(() => {
-    esArchiverLoadEmptyKibana();
-  });
-
-  after(() => {
-    esArchiverUnloadEmptyKibana();
+  beforeEach(() => {
+    cleanKibana();
   });
 
   it('Loads prebuilt rules', () => {
@@ -83,7 +79,7 @@ describe('Deleting prebuilt rules', () => {
     const expectedNumberOfRules = totalNumberOfPrebuiltRules;
     const expectedElasticRulesBtnText = `Elastic rules (${expectedNumberOfRules})`;
 
-    esArchiverLoadEmptyKibana();
+    cleanKibana();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
@@ -96,10 +92,6 @@ describe('Deleting prebuilt rules', () => {
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
-  });
-
-  afterEach(() => {
-    esArchiverUnloadEmptyKibana();
   });
 
   it('Does not allow to delete one rule when more than one is selected', () => {

@@ -17,8 +17,10 @@ export declare type AppSearchDeepLink = {
 } & ({
     path: string;
     searchDeepLinks?: AppSearchDeepLink[];
+    keywords?: string[];
 } | {
     path?: string;
     searchDeepLinks: AppSearchDeepLink[];
+    keywords?: string[];
 });
 ```

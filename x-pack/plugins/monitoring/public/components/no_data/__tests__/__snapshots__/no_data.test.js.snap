@@ -2,7 +2,7 @@
 
 exports[`NoData should show a default message if reason is unknown 1`] = `
 <div
-  class="euiPage"
+  class="euiPage euiPage--paddingMedium"
 >
   <h1
     class="euiScreenReaderOnly"
@@ -92,7 +92,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
 
 exports[`NoData should show text next to the spinner while checking a setting 1`] = `
 <div
-  class="euiPage"
+  class="euiPage euiPage--paddingMedium"
 >
   <h1
     class="euiScreenReaderOnly"

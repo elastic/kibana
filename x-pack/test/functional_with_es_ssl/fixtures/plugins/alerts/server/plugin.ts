@@ -22,11 +22,19 @@ export const noopAlertType: AlertType = {
   name: 'Test: Noop',
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
   async executor() {},
   producer: 'alerts',
 };
 
-export const alwaysFiringAlertType: any = {
+export const alwaysFiringAlertType: AlertType<
+  { instances: Array<{ id: string; state: any }> },
+  {
+    globalStateValue: boolean;
+    groupInSeriesIndex: number;
+  },
+  { instanceStateValue: boolean; globalStateValue: boolean; groupInSeriesIndex: number }
+> = {
   id: 'test.always-firing',
   name: 'Always Firing',
   actionGroups: [
@@ -35,7 +43,8 @@ export const alwaysFiringAlertType: any = {
   ],
   defaultActionGroupId: 'default',
   producer: 'alerts',
-  async executor(alertExecutorOptions: any) {
+  minimumLicenseRequired: 'basic',
+  async executor(alertExecutorOptions) {
     const { services, state, params } = alertExecutorOptions;
 
     (params.instances || []).forEach((instance: { id: string; state: any }) => {
@@ -52,7 +61,7 @@ export const alwaysFiringAlertType: any = {
   },
 };
 
-export const failingAlertType: any = {
+export const failingAlertType: AlertType = {
   id: 'test.failing',
   name: 'Test: Failing',
   actionGroups: [
@@ -63,6 +72,7 @@ export const failingAlertType: any = {
   ],
   producer: 'alerts',
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
   async executor() {
     throw new Error('Failed to execute alert type');
   },

@@ -20,7 +20,7 @@ import styled from 'styled-components';
 import { FormattedRelative } from '@kbn/i18n/react';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineStatus, TimelineTabs, TimelineType } from '../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
@@ -33,7 +33,6 @@ import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import * as commonI18n from '../../timeline/properties/translations';
 import { getTimelineStatusByIdSelector } from './selectors';
-import { TimelineTabs } from '../../../store/timeline/model';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
@@ -86,7 +85,13 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   );
 
   return (
-    <StyledPanel borderRadius="none" grow={false} paddingSize="s" hasShadow={false}>
+    <StyledPanel
+      borderRadius="none"
+      grow={false}
+      paddingSize="s"
+      hasShadow={false}
+      data-test-subj="timeline-flyout-header-panel"
+    >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <AddTimelineButton timelineId={timelineId} />
         <EuiFlexItem grow>

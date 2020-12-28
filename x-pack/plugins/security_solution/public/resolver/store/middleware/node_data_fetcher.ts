@@ -10,7 +10,6 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { ResolverState, DataAccessLayer } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
-import { createRange } from './../../models/time_range';
 
 /**
  * Max number of nodes to request from the server
@@ -60,9 +59,10 @@ export function NodeDataFetcher(
 
     let results: SafeResolverEvent[] | undefined;
     try {
+      const timeRangeFilters = selectors.timeRangeFilters(state);
       results = await dataAccessLayer.nodeData({
         ids: Array.from(newIDsToRequest),
-        timeRange: createRange(),
+        timeRange: timeRangeFilters,
         indexPatterns: indices,
         limit: nodeDataLimit,
       });

@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  FIFTH_RULE,
   FIRST_RULE,
   RULE_NAME,
   RULE_SWITCH,
   SECOND_RULE,
-  SEVENTH_RULE,
   RULE_AUTO_REFRESH_IDLE_MODAL,
+  FOURTH_RULE,
 } from '../screens/alerts_detection_rules';
 
 import {
@@ -28,40 +27,45 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRuleToBeActivated,
 } from '../tasks/alerts_detection_rules';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { DEFAULT_RULE_REFRESH_INTERVAL_VALUE } from '../../common/constants';
 
 import { DETECTIONS_URL } from '../urls/navigation';
+import { createCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
+import { existingRule, newOverrideRule, newRule, newThresholdRule } from '../objects/rule';
 
 describe('Alerts detection rules', () => {
-  before(() => {
-    esArchiverLoad('prebuilt_rules_loaded');
+  beforeEach(() => {
+    cleanKibana();
+    removeSignalsIndex();
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    waitForAlertsPanelToBeLoaded();
+    waitForAlertsIndexToBeCreated();
+    createCustomRule(newRule, 'rule1');
+    createCustomRule(existingRule, 'rule2');
+    createCustomRule(newOverrideRule, 'rule3');
+    createCustomRule(newThresholdRule, 'rule4');
   });
 
   after(() => {
-    esArchiverUnload('prebuilt_rules_loaded');
     cy.clock().invoke('restore');
   });
 
   it('Sorts by activated rules', () => {
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
-    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
 
     cy.get(RULE_NAME)
-      .eq(FIFTH_RULE)
+      .eq(SECOND_RULE)
       .invoke('text')
-      .then((fifthRuleName) => {
-        activateRule(FIFTH_RULE);
+      .then((secondInitialRuleName) => {
+        activateRule(SECOND_RULE);
         waitForRuleToBeActivated();
         cy.get(RULE_NAME)
-          .eq(SEVENTH_RULE)
+          .eq(FOURTH_RULE)
           .invoke('text')
-          .then((seventhRuleName) => {
-            activateRule(SEVENTH_RULE);
+          .then((fourthInitialRuleName) => {
+            activateRule(FOURTH_RULE);
             waitForRuleToBeActivated();
             sortByActivatedRules();
             cy.get(RULE_NAME)
@@ -73,8 +77,8 @@ describe('Alerts detection rules', () => {
                   .invoke('text')
                   .then((secondRuleName) => {
                     const expectedRulesNames = `${firstRuleName} ${secondRuleName}`;
-                    cy.wrap(expectedRulesNames).should('include', fifthRuleName);
-                    cy.wrap(expectedRulesNames).should('include', seventhRuleName);
+                    cy.wrap(expectedRulesNames).should('include', secondInitialRuleName);
+                    cy.wrap(expectedRulesNames).should('include', fourthInitialRuleName);
                   });
               });
             cy.get(RULE_SWITCH).eq(FIRST_RULE).should('have.attr', 'role', 'switch');

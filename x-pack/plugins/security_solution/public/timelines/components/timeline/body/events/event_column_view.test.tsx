@@ -11,7 +11,7 @@ import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import * as i18n from '../translations';
 
 import { EventColumnView } from './event_column_view';
-import { TimelineType } from '../../../../../../common/types/timeline';
+import { TimelineTabs, TimelineType } from '../../../../../../common/types/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 
 jest.mock('../../../../../common/hooks/use_selector');
@@ -20,6 +20,7 @@ describe('EventColumnView', () => {
   (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
 
   const props = {
+    ariaRowindex: 2,
     id: 'event-id',
     actionsColumnWidth: DEFAULT_ACTIONS_COLUMN_WIDTH,
     associateNote: jest.fn(),
@@ -35,8 +36,10 @@ describe('EventColumnView', () => {
     },
     eventIdToNoteIds: {},
     expanded: false,
+    hasRowRenderers: false,
     loading: false,
     loadingEventIds: [],
+    notesCount: 0,
     onEventToggled: jest.fn(),
     onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
@@ -45,6 +48,7 @@ describe('EventColumnView', () => {
     selectedEventIds: {},
     showCheckboxes: false,
     showNotes: false,
+    tabType: TimelineTabs.query,
     timelineId: 'timeline-test',
     toggleShowNotes: jest.fn(),
     updateNote: jest.fn(),

@@ -36,7 +36,6 @@ import {
   EmbeddableStart,
   EmbeddableOutput,
   EmbeddableFactory,
-  EmbeddableStateTransfer,
 } from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
@@ -60,6 +59,7 @@ export interface DashboardContainerInput extends ContainerInput {
   timeRange: TimeRange;
   description?: string;
   useMargins: boolean;
+  syncColors?: boolean;
   viewMode: ViewMode;
   filters: Filter[];
   title: string;
@@ -94,6 +94,7 @@ export interface InheritedChildInput extends IndexSignature {
   hidePanelTitles?: boolean;
   id: string;
   searchSessionId?: string;
+  syncColors?: boolean;
 }
 
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerServices>;
@@ -111,8 +112,6 @@ const defaultCapabilities = {
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
-
-  private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
   public switchViewMode?: (newViewMode: ViewMode) => void;
 
   public getPanelCount = () => {
@@ -122,7 +121,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   constructor(
     initialInput: DashboardContainerInput,
     private readonly services: DashboardContainerServices,
-    stateTransfer?: EmbeddableStateTransfer,
     parent?: Container
   ) {
     super(
@@ -134,7 +132,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       services.embeddable.getEmbeddableFactory,
       parent
     );
-    this.embeddablePanel = services.embeddable.getEmbeddablePanel(stateTransfer);
   }
 
   protected createNewPanelState<
@@ -258,11 +255,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
-          <DashboardViewport
-            container={this}
-            PanelComponent={this.embeddablePanel}
-            switchViewMode={this.switchViewMode}
-          />
+          <DashboardViewport container={this} switchViewMode={this.switchViewMode} />
         </KibanaContextProvider>
       </I18nProvider>,
       dom
@@ -278,6 +271,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       hidePanelTitles,
       filters,
       searchSessionId,
+      syncColors,
     } = this.input;
     return {
       filters,
@@ -288,6 +282,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       viewMode,
       id,
       searchSessionId,
+      syncColors,
     };
   }
 }

@@ -11,14 +11,16 @@ import {
   waitForAlertsPanelToBeLoaded,
 } from '../tasks/alerts';
 import { exportFirstRule } from '../tasks/alerts_detection_rules';
-import { createCustomRule, deleteCustomRule } from '../tasks/api_calls/rules';
+import { createCustomRule } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Export rules', () => {
+describe.skip('Export rules', () => {
   let ruleResponse: Cypress.Response;
-  before(() => {
+  beforeEach(() => {
+    cleanKibana();
     cy.intercept(
       'POST',
       '/api/detection_engine/rules/_export?exclude_export_details=false&file_name=rules_export.ndjson'
@@ -29,10 +31,6 @@ describe('Export rules', () => {
     createCustomRule(newRule).then((response) => {
       ruleResponse = response;
     });
-  });
-
-  after(() => {
-    deleteCustomRule();
   });
 
   it('Exports a custom rule', () => {

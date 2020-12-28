@@ -6,7 +6,13 @@
 
 import sinon from 'sinon';
 import { schema } from '@kbn/config-schema';
-import { AlertExecutorOptions } from '../types';
+import {
+  AlertExecutorOptions,
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../types';
 import {
   ConcreteTaskInstance,
   isUnrecoverableError,
@@ -28,15 +34,19 @@ import { IEventLogger } from '../../../event_log/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { Alert, RecoveredActionGroup } from '../../common';
 import { omit } from 'lodash';
-const alertType = {
+import { UntypedNormalizedAlertType } from '../alert_type_registry';
+import { alertTypeRegistryMock } from '../alert_type_registry.mock';
+const alertType: jest.Mocked<UntypedNormalizedAlertType> = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
 };
+
 let fakeTimer: sinon.SinonFakeTimers;
 
 describe('Task Runner', () => {
@@ -69,6 +79,7 @@ describe('Task Runner', () => {
   const services = alertsMock.createAlertServices();
   const actionsClient = actionsClientMock.create();
   const alertsClient = alertsClientMock.create();
+  const alertTypeRegistry = alertTypeRegistryMock.create();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -83,9 +94,10 @@ describe('Task Runner', () => {
     basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
     internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
+    alertTypeRegistry,
   };
 
-  const mockedAlertTypeSavedObject: Alert = {
+  const mockedAlertTypeSavedObject: Alert<AlertTypeParams> = {
     id: '1',
     consumer: 'bar',
     createdAt: new Date('2019-02-12T21:01:22.479Z'),
@@ -136,6 +148,9 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.getAlertsClientWithRequest.mockReturnValue(alertsClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
       actionsClient
+    );
+    taskRunnerFactoryInitializerParams.actionsPlugin.renderActionParameterTemplates.mockImplementation(
+      (actionTypeId, params) => params
     );
   });
 
@@ -224,13 +239,35 @@ describe('Task Runner', () => {
         "message": "alert executed: test:1: 'alert-name'",
       }
     `);
+
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        executionStatus: {
+          error: null,
+          lastExecutionDate: '1970-01-01T00:00:00.000Z',
+          status: 'ok',
+        },
+      },
+      { refresh: false, namespace: undefined }
+    );
   });
 
   test('actionsPlugin.execute is called per alert instance that is scheduled', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         executorServices
           .alertInstanceFactory('1')
           .scheduleActionsWithSubGroup('default', 'subDefault');
@@ -383,7 +420,14 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
     );
@@ -492,7 +536,14 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
         executorServices.alertInstanceFactory('2').scheduleActions('default');
       }
@@ -538,7 +589,14 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
     );
@@ -632,7 +690,14 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
     );
@@ -672,7 +737,14 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         executorServices
           .alertInstanceFactory('1')
           .scheduleActionsWithSubGroup('default', 'subgroup1');
@@ -720,7 +792,14 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertType.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
     );
@@ -888,7 +967,14 @@ describe('Task Runner', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
 
     alertType.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
     );
@@ -988,7 +1074,14 @@ describe('Task Runner', () => {
     };
 
     alertTypeWithCustomRecovery.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
     );
@@ -1079,7 +1172,14 @@ describe('Task Runner', () => {
 
   test('persists alertInstances passed in from state, only if they are scheduled for execution', async () => {
     alertType.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
     );
@@ -1341,7 +1441,14 @@ describe('Task Runner', () => {
 
   test('recovers gracefully when the AlertType executor throws an exception', async () => {
     alertType.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         throw new Error('OMG');
       }
     );
@@ -1446,6 +1553,73 @@ describe('Task Runner', () => {
               "action": "execute",
               "outcome": "failure",
               "reason": "decrypt",
+            },
+            "kibana": Object {
+              "alerting": Object {
+                "status": "error",
+              },
+              "saved_objects": Array [
+                Object {
+                  "id": "1",
+                  "namespace": undefined,
+                  "rel": "primary",
+                  "type": "alert",
+                },
+              ],
+            },
+            "message": "test:1: execution failed",
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('recovers gracefully when the Alert Task Runner throws an exception when license is higher than supported', async () => {
+    alertTypeRegistry.ensureAlertTypeEnabled.mockImplementation(() => {
+      throw new Error('OMG');
+    });
+
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+
+    alertsClient.get.mockResolvedValue(mockedAlertTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+
+    const runnerResult = await taskRunner.run();
+
+    expect(runnerResult).toMatchInlineSnapshot(`
+      Object {
+        "schedule": Object {
+          "interval": "10s",
+        },
+        "state": Object {},
+      }
+    `);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "@timestamp": "1970-01-01T00:00:00.000Z",
+            "error": Object {
+              "message": "OMG",
+            },
+            "event": Object {
+              "action": "execute",
+              "outcome": "failure",
+              "reason": "license",
             },
             "kibana": Object {
               "alerting": Object {
@@ -1642,7 +1816,14 @@ describe('Task Runner', () => {
     };
 
     alertType.executor.mockImplementation(
-      ({ services: executorServices }: AlertExecutorOptions) => {
+      async ({
+        services: executorServices,
+      }: AlertExecutorOptions<
+        AlertTypeParams,
+        AlertTypeState,
+        AlertInstanceState,
+        AlertInstanceContext
+      >) => {
         throw new Error('OMG');
       }
     );

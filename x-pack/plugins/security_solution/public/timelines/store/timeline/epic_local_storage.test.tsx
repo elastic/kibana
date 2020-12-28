@@ -40,7 +40,7 @@ import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
-import { TimelineId, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('../../containers/local_storage');
 
@@ -96,6 +96,8 @@ describe('epicLocalStorage', () => {
       timelineId: 'foo',
       timerangeKind: 'absolute',
       updateEventTypeAndIndexesName: jest.fn(),
+      activeTab: TimelineTabs.query,
+      show: true,
     };
   });
 

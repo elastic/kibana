@@ -18,8 +18,6 @@
  */
 
 import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
-import { Query, TimeRange } from '../../data/common/query';
-import { Filter } from '../../data/common/es_query/filters';
 
 export enum ViewMode {
   EDIT = 'edit',
@@ -54,24 +52,14 @@ export type EmbeddableInput = {
   disableTriggers?: boolean;
 
   /**
-   * Time range of the chart.
-   */
-  timeRange?: TimeRange;
-
-  /**
-   * Visualization query string used to narrow down results.
-   */
-  query?: Query;
-
-  /**
-   * Visualization filters used to narrow down results.
-   */
-  filters?: Filter[];
-
-  /**
    * Search session id to group searches
    */
   searchSessionId?: string;
+
+  /**
+   * Flag whether colors should be synced with other panels
+   */
+  syncColors?: boolean;
 };
 
 export interface PanelState<E extends EmbeddableInput & { id: string } = { id: string }> {

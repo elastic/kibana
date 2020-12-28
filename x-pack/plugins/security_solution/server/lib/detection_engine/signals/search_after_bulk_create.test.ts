@@ -54,9 +54,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -68,9 +65,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -84,9 +78,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -98,9 +89,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -165,9 +153,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -180,9 +165,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -194,40 +176,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
-            create: {
-              status: 201,
-            },
-          },
-        ],
-      })
-      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits())
-      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12)))
-      .mockResolvedValueOnce({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
-            create: {
-              status: 201,
-            },
-          },
-        ],
-      })
-      .mockResolvedValueOnce(repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3)))
-      .mockResolvedValueOnce({
-        took: 100,
-        errors: false,
-        items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -277,8 +225,8 @@ describe('searchAfterAndBulkCreate', () => {
       buildRuleMessage,
     });
     expect(success).toEqual(true);
-    expect(mockService.callCluster).toHaveBeenCalledTimes(12);
-    expect(createdSignalsCount).toEqual(5);
+    expect(mockService.callCluster).toHaveBeenCalledTimes(8);
+    expect(createdSignalsCount).toEqual(3);
     expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
@@ -290,9 +238,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -491,7 +436,7 @@ describe('searchAfterAndBulkCreate', () => {
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
     expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[8][0]).toContain(
-      'sortIds was empty on searchResult'
+      'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });
 
@@ -503,9 +448,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -575,7 +517,7 @@ describe('searchAfterAndBulkCreate', () => {
     // I don't like testing log statements since logs change but this is the best
     // way I can think of to ensure this section is getting hit with this test case.
     expect(((mockLogger.debug as unknown) as jest.Mock).mock.calls[15][0]).toContain(
-      'sortIds was empty on searchResult name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      'ran out of sort ids to sort on name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
     );
   });
 
@@ -587,9 +529,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,
@@ -768,9 +707,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -863,9 +799,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -878,9 +811,6 @@ describe('searchAfterAndBulkCreate', () => {
         errors: false,
         items: [
           {
-            fakeItemValue: 'fakeItemKey',
-          },
-          {
             create: {
               status: 201,
             },
@@ -892,9 +822,6 @@ describe('searchAfterAndBulkCreate', () => {
         took: 100,
         errors: false,
         items: [
-          {
-            fakeItemValue: 'fakeItemKey',
-          },
           {
             create: {
               status: 201,

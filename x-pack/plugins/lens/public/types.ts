@@ -20,12 +20,15 @@ import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
+import { TriggerContext, VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import {
   SELECT_RANGE_TRIGGER,
-  TriggerContext,
   VALUE_CLICK_TRIGGER,
-  VisualizeFieldContext,
-} from '../../../../src/plugins/ui_actions/public';
+} from '../../../../src/plugins/embeddable/public';
+import type {
+  LensSortActionData,
+  LENS_EDIT_SORT_ACTION,
+} from './datatable_visualization/expression';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
@@ -609,6 +612,11 @@ export interface Visualization<T = unknown> {
    * The frame calls this function to display warnings about visualization
    */
   getWarningMessages?: (state: T, frame: FramePublicAPI) => React.ReactNode[] | undefined;
+
+  /**
+   * On Edit events the frame will call this to know what's going to be the next visualization state
+   */
+  onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
 }
 
 export interface LensFilterEvent {
@@ -621,6 +629,22 @@ export interface LensBrushEvent {
   data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
 }
 
+// Use same technique as TriggerContext
+interface LensEditContextMapping {
+  [LENS_EDIT_SORT_ACTION]: LensSortActionData;
+}
+type LensEditSupportedActions = keyof LensEditContextMapping;
+
+export type LensEditPayload<T extends LensEditSupportedActions> = {
+  action: T;
+} & LensEditContextMapping[T];
+
+type EditPayloadContext<T> = T extends LensEditSupportedActions ? LensEditPayload<T> : never;
+
+export interface LensEditEvent<T> {
+  name: 'edit';
+  data: EditPayloadContext<T>;
+}
 export interface LensTableRowContextMenuEvent {
   name: 'tableRowContextMenuClick';
   data: TriggerContext<typeof ROW_CLICK_TRIGGER>['data'];
@@ -632,6 +656,12 @@ export function isLensFilterEvent(event: ExpressionRendererEvent): event is Lens
 
 export function isLensBrushEvent(event: ExpressionRendererEvent): event is LensBrushEvent {
   return event.name === 'brush';
+}
+
+export function isLensEditEvent<T extends LensEditSupportedActions>(
+  event: ExpressionRendererEvent
+): event is LensEditEvent<T> {
+  return event.name === 'edit';
 }
 
 export function isLensTableRowContextMenuClickEvent(
@@ -646,5 +676,11 @@ export function isLensTableRowContextMenuClickEvent(
  * used, dispatched events will be handled correctly.
  */
 export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandlers {
-  event: (event: LensFilterEvent | LensBrushEvent | LensTableRowContextMenuEvent) => void;
+  event: (
+    event:
+      | LensFilterEvent
+      | LensBrushEvent
+      | LensEditEvent<LensEditSupportedActions>
+      | LensTableRowContextMenuEvent
+  ) => void;
 }

@@ -1,5 +1,330 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
+<DashboardEmptyScreen
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "",
+        "get": [Function],
+        "prepend": [Function],
+        "publicBaseUrl": undefined,
+        "remove": [Function],
+        "serverBasePath": "",
+      },
+      "delete": [MockFunction],
+      "externalUrl": Object {
+        "validateUrl": [MockFunction],
+      },
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  isEditMode={true}
+  onLinkClick={[MockFunction]}
+  uiSettings={
+    Object {
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "theme:darkMode",
+          ],
+          Array [
+            "theme:darkMode",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+      "get$": [MockFunction],
+      "getAll": [MockFunction],
+      "getSaved$": [MockFunction],
+      "getUpdate$": [MockFunction],
+      "getUpdateErrors$": [MockFunction],
+      "isCustom": [MockFunction],
+      "isDeclared": [MockFunction],
+      "isDefault": [MockFunction],
+      "isOverridden": [MockFunction],
+      "overrideLocalDefault": [MockFunction],
+      "remove": [MockFunction],
+      "set": [MockFunction],
+    }
+  }
+>
+  <I18nProvider>
+    <IntlProvider
+      defaultLocale="en"
+      formats={
+        Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
+            },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
+            },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
+            },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
+            },
+          },
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
+          },
+          "relative": Object {
+            "days": Object {
+              "units": "day",
+            },
+            "hours": Object {
+              "units": "hour",
+            },
+            "minutes": Object {
+              "units": "minute",
+            },
+            "months": Object {
+              "units": "month",
+            },
+            "seconds": Object {
+              "units": "second",
+            },
+            "years": Object {
+              "units": "year",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        }
+      }
+      locale="en"
+      messages={Object {}}
+      textComponent={Symbol(react.fragment)}
+    >
+      <PseudoLocaleWrapper>
+        <div
+          className="dshEmptyWidget testClass"
+          data-test-subj="emptyDashboardWidget"
+        >
+          <EuiIcon
+            color="subdued"
+            size="xl"
+            type="visAreaStacked"
+          >
+            <span
+              color="subdued"
+              data-euiicon-type="visAreaStacked"
+              size="xl"
+            />
+          </EuiIcon>
+          <EuiSpacer
+            size="s"
+          >
+            <div
+              className="euiSpacer euiSpacer--s"
+            />
+          </EuiSpacer>
+          <EuiTitle
+            size="xs"
+          >
+            <h3
+              className="euiTitle euiTitle--xsmall"
+            >
+              Add your first panel
+            </h3>
+          </EuiTitle>
+          <EuiSpacer
+            size="s"
+          >
+            <div
+              className="euiSpacer euiSpacer--s"
+            />
+          </EuiSpacer>
+          <EuiText
+            color="subdued"
+            size="s"
+          >
+            <div
+              className="euiText euiText--small"
+            >
+              <EuiTextColor
+                color="subdued"
+                component="div"
+              >
+                <div
+                  className="euiTextColor euiTextColor--subdued"
+                >
+                  <span>
+                    Create content that tells a story about your data.
+                  </span>
+                </div>
+              </EuiTextColor>
+            </div>
+          </EuiText>
+        </div>
+      </PseudoLocaleWrapper>
+    </IntlProvider>
+  </I18nProvider>
+</DashboardEmptyScreen>
+`;
+
 exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
 <DashboardEmptyScreen
   http={
@@ -134,9 +459,9 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
       "timeZone": null,
     }
   }
+  isEditMode={false}
   isReadonlyMode={true}
   onLinkClick={[MockFunction]}
-  showLinkToVisualize={true}
   uiSettings={
     Object {
       "get": [MockFunction] {
@@ -150,15 +475,8 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
           Array [
             "theme:darkMode",
           ],
-          Array [
-            "theme:darkMode",
-          ],
         ],
         "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
           Object {
             "type": "return",
             "value": undefined,
@@ -279,7 +597,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
           restrictWidth="500px"
         >
           <div
-            className="euiPage euiPage--restrictWidth-custom dshStartScreen"
+            className="euiPage euiPage--restrictWidth-custom euiPage--paddingMedium dshStartScreen"
             style={
               Object {
                 "maxWidth": "500px",
@@ -367,7 +685,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
 </DashboardEmptyScreen>
 `;
 
-exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
+exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
 <DashboardEmptyScreen
   http={
     Object {
@@ -501,8 +819,8 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
       "timeZone": null,
     }
   }
+  isEditMode={false}
   onLinkClick={[MockFunction]}
-  showLinkToVisualize={true}
   uiSettings={
     Object {
       "get": [MockFunction] {
@@ -512,388 +830,6 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
           ],
         ],
         "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
-        ],
-      },
-      "get$": [MockFunction],
-      "getAll": [MockFunction],
-      "getSaved$": [MockFunction],
-      "getUpdate$": [MockFunction],
-      "getUpdateErrors$": [MockFunction],
-      "isCustom": [MockFunction],
-      "isDeclared": [MockFunction],
-      "isDefault": [MockFunction],
-      "isOverridden": [MockFunction],
-      "overrideLocalDefault": [MockFunction],
-      "remove": [MockFunction],
-      "set": [MockFunction],
-    }
-  }
->
-  <I18nProvider>
-    <IntlProvider
-      defaultLocale="en"
-      formats={
-        Object {
-          "date": Object {
-            "full": Object {
-              "day": "numeric",
-              "month": "long",
-              "weekday": "long",
-              "year": "numeric",
-            },
-            "long": Object {
-              "day": "numeric",
-              "month": "long",
-              "year": "numeric",
-            },
-            "medium": Object {
-              "day": "numeric",
-              "month": "short",
-              "year": "numeric",
-            },
-            "short": Object {
-              "day": "numeric",
-              "month": "numeric",
-              "year": "2-digit",
-            },
-          },
-          "number": Object {
-            "currency": Object {
-              "style": "currency",
-            },
-            "percent": Object {
-              "style": "percent",
-            },
-          },
-          "relative": Object {
-            "days": Object {
-              "units": "day",
-            },
-            "hours": Object {
-              "units": "hour",
-            },
-            "minutes": Object {
-              "units": "minute",
-            },
-            "months": Object {
-              "units": "month",
-            },
-            "seconds": Object {
-              "units": "second",
-            },
-            "years": Object {
-              "units": "year",
-            },
-          },
-          "time": Object {
-            "full": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-              "second": "numeric",
-              "timeZoneName": "short",
-            },
-            "long": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-              "second": "numeric",
-              "timeZoneName": "short",
-            },
-            "medium": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-              "second": "numeric",
-            },
-            "short": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-            },
-          },
-        }
-      }
-      locale="en"
-      messages={Object {}}
-      textComponent={Symbol(react.fragment)}
-    >
-      <PseudoLocaleWrapper>
-        <div
-          className="dshEmptyWidget testClass"
-          data-test-subj="emptyDashboardWidget"
-        >
-          <EuiText
-            color="subdued"
-            size="m"
-          >
-            <div
-              className="euiText euiText--medium"
-            >
-              <EuiTextColor
-                color="subdued"
-                component="div"
-              >
-                <div
-                  className="euiTextColor euiTextColor--subdued"
-                >
-                  <p>
-                    <EuiLink
-                      aria-label="Add an existing visualization"
-                      data-test-subj=""
-                      onClick={[MockFunction]}
-                    >
-                      <button
-                        aria-label="Add an existing visualization"
-                        className="euiLink euiLink--primary"
-                        data-test-subj=""
-                        onClick={[MockFunction]}
-                        type="button"
-                      >
-                        Add an existing
-                      </button>
-                    </EuiLink>
-                    <span>
-                       
-                    </span>
-                    or new object to this dashboard
-                  </p>
-                </div>
-              </EuiTextColor>
-            </div>
-          </EuiText>
-          <EuiSpacer
-            size="l"
-          >
-            <div
-              className="euiSpacer euiSpacer--l"
-            />
-          </EuiSpacer>
-          <p
-            data-test-subj="linkToVisualizeParagraph"
-          >
-            <EuiButton
-              aria-label="Create new visualization button"
-              data-test-subj="addVisualizationButton"
-              iconSide="left"
-              iconType="plusInCircle"
-              size="s"
-            >
-              <EuiButtonDisplay
-                aria-label="Create new visualization button"
-                baseClassName="euiButton"
-                data-test-subj="addVisualizationButton"
-                element="button"
-                iconSide="left"
-                iconType="plusInCircle"
-                size="s"
-                type="button"
-              >
-                <button
-                  aria-label="Create new visualization button"
-                  className="euiButton euiButton--primary euiButton--small"
-                  data-test-subj="addVisualizationButton"
-                  style={
-                    Object {
-                      "minWidth": undefined,
-                    }
-                  }
-                  type="button"
-                >
-                  <EuiButtonContent
-                    className="euiButton__content"
-                    iconSide="left"
-                    iconType="plusInCircle"
-                    textProps={
-                      Object {
-                        "className": "euiButton__text",
-                      }
-                    }
-                  >
-                    <span
-                      className="euiButtonContent euiButton__content"
-                    >
-                      <EuiIcon
-                        className="euiButtonContent__icon"
-                        size="m"
-                        type="plusInCircle"
-                      >
-                        <span
-                          className="euiButtonContent__icon"
-                          data-euiicon-type="plusInCircle"
-                          size="m"
-                        />
-                      </EuiIcon>
-                      <span
-                        className="euiButton__text"
-                      >
-                        Create new
-                      </span>
-                    </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonDisplay>
-            </EuiButton>
-          </p>
-        </div>
-      </PseudoLocaleWrapper>
-    </IntlProvider>
-  </I18nProvider>
-</DashboardEmptyScreen>
-`;
-
-exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] = `
-<DashboardEmptyScreen
-  http={
-    Object {
-      "addLoadingCountSource": [MockFunction],
-      "anonymousPaths": Object {
-        "isAnonymous": [MockFunction],
-        "register": [MockFunction],
-      },
-      "basePath": BasePath {
-        "basePath": "",
-        "get": [Function],
-        "prepend": [Function],
-        "publicBaseUrl": undefined,
-        "remove": [Function],
-        "serverBasePath": "",
-      },
-      "delete": [MockFunction],
-      "externalUrl": Object {
-        "validateUrl": [MockFunction],
-      },
-      "fetch": [MockFunction],
-      "get": [MockFunction],
-      "getLoadingCount$": [MockFunction],
-      "head": [MockFunction],
-      "intercept": [MockFunction],
-      "options": [MockFunction],
-      "patch": [MockFunction],
-      "post": [MockFunction],
-      "put": [MockFunction],
-    }
-  }
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
-  onLinkClick={[MockFunction]}
-  showLinkToVisualize={false}
-  uiSettings={
-    Object {
-      "get": [MockFunction] {
-        "calls": Array [
-          Array [
-            "theme:darkMode",
-          ],
-          Array [
-            "theme:darkMode",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": undefined,
-          },
           Object {
             "type": "return",
             "value": undefined,
@@ -1006,7 +942,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
           restrictWidth="500px"
         >
           <div
-            className="euiPage euiPage--restrictWidth-custom dshStartScreen"
+            className="euiPage euiPage--restrictWidth-custom euiPage--paddingMedium dshStartScreen"
             style={
               Object {
                 "maxWidth": "500px",
@@ -1100,6 +1036,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                                       aria-label="Edit dashboard"
                                       className="euiLink euiLink--primary"
                                       data-test-subj=""
+                                      disabled={false}
                                       onClick={[MockFunction]}
                                       type="button"
                                     >

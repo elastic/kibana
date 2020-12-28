@@ -42,12 +42,14 @@ describe('markdown vis toExpressionAst function', () => {
 
   it('without params', () => {
     vis.params = {};
+    // @ts-expect-error
     const actual = toExpressionAst(vis);
     expect(actual).toMatchSnapshot();
   });
 
   it('with params', () => {
     vis.params = { markdown: '### my markdown', fontSize: 15, openLinksInNewTab: true };
+    // @ts-expect-error
     const actual = toExpressionAst(vis);
     expect(actual).toMatchSnapshot();
   });
