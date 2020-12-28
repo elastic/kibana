@@ -133,6 +133,12 @@ Example:
 
 `{{split event.value ","}}`
 
+|encodeURIComponent
+a|Escapes string using built in `encodeURIComponent` function.
+
+|encodeURIQuery
+a|Escapes string using built in `encodeURIComponent` function, while keeping "@", ":", "$", ",", and ";" characters as is.
+
 |===
 
 
