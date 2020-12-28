@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { buildRequestBody } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
 import { get } from 'lodash';
@@ -62,9 +63,13 @@ export async function getTableData(req, panel) {
       []
     );
 
+    const series = await Promise.all(
+      buckets.map(processBucket(panel, req, searchStrategy, capabilities))
+    );
+
     return {
       ...meta,
-      series: buckets.map(await processBucket(panel)),
+      series,
     };
   } catch (err) {
     if (err.body || err.name === 'KQLSyntaxError') {

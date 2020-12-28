@@ -22,7 +22,6 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { RedirectAppLinks } from '../../../../../../kibana_react/public';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { calculateLabel } from '../../../../../common/calculate_label';
 import { isSortable } from './is_sortable';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 import { replaceVars } from '../../lib/replace_vars';
@@ -110,7 +109,7 @@ class TableVis extends Component {
   };
 
   renderHeader() {
-    const { model, uiState, onUiState } = this.props;
+    const { model, uiState, onUiState, visData } = this.props;
     const stateKey = `${model.type}.sort`;
     const sort = uiState.get(stateKey, {
       column: '_default_',
@@ -118,7 +117,8 @@ class TableVis extends Component {
     });
 
     const calculateHeaderLabel = (metric, item) => {
-      const defaultLabel = item.label || calculateLabel(metric, item.metrics);
+      const defaultLabel =
+        item.label || visData.series[0]?.series?.find((s) => item.id === s.id)?.label;
 
       switch (metric.type) {
         case METRIC_TYPES.PERCENTILE:
@@ -133,7 +133,6 @@ class TableVis extends Component {
     const columns = this.visibleSeries.map((item) => {
       const metric = last(item.metrics);
       const label = calculateHeaderLabel(metric, item);
-
       const handleClick = () => {
         if (!isSortable(metric)) return;
         let order;
