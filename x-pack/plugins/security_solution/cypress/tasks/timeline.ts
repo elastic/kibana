@@ -49,7 +49,6 @@ import {
   TIMELINE_EDIT_MODAL_OPEN_BUTTON,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
   QUERY_TAB_BUTTON,
-  QUERY_TAB_EVENTS_FOOTER,
 } from '../screens/timeline';
 import { TIMELINES_TABLE } from '../screens/timelines';
 
