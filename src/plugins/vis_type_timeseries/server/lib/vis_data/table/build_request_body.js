@@ -20,8 +20,8 @@
 import { buildProcessorFunction } from '../build_processor_function';
 import { processors } from '../request_processors/table';
 
-export function buildRequestBody(...args) {
+export async function buildRequestBody(...args) {
   const processor = buildProcessorFunction(processors, ...args);
-  const doc = processor({});
+  const doc = await processor({});
   return doc;
 }

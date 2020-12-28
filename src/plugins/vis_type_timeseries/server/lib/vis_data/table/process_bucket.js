@@ -36,7 +36,7 @@ function trendSinceLastBucket(data) {
 
 export function processBucket(panel) {
   return (bucket) => {
-    const series = getActiveSeries(panel).map((series) => {
+    const series = getActiveSeries(panel).map(async (series) => {
       const timeseries = get(bucket, `${series.id}.timeseries`);
       const buckets = get(bucket, `${series.id}.buckets`);
 
@@ -48,7 +48,7 @@ export function processBucket(panel) {
         overwrite(bucket, series.id, { meta, timeseries });
       }
       const processor = buildProcessorFunction(processors, bucket, panel, series);
-      const result = first(processor([]));
+      const result = first(await processor([]));
       if (!result) return null;
       const data = get(result, 'data', []);
       result.slope = trendSinceLastBucket(data);

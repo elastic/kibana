@@ -35,7 +35,7 @@ export async function getSeriesData(req, panel) {
   };
 
   try {
-    const bodiesPromises = getActiveSeries(panel).map((series) =>
+    const bodiesPromises = getActiveSeries(panel).map(async (series) =>
       getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities)
     );
 
@@ -47,9 +47,10 @@ export async function getSeriesData(req, panel) {
 
     const handleResponseBodyFn = handleResponseBody(panel);
 
-    const series = data.map((resp) =>
-      handleResponseBodyFn(resp.rawResponse ? resp.rawResponse : resp)
+    const series = await Promise.all(
+      data.map((resp) => handleResponseBodyFn(resp.rawResponse ? resp.rawResponse : resp))
     );
+
     let annotations = null;
 
     if (panel.annotations && panel.annotations.length) {

@@ -23,7 +23,7 @@ import { isLastValueTimerangeMode } from '../../helpers/get_timerange_mode';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { getTimerange } from '../../helpers/get_timerange';
 import { calculateAggRoot } from './calculate_agg_root';
-import { search } from '../../../../../../../plugins/data/server';
+import { search, UI_SETTINGS } from '../../../../../../../plugins/data/server';
 const { dateHistogramInterval } = search.aggs;
 
 export function dateHistogram(
@@ -32,9 +32,10 @@ export function dateHistogram(
   esQueryConfig,
   indexPatternObject,
   capabilities,
-  { barTargetUiSettings }
+  uiSettings
 ) {
-  return (next) => (doc) => {
+  return (next) => async (doc) => {
+    const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const { timeField, interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const meta = {
       timeField,

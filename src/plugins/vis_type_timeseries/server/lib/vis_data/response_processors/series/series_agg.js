@@ -23,7 +23,7 @@ import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { calculateLabel } from '../../../../../common/calculate_label';
 
 export function seriesAgg(resp, panel, series) {
-  return (next) => (results) => {
+  return (next) => async (results) => {
     if (series.metrics.some((m) => m.type === 'series_agg')) {
       const decoration = getDefaultDecoration(series);
 
@@ -43,6 +43,7 @@ export function seriesAgg(resp, panel, series) {
           const fn = SeriesAgg[m.function];
           return (fn && fn(acc)) || acc;
         }, targetSeries);
+
       results.push({
         id: `${series.id}`,
         label: series.label || calculateLabel(_.last(series.metrics), series.metrics),

@@ -21,6 +21,7 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { calculateAggRoot } from './calculate_agg_root';
 import { createPositiveRate, filter } from '../series/positive_rate';
+import { UI_SETTINGS } from '../../../../../../data/common';
 
 export function positiveRate(
   req,
@@ -28,9 +29,10 @@ export function positiveRate(
   esQueryConfig,
   indexPatternObject,
   capabilities,
-  { barTargetUiSettings }
+  uiSettings
 ) {
-  return (next) => (doc) => {
+  return (next) => async (doc) => {
+    const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
     const { interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
 

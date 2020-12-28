@@ -32,8 +32,8 @@ import { processors } from '../request_processors/annotations';
  * ]
  * @returns {Object} doc - processed body
  */
-export function buildAnnotationRequest(...args) {
+export async function buildAnnotationRequest(...args) {
   const processor = buildProcessorFunction(processors, ...args);
-  const doc = processor({});
+  const doc = await processor({});
   return doc;
 }
