@@ -7,7 +7,6 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import moment from 'moment';
 
 import {
   EuiFormRow,
@@ -356,13 +355,6 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
     defaultMessage: 'Up to',
   });
 
-  const humanDurationFormatter = data.fieldFormats.deserialize({
-    id: 'duration',
-    params: {
-      inputFormat: 'milliseconds',
-    },
-  });
-
   return (
     <EuiPopover
       ownFocus
@@ -411,14 +403,10 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
           })}
         </p>
         <EuiBasicTable
-          items={wrapMomentPrecision(() =>
-            search.aggs.boundsDescendingRaw.map(
-              ({ bound, interval, boundLabel, intervalLabel }) => ({
-                bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${boundLabel}`,
-                interval: intervalLabel, // humanDurationFormatter.convert(interval),
-              })
-            )
-          )}
+          items={search.aggs.boundsDescendingRaw.map(({ bound, boundLabel, intervalLabel }) => ({
+            bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${boundLabel}`,
+            interval: intervalLabel,
+          }))}
           columns={[
             {
               field: 'bound',
@@ -438,31 +426,3 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
     </EuiPopover>
   );
 };
-
-// Below 5 seconds the "humanize" call returns the "few seconds" sentence, which is not ok for ms
-// This special config rewrite makes it sure to have precision also for sub-seconds durations
-// ref: https://github.com/moment/moment/issues/348
-function wrapMomentPrecision<T>(callback: () => T): T {
-  // Save default values
-  const roundingDefault = moment.relativeTimeRounding();
-  const units = [
-    { unit: 'm', value: 60 }, // This should prevent to round up 45 minutes to "an hour"
-    { unit: 's', value: 60 }, // this should prevent to round up 45 seconds to "a minute"
-    { unit: 'ss', value: 0 }, // This should prevent to round anything below 5 seconds to "few seconds"
-  ];
-  const defaultValues = units.map(({ unit }) => moment.relativeTimeThreshold(unit) as number);
-
-  moment.relativeTimeRounding((t) => {
-    const DIGITS = 2;
-    return Math.round(t * Math.pow(10, DIGITS)) / Math.pow(10, DIGITS);
-  });
-  units.forEach(({ unit, value }) => moment.relativeTimeThreshold(unit, value));
-
-  // Execute the format/humanize call in the callback
-  const result = callback();
-
-  // restore all the default values now in moment to not break it
-  units.forEach(({ unit }, i) => moment.relativeTimeThreshold(unit, defaultValues[i]));
-  moment.relativeTimeRounding(roundingDefault);
-  return result;
-}
