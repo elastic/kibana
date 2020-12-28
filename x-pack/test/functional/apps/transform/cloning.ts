@@ -5,12 +5,17 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
+import {
+  isLatestTransform,
+  isPivotTransform,
+  TransformLatestConfig,
+  TransformPivotConfig,
+} from '../../../../plugins/transform/common/types/transform';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
   return {
-    id: `ec_cloning_${date}`,
+    id: `ec_cloning_1_${date}`,
     source: { index: ['ft_ecommerce'] },
     pivot: {
       group_by: { category: { terms: { field: 'category.keyword' } } },
@@ -26,32 +31,96 @@ function getTransformConfig(): TransformPivotConfig {
   };
 }
 
+function getLatestTransformConfig(): TransformLatestConfig {
+  const timestamp = Date.now();
+  return {
+    id: `ec_cloning_2_${timestamp}`,
+    source: { index: ['ft_ecommerce'] },
+    latest: {
+      unique_key: ['category.keyword'],
+      sort: 'order_date',
+    },
+    description: 'ecommerce batch transform with category unique key and sorted by order date',
+    frequency: '3s',
+    settings: {
+      max_page_search_size: 250,
+    },
+    dest: { index: `user-ec_3_${timestamp}` },
+  };
+}
+
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('cloning', function () {
-    const transformConfig = getTransformConfig();
+    const transformConfigWithPivot = getTransformConfig();
+    const transformConfigWithLatest = getLatestTransformConfig();
 
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
-      await transform.api.createAndRunTransform(transformConfig.id, transformConfig);
+      await transform.api.createAndRunTransform(
+        transformConfigWithPivot.id,
+        transformConfigWithPivot
+      );
+      await transform.api.createAndRunTransform(
+        transformConfigWithLatest.id,
+        transformConfigWithLatest
+      );
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
     });
 
     after(async () => {
-      await transform.testResources.deleteIndexPatternByTitle(transformConfig.dest.index);
-      await transform.api.deleteIndices(transformConfig.dest.index);
+      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
+      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
+      await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
     });
 
     const testDataList = [
       {
+        type: 'pivot' as const,
         suiteTitle: 'clone transform',
-        transformId: `clone_${transformConfig.id}`,
+        originalConfig: transformConfigWithPivot,
+        transformId: `clone_${transformConfigWithPivot.id}`,
+        transformDescription: `a cloned transform`,
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          aggs: {
+            index: 0,
+            label: 'products.base_price.avg',
+          },
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          groupBy: {
+            index: 0,
+            label: 'category',
+          },
+          pivotPreview: {
+            column: 0,
+            values: [
+              `Men's Accessories`,
+              `Men's Clothing`,
+              `Men's Shoes`,
+              `Women's Accessories`,
+              `Women's Clothing`,
+            ],
+          },
+        },
+      },
+      {
+        type: 'latest' as const,
+        suiteTitle: 'clone transform with latest function',
+        originalConfig: transformConfigWithLatest,
+        transformId: `clone_${transformConfigWithLatest.id}`,
         transformDescription: `a cloned transform`,
         get destinationIndex(): string {
           return `user-${this.transformId}`;
@@ -102,13 +171,14 @@ export default function ({ getService }: FtrProviderContext) {
             'should display the original transform in the transform list'
           );
           await transform.table.refreshTransformList();
-          await transform.table.filterWithSearchString(transformConfig.id, 1);
+          await transform.table.filterWithSearchString(testData.originalConfig.id, 1);
 
           await transform.testExecution.logTestStep('should show the actions popover');
           await transform.table.assertTransformRowActions(false);
 
           await transform.testExecution.logTestStep('should display the define pivot step');
           await transform.table.clickTransformRowAction('Clone');
+          await transform.wizard.assertSelectedTransformFunction(testData.type);
           await transform.wizard.assertDefineStepActive();
         });
 
@@ -126,21 +196,31 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertQueryInputExists();
           await transform.wizard.assertQueryValue('');
 
-          await transform.testExecution.logTestStep(
-            'should show the pre-filled group-by configuration'
-          );
-          await transform.wizard.assertGroupByEntryExists(
-            testData.expected.groupBy.index,
-            testData.expected.groupBy.label
-          );
+          // assert define step form
+          if (isPivotTransform(testData.originalConfig)) {
+            await transform.testExecution.logTestStep(
+              'should show the pre-filled group-by configuration'
+            );
+            await transform.wizard.assertGroupByEntryExists(
+              testData.expected.groupBy.index,
+              testData.expected.groupBy.label
+            );
 
-          await transform.testExecution.logTestStep(
-            'should show the pre-filled aggs configuration'
-          );
-          await transform.wizard.assertAggregationEntryExists(
-            testData.expected.aggs.index,
-            testData.expected.aggs.label
-          );
+            await transform.testExecution.logTestStep(
+              'should show the pre-filled aggs configuration'
+            );
+            await transform.wizard.assertAggregationEntryExists(
+              testData.expected.aggs.index,
+              testData.expected.aggs.label
+            );
+          } else if (isLatestTransform(testData.originalConfig)) {
+            await transform.testExecution.logTestStep('should show pre-filler unique keys');
+            await transform.wizard.assertUniqueKeysInputValue(
+              testData.originalConfig.latest.unique_key
+            );
+            await transform.testExecution.logTestStep('should show pre-filler sort field');
+            await transform.wizard.assertSortFieldInputValue(testData.originalConfig.latest.sort);
+          }
 
           await transform.testExecution.logTestStep('should show the pivot preview');
           await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
@@ -159,7 +239,9 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should input the transform description');
           await transform.wizard.assertTransformDescriptionInputExists();
-          await transform.wizard.assertTransformDescriptionValue(transformConfig.description!);
+          await transform.wizard.assertTransformDescriptionValue(
+            testData.originalConfig.description!
+          );
           await transform.wizard.setTransformDescription(testData.transformDescription);
 
           await transform.testExecution.logTestStep('should input the destination index');
@@ -181,9 +263,9 @@ export default function ({ getService }: FtrProviderContext) {
             'should display the advanced settings and show pre-filled configuration'
           );
           await transform.wizard.openTransformAdvancedSettingsAccordion();
-          await transform.wizard.assertTransformFrequencyValue(transformConfig.frequency!);
+          await transform.wizard.assertTransformFrequencyValue(testData.originalConfig.frequency!);
           await transform.wizard.assertTransformMaxPageSearchSizeValue(
-            transformConfig.settings!.max_page_search_size!
+            testData.originalConfig.settings!.max_page_search_size!
           );
 
           await transform.testExecution.logTestStep('should load the create step');

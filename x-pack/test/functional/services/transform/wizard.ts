@@ -247,11 +247,15 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async selectTransformFunction(transformFunction: 'pivot' | 'latest') {
-      await testSubjects.click(`transformCreation-${transformFunction}-option`);
+    async assertSelectedTransformFunction(transformFunction: 'pivot' | 'latest') {
       await testSubjects.existOrFail(
         `transformCreation-${transformFunction}-option selectedFunction`
       );
+    },
+
+    async selectTransformFunction(transformFunction: 'pivot' | 'latest') {
+      await testSubjects.click(`transformCreation-${transformFunction}-option`);
+      await this.assertSelectedTransformFunction(transformFunction);
     },
 
     async assertUniqueKeysInputExists() {
