@@ -7,24 +7,38 @@
 import { MockedKeys } from '@kbn/utility-types/jest';
 import { mount, ReactWrapper } from 'enzyme';
 import { CoreSetup } from 'kibana/public';
+import moment from 'moment';
 import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
+import { SessionsMgmtConfigSchema } from '../../';
 import { STATUS, UISession } from '../../../../../common/search/sessions_mgmt';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper, mockUrls } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
+let mockConfig: SessionsMgmtConfigSchema;
 let initialTable: UISession[];
 let api: SearchSessionsMgmtAPI;
 
 describe('Background Search Session Management Table', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
+    mockConfig = {
+      expiresSoonWarning: moment.duration('1d'),
+      maxSessions: 2000,
+      refreshInterval: moment.duration('1s'),
+      refreshTimeout: moment.duration('10m'),
+    };
     const sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
-    api = new SearchSessionsMgmtAPI(sessionsClient, mockUrls, mockCoreSetup.notifications);
+    api = new SearchSessionsMgmtAPI(
+      sessionsClient,
+      mockUrls,
+      mockCoreSetup.notifications,
+      mockConfig
+    );
 
     initialTable = [
       {
@@ -56,6 +70,7 @@ describe('Background Search Session Management Table', () => {
             http={mockCoreSetup.http}
             uiSettings={mockCoreSetup.uiSettings}
             initialTable={initialTable}
+            config={mockConfig}
           />
         </LocaleWrapper>
       );

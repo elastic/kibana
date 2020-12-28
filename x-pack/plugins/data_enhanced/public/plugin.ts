@@ -63,8 +63,10 @@ export class DataEnhancedPlugin
       },
     });
 
-    if (this.initializerContext.config.get().search.sendToBackground.enabled) {
-      registerBackgroundSessionsMgmt(core, { management });
+    const { search: searchConfig } = this.initializerContext.config.get();
+    if (searchConfig.sendToBackground.enabled) {
+      const { sessionsManagement: sessionsMgmtConfig } = searchConfig.sendToBackground;
+      registerBackgroundSessionsMgmt(core, sessionsMgmtConfig, { management });
     }
   }
 

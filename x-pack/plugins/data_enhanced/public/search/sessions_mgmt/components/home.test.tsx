@@ -4,19 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { MockedKeys } from '@kbn/utility-types/jest';
 import { mount, ReactWrapper } from 'enzyme';
 import { CoreSetup } from 'kibana/public';
 import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import { UISession, STATUS } from '../../../../common/search/sessions_mgmt';
+import { SessionsMgmtConfigSchema } from '../';
+import { STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { LocaleWrapper, mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtHome } from './home';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
+let mockConfig: SessionsMgmtConfigSchema;
 let sessionsClient: SessionsClient;
 let initialTable: UISession[];
 let api: SearchSessionsMgmtAPI;
@@ -24,10 +27,21 @@ let api: SearchSessionsMgmtAPI;
 describe('Background Search Session Management Home', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
+    mockConfig = {
+      expiresSoonWarning: moment.duration('1d'),
+      maxSessions: 2000,
+      refreshInterval: moment.duration('1s'),
+      refreshTimeout: moment.duration('10m'),
+    };
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
-    api = new SearchSessionsMgmtAPI(sessionsClient, mockUrls, mockCoreSetup.notifications);
+    api = new SearchSessionsMgmtAPI(
+      sessionsClient,
+      mockUrls,
+      mockCoreSetup.notifications,
+      mockConfig
+    );
 
     initialTable = [
       {
@@ -60,6 +74,7 @@ describe('Background Search Session Management Home', () => {
             uiSettings={mockCoreSetup.uiSettings}
             initialTable={initialTable}
             documentation={new AsyncSearchIntroDocumentation()}
+            config={mockConfig}
           />
         </LocaleWrapper>
       );

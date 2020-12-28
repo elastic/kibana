@@ -7,15 +7,13 @@
 import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HttpStart, IUiSettingsClient } from 'kibana/public';
+import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import * as Rx from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
 import { TableText } from '../';
-import {
-  ActionComplete,
-  REFRESH_INTERVAL_MS,
-  UISession,
-} from '../../../../../common/search/sessions_mgmt';
+import { SessionsMgmtConfigSchema } from '../..';
+import { ActionComplete, UISession } from '../../../../../common/search/sessions_mgmt';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
 import { getAppFilter } from './app_filter';
@@ -28,9 +26,17 @@ interface Props {
   http: HttpStart;
   initialTable: UISession[] | null;
   uiSettings: IUiSettingsClient;
+  config: SessionsMgmtConfigSchema;
 }
 
-export function SearchSessionsMgmtTable({ api, http, uiSettings, initialTable, ...props }: Props) {
+export function SearchSessionsMgmtTable({
+  api,
+  http,
+  uiSettings,
+  initialTable,
+  config,
+  ...props
+}: Props) {
   const [tableData, setTableData] = useState<UISession[]>(initialTable ? initialTable : []);
   const [isLoading, setIsLoading] = useState(false);
   const [pagination, setPagination] = useState({ pageIndex: 0 });
@@ -46,9 +52,19 @@ export function SearchSessionsMgmtTable({ api, http, uiSettings, initialTable, .
     setIsLoading(false);
   };
 
-  // 3s auto-refresh
+  // configurable auto-refresh
   useEffect(() => {
-    const refreshRx = Rx.interval(REFRESH_INTERVAL_MS).pipe(switchMap(doRefresh)).subscribe();
+    const refreshInterval = moment.duration(config.refreshInterval);
+    const refreshRx = Rx.interval(refreshInterval.asMilliseconds())
+      .pipe(
+        switchMap(doRefresh),
+        catchError((err) => {
+          // eslint-disable-next-line no-console
+          console.error(err);
+          return Rx.of(null);
+        })
+      )
+      .subscribe();
 
     return () => {
       refreshRx.unsubscribe();

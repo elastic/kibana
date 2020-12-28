@@ -8,15 +8,18 @@ import { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { MockedKeys } from '@kbn/utility-types/jest';
 import { mount } from 'enzyme';
 import { CoreSetup } from 'kibana/public';
+import moment from 'moment';
 import { ReactElement } from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
+import { SessionsMgmtConfigSchema } from '../';
 import { ActionComplete, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 import { getColumns } from './get_columns';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
+let mockConfig: SessionsMgmtConfigSchema;
 let api: SearchSessionsMgmtAPI;
 let sessionsClient: SessionsClient;
 let handleAction: ActionComplete;
@@ -25,10 +28,21 @@ let mockSession: UISession;
 describe('Background Sessions Management table column factory', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
+    mockConfig = {
+      expiresSoonWarning: moment.duration('1d'),
+      maxSessions: 2000,
+      refreshInterval: moment.duration('1s'),
+      refreshTimeout: moment.duration('10m'),
+    };
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
-    api = new SearchSessionsMgmtAPI(sessionsClient, mockUrls, mockCoreSetup.notifications);
+    api = new SearchSessionsMgmtAPI(
+      sessionsClient,
+      mockUrls,
+      mockCoreSetup.notifications,
+      mockConfig
+    );
     mockCoreSetup.uiSettings.get.mockImplementation((key) => {
       return key === 'dateFormat:tz' ? 'UTC' : null;
     });

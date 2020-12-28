@@ -5,18 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'kibana/public';
+import type { NotificationsStart } from 'kibana/public';
 import moment from 'moment';
-import { SharePluginStart } from 'src/plugins/share/public';
-import { ISessionsClient } from '../../../../../../../src/plugins/data/public';
-import { BackgroundSessionSavedObjectAttributes } from '../../../../common';
-import {
-  ACTION,
-  EXPIRES_SOON_IN_DAYS,
-  SESSIONS_LISTING_SEARCH_SIZE,
-  STATUS,
-  UISession,
-} from '../../../../common/search/sessions_mgmt';
+import * as Rx from 'rxjs';
+import { first, mapTo, tap } from 'rxjs/operators';
+import type { SharePluginStart } from 'src/plugins/share/public';
+import { SessionsMgmtConfigSchema } from '../';
+import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
+import type { BackgroundSessionSavedObjectAttributes } from '../../../../common';
+import type { UISession } from '../../../../common/search/sessions_mgmt';
+import { ACTION, STATUS } from '../../../../common/search/sessions_mgmt';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
@@ -26,9 +24,10 @@ interface BackgroundSessionSavedObject {
 }
 
 // Helper: factory for a function to map server objects to UI objects
-const mapToUISession = (urls: UrlGeneratorsStart) => async (
-  savedObject: BackgroundSessionSavedObject
-): Promise<UISession> => {
+const mapToUISession = (
+  urls: UrlGeneratorsStart,
+  { expiresSoonWarning }: SessionsMgmtConfigSchema
+) => async (savedObject: BackgroundSessionSavedObject): Promise<UISession> => {
   // Actions: always allow delete
   const actions = [ACTION.DELETE];
 
@@ -50,7 +49,7 @@ const mapToUISession = (urls: UrlGeneratorsStart) => async (
       const expiresDate = moment(created);
       const duration = moment.duration(expiresDate.diff(currentDate));
 
-      if (duration.asDays() <= EXPIRES_SOON_IN_DAYS) {
+      if (duration.asDays() <= expiresSoonWarning.asDays()) {
         // TODO: handle negatives by setting status to expired?
         expiresSoon = true;
       }
@@ -91,20 +90,42 @@ export class SearchSessionsMgmtAPI {
   constructor(
     private sessionsClient: ISessionsClient,
     private urls: UrlGeneratorsStart,
-    private notifications: NotificationsStart
+    private notifications: NotificationsStart,
+    private config: SessionsMgmtConfigSchema
   ) {}
 
   public async fetchTableData(): Promise<UISession[] | null> {
     try {
-      const result = await this.sessionsClient.find({
-        page: 1,
-        perPage: SESSIONS_LISTING_SEARCH_SIZE,
-        sortField: 'created',
-        sortOrder: 'asc',
-      });
-      if (result.saved_objects) {
+      const refreshTimeout = moment.duration(this.config.refreshTimeout);
+      const result = await Rx.race<{ saved_objects: object[] } | null>([
+        // fetch the background sessions before timeout triggers
+        this.sessionsClient.find({
+          page: 1,
+          perPage: this.config.maxSessions,
+          sortField: 'created',
+          sortOrder: 'asc',
+        }),
+
+        // this gets unsubscribed if the happy-path observable triggers first
+        Rx.timer(refreshTimeout.asMilliseconds()).pipe(
+          tap(() => {
+            this.notifications.toasts.addDanger(
+              i18n.translate('xpack.data.mgmt.searchSessions.api.fetchTimeout', {
+                defaultMessage:
+                  'Fetching the Background Session info timed out after {timeout} seconds',
+                values: { timeout: refreshTimeout.asSeconds() },
+              })
+            );
+          }),
+          mapTo(null)
+        ),
+      ])
+        .pipe(first())
+        .toPromise();
+
+      if (result && result.saved_objects) {
         const savedObjects = result.saved_objects as BackgroundSessionSavedObject[];
-        return await Promise.all(savedObjects.map(mapToUISession(this.urls)));
+        return await Promise.all(savedObjects.map(mapToUISession(this.urls, this.config)));
       }
       return null;
     } catch (err) {

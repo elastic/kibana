@@ -403,6 +403,7 @@ describe('BackgroundSessionService', () => {
         search: {
           sendToBackground: {
             enabled: true,
+            sessionsManagement: {} as any,
           },
         },
       });

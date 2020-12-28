@@ -5,13 +5,14 @@
  */
 
 import { CoreSetup } from 'kibana/public';
-import { ManagementAppMountParams } from 'src/plugins/management/public';
-import {
-  APP,
+import type { ManagementAppMountParams } from 'src/plugins/management/public';
+import type {
   AppDependencies,
   IManagementSectionsPluginsSetup,
   IManagementSectionsPluginsStart,
+  SessionsMgmtConfigSchema,
 } from '../';
+import { APP } from '../';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { renderApp } from './render';
@@ -19,6 +20,7 @@ import { renderApp } from './render';
 export class SearchSessionsMgmtApp {
   constructor(
     private coreSetup: CoreSetup<IManagementSectionsPluginsStart>,
+    private config: SessionsMgmtConfigSchema,
     private params: ManagementAppMountParams,
     private pluginsSetup: IManagementSectionsPluginsSetup
   ) {}
@@ -42,13 +44,19 @@ export class SearchSessionsMgmtApp {
     params.setBreadcrumbs([{ text: pluginName }]);
 
     const { sessionsClient } = data.search;
-    const api = new SearchSessionsMgmtAPI(sessionsClient, share.urlGenerators, notifications);
+    const api = new SearchSessionsMgmtAPI(
+      sessionsClient,
+      share.urlGenerators,
+      notifications,
+      this.config
+    );
 
     const documentation = new AsyncSearchIntroDocumentation();
     documentation.setup(docLinks);
 
     const dependencies: AppDependencies = {
       plugins: pluginsSetup,
+      config: this.config,
       documentation,
       api,
       http,

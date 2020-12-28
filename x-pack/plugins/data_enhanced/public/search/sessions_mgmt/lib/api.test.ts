@@ -4,22 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import Boom from '@hapi/boom';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup } from 'kibana/public';
 import sinon from 'sinon';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
+import { SessionsMgmtConfigSchema } from '../';
 import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
+let mockConfig: SessionsMgmtConfigSchema;
 let sessionsClient: SessionsClient;
 let findSessions: sinon.SinonStub;
 
 describe('Background Sessions Management API', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
+    mockConfig = {
+      expiresSoonWarning: moment.duration('1d'),
+      maxSessions: 2000,
+      refreshInterval: moment.duration('1s'),
+      refreshTimeout: moment.duration('10m'),
+    };
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
 
@@ -38,7 +47,12 @@ describe('Background Sessions Management API', () => {
 
   describe('listing', () => {
     test('fetchDataTable calls the listing endpoint', async () => {
-      const api = new SearchSessionsMgmtAPI(sessionsClient, mockUrls, mockCoreSetup.notifications);
+      const api = new SearchSessionsMgmtAPI(
+        sessionsClient,
+        mockUrls,
+        mockCoreSetup.notifications,
+        mockConfig
+      );
       expect(await api.fetchTableData()).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -64,7 +78,12 @@ describe('Background Sessions Management API', () => {
         throw Boom.badImplementation('implementation is so bad');
       });
 
-      const api = new SearchSessionsMgmtAPI(sessionsClient, mockUrls, mockCoreSetup.notifications);
+      const api = new SearchSessionsMgmtAPI(
+        sessionsClient,
+        mockUrls,
+        mockCoreSetup.notifications,
+        mockConfig
+      );
       await api.fetchTableData();
 
       expect(mockCoreSetup.notifications.toasts.addError).toHaveBeenCalledWith(
@@ -76,7 +95,12 @@ describe('Background Sessions Management API', () => {
 
   describe('delete', () => {
     test('send delete calls the delete endpoint with a session ID', async () => {
-      const api = new SearchSessionsMgmtAPI(sessionsClient, mockUrls, mockCoreSetup.notifications);
+      const api = new SearchSessionsMgmtAPI(
+        sessionsClient,
+        mockUrls,
+        mockCoreSetup.notifications,
+        mockConfig
+      );
       await api.sendDelete('abc-123-cool-session-ID');
 
       expect(mockCoreSetup.notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -89,7 +113,12 @@ describe('Background Sessions Management API', () => {
         throw Boom.badImplementation('implementation is so bad');
       });
 
-      const api = new SearchSessionsMgmtAPI(sessionsClient, mockUrls, mockCoreSetup.notifications);
+      const api = new SearchSessionsMgmtAPI(
+        sessionsClient,
+        mockUrls,
+        mockCoreSetup.notifications,
+        mockConfig
+      );
       await api.sendDelete('abc-123-cool-session-ID');
 
       expect(mockCoreSetup.notifications.toasts.addError).toHaveBeenCalledWith(

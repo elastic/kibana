@@ -17,6 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { HttpStart, IUiSettingsClient } from 'kibana/public';
 import React from 'react';
+import { SessionsMgmtConfigSchema } from '../';
 import { UISession } from '../../../../common/search/sessions_mgmt';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
@@ -29,6 +30,7 @@ interface Props {
   http: HttpStart;
   initialTable: UISession[] | null;
   uiSettings: IUiSettingsClient;
+  config: SessionsMgmtConfigSchema;
 }
 
 export function SearchSessionsMgmtHome({ documentation, ...tableProps }: Props) {

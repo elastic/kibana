@@ -10,6 +10,12 @@ export const configSchema = schema.object({
   search: schema.object({
     sendToBackground: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
+      sessionsManagement: schema.object({
+        maxSessions: schema.number({ defaultValue: 10000 }),
+        refreshInterval: schema.duration({ defaultValue: '3s' }),
+        refreshTimeout: schema.duration({ defaultValue: '1m' }),
+        expiresSoonWarning: schema.duration({ defaultValue: '1d' }),
+      }),
     }),
   }),
 });

@@ -5,13 +5,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, HttpStart, I18nStart, IUiSettingsClient } from 'kibana/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { ManagementSetup } from 'src/plugins/management/public';
-import { SharePluginStart } from 'src/plugins/share/public';
-import { DataEnhancedStartDependencies } from '../../plugin';
-import { SearchSessionsMgmtAPI } from './lib/api';
-import { AsyncSearchIntroDocumentation } from './lib/documentation';
+import type { HttpStart, I18nStart, IUiSettingsClient } from 'kibana/public';
+import { CoreSetup } from 'kibana/public';
+import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { ManagementSetup } from 'src/plugins/management/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
+import type { ConfigSchema } from '../../../config';
+import type { DataEnhancedStartDependencies } from '../../plugin';
+import type { SearchSessionsMgmtAPI } from './lib/api';
+import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;
@@ -30,6 +32,7 @@ export interface AppDependencies {
   api: SearchSessionsMgmtAPI;
   http: HttpStart;
   i18n: I18nStart;
+  config: SessionsMgmtConfigSchema;
 }
 
 export const APP = {
@@ -40,8 +43,11 @@ export const APP = {
     }),
 };
 
+export type SessionsMgmtConfigSchema = ConfigSchema['search']['sendToBackground']['sessionsManagement'];
+
 export function registerBackgroundSessionsMgmt(
   coreSetup: CoreSetup<DataEnhancedStartDependencies>,
+  config: SessionsMgmtConfigSchema,
   services: IManagementSectionsPluginsSetup
 ) {
   services.management.sections.section.kibana.registerApp({
@@ -50,7 +56,7 @@ export function registerBackgroundSessionsMgmt(
     order: 2,
     mount: async (params) => {
       const { SearchSessionsMgmtApp: MgmtApp } = await import('./application');
-      const mgmtApp = new MgmtApp(coreSetup, params, services);
+      const mgmtApp = new MgmtApp(coreSetup, config, params, services);
       return mgmtApp.mountManagementSection();
     },
   });
