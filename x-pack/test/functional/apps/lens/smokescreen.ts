@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
-  const retry = getService('retry');
 
   describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -238,7 +237,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // check for value labels
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      let data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.bars?.[0].labels).not.to.eql(0);
 
       // switch to stacked bar chart
@@ -246,7 +245,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // check for value labels
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.bars?.[0].labels.length).to.eql(0);
     });
 
@@ -258,14 +257,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      let data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const data = await PageObjects.lens.getCurrentChartDebugState();
+      data = await PageObjects.lens.getCurrentChartDebugState();
       expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
     });
 
