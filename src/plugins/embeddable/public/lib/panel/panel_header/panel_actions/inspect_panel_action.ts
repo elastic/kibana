@@ -59,7 +59,10 @@ export class InspectPanelAction implements Action<ActionContext> {
       title: embeddable.getTitle(),
       options: {
         fileName:
-          embeddable.getTitle() ||
+          embeddable.getTitle() || // pick the visible title
+          embeddable.getInput().title || // or the custom title if used, but currently hidden
+          embeddable.getOutput().defaultTitle || // or the saved title
+          // in the very last resort use "untitled"
           i18n.translate('embeddableApi.panel.inspectPanel.untitledEmbeddableFilename', {
             defaultMessage: 'untitled',
           }),
