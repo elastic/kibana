@@ -216,7 +216,7 @@ const MovingAveragePopup = () => {
         </p>
         <p>
           {i18n.translate('xpack.lens.indexPattern.movingAverage.limitations', {
-            defaultMessage: 'It works only for data histograms.',
+            defaultMessage: 'It works only for date histograms.',
           })}
         </p>
       </EuiText>
