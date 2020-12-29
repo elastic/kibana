@@ -112,7 +112,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                   onClick={() => {
                     const value = table.rows[rowIndex][column.id];
                     const eventData = { table, column: columnIndex, row: rowIndex, value };
-                    uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER' as TriggerId, {
+                    uiActions.getTrigger('VALUE_CLICK_TRIGGER').exec({
                       data: { data: [eventData] },
                     });
                   }}
@@ -145,7 +145,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                     onClick={() => {
                       const value = table.rows[rowIndex][column.id];
                       const eventData = { table, column: columnIndex, row: rowIndex, value };
-                      uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER' as TriggerId, {
+                      uiActions.getTrigger('VALUE_CLICK_TRIGGER').exec({
                         data: { data: [eventData], negate: true },
                       });
                     }}
