@@ -35,7 +35,7 @@ import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Alerts', () => {
+describe.skip('Alerts', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
       cleanKibana();
