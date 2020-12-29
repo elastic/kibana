@@ -8,6 +8,7 @@
     "src/**/__fixtures__/**/*",
     "src/core/**/*",
     "src/plugins/dev_tools/**/*",
+    "src/plugins/expressions/**/*",
     "src/plugins/inspector/**/*",
     "src/plugins/kibana_legacy/**/*",
     "src/plugins/kibana_react/**/*",
@@ -29,6 +30,7 @@
   "references": [
     { "path": "./src/core/tsconfig.json" },
     { "path": "./src/plugins/dev_tools/tsconfig.json" },
+    { "path": "./src/plugins/expressions/tsconfig.json" },
     { "path": "./src/plugins/inspector/tsconfig.json" },
     { "path": "./src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "./src/plugins/kibana_react/tsconfig.json" },

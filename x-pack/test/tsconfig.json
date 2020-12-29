@@ -9,6 +9,7 @@
   "exclude": ["../typings/jest.d.ts"],
   "references": [
     { "path": "../../src/core/tsconfig.json" },
+    { "path": "../../src/plugins/expressions/tsconfig.json" },
     { "path": "../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "../../src/plugins/kibana_utils/tsconfig.json" },
