@@ -24,8 +24,8 @@ export const boundsDescendingRaw = [
   {
     bound: Infinity,
     interval: moment.duration(1, 'year'),
-    boundLabel: i18n.translate('data.search.timeBuckets.yearLabel', {
-      defaultMessage: 'a year',
+    boundLabel: i18n.translate('data.search.timeBuckets.infinityLabel', {
+      defaultMessage: 'More than a year',
     }),
     intervalLabel: i18n.translate('data.search.timeBuckets.yearLabel', {
       defaultMessage: 'a year',
@@ -58,7 +58,7 @@ export const boundsDescendingRaw = [
     interval: moment.duration(1, 'd'),
     boundLabel: i18n.translate('data.search.timeBuckets.dayLabel', {
       defaultMessage: '{amount, plural, one {a day} other {# days}}',
-      values: { amount: 21 },
+      values: { amount: 7 },
     }),
     intervalLabel: i18n.translate('data.search.timeBuckets.dayLabel', {
       defaultMessage: '{amount, plural, one {a day} other {# days}}',
