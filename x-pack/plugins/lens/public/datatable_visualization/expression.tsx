@@ -22,7 +22,7 @@ import {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
 } from '@elastic/eui';
-import { orderBy } from 'lodash';
+
 import { IAggType } from 'src/plugins/data/public';
 import { Datatable, DatatableColumnMeta, RenderMode } from 'src/plugins/expressions';
 import {
@@ -41,6 +41,7 @@ import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
+import { getSortingCriteria } from './sorting';
 
 export const LENS_EDIT_SORT_ACTION = 'sort';
 
@@ -92,6 +93,10 @@ export interface DatatableRender {
   value: DatatableProps;
 }
 
+function isRange(meta: { params?: { id?: string } } | undefined) {
+  return meta?.params?.id === 'range';
+}
+
 export const getDatatable = ({
   formatFactory,
 }: {
@@ -139,17 +144,18 @@ export const getDatatable = ({
 
     if (sortBy && sortDirection !== 'none') {
       // Sort on raw values for these types, while use the formatted value for the rest
-      const sortingCriteria = ['number', 'date'].includes(
-        columnsReverseLookup[sortBy]?.meta?.type || ''
-      )
-        ? sortBy
-        : (row: Record<string, unknown>) => formatters[sortBy]?.convert(row[sortBy]);
-      // replace the table here
-      context.inspectorAdapters.tables[layerId].rows = orderBy(
-        firstTable.rows || [],
-        [sortingCriteria],
-        sortDirection as Direction
+      const sortingCriteria = getSortingCriteria(
+        isRange(columnsReverseLookup[sortBy]?.meta)
+          ? 'range'
+          : columnsReverseLookup[sortBy]?.meta?.type,
+        sortBy,
+        formatters[sortBy],
+        sortDirection
       );
+      // replace the table here
+      context.inspectorAdapters.tables[layerId].rows = (firstTable.rows || [])
+        .slice()
+        .sort(sortingCriteria);
       // replace also the local copy
       firstTable.rows = context.inspectorAdapters.tables[layerId].rows;
     }
