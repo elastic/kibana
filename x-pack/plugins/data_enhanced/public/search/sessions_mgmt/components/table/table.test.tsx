@@ -5,11 +5,15 @@
  */
 
 import { MockedKeys } from '@kbn/utility-types/jest';
+import { waitFor } from '@testing-library/react';
 import { mount, ReactWrapper } from 'enzyme';
 import { CoreSetup } from 'kibana/public';
 import moment from 'moment';
 import React from 'react';
+import sinon from 'sinon';
 import { coreMock } from 'src/core/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { SavedObjectsFindResponse } from 'src/core/server';
 import { SessionsClient } from 'src/plugins/data/public/search';
 import { SessionsMgmtConfigSchema } from '../../';
 import { STATUS, UISession } from '../../../../../common/search/sessions_mgmt';
@@ -19,6 +23,7 @@ import { SearchSessionsMgmtTable } from './table';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockConfig: SessionsMgmtConfigSchema;
+let sessionsClient: SessionsClient;
 let initialTable: UISession[];
 let api: SearchSessionsMgmtAPI;
 
@@ -26,19 +31,11 @@ describe('Background Search Session Management Table', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockConfig = {
-      expiresSoonWarning: moment.duration('1d'),
+      expiresSoonWarning: moment.duration(1, 'days'),
       maxSessions: 2000,
-      refreshInterval: moment.duration('1s'),
-      refreshTimeout: moment.duration('10m'),
+      refreshInterval: moment.duration(1, 'seconds'),
+      refreshTimeout: moment.duration(10, 'minutes'),
     };
-    const sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
-
-    api = new SearchSessionsMgmtAPI(
-      sessionsClient,
-      mockUrls,
-      mockCoreSetup.notifications,
-      mockConfig
-    );
 
     initialTable = [
       {
@@ -53,6 +50,14 @@ describe('Background Search Session Management Table', () => {
         expiresSoon: false,
       },
     ];
+
+    sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
+    api = new SearchSessionsMgmtAPI(
+      sessionsClient,
+      mockUrls,
+      mockCoreSetup.notifications,
+      mockConfig
+    );
   });
 
   describe('renders', () => {
@@ -100,6 +105,43 @@ describe('Background Search Session Management Table', () => {
           "View",
         ]
       `);
+    });
+  });
+
+  describe('fetching sessions data', () => {
+    test('refresh button uses the session client', async () => {
+      const findSessions = sinon
+        .stub(sessionsClient, 'find')
+        .callsFake(async () => ({} as SavedObjectsFindResponse<unknown>));
+
+      mockConfig = {
+        ...mockConfig,
+        refreshInterval: moment.duration(1, 'day'),
+        refreshTimeout: moment.duration(2, 'days'),
+      };
+
+      const table = mount(
+        <LocaleWrapper>
+          <SearchSessionsMgmtTable
+            api={api}
+            http={mockCoreSetup.http}
+            uiSettings={mockCoreSetup.uiSettings}
+            initialTable={[]}
+            config={mockConfig}
+          />
+        </LocaleWrapper>
+      );
+
+      expect(findSessions.called).toBe(false);
+
+      const buttonSelector = `[data-test-subj="session-mgmt-table-btn-refresh"] button`;
+
+      await waitFor(() => {
+        table.find(buttonSelector).first().simulate('click');
+        table.update();
+      });
+
+      expect(findSessions.called).toBe(true);
     });
   });
 });

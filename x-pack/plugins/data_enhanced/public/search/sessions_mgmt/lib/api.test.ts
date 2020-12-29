@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import Boom from '@hapi/boom';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup } from 'kibana/public';
+import moment from 'moment';
+import * as Rx from 'rxjs';
 import sinon from 'sinon';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
@@ -31,7 +32,6 @@ describe('Background Sessions Management API', () => {
     };
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
-
     findSessions = sinon.stub(sessionsClient, 'find').callsFake(
       async () =>
         ({
@@ -73,8 +73,8 @@ describe('Background Sessions Management API', () => {
       `);
     });
 
-    test('error handling', async () => {
-      findSessions.callsFake(() => {
+    test('handle error from sessionsClient response', async () => {
+      findSessions.callsFake(async () => {
         throw Boom.badImplementation('implementation is so bad');
       });
 
@@ -89,6 +89,30 @@ describe('Background Sessions Management API', () => {
       expect(mockCoreSetup.notifications.toasts.addError).toHaveBeenCalledWith(
         new Error('implementation is so bad'),
         { title: 'Failed to refresh the page!' }
+      );
+    });
+
+    test('handle timeout error', async () => {
+      mockConfig = {
+        ...mockConfig,
+        refreshInterval: moment.duration(1, 'hours'),
+        refreshTimeout: moment.duration(1, 'seconds'),
+      };
+
+      findSessions.callsFake(async () => {
+        return await Rx.timer(2000).toPromise();
+      });
+
+      const api = new SearchSessionsMgmtAPI(
+        sessionsClient,
+        mockUrls,
+        mockCoreSetup.notifications,
+        mockConfig
+      );
+      await api.fetchTableData();
+
+      expect(mockCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        'Fetching the Background Session info timed out after 1 seconds'
       );
     });
   });
@@ -109,7 +133,7 @@ describe('Background Sessions Management API', () => {
     });
 
     test('error if deleting shows a toast message', async () => {
-      sinon.stub(sessionsClient, 'delete').callsFake(() => {
+      sinon.stub(sessionsClient, 'delete').callsFake(async () => {
         throw Boom.badImplementation('implementation is so bad');
       });
 

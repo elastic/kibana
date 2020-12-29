@@ -91,6 +91,7 @@ export function SearchSessionsMgmtTable({
           onClick={doRefresh}
           disabled={isLoading}
           isLoading={isLoading}
+          data-test-subj="session-mgmt-table-btn-refresh"
         >
           <FormattedMessage
             id="xpack.data.mgmt.searchSessions.search.tools.refresh"

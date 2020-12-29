@@ -29,10 +29,10 @@ describe('Background Sessions Management table column factory', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockConfig = {
-      expiresSoonWarning: moment.duration('1d'),
+      expiresSoonWarning: moment.duration(1, 'days'),
       maxSessions: 2000,
-      refreshInterval: moment.duration('1s'),
-      refreshTimeout: moment.duration('10m'),
+      refreshInterval: moment.duration(1, 'seconds'),
+      refreshTimeout: moment.duration(10, 'minutes'),
     };
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });

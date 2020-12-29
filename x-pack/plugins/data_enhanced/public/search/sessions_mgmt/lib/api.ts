@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from 'kibana/public';
 import moment from 'moment';
 import * as Rx from 'rxjs';
-import { first, mapTo, tap } from 'rxjs/operators';
+import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import { SessionsMgmtConfigSchema } from '../';
 import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
@@ -95,51 +95,51 @@ export class SearchSessionsMgmtAPI {
   ) {}
 
   public async fetchTableData(): Promise<UISession[] | null> {
+    interface FetchResult {
+      saved_objects: object[];
+    }
+
+    const refreshTimeout = moment.duration(this.config.refreshTimeout);
+
+    const fetch$ = Rx.from(
+      this.sessionsClient.find({
+        page: 1,
+        perPage: this.config.maxSessions,
+        sortField: 'created',
+        sortOrder: 'asc',
+      })
+    );
+    const timeout$ = Rx.timer(refreshTimeout.asMilliseconds()).pipe(
+      tap(() => {
+        this.notifications.toasts.addDanger(
+          i18n.translate('xpack.data.mgmt.searchSessions.api.fetchTimeout', {
+            defaultMessage:
+              'Fetching the Background Session info timed out after {timeout} seconds',
+            values: { timeout: refreshTimeout.asSeconds() },
+          })
+        );
+      }),
+      mapTo(null)
+    );
+
+    // fetch the background sessions before timeout triggers
     try {
-      const refreshTimeout = moment.duration(this.config.refreshTimeout);
-      const result = await Rx.race<{ saved_objects: object[] } | null>([
-        // fetch the background sessions before timeout triggers
-        this.sessionsClient.find({
-          page: 1,
-          perPage: this.config.maxSessions,
-          sortField: 'created',
-          sortOrder: 'asc',
-        }),
-
-        // this gets unsubscribed if the happy-path observable triggers first
-        Rx.timer(refreshTimeout.asMilliseconds()).pipe(
-          tap(() => {
-            this.notifications.toasts.addDanger(
-              i18n.translate('xpack.data.mgmt.searchSessions.api.fetchTimeout', {
-                defaultMessage:
-                  'Fetching the Background Session info timed out after {timeout} seconds',
-                values: { timeout: refreshTimeout.asSeconds() },
-              })
-            );
-          }),
-          mapTo(null)
-        ),
-      ])
-        .pipe(first())
-        .toPromise();
-
+      const result = await Rx.race<FetchResult | null>(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
         const savedObjects = result.saved_objects as BackgroundSessionSavedObject[];
         return await Promise.all(savedObjects.map(mapToUISession(this.urls, this.config)));
       }
-      return null;
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err);
-
       this.notifications.toasts.addError(err, {
         title: i18n.translate('xpack.data.mgmt.searchSessions.api.fetchError', {
           defaultMessage: 'Failed to refresh the page!',
         }),
       });
-
-      return null;
     }
+
+    return null;
   }
 
   // Delete
