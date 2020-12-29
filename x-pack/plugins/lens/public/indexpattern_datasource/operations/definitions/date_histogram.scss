@@ -1,10 +1,17 @@
-.lnsIndexPatternDimensionEditor__helpPopover {
+.lnsHelpPopover {
   // max-height: 500px;
-  max-width: 400px;
+  // max-width: 400px;
   // overflow-y: scroll;
   // overflow-x: hidden;
+  max-width: $euiSize * 35;
 }
 
-// .lnsIndexPatternDimensionEditor__helpPopover {
+// .lnsHelpPopover {
 //   width: 325px;
 // }
+
+.lnsHelpPopover__content {
+  @include euiYScrollWithShadows;
+  max-height: 40vh;
+  padding: $euiSizeM;
+}

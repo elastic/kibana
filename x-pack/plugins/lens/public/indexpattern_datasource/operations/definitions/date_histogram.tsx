@@ -370,16 +370,16 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
       ownFocus
-      panelClassName="lnsIndexPatternDimensionEditor__helpPopover"
+      panelClassName="lnsHelpPopover"
+      panelPaddingSize="none"
     >
       <EuiPopoverTitle>
-        <EuiIcon type="help" />{' '}
         {i18n.translate('xpack.lens.indexPattern.dateHistogram.titleHelp', {
           defaultMessage: 'How does the auto date histogram work?',
         })}
       </EuiPopoverTitle>
 
-      <EuiText size="s" className="lnsIndexPatternDimensionEditor__dateHistogramContentPopover">
+      <EuiText className="lnsHelpPopover__content" size="s">
         <p>
           {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBasicExplanation', {
             defaultMessage: 'Splits a date field into buckets by interval.',

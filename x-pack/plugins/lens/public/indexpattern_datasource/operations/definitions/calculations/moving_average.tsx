@@ -194,17 +194,17 @@ const MovingAveragePopup = () => {
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
       ownFocus
-      panelClassName="lnsIndexPatternDimensionEditor__helpPopover"
+      panelClassName="lnsHelpPopover"
+      panelPaddingSize="none"
     >
       <EuiPopoverTitle>
-        <EuiIcon type="help" />{' '}
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.titleHelp"
           defaultMessage="How does moving average work?"
         />
       </EuiPopoverTitle>
 
-      <EuiText size="s">
+      <EuiText className="lnsHelpPopover__content" size="s">
         <p>
           <FormattedMessage
             id="xpack.lens.indexPattern.movingAverage.basicExplanation"

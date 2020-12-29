@@ -45,16 +45,16 @@ const GranularityHelpPopover = () => {
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
       ownFocus
-      panelClassName="lnsIndexPatternDimensionEditor__helpPopover"
+      panelClassName="lnsHelpPopover"
+      panelPaddingSize="none"
     >
       <EuiPopoverTitle>
-        <EuiIcon type="help" />{' '}
         {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverTitle', {
           defaultMessage: 'How does interval granularity work?',
         })}
       </EuiPopoverTitle>
 
-      <EuiText size="s">
+      <EuiText className="lnsHelpPopover__content" size="s">
         <p>
           {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverBasicExplanation', {
             defaultMessage:
