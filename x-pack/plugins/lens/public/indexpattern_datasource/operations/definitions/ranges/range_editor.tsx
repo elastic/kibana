@@ -9,13 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiRange,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonIcon,
   EuiToolTip,
-  EuiCode,
 } from '@elastic/eui';
 import type { IFieldFormat } from 'src/plugins/data/public';
 import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
