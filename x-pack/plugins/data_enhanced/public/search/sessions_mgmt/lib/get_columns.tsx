@@ -14,17 +14,18 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpStart, IUiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 import { capitalize } from 'lodash';
 import moment from 'moment';
 import React from 'react';
+import { SessionsMgmtConfigSchema } from '../';
 import { ActionComplete, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 import { TableText } from '../components';
 import { InlineActions, PopoverActionsMenu } from '../components/actions';
 import { StatusIndicator } from '../components/status';
 import { SearchSessionsMgmtAPI } from './api';
 import { dateString } from './date_string';
+import { getExpirationStatus } from './get_expiration_status';
 
 // Helper function: translate an app string to EuiIcon-friendly string
 const appToIcon = (app: string) => {
@@ -36,7 +37,7 @@ const appToIcon = (app: string) => {
 
 export const getColumns = (
   api: SearchSessionsMgmtAPI,
-  http: HttpStart,
+  config: SessionsMgmtConfigSchema,
   uiSettings: IUiSettingsClient,
   handleAction: ActionComplete
 ): Array<EuiBasicTableColumn<UISession>> => {
@@ -152,29 +153,23 @@ export const getColumns = (
       field: 'status',
       name: '',
       sortable: false,
-      render: (status, { id, expires, expiresSoon }) => {
-        if (expiresSoon) {
-          const tNow = moment().valueOf();
-          const tFuture = moment(expires).valueOf();
+      render: (status, { id, expires }) => {
+        const tNow = moment.utc().valueOf();
+        const tFuture = moment.utc(expires).valueOf();
+        const durationToExpire = moment.duration(tFuture - tNow);
+        const expiresInDays = Math.floor(durationToExpire.asDays());
+        const sufficientDays = Math.ceil(moment.duration(config.expiresSoonWarning).asDays());
 
-          const numDays = Math.floor(moment.duration(tFuture - tNow).asDays());
-          const toolTipContent = i18n.translate(
-            'xpack.data.mgmt.searchSessions.status.expiresSoonIn',
-            {
-              defaultMessage: 'Expires in {numDays} days',
-              values: { numDays },
-            }
+        if (durationToExpire.valueOf() > 0 && expiresInDays <= sufficientDays) {
+          const { toolTipContent, statusContent } = getExpirationStatus(
+            durationToExpire,
+            expiresInDays
           );
 
           return (
             <EuiToolTip content={toolTipContent}>
-              <EuiBadge color="warning">
-                <FormattedMessage
-                  id="xpack.data.mgmt.searchSessions.status.expiresSoonTooltip"
-                  defaultMessage="{numDays} days"
-                  data-test-subj="session-mgmt-table-col-expires"
-                  values={{ numDays }}
-                />
+              <EuiBadge color="warning" data-test-subj="session-mgmt-table-col-expires">
+                {statusContent}
               </EuiBadge>
             </EuiToolTip>
           );

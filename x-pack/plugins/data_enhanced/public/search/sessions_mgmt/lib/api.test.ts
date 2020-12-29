@@ -62,7 +62,6 @@ describe('Background Sessions Management API', () => {
             "appId": "pizza",
             "created": undefined,
             "expires": undefined,
-            "expiresSoon": false,
             "id": "hello-pizza-123",
             "isViewable": true,
             "name": "Veggie",

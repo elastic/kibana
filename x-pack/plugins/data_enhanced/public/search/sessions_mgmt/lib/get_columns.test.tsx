@@ -60,12 +60,11 @@ describe('Background Sessions Management table column factory', () => {
       created: '2020-12-02T00:19:32Z',
       expires: '2020-12-07T00:19:32Z',
       isViewable: true,
-      expiresSoon: false,
     };
   });
 
   test('returns columns', () => {
-    const columns = getColumns(api, mockCoreSetup.http, mockCoreSetup.uiSettings, handleAction);
+    const columns = getColumns(api, mockConfig, mockCoreSetup.uiSettings, handleAction);
     expect(columns).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -119,7 +118,7 @@ describe('Background Sessions Management table column factory', () => {
     test('rendering', () => {
       const [, nameColumn] = getColumns(
         api,
-        mockCoreSetup.http,
+        mockConfig,
         mockCoreSetup.uiSettings,
         handleAction
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
@@ -135,7 +134,7 @@ describe('Background Sessions Management table column factory', () => {
     test('render in_progress', () => {
       const [, , status] = getColumns(
         api,
-        mockCoreSetup.http,
+        mockConfig,
         mockCoreSetup.uiSettings,
         handleAction
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
@@ -151,7 +150,7 @@ describe('Background Sessions Management table column factory', () => {
     test('error handling', () => {
       const [, , status] = getColumns(
         api,
-        mockCoreSetup.http,
+        mockConfig,
         mockCoreSetup.uiSettings,
         handleAction
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
@@ -172,7 +171,7 @@ describe('Background Sessions Management table column factory', () => {
 
       const [, , , createdDateCol] = getColumns(
         api,
-        mockCoreSetup.http,
+        mockConfig,
         mockCoreSetup.uiSettings,
         handleAction
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
@@ -187,7 +186,7 @@ describe('Background Sessions Management table column factory', () => {
 
       const [, , , createdDateCol] = getColumns(
         api,
-        mockCoreSetup.http,
+        mockConfig,
         mockCoreSetup.uiSettings,
         handleAction
       ) as Array<EuiTableFieldDataColumnType<UISession>>;
@@ -200,7 +199,7 @@ describe('Background Sessions Management table column factory', () => {
     test('error handling', () => {
       const [, , , createdDateCol] = getColumns(
         api,
-        mockCoreSetup.http,
+        mockConfig,
         mockCoreSetup.uiSettings,
         handleAction
       ) as Array<EuiTableFieldDataColumnType<UISession>>;

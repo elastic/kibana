@@ -14,7 +14,7 @@ import { SessionsMgmtConfigSchema } from '../';
 import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
 import type { BackgroundSessionSavedObjectAttributes } from '../../../../common';
 import type { UISession } from '../../../../common/search/sessions_mgmt';
-import { ACTION, STATUS } from '../../../../common/search/sessions_mgmt';
+import { ACTION } from '../../../../common/search/sessions_mgmt';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
@@ -41,26 +41,6 @@ const mapToUISession = (
     restoreState,
   } = savedObject.attributes;
 
-  // calculate expiresSoon flag
-  let expiresSoon = false;
-  if (status === STATUS.COMPLETE) {
-    try {
-      const currentDate = moment();
-      const expiresDate = moment(expires);
-      const durationToExpiration = moment.duration(expiresDate.diff(currentDate));
-
-      if (durationToExpiration.asDays() <= expiresSoonWarning.asDays()) {
-        // TODO: handle negatives by setting status to expired?
-        expiresSoon = true;
-      }
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(`Could not calculate duration to expiration`);
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  }
-
   // derive the URL and add it in
   let url = '/';
   try {
@@ -81,7 +61,6 @@ const mapToUISession = (
     expires,
     status,
     actions,
-    expiresSoon,
     url,
   };
 };

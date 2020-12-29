@@ -110,7 +110,7 @@ export function SearchSessionsMgmtTable({
       {...props}
       id={TABLE_ID}
       data-test-subj={TABLE_ID}
-      columns={getColumns(api, http, uiSettings, handleActionCompleted)}
+      columns={getColumns(api, config, uiSettings, handleActionCompleted)}
       items={tableData}
       pagination={pagination}
       search={search}

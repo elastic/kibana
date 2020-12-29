@@ -47,7 +47,6 @@ describe('Background Search Session Management Table', () => {
         created: '2020-12-02T00:19:32Z',
         expires: '2020-12-07T00:19:32Z',
         isViewable: true,
-        expiresSoon: false,
       },
     ];
 

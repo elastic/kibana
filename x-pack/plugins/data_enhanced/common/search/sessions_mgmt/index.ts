@@ -15,7 +15,6 @@ export interface UISession {
   status: STATUS;
   actions?: ACTION[];
   isViewable: boolean;
-  expiresSoon: boolean;
   url: string;
 }
 

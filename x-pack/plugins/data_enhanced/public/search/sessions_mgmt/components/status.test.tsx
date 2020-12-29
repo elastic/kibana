@@ -34,7 +34,6 @@ describe('Background Search Session management status labels', () => {
       created: '2020-12-02T00:19:32Z',
       expires: '2020-12-07T00:19:32Z',
       isViewable: true,
-      expiresSoon: false,
     };
   });
 
@@ -88,7 +87,6 @@ describe('Background Search Session management status labels', () => {
 
     test('complete - expires soon', () => {
       session.status = STATUS.COMPLETE;
-      session.expiresSoon = true;
 
       const statusIndicator = mount(
         <LocaleWrapper>
