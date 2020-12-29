@@ -138,6 +138,7 @@ export class EditorFrameService {
             onChange,
             showNoDataPopover,
             initialContext,
+            searchSessionId,
           }
         ) => {
           domElement = element;
@@ -172,6 +173,7 @@ export class EditorFrameService {
                 onChange={onChange}
                 showNoDataPopover={showNoDataPopover}
                 initialContext={initialContext}
+                searchSessionId={searchSessionId}
               />
             </I18nProvider>,
             domElement

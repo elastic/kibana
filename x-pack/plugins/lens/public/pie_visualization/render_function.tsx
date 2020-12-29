@@ -38,6 +38,15 @@ import {
 } from '../../../../../src/plugins/charts/public';
 import { LensIconChartDonut } from '../assets/chart_donut';
 
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
+
 const EMPTY_SLICE = Symbol('empty_slice');
 
 export function PieComponent(
@@ -251,6 +260,7 @@ export function PieComponent(
     >
       <Chart>
         <Settings
+          debugState={window._echDebugStateFlag ?? false}
           // Legend is hidden in many scenarios
           // - Tiny preview
           // - Treemap does not need a legend because it uses category labels

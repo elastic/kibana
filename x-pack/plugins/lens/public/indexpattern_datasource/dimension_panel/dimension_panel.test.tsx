@@ -1363,8 +1363,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
       'Median',
       'Minimum',
       'Moving average',
+      'Percentile',
       'Sum',
       'Unique count',
+      '\u00a0',
     ]);
   });
 
