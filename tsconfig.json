@@ -7,6 +7,7 @@
   "exclude": [
     "src/**/__fixtures__/**/*",
     "src/core/**/*",
+    "src/plugins/bfetch/**/*",
     "src/plugins/dev_tools/**/*",
     "src/plugins/expressions/**/*",
     "src/plugins/inspector/**/*",
@@ -29,6 +30,7 @@
   ],
   "references": [
     { "path": "./src/core/tsconfig.json" },
+    { "path": "./src/plugins/bfetch/tsconfig.json" },
     { "path": "./src/plugins/dev_tools/tsconfig.json" },
     { "path": "./src/plugins/expressions/tsconfig.json" },
     { "path": "./src/plugins/inspector/tsconfig.json" },
