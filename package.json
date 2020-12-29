@@ -223,6 +223,7 @@
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",
     "io-ts": "^2.0.5",
+    "ipaddr.js": "2.0.0",
     "isbinaryfile": "4.0.2",
     "joi": "^13.5.2",
     "jquery": "^3.5.0",
