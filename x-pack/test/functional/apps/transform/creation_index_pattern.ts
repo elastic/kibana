@@ -380,7 +380,7 @@ export default function ({ getService }: FtrProviderContext) {
             await transform.wizard.assertAdvancedPivotEditorSwitchCheckState(false);
 
             await transform.testExecution.logTestStep('displays the advanced configuration');
-            await transform.wizard.enabledAdvancedPivotEditor();
+            await transform.wizard.enableAdvancedPivotEditor();
             await transform.wizard.assertAdvancedPivotEditorContent(
               testData.expected.pivotAdvancedEditorValueArr
             );
