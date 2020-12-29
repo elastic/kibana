@@ -23,6 +23,8 @@ import {
   EuiBadge,
   EuiCode,
   EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
@@ -95,8 +97,14 @@ export const FlyoutBody: React.FC = () => {
       </EuiText>
       <EuiSpacer />
       <EuiPanel hasShadow={false} paddingSize="s" className="eui-textBreakAll">
-        <EuiBadge color="primary">POST</EuiBadge>
-        <EuiCode transparentBackground>{documentsApiUrl}</EuiCode>
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="primary">POST</EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiCode transparentBackground>{documentsApiUrl}</EuiCode>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
       <EuiCodeBlock language="bash" fontSize="m" isCopyable>
         {dedent(`
