@@ -18,7 +18,7 @@ import { executeTimelineKQL, openTimelineInspectButton } from '../tasks/timeline
 
 import { HOSTS_URL, NETWORK_URL } from '../urls/navigation';
 
-describe('Inspect', () => {
+describe.skip('Inspect', () => {
   context('Hosts stats and tables', () => {
     before(() => {
       cleanKibana();
