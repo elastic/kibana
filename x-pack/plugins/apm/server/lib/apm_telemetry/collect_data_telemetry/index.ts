@@ -22,6 +22,7 @@ type TelemetryTaskExecutor = (params: {
   indicesStats(
     params: RequestParams.IndicesStats
     // promise returned by client has an abort property
+    // so we cannot use its ReturnType
   ): Promise<{
     _all?: {
       total?: { store?: { size_in_bytes?: number }; docs?: { count?: number } };
