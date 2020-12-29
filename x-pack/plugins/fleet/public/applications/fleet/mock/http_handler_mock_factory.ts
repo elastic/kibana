@@ -16,6 +16,9 @@ class ApiRouteNotMocked extends Error {
 
 type ResponseProviderMocks = Record<string, jest.MockedFunction<any>>;
 
+/**
+ * The interface for a `core.http` set of mocked API responses.
+ */
 interface MockedApi<R extends ResponseProviderMocks = ResponseProviderMocks> {
   /**
    * Will return a promise that resolves when triggered APIs are all complete. This method uses
@@ -25,8 +28,8 @@ interface MockedApi<R extends ResponseProviderMocks = ResponseProviderMocks> {
   waitForApi: () => Promise<void>;
   /**
    * A object containing the list of API response provider functions that are used by the mocked API.
-   * These API response methods are wrapped in `jest.MockedFunction<>`, thus their implementation or
-   * returned values can be manipulated by each test case.
+   * These API response methods are wrapped in `jest.MockedFunction`, thus their implementation or
+   * returned values can be manipulated by each test case using the normal `jest.mock` interface.
    */
   responseProvider: Readonly<R>;
 }
@@ -57,7 +60,8 @@ export type ApiHandlerMockFactoryProps<
   R extends ResponseProviderMocks = ResponseProviderMocks
 > = Array<RouteMock<R>>;
 /**
- * Returns a function that can be used to mock `core.http` methods during testing
+ * Returns a function that can be used to apply mocked responses to calls made via `core.http`
+ * methods during testing.
  *
  * @example
  *
