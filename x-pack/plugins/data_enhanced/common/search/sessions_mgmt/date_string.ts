@@ -6,18 +6,18 @@
 
 import { IUiSettingsClient } from 'kibana/public';
 import moment from 'moment';
+import { DATE_STRING_FORMAT } from './constants';
 
 export const dateString = (inputString: string, uiSettings: IUiSettingsClient): string => {
   if (inputString == null) {
     throw new Error('Invalid date string!');
   }
-  const format = 'D MMM, YYYY, HH:mm:ss';
   const tz: string = uiSettings.get('dateFormat:tz');
   let returnString: string;
   if (tz === 'Browser') {
-    returnString = moment.utc(inputString).tz(moment.tz.guess()).format(format);
+    returnString = moment.utc(inputString).tz(moment.tz.guess()).format(DATE_STRING_FORMAT);
   } else {
-    returnString = moment(inputString).tz(tz).format(format);
+    returnString = moment(inputString).tz(tz).format(DATE_STRING_FORMAT);
   }
 
   return returnString;

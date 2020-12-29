@@ -12,4 +12,6 @@ export enum ACTION {
   DELETE = 'delete',
 }
 
+export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
+
 export { BackgroundSessionStatus as STATUS };

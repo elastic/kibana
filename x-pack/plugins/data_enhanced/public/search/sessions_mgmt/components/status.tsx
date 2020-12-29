@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } fro
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
 import { STATUS } from '../../../../common/search/sessions_mgmt';
-import { dateString } from '../lib/date_string';
+import { dateString } from '../../../../common/search/sessions_mgmt/date_string';
 import { StatusDef as StatusAttributes, StatusIndicatorProps, TableText } from './';
 
 // Shared helper function

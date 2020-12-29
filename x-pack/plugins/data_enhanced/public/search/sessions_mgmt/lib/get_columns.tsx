@@ -24,7 +24,7 @@ import { TableText } from '../components';
 import { InlineActions, PopoverActionsMenu } from '../components/actions';
 import { StatusIndicator } from '../components/status';
 import { SearchSessionsMgmtAPI } from './api';
-import { dateString } from './date_string';
+import { dateString } from '../../../../common/search/sessions_mgmt/date_string';
 import { getExpirationStatus } from './get_expiration_status';
 
 // Helper function: translate an app string to EuiIcon-friendly string
