@@ -38,9 +38,13 @@ search: {
         boundsDescendingRaw: ({
             bound: number;
             interval: import("moment").Duration;
+            boundLabel: string;
+            intervalLabel: string;
         } | {
             bound: import("moment").Duration;
             interval: import("moment").Duration;
+            boundLabel: string;
+            intervalLabel: string;
         })[];
     };
     getRequestInspectorStats: typeof getRequestInspectorStats;
