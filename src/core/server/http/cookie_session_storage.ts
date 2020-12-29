@@ -19,8 +19,6 @@
 
 import { Request, Server } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
-// @ts-expect-error no TS definitions
-import Statehood from '@hapi/statehood';
 
 import { KibanaRequest, ensureRawRequest } from './router';
 import { SessionStorageFactory, SessionStorage } from './session_storage';
@@ -148,7 +146,7 @@ export async function createCookieSessionStorageFactory<T>(
       path: basePath === undefined ? '/' : basePath,
       clearInvalid: false,
       isHttpOnly: true,
-      isSameSite: cookieOptions.sameSite === 'None' ? false : cookieOptions.sameSite ?? false,
+      isSameSite: cookieOptions.sameSite ?? false,
     },
     validateFunc: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);
@@ -158,23 +156,6 @@ export async function createCookieSessionStorageFactory<T>(
       return { valid: result.isValid };
     },
   });
-
-  // A hack to support SameSite: 'None'.
-  // Remove it after update Hapi to v19 that supports SameSite: 'None' out of the box.
-  if (cookieOptions.sameSite === 'None') {
-    log.debug('Patching Statehood.prepareValue');
-    const originalPrepareValue = Statehood.prepareValue;
-    Statehood.prepareValue = function kibanaStatehoodPrepareValueWrapper(
-      name: string,
-      value: unknown,
-      options: any
-    ) {
-      if (name === cookieOptions.name) {
-        options.isSameSite = cookieOptions.sameSite;
-      }
-      return originalPrepareValue(name, value, options);
-    };
-  }
 
   return {
     asScoped(request: KibanaRequest) {
