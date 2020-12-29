@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { TransformLatestConfig } from '../../../../plugins/transform/common/types/transform';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -75,4 +76,22 @@ export function isPivotTransformTestData(arg: any): arg is PivotTransformTestDat
 
 export function isLatestTransformTestData(arg: any): arg is LatestTransformTestData {
   return arg.type === 'latest';
+}
+
+export function getLatestTransformConfig(): TransformLatestConfig {
+  const timestamp = Date.now();
+  return {
+    id: `ec_cloning_2_${timestamp}`,
+    source: { index: ['ft_ecommerce'] },
+    latest: {
+      unique_key: ['category.keyword'],
+      sort: 'order_date',
+    },
+    description: 'ecommerce batch transform with category unique key and sorted by order date',
+    frequency: '3s',
+    settings: {
+      max_page_search_size: 250,
+    },
+    dest: { index: `user-ec_3_${timestamp}` },
+  };
 }

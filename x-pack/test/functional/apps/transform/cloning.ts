@@ -8,9 +8,9 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   isLatestTransform,
   isPivotTransform,
-  TransformLatestConfig,
   TransformPivotConfig,
 } from '../../../../plugins/transform/common/types/transform';
+import { getLatestTransformConfig } from './index';
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
@@ -28,24 +28,6 @@ function getTransformConfig(): TransformPivotConfig {
       max_page_search_size: 250,
     },
     dest: { index: `user-ec_2_${date}` },
-  };
-}
-
-function getLatestTransformConfig(): TransformLatestConfig {
-  const timestamp = Date.now();
-  return {
-    id: `ec_cloning_2_${timestamp}`,
-    source: { index: ['ft_ecommerce'] },
-    latest: {
-      unique_key: ['category.keyword'],
-      sort: 'order_date',
-    },
-    description: 'ecommerce batch transform with category unique key and sorted by order date',
-    frequency: '3s',
-    settings: {
-      max_page_search_size: 250,
-    },
-    dest: { index: `user-ec_3_${timestamp}` },
   };
 }
 
@@ -104,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
             index: 0,
             label: 'category',
           },
-          pivotPreview: {
+          transformPreview: {
             column: 0,
             values: [
               `Men's Accessories`,
@@ -126,26 +108,18 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         expected: {
-          aggs: {
-            index: 0,
-            label: 'products.base_price.avg',
-          },
           indexPreview: {
             columns: 10,
             rows: 5,
           },
-          groupBy: {
-            index: 0,
-            label: 'category',
-          },
-          pivotPreview: {
+          transformPreview: {
             column: 0,
             values: [
-              `Men's Accessories`,
-              `Men's Clothing`,
-              `Men's Shoes`,
-              `Women's Accessories`,
-              `Women's Clothing`,
+              'July 12th 2019, 22:16:19',
+              'July 12th 2019, 22:50:53',
+              'July 12th 2019, 23:06:43',
+              'July 12th 2019, 23:15:22',
+              'July 12th 2019, 23:31:12',
             ],
           },
         },
@@ -202,7 +176,9 @@ export default function ({ getService }: FtrProviderContext) {
               'should show the pre-filled group-by configuration'
             );
             await transform.wizard.assertGroupByEntryExists(
+              // @ts-ignore
               testData.expected.groupBy.index,
+              // @ts-ignore
               testData.expected.groupBy.label
             );
 
@@ -210,7 +186,9 @@ export default function ({ getService }: FtrProviderContext) {
               'should show the pre-filled aggs configuration'
             );
             await transform.wizard.assertAggregationEntryExists(
+              // @ts-ignore
               testData.expected.aggs.index,
+              // @ts-ignore
               testData.expected.aggs.label
             );
           } else if (isLatestTransform(testData.originalConfig)) {
@@ -225,8 +203,8 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('should show the pivot preview');
           await transform.wizard.assertPivotPreviewChartHistogramButtonMissing();
           await transform.wizard.assertPivotPreviewColumnValues(
-            testData.expected.pivotPreview.column,
-            testData.expected.pivotPreview.values
+            testData.expected.transformPreview.column,
+            testData.expected.transformPreview.values
           );
 
           await transform.testExecution.logTestStep('should load the details step');
