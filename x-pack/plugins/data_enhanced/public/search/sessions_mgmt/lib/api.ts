@@ -46,10 +46,10 @@ const mapToUISession = (
   if (status === STATUS.COMPLETE) {
     try {
       const currentDate = moment();
-      const expiresDate = moment(created);
-      const duration = moment.duration(expiresDate.diff(currentDate));
+      const expiresDate = moment(expires);
+      const durationToExpiration = moment.duration(expiresDate.diff(currentDate));
 
-      if (duration.asDays() <= expiresSoonWarning.asDays()) {
+      if (durationToExpiration.asDays() <= expiresSoonWarning.asDays()) {
         // TODO: handle negatives by setting status to expired?
         expiresSoon = true;
       }

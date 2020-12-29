@@ -9,7 +9,7 @@ import { DocLinksStart } from 'kibana/public';
 export class AsyncSearchIntroDocumentation {
   private docsBasePath: string = '';
 
-  public setup(docs: DocLinksStart) {
+  constructor(docs: DocLinksStart) {
     const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docs;
     const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
     this.docsBasePath = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;

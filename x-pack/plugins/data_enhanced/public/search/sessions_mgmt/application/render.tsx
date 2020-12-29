@@ -9,7 +9,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { AppDependencies } from '../';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { UISession } from '../../../../common/search/sessions_mgmt';
-import { SearchSessionsMgmtHome } from '../components/home';
+import { SearchSessionsMgmtMain } from '../components/main';
 
 export const renderApp = (
   elem: HTMLElement | null,
@@ -29,7 +29,7 @@ export const renderApp = (
   render(
     <I18nContext>
       <KibanaReactContextProvider>
-        <SearchSessionsMgmtHome initialTable={initialTable} {...homeDeps} />
+        <SearchSessionsMgmtMain initialTable={initialTable} {...homeDeps} />
       </KibanaReactContextProvider>
     </I18nContext>,
     elem

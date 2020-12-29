@@ -15,12 +15,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpStart, IUiSettingsClient } from 'kibana/public';
+import type { HttpStart, IUiSettingsClient } from 'kibana/public';
 import React from 'react';
-import { SessionsMgmtConfigSchema } from '../';
-import { UISession } from '../../../../common/search/sessions_mgmt';
-import { SearchSessionsMgmtAPI } from '../lib/api';
-import { AsyncSearchIntroDocumentation } from '../lib/documentation';
+import type { SessionsMgmtConfigSchema } from '../';
+import type { UISession } from '../../../../common/search/sessions_mgmt';
+import type { SearchSessionsMgmtAPI } from '../lib/api';
+import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { TableText } from './';
 import { SearchSessionsMgmtTable } from './table';
 
@@ -33,7 +33,7 @@ interface Props {
   config: SessionsMgmtConfigSchema;
 }
 
-export function SearchSessionsMgmtHome({ documentation, ...tableProps }: Props) {
+export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {
   return (
     <EuiPageBody component="div">
       <EuiPageContent>
@@ -42,7 +42,7 @@ export function SearchSessionsMgmtHome({ documentation, ...tableProps }: Props) 
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
-                  id="xpack.data.mgmt.searchSessions.home.sectionTitle"
+                  id="xpack.data.mgmt.searchSessions.main.sectionTitle"
                   defaultMessage="Background Sessions"
                 />
               </h1>
@@ -55,7 +55,7 @@ export function SearchSessionsMgmtHome({ documentation, ...tableProps }: Props) 
               iconType="help"
             >
               <FormattedMessage
-                id="xpack.data.mgmt.searchSessions.home.backgroundSessionsDocsLinkText"
+                id="xpack.data.mgmt.searchSessions.main.backgroundSessionsDocsLinkText"
                 defaultMessage="Documentation"
               />
             </EuiButtonEmpty>
@@ -65,7 +65,7 @@ export function SearchSessionsMgmtHome({ documentation, ...tableProps }: Props) 
         <TableText>
           <p>
             <FormattedMessage
-              id="xpack.data.mgmt.searchSessions.home.sectionDescription"
+              id="xpack.data.mgmt.searchSessions.main.sectionDescription"
               defaultMessage="Manage the sessions that you have sent to the background."
             />
           </p>

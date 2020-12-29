@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import { MockedKeys } from '@kbn/utility-types/jest';
 import { mount, ReactWrapper } from 'enzyme';
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup, DocLinksStart } from 'kibana/public';
+import moment from 'moment';
 import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import { SessionsMgmtConfigSchema } from '../';
+import { SessionsMgmtConfigSchema } from '..';
 import { STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { LocaleWrapper, mockUrls } from '../__mocks__';
-import { SearchSessionsMgmtHome } from './home';
+import { SearchSessionsMgmtMain } from './main';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockConfig: SessionsMgmtConfigSchema;
@@ -24,7 +24,7 @@ let sessionsClient: SessionsClient;
 let initialTable: UISession[];
 let api: SearchSessionsMgmtAPI;
 
-describe('Background Search Session Management Home', () => {
+describe('Background Search Session Management Main', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockConfig = {
@@ -59,21 +59,27 @@ describe('Background Search Session Management Home', () => {
   });
 
   describe('renders', () => {
-    let home: ReactWrapper;
+    const docLinks: DocLinksStart = {
+      ELASTIC_WEBSITE_URL: 'boo/',
+      DOC_LINK_VERSION: '#foo',
+      links: {} as any,
+    };
+
+    let main: ReactWrapper;
 
     beforeEach(() => {
       mockCoreSetup.uiSettings.get.mockImplementation((key: string) => {
         return key === 'dateFormat:tz' ? 'UTC' : null;
       });
 
-      home = mount(
+      main = mount(
         <LocaleWrapper>
-          <SearchSessionsMgmtHome
+          <SearchSessionsMgmtMain
             api={api}
             http={mockCoreSetup.http}
             uiSettings={mockCoreSetup.uiSettings}
             initialTable={initialTable}
-            documentation={new AsyncSearchIntroDocumentation()}
+            documentation={new AsyncSearchIntroDocumentation(docLinks)}
             config={mockConfig}
           />
         </LocaleWrapper>
@@ -81,17 +87,19 @@ describe('Background Search Session Management Home', () => {
     });
 
     test('page title', () => {
-      expect(home.find('h1').text()).toBe('Background Sessions');
+      expect(main.find('h1').text()).toBe('Background Sessions');
     });
 
     test('documentation link', () => {
-      const docLink = home.find('a[href]').first();
+      const docLink = main.find('a[href]').first();
       expect(docLink.text()).toBe('Documentation');
-      expect(docLink.prop('href')).toBe('/async-search-intro.html');
+      expect(docLink.prop('href')).toBe(
+        'boo/guide/en/elasticsearch/reference/#foo/async-search-intro.html'
+      );
     });
 
     test('table is present', () => {
-      expect(home.find(`[data-test-subj="search-sessions-mgmt-table"]`).exists()).toBe(true);
+      expect(main.find(`[data-test-subj="search-sessions-mgmt-table"]`).exists()).toBe(true);
     });
   });
 });

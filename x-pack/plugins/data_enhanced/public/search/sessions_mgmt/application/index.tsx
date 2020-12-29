@@ -51,8 +51,7 @@ export class SearchSessionsMgmtApp {
       this.config
     );
 
-    const documentation = new AsyncSearchIntroDocumentation();
-    documentation.setup(docLinks);
+    const documentation = new AsyncSearchIntroDocumentation(docLinks);
 
     const dependencies: AppDependencies = {
       plugins: pluginsSetup,
