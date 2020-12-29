@@ -5,7 +5,7 @@
  */
 
 import { uniqBy } from 'lodash/fp';
-import { EuiAvatar, EuiButtonIcon, EuiCommentList } from '@elastic/eui';
+import { EuiAvatar, EuiButtonIcon, EuiCommentList, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -15,7 +15,9 @@ import { TimelineResultNote } from '../types';
 import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import { timelineActions } from '../../../store/timeline';
+import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -36,6 +38,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   const handleClick = useCallback(() => {
     dispatch(
       timelineActions.toggleExpandedEvent({
+        tabType: TimelineTabs.notes,
         timelineId,
         event: {
           eventId,
@@ -89,7 +92,14 @@ export const NotePreviews = React.memo<NotePreviewsProps>(
             ) : (
               getEmptyValue()
             ),
-            children: <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>,
+            children: (
+              <div className={NOTE_CONTENT_CLASS_NAME} tabIndex={0}>
+                <EuiScreenReaderOnly data-test-subj="screenReaderOnlyUserAddedANote">
+                  <p>{i18n.USER_ADDED_A_NOTE(note.updatedBy ?? i18n.AN_UNKNOWN_USER)}</p>
+                </EuiScreenReaderOnly>
+                <MarkdownRenderer>{note.note ?? ''}</MarkdownRenderer>
+              </div>
+            ),
             actions:
               eventId && timelineId ? (
                 <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />

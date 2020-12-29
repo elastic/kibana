@@ -59,7 +59,11 @@ beforeEach(() => {
 
 setGlobalDate();
 
-function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions['data'] {
+function getMockData(
+  overwrites: Record<string, unknown> = {}
+): CreateOptions<{
+  bar: boolean;
+}>['data'] {
   return {
     enabled: true,
     name: 'abc',
@@ -93,7 +97,11 @@ describe('create()', () => {
   });
 
   describe('authorization', () => {
-    function tryToExecuteOperation(options: CreateOptions): Promise<unknown> {
+    function tryToExecuteOperation(
+      options: CreateOptions<{
+        bar: boolean;
+      }>
+    ): Promise<unknown> {
       unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [
           {

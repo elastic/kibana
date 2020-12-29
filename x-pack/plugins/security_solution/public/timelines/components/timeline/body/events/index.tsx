@@ -12,7 +12,8 @@ import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnRowSelected } from '../../events';
 import { EventsTbody } from '../../styles';
 import { ColumnRenderer } from '../renderers/column_renderer';
@@ -24,7 +25,6 @@ import { eventIsPinned } from '../helpers';
 const ARIA_ROW_INDEX_OFFSET = 2;
 
 interface Props {
-  activeTab?: TimelineTabs;
   actionsColumnWidth: number;
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
@@ -43,11 +43,11 @@ interface Props {
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
+  tabType?: TimelineTabs;
 }
 
 const EventsComponent: React.FC<Props> = ({
   actionsColumnWidth,
-  activeTab,
   browserFields,
   columnHeaders,
   columnRenderers,
@@ -65,11 +65,11 @@ const EventsComponent: React.FC<Props> = ({
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
+  tabType,
 }) => (
   <EventsTbody data-test-subj="events">
     {data.map((event, i) => (
       <StatefulEvent
-        activeTab={activeTab}
         actionsColumnWidth={actionsColumnWidth}
         ariaRowindex={i + ARIA_ROW_INDEX_OFFSET}
         browserFields={browserFields}
@@ -80,7 +80,7 @@ const EventsComponent: React.FC<Props> = ({
         eventIdToNoteIds={eventIdToNoteIds}
         isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
         isEventViewer={isEventViewer}
-        key={`${id}_${activeTab}_${event._id}_${event._index}`}
+        key={`${id}_${tabType}_${event._id}_${event._index}`}
         lastFocusedAriaColindex={lastFocusedAriaColindex}
         loadingEventIds={loadingEventIds}
         onRowSelected={onRowSelected}
@@ -89,6 +89,7 @@ const EventsComponent: React.FC<Props> = ({
         onRuleChange={onRuleChange}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}
+        tabType={tabType}
         timelineId={id}
       />
     ))}

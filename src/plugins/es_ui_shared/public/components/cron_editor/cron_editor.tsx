@@ -67,6 +67,7 @@ interface Props {
     fieldToPreferredValueMap: FieldToValueMap;
     frequency: Frequency;
   }) => void;
+  autoFocus?: boolean;
 }
 
 type State = FieldToValueMap;
@@ -234,6 +235,7 @@ export class CronEditor extends Component<Props, State> {
           fullWidth
         >
           <EuiSelect
+            autoFocus={this.props.autoFocus}
             options={excludeBlockListedFrequencies(UNITS, frequencyBlockList)}
             value={frequency}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>

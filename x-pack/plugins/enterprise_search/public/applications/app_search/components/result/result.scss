@@ -1,16 +1,43 @@
 .appSearchResult {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    'content actions'
+    'toggle actions';
+  overflow: hidden; // Prevents child background-colors from clipping outside of panel border-radius
 
   &__content {
+    grid-area: content;
     width: 100%;
     padding: $euiSize;
     overflow: hidden;
+    color: $euiTextColor;
   }
 
-  &__hiddenFieldsIndicator {
+  &__hiddenFieldsToggle {
+    grid-area: toggle;
+    display: flex;
+    justify-content: center;
+    padding: $euiSizeS;
+    border-top: $euiBorderThin;
     font-size: $euiFontSizeXS;
-    color: $euiColorDarkShade;
-    margin-top: $euiSizeS;
+    color: $euiColorPrimary;
+
+    &:hover,
+    &:focus {
+      background-color: $euiPageBackgroundColor;
+    }
+
+    .euiIcon {
+      margin-left: $euiSizeXS;
+    }
+  }
+
+  &__actionButtons {
+    grid-area: actions;
+    display: flex;
+    flex-wrap: no-wrap;
   }
 
   &__actionButton {
@@ -21,10 +48,27 @@
     border-left: $euiBorderThin;
 
     &:hover,
-    &:focus,
-    &:active {
+    &:focus {
       background-color: $euiPageBackgroundColor;
-      cursor: pointer;
     }
+  }
+}
+
+/**
+ * CSS for hover specific logic
+ * It's mildly horrific, so I pulled it out to its own section here
+ */
+
+.appSearchResult--link {
+  &:hover,
+  &:focus {
+    @include euiSlightShadowHover;
+  }
+}
+.appSearchResult__content--link:hover {
+  cursor: pointer;
+
+  & ~ .appSearchResult__actionButtons .appSearchResult__actionButton--link {
+    background-color: $euiPageBackgroundColor;
   }
 }

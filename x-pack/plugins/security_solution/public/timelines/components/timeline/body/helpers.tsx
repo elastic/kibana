@@ -16,12 +16,11 @@ import {
   TimelineTypeLiteral,
   TimelineType,
   TimelineId,
+  TimelineTabs,
 } from '../../../../../common/types/timeline';
 import { OnPinEvent, OnUnPinEvent } from '../events';
 import { ActionIconItem } from './actions/action_icon_item';
-
 import * as i18n from './translations';
-import { TimelineTabs } from '../../../store/timeline/model';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
@@ -160,3 +159,9 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
 InvestigateInResolverActionComponent.displayName = 'InvestigateInResolverActionComponent';
 
 export const InvestigateInResolverAction = React.memo(InvestigateInResolverActionComponent);
+
+export const ROW_RENDERER_CLASS_NAME = 'row-renderer';
+
+export const NOTES_CONTAINER_CLASS_NAME = 'notes-container';
+
+export const NOTE_CONTENT_CLASS_NAME = 'note-content';
