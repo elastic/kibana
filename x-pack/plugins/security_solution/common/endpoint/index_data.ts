@@ -232,8 +232,8 @@ const createPolicy = async (
 ): Promise<CreatePackagePolicyResponse['item']> => {
   // Create Agent Policy first
   const newAgentPolicyData: CreateAgentPolicyRequest['body'] = {
-    name: `Policy for ${policyName}`,
-    description: '',
+    name: `Policy for ${policyName} (${Math.random().toString(36).substr(2, 5)})`,
+    description: `Policy created with endpoint data generator (${policyName})`,
     namespace: 'default',
   };
   let agentPolicy;
