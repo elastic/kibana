@@ -60,6 +60,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('management/kibana/background_sessions');
       });
 
+      after(async () => {
+        await sendToBackground.deleteAllBackgroundSessions();
+      });
+
       it('shows no items found', async () => {
         expectSnapshot(
           await testSubjects.find('backgroundSessionsMgmtTable').then((n) => n.getVisibleText())
