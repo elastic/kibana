@@ -15,12 +15,7 @@ import {
   EuiFlexGroup,
   EuiButtonIcon,
   EuiToolTip,
-  EuiText,
   EuiCode,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiLink,
-  EuiIcon,
 } from '@elastic/eui';
 import type { IFieldFormat } from 'src/plugins/data/public';
 import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/public';
@@ -28,64 +23,54 @@ import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
 import { useDebounceWithOptions } from '../helpers';
+import { HelpPopover, HelpPopoverButton } from '../../../help_popover';
 
 const GranularityHelpPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   return (
-    <EuiPopover
+    <HelpPopover
       anchorPosition="upCenter"
       button={
-        <EuiText size="xs">
-          <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
-            <EuiIcon className="lnsHelpPopover__buttonIcon" size="s" type="help" />
-
-            {i18n.translate('xpack.lens.indexPattern.ranges.granularityHelpText', {
-              defaultMessage: 'How does it work?',
-            })}
-          </EuiLink>
-        </EuiText>
+        <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+          {i18n.translate('xpack.lens.indexPattern.ranges.granularityHelpText', {
+            defaultMessage: 'How does it work?',
+          })}
+        </HelpPopoverButton>
       }
       closePopover={() => setIsPopoverOpen(false)}
       isOpen={isPopoverOpen}
-      ownFocus
-      panelClassName="lnsHelpPopover"
-      panelPaddingSize="none"
+      title={i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverTitle', {
+        defaultMessage: 'How does interval granularity work?',
+      })}
     >
-      <EuiPopoverTitle>
-        {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverTitle', {
-          defaultMessage: 'How does interval granularity work?',
+      <p>
+        {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverBasicExplanation', {
+          defaultMessage:
+            'Divides the field into evenly spaced intervals based on the min and max of the field.',
         })}
-      </EuiPopoverTitle>
+      </p>
 
-      <EuiText className="lnsHelpPopover__content" size="s">
-        <p>
-          {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverBasicExplanation', {
-            defaultMessage:
-              'Divides the field into evenly spaced intervals based on the min and max of the field.',
-          })}
-        </p>
-
-        <p>
-          <FormattedMessage
-            id="xpack.lens.indexPattern.ranges.granularityPopoverExplanation"
-            defaultMessage='The size of the interval is chosen to be a "nice" value. It is possible for the chosen
+      <p>
+        <FormattedMessage
+          id="xpack.lens.indexPattern.ranges.granularityPopoverExplanation"
+          defaultMessage='The size of the interval is chosen to be a "nice" value. It is possible for the chosen
             interval to stay the same when changing the granularity slider if the "nice" interval is
             the same. The minimum granularity is 1, and the maximum is 
             {setting} as defined in the Kibana advanced settings.'
-            values={{
-              setting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
-            }}
-          />
-        </p>
+          values={{
+            setting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
+          }}
+        />
+      </p>
 
-        <p>
-          {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverAdvancedExplanation', {
-            defaultMessage:
-              'Intervals are incremented by 10, 2 or 5: for example an interval can be 100 or 0.2 .',
-          })}
-        </p>
-      </EuiText>
-    </EuiPopover>
+      <p>
+        {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverAdvancedExplanation', {
+          defaultMessage:
+            'Intervals are incremented by 10, 2 or 5: for example an interval can be 100 or 0.2 .',
+        })}
+      </p>
+    </HelpPopover>
   );
 };
 
