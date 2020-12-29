@@ -28,7 +28,7 @@ export { RangesParamEditor, RangeValues } from './components/controls/ranges';
 export * from './editor_size';
 export * from './vis_options_props';
 export * from './utils';
-export { ISchemas, Schemas, Schema } from './schemas';
+export { Schemas } from './schemas';
 
 export const plugin = (context: PluginInitializerContext) => {
   return new VisDefaultEditorPlugin();

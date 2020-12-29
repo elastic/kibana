@@ -17,7 +17,9 @@
  * under the License.
  */
 
-import { IAggConfig } from 'src/plugins/data/public';
+import type { IAggConfig } from 'src/plugins/data/public';
+import type { Schema } from 'src/plugins/visualizations/public';
+
 import {
   isAggRemovable,
   calcAggIsTooLow,
@@ -25,7 +27,6 @@ import {
   getEnabledMetricAggsCount,
 } from './agg_group_helper';
 import { AggsState } from './agg_group_state';
-import { Schema } from '../schemas';
 
 describe('DefaultEditorGroup helpers', () => {
   let group: IAggConfig[];

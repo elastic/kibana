@@ -27,13 +27,15 @@ import {
   IndexPattern,
   IndexPatternField,
 } from '../../../data/public';
+import type { Schema } from '../../../visualizations/public';
+
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';
 import { AggParamEditorProps } from './agg_param_props';
 import { aggParamsMap } from './agg_params_map';
 import { EditorConfig } from './utils';
-import { Schema, getSchemaByName } from '../schemas';
+import { getSchemaByName } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
 
 interface ParamInstanceBase {

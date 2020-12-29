@@ -30,7 +30,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { IAggConfig, AggGroupNames } from '../../../data/public';
-import { Schema } from '../schemas';
+import type { Schema } from '../../../visualizations/public';
 
 interface DefaultEditorAggAddProps {
   group?: IAggConfig[];

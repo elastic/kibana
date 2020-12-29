@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { VisParams } from 'src/plugins/visualizations/public';
-import { IAggType, IAggConfig, AggGroupName } from 'src/plugins/data/public';
-import { Schema } from '../schemas';
-import { EditorVisState } from './sidebar/state/reducers';
+import type { VisParams } from 'src/plugins/visualizations/public';
+import type { IAggType, IAggConfig, AggGroupName } from 'src/plugins/data/public';
+import type { Schema } from 'src/plugins/visualizations/public';
+
+import type { EditorVisState } from './sidebar/state/reducers';
 
 type AggId = IAggConfig['id'];
 type AggParams = IAggConfig['params'];

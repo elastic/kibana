@@ -23,9 +23,9 @@ import {
   IndexPatternField,
   OptionedValueProp,
 } from 'src/plugins/data/public';
+import type { Schema } from 'src/plugins/visualizations/public';
 import { ComboBoxGroupedOptions } from '../utils';
 import { EditorConfig } from './utils';
-import { Schema } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
 
 // NOTE: we cannot export the interface with export { InterfaceName }

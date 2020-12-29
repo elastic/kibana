@@ -20,12 +20,14 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
+import type { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
+import type { ISchemas } from 'src/plugins/visualizations/public';
+
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { ISchemas, Schemas } from '../schemas';
-import { EditorVisState } from './sidebar/state/reducers';
+import { Schemas } from '../schemas';
+import type { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',

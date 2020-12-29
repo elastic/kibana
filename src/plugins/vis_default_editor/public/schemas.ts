@@ -17,35 +17,12 @@
  * under the License.
  */
 
-import { ReactNode } from 'react';
 import _, { defaults } from 'lodash';
 
 import { Optional } from '@kbn/utility-types';
 
-import { AggGroupNames, AggParam, AggGroupName } from '../../data/public';
-
-export interface ISchemas {
-  [AggGroupNames.Buckets]: Schema[];
-  [AggGroupNames.Metrics]: Schema[];
-  all: Schema[];
-}
-
-export interface Schema {
-  aggFilter: string[];
-  editor: boolean | string;
-  group: AggGroupName;
-  max: number;
-  min: number;
-  name: string;
-  params: AggParam[];
-  title: string;
-  defaults: unknown;
-  hideCustomLabel?: boolean;
-  mustBeFirst?: boolean;
-  aggSettings?: any;
-  disabled?: boolean;
-  tooltip?: ReactNode;
-}
+import { AggGroupNames, AggParam } from '../../data/public';
+import type { ISchemas, Schema } from '../../visualizations/public';
 
 export class Schemas implements ISchemas {
   all: Schema[] = [];

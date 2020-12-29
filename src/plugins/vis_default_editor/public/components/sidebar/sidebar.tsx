@@ -28,6 +28,7 @@ import {
   PersistedState,
   VisualizeEmbeddableContract,
 } from 'src/plugins/visualizations/public';
+import type { Schema } from 'src/plugins/visualizations/public';
 import { TimeRange } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { DefaultEditorNavBar } from './navbar';
@@ -35,7 +36,6 @@ import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
 import { DefaultEditorAggCommonProps } from '../agg_common_props';
 import { SidebarTitle } from './sidebar_title';
-import { Schema } from '../../schemas';
 import { useOptionTabs } from './use_option_tabs';
 
 interface DefaultEditorSideBarProps {

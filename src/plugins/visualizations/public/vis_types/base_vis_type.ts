@@ -18,9 +18,9 @@
  */
 
 import { defaultsDeep } from 'lodash';
-import { ISchemas } from 'src/plugins/vis_default_editor/public';
+
 import { VisParams } from '../types';
-import { VisType, VisTypeOptions, VisGroups } from './types';
+import { VisType, VisTypeOptions, VisGroups, ISchemas } from './types';
 
 interface CommonBaseVisTypeOptions<TVisParams>
   extends Pick<

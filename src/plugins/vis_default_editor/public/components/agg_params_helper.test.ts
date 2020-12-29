@@ -24,6 +24,8 @@ import {
   IAggType,
   IndexPattern,
 } from 'src/plugins/data/public';
+import type { Schema } from 'src/plugins/visualizations/public';
+
 import {
   getAggParamsToRender,
   getAggTypeOptions,
@@ -31,7 +33,6 @@ import {
 } from './agg_params_helper';
 import { FieldParamEditor, OrderByParamEditor } from './controls';
 import { EditorConfig } from './utils';
-import { Schema } from '../schemas';
 import { EditorVisState } from './sidebar/state/reducers';
 import { groupAndSortBy } from '../utils';
 

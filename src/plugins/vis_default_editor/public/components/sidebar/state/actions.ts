@@ -18,9 +18,10 @@
  */
 
 import { Vis, VisParams } from 'src/plugins/visualizations/public';
-import { IAggConfig } from 'src/plugins/data/public';
+import type { IAggConfig } from 'src/plugins/data/public';
+import type { Schema } from 'src/plugins/visualizations/public';
+
 import { EditorStateActionTypes } from './constants';
-import { Schema } from '../../../schemas';
 
 export interface ActionType<T, P> {
   type: T;
