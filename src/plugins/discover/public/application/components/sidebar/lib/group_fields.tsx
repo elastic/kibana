@@ -70,6 +70,15 @@ export function groupFields(
       result.unpopular.push(field);
     }
   }
+  // add columns, that are not part of the index pattern, to be removeable
+  for (const column of columns) {
+    if (!result.selected.find((field) => field.name === column)) {
+      result.selected.push({ name: column, displayName: column } as IndexPatternField);
+    }
+  }
+  result.selected.sort((a, b) => {
+    return columns.indexOf(a.name) - columns.indexOf(b.name);
+  });
 
   return result;
 }
