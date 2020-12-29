@@ -150,7 +150,7 @@ export const ProcessesTable = ({
 
   return (
     <>
-      <EuiTable>
+      <EuiTable responsive={false}>
         <EuiTableHeader>
           <EuiTableHeaderCell width={24} />
           {columns.map((column) => (

@@ -138,7 +138,7 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
 };
 
 const ChartContainer = euiStyled.div`
-  width: 300px;
+  width: 100%;
   height: 140px;
 `;
 

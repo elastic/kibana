@@ -51,7 +51,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
             {({ measureRef, bounds: { height = 0 } }) => (
               <ExpandedRowCell commandHeight={height}>
                 <EuiSpacer size="s" />
-                <EuiDescriptionList compressed>
+                <ExpandedRowDescriptionList>
                   <EuiFlexGroup gutterSize="s">
                     <EuiFlexItem>
                       <div ref={measureRef}>
@@ -81,7 +81,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>
-                  <EuiFlexGrid columns={2} gutterSize="s">
+                  <EuiFlexGrid columns={2} gutterSize="s" responsive={false}>
                     <EuiFlexItem>
                       <EuiDescriptionListTitle>
                         {i18n.translate(
@@ -110,7 +110,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
                     </EuiFlexItem>
                     <ProcessRowCharts command={item.command} />
                   </EuiFlexGrid>
-                </EuiDescriptionList>
+                </ExpandedRowDescriptionList>
               </ExpandedRowCell>
             )}
           </AutoSizer>
@@ -119,6 +119,12 @@ export const ProcessRow = ({ cells, item }: Props) => {
     </>
   );
 };
+
+const ExpandedRowDescriptionList = euiStyled(EuiDescriptionList).attrs({
+  compressed: true,
+})`
+  width: 100%;
+`;
 
 const CodeListItem = euiStyled(EuiCode).attrs({
   transparentBackground: true,
