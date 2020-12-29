@@ -148,7 +148,6 @@ export async function setupFleet(
             '.ds-.logs-endpoint.diagnostic.collection-*',
           ],
           privileges: ['write', 'create_index', 'indices:admin/auto_create'],
-          allow_restricted_indices: true,
         },
       ],
     },
