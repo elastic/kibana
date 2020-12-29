@@ -15,7 +15,7 @@ import {
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
-import { ServiceOrTransactionsOverviewLink } from '../../../../../../shared/Links/apm/service_transactions_overview';
+import { ServiceOrTransactionsOverviewLink } from '../../../../../../shared/Links/apm/service_transactions_overview_link';
 import { TransactionDetailLink } from '../../../../../../shared/Links/apm/TransactionDetailLink';
 
 interface Props {

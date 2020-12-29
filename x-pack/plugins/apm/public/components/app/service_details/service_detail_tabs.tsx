@@ -10,20 +10,20 @@ import React, { ReactNode } from 'react';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useErrorOverviewHref } from '../../shared/Links/apm/ErrorOverviewLink';
 import { useMetricOverviewHref } from '../../shared/Links/apm/MetricOverviewLink';
 import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
 import { useServiceNodeOverviewHref } from '../../shared/Links/apm/ServiceNodeOverviewLink';
 import { useServiceOverviewHref } from '../../shared/Links/apm/service_overview_link';
-import { useServiceOrTransactionsOverviewHref } from '../../shared/Links/apm/service_transactions_overview';
+import { useTransactionsOverviewHref } from '../../shared/Links/apm/transaction_overview_link';
 import { MainTabs } from '../../shared/main_tabs';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { ServiceMap } from '../ServiceMap';
-import { ServiceMetrics } from '../service_metrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
+import { ServiceMetrics } from '../service_metrics';
 import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../transaction_overview';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 
 interface Tab {
   key: string;
@@ -60,7 +60,7 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   const transactionsTab = {
     key: 'transactions',
-    href: useServiceOrTransactionsOverviewHref(serviceName),
+    href: useTransactionsOverviewHref(serviceName),
     text: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
       defaultMessage: 'Transactions',
     }),
