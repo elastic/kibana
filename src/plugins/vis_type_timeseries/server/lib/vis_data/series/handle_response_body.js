@@ -49,19 +49,9 @@ export function handleResponseBody(panel, req, searchStrategy, capabilities) {
     const meta = get(resp, `aggregations.${seriesId}.meta`, {});
     const series = panel.series.find((s) => s.id === (meta.seriesId || seriesId));
 
-    const extractFieldLabel = (fieldName) =>
-      meta.index
-        ? searchStrategy.findCustomLabelForField(fieldName, req, meta.index, capabilities)
-        : fieldName;
+    const extractFields = (index) => searchStrategy.getFieldsForWildcard(req, index, capabilities);
 
-    const processor = buildProcessorFunction(
-      processors,
-      resp,
-      panel,
-      series,
-      meta,
-      extractFieldLabel
-    );
+    const processor = buildProcessorFunction(processors, resp, panel, series, meta, extractFields);
 
     return await processor([]);
   };

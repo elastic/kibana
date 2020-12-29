@@ -20,7 +20,7 @@
 import { includes, startsWith } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { lookup } from './agg_lookup';
-import { MetricsItemsSchema } from './types';
+import { MetricsItemsSchema, SanitizedFieldType } from './types';
 
 const paths = [
   'cumulative_sum',
@@ -37,11 +37,15 @@ const paths = [
   'positive_only',
 ];
 
-export async function calculateLabel(
+export function calculateLabel(
   metric: MetricsItemsSchema,
   metrics: MetricsItemsSchema[] = [],
-  extractFieldLabel: (fieldName: string) => Promise<string> = (fieldName) => fieldName
-): Promise<string> {
+  fields: SanitizedFieldType[] = []
+): string {
+  const extractFieldLabel = (name: string) => {
+    return fields.find((f) => f.name === name)?.label ?? name;
+  };
+
   if (!metric) {
     return i18n.translate('visTypeTimeseries.calculateLabel.unknownLabel', {
       defaultMessage: 'Unknown',
@@ -78,7 +82,7 @@ export async function calculateLabel(
   if (metric.type === 'positive_rate') {
     return i18n.translate('visTypeTimeseries.calculateLabel.positiveRateLabel', {
       defaultMessage: 'Counter Rate of {field}',
-      values: { field: await extractFieldLabel(metric.field!) },
+      values: { field: extractFieldLabel(metric.field!) },
     });
   }
   if (metric.type === 'static') {
@@ -90,7 +94,7 @@ export async function calculateLabel(
 
   if (includes(paths, metric.type)) {
     const targetMetric = metrics.find((m) => startsWith(metric.field!, m.id));
-    const targetLabel = await calculateLabel(targetMetric!, metrics, extractFieldLabel);
+    const targetLabel = calculateLabel(targetMetric!, metrics, fields);
 
     // For percentiles we need to parse the field id to extract the percentile
     // the user configured in the percentile aggregation and specified in the
@@ -122,7 +126,7 @@ export async function calculateLabel(
     defaultMessage: '{lookupMetricType} of {metricField}',
     values: {
       lookupMetricType: lookup[metric.type],
-      metricField: await extractFieldLabel(metric.field!),
+      metricField: extractFieldLabel(metric.field!),
     },
   });
 }

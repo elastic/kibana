@@ -49,10 +49,8 @@ export function processBucket(panel, req, searchStrategy, capabilities) {
           };
           overwrite(bucket, series.id, { meta, timeseries });
         }
-        const extractFieldLabel = (fieldName) =>
-          meta.index
-            ? searchStrategy.findCustomLabelForField(fieldName, req, meta.index, capabilities)
-            : fieldName;
+        const extractFields = (index) =>
+          searchStrategy.getFieldsForWildcard(req, index, capabilities);
 
         const processor = buildProcessorFunction(
           processors,
@@ -60,13 +58,11 @@ export function processBucket(panel, req, searchStrategy, capabilities) {
           panel,
           series,
           meta,
-          extractFieldLabel
+          extractFields
         );
         const result = first(await processor([]));
         if (!result) return null;
         const data = get(result, 'data', []);
-
-        console.log(data);
         result.slope = trendSinceLastBucket(data);
         result.last = getLastValue(data);
         return result;

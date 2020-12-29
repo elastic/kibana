@@ -25,7 +25,7 @@ import { getSplits } from '../../helpers/get_splits';
 import { mapBucket } from '../../helpers/map_bucket';
 import { evaluate } from 'tinymath';
 
-export function mathAgg(resp, panel, series, meta, extractFieldLabel) {
+export function mathAgg(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
     const mathMetric = last(series.metrics);
     if (mathMetric.type !== 'math') return next(results);
@@ -38,7 +38,7 @@ export function mathAgg(resp, panel, series, meta, extractFieldLabel) {
       return true;
     });
     const decoration = getDefaultDecoration(series);
-    const splits = await getSplits(resp, panel, series, meta, extractFieldLabel);
+    const splits = await getSplits(resp, panel, series, meta, extractFields);
     const mathSeries = splits.map((split) => {
       if (mathMetric.variables.length) {
         // Gather the data for the splits. The data will either be a sibling agg or

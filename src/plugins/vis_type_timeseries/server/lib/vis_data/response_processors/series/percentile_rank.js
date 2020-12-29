@@ -23,7 +23,7 @@ import { getLastMetric } from '../../helpers/get_last_metric';
 import { toPercentileNumber } from '../../../../../common/to_percentile_number';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export function percentileRank(resp, panel, series, meta, extractFieldLabel) {
+export function percentileRank(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
     const metric = getLastMetric(series);
 
@@ -31,7 +31,7 @@ export function percentileRank(resp, panel, series, meta, extractFieldLabel) {
       return next(results);
     }
 
-    (await getSplits(resp, panel, series, meta, extractFieldLabel)).forEach((split) => {
+    (await getSplits(resp, panel, series, meta, extractFields)).forEach((split) => {
       (metric.values || []).forEach((percentileRank, index) => {
         const data = split.timeseries.buckets.map((bucket) => [
           bucket.key,

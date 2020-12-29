@@ -28,6 +28,8 @@ import type { Framework } from '../../../plugin';
 import type { IndexPatternsFetcher, IFieldType } from '../../../../../data/server';
 import type { VisPayload } from '../../../../common/types';
 import type { IndexPatternsService } from '../../../../../data/common';
+import { indexPatterns } from '../../../../../data/server';
+import { SanitizedFieldType } from '../../../../common/types';
 
 /**
  * ReqFacade is a regular KibanaRequest object extended with additional service
@@ -47,6 +49,19 @@ export interface ReqFacade<T = unknown> extends FakeRequest {
   getEsShardTimeout: () => Promise<number>;
   getIndexPatternsService: () => Promise<IndexPatternsService>;
 }
+
+const toSanitizedFieldType = (fields: IFieldType[]) => {
+  return fields
+    .filter((field) => field.aggregatable && !indexPatterns.isNestedField(field))
+    .map(
+      (field: IFieldType) =>
+        ({
+          name: field.name,
+          label: field.customLabel ?? field.name,
+          type: field.type,
+        } as SanitizedFieldType)
+    );
+};
 
 export abstract class AbstractSearchStrategy {
   async search(req: ReqFacade<VisPayload>, bodies: any[], indexType?: string) {
@@ -80,13 +95,7 @@ export abstract class AbstractSearchStrategy {
     throw new TypeError('Must override method');
   }
 
-  protected async extractCustomLabel(fields: IFieldType[], fieldName: string): Promise<string> {
-    const field = fields.find((f) => f.name === fieldName);
-
-    return field?.customLabel ?? fieldName;
-  }
-
-  protected async getFieldsForWildcard<TPayload = unknown>(
+  async getFieldsForWildcard<TPayload = unknown>(
     req: ReqFacade<TPayload>,
     indexPattern: string,
     capabilities?: unknown,
@@ -94,22 +103,22 @@ export abstract class AbstractSearchStrategy {
       type: string;
       rollupIndex: string;
     }>
-  ): Promise<IFieldType[]> {
+  ) {
     const { indexPatternsFetcher } = req.pre;
     const indexPatternsService = await req.getIndexPatternsService();
     const kibanaIndexPattern = (await indexPatternsService.find(indexPattern)).find(
       (index) => index.title === indexPattern
     );
 
-    if (kibanaIndexPattern) {
-      return kibanaIndexPattern.fields.getAll();
-    }
-
-    return await indexPatternsFetcher!.getFieldsForWildcard({
-      pattern: indexPattern,
-      fieldCapsOptions: { allow_no_indices: true },
-      metaFields: [],
-      ...options,
-    });
+    return toSanitizedFieldType(
+      kibanaIndexPattern
+        ? kibanaIndexPattern.fields.getAll()
+        : await indexPatternsFetcher!.getFieldsForWildcard({
+            pattern: indexPattern,
+            fieldCapsOptions: { allow_no_indices: true },
+            metaFields: [],
+            ...options,
+          })
+    );
   }
 }

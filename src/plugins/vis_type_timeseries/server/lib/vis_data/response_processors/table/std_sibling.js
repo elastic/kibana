@@ -21,7 +21,7 @@ import { getSplits } from '../../helpers/get_splits';
 import { getLastMetric } from '../../helpers/get_last_metric';
 import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
 
-export function stdSibling(bucket, panel, series, meta, extractFieldLabel) {
+export function stdSibling(bucket, panel, series, meta, extractFields) {
   return (next) => async (results) => {
     const metric = getLastMetric(series);
 
@@ -29,7 +29,7 @@ export function stdSibling(bucket, panel, series, meta, extractFieldLabel) {
     if (metric.type === 'std_deviation_bucket' && metric.mode === 'band') return next(results);
 
     const fakeResp = { aggregations: bucket };
-    (await getSplits(fakeResp, panel, series, meta, extractFieldLabel)).forEach((split) => {
+    (await getSplits(fakeResp, panel, series, meta, extractFields)).forEach((split) => {
       const data = split.timeseries.buckets.map((b) => {
         return [b.key, getSiblingAggValue(split, metric)];
       });

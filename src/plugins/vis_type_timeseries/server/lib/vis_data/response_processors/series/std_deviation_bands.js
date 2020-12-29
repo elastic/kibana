@@ -20,11 +20,11 @@
 import { getAggValue, getLastMetric, getSplits } from '../../helpers';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export function stdDeviationBands(resp, panel, series, meta, extractFieldLabel) {
+export function stdDeviationBands(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
     const metric = getLastMetric(series);
     if (metric.type === METRIC_TYPES.STD_DEVIATION && metric.mode === 'band') {
-      (await getSplits(resp, panel, series, meta, extractFieldLabel)).forEach(
+      (await getSplits(resp, panel, series, meta, extractFields)).forEach(
         ({ id, color, label, timeseries }) => {
           const data = timeseries.buckets.map((bucket) => [
             bucket.key,

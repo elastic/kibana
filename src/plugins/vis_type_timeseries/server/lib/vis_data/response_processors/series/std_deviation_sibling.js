@@ -19,11 +19,11 @@
 
 import { getSplits, getLastMetric, getSiblingAggValue } from '../../helpers';
 
-export function stdDeviationSibling(resp, panel, series, meta, extractFieldLabel) {
+export function stdDeviationSibling(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
     const metric = getLastMetric(series);
     if (metric.mode === 'band' && metric.type === 'std_deviation_bucket') {
-      (await getSplits(resp, panel, series, meta, extractFieldLabel)).forEach((split) => {
+      (await getSplits(resp, panel, series, meta, extractFields)).forEach((split) => {
         const data = split.timeseries.buckets.map((bucket) => [
           bucket.key,
           getSiblingAggValue(split, { ...metric, mode: 'upper' }),

@@ -23,7 +23,7 @@ import { getSplits } from '../../helpers/get_splits';
 import { getLastMetric } from '../../helpers/get_last_metric';
 import { METRIC_TYPES } from '../../../../../common/metric_types';
 
-export function percentile(resp, panel, series, meta, extractFieldLabel) {
+export function percentile(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
     const metric = getLastMetric(series);
 
@@ -31,7 +31,7 @@ export function percentile(resp, panel, series, meta, extractFieldLabel) {
       return next(results);
     }
 
-    (await getSplits(resp, panel, series, meta, extractFieldLabel)).forEach((split) => {
+    (await getSplits(resp, panel, series, meta, extractFields)).forEach((split) => {
       metric.percentiles.forEach((percentile) => {
         const percentileValue = percentile.value ? percentile.value : 0;
         const id = `${split.id}:${percentile.id}`;

@@ -21,7 +21,7 @@ import { SeriesAgg } from './_series_agg';
 import _ from 'lodash';
 import { calculateLabel } from '../../../../../common/calculate_label';
 
-export function seriesAgg(resp, panel, series, meta, extractFieldLabel) {
+export function seriesAgg(resp, panel, series, meta, extractFields) {
   return (next) => async (results) => {
     if (series.aggregate_by && series.aggregate_function) {
       const targetSeries = [];
@@ -36,11 +36,14 @@ export function seriesAgg(resp, panel, series, meta, extractFieldLabel) {
       });
       const fn = SeriesAgg[series.aggregate_function];
       const data = fn(targetSeries);
+
+      const fieldsForMetaIndex = meta.index ? await extractFields(meta.index) : [];
+
       results.push({
         id: `${series.id}`,
         label:
           series.label ||
-          (await calculateLabel(_.last(series.metrics), series.metrics, extractFieldLabel)),
+          calculateLabel(_.last(series.metrics), series.metrics, fieldsForMetaIndex),
         data: _.first(data),
       });
     }
