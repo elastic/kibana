@@ -36,8 +36,15 @@ const fetch = function (url, params) {
 };
 
 const uiSettings = {
-  get: () => {},
-  get$: (...args) => {
+  get: (setting: string) => {
+    switch (setting) {
+      case 'dateFormat':
+        return 'MMM D, YYYY @ HH:mm:ss.SSS';
+      case 'dateFormat:scaled':
+        return [['', 'HH:mm:ss.SSS']];
+    }
+  },
+  get$: () => {
     return new Subject();
   },
 };
