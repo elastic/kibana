@@ -53,7 +53,7 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType }) => {
         title={
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.title"
-            defaultMessage="ML job synchronization needed"
+            defaultMessage="ML job synchronization required"
           />
         }
         color="warning"
@@ -62,13 +62,13 @@ export const SavedObjectsWarning: FC<Props> = ({ jobType }) => {
         <div>
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.description"
-            defaultMessage="All jobs require an accompanying saved object. Some jobs are missing their saved object and require synchronization in the {link}."
+            defaultMessage="Some jobs are missing their saved object and require synchronization in {link}."
             values={{
               link: (
                 <EuiLink href={`${basePath.get()}/app/management/insightsAndAlerting/jobsListLink`}>
                   <FormattedMessage
                     id="xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link"
-                    defaultMessage="stack management page"
+                    defaultMessage="Stack Management"
                   />
                 </EuiLink>
               ),

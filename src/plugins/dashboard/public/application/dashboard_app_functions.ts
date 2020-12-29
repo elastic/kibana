@@ -151,6 +151,7 @@ export const getDashboardContainerInput = ({
     description: dashboardStateManager.getDescription(),
     id: dashboardStateManager.savedDashboard.id || '',
     useMargins: dashboardStateManager.getUseMargins(),
+    syncColors: dashboardStateManager.getSyncColors(),
     viewMode: dashboardStateManager.getViewMode(),
     filters: query.filterManager.getFilters(),
     query: dashboardStateManager.getQuery(),
