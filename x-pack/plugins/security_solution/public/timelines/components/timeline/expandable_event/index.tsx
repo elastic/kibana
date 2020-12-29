@@ -57,8 +57,9 @@ const StyledFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const StyledEuiFlexItem = styled(EuiFlexItem)`
-  max-height: 80%;
+  max-height: 100%;
   padding-bottom: 48px;
+  box-sizing: border-box;
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
