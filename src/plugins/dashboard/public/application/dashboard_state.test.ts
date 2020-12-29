@@ -68,6 +68,7 @@ describe('DashboardState', function () {
       query: {} as DashboardContainerInput['query'],
       timeRange: {} as DashboardContainerInput['timeRange'],
       useMargins: true,
+      syncColors: false,
       title: 'ultra awesome test dashboard',
       isFullScreenMode: false,
       panels: {} as DashboardContainerInput['panels'],
