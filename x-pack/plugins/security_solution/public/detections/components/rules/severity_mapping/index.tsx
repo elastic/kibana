@@ -125,11 +125,11 @@ export const SeverityField = ({
   );
 
   const getIFieldTypeFromFieldName = (
-    fieldName: string | undefined,
+    fieldName: string,
     iIndexPattern: IIndexPattern
-  ): IFieldType | undefined => {
+  ): IFieldType => {
     const [iFieldType] = iIndexPattern.fields.filter(({ name }) => fieldName === name);
-    return iFieldType;
+    return iFieldType ?? { name: fieldName, type: 'string' };
   };
 
   const handleSeverityMappingChecked = useCallback(() => {

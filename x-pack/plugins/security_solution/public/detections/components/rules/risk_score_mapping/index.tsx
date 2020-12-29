@@ -97,7 +97,7 @@ export const RiskScoreField = ({
     const [newSelectedField] = indices.fields.filter(
       ({ name }) => existingField != null && existingField === name
     );
-    return newSelectedField;
+    return newSelectedField ?? { name: existingField, type: 'number' };
   }, [fieldValue, indices]);
 
   const handleRiskScoreMappingChecked = useCallback(() => {
