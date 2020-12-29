@@ -33,9 +33,12 @@ const GranularityHelpPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
     <EuiPopover
+      anchorPosition="upCenter"
       button={
-        <EuiText size="xs" color="default">
+        <EuiText size="xs">
           <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+            <EuiIcon className="lnsHelpPopover__buttonIcon" size="s" type="help" />
+
             {i18n.translate('xpack.lens.indexPattern.ranges.granularityHelpText', {
               defaultMessage: 'How does it work?',
             })}

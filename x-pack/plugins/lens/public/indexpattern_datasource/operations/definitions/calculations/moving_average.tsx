@@ -14,7 +14,6 @@ import {
   EuiLink,
   EuiFieldNumber,
   EuiPopoverTitle,
-  EuiIcon,
 } from '@elastic/eui';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';

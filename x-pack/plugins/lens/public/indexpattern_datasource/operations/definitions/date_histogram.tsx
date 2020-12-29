@@ -22,7 +22,6 @@ import {
   EuiText,
   EuiPopover,
   EuiPopoverTitle,
-  EuiIcon,
   EuiLink,
   EuiBasicTable,
 } from '@elastic/eui';
@@ -359,7 +358,7 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
     <EuiPopover
       anchorPosition="leftCenter"
       button={
-        <EuiText size="xs" color="default">
+        <EuiText size="xs">
           <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
             {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoHelpText', {
               defaultMessage: 'How does it work?',
