@@ -28,7 +28,7 @@ import { FORMATTERS } from '../../../../../../../../common/formatters';
 import { euiStyled } from '../../../../../../../../../observability/public';
 import { SortBy } from '../../../../hooks/use_process_list';
 import { Process } from './types';
-import { ProcessRow, CodeLine } from './process_row';
+import { ProcessRow } from './process_row';
 import { StateBadge } from './state_badge';
 import { STATE_ORDER } from './states';
 
@@ -296,3 +296,11 @@ const columns: Array<{
     render: (value: number) => FORMATTERS.percent(value),
   },
 ];
+
+const CodeLine = euiStyled.div`
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+  font-size: ${(props) => props.theme.eui.euiFontSizeS};
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;

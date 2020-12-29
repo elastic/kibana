@@ -92,7 +92,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
                         )}
                       </EuiDescriptionListTitle>
                       <EuiDescriptionListDescription>
-                        <CodeLine>{item.pid}</CodeLine>
+                        <CodeListItem>{item.pid}</CodeListItem>
                       </EuiDescriptionListDescription>
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -105,7 +105,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
                         )}
                       </EuiDescriptionListTitle>
                       <EuiDescriptionListDescription>
-                        <CodeLine>{item.user}</CodeLine>
+                        <CodeListItem>{item.user}</CodeListItem>
                       </EuiDescriptionListDescription>
                     </EuiFlexItem>
                     <ProcessRowCharts command={item.command} />
@@ -120,11 +120,9 @@ export const ProcessRow = ({ cells, item }: Props) => {
   );
 };
 
-export const CodeLine = euiStyled(EuiCode).attrs({
+const CodeListItem = euiStyled(EuiCode).attrs({
   transparentBackground: true,
 })`
-  text-overflow: ellipsis;
-  overflow: hidden;
   padding: 0 !important;
   & code.euiCodeBlock__code {
     white-space: nowrap !important;
