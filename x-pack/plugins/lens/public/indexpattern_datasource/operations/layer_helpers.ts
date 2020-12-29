@@ -294,7 +294,7 @@ export function replaceColumn({
 
       const unusedReferencesQueue =
         previousDefinition.input === 'fullReference'
-          ? (previousColumn as ReferenceBasedIndexPatternColumn).references
+          ? [...(previousColumn as ReferenceBasedIndexPatternColumn).references]
           : [];
 
       const referenceIds = operationDefinition.requiredReferences.map((validation) => {
@@ -522,6 +522,16 @@ export function replaceColumn({
       };
     }
 
+    const validOperation = operationDefinition.getPossibleOperationForField(field);
+    if (!validOperation) {
+      return {
+        ...tempLayer,
+        incompleteColumns: {
+          ...(tempLayer.incompleteColumns ?? {}),
+          [columnId]: { operationType: op },
+        },
+      };
+    }
     let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
     newColumn = adjustLabel(newColumn, previousColumn);
 
@@ -562,6 +572,30 @@ export function replaceColumn({
     };
   } else {
     throw new Error('nothing changed');
+  }
+}
+
+export function canTransition({ layer, columnId, op, field, indexPattern }: ColumnChange): boolean {
+  const previousColumn = layer.columns[columnId];
+  if (!previousColumn) {
+    return true;
+  }
+
+  if (previousColumn.operationType === op) {
+    return true;
+  }
+
+  try {
+    const newLayer = replaceColumn({ layer, columnId, op, field, indexPattern });
+    const newDefinition = operationDefinitionMap[op];
+    const newColumn = newLayer.columns[columnId];
+    return (
+      Boolean(newColumn) &&
+      !newLayer.incompleteColumns?.[columnId] &&
+      !newDefinition.getErrorMessage?.(newLayer, columnId, indexPattern)
+    );
+  } catch (e) {
+    return false;
   }
 }
 

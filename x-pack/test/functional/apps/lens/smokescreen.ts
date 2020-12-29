@@ -74,7 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
         operation: 'filters',
-        isPreviousIncompatible: true,
         keepOpen: true,
       });
       await PageObjects.lens.addFilterToAgg(`geo.src : CN`);

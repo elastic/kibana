@@ -1195,6 +1195,52 @@ describe('state_helpers', () => {
         );
       });
 
+      it('should modify a copied object, not the original layer', () => {
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['ref1', 'invalid', 'output'],
+          columns: {
+            ref1: {
+              label: 'Count',
+              customLabel: true,
+              dataType: 'number' as const,
+              isBucketed: false,
+
+              operationType: 'count' as const,
+              sourceField: 'Records',
+            },
+            invalid: {
+              label: 'Test reference',
+              dataType: 'number',
+              isBucketed: false,
+
+              // @ts-expect-error not a valid type
+              operationType: 'testReference',
+              references: [],
+            },
+            output: {
+              label: 'Test reference',
+              dataType: 'number',
+              isBucketed: false,
+
+              // @ts-expect-error not a valid type
+              operationType: 'testReference',
+              references: ['ref1', 'invalid'],
+            },
+          },
+        };
+        replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'output',
+          // @ts-expect-error not statically available
+          op: 'secondTest',
+        });
+        expect(layer.columns.output).toEqual(
+          expect.objectContaining({ references: ['ref1', 'invalid'] })
+        );
+      });
+
       it('should transition by using the field from the previous reference if nothing else works (case r2)', () => {
         const layer: IndexPatternLayer = {
           indexPatternId: '1',

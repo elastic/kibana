@@ -30,6 +30,7 @@ import {
   updateColumnParam,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
+  canTransition,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
@@ -147,19 +148,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const operationsWithCompatibility = [...possibleOperations].map((operationType) => {
     const definition = operationDefinitionMap[operationType];
 
+    const currentField =
+      selectedColumn &&
+      hasField(selectedColumn) &&
+      currentIndexPattern.getFieldByName(selectedColumn.sourceField);
     return {
       operationType,
-      compatibleWithCurrentField:
-        !selectedColumn ||
-        (selectedColumn &&
-          hasField(selectedColumn) &&
-          // True for now: you can switch from a field to a reference while keeping the field
-          (definition.input === 'fullReference' ||
-            (definition.input === 'field' &&
-              fieldByOperation[operationType]?.has(selectedColumn.sourceField)))) ||
-        (selectedColumn && !hasField(selectedColumn) && definition.input === 'none') ||
-        // Consider all reference-based operations to be fully compatible, which is true for now
-        (selectedColumn && !hasField(selectedColumn) && definition.input === 'fullReference'),
+      compatibleWithCurrentField: canTransition({
+        layer: state.layers[layerId],
+        columnId,
+        op: operationType,
+        indexPattern: currentIndexPattern,
+        field: currentField || undefined,
+      }),
       disabledStatus:
         definition.getDisabledStatus &&
         definition.getDisabledStatus(

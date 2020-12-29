@@ -341,14 +341,17 @@ describe('IndexPatternDimensionEditorPanel', () => {
     expect(items.find(({ id }) => id === 'date_histogram')!['data-test-subj']).toContain(
       'incompatible'
     );
-    expect(items.find(({ id }) => id === 'filters')!['data-test-subj']).toContain('incompatible');
+    // Incompatible because there is no date field
+    expect(items.find(({ id }) => id === 'cumulative_sum')!['data-test-subj']).toContain(
+      'incompatible'
+    );
 
-    expect(items.find(({ id }) => id === 'cumulative_sum')!['data-test-subj']).not.toContain(
+    expect(items.find(({ id }) => id === 'filters')!['data-test-subj']).not.toContain(
       'incompatible'
     );
   });
 
-  it('should indicate that all reference-based operations are compatible with each other', () => {
+  it('should indicate that reference-based operations are not compatible when they are incomplete', () => {
     wrapper = mount(
       <IndexPatternDimensionEditorComponent
         {...defaultProps}
@@ -374,10 +377,55 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
 
-    expect(items.find(({ id }) => id === 'derivative')!['data-test-subj']).not.toContain(
+    expect(items.find(({ id }) => id === 'derivative')!['data-test-subj']).toContain(
       'incompatible'
     );
-    expect(items.find(({ id }) => id === 'cumulative_sum')!['data-test-subj']).not.toContain(
+    expect(items.find(({ id }) => id === 'cumulative_sum')!['data-test-subj']).toContain(
+      'incompatible'
+    );
+    expect(items.find(({ id }) => id === 'moving_average')!['data-test-subj']).toContain(
+      'incompatible'
+    );
+  });
+
+  it('should indicate that reference-based operations are compatible sometimes', () => {
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={getStateWithColumns({
+          date: {
+            label: 'Date',
+            dataType: 'date',
+            isBucketed: true,
+            operationType: 'date_histogram',
+            sourceField: '@timestamp',
+            params: { interval: 'auto' },
+          },
+          col1: {
+            label: 'Cumulative sum',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'cumulative_sum',
+            references: ['ref'],
+          },
+          ref: {
+            label: 'Count',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'count',
+            sourceField: 'Records',
+          },
+        })}
+      />
+    );
+
+    const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
+
+    expect(items.find(({ id }) => id === 'counter_rate')!['data-test-subj']).toContain(
+      'incompatible'
+    );
+
+    expect(items.find(({ id }) => id === 'derivative')!['data-test-subj']).not.toContain(
       'incompatible'
     );
     expect(items.find(({ id }) => id === 'moving_average')!['data-test-subj']).not.toContain(
@@ -674,9 +722,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         .find('button[data-test-subj="lns-indexPatternDimension-terms incompatible"]')
         .simulate('click');
 
-      wrapper
-        .find('button[data-test-subj="lns-indexPatternDimension-filters incompatible"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="lns-indexPatternDimension-filters"]').simulate('click');
 
       expect(wrapper.find('[data-test-subj="indexPattern-invalid-operation"]')).toHaveLength(0);
     });
@@ -1586,7 +1632,9 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     expect(wrapper.find('ReferenceEditor')).toHaveLength(0);
 
-    wrapper.find('button[data-test-subj="lns-indexPatternDimension-derivative"]').simulate('click');
+    wrapper
+      .find('button[data-test-subj="lns-indexPatternDimension-derivative incompatible"]')
+      .simulate('click');
 
     expect(wrapper.find('ReferenceEditor')).toHaveLength(1);
   });
