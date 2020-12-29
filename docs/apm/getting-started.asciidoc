@@ -13,8 +13,8 @@ They measure from the start to end of an activity,
 and they can have a parent/child relationship with other spans.
 * *Transactions* are a special kind of span;
 they are the first span for a particular service and have extra metadata associated with them.
-As an example, a transaction could be a request to your server, a batch job, or a custom transaction type.
-*Traces* link together related transactions to show an end-to-end performance of how a request was served and which services were part of it.
+As an example, a transaction could be a request to your server, a batch job, or a custom transaction type. 
+* *Traces* link together related transactions to show an end-to-end performance of how a request was served and which services were part of it.
 * *Errors* contain information about the original exception that occurred or about a log created when the exception occurred.
 
 Curated charts and tables display the different types of APM data, which allows you to compare and debug your applications easily.
