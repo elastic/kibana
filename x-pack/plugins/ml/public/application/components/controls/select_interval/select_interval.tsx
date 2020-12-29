@@ -51,7 +51,7 @@ function optionValueToInterval(value: string) {
   return interval;
 }
 
-const TABLE_INTERVAL_DEFAULT = optionValueToInterval('auto');
+export const TABLE_INTERVAL_DEFAULT = optionValueToInterval('auto');
 
 export const useTableInterval = (): [TableInterval, (v: TableInterval) => void] => {
   return usePageUrlState<TableInterval>('mlSelectInterval', TABLE_INTERVAL_DEFAULT);
