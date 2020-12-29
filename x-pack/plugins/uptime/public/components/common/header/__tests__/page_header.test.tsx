@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
+import * as redux from 'react-redux';
 import moment from 'moment';
 import { PageHeader } from '../page_header';
-import * as redux from 'react-redux';
 import { Ping } from '../../../../../common/runtime_types';
 import { createMemoryHistory } from 'history';
 import { renderWithRouter } from '../../../../lib';
