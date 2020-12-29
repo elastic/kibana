@@ -338,7 +338,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   existingFields={state.existingFields}
                   selectionStyle={selectedOperationDefinition.selectionStyle}
                   dateRange={dateRange}
-                  helpText={selectedOperationDefinition?.getHelpMessage?.({
+                  labelAppend={selectedOperationDefinition?.getHelpMessage?.({
                     data: props.data,
                     uiSettings: props.uiSettings,
                     currentColumn: state.layers[layerId].columns[columnId],
@@ -362,7 +362,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             fullWidth
             isInvalid={Boolean(incompleteOperation || currentFieldIsInvalid)}
             error={fieldErrorMessage}
-            helpText={
+            labelAppend={
               !fieldErrorMessage &&
               selectedOperationDefinition?.getHelpMessage?.({
                 data: props.data,
