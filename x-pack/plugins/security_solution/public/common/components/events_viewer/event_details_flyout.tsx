@@ -25,6 +25,14 @@ const StyledEuiFlyout = styled(EuiFlyout)`
   z-index: ${({ theme }) => theme.eui.euiZLevel7};
 `;
 
+const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
+  height: 100%;
+
+  & .euiFlyoutBody__overflowContent {
+    height: 100%;
+  }
+`;
+
 interface EventDetailsFlyoutProps {
   browserFields: BrowserFields;
   docValueFields: DocValueFields[];
@@ -67,7 +75,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
       <EuiFlyoutHeader hasBorder>
         <ExpandableEventTitle isAlert={isAlert} loading={loading} />
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <StyledEuiFlyoutBody>
         <ExpandableEvent
           browserFields={browserFields}
           detailsData={detailsData}
@@ -77,7 +85,7 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
           timelineId={timelineId}
           timelineTabType="flyout"
         />
-      </EuiFlyoutBody>
+      </StyledEuiFlyoutBody>
     </StyledEuiFlyout>
   );
 };
