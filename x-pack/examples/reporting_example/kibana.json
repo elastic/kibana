@@ -1,0 +1,9 @@
+{
+  "id": "reportingExample",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "server": false,
+  "ui": true,
+  "optionalPlugins": [],
+  "requiredPlugins": ["reporting", "developerExamples", "navigation"]
+}
