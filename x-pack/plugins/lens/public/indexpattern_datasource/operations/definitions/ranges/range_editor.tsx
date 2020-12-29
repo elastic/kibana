@@ -33,8 +33,6 @@ const GranularityHelpPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
     <EuiPopover
-      ownFocus
-      isOpen={isPopoverOpen}
       button={
         <EuiText size="xs" color="default">
           <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
@@ -45,22 +43,25 @@ const GranularityHelpPopover = () => {
         </EuiText>
       }
       closePopover={() => setIsPopoverOpen(false)}
-      panelClassName="lnsIndexPatternDimensionEditor__dateHistogramHelpPopover"
+      isOpen={isPopoverOpen}
+      ownFocus
+      panelClassName="lnsIndexPatternDimensionEditor__helpPopover"
     >
       <EuiPopoverTitle>
-        <EuiIcon type="help" />
-        &nbsp;{' '}
+        <EuiIcon type="help" />{' '}
         {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverTitle', {
           defaultMessage: 'How does interval granularity work?',
         })}
       </EuiPopoverTitle>
-      <EuiText size="s" style={{ width: 300 }}>
+
+      <EuiText size="s">
         <p>
           {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverBasicExplanation', {
             defaultMessage:
               'Divides the field into evenly spaced intervals based on the min and max of the field.',
           })}
         </p>
+
         <p>
           <FormattedMessage
             id="xpack.lens.indexPattern.ranges.granularityPopoverExplanation"
@@ -73,6 +74,7 @@ const GranularityHelpPopover = () => {
             }}
           />
         </p>
+
         <p>
           {i18n.translate('xpack.lens.indexPattern.ranges.granularityPopoverAdvancedExplanation', {
             defaultMessage:

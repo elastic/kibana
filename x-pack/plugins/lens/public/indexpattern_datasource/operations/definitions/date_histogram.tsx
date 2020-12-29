@@ -357,8 +357,7 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
 
   return (
     <EuiPopover
-      ownFocus
-      isOpen={isPopoverOpen}
+      anchorPosition="leftCenter"
       button={
         <EuiText size="xs" color="default">
           <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
@@ -369,22 +368,24 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
         </EuiText>
       }
       closePopover={() => setIsPopoverOpen(false)}
-      anchorPosition="leftCenter"
-      panelClassName="lnsIndexPatternDimensionEditor__dateHistogramHelpPopover"
+      isOpen={isPopoverOpen}
+      ownFocus
+      panelClassName="lnsIndexPatternDimensionEditor__helpPopover"
     >
       <EuiPopoverTitle>
-        <EuiIcon type="help" />
-        &nbsp;{' '}
+        <EuiIcon type="help" />{' '}
         {i18n.translate('xpack.lens.indexPattern.dateHistogram.titleHelp', {
           defaultMessage: 'How does the auto date histogram work?',
         })}
       </EuiPopoverTitle>
+
       <EuiText size="s" className="lnsIndexPatternDimensionEditor__dateHistogramContentPopover">
         <p>
           {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBasicExplanation', {
             defaultMessage: 'Splits a date field into buckets by interval.',
           })}
         </p>
+
         <p>
           <FormattedMessage
             id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
@@ -397,11 +398,13 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
             }}
           />
         </p>
+
         <p>
           {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoAdvancedExplanation', {
             defaultMessage: 'The specific interval follows this logic:',
           })}
         </p>
+
         <EuiBasicTable
           items={search.aggs.boundsDescendingRaw.map(({ bound, boundLabel, intervalLabel }) => ({
             bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${boundLabel}`,

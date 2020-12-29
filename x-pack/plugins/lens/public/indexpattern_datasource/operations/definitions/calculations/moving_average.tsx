@@ -181,8 +181,7 @@ const MovingAveragePopup = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
     <EuiPopover
-      ownFocus
-      isOpen={isPopoverOpen}
+      anchorPosition="leftCenter"
       button={
         <EuiText size="xs">
           <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
@@ -193,7 +192,9 @@ const MovingAveragePopup = () => {
         </EuiText>
       }
       closePopover={() => setIsPopoverOpen(false)}
-      anchorPosition="leftCenter"
+      isOpen={isPopoverOpen}
+      ownFocus
+      panelClassName="lnsIndexPatternDimensionEditor__helpPopover"
     >
       <EuiPopoverTitle>
         <EuiIcon type="help" />{' '}
@@ -202,13 +203,15 @@ const MovingAveragePopup = () => {
           defaultMessage="How does moving average work?"
         />
       </EuiPopoverTitle>
-      <EuiText size="s" style={{ width: 300 }}>
+
+      <EuiText size="s">
         <p>
           <FormattedMessage
             id="xpack.lens.indexPattern.movingAverage.basicExplanation"
             defaultMessage="The Moving Average slides a window across the data and emits the average value of that window."
           />
         </p>
+
         <p>
           <FormattedMessage
             id="xpack.lens.indexPattern.movingAverage.longerExplanation"
@@ -216,24 +219,28 @@ const MovingAveragePopup = () => {
             this means that for missing values the bucket is skipped and the calculation is performed on the next one."
           />
         </p>
+
         <p>
           <FormattedMessage
             id="xpack.lens.indexPattern.movingAverage.tableExplanation"
             defaultMessage="For example, given the data [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], we can calculate a simple moving average with windows size of 5 as follows:"
           />
         </p>
+
         <ul>
           <li>(1 + 2 + 3 + 4 + 5) / 5 = 3</li>
           <li>(2 + 3 + 4 + 5 + 6) / 5 = 4</li>
           <li>...</li>
           <li>(5 + 6 + 7 + 8 + 9) / 5 = 7</li>
         </ul>
+
         <p>
           <FormattedMessage
             id="xpack.lens.indexPattern.movingAverage.windowLimitations"
             defaultMessage="Note that the window does not include the current value."
           />
         </p>
+
         <p>
           <FormattedMessage
             id="xpack.lens.indexPattern.movingAverage.limitations"
