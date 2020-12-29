@@ -6,6 +6,7 @@
 
 import { LayoutSelectorDictionary } from './types';
 
+export * as constants from './constants';
 export { CancellationToken } from './cancellation_token';
 export { Poller } from './poller';
 
