@@ -12,6 +12,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const elasticChart = getService('elasticChart');
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
@@ -216,6 +217,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async toggleToolbarPopover(buttonTestSub: string) {
+      await testSubjects.click(buttonTestSub);
+    },
+
     /**
      * Open the specified dimension.
      *
@@ -353,6 +358,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async changeAxisSide(newSide: string) {
+      await testSubjects.click(`lnsXY_axisSide_groups_${newSide}`);
+    },
+
     /** Counts the visible warnings in the config panel */
     async getErrorCount() {
       const moreButton = await testSubjects.exists('configuration-failure-more-errors');
@@ -482,6 +491,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return (
         (await (await testSubjects.find('lnsWorkspace')).getVisibleText()) === 'No results found'
       );
+    },
+
+    async getCurrentChartDebugState() {
+      return await elasticChart.getChartDebugData('lnsWorkspace');
     },
 
     /**
