@@ -23,6 +23,6 @@ export const agentsSetupApiMock = httpHandlerMockFactory<AgentsSetupResponseProv
     id: 'getAgentsSetup',
     method: 'get',
     path: fleetSetupRouteService.getFleetSetupPath(),
-    handler: jest.fn(agentsSetupResponseMock),
+    handler: agentsSetupResponseMock,
   },
 ]);

@@ -20,6 +20,6 @@ export const fleetSetupApiMock = httpHandlerMockFactory<FleetSetupResponseProvid
     id: 'fleetSetup',
     method: 'post',
     path: setupRouteService.getSetupPath(),
-    handler: jest.fn(setupResponseMock),
+    handler: setupResponseMock,
   },
 ]);

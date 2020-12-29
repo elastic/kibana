@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpFetchOptions, HttpFetchOptionsWithPath, HttpStart } from 'kibana/public';
+import { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler, HttpStart } from 'kibana/public';
 import { extend } from 'lodash';
 
 class ApiRouteNotMocked extends Error {
@@ -37,7 +37,11 @@ interface RouteMock<R extends ResponseProviderMocks = ResponseProviderMocks> {
   id: keyof R;
   method: HttpMethods;
   path: string;
-  handler: jest.MockedFunction<any>;
+  /**
+   * The handler for providing a response to for this API call.
+   * It should return the "raw" value, __NOT__ a `Promise`
+   */
+  handler: (...args: Parameters<HttpHandler>) => any;
 }
 
 export type ApiHandlerMockFactoryProps<
@@ -79,6 +83,15 @@ export const httpHandlerMockFactory = <R extends ResponseProviderMocks = Respons
       }
     };
 
+    const responseProvider: MockedApi<R>['responseProvider'] = mocks.reduce<R>(
+      (providers, routeMock) => {
+        // @ts-ignore
+        providers[routeMock.id] = jest.fn(routeMock.handler);
+        return providers;
+      },
+      {} as R
+    );
+
     const mockedApiInterface: MockedApi<R> = {
       waitForApi() {
         return new Promise((resolve) => {
@@ -89,24 +102,23 @@ export const httpHandlerMockFactory = <R extends ResponseProviderMocks = Respons
           }
         });
       },
-      responseProvider: mocks.reduce<R>((providers, routeMock) => {
-        // @ts-ignore
-        providers[routeMock.id] = routeMock.handler;
-        return providers;
-      }, {} as R),
+      responseProvider,
     };
 
     HTTP_METHODS.forEach((method) => {
       const priorMockedFunction = http[method].getMockImplementation();
       const methodMocks = mocks.filter((mock) => mock.method === method);
 
-      http[method].mockImplementation((...args) => {
+      http[method].mockImplementation(async (...args) => {
         const path = isHttpFetchOptionsWithPath(args[0]) ? args[0].path : args[0];
         const routeMock = methodMocks.find((handler) => handler.path === path);
 
         if (routeMock) {
           markApiCallAsHandled();
-          return routeMock.handler(...args);
+          // Use the handler defined for the HTTP Mocked interface (not the one passed on input to
+          // the factory) for retrieving the response value because that one could have had its
+          // response value manipulated by the individual test case.
+          return responseProvider[routeMock.id](...args);
         } else if (priorMockedFunction) {
           return priorMockedFunction(...args);
         }
