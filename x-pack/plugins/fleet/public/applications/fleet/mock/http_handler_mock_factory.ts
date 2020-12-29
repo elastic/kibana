@@ -6,6 +6,7 @@
 
 import { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler, HttpStart } from 'kibana/public';
 import { extend } from 'lodash';
+import { act } from '@testing-library/react';
 
 class ApiRouteNotMocked extends Error {
   constructor(message: string) {
@@ -16,9 +17,17 @@ class ApiRouteNotMocked extends Error {
 type ResponseProviderMocks = Record<string, jest.MockedFunction<any>>;
 
 interface MockedApi<R extends ResponseProviderMocks = ResponseProviderMocks> {
-  /** Will return a promise that resolves when triggered APIs are complete */
+  /**
+   * Will return a promise that resolves when triggered APIs are all complete. This method uses
+   * React testing `act()` to await for the API calls, thus ensuring that the UI components are
+   * updated with any state that was affected by the returned API responses.
+   */
   waitForApi: () => Promise<void>;
-  /** A object containing the list of API response provider functions that are used by the mocked API */
+  /**
+   * A object containing the list of API response provider functions that are used by the mocked API.
+   * These API response methods are wrapped in `jest.MockedFunction<>`, thus their implementation or
+   * returned values can be manipulated by each test case.
+   */
   responseProvider: Readonly<R>;
 }
 
@@ -93,13 +102,15 @@ export const httpHandlerMockFactory = <R extends ResponseProviderMocks = Respons
     );
 
     const mockedApiInterface: MockedApi<R> = {
-      waitForApi() {
-        return new Promise((resolve) => {
-          if (inflightApiCalls > 0) {
-            apiDoneListeners.push(resolve);
-          } else {
-            resolve();
-          }
+      async waitForApi() {
+        await act(async () => {
+          await new Promise<void>((resolve) => {
+            if (inflightApiCalls > 0) {
+              apiDoneListeners.push(resolve);
+            } else {
+              resolve();
+            }
+          });
         });
       },
       responseProvider,
@@ -165,10 +176,13 @@ export const composeApiHandlerMocks = <R extends ResponseProviderMocks = Respons
   return (http: HttpStart) => {
     const waitForApiHandlers: Array<MockedApi['waitForApi']> = [];
     const mockedApiInterfaces: MockedApi<R> = {
-      waitForApi() {
-        return Promise.all(
-          waitForApiHandlers.map((handlerWaitFor) => handlerWaitFor())
-        ).then(() => {});
+      async waitForApi() {
+        await act(
+          async () =>
+            await Promise.all(
+              waitForApiHandlers.map((handlerWaitFor) => handlerWaitFor())
+            ).then(() => {})
+        );
       },
       // @ts-ignore
       responseProvider: {},

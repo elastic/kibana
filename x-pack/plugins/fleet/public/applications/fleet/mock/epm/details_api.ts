@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { httpHandlerMockFactory } from '../http_handler_mock_factory';
+import { composeApiHandlerMocks, httpHandlerMockFactory } from '../http_handler_mock_factory';
 import {
   agentPolicyRouteService,
   epmRouteService,
-  fleetSetupRouteService,
   GetAgentPoliciesResponse,
   GetFleetStatusResponse,
   GetInfoResponse,
@@ -17,6 +16,12 @@ import {
   KibanaAssetType,
   packagePolicyRouteService,
 } from '../../../../../common';
+import {
+  agentsSetupApiMock,
+  AgentsSetupResponseProvidersMock,
+  fleetSetupApiMock,
+  FleetSetupResponseProvidersMock,
+} from '../setup';
 
 export const epmPackageResponse = (): GetInfoResponse =>
   // @ts-ignore
@@ -486,12 +491,11 @@ export interface EpmPackageDetailsResponseProvidersMock {
   epmGetInfo: jest.MockedFunction<() => GetInfoResponse>;
   epmGetFile: jest.MockedFunction<() => string>;
   epmGetSummary: jest.MockedFunction<() => GetSummaryResponse>;
-  fleetSetup: jest.MockedFunction<() => GetFleetStatusResponse>;
   packagePolicyList: jest.MockedFunction<() => GetPackagePoliciesResponse>;
   agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
 }
 
-export const epmDetailsApiMock = httpHandlerMockFactory<EpmPackageDetailsResponseProvidersMock>([
+const epmDetailsApiOnlyMocks = httpHandlerMockFactory<EpmPackageDetailsResponseProvidersMock>([
   {
     id: 'epmGetInfo',
     method: 'get',
@@ -511,12 +515,6 @@ export const epmDetailsApiMock = httpHandlerMockFactory<EpmPackageDetailsRespons
     handler: epmGetSummaryResponse,
   },
   {
-    id: 'fleetSetup',
-    method: 'get',
-    path: fleetSetupRouteService.getFleetSetupPath(),
-    handler: agentsSetupResponse,
-  },
-  {
     id: 'packagePolicyList',
     method: 'get',
     path: packagePolicyRouteService.getListPath(),
@@ -529,3 +527,9 @@ export const epmDetailsApiMock = httpHandlerMockFactory<EpmPackageDetailsRespons
     handler: agentPoliciesResponse,
   },
 ]);
+
+export const epmDetailsApiMock = composeApiHandlerMocks<
+  FleetSetupResponseProvidersMock &
+    AgentsSetupResponseProvidersMock &
+    EpmPackageDetailsResponseProvidersMock
+>([fleetSetupApiMock, agentsSetupApiMock, epmDetailsApiOnlyMocks]);
