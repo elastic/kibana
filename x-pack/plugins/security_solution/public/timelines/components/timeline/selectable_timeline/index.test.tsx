@@ -3,8 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { EuiSelectableProps } from '@elastic/eui';
 import React from 'react';
 import { shallow, ShallowWrapper, mount } from 'enzyme';
+
 import { TimelineType } from '../../../../../common/types/timeline';
 import { SortFieldTimeline, Direction } from '../../../../graphql/types';
 import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from './';
@@ -40,8 +43,10 @@ describe('SelectableTimeline', () => {
       });
 
       test('render placeholder', () => {
-        const searchProps = wrapper.find('[data-test-subj="selectable-input"]').prop('searchProps');
-        expect(searchProps.placeholder).toEqual('e.g. Timeline name or description');
+        const searchProps: EuiSelectableProps['searchProps'] = wrapper
+          .find('[data-test-subj="selectable-input"]')
+          .prop('searchProps');
+        expect(searchProps!.placeholder).toEqual('e.g. Timeline name or description');
       });
     });
 
@@ -56,8 +61,10 @@ describe('SelectableTimeline', () => {
       });
 
       test('render placeholder', () => {
-        const searchProps = wrapper.find('[data-test-subj="selectable-input"]').prop('searchProps');
-        expect(searchProps.placeholder).toEqual('e.g. Timeline template name or description');
+        const searchProps: EuiSelectableProps['searchProps'] = wrapper
+          .find('[data-test-subj="selectable-input"]')
+          .prop('searchProps');
+        expect(searchProps!.placeholder).toEqual('e.g. Timeline template name or description');
       });
     });
   });
@@ -85,7 +92,7 @@ describe('SelectableTimeline', () => {
       jest.clearAllMocks();
     });
 
-    test('shoule be called with correct args', () => {
+    test('should be called with correct args', () => {
       expect(mockFetchAllTimeline).toBeCalledWith(args);
     });
   });
