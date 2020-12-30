@@ -41,7 +41,7 @@ it('build default and oss dist for current platform, without packages, by defaul
         "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerBundles": false,
+        "createDockerContexts": false,
         "createDockerImages": false,
         "createRpmPackage": false,
         "downloadFreshNode": true,
@@ -64,7 +64,7 @@ it('builds packages if --all-platforms is passed', () => {
         "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": true,
-        "createDockerBundles": true,
+        "createDockerContexts": true,
         "createDockerImages": true,
         "createRpmPackage": true,
         "downloadFreshNode": true,
@@ -87,7 +87,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerBundles": false,
+        "createDockerContexts": false,
         "createDockerImages": false,
         "createRpmPackage": true,
         "downloadFreshNode": true,
@@ -110,7 +110,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": true,
-        "createDockerBundles": false,
+        "createDockerContexts": false,
         "createDockerImages": false,
         "createRpmPackage": false,
         "downloadFreshNode": true,
@@ -125,19 +125,6 @@ it('limits packages if --deb passed with --all-platforms', () => {
   `);
 });
 
-it('limits packages if --docker passed with --skip-docker-ubi and --all-platforms', () => {
-  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--docker', '--skip-docker-ubi']))
-    .toMatchInlineSnapshot(`
-    Object {
-      "log": <ToolingLog>,
-      "showHelp": true,
-      "unknownFlags": Array [
-        "docker",
-        "skip-docker-ubi",
-      ],
-    }
-  `);
-});
 it('limits packages if --docker-images passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--docker-images']))
     .toMatchInlineSnapshot(`
@@ -147,7 +134,7 @@ it('limits packages if --docker-images passed with --all-platforms', () => {
         "buildOssDist": true,
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerBundles": false,
+        "createDockerContexts": false,
         "createDockerImages": true,
         "createRpmPackage": false,
         "downloadFreshNode": true,

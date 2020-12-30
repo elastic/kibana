@@ -33,7 +33,7 @@ export function readCliArgs(argv: string[]) {
       'rpm',
       'deb',
       'docker-images',
-      'docker-bundles',
+      'docker-contexts',
       'release',
       'skip-node-download',
       'verbose',
@@ -54,7 +54,7 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       'docker-images': null,
-      'docker-bundles': null,
+      'docker-contexts': null,
       oss: null,
       'version-qualifier': '',
     },
@@ -81,7 +81,7 @@ export function readCliArgs(argv: string[]) {
 
   // In order to build a docker image we always need
   // to generate all the platforms
-  if (flags['docker-images'] || flags['docker-bundles']) {
+  if (flags['docker-images'] || flags['docker-contexts']) {
     flags['all-platforms'] = true;
   }
 
@@ -95,7 +95,7 @@ export function readCliArgs(argv: string[]) {
       flags.rpm === null &&
       flags.deb === null &&
       flags['docker-images'] === null &&
-      flags['docker-bundles'] === null
+      flags['docker-contexts'] === null
     ) {
       return true;
     }
@@ -113,7 +113,7 @@ export function readCliArgs(argv: string[]) {
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
     createDockerImages: isOsPackageDesired('docker-images'),
-    createDockerBundles: isOsPackageDesired('docker-bundles'),
+    createDockerContexts: isOsPackageDesired('docker-contexts'),
     targetAllPlatforms: Boolean(flags['all-platforms']),
   };
 

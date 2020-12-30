@@ -51,8 +51,8 @@ if (showHelp) {
         --all-platforms         {dim Produce archives for all platforms, not just this one}
         --rpm                   {dim Only build the rpm packages}
         --deb                   {dim Only build the deb packages}
-        --docker-images         {dim Only build the docker images}
-        --docker-bundles        {dim Only build the docker bundles}
+        --docker-images         {dim Only build the Docker images}
+        --docker-contexts       {dim Only build the Docker build contexts}
         --release               {dim Produce a release-ready distributable}
         --version-qualifier     {dim Suffix version with a qualifier}
         --skip-node-download    {dim Reuse existing downloads of node.js}

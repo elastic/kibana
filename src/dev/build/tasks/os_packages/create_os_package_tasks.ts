@@ -61,7 +61,7 @@ export const CreateRpmPackage: Task = {
 };
 
 export const CreateDockerImages: Task = {
-  description: 'Creating docker images',
+  description: 'Creating Docker images',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
@@ -88,8 +88,8 @@ export const CreateDockerImages: Task = {
   },
 };
 
-export const CreateDockerBundles: Task = {
-  description: 'Creating docker bundles',
+export const CreateDockerContexts: Task = {
+  description: 'Creating Docker build contexts',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
