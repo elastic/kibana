@@ -21,6 +21,7 @@ import {
 import { ViewType } from '../state';
 import {
   checkingIfEntriesExist,
+  entriesExist,
   getCurrentLocation,
   getListTotalItemsCount,
 } from '../store/selectors';
@@ -35,12 +36,14 @@ import { TrustedAppsNotifications } from './trusted_apps_notifications';
 import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/types';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { ABOUT_TRUSTED_APPS } from './translations';
+import { EmptyState } from './components/empty_state';
 
 export const TrustedAppsPage = memo(() => {
   const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
   const location = useTrustedAppsSelector(getCurrentLocation);
   const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
+  const doEntriesExist = useTrustedAppsSelector(entriesExist);
   const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({ show: 'create' }));
   const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({ show: undefined }));
   const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
@@ -69,6 +72,39 @@ export const TrustedAppsPage = memo(() => {
     </EuiButton>
   );
 
+  const content = doEntriesExist ? (
+    <>
+      <TrustedAppsNotifications />
+      <TrustedAppDeletionDialog />
+      {location.show === 'create' && (
+        <CreateTrustedAppFlyout
+          onClose={handleAddFlyoutClose}
+          size="m"
+          data-test-subj="addTrustedAppFlyout"
+        />
+      )}
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <ControlPanel
+            totalItemCount={totalItemsCount}
+            currentViewType={location.view_type}
+            onViewTypeChange={handleViewTypeChange}
+          />
+
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
+
+          {location.view_type === 'grid' && <TrustedAppsGrid />}
+          {location.view_type === 'list' && <TrustedAppsList />}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  ) : (
+    <EmptyState onAdd={handleAddButtonClick} />
+  );
+
   return (
     <AdministrationListPage
       data-test-subj="trustedAppsListPage"
@@ -86,34 +122,7 @@ export const TrustedAppsPage = memo(() => {
       {isCheckingIfEntriesExists ? (
         <EuiEmptyPrompt body={<EuiLoadingSpinner className="essentialAnimation" size="xl" />} />
       ) : (
-        <>
-          <TrustedAppsNotifications />
-          <TrustedAppDeletionDialog />
-          {location.show === 'create' && (
-            <CreateTrustedAppFlyout
-              onClose={handleAddFlyoutClose}
-              size="m"
-              data-test-subj="addTrustedAppFlyout"
-            />
-          )}
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <ControlPanel
-                totalItemCount={totalItemsCount}
-                currentViewType={location.view_type}
-                onViewTypeChange={handleViewTypeChange}
-              />
-
-              <EuiSpacer size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiHorizontalRule margin="none" />
-
-              {location.view_type === 'grid' && <TrustedAppsGrid />}
-              {location.view_type === 'list' && <TrustedAppsList />}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+        content
       )}
     </AdministrationListPage>
   );

@@ -166,3 +166,7 @@ export const getCreationError = (
 export const checkingIfEntriesExist = (state: Immutable<TrustedAppsListPageState>): boolean => {
   return state.entriesExist === 'loading';
 };
+
+export const entriesExist = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return state.entriesExist === true;
+};
