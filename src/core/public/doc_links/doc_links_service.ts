@@ -72,6 +72,7 @@ export class DocLinksService {
         aggs: {
           date_histogram: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-datehistogram-aggregation.html`,
           date_range: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-daterange-aggregation.html`,
+          date_format_pattern: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-daterange-aggregation.html#date-format-pattern`,
           filter: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-filter-aggregation.html`,
           filters: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-filters-aggregation.html`,
           geohash_grid: `${ELASTICSEARCH_DOCS}search-aggregations-bucket-geohashgrid-aggregation.html`,
@@ -107,6 +108,7 @@ export class DocLinksService {
           painless: `${ELASTICSEARCH_DOCS}modules-scripting-painless.html`,
           painlessApi: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
           painlessSyntax: `${ELASTICSEARCH_DOCS}modules-scripting-painless-syntax.html`,
+          painlessLanguage: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-lang-spec.html`,
           luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
         },
         indexPatterns: {
@@ -150,13 +152,43 @@ export class DocLinksService {
           classificationAucRoc: `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-class-aucroc`,
         },
         transforms: {
-          guide: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/transforms.html`,
+          guide: `${ELASTICSEARCH_DOCS}transforms.html`,
         },
         visualize: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/visualize.html`,
           timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
+        },
+        observability: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
+        },
+        alerting: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/managing-alerts-and-actions.html`,
+          actionTypes: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/action-types.html`,
+        },
+        maps: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-maps.html`,
+        },
+        monitoring: {
+          alertsKibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html`,
+          monitorElasticsearch: `${ELASTICSEARCH_DOCS}configuring-metricbeat.html`,
+          monitorKibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitoring-metricbeat.html`,
+        },
+        security: {
+          elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
+          kibanaTLS: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/configuring-tls.html`,
+          kibanaPrivileges: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-privileges.html`,
+          indicesPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-indices`,
+          mappingRoles: `${ELASTICSEARCH_DOCS}mapping-roles.html`,
+        },
+        apis: {
+          createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
+          createSnapshotLifecylePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
+          createRoleMapping: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
+          createApiKey: `${ELASTICSEARCH_DOCS}security-api-create-api-key.html`,
+          createPipeline: `${ELASTICSEARCH_DOCS}put-pipeline-api.html`,
+          openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
         },
       },
     });
@@ -204,6 +236,7 @@ export interface DocLinksStart {
     readonly aggs: {
       readonly date_histogram: string;
       readonly date_range: string;
+      readonly date_format_pattern: string;
       readonly filter: string;
       readonly filters: string;
       readonly geohash_grid: string;
@@ -264,5 +297,11 @@ export interface DocLinksStart {
     readonly ml: Record<string, string>;
     readonly transforms: Record<string, string>;
     readonly visualize: Record<string, string>;
+    readonly apis: Record<string, string>;
+    readonly observability: Record<string, string>;
+    readonly alerting: Record<string, string>;
+    readonly maps: Record<string, string>;
+    readonly monitoring: Record<string, string>;
+    readonly security: Record<string, string>;
   };
 }
