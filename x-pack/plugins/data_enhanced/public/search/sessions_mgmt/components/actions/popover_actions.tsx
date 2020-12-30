@@ -79,11 +79,7 @@ export const PopoverActionsMenu = ({ api, handleAction, session }: PopoverAction
     />
   );
 
-  const { actions } = session;
-  if (!actions || actions.length === 0) {
-    return null;
-  }
-
+  const actions = session.actions || [];
   // Generic set of actions - up to the API to return what is available
   const items = actions.reduce((itemSet, actionType) => {
     const actionDef = getAction(api, actionType, session, handleAction);

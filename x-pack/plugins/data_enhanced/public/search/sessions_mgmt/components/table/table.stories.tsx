@@ -52,103 +52,7 @@ storiesOf('components/BackgroundSessionsMgmt/Table', module)
 
     return <SearchSessionsMgmtTable {...props} />;
   })
-  .add('completed session', () => {
-    const sessionsClient = new SessionsClient({ http: ({} as unknown) as HttpSetup });
-    const urls = ({
-      urlGenerator: {},
-      getUrlGenerator: () => ({
-        createUrl: () => ({}),
-      }),
-    } as unknown) as UrlGeneratorsStart;
-    const notifications = ({
-      toasts: {
-        addInfo: () => ({}),
-      },
-    } as unknown) as NotificationsStart;
-    const config: SessionsMgmtConfigSchema = {
-      maxSessions: 100,
-      refreshInterval: moment.duration(1, 'minutes'),
-      refreshTimeout: moment.duration(20, 'minutes'),
-      expiresSoonWarning: moment.duration(2, 'days'),
-    };
-
-    const initialTable = [
-      {
-        id: 'foo-123',
-        name: 'Single Session',
-        appId: 'dashboards',
-        created: '2020-12-29T00:00:00Z',
-        expires: '2021-01-15T00:00:00Z',
-        status: STATUS.COMPLETE,
-        url: '/pepperoni',
-        isViewable: true,
-      },
-    ];
-
-    const props = {
-      api: new SearchSessionsMgmtAPI(sessionsClient, urls, notifications, config),
-      timezone: 'UTC',
-      initialTable,
-      config,
-    };
-
-    return <SearchSessionsMgmtTable {...props} />;
-  })
-  .add('completed session, expires soon', () => {
-    const sessionsClient = new SessionsClient({ http: ({} as unknown) as HttpSetup });
-    const urls = ({
-      urlGenerator: {},
-      getUrlGenerator: () => ({
-        createUrl: () => ({}),
-      }),
-    } as unknown) as UrlGeneratorsStart;
-    const notifications = ({
-      toasts: {
-        addInfo: () => ({}),
-      },
-    } as unknown) as NotificationsStart;
-    const config: SessionsMgmtConfigSchema = {
-      maxSessions: 100,
-      refreshInterval: moment.duration(1, 'minutes'),
-      refreshTimeout: moment.duration(20, 'minutes'),
-      expiresSoonWarning: moment.duration(2, 'days'),
-    };
-
-    const created = moment().subtract(86000000);
-    const expires = moment().add(86000000);
-    const initialTable = [
-      {
-        id: 'foo-123',
-        name: 'Single Session',
-        appId: 'dashboards',
-        created: created.format(),
-        expires: expires.format(),
-        status: STATUS.COMPLETE,
-        url: '/pepperoni',
-        isViewable: true,
-      },
-      {
-        id: 'foo-123',
-        name: 'Single Session',
-        appId: 'dashboards',
-        created: created.format(),
-        expires: expires.add(86000000).format(),
-        status: STATUS.COMPLETE,
-        url: '/pepperoni',
-        isViewable: true,
-      },
-    ];
-
-    const props = {
-      api: new SearchSessionsMgmtAPI(sessionsClient, urls, notifications, config),
-      timezone: 'UTC',
-      initialTable,
-      config,
-    };
-
-    return <SearchSessionsMgmtTable {...props} />;
-  })
-  .add('pages of random data', () => {
+  .add('multiple pages', () => {
     const sessionsClient = new SessionsClient({ http: ({} as unknown) as HttpSetup });
     const urls = ({
       urlGenerator: {},
@@ -205,7 +109,12 @@ storiesOf('components/BackgroundSessionsMgmt/Table', module)
       STATUS.IN_PROGRESS,
     ];
     const viewability = [true, true, false];
-    const actions = [[ACTION.DELETE]];
+    const actions = [
+      [ACTION.DELETE],
+      [ACTION.CANCEL, ACTION.DELETE],
+      [ACTION.EXTEND, ACTION.DELETE],
+      [ACTION.CANCEL, ACTION.EXTEND, ACTION.DELETE],
+    ];
 
     const mockTable = names.map((name, ndx) => {
       const created = moment().subtract(86000000 * ndx);
@@ -220,7 +129,7 @@ storiesOf('components/BackgroundSessionsMgmt/Table', module)
         appId: appIds[ndx % 5],
         status: statuses[ndx % 5],
         isViewable: viewability[ndx % 3],
-        actions: actions[ndx % 2],
+        actions: actions[ndx % 4],
       };
     });
 
