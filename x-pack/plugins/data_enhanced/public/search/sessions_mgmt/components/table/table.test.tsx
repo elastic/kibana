@@ -63,16 +63,11 @@ describe('Background Search Session Management Table', () => {
     let table: ReactWrapper;
 
     beforeEach(() => {
-      mockCoreSetup.uiSettings.get.mockImplementation((key: string) => {
-        return key === 'dateFormat:tz' ? 'UTC' : null;
-      });
-
       table = mount(
         <LocaleWrapper>
           <SearchSessionsMgmtTable
             api={api}
-            http={mockCoreSetup.http}
-            uiSettings={mockCoreSetup.uiSettings}
+            timezone="UTC"
             initialTable={initialTable}
             config={mockConfig}
           />
@@ -121,13 +116,7 @@ describe('Background Search Session Management Table', () => {
 
       const table = mount(
         <LocaleWrapper>
-          <SearchSessionsMgmtTable
-            api={api}
-            http={mockCoreSetup.http}
-            uiSettings={mockCoreSetup.uiSettings}
-            initialTable={[]}
-            config={mockConfig}
-          />
+          <SearchSessionsMgmtTable api={api} timezone="UTC" initialTable={[]} config={mockConfig} />
         </LocaleWrapper>
       );
 

@@ -5,16 +5,13 @@
  */
 
 import { EuiTextProps, EuiToolTipProps } from '@elastic/eui';
-import { MockedKeys } from '@kbn/utility-types/jest';
 import { mount } from 'enzyme';
-import { CoreSetup } from 'kibana/public';
 import React from 'react';
-import { coreMock } from 'src/core/public/mocks';
 import { STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 import { LocaleWrapper } from '../__mocks__';
 import { getStatusText, StatusIndicator } from './status';
 
-let mockCoreSetup: MockedKeys<CoreSetup>;
+let tz: string;
 let session: UISession;
 
 const mockNowTime = new Date();
@@ -22,9 +19,7 @@ mockNowTime.setTime(1607026176061);
 
 describe('Background Search Session management status labels', () => {
   beforeEach(() => {
-    mockCoreSetup = coreMock.createSetup();
-    mockCoreSetup.uiSettings.get.mockImplementation(() => 'Browser');
-
+    tz = 'Browser';
     session = {
       name: 'amazing test',
       id: 'wtywp9u2802hahgp-gsla',
@@ -59,7 +54,7 @@ describe('Background Search Session management status labels', () => {
     test('render in progress', () => {
       const statusIndicator = mount(
         <LocaleWrapper>
-          <StatusIndicator session={session} uiSettings={mockCoreSetup.uiSettings} />
+          <StatusIndicator session={session} timezone={tz} />
         </LocaleWrapper>
       );
 
@@ -74,7 +69,7 @@ describe('Background Search Session management status labels', () => {
 
       const statusIndicator = mount(
         <LocaleWrapper>
-          <StatusIndicator session={session} uiSettings={mockCoreSetup.uiSettings} />
+          <StatusIndicator session={session} timezone={tz} />
         </LocaleWrapper>
       );
 
@@ -90,11 +85,7 @@ describe('Background Search Session management status labels', () => {
 
       const statusIndicator = mount(
         <LocaleWrapper>
-          <StatusIndicator
-            session={session}
-            now={mockNowTime.toISOString()}
-            uiSettings={mockCoreSetup.uiSettings}
-          />
+          <StatusIndicator session={session} now={mockNowTime.toISOString()} timezone={tz} />
         </LocaleWrapper>
       );
 
@@ -109,11 +100,7 @@ describe('Background Search Session management status labels', () => {
 
       const statusIndicator = mount(
         <LocaleWrapper>
-          <StatusIndicator
-            session={session}
-            now={mockNowTime.toISOString()}
-            uiSettings={mockCoreSetup.uiSettings}
-          />
+          <StatusIndicator session={session} now={mockNowTime.toISOString()} timezone={tz} />
         </LocaleWrapper>
       );
 
@@ -130,11 +117,7 @@ describe('Background Search Session management status labels', () => {
 
       const statusIndicator = mount(
         <LocaleWrapper>
-          <StatusIndicator
-            session={session}
-            now={mockNowTime.toISOString()}
-            uiSettings={mockCoreSetup.uiSettings}
-          />
+          <StatusIndicator session={session} now={mockNowTime.toISOString()} timezone={tz} />
         </LocaleWrapper>
       );
 

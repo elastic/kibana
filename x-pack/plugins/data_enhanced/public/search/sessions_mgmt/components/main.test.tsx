@@ -76,7 +76,7 @@ describe('Background Search Session Management Main', () => {
           <SearchSessionsMgmtMain
             api={api}
             http={mockCoreSetup.http}
-            uiSettings={mockCoreSetup.uiSettings}
+            timezone="UTC"
             initialTable={initialTable}
             documentation={new AsyncSearchIntroDocumentation(docLinks)}
             config={mockConfig}

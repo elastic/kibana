@@ -25,6 +25,8 @@ let sessionsClient: SessionsClient;
 let handleAction: ActionComplete;
 let mockSession: UISession;
 
+let tz = 'UTC';
+
 describe('Background Sessions Management table column factory', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
@@ -43,9 +45,7 @@ describe('Background Sessions Management table column factory', () => {
       mockCoreSetup.notifications,
       mockConfig
     );
-    mockCoreSetup.uiSettings.get.mockImplementation((key) => {
-      return key === 'dateFormat:tz' ? 'UTC' : null;
-    });
+    tz = 'UTC';
 
     handleAction = () => {
       throw new Error('not testing handle action');
@@ -64,7 +64,7 @@ describe('Background Sessions Management table column factory', () => {
   });
 
   test('returns columns', () => {
-    const columns = getColumns(api, mockConfig, mockCoreSetup.uiSettings, handleAction);
+    const columns = getColumns(api, mockConfig, tz, handleAction);
     expect(columns).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -116,12 +116,9 @@ describe('Background Sessions Management table column factory', () => {
 
   describe('name', () => {
     test('rendering', () => {
-      const [, nameColumn] = getColumns(
-        api,
-        mockConfig,
-        mockCoreSetup.uiSettings,
-        handleAction
-      ) as Array<EuiTableFieldDataColumnType<UISession>>;
+      const [, nameColumn] = getColumns(api, mockConfig, tz, handleAction) as Array<
+        EuiTableFieldDataColumnType<UISession>
+      >;
 
       const name = mount(nameColumn.render!(mockSession.name, mockSession) as ReactElement);
 
@@ -132,12 +129,9 @@ describe('Background Sessions Management table column factory', () => {
   // Status column
   describe('status', () => {
     test('render in_progress', () => {
-      const [, , status] = getColumns(
-        api,
-        mockConfig,
-        mockCoreSetup.uiSettings,
-        handleAction
-      ) as Array<EuiTableFieldDataColumnType<UISession>>;
+      const [, , status] = getColumns(api, mockConfig, tz, handleAction) as Array<
+        EuiTableFieldDataColumnType<UISession>
+      >;
 
       const statusLine = mount(status.render!(mockSession.status, mockSession) as ReactElement);
       expect(
@@ -148,12 +142,9 @@ describe('Background Sessions Management table column factory', () => {
     });
 
     test('error handling', () => {
-      const [, , status] = getColumns(
-        api,
-        mockConfig,
-        mockCoreSetup.uiSettings,
-        handleAction
-      ) as Array<EuiTableFieldDataColumnType<UISession>>;
+      const [, , status] = getColumns(api, mockConfig, tz, handleAction) as Array<
+        EuiTableFieldDataColumnType<UISession>
+      >;
 
       mockSession.status = 'INVALID' as STATUS;
       const statusLine = mount(status.render!(mockSession.status, mockSession) as ReactElement);
@@ -167,14 +158,11 @@ describe('Background Sessions Management table column factory', () => {
   // Start Date column
   describe('startedDate', () => {
     test('render using Browser timezone', () => {
-      mockCoreSetup.uiSettings.get.mockImplementation(() => 'Browser');
+      tz = 'Browser';
 
-      const [, , , createdDateCol] = getColumns(
-        api,
-        mockConfig,
-        mockCoreSetup.uiSettings,
-        handleAction
-      ) as Array<EuiTableFieldDataColumnType<UISession>>;
+      const [, , , createdDateCol] = getColumns(api, mockConfig, tz, handleAction) as Array<
+        EuiTableFieldDataColumnType<UISession>
+      >;
 
       const date = mount(createdDateCol.render!(mockSession.created, mockSession) as ReactElement);
 
@@ -182,14 +170,11 @@ describe('Background Sessions Management table column factory', () => {
     });
 
     test('render using AK timezone', () => {
-      mockCoreSetup.uiSettings.get.mockImplementation(() => 'US/Alaska');
+      tz = 'US/Alaska';
 
-      const [, , , createdDateCol] = getColumns(
-        api,
-        mockConfig,
-        mockCoreSetup.uiSettings,
-        handleAction
-      ) as Array<EuiTableFieldDataColumnType<UISession>>;
+      const [, , , createdDateCol] = getColumns(api, mockConfig, tz, handleAction) as Array<
+        EuiTableFieldDataColumnType<UISession>
+      >;
 
       const date = mount(createdDateCol.render!(mockSession.created, mockSession) as ReactElement);
 
@@ -197,12 +182,9 @@ describe('Background Sessions Management table column factory', () => {
     });
 
     test('error handling', () => {
-      const [, , , createdDateCol] = getColumns(
-        api,
-        mockConfig,
-        mockCoreSetup.uiSettings,
-        handleAction
-      ) as Array<EuiTableFieldDataColumnType<UISession>>;
+      const [, , , createdDateCol] = getColumns(api, mockConfig, tz, handleAction) as Array<
+        EuiTableFieldDataColumnType<UISession>
+      >;
 
       mockSession.created = 'INVALID';
       const date = mount(createdDateCol.render!(mockSession.created, mockSession) as ReactElement);

@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { HttpStart, IUiSettingsClient } from 'kibana/public';
+import type { HttpStart } from 'kibana/public';
 import React from 'react';
 import type { SessionsMgmtConfigSchema } from '../';
 import type { UISession } from '../../../../common/search/sessions_mgmt';
@@ -29,7 +29,7 @@ interface Props {
   api: SearchSessionsMgmtAPI;
   http: HttpStart;
   initialTable: UISession[] | null;
-  uiSettings: IUiSettingsClient;
+  timezone: string;
   config: SessionsMgmtConfigSchema;
 }
 

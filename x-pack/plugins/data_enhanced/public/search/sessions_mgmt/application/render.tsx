@@ -13,7 +13,7 @@ import { SearchSessionsMgmtMain } from '../components/main';
 
 export const renderApp = (
   elem: HTMLElement | null,
-  { i18n, ...homeDeps }: AppDependencies,
+  { i18n, uiSettings, ...homeDeps }: AppDependencies,
   initialTable: UISession[] | null
 ) => {
   if (!elem) {
@@ -23,13 +23,17 @@ export const renderApp = (
   const { Context: I18nContext } = i18n;
   // uiSettings is required by the listing table to format dates in the timezone from Settings
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
-    uiSettings: homeDeps.uiSettings,
+    uiSettings,
   });
 
   render(
     <I18nContext>
       <KibanaReactContextProvider>
-        <SearchSessionsMgmtMain initialTable={initialTable} {...homeDeps} />
+        <SearchSessionsMgmtMain
+          initialTable={initialTable}
+          {...homeDeps}
+          timezone={uiSettings.get('dateFormat:tz')}
+        />
       </KibanaReactContextProvider>
     </I18nContext>,
     elem
