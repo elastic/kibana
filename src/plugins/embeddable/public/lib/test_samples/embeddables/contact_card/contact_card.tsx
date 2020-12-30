@@ -24,13 +24,6 @@ import { EuiButton } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { UiActionsStart } from '../../../../../../ui_actions/public';
 import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
-import { EmbeddableContext } from '../../../triggers';
-
-declare module '../../../../../../ui_actions/public' {
-  export interface TriggerContextMapping {
-    [CONTACT_USER_TRIGGER]: EmbeddableContext;
-  }
-}
 
 interface Props {
   embeddable: ContactCardEmbeddable;

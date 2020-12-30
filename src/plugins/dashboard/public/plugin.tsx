@@ -62,27 +62,15 @@ import {
 } from './services/kibana_react';
 
 import {
-  ACTION_CLONE_PANEL,
-  ACTION_EXPAND_PANEL,
-  ACTION_REPLACE_PANEL,
   ClonePanelAction,
-  ClonePanelActionContext,
   createDashboardContainerByValueRenderer,
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainerFactory,
   DashboardContainerFactoryDefinition,
   ExpandPanelAction,
-  ExpandPanelActionContext,
   ReplacePanelAction,
-  ReplacePanelActionContext,
-  ACTION_UNLINK_FROM_LIBRARY,
-  UnlinkFromLibraryActionContext,
   UnlinkFromLibraryAction,
-  ACTION_ADD_TO_LIBRARY,
-  AddToLibraryActionContext,
   AddToLibraryAction,
-  ACTION_LIBRARY_NOTIFICATION,
-  LibraryNotificationActionContext,
   LibraryNotificationAction,
 } from './application';
 import {
@@ -94,11 +82,7 @@ import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
-import {
-  ACTION_EXPORT_CSV,
-  ExportContext,
-  ExportCSVAction,
-} from './application/actions/export_csv_action';
+import { ExportCSVAction } from './application/actions/export_csv_action';
 import { dashboardFeatureCatalog } from './dashboard_strings';
 
 declare module '../../share/public' {
@@ -145,18 +129,6 @@ export interface DashboardStart {
   dashboardUrlGenerator?: DashboardUrlGenerator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
-}
-
-declare module '../../../plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_EXPAND_PANEL]: ExpandPanelActionContext;
-    [ACTION_REPLACE_PANEL]: ReplacePanelActionContext;
-    [ACTION_CLONE_PANEL]: ClonePanelActionContext;
-    [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
-    [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
-    [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
-    [ACTION_EXPORT_CSV]: ExportContext;
-  }
 }
 
 export class DashboardPlugin

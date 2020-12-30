@@ -18,43 +18,12 @@
  */
 import { UiActionsSetup } from '../../ui_actions/public';
 import {
-  ACTION_ADD_PANEL,
-  ACTION_CUSTOMIZE_PANEL,
-  ACTION_EDIT_PANEL,
-  ACTION_INSPECT_PANEL,
-  CONTEXT_MENU_TRIGGER,
   contextMenuTrigger,
-  EmbeddableContext,
-  PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
   panelBadgeTrigger,
   panelNotificationTrigger,
-  RangeSelectContext,
-  REMOVE_PANEL_ACTION,
-  SELECT_RANGE_TRIGGER,
   selectRangeTrigger,
-  ValueClickContext,
-  VALUE_CLICK_TRIGGER,
   valueClickTrigger,
 } from './lib';
-
-declare module '../../ui_actions/public' {
-  export interface TriggerContextMapping {
-    [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
-    [PANEL_BADGE_TRIGGER]: EmbeddableContext;
-    [PANEL_NOTIFICATION_TRIGGER]: EmbeddableContext;
-    [SELECT_RANGE_TRIGGER]: RangeSelectContext;
-    [VALUE_CLICK_TRIGGER]: ValueClickContext;
-  }
-
-  export interface ActionContextMapping {
-    [ACTION_CUSTOMIZE_PANEL]: EmbeddableContext;
-    [ACTION_ADD_PANEL]: EmbeddableContext;
-    [ACTION_INSPECT_PANEL]: EmbeddableContext;
-    [REMOVE_PANEL_ACTION]: EmbeddableContext;
-    [ACTION_EDIT_PANEL]: EmbeddableContext;
-  }
-}
 
 /**
  * This method initializes Embeddable plugin with initial set of

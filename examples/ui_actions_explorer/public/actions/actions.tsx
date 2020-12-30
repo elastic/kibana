@@ -38,7 +38,8 @@ export const ACTION_EDIT_USER = 'ACTION_EDIT_USER';
 export const ACTION_TRIGGER_PHONE_USER = 'ACTION_TRIGGER_PHONE_USER';
 export const ACTION_SHOWCASE_PLUGGABILITY = 'ACTION_SHOWCASE_PLUGGABILITY';
 
-export const showcasePluggability = createAction<typeof ACTION_SHOWCASE_PLUGGABILITY>({
+export const showcasePluggability = createAction({
+  id: ACTION_SHOWCASE_PLUGGABILITY,
   type: ACTION_SHOWCASE_PLUGGABILITY,
   getDisplayName: () => 'This is pluggable! Any plugin can inject their actions here.',
   execute: async (context: ActionExecutionContext) =>
@@ -49,13 +50,15 @@ export interface PhoneContext {
   phone: string;
 }
 
-export const makePhoneCallAction = createAction<typeof ACTION_CALL_PHONE_NUMBER>({
+export const makePhoneCallAction = createAction<PhoneContext>({
+  id: ACTION_CALL_PHONE_NUMBER,
   type: ACTION_CALL_PHONE_NUMBER,
   getDisplayName: () => 'Call phone number',
   execute: async (context) => alert(`Pretend calling ${context.phone}...`),
 });
 
-export const lookUpWeatherAction = createAction<typeof ACTION_TRAVEL_GUIDE>({
+export const lookUpWeatherAction = createAction<CountryContext>({
+  id: ACTION_TRAVEL_GUIDE,
   type: ACTION_TRAVEL_GUIDE,
   getIconType: () => 'popout',
   getDisplayName: () => 'View travel guide',
@@ -68,7 +71,8 @@ export interface CountryContext {
   country: string;
 }
 
-export const viewInMapsAction = createAction<typeof ACTION_VIEW_IN_MAPS>({
+export const viewInMapsAction = createAction<CountryContext>({
+  id: ACTION_VIEW_IN_MAPS,
   type: ACTION_VIEW_IN_MAPS,
   getIconType: () => 'popout',
   getDisplayName: () => 'View in maps',
@@ -109,7 +113,8 @@ function EditUserModal({
 }
 
 export const createEditUserAction = (getOpenModal: () => Promise<OverlayStart['openModal']>) =>
-  createAction<typeof ACTION_EDIT_USER>({
+  createAction<UserContext>({
+    id: ACTION_EDIT_USER,
     type: ACTION_EDIT_USER,
     getIconType: () => 'pencil',
     getDisplayName: () => 'Edit user',
@@ -126,7 +131,8 @@ export interface UserContext {
 }
 
 export const createTriggerPhoneTriggerAction = (getUiActionsApi: () => Promise<UiActionsStart>) =>
-  createAction<typeof ACTION_TRIGGER_PHONE_USER>({
+  createAction<UserContext>({
+    id: ACTION_TRIGGER_PHONE_USER,
     type: ACTION_TRIGGER_PHONE_USER,
     getDisplayName: () => 'Call phone number',
     shouldAutoExecute: async () => true,

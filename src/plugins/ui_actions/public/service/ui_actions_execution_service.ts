@@ -19,14 +19,13 @@
 
 import { uniqBy } from 'lodash';
 import { Action } from '../actions';
-import { BaseContext } from '../types';
 import { defer as createDefer, Defer } from '../../../kibana_utils/public';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 import { Trigger } from '../triggers';
 
 interface ExecuteActionTask {
   action: Action;
-  context: BaseContext;
+  context: object;
   trigger: Trigger;
   defer: Defer<void>;
   alwaysShowPopup?: boolean;
@@ -44,8 +43,8 @@ export class UiActionsExecutionService {
       context,
       trigger,
     }: {
-      action: Action<BaseContext>;
-      context: BaseContext;
+      action: Action;
+      context: object;
       trigger: Trigger;
     },
     alwaysShowPopup?: boolean

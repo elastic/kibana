@@ -9,8 +9,11 @@ import { EuiNotificationBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useContainerState } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { EnhancedEmbeddableContext } from '../../../../../../embeddable_enhanced/public';
 import { txtDisplayName } from './i18n';
+import { ActionExecutionContext } from '../../../../../../../../src/plugins/ui_actions/public';
 
-export const MenuItem: React.FC<{ context: EnhancedEmbeddableContext }> = ({ context }) => {
+export const MenuItem: React.FC<{ context: ActionExecutionContext<EnhancedEmbeddableContext> }> = ({
+  context,
+}) => {
   const { events } = useContainerState(context.embeddable.enhancements.dynamicActions.state);
   const count = events.length;
 

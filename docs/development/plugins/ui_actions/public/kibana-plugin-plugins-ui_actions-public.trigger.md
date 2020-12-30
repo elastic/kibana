@@ -13,7 +13,7 @@ More than one action can be attached to a single trigger, in which case when tri
 <b>Signature:</b>
 
 ```typescript
-export interface Trigger<ID extends TriggerId = TriggerId> 
+export interface Trigger 
 ```
 
 ## Properties
@@ -21,6 +21,6 @@ export interface Trigger<ID extends TriggerId = TriggerId>
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [description](./kibana-plugin-plugins-ui_actions-public.trigger.description.md) | <code>string</code> | A longer user friendly description of the trigger. |
-|  [id](./kibana-plugin-plugins-ui_actions-public.trigger.id.md) | <code>ID</code> | Unique name of the trigger as identified in <code>ui_actions</code> plugin trigger registry. |
+|  [id](./kibana-plugin-plugins-ui_actions-public.trigger.id.md) | <code>string</code> | Unique name of the trigger as identified in <code>ui_actions</code> plugin trigger registry. |
 |  [title](./kibana-plugin-plugins-ui_actions-public.trigger.title.md) | <code>string</code> | User friendly name of the trigger. |
 

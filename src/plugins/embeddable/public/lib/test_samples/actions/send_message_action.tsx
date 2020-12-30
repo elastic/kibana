@@ -18,16 +18,14 @@
  */
 import React from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
-import { createAction, IncompatibleActionError, ActionType } from '../../ui_actions';
+import { createAction, IncompatibleActionError } from '../../ui_actions';
 import { CoreStart } from '../../../../../../core/public';
 import { toMountPoint } from '../../../../../kibana_react/public';
 import { Embeddable, EmbeddableInput } from '../../embeddables';
 import { GetMessageModal } from './get_message_modal';
 import { FullNameEmbeddableOutput, hasFullNameOutput } from './say_hello_action';
 
-// Casting to ActionType is a hack - in a real situation use
-// declare module and add this id to ActionContextMapping.
-export const ACTION_SEND_MESSAGE = 'ACTION_SEND_MESSAGE' as ActionType;
+export const ACTION_SEND_MESSAGE = 'ACTION_SEND_MESSAGE';
 
 interface ActionContext {
   embeddable: Embeddable<EmbeddableInput, FullNameEmbeddableOutput>;
@@ -44,7 +42,8 @@ export function createSendMessageAction(overlays: CoreStart['overlays']) {
     overlays.openFlyout(toMountPoint(<EuiFlyoutBody>{content}</EuiFlyoutBody>));
   };
 
-  return createAction<typeof ACTION_SEND_MESSAGE>({
+  return createAction<ActionContext>({
+    id: ACTION_SEND_MESSAGE,
     type: ACTION_SEND_MESSAGE,
     getDisplayName: () => 'Send message',
     isCompatible,

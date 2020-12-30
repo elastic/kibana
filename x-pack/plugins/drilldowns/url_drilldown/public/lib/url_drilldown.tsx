@@ -56,14 +56,14 @@ export type UrlTrigger =
   | typeof ROW_CLICK_TRIGGER
   | typeof CONTEXT_MENU_TRIGGER;
 
-export interface ActionFactoryContext extends BaseActionFactoryContext<UrlTrigger> {
+export interface ActionFactoryContext extends BaseActionFactoryContext {
   embeddable?: EmbeddableWithQueryInput;
 }
 export type CollectConfigProps = CollectConfigPropsBase<Config, ActionFactoryContext>;
 
 const URL_DRILLDOWN = 'URL_DRILLDOWN';
 
-export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactoryContext> {
+export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFactoryContext> {
   public readonly id = URL_DRILLDOWN;
 
   constructor(private readonly deps: UrlDrilldownDeps) {}

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-visualizeGeoFieldTrigger: Trigger<'VISUALIZE_GEO_FIELD_TRIGGER'>
+visualizeGeoFieldTrigger: Trigger
 ```

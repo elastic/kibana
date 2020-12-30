@@ -8,7 +8,7 @@ import { Trigger } from '../../../../../src/plugins/ui_actions/public';
 
 export const SWIM_LANE_SELECTION_TRIGGER = 'SWIM_LANE_SELECTION_TRIGGER';
 
-export const swimLaneSelectionTrigger: Trigger<'SWIM_LANE_SELECTION_TRIGGER'> = {
+export const swimLaneSelectionTrigger: Trigger = {
   id: SWIM_LANE_SELECTION_TRIGGER,
   // This is empty string to hide title of ui_actions context menu that appears
   // when this trigger is executed.

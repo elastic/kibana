@@ -21,7 +21,7 @@ import _ from 'lodash';
 import uuid from 'uuid';
 
 import { CoreStart } from 'src/core/public';
-import { ActionByType, IncompatibleActionError } from '../../services/ui_actions';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { SavedObject } from '../../services/saved_objects';
 import {
   ViewMode,
@@ -45,7 +45,7 @@ export interface ClonePanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL> {
+export class ClonePanelAction implements Action<ClonePanelActionContext> {
   public readonly type = ACTION_CLONE_PANEL;
   public readonly id = ACTION_CLONE_PANEL;
   public order = 45;

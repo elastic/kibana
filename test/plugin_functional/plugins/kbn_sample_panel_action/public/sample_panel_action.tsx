@@ -21,19 +21,18 @@ import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-import { createAction, ActionType } from '../../../../../src/plugins/ui_actions/public';
+import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 
-// Casting to ActionType is a hack - in a real situation use
-// declare module and add this id to ActionContextMapping.
-export const SAMPLE_PANEL_ACTION = 'samplePanelAction' as ActionType;
+export const SAMPLE_PANEL_ACTION = 'samplePanelAction';
 
 export interface SamplePanelActionContext {
   embeddable: IEmbeddable;
 }
 
 export function createSamplePanelAction(getStartServices: CoreSetup['getStartServices']) {
-  return createAction<typeof SAMPLE_PANEL_ACTION>({
+  return createAction<SamplePanelActionContext>({
+    id: SAMPLE_PANEL_ACTION,
     type: SAMPLE_PANEL_ACTION,
     getDisplayName: () => 'Sample Panel Action',
     execute: async ({ embeddable }: SamplePanelActionContext) => {

@@ -23,7 +23,7 @@ import { Datatable } from '../../../expressions';
 
 export const ROW_CLICK_TRIGGER = 'ROW_CLICK_TRIGGER';
 
-export const rowClickTrigger: Trigger<'ROW_CLICK_TRIGGER'> = {
+export const rowClickTrigger: Trigger = {
   id: ROW_CLICK_TRIGGER,
   title: i18n.translate('uiActions.triggers.rowClickTitle', {
     defaultMessage: 'Table row click',

@@ -20,7 +20,7 @@
 import { Trigger } from '.';
 
 export const DEFAULT_TRIGGER = '';
-export const defaultTrigger: Trigger<''> = {
+export const defaultTrigger: Trigger = {
   id: DEFAULT_TRIGGER,
   title: 'Unknown',
   description: 'Unknown trigger.',

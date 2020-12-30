@@ -56,7 +56,7 @@ export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
   | RowClickContext;
 
 export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
-export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
+export const contextMenuTrigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
   title: i18n.translate('embeddableApi.contextMenuTrigger.title', {
     defaultMessage: 'Context menu',
@@ -67,7 +67,7 @@ export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
 };
 
 export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
-export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
+export const panelBadgeTrigger: Trigger = {
   id: PANEL_BADGE_TRIGGER,
   title: i18n.translate('embeddableApi.panelBadgeTrigger.title', {
     defaultMessage: 'Panel badges',
@@ -78,7 +78,7 @@ export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
 };
 
 export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
-export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
+export const panelNotificationTrigger: Trigger = {
   id: PANEL_NOTIFICATION_TRIGGER,
   title: i18n.translate('embeddableApi.panelNotificationTrigger.title', {
     defaultMessage: 'Panel notifications',
@@ -89,7 +89,7 @@ export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
 };
 
 export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
-export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
+export const selectRangeTrigger: Trigger = {
   id: SELECT_RANGE_TRIGGER,
   title: i18n.translate('embeddableApi.selectRangeTrigger.title', {
     defaultMessage: 'Range selection',
@@ -100,7 +100,7 @@ export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
 };
 
 export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
-export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
+export const valueClickTrigger: Trigger = {
   id: VALUE_CLICK_TRIGGER,
   title: i18n.translate('embeddableApi.valueClickTrigger.title', {
     defaultMessage: 'Single click',

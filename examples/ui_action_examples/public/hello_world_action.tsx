@@ -30,6 +30,7 @@ interface StartServices {
 
 export const createHelloWorldAction = (getStartServices: () => Promise<StartServices>) =>
   createAction({
+    id: ACTION_HELLO_WORLD,
     type: ACTION_HELLO_WORLD,
     getDisplayName: () => 'Hello World!',
     execute: async () => {

@@ -20,7 +20,6 @@
 import { Observable } from 'rxjs';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
-import { TriggerContextMapping } from '../../../../ui_actions/public';
 import { EmbeddableInput } from '../../../common/types';
 
 export interface EmbeddableError {
@@ -173,5 +172,5 @@ export interface IEmbeddable<
   /**
    * List of triggers that this embeddable will execute.
    */
-  supportedTriggers(): Array<keyof TriggerContextMapping>;
+  supportedTriggers(): string[];
 }

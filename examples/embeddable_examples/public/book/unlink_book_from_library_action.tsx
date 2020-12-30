@@ -35,6 +35,7 @@ export const createUnlinkBookFromLibraryAction = () =>
       i18n.translate('embeddableExamples.book.unlinkFromLibrary', {
         defaultMessage: 'Unlink Book from Library Item',
       }),
+    id: ACTION_UNLINK_BOOK_FROM_LIBRARY,
     type: ACTION_UNLINK_BOOK_FROM_LIBRARY,
     order: 100,
     getIconType: () => 'folderExclamation',

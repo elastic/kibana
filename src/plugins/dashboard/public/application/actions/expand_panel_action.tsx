@@ -19,7 +19,7 @@
 
 import { dashboardExpandPanelAction } from '../../dashboard_strings';
 import { IEmbeddable } from '../../services/embeddable';
-import { ActionByType, IncompatibleActionError } from '../../services/ui_actions';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
   DASHBOARD_CONTAINER_TYPE,
   DashboardContainer,
@@ -46,7 +46,7 @@ export interface ExpandPanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANEL> {
+export class ExpandPanelAction implements Action<ExpandPanelActionContext> {
   public readonly type = ACTION_EXPAND_PANEL;
   public readonly id = ACTION_EXPAND_PANEL;
   public order = 7;

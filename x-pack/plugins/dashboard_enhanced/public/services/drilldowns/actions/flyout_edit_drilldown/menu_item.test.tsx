@@ -21,6 +21,7 @@ test('<MenuItem/>', () => {
             dynamicActions: ({ state } as unknown) as DynamicActionManager,
           },
         } as unknown) as EnhancedEmbeddable,
+        trigger: {} as any,
       }}
     />
   );

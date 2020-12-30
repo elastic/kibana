@@ -19,7 +19,7 @@
 
 import React from 'react';
 
-import { ActionByType, IncompatibleActionError } from '../../services/ui_actions';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { reactToUiComponent } from '../../services/kibana_react';
 import {
   IEmbeddable,
@@ -38,7 +38,7 @@ export interface LibraryNotificationActionContext {
   embeddable: IEmbeddable;
 }
 
-export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIBRARY_NOTIFICATION> {
+export class LibraryNotificationAction implements Action<LibraryNotificationActionContext> {
   public readonly id = ACTION_LIBRARY_NOTIFICATION;
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;

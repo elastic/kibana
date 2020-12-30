@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type PresentableGrouping<Context extends object = object> = Array<PresentableGroup<Context>>;
+export declare type PresentableGrouping<Context = unknown> = Array<PresentableGroup<Context>>;
 ```

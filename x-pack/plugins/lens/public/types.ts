@@ -8,7 +8,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
-import { ROW_CLICK_TRIGGER } from '../../../../src/plugins/ui_actions/public';
+import { RowClickContext } from '../../../../src/plugins/ui_actions/public';
 import {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -20,11 +20,8 @@ import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
-import { TriggerContext, VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '../../../../src/plugins/embeddable/public';
+import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
+import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
 import type {
   LensSortActionData,
   LENS_EDIT_SORT_ACTION,
@@ -621,12 +618,12 @@ export interface Visualization<T = unknown> {
 
 export interface LensFilterEvent {
   name: 'filter';
-  data: TriggerContext<typeof VALUE_CLICK_TRIGGER>['data'];
+  data: ValueClickContext['data'];
 }
 
 export interface LensBrushEvent {
   name: 'brush';
-  data: TriggerContext<typeof SELECT_RANGE_TRIGGER>['data'];
+  data: RangeSelectContext['data'];
 }
 
 // Use same technique as TriggerContext
@@ -647,7 +644,7 @@ export interface LensEditEvent<T> {
 }
 export interface LensTableRowContextMenuEvent {
   name: 'tableRowContextMenuClick';
-  data: TriggerContext<typeof ROW_CLICK_TRIGGER>['data'];
+  data: RowClickContext['data'];
 }
 
 export function isLensFilterEvent(event: ExpressionRendererEvent): event is LensFilterEvent {

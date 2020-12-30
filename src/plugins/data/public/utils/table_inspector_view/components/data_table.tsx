@@ -38,7 +38,7 @@ import { DataViewRow, DataViewColumn } from '../types';
 import { IUiSettingsClient } from '../../../../../../core/public';
 import { Datatable, DatatableColumn } from '../../../../../expressions/public';
 import { FieldFormatsStart } from '../../../field_formats';
-import { TriggerId, UiActionsStart } from '../../../../../ui_actions/public';
+import { UiActionsStart } from '../../../../../ui_actions/public';
 
 interface DataTableFormatState {
   columns: DataViewColumn[];
@@ -112,7 +112,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                   onClick={() => {
                     const value = table.rows[rowIndex][column.id];
                     const eventData = { table, column: columnIndex, row: rowIndex, value };
-                    uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER' as TriggerId, {
+                    uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
                       data: { data: [eventData] },
                     });
                   }}
@@ -145,7 +145,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                     onClick={() => {
                       const value = table.rows[rowIndex][column.id];
                       const eventData = { table, column: columnIndex, row: rowIndex, value };
-                      uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER' as TriggerId, {
+                      uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
                         data: { data: [eventData], negate: true },
                       });
                     }}

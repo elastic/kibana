@@ -29,12 +29,12 @@ import {
 } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
-import { TriggerContextMapping } from '../../../../ui_actions/public';
+import { RangeSelectContext } from '../../../../embeddable/public';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
-  let baseEvent: TriggerContextMapping['SELECT_RANGE_TRIGGER']['data'];
+  let baseEvent: RangeSelectContext['data'];
 
   const mockField = {
     name: 'time',

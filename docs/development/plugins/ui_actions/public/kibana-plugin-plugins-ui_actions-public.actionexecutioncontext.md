@@ -9,5 +9,5 @@ Action methods are executed with Context from trigger + [ActionExecutionMeta](./
 <b>Signature:</b>
 
 ```typescript
-export declare type ActionExecutionContext<Context extends BaseContext = BaseContext> = Context & ActionExecutionMeta;
+export declare type ActionExecutionContext<Context extends object = object> = Context & ActionExecutionMeta;
 ```

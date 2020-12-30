@@ -53,6 +53,7 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
   createAction({
     getDisplayName: () =>
       i18n.translate('embeddableExamples.book.edit', { defaultMessage: 'Edit Book' }),
+    id: ACTION_EDIT_BOOK,
     type: ACTION_EDIT_BOOK,
     order: 100,
     getIconType: () => 'documents',

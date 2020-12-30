@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface Action<Context extends BaseContext = {}, T = ActionType> extends Partial<Presentable<ActionExecutionContext<Context>>> 
+export interface Action<Context extends object = object> extends Partial<Presentable<ActionExecutionContext<Context>>> 
 ```
 
 ## Properties
@@ -17,7 +17,7 @@ export interface Action<Context extends BaseContext = {}, T = ActionType> extend
 |  [id](./kibana-plugin-plugins-ui_actions-public.action.id.md) | <code>string</code> | A unique identifier for this action instance. |
 |  [MenuItem](./kibana-plugin-plugins-ui_actions-public.action.menuitem.md) | <code>UiComponent&lt;{</code><br/><code>        context: ActionExecutionContext&lt;Context&gt;;</code><br/><code>    }&gt;</code> | <code>UiComponent</code> to render when displaying this action as a context menu item. If not provided, <code>getDisplayName</code> will be used instead. |
 |  [order](./kibana-plugin-plugins-ui_actions-public.action.order.md) | <code>number</code> | Determined the order when there is more than one action matched to a trigger. Higher numbers are displayed first. |
-|  [type](./kibana-plugin-plugins-ui_actions-public.action.type.md) | <code>T</code> | The action type is what determines the context shape. |
+|  [type](./kibana-plugin-plugins-ui_actions-public.action.type.md) | <code>string</code> | The action type is what determines the context shape. |
 
 ## Methods
 

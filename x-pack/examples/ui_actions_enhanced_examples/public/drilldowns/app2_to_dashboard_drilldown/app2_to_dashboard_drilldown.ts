@@ -13,13 +13,12 @@ import { KibanaURL } from '../../../../../../src/plugins/share/public';
 
 export const APP2_TO_DASHBOARD_DRILLDOWN = 'APP2_TO_DASHBOARD_DRILLDOWN';
 
-type Trigger = typeof SAMPLE_APP2_CLICK_TRIGGER;
 type Context = SampleApp2ClickContext;
 
-export class App2ToDashboardDrilldown extends AbstractDashboardDrilldown<Trigger> {
+export class App2ToDashboardDrilldown extends AbstractDashboardDrilldown<Context> {
   public readonly id = APP2_TO_DASHBOARD_DRILLDOWN;
 
-  public readonly supportedTriggers = () => [SAMPLE_APP2_CLICK_TRIGGER] as Trigger[];
+  public readonly supportedTriggers = () => [SAMPLE_APP2_CLICK_TRIGGER];
 
   protected async getURL(config: Config, context: Context): Promise<KibanaURL> {
     const path = await this.urlGenerator.createUrl({

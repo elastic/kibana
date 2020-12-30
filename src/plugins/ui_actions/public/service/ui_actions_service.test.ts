@@ -20,19 +20,17 @@
 import { UiActionsService } from './ui_actions_service';
 import { Action, ActionInternal, createAction } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
-import { TriggerRegistry, TriggerId, ActionType, ActionRegistry } from '../types';
+import { TriggerRegistry, ActionRegistry } from '../types';
 import { Trigger } from '../triggers';
 
-// Casting to ActionType or TriggerId is a hack - in a real situation use
-// declare module and add this id to the appropriate context mapping.
-const FOO_TRIGGER: TriggerId = 'FOO_TRIGGER' as TriggerId;
-const BAR_TRIGGER: TriggerId = 'BAR_TRIGGER' as TriggerId;
-const MY_TRIGGER: TriggerId = 'MY_TRIGGER' as TriggerId;
+const FOO_TRIGGER = 'FOO_TRIGGER';
+const BAR_TRIGGER = 'BAR_TRIGGER';
+const MY_TRIGGER = 'MY_TRIGGER';
 
 const testAction1: Action = {
   id: 'action1',
   order: 1,
-  type: 'type1' as ActionType,
+  type: 'type1',
   execute: async () => {},
   getDisplayName: () => 'test1',
   getIconType: () => '',
@@ -42,7 +40,7 @@ const testAction1: Action = {
 const testAction2: Action = {
   id: 'action2',
   order: 2,
-  type: 'type2' as ActionType,
+  type: 'type2',
   execute: async () => {},
   getDisplayName: () => 'test2',
   getIconType: () => '',
@@ -99,7 +97,7 @@ describe('UiActionsService', () => {
         getDisplayName: () => 'test',
         getIconType: () => '',
         isCompatible: async () => true,
-        type: 'test' as ActionType,
+        type: 'test',
       });
     });
 
@@ -111,7 +109,7 @@ describe('UiActionsService', () => {
         getDisplayName: () => 'test',
         getIconType: () => '',
         isCompatible: async () => true,
-        type: 'test' as ActionType,
+        type: 'test',
       });
 
       expect(action).toBeInstanceOf(ActionInternal);
@@ -123,7 +121,7 @@ describe('UiActionsService', () => {
     const action1: Action = {
       id: 'action1',
       order: 1,
-      type: 'type1' as ActionType,
+      type: 'type1',
       execute: async () => {},
       getDisplayName: () => 'test',
       getIconType: () => '',
@@ -132,7 +130,7 @@ describe('UiActionsService', () => {
     const action2: Action = {
       id: 'action2',
       order: 2,
-      type: 'type2' as ActionType,
+      type: 'type2',
       execute: async () => {},
       getDisplayName: () => 'test',
       getIconType: () => '',
@@ -207,7 +205,8 @@ describe('UiActionsService', () => {
     test('filters out actions not applicable based on the context', async () => {
       const service = new UiActionsService();
       const action = createAction({
-        type: 'test' as ActionType,
+        id: 'test',
+        type: 'test',
         isCompatible: ({ accept }: { accept: boolean }) => Promise.resolve(accept),
         execute: () => Promise.resolve(),
       });
@@ -239,15 +238,15 @@ describe('UiActionsService', () => {
       const service = new UiActionsService();
 
       // Without the cast "as TriggerId" typescript will happily throw an error!
-      await expect(
-        service.getTriggerCompatibleActions('I do not exist' as TriggerId, {})
-      ).rejects.toMatchObject(new Error('Trigger [triggerId = I do not exist] does not exist.'));
+      await expect(service.getTriggerCompatibleActions('I do not exist', {})).rejects.toMatchObject(
+        new Error('Trigger [triggerId = I do not exist] does not exist.')
+      );
     });
 
     test('returns empty list if trigger not attached to any action', async () => {
       const service = new UiActionsService();
       const testTrigger: Trigger = {
-        id: '123' as TriggerId,
+        id: '123',
         title: '123',
       };
       service.registerTrigger(testTrigger);
@@ -445,9 +444,7 @@ describe('UiActionsService', () => {
       } as any;
 
       service.registerAction(action);
-      expect(() =>
-        service.detachAction('i do not exist' as TriggerId, ACTION_HELLO_WORLD)
-      ).toThrowError(
+      expect(() => service.detachAction('i do not exist', ACTION_HELLO_WORLD)).toThrowError(
         'No trigger [triggerId = i do not exist] exists, for detaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });
@@ -461,7 +458,7 @@ describe('UiActionsService', () => {
       } as any;
 
       service.registerAction(action);
-      expect(() => service.addTriggerAction('i do not exist' as TriggerId, action)).toThrowError(
+      expect(() => service.addTriggerAction('i do not exist', action)).toThrowError(
         'No trigger [triggerId = i do not exist] exists, for attaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });

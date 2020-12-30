@@ -20,7 +20,7 @@
 import { Trigger } from '.';
 
 export const VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_TRIGGER';
-export const visualizeFieldTrigger: Trigger<'VISUALIZE_FIELD_TRIGGER'> = {
+export const visualizeFieldTrigger: Trigger = {
   id: VISUALIZE_FIELD_TRIGGER,
   title: 'Visualize field',
   description: 'Triggered when user wants to visualize a field.',

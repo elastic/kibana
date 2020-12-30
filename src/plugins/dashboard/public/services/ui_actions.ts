@@ -18,7 +18,7 @@
  */
 
 export {
-  ActionByType,
+  Action,
   IncompatibleActionError,
   UiActionsSetup,
   UiActionsStart,

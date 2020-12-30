@@ -22,7 +22,7 @@ import { UiComponent } from 'src/plugins/kibana_utils/public';
 /**
  * Represents something that can be displayed to user in UI.
  */
-export interface Presentable<Context extends object = object> {
+export interface Presentable<Context = unknown> {
   /**
    * ID that uniquely identifies this object.
    */
@@ -77,11 +77,11 @@ export interface Presentable<Context extends object = object> {
   readonly grouping?: PresentableGrouping<Context>;
 }
 
-export interface PresentableGroup<Context extends object = object>
+export interface PresentableGroup<Context = unknown>
   extends Partial<
     Pick<Presentable<Context>, 'getDisplayName' | 'getDisplayNameTooltip' | 'getIconType' | 'order'>
   > {
   id: string;
 }
 
-export type PresentableGrouping<Context extends object = object> = Array<PresentableGroup<Context>>;
+export type PresentableGrouping<Context = unknown> = Array<PresentableGroup<Context>>;

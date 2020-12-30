@@ -9,7 +9,6 @@ import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
 } from '../../../../../../../src/plugins/embeddable/public';
-import { TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 
 /**
  * We know that VALUE_CLICK_TRIGGER and SELECT_RANGE_TRIGGER are also triggering APPLY_FILTER_TRIGGER.
@@ -21,7 +20,7 @@ import { TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
  *
  * @param triggers
  */
-export function ensureNestedTriggers(triggers: TriggerId[]): TriggerId[] {
+export function ensureNestedTriggers(triggers: string[]): string[] {
   if (
     !triggers.includes(APPLY_FILTER_TRIGGER) &&
     (triggers.includes(VALUE_CLICK_TRIGGER) || triggers.includes(SELECT_RANGE_TRIGGER))

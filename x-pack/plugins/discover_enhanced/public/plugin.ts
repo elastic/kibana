@@ -15,24 +15,10 @@ import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../src/plugins/ki
 import {
   EmbeddableSetup,
   EmbeddableStart,
-  EmbeddableContext,
   CONTEXT_MENU_TRIGGER,
 } from '../../../../src/plugins/embeddable/public';
-import {
-  ExploreDataContextMenuAction,
-  ExploreDataChartAction,
-  ACTION_EXPLORE_DATA,
-  ACTION_EXPLORE_DATA_CHART,
-  ExploreDataChartActionContext,
-} from './actions';
+import { ExploreDataContextMenuAction, ExploreDataChartAction } from './actions';
 import { Config } from '../common';
-
-declare module '../../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_EXPLORE_DATA]: EmbeddableContext;
-    [ACTION_EXPLORE_DATA_CHART]: ExploreDataChartActionContext;
-  }
-}
 
 export interface DiscoverEnhancedSetupDependencies {
   discover: DiscoverSetup;

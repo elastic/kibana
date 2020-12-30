@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-import { ActionByType, IncompatibleActionError } from '../../services/ui_actions';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
   ViewMode,
   PanelState,
@@ -39,7 +39,7 @@ export interface AddToLibraryActionContext {
   embeddable: IEmbeddable;
 }
 
-export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIBRARY> {
+export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   public readonly type = ACTION_ADD_TO_LIBRARY;
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 15;

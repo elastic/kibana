@@ -32,7 +32,7 @@ import {
 import { VISUALIZE_APP_URL_GENERATOR, VisualizeUrlGeneratorState } from '../url_generator';
 import { AGGS_TERMS_SIZE_SETTING } from '../../common/constants';
 
-export const visualizeFieldAction = createAction<typeof ACTION_VISUALIZE_FIELD>({
+export const visualizeFieldAction = createAction<VisualizeFieldContext>({
   type: ACTION_VISUALIZE_FIELD,
   id: ACTION_VISUALIZE_FIELD,
   getDisplayName: () =>

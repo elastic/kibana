@@ -20,7 +20,7 @@
 import { CoreStart } from 'src/core/public';
 import { IEmbeddable, ViewMode, EmbeddableStart } from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
-import { ActionByType, IncompatibleActionError } from '../../services/ui_actions';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';
 
@@ -34,7 +34,7 @@ export interface ReplacePanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PANEL> {
+export class ReplacePanelAction implements Action<ReplacePanelActionContext> {
   public readonly type = ACTION_REPLACE_PANEL;
   public readonly id = ACTION_REPLACE_PANEL;
   public order = 3;

@@ -24,7 +24,7 @@ import { FormatFactory } from '../../../../data/common/field_formats/utils';
 import { DataPublicPluginStart, exporters } from '../../services/data';
 import { downloadMultipleAs } from '../../services/share';
 import { Adapters, IEmbeddable } from '../../services/embeddable';
-import { ActionByType } from '../../services/ui_actions';
+import { Action } from '../../services/ui_actions';
 import { dashboardExportCsvAction } from '../../dashboard_strings';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
@@ -44,7 +44,7 @@ export interface ExportContext {
  * This is "Export CSV" action which appears in the context
  * menu of a dashboard panel.
  */
-export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
+export class ExportCSVAction implements Action<ExportContext> {
   public readonly id = ACTION_EXPORT_CSV;
 
   public readonly type = ACTION_EXPORT_CSV;

@@ -34,6 +34,7 @@ const createTestAction = ({
   grouping?: PresentableGrouping;
 }) =>
   createAction({
+    id: type as any, // mapping doesn't matter for this test
     type: type as any, // mapping doesn't matter for this test
     getDisplayName: () => dispayName,
     order,

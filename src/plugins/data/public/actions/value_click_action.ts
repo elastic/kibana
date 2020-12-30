@@ -18,7 +18,7 @@
  */
 
 import { Datatable } from 'src/plugins/expressions/public';
-import { ActionByType, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import { Action, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 import type { Filter } from '../../common/es_query/filters';
@@ -44,8 +44,8 @@ export interface ValueClickContext {
 
 export function createValueClickAction(
   getStartServices: () => { uiActions: UiActionsStart }
-): ActionByType<typeof ACTION_VALUE_CLICK> {
-  return createAction<typeof ACTION_VALUE_CLICK>({
+): Action {
+  return createAction({
     type: ACTION_VALUE_CLICK,
     id: ACTION_VALUE_CLICK,
     shouldAutoExecute: async () => true,

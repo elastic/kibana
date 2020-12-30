@@ -5,11 +5,7 @@
  */
 
 import { uiToReactComponent } from '../../../../../src/plugins/kibana_react/public';
-import {
-  TriggerContextMapping,
-  TriggerId,
-  UiActionsPresentable as Presentable,
-} from '../../../../../src/plugins/ui_actions/public';
+import { UiActionsPresentable as Presentable } from '../../../../../src/plugins/ui_actions/public';
 import { ActionFactoryDefinition } from './action_factory_definition';
 import { Configurable } from '../../../../../src/plugins/kibana_utils/public';
 import {
@@ -30,22 +26,14 @@ export interface ActionFactoryDeps {
 
 export class ActionFactory<
   Config extends BaseActionConfig = BaseActionConfig,
-  SupportedTriggers extends TriggerId = TriggerId,
-  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
-    triggers: SupportedTriggers[];
-  },
-  ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
+  ExecutionContext extends object = object,
+  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > implements
     Omit<Presentable<FactoryContext>, 'getHref'>,
     Configurable<Config, FactoryContext>,
     PersistableState<SerializedEvent> {
   constructor(
-    protected readonly def: ActionFactoryDefinition<
-      Config,
-      SupportedTriggers,
-      FactoryContext,
-      ActionContext
-    >,
+    protected readonly def: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>,
     protected readonly deps: ActionFactoryDeps
   ) {
     if (def.minimalLicense && !def.licenseFeatureName) {
@@ -100,23 +88,23 @@ export class ActionFactory<
 
   public create(
     serializedAction: Omit<SerializedAction<Config>, 'factoryId'>
-  ): ActionDefinition<ActionContext> {
+  ): ActionDefinition<ExecutionContext> {
     const action = this.def.create(serializedAction);
     return {
       ...action,
-      isCompatible: async (context: ActionContext): Promise<boolean> => {
+      isCompatible: async (context: ExecutionContext): Promise<boolean> => {
         if (!this.isCompatibleLicense()) return false;
         if (!action.isCompatible) return true;
         return action.isCompatible(context);
       },
-      execute: async (context: ActionContext): Promise<void> => {
+      execute: async (context: ExecutionContext): Promise<void> => {
         this.notifyFeatureUsage();
         return action.execute(context);
       },
     };
   }
 
-  public supportedTriggers(): SupportedTriggers[] {
+  public supportedTriggers(): string[] {
     return this.def.supportedTriggers();
   }
 

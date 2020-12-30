@@ -18,7 +18,7 @@
  */
 
 import { Datatable } from 'src/plugins/expressions/public';
-import { ActionByType, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import { Action, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
 
@@ -38,8 +38,8 @@ export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
 export function createSelectRangeAction(
   getStartServices: () => { uiActions: UiActionsStart }
-): ActionByType<typeof ACTION_SELECT_RANGE> {
-  return createAction<typeof ACTION_SELECT_RANGE>({
+): Action {
+  return createAction({
     type: ACTION_SELECT_RANGE,
     id: ACTION_SELECT_RANGE,
     shouldAutoExecute: async () => true,

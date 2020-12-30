@@ -19,8 +19,8 @@
 
 import { Plugin, CoreSetup, CoreStart } from '../../../src/core/public';
 import { UiActionsSetup, UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import { createHelloWorldAction, ACTION_HELLO_WORLD } from './hello_world_action';
-import { helloWorldTrigger, HELLO_WORLD_TRIGGER_ID } from './hello_world_trigger';
+import { createHelloWorldAction } from './hello_world_action';
+import { helloWorldTrigger } from './hello_world_trigger';
 
 export interface UiActionExamplesSetupDependencies {
   uiActions: UiActionsSetup;
@@ -28,16 +28,6 @@ export interface UiActionExamplesSetupDependencies {
 
 export interface UiActionExamplesStartDependencies {
   uiActions: UiActionsStart;
-}
-
-declare module '../../../src/plugins/ui_actions/public' {
-  export interface TriggerContextMapping {
-    [HELLO_WORLD_TRIGGER_ID]: {};
-  }
-
-  export interface ActionContextMapping {
-    [ACTION_HELLO_WORLD]: {};
-  }
 }
 
 export class UiActionExamplesPlugin

@@ -24,7 +24,7 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { I18nProvider } from '@kbn/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsStart, ActionType } from '../../../../ui_actions/public';
+import { Action, UiActionsStart } from '../../../../ui_actions/public';
 import { Trigger, ViewMode } from '../types';
 import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
@@ -216,7 +216,7 @@ const renderInEditModeAndOpenContextMenu = async (
 test('HelloWorldContainer in edit mode hides disabledActions', async () => {
   const action = {
     id: 'FOO',
-    type: 'FOO' as ActionType,
+    type: 'FOO',
     getIconType: () => undefined,
     getDisplayName: () => 'foo',
     isCompatible: async () => true,
@@ -252,7 +252,7 @@ test('HelloWorldContainer in edit mode hides disabledActions', async () => {
 test('HelloWorldContainer hides disabled badges', async () => {
   const action = {
     id: 'BAR',
-    type: 'BAR' as ActionType,
+    type: 'BAR',
     getIconType: () => undefined,
     getDisplayName: () => 'bar',
     isCompatible: async () => true,

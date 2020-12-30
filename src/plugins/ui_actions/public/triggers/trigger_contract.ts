@@ -18,16 +18,15 @@
  */
 
 import { TriggerInternal } from './trigger_internal';
-import { TriggerId, TriggerContextMapping } from '../types';
 
 /**
  * This is a public representation of a trigger that is provided to other plugins.
  */
-export class TriggerContract<T extends TriggerId> {
+export class TriggerContract<Context extends object = object> {
   /**
    * Unique name of the trigger as identified in `ui_actions` plugin trigger registry.
    */
-  public readonly id: T;
+  public readonly id: string;
 
   /**
    * User friendly name of the trigger.
@@ -39,7 +38,7 @@ export class TriggerContract<T extends TriggerId> {
    */
   public readonly description?: string;
 
-  constructor(private readonly internal: TriggerInternal<T>) {
+  constructor(private readonly internal: TriggerInternal<Context>) {
     this.id = this.internal.trigger.id;
     this.title = this.internal.trigger.title;
     this.description = this.internal.trigger.description;
@@ -48,7 +47,7 @@ export class TriggerContract<T extends TriggerId> {
   /**
    * Use this method to execute action attached to this trigger.
    */
-  public readonly exec = async (context: TriggerContextMapping[T], alwaysShowPopup?: boolean) => {
+  public readonly exec = async (context: Context, alwaysShowPopup?: boolean) => {
     await this.internal.execute(context, alwaysShowPopup);
   };
 }

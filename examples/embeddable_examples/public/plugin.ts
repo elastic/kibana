@@ -51,21 +51,15 @@ import {
   TodoRefEmbeddableFactory,
   TodoRefEmbeddableFactoryDefinition,
 } from './todo/todo_ref_embeddable_factory';
-import { ACTION_EDIT_BOOK, createEditBookAction } from './book/edit_book_action';
-import { BookEmbeddable, BOOK_EMBEDDABLE } from './book/book_embeddable';
+import { createEditBookAction } from './book/edit_book_action';
+import { BOOK_EMBEDDABLE } from './book/book_embeddable';
 import {
   BookEmbeddableFactory,
   BookEmbeddableFactoryDefinition,
 } from './book/book_embeddable_factory';
 import { UiActionsStart } from '../../../src/plugins/ui_actions/public';
-import {
-  ACTION_ADD_BOOK_TO_LIBRARY,
-  createAddBookToLibraryAction,
-} from './book/add_book_to_library_action';
-import {
-  ACTION_UNLINK_BOOK_FROM_LIBRARY,
-  createUnlinkBookFromLibraryAction,
-} from './book/unlink_book_from_library_action';
+import { createAddBookToLibraryAction } from './book/add_book_to_library_action';
+import { createUnlinkBookFromLibraryAction } from './book/unlink_book_from_library_action';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -90,14 +84,6 @@ interface ExampleEmbeddableFactories {
 export interface EmbeddableExamplesStart {
   createSampleData: () => Promise<void>;
   factories: ExampleEmbeddableFactories;
-}
-
-declare module '../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_EDIT_BOOK]: { embeddable: BookEmbeddable };
-    [ACTION_ADD_BOOK_TO_LIBRARY]: { embeddable: BookEmbeddable };
-    [ACTION_UNLINK_BOOK_FROM_LIBRARY]: { embeddable: BookEmbeddable };
-  }
 }
 
 export class EmbeddableExamplesPlugin

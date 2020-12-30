@@ -19,7 +19,7 @@ import {
   PANEL_NOTIFICATION_TRIGGER,
   ViewMode,
 } from '../../../../src/plugins/embeddable/public';
-import { EnhancedEmbeddable, EnhancedEmbeddableContext } from './types';
+import { EnhancedEmbeddable } from './types';
 import {
   EmbeddableActionStorage,
   EmbeddableWithDynamicActions,
@@ -29,13 +29,7 @@ import {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
 } from '../../ui_actions_enhanced/public';
-import { PanelNotificationsAction, ACTION_PANEL_NOTIFICATIONS } from './actions';
-
-declare module '../../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_PANEL_NOTIFICATIONS]: EnhancedEmbeddableContext;
-  }
-}
+import { PanelNotificationsAction } from './actions';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;

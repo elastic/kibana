@@ -9,5 +9,5 @@ Unique name of the trigger as identified in `ui_actions` plugin trigger registry
 <b>Signature:</b>
 
 ```typescript
-id: ID;
+id: string;
 ```

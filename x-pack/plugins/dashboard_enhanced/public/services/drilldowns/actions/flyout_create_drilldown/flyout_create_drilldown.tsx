@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionByType } from '../../../../../../../../src/plugins/ui_actions/public';
+import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   isEnhancedEmbeddable,
@@ -26,7 +26,7 @@ export interface OpenFlyoutAddDrilldownParams {
   start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>;
 }
 
-export class FlyoutCreateDrilldownAction implements ActionByType<typeof OPEN_FLYOUT_ADD_DRILLDOWN> {
+export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
   public readonly type = OPEN_FLYOUT_ADD_DRILLDOWN;
   public readonly id = OPEN_FLYOUT_ADD_DRILLDOWN;
   public order = 12;
