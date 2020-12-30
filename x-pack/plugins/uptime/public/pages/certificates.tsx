@@ -14,6 +14,7 @@ import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { UptimeRefreshContext } from '../contexts';
 import { certificatesSelector, getCertificatesAction } from '../state/certificates/certificates';
 import { CertificateList, CertificateSearch, CertSort } from '../components/certificates';
+import { PageHeader } from '../components/common/header/page_header';
 
 const DEFAULT_PAGE_SIZE = 10;
 const LOCAL_STORAGE_KEY = 'xpack.uptime.certList.pageSize';
@@ -60,31 +61,34 @@ export const CertificatesPage: React.FC = () => {
   const { data: certificates } = useSelector(certificatesSelector);
 
   return (
-    <EuiPanel>
-      <EuiTitle>
-        <h1 className="eui-textNoWrap">
-          <FormattedMessage
-            id="xpack.uptime.certificates.heading"
-            defaultMessage="TLS Certificates ({total})"
-            values={{
-              total: <span data-test-subj="uptimeCertTotal">{certificates?.total ?? 0}</span>,
-            }}
-          />
-        </h1>
-      </EuiTitle>
+    <>
+      <PageHeader includeSpacer showCertificateRefreshBtn showTabs />
+      <EuiPanel>
+        <EuiTitle>
+          <h1 className="eui-textNoWrap">
+            <FormattedMessage
+              id="xpack.uptime.certificates.heading"
+              defaultMessage="TLS Certificates ({total})"
+              values={{
+                total: <span data-test-subj="uptimeCertTotal">{certificates?.total ?? 0}</span>,
+              }}
+            />
+          </h1>
+        </EuiTitle>
 
-      <EuiSpacer size="m" />
-      <CertificateSearch setSearch={setSearch} />
-      <EuiSpacer size="m" />
-      <CertificateList
-        page={page}
-        onChange={(pageVal, sortVal) => {
-          setPage(pageVal);
-          setSort(sortVal);
-          localStorage.setItem(LOCAL_STORAGE_KEY, pageVal.size.toString());
-        }}
-        sort={sort}
-      />
-    </EuiPanel>
+        <EuiSpacer size="m" />
+        <CertificateSearch setSearch={setSearch} />
+        <EuiSpacer size="m" />
+        <CertificateList
+          page={page}
+          onChange={(pageVal, sortVal) => {
+            setPage(pageVal);
+            setSort(sortVal);
+            localStorage.setItem(LOCAL_STORAGE_KEY, pageVal.size.toString());
+          }}
+          sort={sort}
+        />
+      </EuiPanel>
+    </>
   );
 };

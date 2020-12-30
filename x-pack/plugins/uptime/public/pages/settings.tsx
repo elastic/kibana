@@ -27,6 +27,7 @@ import {
   CertificateExpirationForm,
   OnFieldChangeType,
 } from '../components/settings/certificate_form';
+import { PageHeader } from '../components/common/header/page_header';
 import * as Translations from './translations';
 import {
   VALUE_MUST_BE_GREATER_THAN_ZERO,
@@ -145,6 +146,7 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <>
+      <PageHeader includeSpacer showTabs />
       <EuiSpacer size="s" />
       <EuiPanel style={{ maxWidth: 1000, margin: 'auto' }}>
         <EuiFlexGroup>

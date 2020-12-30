@@ -17,7 +17,6 @@ import {
 import { MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
-import { PageHeader } from './components/common/header/page_header';
 
 interface RouteProps {
   path: string;
@@ -85,7 +84,6 @@ export const PageRouter: FC = () => {
       {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
         <Route path={path} key={telemetryId} exact={true}>
           <div data-test-subj={dataTestSubj}>
-            <PageHeader />
             <RouteInit title={title} path={path} telemetryId={telemetryId} />
             <RouteComponent />
           </div>

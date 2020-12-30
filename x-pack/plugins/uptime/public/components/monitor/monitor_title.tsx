@@ -40,7 +40,7 @@ export const MonitorPageTitle: React.FC = () => {
   useBreadcrumbs([{ text: nameOrId }]);
 
   return (
-    <EuiFlexGroup wrap={false}>
+    <EuiFlexGroup wrap={false} data-test-subj="monitorTitle">
       <EuiFlexItem grow={false}>
         <EuiTitle>
           <h1 className="eui-textNoWrap">{nameOrId}</h1>

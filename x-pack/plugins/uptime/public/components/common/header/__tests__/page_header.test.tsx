@@ -9,7 +9,6 @@ import * as redux from 'react-redux';
 import moment from 'moment';
 import { PageHeader } from '../page_header';
 import { Ping } from '../../../../../common/runtime_types';
-import { createMemoryHistory } from 'history';
 import { renderWithRouter } from '../../../../lib';
 
 jest.mock('react-redux', () => {
@@ -47,41 +46,33 @@ describe('PageHeader', () => {
     jest.spyOn(redux, 'useSelector').mockReturnValue(defaultMonitorStatus);
   });
 
-  it('shallow renders with the date picker', () => {
+  it('does not render dynamic elements by default', () => {
     const component = renderWithRouter(<PageHeader />);
-    expect(component).toMatchSnapshot('page_header_with_date_picker');
-  });
 
-  it('shallow renders without the date picker', () => {
-    const component = renderWithRouter(<PageHeader />);
-    expect(component).toMatchSnapshot('page_header_no_date_picker');
-  });
-
-  it('shallow renders extra links', () => {
-    const component = renderWithRouter(<PageHeader />);
-    expect(component).toMatchSnapshot('page_header_with_extra_links');
-  });
-
-  it('renders null when on a step detail page', () => {
-    const history = createMemoryHistory();
-    // navigate to step page
-    history.push('/journey/1/step/1');
-    const component = renderWithRouter(<PageHeader />, history);
-    expect(component.html()).toBe(null);
-  });
-
-  it('renders monitor header without tabs when on a monitor page', () => {
-    const history = createMemoryHistory();
-    // navigate to monitor page
-    history.push('/monitor/1');
-    const component = renderWithRouter(<PageHeader />, history);
-    expect(component.find('h1').text()).toBe(monitorName);
+    expect(component.find('[data-test-subj="superDatePickerShowDatesButton"]').length).toBe(0);
+    expect(component.find('[data-test-subj="certificatesRefreshButton"]').length).toBe(0);
+    expect(component.find('[data-test-subj="monitorTitle"]').length).toBe(0);
     expect(component.find('[data-test-subj="uptimeTabs"]').length).toBe(0);
   });
 
-  it('renders tabs when not on a monitor or step detail page', () => {
-    const history = createMemoryHistory();
-    const component = renderWithRouter(<PageHeader />, history);
+  it('shallow renders with the date picker', () => {
+    const component = renderWithRouter(<PageHeader showDatePicker />);
+    expect(component.find('[data-test-subj="superDatePickerShowDatesButton"]').length).toBe(1);
+  });
+
+  it('shallow renders with certificate refresh button', () => {
+    const component = renderWithRouter(<PageHeader showCertificateRefreshBtn />);
+    expect(component.find('[data-test-subj="certificatesRefreshButton"]').length).toBe(1);
+  });
+
+  it('renders monitor title when showMonitorTitle', () => {
+    const component = renderWithRouter(<PageHeader showMonitorTitle />);
+    expect(component.find('[data-test-subj="monitorTitle"]').length).toBe(1);
+    expect(component.find('h1').text()).toBe(monitorName);
+  });
+
+  it('renders tabs when showTabs is true', () => {
+    const component = renderWithRouter(<PageHeader showTabs />);
     expect(component.find('[data-test-subj="uptimeTabs"]').length).toBe(1);
   });
 });

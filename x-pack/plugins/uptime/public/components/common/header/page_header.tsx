@@ -7,19 +7,20 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { useRouteMatch } from 'react-router-dom';
 import { UptimeDatePicker } from '../uptime_date_picker';
 import { SyntheticsCallout } from '../../overview/synthetics_callout';
 import { PageTabs } from './page_tabs';
-import {
-  CERTIFICATES_ROUTE,
-  MONITOR_ROUTE,
-  SETTINGS_ROUTE,
-  STEP_DETAIL_ROUTE,
-} from '../../../../common/constants';
 import { CertRefreshBtn } from '../../certificates/cert_refresh_btn';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
 import { MonitorPageTitle } from '../../monitor/monitor_title';
+
+interface Props {
+  showTabs?: boolean;
+  showDatePicker?: boolean;
+  showMonitorTitle?: boolean;
+  includeSpacer?: boolean;
+  showCertificateRefreshBtn?: boolean;
+}
 
 const StyledPicker = styled(EuiFlexItem)`
   &&& {
@@ -37,37 +38,32 @@ const StyledPicker = styled(EuiFlexItem)`
   }
 `;
 
-export const PageHeader = () => {
-  const isCertRoute = useRouteMatch(CERTIFICATES_ROUTE);
-  const isSettingsRoute = useRouteMatch(SETTINGS_ROUTE);
-  const isStepDetailRoute = useRouteMatch(STEP_DETAIL_ROUTE);
-
-  const DatePickerComponent = () =>
-    isCertRoute ? (
-      <CertRefreshBtn />
-    ) : (
-      <StyledPicker grow={false} style={{ flexBasis: 485 }}>
-        <UptimeDatePicker />
-      </StyledPicker>
-    );
-
-  const isMonitorRoute = useRouteMatch(MONITOR_ROUTE);
-
-  if (isStepDetailRoute) {
-    return null;
-  }
-
+export const PageHeader = ({
+  showTabs = false,
+  showDatePicker = false,
+  showMonitorTitle = false,
+  includeSpacer = false,
+  showCertificateRefreshBtn = false,
+}: Props) => {
   return (
     <>
       <SyntheticsCallout />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap responsive={false}>
-        <EuiFlexItem>{isMonitorRoute ? <MonitorPageTitle /> : <PageTabs />}</EuiFlexItem>
+        <EuiFlexItem>
+          {showMonitorTitle && <MonitorPageTitle />}
+          {showTabs && <PageTabs />}
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ToggleAlertFlyoutButton />
         </EuiFlexItem>
-        {!isSettingsRoute && <DatePickerComponent />}
+        {showCertificateRefreshBtn && <CertRefreshBtn />}
+        {showDatePicker && (
+          <StyledPicker grow={false} style={{ flexBasis: 485 }}>
+            <UptimeDatePicker />
+          </StyledPicker>
+        )}
       </EuiFlexGroup>
-      {!isMonitorRoute && <EuiSpacer size="m" />}
+      {includeSpacer && <EuiSpacer size="m" />}
     </>
   );
 };

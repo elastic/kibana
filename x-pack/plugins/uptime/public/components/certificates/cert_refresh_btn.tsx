@@ -20,7 +20,11 @@ export const CertRefreshBtn = () => {
   const { refreshApp } = useContext(UptimeRefreshContext);
 
   return (
-    <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
+    <EuiFlexItem
+      style={{ alignItems: 'flex-end' }}
+      grow={false}
+      data-test-subj="certificatesRefreshButton"
+    >
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiHideFor sizes={['xs']}>

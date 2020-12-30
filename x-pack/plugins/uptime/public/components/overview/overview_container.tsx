@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 import { OverviewPageComponent } from '../../pages/overview';
 import { selectIndexPattern } from '../../state/selectors';
 import { setEsKueryString } from '../../state/actions';
+import { PageHeader } from '../../components/common/header/page_header';
 
 export const OverviewPage: React.FC = (props) => {
   const dispatch = useDispatch();
@@ -20,11 +21,14 @@ export const OverviewPage: React.FC = (props) => {
   const { index_pattern: indexPattern, loading } = useSelector(selectIndexPattern);
 
   return (
-    <OverviewPageComponent
-      setEsKueryFilters={setEsKueryFilters}
-      indexPattern={indexPattern}
-      loading={loading}
-      {...props}
-    />
+    <>
+      <PageHeader includeSpacer showTabs showDatePicker />
+      <OverviewPageComponent
+        setEsKueryFilters={setEsKueryFilters}
+        indexPattern={indexPattern}
+        loading={loading}
+        {...props}
+      />
+    </>
   );
 };
