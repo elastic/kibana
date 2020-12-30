@@ -27,17 +27,21 @@ interface Props {
   onUseMarginsChange: (useMargins: boolean) => void;
   hidePanelTitles: boolean;
   onHidePanelTitlesChange: (hideTitles: boolean) => void;
+  syncColors: boolean;
+  onSyncColorsChange: (syncColors: boolean) => void;
 }
 
 interface State {
   useMargins: boolean;
   hidePanelTitles: boolean;
+  syncColors: boolean;
 }
 
 export class OptionsMenu extends Component<Props, State> {
   state = {
     useMargins: this.props.useMargins,
     hidePanelTitles: this.props.hidePanelTitles,
+    syncColors: this.props.syncColors,
   };
 
   constructor(props: Props) {
@@ -54,6 +58,12 @@ export class OptionsMenu extends Component<Props, State> {
     const isChecked = !evt.target.checked;
     this.props.onHidePanelTitlesChange(isChecked);
     this.setState({ hidePanelTitles: isChecked });
+  };
+
+  handleSyncColorsChange = (evt: any) => {
+    const isChecked = evt.target.checked;
+    this.props.onSyncColorsChange(isChecked);
+    this.setState({ syncColors: isChecked });
   };
 
   render() {
@@ -78,6 +88,17 @@ export class OptionsMenu extends Component<Props, State> {
             checked={!this.state.hidePanelTitles}
             onChange={this.handleHidePanelTitlesChange}
             data-test-subj="dashboardPanelTitlesCheckbox"
+          />
+        </EuiFormRow>
+
+        <EuiFormRow>
+          <EuiSwitch
+            label={i18n.translate('dashboard.topNav.options.syncColorsBetweenPanelsSwitchLabel', {
+              defaultMessage: 'Sync color palettes across panels',
+            })}
+            checked={this.state.syncColors}
+            onChange={this.handleSyncColorsChange}
+            data-test-subj="dashboardSyncColorsCheckbox"
           />
         </EuiFormRow>
       </EuiForm>

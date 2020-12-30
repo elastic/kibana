@@ -17,18 +17,19 @@
  * under the License.
  */
 
-export { DefaultEditorController } from './default_editor_controller';
+import { PluginInitializerContext } from 'kibana/public';
+import { DefaultEditorController } from './default_editor_controller';
+import { VisDefaultEditorPlugin } from './plugin';
+
+export { DefaultEditorController };
 export { useValidation } from './components/controls/utils';
+export * from './components/options';
 export { RangesParamEditor, RangeValues } from './components/controls/ranges';
 export * from './editor_size';
 export * from './vis_options_props';
 export * from './utils';
 export { ISchemas, Schemas, Schema } from './schemas';
 
-/** dummy plugin, we just want visDefaultEditor to have its own bundle */
-export function plugin() {
-  return new (class VisDefaultEditor {
-    setup() {}
-    start() {}
-  })();
-}
+export const plugin = (context: PluginInitializerContext) => {
+  return new VisDefaultEditorPlugin();
+};
