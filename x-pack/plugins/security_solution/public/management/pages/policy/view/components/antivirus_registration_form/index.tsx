@@ -18,21 +18,21 @@ const TRANSLATIONS: Readonly<{ [K in 'title' | 'description' | 'label']: string 
   title: i18n.translate(
     'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.type',
     {
-      defaultMessage: 'Register as anti-virus',
+      defaultMessage: 'Register as antivirus',
     }
   ),
   description: i18n.translate(
     'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.explanation',
     {
       defaultMessage:
-        'Toggle on to register Elastic as an official Anti-Virus solution for Windows OS. ' +
+        'Toggle on to register Elastic as an official Antivirus solution for Windows OS. ' +
         'This will also disable Windows Defender.',
     }
   ),
   label: i18n.translate(
     'xpack.securitySolution.endpoint.policy.details.antivirusRegistration.toggle',
     {
-      defaultMessage: 'Register as anti-virus',
+      defaultMessage: 'Register as antivirus',
     }
   ),
 };
