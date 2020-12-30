@@ -185,7 +185,7 @@ export class DocLinksService {
         apis: {
           createIndex: `${ELASTICSEARCH_DOCS}indices-create-index.html`,
           createSnapshotLifecylePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
-          createRoleMappins: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
+          createRoleMapping: `${ELASTICSEARCH_DOCS}security-api-put-role-mapping.html`,
           createApiKey: `${ELASTICSEARCH_DOCS}security-api-create-api-key.html`,
           createPipeline: `${ELASTICSEARCH_DOCS}put-pipeline-api.html`,
           openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
