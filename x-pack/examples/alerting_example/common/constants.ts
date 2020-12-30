@@ -10,15 +10,16 @@ export const ALERTING_EXAMPLE_APP_ID = 'AlertingExample';
 
 // always firing
 export const DEFAULT_INSTANCES_TO_GENERATE = 5;
+export interface AlwaysFiringThresholds {
+  small?: number;
+  medium?: number;
+  large?: number;
+}
 export interface AlwaysFiringParams extends AlertTypeParams {
   instances?: number;
-  thresholds?: {
-    small?: number;
-    medium?: number;
-    large?: number;
-  };
+  thresholds?: AlwaysFiringThresholds;
 }
-export type AlwaysFiringActionGroupIds = keyof AlwaysFiringParams['thresholds'];
+export type AlwaysFiringActionGroupIds = keyof AlwaysFiringThresholds;
 
 // Astros
 export enum Craft {

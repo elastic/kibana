@@ -11,6 +11,7 @@ import {
   DEFAULT_INSTANCES_TO_GENERATE,
   ALERTING_EXAMPLE_APP_ID,
   AlwaysFiringParams,
+  AlwaysFiringActionGroupIds,
 } from '../../common/constants';
 
 type ActionGroups = 'small' | 'medium' | 'large';
@@ -39,7 +40,8 @@ export const alertType: AlertType<
   AlwaysFiringParams,
   { count?: number },
   { triggerdOnCycle: number },
-  never
+  never,
+  AlwaysFiringActionGroupIds
 > = {
   id: 'example.always-firing',
   name: 'Always firing',
