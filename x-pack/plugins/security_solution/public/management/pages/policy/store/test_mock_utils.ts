@@ -4,35 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpStart } from 'kibana/public';
 import { INGEST_API_EPM_PACKAGES, INGEST_API_PACKAGE_POLICIES } from './services/ingest';
-import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
-import { GetPolicyListResponse } from '../../types';
-import { GetPackagesResponse } from '../../../../../../../fleet/common';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import { GetPolicyListResponse } from '../types';
+import { GetPackagesResponse } from '../../../../../../fleet/common';
 
 const generator = new EndpointDocGenerator('policy-list');
-
-/**
- * It sets the mock implementation on the necessary http methods to support the policy list view
- * @param mockedHttpService
- * @param totalPolicies
- */
-export const setPolicyListApiMockImplementation = (
-  mockedHttpService: jest.Mocked<HttpStart>,
-  totalPolicies: number = 1
-): void => {
-  const policyApiHandlers = policyListApiPathHandlers(totalPolicies);
-
-  mockedHttpService.get.mockImplementation(async (...args) => {
-    const [path] = args;
-    if (typeof path === 'string') {
-      if (policyApiHandlers[path]) {
-        return policyApiHandlers[path]();
-      }
-    }
-    return Promise.reject(new Error(`MOCK: unknown policy list api: ${path}`));
-  });
-};
 
 /**
  * Returns the response body for a call to get the list of Policies
