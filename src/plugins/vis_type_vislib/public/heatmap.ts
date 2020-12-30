@@ -20,10 +20,10 @@
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
-import { RangeValues, Schemas } from '../../vis_default_editor/public';
+import { RangeValues } from '../../vis_default_editor/public';
 import { AggGroupNames } from '../../data/public';
 import { ColorSchemas, ColorSchemaParams } from '../../charts/public';
-import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions, Schemas } from '../../visualizations/public';
 import { ValueAxis, ScaleType, AxisType } from '../../vis_type_xy/public';
 
 import { HeatmapOptions, getHeatmapCollections } from './editor';

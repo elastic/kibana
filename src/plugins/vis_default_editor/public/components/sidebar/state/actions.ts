@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { Vis, VisParams } from 'src/plugins/visualizations/public';
+import { Vis, VisParams, Schema } from 'src/plugins/visualizations/public';
 import type { IAggConfig } from 'src/plugins/data/public';
-import type { Schema } from 'src/plugins/visualizations/public';
 
 import { EditorStateActionTypes } from './constants';
 

@@ -18,11 +18,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import { AggGroupNames } from '../../data/public';
-import { Schemas } from '../../vis_default_editor/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 
 import { TableOptions } from './components/table_vis_options_lazy';
-import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, Schemas } from '../../../plugins/visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { TableVisParams } from './types';
 

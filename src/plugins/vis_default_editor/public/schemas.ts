@@ -17,63 +17,7 @@
  * under the License.
  */
 
-import _, { defaults } from 'lodash';
-
-import { Optional } from '@kbn/utility-types';
-
-import { AggGroupNames, AggParam } from '../../data/public';
-import type { ISchemas, Schema } from '../../visualizations/public';
-
-export class Schemas implements ISchemas {
-  all: Schema[] = [];
-  [AggGroupNames.Buckets]: Schema[] = [];
-  [AggGroupNames.Metrics]: Schema[] = [];
-
-  constructor(
-    schemas: Array<
-      Optional<
-        Schema,
-        'min' | 'max' | 'group' | 'title' | 'aggFilter' | 'editor' | 'params' | 'defaults'
-      >
-    >
-  ) {
-    _(schemas || [])
-      .chain()
-      .map((schema) => {
-        if (!schema.name) throw new Error('all schema must have a unique name');
-
-        if (schema.name === 'split') {
-          schema.params = [
-            {
-              name: 'row',
-              default: true,
-            },
-          ] as AggParam[];
-        }
-
-        defaults(schema, {
-          min: 0,
-          max: Infinity,
-          group: AggGroupNames.Buckets,
-          title: schema.name,
-          aggFilter: '*',
-          editor: false,
-          params: [],
-        });
-
-        return schema as Schema;
-      })
-      .tap((fullSchemas: Schema[]) => {
-        this.all = fullSchemas;
-      })
-      .groupBy('group')
-      .forOwn((group, groupName) => {
-        // @ts-ignore
-        this[groupName] = group;
-      })
-      .commit();
-  }
-}
+import type { Schema } from '../../visualizations/public';
 
 export const getSchemaByName = (schemas: Schema[], schemaName?: string) => {
   return schemas.find((s) => s.name === schemaName) || ({} as Schema);

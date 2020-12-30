@@ -21,12 +21,11 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import type { IAggConfigs, IAggConfig } from 'src/plugins/data/public';
-import type { ISchemas } from 'src/plugins/visualizations/public';
+import { ISchemas, Schemas } from 'src/plugins/visualizations/public';
 
 import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { Schemas } from '../schemas';
 import type { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('@elastic/eui', () => ({

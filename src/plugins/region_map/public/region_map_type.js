@@ -22,7 +22,7 @@ import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { RegionMapOptions } from './components/region_map_options';
 import { truncatedColorSchemas } from '../../charts/public';
-import { Schemas } from '../../vis_default_editor/public';
+import { Schemas } from '../../visualizations/public';
 import { ORIGIN } from '../../maps_legacy/public';
 import { getDeprecationMessage } from './get_deprecation_message';
 

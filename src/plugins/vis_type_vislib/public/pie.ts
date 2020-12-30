@@ -21,8 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../data/public';
-import { Schemas } from '../../vis_default_editor/public';
-import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER, Schemas } from '../../visualizations/public';
 import { getPositions } from '../../vis_type_xy/public';
 
 import { CommonVislibParams } from './types';

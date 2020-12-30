@@ -22,7 +22,7 @@ import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
 import { IndexPattern, IAggType, AggGroupNames } from 'src/plugins/data/public';
-import type { Schema } from 'src/plugins/visualizations/public';
+import type { Schema } from '../../../visualizations/public';
 
 import { DefaultEditorAgg, DefaultEditorAggProps } from './agg';
 import { DefaultEditorAggParams } from './agg_params';

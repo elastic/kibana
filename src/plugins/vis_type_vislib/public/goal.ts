@@ -20,9 +20,8 @@
 import { i18n } from '@kbn/i18n';
 
 import { AggGroupNames } from '../../data/public';
-import { Schemas } from '../../vis_default_editor/public';
 import { ColorMode, ColorSchemas } from '../../charts/public';
-import { BaseVisTypeOptions } from '../../visualizations/public';
+import { BaseVisTypeOptions, Schemas } from '../../visualizations/public';
 
 import { getGaugeCollections, GaugeOptions } from './editor';
 import { toExpressionAst } from './to_ast';

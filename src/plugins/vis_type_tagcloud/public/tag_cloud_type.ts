@@ -18,9 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { Schemas } from '../../vis_default_editor/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, Schemas } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
 import { toExpressionAst } from './to_ast';
