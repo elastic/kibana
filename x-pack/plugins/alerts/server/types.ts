@@ -48,6 +48,9 @@ declare module 'src/core/server' {
 }
 
 export interface Services {
+  /**
+   * @deprecated Use `scopedClusterClient` instead.
+   */
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;

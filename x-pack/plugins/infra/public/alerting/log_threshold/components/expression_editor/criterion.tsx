@@ -90,7 +90,7 @@ const getFieldInfo = (fields: IFieldType[], fieldName: string): IFieldType | und
 interface Props {
   idx: number;
   fields: IFieldType[];
-  criterion: CriterionType;
+  criterion: Partial<CriterionType>;
   updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
   removeCriterion: (idx: number) => void;
   canDelete: boolean;
@@ -116,7 +116,11 @@ export const Criterion: React.FC<Props> = ({
   }, [fields]);
 
   const fieldInfo: IFieldType | undefined = useMemo(() => {
-    return getFieldInfo(fields, criterion.field);
+    if (criterion.field) {
+      return getFieldInfo(fields, criterion.field);
+    } else {
+      return undefined;
+    }
   }, [fields, criterion]);
 
   const compatibleComparatorOptions = useMemo(() => {
@@ -129,10 +133,8 @@ export const Criterion: React.FC<Props> = ({
       const nextFieldInfo = getFieldInfo(fields, fieldName);
       // If the field information we're dealing with has changed, reset the comparator and value.
       if (
-        fieldInfo &&
-        nextFieldInfo &&
-        (fieldInfo.type !== nextFieldInfo.type ||
-          fieldInfo.aggregatable !== nextFieldInfo.aggregatable)
+        fieldInfo?.type !== nextFieldInfo?.type ||
+        fieldInfo?.aggregatable !== nextFieldInfo?.aggregatable
       ) {
         const compatibleComparators = getCompatibleComparatorsForField(nextFieldInfo);
         updateCriterion(idx, {
@@ -160,7 +162,7 @@ export const Criterion: React.FC<Props> = ({
                     idx === 0 ? firstCriterionFieldPrefix : successiveCriterionFieldPrefix
                   }
                   uppercase={true}
-                  value={criterion.field}
+                  value={criterion.field ?? 'a chosen field'}
                   isActive={isFieldPopoverOpen}
                   color={errors.field.length === 0 ? 'secondary' : 'danger'}
                   onClick={(e) => {
@@ -180,7 +182,8 @@ export const Criterion: React.FC<Props> = ({
                 <EuiFormRow isInvalid={errors.field.length > 0} error={errors.field}>
                   <EuiSelect
                     compressed
-                    value={criterion.field}
+                    hasNoInitialSelection={criterion.field == null}
+                    value={criterion.field ?? ''}
                     onChange={handleFieldChange}
                     options={fieldOptions}
                   />
@@ -194,9 +197,11 @@ export const Criterion: React.FC<Props> = ({
               button={
                 <EuiExpression
                   description={
-                    ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
-                      ? ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`]
-                      : ComparatorToi18nMap[criterion.comparator]
+                    criterion.comparator
+                      ? ComparatorToi18nMap[`${criterion.comparator}:${fieldInfo?.type}`] ??
+                        ComparatorToi18nMap[criterion.comparator] ??
+                        ''
+                      : ''
                   }
                   uppercase={true}
                   value={criterion.value}
@@ -225,6 +230,7 @@ export const Criterion: React.FC<Props> = ({
                     <EuiFormRow isInvalid={errors.comparator.length > 0} error={errors.comparator}>
                       <EuiSelect
                         compressed
+                        hasNoInitialSelection={criterion.comparator == null}
                         value={criterion.comparator}
                         onChange={(e) =>
                           updateCriterion(idx, { comparator: e.target.value as Comparator })
