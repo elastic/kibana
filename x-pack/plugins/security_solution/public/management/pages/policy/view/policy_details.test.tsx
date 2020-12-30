@@ -12,7 +12,7 @@ import '../../../../common/mock/match_media.ts';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { getPolicyDetailPath, getEndpointListPath } from '../../../common/routing';
-import { policyListApiPathHandlers } from '../store/policy_list/test_mock_utils';
+import { policyListApiPathHandlers } from '../store/test_mock_utils';
 import { licenseService } from '../../../../common/hooks/use_license';
 
 jest.mock('../../../../common/components/link_to');
