@@ -51,7 +51,6 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
 const TabContentWrapper = styled.div`
   height: 100%;
   position: relative;
-  margin-bottom: 48px;
 `;
 
 const EventDetailsComponent: React.FC<Props> = ({

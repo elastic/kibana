@@ -17,7 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { TimelineExpandedEventType, TimelineTabs } from '../../../../../common/types/timeline';
@@ -38,6 +38,7 @@ interface Props {
   event: TimelineExpandedEventType;
   isAlert: boolean;
   loading: boolean;
+  messageHeight?: number;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
 }
@@ -55,11 +56,10 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 const StyledFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
-
-const StyledEuiFlexItem = styled(EuiFlexItem)`
-  max-height: 100%;
-  padding-bottom: 48px;
-  box-sizing: border-box;
+const TabListHeight = 48;
+const StyledEuiFlexItem = styled(EuiFlexItem)<{ $tabListHeight?: number; $messageHeight?: number }>`
+  ${({ $tabListHeight = TabListHeight, $messageHeight = 0 }) =>
+    `max-height: calc(100% - ${$tabListHeight}px - ${$messageHeight}px);`}
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
@@ -100,6 +100,8 @@ export const ExpandableEvent = React.memo<Props>(
       return null;
     }, [detailsData]);
 
+    const messageRef = useRef<HTMLDivElement>(null);
+
     if (!event.eventId) {
       return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
     }
@@ -112,16 +114,18 @@ export const ExpandableEvent = React.memo<Props>(
       <StyledFlexGroup direction="column" gutterSize="none">
         {message && (
           <EuiFlexItem grow={false}>
-            <EuiDescriptionList data-test-subj="event-message" compressed>
-              <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                <LineClamp content={message} />
-              </EuiDescriptionListDescription>
-            </EuiDescriptionList>
-            <EuiSpacer size="m" />
+            <div ref={messageRef}>
+              <EuiDescriptionList data-test-subj="event-message" compressed>
+                <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  <LineClamp content={message} />
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+              <EuiSpacer size="m" />
+            </div>
           </EuiFlexItem>
         )}
-        <StyledEuiFlexItem grow={true}>
+        <StyledEuiFlexItem grow={true} $messageHeight={messageRef?.current?.clientHeight}>
           <EventDetails
             browserFields={browserFields}
             data={detailsData!}
