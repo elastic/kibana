@@ -97,7 +97,7 @@ describe('Events Viewer', () => {
       openEventsViewerFieldsBrowser();
     });
 
-    it.skip('adds a field to the events viewer when the user clicks the checkbox', () => {
+    it('adds a field to the events viewer when the user clicks the checkbox', () => {
       const filterInput = 'host.geo.c';
 
       filterFieldsBrowser(filterInput);
