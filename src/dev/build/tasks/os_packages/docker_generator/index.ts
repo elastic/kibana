@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { runDockerGenerator, runDockerGeneratorForUBI } from './run';
+export { runDockerGenerator } from './run';
