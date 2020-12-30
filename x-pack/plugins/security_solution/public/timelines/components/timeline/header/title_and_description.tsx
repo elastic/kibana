@@ -37,6 +37,8 @@ interface TimelineTitleAndDescriptionProps {
   openSaveTimeline: () => void;
   timelineId: string;
   showWarning?: boolean;
+  updateInitialTitle: (newTitle: string) => void;
+  updateInitialDescription: (newDescription: string) => void;
 }
 
 const Wrapper = styled(EuiModalBody)`
@@ -67,7 +69,15 @@ const usePrevious = (value: unknown) => {
 // the modal is used as a reminder for users to save / discard
 // the unsaved timeline / template
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
-  ({ closeSaveTimeline, initialFocus, openSaveTimeline, timelineId, showWarning }) => {
+  ({
+    closeSaveTimeline,
+    initialFocus,
+    openSaveTimeline,
+    timelineId,
+    showWarning,
+    updateInitialTitle,
+    updateInitialDescription,
+  }) => {
     // TODO: Refactor to use useForm() instead
     const [isFormSubmitted, setFormSubmitted] = useState(false);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -85,13 +95,15 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     );
 
     const handleClick = useCallback(() => {
+      updateInitialTitle(timeline.title);
+      updateInitialDescription(timeline.description);
       // TODO: Refactor action to take only title and description as params not the whole timeline
       onSaveTimeline({
         ...timeline,
         id: timelineId,
       });
       setFormSubmitted(true);
-    }, [onSaveTimeline, timeline, timelineId]);
+    }, [onSaveTimeline, timeline, timelineId, updateInitialTitle, updateInitialDescription]);
 
     const handleCancel = useCallback(() => {
       if (showWarning) {

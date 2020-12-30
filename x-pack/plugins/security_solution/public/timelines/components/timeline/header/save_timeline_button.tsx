@@ -5,12 +5,14 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { pick } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineActions } from '../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { getTimelineSaveModalByIdSelector } from './selectors';
 import { TimelineTitleAndDescription } from './title_and_description';
 import { EDIT } from './translations';
@@ -28,6 +30,28 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
     const show = useDeepEqualSelector((state) => getTimelineSaveModal(state, timelineId));
     const [showSaveTimelineOverlay, setShowSaveTimelineOverlay] = useState<boolean>(false);
 
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+    const { title, description } = useDeepEqualSelector((state) =>
+      pick(['title', 'description'], getTimeline(state, timelineId) ?? timelineDefaults)
+    );
+
+    const [initialTitle, setInitialTitle] = useState(title);
+    const [initialDescription, setInitialDescription] = useState(description);
+
+    const updateInitialTitle = useCallback(
+      (newTitle = '') => {
+        setInitialTitle(newTitle);
+      },
+      [setInitialTitle]
+    );
+
+    const updateInitialDescription = useCallback(
+      (newDescription = '') => {
+        setInitialDescription(newDescription);
+      },
+      [setInitialDescription]
+    );
     const closeSaveTimeline = useCallback(() => {
       setShowSaveTimelineOverlay(false);
       if (show) {
@@ -38,11 +62,29 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
           })
         );
       }
-    }, [dispatch, setShowSaveTimelineOverlay, show]);
+
+      dispatch(
+        timelineActions.updateTitle({
+          id: timelineId,
+          title: initialTitle,
+          disableAutoSave: true,
+        })
+      );
+
+      dispatch(
+        timelineActions.updateDescription({
+          id: timelineId,
+          description: initialDescription,
+          disableAutoSave: true,
+        })
+      );
+    }, [dispatch, setShowSaveTimelineOverlay, show, timelineId, initialTitle, initialDescription]);
 
     const openSaveTimeline = useCallback(() => {
       setShowSaveTimelineOverlay(true);
-    }, [setShowSaveTimelineOverlay]);
+      updateInitialTitle(title);
+      updateInitialDescription(description);
+    }, [description, title, updateInitialDescription, updateInitialTitle]);
 
     const saveTimelineButtonIcon = useMemo(
       () => (
@@ -66,6 +108,8 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
           openSaveTimeline={openSaveTimeline}
           timelineId={timelineId}
           showWarning={initialFocus === 'title' && show}
+          updateInitialTitle={updateInitialTitle}
+          updateInitialDescription={updateInitialDescription}
         />
       </>
     ) : (
