@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
 import moment from 'moment';
 import { DATE_STRING_FORMAT } from './constants';
 
-export const dateString = (inputString: string, uiSettings: IUiSettingsClient): string => {
+export const dateString = (inputString: string, tz: string): string => {
   if (inputString == null) {
     throw new Error('Invalid date string!');
   }
-  const tz: string = uiSettings.get('dateFormat:tz');
   let returnString: string;
   if (tz === 'Browser') {
     returnString = moment.utc(inputString).tz(moment.tz.guess()).format(DATE_STRING_FORMAT);

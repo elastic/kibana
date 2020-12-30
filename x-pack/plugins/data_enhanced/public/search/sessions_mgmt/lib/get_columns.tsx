@@ -14,17 +14,16 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IUiSettingsClient } from 'kibana/public';
 import { capitalize } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import { SessionsMgmtConfigSchema } from '../';
 import { ActionComplete, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
+import { dateString } from '../../../../common/search/sessions_mgmt/date_string';
 import { TableText } from '../components';
 import { InlineActions, PopoverActionsMenu } from '../components/actions';
 import { StatusIndicator } from '../components/status';
 import { SearchSessionsMgmtAPI } from './api';
-import { dateString } from '../../../../common/search/sessions_mgmt/date_string';
 import { getExpirationStatus } from './get_expiration_status';
 
 // Helper function: translate an app string to EuiIcon-friendly string
@@ -38,7 +37,7 @@ const appToIcon = (app: string) => {
 export const getColumns = (
   api: SearchSessionsMgmtAPI,
   config: SessionsMgmtConfigSchema,
-  uiSettings: IUiSettingsClient,
+  timezone: string,
   handleAction: ActionComplete
 ): Array<EuiBasicTableColumn<UISession>> => {
   // Use a literal array of table column definitions to detail a UISession object
@@ -89,7 +88,7 @@ export const getColumns = (
       }),
       sortable: true,
       render: (statusType: UISession['status'], session) => {
-        return <StatusIndicator session={session} uiSettings={uiSettings} />;
+        return <StatusIndicator session={session} timezone={timezone} />;
       },
     },
 
@@ -102,7 +101,7 @@ export const getColumns = (
       sortable: true,
       render: (created: UISession['created'], { id }) => {
         try {
-          const startedOn = dateString(created, uiSettings);
+          const startedOn = dateString(created, timezone);
           return (
             <TableText color="subdued" data-test-subj="session-mgmt-table-col-created">
               {startedOn}
@@ -126,7 +125,7 @@ export const getColumns = (
       render: (expires: UISession['expires'], { id, status }) => {
         if (expires && status !== STATUS.IN_PROGRESS && status !== STATUS.ERROR) {
           try {
-            const expiresOn = dateString(expires, uiSettings);
+            const expiresOn = dateString(expires, timezone);
 
             // return
             return (

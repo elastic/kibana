@@ -7,9 +7,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactElement } from 'react';
-import { STATUS } from '../../../../common/search/sessions_mgmt';
+import { STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 import { dateString } from '../../../../common/search/sessions_mgmt/date_string';
-import { StatusDef as StatusAttributes, StatusIndicatorProps, TableText } from './';
+import { StatusDef as StatusAttributes, TableText } from './';
 
 // Shared helper function
 export const getStatusText = (statusType: string): string => {
@@ -41,17 +41,23 @@ export const getStatusText = (statusType: string): string => {
   }
 };
 
+interface StatusIndicatorProps {
+  now?: string;
+  session: UISession;
+  timezone: string;
+}
+
 // Get the fields needed to show each status type
 // can throw errors around date conversions
 const getStatusAttributes = ({
   now,
   session,
-  uiSettings,
+  timezone,
 }: StatusIndicatorProps): StatusAttributes | null => {
   switch (session.status) {
     case STATUS.IN_PROGRESS:
       try {
-        const createdDate = dateString(session.created, uiSettings);
+        const createdDate = dateString(session.created, timezone);
         return {
           textColor: 'default',
           icon: <EuiLoadingSpinner />,
@@ -72,7 +78,7 @@ const getStatusAttributes = ({
 
     case STATUS.EXPIRED:
       try {
-        const expiredOnDate = dateString(session.expires!, uiSettings);
+        const expiredOnDate = dateString(session.expires!, timezone);
         const expiredOnMessage = i18n.translate(
           'xpack.data.mgmt.searchSessions.status.message.expiredOn',
           {
@@ -114,7 +120,7 @@ const getStatusAttributes = ({
 
     case STATUS.COMPLETE:
       try {
-        const expiresOnDate = dateString(session.expires!, uiSettings);
+        const expiresOnDate = dateString(session.expires!, timezone);
         const expiresOnMessage = i18n.translate('xpack.data.mgmt.searchSessions.status.expiresOn', {
           defaultMessage: 'Expires on {expiresOnDate}',
           values: { expiresOnDate },

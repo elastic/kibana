@@ -6,7 +6,6 @@
 
 import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpStart, IUiSettingsClient } from 'kibana/public';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import * as Rx from 'rxjs';
@@ -23,20 +22,12 @@ const TABLE_ID = 'backgroundSessionsMgmtTable';
 
 interface Props {
   api: SearchSessionsMgmtAPI;
-  http: HttpStart;
   initialTable: UISession[] | null;
-  uiSettings: IUiSettingsClient;
+  timezone: string;
   config: SessionsMgmtConfigSchema;
 }
 
-export function SearchSessionsMgmtTable({
-  api,
-  http,
-  uiSettings,
-  initialTable,
-  config,
-  ...props
-}: Props) {
+export function SearchSessionsMgmtTable({ api, timezone, initialTable, config, ...props }: Props) {
   const [tableData, setTableData] = useState<UISession[]>(initialTable ? initialTable : []);
   const [isLoading, setIsLoading] = useState(false);
   const [pagination, setPagination] = useState({ pageIndex: 0 });
@@ -110,7 +101,7 @@ export function SearchSessionsMgmtTable({
       {...props}
       id={TABLE_ID}
       data-test-subj={TABLE_ID}
-      columns={getColumns(api, config, uiSettings, handleActionCompleted)}
+      columns={getColumns(api, config, timezone, handleActionCompleted)}
       items={tableData}
       pagination={pagination}
       search={search}

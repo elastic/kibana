@@ -5,9 +5,7 @@
  */
 
 import { EuiLinkProps, EuiText, EuiTextProps } from '@elastic/eui';
-import { IUiSettingsClient } from 'kibana/public';
 import React from 'react';
-import { UISession } from '../../../../common/search/sessions_mgmt';
 import extendSessionIcon from '../icons/extend_session.svg';
 
 export const TableText = ({ children, ...props }: EuiTextProps) => {
@@ -27,12 +25,6 @@ export interface IClickActionDescriptor {
 export interface IHrefActionDescriptor {
   label: string;
   props: EuiLinkProps;
-}
-
-export interface StatusIndicatorProps {
-  now?: string;
-  session: UISession;
-  uiSettings: IUiSettingsClient;
 }
 
 export interface StatusDef {
