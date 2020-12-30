@@ -52,6 +52,7 @@ import {
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import * as i18n from './translations';
+import { getCaseConfigurePushUrl } from '../../../../case/common/api/helpers';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -384,6 +385,9 @@ describe('Case Configuration API', () => {
         type: ConnectorTypes.none,
         fields: null,
       },
+      settings: {
+        syncAlerts: true,
+      },
     };
 
     test('check url, method, signal', async () => {
@@ -451,18 +455,24 @@ describe('Case Configuration API', () => {
     });
     const connectorId = 'connectorId';
     test('check url, method, signal', async () => {
-      await pushToService(connectorId, casePushParams, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`/api/actions/action/${connectorId}/_execute`, {
+      await pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(`${getCaseConfigurePushUrl(connectorId)}`, {
         method: 'POST',
         body: JSON.stringify({
-          params: { subAction: 'pushToService', subActionParams: casePushParams },
+          connector_type: ConnectorTypes.jira,
+          params: casePushParams,
         }),
         signal: abortCtrl.signal,
       });
     });
 
     test('happy path', async () => {
-      const resp = await pushToService(connectorId, casePushParams, abortCtrl.signal);
+      const resp = await pushToService(
+        connectorId,
+        ConnectorTypes.jira,
+        casePushParams,
+        abortCtrl.signal
+      );
       expect(resp).toEqual(serviceConnector);
     });
 
@@ -475,7 +485,7 @@ describe('Case Configuration API', () => {
         message: 'not it',
       });
       await expect(
-        pushToService(connectorId, casePushParams, abortCtrl.signal)
+        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
 
@@ -487,7 +497,7 @@ describe('Case Configuration API', () => {
         message: theError,
       });
       await expect(
-        pushToService(connectorId, casePushParams, abortCtrl.signal)
+        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
 
@@ -498,7 +508,7 @@ describe('Case Configuration API', () => {
         status: 'error',
       });
       await expect(
-        pushToService(connectorId, casePushParams, abortCtrl.signal)
+        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
   });

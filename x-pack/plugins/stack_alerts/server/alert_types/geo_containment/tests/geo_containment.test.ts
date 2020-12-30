@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import sampleJsonResponse from './es_sample_response.json';
 import sampleJsonResponseWithNesting from './es_sample_response_with_nesting.json';
-import { transformResults } from '../geo_containment';
+import { getActiveEntriesAndGenerateAlerts, transformResults } from '../geo_containment';
 import { SearchResponse } from 'elasticsearch';
+import { OTHER_CATEGORY } from '../es_query_builder';
+import { alertsMock } from '../../../../../alerts/server/mocks';
+import { GeoContainmentInstanceContext, GeoContainmentInstanceState } from '../alert_type';
 
 describe('geo_containment', () => {
   describe('transformResults', () => {
@@ -114,6 +118,185 @@ describe('geo_containment', () => {
     it('should return an empty array if no results', async () => {
       const transformedResults = transformResults(undefined, dateField, geoField);
       expect(transformedResults).toEqual(new Map());
+    });
+  });
+
+  describe('getActiveEntriesAndGenerateAlerts', () => {
+    const testAlertActionArr: unknown[] = [];
+    beforeEach(() => {
+      jest.clearAllMocks();
+      testAlertActionArr.length = 0;
+    });
+
+    const currLocationMap = new Map([
+      [
+        'a',
+        {
+          location: [0, 0],
+          shapeLocationId: '123',
+          dateInShape: 'Wed Dec 09 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId1',
+        },
+      ],
+      [
+        'b',
+        {
+          location: [0, 0],
+          shapeLocationId: '456',
+          dateInShape: 'Wed Dec 09 2020 15:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId2',
+        },
+      ],
+      [
+        'c',
+        {
+          location: [0, 0],
+          shapeLocationId: '789',
+          dateInShape: 'Wed Dec 09 2020 16:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId3',
+        },
+      ],
+    ]);
+
+    const expectedContext = [
+      {
+        actionGroupId: 'Tracked entity contained',
+        context: {
+          containingBoundaryId: '123',
+          entityDocumentId: 'docId1',
+          entityId: 'a',
+          entityLocation: 'POINT (0 0)',
+        },
+        instanceId: 'a-123',
+      },
+      {
+        actionGroupId: 'Tracked entity contained',
+        context: {
+          containingBoundaryId: '456',
+          entityDocumentId: 'docId2',
+          entityId: 'b',
+          entityLocation: 'POINT (0 0)',
+        },
+        instanceId: 'b-456',
+      },
+      {
+        actionGroupId: 'Tracked entity contained',
+        context: {
+          containingBoundaryId: '789',
+          entityDocumentId: 'docId3',
+          entityId: 'c',
+          entityLocation: 'POINT (0 0)',
+        },
+        instanceId: 'c-789',
+      },
+    ];
+    const emptyShapesIdsNamesMap = {};
+
+    const alertInstanceFactory = (instanceId: string) => {
+      const alertInstance = alertsMock.createAlertInstanceFactory<
+        GeoContainmentInstanceState,
+        GeoContainmentInstanceContext
+      >();
+      alertInstance.scheduleActions.mockImplementation(
+        (actionGroupId: string, context?: GeoContainmentInstanceContext) => {
+          const contextKeys = Object.keys(expectedContext[0].context);
+          const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
+          testAlertActionArr.push({
+            actionGroupId,
+            instanceId,
+            context: contextSubset,
+          });
+          return alertInstance;
+        }
+      );
+      return alertInstance;
+    };
+
+    const currentDateTime = new Date();
+
+    it('should use currently active entities if no older entity entries', () => {
+      const emptyPrevLocationMap = {};
+      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+        emptyPrevLocationMap,
+        currLocationMap,
+        alertInstanceFactory,
+        emptyShapesIdsNamesMap,
+        currentDateTime
+      );
+      expect(allActiveEntriesMap).toEqual(currLocationMap);
+      expect(testAlertActionArr).toMatchObject(expectedContext);
+    });
+    it('should overwrite older identical entity entries', () => {
+      const prevLocationMapWithIdenticalEntityEntry = {
+        a: {
+          location: [0, 0],
+          shapeLocationId: '999',
+          dateInShape: 'Wed Dec 09 2020 12:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId7',
+        },
+      };
+      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+        prevLocationMapWithIdenticalEntityEntry,
+        currLocationMap,
+        alertInstanceFactory,
+        emptyShapesIdsNamesMap,
+        currentDateTime
+      );
+      expect(allActiveEntriesMap).toEqual(currLocationMap);
+      expect(testAlertActionArr).toMatchObject(expectedContext);
+    });
+    it('should preserve older non-identical entity entries', () => {
+      const prevLocationMapWithNonIdenticalEntityEntry = {
+        d: {
+          location: [0, 0],
+          shapeLocationId: '999',
+          dateInShape: 'Wed Dec 09 2020 12:31:31 GMT-0700 (Mountain Standard Time)',
+          docId: 'docId7',
+        },
+      };
+      const expectedContextPlusD = [
+        {
+          actionGroupId: 'Tracked entity contained',
+          context: {
+            containingBoundaryId: '999',
+            entityDocumentId: 'docId7',
+            entityId: 'd',
+            entityLocation: 'POINT (0 0)',
+          },
+          instanceId: 'd-999',
+        },
+        ...expectedContext,
+      ];
+
+      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+        prevLocationMapWithNonIdenticalEntityEntry,
+        currLocationMap,
+        alertInstanceFactory,
+        emptyShapesIdsNamesMap,
+        currentDateTime
+      );
+      expect(allActiveEntriesMap).not.toEqual(currLocationMap);
+      expect(allActiveEntriesMap.has('d')).toBeTruthy();
+      expect(testAlertActionArr).toMatchObject(expectedContextPlusD);
+    });
+    it('should remove "other" entries and schedule the expected number of actions', () => {
+      const emptyPrevLocationMap = {};
+      const currLocationMapWithOther = new Map(currLocationMap).set('d', {
+        location: [0, 0],
+        shapeLocationId: OTHER_CATEGORY,
+        dateInShape: 'Wed Dec 09 2020 14:31:31 GMT-0700 (Mountain Standard Time)',
+        docId: 'docId1',
+      });
+      expect(currLocationMapWithOther).not.toEqual(currLocationMap);
+      const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+        emptyPrevLocationMap,
+        currLocationMapWithOther,
+        alertInstanceFactory,
+        emptyShapesIdsNamesMap,
+        currentDateTime
+      );
+      expect(allActiveEntriesMap).toEqual(currLocationMap);
+      expect(testAlertActionArr).toMatchObject(expectedContext);
     });
   });
 });

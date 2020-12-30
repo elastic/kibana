@@ -40,7 +40,7 @@ import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
-import { TimelineId, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('../../containers/local_storage');
 
@@ -58,10 +58,12 @@ describe('epicLocalStorage', () => {
   );
 
   let props = {} as QueryTabContentComponentProps;
-  const sort: Sort = {
-    columnId: '@timestamp',
-    sortDirection: Direction.desc,
-  };
+  const sort: Sort[] = [
+    {
+      columnId: '@timestamp',
+      sortDirection: Direction.desc,
+    },
+  ];
   const startDate = '2018-03-23T18:49:23.132Z';
   const endDate = '2018-03-24T03:33:52.253Z';
 
@@ -78,12 +80,14 @@ describe('epicLocalStorage', () => {
       dataProviders: mockDataProviders,
       end: endDate,
       eventType: 'all',
+      expandedEvent: {},
       filters: [],
       isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
+      onEventClosed: jest.fn(),
       showCallOutUnauthorizedMsg: false,
       showEventDetails: false,
       start: startDate,
@@ -92,6 +96,8 @@ describe('epicLocalStorage', () => {
       timelineId: 'foo',
       timerangeKind: 'absolute',
       updateEventTypeAndIndexesName: jest.fn(),
+      activeTab: TimelineTabs.query,
+      show: true,
     };
   });
 
@@ -159,10 +165,12 @@ describe('epicLocalStorage', () => {
     store.dispatch(
       updateSort({
         id: 'test',
-        sort: {
-          columnId: 'event.severity',
-          sortDirection: Direction.desc,
-        },
+        sort: [
+          {
+            columnId: 'event.severity',
+            sortDirection: Direction.desc,
+          },
+        ],
       })
     );
     await waitFor(() => expect(addTimelineInStorageMock).toHaveBeenCalled());

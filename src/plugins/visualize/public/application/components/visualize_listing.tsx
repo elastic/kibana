@@ -40,10 +40,12 @@ export const VisualizeListing = () => {
     services: {
       application,
       chrome,
+      dashboard,
       history,
       savedVisualizations,
       toastNotifications,
       visualizations,
+      embeddable,
       savedObjects,
       savedObjectsPublic,
       savedObjectsTagging,
@@ -71,6 +73,8 @@ export const VisualizeListing = () => {
   }, [history, pathname, visualizations]);
 
   useMount(() => {
+    // Reset editor state if the visualize listing page is loaded.
+    embeddable.getStateTransfer().clearEditorState();
     chrome.setBreadcrumbs([
       {
         text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
@@ -179,9 +183,11 @@ export const VisualizeListing = () => {
 
   return (
     <>
-      <div className="visListingCallout">
-        <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
-      </div>
+      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && (
+        <div className="visListingCallout">
+          <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+        </div>
+      )}
       <TableListView
         headingId="visualizeListingHeading"
         // we allow users to create visualizations even if they can't save them

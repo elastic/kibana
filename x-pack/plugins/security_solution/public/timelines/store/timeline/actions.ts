@@ -15,13 +15,15 @@ import {
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { SerializedFilterQuery } from '../../../common/store/types';
 
-import { KqlMode, TimelineModel, ColumnHeaderOptions, TimelineTabs } from './model';
+import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
-  TimelineExpandedEvent,
+  TimelineExpandedEventType,
   TimelineTypeLiteral,
   RowRendererId,
+  TimelineExpandedEvent,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
 
@@ -35,9 +37,10 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-interface ToggleExpandedEvent {
+export interface ToggleExpandedEvent {
+  event?: TimelineExpandedEventType;
+  tabType?: TimelineTabs;
   timelineId: string;
-  event: TimelineExpandedEvent;
 }
 export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
 
@@ -72,7 +75,7 @@ export interface TimelineInput {
     filterQuery: SerializedFilterQuery | null;
   };
   show?: boolean;
-  sort?: Sort;
+  sort?: Sort[];
   showCheckboxes?: boolean;
   timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string | null;
@@ -216,7 +219,7 @@ export const updateRange = actionCreator<{ id: string; start: string; end: strin
   'UPDATE_RANGE'
 );
 
-export const updateSort = actionCreator<{ id: string; sort: Sort }>('UPDATE_SORT');
+export const updateSort = actionCreator<{ id: string; sort: Sort[] }>('UPDATE_SORT');
 
 export const updateAutoSaveMsg = actionCreator<{
   timelineId: string | null;
@@ -284,3 +287,8 @@ export const setActiveTabTimeline = actionCreator<{
   id: string;
   activeTab: TimelineTabs;
 }>('SET_ACTIVE_TAB_TIMELINE');
+
+export const toggleModalSaveTimeline = actionCreator<{
+  id: string;
+  showModalSaveTimeline: boolean;
+}>('TOGGLE_MODAL_SAVE_TIMELINE');

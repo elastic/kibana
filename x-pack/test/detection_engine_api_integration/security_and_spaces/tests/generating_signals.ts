@@ -22,9 +22,10 @@ import {
   getSignalsByIds,
   getSignalsByRuleIds,
   getSimpleRule,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../utils';
+import { SIGNALS_TEMPLATE_VERSION } from '../../../../plugins/security_solution/server/lib/detection_engine/routes/index/get_signals_template';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -62,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: `_id:${ID}`,
         };
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -74,7 +75,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: `_id:${ID}`,
         };
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits[0]._source.signal.rule.rule_id).eql(getSimpleRule().rule_id);
@@ -86,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: `_id:${ID}`,
         };
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         // remove rule to cut down on touch points for test changes when the rule format changes
@@ -123,6 +124,9 @@ export default ({ getService }: FtrProviderContext) => {
             kind: 'event',
             module: 'system',
           },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
         });
       });
 
@@ -132,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: `_id:${ID}`,
         };
         const { id: createdId } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, createdId);
+        await waitForRuleSuccessOrStatus(supertest, createdId);
         await waitForSignalsToBePresent(supertest, 1, [createdId]);
 
         // Run signals on top of that 1 signal which should create a single signal (on top of) a signal
@@ -142,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { id } = await createRule(supertest, ruleForSignals);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
 
         // Get our single signal on top of a signal
@@ -191,10 +195,14 @@ export default ({ getService }: FtrProviderContext) => {
             kind: 'signal',
             module: 'system',
           },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
         });
       });
 
-      describe('EQL Rules', () => {
+      // ES PROMOTION FAILURE: http://github.com/elastic/kibana/issues/86709
+      describe.skip('EQL Rules', () => {
         it('generates signals from EQL sequences in the expected form', async () => {
           const rule: EqlCreateSchema = {
             ...getRuleForSignalTesting(['auditbeat-*']),
@@ -204,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: 'sequence by host.name [any where true] [any where true]',
           };
           const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccess(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signals = await getSignalsByRuleIds(supertest, ['eql-rule']);
           const signal = signals.hits.hits[0]._source.signal;
@@ -244,6 +252,9 @@ export default ({ getService }: FtrProviderContext) => {
                 type: 'event',
               },
             ],
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
+            },
           });
         });
 
@@ -256,7 +267,7 @@ export default ({ getService }: FtrProviderContext) => {
             query: 'sequence by host.name [any where true] [any where true]',
           };
           const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccess(supertest, id);
+          await waitForRuleSuccessOrStatus(supertest, id);
           await waitForSignalsToBePresent(supertest, 1, [id]);
           const signalsOpen = await getSignalsByRuleIds(supertest, ['eql-rule']);
           const sequenceSignal = signalsOpen.hits.hits.find(
@@ -314,6 +325,9 @@ export default ({ getService }: FtrProviderContext) => {
                 type: 'signal',
               },
             ],
+            _meta: {
+              version: SIGNALS_TEMPLATE_VERSION,
+            },
           });
         });
       });
@@ -341,7 +355,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -354,7 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits[0]._source.signal.rule.rule_id).eql(getSimpleRule().rule_id);
@@ -366,7 +380,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: '_id:1',
         };
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         // remove rule to cut down on touch points for test changes when the rule format changes
@@ -398,6 +412,9 @@ export default ({ getService }: FtrProviderContext) => {
           },
           original_time: '2020-10-28T05:08:53.000Z',
           original_signal: 1,
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
         });
       });
 
@@ -407,7 +424,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: '_id:1',
         };
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
 
         // Run signals on top of that 1 signal which should create a single signal (on top of) a signal
@@ -416,7 +433,7 @@ export default ({ getService }: FtrProviderContext) => {
           rule_id: 'signal-on-signal',
         };
         const { id: createdId } = await createRule(supertest, ruleForSignals);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [createdId]);
 
         // Get our single signal on top of a signal
@@ -463,6 +480,9 @@ export default ({ getService }: FtrProviderContext) => {
           original_event: {
             kind: 'signal',
           },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
         });
       });
     });
@@ -488,7 +508,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: '_id:1',
         };
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).greaterThan(0);
@@ -500,7 +520,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: '_id:1',
         };
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits[0]._source.signal.rule.rule_id).eql(getSimpleRule().rule_id);
@@ -512,7 +532,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: '_id:1',
         };
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         // remove rule to cut down on touch points for test changes when the rule format changes
@@ -550,6 +570,9 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
         });
       });
 
@@ -559,7 +582,7 @@ export default ({ getService }: FtrProviderContext) => {
           query: '_id:1',
         };
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 1, [id]);
 
         // Run signals on top of that 1 signal which should create a single signal (on top of) a signal
@@ -568,7 +591,7 @@ export default ({ getService }: FtrProviderContext) => {
           rule_id: 'signal-on-signal',
         };
         const { id: createdId } = await createRule(supertest, ruleForSignals);
-        await waitForRuleSuccess(supertest, createdId);
+        await waitForRuleSuccessOrStatus(supertest, createdId);
         await waitForSignalsToBePresent(supertest, 1, [createdId]);
 
         // Get our single signal on top of a signal
@@ -615,6 +638,9 @@ export default ({ getService }: FtrProviderContext) => {
           original_event: {
             kind: 'signal',
           },
+          _meta: {
+            version: SIGNALS_TEMPLATE_VERSION,
+          },
         });
       });
     });
@@ -635,7 +661,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const executeRuleAndGetSignals = async (rule: QueryCreateSchema) => {
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 4, [id]);
         const signalsResponse = await getSignalsByIds(supertest, [id]);
         const signals = signalsResponse.hits.hits.map((hit) => hit._source);

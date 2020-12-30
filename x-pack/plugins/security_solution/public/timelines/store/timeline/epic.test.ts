@@ -5,10 +5,10 @@
  */
 
 import { Filter, esFilters } from '../../../../../../../src/plugins/data/public';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { Direction } from '../../../graphql/types';
 import { convertTimelineAsInput } from './epic';
-import { TimelineModel, TimelineTabs } from './model';
+import { TimelineModel } from './model';
 
 describe('Epic Timeline', () => {
   describe('#convertTimelineAsInput ', () => {
@@ -149,7 +149,7 @@ describe('Epic Timeline', () => {
         selectedEventIds: {},
         show: true,
         showCheckboxes: false,
-        sort: { columnId: '@timestamp', sortDirection: Direction.desc },
+        sort: [{ columnId: '@timestamp', sortDirection: Direction.desc }],
         status: TimelineStatus.active,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
@@ -286,10 +286,12 @@ describe('Epic Timeline', () => {
           },
         },
         savedQueryId: 'my endgame timeline query',
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         templateTimelineId: null,
         templateTimelineVersion: null,
         timelineType: TimelineType.default,

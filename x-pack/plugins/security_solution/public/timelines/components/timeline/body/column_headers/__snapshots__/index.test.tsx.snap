@@ -2,7 +2,7 @@
 
 exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
 <ColumnHeadersComponent
-  actionsColumnWidth={96}
+  actionsColumnWidth={120}
   browserFields={
     Object {
       "agent": Object {
@@ -465,10 +465,12 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
   showEventsSelect={false}
   showSelectAllCheckbox={false}
   sort={
-    Object {
-      "columnId": "fooColumn",
-      "sortDirection": "desc",
-    }
+    Array [
+      Object {
+        "columnId": "@timestamp",
+        "sortDirection": "desc",
+      },
+    ]
   }
   timelineId="test"
 />

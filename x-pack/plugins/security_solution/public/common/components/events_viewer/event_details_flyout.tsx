@@ -4,19 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { some } from 'lodash/fp';
+import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 import { useDispatch } from 'react-redux';
 
-import { timelineActions } from '../../../timelines/store/timeline';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import {
   ExpandableEvent,
   ExpandableEventTitle,
 } from '../../../timelines/components/timeline/expandable_event';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { useTimelineEventsDetails } from '../../../timelines/containers/details';
+import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 const StyledEuiFlyout = styled(EuiFlyout)`
   z-index: ${({ theme }) => theme.eui.euiZLevel7};
@@ -28,26 +31,32 @@ interface EventDetailsFlyoutProps {
   timelineId: string;
 }
 
-const emptyExpandedEvent = {};
-
 const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   browserFields,
   docValueFields,
   timelineId,
 }) => {
   const dispatch = useDispatch();
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedEvent = useDeepEqualSelector(
-    (state) => state.timeline.timelineById[timelineId]?.expandedEvent ?? emptyExpandedEvent
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults)?.expandedEvent?.query ?? {}
   );
 
   const handleClearSelection = useCallback(() => {
-    dispatch(
-      timelineActions.toggleExpandedEvent({
-        timelineId,
-        event: emptyExpandedEvent,
-      })
-    );
+    dispatch(timelineActions.toggleExpandedEvent({ timelineId }));
   }, [dispatch, timelineId]);
+
+  const [loading, detailsData] = useTimelineEventsDetails({
+    docValueFields,
+    indexName: expandedEvent?.indexName ?? '',
+    eventId: expandedEvent?.eventId ?? '',
+    skip: !expandedEvent.eventId,
+  });
+
+  const isAlert = useMemo(
+    () => some({ category: 'signal', field: 'signal.rule.id' }, detailsData),
+    [detailsData]
+  );
 
   if (!expandedEvent.eventId) {
     return null;
@@ -56,14 +65,17 @@ const EventDetailsFlyoutComponent: React.FC<EventDetailsFlyoutProps> = ({
   return (
     <StyledEuiFlyout size="s" onClose={handleClearSelection}>
       <EuiFlyoutHeader hasBorder>
-        <ExpandableEventTitle />
+        <ExpandableEventTitle isAlert={isAlert} loading={loading} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ExpandableEvent
           browserFields={browserFields}
-          docValueFields={docValueFields}
+          detailsData={detailsData}
           event={expandedEvent}
+          isAlert={isAlert}
+          loading={loading}
           timelineId={timelineId}
+          timelineTabType="flyout"
         />
       </EuiFlyoutBody>
     </StyledEuiFlyout>

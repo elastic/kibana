@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
@@ -15,6 +15,7 @@ import { DispatchUpdateReduxTime } from '../../../../common/components/super_dat
 import { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 
+import { EuiSuperSelect } from './super_select';
 import { options } from './helpers';
 import * as i18n from './translations';
 
@@ -28,8 +29,8 @@ const SearchOrFilterGlobalStyle = createGlobalStyle`
     width: 350px !important;
   }
 
-  .${searchOrFilterPopoverClassName}__popoverPanel {
-    width: ${searchOrFilterPopoverWidth};
+  .${searchOrFilterPopoverClassName}.euiPopover__panel {
+    width: ${searchOrFilterPopoverWidth} !important;
 
     .euiSuperSelect__listbox {
       width: ${searchOrFilterPopoverWidth} !important;
@@ -66,6 +67,9 @@ const SearchOrFilterContainer = styled.div`
       div:first-child {
         margin-right: 0px;
       }
+    }
+    .globalFilterGroup__wrapper.globalFilterGroup__wrapper-isVisible {
+      height: auto !important;
     }
   }
 `;

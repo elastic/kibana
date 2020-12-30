@@ -19,10 +19,14 @@ import {
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../common/ecs';
-import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { TimelineTabs } from '../../../timelines/store/timeline/model';
 
 jest.mock('apollo-client');
 
@@ -105,80 +109,38 @@ describe('alert actions', () => {
             activeTab: TimelineTabs.query,
             columns: [
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: '@timestamp',
-                placeholder: undefined,
-                type: undefined,
                 width: 190,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'message',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'event.category',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'host.name',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'source.ip',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'destination.ip',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
               {
-                aggregatable: undefined,
-                category: undefined,
                 columnHeaderType: 'not-filtered',
-                description: undefined,
-                example: undefined,
                 id: 'user.name',
-                placeholder: undefined,
-                type: undefined,
                 width: 180,
               },
             ],
@@ -242,10 +204,12 @@ describe('alert actions', () => {
             selectedEventIds: {},
             show: true,
             showCheckboxes: false,
-            sort: {
-              columnId: '@timestamp',
-              sortDirection: 'desc',
-            },
+            sort: [
+              {
+                columnId: '@timestamp',
+                sortDirection: 'desc',
+              },
+            ],
             status: TimelineStatus.draft,
             title: '',
             timelineType: TimelineType.default,

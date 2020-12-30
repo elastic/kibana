@@ -5,7 +5,7 @@
  */
 
 import { formatMitreAttackDescription } from '../helpers/rules';
-import { machineLearningRule, totalNumberOfPrebuiltRulesInEsArchive } from '../objects/rule';
+import { machineLearningRule } from '../objects/rule';
 
 import {
   CUSTOM_RULES_BTN,
@@ -46,14 +46,13 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
-  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { removeSignalsIndex } from '../tasks/api_calls';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -61,26 +60,19 @@ import {
   fillScheduleRuleAndContinue,
   selectMachineLearningRuleType,
 } from '../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-const expectedUrls = machineLearningRule.referenceUrls.join('');
-const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
-const expectedTags = machineLearningRule.tags.join('');
-const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
-const expectedNumberOfRules = totalNumberOfPrebuiltRulesInEsArchive + 1;
+describe.skip('Detection rules, machine learning', () => {
+  const expectedUrls = machineLearningRule.referenceUrls.join('');
+  const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
+  const expectedTags = machineLearningRule.tags.join('');
+  const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
+  const expectedNumberOfRules = 1;
 
-describe('Detection rules, machine learning', () => {
-  before(() => {
-    esArchiverLoad('prebuilt_rules_loaded');
-  });
-
-  after(() => {
-    deleteRule();
-    esArchiverUnload('prebuilt_rules_loaded');
-    removeSignalsIndex();
+  beforeEach(() => {
+    cleanKibana();
   });
 
   it('Creates and activates a new ml rule', () => {

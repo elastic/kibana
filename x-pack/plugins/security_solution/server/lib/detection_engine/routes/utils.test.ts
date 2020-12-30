@@ -5,6 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
 
@@ -34,7 +35,7 @@ let alertsClient: ReturnType<typeof alertsClientMock.create>;
 describe('utils', () => {
   describe('transformError', () => {
     test('returns transformed output error from boom object with a 500 and payload of internal server error', () => {
-      const boom = new Boom('some boom message');
+      const boom = new Boom.Boom('some boom message');
       const transformed = transformError(boom);
       expect(transformed).toEqual({
         message: 'An internal server error occurred',
@@ -97,11 +98,33 @@ describe('utils', () => {
         statusCode: 400,
       });
     });
+
+    it('transforms a ResponseError returned by the elasticsearch client', () => {
+      const error: errors.ResponseError = {
+        name: 'ResponseError',
+        message: 'illegal_argument_exception',
+        headers: {},
+        body: {
+          error: {
+            type: 'illegal_argument_exception',
+            reason: 'detailed explanation',
+          },
+        },
+        meta: ({} as unknown) as errors.ResponseError['meta'],
+        statusCode: 400,
+      };
+      const transformed = transformError(error);
+
+      expect(transformed).toEqual({
+        message: 'illegal_argument_exception: detailed explanation',
+        statusCode: 400,
+      });
+    });
   });
 
   describe('transformBulkError', () => {
     test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom('some boom message', { statusCode: 400 });
+      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
       const transformed = transformBulkError('rule-1', boom);
       const expected: BulkError = {
         rule_id: 'rule-1',
@@ -229,7 +252,7 @@ describe('utils', () => {
 
   describe('transformImportError', () => {
     test('returns transformed object if it is a boom object', () => {
-      const boom = new Boom('some boom message', { statusCode: 400 });
+      const boom = new Boom.Boom('some boom message', { statusCode: 400 });
       const transformed = transformImportError('rule-1', boom, {
         success_count: 1,
         success: false,

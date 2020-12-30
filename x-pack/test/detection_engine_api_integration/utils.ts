@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { KbnClient } from '@kbn/dev-utils';
 import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
@@ -25,6 +26,7 @@ import {
   ExceptionListSchema,
 } from '../../plugins/lists/common';
 import { Signal } from '../../plugins/security_solution/server/lib/detection_engine/signals/types';
+import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {
   Status,
   SignalIds,
@@ -114,6 +116,25 @@ export const getRuleForSignalTesting = (
   index,
   type: 'query',
   query: '*:*',
+  from: '1900-01-01T00:00:00.000Z',
+});
+
+export const getRuleForSignalTestingWithTimestampOverride = (
+  index: string[],
+  ruleId = 'rule-1',
+  enabled = true,
+  timestampOverride = 'event.ingested'
+): QueryCreateSchema => ({
+  name: 'Signal Testing Query',
+  description: 'Tests a simple query',
+  enabled,
+  risk_score: 1,
+  rule_id: ruleId,
+  severity: 'high',
+  index,
+  type: 'query',
+  query: '*:*',
+  timestamp_override: timestampOverride,
   from: '1900-01-01T00:00:00.000Z',
 });
 
@@ -862,21 +883,22 @@ export const getRule = async (
 };
 
 /**
- * Waits for the rule in find status to be succeeded before continuing
+ * Waits for the rule in find status to be 'succeeded'
+ * or the provided status, before continuing
  * @param supertest Deps
  */
-export const waitForRuleSuccess = async (
+export const waitForRuleSuccessOrStatus = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  id: string
+  id: string,
+  status: 'succeeded' | 'failed' | 'partial failure' = 'succeeded'
 ): Promise<void> => {
-  // wait for Task Manager to finish executing the rule
   await waitFor(async () => {
     const { body } = await supertest
       .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
       .set('kbn-xsrf', 'true')
       .send({ ids: [id] })
       .expect(200);
-    return body[id]?.current_status?.status === 'succeeded';
+    return body[id]?.current_status?.status === status;
   }, 'waitForRuleSuccess');
 };
 
@@ -1039,4 +1061,44 @@ export const createRuleWithExceptionEntries = async (
     .expect(200);
 
   return ruleResponse;
+};
+
+export const getIndexNameFromLoad = (loadResponse: Record<string, unknown>): string => {
+  const indexNames = Object.keys(loadResponse);
+  if (indexNames.length > 1) {
+    throw new Error(
+      `expected load response to contain one index, but contained multiple: [${indexNames}]`
+    );
+  }
+  return indexNames[0];
+};
+
+/**
+ * Waits for the given index to contain documents
+ *
+ * @param esClient elasticsearch {@link Client}
+ * @param index name of the index to query
+ */
+export const waitForIndexToPopulate = async (es: Client, index: string): Promise<void> => {
+  await waitFor(async () => {
+    const response = await es.count<{ count: number }>({ index });
+    return response.body.count > 0;
+  }, `waitForIndexToPopulate: ${index}`);
+};
+
+export const deleteMigrations = async ({
+  ids,
+  kbnClient,
+}: {
+  ids: string[];
+  kbnClient: KbnClient;
+}): Promise<void> => {
+  await Promise.all(
+    ids.map((id) =>
+      kbnClient.savedObjects.delete({
+        id,
+        type: signalsMigrationType,
+      })
+    )
+  );
 };

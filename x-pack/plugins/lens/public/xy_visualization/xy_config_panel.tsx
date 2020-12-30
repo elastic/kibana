@@ -94,6 +94,7 @@ const valueLabelsOptions: Array<{
   id: string;
   value: 'hide' | 'inside' | 'outside';
   label: string;
+  'data-test-subj': string;
 }> = [
   {
     id: `value_labels_hide`,
@@ -101,6 +102,7 @@ const valueLabelsOptions: Array<{
     label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.auto', {
       defaultMessage: 'Hide',
     }),
+    'data-test-subj': 'lnsXY_valueLabels_hide',
   },
   {
     id: `value_labels_inside`,
@@ -108,6 +110,7 @@ const valueLabelsOptions: Array<{
     label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.inside', {
       defaultMessage: 'Show',
     }),
+    'data-test-subj': 'lnsXY_valueLabels_inside',
   },
 ];
 
@@ -152,6 +155,28 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
       />
     </EuiFormRow>
   );
+}
+
+function getValueLabelDisableReason({
+  isAreaPercentage,
+  isHistogramSeries,
+}: {
+  isAreaPercentage: boolean;
+  isHistogramSeries: boolean;
+}): string {
+  if (isHistogramSeries) {
+    return i18n.translate('xpack.lens.xyChart.valuesHistogramDisabledHelpText', {
+      defaultMessage: 'This setting cannot be changed on histograms.',
+    });
+  }
+  if (isAreaPercentage) {
+    return i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
+      defaultMessage: 'This setting cannot be changed on percentage area charts.',
+    });
+  }
+  return i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
+    defaultMessage: 'This setting cannot be changed on stacked or percentage bar charts',
+  });
 }
 
 export function XyToolbar(props: VisualizationToolbarProps<State>) {
@@ -246,20 +271,17 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
   const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
   const isFittingEnabled = hasNonBarSeries;
 
+  const valueLabelsDisabledReason = getValueLabelDisableReason({
+    isAreaPercentage,
+    isHistogramSeries,
+  });
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
           <TooltipWrapper
-            tooltipContent={
-              isAreaPercentage
-                ? i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
-                    defaultMessage: 'This setting cannot be changed on percentage area charts.',
-                  })
-                : i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
-                    defaultMessage: 'This setting cannot be changed on histograms.',
-                  })
-            }
+            tooltipContent={valueLabelsDisabledReason}
             condition={!isValueLabelsEnabled && !isFittingEnabled}
           >
             <ToolbarPopover
@@ -494,6 +516,7 @@ export function DimensionEditor(
           legend={i18n.translate('xpack.lens.xyChart.axisSide.label', {
             defaultMessage: 'Axis side',
           })}
+          data-test-subj="lnsXY_axisSide_groups"
           name="axisSide"
           buttonSize="compressed"
           options={[
@@ -502,6 +525,7 @@ export function DimensionEditor(
               label: i18n.translate('xpack.lens.xyChart.axisSide.auto', {
                 defaultMessage: 'Auto',
               }),
+              'data-test-subj': 'lnsXY_axisSide_groups_auto',
             },
             {
               id: `${idPrefix}left`,
@@ -512,6 +536,7 @@ export function DimensionEditor(
                 : i18n.translate('xpack.lens.xyChart.axisSide.left', {
                     defaultMessage: 'Left',
                   }),
+              'data-test-subj': 'lnsXY_axisSide_groups_left',
             },
             {
               id: `${idPrefix}right`,
@@ -522,6 +547,7 @@ export function DimensionEditor(
                 : i18n.translate('xpack.lens.xyChart.axisSide.right', {
                     defaultMessage: 'Right',
                   }),
+              'data-test-subj': 'lnsXY_axisSide_groups_right',
             },
           ]}
           idSelected={`${idPrefix}${axisMode}`}

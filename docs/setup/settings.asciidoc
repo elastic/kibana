@@ -192,7 +192,7 @@ In addition to this setting, trusted certificates may be specified via
 <<elasticsearch-ssl-truststore-path, `elasticsearch.ssl.truststore.path`>>. If the trust store
 has no password, leave this as blank. If the trust store has an empty password, set this to `""`.
 
-| `elasticsearch.ssl.verificationMode:`
+|[[elasticsearch-ssl-verificationMode]] `elasticsearch.ssl.verificationMode:`
  | Controls the verification of the server certificate that {kib} receives when
 making an outbound SSL/TLS connection to {es}. Valid values are `"full"`,
 `"certificate"`, and `"none"`. Using `"full"` performs hostname verification,
@@ -450,6 +450,15 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 | [[server-compression]] `server.compression.enabled:`
  | Set to `false` to disable HTTP compression for all responses. *Default: `true`*
 
+| `server.cors.enabled:`
+ | experimental[] Set to `true` to allow cross-origin API calls. *Default:* `false`
+
+| `server.cors.allowCredentials:`
+ | experimental[] Set to `true` to allow browser code to access response body whenever request performed with user credentials. *Default:* `false`
+
+| `server.cors.allowOrigin:`
+ | experimental[] List of origins permitted to access resources. You must specify explicit hostnames and not use `server.cors.allowOrigin: ["*"]` when `server.cors.allowCredentials: true`. *Default:* ["*"]
+
 | `server.compression.referrerWhitelist:`
  | Specifies an array of trusted hostnames, such as the {kib} host, or a reverse
 proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header.
@@ -517,7 +526,7 @@ users. If PKI authentication is enabled, this chain is also used by {kib} to ver
 
 In addition to this setting, trusted certificates may be specified via <<server-ssl-keystore-path, `server.ssl.keystore.path`>> and/or <<server-ssl-truststore-path, `server.ssl.truststore.path`>>.
 
-| `server.ssl.cipherSuites:`
+| [[server-ssl-cipherSuites]] `server.ssl.cipherSuites:`
  | Details on the format, and the valid options, are available via the
 https://www.openssl.org/docs/man1.1.1/man1/ciphers.html#CIPHER-LIST-FORMAT[OpenSSL cipher list format documentation].
 *Default: `TLS_AES_256_GCM_SHA384 TLS_CHACHA20_POLY1305_SHA256 TLS_AES_128_GCM_SHA256 ECDHE-RSA-AES128-GCM-SHA256, ECDHE-ECDSA-AES128-GCM-SHA256, ECDHE-RSA-AES256-GCM-SHA384, ECDHE-ECDSA-AES256-GCM-SHA384, DHE-RSA-AES128-GCM-SHA256, ECDHE-RSA-AES128-SHA256, DHE-RSA-AES128-SHA256, ECDHE-RSA-AES256-SHA384, DHE-RSA-AES256-SHA384, ECDHE-RSA-AES256-SHA256, DHE-RSA-AES256-SHA256, HIGH,!aNULL, !eNULL, !EXPORT, !DES, !RC4, !MD5, !PSK, !SRP, !CAMELLIA`*.
@@ -576,7 +585,7 @@ the trust store has no password, leave this unset. If the trust store has an emp
  | {kib} binds to this port and redirects
 all http requests to https over the port configured as <<server-port, `server.port`>>.
 
-| `server.ssl.supportedProtocols:`
+| [[server-ssl-supportedProtocols]] `server.ssl.supportedProtocols:`
  | An array of supported protocols with versions.
 Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: TLSv1.1, TLSv1.2, TLSv1.3*
 

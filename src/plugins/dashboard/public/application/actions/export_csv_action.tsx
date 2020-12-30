@@ -17,14 +17,15 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { Datatable } from 'src/plugins/expressions/public';
-import { FormatFactory } from '../../../../data/common/field_formats/utils';
-import { DataPublicPluginStart, exporters } from '../../../../data/public';
-import { downloadMultipleAs } from '../../../../share/public';
-import { Adapters, IEmbeddable } from '../../../../embeddable/public';
-import { ActionByType } from '../../../../ui_actions/public';
 import { CoreStart } from '../../../../../core/public';
+import { FormatFactory } from '../../../../data/common/field_formats/utils';
+
+import { DataPublicPluginStart, exporters } from '../../services/data';
+import { downloadMultipleAs } from '../../services/share';
+import { Adapters, IEmbeddable } from '../../services/embeddable';
+import { ActionByType } from '../../services/ui_actions';
+import { dashboardExportCsvAction } from '../../dashboard_strings';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
 
@@ -57,16 +58,14 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
   }
 
   public readonly getDisplayName = (context: ExportContext): string =>
-    i18n.translate('dashboard.actions.DownloadCreateDrilldownAction.displayName', {
-      defaultMessage: 'Download as CSV',
-    });
+    dashboardExportCsvAction.getDisplayName();
 
   public async isCompatible(context: ExportContext): Promise<boolean> {
     return !!this.hasDatatableContent(context.embeddable?.getInspectorAdapters?.());
   }
 
   private hasDatatableContent = (adapters: Adapters | undefined) => {
-    return Object.keys(adapters?.tables || {}).length > 0;
+    return Object.keys(adapters?.tables || {}).length > 0 && adapters!.tables.allowCsvExport;
   };
 
   private getFormatter = (): FormatFactory | undefined => {
@@ -77,7 +76,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
 
   private getDataTableContent = (adapters: Adapters | undefined) => {
     if (this.hasDatatableContent(adapters)) {
-      return adapters?.tables;
+      return adapters?.tables.tables;
     }
     return;
   };
@@ -99,12 +98,7 @@ export class ExportCSVAction implements ActionByType<typeof ACTION_EXPORT_CSV> {
           // skip empty datatables
           if (datatable) {
             const postFix = datatables.length > 1 ? `-${i + 1}` : '';
-            const untitledFilename = i18n.translate(
-              'dashboard.actions.downloadOptionsUnsavedFilename',
-              {
-                defaultMessage: 'unsaved',
-              }
-            );
+            const untitledFilename = dashboardExportCsvAction.getUntitledFilename();
 
             memo[`${context!.embeddable!.getTitle() || untitledFilename}${postFix}.csv`] = {
               content: exporters.datatableToCSV(datatable, {

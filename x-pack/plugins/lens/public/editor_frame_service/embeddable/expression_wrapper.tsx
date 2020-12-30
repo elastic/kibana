@@ -11,11 +11,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
+  ReactExpressionRendererProps,
 } from 'src/plugins/expressions/public';
 import { ExecutionContextSearch } from 'src/plugins/data/public';
-import { RenderMode } from 'src/plugins/expressions';
+import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import { getOriginalRequestErrorMessage } from '../error_helper';
-import { LensInspectorAdapters } from '../types';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -24,8 +24,13 @@ export interface ExpressionWrapperProps {
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
-  onData$: (data: unknown, inspectorAdapters?: LensInspectorAdapters | undefined) => void;
+  onData$: (
+    data: unknown,
+    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
+  ) => void;
   renderMode?: RenderMode;
+  syncColors?: boolean;
+  hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
 }
 
 export function ExpressionWrapper({
@@ -37,6 +42,8 @@ export function ExpressionWrapper({
   searchSessionId,
   onData$,
   renderMode,
+  syncColors,
+  hasCompatibleActions,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -65,6 +72,7 @@ export function ExpressionWrapper({
             searchSessionId={searchSessionId}
             onData$={onData$}
             renderMode={renderMode}
+            syncColors={syncColors}
             renderError={(errorMessage, error) => (
               <div data-test-subj="expression-renderer-error">
                 <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
@@ -80,6 +88,7 @@ export function ExpressionWrapper({
               </div>
             )}
             onEvent={handleEvent}
+            hasCompatibleActions={hasCompatibleActions}
           />
         </div>
       )}

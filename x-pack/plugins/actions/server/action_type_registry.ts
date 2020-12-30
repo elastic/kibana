@@ -177,7 +177,7 @@ export class ActionTypeRegistry {
       minimumLicenseRequired: actionType.minimumLicenseRequired,
       enabled: this.isActionTypeEnabled(actionTypeId),
       enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-      enabledInLicense: this.licenseState.isLicenseValidForActionType(actionType).isValid === true,
+      enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
     }));
   }
 }

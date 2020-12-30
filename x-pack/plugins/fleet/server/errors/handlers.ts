@@ -20,13 +20,14 @@ import {
   PackageNotFoundError,
   AgentPolicyNameExistsError,
   PackageUnsupportedMediaTypeError,
+  ConcurrentInstallOperationError,
 } from './index';
 
 type IngestErrorHandler = (
   params: IngestErrorHandlerParams
 ) => IKibanaResponse | Promise<IKibanaResponse>;
 interface IngestErrorHandlerParams {
-  error: IngestManagerError | Boom | Error;
+  error: IngestManagerError | Boom.Boom | Error;
   response: KibanaResponseFactory;
   request?: KibanaRequest;
   context?: RequestHandlerContext;
@@ -69,7 +70,9 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof PackageUnsupportedMediaTypeError) {
     return 415; // Unsupported Media Type
   }
-
+  if (error instanceof ConcurrentInstallOperationError) {
+    return 409; // Conflict
+  }
   return 400; // Bad Request
 };
 

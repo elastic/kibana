@@ -4,19 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { setMockActions } from '../../../__mocks__/kea.mock';
+
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 
+import { DocumentCreationFlyout } from '../document_creation';
 import { DocumentCreationButton } from './document_creation_button';
 
 describe('DocumentCreationButton', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  let wrapper: ShallowWrapper;
+  const showCreationModes = jest.fn();
+
+  beforeAll(() => {
+    setMockActions({ showCreationModes });
+    wrapper = shallow(<DocumentCreationButton />);
   });
 
-  it('should render', () => {
-    const wrapper = shallow(<DocumentCreationButton />);
+  it('renders', () => {
     expect(wrapper.find(EuiButton).length).toEqual(1);
+    expect(wrapper.find(DocumentCreationFlyout).length).toEqual(1);
+  });
+
+  it('opens the document creation modes modal on click', () => {
+    wrapper.find(EuiButton).simulate('click');
+    expect(showCreationModes).toHaveBeenCalled();
   });
 });

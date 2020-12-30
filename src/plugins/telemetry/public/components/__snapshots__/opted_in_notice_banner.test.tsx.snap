@@ -10,7 +10,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
     values={
       Object {
         "disableLink": <EuiLink
-          href="management/kibana/settings"
+          href="/app/management/kibana/settings"
           onClick={[Function]}
         >
           <FormattedMessage

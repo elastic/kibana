@@ -17,18 +17,12 @@
  * under the License.
  */
 
-import { Query, Filter } from 'src/plugins/data/public';
 import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/public';
-
-import { ViewMode } from './embeddable_plugin';
+import { Query, Filter } from './services/data';
+import { ViewMode } from './services/embeddable';
 
 import { SavedDashboardPanel } from '../common/types';
 export { SavedDashboardPanel };
-
-export interface DashboardCapabilities {
-  showWriteControls: boolean;
-  createNew: boolean;
-}
 
 // TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
 export type SavedObjectAttribute =
@@ -84,6 +78,7 @@ export interface DashboardAppState {
   options: {
     hidePanelTitles: boolean;
     useMargins: boolean;
+    syncColors?: boolean;
   };
   query: Query | string;
   filters: Filter[];

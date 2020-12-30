@@ -5,8 +5,8 @@
  */
 
 import expect from '@kbn/expect';
-import { isEmpty, pick } from 'lodash';
-import { PromiseReturnType } from '../../../../../plugins/observability/typings/common';
+import { isEmpty, pick, sortBy } from 'lodash';
+import { APIReturnType } from '../../../../../plugins/apm/public/services/rest/createCallApmApi';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import archives_metadata from '../../../common/archives_metadata';
 
@@ -43,11 +43,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       after(() => esArchiver.unload(archiveName));
 
       describe('and fetching a list of services', () => {
-        let response: PromiseReturnType<typeof supertest.get>;
+        let response: {
+          status: number;
+          body: APIReturnType<'GET /api/apm/services'>;
+        };
+
+        let sortedItems: typeof response.body.items;
+
         before(async () => {
           response = await supertest.get(
             `/api/apm/services?start=${start}&end=${end}&uiFilters=${uiFilters}`
           );
+          sortedItems = sortBy(response.body.items, 'serviceName');
         });
 
         it('the response is successful', () => {
@@ -63,16 +70,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns the correct service names', () => {
-          expectSnapshot(response.body.items.map((item: any) => item.serviceName)).toMatchInline(`
+          expectSnapshot(sortedItems.map((item) => item.serviceName)).toMatchInline(`
             Array [
               "kibana",
-              "opbeans-python",
-              "opbeans-node",
-              "opbeans-ruby",
-              "opbeans-go",
               "kibana-frontend",
               "opbeans-dotnet",
+              "opbeans-go",
               "opbeans-java",
+              "opbeans-node",
+              "opbeans-python",
+              "opbeans-ruby",
               "opbeans-rum",
             ]
           `);
@@ -80,7 +87,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         it('returns the correct metrics averages', () => {
           expectSnapshot(
-            response.body.items.map((item: any) =>
+            sortedItems.map((item) =>
               pick(
                 item,
                 'transactionErrorRate.value',
@@ -92,65 +99,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             Array [
               Object {
                 "avgResponseTime": Object {
-                  "value": 556200.153101878,
+                  "value": 420419.34550767,
                 },
                 "transactionErrorRate": Object {
                   "value": 0,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 117.133333333333,
+                  "value": 45.6333333333333,
                 },
               },
               Object {
                 "avgResponseTime": Object {
-                  "value": 217138.013645224,
+                  "value": 2382833.33333333,
                 },
                 "transactionErrorRate": Object {
-                  "value": 0.315789473684211,
+                  "value": null,
                 },
                 "transactionsPerMinute": Object {
-                  "value": 17.1,
-                },
-              },
-              Object {
-                "avgResponseTime": Object {
-                  "value": 563605.417040359,
-                },
-                "transactionErrorRate": Object {
-                  "value": 0.0210526315789474,
-                },
-                "transactionsPerMinute": Object {
-                  "value": 7.43333333333333,
-                },
-              },
-              Object {
-                "avgResponseTime": Object {
-                  "value": 70518.9328358209,
-                },
-                "transactionErrorRate": Object {
-                  "value": 0.0373134328358209,
-                },
-                "transactionsPerMinute": Object {
-                  "value": 4.46666666666667,
-                },
-              },
-              Object {
-                "avgResponseTime": Object {
-                  "value": 27946.1484375,
-                },
-                "transactionErrorRate": Object {
-                  "value": 0.015625,
-                },
-                "transactionsPerMinute": Object {
-                  "value": 4.26666666666667,
-                },
-              },
-              Object {
-                "avgResponseTime": Object {
-                  "value": 2629229.16666667,
-                },
-                "transactionsPerMinute": Object {
-                  "value": 3.2,
+                  "value": 0.2,
                 },
               },
               Object {
@@ -166,6 +132,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
               Object {
                 "avgResponseTime": Object {
+                  "value": 27946.1484375,
+                },
+                "transactionErrorRate": Object {
+                  "value": 0.015625,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 4.26666666666667,
+                },
+              },
+              Object {
+                "avgResponseTime": Object {
                   "value": 237339.813333333,
                 },
                 "transactionErrorRate": Object {
@@ -177,7 +154,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
               Object {
                 "avgResponseTime": Object {
+                  "value": 24920.1052631579,
+                },
+                "transactionErrorRate": Object {
+                  "value": 0.0210526315789474,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 3.16666666666667,
+                },
+              },
+              Object {
+                "avgResponseTime": Object {
+                  "value": 29542.6607142857,
+                },
+                "transactionErrorRate": Object {
+                  "value": 0.0357142857142857,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 1.86666666666667,
+                },
+              },
+              Object {
+                "avgResponseTime": Object {
+                  "value": 70518.9328358209,
+                },
+                "transactionErrorRate": Object {
+                  "value": 0.0373134328358209,
+                },
+                "transactionsPerMinute": Object {
+                  "value": 4.46666666666667,
+                },
+              },
+              Object {
+                "avgResponseTime": Object {
                   "value": 2319812.5,
+                },
+                "transactionErrorRate": Object {
+                  "value": null,
                 },
                 "transactionsPerMinute": Object {
                   "value": 0.533333333333333,
@@ -188,29 +201,28 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns environments', () => {
-          expectSnapshot(response.body.items.map((item: any) => item.environments ?? []))
-            .toMatchInline(`
+          expectSnapshot(sortedItems.map((item) => item.environments ?? [])).toMatchInline(`
             Array [
               Array [
                 "production",
               ],
-              Array [],
+              Array [
+                "production",
+              ],
+              Array [
+                "production",
+              ],
+              Array [
+                "testing",
+              ],
+              Array [
+                "production",
+              ],
               Array [
                 "testing",
               ],
               Array [],
-              Array [
-                "testing",
-              ],
-              Array [
-                "production",
-              ],
-              Array [
-                "production",
-              ],
-              Array [
-                "production",
-              ],
+              Array [],
               Array [
                 "testing",
               ],
@@ -222,22 +234,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           // RUM transactions don't have event.outcome set,
           // so they should not have an error rate
 
-          const rumServices = response.body.items.filter(
-            (item: any) => item.agentName === 'rum-js'
-          );
+          const rumServices = sortedItems.filter((item) => item.agentName === 'rum-js');
 
           expect(rumServices.length).to.be.greaterThan(0);
 
-          expect(rumServices.every((item: any) => isEmpty(item.transactionErrorRate?.value)));
+          expect(rumServices.every((item) => isEmpty(item.transactionErrorRate?.value)));
         });
 
         it('non-RUM services all report transaction error rates', () => {
-          const nonRumServices = response.body.items.filter(
-            (item: any) => item.agentName !== 'rum-js'
-          );
+          const nonRumServices = sortedItems.filter((item) => item.agentName !== 'rum-js');
 
           expect(
-            nonRumServices.every((item: any) => {
+            nonRumServices.every((item) => {
               return (
                 typeof item.transactionErrorRate?.value === 'number' &&
                 item.transactionErrorRate.timeseries.length > 0

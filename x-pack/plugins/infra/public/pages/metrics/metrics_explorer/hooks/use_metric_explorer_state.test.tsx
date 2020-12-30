@@ -15,6 +15,11 @@ import {
   createSeries,
 } from '../../../../utils/fixtures/metrics_explorer';
 
+jest.mock('../../../../hooks/use_kibana_timefilter_time', () => ({
+  useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
+  useSyncKibanaTimeFilterTime: () => [() => {}],
+}));
+
 const renderUseMetricsExplorerStateHook = () =>
   renderHook((props) => useMetricsExplorerState(props.source, props.derivedIndexPattern), {
     initialProps: { source, derivedIndexPattern },

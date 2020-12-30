@@ -22,6 +22,7 @@ export type FieldGroups = Record<
     showInAccordion: boolean;
     isInitiallyOpen: boolean;
     title: string;
+    helpText?: string;
     isAffectedByGlobalFilter: boolean;
     isAffectedByTimeFilter: boolean;
     hideDetails?: boolean;
@@ -150,6 +151,7 @@ export function FieldList({
                 key={key}
                 id={`lnsIndexPattern${key}`}
                 label={fieldGroup.title}
+                helpTooltip={fieldGroup.helpText}
                 exists={exists}
                 hideDetails={fieldGroup.hideDetails}
                 hasLoaded={!!hasSyncedExistingFields}

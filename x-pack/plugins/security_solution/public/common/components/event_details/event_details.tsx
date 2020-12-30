@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { EuiTabbedContent, EuiTabbedContentTab, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -13,19 +13,24 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/ti
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import * as i18n from './translations';
+import { SummaryView } from './summary_view';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
-export type View = EventsViewType.tableView | EventsViewType.jsonView;
+export type View = EventsViewType.tableView | EventsViewType.jsonView | EventsViewType.summaryView;
 export enum EventsViewType {
   tableView = 'table-view',
   jsonView = 'json-view',
+  summaryView = 'summary-view',
 }
 
 interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem[];
   id: string;
+  isAlert: boolean;
   view: EventsViewType;
   onViewSelected: (selected: EventsViewType) => void;
+  timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
 }
 
@@ -49,14 +54,35 @@ const EventDetailsComponent: React.FC<Props> = ({
   id,
   view,
   onViewSelected,
+  timelineTabType,
   timelineId,
+  isAlert,
 }) => {
-  const handleTabClick = useCallback((e) => onViewSelected(e.id as EventsViewType), [
-    onViewSelected,
-  ]);
+  const handleTabClick = useCallback((e) => onViewSelected(e.id), [onViewSelected]);
 
+  const alerts = useMemo(
+    () => [
+      {
+        id: EventsViewType.summaryView,
+        name: i18n.SUMMARY,
+        content: (
+          <>
+            <EuiSpacer size="l" />
+            <SummaryView
+              data={data}
+              eventId={id}
+              browserFields={browserFields}
+              timelineId={timelineId}
+            />
+          </>
+        ),
+      },
+    ],
+    [data, id, browserFields, timelineId]
+  );
   const tabs: EuiTabbedContentTab[] = useMemo(
     () => [
+      ...(isAlert ? alerts : []),
       {
         id: EventsViewType.tableView,
         name: i18n.TABLE,
@@ -68,6 +94,7 @@ const EventDetailsComponent: React.FC<Props> = ({
               data={data}
               eventId={id}
               timelineId={timelineId}
+              timelineTabType={timelineTabType}
             />
           </>
         ),
@@ -83,10 +110,10 @@ const EventDetailsComponent: React.FC<Props> = ({
         ),
       },
     ],
-    [browserFields, data, id, timelineId]
+    [alerts, browserFields, data, id, isAlert, timelineId, timelineTabType]
   );
 
-  const selectedTab = view === EventsViewType.tableView ? tabs[0] : tabs[1];
+  const selectedTab = useMemo(() => tabs.find((t) => t.id === view) ?? tabs[0], [tabs, view]);
 
   return (
     <StyledEuiTabbedContent

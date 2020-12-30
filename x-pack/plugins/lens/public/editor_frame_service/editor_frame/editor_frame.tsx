@@ -43,6 +43,7 @@ export interface EditorFrameProps {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  searchSessionId: string;
   onChange: (arg: {
     filterableIndexPatterns: string[];
     doc: Document;
@@ -105,7 +106,7 @@ export function EditorFrame(props: EditorFrameProps) {
     dateRange: props.dateRange,
     query: props.query,
     filters: props.filters,
-
+    searchSessionId: props.searchSessionId,
     availablePalettes: props.palettes,
 
     addNewLayer() {
@@ -126,7 +127,7 @@ export function EditorFrame(props: EditorFrameProps) {
         dispatch({
           type: 'UPDATE_VISUALIZATION_STATE',
           visualizationId: activeVisualization.id,
-          newState: layerIds.reduce(
+          updater: layerIds.reduce(
             (acc, layerId) =>
               activeVisualization.removeLayer ? activeVisualization.removeLayer(acc, layerId) : acc,
             state.visualization.state
@@ -187,7 +188,7 @@ export function EditorFrame(props: EditorFrameProps) {
         dispatch({
           type: 'UPDATE_VISUALIZATION_STATE',
           visualizationId: activeVisualization.id,
-          newState: initialVisualizationState,
+          updater: initialVisualizationState,
         });
       }
     },

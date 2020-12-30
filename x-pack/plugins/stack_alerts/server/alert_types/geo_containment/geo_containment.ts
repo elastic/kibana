@@ -8,15 +8,16 @@ import _ from 'lodash';
 import { SearchResponse } from 'elasticsearch';
 import { Logger } from 'src/core/server';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
-import { AlertServices, AlertTypeState } from '../../../../alerts/server';
-import { ActionGroupId, GEO_CONTAINMENT_ID, GeoContainmentParams } from './alert_type';
+import { AlertServices } from '../../../../alerts/server';
+import {
+  ActionGroupId,
+  GEO_CONTAINMENT_ID,
+  GeoContainmentInstanceState,
+  GeoContainmentAlertType,
+  GeoContainmentInstanceContext,
+} from './alert_type';
 
-interface LatestEntityLocation {
-  location: number[];
-  shapeLocationId: string;
-  dateInShape: string | null;
-  docId: string;
-}
+export type LatestEntityLocation = GeoContainmentInstanceState;
 
 // Flatten agg results and get latest locations for each entity
 export function transformResults(
@@ -94,22 +95,42 @@ function getOffsetTime(delayOffsetWithUnits: string, oldTime: Date): Date {
   return adjustedDate;
 }
 
-export const getGeoContainmentExecutor = (log: Logger) =>
-  async function ({
-    previousStartedAt,
-    startedAt,
-    services,
-    params,
-    alertId,
-    state,
-  }: {
-    previousStartedAt: Date | null;
-    startedAt: Date;
-    services: AlertServices;
-    params: GeoContainmentParams;
-    alertId: string;
-    state: AlertTypeState;
-  }): Promise<AlertTypeState> {
+export function getActiveEntriesAndGenerateAlerts(
+  prevLocationMap: Record<string, LatestEntityLocation>,
+  currLocationMap: Map<string, LatestEntityLocation>,
+  alertInstanceFactory: AlertServices<
+    GeoContainmentInstanceState,
+    GeoContainmentInstanceContext
+  >['alertInstanceFactory'],
+  shapesIdsNamesMap: Record<string, unknown>,
+  currIntervalEndTime: Date
+) {
+  const allActiveEntriesMap: Map<string, LatestEntityLocation> = new Map([
+    ...Object.entries(prevLocationMap || {}),
+    ...currLocationMap,
+  ]);
+  allActiveEntriesMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
+    const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
+    const context = {
+      entityId: entityName,
+      entityDateTime: dateInShape ? new Date(dateInShape).toISOString() : null,
+      entityDocumentId: docId,
+      detectionDateTime: new Date(currIntervalEndTime).toISOString(),
+      entityLocation: `POINT (${location[0]} ${location[1]})`,
+      containingBoundaryId: shapeLocationId,
+      containingBoundaryName,
+    };
+    const alertInstanceId = `${entityName}-${containingBoundaryName}`;
+    if (shapeLocationId === OTHER_CATEGORY) {
+      allActiveEntriesMap.delete(entityName);
+    } else {
+      alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
+    }
+  });
+  return allActiveEntriesMap;
+}
+export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType['executor'] =>
+  async function ({ previousStartedAt, startedAt, services, params, alertId, state }) {
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
       : await getShapesFilters(
@@ -153,26 +174,17 @@ export const getGeoContainmentExecutor = (log: Logger) =>
       params.geoField
     );
 
-    // Cycle through new alert statuses and set active
-    currLocationMap.forEach(({ location, shapeLocationId, dateInShape, docId }, entityName) => {
-      const containingBoundaryName = shapesIdsNamesMap[shapeLocationId] || shapeLocationId;
-      const context = {
-        entityId: entityName,
-        entityDateTime: new Date(currIntervalEndTime).toISOString(),
-        entityDocumentId: docId,
-        detectionDateTime: new Date(currIntervalEndTime).toISOString(),
-        entityLocation: `POINT (${location[0]} ${location[1]})`,
-        containingBoundaryId: shapeLocationId,
-        containingBoundaryName,
-      };
-      const alertInstanceId = `${entityName}-${containingBoundaryName}`;
-      if (shapeLocationId !== OTHER_CATEGORY) {
-        services.alertInstanceFactory(alertInstanceId).scheduleActions(ActionGroupId, context);
-      }
-    });
+    const allActiveEntriesMap = getActiveEntriesAndGenerateAlerts(
+      state.prevLocationMap as Record<string, LatestEntityLocation>,
+      currLocationMap,
+      services.alertInstanceFactory,
+      shapesIdsNamesMap,
+      currIntervalEndTime
+    );
 
     return {
       shapesFilters,
       shapesIdsNamesMap,
+      prevLocationMap: Object.fromEntries(allActiveEntriesMap),
     };
   };

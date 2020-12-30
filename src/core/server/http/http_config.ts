@@ -27,7 +27,7 @@ import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
+const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
@@ -45,7 +45,28 @@ export const config = {
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
-      cors: schema.boolean({ defaultValue: false }),
+      cors: schema.object(
+        {
+          enabled: schema.boolean({ defaultValue: false }),
+          allowCredentials: schema.boolean({ defaultValue: false }),
+          allowOrigin: schema.oneOf(
+            [
+              schema.arrayOf(hostURISchema, { minSize: 1 }),
+              schema.arrayOf(schema.literal('*'), { minSize: 1, maxSize: 1 }),
+            ],
+            {
+              defaultValue: ['*'],
+            }
+          ),
+        },
+        {
+          validate(value) {
+            if (value.allowCredentials === true && value.allowOrigin.includes('*')) {
+              return 'Cannot specify wildcard origin "*" with "credentials: true". Please provide a list of allowed origins.';
+            }
+          },
+        }
+      ),
       customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
         defaultValue: {},
       }),
@@ -148,7 +169,11 @@ export class HttpConfig {
   public keepaliveTimeout: number;
   public socketTimeout: number;
   public port: number;
-  public cors: boolean | { origin: string[] };
+  public cors: {
+    enabled: boolean;
+    allowCredentials: boolean;
+    allowOrigin: string[];
+  };
   public customResponseHeaders: Record<string, string | string[]>;
   public maxPayload: ByteSizeValue;
   public basePath?: string;
@@ -170,7 +195,13 @@ export class HttpConfig {
     rawExternalUrlConfig: ExternalUrlConfig
   ) {
     this.autoListen = rawHttpConfig.autoListen;
-    this.host = rawHttpConfig.host;
+    // TODO: Consider dropping support for '0' in v8.0.0. This value is passed
+    // to hapi, which validates it. Prior to hapi v20, '0' was considered a
+    // valid host, however the validation logic internally in hapi was
+    // re-written for v20 and hapi no longer considers '0' a valid host. For
+    // details, see:
+    // https://github.com/elastic/kibana/issues/86716#issuecomment-749623781
+    this.host = rawHttpConfig.host === '0' ? '0.0.0.0' : rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
     this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders ?? {}).reduce(

@@ -58,6 +58,7 @@ import {
   updateTimelineGraphEventId,
   updateTitle,
   upsertColumn,
+  toggleModalSaveTimeline,
 } from './actions';
 import {
   addNewTimeline,
@@ -102,7 +103,7 @@ import {
 } from './helpers';
 
 import { TimelineState, EMPTY_TIMELINE_BY_ID } from './types';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineTabs } from '../../../../common/types/timeline';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
@@ -177,16 +178,22 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: addTimelineNoteToEvent({ id, noteId, eventId, timelineById: state.timelineById }),
   }))
-  .case(toggleExpandedEvent, (state, { timelineId, event }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [timelineId]: {
-        ...state.timelineById[timelineId],
-        expandedEvent: event,
+  .case(toggleExpandedEvent, (state, { tabType, timelineId, event = {} }) => {
+    const expandedTabType = tabType ?? TimelineTabs.query;
+    return {
+      ...state,
+      timelineById: {
+        ...state.timelineById,
+        [timelineId]: {
+          ...state.timelineById[timelineId],
+          expandedEvent: {
+            ...state.timelineById[timelineId].expandedEvent,
+            [expandedTabType]: event,
+          },
+        },
       },
-    },
-  }))
+    };
+  })
   .case(addProvider, (state, { id, provider }) => ({
     ...state,
     timelineById: addTimelineProvider({ id, provider, timelineById: state.timelineById }),
@@ -517,6 +524,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         activeTab,
+      },
+    },
+  }))
+  .case(toggleModalSaveTimeline, (state, { id, showModalSaveTimeline }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        showSaveModal: showModalSaveTimeline,
       },
     },
   }))
