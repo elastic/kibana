@@ -25,12 +25,16 @@ const create = () =>
     errors: SavedObjectsErrorHelpers,
     create: jest.fn(),
     bulkCreate: jest.fn(),
+    checkConflicts: jest.fn(),
     bulkUpdate: jest.fn(),
     delete: jest.fn(),
     bulkGet: jest.fn(),
     find: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
+    addToNamespaces: jest.fn(),
+    deleteFromNamespaces: jest.fn(),
+    removeReferencesTo: jest.fn(),
   } as unknown) as jest.Mocked<SavedObjectsClientContract>);
 
 export const savedObjectsClientMock = { create };

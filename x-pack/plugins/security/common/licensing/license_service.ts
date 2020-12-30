@@ -6,11 +6,13 @@
 
 import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ILicense } from '../../../licensing/common/types';
+import { ILicense, LicenseType } from '../../../licensing/common/types';
 import { SecurityLicenseFeatures } from './license_features';
 
 export interface SecurityLicense {
+  isLicenseAvailable(): boolean;
   isEnabled(): boolean;
+  getType(): LicenseType | undefined;
   getFeatures(): SecurityLicenseFeatures;
   features$: Observable<SecurityLicenseFeatures>;
 }
@@ -25,18 +27,22 @@ export class SecurityLicenseService {
   public setup({ license$ }: SetupDeps) {
     let rawLicense: Readonly<ILicense> | undefined;
 
-    this.licenseSubscription = license$.subscribe(nextRawLicense => {
+    this.licenseSubscription = license$.subscribe((nextRawLicense) => {
       rawLicense = nextRawLicense;
     });
 
     return {
       license: Object.freeze({
+        isLicenseAvailable: () => rawLicense?.isAvailable ?? false,
+
         isEnabled: () => this.isSecurityEnabledFromRawLicense(rawLicense),
+
+        getType: () => rawLicense?.type,
 
         getFeatures: () => this.calculateFeaturesFromRawLicense(rawLicense),
 
         features$: license$.pipe(
-          map(nextRawLicense => this.calculateFeaturesFromRawLicense(nextRawLicense))
+          map((nextRawLicense) => this.calculateFeaturesFromRawLicense(nextRawLicense))
         ),
       }),
     };
@@ -70,9 +76,14 @@ export class SecurityLicenseService {
         showLogin: true,
         allowLogin: false,
         showLinks: false,
+        showRoleMappingsManagement: false,
+        allowAccessAgreement: false,
+        allowAuditLogging: false,
+        allowLegacyAuditLogging: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
+        allowSubFeaturePrivileges: false,
         layout:
           rawLicense !== undefined && !rawLicense?.isAvailable
             ? 'error-xpack-unavailable'
@@ -85,18 +96,29 @@ export class SecurityLicenseService {
         showLogin: false,
         allowLogin: false,
         showLinks: false,
+        showRoleMappingsManagement: false,
+        allowAccessAgreement: false,
+        allowAuditLogging: false,
+        allowLegacyAuditLogging: false,
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
-        linksMessage: 'Access is denied because Security is disabled in Elasticsearch.',
+        allowSubFeaturePrivileges: false,
       };
     }
 
+    const isLicenseStandardOrBetter = rawLicense.hasAtLeast('standard');
+    const isLicenseGoldOrBetter = rawLicense.hasAtLeast('gold');
     const isLicensePlatinumOrBetter = rawLicense.hasAtLeast('platinum');
     return {
       showLogin: true,
       allowLogin: true,
       showLinks: true,
+      showRoleMappingsManagement: isLicenseGoldOrBetter,
+      allowAccessAgreement: isLicenseGoldOrBetter,
+      allowAuditLogging: isLicenseGoldOrBetter,
+      allowLegacyAuditLogging: isLicenseStandardOrBetter,
+      allowSubFeaturePrivileges: isLicenseGoldOrBetter,
       // Only platinum and trial licenses are compliant with field- and document-level security.
       allowRoleDocumentLevelSecurity: isLicensePlatinumOrBetter,
       allowRoleFieldLevelSecurity: isLicensePlatinumOrBetter,

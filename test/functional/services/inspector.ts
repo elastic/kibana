@@ -23,6 +23,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function InspectorProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
+  const browser = getService('browser');
   const renderable = getService('renderable');
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
@@ -90,7 +91,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
      * @param expectedData
      */
     public async expectTableData(expectedData: string[][]): Promise<void> {
-      await log.debug(`Inspector.expectTableData(${expectedData.join(',')})`);
+      log.debug(`Inspector.expectTableData(${expectedData.join(',')})`);
       const data = await this.getTableData();
       expect(data).to.eql(expectedData);
     }
@@ -119,24 +120,19 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
       const $ = await tableBody.parseDomContent();
       return $('tr')
         .toArray()
-        .map(tr => {
+        .map((tr) => {
           return $(tr)
             .find('td')
             .toArray()
-            .map(cell => {
+            .map((cell) => {
               // if this is an EUI table, filter down to the specific cell content
               // otherwise this will include mobile-specific header information
               const euiTableCellContent = $(cell).find('.euiTableCellContent');
 
               if (euiTableCellContent.length > 0) {
-                return $(cell)
-                  .find('.euiTableCellContent')
-                  .text()
-                  .trim();
+                return $(cell).find('.euiTableCellContent').text().trim();
               } else {
-                return $(cell)
-                  .text()
-                  .trim();
+                return $(cell).text().trim();
               }
             });
         });
@@ -155,11 +151,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
       const $ = await dataTableHeader.parseDomContent();
       return $('th span.euiTableCellContent__text')
         .toArray()
-        .map(cell =>
-          $(cell)
-            .text()
-            .trim()
-        );
+        .map((cell) => $(cell).text().trim());
     }
 
     /**
@@ -178,7 +170,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
      * @param column column index
      * @param row row index
      */
-    public async filterForTableCell(column: string, row: string): Promise<void> {
+    public async filterForTableCell(column: string | number, row: string | number): Promise<void> {
       await retry.try(async () => {
         const table = await testSubjects.find('inspectorTable');
         const cell = await table.findByCssSelector(
@@ -196,7 +188,7 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
      * @param column column index
      * @param row row index
      */
-    public async filterOutTableCell(column: string, row: string): Promise<void> {
+    public async filterOutTableCell(column: string | number, row: string | number): Promise<void> {
       await retry.try(async () => {
         const table = await testSubjects.find('inspectorTable');
         const cell = await table.findByCssSelector(
@@ -236,14 +228,35 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
         await testSubjects.click('inspectorRequestChooser');
         const menu = await testSubjects.find('inspectorRequestChooserMenuPanel');
         const requestNames = await menu.getVisibleText();
-        return requestNames
-          .trim()
-          .split('\n')
-          .join(',');
+        return requestNames.trim().split('\n').join(',');
       }
 
       const singleRequest = await testSubjects.find('inspectorRequestName');
       return await singleRequest.getVisibleText();
+    }
+
+    public getOpenRequestStatisticButton() {
+      return testSubjects.find('inspectorRequestDetailStatistics');
+    }
+
+    public getOpenRequestDetailRequestButton() {
+      return testSubjects.find('inspectorRequestDetailRequest');
+    }
+
+    public getOpenRequestDetailResponseButton() {
+      return testSubjects.find('inspectorRequestDetailResponse');
+    }
+
+    public async getCodeEditorValue() {
+      let request: string = '';
+
+      await retry.try(async () => {
+        request = await browser.execute(
+          () => (window as any).monaco.editor.getModels()[0].getValue() as string
+        );
+      });
+
+      return request;
     }
   }
 

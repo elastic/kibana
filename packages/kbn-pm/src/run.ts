@@ -17,10 +17,6 @@
  * under the License.
  */
 
-import chalk from 'chalk';
-import indentString from 'indent-string';
-import wrapAnsi from 'wrap-ansi';
-
 import { ICommand, ICommandConfig } from './commands';
 import { CliError } from './utils/errors';
 import { log } from './utils/log';
@@ -30,11 +26,7 @@ import { Kibana } from './utils/kibana';
 
 export async function runCommand(command: ICommand, config: Omit<ICommandConfig, 'kbn'>) {
   try {
-    log.write(
-      chalk.bold(
-        `Running [${chalk.green(command.name)}] command from [${chalk.yellow(config.rootPath)}]:\n`
-      )
-    );
+    log.debug(`Running [${command.name}] command from [${config.rootPath}]`);
 
     const kbn = await Kibana.loadFrom(config.rootPath);
     const projects = kbn.getFilteredProjects({
@@ -45,42 +37,39 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
     });
 
     if (projects.size === 0) {
-      log.write(
-        chalk.red(
-          `There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.\n`
-        )
+      log.error(
+        `There are no projects found. Double check project name(s) in '-i/--include' and '-e/--exclude' filters.`
       );
       return process.exit(1);
     }
 
     const projectGraph = buildProjectGraph(projects);
 
-    log.write(chalk.bold(`Found [${chalk.green(projects.size.toString())}] projects:\n`));
-    log.write(renderProjectsTree(config.rootPath, projects));
+    log.debug(`Found ${projects.size.toString()} projects`);
+    log.debug(renderProjectsTree(config.rootPath, projects));
 
     await command.run(projects, projectGraph, {
       ...config,
       kbn,
     });
-  } catch (e) {
-    log.write(chalk.bold.red(`\n[${command.name}] failed:\n`));
+  } catch (error) {
+    log.error(`[${command.name}] failed:`);
 
-    if (e instanceof CliError) {
-      const msg = chalk.red(`CliError: ${e.message}\n`);
-      log.write(wrapAnsi(msg, 80));
+    if (error instanceof CliError) {
+      log.error(error.message);
 
-      const keys = Object.keys(e.meta);
-      if (keys.length > 0) {
-        const metaOutput = keys.map(key => {
-          const value = e.meta[key];
-          return `${key}: ${value}`;
-        });
+      const metaOutput = Object.entries(error.meta)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('\n');
 
-        log.write('Additional debugging info:\n');
-        log.write(indentString(metaOutput.join('\n'), 3));
+      if (metaOutput) {
+        log.info('Additional debugging info:\n');
+        log.indent(2);
+        log.info(metaOutput);
+        log.indent(-2);
       }
     } else {
-      log.write(e.stack);
+      log.error(error);
     }
 
     process.exit(1);

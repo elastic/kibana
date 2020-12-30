@@ -18,10 +18,10 @@
  */
 
 import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualBuilder, timePicker } = getPageObjects(['visualBuilder', 'timePicker']);
   const retry = getService('retry');
 
@@ -30,11 +30,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
     await visualBuilder.setMarkdownDataVariable('', variableName);
     await visualBuilder.markdownSwitchSubTab('markdown');
     const rerenderedTable = await visualBuilder.getMarkdownTableVariables();
-    rerenderedTable.forEach(row => {
-      // eslint-disable-next-line no-unused-expressions
-      variableName === 'label'
-        ? expect(row.key).to.include.string(checkedValue)
-        : expect(row.key).to.not.include.string(checkedValue);
+    rerenderedTable.forEach((row) => {
+      if (variableName === 'label') {
+        expect(row.key).to.include.string(checkedValue);
+      } else {
+        expect(row.key).to.not.include.string(checkedValue);
+      }
     });
   }
 
@@ -91,9 +92,9 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
         await visualBuilder.enterMarkdown(TABLE);
         const text = await visualBuilder.getMarkdownText();
-        const tableValues = text.split('\n').map(row => row.split(' '))[1]; // [46, 46]
+        const tableValues = text.split('\n').map((row) => row.split(' '))[1]; // [46, 46]
 
-        tableValues.forEach(value => {
+        tableValues.forEach((value) => {
           expect(value).to.be.equal(DATA);
         });
       });
@@ -108,10 +109,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
 
         table.forEach((row, index) => {
           // exception: last index for variable is always: {{count.label}}
-          // eslint-disable-next-line no-unused-expressions
-          index === table.length - 1
-            ? expect(row.key).to.not.include.string(VARIABLE)
-            : expect(row.key).to.include.string(VARIABLE);
+          if (index === table.length - 1) {
+            expect(row.key).to.not.include.string(VARIABLE);
+          } else {
+            expect(row.key).to.include.string(VARIABLE);
+          }
         });
 
         await cleanupMarkdownData(VARIABLE, VARIABLE);
@@ -121,7 +123,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.markdownSwitchSubTab('data');
         await visualBuilder.cloneSeries();
 
-        retry.try(async function seriesCountCheck() {
+        await retry.try(async function seriesCountCheck() {
           const seriesLength = (await visualBuilder.getSeries()).length;
           expect(seriesLength).to.be.equal(2);
         });
@@ -131,7 +133,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.markdownSwitchSubTab('data');
         await visualBuilder.createNewAgg();
 
-        retry.try(async function aggregationCountCheck() {
+        await retry.try(async function aggregationCountCheck() {
           const aggregationLength = await visualBuilder.getAggregationCount();
           expect(aggregationLength).to.be.equal(2);
         });

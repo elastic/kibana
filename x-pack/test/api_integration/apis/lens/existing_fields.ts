@@ -8,8 +8,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const TEST_START_TIME = encodeURIComponent('2015-09-19T06:31:44.000');
-const TEST_END_TIME = encodeURIComponent('2015-09-23T18:31:44.000');
+const TEST_START_TIME = '2015-09-19T06:31:44.000';
+const TEST_END_TIME = '2015-09-23T18:31:44.000';
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
@@ -20,6 +20,8 @@ const fieldsWithData = [
   '@tags',
   '@tags.raw',
   '@timestamp',
+  '_id',
+  '_index',
   'agent',
   'agent.raw',
   'bytes',
@@ -57,6 +59,7 @@ const fieldsWithData = [
   'utc_time',
   'xss',
   'xss.raw',
+  'runtime_number',
 
   'relatedContent.article:modified_time',
   'relatedContent.article:published_time',
@@ -94,7 +97,63 @@ const fieldsWithData = [
   'relatedContent.url.raw',
 ];
 
-// eslint-disable-next-line import/no-default-export
+const metricBeatData = [
+  '@timestamp',
+  '_id',
+  '_index',
+  'agent.ephemeral_id',
+  'agent.ephemeral_id.keyword',
+  'agent.hostname',
+  'agent.hostname.keyword',
+  'agent.id',
+  'agent.id.keyword',
+  'agent.type',
+  'agent.type.keyword',
+  'agent.version',
+  'agent.version.keyword',
+  'ecs.version',
+  'ecs.version.keyword',
+  'event.dataset',
+  'event.dataset.keyword',
+  'event.duration',
+  'event.module',
+  'event.module.keyword',
+  'host.architecture',
+  'host.architecture.keyword',
+  'host.hostname',
+  'host.hostname.keyword',
+  'host.id',
+  'host.id.keyword',
+  'host.name',
+  'host.name.keyword',
+  'host.os.build',
+  'host.os.build.keyword',
+  'host.os.family',
+  'host.os.family.keyword',
+  'host.os.kernel',
+  'host.os.kernel.keyword',
+  'host.os.name',
+  'host.os.name.keyword',
+  'host.os.platform',
+  'host.os.platform.keyword',
+  'host.os.version',
+  'host.os.version.keyword',
+  'metricset.name',
+  'metricset.name.keyword',
+  'service.type',
+  'service.type.keyword',
+  'system.cpu.cores',
+  'system.cpu.idle.pct',
+  'system.cpu.iowait.pct',
+  'system.cpu.irq.pct',
+  'system.cpu.nice.pct',
+  'system.cpu.softirq.pct',
+  'system.cpu.steal.pct',
+  'system.cpu.system.pct',
+  'system.cpu.total.pct',
+  'system.cpu.user.pct',
+];
+
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -112,25 +171,89 @@ export default ({ getService }: FtrProviderContext) => {
     describe('existence', () => {
       it('should find which fields exist in the sample documents', async () => {
         const { body } = await supertest
-          .get(
-            `/api/lens/existing_fields/${encodeURIComponent(
-              'logstash-2015.09.22'
-            )}?fromDate=${TEST_START_TIME}&toDate=${TEST_END_TIME}`
-          )
+          .post(`/api/lens/existing_fields/${encodeURIComponent('logstash-*')}`)
           .set(COMMON_HEADERS)
+          .send({
+            dslQuery: {
+              bool: {
+                filter: [{ match_all: {} }],
+              },
+            },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+          })
           .expect(200);
 
-        expect(body.indexPatternTitle).to.eql('logstash-2015.09.22');
+        expect(body.indexPatternTitle).to.eql('logstash-*');
         expect(body.existingFieldNames.sort()).to.eql(fieldsWithData.sort());
       });
 
-      it('should throw a 404 for a non-existent index', async () => {
-        await supertest
-          .get(
-            `/api/lens/existing_fields/nadachance?fromDate=${TEST_START_TIME}&toDate=${TEST_END_TIME}`
-          )
+      it('should succeed for thousands of fields', async () => {
+        const { body } = await supertest
+          .post(`/api/lens/existing_fields/${encodeURIComponent('metricbeat-*')}`)
           .set(COMMON_HEADERS)
-          .expect(404);
+          .send({
+            dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+          })
+          .expect(200);
+
+        expect(body.indexPatternTitle).to.eql('metricbeat-*');
+        expect(body.existingFieldNames.sort()).to.eql(metricBeatData.sort());
+      });
+
+      it('should return fields filtered by query and filters', async () => {
+        const expectedFieldNames = [
+          '@message',
+          '@message.raw',
+          '@tags',
+          '@tags.raw',
+          '@timestamp',
+          '_id',
+          '_index',
+          'agent',
+          'agent.raw',
+          'bytes',
+          'clientip',
+          'extension',
+          'extension.raw',
+          'headings',
+          'headings.raw',
+          'host',
+          'host.raw',
+          'index',
+          'index.raw',
+          'referer',
+          'request',
+          'request.raw',
+          'response',
+          'response.raw',
+          'runtime_number',
+          'spaces',
+          'spaces.raw',
+          'type',
+          'url',
+          'url.raw',
+          'utc_time',
+          'xss',
+          'xss.raw',
+        ];
+
+        const { body } = await supertest
+          .post(`/api/lens/existing_fields/${encodeURIComponent('logstash-*')}`)
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: {
+              bool: {
+                filter: [{ match: { referer: 'https://www.taylorswift.com/' } }],
+              },
+            },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+          })
+          .expect(200);
+        expect(body.existingFieldNames.sort()).to.eql(expectedFieldNames.sort());
       });
     });
   });

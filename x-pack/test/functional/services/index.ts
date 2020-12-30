@@ -6,6 +6,7 @@
 
 import { services as kibanaFunctionalServices } from '../../../../test/functional/services';
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
+import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 
 import {
@@ -30,6 +31,7 @@ import {
   MonitoringKibanaInstancesProvider,
   MonitoringKibanaInstanceProvider,
   MonitoringKibanaSummaryStatusProvider,
+  MonitoringSetupModeProvider,
   // @ts-ignore not ts yet
 } from './monitoring';
 // @ts-ignore not ts yet
@@ -46,9 +48,14 @@ import { GrokDebuggerProvider } from './grok_debugger';
 import { UserMenuProvider } from './user_menu';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
-import { InfraLogStreamProvider } from './infra_log_stream';
+import { LogsUiProvider } from './logs_ui';
 import { MachineLearningProvider } from './ml';
 import { TransformProvider } from './transform';
+import {
+  DashboardDrilldownPanelActionsProvider,
+  DashboardDrilldownsManageProvider,
+  DashboardPanelTimeRangeProvider,
+} from './dashboard';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -57,6 +64,8 @@ export const services = {
   ...kibanaFunctionalServices,
   ...commonServices,
 
+  supertest: kibanaApiIntegrationServices.supertest,
+  supertestWithoutAuth: kibanaXPackApiIntegrationServices.supertestWithoutAuth,
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   monitoringNoData: MonitoringNoDataProvider,
   monitoringClusterList: MonitoringClusterListProvider,
@@ -79,6 +88,7 @@ export const services = {
   monitoringKibanaInstances: MonitoringKibanaInstancesProvider,
   monitoringKibanaInstance: MonitoringKibanaInstanceProvider,
   monitoringKibanaSummaryStatus: MonitoringKibanaSummaryStatusProvider,
+  monitoringSetupMode: MonitoringSetupModeProvider,
   pipelineList: PipelineListProvider,
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,
@@ -87,7 +97,10 @@ export const services = {
   userMenu: UserMenuProvider,
   uptime: UptimeProvider,
   infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
-  infraLogStream: InfraLogStreamProvider,
+  logsUi: LogsUiProvider,
   ml: MachineLearningProvider,
   transform: TransformProvider,
+  dashboardDrilldownPanelActions: DashboardDrilldownPanelActionsProvider,
+  dashboardDrilldownsManage: DashboardDrilldownsManageProvider,
+  dashboardPanelTimeRange: DashboardPanelTimeRangeProvider,
 };

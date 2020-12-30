@@ -1,0 +1,25 @@
+{
+  "id": "uiActionsEnhancedExamples",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["ui_actions_enhanced_examples"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "uiActions",
+    "uiActionsEnhanced",
+    "data",
+    "discover",
+    "dashboard",
+    "dashboardEnhanced",
+    "developerExamples"
+  ],
+  "optionalPlugins": [],
+  "requiredBundles": [
+    "dashboardEnhanced",
+    "embeddable",
+    "kibanaUtils",
+    "kibanaReact",
+    "share"
+  ]
+}

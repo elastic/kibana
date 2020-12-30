@@ -29,18 +29,18 @@ interface Props {
   [key: string]: any;
 }
 
-export const RadioGroupField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const RadioGroupField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
     <EuiFormRow
       label={field.label}
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
-      describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      describedByIds={idAria ? [idAria] : undefined}
+      {...rest}
     >
       <EuiRadioGroup
         idSelected={field.value as string}

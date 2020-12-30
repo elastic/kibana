@@ -17,7 +17,10 @@
  * under the License.
  */
 
-export interface Query {
+export * from './timefilter/types';
+
+// eslint-disable-next-line
+export type Query = {
   query: string | { [key: string]: any };
   language: string;
-}
+};

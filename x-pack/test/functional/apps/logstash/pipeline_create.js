@@ -5,8 +5,9 @@
  */
 
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const random = getService('random');
@@ -76,7 +77,7 @@ export default function({ getService, getPageObjects }) {
 
         await retry.try(async () => {
           const rows = await pipelineList.readRows();
-          const newRow = rows.find(row => row.id === id);
+          const newRow = rows.find((row) => row.id === id);
 
           expect(newRow).to.have.property('description', description);
         });
@@ -88,6 +89,7 @@ export default function({ getService, getPageObjects }) {
         await PageObjects.logstash.gotoPipelineList();
         await pipelineList.assertExists();
         const originalRows = await pipelineList.readRows();
+        const originalRowsWithoutTime = originalRows.map((row) => omit(row, 'lastModified'));
 
         await PageObjects.logstash.gotoNewPipelineEditor();
         await pipelineEditor.clickCancel();
@@ -95,7 +97,8 @@ export default function({ getService, getPageObjects }) {
         await retry.try(async () => {
           await pipelineList.assertExists();
           const currentRows = await pipelineList.readRows();
-          expect(originalRows).to.eql(currentRows);
+          const currentRowsWithoutTime = currentRows.map((row) => omit(row, 'lastModified'));
+          expect(originalRowsWithoutTime).to.eql(currentRowsWithoutTime);
         });
       });
     });

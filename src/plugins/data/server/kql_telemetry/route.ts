@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { CoreSetup, IRouter, Logger } from 'kibana/server';
+import { StartServicesAccessor, IRouter, Logger } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 
 export function registerKqlTelemetryRoute(
   router: IRouter,
-  savedObjects: CoreSetup['savedObjects'],
+  getStartServices: StartServicesAccessor,
   logger: Logger
 ) {
   router.post(
     {
-      path: '/api/kibana/kql_opt_in_telemetry',
+      path: '/api/kibana/kql_opt_in_stats',
       validate: {
         body: schema.object({
           opt_in: schema.boolean(),
@@ -35,6 +35,7 @@ export function registerKqlTelemetryRoute(
       },
     },
     async (context, request, response) => {
+      const [{ savedObjects }] = await getStartServices();
       const internalRepository = savedObjects.createScopedRepository(request);
 
       const {
@@ -44,7 +45,7 @@ export function registerKqlTelemetryRoute(
       const counterName = optIn ? 'optInCount' : 'optOutCount';
 
       try {
-        await internalRepository.incrementCounter('kql-telemetry', 'kql-telemetry', counterName);
+        await internalRepository.incrementCounter('kql-telemetry', 'kql-telemetry', [counterName]);
       } catch (error) {
         logger.warn(`Unable to increment counter: ${error}`);
         return response.customError({

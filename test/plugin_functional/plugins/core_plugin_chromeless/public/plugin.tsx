@@ -31,12 +31,6 @@ export class CorePluginChromelessPlugin
         return renderApp(context, params);
       },
     });
-
-    return {
-      getGreeting() {
-        return 'Hello from Plugin Chromeless!';
-      },
-    };
   }
 
   public start() {}

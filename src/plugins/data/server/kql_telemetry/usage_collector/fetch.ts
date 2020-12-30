@@ -18,29 +18,39 @@
  */
 
 import { get } from 'lodash';
-import { APICaller } from 'kibana/server';
-import { DEFAULT_QUERY_LANGUAGE } from '../../../common';
+import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
+import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
 
+export interface Usage {
+  optInCount: number;
+  optOutCount: number;
+  defaultQueryLanguage: string;
+}
+
 export function fetchProvider(index: string) {
-  return async (callCluster: APICaller) => {
-    const [response, config] = await Promise.all([
-      callCluster('get', {
-        index,
-        id: 'kql-telemetry:kql-telemetry',
-        ignore: [404],
-      }),
-      callCluster('search', {
-        index,
-        body: { query: { term: { type: 'config' } } },
-        ignore: [404],
-      }),
+  return async ({ esClient }: CollectorFetchContext): Promise<Usage> => {
+    const [{ body: response }, { body: config }] = await Promise.all([
+      esClient.get(
+        {
+          index,
+          id: 'kql-telemetry:kql-telemetry',
+        },
+        { ignore: [404] }
+      ),
+      esClient.search(
+        {
+          index,
+          body: { query: { term: { type: 'config' } } },
+        },
+        { ignore: [404] }
+      ),
     ]);
 
-    const queryLanguageConfigValue = get(
+    const queryLanguageConfigValue: string | null | undefined = get(
       config,
-      'hits.hits[0]._source.config.search:queryLanguage'
+      `hits.hits[0]._source.config.${UI_SETTINGS.SEARCH_QUERY_LANGUAGE}`
     );
 
     // search:queryLanguage can potentially be in four states in the .kibana index:

@@ -1,0 +1,625 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+<div>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+    responsive={false}
+    wrap={true}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h2>
+          title1
+        </h2>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    />
+  </EuiFlexGroup>
+  <EuiTabs>
+    <EuiTab
+      isSelected={true}
+      key="0"
+      onClick={[Function]}
+    >
+      OSX
+    </EuiTab>
+    <EuiTab
+      isSelected={false}
+      key="1"
+      onClick={[Function]}
+    >
+      Windows
+    </EuiTab>
+  </EuiTabs>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiSteps
+    firstStepNumber={1}
+    steps={
+      Array [
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 0,
+          "title": "step 1",
+        },
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do more stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 1,
+          "title": "step 2",
+        },
+      ]
+    }
+  />
+</div>
+`;
+
+exports[`statusCheckState checking status 1`] = `
+<div>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+    responsive={false}
+    wrap={true}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h2>
+          title1
+        </h2>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    />
+  </EuiFlexGroup>
+  <EuiTabs>
+    <EuiTab
+      isSelected={true}
+      key="0"
+      onClick={[Function]}
+    >
+      OSX
+    </EuiTab>
+    <EuiTab
+      isSelected={false}
+      key="1"
+      onClick={[Function]}
+    >
+      Windows
+    </EuiTab>
+  </EuiTabs>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiSteps
+    firstStepNumber={1}
+    steps={
+      Array [
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 0,
+          "title": "step 1",
+        },
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do more stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 1,
+          "title": "step 2",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem>
+                <Content
+                  text="custom status check description"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <EuiButton
+                  isLoading={true}
+                  onClick={[Function]}
+                >
+                  custom btn label
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer
+              size="s"
+            />
+          </React.Fragment>,
+          "key": "checkStatusStep",
+          "status": "incomplete",
+          "title": "custom title",
+        },
+      ]
+    }
+  />
+</div>
+`;
+
+exports[`statusCheckState failed status check - error 1`] = `
+<div>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+    responsive={false}
+    wrap={true}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h2>
+          title1
+        </h2>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    />
+  </EuiFlexGroup>
+  <EuiTabs>
+    <EuiTab
+      isSelected={true}
+      key="0"
+      onClick={[Function]}
+    >
+      OSX
+    </EuiTab>
+    <EuiTab
+      isSelected={false}
+      key="1"
+      onClick={[Function]}
+    >
+      Windows
+    </EuiTab>
+  </EuiTabs>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiSteps
+    firstStepNumber={1}
+    steps={
+      Array [
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 0,
+          "title": "step 1",
+        },
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do more stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 1,
+          "title": "step 2",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem>
+                <Content
+                  text="custom status check description"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <EuiButton
+                  isLoading={false}
+                  onClick={[Function]}
+                >
+                  custom btn label
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCallOut
+              color="warning"
+              title="custom error msg"
+            />
+          </React.Fragment>,
+          "key": "checkStatusStep",
+          "status": "danger",
+          "title": "custom title",
+        },
+      ]
+    }
+  />
+</div>
+`;
+
+exports[`statusCheckState failed status check - no data 1`] = `
+<div>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+    responsive={false}
+    wrap={true}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h2>
+          title1
+        </h2>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    />
+  </EuiFlexGroup>
+  <EuiTabs>
+    <EuiTab
+      isSelected={true}
+      key="0"
+      onClick={[Function]}
+    >
+      OSX
+    </EuiTab>
+    <EuiTab
+      isSelected={false}
+      key="1"
+      onClick={[Function]}
+    >
+      Windows
+    </EuiTab>
+  </EuiTabs>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiSteps
+    firstStepNumber={1}
+    steps={
+      Array [
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 0,
+          "title": "step 1",
+        },
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do more stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 1,
+          "title": "step 2",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem>
+                <Content
+                  text="custom status check description"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <EuiButton
+                  isLoading={false}
+                  onClick={[Function]}
+                >
+                  custom btn label
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCallOut
+              color="warning"
+              title="custom error msg"
+            />
+          </React.Fragment>,
+          "key": "checkStatusStep",
+          "status": "warning",
+          "title": "custom title",
+        },
+      ]
+    }
+  />
+</div>
+`;
+
+exports[`statusCheckState initial state - no check has been attempted 1`] = `
+<div>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+    responsive={false}
+    wrap={true}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h2>
+          title1
+        </h2>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    />
+  </EuiFlexGroup>
+  <EuiTabs>
+    <EuiTab
+      isSelected={true}
+      key="0"
+      onClick={[Function]}
+    >
+      OSX
+    </EuiTab>
+    <EuiTab
+      isSelected={false}
+      key="1"
+      onClick={[Function]}
+    >
+      Windows
+    </EuiTab>
+  </EuiTabs>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiSteps
+    firstStepNumber={1}
+    steps={
+      Array [
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 0,
+          "title": "step 1",
+        },
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do more stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 1,
+          "title": "step 2",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem>
+                <Content
+                  text="custom status check description"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <EuiButton
+                  isLoading={true}
+                  onClick={[Function]}
+                >
+                  custom btn label
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer
+              size="s"
+            />
+          </React.Fragment>,
+          "key": "checkStatusStep",
+          "status": "incomplete",
+          "title": "custom title",
+        },
+      ]
+    }
+  />
+</div>
+`;
+
+exports[`statusCheckState successful status check 1`] = `
+<div>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+    responsive={false}
+    wrap={true}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTitle
+        size="m"
+      >
+        <h2>
+          title1
+        </h2>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    />
+  </EuiFlexGroup>
+  <EuiTabs>
+    <EuiTab
+      isSelected={true}
+      key="0"
+      onClick={[Function]}
+    >
+      OSX
+    </EuiTab>
+    <EuiTab
+      isSelected={false}
+      key="1"
+      onClick={[Function]}
+    >
+      Windows
+    </EuiTab>
+  </EuiTabs>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiSteps
+    firstStepNumber={1}
+    steps={
+      Array [
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 0,
+          "title": "step 1",
+        },
+        Object {
+          "children": <Instruction
+            commands={
+              Array [
+                "do more stuff in command line",
+              ]
+            }
+            paramValues={Object {}}
+            replaceTemplateStrings={[Function]}
+          />,
+          "key": 1,
+          "title": "step 2",
+        },
+        Object {
+          "children": <React.Fragment>
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+            >
+              <EuiFlexItem>
+                <Content
+                  text="custom status check description"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={false}
+              >
+                <EuiButton
+                  isLoading={false}
+                  onClick={[Function]}
+                >
+                  custom btn label
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer
+              size="s"
+            />
+            <EuiCallOut
+              color="success"
+              title="custom success msg"
+            />
+          </React.Fragment>,
+          "key": "checkStatusStep",
+          "status": "complete",
+          "title": "custom title",
+        },
+      ]
+    }
+  />
+</div>
+`;

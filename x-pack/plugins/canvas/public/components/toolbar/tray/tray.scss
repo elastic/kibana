@@ -1,0 +1,10 @@
+.canvasTray {
+  @include euiBottomShadowFlat;
+  flex-direction: column;
+}
+
+.canvasTray__panel {
+  background-color: $euiFormBackgroundColor;
+  border-radius: 0;
+}
+

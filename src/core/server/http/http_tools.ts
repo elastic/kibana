@@ -16,19 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { readFileSync } from 'fs';
-import { Lifecycle, Request, ResponseToolkit, Server, ServerOptions, Util } from 'hapi';
-import Hoek from 'hoek';
-import { ServerOptions as TLSOptions } from 'https';
-import { ValidationError } from 'joi';
+import { Server } from '@hapi/hapi';
+import type {
+  Lifecycle,
+  Request,
+  ResponseToolkit,
+  RouteOptionsCors,
+  ServerOptions,
+  Util,
+} from '@hapi/hapi';
+import Hoek from '@hapi/hoek';
+import type { ServerOptions as TLSOptions } from 'https';
+import type { ValidationError } from 'joi';
+import uuid from 'uuid';
 import { HttpConfig } from './http_config';
 import { validateObject } from './prototype_pollution';
 
+const corsAllowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'];
 /**
  * Converts Kibana `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
  */
 export function getServerOptions(config: HttpConfig, { configureTLS = true } = {}) {
+  const cors: RouteOptionsCors | false = config.cors.enabled
+    ? {
+        credentials: config.cors.allowCredentials,
+        origin: config.cors.allowOrigin,
+        headers: corsAllowedHeaders,
+      }
+    : false;
   // Note that all connection options configured here should be exactly the same
   // as in the legacy platform server (see `src/legacy/server/http/index`). Any change
   // SHOULD BE applied in both places. The only exception is TLS-specific options,
@@ -37,7 +52,11 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
     host: config.host,
     port: config.port,
     routes: {
-      cors: config.cors,
+      cache: {
+        privacy: 'private',
+        otherwise: 'private, no-cache, no-store, must-revalidate',
+      },
+      cors,
       payload: {
         maxBytes: config.maxPayload.getValueInBytes(),
       },
@@ -50,7 +69,7 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
         // This is a default payload validation which applies to all LP routes which do not specify their own
         // `validate.payload` handler, in order to reduce the likelyhood of prototype pollution vulnerabilities.
         // (All NP routes are already required to specify their own validation in order to access the payload)
-        payload: value => Promise.resolve(validateObject(value)),
+        payload: (value) => Promise.resolve(validateObject(value)),
       },
     },
     state: {
@@ -66,14 +85,12 @@ export function getServerOptions(config: HttpConfig, { configureTLS = true } = {
     // TODO: Hapi types have a typo in `tls` property type definition: `https.RequestOptions` is used instead of
     // `https.ServerOptions`, and `honorCipherOrder` isn't presented in `https.RequestOptions`.
     const tlsOptions: TLSOptions = {
-      ca:
-        config.ssl.certificateAuthorities &&
-        config.ssl.certificateAuthorities.map(caFilePath => readFileSync(caFilePath)),
-      cert: readFileSync(ssl.certificate!),
+      ca: ssl.certificateAuthorities,
+      cert: ssl.certificate,
       ciphers: config.ssl.cipherSuites.join(':'),
       // We use the server's cipher order rather than the client's to prevent the BEAST attack.
       honorCipherOrder: true,
-      key: readFileSync(ssl.key!),
+      key: ssl.key,
       passphrase: ssl.keyPassphrase,
       secureOptions: ssl.getSecureOptions(),
       requestCert: ssl.requestCert,
@@ -103,7 +120,7 @@ export function createServer(serverOptions: ServerOptions, listenerOptions: List
 
   server.listener.keepAliveTimeout = listenerOptions.keepaliveTimeout;
   server.listener.setTimeout(listenerOptions.socketTimeout);
-  server.listener.on('timeout', socket => {
+  server.listener.on('timeout', (socket) => {
     socket.destroy();
   });
   server.listener.on('clientError', (err, socket) => {
@@ -154,7 +171,7 @@ export function defaultValidationErrorHandler(
     const validationError: HapiValidationError = err as HapiValidationError;
     const validationKeys: string[] = [];
 
-    validationError.details.forEach(detail => {
+    validationError.details.forEach((detail) => {
       if (detail.path.length > 0) {
         validationKeys.push(Hoek.escapeHtml(detail.path.join('.')));
       } else {
@@ -167,4 +184,13 @@ export function defaultValidationErrorHandler(
   }
 
   throw err;
+}
+
+export function getRequestId(request: Request, options: HttpConfig['requestId']): string {
+  return options.allowFromAnyIp ||
+    // socket may be undefined in integration tests that connect via the http listener directly
+    (request.raw.req.socket?.remoteAddress &&
+      options.ipAllowlist.includes(request.raw.req.socket.remoteAddress))
+    ? request.headers['x-opaque-id'] ?? uuid.v4()
+    : uuid.v4();
 }

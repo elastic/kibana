@@ -47,7 +47,7 @@ export const BannersList: React.FunctionComponent<Props> = ({ banners$ }) => {
 
   return (
     <div className="kbnGlobalBannerList">
-      {banners.map(banner => (
+      {banners.map((banner) => (
         <BannerItem key={banner.id} banner={banner} />
       ))}
     </div>
@@ -59,6 +59,11 @@ const BannerItem: React.FunctionComponent<{ banner: OverlayBanner }> = ({ banner
   useEffect(() => banner.mount(element.current!), [banner]); // Only unmount / remount if banner object changed.
 
   return (
-    <div data-test-priority={banner.priority} className="kbnGlobalBannerList__item" ref={element} />
+    <div
+      data-test-priority={banner.priority}
+      className="kbnGlobalBannerList__item"
+      ref={element}
+      data-test-subj="global-banner-item"
+    />
   );
 };

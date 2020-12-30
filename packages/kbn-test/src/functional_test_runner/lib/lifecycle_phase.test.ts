@@ -59,11 +59,17 @@ describe('with randomness', () => {
     );
 
     await phase.trigger();
+
+    // `phase.trigger()` uses `Math.random` to sort the internal array of
+    // handlers. But since the sorting algorithm used internally in
+    // `Array.prototype.sort` is not spec'ed, it can change between Node.js
+    // versions, and as a result the expected output below might not match if
+    // you up/downgrade Node.js.
     expect(order).toMatchInlineSnapshot(`
       Array [
-        "one",
         "three",
         "two",
+        "one",
       ]
     `);
   });
@@ -104,7 +110,7 @@ describe('without randomness', () => {
 
     const handler = jest.fn(async () => {
       order.push('handler start');
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       order.push('handler done');
     });
     phase.add(handler);
@@ -124,10 +130,10 @@ describe('without randomness', () => {
     const phase = new LifecyclePhase({ singular: true });
 
     const beforeNotifs: Array<Rx.Notification<unknown>> = [];
-    phase.before$.pipe(materialize()).subscribe(n => beforeNotifs.push(n));
+    phase.before$.pipe(materialize()).subscribe((n) => beforeNotifs.push(n));
 
     const afterNotifs: Array<Rx.Notification<unknown>> = [];
-    phase.after$.pipe(materialize()).subscribe(n => afterNotifs.push(n));
+    phase.after$.pipe(materialize()).subscribe((n) => afterNotifs.push(n));
 
     await phase.trigger();
     expect(beforeNotifs).toMatchInlineSnapshot(`

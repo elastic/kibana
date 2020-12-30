@@ -7,13 +7,13 @@
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 import { SessionTimeoutHttpInterceptor } from './session_timeout_http_interceptor';
-import { setup } from '../../../../../src/test_utils/public/http_test_setup';
+import { setup } from '../../../../../src/core/test_helpers/http_test_setup';
 import { createSessionTimeoutMock } from './session_timeout.mock';
 
 const mockCurrentUrl = (url: string) => window.history.pushState({}, '', url);
 
 const setupHttp = (basePath: string) => {
-  const { http } = setup(injectedMetadata => {
+  const { http } = setup((injectedMetadata) => {
     injectedMetadata.getBasePath.mockReturnValue(basePath);
   });
   return http;
@@ -58,7 +58,7 @@ describe('response', () => {
     http.intercept(interceptor);
     fetchMock.mock('*', 200);
 
-    await http.fetch('/foo-api', { headers: { 'kbn-system-api': 'true' } });
+    await http.fetch('/foo-api', { asSystemRequest: true });
 
     expect(sessionTimeoutMock.extend).not.toHaveBeenCalled();
   });
@@ -99,9 +99,9 @@ describe('responseError', () => {
     http.intercept(interceptor);
     fetchMock.mock('*', 401);
 
-    await expect(
-      http.fetch('/foo-api', { headers: { 'kbn-system-api': 'true' } })
-    ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized]`);
+    await expect(http.fetch('/foo-api', { asSystemRequest: true })).rejects.toMatchInlineSnapshot(
+      `[Error: Unauthorized]`
+    );
 
     expect(sessionTimeoutMock.extend).not.toHaveBeenCalled();
   });

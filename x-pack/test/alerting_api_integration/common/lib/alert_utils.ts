@@ -8,6 +8,7 @@ import { Space, User } from '../types';
 import { ObjectRemover } from './object_remover';
 import { getUrlPrefix } from './space_test_utils';
 import { ES_TEST_INDEX_NAME } from './es_test_index_tool';
+import { getTestAlertData } from './get_test_alert_data';
 
 export interface AlertUtilsOpts {
   user?: User;
@@ -22,6 +23,18 @@ export interface CreateAlertWithActionOpts {
   objectRemover?: ObjectRemover;
   overwrites?: Record<string, any>;
   reference: string;
+}
+export interface CreateNoopAlertOpts {
+  objectRemover?: ObjectRemover;
+  overwrites?: Record<string, any>;
+}
+
+interface UpdateAlwaysFiringAction {
+  alertId: string;
+  actionId: string | undefined;
+  reference: string;
+  user: User;
+  overwrites: Record<string, any>;
 }
 
 export class AlertUtils {
@@ -54,7 +67,7 @@ export class AlertUtils {
 
   public getEnableRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_enable`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}/_enable`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -64,7 +77,7 @@ export class AlertUtils {
 
   public getDisableRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_disable`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}/_disable`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -74,7 +87,7 @@ export class AlertUtils {
 
   public getMuteAllRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_mute_all`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}/_mute_all`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -84,7 +97,7 @@ export class AlertUtils {
 
   public getUnmuteAllRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_unmute_all`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}/_unmute_all`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -95,7 +108,9 @@ export class AlertUtils {
   public getMuteInstanceRequest(alertId: string, instanceId: string) {
     const request = this.supertestWithoutAuth
       .post(
-        `${getUrlPrefix(this.space.id)}/api/alert/${alertId}/alert_instance/${instanceId}/_mute`
+        `${getUrlPrefix(
+          this.space.id
+        )}/api/alerts/alert/${alertId}/alert_instance/${instanceId}/_mute`
       )
       .set('kbn-xsrf', 'foo');
     if (this.user) {
@@ -107,7 +122,9 @@ export class AlertUtils {
   public getUnmuteInstanceRequest(alertId: string, instanceId: string) {
     const request = this.supertestWithoutAuth
       .post(
-        `${getUrlPrefix(this.space.id)}/api/alert/${alertId}/alert_instance/${instanceId}/_unmute`
+        `${getUrlPrefix(
+          this.space.id
+        )}/api/alerts/alert/${alertId}/alert_instance/${instanceId}/_unmute`
       )
       .set('kbn-xsrf', 'foo');
     if (this.user) {
@@ -118,7 +135,7 @@ export class AlertUtils {
 
   public getUpdateApiKeyRequest(alertId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert/${alertId}/_update_api_key`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}/_update_api_key`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -171,40 +188,43 @@ export class AlertUtils {
     }
 
     let request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
     }
-    const response = await request.send({
-      enabled: true,
-      name: 'abc',
-      schedule: { interval: '1m' },
-      throttle: '1m',
-      tags: [],
-      alertTypeId: 'test.always-firing',
-      consumer: 'bar',
-      params: {
-        index: ES_TEST_INDEX_NAME,
-        reference,
-      },
-      actions: [
-        {
-          group: 'default',
-          id: this.indexRecordActionId,
-          params: {
-            index: ES_TEST_INDEX_NAME,
-            reference,
-            message:
-              'instanceContextValue: {{context.instanceContextValue}}, instanceStateValue: {{state.instanceStateValue}}',
-          },
-        },
-      ],
-      ...overwrites,
-    });
+    const alertBody = getDefaultAlwaysFiringAlertData(reference, actionId);
+    const response = await request.send({ ...alertBody, ...overwrites });
     if (response.statusCode === 200) {
-      objRemover.add(this.space.id, response.body.id, 'alert');
+      objRemover.add(this.space.id, response.body.id, 'alert', 'alerts');
     }
+    return response;
+  }
+
+  public async updateAlwaysFiringAction({
+    alertId,
+    actionId,
+    reference,
+    user,
+    overwrites = {},
+  }: UpdateAlwaysFiringAction) {
+    actionId = actionId || this.indexRecordActionId;
+
+    if (!actionId) {
+      throw new Error('actionId is required ');
+    }
+
+    const request = this.supertestWithoutAuth
+      .put(`${getUrlPrefix(this.space.id)}/api/alerts/alert/${alertId}`)
+      .set('kbn-xsrf', 'foo')
+      .auth(user.username, user.password);
+
+    const { alertTypeId, enabled, consumer, ...alertBody } = getDefaultAlwaysFiringAlertData(
+      reference,
+      actionId
+    );
+
+    const response = await request.send({ ...alertBody, ...overwrites });
     return response;
   }
 
@@ -225,7 +245,7 @@ export class AlertUtils {
     }
 
     let request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alert`)
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert`)
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
@@ -237,7 +257,7 @@ export class AlertUtils {
       throttle: '30s',
       tags: [],
       alertTypeId: 'test.failing',
-      consumer: 'bar',
+      consumer: 'alertsFixture',
       params: {
         index: ES_TEST_INDEX_NAME,
         reference,
@@ -246,8 +266,94 @@ export class AlertUtils {
       ...overwrites,
     });
     if (response.statusCode === 200) {
-      objRemover.add(this.space.id, response.body.id, 'alert');
+      objRemover.add(this.space.id, response.body.id, 'alert', 'alerts');
     }
     return response;
   }
+
+  public replaceApiKeys(id: string) {
+    let request = this.supertestWithoutAuth
+      .put(`/api/alerts_fixture/${id}/replace_api_key`)
+      .set('kbn-xsrf', 'foo');
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+    return request.send({ spaceId: this.space.id });
+  }
+
+  public async createNoopAlert({ objectRemover, overwrites = {} }: CreateNoopAlertOpts) {
+    const objRemover = objectRemover || this.objectRemover;
+
+    if (!objRemover) {
+      throw new Error('objectRemover is required');
+    }
+
+    let request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/api/alerts/alert`)
+      .set('kbn-xsrf', 'foo');
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+    const response = await request.send({
+      ...getTestAlertData(),
+      ...overwrites,
+    });
+    if (response.statusCode === 200) {
+      objRemover.add(this.space.id, response.body.id, 'alert', 'alerts');
+    }
+    return response;
+  }
+}
+
+export function getConsumerUnauthorizedErrorMessage(
+  operation: string,
+  alertType: string,
+  consumer: string
+) {
+  return `Unauthorized to ${operation} a "${alertType}" alert for "${consumer}"`;
+}
+
+export function getProducerUnauthorizedErrorMessage(
+  operation: string,
+  alertType: string,
+  producer: string
+) {
+  return `Unauthorized to ${operation} a "${alertType}" alert by "${producer}"`;
+}
+
+function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {
+  const messageTemplate = `
+alertId: {{alertId}},
+alertName: {{alertName}},
+spaceId: {{spaceId}},
+tags: {{tags}},
+alertInstanceId: {{alertInstanceId}},
+alertActionGroup: {{alertActionGroup}},
+instanceContextValue: {{context.instanceContextValue}},
+instanceStateValue: {{state.instanceStateValue}}
+`.trim();
+  return {
+    enabled: true,
+    name: 'abc',
+    schedule: { interval: '1m' },
+    throttle: '1m',
+    tags: ['tag-A', 'tag-B'],
+    alertTypeId: 'test.always-firing',
+    consumer: 'alertsFixture',
+    params: {
+      index: ES_TEST_INDEX_NAME,
+      reference,
+    },
+    actions: [
+      {
+        group: 'default',
+        id: actionId,
+        params: {
+          index: ES_TEST_INDEX_NAME,
+          reference,
+          message: messageTemplate,
+        },
+      },
+    ],
+  };
 }

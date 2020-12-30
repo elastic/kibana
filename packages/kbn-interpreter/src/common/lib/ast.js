@@ -55,7 +55,7 @@ function getExpressionArgs(block, level = 0) {
 
   const argKeys = Object.keys(args);
   const MAX_LINE_LENGTH = 80; // length before wrapping arguments
-  return argKeys.map(argKey =>
+  return argKeys.map((argKey) =>
     args[argKey].reduce((acc, arg) => {
       const argString = getArgumentString(arg, argKey, level);
       const lineLength = acc.split('\n').pop().length;
@@ -86,7 +86,7 @@ function getExpression(chain, level = 0) {
   const separator = level > 0 ? ' | ' : '\n| ';
 
   return chain
-    .map(chainObj => {
+    .map((chainObj) => {
       const type = getType(chainObj);
 
       if (type === 'function') {

@@ -32,6 +32,24 @@
   font-style: italic;
 }
 
+.globalFilterItem-isError, .globalFilterItem-isWarning {
+  .globalFilterLabel__value {
+    font-weight: $euiFontWeightBold;
+  }
+}
+
+.globalFilterItem-isError {
+  .globalFilterLabel__value {
+    color: makeHighContrastColor($euiColorDangerText, $euiColorLightShade);
+  }
+}
+
+.globalFilterItem-isWarning {
+  .globalFilterLabel__value {
+    color: makeHighContrastColor($euiColorWarningText, $euiColorLightShade);
+  }
+}
+
 .globalFilterItem-isPinned {
   position: relative;
 

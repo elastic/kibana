@@ -40,7 +40,7 @@ export const split = (delimiter: string = '\n') => (
   let startingText = '';
 
   in$.subscribe(
-    chunk => {
+    (chunk) => {
       const messages = (startingText + chunk).split(delimiter);
 
       // We don't want to send the last message here, since it may or

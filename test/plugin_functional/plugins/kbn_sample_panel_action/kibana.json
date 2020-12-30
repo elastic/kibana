@@ -1,0 +1,10 @@
+{
+  "id": "kbn_sample_panel_action",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["kbn_sample_panel_action"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["uiActions", "embeddable"],
+  "requiredBundles": ["kibanaReact"]
+}

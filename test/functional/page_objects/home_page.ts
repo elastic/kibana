@@ -19,10 +19,13 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function HomePageProvider({ getService }: FtrProviderContext) {
+export function HomePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
+  const deployment = getService('deployment');
+  const PageObjects = getPageObjects(['common']);
+  let isOss = true;
 
   class HomePage {
     async clickSynopsis(title: string) {
@@ -38,15 +41,32 @@ export function HomePageProvider({ getService }: FtrProviderContext) {
     }
 
     async isSampleDataSetInstalled(id: string) {
-      return await testSubjects.exists(`removeSampleDataSet${id}`);
+      return !(await testSubjects.exists(`addSampleDataSet${id}`));
+    }
+
+    async getVisibileSolutions() {
+      const solutionPanels = await testSubjects.findAll('~homSolutionPanel', 2000);
+      const panelAttributes = await Promise.all(
+        solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
+      );
+      return panelAttributes.map((attributeValue) => attributeValue.split('homSolutionPanel_')[1]);
     }
 
     async addSampleDataSet(id: string) {
-      await testSubjects.click(`addSampleDataSet${id}`);
-      await this._waitForSampleDataLoadingAction(id);
+      const isInstalled = await this.isSampleDataSetInstalled(id);
+      if (!isInstalled) {
+        await testSubjects.click(`addSampleDataSet${id}`);
+        await this._waitForSampleDataLoadingAction(id);
+      }
     }
 
     async removeSampleDataSet(id: string) {
+      // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
+      await testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
+      // https://github.com/elastic/kibana/issues/65949
+      // Even after waiting for the "Remove" button to be enabled we still have failures
+      // where it appears the click just didn't work.
+      await PageObjects.common.sleep(1010);
       await testSubjects.click(`removeSampleDataSet${id}`);
       await this._waitForSampleDataLoadingAction(id);
     }
@@ -61,14 +81,65 @@ export function HomePageProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    async launchSampleDataSet(id: string) {
-      if (await find.existsByCssSelector(`#sampleDataLinks${id}`)) {
-        // omits cloud test failures
-        await find.clickByCssSelectorWhenNotDisabled(`#sampleDataLinks${id}`);
-        await find.clickByCssSelector('.euiContextMenuItem:nth-of-type(1)');
-      } else {
-        await testSubjects.click(`launchSampleDataSet${id}`);
+    async launchSampleDashboard(id: string) {
+      await this.launchSampleDataSet(id);
+      isOss = await deployment.isOss();
+      if (!isOss) {
+        await find.clickByLinkText('Dashboard');
       }
+    }
+
+    async launchSampleDataSet(id: string) {
+      await this.addSampleDataSet(id);
+      await testSubjects.click(`launchSampleDataSet${id}`);
+    }
+
+    async clickAllKibanaPlugins() {
+      await testSubjects.click('allPlugins');
+    }
+
+    async clickVisualizeExplorePlugins() {
+      await testSubjects.click('tab-data');
+    }
+
+    async clickAdminPlugin() {
+      await testSubjects.click('tab-admin');
+    }
+
+    async clickOnConsole() {
+      await this.clickSynopsis('console');
+    }
+    async clickOnLogo() {
+      await testSubjects.click('logo');
+    }
+
+    async clickOnAddData() {
+      await this.clickSynopsis('home_tutorial_directory');
+    }
+
+    // clicks on Active MQ logs
+    async clickOnLogsTutorial() {
+      await this.clickSynopsis('activemqlogs');
+    }
+
+    // clicks on cloud tutorial link
+    async clickOnCloudTutorial() {
+      await testSubjects.click('onCloudTutorial');
+    }
+
+    // click on side nav toggle button to see all of side nav
+    async clickOnToggleNavButton() {
+      await testSubjects.click('toggleNavButton');
+    }
+
+    // collapse the observability side nav details
+    async collapseObservabibilitySideNav() {
+      await testSubjects.click('collapsibleNavGroup-observability');
+    }
+
+    // dock the side nav
+    async dockTheSideNav() {
+      await testSubjects.click('collapsible-nav-lock');
     }
 
     async loadSavedObjects() {

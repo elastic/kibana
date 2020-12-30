@@ -6,38 +6,34 @@
 
 import {
   HttpInterceptor,
-  HttpErrorResponse,
-  IHttpResponse,
+  HttpInterceptorResponseError,
+  HttpResponse,
   IAnonymousPaths,
 } from 'src/core/public';
 
 import { ISessionTimeout } from './session_timeout';
 
-const isSystemAPIRequest = (request: Request) => {
-  return request.headers.has('kbn-system-api');
-};
-
 export class SessionTimeoutHttpInterceptor implements HttpInterceptor {
   constructor(private sessionTimeout: ISessionTimeout, private anonymousPaths: IAnonymousPaths) {}
 
-  response(httpResponse: IHttpResponse) {
+  response(httpResponse: HttpResponse) {
     if (this.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }
 
-    if (isSystemAPIRequest(httpResponse.request)) {
+    if (httpResponse.fetchOptions.asSystemRequest) {
       return;
     }
 
     this.sessionTimeout.extend(httpResponse.request.url);
   }
 
-  responseError(httpErrorResponse: HttpErrorResponse) {
+  responseError(httpErrorResponse: HttpInterceptorResponseError) {
     if (this.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }
 
-    if (isSystemAPIRequest(httpErrorResponse.request)) {
+    if (httpErrorResponse.fetchOptions.asSystemRequest) {
       return;
     }
 

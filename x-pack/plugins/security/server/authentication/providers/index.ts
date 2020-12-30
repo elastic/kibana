@@ -9,9 +9,11 @@ export {
   AuthenticationProviderOptions,
   AuthenticationProviderSpecificOptions,
 } from './base';
+export { AnonymousAuthenticationProvider } from './anonymous';
 export { BasicAuthenticationProvider } from './basic';
 export { KerberosAuthenticationProvider } from './kerberos';
-export { SAMLAuthenticationProvider, isSAMLRequestQuery, SAMLLoginStep } from './saml';
+export { SAMLAuthenticationProvider, SAMLLogin } from './saml';
 export { TokenAuthenticationProvider } from './token';
-export { OIDCAuthenticationProvider, OIDCAuthenticationFlow } from './oidc';
+export { OIDCAuthenticationProvider, OIDCLogin } from './oidc';
 export { PKIAuthenticationProvider } from './pki';
+export { HTTPAuthenticationProvider } from './http';

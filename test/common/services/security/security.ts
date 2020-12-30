@@ -17,19 +17,27 @@
  * under the License.
  */
 
-import { format as formatUrl } from 'url';
-
 import { Role } from './role';
 import { User } from './user';
+import { RoleMappings } from './role_mappings';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { createTestUserService, TestUserSupertestProvider } from './test_user';
 
-export function SecurityServiceProvider({ getService }: FtrProviderContext) {
+export async function SecurityServiceProvider(context: FtrProviderContext) {
+  const { getService } = context;
   const log = getService('log');
-  const config = getService('config');
-  const url = formatUrl(config.get('servers.kibana'));
+  const kibanaServer = getService('kibanaServer');
+
+  const role = new Role(log, kibanaServer);
+  const user = new User(log, kibanaServer);
+  const testUser = await createTestUserService(role, user, context);
+  const testUserSupertest = TestUserSupertestProvider(context);
 
   return new (class SecurityService {
-    role = new Role(url, log);
-    user = new User(url, log);
+    roleMappings = new RoleMappings(log, kibanaServer);
+    testUser = testUser;
+    role = role;
+    user = user;
+    testUserSupertest = testUserSupertest;
   })();
 }

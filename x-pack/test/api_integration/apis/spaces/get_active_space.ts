@@ -6,7 +6,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const spacesService = getService('spaces');
 
@@ -25,8 +25,19 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('returns the default space', async () => {
+      await supertest.get('/internal/spaces/_active_space').set('kbn-xsrf', 'xxx').expect(200, {
+        id: 'default',
+        name: 'Default',
+        description: 'This is your default space!',
+        color: '#00bfb3',
+        disabledFeatures: [],
+        _reserved: true,
+      });
+    });
+
+    it('returns the default space when explicitly referenced', async () => {
       await supertest
-        .get('/internal/spaces/_active_space')
+        .get('/s/default/internal/spaces/_active_space')
         .set('kbn-xsrf', 'xxx')
         .expect(200, {
           id: 'default',

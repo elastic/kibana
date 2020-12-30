@@ -25,6 +25,7 @@ import { AnonymousPathsService } from './anonymous_paths_service';
 import { LoadingCountService } from './loading_count_service';
 import { Fetch } from './fetch';
 import { CoreService } from '../../types';
+import { ExternalUrlService } from './external_url_service';
 
 interface HttpDeps {
   injectedMetadata: InjectedMetadataSetup;
@@ -35,16 +36,23 @@ interface HttpDeps {
 export class HttpService implements CoreService<HttpSetup, HttpStart> {
   private readonly anonymousPaths = new AnonymousPathsService();
   private readonly loadingCount = new LoadingCountService();
+  private service?: HttpSetup;
 
   public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
     const kibanaVersion = injectedMetadata.getKibanaVersion();
-    const basePath = new BasePath(injectedMetadata.getBasePath());
+    const basePath = new BasePath(
+      injectedMetadata.getBasePath(),
+      injectedMetadata.getServerBasePath(),
+      injectedMetadata.getPublicBaseUrl()
+    );
     const fetchService = new Fetch({ basePath, kibanaVersion });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
+    loadingCount.addLoadingCountSource(fetchService.getRequestCount$());
 
-    return {
+    this.service = {
       basePath,
       anonymousPaths: this.anonymousPaths.setup({ basePath }),
+      externalUrl: new ExternalUrlService().setup({ injectedMetadata, location: window.location }),
       intercept: fetchService.intercept.bind(fetchService),
       fetch: fetchService.fetch.bind(fetchService),
       delete: fetchService.delete.bind(fetchService),
@@ -56,10 +64,16 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
       put: fetchService.put.bind(fetchService),
       ...loadingCount,
     };
+
+    return this.service;
   }
 
-  public start(deps: HttpDeps) {
-    return this.setup(deps);
+  public start() {
+    if (!this.service) {
+      throw new Error(`HttpService#setup() must be called first!`);
+    }
+
+    return this.service;
   }
 
   public stop() {

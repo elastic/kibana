@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors_service';
 
 const createSetupContractMock = () => {
@@ -26,18 +27,22 @@ const createSetupContractMock = () => {
 
   return setupContract;
 };
+const createStartContractMock = createSetupContractMock;
 
 type FatalErrorsServiceContract = PublicMethodsOf<FatalErrorsService>;
 const createMock = () => {
   const mocked: jest.Mocked<FatalErrorsServiceContract> = {
     setup: jest.fn(),
+    start: jest.fn(),
   };
 
   mocked.setup.mockReturnValue(createSetupContractMock());
+  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
 export const fatalErrorsServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

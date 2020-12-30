@@ -22,5 +22,9 @@ export const DATES = {
       withData: '10/17/2018 7:58:03 PM',
       withoutData: '10/09/2018 10:00:00 PM',
     },
+    stream: {
+      startWithData: '2018-10-17T19:42:22.000Z',
+      endWithData: '2018-10-17T19:57:21.000Z',
+    },
   },
 };

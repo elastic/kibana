@@ -1,8 +1,8 @@
 [[upgrade-standard]]
 === Standard upgrade
 
-NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant] 
-to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
+NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant]
+to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
 
 [IMPORTANT]
 ===========================================
@@ -13,10 +13,19 @@ necessary remediation steps as per those instructions.
 ===========================================
 
 [float]
-==== Upgrading using a `deb` or `rpm` package
+==== Upgrading multiple {kib} instances
+
+WARNING: Kibana does not support rolling upgrades. If you're running multiple {kib} instances, all instances should be stopped before upgrading.
+
+Different versions of {kib} running against the same {es} index, such as during a rolling upgrade, can cause upgrade migration failures and data loss. This is because acknowledged writes from the older instances could be written into the _old_ index while the migration is in progress. To prevent this from happening ensure that all old {kib} instances are shutdown before starting up instances on a newer version.
+
+The first instance that triggers saved object migrations will run the entire process. Any other instances started up while a migration is running will log a message and then wait until saved object migrations has completed before they start serving HTTP traffic.
+
+[float]
+==== Upgrade using a `deb` or `rpm` package
 
 . Stop the existing {kib} process using the appropriate command for your
-  system.
+  system. If you have multiple {kib} instances connecting to the same {es} cluster ensure that all instances are stopped before proceeding to the next step to avoid data loss.
 . Use `rpm` or `dpkg` to install the new package. All files should be placed in
   their proper locations and config files should not be overwritten.
 +
@@ -37,14 +46,13 @@ otherwise {kib} will fail to start.
 . Start the new {kib} process using the appropriate command for your system.
 
 [float]
-==== Upgrading using a `zip` or `tar.gz` archive
+==== Upgrade using a `zip` or `tar.gz` archive
 
 . Extract the `zip` or `tar.gz` archive to a new directory to be sure that you
   don't overwrite the `config` or `data` directories. +
 +
 --
-IMPORTANT: If you use {monitor-features}, you must re-use the data directory when you
-upgrade {kib}. Otherwise, the {kib} instance is assigned a new persistent UUID
+IMPORTANT: If you use {monitor-features}, you must re-use the data directory when you upgrade {kib}. Otherwise, the {kib} instance is assigned a new persistent UUID
 and becomes a new instance in the monitoring data.
 
 --
@@ -57,5 +65,5 @@ and becomes a new instance in the monitoring data.
 . Install the appropriate versions of all your plugins for your new
   installation using the `kibana-plugin` script. Check out the
   <<kibana-plugins,plugins>> documentation for more information.
-. Stop the old {kib} process.
+. Stop the old {kib} process. If you have multiple {kib} instances connecting to the same {es} cluster ensure that all instances are stopped before proceeding to the next step to avoid data loss.
 . Start the new {kib} process.

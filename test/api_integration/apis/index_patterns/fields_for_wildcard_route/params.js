@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const randomness = getService('randomness');
@@ -27,10 +27,7 @@ export default function({ getService }) {
     after(() => esArchiver.unload('index_patterns/basic_index'));
 
     it('requires a pattern query param', () =>
-      supertest
-        .get('/api/index_patterns/_fields_for_wildcard')
-        .query({})
-        .expect(400));
+      supertest.get('/api/index_patterns/_fields_for_wildcard').query({}).expect(400));
 
     it('accepts a JSON formatted meta_fields query param', () =>
       supertest

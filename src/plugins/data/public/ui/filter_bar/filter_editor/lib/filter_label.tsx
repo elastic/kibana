@@ -21,14 +21,19 @@ import React, { Fragment } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { existsOperator, isOneOfOperator } from './filter_operators';
-import { esFilters } from '../../../..';
+import { Filter, FILTERS } from '../../../../../common';
+import type { FilterLabelStatus } from '../../filter_item';
 
-interface Props {
-  filter: esFilters.Filter;
+// @internal
+export interface FilterLabelProps {
+  filter: Filter;
   valueLabel?: string;
+  filterLabelStatus?: FilterLabelStatus;
 }
 
-export function FilterLabel({ filter, valueLabel }: Props) {
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default function FilterLabel({ filter, valueLabel, filterLabelStatus }: FilterLabelProps) {
   const prefixText = filter.meta.negate
     ? ` ${i18n.translate('data.filter.filterBar.negatedFilterPrefix', {
         defaultMessage: 'NOT ',
@@ -41,64 +46,69 @@ export function FilterLabel({ filter, valueLabel }: Props) {
       prefixText
     );
 
+  const getValue = (text?: string) => {
+    return <span className="globalFilterLabel__value">{text}</span>;
+  };
+
   if (filter.meta.alias !== null) {
     return (
       <Fragment>
         {prefix}
         {filter.meta.alias}
+        {filterLabelStatus && <>: {getValue(valueLabel)}</>}
       </Fragment>
     );
   }
 
   switch (filter.meta.type) {
-    case esFilters.FILTERS.EXISTS:
+    case FILTERS.EXISTS:
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key} {existsOperator.message}
+          {filter.meta.key}: {getValue(`${existsOperator.message}`)}
         </Fragment>
       );
-    case esFilters.FILTERS.GEO_BOUNDING_BOX:
+    case FILTERS.GEO_BOUNDING_BOX:
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {valueLabel}
+          {filter.meta.key}: {getValue(valueLabel)}
         </Fragment>
       );
-    case esFilters.FILTERS.GEO_POLYGON:
+    case FILTERS.GEO_POLYGON:
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {valueLabel}
+          {filter.meta.key}: {getValue(valueLabel)}
         </Fragment>
       );
-    case esFilters.FILTERS.PHRASES:
+    case FILTERS.PHRASES:
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key} {isOneOfOperator.message} {valueLabel}
+          {filter.meta.key}: {getValue(`${isOneOfOperator.message} ${valueLabel}`)}
         </Fragment>
       );
-    case esFilters.FILTERS.QUERY_STRING:
+    case FILTERS.QUERY_STRING:
       return (
         <Fragment>
           {prefix}
-          {valueLabel}
+          {getValue(`${valueLabel}`)}
         </Fragment>
       );
-    case esFilters.FILTERS.PHRASE:
-    case esFilters.FILTERS.RANGE:
+    case FILTERS.PHRASE:
+    case FILTERS.RANGE:
       return (
         <Fragment>
           {prefix}
-          {filter.meta.key}: {valueLabel}
+          {filter.meta.key}: {getValue(valueLabel)}
         </Fragment>
       );
     default:
       return (
         <Fragment>
           {prefix}
-          {JSON.stringify(filter.query)}
+          {getValue(`${JSON.stringify(filter.query) || filter.meta.value}`)}
         </Fragment>
       );
   }

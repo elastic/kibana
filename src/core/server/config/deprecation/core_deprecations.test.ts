@@ -17,9 +17,8 @@
  * under the License.
  */
 
+import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
 import { coreDeprecationProvider } from './core_deprecations';
-import { configDeprecationFactory } from './deprecation_factory';
-import { applyDeprecations } from './apply_deprecations';
 
 const initialEnv = { ...process.env };
 
@@ -28,11 +27,11 @@ const applyCoreDeprecations = (settings: Record<string, any> = {}) => {
   const deprecationMessages: string[] = [];
   const migrated = applyDeprecations(
     settings,
-    deprecations.map(deprecation => ({
+    deprecations.map((deprecation) => ({
       deprecation,
       path: '',
     })),
-    msg => deprecationMessages.push(msg)
+    (msg) => deprecationMessages.push(msg)
   );
   return {
     messages: deprecationMessages,
@@ -51,7 +50,7 @@ describe('core deprecations', () => {
       const { messages } = applyCoreDeprecations();
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder",
+          "Environment variable CONFIG_PATH is deprecated. It has been replaced with KBN_PATH_CONF pointing to a config folder",
         ]
       `);
     });
@@ -78,6 +77,46 @@ describe('core deprecations', () => {
       delete process.env.DATA_PATH;
       const { messages } = applyCoreDeprecations();
       expect(messages).toHaveLength(0);
+    });
+  });
+
+  describe('xsrfDeprecation', () => {
+    it('logs a warning if server.xsrf.whitelist is set', () => {
+      const { migrated, messages } = applyCoreDeprecations({
+        server: { xsrf: { whitelist: ['/path'] } },
+      });
+      expect(migrated.server.xsrf.allowlist).toEqual(['/path']);
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"server.xsrf.whitelist\\" is deprecated and has been replaced by \\"server.xsrf.allowlist\\"",
+        ]
+      `);
+    });
+  });
+
+  describe('server.cors', () => {
+    it('renames server.cors to server.cors.enabled', () => {
+      const { migrated } = applyCoreDeprecations({
+        server: { cors: true },
+      });
+      expect(migrated.server.cors).toEqual({ enabled: true });
+    });
+    it('logs a warning message about server.cors renaming', () => {
+      const { messages } = applyCoreDeprecations({
+        server: { cors: true },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"server.cors\\" is deprecated and has been replaced by \\"server.cors.enabled\\"",
+        ]
+      `);
+    });
+    it('does not log deprecation message when server.cors.enabled set', () => {
+      const { migrated, messages } = applyCoreDeprecations({
+        server: { cors: { enabled: true } },
+      });
+      expect(migrated.server.cors).toEqual({ enabled: true });
+      expect(messages.length).toBe(0);
     });
   });
 

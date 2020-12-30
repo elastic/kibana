@@ -27,6 +27,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
+  const elasticChart = getService('elasticChart');
   const { common, header, visChart } = getPageObjects(['common', 'header', 'visChart']);
 
   interface IntervalOptions {
@@ -37,19 +38,19 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
 
   class VisualizeEditorPage {
     public async clickDataTab() {
-      await testSubjects.click('visualizeEditDataLink');
+      await testSubjects.click('visEditorTab__data');
     }
 
     public async clickOptionsTab() {
-      await testSubjects.click('visEditorTaboptions');
+      await testSubjects.click('visEditorTab__options');
     }
 
     public async clickMetricsAndAxes() {
-      await testSubjects.click('visEditorTabadvanced');
+      await testSubjects.click('visEditorTab__advanced');
     }
 
     public async clickVisEditorTab(tabName: string) {
-      await testSubjects.click('visEditorTab' + tabName);
+      await testSubjects.click(`visEditorTab__${tabName}`);
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -73,6 +74,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickGo() {
+      if (await visChart.isNewChartsLibraryEnabled()) {
+        await elasticChart.setNewChartUiDebugFlag();
+      }
+
       const prevRenderingCount = await visChart.getVisualizationRenderingCount();
       log.debug(`Before Rendering count ${prevRenderingCount}`);
       await testSubjects.clickWhenNotDisabled('visualizeEditorRenderButton');
@@ -97,9 +102,17 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async clickSplitDirection(direction: string) {
-      const control = await testSubjects.find('visEditorSplitBy');
-      const radioBtn = await control.findByCssSelector(`[title="${direction}"]`);
+      const radioBtn = await find.byCssSelector(`[data-test-subj="visEditorSplitBy-${direction}"]`);
       await radioBtn.click();
+    }
+
+    public async clickAddDateRange() {
+      await testSubjects.click(`visEditorAddDateRange`);
+    }
+
+    public async setDateRangeByIndex(index: string, from: string, to: string) {
+      await testSubjects.setValue(`visEditorDateRange${index}__from`, from);
+      await testSubjects.setValue(`visEditorDateRange${index}__to`, to);
     }
 
     /**
@@ -109,7 +122,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
      */
     public async clickBucket(bucketName: string, type = 'buckets') {
       await testSubjects.click(`visEditorAdd_${type}`);
-      await find.clickByCssSelector(`[data-test-subj="visEditorAdd_${type}_${bucketName}"`);
+      await testSubjects.click(`visEditorAdd_${type}_${bucketName}`);
     }
 
     public async clickEnableCustomRanges() {
@@ -120,7 +133,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click(`heatmapColorRange__addRangeButton`);
     }
 
-    public async setCustomRangeByIndex(index: string, from: string, to: string) {
+    public async setCustomRangeByIndex(index: string | number, from: string, to: string) {
       await testSubjects.setValue(`heatmapColorRange${index}__from`, from);
       await testSubjects.setValue(`heatmapColorRange${index}__to`, to);
     }
@@ -133,7 +146,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
 
     public async getBucketErrorMessage() {
       const error = await find.byCssSelector(
-        '[group-name="buckets"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText'
+        '[data-test-subj="bucketsAggGroup"] [data-test-subj="defaultEditorAggSelect"] + .euiFormErrorText'
       );
       const errorMessage = await error.getAttribute('innerText');
       log.debug(errorMessage);
@@ -147,14 +160,14 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     public async selectField(
       fieldValue: string,
       groupName = 'buckets',
-      childAggregationType = false
+      isChildAggregation = false
     ) {
       log.debug(`selectField ${fieldValue}`);
       const selector = `
-          [group-name="${groupName}"]
+          [data-test-subj="${groupName}AggGroup"]
           [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
           [data-test-subj="visAggEditorParams"]
-          ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
+          ${isChildAggregation ? '.visEditorAgg__subAgg' : ''}
           [data-test-subj="visDefaultEditorField"]
         `;
       const fieldEl = await find.byCssSelector(selector);
@@ -176,12 +189,12 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     public async selectAggregation(
       aggValue: string,
       groupName = 'buckets',
-      childAggregationType = false
+      isChildAggregation = false
     ) {
       const comboBoxElement = await find.byCssSelector(`
-          [group-name="${groupName}"]
+          [data-test-subj="${groupName}AggGroup"]
           [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
-          ${childAggregationType ? '.visEditorAgg__subAgg' : ''}
+          ${isChildAggregation ? '.visEditorAgg__subAgg' : ''}
           [data-test-subj="defaultEditorAggSelect"]
         `);
 
@@ -218,6 +231,10 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
 
     public async clickDropPartialBuckets() {
       await testSubjects.click('dropPartialBucketsCheckbox');
+    }
+
+    public async expectMarkdownTextArea() {
+      await testSubjects.existOrFail('markdownTextarea');
     }
 
     public async setMarkdownTxt(markdownTxt: string) {
@@ -258,7 +275,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       });
     }
 
-    public async setCustomLabel(label: string, index = 1) {
+    public async setCustomLabel(label: string, index: number | string = 1) {
       const customLabel = await testSubjects.find(`visEditorStringInput${index}customLabel`);
       customLabel.type(label);
     }
@@ -290,27 +307,28 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async sizeUpEditor() {
-      await testSubjects.click('visualizeEditorResizer');
-      await browser.pressKeys(browser.keys.ARROW_RIGHT);
+      const resizerPanel = await testSubjects.find('splitPanelResizer');
+      // Drag panel 100 px left
+      await browser.dragAndDrop({ location: resizerPanel }, { location: { x: -100, y: 0 } });
     }
 
-    public async toggleDisabledAgg(agg: string) {
+    public async toggleDisabledAgg(agg: string | number) {
       await testSubjects.click(`visEditorAggAccordion${agg} > ~toggleDisableAggregationBtn`);
       await header.waitUntilLoadingHasFinished();
     }
 
-    public async toggleAggregationEditor(agg: string) {
+    public async toggleAggregationEditor(agg: string | number) {
       await find.clickByCssSelector(
         `[data-test-subj="visEditorAggAccordion${agg}"] .euiAccordion__button`
       );
       await header.waitUntilLoadingHasFinished();
     }
 
-    public async toggleOtherBucket(agg = 2) {
+    public async toggleOtherBucket(agg: string | number = 2) {
       await testSubjects.click(`visEditorAggAccordion${agg} > otherBucketSwitch`);
     }
 
-    public async toggleMissingBucket(agg = 2) {
+    public async toggleMissingBucket(agg: string | number = 2) {
       await testSubjects.click(`visEditorAggAccordion${agg} > missingBucketSwitch`);
     }
 
@@ -357,16 +375,25 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.click(`toggleYAxisOptions-${axisId}`);
     }
 
-    public async clickYAxisAdvancedOptions(axisId: string) {
-      await testSubjects.click(`toggleYAxisAdvancedOptions-${axisId}`);
+    public async changeYAxisShowCheckbox(axisId: string, enabled: boolean) {
+      const selector = `valueAxisShow-${axisId}`;
+      const button = await testSubjects.find(selector);
+      const isEnabled = (await button.getAttribute('aria-checked')) === 'true';
+      if (enabled !== isEnabled) {
+        await button.click();
+      }
     }
 
     public async changeYAxisFilterLabelsCheckbox(axisId: string, enabled: boolean) {
       const selector = `yAxisFilterLabelsCheckbox-${axisId}`;
-      await testSubjects.setCheckbox(selector, enabled ? 'check' : 'uncheck');
+      const button = await testSubjects.find(selector);
+      const isEnabled = (await button.getAttribute('aria-checked')) === 'true';
+      if (enabled !== isEnabled) {
+        await button.click();
+      }
     }
 
-    public async setSize(newValue: string, aggId: string) {
+    public async setSize(newValue: number, aggId?: number) {
       const dataTestSubj = aggId
         ? `visEditorAggAccordion${aggId} > sizeParamEditor`
         : 'sizeParamEditor';
@@ -379,9 +406,17 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async selectYAxisScaleType(axisId: string, scaleType: string) {
-      const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
-      const selector = await selectElement.findByCssSelector(`option[value="${scaleType}"]`);
+      const selector = await find.byCssSelector(
+        `#scaleSelectYAxis-${axisId} > option[value="${scaleType}"]`
+      );
       await selector.click();
+    }
+
+    public async selectXAxisPosition(position: string) {
+      const option = await (await testSubjects.find('categoryAxisPosition')).findByCssSelector(
+        `option[value="${position}"]`
+      );
+      await option.click();
     }
 
     public async selectYAxisMode(mode: string) {
@@ -402,18 +437,28 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       await testSubjects.selectValue('visDefaultEditorAggregateWith', fieldValue);
     }
 
-    public async setInterval(newValue: string, options: IntervalOptions = {}) {
+    public async setInterval(newValue: string | number, options: IntervalOptions = {}) {
+      const newValueString = `${newValue}`;
       const { type = 'default', aggNth = 2, append = false } = options;
-      log.debug(`visEditor.setInterval(${newValue}, {${type}, ${aggNth}, ${append}})`);
+      log.debug(`visEditor.setInterval(${newValueString}, {${type}, ${aggNth}, ${append}})`);
       if (type === 'default') {
-        await comboBox.set('visEditorInterval', newValue);
+        await comboBox.set('visEditorInterval', newValueString);
       } else if (type === 'custom') {
-        await comboBox.setCustom('visEditorInterval', newValue);
+        await comboBox.setCustom('visEditorInterval', newValueString);
       } else {
+        if (type === 'numeric') {
+          const autoMode = await testSubjects.getAttribute(
+            `visEditorIntervalSwitch${aggNth}`,
+            'aria-checked'
+          );
+          if (autoMode === 'true') {
+            await testSubjects.click(`visEditorIntervalSwitch${aggNth}`);
+          }
+        }
         if (append) {
-          await testSubjects.append(`visEditorInterval${aggNth}`, String(newValue));
+          await testSubjects.append(`visEditorInterval${aggNth}`, String(newValueString));
         } else {
-          await testSubjects.setValue(`visEditorInterval${aggNth}`, String(newValue));
+          await testSubjects.setValue(`visEditorInterval${aggNth}`, String(newValueString));
         }
       }
     }
@@ -422,12 +467,12 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       return await comboBox.getComboBoxSelectedOptions('visEditorInterval');
     }
 
-    public async getNumericInterval(agg = 2) {
-      return await testSubjects.getAttribute(`visEditorInterval${agg}`, 'value');
+    public async getNumericInterval(aggNth = 2) {
+      return await testSubjects.getAttribute(`visEditorInterval${aggNth}`, 'value');
     }
 
     public async clickMetricEditor() {
-      await find.clickByCssSelector('[group-name="metrics"] .euiAccordion__button');
+      await find.clickByCssSelector('[data-test-subj="metricsAggGroup"] .euiAccordion__button');
     }
 
     public async clickMetricByIndex(index: number) {
@@ -444,7 +489,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       const $ = await selectField.parseDomContent();
       const optionsText = $('option')
         .toArray()
-        .map(option => $(option).text());
+        .map((option) => $(option).text());
       const optionIndex = optionsText.indexOf(optionText);
 
       if (optionIndex === -1) {
@@ -455,6 +500,37 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
         );
       }
       await options[optionIndex].click();
+    }
+
+    // point series
+
+    async clickAddAxis() {
+      return await testSubjects.click('visualizeAddYAxisButton');
+    }
+
+    async setAxisTitle(title: string, aggNth = 0) {
+      return await testSubjects.setValue(`valueAxisTitle${aggNth}`, title);
+    }
+
+    public async toggleGridCategoryLines() {
+      return await testSubjects.click('showCategoryLines');
+    }
+
+    public async toggleValuesOnChart() {
+      return await testSubjects.click('showValuesOnChart');
+    }
+
+    public async setGridValueAxis(axis: string) {
+      log.debug(`setGridValueAxis(${axis})`);
+      await find.selectValue('select#gridAxis', axis);
+    }
+
+    public async setSeriesAxis(seriesNth: number, axis: string) {
+      await find.selectValue(`select#seriesValueAxis${seriesNth}`, axis);
+    }
+
+    public async setSeriesType(seriesNth: number, type: string) {
+      await find.selectValue(`select#seriesType${seriesNth}`, type);
     }
   }
 

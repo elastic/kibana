@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SizeParamEditor should init with the default set of props 1`] = `
+<EuiFormRow
+  describedByIds={Array []}
+  display="rowCompressed"
+  fullWidth={true}
+  hasChildLabel={true}
+  hasEmptyLabelSpace={false}
+  isInvalid={false}
+  label={
+    <React.Fragment>
+      <FormattedMessage
+        defaultMessage="Size"
+        id="visDefaultEditor.controls.sizeLabel"
+        values={Object {}}
+      />
+    </React.Fragment>
+  }
+  labelType="label"
+>
+  <EuiFieldNumber
+    compressed={true}
+    data-test-subj="sizeParamEditor"
+    fullWidth={true}
+    isInvalid={false}
+    min={1}
+    onBlur={[MockFunction]}
+    onChange={[Function]}
+    value=""
+  />
+</EuiFormRow>
+`;

@@ -17,48 +17,22 @@
  * under the License.
  */
 
-import { difference, get, set } from 'lodash';
-// @ts-ignore
-import { getTransform } from '../../../../legacy/deprecation/index';
-import { unset, getFlattenedObject } from '../../../../legacy/utils';
+import { difference } from 'lodash';
+import { getFlattenedObject } from '@kbn/std';
 import { hasConfigPathIntersection } from '../../config';
-import { LegacyPluginSpec, LegacyConfig, LegacyVars } from '../types';
+import { LegacyConfig, LegacyVars } from '../types';
 
 const getFlattenedKeys = (object: object) => Object.keys(getFlattenedObject(object));
 
 export async function getUnusedConfigKeys({
   coreHandledConfigPaths,
-  pluginSpecs,
-  disabledPluginSpecs,
   settings,
   legacyConfig,
 }: {
   coreHandledConfigPaths: string[];
-  pluginSpecs: LegacyPluginSpec[];
-  disabledPluginSpecs: LegacyPluginSpec[];
   settings: LegacyVars;
   legacyConfig: LegacyConfig;
 }) {
-  // transform deprecated plugin settings
-  for (let i = 0; i < pluginSpecs.length; i++) {
-    const spec = pluginSpecs[i];
-    const transform = await getTransform(spec);
-    const prefix = spec.getConfigPrefix();
-
-    // nested plugin prefixes (a.b) translate to nested objects
-    const pluginSettings = get(settings, prefix);
-    if (pluginSettings) {
-      // flattened settings are expected to be converted to nested objects
-      // a.b = true => { a: { b: true }}
-      set(settings, prefix, transform(pluginSettings));
-    }
-  }
-
-  // remove config values from disabled plugins
-  for (const spec of disabledPluginSpecs) {
-    unset(settings, spec.getConfigPrefix());
-  }
-
   const inputKeys = getFlattenedKeys(settings);
   const appliedKeys = getFlattenedKeys(legacyConfig.get());
 
@@ -71,8 +45,8 @@ export async function getUnusedConfigKeys({
 
   // Filter out keys that are marked as used in the core (e.g. by new core plugins).
   return difference(inputKeys, appliedKeys).filter(
-    unusedConfigKey =>
-      !coreHandledConfigPaths.some(usedInCoreConfigKey =>
+    (unusedConfigKey) =>
+      !coreHandledConfigPaths.some((usedInCoreConfigKey) =>
         hasConfigPathIntersection(unusedConfigKey, usedInCoreConfigKey)
       )
   );

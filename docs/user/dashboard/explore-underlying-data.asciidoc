@@ -1,0 +1,27 @@
+[float]
+[[explore-the-underlying-data]]
+=== Explore the underlying data for panels
+
+To explore the underlying data of the panels on your dashboard, {kib} opens *Discover*,
+where you can view and filter the data in the visualization panel. When {kib} opens *Discover*, the index pattern, filters, query, and time range for the visualization continue to apply.
+
+TIP: The *Explore underlying data* option is available only for visualization panels with a single index pattern.
+
+To use the *Explore underlying data* option: 
+
+* Click the from the panel menu, then click *Explore underlying data*.
++
+[role="screenshot"]
+image::images/explore_data_context_menu.png[Explore underlying data from panel context menu]
+
+* Interact with the chart, then click *Explore underlying data* on the menu that appears.
++
+[role="screenshot"]
+image::images/explore_data_in_chart.png[Explore underlying data from chart]
++
+To enable, open `kibana.yml`, then add the following:
+
+["source","yml"]
+-----------
+xpack.discoverEnhanced.actions.exploreDataInChart.enabled: true
+-----------

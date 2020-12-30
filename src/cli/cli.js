@@ -22,9 +22,7 @@ import { pkg } from '../core/server/utils';
 import Command from './command';
 import serveCommand from './serve/serve';
 
-const argv = process.env.kbnWorkerArgv
-  ? JSON.parse(process.env.kbnWorkerArgv)
-  : process.argv.slice();
+const argv = process.argv.slice();
 const program = new Command('bin/kibana');
 
 program
@@ -40,13 +38,13 @@ serveCommand(program);
 program
   .command('help <command>')
   .description('Get the help for a specific command')
-  .action(function(cmdName) {
+  .action(function (cmdName) {
     const cmd = _.find(program.commands, { _name: cmdName });
     if (!cmd) return program.error(`unknown command ${cmdName}`);
     cmd.help();
   });
 
-program.command('*', null, { noHelp: true }).action(function(cmd) {
+program.command('*', null, { noHelp: true }).action(function (cmd) {
   program.error(`unknown command ${cmd}`);
 });
 

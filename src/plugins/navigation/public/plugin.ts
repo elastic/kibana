@@ -40,14 +40,14 @@ export class NavigationPublicPlugin
   }
 
   public start(
-    core: CoreStart,
+    { i18n }: CoreStart,
     { data }: NavigationPluginStartDependencies
   ): NavigationPublicPluginStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 
     return {
       ui: {
-        TopNavMenu: createTopNav(data, extensions),
+        TopNavMenu: createTopNav(data, extensions, i18n),
       },
     };
   }

@@ -6,11 +6,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  const PageObjects = getPageObjects(['common', 'settings', 'security', 'error', 'savedObjects']);
   let version: string = '';
 
   describe('feature controls saved objects management', () => {
@@ -52,10 +52,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_all_role'),
           security.user.delete('global_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -66,7 +66,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('shows all saved objects', async () => {
-          const objects = await PageObjects.settings.getSavedObjectsInTable();
+          const objects = await PageObjects.savedObjects.getRowTitles();
           expect(objects).to.eql([
             'Advanced Settings [6.0.0]',
             `Advanced Settings [${version}]`,
@@ -77,7 +77,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('can view all saved objects in applications', async () => {
-          const bools = await PageObjects.settings.getSavedObjectsTableSummary();
+          const bools = await PageObjects.savedObjects.getTableSummary();
           expect(bools).to.eql([
             {
               title: 'Advanced Settings [6.0.0]',
@@ -103,19 +103,20 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('can delete all saved objects', async () => {
-          await PageObjects.settings.clickSavedObjectsTableSelectAll();
-          const actual = await PageObjects.settings.canSavedObjectsBeDeleted();
+          await PageObjects.savedObjects.clickTableSelectAll();
+          const actual = await PageObjects.savedObjects.canBeDeleted();
           expect(actual).to.be(true);
         });
       });
 
       describe('edit visualization', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'kibana',
-            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
+              shouldUseHashForSubUrl: false,
             }
           );
         });
@@ -170,10 +171,10 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_som_read_role'),
           security.user.delete('global_som_read_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
@@ -184,7 +185,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('shows all saved objects', async () => {
-          const objects = await PageObjects.settings.getSavedObjectsInTable();
+          const objects = await PageObjects.savedObjects.getRowTitles();
           expect(objects).to.eql([
             'Advanced Settings [6.0.0]',
             `Advanced Settings [${version}]`,
@@ -195,7 +196,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('cannot view any saved objects in applications', async () => {
-          const bools = await PageObjects.settings.getSavedObjectsTableSummary();
+          const bools = await PageObjects.savedObjects.getTableSummary();
           expect(bools).to.eql([
             {
               title: 'Advanced Settings [6.0.0]',
@@ -221,19 +222,20 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it(`can't delete all saved objects`, async () => {
-          await PageObjects.settings.clickSavedObjectsTableSelectAll();
-          const actual = await PageObjects.settings.canSavedObjectsBeDeleted();
+          await PageObjects.savedObjects.clickTableSelectAll();
+          const actual = await PageObjects.savedObjects.canBeDeleted();
           expect(actual).to.be(false);
         });
       });
 
       describe('edit visualization', () => {
         before(async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'kibana',
-            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
+              shouldUseHashForSubUrl: false,
             }
           );
           await testSubjects.existOrFail('savedObjectsEdit');
@@ -293,34 +295,37 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_visualize_all_role'),
           security.user.delete('global_visualize_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       describe('listing', () => {
-        it('redirects to Kibana home', async () => {
-          await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/objects', {
+        it(`can't navigate to listing page`, async () => {
+          await PageObjects.common.navigateToUrl('management', 'kibana/objects', {
             ensureCurrentUrl: false,
             shouldLoginIfPrompted: false,
+            shouldUseHashForSubUrl: false,
           });
-          await testSubjects.existOrFail('homeApp');
+
+          await testSubjects.existOrFail('appNotFoundPageContent');
         });
       });
 
       describe('edit visualization', () => {
-        it('redirects to Kibana home', async () => {
-          await PageObjects.common.navigateToActualUrl(
-            'kibana',
-            '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
+        it('redirects to management home', async () => {
+          await PageObjects.common.navigateToUrl(
+            'management',
+            'kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
               shouldLoginIfPrompted: false,
               ensureCurrentUrl: false,
+              shouldUseHashForSubUrl: false,
             }
           );
-          await testSubjects.existOrFail('homeApp');
+          await testSubjects.existOrFail('appNotFoundPageContent');
         });
       });
     });

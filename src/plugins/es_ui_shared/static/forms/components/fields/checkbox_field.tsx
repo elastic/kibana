@@ -30,17 +30,17 @@ interface Props {
   [key: string]: any;
 }
 
-export const CheckBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const CheckBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
     <EuiFormRow
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
-      describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      describedByIds={idAria ? [idAria] : undefined}
+      {...rest}
     >
       <EuiCheckbox
         label={field.label}

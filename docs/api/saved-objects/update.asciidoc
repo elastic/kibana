@@ -9,9 +9,9 @@ experimental[] Update the attributes for existing {kib} saved objects.
 [[saved-objects-api-update-request]]
 ==== Request
 
-`PUT /api/saved_objects/<type>/<id>`
+`PUT <kibana host>:<port>/api/saved_objects/<type>/<id>`
 
-`PUT /s/<space_id>/api/saved_objects/<type>/<id>`
+`PUT <kibana host>:<port>/s/<space_id>/api/saved_objects/<type>/<id>`
 
 [[saved-objects-api-update-path-params]]
 ==== Path parameters
@@ -47,9 +47,9 @@ WARNING: When you update, attributes are not validated, which allows you to pass
 
 Update an existing index pattern object,`my-pattern`, with a different title:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-PUT api/saved_objects/index-pattern/my-pattern
+$ curl -X PUT api/saved_objects/index-pattern/my-pattern
 {
   "attributes": {
     "title": "some-other-pattern-*"
@@ -60,7 +60,7 @@ PUT api/saved_objects/index-pattern/my-pattern
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "id": "my-pattern",

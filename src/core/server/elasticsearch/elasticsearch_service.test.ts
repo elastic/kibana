@@ -17,31 +17,34 @@
  * under the License.
  */
 
+import { MockLegacyClusterClient, MockClusterClient } from './elasticsearch_service.test.mocks';
+import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
-
-import { MockClusterClient } from './elasticsearch_service.test.mocks';
-
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
+import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';
-import { configServiceMock } from '../config/config_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
+import { elasticsearchClientMock } from './client/mocks';
+import { duration } from 'moment';
+
+const delay = async (durationMs: number) =>
+  await new Promise((resolve) => setTimeout(resolve, durationMs));
 
 let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
-const deps = {
-  http: httpServiceMock.createSetupContract(),
+const setupDeps = {
+  http: httpServiceMock.createInternalSetupContract(),
 };
 configService.atPath.mockReturnValue(
   new BehaviorSubject({
     hosts: ['http://1.2.3.4'],
     healthCheck: {
-      delay: 2000,
+      delay: duration(10),
     },
     ssl: {
       verificationMode: 'none',
@@ -51,97 +54,61 @@ configService.atPath.mockReturnValue(
 
 let env: Env;
 let coreContext: CoreContext;
-const logger = loggingServiceMock.create();
+const logger = loggingSystemMock.create();
+
+let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
+let mockLegacyClusterClientInstance: ReturnType<
+  typeof elasticsearchServiceMock.createLegacyCustomClusterClient
+>;
+
 beforeEach(() => {
-  env = Env.createDefault(getEnvOptions());
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
   elasticsearchService = new ElasticsearchService(coreContext);
+
+  MockLegacyClusterClient.mockClear();
+  MockClusterClient.mockClear();
+
+  mockLegacyClusterClientInstance = elasticsearchServiceMock.createLegacyCustomClusterClient();
+  MockLegacyClusterClient.mockImplementation(() => mockLegacyClusterClientInstance);
+  mockClusterClientInstance = elasticsearchClientMock.createCustomClusterClient();
+  MockClusterClient.mockImplementation(() => mockClusterClientInstance);
 });
 
 afterEach(() => jest.clearAllMocks());
 
 describe('#setup', () => {
   it('returns legacy Elasticsearch config as a part of the contract', async () => {
-    const setupContract = await elasticsearchService.setup(deps);
+    const setupContract = await elasticsearchService.setup(setupDeps);
 
     await expect(setupContract.legacy.config$.pipe(first()).toPromise()).resolves.toBeInstanceOf(
       ElasticsearchConfig
     );
   });
 
-  it('returns data and admin client as a part of the contract', async () => {
-    const mockAdminClusterClientInstance = elasticsearchServiceMock.createClusterClient();
-    const mockDataClusterClientInstance = elasticsearchServiceMock.createClusterClient();
-    MockClusterClient.mockImplementationOnce(
-      () => mockAdminClusterClientInstance
-    ).mockImplementationOnce(() => mockDataClusterClientInstance);
+  it('returns legacy elasticsearch client as a part of the contract', async () => {
+    const setupContract = await elasticsearchService.setup(setupDeps);
+    const client = setupContract.legacy.client;
 
-    const setupContract = await elasticsearchService.setup(deps);
-
-    const adminClient = setupContract.adminClient;
-    const dataClient = setupContract.dataClient;
-
-    expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
-    await adminClient.callAsInternalUser('any');
-    expect(mockAdminClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
-
-    expect(mockDataClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
-    await dataClient.callAsInternalUser('any');
-    expect(mockDataClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
+    expect(mockLegacyClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(0);
+    await client.callAsInternalUser('any');
+    expect(mockLegacyClusterClientInstance.callAsInternalUser).toHaveBeenCalledTimes(1);
   });
 
-  it('returns data and admin client observables as a part of the contract', async () => {
-    const mockAdminClusterClientInstance = { close: jest.fn() };
-    const mockDataClusterClientInstance = { close: jest.fn() };
-    MockClusterClient.mockImplementationOnce(
-      () => mockAdminClusterClientInstance
-    ).mockImplementationOnce(() => mockDataClusterClientInstance);
-
-    const setupContract = await elasticsearchService.setup(deps);
-
-    const [esConfig, adminClient, dataClient] = await combineLatest(
-      setupContract.legacy.config$,
-      setupContract.adminClient$,
-      setupContract.dataClient$
-    )
-      .pipe(first())
-      .toPromise();
-
-    expect(adminClient).toBe(mockAdminClusterClientInstance);
-    expect(dataClient).toBe(mockDataClusterClientInstance);
-
-    expect(MockClusterClient).toHaveBeenCalledTimes(2);
-    expect(MockClusterClient).toHaveBeenNthCalledWith(
-      1,
-      esConfig,
-      expect.objectContaining({ context: ['elasticsearch', 'admin'] }),
-      undefined
-    );
-    expect(MockClusterClient).toHaveBeenNthCalledWith(
-      2,
-      esConfig,
-      expect.objectContaining({ context: ['elasticsearch', 'data'] }),
-      expect.any(Function)
-    );
-
-    expect(mockAdminClusterClientInstance.close).not.toHaveBeenCalled();
-    expect(mockDataClusterClientInstance.close).not.toHaveBeenCalled();
-  });
-
-  describe('#createClient', () => {
+  describe('#createLegacyClient', () => {
     it('allows to specify config properties', async () => {
-      const setupContract = await elasticsearchService.setup(deps);
+      const setupContract = await elasticsearchService.setup(setupDeps);
 
-      const mockClusterClientInstance = { close: jest.fn() };
-      MockClusterClient.mockImplementation(() => mockClusterClientInstance);
+      // reset all mocks called during setup phase
+      MockLegacyClusterClient.mockClear();
 
       const customConfig = { logQueries: true };
-      const clusterClient = setupContract.createClient('some-custom-type', customConfig);
+      const clusterClient = setupContract.legacy.createClient('some-custom-type', customConfig);
 
-      expect(clusterClient).toBe(mockClusterClientInstance);
+      expect(clusterClient).toBe(mockLegacyClusterClientInstance);
 
-      expect(MockClusterClient).toHaveBeenCalledWith(
+      expect(MockLegacyClusterClient).toHaveBeenCalledWith(
         expect.objectContaining(customConfig),
         expect.objectContaining({ context: ['elasticsearch', 'some-custom-type'] }),
         expect.any(Function)
@@ -149,58 +116,64 @@ describe('#setup', () => {
     });
 
     it('falls back to elasticsearch default config values if property not specified', async () => {
-      const setupContract = await elasticsearchService.setup(deps);
+      const setupContract = await elasticsearchService.setup(setupDeps);
+
       // reset all mocks called during setup phase
-      MockClusterClient.mockClear();
+      MockLegacyClusterClient.mockClear();
 
       const customConfig = {
         hosts: ['http://8.8.8.8'],
         logQueries: true,
         ssl: { certificate: 'certificate-value' },
       };
-      setupContract.createClient('some-custom-type', customConfig);
+      setupContract.legacy.createClient('some-custom-type', customConfig);
 
-      const config = MockClusterClient.mock.calls[0][0];
+      const config = MockLegacyClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
-Object {
-  "healthCheckDelay": 2000,
-  "hosts": Array [
-    "http://8.8.8.8",
-  ],
-  "logQueries": true,
-  "requestHeadersWhitelist": Array [
-    undefined,
-  ],
-  "ssl": Object {
-    "certificate": "certificate-value",
-    "verificationMode": "none",
-  },
-}
-`);
+        Object {
+          "healthCheckDelay": "PT0.01S",
+          "hosts": Array [
+            "http://8.8.8.8",
+          ],
+          "logQueries": true,
+          "requestHeadersWhitelist": Array [
+            undefined,
+          ],
+          "ssl": Object {
+            "certificate": "certificate-value",
+            "verificationMode": "none",
+          },
+        }
+      `);
     });
     it('falls back to elasticsearch config if custom config not passed', async () => {
-      const setupContract = await elasticsearchService.setup(deps);
+      const setupContract = await elasticsearchService.setup(setupDeps);
+
       // reset all mocks called during setup phase
-      MockClusterClient.mockClear();
+      MockLegacyClusterClient.mockClear();
 
-      setupContract.createClient('another-type');
+      setupContract.legacy.createClient('another-type');
 
-      const config = MockClusterClient.mock.calls[0][0];
+      const config = MockLegacyClusterClient.mock.calls[0][0];
       expect(config).toMatchInlineSnapshot(`
-Object {
-  "healthCheckDelay": 2000,
-  "hosts": Array [
-    "http://1.2.3.4",
-  ],
-  "requestHeadersWhitelist": Array [
-    undefined,
-  ],
-  "ssl": Object {
-    "certificateAuthorities": undefined,
-    "verificationMode": "none",
-  },
-}
-`);
+        Object {
+          "healthCheckDelay": "PT0.01S",
+          "hosts": Array [
+            "http://1.2.3.4",
+          ],
+          "requestHeadersWhitelist": Array [
+            undefined,
+          ],
+          "ssl": Object {
+            "alwaysPresentCertificate": undefined,
+            "certificate": undefined,
+            "certificateAuthorities": undefined,
+            "key": undefined,
+            "keyPassphrase": undefined,
+            "verificationMode": "none",
+          },
+        }
+      `);
     });
 
     it('does not merge elasticsearch hosts if custom config overrides', async () => {
@@ -208,7 +181,7 @@ Object {
         new BehaviorSubject({
           hosts: ['http://1.2.3.4', 'http://9.8.7.6'],
           healthCheck: {
-            delay: 2000,
+            delay: duration(2000),
           },
           ssl: {
             verificationMode: 'none',
@@ -216,7 +189,126 @@ Object {
         } as any)
       );
       elasticsearchService = new ElasticsearchService(coreContext);
-      const setupContract = await elasticsearchService.setup(deps);
+      const setupContract = await elasticsearchService.setup(setupDeps);
+
+      // reset all mocks called during setup phase
+      MockLegacyClusterClient.mockClear();
+
+      const customConfig = {
+        hosts: ['http://8.8.8.8'],
+        logQueries: true,
+        ssl: { certificate: 'certificate-value' },
+      };
+      setupContract.legacy.createClient('some-custom-type', customConfig);
+
+      const config = MockLegacyClusterClient.mock.calls[0][0];
+      expect(config).toMatchInlineSnapshot(`
+        Object {
+          "healthCheckDelay": "PT2S",
+          "hosts": Array [
+            "http://8.8.8.8",
+          ],
+          "logQueries": true,
+          "requestHeadersWhitelist": Array [
+            undefined,
+          ],
+          "ssl": Object {
+            "certificate": "certificate-value",
+            "verificationMode": "none",
+          },
+        }
+      `);
+    });
+  });
+
+  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {
+    const mockedClient = mockClusterClientInstance.asInternalUser;
+    mockedClient.nodes.info.mockImplementation(() =>
+      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+    );
+
+    const setupContract = await elasticsearchService.setup(setupDeps);
+    await delay(10);
+
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
+    setupContract.esNodesCompatibility$.subscribe(() => {
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+      done();
+    });
+  });
+
+  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async (done) => {
+    const mockedClient = mockClusterClientInstance.asInternalUser;
+    mockedClient.nodes.info.mockImplementation(() =>
+      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+    );
+
+    const setupContract = await elasticsearchService.setup(setupDeps);
+
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
+    const sub = setupContract.esNodesCompatibility$.subscribe(async () => {
+      sub.unsubscribe();
+      await delay(100);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+      done();
+    });
+  });
+});
+
+describe('#start', () => {
+  it('throws if called before `setup`', async () => {
+    expect(() => elasticsearchService.start()).rejects.toMatchInlineSnapshot(
+      `[Error: ElasticsearchService needs to be setup before calling start]`
+    );
+  });
+
+  it('returns elasticsearch client as a part of the contract', async () => {
+    await elasticsearchService.setup(setupDeps);
+    const startContract = await elasticsearchService.start();
+    const client = startContract.client;
+
+    expect(client.asInternalUser).toBe(mockClusterClientInstance.asInternalUser);
+  });
+
+  describe('#createClient', () => {
+    it('allows to specify config properties', async () => {
+      await elasticsearchService.setup(setupDeps);
+      const startContract = await elasticsearchService.start();
+
+      // reset all mocks called during setup phase
+      MockClusterClient.mockClear();
+
+      const customConfig = { logQueries: true };
+      const clusterClient = startContract.createClient('custom-type', customConfig);
+
+      expect(clusterClient).toBe(mockClusterClientInstance);
+
+      expect(MockClusterClient).toHaveBeenCalledTimes(1);
+      expect(MockClusterClient).toHaveBeenCalledWith(
+        expect.objectContaining(customConfig),
+        expect.objectContaining({ context: ['elasticsearch', 'custom-type'] }),
+        expect.any(Function)
+      );
+    });
+    it('creates a new client on each call', async () => {
+      await elasticsearchService.setup(setupDeps);
+      const startContract = await elasticsearchService.start();
+
+      // reset all mocks called during setup phase
+      MockClusterClient.mockClear();
+
+      const customConfig = { logQueries: true };
+
+      startContract.createClient('custom-type', customConfig);
+      startContract.createClient('another-type', customConfig);
+
+      expect(MockClusterClient).toHaveBeenCalledTimes(2);
+    });
+
+    it('falls back to elasticsearch default config values if property not specified', async () => {
+      await elasticsearchService.setup(setupDeps);
+      const startContract = await elasticsearchService.start();
+
       // reset all mocks called during setup phase
       MockClusterClient.mockClear();
 
@@ -225,12 +317,13 @@ Object {
         logQueries: true,
         ssl: { certificate: 'certificate-value' },
       };
-      setupContract.createClient('some-custom-type', customConfig);
 
+      startContract.createClient('some-custom-type', customConfig);
       const config = MockClusterClient.mock.calls[0][0];
+
       expect(config).toMatchInlineSnapshot(`
         Object {
-          "healthCheckDelay": 2000,
+          "healthCheckDelay": "PT0.01S",
           "hosts": Array [
             "http://8.8.8.8",
           ],
@@ -249,17 +342,32 @@ Object {
 });
 
 describe('#stop', () => {
-  it('stops both admin and data clients', async () => {
-    const mockAdminClusterClientInstance = { close: jest.fn() };
-    const mockDataClusterClientInstance = { close: jest.fn() };
-    MockClusterClient.mockImplementationOnce(
-      () => mockAdminClusterClientInstance
-    ).mockImplementationOnce(() => mockDataClusterClientInstance);
-
-    await elasticsearchService.setup(deps);
+  it('stops both legacy and new clients', async () => {
+    await elasticsearchService.setup(setupDeps);
+    await elasticsearchService.start();
     await elasticsearchService.stop();
 
-    expect(mockAdminClusterClientInstance.close).toHaveBeenCalledTimes(1);
-    expect(mockDataClusterClientInstance.close).toHaveBeenCalledTimes(1);
+    expect(mockLegacyClusterClientInstance.close).toHaveBeenCalledTimes(1);
+    expect(mockClusterClientInstance.close).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops pollEsNodeVersions even if there are active subscriptions', async (done) => {
+    expect.assertions(2);
+
+    const mockedClient = mockClusterClientInstance.asInternalUser;
+    mockedClient.nodes.info.mockImplementation(() =>
+      elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
+    );
+
+    const setupContract = await elasticsearchService.setup(setupDeps);
+
+    setupContract.esNodesCompatibility$.subscribe(async () => {
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+
+      await elasticsearchService.stop();
+      await delay(100);
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+      done();
+    });
   });
 });

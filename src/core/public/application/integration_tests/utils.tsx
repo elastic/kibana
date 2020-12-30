@@ -18,12 +18,12 @@
  */
 
 import React, { ReactElement } from 'react';
+import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
-
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { App, LegacyApp, AppMountParameters } from '../types';
-import { MockedMounter, MockedMounterTuple } from '../test_types';
+import { AppMountParameters } from '../types';
+import { MockedMounterTuple, Mountable } from '../test_types';
 
 type Dom = ReturnType<typeof mount> | null;
 type Renderer = () => Dom | Promise<Dom>;
@@ -32,19 +32,29 @@ export const createRenderer = (element: ReactElement | null): Renderer => {
   const dom: Dom = element && mount(<I18nProvider>{element}</I18nProvider>);
 
   return () =>
-    new Promise(async resolve => {
+    new Promise(async (resolve) => {
       if (dom) {
-        dom.update();
+        await act(async () => {
+          dom.update();
+        });
       }
       setImmediate(() => resolve(dom)); // flushes any pending promises
     });
 };
 
-export const createAppMounter = (
-  appId: string,
-  html: string,
-  appRoute = `/app/${appId}`
-): MockedMounterTuple<App> => {
+export const createAppMounter = ({
+  appId,
+  html = `<div>App ${appId}</div>`,
+  appRoute = `/app/${appId}`,
+  exactRoute = false,
+  extraMountHook,
+}: {
+  appId: string;
+  html?: string;
+  appRoute?: string;
+  exactRoute?: boolean;
+  extraMountHook?: (params: AppMountParameters) => void;
+}): MockedMounterTuple => {
   const unmount = jest.fn();
   return [
     appId,
@@ -52,11 +62,16 @@ export const createAppMounter = (
       mounter: {
         appRoute,
         appBasePath: appRoute,
-        mount: jest.fn(async ({ appBasePath: basename, element }: AppMountParameters) => {
+        exactRoute,
+        mount: jest.fn(async (params: AppMountParameters) => {
+          const { appBasePath: basename, element } = params;
           Object.assign(element, {
             innerHTML: `<div>\nbasename: ${basename}\nhtml: ${html}\n</div>`,
           });
           unmount.mockImplementation(() => Object.assign(element, { innerHTML: '' }));
+          if (extraMountHook) {
+            extraMountHook(params);
+          }
           return unmount;
         }),
       },
@@ -65,18 +80,6 @@ export const createAppMounter = (
   ];
 };
 
-export const createLegacyAppMounter = (
-  appId: string,
-  legacyMount: MockedMounter<LegacyApp>['mount']
-): MockedMounterTuple<LegacyApp> => [
-  appId,
-  {
-    mounter: {
-      appRoute: `/app/${appId.split(':')[0]}`,
-      appBasePath: `/app/${appId.split(':')[0]}`,
-      unmountBeforeMounting: true,
-      mount: legacyMount,
-    },
-    unmount: jest.fn(),
-  },
-];
+export function getUnmounter(app: Mountable) {
+  return app.mounter.mount.mock.results[0].value;
+}

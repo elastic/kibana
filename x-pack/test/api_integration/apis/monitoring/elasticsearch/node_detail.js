@@ -7,11 +7,11 @@
 import expect from '@kbn/expect';
 import nodeDetailFixture from './fixtures/node_detail';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('node detail', function() {
+  describe('node detail', function () {
     // TODO: https://github.com/elastic/stack-monitoring/issues/31
     this.tags(['skipCloud']);
 
@@ -32,7 +32,7 @@ export default function({ getService }) {
     it('should summarize node with metrics', async () => {
       const { body } = await supertest
         .post(
-          '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/nodes/jxcP6ue7eRCieNNitFTT0EA'
+          '/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/nodes/jUT5KdxfRbORSCWkb5zjmA'
         )
         .set('kbn-xsrf', 'xxx')
         .send({

@@ -5,32 +5,41 @@
  */
 import { ConnectableObservable, Observable, Subject, from, merge } from 'rxjs';
 
-import { filter, map, pairwise, switchMap, publishReplay, takeUntil } from 'rxjs/operators';
+import {
+  filter,
+  map,
+  pairwise,
+  exhaustMap,
+  publishReplay,
+  share,
+  take,
+  takeUntil,
+} from 'rxjs/operators';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 import { ILicense } from './types';
 
 export function createLicenseUpdate(
-  trigger$: Observable<unknown>,
+  triggerRefresh$: Observable<unknown>,
   stop$: Observable<unknown>,
   fetcher: () => Promise<ILicense>,
   initialValues?: ILicense
 ) {
-  const triggerRefresh$ = trigger$.pipe(switchMap(fetcher));
-  const manuallyFetched$ = new Subject<ILicense>();
+  const manuallyRefresh$ = new Subject();
+  const fetched$ = merge(triggerRefresh$, manuallyRefresh$).pipe(exhaustMap(fetcher), share());
 
-  const fetched$ = merge(triggerRefresh$, manuallyFetched$).pipe(
+  const cached$ = fetched$.pipe(
     takeUntil(stop$),
     publishReplay(1)
     // have to cast manually as pipe operator cannot return ConnectableObservable
     // https://github.com/ReactiveX/rxjs/issues/2972
   ) as ConnectableObservable<ILicense>;
 
-  const fetchSubscription = fetched$.connect();
-  stop$.subscribe({ complete: () => fetchSubscription.unsubscribe() });
+  const cachedSubscription = cached$.connect();
+  stop$.subscribe({ complete: () => cachedSubscription.unsubscribe() });
 
   const initialValues$ = initialValues ? from([undefined, initialValues]) : from([undefined]);
 
-  const license$: Observable<ILicense> = merge(initialValues$, fetched$).pipe(
+  const license$: Observable<ILicense> = merge(initialValues$, cached$).pipe(
     pairwise(),
     filter(([previous, next]) => hasLicenseInfoChanged(previous, next!)),
     map(([, next]) => next!)
@@ -38,10 +47,10 @@ export function createLicenseUpdate(
 
   return {
     license$,
-    async refreshManually() {
-      const license = await fetcher();
-      manuallyFetched$.next(license);
-      return license;
+    refreshManually() {
+      const licensePromise = fetched$.pipe(take(1)).toPromise();
+      manuallyRefresh$.next();
+      return licensePromise;
     },
   };
 }

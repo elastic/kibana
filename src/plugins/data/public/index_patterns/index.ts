@@ -17,32 +17,23 @@
  * under the License.
  */
 
-import {
+export {
   ILLEGAL_CHARACTERS_KEY,
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
-  IndexPatternMissingIndices,
   validateIndexPattern,
-  getFromSavedObject,
-} from './lib';
-import { getRoutes } from './utils';
-import { flattenHitWrapper, formatHitProvider } from './index_patterns';
+  isDefault,
+} from '../../common/index_patterns/lib';
+export { flattenHitWrapper, formatHitProvider, onRedirectNoIndexPattern } from './index_patterns';
 
-export const indexPatterns = {
-  ILLEGAL_CHARACTERS_KEY,
-  CONTAINS_SPACES_KEY,
-  ILLEGAL_CHARACTERS_VISIBLE,
-  ILLEGAL_CHARACTERS,
-  IndexPatternMissingIndices,
-  validate: validateIndexPattern,
-  getRoutes,
-  getFromSavedObject,
-  flattenHitWrapper,
-  formatHitProvider,
-};
+export { IndexPatternField, IIndexPatternFieldList } from '../../common/index_patterns';
 
-export { Field, FieldList, IFieldList } from './fields';
-
-// TODO: figure out how to replace IndexPatterns in get_inner_angular.
-export { IndexPattern, IndexPatterns, IndexPatternsContract } from './index_patterns';
+export {
+  IndexPatternsService,
+  IndexPatternsContract,
+  IndexPattern,
+  IndexPatternsApiClient,
+} from './index_patterns';
+export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
+export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';

@@ -1,0 +1,242 @@
+[[aggregation-reference]]
+== Aggregation reference
+
+{kib} supports many types of {ref}/search-aggregations.html[{es} aggregations] that you can use to build complex summaries of your data. 
+
+By using a series of {es} aggregations to extract and process your data, you can create panels that tell a 
+story about the trends, patterns, and outliers in your data.
+
+[float]
+[[bucket-aggregations]]
+=== Bucket aggregations
+
+For information about Elasticsearch bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
+
+[options="header"]
+|===
+
+| Type | Visualizations | Data table | Markdown | Lens | TSVB 
+
+| Histogram
+^| X
+^| X
+^| X
+| 
+| 
+
+| Date histogram
+^| X
+^| X
+^| X
+^| X
+^| X
+
+| Date range
+^| X
+^| X
+^| X
+| 
+| 
+
+| Filter
+^| X
+^| X
+^| X
+| 
+^| X
+
+| Filters
+^| X
+^| X
+^| X
+| 
+^| X
+
+| GeoHash grid
+^| X
+^| X
+^| X
+| 
+| 
+
+| IP range
+^| X
+^| X
+^| X
+| 
+| 
+
+| Range
+^| X
+^| X
+^| X
+| 
+| 
+
+| Terms
+^| X
+^| X
+^| X
+^| X
+^| X
+
+| Significant terms
+^| X
+^| X
+^| X
+|
+^| X
+
+|===
+
+[float]
+[[metrics-aggregations]]
+=== Metrics aggregations
+
+For information about Elasticsearch metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
+
+[options="header"]
+|===
+
+| Type | Visualizations | Data table | Markdown | Lens | TSVB
+
+| Average
+^| X
+^| X
+^| X
+^| X
+^| X
+
+| Sum 
+^| X
+^| X
+^| X
+^| X
+^| X
+
+| Unique count (Cardinality)
+^| X
+^| X
+^| X
+^| X
+^| X
+
+| Max
+^| X
+^| X
+^| X
+^| X
+^| X
+
+| Min
+^| X
+^| X
+^| X
+^| X
+^| X
+
+| Percentiles
+^| X
+^| X
+^| X
+| 
+^| X
+
+| Percentiles Rank
+^| X
+^| X
+^| X
+| 
+^| X
+
+| Top hit 
+^| X
+^| X
+^| X
+| 
+^| X
+
+| Value count 
+| 
+| 
+| 
+| 
+^| X
+
+|===
+
+[float]
+[[pipeline-aggregations]]
+=== Pipeline aggregations
+
+For information about Elasticsearch pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
+
+[options="header"]
+|===
+
+| Type | Visualizations | Data table | Markdown | Lens | TSVB
+
+| Avg bucket  
+^| X
+^| X
+^| X
+| 
+^| X
+
+| Derivative  
+^| X
+^| X
+^| X
+| 
+^| X
+
+| Max bucket   
+^| X
+^| X
+^| X
+| 
+^| X
+
+| Min bucket   
+^| X
+^| X
+^| X
+| 
+^| X
+
+| Sum bucket  
+^| X
+^| X
+^| X
+^| 
+^| X
+ 
+| Moving average  
+^| X
+^| X
+^| X
+^| 
+^| X
+
+| Cumulative sum 
+^| X
+^| X
+^| X
+^| 
+^| X
+
+| Bucket script 
+| 
+| 
+| 
+| 
+^| X
+
+| Serial differencing 
+^| X
+^| X
+^| X
+| 
+^| X
+
+|===

@@ -17,26 +17,39 @@
  * under the License.
  */
 
-export { ISearchAppMountContext } from './i_search_app_mount_context';
+export * from './expressions';
 
-export { ISearchSetup } from './i_search_setup';
-
-export { ISearchContext } from './i_search_context';
+export { ISearchSetup, ISearchStart, ISearchStartSearchSource, SearchEnhancements } from './types';
 
 export {
-  ISearch,
-  ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
+  ES_SEARCH_STRATEGY,
+  EsQuerySortValue,
+  extractReferences as extractSearchSourceReferences,
+  getSearchParamsFromRequest,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  injectReferences as injectSearchSourceReferences,
   ISearchGeneric,
-} from './i_search';
+  ISearchSource,
+  parseSearchSourceJSON,
+  SearchError,
+  SearchRequest,
+  SearchSource,
+  SearchSourceDependencies,
+  SearchSourceFields,
+  SortDirection,
+} from '../../common/search';
+export {
+  SessionService,
+  ISessionService,
+  SearchSessionInfoProvider,
+  SessionState,
+  SessionsClient,
+  ISessionsClient,
+} from './session';
+export { getEsPreference } from './es_search';
 
-export { TSearchStrategyProvider, ISearchStrategy } from './i_search_strategy';
-
-export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
-
-export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
-
-export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
-
-export { ISearchStart } from './search_service';
+export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
+export * from './errors';

@@ -6,8 +6,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context.d';
 
-// eslint-disable-next-line @typescript-eslint/no-namespace, import/no-default-export
-export default function({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
@@ -15,7 +14,7 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
   describe('lens app', () => {
     before(async () => {
       log.debug('Starting lens before method');
-      browser.setWindowSize(1280, 800);
+      await browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.loadIfNeeded('lens/basic');
     });
@@ -25,11 +24,19 @@ export default function({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('lens/basic');
     });
 
-    describe('', function() {
+    describe('', function () {
       this.tags(['ciGroup4', 'skipFirefox']);
 
       loadTestFile(require.resolve('./smokescreen'));
+      loadTestFile(require.resolve('./dashboard'));
+      loadTestFile(require.resolve('./persistent_context'));
+      loadTestFile(require.resolve('./colors'));
+      loadTestFile(require.resolve('./chart_data'));
+      loadTestFile(require.resolve('./drag_and_drop'));
       loadTestFile(require.resolve('./lens_reporting'));
+
+      // has to be last one in the suite because it overrides saved objects
+      loadTestFile(require.resolve('./rollup'));
     });
   });
 }

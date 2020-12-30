@@ -1,0 +1,26 @@
+{
+  "id": "transform",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "data",
+    "home",
+    "licensing",
+    "management",
+    "features",
+    "savedObjects"
+  ],
+  "optionalPlugins": [
+    "security",
+    "usageCollection"
+  ],
+  "configPath": ["xpack", "transform"],
+  "requiredBundles": [
+    "esUiShared",
+    "discover",
+    "kibanaUtils",
+    "kibanaReact",
+    "ml"
+  ]
+}

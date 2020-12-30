@@ -4,32 +4,30 @@
 <titleabbrev>Get specific role</titleabbrev>
 ++++
 
-Retrieve a specific role.
-
-experimental["The underlying mechanism of enforcing role-based access control is stable, but the APIs for managing the roles are experimental."]
+experimental[] Retrieve a specific role.
 
 [[role-management-specific-api-get-prereqs]]
-==== Prerequisite 
+==== Prerequisite
 
 To use the get specific role API, you must have the `manage_security` cluster privilege.
 
 [[role-management-specific-api-retrieve-all-request-body]]
 ===== Request
 
-`GET /api/security/role/my_restricted_kibana_role`
+`GET <kibana host>:<port>/api/security/role/my_restricted_kibana_role`
 
 [[role-management-specific-api-retrieve-all-response-codes]]
 ==== Response code
 
-`200`:: 
+`200`::
   Indicates a successful call.
-  
+
 [[role-management-specific-api-retrieve-all-example]]
 ===== Example
 
 The API returns the following:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
 {
   "name": "my_restricted_kibana_role",

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { HttpService } from './http_service';
 import { HttpSetup } from './types';
 import { BehaviorSubject } from 'rxjs';
@@ -40,6 +40,9 @@ const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   anonymousPaths: {
     register: jest.fn(),
     isAnonymous: jest.fn(),
+  },
+  externalUrl: {
+    validateUrl: jest.fn(),
   },
   addLoadingCountSource: jest.fn(),
   getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),

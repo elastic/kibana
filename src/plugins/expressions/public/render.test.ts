@@ -19,9 +19,10 @@
 
 import { ExpressionRenderHandler, render } from './render';
 import { Observable } from 'rxjs';
-import { IInterpreterRenderHandlers, RenderError } from './types';
+import { ExpressionRenderError } from './types';
 import { getRenderersRegistry } from './services';
 import { first, take, toArray } from 'rxjs/operators';
+import { IInterpreterRenderHandlers } from '../common';
 
 const element: HTMLElement = {} as HTMLElement;
 const mockNotificationService = {
@@ -49,7 +50,8 @@ jest.mock('./services', () => {
 });
 
 const mockMockErrorRenderFunction = jest.fn(
-  (el: HTMLElement, error: RenderError, handlers: IInterpreterRenderHandlers) => handlers.done()
+  (el: HTMLElement, error: ExpressionRenderError, handlers: IInterpreterRenderHandlers) =>
+    handlers.done()
 );
 // extracts data from mockMockErrorRenderFunction call to assert in tests
 const getHandledError = () => {
@@ -124,11 +126,36 @@ describe('ExpressionRenderHandler', () => {
       expect(getHandledError()!.message).toEqual('renderer error');
     });
 
+    it('should pass through provided "hasCompatibleActions" to the expression renderer', async () => {
+      const hasCompatibleActions = jest.fn();
+      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({ get: () => true });
+      (getRenderersRegistry as jest.Mock).mockReturnValueOnce({
+        get: () => ({
+          render: (domNode: HTMLElement, config: unknown, handlers: IInterpreterRenderHandlers) => {
+            handlers.hasCompatibleActions!({
+              foo: 'bar',
+            });
+          },
+        }),
+      });
+
+      const expressionRenderHandler = new ExpressionRenderHandler(element, {
+        onRenderError: mockMockErrorRenderFunction,
+        hasCompatibleActions,
+      });
+      expect(hasCompatibleActions).toHaveBeenCalledTimes(0);
+      await expressionRenderHandler.render({ type: 'render', as: 'something' });
+      expect(hasCompatibleActions).toHaveBeenCalledTimes(1);
+      expect(hasCompatibleActions.mock.calls[0][0]).toEqual({
+        foo: 'bar',
+      });
+    });
+
     it('sends a next observable once rendering is complete', () => {
       const expressionRenderHandler = new ExpressionRenderHandler(element);
       expect.assertions(1);
-      return new Promise(resolve => {
-        expressionRenderHandler.render$.subscribe(renderCount => {
+      return new Promise<void>((resolve) => {
+        expressionRenderHandler.render$.subscribe((renderCount) => {
           expect(renderCount).toBe(1);
           resolve();
         });

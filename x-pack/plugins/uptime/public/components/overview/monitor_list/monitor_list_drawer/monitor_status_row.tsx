@@ -1,0 +1,42 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React from 'react';
+import { EuiBadge, EuiSpacer } from '@elastic/eui';
+import { UNNAMED_LOCATION, STATUS } from '../../../../../common/constants';
+import { getHealthMessage } from '../columns/monitor_status_column';
+
+interface MonitorStatusRowProps {
+  /**
+   * Recent List of checks performed on monitor
+   */
+  locationNames: Set<string>;
+  /**
+   * Monitor status for this of locations
+   */
+  status: string;
+}
+
+export const MonitorStatusRow = ({ locationNames, status }: MonitorStatusRowProps) => {
+  const color = status === STATUS.UP ? 'secondary' : 'danger';
+
+  let checkListArray = [...locationNames];
+  // If un-named location exists, move it to end
+  if (locationNames.has(UNNAMED_LOCATION)) {
+    checkListArray = checkListArray.filter((item) => item !== UNNAMED_LOCATION);
+    checkListArray.push(UNNAMED_LOCATION);
+  }
+
+  const locations = checkListArray.join(', ');
+  return (
+    <span>
+      <EuiBadge color={color}>{getHealthMessage(status)}</EuiBadge>
+      <EuiSpacer size="xs" />
+      {locations || '--'}
+      <EuiSpacer size="xs" />
+    </span>
+  );
+};

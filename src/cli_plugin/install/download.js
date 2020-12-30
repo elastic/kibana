@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import downloadHttpFile from './downloaders/http';
-import downloadLocalFile from './downloaders/file';
-import { UnsupportedProtocolError } from '../lib/errors';
 import { parse } from 'url';
+
+import { UnsupportedProtocolError } from '../lib/errors';
+import { downloadHttpFile } from './downloaders/http';
+import { downloadLocalFile } from './downloaders/file';
 
 function _isWindows() {
   return /^win/.test(process.platform);
@@ -80,7 +81,7 @@ export function download(settings, logger) {
 
     logger.log(`Attempting to transfer from ${sourceUrl}`);
 
-    return _downloadSingle(settings, logger, sourceUrl).catch(err => {
+    return _downloadSingle(settings, logger, sourceUrl).catch((err) => {
       const isUnsupportedProtocol = err instanceof UnsupportedProtocolError;
       const isDownloadResourceNotFound = err.message === 'ENOTFOUND';
       if (isUnsupportedProtocol || isDownloadResourceNotFound) {

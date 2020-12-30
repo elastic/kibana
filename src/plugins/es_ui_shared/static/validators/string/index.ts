@@ -25,3 +25,4 @@ export * from './is_empty';
 export * from './is_url';
 export * from './starts_with';
 export * from './is_json';
+export * from './is_lowercase';

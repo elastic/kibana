@@ -21,13 +21,17 @@ import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { QueryBarTopRow } from './query_bar_top_row';
+import { waitFor } from '@testing-library/dom';
+import { render } from '@testing-library/react';
+
+import { QueryBarTopRow } from './';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { stubIndexPatternWithFields } from '../../stubs';
+import { UI_SETTINGS } from '../../../common';
 const startMock = coreMock.createStart();
 
 const mockTimeHistory = {
@@ -38,7 +42,7 @@ const mockTimeHistory = {
 
 startMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
-    case 'timepicker:quickRanges':
+    case UI_SETTINGS.TIMEPICKER_QUICK_RANGES:
       return [
         {
           from: 'now/d',
@@ -48,9 +52,9 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
       ];
     case 'dateFormat':
       return 'MMM D, YYYY @ HH:mm:ss.SSS';
-    case 'history:limit':
+    case UI_SETTINGS.HISTORY_LIMIT:
       return 10;
-    case 'timepicker:timeDefaults':
+    case UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS:
       return {
         from: 'now-15m',
         to: 'now',
@@ -104,7 +108,7 @@ function wrapQueryBarTopRowInContext(testProps: any) {
   return (
     <I18nProvider>
       <KibanaContextProvider services={services}>
-        <QueryBarTopRow.WrappedComponent {...defaultOptions} {...testProps} />
+        <QueryBarTopRow {...defaultOptions} {...testProps} />
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -119,8 +123,8 @@ describe('QueryBarTopRowTopRow', () => {
     jest.clearAllMocks();
   });
 
-  it('Should render query and time picker', () => {
-    const component = mount(
+  it('Should render query and time picker', async () => {
+    const { getByText, getByTestId } = render(
       wrapQueryBarTopRowInContext({
         query: kqlQuery,
         screenTitle: 'Another Screen',
@@ -130,8 +134,8 @@ describe('QueryBarTopRowTopRow', () => {
       })
     );
 
-    expect(component.find(QUERY_INPUT_SELECTOR).length).toBe(1);
-    expect(component.find(TIMEPICKER_SELECTOR).length).toBe(1);
+    await waitFor(() => getByText(kqlQuery.query));
+    await waitFor(() => getByTestId('superDatePickerShowDatesButton'));
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {

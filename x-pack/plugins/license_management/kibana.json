@@ -1,0 +1,14 @@
+{
+  "id": "licenseManagement",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["home", "licensing", "management", "features"],
+  "optionalPlugins": ["telemetry"],
+  "configPath": ["xpack", "license_management"],
+  "extraPublicDirs": ["common/constants"],
+  "requiredBundles": [
+    "telemetryManagementSection",
+    "kibanaReact"
+  ]
+}

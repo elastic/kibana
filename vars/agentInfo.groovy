@@ -1,5 +1,5 @@
 def print() {
-  try {
+  catchError(catchInterruptions: false, buildResult: null) {
     def startTime = sh(script: "date -d '-3 minutes' -Iseconds | sed s/+/%2B/", returnStdout: true).trim()
     def endTime = sh(script: "date -d '+1 hour 30 minutes' -Iseconds | sed s/+/%2B/", returnStdout: true).trim()
 
@@ -34,8 +34,6 @@ def print() {
       echo 'SSH Command:'
       echo "ssh -F ssh_config \$(hostname --ip-address)"
     """, label: "Worker/Agent/Node debug links"
-  } catch(ex) {
-    print ex.toString()
   }
 }
 

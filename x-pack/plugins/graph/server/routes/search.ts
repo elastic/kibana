@@ -6,8 +6,8 @@
 
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 
 export function registerSearchRoute({
   router,
@@ -22,7 +22,7 @@ export function registerSearchRoute({
       validate: {
         body: schema.object({
           index: schema.string(),
-          body: schema.object({}, { allowUnknowns: true }),
+          body: schema.object({}, { unknowns: 'allow' }),
         }),
       },
     },
@@ -31,29 +31,35 @@ export function registerSearchRoute({
         {
           core: {
             uiSettings: { client: uiSettings },
-            elasticsearch: {
-              dataClient: { callAsCurrentUser: callCluster },
-            },
+            elasticsearch: { client: esClient },
           },
         },
         request,
         response
       ) => {
         verifyApiAccess(licenseState);
-        const includeFrozen = await uiSettings.get<boolean>('search:includeFrozen');
+        licenseState.notifyUsage('Graph');
+        const includeFrozen = await uiSettings.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
         try {
           return response.ok({
             body: {
-              resp: await callCluster('search', {
-                index: request.body.index,
-                body: request.body.body,
-                rest_total_hits_as_int: true,
-                ignore_throttled: !includeFrozen,
-              }),
+              resp: (
+                await esClient.asCurrentUser.search({
+                  index: request.body.index,
+                  body: request.body.body,
+                  track_total_hits: true,
+                  ignore_throttled: !includeFrozen,
+                })
+              ).body,
             },
           });
         } catch (error) {
-          throw Boom.boomify(error, { statusCode: error.statusCode || 500 });
+          return response.customError({
+            statusCode: error.statusCode || 500,
+            body: {
+              message: error.message,
+            },
+          });
         }
       }
     )

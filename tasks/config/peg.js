@@ -25,4 +25,8 @@ module.exports = {
       allowedStartRules: ['start', 'Literal'],
     },
   },
+  timelion_chain: {
+    src: 'src/plugins/vis_type_timelion/public/chain.peg',
+    dest: 'src/plugins/vis_type_timelion/public/_generated_/chain.js',
+  },
 };

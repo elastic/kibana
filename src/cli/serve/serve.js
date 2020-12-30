@@ -17,18 +17,17 @@
  * under the License.
  */
 
+import { set as lodashSet } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
+import { getConfigPath } from '@kbn/utils';
 import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { fromRoot } from '../../core/server/utils';
-import { getConfigPath } from '../../core/server/path';
 import { bootstrap } from '../../core/server';
-import { readKeystore } from './read_keystore';
-
-import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
+import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {
   try {
@@ -43,20 +42,12 @@ function canRequire(path) {
   }
 }
 
-const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
-const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
+const DEV_MODE_PATH = resolve(__dirname, '../../dev/cli_dev_mode');
+const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
 
-const REPL_PATH = resolve(__dirname, '../repl');
-const CAN_REPL = canRequire(REPL_PATH);
-
-// xpack is installed in both dev and the distributable, it's optional if
-// install is a link to the source, not an actual install
-const XPACK_DIR = resolve(__dirname, '../../../x-pack');
-const XPACK_INSTALLED = canRequire(XPACK_DIR);
-
-const pathCollector = function() {
+const pathCollector = function () {
   const paths = [];
-  return function(path) {
+  return function (path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
@@ -67,7 +58,7 @@ const pluginDirCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
 function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
-  const set = _.partial(_.set, rawConfig);
+  const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);
@@ -78,10 +69,9 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   if (opts.dev) {
     set('env', 'development');
-    set('optimize.watch', true);
 
     if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'kibana');
+      set('elasticsearch.username', 'kibana_system');
     }
 
     if (!has('elasticsearch.password')) {
@@ -90,7 +80,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
     if (opts.ssl) {
       // @kbn/dev-utils is part of devDependencies
-      const { CA_CERT_PATH } = require('@kbn/dev-utils');
+      const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
       const customElasticsearchHosts = opts.elasticsearch
         ? opts.elasticsearch.split(',')
         : [].concat(get('elasticsearch.hosts') || []);
@@ -102,13 +92,16 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       }
       ensureNotDefined('server.ssl.certificate');
       ensureNotDefined('server.ssl.key');
+      ensureNotDefined('server.ssl.keystore.path');
+      ensureNotDefined('server.ssl.truststore.path');
+      ensureNotDefined('server.ssl.certificateAuthorities');
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
 
       const elasticsearchHosts = (
         (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
           'https://localhost:9200',
         ]
-      ).map(hostUrl => {
+      ).map((hostUrl) => {
         const parsedUrl = url.parse(hostUrl);
         if (parsedUrl.hostname !== 'localhost') {
           throw new Error(
@@ -119,8 +112,9 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       });
 
       set('server.ssl.enabled', true);
-      set('server.ssl.certificate', DEV_SSL_CERT_PATH);
-      set('server.ssl.key', DEV_SSL_KEY_PATH);
+      set('server.ssl.certificate', KBN_CERT_PATH);
+      set('server.ssl.key', KBN_KEY_PATH);
+      set('server.ssl.certificateAuthorities', CA_CERT_PATH);
       set('elasticsearch.hosts', elasticsearchHosts);
       set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }
@@ -134,30 +128,16 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.verbose) set('logging.verbose', true);
   if (opts.logFile) set('logging.dest', opts.logFile);
 
-  if (opts.optimize) {
-    set('server.autoListen', false);
-    set('plugins.initialize', false);
-  }
-
   set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
-  set(
-    'plugins.paths',
-    _.compact(
-      [].concat(
-        get('plugins.paths'),
-        opts.pluginPath,
-        XPACK_INSTALLED && !opts.oss ? [XPACK_DIR] : []
-      )
-    )
-  );
+  set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
   merge(extraCliOptions);
-  merge(readKeystore(get('path.data')));
+  merge(readKeystore());
 
   return rawConfig;
 }
 
-export default function(program) {
+export default function (program) {
   const command = program.command('serve');
 
   command
@@ -181,7 +161,7 @@ export default function(program) {
       'A path to scan for plugins, this can be specified multiple ' +
         'times to specify multiple directories',
       pluginDirCollector,
-      [fromRoot('plugins'), fromRoot('src/legacy/core_plugins')]
+      [fromRoot('plugins')]
     )
     .option(
       '--plugin-path <path>',
@@ -191,11 +171,7 @@ export default function(program) {
       []
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
-    .option('--optimize', 'Optimize and then stop the server');
-
-  if (CAN_REPL) {
-    command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
-  }
+    .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (!IS_KIBANA_DISTRIBUTABLE) {
     command
@@ -206,20 +182,22 @@ export default function(program) {
       );
   }
 
-  if (CAN_CLUSTER) {
+  if (DEV_MODE_SUPPORTED) {
     command
       .option('--dev', 'Run the server with development mode defaults')
-      .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
+      .option('--dist', 'Use production assets from kbn/optimizer')
       .option(
         '--no-base-path',
         "Don't put a proxy in front of the dev server, which adds a random basePath"
       )
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
+      .option('--no-optimizer', 'Disable the kbn/optimizer completely')
+      .option('--no-cache', 'Disable the kbn/optimizer cache')
       .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
 
-  command.action(async function(opts) {
+  command.action(async function (opts) {
     if (opts.dev && opts.devConfig !== false) {
       try {
         const kbnDevConfig = fromRoot('config/kibana.dev.yml');
@@ -236,12 +214,10 @@ export default function(program) {
       configs: [].concat(opts.config || []),
       cliArgs: {
         dev: !!opts.dev,
-        open: !!opts.open,
         envName: unknownOptions.env ? unknownOptions.env.name : undefined,
         quiet: !!opts.quiet,
         silent: !!opts.silent,
         watch: !!opts.watch,
-        repl: !!opts.repl,
         runExamples: !!opts.runExamples,
         // We want to run without base path when the `--run-examples` flag is given so that we can use local
         // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
@@ -250,13 +226,15 @@ export default function(program) {
         // elastic.co links.
         basePath: opts.runExamples ? false : !!opts.basePath,
         optimize: !!opts.optimize,
+        disableOptimizer: !opts.optimizer,
         oss: !!opts.oss,
+        cache: !!opts.cache,
+        dist: !!opts.dist,
       },
       features: {
-        isClusterModeSupported: CAN_CLUSTER,
-        isReplModeSupported: CAN_REPL,
+        isCliDevModeSupported: DEV_MODE_SUPPORTED,
       },
-      applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
+      applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });
   });
 }

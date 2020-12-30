@@ -29,23 +29,23 @@ interface Props {
   [key: string]: any;
 }
 
-export const MultiSelectField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const MultiSelectField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
     <EuiFormRow
       label={field.label}
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
-      describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      describedByIds={idAria ? [idAria] : undefined}
+      {...rest}
     >
       <EuiSelectable
         allowExclusions={false}
         height={300}
-        onChange={options => {
+        onChange={(options) => {
           field.setValue(options);
         }}
         options={field.value as any[]}

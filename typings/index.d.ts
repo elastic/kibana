@@ -23,17 +23,14 @@ declare module '*.html' {
   export default template;
 }
 
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
-}[keyof T];
+declare module '*.png' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}
 
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
-type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
-
-type DeeplyMockedKeys<T> = {
-  [P in keyof T]: T[P] extends (...args: any[]) => any
-    ? jest.MockInstance<ReturnType<T[P]>, Parameters<T[P]>>
-    : DeeplyMockedKeys<T[P]>;
-} &
-  T;
+declare module '*.svg' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default content;
+}

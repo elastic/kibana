@@ -60,7 +60,7 @@ export function MonitoringClusterAlertsProvider({ getService, getPageObjects }) 
       const listingRows = await this.getOverviewAlerts();
       const alertIcons = await retry.try(async () => {
         const elements = await find.allByCssSelector(SUBJ_OVERVIEW_ICONS);
-        return await mapAsync(elements, async element => {
+        return await mapAsync(elements, async (element) => {
           return await element.getVisibleText();
         });
       });

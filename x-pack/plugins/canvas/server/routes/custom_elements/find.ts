@@ -7,10 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { SavedObjectAttributes } from 'src/core/server';
 import { RouteInitializerDeps } from '../';
-import {
-  CUSTOM_ELEMENT_TYPE,
-  API_ROUTE_CUSTOM_ELEMENT,
-} from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CUSTOM_ELEMENT_TYPE, API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
 
 export function initializeFindCustomElementsRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
@@ -53,7 +50,7 @@ export function initializeFindCustomElementsRoute(deps: RouteInitializerDeps) {
         return response.ok({
           body: {
             total: customElements.total,
-            customElements: customElements.saved_objects.map(hit => ({
+            customElements: customElements.saved_objects.map((hit) => ({
               id: hit.id,
               ...hit.attributes,
             })),

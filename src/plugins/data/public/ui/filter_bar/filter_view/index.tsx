@@ -20,12 +20,15 @@
 import { EuiBadge, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
-import { FilterLabel } from '../filter_editor/lib/filter_label';
-import { esFilters } from '../../..';
+import { FilterLabel } from '../';
+import { Filter, isFilterPinned } from '../../../../common';
+import type { FilterLabelStatus } from '../filter_item';
 
 interface Props {
-  filter: esFilters.Filter;
+  filter: Filter;
   valueLabel: string;
+  filterLabelStatus: FilterLabelStatus;
+  errorMessage?: string;
   [propName: string]: any;
 }
 
@@ -34,16 +37,20 @@ export const FilterView: FC<Props> = ({
   iconOnClick,
   onClick,
   valueLabel,
+  errorMessage,
+  filterLabelStatus,
   ...rest
 }: Props) => {
   const [ref, innerText] = useInnerText();
 
-  let title = i18n.translate('data.filter.filterBar.moreFilterActionsMessage', {
-    defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
-    values: { innerText },
-  });
+  let title =
+    errorMessage ||
+    i18n.translate('data.filter.filterBar.moreFilterActionsMessage', {
+      defaultMessage: 'Filter: {innerText}. Select for more filter actions.',
+      values: { innerText },
+    });
 
-  if (esFilters.isFilterPinned(filter)) {
+  if (isFilterPinned(filter)) {
     title = `${i18n.translate('data.filter.filterBar.pinnedFilterPrefix', {
       defaultMessage: 'Pinned',
     })} ${title}`;
@@ -57,10 +64,11 @@ export const FilterView: FC<Props> = ({
   return (
     <EuiBadge
       title={title}
+      color="hollow"
       iconType="cross"
       iconSide="right"
       closeButtonProps={{
-        // Removing tab focus on close button because the same option can be optained through the context menu
+        // Removing tab focus on close button because the same option can be obtained through the context menu
         // Also, we may want to add a `DEL` keyboard press functionality
         tabIndex: -1,
       }}
@@ -75,7 +83,11 @@ export const FilterView: FC<Props> = ({
       {...rest}
     >
       <span ref={ref}>
-        <FilterLabel filter={filter} valueLabel={valueLabel} />
+        <FilterLabel
+          filter={filter}
+          valueLabel={valueLabel}
+          filterLabelStatus={filterLabelStatus}
+        />
       </span>
     </EuiBadge>
   );

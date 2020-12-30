@@ -1,6 +1,7 @@
 # kibana-legacy
 
-This plugin will contain several helpers and services to integrate pieces of the legacy Kibana app with the new Kibana platform.
+This plugin contains several helpers and services to integrate pieces of the legacy Kibana app with the new Kibana platform.
 
-Currently, the only service offered is the ability to register apps which are rendered in the legacy "kibana" plugin.
+This plugin will be removed once all parts of legacy Kibana are removed from other plugins.
 
+All of this plugin should be considered deprecated. New code should never integrate with the services provided from this plugin.

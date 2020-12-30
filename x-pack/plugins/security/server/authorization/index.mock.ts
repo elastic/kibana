@@ -3,17 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Actions } from '.';
 import { AuthorizationMode } from './mode';
+import { actionsMock } from './actions/actions.mock';
 
 export const authorizationMock = {
   create: ({
     version = 'mock-version',
     applicationName = 'mock-application',
   }: { version?: string; applicationName?: string } = {}) => ({
-    actions: new Actions(version),
+    actions: actionsMock.create(version),
     checkPrivilegesWithRequest: jest.fn(),
+    checkElasticsearchPrivilegesWithRequest: jest.fn(),
     checkPrivilegesDynamicallyWithRequest: jest.fn(),
     checkSavedObjectsPrivilegesWithRequest: jest.fn(),
     applicationName,

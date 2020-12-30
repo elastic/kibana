@@ -16,28 +16,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { App, LegacyApp, Mounter, AppUnmount } from './types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { AppUnmount, Mounter } from './types';
 import { ApplicationService } from './application_service';
 
 /** @internal */
 export type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
 /** @internal */
-export type EitherApp = App | LegacyApp;
-/** @internal */
 export type MockedUnmount = jest.Mocked<AppUnmount>;
+
 /** @internal */
-export type MockedMounter<T extends EitherApp> = jest.Mocked<Mounter<jest.Mocked<T>>>;
+export interface Mountable {
+  mounter: MockedMounter;
+  unmount: MockedUnmount;
+}
+
 /** @internal */
-export type MockedMounterTuple<T extends EitherApp> = [
-  string,
-  { mounter: MockedMounter<T>; unmount: MockedUnmount }
-];
+export type MockedMounter = jest.Mocked<Mounter>;
 /** @internal */
-export type MockedMounterMap<T extends EitherApp> = Map<
-  string,
-  { mounter: MockedMounter<T>; unmount: MockedUnmount }
->;
+export type MockedMounterTuple = [string, Mountable];
+/** @internal */
+export type MockedMounterMap = Map<string, Mountable>;
 /** @internal */
 export type MockLifecycle<
   T extends keyof ApplicationService,

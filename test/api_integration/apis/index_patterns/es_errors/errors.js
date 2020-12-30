@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import { errors as esErrors } from 'elasticsearch';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import {
   isEsIndexNotFoundError,
@@ -30,7 +30,7 @@ import {
 
 import { getIndexNotFoundError, getDocNotFoundError } from './lib';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 

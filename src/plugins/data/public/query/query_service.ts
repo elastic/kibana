@@ -17,26 +17,43 @@
  * under the License.
  */
 
-import { CoreStart } from 'src/core/public';
+import { share } from 'rxjs/operators';
+import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { FilterManager } from './filter_manager';
+import { createAddToQueryLog } from './lib';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
+import { createQueryStateObservable } from './state_sync/create_global_query_observable';
+import { QueryStringManager, QueryStringContract } from './query_string';
+import { buildEsQuery, getEsQueryConfig } from '../../common';
+import { getUiSettings } from '../services';
+import { IndexPattern } from '..';
 
 /**
  * Query Service
  * @internal
  */
 
-export interface QueryServiceDependencies {
+interface QueryServiceSetupDependencies {
   storage: IStorageWrapper;
-  uiSettings: CoreStart['uiSettings'];
+  uiSettings: IUiSettingsClient;
 }
+
+interface QueryServiceStartDependencies {
+  savedObjectsClient: SavedObjectsClientContract;
+  storage: IStorageWrapper;
+  uiSettings: IUiSettingsClient;
+}
+
 export class QueryService {
   filterManager!: FilterManager;
   timefilter!: TimefilterSetup;
+  queryStringManager!: QueryStringContract;
 
-  public setup({ uiSettings, storage }: QueryServiceDependencies) {
+  state$!: ReturnType<typeof createQueryStateObservable>;
+
+  public setup({ storage, uiSettings }: QueryServiceSetupDependencies) {
     this.filterManager = new FilterManager(uiSettings);
 
     const timefilterService = new TimefilterService();
@@ -45,17 +62,43 @@ export class QueryService {
       storage,
     });
 
+    this.queryStringManager = new QueryStringManager(storage, uiSettings);
+
+    this.state$ = createQueryStateObservable({
+      filterManager: this.filterManager,
+      timefilter: this.timefilter,
+      queryString: this.queryStringManager,
+    }).pipe(share());
+
     return {
       filterManager: this.filterManager,
       timefilter: this.timefilter,
+      queryString: this.queryStringManager,
+      state$: this.state$,
     };
   }
 
-  public start(savedObjects: CoreStart['savedObjects']) {
+  public start({ savedObjectsClient, storage, uiSettings }: QueryServiceStartDependencies) {
     return {
+      addToQueryLog: createAddToQueryLog({
+        storage,
+        uiSettings,
+      }),
       filterManager: this.filterManager,
+      queryString: this.queryStringManager,
+      savedQueries: createSavedQueryService(savedObjectsClient),
+      state$: this.state$,
       timefilter: this.timefilter,
-      savedQueries: createSavedQueryService(savedObjects.client),
+      getEsQuery: (indexPattern: IndexPattern) => {
+        const timeFilter = this.timefilter.timefilter.createFilter(indexPattern);
+
+        return buildEsQuery(
+          indexPattern,
+          this.queryStringManager.getQuery(),
+          [...this.filterManager.getFilters(), ...(timeFilter ? [timeFilter] : [])],
+          getEsQueryConfig(getUiSettings())
+        );
+      },
     };
   }
 

@@ -4,17 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler } from 'kibana/server';
-import { LICENSE_CHECK_STATE } from '../../../licensing/server';
+import { KibanaResponseFactory, RequestHandler, RouteMethod } from 'kibana/server';
 
-export const createLicensedRouteHandler = <P, Q, B>(handler: RequestHandler<P, Q, B>) => {
-  const licensedRouteHandler: RequestHandler<P, Q, B> = (context, request, responseToolkit) => {
+export const createLicensedRouteHandler = <
+  P,
+  Q,
+  B,
+  M extends RouteMethod,
+  R extends KibanaResponseFactory
+>(
+  handler: RequestHandler<P, Q, B, M, R>
+) => {
+  const licensedRouteHandler: RequestHandler<P, Q, B, M, R> = (
+    context,
+    request,
+    responseToolkit
+  ) => {
     const { license } = context.licensing;
     const licenseCheck = license.check('security', 'basic');
-    if (
-      licenseCheck.state === LICENSE_CHECK_STATE.Unavailable ||
-      licenseCheck.state === LICENSE_CHECK_STATE.Invalid
-    ) {
+    if (licenseCheck.state === 'unavailable' || licenseCheck.state === 'invalid') {
       return responseToolkit.forbidden({ body: { message: licenseCheck.message! } });
     }
 

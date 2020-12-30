@@ -17,18 +17,18 @@
  * under the License.
  */
 
-export default function({ getService, loadTestFile }) {
+export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
-  describe('timelion app', function() {
+  describe('timelion app', function () {
     this.tags('ciGroup1');
 
-    before(async function() {
+    before(async function () {
       log.debug('Starting timelion before method');
-      browser.setWindowSize(1280, 800);
+      await browser.setWindowSize(1280, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
     });

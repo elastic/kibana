@@ -19,8 +19,6 @@
 
 import { dirname, relative, resolve, sep } from 'path';
 
-import chalk from 'chalk';
-
 import { chmod, createSymlink, isFile, mkdirp } from './fs';
 import { log } from './log';
 import { ProjectGraph, ProjectMap } from './projects';
@@ -37,34 +35,47 @@ export async function linkProjectExecutables(
   projectsByName: ProjectMap,
   projectGraph: ProjectGraph
 ) {
+  log.debug(`Linking package executables`);
+
+  // Find root and generate executables from dependencies for it
+  let rootProject = null;
+  let rootProjectDeps = [] as any;
   for (const [projectName, projectDeps] of projectGraph) {
     const project = projectsByName.get(projectName)!;
-    const binsDir = resolve(project.nodeModulesLocation, '.bin');
+    if (project.isSinglePackageJsonProject) {
+      rootProject = projectsByName.get(projectName);
+      rootProjectDeps = projectDeps;
+      break;
+    }
+  }
 
-    for (const projectDep of projectDeps) {
-      const executables = projectDep.getExecutables();
-      for (const name of Object.keys(executables)) {
-        const srcPath = executables[name];
+  if (!rootProject) {
+    throw new Error('Could not finding root project while linking package executables');
+  }
 
-        // existing logic from lerna -- ensure that the bin we are going to
-        // point to exists or ignore it
-        if (!(await isFile(srcPath))) {
-          continue;
-        }
+  // Prepare root project node_modules/.bin
+  const rootBinsDir = resolve(rootProject.nodeModulesLocation, '.bin');
+  for (const rootProjectDep of rootProjectDeps) {
+    const executables = rootProjectDep.getExecutables();
+    for (const name of Object.keys(executables)) {
+      const srcPath = executables[name];
 
-        const dest = resolve(binsDir, name);
-
-        // Get relative project path with normalized path separators.
-        const projectRelativePath = relative(project.path, srcPath)
-          .split(sep)
-          .join('/');
-
-        log.write(chalk`{dim [${project.name}]} ${name} -> {dim ${projectRelativePath}}`);
-
-        await mkdirp(dirname(dest));
-        await createSymlink(srcPath, dest, 'exec');
-        await chmod(dest, '755');
+      // existing logic from lerna -- ensure that the bin we are going to
+      // point to exists or ignore it
+      if (!(await isFile(srcPath))) {
+        continue;
       }
+
+      const dest = resolve(rootBinsDir, name);
+
+      // Get relative project path with normalized path separators.
+      const rootProjectRelativePath = relative(rootProject.path, srcPath).split(sep).join('/');
+
+      log.debug(`[${rootProject.name}] ${name} -> ${rootProjectRelativePath}`);
+
+      await mkdirp(dirname(dest));
+      await createSymlink(srcPath, dest, 'exec');
+      await chmod(dest, '755');
     }
   }
 }

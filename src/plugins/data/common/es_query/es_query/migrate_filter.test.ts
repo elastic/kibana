@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { isEqual, clone } from 'lodash';
+import { isEqual, cloneDeep } from 'lodash';
 import { migrateFilter, DeprecatedMatchPhraseFilter } from './migrate_filter';
 import { PhraseFilter, MatchAllFilter } from '../filters';
 
-describe('migrateFilter', function() {
+describe('migrateFilter', function () {
   const oldMatchPhraseFilter = ({
     query: {
       match: {
@@ -45,21 +45,21 @@ describe('migrateFilter', function() {
     meta: {},
   } as unknown) as PhraseFilter;
 
-  it('should migrate match filters of type phrase', function() {
+  it('should migrate match filters of type phrase', function () {
     const migratedFilter = migrateFilter(oldMatchPhraseFilter, undefined);
 
     expect(migratedFilter).toEqual(newMatchPhraseFilter);
   });
 
-  it('should not modify the original filter', function() {
-    const oldMatchPhraseFilterCopy = clone(oldMatchPhraseFilter, true);
+  it('should not modify the original filter', function () {
+    const oldMatchPhraseFilterCopy = cloneDeep(oldMatchPhraseFilter);
 
     migrateFilter(oldMatchPhraseFilter, undefined);
 
     expect(isEqual(oldMatchPhraseFilter, oldMatchPhraseFilterCopy)).toBe(true);
   });
 
-  it('should return the original filter if no migration is necessary', function() {
+  it('should return the original filter if no migration is necessary', function () {
     const originalFilter = {
       match_all: {},
     } as MatchAllFilter;

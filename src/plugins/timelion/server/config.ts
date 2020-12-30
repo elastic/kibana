@@ -17,12 +17,16 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export const configSchema = {
+  schema: schema.object({
+    graphiteUrls: schema.maybe(schema.arrayOf(schema.string())),
+    enabled: schema.boolean({ defaultValue: true }),
+    ui: schema.object({
+      enabled: schema.boolean({ defaultValue: true }),
+    }),
+  }),
+};
+
+export type TimelionConfigType = TypeOf<typeof configSchema.schema>;

@@ -17,4 +17,5 @@
  * under the License.
  */
 
+export * from './normalize_error';
 export * from './remove_leading_slash';

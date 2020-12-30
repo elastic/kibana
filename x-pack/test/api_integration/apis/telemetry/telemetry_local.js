@@ -34,36 +34,31 @@ const disableCollection = {
   },
 };
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
 
   describe('/api/telemetry/v2/clusters/_stats with monitoring disabled', () => {
     before('', async () => {
-      await esSupertest
-        .put('/_cluster/settings')
-        .send(disableCollection)
-        .expect(200);
-      await new Promise(r => setTimeout(r, 1000));
+      await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
+      await new Promise((r) => setTimeout(r, 1000));
     });
 
     it('should pull local stats and validate data types', async () => {
-      const timeRange = {
-        min: '2018-07-23T22:07:00Z',
-        max: '2018-07-23T22:13:00Z',
-      };
-
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timeRange, unencrypted: true })
+        .send({ unencrypted: true })
         .expect(200);
 
       expect(body.length).to.be(1);
       const stats = body[0];
 
       expect(stats.collection).to.be('local');
-      expect(stats.license.issuer).to.be('elasticsearch');
+      expect(stats.collectionSource).to.be('local_xpack');
+
+      // License should exist in X-Pack
+      expect(stats.license.issuer).to.be.a('string');
       expect(stats.license.status).to.be('active');
 
       expect(stats.stack_stats.kibana.count).to.be(1);
@@ -79,9 +74,10 @@ export default function({ getService }) {
       expect(stats.stack_stats.kibana.plugins.apm.services_per_agent).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.infraops.last_24_hours).to.be.an('object');
       expect(stats.stack_stats.kibana.plugins.kql.defaultQueryLanguage).to.be.a('string');
-      expect(stats.stack_stats.kibana.plugins['maps-telemetry'].attributes.timeCaptured).to.be.a(
-        'string'
-      );
+      expect(stats.stack_stats.kibana.plugins.maps.timeCaptured).to.be.a('string');
+      expect(stats.stack_stats.kibana.plugins.maps.attributes).to.be(undefined);
+      expect(stats.stack_stats.kibana.plugins.maps.id).to.be(undefined);
+      expect(stats.stack_stats.kibana.plugins.maps.type).to.be(undefined);
 
       expect(stats.stack_stats.kibana.plugins.reporting.enabled).to.be(true);
       expect(stats.stack_stats.kibana.plugins.rollups.index_patterns).to.be.an('object');
@@ -107,15 +103,10 @@ export default function({ getService }) {
     });
 
     it('should pull local stats and validate fields', async () => {
-      const timeRange = {
-        min: '2018-07-23T22:07:00Z',
-        max: '2018-07-23T22:13:00Z',
-      };
-
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timeRange, unencrypted: true })
+        .send({ unencrypted: true })
         .expect(200);
 
       const stats = body[0];
@@ -182,7 +173,7 @@ export default function({ getService }) {
         'version',
       ];
 
-      expect(expected.every(m => actual.includes(m))).to.be.ok();
+      expect(expected.every((m) => actual.includes(m))).to.be.ok();
     });
   });
 }

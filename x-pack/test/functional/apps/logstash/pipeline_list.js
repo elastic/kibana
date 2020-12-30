@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const random = getService('random');
@@ -35,25 +35,15 @@ export default function({ getService, getPageObjects }) {
 
     it('shows example pipelines', async () => {
       const rows = await pipelineList.readRows();
-      const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
+      const rowsWithoutTime = rows.map((row) => omit(row, 'lastModified'));
 
-      for (const time of rows.map(row => row.lastModified)) {
+      for (const time of rows.map((row) => row.lastModified)) {
         // last modified is a relative time string. Check for 'ago' suffix
-        expect(time)
-          .to.be.a('string')
-          .match(/ ago$/);
+        expect(time).to.be.a('string').match(/ ago$/);
       }
 
-      const expectedRows = [
-        {
-          selected: false,
-          id: 'tweets_and_beats',
-          description: 'ingest tweets and beats',
-          username: 'elastic',
-        },
-      ];
-
-      for (let emptyPipelineId = 1; emptyPipelineId <= 19; ++emptyPipelineId) {
+      let expectedRows = [];
+      for (let emptyPipelineId = 1; emptyPipelineId <= 21; ++emptyPipelineId) {
         expectedRows.push({
           selected: false,
           id: `empty_pipeline_${emptyPipelineId}`,
@@ -61,6 +51,10 @@ export default function({ getService, getPageObjects }) {
           username: 'elastic',
         });
       }
+      expectedRows = expectedRows.sort((a, b) => {
+        return a.id.localeCompare(b.id);
+      });
+      expectedRows.pop();
 
       expect(rowsWithoutTime).to.eql(expectedRows);
     });
@@ -137,26 +131,24 @@ export default function({ getService, getPageObjects }) {
       it('takes user to the second page', async () => {
         await pipelineList.clickNextPage();
         const rows = await pipelineList.readRows();
-        const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
+        const rowsWithoutTime = rows.map((row) => omit(row, 'lastModified'));
 
-        for (const time of rows.map(row => row.lastModified)) {
+        for (const time of rows.map((row) => row.lastModified)) {
           // last modified is a relative time string. Check for 'ago' suffix
-          expect(time)
-            .to.be.a('string')
-            .match(/ ago$/);
+          expect(time).to.be.a('string').match(/ ago$/);
         }
 
         expect(rowsWithoutTime).to.eql([
           {
             selected: false,
-            id: 'empty_pipeline_20',
+            id: 'empty_pipeline_9',
             description: 'an empty pipeline',
             username: 'elastic',
           },
           {
             selected: false,
-            id: 'empty_pipeline_21',
-            description: 'an empty pipeline',
+            id: 'tweets_and_beats',
+            description: 'ingest tweets and beats',
             username: 'elastic',
           },
         ]);

@@ -1,6 +1,6 @@
 [role="xpack"]
 [[dev-settings-kb]]
-=== Development tools settings in Kibana
+=== Development tools settings in {kib}
 ++++
 <titleabbrev>Development tools settings</titleabbrev>
 ++++
@@ -12,12 +12,20 @@ They are enabled by default.
 [[grok-settings]]
 ==== Grok Debugger settings
 
-`xpack.grokdebugger.enabled`::
-Set to `true` (default) to enable the <<xpack-grokdebugger,Grok Debugger>>.
+[cols="2*<"]
+|===
+| `xpack.grokdebugger.enabled` {ess-icon}
+  | Set to `true` to enable the <<xpack-grokdebugger,Grok Debugger>>. Defaults to `true`.
+
+|===
 
 [float]
 [[profiler-settings]]
-==== {searchprofiler} Settings
+==== {searchprofiler} settings
 
-`xpack.searchprofiler.enabled`::
-Set to `true` (default) to enable the <<xpack-profiler,{searchprofiler}>>.
+[cols="2*<"]
+|===
+| `xpack.searchprofiler.enabled`
+  | Set to `true` to enable the <<xpack-profiler,{searchprofiler}>>. Defaults to `true`.
+
+|===

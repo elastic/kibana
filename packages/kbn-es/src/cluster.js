@@ -35,13 +35,13 @@ const { createCliError } = require('./errors');
 const { promisify } = require('util');
 const treeKillAsync = promisify(require('tree-kill'));
 const { parseSettings, SettingsFilter } = require('./settings');
-const { CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
+const { CA_CERT_PATH, ES_P12_PATH, ES_P12_PASSWORD } = require('@kbn/dev-utils');
 const readFile = util.promisify(fs.readFile);
 
 // listen to data on stream until map returns anything but undefined
 const first = (stream, map) =>
-  new Promise(resolve => {
-    const onData = data => {
+  new Promise((resolve) => {
+    const onData = (data) => {
       const result = map(data);
       if (result !== undefined) {
         resolve(result);
@@ -180,7 +180,7 @@ exports.Cluster = class Cluster {
     await Promise.race([
       // wait for native realm to be setup and es to be started
       Promise.all([
-        first(this._process.stdout, data => {
+        first(this._process.stdout, (data) => {
           if (/started/.test(data)) {
             return true;
           }
@@ -207,7 +207,7 @@ exports.Cluster = class Cluster {
     this._exec(installPath, options);
 
     // log native realm setup errors so they aren't uncaught
-    this._nativeRealmSetup.catch(error => {
+    this._nativeRealmSetup.catch((error) => {
       this._log.error(error);
       this.stop();
     });
@@ -261,9 +261,9 @@ exports.Cluster = class Cluster {
     const esArgs = [].concat(options.esArgs || []);
     if (this._ssl) {
       esArgs.push('xpack.security.http.ssl.enabled=true');
-      esArgs.push(`xpack.security.http.ssl.key=${ES_KEY_PATH}`);
-      esArgs.push(`xpack.security.http.ssl.certificate=${ES_CERT_PATH}`);
-      esArgs.push(`xpack.security.http.ssl.certificate_authorities=${CA_CERT_PATH}`);
+      esArgs.push(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+      esArgs.push(`xpack.security.http.ssl.keystore.type=PKCS12`);
+      esArgs.push(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
     }
 
     const args = parseSettings(extractConfigFiles(esArgs, installPath, { log: this._log }), {
@@ -274,6 +274,15 @@ exports.Cluster = class Cluster {
     );
 
     this._log.debug('%s %s', ES_BIN, args.join(' '));
+
+    options.esEnvVars = options.esEnvVars || {};
+
+    // ES now automatically sets heap size to 50% of the machine's available memory
+    // so we need to set it to a smaller size for local dev and CI
+    // especially because we currently run many instances of ES on the same machine during CI
+    options.esEnvVars.ES_JAVA_OPTS =
+      (options.esEnvVars.ES_JAVA_OPTS ? `${options.esEnvVars.ES_JAVA_OPTS} ` : '') +
+      '-Xms1g -Xmx1g';
 
     this._process = execa(ES_BIN, args, {
       cwd: installPath,
@@ -287,7 +296,7 @@ exports.Cluster = class Cluster {
     });
 
     // parse log output to find http port
-    const httpPort = first(this._process.stdout, data => {
+    const httpPort = first(this._process.stdout, (data) => {
       const match = data.toString('utf8').match(/HttpServer.+publish_address {[0-9.]+:([0-9]+)/);
 
       if (match) {
@@ -296,7 +305,7 @@ exports.Cluster = class Cluster {
     });
 
     // once the http port is available setup the native realm
-    this._nativeRealmSetup = httpPort.then(async port => {
+    this._nativeRealmSetup = httpPort.then(async (port) => {
       const caCert = await this._caCertPromise;
       const nativeRealm = new NativeRealm({
         port,
@@ -309,19 +318,19 @@ exports.Cluster = class Cluster {
     });
 
     // parse and forward es stdout to the log
-    this._process.stdout.on('data', data => {
+    this._process.stdout.on('data', (data) => {
       const lines = parseEsLog(data.toString());
-      lines.forEach(line => {
+      lines.forEach((line) => {
         this._log.info(line.formattedMessage);
       });
     });
 
     // forward es stderr to the log
-    this._process.stderr.on('data', data => this._log.error(chalk.red(data.toString())));
+    this._process.stderr.on('data', (data) => this._log.error(chalk.red(data.toString())));
 
     // observe the exit code of the process and reflect in _outcome promies
-    const exitCode = new Promise(resolve => this._process.once('exit', resolve));
-    this._outcome = exitCode.then(code => {
+    const exitCode = new Promise((resolve) => this._process.once('exit', resolve));
+    this._outcome = exitCode.then((code) => {
       if (this._stopCalled) {
         return;
       }

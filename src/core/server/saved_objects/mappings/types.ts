@@ -17,47 +17,150 @@
  * under the License.
  */
 
-// FieldMapping isn't 1:1 with the options available,
-// modify as needed.
-export interface CoreFieldMapping {
-  type: string;
-  fields?: {
-    [subfield: string]: {
-      type: string;
-    };
-  };
+/**
+ * Describe a saved object type mapping.
+ *
+ * @example
+ * ```ts
+ * const typeDefinition: SavedObjectsTypeMappingDefinition = {
+ *   properties: {
+ *     enabled: {
+ *       type: "boolean"
+ *     },
+ *     sendUsageFrom: {
+ *       ignore_above: 256,
+ *       type: "keyword"
+ *     },
+ *     lastReported: {
+ *       type: "date"
+ *     },
+ *     lastVersionChecked: {
+ *       ignore_above: 256,
+ *       type: "keyword"
+ *     },
+ *   }
+ * }
+ * ```
+ *
+ * @public
+ */
+export interface SavedObjectsTypeMappingDefinition {
+  /** The dynamic property of the mapping, either `false` or `'strict'`. If
+   * unspecified `dynamic: 'strict'` will be inherited from the top-level
+   * index mappings. */
+  dynamic?: false | 'strict';
+  /** The underlying properties of the type mapping */
+  properties: SavedObjectsMappingProperties;
 }
 
-// FieldMapping isn't 1:1 with the options available,
-// modify as needed.
-export interface ComplexFieldMapping {
+/**
+ * A map of {@link SavedObjectsTypeMappingDefinition | saved object type mappings}
+ *
+ * @example
+ * ```ts
+ * const mappings: SavedObjectsTypeMappingDefinitions = {
+ *   someType: {
+ *     properties: {
+ *       enabled: {
+ *         type: "boolean"
+ *       },
+ *       field: {
+ *         type: "keyword"
+ *       },
+ *     },
+ *   },
+ *   anotherType: {
+ *     properties: {
+ *       enabled: {
+ *         type: "boolean"
+ *       },
+ *       lastReported: {
+ *         type: "date"
+ *       },
+ *     },
+ *   },
+
+ * }
+ * ```
+ * @remark This is the format for the legacy `mappings.json` savedObject mapping file.
+ *
+ * @internal
+ */
+export interface SavedObjectsTypeMappingDefinitions {
+  [type: string]: SavedObjectsTypeMappingDefinition;
+}
+
+/**
+ * Describe the fields of a {@link SavedObjectsTypeMappingDefinition | saved object type}.
+ *
+ * @public
+ */
+export interface SavedObjectsMappingProperties {
+  [field: string]: SavedObjectsFieldMapping;
+}
+
+/**
+ * Describe a {@link SavedObjectsTypeMappingDefinition | saved object type mapping} field.
+ *
+ * Please refer to {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html | elasticsearch documentation}
+ * For the mapping documentation
+ *
+ * @public
+ */
+export type SavedObjectsFieldMapping =
+  | SavedObjectsCoreFieldMapping
+  | SavedObjectsComplexFieldMapping;
+
+/** @internal */
+export interface IndexMapping {
   dynamic?: string;
-  type?: string;
-  properties: MappingProperties;
+  properties: SavedObjectsMappingProperties;
+  _meta?: IndexMappingMeta;
 }
 
-export type FieldMapping = CoreFieldMapping | ComplexFieldMapping;
-
-export interface MappingProperties {
-  [field: string]: FieldMapping;
-}
-
-export interface SavedObjectsMapping {
-  pluginId: string;
-  properties: MappingProperties;
-}
-
-export interface MappingMeta {
+/** @internal */
+export interface IndexMappingMeta {
   // A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
   // with each key being a root-level mapping property, and each value being
   // the md5 hash of that mapping's value when the index was created.
   migrationMappingPropertyHashes?: { [k: string]: string };
 }
 
-// IndexMapping isn't 1:1 with the options available,
-// modify as needed.
-export interface IndexMapping {
-  dynamic?: string;
-  properties: MappingProperties;
-  _meta?: MappingMeta;
+/**
+ * See {@link SavedObjectsFieldMapping} for documentation.
+ *
+ * @public
+ */
+export interface SavedObjectsCoreFieldMapping {
+  type: string;
+  null_value?: number | boolean | string;
+  index?: boolean;
+  doc_values?: boolean;
+  fields?: {
+    [subfield: string]: {
+      type: string;
+      ignore_above?: number;
+    };
+  };
+}
+
+/**
+ * See {@link SavedObjectsFieldMapping} for documentation.
+ *
+ * @public
+ */
+export interface SavedObjectsComplexFieldMapping {
+  /**
+   * The dynamic property of the mapping, either `false` or `'strict'`. If
+   * unspecified `dynamic: 'strict'` will be inherited from the top-level
+   * index mappings.
+   *
+   * Note: To limit the number of mapping fields Saved Object types should
+   * *never* use `dynamic: true`.
+   */
+  dynamic?: false | 'strict';
+  enabled?: boolean;
+  doc_values?: boolean;
+  type?: string;
+  properties: SavedObjectsMappingProperties;
 }

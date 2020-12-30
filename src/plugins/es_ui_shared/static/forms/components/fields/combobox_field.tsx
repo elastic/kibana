@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { FieldHook, VALIDATION_TYPES, FieldValidateResponse } from '../../hook_form_lib';
 
@@ -30,7 +30,7 @@ interface Props {
   [key: string]: any;
 }
 
-export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
+export const ComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Props) => {
   // Errors for the comboBox value (the "array")
   const errorMessageField = field.getErrorsMessages();
 
@@ -69,12 +69,12 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
     field.setValue(newValue);
   };
 
-  const onComboChange = (options: EuiComboBoxOptionProps[]) => {
-    field.setValue(options.map(option => option.label));
+  const onComboChange = (options: EuiComboBoxOptionOption[]) => {
+    field.setValue(options.map((option) => option.label));
   };
 
   const onSearchComboChange = (value: string) => {
-    if (value) {
+    if (value !== undefined) {
       field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
     }
   };
@@ -83,19 +83,19 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
     <EuiFormRow
       label={field.label}
       labelAppend={field.labelAppend}
-      helpText={field.helpText}
+      helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
-      describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      describedByIds={idAria ? [idAria] : undefined}
+      {...rest}
     >
       <EuiComboBox
         noSuggestions
         placeholder={i18n.translate('esUi.forms.comboBoxField.placeHolderText', {
           defaultMessage: 'Type and then hit "ENTER"',
         })}
-        selectedOptions={(field.value as any[]).map(v => ({ label: v }))}
+        selectedOptions={(field.value as any[]).map((v) => ({ label: v }))}
         onCreateOption={onCreateComboOption}
         onChange={onComboChange}
         onSearchChange={onSearchComboChange}

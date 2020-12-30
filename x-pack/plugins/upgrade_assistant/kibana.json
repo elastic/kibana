@@ -1,0 +1,9 @@
+{
+  "id": "upgradeAssistant",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "configPath": ["xpack", "upgrade_assistant"],
+  "requiredPlugins": ["management", "licensing", "features"],
+  "optionalPlugins": ["cloud", "usageCollection"]
+}

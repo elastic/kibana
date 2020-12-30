@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import {
   TutorialsRegistry,
   TutorialsRegistrySetup,
@@ -26,9 +26,12 @@ import {
   SampleDataRegistryStart,
 } from './services';
 import { UsageCollectionSetup } from '../../usage_collection/server';
+import { capabilitiesProvider } from './capabilities_provider';
+import { sampleDataTelemetry } from './saved_objects';
+import { registerRoutes } from './routes';
 
 interface HomeServerPluginSetupDependencies {
-  usage_collection?: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
@@ -37,9 +40,15 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
   private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
+    core.capabilities.registerProvider(capabilitiesProvider);
+    core.savedObjects.registerType(sampleDataTelemetry);
+
+    const router = core.http.createRouter();
+    registerRoutes(router);
+
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core) },
-      sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usage_collection) },
+      sampleData: { ...this.sampleDataRegistry.setup(core, plugins.usageCollection) },
     };
   }
 

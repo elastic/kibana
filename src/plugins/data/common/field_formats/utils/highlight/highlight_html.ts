@@ -24,7 +24,7 @@ import { htmlTags } from './html_tags';
 export function getHighlightHtml(fieldValue: any, highlights: any) {
   let highlightHtml = typeof fieldValue === 'object' ? JSON.stringify(fieldValue) : fieldValue;
 
-  _.each(highlights, function(highlight) {
+  _.each(highlights, function (highlight) {
     const escapedHighlight = _.escape(highlight);
 
     // Strip out the highlight tags to compare against the field text

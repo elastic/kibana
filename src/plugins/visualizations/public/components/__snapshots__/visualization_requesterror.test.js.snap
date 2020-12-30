@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`VisualizationRequestError should render according to snapshot 1`] = `
+<div
+  class="visError"
+>
+  <div
+    class="euiText euiText--extraSmall"
+  >
+    <div
+      class="euiTextColor euiTextColor--subdued"
+    >
+      <span
+        color="danger"
+        data-euiicon-type="alert"
+      />
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      Request error
+    </div>
+  </div>
+</div>
+`;

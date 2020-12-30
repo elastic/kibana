@@ -5,11 +5,14 @@
  */
 
 import { buildOSSFeatures } from './oss_features';
+import { featurePrivilegeIterator } from '../../security/server/authorization';
+import { KibanaFeature } from '.';
+import { LicenseType } from '../../licensing/server';
 
 describe('buildOSSFeatures', () => {
   it('returns features including timelion', () => {
     expect(
-      buildOSSFeatures({ savedObjectTypes: ['foo', 'bar'], includeTimelion: true }).map(f => f.id)
+      buildOSSFeatures({ savedObjectTypes: ['foo', 'bar'], includeTimelion: true }).map((f) => f.id)
     ).toMatchInlineSnapshot(`
 Array [
   "discover",
@@ -26,7 +29,9 @@ Array [
 
   it('returns features excluding timelion', () => {
     expect(
-      buildOSSFeatures({ savedObjectTypes: ['foo', 'bar'], includeTimelion: false }).map(f => f.id)
+      buildOSSFeatures({ savedObjectTypes: ['foo', 'bar'], includeTimelion: false }).map(
+        (f) => f.id
+      )
     ).toMatchInlineSnapshot(`
 Array [
   "discover",
@@ -38,5 +43,26 @@ Array [
   "savedObjectsManagement",
 ]
 `);
+  });
+
+  const features = buildOSSFeatures({ savedObjectTypes: ['foo', 'bar'], includeTimelion: true });
+  features.forEach((featureConfig) => {
+    (['enterprise', 'basic'] as LicenseType[]).forEach((licenseType) => {
+      describe(`with a ${licenseType} license`, () => {
+        it(`returns the ${featureConfig.id} feature augmented with appropriate sub feature privileges`, () => {
+          const privileges = [];
+          for (const featurePrivilege of featurePrivilegeIterator(
+            new KibanaFeature(featureConfig),
+            {
+              augmentWithSubFeaturePrivileges: true,
+              licenseType,
+            }
+          )) {
+            privileges.push(featurePrivilege);
+          }
+          expect(privileges).toMatchSnapshot();
+        });
+      });
+    });
   });
 });

@@ -25,10 +25,7 @@ import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.moc
 import { i18nServiceMock } from '../../i18n/i18n_service.mock';
 
 async function getCurrentToasts(toasts: ToastsApi) {
-  return await toasts
-    .get$()
-    .pipe(take(1))
-    .toPromise();
+  return await toasts.get$().pipe(take(1)).toPromise();
 }
 
 function uiSettingsMock() {
@@ -143,6 +140,21 @@ describe('#remove()', () => {
 
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts).toHaveLength(1);
+  });
+});
+
+describe('#addInfo()', () => {
+  it('adds a info toast', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    expect(toasts.addInfo({})).toHaveProperty('color', 'primary');
+  });
+
+  it('returns the created toast', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    const toast = toasts.addInfo({}, { toastLifeTimeMs: 1 });
+    const currentToasts = await getCurrentToasts(toasts);
+    expect(currentToasts[0].toastLifeTimeMs).toBe(1);
+    expect(currentToasts[0]).toBe(toast);
   });
 });
 

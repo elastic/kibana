@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getPageObjects }) {
+export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'timelion', 'settings', 'timePicker']);
 
   describe('expression typeahead', () => {
@@ -86,7 +86,7 @@ export default function({ getPageObjects }) {
           await PageObjects.timelion.updateExpression(',split');
           await PageObjects.timelion.clickSuggestion();
           const suggestions = await PageObjects.timelion.getSuggestionItemsText();
-          expect(suggestions.length).to.eql(52);
+          expect(suggestions.length).to.eql(51);
           expect(suggestions[0].includes('@message.raw')).to.eql(true);
           await PageObjects.timelion.clickSuggestion(10);
         });

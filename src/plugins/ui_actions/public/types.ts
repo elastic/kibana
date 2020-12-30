@@ -17,42 +17,47 @@
  * under the License.
  */
 
-import { IAction } from './actions/i_action';
-import { ITrigger } from './triggers/i_trigger';
+import { ActionInternal } from './actions/action_internal';
+import { TriggerInternal } from './triggers/trigger_internal';
+import {
+  ROW_CLICK_TRIGGER,
+  VISUALIZE_FIELD_TRIGGER,
+  VISUALIZE_GEO_FIELD_TRIGGER,
+  DEFAULT_TRIGGER,
+  RowClickContext,
+} from './triggers';
 
-export { IAction } from './actions';
-export { ITrigger } from './triggers/i_trigger';
+export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
+export type ActionRegistry = Map<string, ActionInternal>;
+export type TriggerToActionsRegistry = Map<TriggerId, string[]>;
 
-export type TExecuteTriggerActions = <A>(triggerId: string, actionContext: A) => Promise<void>;
-
-export type TGetActionsCompatibleWithTrigger = <C>(
-  triggerId: string,
-  context: C
-) => Promise<IAction[]>;
-
-export interface IUiActionsApi {
-  attachAction: (triggerId: string, actionId: string) => void;
-  detachAction: (triggerId: string, actionId: string) => void;
-  executeTriggerActions: TExecuteTriggerActions;
-  getTrigger: (id: string) => ITrigger;
-  getTriggerActions: (id: string) => IAction[];
-  getTriggerCompatibleActions: <C>(triggerId: string, context: C) => Promise<Array<IAction<C>>>;
-  registerAction: (action: IAction) => void;
-  registerTrigger: (trigger: ITrigger) => void;
+export interface VisualizeFieldContext {
+  fieldName: string;
+  indexPatternId: string;
+  contextualFields?: string[];
 }
 
-export interface IUiActionsDependencies {
-  actions: IActionRegistry;
-  triggers: ITriggerRegistry;
+export type TriggerId = keyof TriggerContextMapping;
+
+export type BaseContext = object;
+export type TriggerContext = BaseContext;
+
+export interface TriggerContextMapping {
+  [DEFAULT_TRIGGER]: TriggerContext;
+  [ROW_CLICK_TRIGGER]: RowClickContext;
+  [VISUALIZE_FIELD_TRIGGER]: VisualizeFieldContext;
+  [VISUALIZE_GEO_FIELD_TRIGGER]: VisualizeFieldContext;
 }
 
-export interface IUiActionsDependenciesInternal extends IUiActionsDependencies {
-  api: Readonly<Partial<IUiActionsApi>>;
+const DEFAULT_ACTION = '';
+export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
+export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
+export const ACTION_VISUALIZE_LENS_FIELD = 'ACTION_VISUALIZE_LENS_FIELD';
+export type ActionType = keyof ActionContextMapping;
+
+export interface ActionContextMapping {
+  [DEFAULT_ACTION]: BaseContext;
+  [ACTION_VISUALIZE_FIELD]: VisualizeFieldContext;
+  [ACTION_VISUALIZE_GEO_FIELD]: VisualizeFieldContext;
+  [ACTION_VISUALIZE_LENS_FIELD]: VisualizeFieldContext;
 }
-
-export type IUiActionsApiPure = {
-  [K in keyof IUiActionsApi]: (deps: IUiActionsDependenciesInternal) => IUiActionsApi[K];
-};
-
-export type ITriggerRegistry = Map<string, ITrigger>;
-export type IActionRegistry = Map<string, IAction>;

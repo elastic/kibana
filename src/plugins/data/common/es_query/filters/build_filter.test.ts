@@ -18,7 +18,7 @@
  */
 
 import { buildFilter, FilterStateStore, FILTERS } from '.';
-import { stubIndexPattern, stubFields } from '../../../public/stubs';
+import { stubIndexPattern, stubFields } from '../../../common/stubs';
 
 describe('buildFilter', () => {
   it('should build phrase filters', () => {

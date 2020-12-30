@@ -26,6 +26,9 @@ export {
   SavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
   SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
 } from './scoped_client_provider';
 
 export { SavedObjectsErrorHelpers } from './errors';
+
+export { SavedObjectsUtils } from './utils';

@@ -16,7 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectsClientContract, SavedObjectAttribute } from '../saved_objects/types';
+import { SavedObjectsClientContract } from '../saved_objects/types';
+import { UiSettingsParams, UserProvidedValues, PublicUiSettingsParams } from '../../types';
+export {
+  UiSettingsParams,
+  PublicUiSettingsParams,
+  StringValidationRegexString,
+  StringValidationRegex,
+  StringValidation,
+  DeprecationSettings,
+  ImageValidation,
+  UiSettingsType,
+  UserProvidedValues,
+} from '../../types';
+
 /**
  * Server-side client that provides access to the advanced settings stored in elasticsearch.
  * The settings provide control over the behavior of the Kibana application.
@@ -29,7 +42,7 @@ export interface IUiSettingsClient {
   /**
    * Returns registered uiSettings values {@link UiSettingsParams}
    */
-  getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
+  getRegistered: () => Readonly<Record<string, PublicUiSettingsParams>>;
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
@@ -64,46 +77,6 @@ export interface IUiSettingsClient {
   isOverridden: (key: string) => boolean;
 }
 
-/**
- * Describes the values explicitly set by user.
- * @public
- * */
-export interface UserProvidedValues<T = any> {
-  userValue?: T;
-  isOverridden?: boolean;
-}
-
-/**
- * UI element type to represent the settings.
- * @public
- * */
-export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
-
-/**
- * UiSettings parameters defined by the plugins.
- * @public
- * */
-export interface UiSettingsParams {
-  /** title in the UI */
-  name?: string;
-  /** default value to fall back to if a user doesn't provide any */
-  value?: SavedObjectAttribute;
-  /** description provided to a user in UI */
-  description?: string;
-  /** used to group the configured setting in the UI */
-  category?: string[];
-  /** array of permitted values for this setting */
-  options?: string[];
-  /** text labels for 'select' type UI element */
-  optionLabels?: Record<string, string>;
-  /** a flag indicating whether new value applying requires page reloading */
-  requiresPageReload?: boolean;
-  /** a flag indicating that value cannot be changed */
-  readonly?: boolean;
-  /** defines a type of UI element {@link UiSettingsType} */
-  type?: UiSettingsType;
-}
-
 /** @internal */
 export interface InternalUiSettingsServiceSetup {
   /**
@@ -111,11 +84,6 @@ export interface InternalUiSettingsServiceSetup {
    * @param settings
    */
   register(settings: Record<string, UiSettingsParams>): void;
-  /**
-   * Creates uiSettings client with provided *scoped* saved objects client {@link IUiSettingsClient}
-   * @param savedObjectsClient
-   */
-  asScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUiSettingsClient;
 }
 
 /** @public */

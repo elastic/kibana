@@ -19,7 +19,7 @@
 
 import dedent from 'dedent';
 
-import { createFailureIssue, updateFailureIssue } from './report_failure';
+import { createFailureIssue, getCiType, updateFailureIssue } from './report_failure';
 
 jest.mock('./github_api');
 const { GithubApi } = jest.requireMock('./github_api');
@@ -51,7 +51,7 @@ describe('createFailureIssue()', () => {
       this is the failure text
       \`\`\`
 
-      First failure: [Jenkins Build](https://build-url)
+      First failure: [${getCiType()} Build](https://build-url)
 
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"some.classname\\",\\"test.name\\":\\"test name\\",\\"test.failCount\\":1}} -->",
             Array [
@@ -78,9 +78,7 @@ describe('updateFailureIssue()', () => {
       'https://build-url',
       {
         html_url: 'https://github.com/issues/1234',
-        labels: ['some-label'],
         number: 1234,
-        title: 'issue title',
         body: dedent`
           # existing issue body
 
@@ -113,7 +111,7 @@ describe('updateFailureIssue()', () => {
         "calls": Array [
           Array [
             1234,
-            "New failure: [Jenkins Build](https://build-url)",
+            "New failure: [${getCiType()} Build](https://build-url)",
           ],
         ],
         "results": Array [

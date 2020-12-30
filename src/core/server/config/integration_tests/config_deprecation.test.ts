@@ -17,12 +17,16 @@
  * under the License.
  */
 
-import { mockLoggingService } from './config_deprecation.test.mocks';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import { mockLoggingSystem } from './config_deprecation.test.mocks';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('configuration deprecations', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   afterEach(async () => {
     if (root) {
@@ -35,8 +39,8 @@ describe('configuration deprecations', () => {
 
     await root.setup();
 
-    const logs = loggingServiceMock.collect(mockLoggingService);
-    expect(logs.warn).toMatchInlineSnapshot(`Array []`);
+    const logs = loggingSystemMock.collect(mockLoggingSystem);
+    expect(logs.warn.flat()).toMatchInlineSnapshot(`Array []`);
   });
 
   it('should log deprecation warnings for core deprecations', async () => {
@@ -49,15 +53,11 @@ describe('configuration deprecations', () => {
 
     await root.setup();
 
-    const logs = loggingServiceMock.collect(mockLoggingService);
-    expect(logs.warn).toMatchInlineSnapshot(`
+    const logs = loggingSystemMock.collect(mockLoggingSystem);
+    expect(logs.warn.flat()).toMatchInlineSnapshot(`
       Array [
-        Array [
-          "\\"optimize.lazy\\" is deprecated and has been replaced by \\"optimize.watch\\"",
-        ],
-        Array [
-          "\\"optimize.lazyPort\\" is deprecated and has been replaced by \\"optimize.watchPort\\"",
-        ],
+        "optimize.lazy is deprecated and is no longer used",
+        "optimize.lazyPort is deprecated and is no longer used",
       ]
     `);
   });

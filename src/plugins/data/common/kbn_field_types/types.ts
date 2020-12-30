@@ -52,6 +52,7 @@ export enum ES_FIELD_TYPES {
   INTEGER = 'integer',
   LONG = 'long',
   SHORT = 'short',
+  UNSIGNED_LONG = 'unsigned_long',
 
   NESTED = 'nested',
   BYTE = 'byte',
@@ -59,6 +60,8 @@ export enum ES_FIELD_TYPES {
   ATTACHMENT = 'attachment',
   TOKEN_COUNT = 'token_count',
   MURMUR3 = 'murmur3',
+
+  HISTOGRAM = 'histogram',
 }
 
 /** @public **/
@@ -77,4 +80,5 @@ export enum KBN_FIELD_TYPES {
   CONFLICT = 'conflict',
   OBJECT = 'object',
   NESTED = 'nested',
+  HISTOGRAM = 'histogram',
 }

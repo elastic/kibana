@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { trunc } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { truncate } from 'lodash';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
@@ -26,13 +27,15 @@ const omission = '...';
 
 export class TruncateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.TRUNCATE;
-  static title = 'Truncated String';
+  static title = i18n.translate('data.fieldFormats.truncated_string.title', {
+    defaultMessage: 'Truncated string',
+  });
   static fieldType = KBN_FIELD_TYPES.STRING;
 
-  textConvert: TextContextTypeConvert = val => {
+  textConvert: TextContextTypeConvert = (val) => {
     const length = this.param('fieldLength');
     if (length > 0) {
-      return trunc(val, {
+      return truncate(val, {
         length: length + omission.length,
         omission,
       });

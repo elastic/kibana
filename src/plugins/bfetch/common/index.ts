@@ -19,3 +19,5 @@
 
 export * from './util';
 export * from './streaming';
+export * from './buffer';
+export * from './batch';

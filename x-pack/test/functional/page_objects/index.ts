@@ -7,36 +7,23 @@
 import { pageObjects as kibanaFunctionalPageObjects } from '../../../../test/functional/page_objects';
 
 import { CanvasPageProvider } from './canvas_page';
-// @ts-ignore not ts yet
 import { SecurityPageProvider } from './security_page';
-// @ts-ignore not ts yet
 import { MonitoringPageProvider } from './monitoring_page';
 // @ts-ignore not ts yet
 import { LogstashPageProvider } from './logstash_page';
-// @ts-ignore not ts yet
 import { GraphPageProvider } from './graph_page';
-// @ts-ignore not ts yet
 import { GrokDebuggerPageProvider } from './grok_debugger_page';
-// @ts-ignore not ts yet
 import { WatcherPageProvider } from './watcher_page';
-// @ts-ignore not ts yet
 import { ReportingPageProvider } from './reporting_page';
-// @ts-ignore not ts yet
-import { SpaceSelectorPageProvider } from './space_selector_page';
-// @ts-ignore not ts yet
-import { AccountSettingProvider } from './accountsetting_page';
+import { AccountSettingProvider } from './account_settings_page';
 import { InfraHomePageProvider } from './infra_home_page';
 import { InfraLogsPageProvider } from './infra_logs_page';
-// @ts-ignore not ts yet
 import { GisPageProvider } from './gis_page';
-// @ts-ignore not ts yet
 import { StatusPagePageProvider } from './status_page';
-// @ts-ignore not ts yet
-import { UpgradeAssistantProvider } from './upgrade_assistant';
-import { CodeHomePageProvider } from './code_page';
-// @ts-ignore not ts yet
+import { UpgradeAssistantPageProvider } from './upgrade_assistant_page';
 import { RollupPageProvider } from './rollup_page';
 import { UptimePageProvider } from './uptime_page';
+import { ApiKeysPageProvider } from './api_keys_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { IndexManagementPageProvider } from './index_management_page';
 import { IndexLifecycleManagementPageProvider } from './index_lifecycle_management_page';
@@ -46,6 +33,11 @@ import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
 import { LensPageProvider } from './lens_page';
 import { InfraMetricExplorerProvider } from './infra_metric_explorer';
+import { RoleMappingsPageProvider } from './role_mappings_page';
+import { SpaceSelectorPageProvider } from './space_selector_page';
+import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
+import { TagManagementPageProvider } from './tag_management_page';
+import { NavigationalSearchProvider } from './navigational_search';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -66,16 +58,20 @@ export const pageObjects = {
   infraLogs: InfraLogsPageProvider,
   maps: GisPageProvider,
   statusPage: StatusPagePageProvider,
-  upgradeAssistant: UpgradeAssistantProvider,
-  code: CodeHomePageProvider,
+  upgradeAssistant: UpgradeAssistantPageProvider,
   uptime: UptimePageProvider,
   rollup: RollupPageProvider,
+  apiKeys: ApiKeysPageProvider,
   licenseManagement: LicenseManagementPageProvider,
   indexManagement: IndexManagementPageProvider,
   indexLifecycleManagement: IndexLifecycleManagementPageProvider,
+  tagManagement: TagManagementPageProvider,
   snapshotRestore: SnapshotRestorePageProvider,
   crossClusterReplication: CrossClusterReplicationPageProvider,
   remoteClusters: RemoteClustersPageProvider,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   lens: LensPageProvider,
+  roleMappings: RoleMappingsPageProvider,
+  ingestPipelines: IngestPipelinesPageProvider,
+  navigationalSearch: NavigationalSearchProvider,
 };

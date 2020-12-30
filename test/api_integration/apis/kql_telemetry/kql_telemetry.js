@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 import Bluebird from 'bluebird';
 import { get } from 'lodash';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
@@ -32,7 +32,7 @@ export default function({ getService }) {
 
     it('should increment the opt *in* counter in the .kibana/kql-telemetry document', async () => {
       await supertest
-        .post('/api/kibana/kql_opt_in_telemetry')
+        .post('/api/kibana/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: true })
         .expect(200);
@@ -42,7 +42,7 @@ export default function({ getService }) {
           index: '.kibana',
           q: 'type:kql-telemetry',
         })
-        .then(response => {
+        .then((response) => {
           const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
           expect(kqlTelemetryDoc.optInCount).to.be(1);
         });
@@ -50,7 +50,7 @@ export default function({ getService }) {
 
     it('should increment the opt *out* counter in the .kibana/kql-telemetry document', async () => {
       await supertest
-        .post('/api/kibana/kql_opt_in_telemetry')
+        .post('/api/kibana/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: false })
         .expect(200);
@@ -60,7 +60,7 @@ export default function({ getService }) {
           index: '.kibana',
           q: 'type:kql-telemetry',
         })
-        .then(response => {
+        .then((response) => {
           const kqlTelemetryDoc = get(response, 'hits.hits[0]._source.kql-telemetry');
           expect(kqlTelemetryDoc.optOutCount).to.be(1);
         });
@@ -68,7 +68,7 @@ export default function({ getService }) {
 
     it('should report success when opt *in* is incremented successfully', () => {
       return supertest
-        .post('/api/kibana/kql_opt_in_telemetry')
+        .post('/api/kibana/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: true })
         .expect('Content-Type', /json/)
@@ -80,7 +80,7 @@ export default function({ getService }) {
 
     it('should report success when opt *out* is incremented successfully', () => {
       return supertest
-        .post('/api/kibana/kql_opt_in_telemetry')
+        .post('/api/kibana/kql_opt_in_stats')
         .set('content-type', 'application/json')
         .send({ opt_in: false })
         .expect('Content-Type', /json/)
@@ -90,30 +90,30 @@ export default function({ getService }) {
         });
     });
 
-    it('should only accept literal boolean values for the opt_in POST body param', function() {
+    it('should only accept literal boolean values for the opt_in POST body param', function () {
       return Bluebird.all([
         supertest
-          .post('/api/kibana/kql_opt_in_telemetry')
+          .post('/api/kibana/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: 'notabool' })
           .expect(400),
         supertest
-          .post('/api/kibana/kql_opt_in_telemetry')
+          .post('/api/kibana/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: 0 })
           .expect(400),
         supertest
-          .post('/api/kibana/kql_opt_in_telemetry')
+          .post('/api/kibana/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: null })
           .expect(400),
         supertest
-          .post('/api/kibana/kql_opt_in_telemetry')
+          .post('/api/kibana/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({ opt_in: undefined })
           .expect(400),
         supertest
-          .post('/api/kibana/kql_opt_in_telemetry')
+          .post('/api/kibana/kql_opt_in_stats')
           .set('content-type', 'application/json')
           .send({})
           .expect(400),

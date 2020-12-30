@@ -27,6 +27,7 @@ export type Start = jest.Mocked<BfetchPublicStart>;
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     fetchStreaming: jest.fn(),
+    batchedFunction: jest.fn(),
   };
   return setupContract;
 };
@@ -34,6 +35,7 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     fetchStreaming: jest.fn(),
+    batchedFunction: jest.fn(),
   };
 
   return startContract;
@@ -56,7 +58,7 @@ const createPlugin = async () => {
   };
 };
 
-export const uiActionsPluginMock = {
+export const bfetchPluginMock = {
   createSetupContract,
   createStartContract,
   createPlugin,

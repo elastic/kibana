@@ -1,0 +1,55 @@
+{
+  "job_type": "anomaly_detector",
+  "description": "Security: Packetbeat - Looks for unusual DNS activity that could indicate command-and-control or data exfiltration activity.",
+  "groups": [
+    "security",
+    "packetbeat",
+    "dns"
+  ],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "high_info_content(\"dns.question.name\") over tld",
+        "function": "high_info_content",
+        "field_name": "dns.question.name",
+        "over_field_name": "dns.question.etld_plus_one",
+        "custom_rules": [
+          {
+            "actions": [
+              "skip_result"
+            ],
+            "conditions": [
+              {
+                "applies_to": "actual",
+                "operator": "lt",
+                "value": 350
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "influencers": [
+      "destination.ip",
+      "host.name",
+      "dns.question.etld_plus_one"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-siem-packetbeat",
+    "custom_urls": [
+      {
+        "url_name": "Host Details",
+        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      }
+    ]
+  }
+}

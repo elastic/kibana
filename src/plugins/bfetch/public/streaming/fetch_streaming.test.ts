@@ -20,7 +20,7 @@
 import { fetchStreaming } from './fetch_streaming';
 import { mockXMLHttpRequest } from '../test_helpers/xhr';
 
-const tick = () => new Promise(resolve => setTimeout(resolve, 1));
+const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
 
 const setup = () => {
   const { xhr, XMLHttpRequest } = mockXMLHttpRequest();
@@ -36,14 +36,6 @@ test('returns XHR request', () => {
   expect(typeof xhr.readyState).toBe('number');
 });
 
-test('returns promise', () => {
-  setup();
-  const { promise } = fetchStreaming({
-    url: 'http://example.com',
-  });
-  expect(typeof promise.then).toBe('function');
-});
-
 test('returns stream', () => {
   setup();
   const { stream } = fetchStreaming({
@@ -54,12 +46,12 @@ test('returns stream', () => {
 
 test('promise resolves when request completes', async () => {
   const env = setup();
-  const { promise } = fetchStreaming({
+  const { stream } = fetchStreaming({
     url: 'http://example.com',
   });
 
   let resolved = false;
-  promise.then(() => (resolved = true));
+  stream.toPromise().then(() => (resolved = true));
 
   await tick();
   expect(resolved).toBe(false);
@@ -140,14 +132,41 @@ test('completes stream observable when request finishes', async () => {
   expect(spy).toHaveBeenCalledTimes(1);
 });
 
+test('completes stream observable when aborted', async () => {
+  const env = setup();
+  const abort = new AbortController();
+  const { stream } = fetchStreaming({
+    url: 'http://example.com',
+    signal: abort.signal,
+  });
+
+  const spy = jest.fn();
+  stream.subscribe({
+    complete: spy,
+  });
+
+  expect(spy).toHaveBeenCalledTimes(0);
+
+  (env.xhr as any).responseText = 'foo';
+  env.xhr.onprogress!({} as any);
+
+  abort.abort();
+
+  (env.xhr as any).readyState = 4;
+  (env.xhr as any).status = 200;
+  env.xhr.onreadystatechange!({} as any);
+
+  expect(spy).toHaveBeenCalledTimes(1);
+});
+
 test('promise throws when request errors', async () => {
   const env = setup();
-  const { promise } = fetchStreaming({
+  const { stream } = fetchStreaming({
     url: 'http://example.com',
   });
 
   const spy = jest.fn();
-  promise.catch(spy);
+  stream.toPromise().catch(spy);
 
   await tick();
   expect(spy).toHaveBeenCalledTimes(0);
@@ -168,12 +187,11 @@ test('promise throws when request errors', async () => {
 
 test('stream observable errors when request errors', async () => {
   const env = setup();
-  const { promise, stream } = fetchStreaming({
+  const { stream } = fetchStreaming({
     url: 'http://example.com',
   });
 
   const spy = jest.fn();
-  promise.catch(() => {});
   stream.subscribe({
     error: spy,
   });

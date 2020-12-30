@@ -9,7 +9,7 @@ import { createScenario } from '../scenario';
 import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function(ftrContext: FtrProviderContext) {
+export default function (ftrContext: FtrProviderContext) {
   const { getService } = ftrContext;
   const testSubjects = getService('testSubjects');
 
@@ -61,6 +61,14 @@ export default function(ftrContext: FtrProviderContext) {
 
       // banner shown only when license expired not just deleted
       await testSubjects.missingOrFail('licenseExpiredBanner');
+    });
+
+    it('properly recognize an enterprise license', async () => {
+      await scenario.startEnterprise();
+      await scenario.waitForPluginToDetectLicenseUpdate();
+
+      const enterpriseLicense = await scenario.getLicense();
+      expect(enterpriseLicense.license?.type).to.be('enterprise');
     });
   });
 }

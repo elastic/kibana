@@ -19,6 +19,7 @@
 
 import uuid from 'uuid';
 import { merge, Subscription } from 'rxjs';
+import { startWith, pairwise } from 'rxjs/operators';
 import {
   Embeddable,
   EmbeddableInput,
@@ -29,15 +30,17 @@ import {
 } from '../embeddables';
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
-import { GetEmbeddableFactory } from '../types';
+import { EmbeddableStart } from '../../plugin';
+import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export abstract class Container<
-  TChildInput extends Partial<EmbeddableInput> = {},
-  TContainerInput extends ContainerInput<TChildInput> = ContainerInput<TChildInput>,
-  TContainerOutput extends ContainerOutput = ContainerOutput
-> extends Embeddable<TContainerInput, TContainerOutput>
+    TChildInput extends Partial<EmbeddableInput> = {},
+    TContainerInput extends ContainerInput<TChildInput> = ContainerInput<TChildInput>,
+    TContainerOutput extends ContainerOutput = ContainerOutput
+  >
+  extends Embeddable<TContainerInput, TContainerOutput>
   implements IContainer<TChildInput, TContainerInput, TContainerOutput> {
   public readonly isContainer: boolean = true;
   protected readonly children: {
@@ -49,11 +52,16 @@ export abstract class Container<
   constructor(
     input: TContainerInput,
     output: TContainerOutput,
-    protected readonly getFactory: GetEmbeddableFactory,
+    protected readonly getFactory: EmbeddableStart['getEmbeddableFactory'],
     parent?: Container
   ) {
     super(input, output, parent);
-    this.subscription = this.getInput$().subscribe(() => this.maybeUpdateChildren());
+    this.subscription = this.getInput$()
+      // At each update event, get both the previous and current state
+      .pipe(startWith(input), pairwise())
+      .subscribe(([{ panels: prevPanels }, { panels: currentPanels }]) => {
+        this.maybeUpdateChildren(currentPanels, prevPanels);
+      });
   }
 
   public updateInputForChild<EEI extends EmbeddableInput = EmbeddableInput>(
@@ -79,7 +87,7 @@ export abstract class Container<
   }
 
   public reload() {
-    Object.values(this.children).forEach(child => child.reload());
+    Object.values(this.children).forEach((child) => child.reload());
   }
 
   public async addNewEmbeddable<
@@ -94,17 +102,6 @@ export abstract class Container<
     }
 
     const panelState = this.createNewPanelState<EEI, E>(factory, explicitInput);
-
-    return this.createAndSaveEmbeddable(type, panelState);
-  }
-
-  public async addSavedObjectEmbeddable<
-    TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput> = IEmbeddable<TEmbeddableInput>
-  >(type: string, savedObjectId: string): Promise<TEmbeddable | ErrorEmbeddable> {
-    const factory = this.getFactory(type) as EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>;
-    const panelState = this.createNewPanelState(factory);
-    panelState.savedObjectId = savedObjectId;
 
     return this.createAndSaveEmbeddable(type, panelState);
   }
@@ -141,7 +138,7 @@ export abstract class Container<
     // to default back to inherited input. However, if the particular value is not part of the container, then
     // the caller may be trying to explicitly tell the child to clear out a given value, so in that case, we want
     // to pass it along.
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (explicitInput[key] === undefined && containerInput[key] !== undefined) {
         return;
       }
@@ -159,7 +156,7 @@ export abstract class Container<
 
   public destroy() {
     super.destroy();
-    Object.values(this.children).forEach(child => child.destroy());
+    Object.values(this.children).forEach((child) => child.destroy());
     this.subscription.unsubscribe();
   }
 
@@ -174,7 +171,7 @@ export abstract class Container<
       return this.children[id] as TEmbeddable;
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<TEmbeddable>((resolve, reject) => {
       const subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
         if (this.output.embeddableLoaded[id]) {
           subscription.unsubscribe();
@@ -184,6 +181,7 @@ export abstract class Container<
         // If we hit this, the panel was removed before the embeddable finished loading.
         if (this.input.panels[id] === undefined) {
           subscription.unsubscribe();
+          // @ts-expect-error undefined in not assignable to TEmbeddable | ErrorEmbeddable
           resolve(undefined);
         }
       });
@@ -208,8 +206,8 @@ export abstract class Container<
     return {
       type: factory.type,
       explicitInput: {
-        id: embeddableId,
         ...explicitInput,
+        id: embeddableId,
       } as TEmbeddableInput,
     };
   }
@@ -240,7 +238,6 @@ export abstract class Container<
         ...this.input.panels,
         [panelState.explicitInput.id]: panelState,
       },
-      isEmptyState: false,
     } as Partial<TContainerInput>);
 
     return await this.untilEmbeddableLoaded<TEmbeddable>(panelState.explicitInput.id);
@@ -248,9 +245,10 @@ export abstract class Container<
 
   private createNewExplicitEmbeddableInput<
     TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
-    TEmbeddable extends IEmbeddable<TEmbeddableInput, EmbeddableOutput> = IEmbeddable<
-      TEmbeddableInput
-    >
+    TEmbeddable extends IEmbeddable<
+      TEmbeddableInput,
+      EmbeddableOutput
+    > = IEmbeddable<TEmbeddableInput>
   >(
     id: string,
     factory: EmbeddableFactory<TEmbeddableInput, any, TEmbeddable>,
@@ -262,7 +260,7 @@ export abstract class Container<
     // Container input overrides defaults.
     const explicitInput: Partial<TEmbeddableInput> = partial;
 
-    getKeys(defaults).forEach(key => {
+    getKeys(defaults).forEach((key) => {
       // @ts-ignore We know this key might not exist on inheritedInput.
       const inheritedValue = inheritedInput[key];
       if (inheritedValue === undefined && explicitInput[key] === undefined) {
@@ -305,8 +303,10 @@ export abstract class Container<
         throw new EmbeddableFactoryNotFoundError(panel.type);
       }
 
-      embeddable = panel.savedObjectId
-        ? await factory.createFromSavedObject(panel.savedObjectId, inputForChild, this)
+      // TODO: lets get rid of this distinction with factories, I don't think it will be needed
+      // anymore after this change.
+      embeddable = isSavedObjectEmbeddableInput(inputForChild)
+        ? await factory.createFromSavedObject(inputForChild.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);
     } catch (e) {
       embeddable = new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
@@ -324,23 +324,6 @@ export abstract class Container<
         return;
       }
 
-      if (embeddable.getOutput().savedObjectId) {
-        this.updateInput({
-          panels: {
-            ...this.input.panels,
-            [panel.explicitInput.id]: {
-              ...this.input.panels[panel.explicitInput.id],
-              ...(embeddable.getOutput().savedObjectId
-                ? { savedObjectId: embeddable.getOutput().savedObjectId }
-                : undefined),
-              explicitInput: {
-                ...this.input.panels[panel.explicitInput.id].explicitInput,
-              },
-            },
-          },
-        } as Partial<TContainerInput>);
-      }
-
       this.children[embeddable.id] = embeddable;
       this.updateOutput({
         embeddableLoaded: {
@@ -354,16 +337,30 @@ export abstract class Container<
     return embeddable;
   }
 
-  private maybeUpdateChildren() {
-    const allIds = Object.keys({ ...this.input.panels, ...this.output.embeddableLoaded });
-    allIds.forEach(id => {
-      if (this.input.panels[id] !== undefined && this.output.embeddableLoaded[id] === undefined) {
-        this.onPanelAdded(this.input.panels[id]);
-      } else if (
-        this.input.panels[id] === undefined &&
-        this.output.embeddableLoaded[id] !== undefined
-      ) {
-        this.onPanelRemoved(id);
+  private panelHasChanged(currentPanel: PanelState, prevPanel: PanelState) {
+    if (currentPanel.type !== prevPanel.type) {
+      return true;
+    }
+  }
+
+  private maybeUpdateChildren(
+    currentPanels: TContainerInput['panels'],
+    prevPanels: TContainerInput['panels']
+  ) {
+    const allIds = Object.keys({ ...currentPanels, ...this.output.embeddableLoaded });
+    allIds.forEach((id) => {
+      if (currentPanels[id] !== undefined && this.output.embeddableLoaded[id] === undefined) {
+        return this.onPanelAdded(currentPanels[id]);
+      }
+      if (currentPanels[id] === undefined && this.output.embeddableLoaded[id] !== undefined) {
+        return this.onPanelRemoved(id);
+      }
+      // In case of type change, remove and add a panel with the same id
+      if (currentPanels[id] && prevPanels[id]) {
+        if (this.panelHasChanged(currentPanels[id], prevPanels[id])) {
+          this.onPanelRemoved(id);
+          this.onPanelAdded(currentPanels[id]);
+        }
       }
     });
   }

@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { LogLevel } from '../../log_level';
-import { LogRecord } from '../../log_record';
+import { LogLevel, LogRecord } from '@kbn/logging';
 import { BufferAppender } from './buffer_appender';
 
 test('`flush()` does not return any record buffered at the beginning.', () => {
@@ -34,12 +33,14 @@ test('`flush()` returns all appended records and cleans internal buffer.', () =>
       level: LogLevel.All,
       message: 'message-1',
       timestamp: new Date(),
+      pid: 5355,
     },
     {
       context: 'context-2',
       level: LogLevel.Trace,
       message: 'message-2',
       timestamp: new Date(),
+      pid: 5355,
     },
   ];
 
@@ -64,6 +65,7 @@ test('`dispose()` flushes internal buffer.', async () => {
     level: LogLevel.All,
     message: 'message-1',
     timestamp: new Date(),
+    pid: 5355,
   });
 
   await appender.dispose();

@@ -20,29 +20,29 @@
 import SimpleGit from 'simple-git';
 import { fromNode as fcb } from 'bluebird';
 
-import { REPO_ROOT } from '../constants';
+import { REPO_ROOT } from '@kbn/utils';
 import { File } from '../file';
 
 /**
  * Get the files that are staged for commit (excluding deleted files)
  * as `File` objects that are aware of their commit status.
  *
- * @param  {String} repoPath
+ * @param  {String} gitRef
  * @return {Promise<Array<File>>}
  */
-export async function getFilesForCommit() {
+export async function getFilesForCommit(gitRef) {
   const simpleGit = new SimpleGit(REPO_ROOT);
-
-  const output = await fcb(cb => simpleGit.diff(['--name-status', '--cached'], cb));
+  const gitRefForDiff = gitRef ? gitRef : '--cached';
+  const output = await fcb((cb) => simpleGit.diff(['--name-status', gitRefForDiff], cb));
 
   return (
     output
       .split('\n')
       // Ignore blank lines
-      .filter(line => line.trim().length > 0)
+      .filter((line) => line.trim().length > 0)
       // git diff --name-status outputs lines with two OR three parts
       // separated by a tab character
-      .map(line => line.trim().split('\t'))
+      .map((line) => line.trim().split('\t'))
       .map(([status, ...paths]) => {
         // ignore deleted files
         if (status === 'D') {

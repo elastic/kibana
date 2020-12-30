@@ -17,20 +17,22 @@
  * under the License.
  */
 
+import moment from 'moment-timezone';
 import { UnreachableCaseError, wrapArray } from './util';
-import { Metric, Stats, UiStatsMetricType, METRIC_TYPE } from './metrics';
-const REPORT_VERSION = 1;
+import { ApplicationUsageTracker } from './application_usage_tracker';
+import { Metric, UiCounterMetricType, METRIC_TYPE } from './metrics';
+const REPORT_VERSION = 3;
 
 export interface Report {
   reportVersion: typeof REPORT_VERSION;
-  uiStatsMetrics?: Record<
+  uiCounter?: Record<
     string,
     {
       key: string;
       appName: string;
       eventName: string;
-      type: UiStatsMetricType;
-      stats: Stats;
+      type: UiCounterMetricType;
+      total: number;
     }
   >;
   userAgent?: Record<
@@ -40,6 +42,15 @@ export interface Report {
       key: string;
       type: METRIC_TYPE.USER_AGENT;
       appName: string;
+    }
+  >;
+  application_usage?: Record<
+    string,
+    {
+      appId: string;
+      viewId: string;
+      minutesOnScreen: number;
+      numberOfClicks: number;
     }
   >;
 }
@@ -57,27 +68,18 @@ export class ReportManager {
     this.report = ReportManager.createReport();
   }
   public isReportEmpty(): boolean {
-    const { uiStatsMetrics, userAgent } = this.report;
-    const noUiStats = !uiStatsMetrics || Object.keys(uiStatsMetrics).length === 0;
-    const noUserAgent = !userAgent || Object.keys(userAgent).length === 0;
-    return noUiStats && noUserAgent;
+    const { uiCounter, userAgent, application_usage: appUsage } = this.report;
+    const noUiCounters = !uiCounter || Object.keys(uiCounter).length === 0;
+    const noUserAgents = !userAgent || Object.keys(userAgent).length === 0;
+    const noAppUsage = !appUsage || Object.keys(appUsage).length === 0;
+    return noUiCounters && noUserAgents && noAppUsage;
   }
-  private incrementStats(count: number, stats?: Stats): Stats {
-    const { min = 0, max = 0, sum = 0 } = stats || {};
-    const newMin = Math.min(min, count);
-    const newMax = Math.max(max, count);
-    const newAvg = newMin + newMax / 2;
-    const newSum = sum + count;
-
-    return {
-      min: newMin,
-      max: newMax,
-      avg: newAvg,
-      sum: newSum,
-    };
+  private incrementTotal(count: number, currentTotal?: number): number {
+    const currentTotalNumber = typeof currentTotal === 'number' ? currentTotal : 0;
+    return count + currentTotalNumber;
   }
   assignReports(newMetrics: Metric | Metric[]) {
-    wrapArray(newMetrics).forEach(newMetric => this.assignReport(this.report, newMetric));
+    wrapArray(newMetrics).forEach((newMetric) => this.assignReport(this.report, newMetric));
     return { report: this.report };
   }
   static createMetricKey(metric: Metric): string {
@@ -91,6 +93,10 @@ export class ReportManager {
       case METRIC_TYPE.COUNT: {
         const { appName, eventName, type } = metric;
         return `${appName}-${type}-${eventName}`;
+      }
+      case METRIC_TYPE.APPLICATION_USAGE: {
+        const { appId, viewId } = metric;
+        return ApplicationUsageTracker.serializeKey({ appId, viewId });
       }
       default:
         throw new UnreachableCaseError(metric);
@@ -118,15 +124,34 @@ export class ReportManager {
       case METRIC_TYPE.LOADED:
       case METRIC_TYPE.COUNT: {
         const { appName, type, eventName, count } = metric;
-        report.uiStatsMetrics = report.uiStatsMetrics || {};
-        const existingStats = (report.uiStatsMetrics[key] || {}).stats;
-        report.uiStatsMetrics[key] = {
+        report.uiCounter = report.uiCounter || {};
+        const currentTotal = report.uiCounter[key]?.total;
+        report.uiCounter[key] = {
           key,
           appName,
           eventName,
           type,
-          stats: this.incrementStats(count, existingStats),
+          total: this.incrementTotal(count, currentTotal),
         };
+        return;
+      }
+      case METRIC_TYPE.APPLICATION_USAGE: {
+        const { numberOfClicks, startTime, appId, viewId } = metric;
+        const minutesOnScreen = moment().diff(startTime, 'minutes', true);
+
+        report.application_usage = report.application_usage || {};
+        const appExistingData = report.application_usage[key] || {
+          minutesOnScreen: 0,
+          numberOfClicks: 0,
+          appId,
+          viewId,
+        };
+        report.application_usage[key] = {
+          ...appExistingData,
+          minutesOnScreen: appExistingData.minutesOnScreen + minutesOnScreen,
+          numberOfClicks: appExistingData.numberOfClicks + numberOfClicks,
+        };
+
         return;
       }
       default:

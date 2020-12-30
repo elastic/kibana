@@ -9,21 +9,6 @@
     "totalShards": 10,
     "status": "green"
   },
-  "logs": {
-    "enabled": false,
-    "limit": 10,
-    "reason": {
-      "clusterExists": false,
-      "indexPatternExists": false,
-      "indexPatternInTimeRangeExists": false,
-      "typeExistsAtAnyTime": false,
-      "usingStructuredLogs": false,
-      "nodeExists": null,
-      "indexExists": false,
-      "typeExists": false
-    },
-    "logs": []
-  },
   "metrics": {
     "index_search_request_rate": [
       {
@@ -1104,93 +1089,108 @@
       }
     ]
   },
+  "logs": {
+    "enabled": false,
+    "logs": [],
+    "reason": {
+      "indexPatternExists": false,
+      "indexPatternInTimeRangeExists": false,
+      "typeExistsAtAnyTime": false,
+      "typeExists": false,
+      "usingStructuredLogs": false,
+      "clusterExists": false,
+      "nodeExists": null,
+      "indexExists": false
+    },
+    "limit": 10
+  },
   "shards": [
     {
-      "state": "STARTED",
-      "primary": false,
+      "index": "avocado-tweets-2017.10.02",
       "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": false,
       "relocating_node": null,
       "shard": 4,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": true,
+      "index": "avocado-tweets-2017.10.02",
       "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
       "relocating_node": null,
       "shard": 4,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": true,
+      "index": "avocado-tweets-2017.10.02",
       "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": true,
       "relocating_node": null,
       "shard": 1,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": false,
+      "index": "avocado-tweets-2017.10.02",
       "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": false,
       "relocating_node": null,
       "shard": 1,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": true,
+      "index": "avocado-tweets-2017.10.02",
       "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": true,
       "relocating_node": null,
       "shard": 2,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": false,
+      "index": "avocado-tweets-2017.10.02",
       "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": false,
       "relocating_node": null,
       "shard": 2,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": false,
+      "index": "avocado-tweets-2017.10.02",
       "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": false,
       "relocating_node": null,
       "shard": 3,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": true,
+      "index": "avocado-tweets-2017.10.02",
       "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
       "relocating_node": null,
       "shard": 3,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": false,
+      "index": "avocado-tweets-2017.10.02",
       "node": "xcP6ue7eRCieNNitFTT0EA",
+      "primary": false,
       "relocating_node": null,
       "shard": 0,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     },
     {
-      "state": "STARTED",
-      "primary": true,
+      "index": "avocado-tweets-2017.10.02",
       "node": "jUT5KdxfRbORSCWkb5zjmA",
+      "primary": true,
       "relocating_node": null,
       "shard": 0,
-      "index": "avocado-tweets-2017.10.02"
+      "state": "STARTED"
     }
   ],
   "shardStats": {
     "nodes": {
       "jUT5KdxfRbORSCWkb5zjmA": {
-        "shardCount": 38,
-        "indexCount": 20,
+        "shardCount": 5,
+        "indexCount": 1,
         "name": "whatever-01",
         "node_ids": [
           "jUT5KdxfRbORSCWkb5zjmA"
@@ -1198,20 +1198,11 @@
         "type": "master"
       },
       "xcP6ue7eRCieNNitFTT0EA": {
-        "shardCount": 36,
-        "indexCount": 19,
+        "shardCount": 5,
+        "indexCount": 1,
         "name": "whatever-02",
         "node_ids": [
           "xcP6ue7eRCieNNitFTT0EA"
-        ],
-        "type": "node"
-      },
-      "bwQWH-7IQY-mFPpfoaoFXQ": {
-        "shardCount": 4,
-        "indexCount": 4,
-        "name": "whatever-03",
-        "node_ids": [
-          "bwQWH-7IQY-mFPpfoaoFXQ"
         ],
         "type": "node"
       }
@@ -1219,8 +1210,8 @@
   },
   "nodes": {
     "jUT5KdxfRbORSCWkb5zjmA": {
-      "shardCount": 38,
-      "indexCount": 20,
+      "shardCount": 5,
+      "indexCount": 1,
       "name": "whatever-01",
       "node_ids": [
         "jUT5KdxfRbORSCWkb5zjmA"
@@ -1228,20 +1219,11 @@
       "type": "master"
     },
     "xcP6ue7eRCieNNitFTT0EA": {
-      "shardCount": 36,
-      "indexCount": 19,
+      "shardCount": 5,
+      "indexCount": 1,
       "name": "whatever-02",
       "node_ids": [
         "xcP6ue7eRCieNNitFTT0EA"
-      ],
-      "type": "node"
-    },
-    "bwQWH-7IQY-mFPpfoaoFXQ": {
-      "shardCount": 4,
-      "indexCount": 4,
-      "name": "whatever-03",
-      "node_ids": [
-        "bwQWH-7IQY-mFPpfoaoFXQ"
       ],
       "type": "node"
     }

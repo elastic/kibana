@@ -3,22 +3,45 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Readable } from 'stream';
 import {
-  SavedObjectsSchema,
-  SavedObjectsLegacyService,
-  SavedObjectsClientContract,
   SavedObjectsImportResponse,
   SavedObjectsImportOptions,
   SavedObjectsExportOptions,
+  SavedObjectsImportSuccess,
 } from 'src/core/server';
+import {
+  coreMock,
+  httpServerMock,
+  savedObjectsTypeRegistryMock,
+  savedObjectsClientMock,
+} from 'src/core/server/mocks';
 import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
-import { Readable } from 'stream';
+
+// Mock out circular dependency
+jest.mock('../../../../../../src/core/server/saved_objects/es_query', () => {});
+
+jest.mock('../../../../../../src/core/server', () => {
+  return {
+    ...(jest.requireActual('../../../../../../src/core/server') as Record<string, unknown>),
+    exportSavedObjectsToStream: jest.fn(),
+    importSavedObjectsFromStream: jest.fn(),
+  };
+});
+import {
+  exportSavedObjectsToStream,
+  importSavedObjectsFromStream,
+} from '../../../../../../src/core/server';
 
 interface SetupOpts {
   objects: Array<{ type: string; id: string; attributes: Record<string, any> }>;
-  getSortedObjectsForExportImpl?: (opts: SavedObjectsExportOptions) => Promise<Readable>;
-  importSavedObjectsImpl?: (opts: SavedObjectsImportOptions) => Promise<SavedObjectsImportResponse>;
+  exportSavedObjectsToStreamImpl?: (opts: SavedObjectsExportOptions) => Promise<Readable>;
+  importSavedObjectsFromStreamImpl?: (
+    opts: SavedObjectsImportOptions
+  ) => Promise<SavedObjectsImportResponse>;
 }
+
+const EXPORT_LIMIT = 1000;
 
 const expectStreamToContainObjects = async (
   stream: Readable,
@@ -26,11 +49,11 @@ const expectStreamToContainObjects = async (
 ) => {
   const objectsToResolve: unknown[] = await new Promise((resolve, reject) => {
     const objects: SetupOpts['objects'] = [];
-    stream.on('data', chunk => {
+    stream.on('data', (chunk) => {
       objects.push(chunk);
     });
     stream.on('end', () => resolve(objects));
-    stream.on('error', err => reject(err));
+    stream.on('error', (err) => reject(err));
   });
 
   // Ensure the Readable stream passed to `resolveImportErrors` contains all of the expected objects.
@@ -39,273 +62,180 @@ const expectStreamToContainObjects = async (
 };
 
 describe('copySavedObjectsToSpaces', () => {
+  const mockExportResults = [
+    { type: 'dashboard', id: 'my-dashboard', attributes: {} },
+    { type: 'visualization', id: 'my-viz', attributes: {} },
+    { type: 'index-pattern', id: 'my-index-pattern', attributes: {} },
+    { type: 'globaltype', id: 'my-globaltype', attributes: {} },
+  ];
+
   const setup = (setupOpts: SetupOpts) => {
-    const savedObjectsClient = (null as unknown) as SavedObjectsClientContract;
+    const coreStart = coreMock.createStart();
 
-    const savedObjectsService: SavedObjectsLegacyService = ({
-      importExport: {
-        objectLimit: 1000,
-        getSortedObjectsForExport:
-          setupOpts.getSortedObjectsForExportImpl ||
-          jest.fn().mockResolvedValue(
-            new Readable({
-              objectMode: true,
-              read() {
-                setupOpts.objects.forEach(o => this.push(o));
+    const savedObjectsClient = savedObjectsClientMock.create();
+    const typeRegistry = savedObjectsTypeRegistryMock.create();
+    coreStart.savedObjects.getScopedClient.mockReturnValue(savedObjectsClient);
+    coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
 
-                this.push(null);
-              },
-            })
-          ),
-        importSavedObjects:
-          setupOpts.importSavedObjectsImpl ||
-          jest.fn().mockImplementation(async (importOpts: SavedObjectsImportOptions) => {
-            await expectStreamToContainObjects(importOpts.readStream, setupOpts.objects);
-            const response: SavedObjectsImportResponse = {
-              success: true,
-              successCount: setupOpts.objects.length,
-            };
-
-            return Promise.resolve(response);
-          }),
+    typeRegistry.getImportableAndExportableTypes.mockReturnValue([
+      // don't need to include all types, just need a positive case (agnostic) and a negative case (non-agnostic)
+      {
+        name: 'dashboard',
+        namespaceType: 'single',
+        hidden: false,
+        mappings: { properties: {} },
       },
-      types: ['dashboard', 'visualization', 'globalType'],
-      schema: new SavedObjectsSchema({
-        globalType: { isNamespaceAgnostic: true },
-      }),
-    } as unknown) as SavedObjectsLegacyService;
+      {
+        name: 'globaltype',
+        namespaceType: 'agnostic',
+        hidden: false,
+        mappings: { properties: {} },
+      },
+    ]);
+    typeRegistry.isNamespaceAgnostic.mockImplementation((type: string) =>
+      typeRegistry
+        .getImportableAndExportableTypes()
+        .some((t) => t.name === type && t.namespaceType === 'agnostic')
+    );
+
+    (exportSavedObjectsToStream as jest.Mock).mockImplementation(
+      async (opts: SavedObjectsExportOptions) => {
+        return (
+          setupOpts.exportSavedObjectsToStreamImpl?.(opts) ??
+          new Readable({
+            objectMode: true,
+            read() {
+              setupOpts.objects.forEach((o) => this.push(o));
+
+              this.push(null);
+            },
+          })
+        );
+      }
+    );
+
+    (importSavedObjectsFromStream as jest.Mock).mockImplementation(
+      async (opts: SavedObjectsImportOptions) => {
+        const defaultImpl = async () => {
+          // namespace-agnostic types should be filtered out before import
+          const filteredObjects = setupOpts.objects.filter(({ type }) => type !== 'globaltype');
+          await expectStreamToContainObjects(opts.readStream, filteredObjects);
+          const response: SavedObjectsImportResponse = {
+            success: true,
+            successCount: filteredObjects.length,
+            successResults: [
+              ('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess,
+            ],
+          };
+
+          return Promise.resolve(response);
+        };
+
+        return setupOpts.importSavedObjectsFromStreamImpl?.(opts) ?? defaultImpl();
+      }
+    );
 
     return {
+      savedObjects: coreStart.savedObjects,
       savedObjectsClient,
-      savedObjectsService,
+      typeRegistry,
     };
   };
 
   it('uses the Saved Objects Service to perform an export followed by a series of imports', async () => {
-    const { savedObjectsClient, savedObjectsService } = setup({
-      objects: [
-        {
-          type: 'dashboard',
-          id: 'my-dashboard',
-          attributes: {},
-        },
-        {
-          type: 'visualization',
-          id: 'my-viz',
-          attributes: {},
-        },
-        {
-          type: 'index-pattern',
-          id: 'my-index-pattern',
-          attributes: {},
-        },
-      ],
+    const { savedObjects, savedObjectsClient, typeRegistry } = setup({
+      objects: mockExportResults,
     });
 
+    const request = httpServerMock.createKibanaRequest();
+
     const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-      savedObjectsClient,
-      savedObjectsService
+      savedObjects,
+      () => EXPORT_LIMIT,
+      request
     );
 
-    const result = await copySavedObjectsToSpaces('sourceSpace', ['destination1', 'destination2'], {
+    const namespace = 'sourceSpace';
+    const objects = [{ type: 'dashboard', id: 'my-dashboard' }];
+    const result = await copySavedObjectsToSpaces(namespace, ['destination1', 'destination2'], {
       includeReferences: true,
       overwrite: true,
-      objects: [
-        {
-          type: 'dashboard',
-          id: 'my-dashboard',
-        },
-      ],
+      objects,
+      createNewCopies: false,
     });
 
     expect(result).toMatchInlineSnapshot(`
-                                                                        Object {
-                                                                          "destination1": Object {
-                                                                            "errors": undefined,
-                                                                            "success": true,
-                                                                            "successCount": 3,
-                                                                          },
-                                                                          "destination2": Object {
-                                                                            "errors": undefined,
-                                                                            "success": true,
-                                                                            "successCount": 3,
-                                                                          },
-                                                                        }
-                                                `);
-
-    expect((savedObjectsService.importExport.getSortedObjectsForExport as jest.Mock).mock.calls)
-      .toMatchInlineSnapshot(`
-                  Array [
-                    Array [
-                      Object {
-                        "excludeExportDetails": true,
-                        "exportSizeLimit": 1000,
-                        "includeReferencesDeep": true,
-                        "namespace": "sourceSpace",
-                        "objects": Array [
-                          Object {
-                            "id": "my-dashboard",
-                            "type": "dashboard",
-                          },
-                        ],
-                        "savedObjectsClient": null,
-                        "types": Array [
-                          "dashboard",
-                          "visualization",
-                        ],
-                      },
-                    ],
-                  ]
-            `);
-
-    expect((savedObjectsService.importExport.importSavedObjects as jest.Mock).mock.calls)
-      .toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "namespace": "destination1",
-            "objectLimit": 1000,
-            "overwrite": true,
-            "readStream": Readable {
-              "_events": Object {
-                "data": [Function],
-                "end": [Function],
-                "error": [Function],
-              },
-              "_eventsCount": 3,
-              "_maxListeners": undefined,
-              "_read": [Function],
-              "_readableState": ReadableState {
-                "autoDestroy": false,
-                "awaitDrain": 0,
-                "buffer": BufferList {
-                  "head": null,
-                  "length": 0,
-                  "tail": null,
-                },
-                "decoder": null,
-                "defaultEncoding": "utf8",
-                "destroyed": false,
-                "emitClose": true,
-                "emittedReadable": false,
-                "encoding": null,
-                "endEmitted": true,
-                "ended": true,
-                "flowing": true,
-                "highWaterMark": 16,
-                "length": 0,
-                "needReadable": false,
-                "objectMode": true,
-                "paused": false,
-                "pipes": null,
-                "pipesCount": 0,
-                "readableListening": false,
-                "reading": false,
-                "readingMore": false,
-                "resumeScheduled": false,
-                "sync": false,
-              },
-              "readable": false,
-            },
-            "savedObjectsClient": null,
-            "supportedTypes": Array [
-              "dashboard",
-              "visualization",
-            ],
-          },
-        ],
-        Array [
-          Object {
-            "namespace": "destination2",
-            "objectLimit": 1000,
-            "overwrite": true,
-            "readStream": Readable {
-              "_events": Object {
-                "data": [Function],
-                "end": [Function],
-                "error": [Function],
-              },
-              "_eventsCount": 3,
-              "_maxListeners": undefined,
-              "_read": [Function],
-              "_readableState": ReadableState {
-                "autoDestroy": false,
-                "awaitDrain": 0,
-                "buffer": BufferList {
-                  "head": null,
-                  "length": 0,
-                  "tail": null,
-                },
-                "decoder": null,
-                "defaultEncoding": "utf8",
-                "destroyed": false,
-                "emitClose": true,
-                "emittedReadable": false,
-                "encoding": null,
-                "endEmitted": true,
-                "ended": true,
-                "flowing": true,
-                "highWaterMark": 16,
-                "length": 0,
-                "needReadable": false,
-                "objectMode": true,
-                "paused": false,
-                "pipes": null,
-                "pipesCount": 0,
-                "readableListening": false,
-                "reading": false,
-                "readingMore": false,
-                "resumeScheduled": false,
-                "sync": false,
-              },
-              "readable": false,
-            },
-            "savedObjectsClient": null,
-            "supportedTypes": Array [
-              "dashboard",
-              "visualization",
-            ],
-          },
-        ],
-      ]
+      Object {
+        "destination1": Object {
+          "errors": undefined,
+          "success": true,
+          "successCount": 3,
+          "successResults": Array [
+            "Some success(es) occurred!",
+          ],
+        },
+        "destination2": Object {
+          "errors": undefined,
+          "success": true,
+          "successCount": 3,
+          "successResults": Array [
+            "Some success(es) occurred!",
+          ],
+        },
+      }
     `);
+
+    expect(exportSavedObjectsToStream).toHaveBeenCalledWith({
+      excludeExportDetails: true,
+      exportSizeLimit: EXPORT_LIMIT,
+      includeReferencesDeep: true,
+      namespace,
+      objects,
+      savedObjectsClient,
+    });
+
+    const importOptions = {
+      createNewCopies: false,
+      objectLimit: EXPORT_LIMIT,
+      overwrite: true,
+      readStream: expect.any(Readable),
+      savedObjectsClient,
+      typeRegistry,
+    };
+    expect(importSavedObjectsFromStream).toHaveBeenNthCalledWith(1, {
+      ...importOptions,
+      namespace: 'destination1',
+    });
+    expect(importSavedObjectsFromStream).toHaveBeenNthCalledWith(2, {
+      ...importOptions,
+      namespace: 'destination2',
+    });
   });
 
   it(`doesn't stop copy if some spaces fail`, async () => {
-    const objects = [
-      {
-        type: 'dashboard',
-        id: 'my-dashboard',
-        attributes: {},
-      },
-      {
-        type: 'visualization',
-        id: 'my-viz',
-        attributes: {},
-      },
-      {
-        type: 'index-pattern',
-        id: 'my-index-pattern',
-        attributes: {},
-      },
-    ];
-    const { savedObjectsClient, savedObjectsService } = setup({
-      objects,
-      importSavedObjectsImpl: async opts => {
+    const { savedObjects } = setup({
+      objects: mockExportResults,
+      importSavedObjectsFromStreamImpl: async (opts) => {
         if (opts.namespace === 'failure-space') {
           throw new Error(`Some error occurred!`);
         }
-        await expectStreamToContainObjects(opts.readStream, objects);
+        // namespace-agnostic types should be filtered out before import
+        const filteredObjects = mockExportResults.filter(({ type }) => type !== 'globaltype');
+        await expectStreamToContainObjects(opts.readStream, filteredObjects);
         return Promise.resolve({
           success: true,
-          successCount: 3,
+          successCount: filteredObjects.length,
+          successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
         });
       },
     });
 
+    const request = httpServerMock.createKibanaRequest();
+
     const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-      savedObjectsClient,
-      savedObjectsService
+      savedObjects,
+      () => EXPORT_LIMIT,
+      request
     );
 
     const result = await copySavedObjectsToSpaces(
@@ -314,72 +244,61 @@ describe('copySavedObjectsToSpaces', () => {
       {
         includeReferences: true,
         overwrite: true,
-        objects: [
-          {
-            type: 'dashboard',
-            id: 'my-dashboard',
-          },
-        ],
+        objects: [{ type: 'dashboard', id: 'my-dashboard' }],
+        createNewCopies: false,
       }
     );
 
     expect(result).toMatchInlineSnapshot(`
-                        Object {
-                          "failure-space": Object {
-                            "errors": Array [
-                              [Error: Some error occurred!],
-                            ],
-                            "success": false,
-                            "successCount": 0,
-                          },
-                          "marketing": Object {
-                            "errors": undefined,
-                            "success": true,
-                            "successCount": 3,
-                          },
-                          "non-existent-space": Object {
-                            "errors": undefined,
-                            "success": true,
-                            "successCount": 3,
-                          },
-                        }
-                `);
+      Object {
+        "failure-space": Object {
+          "errors": Array [
+            [Error: Some error occurred!],
+          ],
+          "success": false,
+          "successCount": 0,
+        },
+        "marketing": Object {
+          "errors": undefined,
+          "success": true,
+          "successCount": 3,
+          "successResults": Array [
+            "Some success(es) occurred!",
+          ],
+        },
+        "non-existent-space": Object {
+          "errors": undefined,
+          "success": true,
+          "successCount": 3,
+          "successResults": Array [
+            "Some success(es) occurred!",
+          ],
+        },
+      }
+    `);
   });
 
   it(`handles stream read errors`, async () => {
-    const { savedObjectsClient, savedObjectsService } = setup({
-      objects: [
-        {
-          type: 'dashboard',
-          id: 'my-dashboard',
-          attributes: {},
-        },
-        {
-          type: 'visualization',
-          id: 'my-viz',
-          attributes: {},
-        },
-        {
-          type: 'index-pattern',
-          id: 'my-index-pattern',
-          attributes: {},
-        },
-      ],
-      getSortedObjectsForExportImpl: opts => {
+    const { savedObjects } = setup({
+      objects: mockExportResults,
+      exportSavedObjectsToStreamImpl: (_opts) => {
         return Promise.resolve(
           new Readable({
             objectMode: true,
             read() {
-              this.emit('error', new Error('Something went wrong while reading this stream'));
+              this.destroy(new Error('Something went wrong while reading this stream'));
             },
           })
         );
       },
     });
 
+    const request = httpServerMock.createKibanaRequest();
+
     const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-      savedObjectsClient,
-      savedObjectsService
+      savedObjects,
+      () => EXPORT_LIMIT,
+      request
     );
 
     await expect(
@@ -389,12 +308,8 @@ describe('copySavedObjectsToSpaces', () => {
         {
           includeReferences: true,
           overwrite: true,
-          objects: [
-            {
-              type: 'dashboard',
-              id: 'my-dashboard',
-            },
-          ],
+          objects: [{ type: 'dashboard', id: 'my-dashboard' }],
+          createNewCopies: false,
         }
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(

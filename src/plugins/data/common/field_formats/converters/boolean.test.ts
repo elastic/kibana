@@ -63,7 +63,7 @@ describe('Boolean Format', () => {
       input: ' True  ', // should handle trailing and mixed case
       expected: 'true',
     },
-  ].forEach(data => {
+  ].forEach((data) => {
     test(`convert ${data.input} to boolean`, () => {
       expect(boolean.convert(data.input)).toBe(data.expected);
     });

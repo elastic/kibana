@@ -7,7 +7,7 @@
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('Builtin ES Privileges', () => {
@@ -25,11 +25,11 @@ export default function({ getService }: FtrProviderContext) {
             const payload = response.body;
             expect(Object.keys(payload).sort()).to.eql(['cluster', 'index']);
 
-            sampleOfExpectedClusterPrivileges.forEach(privilege =>
+            sampleOfExpectedClusterPrivileges.forEach((privilege) =>
               expect(payload.cluster).to.contain(privilege)
             );
 
-            sampleOfExpectedIndexPrivileges.forEach(privilege =>
+            sampleOfExpectedIndexPrivileges.forEach((privilege) =>
               expect(payload.index).to.contain(privilege)
             );
 

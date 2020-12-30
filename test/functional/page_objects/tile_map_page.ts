@@ -35,7 +35,9 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
     public async clickMapButton(zoomSelector: string, waitForLoading?: boolean) {
       await retry.try(async () => {
         const zooms = await this.getZoomSelectors(zoomSelector);
-        await Promise.all(zooms.map(async zoom => await zoom.click()));
+        for (let i = 0; i < zooms.length; i++) {
+          await zooms[i].click();
+        }
         if (waitForLoading) {
           await header.waitUntilLoadingHasFinished();
         }
@@ -48,12 +50,14 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
       await testSubjects.click('inspectorViewChooser');
       await testSubjects.click('inspectorViewChooserRequests');
       await testSubjects.click('inspectorRequestDetailRequest');
-      return await testSubjects.getVisibleText('inspectorRequestBody');
+
+      return await inspector.getCodeEditorValue();
     }
 
     public async getMapBounds(): Promise<object> {
       const request = await this.getVisualizationRequest();
       const requestObject = JSON.parse(request);
+
       return requestObject.aggs.filter_agg.filter.geo_bounding_box['geo.coordinates'];
     }
 
@@ -68,7 +72,7 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
     public async getMapZoomEnabled(zoomSelector: string): Promise<boolean> {
       const zooms = await this.getZoomSelectors(zoomSelector);
       const classAttributes = await Promise.all(
-        zooms.map(async zoom => await zoom.getAttribute('class'))
+        zooms.map(async (zoom) => await zoom.getAttribute('class'))
       );
       return !classAttributes.join('').includes('leaflet-disabled');
     }

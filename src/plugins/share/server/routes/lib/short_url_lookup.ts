@@ -27,13 +27,20 @@ export interface ShortUrlLookupService {
   getUrl(url: string, deps: { savedObjects: SavedObjectsClientContract }): Promise<string>;
 }
 
+export interface UrlAttributes {
+  url: string;
+  accessCount: number;
+  createDate: number;
+  accessDate: number;
+}
+
 export function shortUrlLookupProvider({ logger }: { logger: Logger }): ShortUrlLookupService {
   async function updateMetadata(
-    doc: SavedObject,
+    doc: SavedObject<UrlAttributes>,
     { savedObjects }: { savedObjects: SavedObjectsClientContract }
   ) {
     try {
-      await savedObjects.update('url', doc.id, {
+      await savedObjects.update<UrlAttributes>('url', doc.id, {
         accessDate: new Date().valueOf(),
         accessCount: get(doc, 'attributes.accessCount', 0) + 1,
       });
@@ -46,14 +53,11 @@ export function shortUrlLookupProvider({ logger }: { logger: Logger }): ShortUrl
 
   return {
     async generateUrlId(url, { savedObjects }) {
-      const id = crypto
-        .createHash('md5')
-        .update(url)
-        .digest('hex');
+      const id = crypto.createHash('md5').update(url).digest('hex');
       const { isConflictError } = savedObjects.errors;
 
       try {
-        const doc = await savedObjects.create(
+        const doc = await savedObjects.create<UrlAttributes>(
           'url',
           {
             url,
@@ -75,7 +79,7 @@ export function shortUrlLookupProvider({ logger }: { logger: Logger }): ShortUrl
     },
 
     async getUrl(id, { savedObjects }) {
-      const doc = await savedObjects.get('url', id);
+      const doc = await savedObjects.get<UrlAttributes>('url', id);
       updateMetadata(doc, { savedObjects });
 
       return doc.attributes.url;

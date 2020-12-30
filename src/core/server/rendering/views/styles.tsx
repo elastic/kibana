@@ -32,17 +32,28 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
     <style
       dangerouslySetInnerHTML={{
         __html: `
-          * {
+
+          *, *:before, *:after {
             box-sizing: border-box;
+          }
+
+          html, body, div, span, svg {
+            margin: 0;
+            padding: 0;
+            border: none;
+            vertical-align: baseline;
           }
 
           body, html {
             width: 100%;
             height: 100%;
             margin: 0;
+            display: block;
           }
 
-          .kibanaWelcomeView {
+          .kbnWelcomeView {
+            line-height: 1.5;
+            background-color: ${darkMode ? '#1D1E24' : '#FFF'};
             height: 100%;
             display: -webkit-box;
             display: -webkit-flex;
@@ -67,101 +78,81 @@ export const Styles: FunctionComponent<Props> = ({ darkMode }) => {
                     justify-content: center;
           }
 
-          .kibanaWelcomeLogo {
-            width: 60px;
-            height: 60px;
-            margin: 10px 0 10px 20px;
-            background-repeat: no-repeat;
-            background-size: contain;
-            /* SVG optimized according to http://codepen.io/tigt/post/optimizing-svgs-in-data-uris */
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMCIgaGVpZ2h0PSIzOSIgdmlld0JveD0iMCAwIDMwIDM5Ij4gIDxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCI+ICAgIDxwb2x5Z29uIGZpbGw9IiNGMDRFOTgiIHBvaW50cz0iMCAwIDAgMzQuNTQ3IDI5LjkyMiAuMDIiLz4gICAgPHBhdGggZmlsbD0iIzM0Mzc0MSIgZD0iTTAsMTQuNCBMMCwzNC41NDY4IEwxNC4yODcyLDE4LjA2MTIgQzEwLjA0MTYsMTUuNzM4IDUuMTgwNCwxNC40IDAsMTQuNCIvPiAgICA8cGF0aCBmaWxsPSIjMDBCRkIzIiBkPSJNMTcuMzc0MiwxOS45OTY4IEwyLjcyMSwzNi45MDQ4IEwxLjQzMzQsMzguMzg5MiBMMjkuMjYzOCwzOC4zODkyIEMyNy43NjE0LDMwLjgzODggMjMuNDA0MiwyNC4zMjY0IDE3LjM3NDIsMTkuOTk2OCIvPiAgPC9nPjwvc3ZnPg==');
-          }
-
-          .kibanaWelcomeTitle {
+          .kbnWelcomeTitle {
             color: #000;
             font-size: 20px;
             font-family: sans-serif;
-            margin-top: 20px;
+            margin: 16px 0;
             animation: fadeIn 1s ease-in-out;
             animation-fill-mode: forwards;
             opacity: 0;
             animation-delay: 1.0s;
           }
 
-          .kibanaWelcomeText {
+          .kbnWelcomeText {
+            font-family:
+            display: inline-block;
             font-size: 14px;
             font-family: sans-serif;
+            line-height: 40px !important;
+            height: 40px !important;
             color: #98a2b3;
-            animation: fadeIn 1s ease-in-out;
-            animation-fill-mode: forwards;
-            opacity: 0;
-            animation-delay: 1.0s;
+            color: ${darkMode ? '#98A2B3' : '#69707D'};
           }
 
-          .kibanaLoaderWrap {
-            height: 128px;
-            width: 128px;
+          .kbnLoaderWrap {
+            text-align: center;
+            line-height: 1;
+            text-align: center;
+            font-faimily: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial !important;
+            letter-spacing: -.005em;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            font-kerning: normal;
+            font-weight: 400;
+          }
+
+          .kbnLoaderWrap svg {
+            width: 64px;
+            height: 64px;
+            margin: auto;
+            line-height: 1;
+          }
+
+          .kbnLoader path {
+            stroke: white;
+          }
+
+          .kbnProgress {
+            display: inline-block;
             position: relative;
-            margin-top: 40px;
+            width: 32px;
+            height: 4px;
+            overflow: hidden;
+            background-color: ${darkMode ? '#25262E' : '#F5F7FA'};
+            line-height: 1;
           }
 
-          .kibanaLoaderWrap + * {
-            margin-top: 24px;
-          }
-
-          .kibanaLoader {
-            height: 128px;
-            width: 128px;
-            margin: 0 auto;
-            position: relative;
-            border: 2px solid transparent;
-            border-top: 2px solid #017d73;
-            border-radius: 100%;
-            display: block;
-            opacity: 0;
-            animation: rotation .75s .5s infinite linear, fadeIn 1s .5s ease-in-out forwards;
-          }
-
-          .kibanaWelcomeLogoCircle {
+          .kbnProgress:before {
             position: absolute;
-            left: 4px;
-            top: 4px;
-            width: 120px;
-            height: 120px;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 50%;
-            animation: bounceIn .5s ease-in-out;
+            content: '';
+            height: 4px;
+            width: 100%;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            transform: scaleX(0) translateX(0%);
+            animation: kbnProgress 1s cubic-bezier(.694, .0482, .335, 1) infinite;
+            background-color: ${darkMode ? '#1BA9F5' : '#006DE4'};
           }
 
-          @keyframes rotation {
-            from {
-              transform: rotate(0deg);
-            }
-            to {
-              transform: rotate(359deg);
-            }
-          }
-          @keyframes fadeIn {
-            from {
-              opacity: 0;
-            }
-            to {
-              opacity: 1;
-            }
-          }
-          @keyframes bounceIn {
+          @keyframes kbnProgress {
             0% {
-              opacity: 0;
-              transform: scale(.1);
+              transform: scaleX(1) translateX(-100%);
             }
-            80% {
-              opacity: .5;
-              transform: scale(1.2);
-            }
+
             100% {
-              opacity: 1;
-              transform: scale(1);
+              transform: scaleX(1) translateX(100%);
             }
           }
         `,

@@ -1,0 +1,27 @@
+{
+  "indices.get": {
+    "url_params": {
+      "include_type_name": "__flag__",
+      "local": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "open",
+        "closed",
+        "hidden",
+        "none",
+        "all"
+      ],
+      "flat_settings": "__flag__",
+      "include_defaults": "__flag__",
+      "master_timeout": ""
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "{indices}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-get-index.html"
+  }
+}

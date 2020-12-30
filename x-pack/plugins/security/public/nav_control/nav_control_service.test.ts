@@ -9,13 +9,13 @@ import { BehaviorSubject } from 'rxjs';
 import { ILicense } from '../../../licensing/public';
 import { SecurityNavControlService } from '.';
 import { SecurityLicenseService } from '../../common/licensing';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { securityMock } from '../mocks';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 
 const validLicense = {
   isAvailable: true,
-  getFeature: feature => {
+  getFeature: (feature) => {
     expect(feature).toEqual('security');
 
     return {
@@ -38,6 +38,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       authc: mockSecuritySetup.authc,
+      logoutUrl: '/some/logout/url',
     });
 
     const coreStart = coreMock.createStart();
@@ -73,7 +74,7 @@ describe('SecurityNavControlService', () => {
               <div
                 aria-label="some-user"
                 class="euiAvatar euiAvatar--s euiAvatar--user"
-                style="background-image: none; background-color: rgb(146, 0, 0); color: rgb(255, 255, 255);"
+                style="background-image: none; background-color: rgb(255, 126, 98); color: rgb(0, 0, 0);"
                 title="some-user"
               >
                 <span
@@ -100,6 +101,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       authc: securityMock.createSetup().authc,
+      logoutUrl: '/some/logout/url',
     });
 
     const coreStart = coreMock.createStart();
@@ -119,6 +121,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       authc: securityMock.createSetup().authc,
+      logoutUrl: '/some/logout/url',
     });
 
     const coreStart = coreMock.createStart();
@@ -135,6 +138,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       authc: securityMock.createSetup().authc,
+      logoutUrl: '/some/logout/url',
     });
 
     const coreStart = coreMock.createStart();
@@ -156,6 +160,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       authc: securityMock.createSetup().authc,
+      logoutUrl: '/some/logout/url',
     });
 
     const coreStart = coreMock.createStart();
@@ -167,5 +172,135 @@ describe('SecurityNavControlService', () => {
 
     navControlService.start({ core: coreStart });
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(2);
+  });
+
+  describe(`#start`, () => {
+    it('should return functions to register and retrieve user menu links', () => {
+      const license$ = new BehaviorSubject<ILicense>(validLicense);
+
+      const navControlService = new SecurityNavControlService();
+      navControlService.setup({
+        securityLicense: new SecurityLicenseService().setup({ license$ }).license,
+        authc: securityMock.createSetup().authc,
+        logoutUrl: '/some/logout/url',
+      });
+
+      const coreStart = coreMock.createStart();
+      const navControlServiceStart = navControlService.start({ core: coreStart });
+      expect(navControlServiceStart).toHaveProperty('getUserMenuLinks$');
+      expect(navControlServiceStart).toHaveProperty('addUserMenuLinks');
+    });
+
+    it('should register custom user menu links to be displayed in the nav controls', (done) => {
+      const license$ = new BehaviorSubject<ILicense>(validLicense);
+
+      const navControlService = new SecurityNavControlService();
+      navControlService.setup({
+        securityLicense: new SecurityLicenseService().setup({ license$ }).license,
+        authc: securityMock.createSetup().authc,
+        logoutUrl: '/some/logout/url',
+      });
+
+      const coreStart = coreMock.createStart();
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const userMenuLinks$ = getUserMenuLinks$();
+
+      addUserMenuLinks([
+        {
+          label: 'link1',
+          href: 'path-to-link1',
+          iconType: 'empty',
+        },
+      ]);
+
+      userMenuLinks$.subscribe((links) => {
+        expect(links).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "href": "path-to-link1",
+              "iconType": "empty",
+              "label": "link1",
+            },
+          ]
+        `);
+        done();
+      });
+    });
+
+    it('should retrieve user menu links sorted by order', (done) => {
+      const license$ = new BehaviorSubject<ILicense>(validLicense);
+
+      const navControlService = new SecurityNavControlService();
+      navControlService.setup({
+        securityLicense: new SecurityLicenseService().setup({ license$ }).license,
+        authc: securityMock.createSetup().authc,
+        logoutUrl: '/some/logout/url',
+      });
+
+      const coreStart = coreMock.createStart();
+      const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({ core: coreStart });
+      const userMenuLinks$ = getUserMenuLinks$();
+
+      addUserMenuLinks([
+        {
+          label: 'link3',
+          href: 'path-to-link3',
+          iconType: 'empty',
+          order: 3,
+        },
+        {
+          label: 'link1',
+          href: 'path-to-link1',
+          iconType: 'empty',
+          order: 1,
+        },
+        {
+          label: 'link2',
+          href: 'path-to-link2',
+          iconType: 'empty',
+          order: 2,
+        },
+      ]);
+      addUserMenuLinks([
+        {
+          label: 'link4',
+          href: 'path-to-link4',
+          iconType: 'empty',
+          order: 4,
+        },
+      ]);
+
+      userMenuLinks$.subscribe((links) => {
+        expect(links).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "href": "path-to-link1",
+              "iconType": "empty",
+              "label": "link1",
+              "order": 1,
+            },
+            Object {
+              "href": "path-to-link2",
+              "iconType": "empty",
+              "label": "link2",
+              "order": 2,
+            },
+            Object {
+              "href": "path-to-link3",
+              "iconType": "empty",
+              "label": "link3",
+              "order": 3,
+            },
+            Object {
+              "href": "path-to-link4",
+              "iconType": "empty",
+              "label": "link4",
+              "order": 4,
+            },
+          ]
+        `);
+        done();
+      });
+    });
   });
 });

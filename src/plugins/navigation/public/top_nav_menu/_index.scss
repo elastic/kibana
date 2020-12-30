@@ -1,7 +1,3 @@
-.kbnTopNavMenu__wrapper {
-  z-index: 5;
-
-  .kbnTopNavMenu {      
-    padding: $euiSizeS 0px $euiSizeXS;
-  }
+.kbnTopNavMenu {
+  margin-right: $euiSizeXS;
 }

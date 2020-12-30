@@ -1,0 +1,129 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EnabledFeatures renders as expected 1`] = `
+<SectionPanel
+  data-test-subj="enabled-features-panel"
+  description="Customize visible features"
+  title={
+    <span>
+      <FormattedMessage
+        defaultMessage="Features"
+        id="xpack.spaces.management.enabledSpaceFeatures.enabledFeaturesSectionMessage"
+        values={Object {}}
+      />
+       
+      <EuiText
+        color="danger"
+        size="s"
+        style={
+          Object {
+            "display": "inline-block",
+          }
+        }
+      >
+        <em>
+          <FormattedMessage
+            defaultMessage="(no features visible)"
+            id="xpack.spaces.management.enabledSpaceFeatures.noFeaturesEnabledMessage"
+            values={Object {}}
+          />
+        </em>
+      </EuiText>
+    </span>
+  }
+>
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiTitle
+        size="xs"
+      >
+        <h3>
+          <FormattedMessage
+            defaultMessage="Set feature visibility for this space"
+            id="xpack.spaces.management.enabledSpaceFeatures.enableFeaturesInSpaceMessage"
+            values={Object {}}
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiText
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="The feature is hidden in the UI, but is not disabled."
+            id="xpack.spaces.management.enabledSpaceFeatures.notASecurityMechanismMessage"
+            values={Object {}}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            defaultMessage="If you wish to secure access to features, please {manageSecurityRoles}."
+            id="xpack.spaces.management.enabledSpaceFeatures.goToRolesLink"
+            values={
+              Object {
+                "manageSecurityRoles": <EuiLink
+                  data-test-subj="goToRoles"
+                  href="management"
+                >
+                  <FormattedMessage
+                    defaultMessage="manage security roles"
+                    id="xpack.spaces.management.enabledSpaceFeatures.rolesLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
+          />
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <FeatureTable
+        features={
+          Array [
+            Object {
+              "app": Array [],
+              "category": Object {
+                "euiIconType": "logoKibana",
+                "id": "kibana",
+                "label": "Analytics",
+                "order": 1000,
+              },
+              "id": "feature-1",
+              "name": "Feature 1",
+              "privileges": null,
+            },
+            Object {
+              "app": Array [],
+              "category": Object {
+                "euiIconType": "logoKibana",
+                "id": "kibana",
+                "label": "Analytics",
+                "order": 1000,
+              },
+              "id": "feature-2",
+              "name": "Feature 2",
+              "privileges": null,
+            },
+          ]
+        }
+        onChange={[MockFunction]}
+        space={
+          Object {
+            "disabledFeatures": Array [
+              "feature-1",
+              "feature-2",
+            ],
+            "id": "my-space",
+            "name": "my space",
+          }
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</SectionPanel>
+`;

@@ -1,0 +1,32 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "A Socat process is running on a Linux host. Socat is often used as a persistence mechanism by exporting a reverse shell, or by serving a shell on a listening port. Socat is also sometimes used for lateral movement.",
+  "false_positives": [
+    "Socat is a dual-use tool that can be used for benign or malicious activity. Some normal use of this program, at varying levels of frequency, may originate from scripts, automation tools, and frameworks. Usage by web servers is more likely to be suspicious."
+  ],
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Socat Process Activity",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:socat and not process.args:-V",
+  "references": [
+    "https://blog.ropnop.com/upgrading-simple-shells-to-fully-interactive-ttys/#method-2-using-socat"
+  ],
+  "risk_score": 47,
+  "rule_id": "cd4d5754-07e1-41d4-b9a5-ef4ea6a0a126",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Linux",
+    "Threat Detection"
+  ],
+  "type": "query",
+  "version": 5
+}

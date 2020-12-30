@@ -17,10 +17,37 @@
  * under the License.
  */
 
-const createStartContract = () => ({
-  legacy: {},
+import { ManagementSetup, ManagementStart, DefinedSections } from '../types';
+import { ManagementSection } from '../index';
+
+export const createManagementSectionMock = () =>
+  (({
+    disable: jest.fn(),
+    enable: jest.fn(),
+    registerApp: jest.fn(),
+    getApp: jest.fn(),
+    getEnabledItems: jest.fn().mockReturnValue([]),
+  } as unknown) as ManagementSection);
+
+const createSetupContract = (): ManagementSetup => ({
+  sections: {
+    register: jest.fn(() => createManagementSectionMock()),
+    section: ({
+      ingest: createManagementSectionMock(),
+      data: createManagementSectionMock(),
+      insightsAndAlerting: createManagementSectionMock(),
+      security: createManagementSectionMock(),
+      kibana: createManagementSectionMock(),
+      stack: createManagementSectionMock(),
+    } as unknown) as DefinedSections,
+  },
+});
+
+const createStartContract = (): ManagementStart => ({
+  sections: {},
 });
 
 export const managementPluginMock = {
+  createSetupContract,
   createStartContract,
 };

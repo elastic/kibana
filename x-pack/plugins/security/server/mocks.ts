@@ -4,25 +4,60 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginSetupContract } from './plugin';
-
-import { authenticationMock } from './authentication/index.mock';
+import type { ApiResponse } from '@elastic/elasticsearch';
+import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { authorizationMock } from './authorization/index.mock';
+import { licenseMock } from '../common/licensing/index.mock';
+import { auditServiceMock } from './audit/index.mock';
 
 function createSetupMock() {
   const mockAuthz = authorizationMock.create();
   return {
-    authc: authenticationMock.create(),
+    audit: auditServiceMock.create(),
+    authc: authenticationServiceMock.createSetup(),
     authz: {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
+      checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
       mode: mockAuthz.mode,
     },
     registerSpacesService: jest.fn(),
-    __legacyCompat: {} as PluginSetupContract['__legacyCompat'],
+    license: licenseMock.create(),
+  };
+}
+
+function createStartMock() {
+  const mockAuthz = authorizationMock.create();
+  const mockAuthc = authenticationServiceMock.createStart();
+  return {
+    authc: {
+      apiKeys: mockAuthc.apiKeys,
+      getCurrentUser: mockAuthc.getCurrentUser,
+    },
+    authz: {
+      actions: mockAuthz.actions,
+      checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
+      checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
+      mode: mockAuthz.mode,
+    },
+  };
+}
+
+function createApiResponseMock<TResponse, TContext>(
+  apiResponse: Pick<ApiResponse<TResponse, TContext>, 'body'> &
+    Partial<Omit<ApiResponse<TResponse, TContext>, 'body'>>
+): ApiResponse<TResponse, TContext> {
+  return {
+    statusCode: null,
+    headers: null,
+    warnings: null,
+    meta: {} as any,
+    ...apiResponse,
   };
 }
 
 export const securityMock = {
   createSetup: createSetupMock,
+  createStart: createStartMock,
+  createApiResponse: createApiResponseMock,
 };

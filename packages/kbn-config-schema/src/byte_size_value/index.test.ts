@@ -42,19 +42,29 @@ describe('parsing units', () => {
   });
 
   test('throws an error when unsupported unit specified', () => {
-    expect(() => ByteSizeValue.parse('1tb')).toThrowErrorMatchingSnapshot();
+    expect(() => ByteSizeValue.parse('1tb')).toThrowErrorMatchingInlineSnapshot(
+      `"Failed to parse value as byte value. Value must be either number of bytes, or follow the format <count>[b|kb|mb|gb] (e.g., '1024kb', '200mb', '1gb'), where the number is a safe positive integer."`
+    );
   });
 });
 
 describe('#constructor', () => {
   test('throws if number of bytes is negative', () => {
-    expect(() => new ByteSizeValue(-1024)).toThrowErrorMatchingSnapshot();
+    expect(() => new ByteSizeValue(-1024)).toThrowErrorMatchingInlineSnapshot(
+      `"Value in bytes is expected to be a safe positive integer."`
+    );
   });
 
   test('throws if number of bytes is not safe', () => {
-    expect(() => new ByteSizeValue(NaN)).toThrowErrorMatchingSnapshot();
-    expect(() => new ByteSizeValue(Infinity)).toThrowErrorMatchingSnapshot();
-    expect(() => new ByteSizeValue(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
+    expect(() => new ByteSizeValue(NaN)).toThrowErrorMatchingInlineSnapshot(
+      `"Value in bytes is expected to be a safe positive integer."`
+    );
+    expect(() => new ByteSizeValue(Infinity)).toThrowErrorMatchingInlineSnapshot(
+      `"Value in bytes is expected to be a safe positive integer."`
+    );
+    expect(() => new ByteSizeValue(Math.pow(2, 53))).toThrowErrorMatchingInlineSnapshot(
+      `"Value in bytes is expected to be a safe positive integer."`
+    );
   });
 
   test('accepts 0', () => {

@@ -1,0 +1,10 @@
+{
+  "id": "actions",
+  "server": true,
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "actions"],
+  "requiredPlugins": ["licensing", "taskManager", "encryptedSavedObjects", "eventLog", "features"],
+  "optionalPlugins": ["usageCollection", "spaces", "security"],
+  "ui": false
+}

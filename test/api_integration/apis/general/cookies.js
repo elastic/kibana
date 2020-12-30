@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
 
   describe('cookie handling', () => {
@@ -27,7 +27,7 @@ export default function({ getService }) {
       supertest
         .get('/')
         .set('cookie', 'test:80=value;test_80=value')
-        .then(response => {
+        .then((response) => {
           expect(response.text).not.to.contain('Invalid cookie header');
         }));
 
@@ -36,7 +36,7 @@ export default function({ getService }) {
         .get('/')
         .set('cookie', 'a')
         .expect(400)
-        .then(response => {
+        .then((response) => {
           expect(response.text).to.contain('Invalid cookie header');
         }));
   });

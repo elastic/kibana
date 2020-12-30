@@ -1,0 +1,27 @@
+{
+  "id": "rollup",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": [
+    "indexPatternManagement",
+    "management",
+    "licensing",
+    "features"
+  ],
+  "optionalPlugins": [
+    "home",
+    "indexManagement",
+    "usageCollection",
+    "visTypeTimeseries"
+  ],
+  "configPath": ["xpack", "rollup"],
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "home",
+    "esUiShared",
+    "data"
+  ]
+}

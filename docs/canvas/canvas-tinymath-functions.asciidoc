@@ -3,21 +3,21 @@
 === TinyMath functions
 
 TinyMath provides a set of functions that can be used with the Canvas expression
-language to perform complex math calculations. Read on for detailed information about 
-the functions available in TinyMath, including what parameters each function accepts, 
+language to perform complex math calculations. Read on for detailed information about
+the functions available in TinyMath, including what parameters each function accepts,
 the return value of that function, and examples of how each function behaves.
 
-Most of the functions below accept arrays and apply JavaScript Math methods to 
-each element of that array. For the functions that accept multiple arrays as 
-parameters, the function generally does the calculation index by index. 
+Most of the functions accept arrays and apply JavaScript Math methods to
+each element of that array. For the functions that accept multiple arrays as
+parameters, the function generally does the calculation index by index.
 
-Any function below can be wrapped by another function as long as the return type
+Any function can be wrapped by another function as long as the return type
 of the inner function matches the acceptable parameter type of the outer function.
 
 [float]
 === abs( a )
 
-Calculates the absolute value of a number. For arrays, the function will be 
+Calculates the absolute value of a number. For arrays, the function will be
 applied index-wise to each element.
 
 [cols="3*^<"]
@@ -29,7 +29,7 @@ applied index-wise to each element.
 |a number or an array of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The absolute value of `a`. Returns 
+*Returns*: `number` | `Array.<number>`. The absolute value of `a`. Returns
 an array with the absolute values of each element if `a` is an array.
 
 *Example*
@@ -43,7 +43,7 @@ abs([-1 , -2, 3, -4]) // returns [1, 2, 3, 4]
 [float]
 === add( ...args )
 
-Calculates the sum of one or more numbers/arrays passed into the function. If at 
+Calculates the sum of one or more numbers/arrays passed into the function. If at
 least one array of numbers is passed into the function, the function will calculate the sum by index.
 
 [cols="3*^<"]
@@ -55,9 +55,9 @@ least one array of numbers is passed into the function, the function will calcul
 |one or more numbers or arrays of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The sum of all numbers in `args` if `args` 
-contains only numbers. Returns an array of sums of the elements at each index, 
-including all scalar numbers in `args` in the calculation at each index if `args` 
+*Returns*: `number` | `Array.<number>`. The sum of all numbers in `args` if `args`
+contains only numbers. Returns an array of sums of the elements at each index,
+including all scalar numbers in `args` in the calculation at each index if `args`
 contains at least one array.
 
 *Throws*: `'Array length mismatch'` if `args` contains arrays of different lengths
@@ -73,7 +73,7 @@ add([1, 2], 3, [4, 5], 6) // returns [(1 + 3 + 4 + 6), (2 + 3 + 5 + 6)] = [14, 1
 [float]
 === cbrt( a )
 
-Calculates the cube root of a number. For arrays, the function will be applied 
+Calculates the cube root of a number. For arrays, the function will be applied
 index-wise to each element.
 
 [cols="3*^<"]
@@ -85,7 +85,7 @@ index-wise to each element.
 |a number or an array of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The cube root of `a`. Returns an array with 
+*Returns*: `number` | `Array.<number>`. The cube root of `a`. Returns an array with
 the cube roots of each element if `a` is an array.
 
 *Example*
@@ -99,7 +99,7 @@ cbrt([27, 64, 125]) // returns [3, 4, 5]
 [float]
 === ceil( a )
 
-Calculates the ceiling of a number, i.e., rounds a number towards positive infinity. 
+Calculates the ceiling of a number, i.e., rounds a number towards positive infinity.
 For arrays, the function will be applied index-wise to each element.
 
 [cols="3*^<"]
@@ -111,7 +111,7 @@ For arrays, the function will be applied index-wise to each element.
 |a number or an array of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The ceiling of `a`. Returns an array with 
+*Returns*: `number` | `Array.<number>`. The ceiling of `a`. Returns an array with
 the ceilings of each element if `a` is an array.
 
 *Example*
@@ -125,7 +125,7 @@ ceil([1.1, 2.2, 3.3]) // returns [2, 3, 4]
 [float]
 === clamp( ...a, min, max )
 
-Restricts value to a given range and returns closed available value. If only `min` 
+Restricts value to a given range and returns closed available value. If only `min`
 is provided, values are restricted to only a lower bound.
 
 [cols="3*^<"]
@@ -145,11 +145,11 @@ is provided, values are restricted to only a lower bound.
 |(optional) The maximum value this function will return.
 |===
 
-*Returns*: `number` | `Array.<number>`. The closest value between `min` (inclusive) 
-and `max` (inclusive). Returns an array with values greater than or equal to `min` 
+*Returns*: `number` | `Array.<number>`. The closest value between `min` (inclusive)
+and `max` (inclusive). Returns an array with values greater than or equal to `min`
 and less than or equal to `max` (if provided) at each index.
 
-*Throws*: 
+*Throws*:
 
 - `'Array length mismatch'` if a `min` and/or `max` are arrays of different lengths
 
@@ -194,7 +194,7 @@ count(100) // returns 1
 [float]
 === cube( a )
 
-Calculates the cube of a number. For arrays, the function will be applied 
+Calculates the cube of a number. For arrays, the function will be applied
 index-wise to each element.
 
 [cols="3*^<"]
@@ -206,7 +206,7 @@ index-wise to each element.
 |a number or an array of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The cube of `a`. Returns an array 
+*Returns*: `number` | `Array.<number>`. The cube of `a`. Returns an array
 with the cubes of each element if `a` is an array.
 
 *Example*
@@ -219,7 +219,7 @@ cube([3, 4, 5]) // returns [27, 64, 125]
 [float]
 === divide( a, b )
 
-Divides two numbers. If at least one array of numbers is passed into the function, 
+Divides two numbers. If at least one array of numbers is passed into the function,
 the function will be applied index-wise to each element.
 
 [cols="3*^<"]
@@ -235,8 +235,8 @@ the function will be applied index-wise to each element.
 |divisor, a number or an array of numbers, b != 0
 |===
 
-*Returns*: `number` | `Array.<number>`. Returns the quotient of `a` and `b` 
-if both are numbers. Returns an array with the quotients applied index-wise to 
+*Returns*: `number` | `Array.<number>`. Returns the quotient of `a` and `b`
+if both are numbers. Returns an array with the quotients applied index-wise to
 each element if `a` or `b` is an array.
 
 *Throws*:
@@ -257,7 +257,7 @@ divide([14, 42, 65, 108], [2, 7, 5, 12]) // returns [7, 6, 13, 9]
 [float]
 === exp( a )
 
-Calculates _e^x_ where _e_ is Euler's number. For arrays, the function will be applied 
+Calculates _e^x_ where _e_ is Euler's number. For arrays, the function will be applied
 index-wise to each element.
 
 [cols="3*^<"]
@@ -269,7 +269,7 @@ index-wise to each element.
 |a number or an array of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. Returns an array with the values of 
+*Returns*: `number` | `Array.<number>`. Returns an array with the values of
 `e^x` evaluated where `x` is each element of `a` if `a` is an array.
 
 *Example*
@@ -282,7 +282,7 @@ exp([1, 2, 3]) // returns [e^1, e^2, e^3] = [2.718281828459045, 7.38905609893064
 [float]
 === first( a )
 
-Returns the first element of an array. If anything other than an array is passed 
+Returns the first element of an array. If anything other than an array is passed
 in, the input is returned.
 
 [cols="3*^<"]
@@ -306,7 +306,7 @@ first([1, 2, 3]) // returns 1
 [float]
 === fix( a )
 
-Calculates the fix of a number, i.e., rounds a number towards 0. For arrays, the 
+Calculates the fix of a number, i.e., rounds a number towards 0. For arrays, the
 function will be applied index-wise to each element.
 
 [cols="3*^<"]
@@ -318,7 +318,7 @@ function will be applied index-wise to each element.
 |a number or an array of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The fix of `a`. Returns an array with 
+*Returns*: `number` | `Array.<number>`. The fix of `a`. Returns an array with
 the fixes for each element if `a` is an array.
 
 *Example*
@@ -332,7 +332,7 @@ fix([1.8, 2.9, -3.7, -4.6]) // returns [1, 2, -3, -4]
 [float]
 === floor( a )
 
-Calculates the floor of a number, i.e., rounds a number towards negative infinity. 
+Calculates the floor of a number, i.e., rounds a number towards negative infinity.
 For arrays, the function will be applied index-wise to each element.
 
 [cols="3*^<"]
@@ -344,7 +344,7 @@ For arrays, the function will be applied index-wise to each element.
 |a number or an array of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The floor of `a`. Returns an array 
+*Returns*: `number` | `Array.<number>`. The floor of `a`. Returns an array
 with the floor of each element if `a` is an array.
 
 *Example*
@@ -358,7 +358,7 @@ floor([1.7, 2.8, 3.9]) // returns [1, 2, 3]
 [float]
 === last( a )
 
-Returns the last element of an array. If anything other than an array is passed 
+Returns the last element of an array. If anything other than an array is passed
 in, the input is returned.
 
 [cols="3*^<"]
@@ -382,7 +382,7 @@ last([1, 2, 3]) // returns 3
 [float]
 === log( a, b )
 
-Calculates the logarithm of a number. For arrays, the function will be applied 
+Calculates the logarithm of a number. For arrays, the function will be applied
 index-wise to each element.
 
 [cols="3*^<"]
@@ -398,7 +398,7 @@ index-wise to each element.
 |(optional) base for the logarithm. If not provided a value, the default base is e, and the natural log is calculated.
 |===
 
-*Returns*: `number` | `Array.<number>`.  The logarithm of `a`. Returns an array 
+*Returns*: `number` | `Array.<number>`.  The logarithm of `a`. Returns an array
 with the the logarithms of each element if `a` is an array.
 
 *Throws*:
@@ -419,7 +419,7 @@ log([2, 4, 8, 16, 32], 2) // returns [1, 2, 3, 4, 5]
 [float]
 === log10( a )
 
-Calculates the logarithm base 10 of a number. For arrays, the function will be 
+Calculates the logarithm base 10 of a number. For arrays, the function will be
 applied index-wise to each element.
 
 [cols="3*^<"]
@@ -431,7 +431,7 @@ applied index-wise to each element.
 |a number or an array of numbers, `a` must be greater than 0
 |===
 
-*Returns*: `number` | `Array.<number>`. The logarithm of `a`. Returns an array 
+*Returns*: `number` | `Array.<number>`. The logarithm of `a`. Returns an array
 with the the logarithms base 10 of each element if `a` is an array.
 
 *Throws*: `'Must be greater than 0'` if `a` < 0
@@ -448,8 +448,8 @@ log([10, 100, 1000, 10000, 100000]) // returns [1, 2, 3, 4, 5]
 [float]
 === max( ...args )
 
-Finds the maximum value of one of more numbers/arrays of numbers passed into the function. 
-If at least one array of numbers is passed into the function, the function will 
+Finds the maximum value of one of more numbers/arrays of numbers passed into the function.
+If at least one array of numbers is passed into the function, the function will
 find the maximum by index.
 
 [cols="3*^<"]
@@ -461,9 +461,9 @@ find the maximum by index.
 |one or more numbers or arrays of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The maximum value of all numbers if 
-`args` contains only numbers. Returns an array with the the maximum values at each 
-index, including all scalar numbers in `args` in the calculation at each index if 
+*Returns*: `number` | `Array.<number>`. The maximum value of all numbers if
+`args` contains only numbers. Returns an array with the the maximum values at each
+index, including all scalar numbers in `args` in the calculation at each index if
 `args` contains at least one array.
 
 *Throws*: `'Array length mismatch'` if `args` contains arrays of different lengths
@@ -479,8 +479,8 @@ max([1, 9], 4, [3, 5]) // returns [max([1, 4, 3]), max([9, 4, 5])] = [4, 9]
 [float]
 === mean( ...args )
 
-Finds the mean value of one of more numbers/arrays of numbers passed into the function. 
-If at least one array of numbers is passed into the function, the function will 
+Finds the mean value of one of more numbers/arrays of numbers passed into the function.
+If at least one array of numbers is passed into the function, the function will
 find the mean by index.
 
 [cols="3*^<"]
@@ -492,40 +492,9 @@ find the mean by index.
 |one or more numbers or arrays of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The maximum value of all numbers if 
-`args` contains only numbers. Returns an array with the the maximum values at each 
-index, including all scalar numbers in `args` in the calculation at each index if 
-`args` contains at least one array.
-
-*Throws*: `'Array length mismatch'` if `args` contains arrays of different lengths
-
-*Example*
-[source, js]
-------------
-max(1, 2, 3) // returns 3
-max([10, 20, 30, 40], 15) // returns [15, 20, 30, 40]
-max([1, 9], 4, [3, 5]) // returns [max([1, 4, 3]), max([9, 4, 5])] = [4, 9]
-------------
-
-[float]
-=== mean( ...args )
-
-Finds the mean value of one of more numbers/arrays of numbers passed into the function. 
-If at least one array of numbers is passed into the function, the function will 
-find the mean by index.
-
-[cols="3*^<"]
-|===
-|Param |Type |Description
-
-|...args
-|number \| Array.<number>
-|one or more numbers or arrays of numbers
-|===
-
-*Returns*: `number` | `Array.<number>`. The mean value of all numbers if `args` 
-contains only numbers. Returns an array with the the mean values of each index, 
-including all scalar numbers in `args` in the calculation at each index if `args` 
+*Returns*: `number` | `Array.<number>`. The mean value of all numbers if `args`
+contains only numbers. Returns an array with the the mean values of each index,
+including all scalar numbers in `args` in the calculation at each index if `args`
 contains at least one array.
 
 *Example*
@@ -539,8 +508,8 @@ mean([1, 9], 5, [3, 4]) // returns [mean([1, 5, 3]), mean([9, 5, 4])] = [3, 6]
 [float]
 === median( ...args )
 
-Finds the median value(s) of one of more numbers/arrays of numbers passed into the function. 
-If at least one array of numbers is passed into the function, the function will 
+Finds the median value(s) of one of more numbers/arrays of numbers passed into the function.
+If at least one array of numbers is passed into the function, the function will
 find the median by index.
 
 [cols="3*^<"]
@@ -552,9 +521,9 @@ find the median by index.
 |one or more numbers or arrays of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The median value of all numbers if `args` 
-contains only numbers. Returns an array with the the median values of each index, 
-including all scalar numbers in `args` in the calculation at each index if `args` 
+*Returns*: `number` | `Array.<number>`. The median value of all numbers if `args`
+contains only numbers. Returns an array with the the median values of each index,
+including all scalar numbers in `args` in the calculation at each index if `args`
 contains at least one array.
 
 *Example*
@@ -569,8 +538,8 @@ median([1, 9], 2, 4, [3, 5]) // returns [median([1, 2, 4, 3]), median([9, 2, 4, 
 [float]
 === min( ...args )
 
-Finds the minimum value of one of more numbers/arrays of numbers passed into the function. 
-If at least one array of numbers is passed into the function, the function will 
+Finds the minimum value of one of more numbers/arrays of numbers passed into the function.
+If at least one array of numbers is passed into the function, the function will
 find the minimum by index.
 
 [cols="3*^<"]
@@ -582,9 +551,9 @@ find the minimum by index.
 |one or more numbers or arrays of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The minimum value of all numbers if 
-`args` contains only numbers. Returns an array with the the minimum values of each 
-index, including all scalar numbers in `args` in the calculation at each index if `a` 
+*Returns*: `number` | `Array.<number>`. The minimum value of all numbers if
+`args` contains only numbers. Returns an array with the the minimum values of each
+index, including all scalar numbers in `args` in the calculation at each index if `a`
 is an array.
 
 *Throws*: `'Array length mismatch'` if `args` contains arrays of different lengths.
@@ -600,7 +569,7 @@ min([1, 9], 4, [3, 5]) // returns [min([1, 4, 3]), min([9, 4, 5])] = [1, 4]
 [float]
 === mod( a, b )
 
-Remainder after dividing two numbers. If at least one array of numbers is passed 
+Remainder after dividing two numbers. If at least one array of numbers is passed
 into the function, the function will be applied index-wise to each element.
 
 [cols="3*^<"]
@@ -616,8 +585,8 @@ into the function, the function will be applied index-wise to each element.
 |divisor, a number or an array of numbers, b != 0
 |===
 
-*Returns*: `number` | `Array.<number>`. The remainder of `a` divided by `b` if 
-both are numbers. Returns an array with the the remainders applied index-wise to 
+*Returns*: `number` | `Array.<number>`. The remainder of `a` divided by `b` if
+both are numbers. Returns an array with the the remainders applied index-wise to
 each element if `a` or `b` is an array.
 
 *Throws*:
@@ -638,8 +607,8 @@ mod([14, 42, 65, 108], [5, 4, 14, 2]) // returns [5, 2, 9, 0]
 [float]
 === mode( ...args )
 
-Finds the mode value(s) of one of more numbers/arrays of numbers passed into the function. 
-If at least one array of numbers is passed into the function, the function will 
+Finds the mode value(s) of one of more numbers/arrays of numbers passed into the function.
+If at least one array of numbers is passed into the function, the function will
 find the mode by index.
 
 [cols="3*^<"]
@@ -651,9 +620,9 @@ find the mode by index.
 |one or more numbers or arrays of numbers
 |===
 
-*Returns*: `number` | `Array.<Array.<number>>`. An array of mode value(s) of all 
-numbers if `args` contains only numbers. Returns an array of arrays with mode value(s) 
-of each index, including all scalar numbers in `args` in the calculation at each index 
+*Returns*: `number` | `Array.<Array.<number>>`. An array of mode value(s) of all
+numbers if `args` contains only numbers. Returns an array of arrays with mode value(s)
+of each index, including all scalar numbers in `args` in the calculation at each index
 if `args` contains at least one array.
 
 *Example*
@@ -668,7 +637,7 @@ mode([1, 9], 1, 4, [3, 5]) // returns [mode([1, 1, 4, 3]), mode([9, 1, 4, 5])] =
 [float]
 === multiply( a, b )
 
-Multiplies two numbers. If at least one array of numbers is passed into the function, 
+Multiplies two numbers. If at least one array of numbers is passed into the function,
 the function will be applied index-wise to each element.
 
 [cols="3*^<"]
@@ -684,11 +653,11 @@ the function will be applied index-wise to each element.
 |a number or an array of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The product of `a` and `b` if both are 
-numbers. Returns an array with the the products applied index-wise to each element 
+*Returns*: `number` | `Array.<number>`. The product of `a` and `b` if both are
+numbers. Returns an array with the the products applied index-wise to each element
 if `a` or `b` is an array.
 
-*Throws*: `'Array length mismatch'` if `a` and `b` are arrays with different lengths 
+*Throws*: `'Array length mismatch'` if `a` and `b` are arrays with different lengths
 
 *Example*
 [source, js]
@@ -702,7 +671,7 @@ multiply([1, 2, 3, 4], [2, 7, 5, 12]) // returns [2, 14, 15, 48]
 [float]
 === pow( a, b )
 
-Calculates the cube root of a number. For arrays, the function will be applied 
+Calculates the cube root of a number. For arrays, the function will be applied
 index-wise to each element.
 
 [cols="3*^<"]
@@ -718,7 +687,7 @@ index-wise to each element.
 |the power that `a` is raised to
 |===
 
-*Returns*: `number` | `Array.<number>`. `a` raised to the power of `b`. Returns 
+*Returns*: `number` | `Array.<number>`. `a` raised to the power of `b`. Returns
 an array with the each element raised to the power of `b` if `a` is an array.
 
 *Throws*: `'Missing exponent'` if `b` is not provided
@@ -733,8 +702,8 @@ pow([1, 2, 3], 4) // returns [1, 16, 81]
 [float]
 === random( a, b )
 
-Generates a random number within the given range where the lower bound is inclusive 
-and the upper bound is exclusive. If no numbers are passed in, it will return a 
+Generates a random number within the given range where the lower bound is inclusive
+and the upper bound is exclusive. If no numbers are passed in, it will return a
 number between 0 and 1. If only one number is passed in, it will return a number
 between 0 and the number passed in.
 
@@ -751,11 +720,11 @@ between 0 and the number passed in.
 |(optional) must be greater than `a`
 |===
 
-*Returns*: `number`. A random number between 0 and 1 if no numbers are passed in. 
-Returns a random number between 0 and `a` if only one number is passed in. Returns 
+*Returns*: `number`. A random number between 0 and 1 if no numbers are passed in.
+Returns a random number between 0 and `a` if only one number is passed in. Returns
 a random number between `a` and `b` if two numbers are passed in.
 
-*Throws*: `'Min must be greater than max'` if `a` < 0 when only `a` is passed in 
+*Throws*: `'Min must be greater than max'` if `a` < 0 when only `a` is passed in
 or if `a` > `b` when both `a` and `b` are passed in
 
 *Example*
@@ -769,8 +738,8 @@ random(-10,10) // returns a random number between -10 (inclusive) and 10 (exclus
 [float]
 === range( ...args )
 
-Finds the range of one of more numbers/arrays of numbers passed into the function. If at 
-least one array of numbers is passed into the function, the function will find 
+Finds the range of one of more numbers/arrays of numbers passed into the function. If at
+least one array of numbers is passed into the function, the function will find
 the range by index.
 
 [cols="3*^<"]
@@ -782,9 +751,9 @@ the range by index.
 |one or more numbers or arrays of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The range value of all numbers if `args` 
-contains only numbers. Returns an array with the range values at each index, 
-including all scalar numbers in `args` in the calculation at each index if `args` 
+*Returns*: `number` | `Array.<number>`. The range value of all numbers if `args`
+contains only numbers. Returns an array with the range values at each index,
+including all scalar numbers in `args` in the calculation at each index if `args`
 contains at least one array.
 
 *Example*
@@ -798,8 +767,8 @@ range([1, 9], 4, [3, 5]) // returns [range([1, 4, 3]), range([9, 4, 5])] = [3, 5
 [float]
 === range( ...args )
 
-Finds the range of one of more numbers/arrays of numbers into the function. If at 
-least one array of numbers is passed into the function, the function will find 
+Finds the range of one of more numbers/arrays of numbers into the function. If at
+least one array of numbers is passed into the function, the function will find
 the range by index.
 
 [cols="3*^<"]
@@ -811,9 +780,9 @@ the range by index.
 |one or more numbers or arrays of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The range value of all numbers if `args` 
-contains only numbers. Returns an array with the the range values at each index, 
-including all scalar numbers in `args` in the calculation at each index if `args` 
+*Returns*: `number` | `Array.<number>`. The range value of all numbers if `args`
+contains only numbers. Returns an array with the the range values at each index,
+including all scalar numbers in `args` in the calculation at each index if `args`
 contains at least one array.
 
 *Example*
@@ -827,7 +796,7 @@ range([1, 9], 4, [3, 5]) // returns [range([1, 4, 3]), range([9, 4, 5])] = [3, 5
 [float]
 === round( a, b )
 
-Rounds a number towards the nearest integer by default, or decimal place (if passed in as `b`). 
+Rounds a number towards the nearest integer by default, or decimal place (if passed in as `b`).
 For arrays, the function will be applied index-wise to each element.
 
 [cols="3*^<"]
@@ -843,7 +812,7 @@ For arrays, the function will be applied index-wise to each element.
 |(optional) number of decimal places, default value: 0
 |===
 
-*Returns*: `number` | `Array.<number>`. The rounded value of `a`. Returns an 
+*Returns*: `number` | `Array.<number>`. The rounded value of `a`. Returns an
 array with the the rounded values of each element if `a` is an array.
 
 *Example*
@@ -885,7 +854,7 @@ size(100) // returns 1
 [float]
 === sqrt( a )
 
-Calculates the square root of a number. For arrays, the function will be applied 
+Calculates the square root of a number. For arrays, the function will be applied
 index-wise to each element.
 
 [cols="3*^<"]
@@ -897,7 +866,7 @@ index-wise to each element.
 |a number or an array of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The square root of `a`. Returns an array 
+*Returns*: `number` | `Array.<number>`. The square root of `a`. Returns an array
 with the the square roots of each element if `a` is an array.
 
 *Throws*: `'Unable find the square root of a negative number'` if `a` < 0
@@ -913,7 +882,7 @@ sqrt([9, 16, 25]) // returns [3, 4, 5]
 [float]
 === square( a )
 
-Calculates the square of a number. For arrays, the function will be applied 
+Calculates the square of a number. For arrays, the function will be applied
 index-wise to each element.
 
 [cols="3*^<"]
@@ -925,7 +894,7 @@ index-wise to each element.
 |a number or an array of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The square of `a`. Returns an array 
+*Returns*: `number` | `Array.<number>`. The square of `a`. Returns an array
 with the the squares of each element if `a` is an array.
 
 *Example*
@@ -938,7 +907,7 @@ square([3, 4, 5]) // returns [9, 16, 25]
 [float]
 === subtract( a, b )
 
-Subtracts two numbers. If at least one array of numbers is passed into the function, 
+Subtracts two numbers. If at least one array of numbers is passed into the function,
 the function will be applied index-wise to each element.
 
 [cols="3*^<"]
@@ -954,7 +923,7 @@ the function will be applied index-wise to each element.
 |a number or an array of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The difference of `a` and `b` if both are 
+*Returns*: `number` | `Array.<number>`. The difference of `a` and `b` if both are
 numbers, or an array of differences applied index-wise to each element.
 
 *Throws*: `'Array length mismatch'` if `a` and `b` are arrays with different lengths
@@ -971,11 +940,11 @@ subtract([14, 42, 65, 108], [2, 7, 5, 12]) // returns [12, 35, 52, 96]
 [float]
 === sum( ...args )
 
-Calculates the sum of one or more numbers/arrays passed into the function. If at 
-least one array is passed, the function will sum up one or more numbers/arrays of 
+Calculates the sum of one or more numbers/arrays passed into the function. If at
+least one array is passed, the function will sum up one or more numbers/arrays of
 numbers and distinct values of an array. Sum accepts arrays of different lengths.
 
-*Returns*: `number`. The sum of one or more numbers/arrays of numbers including 
+*Returns*: `number`. The sum of one or more numbers/arrays of numbers including
 distinct values in arrays
 
 *Example*
@@ -992,7 +961,7 @@ sum([10, 20, 30, 40], 10, [1, 2, 3], 22) // returns sum(10, 20, 30, 40, 10, 1, 2
 
 Counts the number of unique values in an array.
 
-*Returns*: `number`. The number of unique values in the array. Returns 1 if `a` 
+*Returns*: `number`. The number of unique values in the array. Returns 1 if `a`
 is not an array.
 
 *Example*
@@ -1003,4 +972,3 @@ unique([]) // returns 0
 unique([1, 2, 3, 4]) // returns 4
 unique([1, 2, 3, 4, 2, 2, 2, 3, 4, 2, 4, 5, 2, 1, 4, 2]) // returns 5
 ------------
-

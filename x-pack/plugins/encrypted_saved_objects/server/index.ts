@@ -9,7 +9,8 @@ import { ConfigSchema } from './config';
 import { Plugin } from './plugin';
 
 export { EncryptedSavedObjectTypeRegistration, EncryptionError } from './crypto';
-export { PluginSetupContract, PluginStartContract } from './plugin';
+export { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
+export { EncryptedSavedObjectsClient } from './saved_objects';
 
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>

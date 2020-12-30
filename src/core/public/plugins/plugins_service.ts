@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { withTimeout } from '@kbn/std';
 import { PluginName, PluginOpaqueId } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
@@ -29,6 +30,7 @@ import {
 import { InternalCoreSetup, InternalCoreStart } from '../core_system';
 import { InjectedPluginMetadata } from '../injected_metadata';
 
+const Sec = 1000;
 /** @internal */
 export type PluginsServiceSetupDeps = InternalCoreSetup;
 /** @internal */
@@ -51,21 +53,21 @@ export interface PluginsServiceStart {
  */
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   /** Plugin wrappers in topological order. */
-  private readonly plugins = new Map<PluginName, PluginWrapper<unknown, Record<string, unknown>>>();
+  private readonly plugins = new Map<PluginName, PluginWrapper<unknown, unknown>>();
   private readonly pluginDependencies = new Map<PluginName, PluginName[]>();
 
   private readonly satupPlugins: PluginName[] = [];
 
   constructor(private readonly coreContext: CoreContext, plugins: InjectedPluginMetadata[]) {
     // Generate opaque ids
-    const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map(p => [p.id, Symbol(p.id)]));
+    const opaqueIds = new Map<PluginName, PluginOpaqueId>(plugins.map((p) => [p.id, Symbol(p.id)]));
 
     // Setup dependency map and plugin wrappers
     plugins.forEach(({ id, plugin, config = {} }) => {
       // Setup map of dependencies
       this.pluginDependencies.set(id, [
         ...plugin.requiredPlugins,
-        ...plugin.optionalPlugins.filter(optPlugin => opaqueIds.has(optPlugin)),
+        ...plugin.optionalPlugins.filter((optPlugin) => opaqueIds.has(optPlugin)),
       ]);
 
       // Construct plugin wrappers, depending on the topological order set by the server.
@@ -85,15 +87,12 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     return new Map(
       [...this.pluginDependencies].map(([id, deps]) => [
         this.plugins.get(id)!.opaqueId,
-        deps.map(depId => this.plugins.get(depId)!.opaqueId),
+        deps.map((depId) => this.plugins.get(depId)!.opaqueId),
       ])
     );
   }
 
   public async setup(deps: PluginsServiceSetupDeps): Promise<PluginsServiceSetup> {
-    // Load plugin bundles
-    await this.loadPluginBundles(deps.http.basePath.prepend);
-
     // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
@@ -110,13 +109,15 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         {} as Record<PluginName, unknown>
       );
 
-      contracts.set(
-        pluginName,
-        await plugin.setup(
+      const contract = await withTimeout({
+        promise: plugin.setup(
           createPluginSetupContext(this.coreContext, deps, plugin),
           pluginDepContracts
-        )
-      );
+        ),
+        timeout: 30 * Sec,
+        errorMessage: `Setup lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
+      });
+      contracts.set(pluginName, contract);
 
       this.satupPlugins.push(pluginName);
     }
@@ -142,13 +143,15 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         {} as Record<PluginName, unknown>
       );
 
-      contracts.set(
-        pluginName,
-        await plugin.start(
+      const contract = await withTimeout({
+        promise: plugin.start(
           createPluginStartContext(this.coreContext, deps, plugin),
           pluginDepContracts
-        )
-      );
+        ),
+        timeout: 30 * Sec,
+        errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
+      });
+      contracts.set(pluginName, contract);
     }
 
     // Expose start contracts
@@ -160,10 +163,5 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     for (const pluginName of this.satupPlugins.reverse()) {
       this.plugins.get(pluginName)!.stop();
     }
-  }
-
-  private loadPluginBundles(addBasePath: (path: string) => string) {
-    // Load all bundles in parallel
-    return Promise.all([...this.plugins.values()].map(plugin => plugin.load(addBasePath)));
   }
 }

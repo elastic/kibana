@@ -17,13 +17,13 @@
  * under the License.
  */
 export { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
+export { isEmbeddable } from './is_embeddable';
 export { Embeddable } from './embeddable';
-export {
-  EmbeddableInstanceConfiguration,
-  EmbeddableFactory,
-  OutputSpec,
-} from './embeddable_factory';
+export * from './embeddable_factory';
+export * from './embeddable_factory_definition';
+export * from './default_embeddable_factory_provider';
 export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
 export { withEmbeddableSubscription } from './with_subscription';
-export { EmbeddableFactoryRenderer } from './embeddable_factory_renderer';
 export { EmbeddableRoot } from './embeddable_root';
+export * from '../../../common/lib/saved_object_embeddable';
+export { EmbeddableRenderer, EmbeddableRendererProps } from './embeddable_renderer';

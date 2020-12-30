@@ -17,7 +17,7 @@
  * under the License.
  */
 import { mapPhrase } from './map_phrase';
-import { esFilters } from '../../../../../common';
+import { PhraseFilter, Filter } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   describe('mapPhrase()', () => {
@@ -25,7 +25,7 @@ describe('filter manager utilities', () => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { match: { _type: { query: 'apache', type: 'phrase' } } },
-      } as esFilters.PhraseFilter;
+      } as PhraseFilter;
 
       const result = mapPhrase(filter);
 
@@ -38,11 +38,11 @@ describe('filter manager utilities', () => {
       }
     });
 
-    test('should return undefined for none matching', async done => {
+    test('should return undefined for none matching', async (done) => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
-      } as esFilters.Filter;
+      } as Filter;
 
       try {
         mapPhrase(filter);

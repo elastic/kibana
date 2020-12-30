@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   TutorialsRegistrySetup,
   TutorialsRegistryStart,
@@ -26,6 +26,7 @@ import {
 const createSetupMock = (): jest.Mocked<TutorialsRegistrySetup> => {
   const setup = {
     registerTutorial: jest.fn(),
+    unregisterTutorial: jest.fn(),
     addScopedTutorialContextFactory: jest.fn(),
   };
   return setup;

@@ -1,0 +1,39 @@
+{
+  "job_type": "anomaly_detector",
+  "groups": [
+    "security",
+    "winlogbeat",
+    "system"
+  ],
+  "description": "Security: Winlogbeat - Looks for rare and unusual Windows services which may indicate execution of unauthorized services, malware, or persistence mechanisms.",
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "rare by \"winlog.event_data.ServiceName\"",
+        "function": "rare",
+        "by_field_name": "winlog.event_data.ServiceName"
+      }
+    ],
+    "influencers": [
+      "host.name",
+      "winlog.event_data.ServiceName"
+    ]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-siem-winlogbeat",
+    "custom_urls": [
+      {
+        "url_name": "Host Details",
+        "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+      }
+    ]
+  }
+}

@@ -6,7 +6,14 @@
 
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../scenarios';
-import { checkAAD, getTestAlertData, getUrlPrefix, ObjectRemover } from '../../../common/lib';
+import {
+  checkAAD,
+  getTestAlertData,
+  getConsumerUnauthorizedErrorMessage,
+  getUrlPrefix,
+  ObjectRemover,
+  getProducerUnauthorizedErrorMessage,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -32,7 +39,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle create alert request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'MY action',
@@ -43,7 +50,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
@@ -62,17 +69,30 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to get actions`,
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert');
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
               expect(response.body).to.eql({
                 id: response.body.id,
                 name: 'abc',
@@ -87,7 +107,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 ],
                 enabled: true,
                 alertTypeId: 'test.noop',
-                consumer: 'bar',
+                consumer: 'alertsFixture',
                 params: {},
                 createdBy: user.username,
                 schedule: { interval: '1m' },
@@ -95,10 +115,12 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
                 throttle: '1m',
+                notifyWhen: 'onThrottleInterval',
                 updatedBy: user.username,
                 apiKeyOwner: user.username,
                 muteAll: false,
                 mutedInstanceIds: [],
+                executionStatus: response.body.executionStatus,
               });
               expect(typeof response.body.scheduledTaskId).to.be('string');
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
@@ -124,9 +146,177 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           }
         });
 
+        it('should handle create alert request appropriately when consumer is the same as producer', async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                alertTypeId: 'test.restricted-noop',
+                consumer: 'alertsRestrictedFixture',
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.restricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle create alert request appropriately when consumer is not the producer', async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({ alertTypeId: 'test.unrestricted-noop', consumer: 'alertsFixture' })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.unrestricted-noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getProducerUnauthorizedErrorMessage(
+                  'create',
+                  'test.unrestricted-noop',
+                  'alertsRestrictedFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle create alert request appropriately when consumer is "alerts"', async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                alertTypeId: 'test.noop',
+                consumer: 'alerts',
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage('create', 'test.noop', 'alerts'),
+                statusCode: 403,
+              });
+              break;
+            case 'global_read at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getProducerUnauthorizedErrorMessage(
+                  'create',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle create alert request appropriately when consumer is unknown', async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                alertTypeId: 'test.noop',
+                consumer: 'some consumer patrick invented',
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.noop',
+                  'some consumer patrick invented'
+                ),
+                statusCode: 403,
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
         it('should handle create alert request appropriately when an alert is disabled ', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(getTestAlertData({ enabled: false }));
@@ -135,18 +325,63 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert');
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
               expect(response.body.scheduledTaskId).to.eql(undefined);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle create alert request appropriately when alert name has leading and trailing whitespaces', async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send(
+              getTestAlertData({
+                name: ' leading and trailing whitespace ',
+              })
+            );
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.noop',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.name).to.eql(' leading and trailing whitespace ');
+              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -155,7 +390,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         it('should handle create alert request appropriately when alert type is unregistered', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
@@ -168,15 +403,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
-            case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -191,7 +421,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         it('should handle create alert request appropriately when payload is empty and invalid', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({});
@@ -200,25 +430,15 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "name" fails because ["name" is required]. child "alertTypeId" fails because ["alertTypeId" is required]. child "consumer" fails because ["consumer" is required]. child "schedule" fails because ["schedule" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
-                validation: {
-                  source: 'payload',
-                  keys: ['name', 'alertTypeId', 'consumer', 'schedule', 'params', 'actions'],
-                },
+                message: '[request body.name]: expected value of type [string] but got [undefined]',
               });
               break;
             default:
@@ -228,7 +448,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         it(`should handle create alert request appropriately when params isn't valid`, async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
@@ -241,15 +461,21 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                error: 'Forbidden',
+                message: getConsumerUnauthorizedErrorMessage(
+                  'create',
+                  'test.validation',
+                  'alertsFixture'
+                ),
+                statusCode: 403,
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -265,7 +491,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         it('should handle create alert request appropriately when interval schedule is wrong syntax', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(getTestAlertData(getTestAlertData({ schedule: { interval: '10x' } })));
@@ -274,30 +500,15 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
-                statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "schedule" fails because [child "interval" fails because ["interval" with value "10x" fails to match the seconds pattern, "interval" with value "10x" fails to match the minutes pattern, "interval" with value "10x" fails to match the hours pattern, "interval" with value "10x" fails to match the days pattern]]',
-                validation: {
-                  source: 'payload',
-                  keys: [
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                  ],
-                },
+                message: '[request body.schedule.interval]: string is not a valid duration: 10x',
+                statusCode: 400,
               });
               break;
             default:
@@ -307,7 +518,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
 
         it('should handle create alert request appropriately when interval schedule is 0', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(getTestAlertData(getTestAlertData({ schedule: { interval: '0s' } })));
@@ -316,30 +527,15 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             case 'no_kibana_privileges at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
-                statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'child "schedule" fails because [child "interval" fails because ["interval" with value "0s" fails to match the seconds pattern, "interval" with value "0s" fails to match the minutes pattern, "interval" with value "0s" fails to match the hours pattern, "interval" with value "0s" fails to match the days pattern]]',
-                validation: {
-                  source: 'payload',
-                  keys: [
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                    'schedule.interval',
-                  ],
-                },
+                message: '[request body.schedule.interval]: string is not a valid duration: 0s',
+                statusCode: 400,
               });
               break;
             default:

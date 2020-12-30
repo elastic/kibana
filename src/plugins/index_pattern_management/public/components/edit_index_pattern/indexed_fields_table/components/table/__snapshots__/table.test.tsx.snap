@@ -1,0 +1,166 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Table should render conflicting type 1`] = `
+<span>
+  conflict
+  <span>
+     
+    <EuiIconTip
+      aria-label="Multiple type field"
+      color="warning"
+      content="The type of this field changes across indices. It is unavailable for many analysis functions."
+      type="alert"
+    />
+  </span>
+</span>
+`;
+
+exports[`Table should render normal field name 1`] = `
+<span>
+  Elastic
+</span>
+`;
+
+exports[`Table should render normal type 1`] = `
+<span>
+  string
+</span>
+`;
+
+exports[`Table should render normally 1`] = `
+<EuiInMemoryTable
+  columns={
+    Array [
+      Object {
+        "data-test-subj": "indexedFieldName",
+        "dataType": "string",
+        "field": "displayName",
+        "name": "Name",
+        "render": [Function],
+        "sortable": true,
+        "width": "38%",
+      },
+      Object {
+        "data-test-subj": "indexedFieldType",
+        "dataType": "string",
+        "field": "type",
+        "name": "Type",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "string",
+        "field": "format",
+        "name": "Format",
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "These fields can be used in the filter bar",
+        "field": "searchable",
+        "name": "Searchable",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "These fields can be used in visualization aggregations",
+        "field": "aggregatable",
+        "name": "Aggregatable",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "dataType": "boolean",
+        "description": "Fields that are excluded from _source when it is fetched",
+        "field": "excluded",
+        "name": "Excluded",
+        "render": [Function],
+        "sortable": true,
+      },
+      Object {
+        "actions": Array [
+          Object {
+            "data-test-subj": "editFieldFormat",
+            "description": "Edit",
+            "icon": "pencil",
+            "name": "Edit",
+            "onClick": [Function],
+            "type": "icon",
+          },
+        ],
+        "name": "",
+        "width": "40px",
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "displayName": "Elastic",
+        "excluded": false,
+        "format": "",
+        "info": Array [],
+        "name": "Elastic",
+        "searchable": true,
+        "type": "name",
+      },
+      Object {
+        "displayName": "timestamp",
+        "excluded": false,
+        "format": "YYYY-MM-DD",
+        "info": Array [],
+        "name": "timestamp",
+        "type": "date",
+      },
+      Object {
+        "displayName": "conflictingField",
+        "excluded": false,
+        "format": "",
+        "info": Array [],
+        "name": "conflictingField",
+        "type": "conflict",
+      },
+    ]
+  }
+  pagination={
+    Object {
+      "initialPageSize": 10,
+      "pageSizeOptions": Array [
+        5,
+        10,
+        25,
+        50,
+      ],
+    }
+  }
+  responsive={true}
+  sorting={true}
+  tableLayout="fixed"
+/>
+`;
+
+exports[`Table should render the boolean template (false) 1`] = `<span />`;
+
+exports[`Table should render the boolean template (true) 1`] = `
+<span
+  aria-label="Is searchable"
+  color="secondary"
+  data-euiicon-type="dot"
+/>
+`;
+
+exports[`Table should render timestamp field name 1`] = `
+<span>
+  timestamp
+  <span>
+     
+    <EuiIconTip
+      aria-label="Primary time field"
+      color="primary"
+      content="This field represents the time that events occurred."
+      type="clock"
+    />
+  </span>
+</span>
+`;

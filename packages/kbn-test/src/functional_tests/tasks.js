@@ -34,8 +34,15 @@ import {
 
 import { readConfigFile } from '../functional_test_runner/lib';
 
-const makeSuccessMessage = options => {
+const makeSuccessMessage = (options) => {
   const installDirFlag = options.installDir ? ` --kibana-install-dir=${options.installDir}` : '';
+  const configPaths = Array.isArray(options.config) ? options.config : [options.config];
+  const pathsMessage = options.useDefaultConfig
+    ? ''
+    : configPaths
+        .map((path) => relative(process.cwd(), path))
+        .map((path) => ` --config ${path}`)
+        .join('');
 
   return (
     '\n\n' +
@@ -43,7 +50,7 @@ const makeSuccessMessage = options => {
       Elasticsearch and Kibana are ready for functional testing. Start the functional tests
       in another terminal session by running this command from this directory:
 
-          node ${relative(process.cwd(), KIBANA_FTR_SCRIPT)}${installDirFlag}
+          node ${relative(process.cwd(), KIBANA_FTR_SCRIPT)}${installDirFlag}${pathsMessage}
     ` +
     '\n\n'
   );
@@ -59,6 +66,19 @@ const makeSuccessMessage = options => {
  * @property {string} options.esFrom         Optionally run from source instead of snapshot
  */
 export async function runTests(options) {
+  if (!process.env.KBN_NP_PLUGINS_BUILT) {
+    const log = options.createLogger();
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning(
+      "   Don't forget to use `node scripts/build_kibana_platform_plugins` to build plugins you plan on testing"
+    );
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+    log.warning('❗️❗️❗️');
+  }
+
   for (const configPath of options.configs) {
     const log = options.createLogger();
     const opts = {
@@ -79,7 +99,7 @@ export async function runTests(options) {
       continue;
     }
 
-    await withProcRunner(log, async procs => {
+    await withProcRunner(log, async (procs) => {
       const config = await readConfigFile(log, configPath);
 
       let es;
@@ -115,7 +135,7 @@ export async function startServers(options) {
     log,
   };
 
-  await withProcRunner(log, async procs => {
+  await withProcRunner(log, async (procs) => {
     const config = await readConfigFile(log, options.config);
 
     const es = await runElasticsearch({ config, options: opts });

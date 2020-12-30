@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
@@ -11,7 +11,8 @@
   ],
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "outDir": "./target/types",
     "types": [
       "jest",
       "node"

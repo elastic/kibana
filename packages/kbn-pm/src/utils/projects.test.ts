@@ -208,7 +208,7 @@ describe('#topologicallyBatchProjects', () => {
   test('batches projects topologically based on their project dependencies', async () => {
     const batches = topologicallyBatchProjects(projects, graph);
 
-    const expectedBatches = batches.map(batch => batch.map(project => project.name));
+    const expectedBatches = batches.map((batch) => batch.map((project) => project.name));
 
     expect(expectedBatches).toMatchSnapshot();
   });
@@ -219,19 +219,9 @@ describe('#topologicallyBatchProjects', () => {
 
     const batches = topologicallyBatchProjects(projects, graph);
 
-    const expectedBatches = batches.map(batch => batch.map(project => project.name));
+    const expectedBatches = batches.map((batch) => batch.map((project) => project.name));
 
     expect(expectedBatches).toMatchSnapshot();
-  });
-
-  describe('batchByWorkspace = true', () => {
-    test('batches projects topologically based on their project dependencies and workspaces', async () => {
-      const batches = topologicallyBatchProjects(projects, graph, { batchByWorkspace: true });
-
-      const expectedBatches = batches.map(batch => batch.map(project => project.name));
-
-      expect(expectedBatches).toEqual([['kibana'], ['bar', 'foo'], ['baz', 'zorge'], ['quux']]);
-    });
   });
 });
 

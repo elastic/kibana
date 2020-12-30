@@ -1,0 +1,13 @@
+.lnsDataTable {
+  align-self: flex-start;
+}
+
+.lnsDataTable__filter {
+  opacity: 0;
+  transition: opacity $euiAnimSpeedNormal ease-in-out;
+}
+
+.lnsDataTable__cell:hover .lnsDataTable__filter,
+.lnsDataTable__filter:focus-within {
+  opacity: 1;
+}

@@ -1,0 +1,9 @@
+{
+  "id": "console",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["devTools"],
+  "optionalPlugins": ["usageCollection", "home"],
+  "requiredBundles": ["esUiShared", "kibanaReact", "kibanaUtils", "home"]
+}

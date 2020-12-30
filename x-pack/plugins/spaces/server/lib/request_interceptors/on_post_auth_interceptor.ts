@@ -6,31 +6,31 @@
 import { Logger, CoreSetup } from 'src/core/server';
 import { Space } from '../../../common/model/space';
 import { wrapError } from '../errors';
-import { SpacesServiceSetup } from '../../spaces_service/spaces_service';
-import { LegacyAPI, PluginsSetup } from '../../plugin';
+import { SpacesServiceStart } from '../../spaces_service/spaces_service';
+import { PluginsSetup } from '../../plugin';
 import { getSpaceSelectorUrl } from '../get_space_selector_url';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
 import { addSpaceIdToPath } from '../../../common';
 
 export interface OnPostAuthInterceptorDeps {
-  getLegacyAPI(): LegacyAPI;
   http: CoreSetup['http'];
   features: PluginsSetup['features'];
-  spacesService: SpacesServiceSetup;
+  getSpacesService: () => SpacesServiceStart;
   log: Logger;
 }
 
 export function initSpacesOnPostAuthRequestInterceptor({
   features,
-  getLegacyAPI,
-  spacesService,
+  getSpacesService,
   log,
   http,
 }: OnPostAuthInterceptorDeps) {
   http.registerOnPostAuth(async (request, response, toolkit) => {
     const serverBasePath = http.basePath.serverBasePath;
 
-    const path = request.url.pathname!;
+    const path = request.url.pathname;
+
+    const spacesService = getSpacesService();
 
     const spaceId = spacesService.getSpaceId(request);
 
@@ -40,13 +40,12 @@ export function initSpacesOnPostAuthRequestInterceptor({
     const isRequestingSpaceRoot = path === '/' && spaceId !== DEFAULT_SPACE_ID;
     const isRequestingApplication = path.startsWith('/app');
 
-    const spacesClient = await spacesService.scopedClient(request);
-
     // if requesting the application root, then show the Space Selector UI to allow the user to choose which space
     // they wish to visit. This is done "onPostAuth" to allow the Saved Objects Client to use the request's auth credentials,
     // which is not available at the time of "onRequest".
     if (isRequestingKibanaRoot) {
       try {
+        const spacesClient = spacesService.createSpacesClient(request);
         const spaces = await spacesClient.getAll();
 
         if (spaces.length === 1) {
@@ -79,28 +78,27 @@ export function initSpacesOnPostAuthRequestInterceptor({
       try {
         log.debug(`Verifying access to space "${spaceId}"`);
 
+        const spacesClient = spacesService.createSpacesClient(request);
         space = await spacesClient.get(spaceId);
       } catch (error) {
         const wrappedError = wrapError(error);
 
         const statusCode = wrappedError.statusCode;
 
-        // If user is not authorized, or the space cannot be found, allow them to select another space
-        // by redirecting to the space selector.
-        const shouldRedirectToSpaceSelector = statusCode === 403 || statusCode === 404;
-
-        if (shouldRedirectToSpaceSelector) {
-          log.debug(
-            `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
-          );
-          return response.redirected({
-            headers: {
-              location: getSpaceSelectorUrl(serverBasePath),
-            },
-          });
-        } else {
-          log.error(`Unable to navigate to space "${spaceId}". ${error}`);
-          return response.customError(wrappedError);
+        switch (statusCode) {
+          case 403:
+            log.debug(`User unauthorized for space "${spaceId}". ${error}`);
+            return response.forbidden();
+          case 404:
+            log.debug(
+              `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
+            );
+            return response.redirected({
+              headers: { location: getSpaceSelectorUrl(serverBasePath) },
+            });
+          default:
+            log.error(`Unable to navigate to space "${spaceId}". ${error}`);
+            return response.customError(wrappedError);
         }
       }
 
@@ -110,15 +108,15 @@ export function initSpacesOnPostAuthRequestInterceptor({
       if (appId !== 'kibana' && space && space.disabledFeatures.length > 0) {
         log.debug(`Verifying application is available: "${appId}"`);
 
-        const allFeatures = features.getFeatures();
+        const allFeatures = features.getKibanaFeatures();
 
-        const isRegisteredApp = allFeatures.some(feature => feature.app.includes(appId));
+        const isRegisteredApp = allFeatures.some((feature) => feature.app.includes(appId));
         if (isRegisteredApp) {
           const enabledFeatures = allFeatures.filter(
-            feature => !space.disabledFeatures.includes(feature.id)
+            (feature) => !space.disabledFeatures.includes(feature.id)
           );
 
-          const isAvailableInSpace = enabledFeatures.some(feature => feature.app.includes(appId));
+          const isAvailableInSpace = enabledFeatures.some((feature) => feature.app.includes(appId));
 
           if (!isAvailableInSpace) {
             log.debug(`App ${appId} is not enabled within space "${spaceId}".`);

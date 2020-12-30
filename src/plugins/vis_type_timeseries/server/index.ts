@@ -17,18 +17,36 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { VisTypeTimeseriesConfig, config as configSchema } from './config';
 import { VisTypeTimeseriesPlugin } from './plugin';
-export { VisTypeTimeseriesSetup, Framework } from './plugin';
 
-export const config = {
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
+export { VisTypeTimeseriesSetup } from './plugin';
+
+export const config: PluginConfigDescriptor<VisTypeTimeseriesConfig> = {
+  deprecations: ({ unused, renameFromRoot }) => [
+    // In Kibana v7.8 plugin id was renamed from 'metrics' to 'vis_type_timeseries':
+    renameFromRoot('metrics.enabled', 'vis_type_timeseries.enabled', true),
+    renameFromRoot('metrics.chartResolution', 'vis_type_timeseries.chartResolution', true),
+    renameFromRoot('metrics.minimumBucketSize', 'vis_type_timeseries.minimumBucketSize', true),
+
+    // Unused properties which should be removed after releasing Kibana v8.0:
+    unused('chartResolution'),
+    unused('minimumBucketSize'),
+  ],
+  schema: configSchema,
 };
 
-export type VisTypeTimeseriesConfig = TypeOf<typeof config.schema>;
+export { ValidationTelemetryServiceSetup } from './validation_telemetry';
+
+export {
+  AbstractSearchStrategy,
+  ReqFacade,
+} from './lib/search_strategies/strategies/abstract_search_strategy';
+
+export { VisPayload } from '../common/types';
+
+export { DefaultSearchCapabilities } from './lib/search_strategies/default_search_capabilities';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisTypeTimeseriesPlugin(initializerContext);

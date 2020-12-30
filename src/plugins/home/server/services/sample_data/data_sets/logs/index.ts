@@ -31,13 +31,13 @@ const logsDescription = i18n.translate('home.sampleData.logsSpecDescription', {
 });
 const initialAppLinks = [] as AppLinkSchema[];
 
-export const logsSpecProvider = function(): SampleDatasetSchema {
+export const logsSpecProvider = function (): SampleDatasetSchema {
   return {
     id: 'logs',
     name: logsName,
     description: logsDescription,
-    previewImagePath: '/plugins/kibana/home/sample_data_resources/logs/dashboard.png',
-    darkPreviewImagePath: '/plugins/kibana/home/sample_data_resources/logs/dashboard_dark.png',
+    previewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard.png',
+    darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard_dark.png',
     overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
     appLinks: initialAppLinks,
     defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0b247',

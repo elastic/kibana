@@ -20,16 +20,9 @@
 import getopts from 'getopts';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
-interface ParsedArgs {
-  showHelp: boolean;
-  unknownFlags: string[];
-  log?: ToolingLog;
-  buildArgs?: {
-    [key: string]: any;
-  };
-}
+import { BuildOptions } from './build_distributables';
 
-export function readCliArgs(argv: string[]): ParsedArgs {
+export function readCliArgs(argv: string[]) {
   const unknownFlags: string[] = [];
   const flags = getopts(argv, {
     boolean: [
@@ -40,6 +33,7 @@ export function readCliArgs(argv: string[]): ParsedArgs {
       'rpm',
       'deb',
       'docker',
+      'skip-docker-ubi',
       'release',
       'skip-node-download',
       'verbose',
@@ -63,14 +57,22 @@ export function readCliArgs(argv: string[]): ParsedArgs {
       oss: null,
       'version-qualifier': '',
     },
-    unknown: flag => {
+    unknown: (flag) => {
       unknownFlags.push(flag);
       return false;
     },
   });
 
+  const log = new ToolingLog({
+    level: pickLevelFromFlags(flags, {
+      default: flags.debug === false ? 'info' : 'debug',
+    }),
+    writeTo: process.stdout,
+  });
+
   if (unknownFlags.length || flags.help) {
     return {
+      log,
       showHelp: true,
       unknownFlags,
     };
@@ -81,13 +83,6 @@ export function readCliArgs(argv: string[]): ParsedArgs {
   if (flags.docker) {
     flags['all-platforms'] = true;
   }
-
-  const log = new ToolingLog({
-    level: pickLevelFromFlags(flags, {
-      default: flags.debug === false ? 'info' : 'debug',
-    }),
-    writeTo: process.stdout,
-  });
 
   function isOsPackageDesired(name: string) {
     if (flags['skip-os-packages'] || !flags['all-platforms']) {
@@ -102,21 +97,24 @@ export function readCliArgs(argv: string[]): ParsedArgs {
     return Boolean(flags[name]);
   }
 
+  const buildOptions: BuildOptions = {
+    isRelease: Boolean(flags.release),
+    versionQualifier: flags['version-qualifier'],
+    buildOssDist: flags.oss !== false,
+    buildDefaultDist: !flags.oss,
+    downloadFreshNode: !Boolean(flags['skip-node-download']),
+    createArchives: !Boolean(flags['skip-archives']),
+    createRpmPackage: isOsPackageDesired('rpm'),
+    createDebPackage: isOsPackageDesired('deb'),
+    createDockerPackage: isOsPackageDesired('docker'),
+    createDockerUbiPackage: isOsPackageDesired('docker') && !Boolean(flags['skip-docker-ubi']),
+    targetAllPlatforms: Boolean(flags['all-platforms']),
+  };
+
   return {
+    log,
     showHelp: false,
     unknownFlags: [],
-    log,
-    buildArgs: {
-      isRelease: Boolean(flags.release),
-      versionQualifier: flags['version-qualifier'],
-      buildOssDist: flags.oss !== false,
-      buildDefaultDist: !flags.oss,
-      downloadFreshNode: !Boolean(flags['skip-node-download']),
-      createArchives: !Boolean(flags['skip-archives']),
-      createRpmPackage: isOsPackageDesired('rpm'),
-      createDebPackage: isOsPackageDesired('deb'),
-      createDockerPackage: isOsPackageDesired('docker'),
-      targetAllPlatforms: Boolean(flags['all-platforms']),
-    },
+    buildOptions,
   };
 }

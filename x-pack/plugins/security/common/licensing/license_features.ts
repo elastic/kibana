@@ -5,6 +5,11 @@
  */
 
 /**
+ * Represents types of login form layouts.
+ */
+export type LoginLayout = 'form' | 'error-es-unavailable' | 'error-xpack-unavailable';
+
+/**
  * Describes Security plugin features that depend on license.
  */
 export interface SecurityLicenseFeatures {
@@ -24,6 +29,27 @@ export interface SecurityLicenseFeatures {
   readonly showLinks: boolean;
 
   /**
+   * Indicates whether we show the Role Mappings UI.
+   */
+  readonly showRoleMappingsManagement: boolean;
+
+  /**
+   * Indicates whether we allow users to access agreement UI and acknowledge it.
+   */
+  readonly allowAccessAgreement: boolean;
+
+  /**
+   * Indicates whether we allow logging of audit events.
+   */
+  readonly allowAuditLogging: boolean;
+
+  /**
+   * Indicates whether we allow logging of legacy audit events.
+   * @deprecated
+   */
+  readonly allowLegacyAuditLogging: boolean;
+
+  /**
    * Indicates whether we allow users to define document level security in roles.
    */
   readonly allowRoleDocumentLevelSecurity: boolean;
@@ -39,12 +65,12 @@ export interface SecurityLicenseFeatures {
   readonly allowRbac: boolean;
 
   /**
-   * Describes the layout of the login form if it's displayed.
+   * Indicates whether we allow sub-feature privileges.
    */
-  readonly layout?: string;
+  readonly allowSubFeaturePrivileges: boolean;
 
   /**
-   * Message to show when security links are clicked throughout the kibana app.
+   * Describes the layout of the login form if it's displayed.
    */
-  readonly linksMessage?: string;
+  readonly layout?: LoginLayout;
 }

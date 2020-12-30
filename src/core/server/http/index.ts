@@ -24,11 +24,14 @@ export { AuthStatus, GetAuthState, IsAuthenticated } from './auth_state_storage'
 export {
   CustomHttpResponseOptions,
   IKibanaSocket,
+  isKibanaRequest,
   isRealRequest,
+  Headers,
   HttpResponseOptions,
   HttpResponsePayload,
   ErrorHttpResponseOptions,
   KibanaRequest,
+  KibanaRequestEvents,
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,
@@ -37,6 +40,7 @@ export {
   LifecycleResponseFactory,
   RedirectResponseOptions,
   RequestHandler,
+  RequestHandlerWrapper,
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
@@ -57,22 +61,29 @@ export {
   RouteValidationError,
   RouteValidatorFullConfig,
   RouteValidationResultFactory,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
 } from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';
-export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
+export { OnPreRoutingHandler, OnPreRoutingToolkit } from './lifecycle/on_pre_routing';
 export {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
+  AuthRedirected,
+  AuthRedirectedParams,
   AuthToolkit,
   AuthResult,
   Authenticated,
+  AuthNotHandled,
   AuthResultType,
 } from './lifecycle/auth';
 export { OnPostAuthHandler, OnPostAuthToolkit } from './lifecycle/on_post_auth';
+export { OnPreAuthHandler, OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 export {
   OnPreResponseHandler,
   OnPreResponseToolkit,
+  OnPreResponseRender,
   OnPreResponseExtensions,
   OnPreResponseInfo,
 } from './lifecycle/on_pre_response';

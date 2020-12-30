@@ -1,0 +1,10 @@
+{
+  "get_script_languages": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_script_language"
+    ]
+  }
+}

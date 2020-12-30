@@ -80,29 +80,31 @@ describe('#indent()', () => {
   });
 });
 
-(['verbose', 'debug', 'info', 'success', 'warning', 'error', 'write'] as const).forEach(method => {
-  describe(`#${method}()`, () => {
-    it(`sends a msg of type "${method}" to each writer with indent and arguments`, () => {
-      const log = new ToolingLog();
-      const writeA = jest.fn();
-      const writeB = jest.fn();
+(['verbose', 'debug', 'info', 'success', 'warning', 'error', 'write'] as const).forEach(
+  (method) => {
+    describe(`#${method}()`, () => {
+      it(`sends a msg of type "${method}" to each writer with indent and arguments`, () => {
+        const log = new ToolingLog();
+        const writeA = jest.fn();
+        const writeB = jest.fn();
 
-      log.setWriters([{ write: writeA }, { write: writeB }]);
+        log.setWriters([{ write: writeA }, { write: writeB }]);
 
-      if (method === 'error') {
-        const error = new Error('error message');
-        error.stack = '... stack trace ...';
-        log.error(error);
-        log.error('string message');
-      } else {
-        log[method]('foo', 'bar', 'baz');
-      }
+        if (method === 'error') {
+          const error = new Error('error message');
+          error.stack = '... stack trace ...';
+          log.error(error);
+          log.error('string message');
+        } else {
+          log[method]('foo', 'bar', 'baz');
+        }
 
-      expect(writeA.mock.calls).toMatchSnapshot();
-      expect(writeA.mock.calls).toEqual(writeB.mock.calls);
+        expect(writeA.mock.calls).toMatchSnapshot();
+        expect(writeA.mock.calls).toEqual(writeB.mock.calls);
+      });
     });
-  });
-});
+  }
+);
 
 describe('#getWritten$()', () => {
   async function testWrittenMsgs(writers: Writer[]) {
@@ -110,10 +112,7 @@ describe('#getWritten$()', () => {
     log.setWriters(writers);
 
     const done$ = new Rx.Subject();
-    const promise = log
-      .getWritten$()
-      .pipe(takeUntil(done$), toArray())
-      .toPromise();
+    const promise = log.getWritten$().pipe(takeUntil(done$), toArray()).toPromise();
 
     log.debug('foo');
     log.info('bar');

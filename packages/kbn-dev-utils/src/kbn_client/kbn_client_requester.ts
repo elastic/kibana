@@ -16,10 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import Url from 'url';
-
-import Axios from 'axios';
+import Https from 'https';
+import Axios, { AxiosResponse } from 'axios';
 
 import { isAxiosRequestError, isAxiosResponseError } from '../axios';
 import { ToolingLog } from '../tooling_log';
@@ -66,24 +65,38 @@ export interface ReqOptions {
 }
 
 const delay = (ms: number) =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 
+interface Options {
+  url: string;
+  certificateAuthorities?: Buffer[];
+}
+
 export class KbnClientRequester {
-  constructor(private readonly log: ToolingLog, private readonly kibanaUrls: string[]) {}
+  private readonly url: string;
+  private readonly httpsAgent: Https.Agent | null;
+
+  constructor(private readonly log: ToolingLog, options: Options) {
+    this.url = options.url;
+    this.httpsAgent =
+      Url.parse(options.url).protocol === 'https:'
+        ? new Https.Agent({
+            ca: options.certificateAuthorities,
+          })
+        : null;
+  }
 
   private pickUrl() {
-    const url = this.kibanaUrls.shift()!;
-    this.kibanaUrls.push(url);
-    return url;
+    return this.url;
   }
 
   public resolveUrl(relativeUrl: string = '/') {
     return Url.resolve(this.pickUrl(), relativeUrl);
   }
 
-  async request<T>(options: ReqOptions): Promise<T> {
+  async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {
     const url = Url.resolve(this.pickUrl(), options.path);
     const description = options.description || `${options.method} ${url}`;
     let attempt = 0;
@@ -93,7 +106,7 @@ export class KbnClientRequester {
       attempt += 1;
 
       try {
-        const response = await Axios.request<T>({
+        const response = await Axios.request({
           method: options.method,
           url,
           data: options.body,
@@ -101,9 +114,10 @@ export class KbnClientRequester {
           headers: {
             'kbn-xsrf': 'kbn-client',
           },
+          httpsAgent: this.httpsAgent,
         });
 
-        return response.data;
+        return response;
       } catch (error) {
         const conflictOnGet = isConcliftOnGetError(error);
         const requestedRetries = options.retries !== undefined;
@@ -114,7 +128,7 @@ export class KbnClientRequester {
           errorMessage = `Conflict on GET (path=${options.path}, attempt=${attempt}/${maxAttempts})`;
           this.log.error(errorMessage);
         } else if (requestedRetries || failedToGetResponse) {
-          errorMessage = `[${description}] request failed (attempt=${attempt}/${maxAttempts})`;
+          errorMessage = `[${description}] request failed (attempt=${attempt}/${maxAttempts}): ${error.message}`;
           this.log.error(errorMessage);
         } else {
           throw error;

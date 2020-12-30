@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies an executable created by a Microsoft Office application and subsequently executed. These processes are often launched via scripts inside documents or during exploitation of MS Office applications.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*"
+  ],
+  "language": "eql",
+  "license": "Elastic License",
+  "name": "Execution of File Written or Modified by Microsoft Office",
+  "query": "sequence with maxspan=2h\n  [file where event.type != \"deletion\" and file.extension : \"exe\" and\n     (process.name : \"WINWORD.EXE\" or\n      process.name : \"EXCEL.EXE\" or\n      process.name : \"OUTLOOK.EXE\" or\n      process.name : \"POWERPNT.EXE\" or\n      process.name : \"eqnedt32.exe\" or\n      process.name : \"fltldr.exe\" or\n      process.name : \"MSPUB.EXE\" or\n      process.name : \"MSACCESS.EXE\")\n  ] by host.id, file.path\n  [process where event.type in (\"start\", \"process_started\")] by host.id, process.executable\n",
+  "risk_score": 21,
+  "rule_id": "0d8ad79f-9025-45d8-80c1-4f0cd3c5e8e5",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1064",
+          "name": "Scripting",
+          "reference": "https://attack.mitre.org/techniques/T1064/"
+        },
+        {
+          "id": "T1192",
+          "name": "Spearphishing Link",
+          "reference": "https://attack.mitre.org/techniques/T1192/"
+        },
+        {
+          "id": "T1193",
+          "name": "Spearphishing Attachment",
+          "reference": "https://attack.mitre.org/techniques/T1193/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 1
+}

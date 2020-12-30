@@ -19,7 +19,7 @@
 
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
-describe('savedObjects/health_check/isConfigVersionUpgradeable', function() {
+describe('savedObjects/health_check/isConfigVersionUpgradeable', function () {
   function isUpgradeableTest(savedVersion: string, kibanaVersion: string, expected: boolean) {
     it(`should return ${expected} for config version ${savedVersion} and kibana version ${kibanaVersion}`, () => {
       expect(isConfigVersionUpgradeable(savedVersion, kibanaVersion)).toBe(expected);

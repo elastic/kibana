@@ -18,10 +18,10 @@
  */
 
 import { Router } from './router';
-import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { schema } from '@kbn/config-schema';
 
-const logger = loggingServiceMock.create().get();
+const logger = loggingSystemMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 describe('Router', () => {
@@ -59,7 +59,7 @@ describe('Router', () => {
           {
             path: '/',
             options: { body: { output: 'file' } } as any, // We explicitly don't support 'file'
-            validate: { body: schema.object({}, { allowUnknowns: true }) },
+            validate: { body: schema.object({}, { unknowns: 'allow' }) },
           },
           (context, req, res) => res.ok({})
         )

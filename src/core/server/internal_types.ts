@@ -22,14 +22,24 @@ import { Type } from '@kbn/config-schema';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { ConfigDeprecationProvider } from './config';
 import { ContextSetup } from './context';
-import { InternalElasticsearchServiceSetup } from './elasticsearch';
-import { InternalHttpServiceSetup } from './http';
+import {
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from './elasticsearch';
+import { InternalHttpServiceSetup, InternalHttpServiceStart } from './http';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
 } from './saved_objects';
 import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
-import { UuidServiceSetup } from './uuid';
+import { InternalEnvironmentServiceSetup } from './environment';
+import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
+import { InternalRenderingServiceSetup } from './rendering';
+import { InternalHttpResourcesSetup } from './http_resources';
+import { InternalStatusServiceSetup } from './status';
+import { InternalLoggingServiceSetup } from './logging';
+import { CoreUsageDataStart } from './core_usage_data';
+import { I18nServiceSetup } from './i18n';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -37,9 +47,15 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
-  uiSettings: InternalUiSettingsServiceSetup;
+  i18n: I18nServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
-  uuid: UuidServiceSetup;
+  status: InternalStatusServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
+  environment: InternalEnvironmentServiceSetup;
+  rendering: InternalRenderingServiceSetup;
+  httpResources: InternalHttpResourcesSetup;
+  logging: InternalLoggingServiceSetup;
+  metrics: InternalMetricsServiceSetup;
 }
 
 /**
@@ -47,8 +63,12 @@ export interface InternalCoreSetup {
  */
 export interface InternalCoreStart {
   capabilities: CapabilitiesStart;
+  elasticsearch: InternalElasticsearchServiceStart;
+  http: InternalHttpServiceStart;
+  metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
+  coreUsageData: CoreUsageDataStart;
 }
 
 /**

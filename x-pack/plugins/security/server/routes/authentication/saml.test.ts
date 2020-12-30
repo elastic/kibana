@@ -5,38 +5,26 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { Authentication, AuthenticationResult, SAMLLoginStep } from '../../authentication';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { AuthenticationResult, AuthenticationServiceStart, SAMLLogin } from '../../authentication';
 import { defineSAMLRoutes } from './saml';
-import { ConfigType } from '../../config';
-import { IRouter, RequestHandler, RouteConfig } from '../../../../../../src/core/server';
+import type { IRouter, RequestHandler, RouteConfig } from '../../../../../../src/core/server';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  httpServiceMock,
-  loggingServiceMock,
-} from '../../../../../../src/core/server/mocks';
-import { authenticationMock } from '../../authentication/index.mock';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import { authorizationMock } from '../../authorization/index.mock';
+import { routeDefinitionParamsMock } from '../index.mock';
+import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 
 describe('SAML authentication routes', () => {
   let router: jest.Mocked<IRouter>;
-  let authc: jest.Mocked<Authentication>;
+  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   beforeEach(() => {
-    router = httpServiceMock.createRouter();
-    authc = authenticationMock.create();
+    const routeParamsMock = routeDefinitionParamsMock.create();
+    router = routeParamsMock.router;
+    authc = authenticationServiceMock.createStart();
+    routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 
-    defineSAMLRoutes({
-      router,
-      clusterClient: elasticsearchServiceMock.createClusterClient(),
-      basePath: httpServiceMock.createBasePath(),
-      logger: loggingServiceMock.create().get(),
-      config: { authc: { providers: ['saml'] } } as ConfigType,
-      authc,
-      authz: authorizationMock.create(),
-      csp: httpServiceMock.createSetupContract().csp,
-    });
+    defineSAMLRoutes(routeParamsMock);
   });
 
   describe('Assertion consumer service endpoint', () => {
@@ -52,7 +40,7 @@ describe('SAML authentication routes', () => {
     });
 
     it('correctly defines route.', () => {
-      expect(routeConfig.options).toEqual({ authRequired: false });
+      expect(routeConfig.options).toEqual({ authRequired: false, xsrfRequired: false });
       expect(routeConfig.validate).toEqual({
         body: expect.any(Type),
         query: undefined,
@@ -77,9 +65,9 @@ describe('SAML authentication routes', () => {
         `"[SAMLResponse]: expected value of type [string] but got [undefined]"`
       );
 
-      expect(() =>
-        bodyValidator.validate({ SAMLResponse: 'saml-response', UnknownArg: 'arg' })
-      ).toThrowErrorMatchingInlineSnapshot(`"[UnknownArg]: definition for this key is missing"`);
+      expect(bodyValidator.validate({ SAMLResponse: 'saml-response', UnknownArg: 'arg' })).toEqual({
+        SAMLResponse: 'saml-response',
+      });
     });
 
     it('returns 500 if authentication throws unhandled exception.', async () => {
@@ -99,9 +87,9 @@ describe('SAML authentication routes', () => {
       );
 
       expect(authc.login).toHaveBeenCalledWith(request, {
-        provider: 'saml',
+        provider: { type: 'saml' },
         value: {
-          step: SAMLLoginStep.SAMLResponseReceived,
+          type: SAMLLogin.LoginWithSAMLResponse,
           samlResponse: 'saml-response',
         },
       });
@@ -178,10 +166,39 @@ describe('SAML authentication routes', () => {
       );
 
       expect(authc.login).toHaveBeenCalledWith(request, {
-        provider: 'saml',
+        provider: { type: 'saml' },
         value: {
-          step: SAMLLoginStep.SAMLResponseReceived,
+          type: SAMLLogin.LoginWithSAMLResponse,
           samlResponse: 'saml-response',
+        },
+      });
+
+      expect(responseFactory.redirected).toHaveBeenCalledWith({
+        headers: { location: 'http://redirect-to/path' },
+      });
+    });
+
+    it('passes `RelayState` within login attempt.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.redirectTo('http://redirect-to/path'));
+
+      const redirectResponse = Symbol('error');
+      const responseFactory = httpServerMock.createResponseFactory();
+      responseFactory.redirected.mockReturnValue(redirectResponse as any);
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { SAMLResponse: 'saml-response', RelayState: '/app/kibana' },
+      });
+
+      await expect(routeHandler({} as any, request, responseFactory)).resolves.toBe(
+        redirectResponse
+      );
+
+      expect(authc.login).toHaveBeenCalledWith(request, {
+        provider: { type: 'saml' },
+        value: {
+          type: SAMLLogin.LoginWithSAMLResponse,
+          samlResponse: 'saml-response',
+          relayState: '/app/kibana',
         },
       });
 

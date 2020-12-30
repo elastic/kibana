@@ -17,6 +17,7 @@
  * under the License.
  */
 import * as Rx from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { UiSettingsService } from './';
 import { IUiSettingsClient } from './types';
 
@@ -40,6 +41,7 @@ const createSetupContractMock = () => {
   setupContract.getUpdate$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getSaved$.mockReturnValue(new Rx.Subject<any>());
   setupContract.getUpdateErrors$.mockReturnValue(new Rx.Subject<any>());
+  setupContract.getAll.mockReturnValue({});
 
   return setupContract;
 };

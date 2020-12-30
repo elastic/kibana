@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import './core.css';
-
+import { pick } from '@kbn/std';
 import { CoreId } from '../server';
 import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
@@ -32,26 +31,23 @@ import {
   InjectedMetadataSetup,
   InjectedMetadataStart,
 } from './injected_metadata';
-import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
-import { mapToObject, pick } from '../utils/';
 import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
-import { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+import { CoreApp } from './core_app';
+import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
 interface Params {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
-  requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
-  useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
 }
 
 /** @internal */
@@ -86,7 +82,6 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
 export class CoreSystem {
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
-  private readonly legacy: LegacyPlatformService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly savedObjects: SavedObjectsService;
@@ -100,19 +95,14 @@ export class CoreSystem {
   private readonly rendering: RenderingService;
   private readonly context: ContextService;
   private readonly integrations: IntegrationsService;
+  private readonly coreApp: CoreApp;
 
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
-    const {
-      rootDomElement,
-      browserSupportsCsp,
-      injectedMetadata,
-      requireLegacyFiles,
-      useLegacyTestHarness,
-    } = params;
+    const { rootDomElement, browserSupportsCsp, injectedMetadata } = params;
 
     this.rootDomElement = rootDomElement;
 
@@ -142,11 +132,7 @@ export class CoreSystem {
 
     this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
-
-    this.legacy = new LegacyPlatformService({
-      requireLegacyFiles,
-      useLegacyTestHarness,
-    });
+    this.coreApp = new CoreApp(this.coreContext);
   }
 
   public async setup() {
@@ -159,22 +145,17 @@ export class CoreSystem {
         i18n: this.i18n.getContext(),
       });
       await this.integrations.setup();
+      this.docLinks.setup();
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
-        // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
-        // 1) Can access context from any NP plugin
-        // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
-        //    New Platform plugins.
-        pluginDependencies: new Map([
-          ...pluginDependencies,
-          [this.legacy.legacyId, [...pluginDependencies.keys()]],
-        ]),
+        pluginDependencies: new Map([...pluginDependencies]),
       });
-      const application = this.application.setup({ context, http, injectedMetadata });
+      const application = this.application.setup({ context, http });
+      this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
         application,
@@ -187,12 +168,7 @@ export class CoreSystem {
       };
 
       // Services that do not expose contracts at setup
-      const plugins = await this.plugins.setup(core);
-
-      await this.legacy.setup({
-        core,
-        plugins: mapToObject(plugins.contracts),
-      });
+      await this.plugins.setup(core);
 
       return { fatalErrors: this.fatalErrorsSetup };
     } catch (error) {
@@ -210,24 +186,17 @@ export class CoreSystem {
     try {
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
-      const docLinks = await this.docLinks.start({ injectedMetadata });
-      const http = await this.http.start({ injectedMetadata, fatalErrors: this.fatalErrorsSetup! });
+      const docLinks = this.docLinks.start({ injectedMetadata });
+      const http = await this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
       const i18n = await this.i18n.start();
-      const application = await this.application.start({ http, injectedMetadata });
+      const fatalErrors = await this.fatalErrors.start();
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
-
-      // ensure the rootDomElement is empty
-      this.rootDomElement.textContent = '';
-      this.rootDomElement.classList.add('coreSystemRootDomElement');
-      this.rootDomElement.appendChild(coreUiTargetDomElement);
-      this.rootDomElement.appendChild(notificationsTargetDomElement);
-      this.rootDomElement.appendChild(overlayTargetDomElement);
 
       const overlays = this.overlay.start({
         i18n,
@@ -239,13 +208,17 @@ export class CoreSystem {
         overlays,
         targetDomElement: notificationsTargetDomElement,
       });
+      const application = await this.application.start({ http, overlays });
       const chrome = await this.chrome.start({
         application,
         docLinks,
         http,
         injectedMetadata,
         notifications,
+        uiSettings,
       });
+
+      this.coreApp.start({ application, http, notifications, uiSettings });
 
       application.registerMountContext(this.coreContext.coreId, 'core', () => ({
         application: pick(application, ['capabilities', 'navigateToApp']),
@@ -271,22 +244,28 @@ export class CoreSystem {
         notifications,
         overlays,
         uiSettings,
+        fatalErrors,
       };
 
-      const plugins = await this.plugins.start(core);
-      const rendering = this.rendering.start({
+      await this.plugins.start(core);
+
+      // ensure the rootDomElement is empty
+      this.rootDomElement.textContent = '';
+      this.rootDomElement.classList.add('coreSystemRootDomElement');
+      this.rootDomElement.appendChild(coreUiTargetDomElement);
+      this.rootDomElement.appendChild(notificationsTargetDomElement);
+      this.rootDomElement.appendChild(overlayTargetDomElement);
+
+      this.rendering.start({
         application,
         chrome,
-        injectedMetadata,
         overlays,
         targetDomElement: coreUiTargetDomElement,
       });
 
-      await this.legacy.start({
-        core,
-        plugins: mapToObject(plugins.contracts),
-        targetDomElement: rendering.legacyTargetDomElement,
-      });
+      return {
+        application,
+      };
     } catch (error) {
       if (this.fatalErrorsSetup) {
         this.fatalErrorsSetup.add(error);
@@ -299,8 +278,8 @@ export class CoreSystem {
   }
 
   public stop() {
-    this.legacy.stop();
     this.plugins.stop();
+    this.coreApp.stop();
     this.notifications.stop();
     this.http.stop();
     this.integrations.stop();

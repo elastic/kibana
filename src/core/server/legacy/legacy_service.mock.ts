@@ -16,34 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { LegacyService } from './legacy_service';
-import { LegacyServiceDiscoverPlugins, LegacyServiceSetupDeps } from './types';
+import { LegacyConfig, LegacyServiceSetupDeps } from './types';
 
 type LegacyServiceMock = jest.Mocked<PublicMethodsOf<LegacyService> & { legacyId: symbol }>;
 
-const createDiscoverPluginsMock = (): LegacyServiceDiscoverPlugins => ({
-  pluginSpecs: [],
-  uiExports: {} as any,
-  navLinks: [],
-  pluginExtendedConfig: {
-    get: jest.fn(),
-    has: jest.fn(),
-    set: jest.fn(),
-  },
-  disabledPluginSpecs: [],
-  settings: {},
-});
 const createLegacyServiceMock = (): LegacyServiceMock => ({
   legacyId: Symbol(),
-  discoverPlugins: jest.fn().mockResolvedValue(createDiscoverPluginsMock()),
+  setupLegacyConfig: jest.fn(),
   setup: jest.fn(),
   start: jest.fn(),
   stop: jest.fn(),
 });
 
+const createLegacyConfigMock = (): jest.Mocked<LegacyConfig> => ({
+  get: jest.fn(),
+  has: jest.fn(),
+  set: jest.fn(),
+});
+
 export const legacyServiceMock = {
   create: createLegacyServiceMock,
   createSetupContract: (deps: LegacyServiceSetupDeps) => createLegacyServiceMock().setup(deps),
-  createDiscoverPlugins: createDiscoverPluginsMock,
+  createLegacyConfig: createLegacyConfigMock,
 };

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
@@ -44,7 +44,7 @@ export default function({ getService }) {
       await security.user.create(username, {
         password: password,
         full_name: 'Limited User',
-        roles: ['kibana_user', 'monitoring_user'],
+        roles: ['kibana_admin', 'monitoring_user'],
       });
 
       const { body } = await supertestWithoutAuth

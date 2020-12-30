@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
+import { modifyUrl } from '@kbn/std';
 
-import { modifyUrl } from '../../utils';
+import { ensureRawRequest, KibanaRequest, LegacyRequest } from './router';
 
 /**
  * Access or manipulate the Kibana base path
@@ -34,10 +34,19 @@ export class BasePath {
    * See {@link BasePath.get} for getting the basePath value for a specific request
    */
   public readonly serverBasePath: string;
+  /**
+   * The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the
+   * {@link BasePath.serverBasePath}.
+   *
+   * @remarks
+   * Should be used for generating external URL links back to this Kibana instance.
+   */
+  public readonly publicBaseUrl?: string;
 
   /** @internal */
-  constructor(serverBasePath: string = '') {
+  constructor(serverBasePath: string = '', publicBaseUrl?: string) {
     this.serverBasePath = serverBasePath;
+    this.publicBaseUrl = publicBaseUrl;
   }
 
   /**
@@ -69,7 +78,7 @@ export class BasePath {
    */
   public prepend = (path: string): string => {
     if (this.serverBasePath === '') return path;
-    return modifyUrl(path, parts => {
+    return modifyUrl(path, (parts) => {
       if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
         parts.pathname = `${this.serverBasePath}${parts.pathname}`;
       }

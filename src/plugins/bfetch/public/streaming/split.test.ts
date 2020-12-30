@@ -26,7 +26,7 @@ test('splits a single IP address', () => {
   const subject = new Subject<string>();
   const splitted = split('.')(subject);
 
-  splitted.subscribe(value => list.push(value));
+  splitted.subscribe((value) => list.push(value));
 
   subject.next(ip);
   subject.complete();
@@ -56,7 +56,7 @@ for (const stream of streams) {
       const list: string[] = [];
       const subject = new Subject<string>();
       const splitted = split('.')(subject);
-      splitted.subscribe(value => list.push(value));
+      splitted.subscribe((value) => list.push(value));
       let i = 0;
       while (i < stream.length) {
         const len = Math.round(Math.random() * 10);

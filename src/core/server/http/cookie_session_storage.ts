@@ -17,8 +17,10 @@
  * under the License.
  */
 
-import { Request, Server } from 'hapi';
-import hapiAuthCookie from 'hapi-auth-cookie';
+import { Request, Server } from '@hapi/hapi';
+import hapiAuthCookie from '@hapi/cookie';
+// @ts-expect-error no TS definitions
+import Statehood from '@hapi/statehood';
 
 import { KibanaRequest, ensureRawRequest } from './router';
 import { SessionStorageFactory, SessionStorage } from './session_storage';
@@ -45,6 +47,11 @@ export interface SessionStorageCookieOptions<T> {
    * Flag indicating whether the cookie should be sent only via a secure connection.
    */
   isSecure: boolean;
+  /**
+   * Defines SameSite attribute of the Set-Cookie Header.
+   * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+   */
+  sameSite?: 'Strict' | 'Lax' | 'None';
 }
 
 /**
@@ -73,7 +80,7 @@ class ScopedCookieSessionStorage<T extends Record<string, any>> implements Sessi
       const session = await this.server.auth.test('security-cookie', this.request);
       // A browser can send several cookies, if it's not an array, just return the session value
       if (!Array.isArray(session)) {
-        return session as T;
+        return session.credentials as T;
       }
 
       // If we have an array with one value, we're good also
@@ -100,6 +107,12 @@ class ScopedCookieSessionStorage<T extends Record<string, any>> implements Sessi
   }
 }
 
+function validateOptions(options: SessionStorageCookieOptions<any>) {
+  if (options.sameSite === 'None' && options.isSecure !== true) {
+    throw new Error('"SameSite: None" requires Secure connection');
+  }
+}
+
 /**
  * Creates SessionStorage factory, which abstract the way of
  * session storage implementation and scoping to the incoming requests.
@@ -113,10 +126,12 @@ export async function createCookieSessionStorageFactory<T>(
   cookieOptions: SessionStorageCookieOptions<T>,
   basePath?: string
 ): Promise<SessionStorageFactory<T>> {
+  validateOptions(cookieOptions);
+
   function clearInvalidCookie(req: Request | undefined, path: string = basePath || '/') {
     // if the cookie did not include the 'path' attribute in the session value, it is a legacy cookie
     // we will assume that the cookie was created with the current configuration
-    log.debug(`Clearing invalid session cookie`);
+    log.debug('Clearing invalid session cookie');
     // need to use Hapi toolkit to clear cookie with defined options
     if (req) {
       (req.cookieAuth as any).h.unstate(cookieOptions.name, { path });
@@ -126,21 +141,40 @@ export async function createCookieSessionStorageFactory<T>(
   await server.register({ plugin: hapiAuthCookie });
 
   server.auth.strategy('security-cookie', 'cookie', {
-    cookie: cookieOptions.name,
-    password: cookieOptions.encryptionKey,
-    validateFunc: async (req, session: T | T[]) => {
+    cookie: {
+      name: cookieOptions.name,
+      password: cookieOptions.encryptionKey,
+      isSecure: cookieOptions.isSecure,
+      path: basePath === undefined ? '/' : basePath,
+      clearInvalid: false,
+      isHttpOnly: true,
+      isSameSite: cookieOptions.sameSite === 'None' ? false : cookieOptions.sameSite ?? false,
+    },
+    validateFunc: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);
       if (!result.isValid) {
         clearInvalidCookie(req, result.path);
       }
       return { valid: result.isValid };
     },
-    isSecure: cookieOptions.isSecure,
-    path: basePath,
-    clearInvalid: false,
-    isHttpOnly: true,
-    isSameSite: false,
   });
+
+  // A hack to support SameSite: 'None'.
+  // Remove it after update Hapi to v19 that supports SameSite: 'None' out of the box.
+  if (cookieOptions.sameSite === 'None') {
+    log.debug('Patching Statehood.prepareValue');
+    const originalPrepareValue = Statehood.prepareValue;
+    Statehood.prepareValue = function kibanaStatehoodPrepareValueWrapper(
+      name: string,
+      value: unknown,
+      options: any
+    ) {
+      if (name === cookieOptions.name) {
+        options.isSameSite = cookieOptions.sameSite;
+      }
+      return originalPrepareValue(name, value, options);
+    };
+  }
 
   return {
     asScoped(request: KibanaRequest) {

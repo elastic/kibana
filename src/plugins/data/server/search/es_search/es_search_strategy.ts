@@ -16,42 +16,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { first } from 'rxjs/operators';
-import { APICaller } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
-import { ES_SEARCH_STRATEGY } from '../../../common/search';
-import { ISearchStrategy, TSearchStrategyProvider } from '../i_search_strategy';
-import { ISearchContext } from '..';
+import { from, Observable } from 'rxjs';
+import { first, tap } from 'rxjs/operators';
+import type { SearchResponse } from 'elasticsearch';
+import type { Logger, SharedGlobalConfig } from 'kibana/server';
+import type { ISearchStrategy } from '../types';
+import type { SearchUsage } from '../collectors';
+import { getDefaultSearchParams, getShardTimeout, shimAbortSignal } from './request_utils';
+import { toKibanaSearchResponse } from './response_utils';
+import { searchUsageObserver } from '../collectors/usage';
+import { KbnServerError } from '../../../../kibana_utils/server';
 
-export const esSearchStrategyProvider: TSearchStrategyProvider<typeof ES_SEARCH_STRATEGY> = (
-  context: ISearchContext,
-  caller: APICaller
-): ISearchStrategy<typeof ES_SEARCH_STRATEGY> => {
-  return {
-    search: async (request, options) => {
-      const config = await context.config$.pipe(first()).toPromise();
+export const esSearchStrategyProvider = (
+  config$: Observable<SharedGlobalConfig>,
+  logger: Logger,
+  usage?: SearchUsage
+): ISearchStrategy => ({
+  search: (request, { abortSignal }, { esClient, uiSettingsClient }) => {
+    // Only default index pattern type is supported here.
+    // See data_enhanced for other type support.
+    if (request.indexType) {
+      throw new KbnServerError(`Unsupported index pattern type ${request.indexType}`, 400);
+    }
+
+    const search = async () => {
+      const config = await config$.pipe(first()).toPromise();
       const params = {
-        timeout: `${config.elasticsearch.shardTimeout.asMilliseconds()}ms`,
-        ignoreUnavailable: true, // Don't fail if the index/indices don't exist
-        restTotalHitsAsInt: true, // Get the number of hits as an int rather than a range
+        ...(await getDefaultSearchParams(uiSettingsClient)),
+        ...getShardTimeout(config),
         ...request.params,
       };
-      if (request.debug) {
-        // eslint-disable-next-line
-        console.log(JSON.stringify(params, null, 2));
-      }
-      const esSearchResponse = (await caller('search', params, options)) as SearchResponse<any>;
+      const promise = esClient.asCurrentUser.search<SearchResponse<unknown>>(params);
+      const { body } = await shimAbortSignal(promise, abortSignal);
+      return toKibanaSearchResponse(body);
+    };
 
-      // The above query will either complete or timeout and throw an error.
-      // There is no progress indication on this api.
-      return {
-        total: esSearchResponse._shards.total,
-        loaded:
-          esSearchResponse._shards.failed +
-          esSearchResponse._shards.skipped +
-          esSearchResponse._shards.successful,
-        rawResponse: esSearchResponse,
-      };
-    },
-  };
-};
+    return from(search()).pipe(tap(searchUsageObserver(logger, usage)));
+  },
+});

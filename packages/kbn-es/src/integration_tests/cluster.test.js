@@ -17,7 +17,7 @@
  * under the License.
  */
 
-const { ToolingLog, CA_CERT_PATH, ES_KEY_PATH, ES_CERT_PATH } = require('@kbn/dev-utils');
+const { ToolingLog, ES_P12_PATH, ES_P12_PASSWORD } = require('@kbn/dev-utils');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
 const { installSource, installSnapshot, installArchive } = require('../install');
@@ -37,7 +37,7 @@ jest.mock('../utils/extract_config_files', () => ({
 const log = new ToolingLog();
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function ensureNoResolve(promise) {
@@ -60,7 +60,7 @@ async function ensureResolve(promise) {
 
 function mockEsBin({ exitCode, start }) {
   execa.mockImplementationOnce((cmd, args, options) =>
-    require.requireActual('execa')(
+    jest.requireActual('execa')(
       process.execPath,
       [
         require.resolve('./__fixtures__/es_bin.js'),
@@ -77,7 +77,7 @@ function mockEsBin({ exitCode, start }) {
 
 beforeEach(() => {
   jest.resetAllMocks();
-  extractConfigFiles.mockImplementation(config => config);
+  extractConfigFiles.mockImplementation((config) => config);
 });
 
 describe('#installSource()', () => {
@@ -85,7 +85,7 @@ describe('#installSource()', () => {
     let resolveInstallSource;
     installSource.mockImplementationOnce(
       () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           resolveInstallSource = () => {
             resolve({ installPath: 'foo' });
           };
@@ -124,7 +124,7 @@ describe('#installSnapshot()', () => {
     let resolveInstallSnapshot;
     installSnapshot.mockImplementationOnce(
       () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           resolveInstallSnapshot = () => {
             resolve({ installPath: 'foo' });
           };
@@ -163,7 +163,7 @@ describe('#installArchive(path)', () => {
     let resolveInstallArchive;
     installArchive.mockImplementationOnce(
       () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           resolveInstallArchive = () => {
             resolve({ installPath: 'foo' });
           };
@@ -252,9 +252,9 @@ describe('#start(installPath)', () => {
 
     const config = extractConfigFiles.mock.calls[0][0];
     expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(`xpack.security.http.ssl.key=${ES_KEY_PATH}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate=${ES_CERT_PATH}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate_authorities=${CA_CERT_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.keystore.type=PKCS12`);
+    expect(config).toContain(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
   });
 
   it(`doesn't setup SSL when disabled`, async () => {
@@ -319,9 +319,9 @@ describe('#run()', () => {
 
     const config = extractConfigFiles.mock.calls[0][0];
     expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(`xpack.security.http.ssl.key=${ES_KEY_PATH}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate=${ES_CERT_PATH}`);
-    expect(config).toContain(`xpack.security.http.ssl.certificate_authorities=${CA_CERT_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.keystore.type=PKCS12`);
+    expect(config).toContain(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
   });
 
   it(`doesn't setup SSL when disabled`, async () => {

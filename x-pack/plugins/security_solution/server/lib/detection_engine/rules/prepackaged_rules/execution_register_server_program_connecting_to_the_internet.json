@@ -1,0 +1,62 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies the native Windows tools regsvr32.exe, regsvr64.exe, RegSvcs.exe, or RegAsm.exe making a network connection. This may be indicative of an attacker bypassing allowlists or running arbitrary scripts via a signed Microsoft binary.",
+  "false_positives": [
+    "Security testing may produce events like this. Activity of this kind performed by non-engineers and ordinary users is unusual."
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "eql",
+  "license": "Elastic License",
+  "name": "Network Connection via Registration Utility",
+  "query": "sequence by process.entity_id\n  [process where (process.name : \"regsvr32.exe\" or process.name : \"regsvr64.exe\" or\n                  process.name : \"RegAsm.exe\" or process.name : \"RegSvcs.exe\") and\n     event.type == \"start\"]\n  [network where (process.name : \"regsvr32.exe\" or process.name : \"regsvr64.exe\" or\n                  process.name : \"RegAsm.exe\" or process.name : \"RegSvcs.exe\") and\n     not cidrmatch(destination.ip, \"10.0.0.0/8\", \"169.254.169.254\", \"172.16.0.0/12\", \"192.168.0.0/16\")]\n",
+  "risk_score": 21,
+  "rule_id": "fb02b8d3-71ee-4af1-bacd-215d23f17efa",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
+      },
+      "technique": [
+        {
+          "id": "T1117",
+          "name": "Regsvr32",
+          "reference": "https://attack.mitre.org/techniques/T1117/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 5
+}

@@ -1,0 +1,92 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataOrIndexMissing component renders headingMessage 1`] = `
+<EuiFlexGroup
+  data-test-subj="data-missing"
+  justifyContent="center"
+>
+  <EuiFlexItem
+    grow={false}
+    style={
+      Object {
+        "flexBasis": 700,
+      }
+    }
+  >
+    <EuiSpacer
+      size="m"
+    />
+    <EuiPanel>
+      <EuiEmptyPrompt
+        actions={
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiButton
+                color="primary"
+                fill={true}
+                href="/app/home#/tutorial/uptimeMonitors"
+              >
+                <FormattedMessage
+                  defaultMessage="View setup instructions"
+                  id="xpack.uptime.emptyState.viewSetupInstructions"
+                  values={Object {}}
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButton
+                color="primary"
+                href="/app/uptime/settings"
+              >
+                <FormattedMessage
+                  defaultMessage="Update index pattern settings"
+                  id="xpack.uptime.emptyState.updateIndexPattern"
+                  values={Object {}}
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        body={
+          <React.Fragment>
+            <p>
+              <FormattedMessage
+                defaultMessage="If you have not setup heartbeat yet, you can setup heartbeat to start monitoring your services."
+                id="xpack.uptime.emptyState.configureHeartbeatToGetStartedMessage"
+                values={Object {}}
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                defaultMessage="If you have setup heartbeat and confirmed data is being sent to Elasticsearch, update your index pattern settings and insure they are aligned with your Heartbeat config."
+                id="xpack.uptime.emptyState.configureHeartbeatIndexSettings"
+                values={Object {}}
+              />
+            </p>
+          </React.Fragment>
+        }
+        iconType="logoUptime"
+        title={
+          <EuiTitle
+            size="l"
+          >
+            <h3>
+              <FormattedMessage
+                defaultMessage="Uptime index {indexName} not found"
+                id="xpack.uptime.emptyState.noIndexTitle"
+                values={
+                  Object {
+                    "indexName": <em>
+                      heartbeat-*
+                    </em>,
+                  }
+                }
+              />
+            </h3>
+          </EuiTitle>
+        }
+      />
+    </EuiPanel>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

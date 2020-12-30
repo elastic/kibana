@@ -25,7 +25,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
       describe(scenario.id, () => {
         it('should handle delete action request appropriately', async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -40,24 +40,26 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/action/${createdAction.id}`)
+            .delete(`${getUrlPrefix(space.id)}/api/actions/action/${createdAction.id}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo');
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to delete actions',
               });
-              objectRemover.add(space.id, createdAction.id, 'action');
+              objectRemover.add(space.id, createdAction.id, 'action', 'actions');
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(204);
               expect(response.body).to.eql('');
               break;
@@ -68,7 +70,7 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
 
         it(`shouldn't delete action from another space`, async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
@@ -81,26 +83,29 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
               },
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action');
+          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix('other')}/api/action/${createdAction.id}`)
+            .delete(`${getUrlPrefix('other')}/api/actions/action/${createdAction.id}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo');
 
-          expect(response.statusCode).to.eql(404);
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to delete actions',
               });
               break;
             case 'superuser at space1':
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
@@ -114,24 +119,58 @@ export default function deleteActionTests({ getService }: FtrProviderContext) {
 
         it(`should handle delete request appropriately when action doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/action/2`)
+            .delete(`${getUrlPrefix(space.id)}/api/actions/action/2`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'global_read at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to delete actions',
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(404);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it(`shouldn't delete action from preconfigured list`, async () => {
+          const response = await supertestWithoutAuth
+            .delete(`${getUrlPrefix(space.id)}/api/actions/action/my-slack1`)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'foo');
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to delete actions',
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'Preconfigured action my-slack1 is not allowed to delete.',
+              });
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

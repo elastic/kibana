@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Latest Versions that latest active component renders normally 1`] = `
+<EuiBasicTable
+  columns={
+    Array [
+      Object {
+        "field": "version",
+        "name": "",
+      },
+      Object {
+        "dataType": "number",
+        "field": "count",
+        "name": "",
+      },
+    ]
+  }
+  items={
+    Array [
+      Object {
+        "count": 8,
+        "version": "6.3.1",
+      },
+      Object {
+        "count": 2,
+        "version": "6.3.0",
+      },
+    ]
+  }
+  noItemsMessage="No items found"
+  responsive={true}
+  tableLayout="fixed"
+/>
+`;

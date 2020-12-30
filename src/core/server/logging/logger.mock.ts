@@ -17,30 +17,4 @@
  * under the License.
  */
 
-import { Logger } from './logger';
-
-export type MockedLogger = jest.Mocked<Logger> & { context: string[] };
-
-const createLoggerMock = (context: string[] = []) => {
-  const mockLog: MockedLogger = {
-    context,
-    debug: jest.fn(),
-    error: jest.fn(),
-    fatal: jest.fn(),
-    info: jest.fn(),
-    log: jest.fn(),
-    trace: jest.fn(),
-    warn: jest.fn(),
-    get: jest.fn(),
-  };
-  mockLog.get.mockImplementation((...ctx) => ({
-    ctx,
-    ...mockLog,
-  }));
-
-  return mockLog;
-};
-
-export const loggerMock = {
-  create: createLoggerMock,
-};
+export { loggerMock, MockedLogger } from '@kbn/logging/target/mocks';

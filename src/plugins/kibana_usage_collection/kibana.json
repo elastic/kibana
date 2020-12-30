@@ -1,0 +1,13 @@
+{
+  "id": "kibanaUsageCollection",
+  "version": "kibana",
+  "server": true,
+  "ui": false,
+  "requiredBundles": [
+    "usageCollection"
+  ],
+  "requiredPlugins": [
+    "usageCollection"
+  ],
+  "optionalPlugins": []
+}

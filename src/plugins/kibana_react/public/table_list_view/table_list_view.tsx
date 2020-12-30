@@ -20,7 +20,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { debounce, indexBy, sortBy, uniq } from 'lodash';
+import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import {
   EuiTitle,
   EuiInMemoryTable,
@@ -36,17 +36,12 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiBasicTableColumn,
+  EuiTableActionsColumnType,
+  SearchFilterConfig,
 } from '@elastic/eui';
-import { ToastsStart, IUiSettingsClient } from 'kibana/public';
+
+import { HttpFetchError, ToastsStart } from 'kibana/public';
 import { toMountPoint } from '../util';
-
-export const EMPTY_FILTER = '';
-
-interface Column {
-  name: string;
-  width?: string;
-  actions?: object[];
-}
 
 interface Item {
   id?: string;
@@ -61,12 +56,25 @@ export interface TableListViewProps {
   findItems(query: string): Promise<{ total: number; hits: object[] }>;
   listingLimit: number;
   initialFilter: string;
-  noItemsFragment: JSX.Element;
-  // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
-  tableColumns: Column[];
+  initialPageSize: number;
+  noItemsFragment?: JSX.Element;
+  tableColumns: Array<EuiBasicTableColumn<any>>;
   tableListTitle: string;
   toastNotifications: ToastsStart;
-  uiSettings: IUiSettingsClient;
+  /**
+   * Id of the heading element describing the table. This id will be used as `aria-labelledby` of the wrapper element.
+   * If the table is not empty, this component renders its own h1 element using the same id.
+   */
+  headingId?: string;
+  /**
+   * Indicates which column should be used as the identifying cell in each row.
+   */
+  rowHeader: string;
+  /**
+   * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
+   */
+  tableCaption?: string;
+  searchFilters?: SearchFilterConfig[];
 }
 
 export interface TableListViewState {
@@ -76,6 +84,7 @@ export interface TableListViewState {
   isDeletingItems: boolean;
   showDeleteModal: boolean;
   showLimitError: boolean;
+  fetchError?: HttpFetchError;
   filter: string;
   selectedIds: string[];
   totalItems: number;
@@ -93,11 +102,10 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   constructor(props: TableListViewProps) {
     super(props);
 
-    const initialPageSize = props.uiSettings.get('savedObjects:perPage');
     this.pagination = {
       initialPageIndex: 0,
-      initialPageSize,
-      pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+      initialPageSize: props.initialPageSize,
+      pageSizeOptions: uniq([10, 20, 50, props.initialPageSize]).sort(),
     };
     this.state = {
       items: [],
@@ -126,22 +134,33 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   debouncedFetch = debounce(async (filter: string) => {
-    const response = await this.props.findItems(filter);
+    try {
+      const response = await this.props.findItems(filter);
 
-    if (!this._isMounted) {
-      return;
-    }
+      if (!this._isMounted) {
+        return;
+      }
 
-    // We need this check to handle the case where search results come back in a different
-    // order than they were sent out. Only load results for the most recent search.
-    // Also, in case filter is empty, items are being pre-sorted alphabetically.
-    if (filter === this.state.filter) {
+      // We need this check to handle the case where search results come back in a different
+      // order than they were sent out. Only load results for the most recent search.
+      // Also, in case filter is empty, items are being pre-sorted alphabetically.
+      if (filter === this.state.filter) {
+        this.setState({
+          hasInitialFetchReturned: true,
+          isFetchingItems: false,
+          items: !filter ? sortBy(response.hits, 'title') : response.hits,
+          totalItems: response.total,
+          showLimitError: response.total > this.props.listingLimit,
+        });
+      }
+    } catch (fetchError) {
       this.setState({
         hasInitialFetchReturned: true,
         isFetchingItems: false,
-        items: !filter ? sortBy(response.hits, 'title') : response.hits,
-        totalItems: response.total,
-        showLimitError: response.total > this.props.listingLimit,
+        items: [],
+        totalItems: 0,
+        showLimitError: false,
+        fetchError,
       });
     }
   }, 300);
@@ -150,6 +169,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     this.setState(
       {
         isFetchingItems: true,
+        fetchError: undefined,
       },
       this.debouncedFetch.bind(null, this.state.filter)
     );
@@ -163,8 +183,8 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       isDeletingItems: true,
     });
     try {
-      const itemsById = indexBy(this.state.items, 'id');
-      await this.props.deleteItems(this.state.selectedIds.map(id => itemsById[id]));
+      const itemsById = keyBy(this.state.items, 'id');
+      await this.props.deleteItems(this.state.selectedIds.map((id) => itemsById[id]));
     } catch (error) {
       this.props.toastNotifications.addDanger({
         title: toMountPoint(
@@ -310,6 +330,37 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     }
   }
 
+  renderFetchError() {
+    if (this.state.fetchError) {
+      return (
+        <React.Fragment>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="kibana-react.tableListView.listing.fetchErrorTitle"
+                defaultMessage="Fetching listing failed"
+              />
+            }
+            color="danger"
+            iconType="alert"
+          >
+            <p>
+              <FormattedMessage
+                id="kibana-react.tableListView.listing.fetchErrorDescription"
+                defaultMessage="The {entityName} listing could not be fetched: {message}."
+                values={{
+                  entityName: this.props.entityName,
+                  message: this.state.fetchError.body?.message || this.state.fetchError.message,
+                }}
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </React.Fragment>
+      );
+    }
+  }
+
   renderNoItemsMessage() {
     if (this.props.noItemsFragment) {
       return this.props.noItemsFragment;
@@ -356,19 +407,21 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   renderTable() {
+    const { searchFilters } = this.props;
+
     const selection = this.props.deleteItems
       ? {
           onSelectionChange: (obj: Item[]) => {
             this.setState({
               selectedIds: obj
-                .map(item => item.id)
+                .map((item) => item.id)
                 .filter((id: undefined | string): id is string => Boolean(id)),
             });
           },
         }
       : undefined;
 
-    const actions = [
+    const actions: EuiTableActionsColumnType<any>['actions'] = [
       {
         name: i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
           defaultMessage: 'Edit',
@@ -381,6 +434,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         ),
         icon: 'pencil',
         type: 'icon',
+        enabled: ({ error }: { error: string }) => !error,
         onClick: this.props.editItem,
       },
     ];
@@ -391,7 +445,9 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       defaultQuery: this.state.filter,
       box: {
         incremental: true,
+        'data-test-subj': 'tableListSearchBox',
       },
+      filters: searchFilters ?? [],
     };
 
     const columns = this.props.tableColumns.slice();
@@ -416,7 +472,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       <EuiInMemoryTable
         itemId="id"
         items={this.state.items}
-        columns={(columns as unknown) as Array<EuiBasicTableColumn<object>>} // EuiBasicTableColumn is stricter than Column
+        columns={columns}
         pagination={this.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}
@@ -424,12 +480,14 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         search={search}
         sorting={true}
         data-test-subj="itemsInMemTable"
+        rowHeader={this.props.rowHeader}
+        tableCaption={this.props.tableCaption}
       />
     );
   }
 
   renderListingOrEmptyState() {
-    if (this.hasNoItems()) {
+    if (!this.state.fetchError && this.hasNoItems()) {
       return this.renderNoItemsMessage();
     }
 
@@ -463,7 +521,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>{this.props.tableListTitle}</h1>
+              <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
             </EuiTitle>
           </EuiFlexItem>
 
@@ -473,6 +531,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         <EuiSpacer size="m" />
 
         {this.renderListingLimitWarning()}
+        {this.renderFetchError()}
 
         {this.renderTable()}
       </div>
@@ -498,10 +557,17 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         className="itemListing__page"
         restrictWidth
       >
-        <EuiPageBody>{this.renderPageContent()}</EuiPageBody>
+        <EuiPageBody
+          aria-labelledby={this.state.hasInitialFetchReturned ? this.props.headingId : undefined}
+        >
+          {this.renderPageContent()}
+        </EuiPageBody>
       </EuiPage>
     );
   }
 }
 
 export { TableListView };
+
+// eslint-disable-next-line import/no-default-export
+export default TableListView;

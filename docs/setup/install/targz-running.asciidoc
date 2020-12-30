@@ -1,4 +1,4 @@
-==== Running Kibana from the command line
+==== Run {kib} from the command line
 
 Kibana can be started from the command line as follows:
 

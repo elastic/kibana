@@ -11,7 +11,7 @@ export const createReadableStreamFromArray = (array: unknown[]) => {
   return new Readable({
     objectMode: true,
     read() {
-      array.forEach(entry => this.push(entry));
+      array.forEach((entry) => this.push(entry));
       this.push(null);
     },
   });

@@ -1,0 +1,28 @@
+.ml-field-title-bar {
+  @include euiFontSizeM;
+  font-family: Roboto Mono, serif;
+  font-style: normal;
+  font-weight: bold;
+  font-size: $euiFontSizeS;
+  border-radius: $euiBorderRadius $euiBorderRadius 0 0;
+  padding: $euiSizeXS;
+  margin: (-$euiSize) (-$euiSize) 0 (-$euiSize);
+  border-top: 3px solid;
+  text-align: center;
+
+  .field-type-icon {
+    vertical-align: middle;
+    margin-bottom: -$euiSizeXS;
+    display: inline-block;
+  }
+
+  .field-name {
+    @include euiTextTruncate;
+
+    vertical-align: middle;
+    padding-right: $euiSizeS;
+    max-width: 290px; // SASSTODO: Calculate value
+    display: inline-block;
+    margin-left: $euiSizeS;
+  }
+}

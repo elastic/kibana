@@ -46,7 +46,7 @@ export class ShareMenuRegistry {
   public start() {
     return {
       getShareMenuItems: (context: ShareContext) =>
-        Array.from(this.shareMenuProviders.values()).flatMap(shareActionProvider =>
+        Array.from(this.shareMenuProviders.values()).flatMap((shareActionProvider) =>
           shareActionProvider.getShareMenuItems(context)
         ),
     };

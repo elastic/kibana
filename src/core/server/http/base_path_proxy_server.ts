@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import apm from 'elastic-apm-node';
-
-import { ByteSizeValue } from '@kbn/config-schema';
-import { Server, Request } from 'hapi';
 import Url from 'url';
 import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
-import { sample } from 'lodash';
+
+import apm from 'elastic-apm-node';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { Server, Request } from '@hapi/hapi';
+import HapiProxy from '@hapi/h2o2';
+import { sampleSize } from 'lodash';
+import * as Rx from 'rxjs';
+import { take } from 'rxjs/operators';
+
 import { DevConfig } from '../dev';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
@@ -33,7 +37,7 @@ const alphabet = 'abcdefghijklmnopqrztuvwxyz'.split('');
 
 export interface BasePathProxyServerOptions {
   shouldRedirectFromOldBasePath: (path: string) => boolean;
-  blockUntil: () => Promise<void>;
+  delayUntil: () => Rx.Observable<void>;
 }
 
 export class BasePathProxyServer {
@@ -48,6 +52,14 @@ export class BasePathProxyServer {
     return this.devConfig.basePathProxyTargetPort;
   }
 
+  public get host() {
+    return this.httpConfig.host;
+  }
+
+  public get port() {
+    return this.httpConfig.port;
+  }
+
   constructor(
     private readonly log: Logger,
     private readonly httpConfig: HttpConfig,
@@ -57,7 +69,7 @@ export class BasePathProxyServer {
     httpConfig.maxPayload = new ByteSizeValue(ONE_GIGABYTE);
 
     if (!httpConfig.basePath) {
-      httpConfig.basePath = `/${sample(alphabet, 3).join('')}`;
+      httpConfig.basePath = `/${sampleSize(alphabet, 3).join('')}`;
     }
   }
 
@@ -70,7 +82,7 @@ export class BasePathProxyServer {
 
     // Register hapi plugin that adds proxying functionality. It can be configured
     // through the route configuration object (see { handler: { proxy: ... } }).
-    await this.server.register({ plugin: require('h2o2') });
+    await this.server.register([HapiProxy]);
 
     if (this.httpConfig.ssl.enabled) {
       const tlsOptions = serverOptions.tls as TlsOptions;
@@ -88,7 +100,10 @@ export class BasePathProxyServer {
     await this.server.start();
 
     this.log.info(
-      `basepath proxy server running at ${this.server.info.uri}${this.httpConfig.basePath}`
+      `basepath proxy server running at ${Url.format({
+        host: this.server.info.uri,
+        pathname: this.httpConfig.basePath,
+      })}`
     );
   }
 
@@ -108,7 +123,7 @@ export class BasePathProxyServer {
   }
 
   private setupRoutes({
-    blockUntil,
+    delayUntil,
     shouldRedirectFromOldBasePath,
   }: Readonly<BasePathProxyServerOptions>) {
     if (this.server === undefined) {
@@ -131,7 +146,8 @@ export class BasePathProxyServer {
           host: this.server.info.host,
           passThrough: true,
           port: this.devConfig.basePathProxyTargetPort,
-          protocol: this.server.info.protocol,
+          // typings mismatch. h2o2 doesn't support "socket"
+          protocol: this.server.info.protocol as HapiProxy.ProxyHandlerOptions['protocol'],
           xforward: true,
         },
       },
@@ -142,7 +158,7 @@ export class BasePathProxyServer {
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
             apm.setTransactionName(`${request.method.toUpperCase()} /{basePath}/{kbnPath*}`);
-            await blockUntil();
+            await delayUntil().pipe(take(1)).toPromise();
             return responseToolkit.continue;
           },
         ],
@@ -157,7 +173,7 @@ export class BasePathProxyServer {
           agent: this.httpsAgent,
           passThrough: true,
           xforward: true,
-          mapUri: (request: Request) => ({
+          mapUri: async (request: Request) => ({
             uri: Url.format({
               hostname: request.server.info.host,
               port: this.devConfig.basePathProxyTargetPort,
@@ -175,7 +191,7 @@ export class BasePathProxyServer {
           // Before we proxy request to a target port we may want to wait until some
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
-            await blockUntil();
+            await delayUntil().pipe(take(1)).toPromise();
             return responseToolkit.continue;
           },
         ],
@@ -194,8 +210,13 @@ export class BasePathProxyServer {
         const isGet = request.method === 'get';
         const isBasepathLike = oldBasePath.length === 3;
 
+        const newUrl = Url.format({
+          pathname: `${this.httpConfig.basePath}/${kbnPath}`,
+          query: request.query,
+        });
+
         return isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)
-          ? responseToolkit.redirect(`${this.httpConfig.basePath}/${kbnPath}`)
+          ? responseToolkit.redirect(newUrl)
           : responseToolkit.response('Not Found').code(404);
       },
       method: '*',

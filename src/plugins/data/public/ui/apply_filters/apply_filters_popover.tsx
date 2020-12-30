@@ -18,24 +18,29 @@
  */
 
 import React from 'react';
-import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
-import { IIndexPattern, esFilters } from '../..';
+import { IIndexPattern, Filter } from '../..';
 
 type CancelFnType = () => void;
-type SubmitFnType = (filters: esFilters.Filter[]) => void;
+type SubmitFnType = (filters: Filter[]) => void;
+
+const Fallback = () => <div />;
+
+const LazyApplyFiltersPopoverContent = React.lazy(() => import('./apply_filter_popover_content'));
 
 export const applyFiltersPopover = (
-  filters: esFilters.Filter[],
+  filters: Filter[],
   indexPatterns: IIndexPattern[],
   onCancel: CancelFnType,
   onSubmit: SubmitFnType
 ) => {
   return (
-    <ApplyFiltersPopoverContent
-      indexPatterns={indexPatterns}
-      filters={filters}
-      onCancel={onCancel}
-      onSubmit={onSubmit}
-    />
+    <React.Suspense fallback={<Fallback />}>
+      <LazyApplyFiltersPopoverContent
+        indexPatterns={indexPatterns}
+        filters={filters}
+        onCancel={onCancel}
+        onSubmit={onSubmit}
+      />
+    </React.Suspense>
   );
 };

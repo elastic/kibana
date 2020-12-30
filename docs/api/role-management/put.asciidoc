@@ -4,63 +4,66 @@
 <titleabbrev>Create or update role</titleabbrev>
 ++++
 
-Create a new {kib} role, or update the attributes of an existing role. {kib} roles are stored in the
+experimental[] Create a new {kib} role, or update the attributes of an existing role. {kib} roles are stored in the
 {es} native realm.
-
-experimental["The underlying mechanism of enforcing role-based access control is stable, but the APIs for managing the roles are experimental."]
 
 [[role-management-api-put-request]]
 ==== Request
 
-`PUT /api/security/role/my_kibana_role`
+`PUT <kibana host>:<port>/api/security/role/my_kibana_role`
 
 [[role-management-api-put-prereqs]]
 ==== Prerequisite
 
 To use the create or update role API, you must have the `manage_security` cluster privilege.
 
+[role="child_attributes"]
 [[role-management-api-response-body]]
 ==== Request body
 
-`metadata`:: 
+`metadata`::
   (Optional, object) In the `metadata` object, keys that begin with `_` are reserved for system usage.
 
-`elasticsearch`:: 
-  (Optional, object) {es} cluster and index privileges. Valid keys include 
+`elasticsearch`::
+  (Optional, object) {es} cluster and index privileges. Valid keys include
   `cluster`, `indices`, and `run_as`. For more information, see
   {ref}/defining-roles.html[Defining roles].
 
-`kibana`:: 
-  (list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role:
-
-`base` ::: 
+`kibana`::
+  (list) Objects that specify the <<kibana-privileges, Kibana privileges>> for the role.
++
+.Properties of `kibana`
+[%collapsible%open]
+=====
+`base` :::
   (Optional, list) A base privilege. When specified, the base must be `["all"]` or `["read"]`.
   When the `base` privilege is specified, you are unable to use the `feature` section.
   "all" grants read/write access to all {kib} features for the specified spaces.
   "read" grants read-only access to all {kib} features for the specified spaces.
 
-`feature` ::: 
+`feature` :::
   (object) Contains privileges for specific features.
   When the `feature` privileges are specified, you are unable to use the `base` section.
   To retrieve a list of available features, use the <<features-api-get, features API>>.
 
-`spaces` ::: 
+`spaces` :::
   (list) The spaces to apply the privileges to.
   To grant access to all spaces, set to `["*"]`, or omit the value.
+=====
 
 [[role-management-api-put-response-codes]]
 ==== Response code
 
-`204`:: 
+`204`::
   Indicates a successful call.
 
-===== Examples
+==== Examples
 
 Grant access to various features in all spaces:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-PUT /api/security/role/my_kibana_role
+$ curl -X PUT api/security/role/my_kibana_role
 {
   "metadata" : {
     "version" : 1
@@ -127,9 +130,9 @@ PUT /api/security/role/my_kibana_role
 
 Grant dashboard-only access to only the Marketing space:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-PUT /api/security/role/my_kibana_role
+$ curl -X PUT api/security/role/my_kibana_role
 {
   "metadata" : {
     "version" : 1
@@ -155,9 +158,9 @@ PUT /api/security/role/my_kibana_role
 
 Grant full access to all features in the Default space:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-PUT /api/security/role/my_kibana_role
+$ curl -X PUT api/security/role/my_kibana_role
 {
   "metadata" : {
     "version" : 1
@@ -182,9 +185,9 @@ PUT /api/security/role/my_kibana_role
 
 Grant different access to different spaces:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-PUT /api/security/role/my_kibana_role
+$ curl -X PUT api/security/role/my_kibana_role
 {
   "metadata" : {
     "version" : 1
@@ -216,11 +219,11 @@ PUT /api/security/role/my_kibana_role
 --------------------------------------------------
 // KIBANA
 
-Grant access to {kib} and Elasticsearch:
+Grant access to {kib} and {es}:
 
-[source,js]
+[source,sh]
 --------------------------------------------------
-PUT /api/security/role/my_kibana_role
+$ curl -X PUT api/security/role/my_kibana_role
 {
   "metadata" : {
     "version" : 1

@@ -8,13 +8,6 @@ import { ApiActions } from './api';
 
 const version = '1.0.0-zeta1';
 
-describe('#all', () => {
-  test('returns `api:${version}:*`', () => {
-    const apiActions = new ApiActions(version);
-    expect(apiActions.all).toBe('api:1.0.0-zeta1:*');
-  });
-});
-
 describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((operation: any) => {
     test(`operation of ${JSON.stringify(operation)} throws error`, () => {

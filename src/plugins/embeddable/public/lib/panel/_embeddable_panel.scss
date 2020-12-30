@@ -54,11 +54,22 @@
   .embPanel__titleInner {
     overflow: hidden;
     display: flex;
+    align-items: center;
     padding-right: $euiSizeS;
+  }
+
+  .embPanel__titleTooltipAnchor {
+    max-width: 100%;
   }
 
   .embPanel__titleText {
     @include euiTextTruncate;
+    font-weight: $euiFontWeightBold;
+  }
+
+  .embPanel__placeholderTitleText {
+    color: $euiColorMediumShade;
+    font-weight: $euiFontWeightRegular;
   }
 }
 
@@ -100,7 +111,6 @@
   }
 }
 
-.embPanel__optionsMenuPopover[class*='-isOpen'],
 .embPanel:hover {
   .embPanel__optionsMenuButton {
     opacity: 1;
@@ -133,6 +143,14 @@
   }
 }
 
+// LOADING and ERRORS
+
+.embPanel--loading {
+  .embPanel__title {
+    color: $euiTextSubduedColor;
+  }
+}
+
 .embPanel__error {
   text-align: center;
   justify-content: center;
@@ -140,4 +158,16 @@
   overflow: auto;
   text-align: center;
   padding: $euiSizeS;
+}
+
+.embPanel__label {
+  position: absolute;
+  padding-left: $euiSizeS;
+}
+
+.embPanel__content[data-error],
+.embPanel__content[data-loading] {
+  pointer-events: none;
+  filter: grayscale(100%);
+  filter: gray;
 }

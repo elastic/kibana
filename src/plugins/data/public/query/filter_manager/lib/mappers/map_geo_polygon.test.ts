@@ -18,10 +18,10 @@
  */
 
 import { mapGeoPolygon } from './map_geo_polygon';
-import { esFilters } from '../../../../../common';
+import { Filter, GeoPolygonFilter } from '../../../../../common';
 
 describe('filter manager utilities', () => {
-  let filter: esFilters.GeoPolygonFilter;
+  let filter: GeoPolygonFilter;
 
   beforeEach(() => {
     filter = {
@@ -36,7 +36,7 @@ describe('filter manager utilities', () => {
           ],
         },
       },
-    } as esFilters.GeoPolygonFilter;
+    } as GeoPolygonFilter;
   });
 
   describe('mapGeoPolygon()', () => {
@@ -70,11 +70,11 @@ describe('filter manager utilities', () => {
       }
     });
 
-    test('should return undefined for none matching', async done => {
+    test('should return undefined for none matching', async (done) => {
       const wrongFilter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
-      } as esFilters.Filter;
+      } as Filter;
 
       try {
         mapGeoPolygon(wrongFilter);

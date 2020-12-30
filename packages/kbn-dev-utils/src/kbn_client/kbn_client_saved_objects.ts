@@ -57,8 +57,28 @@ interface UpdateOptions<Attributes> extends IndexOptions<Attributes> {
   id: string;
 }
 
+interface MigrateResponse {
+  success: boolean;
+  result: Array<{ status: string }>;
+}
+
 export class KbnClientSavedObjects {
   constructor(private readonly log: ToolingLog, private readonly requester: KbnClientRequester) {}
+
+  /**
+   * Run the saved objects migration
+   */
+  public async migrate() {
+    this.log.debug('Migrating saved objects');
+
+    const { data } = await this.requester.request<MigrateResponse>({
+      description: 'migrate saved objects',
+      path: uriencode`/internal/saved_objects/_migrate`,
+      method: 'POST',
+      body: {},
+    });
+    return data;
+  }
 
   /**
    * Get an object
@@ -66,11 +86,12 @@ export class KbnClientSavedObjects {
   public async get<Attributes extends Record<string, any>>(options: GetOptions) {
     this.log.debug('Gettings saved object: %j', options);
 
-    return await this.requester.request<SavedObjectResponse<Attributes>>({
+    const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'get saved object',
       path: uriencode`/api/saved_objects/${options.type}/${options.id}`,
       method: 'GET',
     });
+    return data;
   }
 
   /**
@@ -79,7 +100,7 @@ export class KbnClientSavedObjects {
   public async create<Attributes extends Record<string, any>>(options: IndexOptions<Attributes>) {
     this.log.debug('Creating saved object: %j', options);
 
-    return await this.requester.request<SavedObjectResponse<Attributes>>({
+    const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'update saved object',
       path: options.id
         ? uriencode`/api/saved_objects/${options.type}/${options.id}`
@@ -94,6 +115,7 @@ export class KbnClientSavedObjects {
         references: options.references,
       },
     });
+    return data;
   }
 
   /**
@@ -102,7 +124,7 @@ export class KbnClientSavedObjects {
   public async update<Attributes extends Record<string, any>>(options: UpdateOptions<Attributes>) {
     this.log.debug('Updating saved object: %j', options);
 
-    return await this.requester.request<SavedObjectResponse<Attributes>>({
+    const { data } = await this.requester.request<SavedObjectResponse<Attributes>>({
       description: 'update saved object',
       path: uriencode`/api/saved_objects/${options.type}/${options.id}`,
       query: {
@@ -115,6 +137,7 @@ export class KbnClientSavedObjects {
         references: options.references,
       },
     });
+    return data;
   }
 
   /**
@@ -123,10 +146,12 @@ export class KbnClientSavedObjects {
   public async delete(options: GetOptions) {
     this.log.debug('Deleting saved object %s/%s', options);
 
-    return await this.requester.request({
+    const { data } = await this.requester.request({
       description: 'delete saved object',
       path: uriencode`/api/saved_objects/${options.type}/${options.id}`,
       method: 'DELETE',
     });
+
+    return data;
   }
 }

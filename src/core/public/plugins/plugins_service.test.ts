@@ -21,7 +21,6 @@ import { omit, pick } from 'lodash';
 
 import {
   MockedPluginInitializer,
-  mockLoadPluginBundle,
   mockPluginInitializerProvider,
 } from './plugins_service.test.mocks';
 
@@ -32,6 +31,7 @@ import {
   PluginsServiceStartDeps,
   PluginsServiceSetupDeps,
 } from './plugins_service';
+
 import { InjectedPluginMetadata } from '../injected_metadata';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { applicationServiceMock } from '../application/application_service.mock';
@@ -44,13 +44,13 @@ import { injectedMetadataServiceMock } from '../injected_metadata/injected_metad
 import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
-import { savedObjectsMock } from '../saved_objects/saved_objects_service.mock';
+import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 
 export let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
 mockPluginInitializerProvider.mockImplementation(
-  pluginName => mockPluginInitializers.get(pluginName)!
+  (pluginName) => mockPluginInitializers.get(pluginName)!
 );
 
 let plugins: InjectedPluginMetadata[];
@@ -73,6 +73,7 @@ function createManifest(
     configPath: ['path'],
     requiredPlugins: required,
     optionalPlugins: optional,
+    requiredBundles: [],
   };
 }
 
@@ -91,7 +92,7 @@ describe('PluginsService', () => {
       context: contextServiceMock.createSetupContract(),
       fatalErrors: fatalErrorsServiceMock.createSetupContract(),
       http: httpServiceMock.createSetupContract(),
-      injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
+      injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createSetupContract(),
       uiSettings: uiSettingsServiceMock.createSetupContract(),
     };
@@ -99,6 +100,7 @@ describe('PluginsService', () => {
       ...mockSetupDeps,
       application: expect.any(Object),
       getStartServices: expect.any(Function),
+      injectedMetadata: pick(mockSetupDeps.injectedMetadata, 'getInjectedVar'),
     };
     mockStartDeps = {
       application: applicationServiceMock.createInternalStartContract(),
@@ -106,16 +108,18 @@ describe('PluginsService', () => {
       http: httpServiceMock.createStartContract(),
       chrome: chromeServiceMock.createStartContract(),
       i18n: i18nServiceMock.createStartContract(),
-      injectedMetadata: pick(injectedMetadataServiceMock.createStartContract(), 'getInjectedVar'),
+      injectedMetadata: injectedMetadataServiceMock.createStartContract(),
       notifications: notificationServiceMock.createStartContract(),
       overlays: overlayServiceMock.createStartContract(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
-      savedObjects: savedObjectsMock.createStartContract(),
+      savedObjects: savedObjectsServiceMock.createStartContract(),
+      fatalErrors: fatalErrorsServiceMock.createStartContract(),
     };
     mockStartContext = {
       ...mockStartDeps,
       application: expect.any(Object),
       chrome: omit(mockStartDeps.chrome, 'getComponent'),
+      injectedMetadata: pick(mockStartDeps.injectedMetadata, 'getInjectedVar'),
     };
 
     // Reset these for each test.
@@ -151,10 +155,6 @@ describe('PluginsService', () => {
     ] as unknown) as [[PluginName, any]]);
   });
 
-  afterEach(() => {
-    mockLoadPluginBundle.mockClear();
-  });
-
   describe('#getOpaqueIds()', () => {
     it('returns dependency tree of symbols', () => {
       const pluginsService = new PluginsService(mockCoreContext, plugins);
@@ -173,39 +173,11 @@ describe('PluginsService', () => {
   });
 
   describe('#setup()', () => {
-    it('fails if any bundle cannot be loaded', async () => {
-      mockLoadPluginBundle.mockRejectedValueOnce(new Error('Could not load bundle'));
-
-      const pluginsService = new PluginsService(mockCoreContext, plugins);
-      await expect(pluginsService.setup(mockSetupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Could not load bundle"`
-      );
-    });
-
     it('fails if any plugin instance does not have a setup function', async () => {
       mockPluginInitializers.set('pluginA', (() => ({})) as any);
       const pluginsService = new PluginsService(mockCoreContext, plugins);
       await expect(pluginsService.setup(mockSetupDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Instance of plugin \\"pluginA\\" does not define \\"setup\\" function."`
-      );
-    });
-
-    it('calls loadPluginBundles with http and plugins', async () => {
-      const pluginsService = new PluginsService(mockCoreContext, plugins);
-      await pluginsService.setup(mockSetupDeps);
-
-      expect(mockLoadPluginBundle).toHaveBeenCalledTimes(3);
-      expect(mockLoadPluginBundle).toHaveBeenCalledWith(
-        mockSetupDeps.http.basePath.prepend,
-        'pluginA'
-      );
-      expect(mockLoadPluginBundle).toHaveBeenCalledWith(
-        mockSetupDeps.http.basePath.prepend,
-        'pluginB'
-      );
-      expect(mockLoadPluginBundle).toHaveBeenCalledWith(
-        mockSetupDeps.http.basePath.prepend,
-        'pluginC'
       );
     });
 
@@ -279,6 +251,36 @@ describe('PluginsService', () => {
       expect((contracts.get('pluginA')! as any).setupValue).toEqual(1);
       expect((contracts.get('pluginB')! as any).pluginAPlusB).toEqual(2);
     });
+
+    describe('timeout', () => {
+      const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+      beforeAll(() => {
+        jest.useFakeTimers();
+      });
+      afterAll(() => {
+        jest.useRealTimers();
+      });
+
+      it('throws timeout error if "setup" was not completed in 30 sec.', async () => {
+        mockPluginInitializers.set(
+          'pluginA',
+          jest.fn(() => ({
+            setup: jest.fn(() => new Promise((i) => i)),
+            start: jest.fn(() => ({ value: 1 })),
+            stop: jest.fn(),
+          }))
+        );
+        const pluginsService = new PluginsService(mockCoreContext, plugins);
+        const promise = pluginsService.setup(mockSetupDeps);
+
+        await flushPromises();
+        jest.runAllTimers(); // setup plugins
+
+        await expect(promise).rejects.toMatchInlineSnapshot(
+          `[Error: Setup lifecycle of "pluginA" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+        );
+      });
+    });
   });
 
   describe('#start()', () => {
@@ -330,6 +332,34 @@ describe('PluginsService', () => {
       // Verify that plugin contracts were available
       expect((contracts.get('pluginA')! as any).startValue).toEqual(2);
       expect((contracts.get('pluginB')! as any).pluginAPlusB).toEqual(3);
+    });
+    describe('timeout', () => {
+      beforeAll(() => {
+        jest.useFakeTimers();
+      });
+      afterAll(() => {
+        jest.useRealTimers();
+      });
+
+      it('throws timeout error if "start" was not completed in 30 sec.', async () => {
+        mockPluginInitializers.set(
+          'pluginA',
+          jest.fn(() => ({
+            setup: jest.fn(() => ({ value: 1 })),
+            start: jest.fn(() => new Promise((i) => i)),
+            stop: jest.fn(),
+          }))
+        );
+        const pluginsService = new PluginsService(mockCoreContext, plugins);
+        await pluginsService.setup(mockSetupDeps);
+
+        const promise = pluginsService.start(mockStartDeps);
+        jest.runAllTimers();
+
+        await expect(promise).rejects.toMatchInlineSnapshot(
+          `[Error: Start lifecycle of "pluginA" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.]`
+        );
+      });
     });
   });
 

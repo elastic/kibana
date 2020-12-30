@@ -5,11 +5,10 @@
  */
 
 import expect from '@kbn/expect';
-import _ from 'lodash';
 
 import { MAPBOX_STYLES } from './mapbox_styles';
 
-const JOIN_PROPERTY_NAME = '__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name';
+const JOIN_PROPERTY_NAME = '__kbnjoin__max_of_prop1__855ccb86-fe42-11e8-8eb2-f2801f1b9fd1';
 const EXPECTED_JOIN_VALUES = {
   alpha: 10,
   bravo: 3,
@@ -21,18 +20,26 @@ const VECTOR_SOURCE_ID = 'n1t6f';
 const CIRCLE_STYLE_LAYER_INDEX = 0;
 const FILL_STYLE_LAYER_INDEX = 2;
 const LINE_STYLE_LAYER_INDEX = 3;
+const TOO_MANY_FEATURES_LAYER_INDEX = 4;
 
-export default function({ getPageObjects, getService }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const security = getService('security');
 
   describe('layer with joins', () => {
     before(async () => {
+      await security.testUser.setRoles(
+        ['global_maps_all', 'geoshape_data_reader', 'meta_for_geoshape_data_reader'],
+        false
+      );
       await PageObjects.maps.loadSavedMap('join example');
     });
 
     after(async () => {
       await inspector.close();
+      await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
+      await security.testUser.restoreDefaults();
     });
 
     it('should re-fetch join with refresh timer', async () => {
@@ -58,11 +65,18 @@ export default function({ getPageObjects, getService }) {
       const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
       const split = layerTOCDetails.trim().split('\n');
 
-      const min = split[0];
-      expect(min).to.equal('3');
+      //field display name
+      expect(split[0]).to.equal('max prop1');
 
-      const max = split[2];
-      expect(max).to.equal('12');
+      //bands 1-8
+      expect(split[1]).to.equal('< 4.13');
+      expect(split[2]).to.equal('4.13 up to 5.25');
+      expect(split[3]).to.equal('5.25 up to 6.38');
+      expect(split[4]).to.equal('6.38 up to 7.5');
+      expect(split[5]).to.equal('7.5 up to 8.63');
+      expect(split[6]).to.equal('8.63 up to 9.75');
+      expect(split[7]).to.equal('9.75 up to 11');
+      expect(split[8]).to.equal('>= 11');
     });
 
     it('should decorate feature properties with join property', async () => {
@@ -80,35 +94,39 @@ export default function({ getPageObjects, getService }) {
       });
     });
 
-    it('should style fills, points and lines independently', async () => {
+    it('should style fills, points, lines, and bounding-boxes independently', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-      const layersForVectorSource = mapboxStyle.layers.filter(mbLayer => {
+      const layersForVectorSource = mapboxStyle.layers.filter((mbLayer) => {
         return mbLayer.id.startsWith(VECTOR_SOURCE_ID);
       });
 
-      // Color is dynamically obtained from eui source lib
-      const dynamicColor =
-        layersForVectorSource[CIRCLE_STYLE_LAYER_INDEX].paint['circle-stroke-color'];
-
       //circle layer for points
-      expect(layersForVectorSource[CIRCLE_STYLE_LAYER_INDEX]).to.eql(
-        _.set(MAPBOX_STYLES.POINT_LAYER, 'paint.circle-stroke-color', dynamicColor)
-      );
+      expect(layersForVectorSource[CIRCLE_STYLE_LAYER_INDEX]).to.eql(MAPBOX_STYLES.POINT_LAYER);
 
       //fill layer
       expect(layersForVectorSource[FILL_STYLE_LAYER_INDEX]).to.eql(MAPBOX_STYLES.FILL_LAYER);
 
       //line layer for borders
-      expect(layersForVectorSource[LINE_STYLE_LAYER_INDEX]).to.eql(
-        _.set(MAPBOX_STYLES.LINE_LAYER, 'paint.line-color', dynamicColor)
-      );
+      expect(layersForVectorSource[LINE_STYLE_LAYER_INDEX]).to.eql(MAPBOX_STYLES.LINE_LAYER);
+
+      //Too many features layer (this is a static style config)
+      expect(layersForVectorSource[TOO_MANY_FEATURES_LAYER_INDEX]).to.eql({
+        id: 'n1t6f_toomanyfeatures',
+        type: 'fill',
+        source: 'n1t6f',
+        minzoom: 0,
+        maxzoom: 24,
+        filter: ['==', ['get', '__kbn_too_many_features__'], true],
+        layout: { visibility: 'visible' },
+        paint: { 'fill-pattern': '__kbn_too_many_features_image_id__', 'fill-opacity': 0.75 },
+      });
     });
 
     it('should flag only the joined features as visible', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
       const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
 
-      const visibilitiesOfFeatures = vectorSource.data.features.map(feature => {
+      const visibilitiesOfFeatures = vectorSource.data.features.map((feature) => {
         return feature.properties.__kbn_isvisibleduetojoin__;
       });
 
@@ -164,17 +182,17 @@ export default function({ getPageObjects, getService }) {
         const split = layerTOCDetails.trim().split('\n');
 
         const min = split[0];
-        expect(min).to.equal('12');
+        expect(min).to.equal('max prop1');
 
-        const max = split[2];
-        expect(max).to.equal('12');
+        const max = split[1];
+        expect(max).to.equal('12'); // just single band because single value
       });
 
       it('should flag only the joined features as visible', async () => {
         const mapboxStyle = await PageObjects.maps.getMapboxStyle();
         const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
 
-        const visibilitiesOfFeatures = vectorSource.data.features.map(feature => {
+        const visibilitiesOfFeatures = vectorSource.data.features.map((feature) => {
           return feature.properties.__kbn_isvisibleduetojoin__;
         });
 

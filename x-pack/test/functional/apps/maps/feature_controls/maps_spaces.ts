@@ -6,8 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'maps', 'security']);
   const appsMenu = getService('appsMenu');
@@ -15,13 +14,11 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/38414
   describe.skip('spaces feature controls', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('maps/data');
-      await esArchiver.load('maps/kibana');
       PageObjects.maps.setBasePath('/s/custom_space');
     });
 
     after(async () => {
-      await esArchiver.unload('maps/kibana');
+      await PageObjects.security.forceLogout();
       PageObjects.maps.setBasePath('');
     });
 
@@ -42,9 +39,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Maps');
       });
 
@@ -86,7 +81,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

@@ -17,8 +17,14 @@
  * under the License.
  */
 
-export { CollectorSet } from './collector_set';
-// @ts-ignore
-export { Collector } from './collector';
-// @ts-ignore
-export { UsageCollector } from './usage_collector';
+export { CollectorSet, CollectorSetPublic } from './collector_set';
+export {
+  Collector,
+  AllowedSchemaTypes,
+  AllowedSchemaNumberTypes,
+  SchemaField,
+  MakeSchemaFrom,
+  CollectorOptions,
+  CollectorFetchContext,
+} from './collector';
+export { UsageCollector, UsageCollectorOptions } from './usage_collector';

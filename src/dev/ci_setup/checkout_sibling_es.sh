@@ -7,10 +7,11 @@ function checkout_sibling {
   targetDir=$2
   useExistingParamName=$3
   useExisting="$(eval "echo "\$$useExistingParamName"")"
+  repoAddress="https://github.com/"
 
   if [ -z ${useExisting:+x} ]; then
     if [ -d "$targetDir" ]; then
-      echo "I expected a clean workspace but an '${project}' sibling directory already exists in [$PARENT_DIR]!"
+      echo "I expected a clean workspace but an '${project}' sibling directory already exists in [$WORKSPACE]!"
       echo
       echo "Either define '${useExistingParamName}' or remove the existing '${project}' sibling."
       exit 1
@@ -21,8 +22,9 @@ function checkout_sibling {
     cloneBranch=""
 
     function clone_target_is_valid {
+
       echo " -> checking for '${cloneBranch}' branch at ${cloneAuthor}/${project}"
-      if [[ -n "$(git ls-remote --heads "git@github.com:${cloneAuthor}/${project}.git" ${cloneBranch} 2>/dev/null)" ]]; then
+      if [[ -n "$(git ls-remote --heads "${repoAddress}${cloneAuthor}/${project}.git" ${cloneBranch} 2>/dev/null)" ]]; then
         return 0
       else
         return 1
@@ -43,7 +45,7 @@ function checkout_sibling {
       fi
 
       cloneAuthor="elastic"
-      cloneBranch="${PR_SOURCE_BRANCH:-${GIT_BRANCH#*/}}" # GIT_BRANCH starts with the repo, i.e., origin/master
+      cloneBranch="$GIT_BRANCH"
       if clone_target_is_valid ; then
         return 0
       fi
@@ -71,7 +73,7 @@ function checkout_sibling {
       fi
 
       echo " -> checking out '${cloneBranch}' branch from ${cloneAuthor}/${project}..."
-      git clone -b "$cloneBranch" "git@github.com:${cloneAuthor}/${project}.git" "$targetDir" --depth=1
+      git clone -b "$cloneBranch" "${repoAddress}${cloneAuthor}/${project}.git" "$targetDir" --depth=1
       echo " -> checked out ${project} revision: $(git -C "${targetDir}" rev-parse HEAD)"
       echo
     }
@@ -87,12 +89,12 @@ function checkout_sibling {
   fi
 }
 
-checkout_sibling "elasticsearch" "${PARENT_DIR}/elasticsearch" "USE_EXISTING_ES"
+checkout_sibling "elasticsearch" "${WORKSPACE}/elasticsearch" "USE_EXISTING_ES"
 export TEST_ES_FROM=${TEST_ES_FROM:-snapshot}
 
 # Set the JAVA_HOME based on the Java property file in the ES repo
 # This assumes the naming convention used on CI (ex: ~/.java/java10)
-ES_DIR="$PARENT_DIR/elasticsearch"
+ES_DIR="$WORKSPACE/elasticsearch"
 ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
 
 

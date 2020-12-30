@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CallOuts should render normally 1`] = `
+<Fragment>
+  <EuiCallOut
+    color="danger"
+    iconType="cross"
+    title={
+      <FormattedMessage
+        defaultMessage="Deprecation languages in use"
+        id="indexPatternManagement.editIndexPattern.scripted.deprecationLangHeader"
+        values={Object {}}
+      />
+    }
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="The following deprecated languages are in use: {deprecatedLangsInUse}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert you scripted fields to {link} to avoid any problems."
+        id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.deprecationLangDetail"
+        values={
+          Object {
+            "deprecatedLangsInUse": "php",
+            "link": <EuiLink
+              href="http://www.elastic.co/painlessDocs"
+            >
+              <FormattedMessage
+                defaultMessage="Painless"
+                id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.painlessDescription"
+                values={Object {}}
+              />
+            </EuiLink>,
+          }
+        }
+      />
+    </p>
+  </EuiCallOut>
+  <EuiSpacer
+    size="m"
+  />
+</Fragment>
+`;
+
+exports[`CallOuts should render without any call outs 1`] = `""`;

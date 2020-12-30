@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const log = getService('log');
@@ -27,8 +27,10 @@ export default function({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['settings']);
 
-  describe('filter scripted fields', function describeIndexTests() {
-    before(async function() {
+  // this functionality is no longer functional as of 7.0 but still needs cleanup
+  // https://github.com/elastic/kibana/issues/74118
+  describe.skip('filter scripted fields', function describeIndexTests() {
+    before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await browser.setWindowSize(1200, 800);
       await esArchiver.load('management');
@@ -37,14 +39,14 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    after(async function() {
+    after(async function () {
       await esArchiver.unload('management');
       await kibanaServer.uiSettings.replace({});
     });
 
     const scriptedPainlessFieldName = 'ram_pain1';
 
-    it('should filter scripted fields', async function() {
+    it('should filter scripted fields', async function () {
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.clickIndexPatternLogstash();
@@ -64,14 +66,14 @@ export default function({ getService, getPageObjects }) {
       );
 
       // confirm two additional scripted fields were created
-      await retry.try(async function() {
+      await retry.try(async function () {
         const scriptedFieldLangs = await PageObjects.settings.getScriptedFieldLangs();
         expect(scriptedFieldLangs.length).to.be(scriptedFieldLangsBefore.length + 1);
       });
 
       await PageObjects.settings.setScriptedFieldLanguageFilter('painless');
 
-      await retry.try(async function() {
+      await retry.try(async function () {
         const scriptedFieldLangs = await PageObjects.settings.getScriptedFieldLangs();
         expect(scriptedFieldLangs.length).to.be.above(0);
         for (const lang of scriptedFieldLangs) {
@@ -81,7 +83,7 @@ export default function({ getService, getPageObjects }) {
 
       await PageObjects.settings.setScriptedFieldLanguageFilter('expression');
 
-      await retry.try(async function() {
+      await retry.try(async function () {
         const scriptedFieldLangs = await PageObjects.settings.getScriptedFieldLangs();
         expect(scriptedFieldLangs.length).to.be.above(0);
         for (const lang of scriptedFieldLangs) {

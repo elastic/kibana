@@ -20,20 +20,20 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  const ensureFieldsAreSorted = resp => {
+  const ensureFieldsAreSorted = (resp) => {
     expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
   };
 
-  describe('response', () => {
+  describe('fields_for_wildcard_route response', () => {
     before(() => esArchiver.load('index_patterns/basic_index'));
     after(() => esArchiver.unload('index_patterns/basic_index'));
 
-    it('returns a flattened version of the fields in es', () =>
-      supertest
+    it('returns a flattened version of the fields in es', async () => {
+      await supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({ pattern: 'basic_index' })
         .expect(200, {
@@ -72,7 +72,7 @@ export default function({ getService }) {
               readFromDocValues: true,
             },
             {
-              aggregatable: false,
+              aggregatable: true,
               esTypes: ['keyword'],
               name: 'nestedField.child',
               readFromDocValues: true,
@@ -86,10 +86,12 @@ export default function({ getService }) {
             },
           ],
         })
-        .then(ensureFieldsAreSorted));
+        .then(ensureFieldsAreSorted);
+    });
 
-    it('always returns a field for all passed meta fields', () =>
-      supertest
+    // https://github.com/elastic/kibana/issues/79813
+    it.skip('always returns a field for all passed meta fields', async () => {
+      await supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({
           pattern: 'basic_index',
@@ -154,7 +156,7 @@ export default function({ getService }) {
               readFromDocValues: true,
             },
             {
-              aggregatable: false,
+              aggregatable: true,
               esTypes: ['keyword'],
               name: 'nestedField.child',
               readFromDocValues: true,
@@ -168,14 +170,16 @@ export default function({ getService }) {
             },
           ],
         })
-        .then(ensureFieldsAreSorted));
+        .then(ensureFieldsAreSorted);
+    });
 
-    it('returns 404 when the pattern does not exist', () =>
-      supertest
+    it('returns 404 when the pattern does not exist', async () => {
+      await supertest
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({
           pattern: '[non-existing-pattern]its-invalid-*',
         })
-        .expect(404));
+        .expect(404);
+    });
   });
 }

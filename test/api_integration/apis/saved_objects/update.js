@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -37,7 +37,7 @@ export default function({ getService }) {
             },
           })
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             // loose uuid validation
             expect(resp.body)
               .to.have.property('id')
@@ -52,10 +52,11 @@ export default function({ getService }) {
               id: resp.body.id,
               type: 'visualization',
               updated_at: resp.body.updated_at,
-              version: 'WzgsMV0=',
+              version: resp.body.version,
               attributes: {
                 title: 'My second favorite vis',
               },
+              namespaces: ['default'],
             });
           });
       });
@@ -115,7 +116,7 @@ export default function({ getService }) {
               },
             })
             .expect(404)
-            .then(resp => {
+            .then((resp) => {
               expect(resp.body).eql({
                 statusCode: 404,
                 error: 'Not Found',
@@ -145,7 +146,7 @@ export default function({ getService }) {
             },
           })
           .expect(404)
-          .then(resp => {
+          .then((resp) => {
             expect(resp.body).eql({
               statusCode: 404,
               error: 'Not Found',

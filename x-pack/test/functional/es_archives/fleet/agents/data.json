@@ -1,0 +1,280 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agents:agent1",
+    "index": ".kibana",
+    "source": {
+      "type": "fleet-agents",
+      "fleet-agents": {
+        "access_api_key_id": "api-key-2",
+        "active": true,
+        "shared_id": "agent1_filebeat",
+        "policy_id": "policy1",
+        "type": "PERMANENT",
+        "local_metadata": {},
+        "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agents:agent2",
+    "index": ".kibana",
+    "source": {
+      "type": "fleet-agents",
+      "fleet-agents": {
+        "access_api_key_id": "api-key-2",
+        "active": true,
+        "shared_id": "agent2_filebeat",
+        "policy_id": "policy1",
+        "type": "PERMANENT",
+        "local_metadata": {},
+        "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agents:agent3",
+    "index": ".kibana",
+    "source": {
+      "type": "fleet-agents",
+      "fleet-agents": {
+        "access_api_key_id": "api-key-3",
+        "active": true,
+        "shared_id": "agent3_metricbeat",
+        "policy_id": "policy1",
+        "type": "PERMANENT",
+        "local_metadata": {},
+        "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agents:agent4",
+    "index": ".kibana",
+    "source": {
+      "type": "fleet-agents",
+      "fleet-agents": {
+        "access_api_key_id": "api-key-4",
+        "active": true,
+        "shared_id": "agent4_metricbeat",
+        "policy_id": "policy1",
+        "type": "PERMANENT",
+        "local_metadata": {},
+        "user_provided_metadata": {}
+      },
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-enrollment-api-keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0",
+    "index": ".kibana",
+    "source": {
+      "fleet-enrollment-api-keys" :  {
+        "created_at" : "2019-10-10T16:31:12.518Z",
+        "name": "FleetEnrollmentKey:1",
+        "api_key_id" : "key",
+        "policy_id" : "policy1",
+        "active" : true
+      },
+      "type" : "fleet-enrollment-api-keys",
+      "references": [],
+      "migrationVersion": {
+        "fleet-enrollment-api-keys": "7.10.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agent-events:event1",
+    "index": ".kibana",
+    "source": {
+      "type": "fleet-agent-events",
+      "fleet-agent-events": {
+        "agent_id": "agent1",
+        "type": "STATE",
+        "subtype": "STARTED",
+        "message": "State changed from STOPPED to STARTED",
+        "payload": "{\"previous_state\": \"STOPPED\"}",
+        "timestamp": "2019-09-20T17:30:22.950Z"
+      },
+      "migrationVersion": {
+        "fleet-agent-events": "7.10.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agent-events:event2",
+    "index": ".kibana",
+    "source": {
+      "type": "fleet-agent-events",
+      "fleet-agent-events": {
+        "agent_id": "agent1",
+        "type": "STATE",
+        "subtype": "STOPPED",
+        "message": "State changed from RUNNING to STOPPED",
+        "payload": "{\"previous_state\": \"RUNNING\"}",
+        "timestamp": "2019-09-20T17:30:25.950Z"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agent-actions:37ed51ff-e80f-4f2a-a62d-f4fa975e7d85",
+    "index": ".kibana",
+    "source": {
+      "type": "fleet-agent-actions",
+      "fleet-agent-actions": {
+        "agent_id": "agent1",
+        "created_at": "2019-09-04T15:04:07+0000",
+        "type": "RESUME",
+        "sent_at": "2019-09-04T15:03:07+0000"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agent-actions:b400439c-bbbf-43d5-83cb-cf8b7e32506f",
+    "index": ".kibana",
+    "source": {
+      "type": "fleet-agent-actions",
+      "fleet-agent-actions": {
+        "agent_id": "agent1",
+        "type": "PAUSE",
+        "created_at": "2019-09-04T15:01:07+0000",
+        "sent_at": "2019-09-04T15:03:07+0000"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agent-actions:48cebde1-c906-4893-b89f-595d943b72a1",
+    "index": ".kibana",
+    "source": {
+      "type": "fleet-agent-actions",
+      "fleet-agent-actions": {
+        "agent_id": "agent1",
+        "type": "POLICY_CHANGE",
+        "created_at": "2020-03-15T03:47:15.129Z",
+        "sent_at": "2020-03-04T15:03:07+0000"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "fleet-agent-actions:48cebde1-c906-4893-b89f-595d943b72a2",
+    "index": ".kibana",
+    "source": {
+      "type": "fleet-agent-actions",
+      "fleet-agent-actions": {
+        "agent_id": "agent1",
+        "type": "POLICY_CHANGE",
+        "created_at": "2020-03-15T03:47:15.129Z",
+        "sent_at": "2020-03-04T15:03:07+0000"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ingest-agent-policies:policy1",
+    "index": ".kibana",
+    "source": {
+      "type": "ingest-agent-policies",
+      "ingest-agent-policies": {
+        "name": "Test policy",
+        "namespace": "default",
+        "description": "Policy 1",
+        "status": "active",
+        "package_policies": [],
+        "is_default": true,
+        "monitoring_enabled": [
+          "logs",
+          "metrics"
+        ],
+        "revision": 2,
+        "updated_at": "2020-05-07T19:34:42.533Z",
+        "updated_by": "system"
+      },
+      "migrationVersion": {
+        "ingest-agent-policies": "7.10.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "ingest-agent-policies:policy2",
+    "index": ".kibana",
+    "source": {
+      "type": "ingest-agent-policies",
+      "ingest-agent-policies": {
+        "name": "Test policy 2",
+        "namespace": "default",
+        "description": "Policy 2",
+        "status": "active",
+        "package_policies": [],
+        "is_default": true,
+        "monitoring_enabled": [
+          "logs",
+          "metrics"
+        ],
+        "revision": 2,
+        "updated_at": "2020-05-07T19:34:42.533Z",
+        "updated_by": "system"
+      },
+      "migrationVersion": {
+        "ingest-agent-policies": "7.10.0"
+      }
+    }
+  }
+}

@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import _ from 'lodash';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -61,10 +61,11 @@ export default function({ getService }) {
         expect(_.omit(firstObject, ['updated_at'])).to.eql({
           id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
           type: 'visualization',
-          version: 'WzgsMV0=',
+          version: firstObject.version,
           attributes: {
             title: 'An existing visualization',
           },
+          namespaces: ['default'],
         });
 
         expect(secondObject)
@@ -73,10 +74,11 @@ export default function({ getService }) {
         expect(_.omit(secondObject, ['updated_at'])).to.eql({
           id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
           type: 'dashboard',
-          version: 'WzksMV0=',
+          version: secondObject.version,
           attributes: {
             title: 'An existing dashboard',
           },
+          namespaces: ['default'],
         });
       });
 
@@ -233,6 +235,7 @@ export default function({ getService }) {
             attributes: {
               title: 'An existing dashboard',
             },
+            namespaces: ['default'],
           });
         });
       });

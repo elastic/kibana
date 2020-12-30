@@ -1,0 +1,172 @@
+{
+  "id": "siem_auditbeat",
+  "title": "Security: Auditbeat",
+  "description": "Detect suspicious network activity and unusual processes in Auditbeat data.",
+  "type": "Auditbeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "auditbeat-*",
+  "query": {
+    "bool": {
+      "filter": [
+        {"term": {"agent.type": "auditbeat"}}
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "rare_process_by_host_linux_ecs",
+      "file": "rare_process_by_host_linux_ecs.json"
+    },
+    {
+      "id": "linux_anomalous_network_activity_ecs",
+      "file": "linux_anomalous_network_activity_ecs.json"
+    },
+    {
+      "id": "linux_anomalous_network_port_activity_ecs",
+      "file": "linux_anomalous_network_port_activity_ecs.json"
+    },
+    {
+      "id": "linux_anomalous_network_service",
+      "file": "linux_anomalous_network_service.json"
+    },
+    {
+      "id": "linux_anomalous_network_url_activity_ecs",
+      "file": "linux_anomalous_network_url_activity_ecs.json"
+    },
+    {
+      "id": "linux_anomalous_process_all_hosts_ecs",
+      "file": "linux_anomalous_process_all_hosts_ecs.json"
+    },
+    {
+      "id": "linux_anomalous_user_name_ecs",
+      "file": "linux_anomalous_user_name_ecs.json"
+    },
+    {
+      "id": "linux_rare_metadata_process",
+      "file": "linux_rare_metadata_process.json"
+    },
+    {
+      "id": "linux_rare_metadata_user",
+      "file": "linux_rare_metadata_user.json"
+    },
+    {
+      "id": "linux_rare_user_compiler",
+      "file": "linux_rare_user_compiler.json"
+    },
+    {
+      "id": "linux_rare_kernel_module_arguments",
+      "file": "linux_rare_kernel_module_arguments.json"
+    },
+    {
+      "id": "linux_rare_sudo_user",
+      "file": "linux_rare_sudo_user.json"
+    },
+    {
+      "id": "linux_system_user_discovery",
+      "file": "linux_system_user_discovery.json"
+    },
+    {
+      "id": "linux_system_information_discovery",
+      "file": "linux_system_information_discovery.json"
+    },
+    {
+      "id": "linux_system_process_discovery",
+      "file": "linux_system_process_discovery.json"
+    },
+    {
+      "id": "linux_network_connection_discovery",
+      "file": "linux_network_connection_discovery.json"
+    },
+    {
+      "id": "linux_network_configuration_discovery",
+      "file": "linux_network_configuration_discovery.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-rare_process_by_host_linux_ecs",
+      "file": "datafeed_rare_process_by_host_linux_ecs.json",
+      "job_id": "rare_process_by_host_linux_ecs"
+    },
+    {
+      "id": "datafeed-linux_anomalous_network_activity_ecs",
+      "file": "datafeed_linux_anomalous_network_activity_ecs.json",
+      "job_id": "linux_anomalous_network_activity_ecs"
+    },
+    {
+      "id": "datafeed-linux_anomalous_network_port_activity_ecs",
+      "file": "datafeed_linux_anomalous_network_port_activity_ecs.json",
+      "job_id": "linux_anomalous_network_port_activity_ecs"
+    },
+    {
+      "id": "datafeed-linux_anomalous_network_service",
+      "file": "datafeed_linux_anomalous_network_service.json",
+      "job_id": "linux_anomalous_network_service"
+    },
+    {
+      "id": "datafeed-linux_anomalous_network_url_activity_ecs",
+      "file": "datafeed_linux_anomalous_network_url_activity_ecs.json",
+      "job_id": "linux_anomalous_network_url_activity_ecs"
+    },
+    {
+      "id": "datafeed-linux_anomalous_process_all_hosts_ecs",
+      "file": "datafeed_linux_anomalous_process_all_hosts_ecs.json",
+      "job_id": "linux_anomalous_process_all_hosts_ecs"
+    },
+    {
+      "id": "datafeed-linux_anomalous_user_name_ecs",
+      "file": "datafeed_linux_anomalous_user_name_ecs.json",
+      "job_id": "linux_anomalous_user_name_ecs"
+    },
+    {
+      "id": "datafeed-linux_rare_metadata_process",
+      "file": "datafeed_linux_rare_metadata_process.json",
+      "job_id": "linux_rare_metadata_process"
+    },
+    {
+      "id": "datafeed-linux_rare_metadata_user",
+      "file": "datafeed_linux_rare_metadata_user.json",
+      "job_id": "linux_rare_metadata_user"
+    },
+    {
+      "id": "datafeed-linux_rare_user_compiler",
+      "file": "datafeed_linux_rare_user_compiler.json",
+      "job_id": "linux_rare_user_compiler"
+    },
+    {
+      "id": "datafeed-linux_rare_kernel_module_arguments",
+      "file": "datafeed_linux_rare_kernel_module_arguments.json",
+      "job_id": "linux_rare_kernel_module_arguments"
+    },
+    {
+      "id": "datafeed-linux_rare_sudo_user",
+      "file": "datafeed_linux_rare_sudo_user.json",
+      "job_id": "linux_rare_sudo_user"
+    },
+    {
+      "id": "datafeed-linux_system_information_discovery",
+      "file": "datafeed_linux_system_information_discovery.json",
+      "job_id": "linux_system_information_discovery"
+    },
+    {
+      "id": "datafeed-linux_system_process_discovery",
+      "file": "datafeed_linux_system_process_discovery.json",
+      "job_id": "linux_system_process_discovery"
+    },
+    {
+      "id": "datafeed-linux_system_user_discovery",
+      "file": "datafeed_linux_system_user_discovery.json",
+      "job_id": "linux_system_user_discovery"
+    },
+    {
+      "id": "datafeed-linux_network_configuration_discovery",
+      "file": "datafeed_linux_network_configuration_discovery.json",
+      "job_id": "linux_network_configuration_discovery"
+    },
+    {
+      "id": "datafeed-linux_network_connection_discovery",
+      "file": "datafeed_linux_network_connection_discovery.json",
+      "job_id": "linux_network_connection_discovery"
+    }
+  ]
+}

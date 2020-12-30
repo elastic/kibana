@@ -20,52 +20,65 @@
 import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import {
-  Data,
-  event,
-  IInterpreterRenderHandlers,
-  RenderError,
-  RenderErrorHandlerFnType,
-  RenderId,
-} from './types';
-import { getRenderersRegistry } from './services';
+import { ExpressionRenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
+import { IInterpreterRenderHandlers, ExpressionAstExpression, RenderMode } from '../common';
+
+import { getRenderersRegistry } from './services';
 
 export type IExpressionRendererExtraHandlers = Record<string, any>;
 
 export interface ExpressionRenderHandlerParams {
-  onRenderError: RenderErrorHandlerFnType;
+  onRenderError?: RenderErrorHandlerFnType;
+  renderMode?: RenderMode;
+  syncColors?: boolean;
+  hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
+}
+
+export interface ExpressionRendererEvent {
+  name: string;
+  data: any;
+}
+
+interface UpdateValue {
+  newExpression?: string | ExpressionAstExpression;
+  newParams: IExpressionLoaderParams;
 }
 
 export class ExpressionRenderHandler {
-  render$: Observable<RenderId>;
-  update$: Observable<any>;
-  events$: Observable<event>;
+  render$: Observable<number>;
+  update$: Observable<UpdateValue | null>;
+  events$: Observable<ExpressionRendererEvent>;
 
   private element: HTMLElement;
   private destroyFn?: any;
   private renderCount: number = 0;
-  private renderSubject: Rx.BehaviorSubject<RenderId | null>;
+  private renderSubject: Rx.BehaviorSubject<number | null>;
   private eventsSubject: Rx.Subject<unknown>;
-  private updateSubject: Rx.Subject<unknown>;
+  private updateSubject: Rx.Subject<UpdateValue | null>;
   private handlers: IInterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
 
   constructor(
     element: HTMLElement,
-    { onRenderError }: Partial<ExpressionRenderHandlerParams> = {}
+    {
+      onRenderError,
+      renderMode,
+      syncColors,
+      hasCompatibleActions = async () => false,
+    }: ExpressionRenderHandlerParams = {}
   ) {
     this.element = element;
 
     this.eventsSubject = new Rx.Subject();
-    this.events$ = this.eventsSubject.asObservable();
+    this.events$ = this.eventsSubject.asObservable() as Observable<ExpressionRendererEvent>;
 
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
 
-    this.renderSubject = new Rx.BehaviorSubject(null as RenderId | null);
-    this.render$ = this.renderSubject.asObservable().pipe(filter(_ => _ !== null)) as Observable<
-      RenderId
-    >;
+    this.renderSubject = new Rx.BehaviorSubject(null as any | null);
+    this.render$ = this.renderSubject
+      .asObservable()
+      .pipe(filter((_) => _ !== null)) as Observable<any>;
 
     this.updateSubject = new Rx.Subject();
     this.update$ = this.updateSubject.asObservable();
@@ -81,23 +94,30 @@ export class ExpressionRenderHandler {
       reload: () => {
         this.updateSubject.next(null);
       },
-      update: params => {
+      update: (params) => {
         this.updateSubject.next(params);
       },
-      event: data => {
+      event: (data) => {
         this.eventsSubject.next(data);
       },
+      getRenderMode: () => {
+        return renderMode || 'display';
+      },
+      isSyncColorsEnabled: () => {
+        return syncColors || false;
+      },
+      hasCompatibleActions,
     };
   }
 
-  render = async (data: Data, extraHandlers: IExpressionRendererExtraHandlers = {}) => {
-    if (!data || typeof data !== 'object') {
+  render = async (value: any, uiState: any = {}) => {
+    if (!value || typeof value !== 'object') {
       return this.handleRenderError(new Error('invalid data provided to the expression renderer'));
     }
 
-    if (data.type !== 'render' || !data.as) {
-      if (data.type === 'error') {
-        return this.handleRenderError(data.error);
+    if (value.type !== 'render' || !value.as) {
+      if (value.type === 'error') {
+        return this.handleRenderError(value.error);
       } else {
         return this.handleRenderError(
           new Error('invalid data provided to the expression renderer')
@@ -105,15 +125,18 @@ export class ExpressionRenderHandler {
       }
     }
 
-    if (!getRenderersRegistry().get(data.as)) {
-      return this.handleRenderError(new Error(`invalid renderer id '${data.as}'`));
+    if (!getRenderersRegistry().get(value.as)) {
+      return this.handleRenderError(new Error(`invalid renderer id '${value.as}'`));
     }
 
     try {
       // Rendering is asynchronous, completed by handlers.done()
       await getRenderersRegistry()
-        .get(data.as)!
-        .render(this.element, data.value, { ...this.handlers, ...extraHandlers });
+        .get(value.as)!
+        .render(this.element, value.value, {
+          ...this.handlers,
+          uiState,
+        } as any);
     } catch (e) {
       return this.handleRenderError(e);
     }
@@ -132,15 +155,15 @@ export class ExpressionRenderHandler {
     return this.element;
   };
 
-  handleRenderError = (error: RenderError) => {
+  handleRenderError = (error: ExpressionRenderError) => {
     this.onRenderError(this.element, error, this.handlers);
   };
 }
 
 export function render(
   element: HTMLElement,
-  data: Data,
-  options?: Partial<ExpressionRenderHandlerParams>
+  data: any,
+  options?: ExpressionRenderHandlerParams
 ): ExpressionRenderHandler {
   const handler = new ExpressionRenderHandler(element, options);
   handler.render(data);

@@ -1,0 +1,9 @@
+{
+  "id": "visTypeTimelion",
+  "version": "8.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["visualizations", "data", "expressions"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"]
+}

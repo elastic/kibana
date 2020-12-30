@@ -17,88 +17,48 @@
  * under the License.
  */
 
+import { EuiFlexGroup, EuiHeaderBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { Component } from 'react';
-import * as Rx from 'rxjs';
-
-import { EuiHeaderBreadcrumbs } from '@elastic/eui';
-import { ChromeBreadcrumb } from '../../chrome_service';
+import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
+import { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from '../../chrome_service';
+import { HeaderExtension } from './header_extension';
 
 interface Props {
-  appTitle?: string;
-  breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
+  appTitle$: Observable<string>;
+  breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  breadcrumbsAppendExtension$: Observable<ChromeBreadcrumbsAppendExtension | undefined>;
 }
 
-interface State {
-  breadcrumbs: ChromeBreadcrumb[];
-}
+export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$, breadcrumbsAppendExtension$ }: Props) {
+  const appTitle = useObservable(appTitle$, 'Kibana');
+  const breadcrumbs = useObservable(breadcrumbs$, []);
+  const breadcrumbsAppendExtension = useObservable(breadcrumbsAppendExtension$);
+  let crumbs = breadcrumbs;
 
-export class HeaderBreadcrumbs extends Component<Props, State> {
-  private subscription?: Rx.Subscription;
-
-  constructor(props: Props) {
-    super(props);
-
-    this.state = { breadcrumbs: [] };
+  if (breadcrumbs.length === 0 && appTitle) {
+    crumbs = [{ text: appTitle }];
   }
 
-  public componentDidMount() {
-    this.subscribe();
-  }
+  crumbs = crumbs.map((breadcrumb, i) => ({
+    ...breadcrumb,
+    'data-test-subj': classNames(
+      'breadcrumb',
+      breadcrumb['data-test-subj'],
+      i === 0 && 'first',
+      i === breadcrumbs.length - 1 && 'last'
+    ),
+  }));
 
-  public componentDidUpdate(prevProps: Props) {
-    if (prevProps.breadcrumbs$ === this.props.breadcrumbs$) {
-      return;
-    }
-
-    this.unsubscribe();
-    this.subscribe();
-  }
-
-  public componentWillUnmount() {
-    this.unsubscribe();
-  }
-
-  public render() {
-    return (
-      <EuiHeaderBreadcrumbs
-        breadcrumbs={this.getBreadcrumbs()}
-        max={10}
-        data-test-subj="breadcrumbs"
-      />
+  if (breadcrumbsAppendExtension && crumbs[crumbs.length - 1]) {
+    const lastCrumb = crumbs[crumbs.length - 1];
+    lastCrumb.text = (
+      <EuiFlexGroup responsive={false} gutterSize={'none'} alignItems={'baseline'}>
+        <div className="eui-textTruncate">{lastCrumb.text}</div>
+        <HeaderExtension extension={breadcrumbsAppendExtension.content} />
+      </EuiFlexGroup>
     );
   }
-
-  private subscribe() {
-    this.subscription = this.props.breadcrumbs$.subscribe(breadcrumbs => {
-      this.setState({
-        breadcrumbs,
-      });
-    });
-  }
-
-  private unsubscribe() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      delete this.subscription;
-    }
-  }
-
-  private getBreadcrumbs() {
-    let breadcrumbs = this.state.breadcrumbs;
-
-    if (breadcrumbs.length === 0 && this.props.appTitle) {
-      breadcrumbs = [{ text: this.props.appTitle }];
-    }
-
-    return breadcrumbs.map((breadcrumb, i) => ({
-      ...breadcrumb,
-      'data-test-subj': classNames(
-        'breadcrumb',
-        breadcrumb['data-test-subj'],
-        i === 0 && 'first',
-        i === breadcrumbs.length - 1 && 'last'
-      ),
-    }));
-  }
+  return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
 }

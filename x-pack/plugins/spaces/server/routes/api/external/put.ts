@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
@@ -12,7 +13,7 @@ import { ExternalRouteDeps } from '.';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initPutSpacesApi(deps: ExternalRouteDeps) {
-  const { externalRouter, spacesService, getSavedObjects } = deps;
+  const { externalRouter, getSpacesService } = deps;
 
   externalRouter.put(
     {
@@ -25,8 +26,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const { SavedObjectsClient } = getSavedObjects();
-      const spacesClient = await spacesService.scopedClient(request);
+      const spacesClient = getSpacesService().createSpacesClient(request);
 
       const space = request.body;
       const id = request.params.id;
@@ -35,7 +35,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
       try {
         result = await spacesClient.update(id, { ...space });
       } catch (error) {
-        if (SavedObjectsClient.errors.isNotFoundError(error)) {
+        if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
           return response.notFound();
         }
         return response.customError(wrapError(error));

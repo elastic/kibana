@@ -12,10 +12,6 @@ export class AppActions {
     this.prefix = `app:${versionNumber}:`;
   }
 
-  public get all(): string {
-    return `${this.prefix}*`;
-  }
-
   public get(appId: string) {
     if (!appId || !isString(appId)) {
       throw new Error('appId is required and must be a string');

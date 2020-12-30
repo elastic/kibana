@@ -1,0 +1,25 @@
+---
+  - "Feature:Embedding":
+    - "src/plugins/embeddable/**/*.*"
+    - "src/plugins/dashboard_embeddable_container/**/*.*"
+  - "Feature:Drilldowns":
+    - "x-pack/plugins/drilldowns/**/*.*"
+    - "x-pack/plugins/dashboard_enhanced/public/services/drilldowns/**/*.*"
+  - "Feature:ExpressionLanguage":
+    - "src/plugins/expressions/**/*.*"
+    - "src/plugins/bfetch/**/*.*"
+  - "Team:apm":
+    - "x-pack/plugins/apm/**/*.*"
+  - "Team:Ingest Management":
+    - "x-pack/plugins/fleet/**/*.*"
+    - "x-pack/test/fleet_api_integration/**/*.*"
+  - "Team:uptime":
+    - "x-pack/plugins/uptime/**/*.*"
+    - "x-pack/plugins/apm/e2e/cypress/support/step_definitions/csm/*.*"
+    - "x-pack/plugins/apm/public/application/csmApp.tsx"
+    - "x-pack/plugins/apm/public/components/app/RumDashboard/**/*.*"
+    - "x-pack/plugins/apm/public/components/app/RumDashboard/*.*"
+    - "x-pack/plugins/apm/server/lib/rum_client/**/*.*"
+    - "x-pack/plugins/apm/server/lib/rum_client/*.*"
+    - "x-pack/plugins/apm/server/routes/rum_client.ts"
+    - "x-pack/plugins/apm/server/projections/rum_overview.ts"

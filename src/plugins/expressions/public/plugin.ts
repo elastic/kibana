@@ -17,165 +17,84 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionInterpretWithHandlers, ExpressionExecutor } from './types';
-import { FunctionsRegistry, RenderFunctionsRegistry, TypesRegistry } from './registries';
-import { Setup as InspectorSetup, Start as InspectorStart } from '../../inspector/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import {
-  setCoreStart,
-  setInspector,
-  setInterpreter,
-  setRenderersRegistry,
-  setNotifications,
-} from './services';
-import { clog as clogFunction } from './functions/clog';
-import { font as fontFunction } from './functions/font';
-import { kibana as kibanaFunction } from './functions/kibana';
-import { kibanaContext as kibanaContextFunction } from './functions/kibana_context';
-import {
-  boolean as booleanType,
-  datatable as datatableType,
-  error as errorType,
-  filter as filterType,
-  image as imageType,
-  nullType,
-  number as numberType,
-  pointseries,
-  range as rangeType,
-  render as renderType,
-  shape as shapeType,
-  string as stringType,
-  style as styleType,
-  kibanaContext as kibanaContextType,
-  kibanaDatatable as kibanaDatatableType,
-} from '../common/expression_types';
-import { interpreterProvider } from './interpreter_provider';
-import { createHandlers } from './create_handlers';
-import { ExpressionRendererImplementation } from './expression_renderer';
-import { ExpressionLoader, loader } from './loader';
-import { ExpressionDataHandler, execute } from './execute';
+  ExpressionsService,
+  ExpressionsServiceSetup,
+  ExecutionContext,
+  ExpressionsServiceStart,
+} from '../common';
+import { setRenderersRegistry, setNotifications, setExpressionsService } from './services';
+import { ReactExpressionRenderer } from './react_expression_renderer';
+import { ExpressionLoader, IExpressionLoader, loader } from './loader';
 import { render, ExpressionRenderHandler } from './render';
-import { AnyExpressionFunction, AnyExpressionType } from '../common/types';
 
-export interface ExpressionsSetupDeps {
-  inspector: InspectorSetup;
-}
+/**
+ * Expressions public setup contract, extends {@link ExpressionsServiceSetup}
+ */
+export type ExpressionsSetup = ExpressionsServiceSetup;
 
-export interface ExpressionsStartDeps {
-  inspector: InspectorStart;
-}
-
-export interface ExpressionsSetup {
-  registerFunction: (fn: AnyExpressionFunction | (() => AnyExpressionFunction)) => void;
-  registerRenderer: (renderer: any) => void;
-  registerType: (type: () => AnyExpressionType) => void;
-  __LEGACY: {
-    functions: FunctionsRegistry;
-    renderers: RenderFunctionsRegistry;
-    types: TypesRegistry;
-    getExecutor: () => ExpressionExecutor;
-  };
-}
-
-export interface ExpressionsStart {
-  execute: typeof execute;
-  ExpressionDataHandler: typeof ExpressionDataHandler;
+/**
+ * Expressions public start contrect, extends {@link ExpressionServiceStart}
+ */
+export interface ExpressionsStart extends ExpressionsServiceStart {
   ExpressionLoader: typeof ExpressionLoader;
-  ExpressionRenderer: typeof ExpressionRendererImplementation;
   ExpressionRenderHandler: typeof ExpressionRenderHandler;
-  loader: typeof loader;
+  loader: IExpressionLoader;
+  ReactExpressionRenderer: typeof ReactExpressionRenderer;
   render: typeof render;
 }
 
-export class ExpressionsPublicPlugin
-  implements
-    Plugin<ExpressionsSetup, ExpressionsStart, ExpressionsSetupDeps, ExpressionsStartDeps> {
-  private readonly functions = new FunctionsRegistry();
-  private readonly renderers = new RenderFunctionsRegistry();
-  private readonly types = new TypesRegistry();
+export class ExpressionsPublicPlugin implements Plugin<ExpressionsSetup, ExpressionsStart> {
+  private readonly expressions: ExpressionsService = new ExpressionsService();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { inspector }: ExpressionsSetupDeps): ExpressionsSetup {
-    const { functions, renderers, types } = this;
+  private configureExecutor(core: CoreSetup) {
+    const { executor } = this.expressions;
+
+    const getSavedObject: ExecutionContext['getSavedObject'] = async (type, id) => {
+      const [start] = await core.getStartServices();
+      return start.savedObjects.client.get(type, id);
+    };
+
+    executor.extendContext({
+      environment: 'client',
+      getSavedObject,
+    });
+  }
+
+  public setup(core: CoreSetup): ExpressionsSetup {
+    this.configureExecutor(core);
+
+    const { expressions } = this;
+    const { renderers } = expressions;
 
     setRenderersRegistry(renderers);
+    setExpressionsService(expressions);
 
-    const registerFunction: ExpressionsSetup['registerFunction'] = fn => {
-      functions.register(fn);
-    };
+    const setup = expressions.setup();
 
-    registerFunction(clogFunction);
-    registerFunction(fontFunction);
-    registerFunction(kibanaFunction);
-    registerFunction(kibanaContextFunction);
-
-    types.register(booleanType);
-    types.register(datatableType);
-    types.register(errorType);
-    types.register(filterType);
-    types.register(imageType);
-    types.register(nullType);
-    types.register(numberType);
-    types.register(pointseries);
-    types.register(rangeType);
-    types.register(renderType);
-    types.register(shapeType);
-    types.register(stringType);
-    types.register(styleType);
-    types.register(kibanaContextType);
-    types.register(kibanaDatatableType);
-
-    // TODO: Refactor this function.
-    const getExecutor = () => {
-      const interpretAst: ExpressionInterpretWithHandlers = (ast, context, handlers) => {
-        const interpret = interpreterProvider({
-          types: types.toJS(),
-          handlers: { ...handlers, ...createHandlers() },
-          functions,
-        });
-        return interpret(ast, context);
-      };
-      const executor: ExpressionExecutor = { interpreter: { interpretAst } };
-      return executor;
-    };
-
-    setInterpreter(getExecutor().interpreter);
-
-    const setup: ExpressionsSetup = {
-      registerFunction,
-      registerRenderer: (renderer: any) => {
-        renderers.register(renderer);
-      },
-      registerType: type => {
-        types.register(type);
-      },
-      __LEGACY: {
-        functions,
-        renderers,
-        types,
-        getExecutor,
-      },
-    };
-
-    return setup;
+    return Object.freeze(setup);
   }
 
-  public start(core: CoreStart, { inspector }: ExpressionsStartDeps): ExpressionsStart {
-    setCoreStart(core);
-    setInspector(inspector);
+  public start(core: CoreStart): ExpressionsStart {
     setNotifications(core.notifications);
 
-    return {
-      execute,
-      ExpressionDataHandler,
+    const { expressions } = this;
+    const start = {
+      ...expressions.start(),
       ExpressionLoader,
-      ExpressionRenderer: ExpressionRendererImplementation,
       ExpressionRenderHandler,
       loader,
+      ReactExpressionRenderer,
       render,
     };
+
+    return Object.freeze(start);
   }
 
-  public stop() {}
+  public stop() {
+    this.expressions.stop();
+  }
 }

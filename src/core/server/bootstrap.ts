@@ -18,19 +18,15 @@
  */
 
 import chalk from 'chalk';
-import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
 import { Root } from './root';
 import { CriticalError } from './errors';
 
 interface KibanaFeatures {
-  // Indicates whether we can run Kibana in a so called cluster mode in which
-  // Kibana is run as a "worker" process together with optimizer "worker" process
-  // that are orchestrated by the "master" process (dev mode only feature).
-  isClusterModeSupported: boolean;
-
-  // Indicates whether we can run Kibana in REPL mode (dev mode only feature).
-  isReplModeSupported: boolean;
+  // Indicates whether we can run Kibana in dev mode in which Kibana is run as
+  // a child process together with optimizer "worker" processes that are
+  // orchestrated by a parent process (dev mode only feature).
+  isCliDevModeSupported: boolean;
 }
 
 interface BootstrapArgs {
@@ -51,14 +47,23 @@ export async function bootstrap({
   applyConfigOverrides,
   features,
 }: BootstrapArgs) {
-  if (cliArgs.repl && !features.isReplModeSupported) {
-    onRootShutdown('Kibana REPL mode can only be run in development mode.');
+  if (cliArgs.optimize) {
+    // --optimize is deprecated and does nothing now, avoid starting up and just shutdown
+    return;
   }
 
-  const env = Env.createDefault({
+  // `bootstrap` is exported from the `src/core/server/index` module,
+  // meaning that any test importing, implicitly or explicitly, anything concrete
+  // from `core/server` will load `dev-utils`. As some tests are mocking the `fs` package,
+  // and as `REPO_ROOT` is initialized on the fly when importing `dev-utils` and requires
+  // the `fs` package, it causes failures. This is why we use a dynamic `require` here.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { REPO_ROOT } = require('@kbn/utils');
+
+  const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
-    isDevClusterMaster: isMaster && cliArgs.dev && features.isClusterModeSupported,
+    isDevCliParent: cliArgs.dev && features.isCliDevModeSupported && !process.env.isDevCliChild,
   });
 
   const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);
@@ -71,7 +76,7 @@ export async function bootstrap({
   // This is only used by the LogRotator service
   // in order to be able to reload the log configuration
   // under the cluster mode
-  process.on('message', msg => {
+  process.on('message', (msg) => {
     if (!msg || msg.reloadLoggingConfig !== true) {
       return;
     }
@@ -105,12 +110,6 @@ export async function bootstrap({
     await root.start();
   } catch (err) {
     await shutdown(err);
-  }
-
-  if (cliArgs.optimize) {
-    const cliLogger = root.logger.get('cli');
-    cliLogger.info('Optimization done.');
-    await shutdown();
   }
 }
 

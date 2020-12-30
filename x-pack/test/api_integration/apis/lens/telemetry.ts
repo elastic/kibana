@@ -6,26 +6,20 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { Client, SearchParams } from 'elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { getDailyEvents } from '../../../../legacy/plugins/lens/server/usage/task';
-import { getVisualizationCounts } from '../../../../legacy/plugins/lens/server/usage/visualization_counts';
+import { getDailyEvents } from '../../../../plugins/lens/server/usage/task';
+import { getVisualizationCounts } from '../../../../plugins/lens/server/usage/visualization_counts';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es: Client = getService('legacyEs');
-  const callCluster: CallCluster = (((path: 'search', searchParams: SearchParams) => {
-    return es[path].call(es, searchParams);
-  }) as unknown) as CallCluster;
+  const es: Client = getService('es');
 
   async function assertExpectedSavedObjects(num: number) {
     // Make sure that new/deleted docs are available to search
@@ -33,7 +27,9 @@ export default ({ getService }: FtrProviderContext) => {
       index: '.kibana',
     });
 
-    const { count } = await es.count({
+    const {
+      body: { count },
+    } = await es.count({
       index: '.kibana',
       q: 'type:lens-ui-telemetry',
     });
@@ -46,8 +42,9 @@ export default ({ getService }: FtrProviderContext) => {
       await es.deleteByQuery({
         index: '.kibana',
         q: 'type:lens-ui-telemetry',
-        waitForCompletion: true,
-        refresh: 'wait_for',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
       });
     });
 
@@ -55,14 +52,15 @@ export default ({ getService }: FtrProviderContext) => {
       await es.deleteByQuery({
         index: '.kibana',
         q: 'type:lens-ui-telemetry',
-        waitForCompletion: true,
-        refresh: 'wait_for',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
       });
     });
 
     it('should do nothing on empty post', async () => {
       await supertest
-        .post('/api/lens/telemetry')
+        .post('/api/lens/stats')
         .set(COMMON_HEADERS)
         .send({
           events: {},
@@ -75,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should write a document per results', async () => {
       await supertest
-        .post('/api/lens/telemetry')
+        .post('/api/lens/stats')
         .set(COMMON_HEADERS)
         .send({
           events: {
@@ -92,9 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should delete older telemetry documents while running', async () => {
-      const olderDate = moment()
-        .subtract(100, 'days')
-        .valueOf();
+      const olderDate = moment().subtract(100, 'days').valueOf();
 
       // @ts-ignore optional type: string
       await es.index({
@@ -111,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
         refresh: 'wait_for',
       });
 
-      const result = await getDailyEvents('.kibana', callCluster);
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
 
       expect(result).to.eql({
         byDate: {},
@@ -123,16 +119,8 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should aggregate the individual events into daily totals by type', async () => {
       // Dates are set to midnight in the aggregation, so let's make this easier for the test
-      const date1 = moment()
-        .utc()
-        .subtract(10, 'days')
-        .startOf('day')
-        .valueOf();
-      const date2 = moment()
-        .utc()
-        .subtract(20, 'days')
-        .startOf('day')
-        .valueOf();
+      const date1 = moment().utc().subtract(10, 'days').startOf('day').valueOf();
+      const date2 = moment().utc().subtract(20, 'days').startOf('day').valueOf();
 
       function getEvent(name: string, date: number, type = 'regular') {
         return {
@@ -162,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
         ],
       });
 
-      const result = await getDailyEvents('.kibana', callCluster);
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
 
       expect(result).to.eql({
         byDate: {
@@ -189,13 +177,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await esArchiver.loadIfNeeded('lens/basic');
 
-      const results = await getVisualizationCounts(callCluster, {
-        // Fake KibanaConfig service
-        get() {
-          return '.kibana';
-        },
-        has: () => false,
-      } as KibanaConfig);
+      const results = await getVisualizationCounts(() => Promise.resolve(es), '.kibana');
 
       expect(results).to.have.keys([
         'saved_overall',
@@ -208,8 +190,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(results.saved_overall).to.eql({
         lnsMetric: 1,
+        bar_stacked: 1,
+        lnsPie: 1,
       });
-      expect(results.saved_overall_total).to.eql(1);
+      expect(results.saved_overall_total).to.eql(3);
 
       await esArchiver.unload('lens/basic');
     });

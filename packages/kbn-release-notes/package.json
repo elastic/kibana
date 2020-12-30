@@ -1,0 +1,17 @@
+{
+  "name": "@kbn/release-notes",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "main": "target/index.js",
+  "kibana": {
+    "devOnly": true
+  },
+  "scripts": {
+    "kbn:bootstrap": "../../node_modules/.bin/tsc",
+    "kbn:watch": "../../node_modules/.bin/tsc --watch"
+  },
+  "dependencies": {
+    "@kbn/utils": "link:../kbn-utils",
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
+  }
+}

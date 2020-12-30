@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
@@ -37,7 +37,7 @@ export default function({ getService }) {
             },
           })
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             // loose uuid validation
             expect(resp.body)
               .to.have.property('id')
@@ -53,11 +53,12 @@ export default function({ getService }) {
               type: 'visualization',
               migrationVersion: resp.body.migrationVersion,
               updated_at: resp.body.updated_at,
-              version: 'WzgsMV0=',
+              version: resp.body.version,
               attributes: {
                 title: 'My favorite vis',
               },
               references: [],
+              namespaces: ['default'],
             });
             expect(resp.body.migrationVersion).to.be.ok();
           });
@@ -83,7 +84,7 @@ export default function({ getService }) {
             },
           })
           .expect(200)
-          .then(resp => {
+          .then((resp) => {
             // loose uuid validation
             expect(resp.body)
               .to.have.property('id')
@@ -99,11 +100,12 @@ export default function({ getService }) {
               type: 'visualization',
               migrationVersion: resp.body.migrationVersion,
               updated_at: resp.body.updated_at,
-              version: 'WzAsMV0=',
+              version: resp.body.version,
               attributes: {
                 title: 'My favorite vis',
               },
               references: [],
+              namespaces: ['default'],
             });
             expect(resp.body.migrationVersion).to.be.ok();
           });

@@ -20,7 +20,7 @@
 import { ExpectExpression, expectExpressionProvider, ExpressionResult } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function({
+export default function ({
   getService,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
@@ -33,14 +33,10 @@ export default function({
     describe('correctly renders metric', () => {
       let dataContext: ExpressionResult;
       before(async () => {
-        const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
-          {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
-          {"id":"1","enabled":true,"type":"max","schema":"metric","params":
-            {"field":"bytes"}
-          },
-          {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
-            {"field":"response.raw","size":4,"order":"desc","orderBy":"1"}
-          }]'`;
+        const expression = `kibana | kibana_context | esaggs index={indexPatternLoad id='logstash-*'}
+          aggs={aggCount id="1" enabled=true schema="metric"}
+          aggs={aggMax id="1" enabled=true schema="metric" field="bytes"}
+          aggs={aggTerms id="2" enabled=true schema="segment" field="response.raw" size=4 order="desc" orderBy="1"}`;
         // we execute the part of expression that fetches the data and store its response
         dataContext = await expectExpression('partial_metric_test', expression).getResponse();
       });
@@ -81,11 +77,15 @@ export default function({
         ).toMatchScreenshot();
       });
 
-      it('with percentage option', async () => {
+      it('with percentageMode option', async () => {
         const expression =
-          'metricVis metric={visdimension 0} percentage=true colorRange={range from=0 to=1000}';
+          'metricVis metric={visdimension 0} percentageMode=true colorRange={range from=0 to=1000}';
         await (
-          await expectExpression('metric_percentage', expression, dataContext).toMatchSnapshot()
+          await expectExpression(
+            'metric_percentage_mode',
+            expression,
+            dataContext
+          ).toMatchSnapshot()
         ).toMatchScreenshot();
       });
     });

@@ -1,0 +1,34 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when a Virtual Private Cloud (VPC) route is deleted in Google Cloud Platform (GCP). Google Cloud routes define the paths that network traffic takes from a virtual machine (VM) instance to other destinations. These destinations can be inside a Google VPC network or outside it. An adversary may delete a route in order to impact the flow of network traffic in their target's cloud environment.",
+  "false_positives": [
+    "Virtual Private Cloud routes may be deleted by system administrators. Verify that the configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "GCP Virtual Private Cloud Route Deletion",
+  "note": "The GCP Filebeat module must be enabled to use this rule.",
+  "query": "event.dataset:googlecloud.audit and event.action:v*.compute.routes.delete and event.outcome:success",
+  "references": [
+    "https://cloud.google.com/vpc/docs/routes",
+    "https://cloud.google.com/vpc/docs/using-routes"
+  ],
+  "risk_score": 47,
+  "rule_id": "a17bcc91-297b-459b-b5ce-bc7460d8f82a",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "GCP",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "type": "query",
+  "version": 1
+}

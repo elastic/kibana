@@ -17,16 +17,19 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export class IpFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.IP;
-  static title = 'IP Address';
+  static title = i18n.translate('data.fieldFormats.ip.title', {
+    defaultMessage: 'IP address',
+  });
   static fieldType = KBN_FIELD_TYPES.IP;
 
-  textConvert: TextContextTypeConvert = val => {
+  textConvert: TextContextTypeConvert = (val) => {
     if (val === undefined || val === null) return '-';
     if (!isFinite(val)) return val;
 

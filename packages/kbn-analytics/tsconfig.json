@@ -1,8 +1,9 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "outDir": "./target/types",
     "stripInternal": true,
     "declarationMap": true,
     "types": [
@@ -11,7 +12,7 @@
     ]
   },
   "include": [
-    "./src/**/*.ts"
+    "src/**/*"
   ],
   "exclude": [
     "target"

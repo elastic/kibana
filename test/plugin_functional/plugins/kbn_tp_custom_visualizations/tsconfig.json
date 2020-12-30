@@ -1,0 +1,22 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target",
+    "skipLibCheck": true,
+    "types": [
+      "node",
+      "jest",
+      "react"
+    ]
+  },
+  "include": [
+    "index.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "../../../../typings/**/*"
+  ],
+  "exclude": [],
+  "references": [
+    { "path": "../../../../src/core/tsconfig.json" }
+  ]
+}

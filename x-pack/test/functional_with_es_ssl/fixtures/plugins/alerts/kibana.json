@@ -1,0 +1,9 @@
+{
+  "id": "alerting_fixture",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack"],
+  "requiredPlugins": ["alerts", "triggersActionsUi", "features"],
+  "server": true,
+  "ui": true
+}

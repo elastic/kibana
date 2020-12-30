@@ -1,0 +1,18 @@
+{
+  "indices.split": {
+    "url_params": {
+      "copy_settings": "__flag__",
+      "timeout": "",
+      "master_timeout": "",
+      "wait_for_active_shards": ""
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "{indices}/_split/{target}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-split-index.html"
+  }
+}

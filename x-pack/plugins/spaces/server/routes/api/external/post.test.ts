@@ -6,68 +6,63 @@
 import * as Rx from 'rxjs';
 import {
   createSpaces,
-  createLegacyAPI,
   createMockSavedObjectsRepository,
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, kibanaResponseFactory, IRouter, RouteValidatorConfig } from 'src/core/server';
+import { kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
-  loggingServiceMock,
-  elasticsearchServiceMock,
+  loggingSystemMock,
   httpServerMock,
   httpServiceMock,
+  coreMock,
 } from 'src/core/server/mocks';
 import { SpacesService } from '../../../spaces_service';
-import { SpacesAuditLogger } from '../../../lib/audit_logger';
-import { SpacesClient } from '../../../lib/spaces_client';
 import { initPostSpacesApi } from './post';
 import { spacesConfig } from '../../../lib/__fixtures__';
-import { securityMock } from '../../../../../security/server/mocks';
 import { ObjectType } from '@kbn/config-schema';
+import { SpacesClientService } from '../../../spaces_client';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
-  const spaces = spacesSavedObjects.map(s => ({ id: s.id, ...s.attributes }));
 
   const setup = async () => {
     const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
+    const router = httpService.createRouter();
 
-    const legacyAPI = createLegacyAPI({ spaces });
+    const coreStart = coreMock.createStart();
 
     const savedObjectsRepositoryMock = createMockSavedObjectsRepository(spacesSavedObjects);
 
-    const log = loggingServiceMock.create().get('spaces');
+    const log = loggingSystemMock.create().get('spaces');
 
-    const service = new SpacesService(log, () => legacyAPI);
-    const spacesService = await service.setup({
-      http: (httpService as unknown) as CoreSetup['http'],
-      elasticsearch: elasticsearchServiceMock.createSetup(),
-      authorization: securityMock.createSetup().authz,
-      getSpacesAuditLogger: () => ({} as SpacesAuditLogger),
-      config$: Rx.of(spacesConfig),
+    const clientService = new SpacesClientService(jest.fn());
+    clientService
+      .setup({ config$: Rx.of(spacesConfig) })
+      .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
+
+    const service = new SpacesService();
+    service.setup({
+      basePath: httpService.basePath,
     });
 
-    spacesService.scopedClient = jest.fn((req: any) => {
-      return Promise.resolve(
-        new SpacesClient(
-          null as any,
-          () => null,
-          null,
-          savedObjectsRepositoryMock,
-          spacesConfig,
-          savedObjectsRepositoryMock,
-          req
-        )
-      );
+    const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
+
+    const clientServiceStart = clientService.start(coreStart);
+
+    const spacesServiceStart = service.start({
+      basePath: coreStart.http.basePath,
+      spacesClientService: clientServiceStart,
     });
 
     initPostSpacesApi({
       externalRouter: router,
-      getSavedObjects: () => legacyAPI.savedObjects,
+      getStartServices: async () => [coreStart, {}, {}],
+      getImportExportObjectLimit: () => 1000,
       log,
-      spacesService,
+      getSpacesService: () => spacesServiceStart,
+      usageStatsServicePromise,
     });
 
     const [routeDefinition, routeHandler] = router.post.mock.calls[0];
@@ -145,7 +140,7 @@ describe('Spaces Public API', () => {
     const { status, payload: responsePayload } = response;
 
     expect(status).toEqual(409);
-    expect(responsePayload.message).toEqual('space conflict');
+    expect(responsePayload.message).toEqual('A space with the identifier a-space already exists.');
   });
 
   it('should not require disabledFeatures to be specified', async () => {

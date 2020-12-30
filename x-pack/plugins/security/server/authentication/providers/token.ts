@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { KibanaRequest } from '../../../../../../src/core/server';
+import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { canRedirectRequest } from '../can_redirect_request';
+import { HTTPAuthorizationHeader } from '../http_authentication';
+import { Tokens, TokenPair, RefreshTokenResult } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
-import { Tokens, TokenPair } from '../tokens';
-import { canRedirectRequest } from '..';
 
 /**
  * Describes the parameters that are required by the provider to process the initial login request.
@@ -26,15 +28,24 @@ interface ProviderLoginAttempt {
 type ProviderState = TokenPair;
 
 /**
+ * Checks whether current request can initiate new session.
+ * @param request Request instance.
+ */
+function canStartNewSession(request: KibanaRequest) {
+  // We should try to establish new session only if request requires authentication and client
+  // can be redirected to the login page where they can enter username and password.
+  return canRedirectRequest(request) && request.route.options.authRequired === true;
+}
+
+/**
  * Provider that supports token-based request authentication.
  */
 export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
   /**
-   * Performs initial login request using username and password.
-   * @param request Request instance.
-   * @param loginAttempt Login attempt description.
-   * @param [state] Optional state object associated with the provider.
+   * Type of the provider.
    */
+  static readonly type = 'token';
+
   /**
    * Performs initial login request using username and password.
    * @param request Request instance.
@@ -53,21 +64,21 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
+        authentication: authenticationInfo,
       } = await this.options.client.callAsInternalUser('shield.getAccessToken', {
         body: { grant_type: 'password', username, password },
       });
 
       this.logger.debug('Get token API request to Elasticsearch successful');
-
-      // Then attempt to query for the user details using the new token
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
-      const user = await this.getUser(request, authHeaders);
-
-      this.logger.debug('Login has been successfully performed.');
-      return AuthenticationResult.succeeded(user, {
-        authHeaders,
-        state: { accessToken, refreshToken },
-      });
+      return AuthenticationResult.succeeded(
+        this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+        {
+          authHeaders: {
+            authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+          },
+          state: { accessToken, refreshToken },
+        }
+      );
     } catch (err) {
       this.logger.debug(`Failed to perform a login: ${err.message}`);
       return AuthenticationResult.failed(err);
@@ -80,20 +91,17 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * @param [state] Optional state object associated with the provider.
    */
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
+    this.logger.debug(
+      `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
+    );
 
-    // if there isn't a payload, try header-based token auth
-    const {
-      authenticationResult: headerAuthResult,
-      headerNotRecognized,
-    } = await this.authenticateViaHeader(request);
-    if (headerNotRecognized) {
-      return headerAuthResult;
+    if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
+      this.logger.debug('Cannot authenticate requests with `Authorization` header.');
+      return AuthenticationResult.notHandled();
     }
 
-    let authenticationResult = headerAuthResult;
-    // if we still can't attempt auth, try authenticating via state (session token)
-    if (authenticationResult.notHandled() && state) {
+    let authenticationResult = AuthenticationResult.notHandled();
+    if (state) {
       authenticationResult = await this.authenticateViaState(request, state);
       if (
         authenticationResult.failed() &&
@@ -105,7 +113,8 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
 
     // finally, if authentication still can not be handled for this
     // request/state combination, redirect to the login page if appropriate
-    if (authenticationResult.notHandled() && canRedirectRequest(request)) {
+    if (authenticationResult.notHandled() && canStartNewSession(request)) {
+      this.logger.debug('Redirecting request to Login page.');
       authenticationResult = AuthenticationResult.redirectTo(this.getLoginPageURL(request));
     }
 
@@ -118,58 +127,34 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * @param state State value previously stored by the provider.
    */
   public async logout(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to log user out via ${request.url.path}.`);
+    this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
+    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // session isn't defined then provider is just being probed whether or not it can perform logout.
+    if (state === undefined) {
+      this.logger.debug('There are no access and refresh tokens to invalidate.');
+      return DeauthenticationResult.notHandled();
+    }
+
+    this.logger.debug('Token-based logout has been initiated by the user.');
     if (state) {
-      this.logger.debug('Token-based logout has been initiated by the user.');
       try {
         await this.options.tokens.invalidate(state);
       } catch (err) {
         this.logger.debug(`Failed invalidating user's access token: ${err.message}`);
         return DeauthenticationResult.failed(err);
       }
-    } else {
-      this.logger.debug('There are no access and refresh tokens to invalidate.');
     }
 
-    const queryString = request.url.search || `?msg=LOGGED_OUT`;
-    return DeauthenticationResult.redirectTo(
-      `${this.options.basePath.get(request)}/login${queryString}`
-    );
+    return DeauthenticationResult.redirectTo(this.options.urls.loggedOut(request));
   }
 
   /**
-   * Validates whether request contains `Bearer ***` Authorization header and just passes it
-   * forward to Elasticsearch backend.
-   * @param request Request instance.
+   * Returns HTTP authentication scheme (`Bearer`) that's used within `Authorization` HTTP header
+   * that provider attaches to all successfully authenticated requests to Elasticsearch.
    */
-  private async authenticateViaHeader(request: KibanaRequest) {
-    this.logger.debug('Trying to authenticate via header.');
-
-    const authorization = request.headers.authorization;
-    if (!authorization || typeof authorization !== 'string') {
-      this.logger.debug('Authorization header is not presented.');
-      return { authenticationResult: AuthenticationResult.notHandled() };
-    }
-
-    const authenticationSchema = authorization.split(/\s+/)[0];
-    if (authenticationSchema.toLowerCase() !== 'bearer') {
-      this.logger.debug(`Unsupported authentication schema: ${authenticationSchema}`);
-      return { authenticationResult: AuthenticationResult.notHandled(), headerNotRecognized: true };
-    }
-
-    try {
-      const user = await this.getUser(request);
-
-      this.logger.debug('Request has been authenticated via header.');
-
-      // We intentionally do not store anything in session state because token
-      // header auth can only be used on a request by request basis.
-      return { authenticationResult: AuthenticationResult.succeeded(user) };
-    } catch (err) {
-      this.logger.debug(`Failed to authenticate request via header: ${err.message}`);
-      return { authenticationResult: AuthenticationResult.failed(err) };
-    }
+  public getHTTPAuthenticationScheme() {
+    return 'bearer';
   }
 
   /**
@@ -182,7 +167,9 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate via state.');
 
     try {
-      const authHeaders = { authorization: `Bearer ${accessToken}` };
+      const authHeaders = {
+        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+      };
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Request has been authenticated via state.');
@@ -200,23 +187,20 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaRefreshToken(
-    request: KibanaRequest,
-    { refreshToken }: ProviderState
-  ) {
+  private async authenticateViaRefreshToken(request: KibanaRequest, state: ProviderState) {
     this.logger.debug('Trying to refresh access token.');
 
-    let refreshedTokenPair: TokenPair | null;
+    let refreshTokenResult: RefreshTokenResult | null;
     try {
-      refreshedTokenPair = await this.options.tokens.refresh(refreshToken);
+      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
       return AuthenticationResult.failed(err);
     }
 
     // If refresh token is no longer valid, then we should clear session and redirect user to the
     // login page to re-authenticate, or fail if redirect isn't possible.
-    if (refreshedTokenPair === null) {
-      if (canRedirectRequest(request)) {
+    if (refreshTokenResult === null) {
+      if (canStartNewSession(request)) {
         this.logger.debug('Clearing session since both access and refresh tokens are expired.');
 
         // Set state to `null` to let `Authenticator` know that we want to clear current session.
@@ -228,18 +212,17 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       );
     }
 
-    try {
-      const authHeaders = { authorization: `Bearer ${refreshedTokenPair.accessToken}` };
-      const user = await this.getUser(request, authHeaders);
-
-      this.logger.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, { authHeaders, state: refreshedTokenPair });
-    } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate user using newly refreshed access token: ${err.message}`
-      );
-      return AuthenticationResult.failed(err);
-    }
+    this.logger.debug('Request has been authenticated via refreshed token.');
+    const { accessToken, refreshToken, authenticationInfo } = refreshTokenResult;
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+        },
+        state: { accessToken, refreshToken },
+      }
+    );
   }
 
   /**
@@ -247,7 +230,11 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    */
   private getLoginPageURL(request: KibanaRequest) {
-    const nextURL = encodeURIComponent(`${this.options.basePath.get(request)}${request.url.path}`);
-    return `${this.options.basePath.get(request)}/login?next=${nextURL}`;
+    const nextURL = encodeURIComponent(
+      `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
+    );
+    return `${this.options.basePath.get(
+      request
+    )}/login?${NEXT_URL_QUERY_STRING_PARAMETER}=${nextURL}`;
   }
 }

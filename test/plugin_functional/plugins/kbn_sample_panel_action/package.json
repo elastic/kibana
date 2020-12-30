@@ -1,0 +1,14 @@
+{
+  "name": "kbn_sample_panel_action",
+  "version": "1.0.0",
+  "main": "target/test/plugin_functional/plugins/kbn_sample_panel_action",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "kbn": "node ../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../node_modules/.bin/tsc"
+  }
+}

@@ -8,57 +8,56 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { isCustomRoleSpecification } from '../../common/types';
 import { Spaces, Users } from '../scenarios';
 
-// eslint-disable-next-line import/no-default-export
-export default function alertingApiIntegrationTests({
-  loadTestFile,
-  getService,
-}: FtrProviderContext) {
+export async function setupSpacesAndUsers(getService: FtrProviderContext['getService']) {
   const securityService = getService('security');
   const spacesService = getService('spaces');
+
+  for (const space of Spaces) {
+    await spacesService.create(space);
+  }
+
+  for (const user of Users) {
+    const roles = [...(user.role ? [user.role] : []), ...(user.roles ? user.roles : [])];
+
+    await securityService.user.create(user.username, {
+      password: user.password,
+      full_name: user.fullName,
+      roles: roles.map((role) => role.name),
+    });
+
+    for (const role of roles) {
+      if (isCustomRoleSpecification(role)) {
+        await securityService.role.create(role.name, {
+          kibana: role.kibana,
+          elasticsearch: role.elasticsearch,
+        });
+      }
+    }
+  }
+}
+
+export async function tearDown(getService: FtrProviderContext['getService']) {
+  const securityService = getService('security');
   const esArchiver = getService('esArchiver');
 
-  describe('alerting api integration security and spaces enabled', function() {
-    this.tags('ciGroup1');
+  for (const user of Users) {
+    await securityService.user.delete(user.username);
 
-    before(async () => {
-      for (const space of Spaces) {
-        await spacesService.create(space);
+    const roles = [...(user.role ? [user.role] : []), ...(user.roles ? user.roles : [])];
+    for (const role of roles) {
+      if (isCustomRoleSpecification(role)) {
+        await securityService.role.delete(role.name);
       }
+    }
+  }
 
-      for (const user of Users) {
-        const roles = [...(user.role ? [user.role] : []), ...(user.roles ? user.roles : [])];
+  await esArchiver.unload('empty_kibana');
+}
 
-        await securityService.user.create(user.username, {
-          password: user.password,
-          full_name: user.fullName,
-          roles: roles.map(role => role.name),
-        });
-
-        for (const role of roles) {
-          if (isCustomRoleSpecification(role)) {
-            await securityService.role.create(role.name, {
-              kibana: role.kibana,
-              elasticsearch: role.elasticsearch,
-            });
-          }
-        }
-      }
-    });
-
-    after(async () => {
-      for (const user of Users) {
-        await securityService.user.delete(user.username);
-
-        const roles = [...(user.role ? [user.role] : []), ...(user.roles ? user.roles : [])];
-        for (const role of roles) {
-          if (isCustomRoleSpecification(role)) {
-            await securityService.role.delete(role.name);
-          }
-        }
-      }
-
-      await esArchiver.unload('empty_kibana');
-    });
+// eslint-disable-next-line import/no-default-export
+export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
+  describe('alerting api integration security and spaces enabled', function () {
+    this.tags('ciGroup5');
 
     loadTestFile(require.resolve('./actions'));
     loadTestFile(require.resolve('./alerting'));

@@ -51,8 +51,8 @@ export class SampleDataRegistry {
       makeSampleDataUsageCollector(usageCollections, this.initContext);
     }
     const usageTracker = usage(
-      core.savedObjects,
-      this.initContext.logger.get('sample_data', 'telemetry')
+      core.getStartServices().then(([coreStart]) => coreStart.savedObjects),
+      this.initContext.logger.get('sample_data', 'usage')
     );
     const router = core.http.createRouter();
     createListRoute(router, this.sampleDatasets);
@@ -97,7 +97,7 @@ export class SampleDataRegistry {
       getSampleDatasets: () => this.sampleDatasets,
 
       addSavedObjectsToSampleDataset: (id: string, savedObjects: SavedObject[]) => {
-        const sampleDataset = this.sampleDatasets.find(dataset => {
+        const sampleDataset = this.sampleDatasets.find((dataset) => {
           return dataset.id === id;
         });
 
@@ -109,7 +109,7 @@ export class SampleDataRegistry {
       },
 
       addAppLinksToSampleDataset: (id: string, appLinks: AppLinkSchema[]) => {
-        const sampleDataset = this.sampleDatasets.find(dataset => {
+        const sampleDataset = this.sampleDatasets.find((dataset) => {
           return dataset.id === id;
         });
 
@@ -130,16 +130,16 @@ export class SampleDataRegistry {
         embeddableType,
         embeddableConfig,
       }: SampleDatasetDashboardPanel) => {
-        const sampleDataset = this.sampleDatasets.find(dataset => {
+        const sampleDataset = this.sampleDatasets.find((dataset) => {
           return dataset.id === sampleDataId;
         });
         if (!sampleDataset) {
           throw new Error(`Unable to find sample dataset with id: ${sampleDataId}`);
         }
 
-        const dashboard = sampleDataset.savedObjects.find((savedObject: SavedObject) => {
+        const dashboard = sampleDataset.savedObjects.find((savedObject) => {
           return savedObject.id === dashboardId && savedObject.type === 'dashboard';
-        });
+        }) as SavedObject<{ panelsJSON: string }>;
         if (!dashboard) {
           throw new Error(`Unable to find dashboard with id: ${dashboardId}`);
         }

@@ -20,23 +20,24 @@
 import { Observable } from 'rxjs';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
-import { ViewMode } from '../types';
+import { TriggerContextMapping } from '../../../../ui_actions/public';
+import { EmbeddableInput } from '../../../common/types';
 
-export interface EmbeddableInput {
-  viewMode?: ViewMode;
-  title?: string;
-  id: string;
-  lastReloadRequestTime?: number;
-  hidePanelTitles?: boolean;
-  isEmptyState?: boolean;
-  /**
-   * List of action IDs that this embeddable should not render.
-   */
-  disabledActions?: string[];
+export interface EmbeddableError {
+  name: string;
+  message: string;
 }
 
+export { EmbeddableInput };
+
 export interface EmbeddableOutput {
+  // Whether the embeddable is actively loading.
+  loading?: boolean;
+  // Whether the embeddable finished loading with an error.
+  error?: EmbeddableError;
   editUrl?: string;
+  editApp?: string;
+  editPath?: string;
   defaultTitle?: string;
   title?: string;
   editable?: boolean;
@@ -70,6 +71,24 @@ export interface IEmbeddable<
    * Panel States to a child embeddable instance.
    **/
   readonly id: string;
+
+  /**
+   * Unique ID an embeddable is assigned each time it is initialized. This ID
+   * is different for different instances of the same embeddable. For example,
+   * if the same dashboard is rendered twice on the screen, all embeddable
+   * instances will have a unique `runtimeId`.
+   */
+  readonly runtimeId?: number;
+
+  /**
+   * Extra abilities added to Embeddable by `*_enhanced` plugins.
+   */
+  enhancements?: object;
+
+  /**
+   * If this embeddable has encountered a fatal error, that error will be stored here
+   **/
+  fatalError?: Error;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to
@@ -150,4 +169,9 @@ export interface IEmbeddable<
    * Cleans up subscriptions, destroy nodes mounted from calls to render.
    */
   destroy(): void;
+
+  /**
+   * List of triggers that this embeddable will execute.
+   */
+  supportedTriggers(): Array<keyof TriggerContextMapping>;
 }

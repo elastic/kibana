@@ -3,6 +3,19 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["uiActions"],
-  "optionalPlugins": ["usageCollection"]
+  "requiredPlugins": [
+    "bfetch",
+    "expressions",
+    "uiActions",
+    "share",
+    "inspector"
+  ],
+  "optionalPlugins": ["usageCollection"],
+  "extraPublicDirs": ["common"],
+  "requiredBundles": [
+    "usageCollection",
+    "kibanaUtils",
+    "kibanaReact",
+    "inspector"
+  ]
 }

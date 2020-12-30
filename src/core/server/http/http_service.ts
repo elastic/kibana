@@ -19,7 +19,8 @@
 
 import { Observable, Subscription, combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
+import { pick } from '@kbn/std';
 
 import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
@@ -38,18 +39,24 @@ import {
   RequestHandlerContextContainer,
   RequestHandlerContextProvider,
   InternalHttpServiceSetup,
-  HttpServiceStart,
+  InternalHttpServiceStart,
 } from './types';
 
 import { RequestHandlerContext } from '../../server';
 import { registerCoreHandlers } from './lifecycle_handlers';
+import {
+  ExternalUrlConfigType,
+  config as externalUrlConfig,
+  ExternalUrlConfig,
+} from '../external_url';
 
 interface SetupDeps {
   context: ContextSetup;
 }
 
 /** @internal */
-export class HttpService implements CoreService<InternalHttpServiceSetup, HttpServiceStart> {
+export class HttpService
+  implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private readonly config$: Observable<HttpConfig>;
@@ -59,6 +66,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
   private readonly log: Logger;
   private readonly env: Env;
   private notReadyServer?: Server;
+  private internalSetup?: InternalHttpServiceSetup;
   private requestHandlerContext?: RequestHandlerContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -70,7 +78,8 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
     this.config$ = combineLatest([
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path),
-    ]).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
+      configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
+    ]).pipe(map(([http, csp, externalUrl]) => new HttpConfig(http, csp, externalUrl)));
     this.httpServer = new HttpServer(logger, 'Kibana');
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
@@ -97,8 +106,10 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
 
     registerCoreHandlers(serverContract, config, this.env);
 
-    const contract: InternalHttpServiceSetup = {
+    this.internalSetup = {
       ...serverContract,
+
+      externalUrl: new ExternalUrlConfig(config.externalUrl),
 
       createRouter: (path: string, pluginId: PluginOpaqueId = this.coreContext.coreId) => {
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
@@ -114,7 +125,16 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
       ) => this.requestHandlerContext!.registerContext(pluginOpaqueId, contextName, provider),
     };
 
-    return contract;
+    return this.internalSetup;
+  }
+
+  // this method exists because we need the start contract to create the `CoreStart` used to start
+  // the `plugin` and `legacy` services.
+  public getStartContract(): InternalHttpServiceStart {
+    return {
+      ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo']),
+      isListening: () => this.httpServer.isListening(),
+    };
   }
 
   public async start() {
@@ -134,9 +154,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
       await this.httpServer.start();
     }
 
-    return {
-      isListening: () => this.httpServer.isListening(),
-    };
+    return this.getStartContract();
   }
 
   /**
@@ -148,7 +166,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
    * @internal
    * */
   private shouldListen(config: HttpConfig) {
-    return !this.coreContext.env.isDevClusterMaster && config.autoListen;
+    return !this.coreContext.env.isDevCliParent && config.autoListen;
   }
 
   public async stop() {

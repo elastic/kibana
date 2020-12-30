@@ -1,0 +1,27 @@
+[[share-dashboards]]
+== Share dashboards
+
+[[embedding-dashboards]]
+Share your dashboard outside of {kib}.
+
+From the *Share* menu, you can:
+
+* Embed the code in a web page. Users must have {kib} access
+to view an embedded dashboard.
+* Share a direct link to a {kib} dashboard
+* Generate a PDF report
+* Generate a PNG report
+
+TIP: To create a link to a dashboard by title, use: +
+`${domain}/${basepath?}/app/dashboards#/list?title=${yourdashboardtitle}`
+
+TIP: When sharing a link to a dashboard snapshot, use the *Short URL*. Snapshot
+URLs are long and can be problematic for Internet Explorer and other
+tools. To create a short URL, you must have write access to {kib}.
+
+[float]
+[[import-dashboards]]
+=== Export the dashboard
+
+To export the dashboard, open the main menu, then click *Stack Management > Saved Objects*. For more information,
+refer to <<managing-saved-objects, Managing saved objects>>.

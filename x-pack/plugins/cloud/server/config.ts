@@ -21,6 +21,9 @@ const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   id: schema.maybe(schema.string()),
   apm: schema.maybe(apmConfigSchema),
+  resetPasswordUrl: schema.maybe(schema.string()),
+  deploymentUrl: schema.maybe(schema.string()),
+  accountUrl: schema.maybe(schema.string()),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;
@@ -28,6 +31,9 @@ export type CloudConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<CloudConfigType> = {
   exposeToBrowser: {
     id: true,
+    resetPasswordUrl: true,
+    deploymentUrl: true,
+    accountUrl: true,
   },
   schema: configSchema,
 };

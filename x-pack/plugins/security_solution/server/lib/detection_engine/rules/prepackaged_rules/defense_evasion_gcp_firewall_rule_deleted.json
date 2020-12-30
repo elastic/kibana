@@ -1,0 +1,50 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when a firewall rule is deleted in Google Cloud Platform (GCP). Virtual Private Cloud (VPC) firewall rules can be configured to allow or deny connections to or from virtual machine (VM) instances. An adversary may delete a firewall rule in order to weaken their target's security controls.",
+  "false_positives": [
+    "Firewall rules may be deleted by system administrators. Verify that the firewall configuration change was expected. Exceptions can be added to this rule to filter expected behavior."
+  ],
+  "index": [
+    "filebeat-*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "GCP Firewall Rule Deletion",
+  "note": "The GCP Filebeat module must be enabled to use this rule.",
+  "query": "event.dataset:googlecloud.audit and event.action:v*.compute.firewalls.delete",
+  "references": [
+    "https://cloud.google.com/vpc/docs/firewalls"
+  ],
+  "risk_score": 47,
+  "rule_id": "ff9b571e-61d6-4f6c-9561-eb4cca3bafe1",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Cloud",
+    "GCP",
+    "Continuous Monitoring",
+    "SecOps",
+    "Configuration Audit"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "reference": "https://attack.mitre.org/techniques/T1562/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

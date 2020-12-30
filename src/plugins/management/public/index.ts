@@ -21,7 +21,16 @@ import { PluginInitializerContext } from 'kibana/public';
 import { ManagementPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new ManagementPlugin();
+  return new ManagementPlugin(initializerContext);
 }
 
-export { ManagementStart } from './types';
+export { RegisterManagementAppArgs, ManagementSection, ManagementApp } from './utils';
+
+export {
+  ManagementAppMountParams,
+  ManagementSetup,
+  ManagementStart,
+  DefinedSections,
+} from './types';
+
+export { MANAGEMENT_APP_ID } from '../common/contants';

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { schema } from '@kbn/config-schema';
 import { Plugin, CoreSetup } from 'kibana/server';
 
 export class UiSettingsPlugin implements Plugin {
@@ -27,6 +27,7 @@ export class UiSettingsPlugin implements Plugin {
         description: 'just for testing',
         value: '2',
         category: ['any'],
+        schema: schema.string(),
       },
     });
 

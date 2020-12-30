@@ -23,10 +23,19 @@ jest.mock('./fs');
 
 import { resolve } from 'path';
 
+import { ToolingLogCollectingWriter } from '@kbn/dev-utils/tooling_log';
+
 import { absolutePathSnapshotSerializer, stripAnsiSnapshotSerializer } from '../test_helpers';
 import { linkProjectExecutables } from './link_project_executables';
 import { Project } from './project';
 import { buildProjectGraph } from './projects';
+import { log } from './log';
+
+const logWriter = new ToolingLogCollectingWriter();
+log.setWriters([logWriter]);
+beforeEach(() => {
+  logWriter.messages.length = 0;
+});
 
 const projectsByName = new Map([
   [
@@ -64,13 +73,14 @@ const projectsByName = new Map([
     ),
   ],
 ]);
+(projectsByName.get('bar') as Project).isSinglePackageJsonProject = true;
 
 const projectGraph = buildProjectGraph(projectsByName);
 
 function getFsMockCalls() {
   const fs = require('./fs');
   const fsMockCalls: { [key: string]: any[][] } = {};
-  Object.keys(fs).map(key => {
+  Object.keys(fs).map((key) => {
     if (jest.isMockFunction(fs[key])) {
       fsMockCalls[key] = fs[key].mock.calls;
     }
@@ -87,9 +97,10 @@ afterEach(() => {
 });
 
 describe('bin script points nowhere', () => {
-  test('does not try to create symlink or node_modules/.bin directory', async () => {
+  test('does not try to create symlink on node_modules/.bin for that bin script', async () => {
     const fs = require('./fs');
     fs.isFile.mockReturnValue(false);
+    fs.isDirectory.mockReturnValue(true);
 
     await linkProjectExecutables(projectsByName, projectGraph);
     expect(getFsMockCalls()).toMatchSnapshot('fs module calls');
@@ -97,16 +108,18 @@ describe('bin script points nowhere', () => {
 });
 
 describe('bin script points to a file', () => {
-  test('creates a symlink in the project node_modules/.bin directory', async () => {
+  test('creates a symlink for the project bin into the roots project node_modules/.bin directory as well as node_modules/.bin directory symlink into the roots one', async () => {
     const fs = require('./fs');
     fs.isFile.mockReturnValue(true);
+    fs.isDirectory.mockReturnValue(false);
 
-    const logMock = jest.spyOn(console, 'log').mockImplementation(() => {
-      // noop
-    });
     await linkProjectExecutables(projectsByName, projectGraph);
 
     expect(getFsMockCalls()).toMatchSnapshot('fs module calls');
-    expect(logMock.mock.calls).toMatchSnapshot('logs');
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+         debg Linking package executables,
+      ]
+    `);
   });
 });

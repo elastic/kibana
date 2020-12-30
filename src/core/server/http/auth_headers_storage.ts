@@ -33,7 +33,7 @@ export class AuthHeadersStorage {
   public set = (request: KibanaRequest | LegacyRequest, headers: AuthHeaders) => {
     this.authHeadersCache.set(ensureRawRequest(request), headers);
   };
-  public get: GetAuthHeaders = request => {
+  public get: GetAuthHeaders = (request) => {
     return this.authHeadersCache.get(ensureRawRequest(request));
   };
 }

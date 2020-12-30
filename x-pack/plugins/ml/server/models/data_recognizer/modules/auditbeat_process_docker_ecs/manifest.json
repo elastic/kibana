@@ -1,0 +1,73 @@
+{
+  "id": "auditbeat_process_docker_ecs",
+  "title": "Auditbeat docker processes",
+  "description": "Detect unusual processes in docker containers from auditd data (ECS).",
+  "type": "Auditbeat data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "auditbeat-*",
+  "query": {
+    "bool": {
+      "filter": [
+        { "term":  { "event.module": "auditd" } },
+        { "term":  { "container.runtime": "docker" } }
+      ],
+      "must": {
+        "exists": { "field": "auditd.data.syscall" }
+      }
+    }
+  },
+  "jobs": [
+    {
+      "id": "docker_high_count_process_events_ecs",
+      "file": "docker_high_count_process_events_ecs.json"
+    },
+    {
+      "id": "docker_rare_process_activity_ecs",
+      "file": "docker_rare_process_activity_ecs.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-docker_high_count_process_events_ecs",
+      "file": "datafeed_docker_high_count_process_events_ecs.json",
+      "job_id": "docker_high_count_process_events_ecs"
+    },
+    {
+      "id": "datafeed-docker_rare_process_activity_ecs",
+      "file": "datafeed_docker_rare_process_activity_ecs.json",
+      "job_id": "docker_rare_process_activity_ecs"
+    }
+  ],
+  "kibana": {
+    "dashboard": [
+      {
+        "id": "ml_auditbeat_docker_process_event_rate_ecs",
+        "file": "ml_auditbeat_docker_process_event_rate_ecs.json"
+      },
+      {
+        "id": "ml_auditbeat_docker_process_explorer_ecs",
+        "file": "ml_auditbeat_docker_process_explorer_ecs.json"
+      }
+    ],
+    "search": [
+      {
+        "id": "ml_auditbeat_docker_process_events_ecs",
+        "file": "ml_auditbeat_docker_process_events_ecs.json"
+      }
+    ],
+    "visualization": [
+      {
+        "id": "ml_auditbeat_docker_process_event_rate_by_process_ecs",
+        "file": "ml_auditbeat_docker_process_event_rate_by_process_ecs.json"
+      },
+      {
+        "id": "ml_auditbeat_docker_process_event_rate_vis_ecs",
+        "file": "ml_auditbeat_docker_process_event_rate_vis_ecs.json"
+      },
+      {
+        "id": "ml_auditbeat_docker_process_occurrence_ecs",
+        "file": "ml_auditbeat_docker_process_occurrence_ecs.json"
+      }
+    ]
+  }
+}

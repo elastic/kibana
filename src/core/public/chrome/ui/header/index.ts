@@ -18,8 +18,9 @@
  */
 
 export { Header, HeaderProps } from './header';
-export { HeaderWrapper } from './header_wrapper';
+export { OnIsLockedUpdate, NavType } from './types';
 export {
+  ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,

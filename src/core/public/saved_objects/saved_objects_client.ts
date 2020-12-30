@@ -17,28 +17,25 @@
  * under the License.
  */
 
-import { cloneDeep, pick, throttle } from 'lodash';
+import { pick, throttle, cloneDeep } from 'lodash';
 import { resolve as resolveUrl } from 'url';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   SavedObject,
-  SavedObjectAttributes,
   SavedObjectReference,
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
 } from '../../server';
 
-// TODO: Migrate to an error modal powered by the NP?
-import {
-  isAutoCreateIndexError,
-  showAutoCreateIndexErrorPage,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpSetup } from '../http';
 
-type SavedObjectsFindOptions = Omit<SavedObjectFindOptionsServer, 'namespace' | 'sortOrder'>;
+type SavedObjectsFindOptions = Omit<
+  SavedObjectFindOptionsServer,
+  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
+>;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
@@ -61,9 +58,7 @@ export interface SavedObjectsCreateOptions {
  *
  * @public
  */
-export interface SavedObjectsBulkCreateObject<
-  T extends SavedObjectAttributes = SavedObjectAttributes
-> extends SavedObjectsCreateOptions {
+export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsCreateOptions {
   type: string;
   attributes: T;
 }
@@ -75,9 +70,7 @@ export interface SavedObjectsBulkCreateOptions {
 }
 
 /** @public */
-export interface SavedObjectsBulkUpdateObject<
-  T extends SavedObjectAttributes = SavedObjectAttributes
-> {
+export interface SavedObjectsBulkUpdateObject<T = unknown> {
   type: string;
   id: string;
   attributes: T;
@@ -99,10 +92,14 @@ export interface SavedObjectsUpdateOptions {
 }
 
 /** @public */
-export interface SavedObjectsBatchResponse<
-  T extends SavedObjectAttributes = SavedObjectAttributes
-> {
+export interface SavedObjectsBatchResponse<T = unknown> {
   savedObjects: Array<SimpleSavedObject<T>>;
+}
+
+/** @public */
+export interface SavedObjectsDeleteOptions {
+  /** Force deletion of an object that exists in multiple namespaces */
+  force?: boolean;
 }
 
 /**
@@ -113,9 +110,7 @@ export interface SavedObjectsBatchResponse<
  *
  * @public
  */
-export interface SavedObjectsFindResponsePublic<
-  T extends SavedObjectAttributes = SavedObjectAttributes
-> extends SavedObjectsBatchResponse<T> {
+export interface SavedObjectsFindResponsePublic<T = unknown> extends SavedObjectsBatchResponse<T> {
   total: number;
   perPage: number;
   page: number;
@@ -124,7 +119,7 @@ export interface SavedObjectsFindResponsePublic<
 interface BatchQueueEntry {
   type: string;
   id: string;
-  resolve: <T extends SavedObjectAttributes>(value: SimpleSavedObject<T> | SavedObject<T>) => void;
+  resolve: <T = unknown>(value: SimpleSavedObject<T> | SavedObject<T>) => void;
   reject: (reason?: any) => void;
 }
 
@@ -149,6 +144,23 @@ const API_BASE_URL = '/api/saved_objects/';
  */
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
+interface ObjectTypeAndId {
+  id: string;
+  type: string;
+}
+
+const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
+  const objects: ObjectTypeAndId[] = [];
+  const inserted = new Set<string>();
+  queue.forEach(({ id, type }) => {
+    if (!inserted.has(`${type}|${id}`)) {
+      objects.push({ id, type });
+      inserted.add(`${type}|${id}`);
+    }
+  });
+  return objects;
+};
+
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
  * use Elasticsearch for storing plugin state. The client-side
@@ -165,29 +177,34 @@ export class SavedObjectsClient {
    * Throttled processing of get requests into bulk requests at 100ms interval
    */
   private processBatchQueue = throttle(
-    () => {
-      const queue = cloneDeep(this.batchQueue);
+    async () => {
+      const queue = [...this.batchQueue];
       this.batchQueue = [];
 
-      this.bulkGet(queue)
-        .then(({ savedObjects }) => {
-          queue.forEach(queueItem => {
-            const foundObject = savedObjects.find(savedObject => {
-              return savedObject.id === queueItem.id && savedObject.type === queueItem.type;
-            });
+      try {
+        const objectsToFetch = getObjectsToFetch(queue);
+        const { saved_objects: savedObjects } = await this.performBulkGet(objectsToFetch);
 
-            if (!foundObject) {
-              return queueItem.resolve(this.createSavedObject(pick(queueItem, ['id', 'type'])));
-            }
+        queue.forEach((queueItem) => {
+          const foundObject = savedObjects.find((savedObject) => {
+            return savedObject.id === queueItem.id && savedObject.type === queueItem.type;
+          });
 
-            queueItem.resolve(foundObject);
-          });
-        })
-        .catch(err => {
-          queue.forEach(queueItem => {
-            queueItem.reject(err);
-          });
+          if (foundObject) {
+            // multiple calls may have been requested the same object.
+            // we need to clone to avoid sharing references between the instances
+            queueItem.resolve(this.createSavedObject(cloneDeep(foundObject)));
+          } else {
+            queueItem.resolve(
+              this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
+            );
+          }
         });
+      } catch (err) {
+        queue.forEach((queueItem) => {
+          queueItem.reject(err);
+        });
+      }
     },
     BATCH_INTERVAL,
     { leading: false }
@@ -207,7 +224,7 @@ export class SavedObjectsClient {
    * @param options
    * @returns
    */
-  public create = <T extends SavedObjectAttributes>(
+  public create = <T = unknown>(
     type: string,
     attributes: T,
     options: SavedObjectsCreateOptions = {}
@@ -231,15 +248,7 @@ export class SavedObjectsClient {
       }),
     });
 
-    return createRequest
-      .then(resp => this.createSavedObject(resp))
-      .catch((error: object) => {
-        if (isAutoCreateIndexError(error)) {
-          showAutoCreateIndexErrorPage();
-        }
-
-        throw error;
-      });
+    return createRequest.then((resp) => this.createSavedObject(resp));
   };
 
   /**
@@ -262,8 +271,8 @@ export class SavedObjectsClient {
       query,
       body: JSON.stringify(objects),
     });
-    return request.then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    return request.then((resp) => {
+      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>,
         SavedObjectsBatchResponse
@@ -278,12 +287,20 @@ export class SavedObjectsClient {
    * @param id
    * @returns
    */
-  public delete = (type: string, id: string): ReturnType<SavedObjectsApi['delete']> => {
+  public delete = (
+    type: string,
+    id: string,
+    options?: SavedObjectsDeleteOptions
+  ): ReturnType<SavedObjectsApi['delete']> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE' });
+    const query = {
+      force: !!options?.force,
+    };
+
+    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query });
   };
 
   /**
@@ -300,7 +317,7 @@ export class SavedObjectsClient {
    * @property {object} [options.hasReference] - { type, id }
    * @returns A find result with objects matching the specified search.
    */
-  public find = <T extends SavedObjectAttributes>(
+  public find = <T = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
@@ -308,6 +325,7 @@ export class SavedObjectsClient {
       defaultSearchOperator: 'default_search_operator',
       fields: 'fields',
       hasReference: 'has_reference',
+      hasReferenceOperator: 'has_reference_operator',
       page: 'page',
       perPage: 'per_page',
       search: 'search',
@@ -315,17 +333,27 @@ export class SavedObjectsClient {
       sortField: 'sort_field',
       type: 'type',
       filter: 'filter',
+      namespaces: 'namespaces',
+      preference: 'preference',
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
-    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]);
+    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Record<
+      string,
+      any
+    >;
+
+    // `has_references` is a structured object. we need to stringify it before sending it, as `fetch`
+    // is not doing it implicitly.
+    if (query.has_reference) {
+      query.has_reference = JSON.stringify(query.has_reference);
+    }
 
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',
       query,
     });
-    return request.then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    return request.then((resp) => {
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['find']>>,
         SavedObjectsFindResponsePublic
@@ -336,7 +364,10 @@ export class SavedObjectsClient {
           per_page: 'perPage',
           page: 'page',
         },
-        resp
+        {
+          ...resp,
+          saved_objects: resp.saved_objects.map((d) => this.createSavedObject(d)),
+        }
       ) as SavedObjectsFindResponsePublic<T>;
     });
   };
@@ -348,10 +379,7 @@ export class SavedObjectsClient {
    * @param {string} id
    * @returns The saved object for the given type and id.
    */
-  public get = <T extends SavedObjectAttributes>(
-    type: string,
-    id: string
-  ): Promise<SimpleSavedObject<T>> => {
+  public get = <T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
@@ -375,21 +403,24 @@ export class SavedObjectsClient {
    * ])
    */
   public bulkGet = (objects: Array<{ id: string; type: string }> = []) => {
-    const path = this.getPath(['_bulk_get']);
-    const filteredObjects = objects.map(obj => pick(obj, ['id', 'type']));
-
-    const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
-      method: 'POST',
-      body: JSON.stringify(filteredObjects),
-    });
-    return request.then(resp => {
-      resp.saved_objects = resp.saved_objects.map(d => this.createSavedObject(d));
+    const filteredObjects = objects.map((obj) => pick(obj, ['id', 'type']));
+    return this.performBulkGet(filteredObjects).then((resp) => {
+      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
         SavedObjectsBatchResponse
       >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
     });
   };
+
+  private async performBulkGet(objects: ObjectTypeAndId[]) {
+    const path = this.getPath(['_bulk_get']);
+    const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
+      method: 'POST',
+      body: JSON.stringify(objects),
+    });
+    return request;
+  }
 
   /**
    * Updates an object
@@ -402,7 +433,7 @@ export class SavedObjectsClient {
    * @prop {object} options.migrationVersion - The optional migrationVersion of this document
    * @returns
    */
-  public update<T extends SavedObjectAttributes>(
+  public update<T = unknown>(
     type: string,
     id: string,
     attributes: T,
@@ -434,13 +465,13 @@ export class SavedObjectsClient {
    * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
    * @returns The result of the update operation containing both failed and updated saved objects.
    */
-  public bulkUpdate<T extends SavedObjectAttributes>(objects: SavedObjectsBulkUpdateObject[] = []) {
+  public bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[] = []) {
     const path = this.getPath(['_bulk_update']);
 
     return this.savedObjectsFetch(path, {
       method: 'PUT',
       body: JSON.stringify(objects),
-    }).then(resp => {
+    }).then((resp) => {
       resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkUpdate']>>,
@@ -449,9 +480,7 @@ export class SavedObjectsClient {
     });
   }
 
-  private createSavedObject<T extends SavedObjectAttributes>(
-    options: SavedObject<T>
-  ): SimpleSavedObject<T> {
+  private createSavedObject<T = unknown>(options: SavedObject<T>): SimpleSavedObject<T> {
     return new SimpleSavedObject(this, options);
   }
 
@@ -465,11 +494,7 @@ export class SavedObjectsClient {
    * uses `{response: {status: number}}`.
    */
   private savedObjectsFetch(path: string, { method, query, body }: HttpFetchOptions) {
-    return this.http.fetch(path, { method, query, body }).catch(err => {
-      const kfetchError = Object.assign(err, { res: err.response });
-      delete kfetchError.response;
-      return Promise.reject(kfetchError);
-    });
+    return this.http.fetch(path, { method, query, body });
   }
 }
 

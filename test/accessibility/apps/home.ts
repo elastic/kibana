@@ -19,7 +19,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export default function({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'home']);
   const a11y = getService('a11y');
 
@@ -33,7 +33,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Add Kibana sample data page', async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
       await a11y.testAppSnapshot();
     });
 

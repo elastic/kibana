@@ -18,12 +18,18 @@
  */
 
 import { EditPanelAction } from './edit_panel_action';
-import { EmbeddableFactory, Embeddable, EmbeddableInput } from '../embeddables';
-import { GetEmbeddableFactory, ViewMode } from '../types';
+import { Embeddable, EmbeddableInput, SavedObjectEmbeddableInput } from '../embeddables';
+import { ViewMode } from '../types';
 import { ContactCardEmbeddable } from '../test_samples';
+import { embeddablePluginMock } from '../../mocks';
+import { applicationServiceMock } from '../../../../../core/public/mocks';
+import { of } from 'rxjs';
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
+const { doStart } = embeddablePluginMock.createInstance();
+const start = doStart();
+const getFactory = start.getEmbeddableFactory;
+const applicationMock = applicationServiceMock.createStartContract();
+const stateTransferMock = embeddablePluginMock.createStartContract().getStateTransfer();
 
 class EditableEmbeddable extends Embeddable {
   public readonly type = 'EDITABLE_EMBEDDABLE';
@@ -39,7 +45,7 @@ class EditableEmbeddable extends Embeddable {
 }
 
 test('is compatible when edit url is available, in edit mode and editable', async () => {
-  const action = new EditPanelAction(getFactory);
+  const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
   expect(
     await action.isCompatible({
       embeddable: new EditableEmbeddable({ id: '123', viewMode: ViewMode.EDIT }, true),
@@ -47,14 +53,62 @@ test('is compatible when edit url is available, in edit mode and editable', asyn
   ).toBe(true);
 });
 
+test('redirects to app using state transfer with by value mode', async () => {
+  applicationMock.currentAppId$ = of('superCoolCurrentApp');
+  const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
+  const embeddable = new EditableEmbeddable(
+    ({
+      id: '123',
+      viewMode: ViewMode.EDIT,
+      coolInput1: 1,
+      coolInput2: 2,
+    } as unknown) as EmbeddableInput,
+    true
+  );
+  embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
+  await action.execute({ embeddable });
+  expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
+    path: '/123',
+    state: {
+      originatingApp: 'superCoolCurrentApp',
+      embeddableId: '123',
+      valueInput: {
+        id: '123',
+        viewMode: ViewMode.EDIT,
+        coolInput1: 1,
+        coolInput2: 2,
+      },
+    },
+  });
+});
+
+test('redirects to app using state transfer without by value mode', async () => {
+  applicationMock.currentAppId$ = of('superCoolCurrentApp');
+  const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
+  const embeddable = new EditableEmbeddable(
+    { id: '123', viewMode: ViewMode.EDIT, savedObjectId: '1234' } as SavedObjectEmbeddableInput,
+    true
+  );
+  embeddable.getOutput = jest.fn(() => ({ editApp: 'ultraVisualize', editPath: '/123' }));
+  await action.execute({ embeddable });
+  expect(stateTransferMock.navigateToEditor).toHaveBeenCalledWith('ultraVisualize', {
+    path: '/123',
+    state: {
+      originatingApp: 'superCoolCurrentApp',
+      embeddableId: '123',
+      valueInput: undefined,
+    },
+  });
+});
+
 test('getHref returns the edit urls', async () => {
-  const action = new EditPanelAction(getFactory);
+  const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
   expect(action.getHref).toBeDefined();
 
   if (action.getHref) {
     const embeddable = new EditableEmbeddable({ id: '123', viewMode: ViewMode.EDIT }, true);
     expect(
-      action.getHref({
+      await action.getHref({
         embeddable,
       })
     ).toBe(embeddable.getOutput().editUrl);
@@ -62,7 +116,7 @@ test('getHref returns the edit urls', async () => {
 });
 
 test('is not compatible when edit url is not available', async () => {
-  const action = new EditPanelAction(getFactory);
+  const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
   const embeddable = new ContactCardEmbeddable(
     {
       id: '123',
@@ -81,8 +135,7 @@ test('is not compatible when edit url is not available', async () => {
 });
 
 test('is not visible when edit url is available but in view mode', async () => {
-  embeddableFactories.clear();
-  const action = new EditPanelAction(type => embeddableFactories.get(type));
+  const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
   expect(
     await action.isCompatible({
       embeddable: new EditableEmbeddable(
@@ -97,8 +150,7 @@ test('is not visible when edit url is available but in view mode', async () => {
 });
 
 test('is not compatible when edit url is available, in edit mode, but not editable', async () => {
-  embeddableFactories.clear();
-  const action = new EditPanelAction(type => embeddableFactories.get(type));
+  const action = new EditPanelAction(getFactory, applicationMock, stateTransferMock);
   expect(
     await action.isCompatible({
       embeddable: new EditableEmbeddable(

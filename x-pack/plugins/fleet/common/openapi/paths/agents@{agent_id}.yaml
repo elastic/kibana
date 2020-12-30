@@ -1,0 +1,36 @@
+parameters:
+  - schema:
+      type: string
+    name: agentId
+    in: path
+    required: true
+get:
+  summary: Fleet - Agent - Info
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                type: object
+            required:
+              - item
+  operationId: get-fleet-agents-agentId
+put:
+  summary: Fleet - Agent - Update
+  tags: []
+  responses: {}
+  operationId: put-fleet-agents-agentId
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+delete:
+  summary: Fleet - Agent - Delete
+  tags: []
+  responses: {}
+  operationId: delete-fleet-agents-agentId
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml

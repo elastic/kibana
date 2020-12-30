@@ -5,22 +5,13 @@
  */
 
 import sinon from 'sinon';
-import { CustomElement } from '../../../../../legacy/plugins/canvas/types';
-import { CUSTOM_ELEMENT_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { CustomElement } from '../../../types';
+import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateCustomElementRoute } from './update';
-import {
-  IRouter,
-  kibanaResponseFactory,
-  RequestHandlerContext,
-  RequestHandler,
-} from 'src/core/server';
-import {
-  savedObjectsClientMock,
-  httpServiceMock,
-  httpServerMock,
-  loggingServiceMock,
-} from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
+import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
 import { okResponse } from '../ok_response';
+import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = ({
   core: {
@@ -45,7 +36,6 @@ const customElement: CustomElementPayload = {
   name: 'MyCustomElement',
   displayName: 'My Wonderful Custom Element',
   content: 'This is content',
-  tags: ['filter', 'graphic'],
   '@created': '2019-02-08T18:35:23.029Z',
   '@timestamp': '2019-02-08T18:35:23.029Z',
 };
@@ -57,14 +47,10 @@ describe('PUT custom element', () => {
   beforeEach(() => {
     clock = sinon.useFakeTimers(now);
 
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-    initializeUpdateCustomElementRoute({
-      router,
-      logger: loggingServiceMock.create().get(),
-    });
+    const routerDeps = getMockedRouterDeps();
+    initializeUpdateCustomElementRoute(routerDeps);
 
-    routeHandler = router.put.mock.calls[0][1];
+    routeHandler = routerDeps.router.put.mock.calls[0][1];
   });
 
   afterEach(() => {

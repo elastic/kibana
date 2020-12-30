@@ -17,86 +17,96 @@
  * under the License.
  */
 
-import React, { useEffect, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
-import { FieldHook, FieldConfig } from '../types';
+import { FieldHook, FieldConfig, FormData } from '../types';
 import { useField } from '../hooks';
 import { useFormContext } from '../form_context';
 
-interface Props {
+export interface Props<T, FormType = FormData, I = T> {
   path: string;
-  config?: FieldConfig<any>;
-  defaultValue?: unknown;
-  component?: FunctionComponent<any> | 'input';
+  config?: FieldConfig<T, FormType, I>;
+  defaultValue?: T;
+  component?: FunctionComponent<any>;
   componentProps?: Record<string, any>;
-  children?: (field: FieldHook) => JSX.Element;
+  readDefaultValueOnForm?: boolean;
+  onChange?: (value: I) => void;
+  children?: (field: FieldHook<T, I>) => JSX.Element | null;
+  [key: string]: any;
 }
 
-export const UseField = ({
-  path,
-  config,
-  defaultValue,
-  component = 'input',
-  componentProps = {},
-  children,
-}: Props) => {
-  const form = useFormContext();
+function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, FormType, I>) {
+  const {
+    path,
+    config,
+    defaultValue,
+    component,
+    componentProps,
+    readDefaultValueOnForm = true,
+    onChange,
+    children,
+    ...rest
+  } = props;
 
-  if (typeof defaultValue === 'undefined') {
-    defaultValue = form.getFieldDefaultValue(path);
-  }
+  const form = useFormContext<FormType>();
+  const ComponentToRender = component ?? 'input';
+  const propsToForward = { ...componentProps, ...rest };
 
-  if (!config) {
-    config = form.__readFieldConfigFromSchema(path);
-  }
+  const fieldConfig: FieldConfig<T, FormType, I> & { initialValue?: T } =
+    config !== undefined
+      ? { ...config }
+      : ({
+          ...form.__readFieldConfigFromSchema(path),
+        } as Partial<FieldConfig<T, FormType, I>>);
 
-  // Don't modify the config object
-  const configCopy =
-    typeof defaultValue !== 'undefined' ? { ...config, defaultValue } : { ...config };
+  if (defaultValue !== undefined) {
+    // update the form "defaultValue" ref object so when/if we reset the form we can go back to this value
+    form.__updateDefaultValueAt(path, defaultValue);
 
-  if (!configCopy.path) {
-    configCopy.path = path;
+    // Use the defaultValue prop as initial value
+    fieldConfig.initialValue = defaultValue;
   } else {
-    if (configCopy.path !== path) {
-      throw new Error(
-        `Field path mismatch. Got "${path}" but field config has "${configCopy.path}".`
-      );
+    if (readDefaultValueOnForm) {
+      // Read the field initial value from the "defaultValue" object passed to the form
+      fieldConfig.initialValue =
+        (form.__getFieldDefaultValue(path) as T) ?? fieldConfig.defaultValue;
     }
   }
 
-  const field = useField(form, path, configCopy);
-
-  // Remove field from form when it is unmounted or if its path changes
-  useEffect(() => {
-    return () => {
-      form.__removeField(path);
-    };
-  }, [path]);
+  const field = useField<T, FormType, I>(form, path, fieldConfig, onChange);
 
   // Children prevails over anything else provided.
   if (children) {
     return children!(field);
   }
 
-  if (component === 'input') {
+  if (ComponentToRender === 'input') {
     return (
-      <input
+      <ComponentToRender
         type={field.type}
         onChange={field.onChange}
-        value={field.value as string}
-        {...componentProps}
+        value={(field.value as unknown) as string}
+        {...propsToForward}
       />
     );
   }
 
-  return component({ field, ...componentProps });
-};
+  return <ComponentToRender {...{ field, ...propsToForward }} />;
+}
+
+export const UseField = React.memo(UseFieldComp) as typeof UseFieldComp;
 
 /**
  * Get a <UseField /> component providing some common props for all instances.
  * @param partialProps Partial props to apply to all <UseField /> instances
  */
-export const getUseField = (partialProps: Partial<Props>) => (props: Partial<Props>) => {
-  const componentProps = { ...partialProps, ...props } as Props;
-  return <UseField {...componentProps} />;
-};
+export function getUseField<T1 = unknown, FormType1 = FormData, I1 = T1>(
+  partialProps: Partial<Props<T1, FormType1, I1>>
+) {
+  return function <T2 = T1, FormType2 = FormType1, I2 = I1>(
+    props: Partial<Props<T2, FormType2, I2>>
+  ) {
+    const componentProps = { ...partialProps, ...props } as Props<T2, FormType2, I2>;
+    return <UseField<T2, FormType2, I2> {...componentProps} />;
+  };
+}

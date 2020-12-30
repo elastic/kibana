@@ -16,41 +16,68 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
+import { CoreSetup, CoreStart } from '../../../../core/server';
 import { coreMock } from '../../../../core/server/mocks';
 
-import { SearchService } from './search_service';
-import { CoreSetup } from '../../../../core/server';
+import { DataPluginStart } from '../plugin';
+import { createFieldFormatsStartMock } from '../field_formats/mocks';
+import { createIndexPatternsStartMock } from '../index_patterns/mocks';
 
-const mockSearchApi = { search: jest.fn() };
-jest.mock('./create_api', () => ({
-  createApi: () => mockSearchApi,
-}));
+import { SearchService, SearchServiceSetupDependencies } from './search_service';
+import { bfetchPluginMock } from '../../../bfetch/server/mocks';
+import { of } from 'rxjs';
 
 describe('Search service', () => {
   let plugin: SearchService;
-  let mockCoreSetup: MockedKeys<CoreSetup>;
+  let mockCoreSetup: MockedKeys<CoreSetup<object, DataPluginStart>>;
+  let mockCoreStart: MockedKeys<CoreStart>;
 
   beforeEach(() => {
-    plugin = new SearchService(coreMock.createPluginInitializerContext({}));
+    const mockLogger: any = {
+      debug: () => {},
+    };
+    const context = coreMock.createPluginInitializerContext({});
+    context.config.create = jest.fn().mockImplementation(() => {
+      return of({
+        search: {
+          aggs: {
+            shardDelay: {
+              enabled: true,
+            },
+          },
+        },
+      });
+    });
+    plugin = new SearchService(context, mockLogger);
     mockCoreSetup = coreMock.createSetup();
-    mockSearchApi.search.mockClear();
+    mockCoreStart = coreMock.createStart();
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
-      const setup = plugin.setup(mockCoreSetup);
-      expect(setup).toHaveProperty('registerSearchStrategyContext');
-      expect(setup).toHaveProperty('registerSearchStrategyProvider');
-      expect(setup).toHaveProperty('__LEGACY');
+      const bfetch = bfetchPluginMock.createSetupContract();
+      const setup = plugin.setup(mockCoreSetup, ({
+        packageInfo: { version: '8' },
+        bfetch,
+        expressions: {
+          registerFunction: jest.fn(),
+          registerType: jest.fn(),
+        },
+      } as unknown) as SearchServiceSetupDependencies);
+      expect(setup).toHaveProperty('aggs');
+      expect(setup).toHaveProperty('registerSearchStrategy');
     });
   });
 
-  describe('__LEGACY', () => {
-    it('calls searchAPI.search', async () => {
-      const setup = plugin.setup(mockCoreSetup);
-      setup.__LEGACY.search(jest.fn(), {}, 'foo');
-      expect(mockSearchApi.search).toBeCalled();
+  describe('start()', () => {
+    it('exposes proper contract', async () => {
+      const start = plugin.start(mockCoreStart, {
+        fieldFormats: createFieldFormatsStartMock(),
+        indexPatterns: createIndexPatternsStartMock(),
+      });
+      expect(start).toHaveProperty('aggs');
+      expect(start).toHaveProperty('getSearchStrategy');
     });
   });
 });

@@ -4,39 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Logger,
-  SavedObjectsBaseOptions,
-  PluginInitializerContext,
-  CoreSetup,
-} from 'src/core/server';
-import { first } from 'rxjs/operators';
-import { createConfig$ } from './config';
+import { first, map } from 'rxjs/operators';
+import nodeCrypto from '@elastic/node-crypto';
+import { Logger, PluginInitializerContext, CoreSetup } from 'src/core/server';
+import { TypeOf } from '@kbn/config-schema';
+import { SecurityPluginSetup } from '../../security/server';
+import { createConfig, ConfigSchema } from './config';
 import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
   EncryptionError,
+  EncryptionKeyRotationService,
 } from './crypto';
 import { EncryptedSavedObjectsAuditLogger } from './audit';
-import { SavedObjectsSetup, setupSavedObjects } from './saved_objects';
+import { setupSavedObjects, ClientInstanciator } from './saved_objects';
+import { getCreateMigration, CreateEncryptedSavedObjectsMigrationFn } from './create_migration';
+import { defineRoutes } from './routes';
 
-export interface PluginSetupContract {
+export interface PluginsSetup {
+  security?: SecurityPluginSetup;
+}
+
+export interface EncryptedSavedObjectsPluginSetup {
   registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => void;
-  __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => void };
+  usingEphemeralEncryptionKey: boolean;
+  createMigration: CreateEncryptedSavedObjectsMigrationFn;
 }
 
-export interface PluginStartContract extends SavedObjectsSetup {
+export interface EncryptedSavedObjectsPluginStart {
   isEncryptionError: (error: Error) => boolean;
-}
-
-/**
- * Describes a set of APIs that is available in the legacy platform only and required by this plugin
- * to function properly.
- */
-export interface LegacyAPI {
-  auditLogger: {
-    log: (eventType: string, message: string, data?: Record<string, unknown>) => void;
-  };
+  getClient: ClientInstanciator;
 }
 
 /**
@@ -44,50 +41,87 @@ export interface LegacyAPI {
  */
 export class Plugin {
   private readonly logger: Logger;
-  private savedObjectsSetup!: SavedObjectsSetup;
-
-  private legacyAPI?: LegacyAPI;
-  private readonly getLegacyAPI = () => {
-    if (!this.legacyAPI) {
-      throw new Error('Legacy API is not registered!');
-    }
-    return this.legacyAPI;
-  };
+  private savedObjectsSetup!: ClientInstanciator;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup): Promise<PluginSetupContract> {
-    const config = await createConfig$(this.initializerContext)
+  public async setup(
+    core: CoreSetup,
+    deps: PluginsSetup
+  ): Promise<EncryptedSavedObjectsPluginSetup> {
+    const config = await this.initializerContext.config
+      .create<TypeOf<typeof ConfigSchema>>()
+      .pipe(
+        map((rawConfig) => createConfig(rawConfig, this.initializerContext.logger.get('config')))
+      )
       .pipe(first())
       .toPromise();
-
-    const service = Object.freeze(
-      new EncryptedSavedObjectsService(
-        config.encryptionKey,
-        this.logger,
-        new EncryptedSavedObjectsAuditLogger(() => this.getLegacyAPI().auditLogger)
-      )
+    const auditLogger = new EncryptedSavedObjectsAuditLogger(
+      deps.security?.audit.getLogger('encryptedSavedObjects')
     );
 
-    this.savedObjectsSetup = setupSavedObjects({ service, savedObjects: core.savedObjects });
+    const primaryCrypto = nodeCrypto({ encryptionKey: config.encryptionKey });
+    const decryptionOnlyCryptos = config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
+      nodeCrypto({ encryptionKey: decryptionKey })
+    );
+
+    const service = Object.freeze(
+      new EncryptedSavedObjectsService({
+        primaryCrypto,
+        decryptionOnlyCryptos,
+        logger: this.logger,
+        audit: auditLogger,
+      })
+    );
+
+    this.savedObjectsSetup = setupSavedObjects({
+      service,
+      savedObjects: core.savedObjects,
+      security: deps.security,
+      getStartServices: core.getStartServices,
+    });
+
+    defineRoutes({
+      router: core.http.createRouter(),
+      logger: this.initializerContext.logger.get('routes'),
+      encryptionKeyRotationService: Object.freeze(
+        new EncryptionKeyRotationService({
+          logger: this.logger.get('key-rotation-service'),
+          service,
+          getStartServices: core.getStartServices,
+          security: deps.security,
+        })
+      ),
+      config,
+    });
 
     return {
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) =>
         service.registerType(typeRegistration),
-      __legacyCompat: { registerLegacyAPI: (legacyAPI: LegacyAPI) => (this.legacyAPI = legacyAPI) },
+      usingEphemeralEncryptionKey: config.usingEphemeralEncryptionKey,
+      createMigration: getCreateMigration(
+        service,
+        (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
+          const serviceForMigration = new EncryptedSavedObjectsService({
+            primaryCrypto,
+            decryptionOnlyCryptos,
+            logger: this.logger,
+            audit: auditLogger,
+          });
+          serviceForMigration.registerType(typeRegistration);
+          return serviceForMigration;
+        }
+      ),
     };
   }
 
   public start() {
     this.logger.debug('Starting plugin');
-
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
-      getDecryptedAsInternalUser: (type: string, id: string, options?: SavedObjectsBaseOptions) => {
-        return this.savedObjectsSetup.getDecryptedAsInternalUser(type, id, options);
-      },
+      getClient: (options = {}) => this.savedObjectsSetup(options),
     };
   }
 

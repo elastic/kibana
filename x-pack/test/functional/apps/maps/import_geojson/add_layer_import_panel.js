@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import path from 'path';
 
-export default function({ getPageObjects }) {
+export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['maps', 'common']);
 
   const IMPORT_FILE_PREVIEW_NAME = 'Import File';
@@ -28,7 +28,7 @@ export default function({ getPageObjects }) {
     });
 
     afterEach(async () => {
-      await PageObjects.maps.cancelLayerAdd();
+      await PageObjects.maps.closeOrCancelLayer();
     });
 
     it('should add GeoJSON file to map', async () => {

@@ -1,0 +1,19 @@
+{
+  "name": "@kbn/telemetry-tools",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "main": "./target/index.js",
+  "private": true,
+  "kibana": {
+    "devOnly": true
+  },
+  "scripts": {
+    "build": "../../node_modules/.bin/babel src --out-dir target --delete-dir-on-start --extensions .ts --source-maps=inline",
+    "kbn:bootstrap": "yarn build",
+    "kbn:watch": "yarn build --watch"
+  },
+  "devDependencies": {
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/utility-types": "link:../kbn-utility-types"
+  }
+}

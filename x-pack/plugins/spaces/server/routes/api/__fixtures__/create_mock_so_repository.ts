@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from 'src/core/server';
+import { ISavedObjectsRepository, SavedObjectsErrorHelpers } from 'src/core/server';
 
 export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
   const mockSavedObjectsClientContract = ({
     get: jest.fn((type, id) => {
-      const result = spaces.filter(s => s.id === id);
+      const result = spaces.filter((s) => s.id === id);
       if (!result.length) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
@@ -22,13 +22,13 @@ export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
       };
     }),
     create: jest.fn((type, attributes, { id }) => {
-      if (spaces.find(s => s.id === id)) {
+      if (spaces.find((s) => s.id === id)) {
         throw SavedObjectsErrorHelpers.decorateConflictError(new Error(), 'space conflict');
       }
       return {};
     }),
     update: jest.fn((type, id) => {
-      if (!spaces.find(s => s.id === id)) {
+      if (!spaces.find((s) => s.id === id)) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       }
       return {};
@@ -37,7 +37,7 @@ export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
       return {};
     }),
     deleteByNamespace: jest.fn(),
-  } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+  } as unknown) as jest.Mocked<ISavedObjectsRepository>;
 
   return mockSavedObjectsClientContract;
 };

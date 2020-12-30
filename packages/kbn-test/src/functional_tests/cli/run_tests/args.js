@@ -46,6 +46,20 @@ const options = {
   updateBaselines: {
     desc: 'Replace baseline screenshots with whatever is generated from the test.',
   },
+  updateSnapshots: {
+    desc: 'Replace inline and file snapshots with whatever is generated from the test.',
+  },
+  u: {
+    desc: 'Replace both baseline screenshots and snapshots',
+  },
+  include: {
+    arg: '<file>',
+    desc: 'Files that must included to be run, can be included multiple times.',
+  },
+  exclude: {
+    arg: '<file>',
+    desc: 'Files that must NOT be included to be run, can be included multiple times.',
+  },
   'include-tag': {
     arg: '<tag>',
     desc: 'Tags that suites must include to be run, can be included multiple times.',
@@ -65,8 +79,8 @@ const options = {
 
 export function displayHelp() {
   const helpOptions = Object.keys(options)
-    .filter(name => name !== '_')
-    .map(name => {
+    .filter((name) => name !== '_')
+    .map((name) => {
       const option = options[name];
       return {
         ...option,
@@ -74,7 +88,7 @@ export function displayHelp() {
         default: option.defaultHelp || '',
       };
     })
-    .map(option => {
+    .map((option) => {
       return `--${option.usage.padEnd(28)} ${option.desc} ${option.default}`;
     })
     .join(`\n      `);
@@ -115,6 +129,13 @@ export function processOptions(userOptions, defaultConfigPaths) {
     delete userOptions['kibana-install-dir'];
   }
 
+  userOptions.suiteFiles = {
+    include: [].concat(userOptions.include || []),
+    exclude: [].concat(userOptions.exclude || []),
+  };
+  delete userOptions.include;
+  delete userOptions.exclude;
+
   userOptions.suiteTags = {
     include: [].concat(userOptions['include-tag'] || []),
     exclude: [].concat(userOptions['exclude-tag'] || []),
@@ -134,7 +155,7 @@ export function processOptions(userOptions, defaultConfigPaths) {
 
   return {
     ...userOptions,
-    configs: configs.map(c => resolve(c)),
+    configs: configs.map((c) => resolve(c)),
     createLogger,
     extraKbnOpts: userOptions._,
   };

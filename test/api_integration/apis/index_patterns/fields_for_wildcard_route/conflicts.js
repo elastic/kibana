@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -32,7 +32,7 @@ export default function({ getService }) {
         .get('/api/index_patterns/_fields_for_wildcard')
         .query({ pattern: 'logs-*' })
         .expect(200)
-        .then(resp => {
+        .then((resp) => {
           expect(resp.body).to.eql({
             fields: [
               {

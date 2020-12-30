@@ -17,6 +17,13 @@
  * under the License.
  */
 
-export * from './type';
 export * from './types';
+export * from './ast';
+export * from './fonts';
 export * from './expression_types';
+export * from './expression_functions';
+export * from './expression_renderers';
+export * from './executor';
+export * from './execution';
+export * from './service';
+export * from './util';

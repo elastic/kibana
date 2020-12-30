@@ -49,7 +49,7 @@ export async function addMessagesToReport(options: {
   for (const testCase of makeFailedTestCaseIter(report)) {
     const { classname, name } = testCase.$;
     const messageList = messages
-      .filter(u => u.classname === classname && u.name === name)
+      .filter((u) => u.classname === classname && u.name === name)
       .reduce((acc, u) => `${acc}\n  - ${u.message}`, '');
 
     if (!messageList) {
@@ -59,10 +59,14 @@ export async function addMessagesToReport(options: {
     log.info(`${classname} - ${name}:${messageList}`);
     const output = `Failed Tests Reporter:${messageList}\n\n`;
 
-    if (!testCase['system-out']) {
-      testCase['system-out'] = [output];
+    if (typeof testCase.failure[0] === 'object' && testCase.failure[0].$.message) {
+      // failure with "messages" ignore the system-out on jenkins
+      // so we instead extend the failure message
+      testCase.failure[0]._ = output + testCase.failure[0]._;
+    } else if (!testCase['system-out']) {
+      testCase['system-out'] = [{ _: output }];
     } else if (typeof testCase['system-out'][0] === 'string') {
-      testCase['system-out'][0] = output + String(testCase['system-out'][0]);
+      testCase['system-out'][0] = { _: output + testCase['system-out'][0] };
     } else {
       testCase['system-out'][0]._ = output + testCase['system-out'][0]._;
     }
@@ -76,7 +80,7 @@ export async function addMessagesToReport(options: {
   const xml = builder
     .buildObject(report)
     .split('\n')
-    .map(line => (line.trim() === '' ? '' : line))
+    .map((line) => (line.trim() === '' ? '' : line))
     .join('\n');
 
   if (dryRun) {

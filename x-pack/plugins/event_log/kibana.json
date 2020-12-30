@@ -1,0 +1,9 @@
+{
+  "id": "eventLog",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "eventLog"],
+  "optionalPlugins": ["spaces"],
+  "server": true,
+  "ui": false
+}

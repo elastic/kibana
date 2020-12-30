@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createKbnFieldTypes } from './kbn_field_types_factory';
+import { createKbnFieldTypes, kbnFieldTypeUnknown } from './kbn_field_types_factory';
 import { KbnFieldType } from './kbn_field_type';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 
@@ -30,8 +30,8 @@ const registeredKbnTypes = createKbnFieldTypes();
  *  @param  {string} typeName
  *  @return {KbnFieldType}
  */
-export const getKbnFieldType = (typeName: string): KbnFieldType | undefined =>
-  registeredKbnTypes.find(t => t.name === typeName);
+export const getKbnFieldType = (typeName: string): KbnFieldType =>
+  registeredKbnTypes.find((t) => t.name === typeName) || kbnFieldTypeUnknown;
 
 /**
  *  Get the esTypes known by all kbnFieldTypes
@@ -39,7 +39,7 @@ export const getKbnFieldType = (typeName: string): KbnFieldType | undefined =>
  *  @return {Array<string>}
  */
 export const getKbnTypeNames = (): string[] =>
-  registeredKbnTypes.filter(type => type.name).map(type => type.name);
+  registeredKbnTypes.filter((type) => type.name).map((type) => type.name);
 
 /**
  *  Get the KbnFieldType name for an esType string
@@ -48,7 +48,7 @@ export const getKbnTypeNames = (): string[] =>
  *  @return {string}
  */
 export const castEsToKbnFieldTypeName = (esType: ES_FIELD_TYPES | string): KBN_FIELD_TYPES => {
-  const type = registeredKbnTypes.find(t => t.esTypes.includes(esType as ES_FIELD_TYPES));
+  const type = registeredKbnTypes.find((t) => t.esTypes.includes(esType as ES_FIELD_TYPES));
 
   return type && type.name ? (type.name as KBN_FIELD_TYPES) : KBN_FIELD_TYPES.UNKNOWN;
 };
@@ -59,4 +59,4 @@ export const castEsToKbnFieldTypeName = (esType: ES_FIELD_TYPES | string): KBN_F
  *  @return {Array<string>}
  */
 export const getFilterableKbnTypeNames = (): string[] =>
-  registeredKbnTypes.filter(type => type.filterable).map(type => type.name);
+  registeredKbnTypes.filter((type) => type.filterable).map((type) => type.name);

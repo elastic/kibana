@@ -21,6 +21,7 @@ import { isAbsolute } from 'path';
 
 import { loadTracer } from '../load_tracer';
 import { decorateMochaUi } from './decorate_mocha_ui';
+import { decorateSnapshotUi } from '../snapshots/decorate_snapshot_ui';
 
 /**
  *  Load an array of test files into a mocha instance
@@ -37,20 +38,14 @@ export const loadTestFiles = ({
   lifecycle,
   providers,
   paths,
-  excludePaths,
   updateBaselines,
+  updateSnapshots,
 }) => {
-  const pendingExcludes = new Set(excludePaths.slice(0));
+  decorateSnapshotUi({ lifecycle, updateSnapshots, isCi: !!process.env.CI });
 
-  const innerLoadTestFile = path => {
+  const innerLoadTestFile = (path) => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');
-    }
-
-    if (pendingExcludes.has(path)) {
-      pendingExcludes.delete(path);
-      log.warning('Skipping test file %s', path);
-      return;
     }
 
     loadTracer(path, `testFile[${path}]`, () => {
@@ -94,13 +89,4 @@ export const loadTestFiles = ({
   };
 
   paths.forEach(innerLoadTestFile);
-
-  if (pendingExcludes.size) {
-    throw new Error(
-      `After loading all test files some exclude paths were not consumed:${[
-        '',
-        ...pendingExcludes,
-      ].join('\n  -')}`
-    );
-  }
 };

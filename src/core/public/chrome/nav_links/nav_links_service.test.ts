@@ -19,35 +19,22 @@
 
 import { NavLinksService } from './nav_links_service';
 import { take, map, takeLast } from 'rxjs/operators';
-import { App, LegacyApp } from '../../application';
+import { App } from '../../application';
+import { BehaviorSubject } from 'rxjs';
 
-const mockAppService = {
-  availableApps: new Map<string, App>(
-    ([
-      { id: 'app1', order: 0, title: 'App 1', icon: 'app1' },
-      {
-        id: 'app2',
-        order: -10,
-        title: 'App 2',
-        euiIconType: 'canvasApp',
-      },
-      { id: 'chromelessApp', order: 20, title: 'Chromless App', chromeless: true },
-    ] as App[]).map(app => [app.id, app])
-  ),
-  availableLegacyApps: new Map<string, LegacyApp>(
-    ([
-      { id: 'legacyApp1', order: 5, title: 'Legacy App 1', icon: 'legacyApp1', appUrl: '/app1' },
-      {
-        id: 'legacyApp2',
-        order: -5,
-        title: 'Legacy App 2',
-        euiIconType: 'canvasApp',
-        appUrl: '/app2',
-      },
-      { id: 'legacyApp3', order: 15, title: 'Legacy App 3', appUrl: '/app3' },
-    ] as LegacyApp[]).map(app => [app.id, app])
-  ),
-} as any;
+const availableApps = new Map([
+  ['app1', { id: 'app1', order: 0, title: 'App 1', icon: 'app1' }],
+  [
+    'app2',
+    {
+      id: 'app2',
+      order: -10,
+      title: 'App 2',
+      euiIconType: 'canvasApp',
+    },
+  ],
+  ['chromelessApp', { id: 'chromelessApp', order: 20, title: 'Chromless App', chromeless: true }],
+]);
 
 const mockHttp = {
   basePath: {
@@ -57,10 +44,14 @@ const mockHttp = {
 
 describe('NavLinksService', () => {
   let service: NavLinksService;
+  let mockAppService: any;
   let start: ReturnType<NavLinksService['start']>;
 
   beforeEach(() => {
     service = new NavLinksService();
+    mockAppService = {
+      applications$: new BehaviorSubject<ReadonlyMap<string, App>>(availableApps as any),
+    };
     start = service.start({ application: mockAppService, http: mockHttp });
   });
 
@@ -71,7 +62,7 @@ describe('NavLinksService', () => {
           .getNavLinks$()
           .pipe(
             take(1),
-            map(links => links.map(l => l.id))
+            map((links) => links.map((l) => l.id))
           )
           .toPromise()
       ).not.toContain('chromelessApp');
@@ -83,30 +74,27 @@ describe('NavLinksService', () => {
           .getNavLinks$()
           .pipe(
             take(1),
-            map(links => links.map(l => l.id))
+            map((links) => links.map((l) => l.id))
           )
           .toPromise()
-      ).toEqual(['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3']);
+      ).toEqual(['app2', 'app1']);
     });
 
     it('emits multiple values', async () => {
-      const navLinkIds$ = start.getNavLinks$().pipe(map(links => links.map(l => l.id)));
+      const navLinkIds$ = start.getNavLinks$().pipe(map((links) => links.map((l) => l.id)));
       const emittedLinks: string[][] = [];
-      navLinkIds$.subscribe(r => emittedLinks.push(r));
-      start.update('legacyApp1', { active: true });
+      navLinkIds$.subscribe((r) => emittedLinks.push(r));
+      start.update('app1', { href: '/foo' });
 
       service.stop();
       expect(emittedLinks).toEqual([
-        ['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3'],
-        ['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3'],
+        ['app2', 'app1'],
+        ['app2', 'app1'],
       ]);
     });
 
     it('completes when service is stopped', async () => {
-      const last$ = start
-        .getNavLinks$()
-        .pipe(takeLast(1))
-        .toPromise();
+      const last$ = start.getNavLinks$().pipe(takeLast(1)).toPromise();
       service.stop();
       await expect(last$).resolves.toBeInstanceOf(Array);
     });
@@ -114,7 +102,7 @@ describe('NavLinksService', () => {
 
   describe('#get()', () => {
     it('returns link if exists', () => {
-      expect(start.get('legacyApp1')!.title).toEqual('Legacy App 1');
+      expect(start.get('app2')!.title).toEqual('App 2');
     });
 
     it('returns undefined if it does not exist', () => {
@@ -124,19 +112,13 @@ describe('NavLinksService', () => {
 
   describe('#getAll()', () => {
     it('returns a sorted array of navlinks', () => {
-      expect(start.getAll().map(l => l.id)).toEqual([
-        'app2',
-        'legacyApp2',
-        'app1',
-        'legacyApp1',
-        'legacyApp3',
-      ]);
+      expect(start.getAll().map((l) => l.id)).toEqual(['app2', 'app1']);
     });
   });
 
   describe('#has()', () => {
     it('returns true if exists', () => {
-      expect(start.has('legacyApp1')).toBe(true);
+      expect(start.has('app2')).toBe(true);
     });
 
     it('returns false if it does not exist', () => {
@@ -152,10 +134,10 @@ describe('NavLinksService', () => {
           .getNavLinks$()
           .pipe(
             take(1),
-            map(links => links.map(l => l.id))
+            map((links) => links.map((l) => l.id))
           )
           .toPromise()
-      ).toEqual(['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3']);
+      ).toEqual(['app2', 'app1']);
     });
 
     it('does nothing on chromeless applications', async () => {
@@ -165,72 +147,90 @@ describe('NavLinksService', () => {
           .getNavLinks$()
           .pipe(
             take(1),
-            map(links => links.map(l => l.id))
+            map((links) => links.map((l) => l.id))
           )
           .toPromise()
-      ).toEqual(['app2', 'legacyApp2', 'app1', 'legacyApp1', 'legacyApp3']);
+      ).toEqual(['app2', 'app1']);
     });
 
     it('removes all other links', async () => {
-      start.showOnly('legacyApp1');
+      start.showOnly('app2');
       expect(
         await start
           .getNavLinks$()
           .pipe(
             take(1),
-            map(links => links.map(l => l.id))
+            map((links) => links.map((l) => l.id))
           )
           .toPromise()
-      ).toEqual(['legacyApp1']);
+      ).toEqual(['app2']);
+    });
+
+    it('still removes all other links when availableApps are re-emitted', async () => {
+      start.showOnly('app2');
+      mockAppService.applications$.next(mockAppService.applications$.value);
+      expect(
+        await start
+          .getNavLinks$()
+          .pipe(
+            take(1),
+            map((links) => links.map((l) => l.id))
+          )
+          .toPromise()
+      ).toEqual(['app2']);
     });
   });
 
   describe('#update()', () => {
     it('updates the navlinks and returns the updated link', async () => {
-      expect(start.update('legacyApp1', { hidden: true })).toMatchInlineSnapshot(`
-        Object {
-          "appUrl": "/app1",
-          "baseUrl": "http://localhost/wow/app1",
-          "hidden": true,
-          "icon": "legacyApp1",
-          "id": "legacyApp1",
-          "legacy": true,
-          "order": 5,
-          "title": "Legacy App 1",
-        }
-      `);
+      expect(start.update('app2', { hidden: true })).toEqual(
+        expect.objectContaining({
+          hidden: true,
+          id: 'app2',
+          order: -10,
+          title: 'App 2',
+          euiIconType: 'canvasApp',
+        })
+      );
       const hiddenLinkIds = await start
         .getNavLinks$()
         .pipe(
           take(1),
-          map(links => links.filter(l => l.hidden).map(l => l.id))
+          map((links) => links.filter((l) => l.hidden).map((l) => l.id))
         )
         .toPromise();
-      expect(hiddenLinkIds).toEqual(['legacyApp1']);
+      expect(hiddenLinkIds).toEqual(['app2']);
     });
 
     it('returns undefined if link does not exist', () => {
       expect(start.update('fake', { hidden: true })).toBeUndefined();
     });
+
+    it('keeps the updated link when availableApps are re-emitted', async () => {
+      start.update('app2', { hidden: true });
+      mockAppService.applications$.next(mockAppService.applications$.value);
+      const hiddenLinkIds = await start
+        .getNavLinks$()
+        .pipe(
+          take(1),
+          map((links) => links.filter((l) => l.hidden).map((l) => l.id))
+        )
+        .toPromise();
+      expect(hiddenLinkIds).toEqual(['app2']);
+    });
   });
 
   describe('#enableForcedAppSwitcherNavigation()', () => {
     it('flips #getForceAppSwitcherNavigation$()', async () => {
-      await expect(
-        start
-          .getForceAppSwitcherNavigation$()
-          .pipe(take(1))
-          .toPromise()
-      ).resolves.toBe(false);
+      await expect(start.getForceAppSwitcherNavigation$().pipe(take(1)).toPromise()).resolves.toBe(
+        false
+      );
 
       start.enableForcedAppSwitcherNavigation();
 
-      await expect(
-        start
-          .getForceAppSwitcherNavigation$()
-          .pipe(take(1))
-          .toPromise()
-      ).resolves.toBe(true);
+      await expect(start.getForceAppSwitcherNavigation$().pipe(take(1)).toPromise()).resolves.toBe(
+        true
+      );
     });
   });
 });

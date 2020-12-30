@@ -17,45 +17,28 @@
  * under the License.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import React from 'react';
 
 import { FormData } from '../types';
-import { Subscription } from '../lib';
-import { useFormContext } from '../form_context';
+import { useFormData } from '../hooks';
 
-interface Props {
-  children: (formData: FormData) => JSX.Element | null;
+interface Props<I> {
+  children: (formData: I) => JSX.Element | null;
   pathsToWatch?: string | string[];
 }
 
-export const FormDataProvider = ({ children, pathsToWatch }: Props) => {
-  const [formData, setFormData] = useState<FormData>({});
-  const previousState = useRef<FormData>({});
-  const subscription = useRef<Subscription | null>(null);
-  const form = useFormContext();
+const FormDataProviderComp = function <I extends FormData = FormData>({
+  children,
+  pathsToWatch,
+}: Props<I>) {
+  const { 0: formData, 2: isReady } = useFormData<I>({ watch: pathsToWatch });
 
-  useEffect(() => {
-    subscription.current = form.__formData$.current.subscribe(data => {
-      // To avoid re-rendering the children for updates on the form data
-      // that we are **not** interested in, we can specify one or multiple path(s)
-      // to watch.
-      if (pathsToWatch) {
-        const valuesToWatchArray = Array.isArray(pathsToWatch)
-          ? (pathsToWatch as string[])
-          : ([pathsToWatch] as string[]);
-        if (valuesToWatchArray.some(value => previousState.current[value] !== data[value])) {
-          previousState.current = data;
-          setFormData(data);
-        }
-      } else {
-        setFormData(data);
-      }
-    });
-
-    return () => {
-      subscription.current!.unsubscribe();
-    };
-  }, [pathsToWatch]);
+  if (!isReady) {
+    // No field has mounted yet, don't render anything
+    return null;
+  }
 
   return children(formData);
 };
+
+export const FormDataProvider = React.memo(FormDataProviderComp) as typeof FormDataProviderComp;

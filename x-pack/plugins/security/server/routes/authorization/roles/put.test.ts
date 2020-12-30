@@ -5,16 +5,15 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { LicenseCheck, LICENSE_CHECK_STATE } from '../../../../../licensing/server';
+import { kibanaResponseFactory } from '../../../../../../../src/core/server';
+import { LicenseCheck } from '../../../../../licensing/server';
 import { GLOBAL_RESOURCE } from '../../../../common/constants';
 import { definePutRolesRoutes } from './put';
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-} from '../../../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from '../../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../../index.mock';
+import { KibanaFeature } from '../../../../../features/server';
+import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 
 const application = 'kibana-.kibana';
 const privilegeMap = {
@@ -45,31 +44,86 @@ const privilegeMap = {
 interface TestOptions {
   name: string;
   licenseCheckResult?: LicenseCheck;
-  apiResponses?: Array<() => Promise<unknown>>;
+  apiResponses?: {
+    get: () => Promise<unknown>;
+    put: () => Promise<unknown>;
+  };
   payload?: Record<string, any>;
-  asserts: { statusCode: number; result?: Record<string, any>; apiArguments?: unknown[][] };
+  asserts: {
+    statusCode: number;
+    result?: Record<string, any>;
+    apiArguments?: { get: unknown[]; put: unknown[] };
+    recordSubFeaturePrivilegeUsage?: boolean;
+  };
 }
 
 const putRoleTest = (
   description: string,
-  {
-    name,
-    payload,
-    licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
-    apiResponses = [],
-    asserts,
-  }: TestOptions
+  { name, payload, licenseCheckResult = { state: 'valid' }, apiResponses, asserts }: TestOptions
 ) => {
   test(description, async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
-    const mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
-    for (const apiResponse of apiResponses) {
-      mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
+    const mockContext = {
+      core: coreMock.createRequestHandlerContext(),
+      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
+    };
+
+    if (apiResponses?.get) {
+      mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockImplementationOnce(
+        (async () => ({ body: await apiResponses?.get() })) as any
+      );
     }
+
+    if (apiResponses?.put) {
+      mockContext.core.elasticsearch.client.asCurrentUser.security.putRole.mockImplementationOnce(
+        (async () => ({ body: await apiResponses?.put() })) as any
+      );
+    }
+
+    mockRouteDefinitionParams.getFeatureUsageService.mockReturnValue(
+      securityFeatureUsageServiceMock.createStartContract()
+    );
+
+    mockRouteDefinitionParams.getFeatures.mockResolvedValue([
+      new KibanaFeature({
+        id: 'feature_1',
+        name: 'feature 1',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            ui: [],
+            savedObject: { all: [], read: [] },
+          },
+          read: {
+            ui: [],
+            savedObject: { all: [], read: [] },
+          },
+        },
+        subFeatures: [
+          {
+            name: 'sub feature 1',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'sub_feature_privilege_1',
+                    name: 'first sub-feature privilege',
+                    includeIn: 'none',
+                    ui: [],
+                    savedObject: { all: [], read: [] },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    ]);
 
     definePutRolesRoutes(mockRouteDefinitionParams);
     const [[{ validate }, handler]] = mockRouteDefinitionParams.router.put.mock.calls;
@@ -82,23 +136,32 @@ const putRoleTest = (
       body: payload !== undefined ? (validate as any).body.validate(payload) : undefined,
       headers,
     });
-    const mockContext = ({
-      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-    } as unknown) as RequestHandlerContext;
 
     const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
     expect(response.status).toBe(asserts.statusCode);
     expect(response.payload).toEqual(asserts.result);
 
-    if (Array.isArray(asserts.apiArguments)) {
-      for (const apiArguments of asserts.apiArguments) {
-        expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
-        expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(...apiArguments);
-      }
-    } else {
-      expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
+    if (asserts.apiArguments?.get) {
+      expect(
+        mockContext.core.elasticsearch.client.asCurrentUser.security.getRole
+      ).toHaveBeenCalledWith(...asserts.apiArguments?.get);
+    }
+    if (asserts.apiArguments?.put) {
+      expect(
+        mockContext.core.elasticsearch.client.asCurrentUser.security.putRole
+      ).toHaveBeenCalledWith(...asserts.apiArguments?.put);
     }
     expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+
+    if (asserts.recordSubFeaturePrivilegeUsage) {
+      expect(
+        mockRouteDefinitionParams.getFeatureUsageService().recordSubFeaturePrivilegeUsage
+      ).toHaveBeenCalledTimes(1);
+    } else {
+      expect(
+        mockRouteDefinitionParams.getFeatureUsageService().recordSubFeaturePrivilegeUsage
+      ).not.toHaveBeenCalled();
+    }
   });
 };
 
@@ -124,7 +187,7 @@ describe('PUT role', () => {
       expect(() =>
         requestParamsSchema.validate({ name: '' }, {}, 'request params')
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[request params.name]: value is [] but it must have a minimum length of [1]."`
+        `"[request params.name]: value has length [0] but it must have a minimum length of [1]."`
       );
     });
 
@@ -132,7 +195,7 @@ describe('PUT role', () => {
       expect(() =>
         requestParamsSchema.validate({ name: 'a'.repeat(1025) }, {}, 'request params')
       ).toThrowErrorMatchingInlineSnapshot(
-        `"[request params.name]: value is [aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] but it must have a maximum length of [1024]."`
+        `"[request params.name]: value has length [1025] but it must have a maximum length of [1024]."`
       );
     });
   });
@@ -140,7 +203,7 @@ describe('PUT role', () => {
   describe('failure', () => {
     putRoleTest('returns result of license checker', {
       name: 'foo-role',
-      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
+      licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
   });
@@ -149,12 +212,11 @@ describe('PUT role', () => {
     putRoleTest(`creates empty role`, {
       name: 'foo-role',
       payload: {},
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -165,7 +227,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -180,12 +242,11 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -202,7 +263,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -220,12 +281,11 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -242,7 +302,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -258,12 +318,11 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -280,7 +339,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -324,12 +383,11 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [async () => ({}), async () => {}],
+      apiResponses: { get: async () => ({}), put: async () => {} },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -367,7 +425,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -414,8 +472,8 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [
-        async () => ({
+      apiResponses: {
+        get: async () => ({
           'foo-role': {
             metadata: {
               bar: 'old-metadata',
@@ -445,13 +503,12 @@ describe('PUT role', () => {
             ],
           },
         }),
-        async () => {},
-      ],
+        put: async () => {},
+      },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -489,7 +546,7 @@ describe('PUT role', () => {
               },
             },
           ],
-        ],
+        },
         statusCode: 204,
         result: undefined,
       },
@@ -518,8 +575,8 @@ describe('PUT role', () => {
           },
         ],
       },
-      apiResponses: [
-        async () => ({
+      apiResponses: {
+        get: async () => ({
           'foo-role': {
             metadata: {
               bar: 'old-metadata',
@@ -554,13 +611,12 @@ describe('PUT role', () => {
             ],
           },
         }),
-        async () => {},
-      ],
+        put: async () => {},
+      },
       asserts: {
-        apiArguments: [
-          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-          [
-            'shield.putRole',
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
             {
               name: 'foo-role',
               body: {
@@ -593,7 +649,130 @@ describe('PUT role', () => {
               },
             },
           ],
+        },
+        statusCode: 204,
+        result: undefined,
+      },
+    });
+
+    putRoleTest(`notifies when sub-feature privileges are included`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            spaces: ['*'],
+            feature: {
+              feature_1: ['sub_feature_privilege_1'],
+            },
+          },
         ],
+      },
+      apiResponses: { get: async () => ({}), put: async () => {} },
+      asserts: {
+        recordSubFeaturePrivilegeUsage: true,
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [
+                  {
+                    application: 'kibana-.kibana',
+                    privileges: ['feature_feature_1.sub_feature_privilege_1'],
+                    resources: ['*'],
+                  },
+                ],
+                metadata: undefined,
+              },
+            },
+          ],
+        },
+        statusCode: 204,
+        result: undefined,
+      },
+    });
+
+    putRoleTest(`does not record sub-feature privilege usage for unknown privileges`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            spaces: ['*'],
+            feature: {
+              feature_1: ['unknown_sub_feature_privilege_1'],
+            },
+          },
+        ],
+      },
+      apiResponses: { get: async () => ({}), put: async () => {} },
+      asserts: {
+        recordSubFeaturePrivilegeUsage: false,
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [
+                  {
+                    application: 'kibana-.kibana',
+                    privileges: ['feature_feature_1.unknown_sub_feature_privilege_1'],
+                    resources: ['*'],
+                  },
+                ],
+                metadata: undefined,
+              },
+            },
+          ],
+        },
+        statusCode: 204,
+        result: undefined,
+      },
+    });
+
+    putRoleTest(`does not record sub-feature privilege usage for unknown features`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            spaces: ['*'],
+            feature: {
+              unknown_feature: ['sub_feature_privilege_1'],
+            },
+          },
+        ],
+      },
+      apiResponses: { get: async () => ({}), put: async () => {} },
+      asserts: {
+        recordSubFeaturePrivilegeUsage: false,
+        apiArguments: {
+          get: [{ name: 'foo-role' }, { ignore: [404] }],
+          put: [
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [
+                  {
+                    application: 'kibana-.kibana',
+                    privileges: ['feature_unknown_feature.sub_feature_privilege_1'],
+                    resources: ['*'],
+                  },
+                ],
+                metadata: undefined,
+              },
+            },
+          ],
+        },
         statusCode: 204,
         result: undefined,
       },

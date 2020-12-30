@@ -1,0 +1,9 @@
+{
+  "id": "actions_simulators",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack"],
+  "requiredPlugins": ["actions", "features", "encryptedSavedObjects"],
+  "server": true,
+  "ui": false
+}

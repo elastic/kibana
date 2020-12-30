@@ -19,19 +19,19 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { AutocompleteSuggestion } from '../..';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 
 const noop = () => {
   return;
 };
 
-const mockSuggestion: AutocompleteSuggestion = {
+const mockSuggestion: QuerySuggestion = {
   description: 'This is not a helpful suggestion',
   end: 0,
   start: 42,
   text: 'as promised, not helpful',
-  type: 'value',
+  type: QuerySuggestionTypes.Value,
 };
 
 describe('SuggestionComponent', () => {
@@ -44,6 +44,7 @@ describe('SuggestionComponent', () => {
         suggestion={mockSuggestion}
         innerRef={noop}
         ariaId={'suggestion-1'}
+        shouldDisplayDescription={true}
       />
     );
 
@@ -59,6 +60,7 @@ describe('SuggestionComponent', () => {
         suggestion={mockSuggestion}
         innerRef={noop}
         ariaId={'suggestion-1'}
+        shouldDisplayDescription={true}
       />
     );
 
@@ -79,6 +81,7 @@ describe('SuggestionComponent', () => {
         suggestion={mockSuggestion}
         innerRef={innerRefCallback}
         ariaId={'suggestion-1'}
+        shouldDisplayDescription={true}
       />
     );
   });
@@ -94,6 +97,7 @@ describe('SuggestionComponent', () => {
         suggestion={mockSuggestion}
         innerRef={noop}
         ariaId={'suggestion-1'}
+        shouldDisplayDescription={true}
       />
     );
 
@@ -113,6 +117,7 @@ describe('SuggestionComponent', () => {
         suggestion={mockSuggestion}
         innerRef={noop}
         ariaId={'suggestion-1'}
+        shouldDisplayDescription={true}
       />
     );
 

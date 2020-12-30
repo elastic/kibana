@@ -18,14 +18,14 @@
  */
 
 import { SavedObjectsClient } from './service/saved_objects_client';
-import { SavedObjectsMapping } from './mappings';
-import { MigrationDefinition } from './migrations/core/document_migrator';
-import { SavedObjectsSchemaDefinition } from './schema';
-import { PropertyValidators } from './validation';
+import { SavedObjectsTypeMappingDefinition } from './mappings';
+import { SavedObjectMigrationMap } from './migrations';
 
 export {
   SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
@@ -33,87 +33,37 @@ export {
   SavedObjectsImportRetry,
 } from './import/types';
 
-/**
- * Information about the migrations that have been applied to this SavedObject.
- * When Kibana starts up, KibanaMigrator detects outdated documents and
- * migrates them based on this value. For each migration that has been applied,
- * the plugin's name is used as a key and the latest migration version as the
- * value.
- *
- * @example
- * migrationVersion: {
- *   dashboard: '7.1.1',
- *   space: '6.6.6',
- * }
- *
- * @public
- */
-export interface SavedObjectsMigrationVersion {
-  [pluginName: string]: string;
-}
+import { SavedObject } from '../../types';
+
+type KueryNode = any;
+
+export {
+  SavedObjectAttributes,
+  SavedObjectAttribute,
+  SavedObjectAttributeSingle,
+  SavedObject,
+  SavedObjectError,
+  SavedObjectReference,
+  SavedObjectsMigrationVersion,
+} from '../../types';
 
 /**
- * Don't use this type, it's simply a helper type for {@link SavedObjectAttribute}
+ * Meta information about the SavedObjectService's status. Available to plugins via {@link CoreSetup.status}.
  *
  * @public
  */
-export type SavedObjectAttributeSingle =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | SavedObjectAttributes;
-
-/**
- * Type definition for a Saved Object attribute value
- *
- * @public
- */
-export type SavedObjectAttribute = SavedObjectAttributeSingle | SavedObjectAttributeSingle[];
-
-/**
- * The data for a Saved Object is stored as an object in the `attributes`
- * property.
- *
- * @public
- */
-export interface SavedObjectAttributes {
-  [key: string]: SavedObjectAttribute;
-}
-
-/**
- *
- * @public
- */
-export interface SavedObject<T extends SavedObjectAttributes = any> {
-  /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
-  id: string;
-  /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
-  type: string;
-  /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
-  version?: string;
-  /** Timestamp of the last time this document had been updated.  */
-  updated_at?: string;
-  error?: {
-    message: string;
-    statusCode: number;
+export interface SavedObjectStatusMeta {
+  migratedIndices: {
+    [status: string]: number;
+    skipped: number;
+    migrated: number;
   };
-  /** {@inheritdoc SavedObjectAttributes} */
-  attributes: T;
-  /** {@inheritdoc SavedObjectReference} */
-  references: SavedObjectReference[];
-  /** {@inheritdoc SavedObjectsMigrationVersion} */
-  migrationVersion?: SavedObjectsMigrationVersion;
 }
 
 /**
- * A reference to another saved object.
- *
  * @public
  */
-export interface SavedObjectReference {
-  name: string;
+export interface SavedObjectsFindOptionsReference {
   type: string;
   id: string;
 }
@@ -122,7 +72,7 @@ export interface SavedObjectReference {
  *
  * @public
  */
-export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsFindOptions {
   type: string | string[];
   page?: number;
   perPage?: number;
@@ -138,9 +88,38 @@ export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   search?: string;
   /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
   searchFields?: string[];
-  hasReference?: { type: string; id: string };
+  /**
+   * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
+   * be modified. If used in conjunction with `searchFields`, both are concatenated together.
+   */
+  rootSearchFields?: string[];
+
+  /**
+   * Search for documents having a reference to the specified objects.
+   * Use `hasReferenceOperator` to specify the operator to use when searching for multiple references.
+   */
+  hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
+  /**
+   * The operator to use when searching by multiple references using the `hasReference` option. Defaults to `OR`
+   */
+  hasReferenceOperator?: 'AND' | 'OR';
+
+  /**
+   * The search operator to use with the provided filter. Defaults to `OR`
+   */
   defaultSearchOperator?: 'AND' | 'OR';
-  filter?: string;
+  filter?: string | KueryNode;
+  namespaces?: string[];
+  /**
+   * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved
+   * object client wrapper.
+   * If this is defined, it supersedes the `type` and `namespaces` fields when building the Elasticsearch query.
+   * Any types that are not included in this map will be excluded entirely.
+   * If a type is included but its value is undefined, the operation will search for that type in the Default namespace.
+   */
+  typeToNamespacesMap?: Map<string, string[] | undefined>;
+  /** An optional ES preference value to be used for the query **/
+  preference?: string;
 }
 
 /**
@@ -215,15 +194,6 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  * takes special care to ensure that 404 errors are generic and don't distinguish
  * between index missing or document missing.
  *
- * ### 503s from missing index
- *
- * Unlike all other methods, create requests are supposed to succeed even when
- * the Kibana index does not exist because it will be automatically created by
- * elasticsearch. When that is not the case it is because Elasticsearch's
- * `action.auto_create_index` setting prevents it from being created automatically
- * so we throw a special 503 with the intention of informing the user that their
- * Elasticsearch settings need to be updated.
- *
  * See {@link SavedObjectsClient}
  * See {@link SavedObjectsErrorHelpers}
  *
@@ -232,12 +202,94 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
 /**
- * @internal
- * @deprecated
+ * The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:
+ *  * single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace.
+ *  * multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces.
+ *  * agnostic: this type of saved object is global.
+ *
+ * @public
  */
-export interface SavedObjectsLegacyUiExports {
-  savedObjectMappings: SavedObjectsMapping[];
-  savedObjectMigrations: MigrationDefinition;
-  savedObjectSchemas: SavedObjectsSchemaDefinition;
-  savedObjectValidations: PropertyValidators;
+export type SavedObjectsNamespaceType = 'single' | 'multiple' | 'agnostic';
+
+/**
+ * @remarks This is only internal for now, and will only be public when we expose the registerType API
+ *
+ * @public
+ */
+export interface SavedObjectsType {
+  /**
+   * The name of the type, which is also used as the internal id.
+   */
+  name: string;
+  /**
+   * Is the type hidden by default. If true, repositories will not have access to this type unless explicitly
+   * declared as an `extraType` when creating the repository.
+   *
+   * See {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}.
+   */
+  hidden: boolean;
+  /**
+   * The {@link SavedObjectsNamespaceType | namespace type} for the type.
+   */
+  namespaceType: SavedObjectsNamespaceType;
+  /**
+   * If defined, the type instances will be stored in the given index instead of the default one.
+   */
+  indexPattern?: string;
+  /**
+   * If defined, will be used to convert the type to an alias.
+   */
+  convertToAliasScript?: string;
+  /**
+   * The {@link SavedObjectsTypeMappingDefinition | mapping definition} for the type.
+   */
+  mappings: SavedObjectsTypeMappingDefinition;
+  /**
+   * An optional map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type.
+   */
+  migrations?: SavedObjectMigrationMap;
+  /**
+   * An optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type.
+   */
+  management?: SavedObjectsTypeManagementDefinition;
+}
+
+/**
+ * Configuration options for the {@link SavedObjectsType | type}'s management section.
+ *
+ * @public
+ */
+export interface SavedObjectsTypeManagementDefinition {
+  /**
+   * Is the type importable or exportable. Defaults to `false`.
+   */
+  importableAndExportable?: boolean;
+  /**
+   * The default search field to use for this type. Defaults to `id`.
+   */
+  defaultSearchField?: string;
+  /**
+   * The eui icon name to display in the management table.
+   * If not defined, the default icon will be used.
+   */
+  icon?: string;
+  /**
+   * Function returning the title to display in the management table.
+   * If not defined, will use the object's type and id to generate a label.
+   */
+  getTitle?: (savedObject: SavedObject<any>) => string;
+  /**
+   * Function returning the url to use to redirect to the editing page of this object.
+   * If not defined, editing will not be allowed.
+   */
+  getEditUrl?: (savedObject: SavedObject<any>) => string;
+  /**
+   * Function returning the url to use to redirect to this object from the management section.
+   * If not defined, redirecting to the object will not be allowed.
+   *
+   * @returns an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to
+   *          the object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the
+   *          {@link Capabilities | uiCapabilities} to check if the user has permission to access the object.
+   */
+  getInAppUrl?: (savedObject: SavedObject<any>) => { path: string; uiCapabilitiesPath: string };
 }

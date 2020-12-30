@@ -18,13 +18,13 @@
  */
 
 import { get } from 'lodash';
-import { esFilters } from '../../../../../common';
+import { Filter, isExistsFilter, FILTERS } from '../../../../../common';
 
-export const mapExists = (filter: esFilters.Filter) => {
-  if (esFilters.isExistsFilter(filter)) {
+export const mapExists = (filter: Filter) => {
+  if (isExistsFilter(filter)) {
     return {
-      type: esFilters.FILTERS.EXISTS,
-      value: esFilters.FILTERS.EXISTS,
+      type: FILTERS.EXISTS,
+      value: FILTERS.EXISTS,
       key: get(filter, 'exists.field'),
     };
   }

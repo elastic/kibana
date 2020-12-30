@@ -6,14 +6,15 @@
 
 import expect from '@kbn/expect';
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring', 'common', 'header']);
   const esSupertest = getService('esSupertest');
   const noData = getService('monitoringNoData');
+  const testSubjects = getService('testSubjects');
   const clusterOverview = getService('monitoringClusterOverview');
   const retry = getService('retry');
 
-  describe('Monitoring is turned off', function() {
+  describe('Monitoring is turned off', function () {
     before(async () => {
       const browser = getService('browser');
       await browser.setWindowSize(1600, 1000);
@@ -35,22 +36,21 @@ export default function({ getService, getPageObjects }) {
         },
       };
 
-      await esSupertest
-        .put('/_cluster/settings')
-        .send(disableCollection)
-        .expect(200);
+      await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
       await esSupertest.delete('/.monitoring-*').expect(200);
     });
 
-    it('Monitoring enabled', async function() {
+    it('Monitoring enabled', async function () {
       await noData.enableMonitoring();
       await retry.try(async () => {
         expect(await noData.isMonitoringEnabled()).to.be(true);
       });
 
       // Here we are checking that once Monitoring is enabled,
-      //it moves on to the cluster overview page.
-      await retry.try(async () => {
+      // it moves on to the cluster overview page.
+      await retry.tryForTime(10000, async () => {
+        // Click the refresh button
+        await testSubjects.click('querySubmitButton');
         expect(await clusterOverview.isOnClusterOverview()).to.be(true);
       });
     });

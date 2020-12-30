@@ -249,7 +249,7 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
           .flatMap(({ family, variants }) =>
             variants.map(({ style, weight, format, sources, unicodeRange }) => {
               const src = sources
-                .map(source =>
+                .map((source) =>
                   source.startsWith(url)
                     ? `url('${source}') format('${format || source.split('.').pop()}')`
                     : `local('${source}')`

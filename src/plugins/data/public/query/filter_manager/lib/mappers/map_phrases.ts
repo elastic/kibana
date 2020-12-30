@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { esFilters } from '../../../../../common';
+import { Filter, isPhrasesFilter } from '../../../../../common';
 
-export const mapPhrases = (filter: esFilters.Filter) => {
-  if (!esFilters.isPhrasesFilter(filter)) {
+export const mapPhrases = (filter: Filter) => {
+  if (!isPhrasesFilter(filter)) {
     throw filter;
   }
 

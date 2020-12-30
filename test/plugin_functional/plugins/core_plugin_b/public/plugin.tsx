@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
 
 declare global {
@@ -52,7 +52,17 @@ export class CorePluginBPlugin
     };
   }
 
-  public start() {}
+  public async start(core: CoreStart, deps: {}) {
+    return {
+      sendSystemRequest: async (asSystemRequest: boolean) => {
+        const response = await core.http.post<string>('/core_plugin_b/system_request', {
+          asSystemRequest,
+        });
+        return `/core_plugin_b/system_request says: "${response}"`;
+      },
+    };
+  }
+
   public stop() {}
 }
 

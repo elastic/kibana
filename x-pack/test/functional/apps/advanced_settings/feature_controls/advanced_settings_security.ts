@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
@@ -59,18 +59,16 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_advanced_settings_all_role'),
           security.user.delete('global_advanced_settings_all_user'),
-          PageObjects.security.forceLogout(),
         ]);
       });
 
       it('shows management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`allows settings to be changed`, async () => {
@@ -125,10 +123,8 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Management']);
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`does not allow settings to be changed`, async () => {
@@ -141,7 +137,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no advanced_settings privileges', () => {
+    describe('no advanced_settings privileges', function () {
       before(async () => {
         await security.role.create('no_advanced_settings_privileges_role', {
           elasticsearch: {
@@ -177,21 +173,18 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_advanced_settings_privileges_user');
       });
 
-      it('shows Management navlink', async () => {
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
-        expect(navLinks).to.eql(['Discover', 'Management']);
+      it('does not show Management navlink', async () => {
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
+        expect(navLinks).to.eql(['Overview', 'Discover']);
       });
 
-      it(`does not allow navigation to advanced settings; redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+      it(`does not allow navigation to advanced settings; shows "not found" error`, async () => {
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail('homeApp', {
-          timeout: 10000,
-        });
+        await testSubjects.existOrFail('appNotFoundPageContent');
       });
     });
   });

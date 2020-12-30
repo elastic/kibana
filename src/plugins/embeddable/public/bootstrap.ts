@@ -16,45 +16,54 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { UiActionsSetup } from '../../ui_actions/public';
 import {
+  ACTION_ADD_PANEL,
+  ACTION_CUSTOMIZE_PANEL,
+  ACTION_EDIT_PANEL,
+  ACTION_INSPECT_PANEL,
   CONTEXT_MENU_TRIGGER,
-  APPLY_FILTER_TRIGGER,
-  createFilterAction,
+  contextMenuTrigger,
+  EmbeddableContext,
   PANEL_BADGE_TRIGGER,
+  PANEL_NOTIFICATION_TRIGGER,
+  panelBadgeTrigger,
+  panelNotificationTrigger,
+  RangeSelectContext,
+  REMOVE_PANEL_ACTION,
+  SELECT_RANGE_TRIGGER,
+  selectRangeTrigger,
+  ValueClickContext,
+  VALUE_CLICK_TRIGGER,
+  valueClickTrigger,
 } from './lib';
+
+declare module '../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
+    [PANEL_BADGE_TRIGGER]: EmbeddableContext;
+    [PANEL_NOTIFICATION_TRIGGER]: EmbeddableContext;
+    [SELECT_RANGE_TRIGGER]: RangeSelectContext;
+    [VALUE_CLICK_TRIGGER]: ValueClickContext;
+  }
+
+  export interface ActionContextMapping {
+    [ACTION_CUSTOMIZE_PANEL]: EmbeddableContext;
+    [ACTION_ADD_PANEL]: EmbeddableContext;
+    [ACTION_INSPECT_PANEL]: EmbeddableContext;
+    [REMOVE_PANEL_ACTION]: EmbeddableContext;
+    [ACTION_EDIT_PANEL]: EmbeddableContext;
+  }
+}
 
 /**
  * This method initializes Embeddable plugin with initial set of
  * triggers and actions.
- *
- * @param api
  */
-export const bootstrap = (uiActions: IUiActionsSetup) => {
-  const triggerContext = {
-    id: CONTEXT_MENU_TRIGGER,
-    title: 'Context menu',
-    description: 'Triggered on top-right corner context-menu select.',
-    actionIds: [],
-  };
-  const triggerFilter = {
-    id: APPLY_FILTER_TRIGGER,
-    title: 'Filter click',
-    description: 'Triggered when user applies filter to an embeddable.',
-    actionIds: [],
-  };
-  const triggerBadge = {
-    id: PANEL_BADGE_TRIGGER,
-    title: 'Panel badges',
-    description: 'Actions appear in title bar when an embeddable loads in a panel',
-    actionIds: [],
-  };
-  const actionApplyFilter = createFilterAction();
-
-  uiActions.registerTrigger(triggerContext);
-  uiActions.registerTrigger(triggerFilter);
-  uiActions.registerAction(actionApplyFilter);
-  uiActions.registerTrigger(triggerBadge);
-  // uiActions.attachAction(triggerFilter.id, actionApplyFilter.id);
+export const bootstrap = (uiActions: UiActionsSetup) => {
+  uiActions.registerTrigger(contextMenuTrigger);
+  uiActions.registerTrigger(panelBadgeTrigger);
+  uiActions.registerTrigger(panelNotificationTrigger);
+  uiActions.registerTrigger(selectRangeTrigger);
+  uiActions.registerTrigger(valueClickTrigger);
 };

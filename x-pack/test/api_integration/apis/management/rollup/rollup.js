@@ -9,7 +9,7 @@ import { API_BASE_PATH, ROLLUP_INDEX_NAME } from './constants';
 
 import { registerHelpers } from './rollup.test_helpers';
 
-export default function({ getService }) {
+export default function ({ getService }) {
   const supertest = getService('supertest');
   const es = getService('legacyEs');
 
@@ -45,13 +45,21 @@ export default function({ getService }) {
 
         const { body } = await supertest.get(uri).expect(200);
 
-        expect(body).to.eql({
-          dateFields: ['testCreatedField'],
-          keywordFields: ['testTagField'],
-          numericFields: ['testTotalField'],
-          doesMatchIndices: true,
-          doesMatchRollupIndices: false,
-        });
+        expect(Object.keys(body)).to.eql([
+          'doesMatchIndices',
+          'doesMatchRollupIndices',
+          'dateFields',
+          'numericFields',
+          'keywordFields',
+        ]);
+
+        expect(body.doesMatchIndices).to.be(true);
+        expect(body.doesMatchRollupIndices).to.be(false);
+        expect(body.dateFields).to.eql(['testCreatedField']);
+        expect(body.keywordFields).to.eql(['testTagField']);
+
+        // Allowing the test to account for future addition of doc_count
+        expect(body.numericFields.indexOf('testTotalField')).to.be.greaterThan(-1);
       });
 
       it("should not return any fields when the index pattern doesn't match any indices", async () => {
@@ -113,7 +121,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          const job = jobs.find(job => job.config.id === payload.job.id);
+          const job = jobs.find((job) => job.config.id === payload.job.id);
 
           expect(job).not.be(undefined);
           expect(job.config.index_pattern).to.eql(payload.job.index_pattern);
@@ -218,7 +226,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === payload.job.id);
+          job = jobs.find((job) => job.config.id === payload.job.id);
         });
 
         it('should start the job', async () => {
@@ -233,7 +241,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === jobId);
+          job = jobs.find((job) => job.config.id === jobId);
           expect(job.status.job_state).to.eql('started');
         });
 
@@ -254,7 +262,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === payload.job.id);
+          job = jobs.find((job) => job.config.id === payload.job.id);
         });
 
         it('should stop the job', async () => {
@@ -268,7 +276,7 @@ export default function({ getService }) {
           const {
             body: { jobs },
           } = await loadJobs();
-          job = jobs.find(job => job.config.id === jobId);
+          job = jobs.find((job) => job.config.id === jobId);
           expect(job.status.job_state).to.eql('stopped');
         });
 

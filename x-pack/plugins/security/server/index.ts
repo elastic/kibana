@@ -4,38 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type {
   PluginConfigDescriptor,
   PluginInitializer,
   PluginInitializerContext,
-  RecursiveReadonly,
 } from '../../../../src/core/server';
 import { ConfigSchema } from './config';
-import { Plugin, PluginSetupContract, PluginSetupDependencies } from './plugin';
+import { securityConfigDeprecationProvider } from './config_deprecations';
+import {
+  Plugin,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+  PluginSetupDependencies,
+} from './plugin';
 
 // These exports are part of public Security plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change.
-export {
-  Authentication,
-  AuthenticationResult,
-  DeauthenticationResult,
+export type {
   CreateAPIKeyResult,
   InvalidateAPIKeyParams,
   InvalidateAPIKeyResult,
+  GrantAPIKeyResult,
 } from './authentication';
-export { PluginSetupContract };
-export { AuthenticatedUser } from '../common/model';
+export {
+  LegacyAuditLogger,
+  AuditLogger,
+  AuditEvent,
+  EventCategory,
+  EventType,
+  EventOutcome,
+} from './audit';
+export type { SecurityPluginSetup, SecurityPluginStart };
+export type { AuthenticatedUser } from '../common/model';
 
 export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
   schema: ConfigSchema,
-  deprecations: ({ rename, unused }) => [
-    rename('sessionTimeout', 'session.idleTimeout'),
-    unused('authorization.legacyFallback.enabled'),
-  ],
+  deprecations: securityConfigDeprecationProvider,
+  exposeToBrowser: {
+    loginAssistanceMessage: true,
+  },
 };
 export const plugin: PluginInitializer<
-  RecursiveReadonly<PluginSetupContract>,
-  void,
+  RecursiveReadonly<SecurityPluginSetup>,
+  RecursiveReadonly<SecurityPluginStart>,
   PluginSetupDependencies
 > = (initializerContext: PluginInitializerContext) => new Plugin(initializerContext);

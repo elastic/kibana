@@ -28,17 +28,14 @@ import * as i18n from '../core/i18n';
 import { i18nFilter as angularI18nFilter } from './filter';
 import { I18nProvider, I18nServiceType } from './provider';
 
-angular
-  .module('app', [])
-  .provider('i18n', I18nProvider)
-  .filter('i18n', angularI18nFilter);
+angular.module('app', []).provider('i18n', I18nProvider).filter('i18n', angularI18nFilter);
 
 describe('i18nFilter', () => {
   let filter: I18nServiceType;
 
   beforeEach(angular.mock.module('app'));
   beforeEach(
-    angular.mock.inject(i18nFilter => {
+    angular.mock.inject((i18nFilter) => {
       filter = i18nFilter;
     })
   );

@@ -1,0 +1,99 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+<EuiPanel
+  paddingSize="l"
+>
+  <EuiTitle
+    size="xs"
+  >
+    <h2>
+      <EuiTextColor
+        color="subdued"
+      >
+        <FormattedMessage
+          defaultMessage="Recently viewed"
+          id="home.recentlyAccessed.recentlyViewedTitle"
+          values={Object {}}
+        />
+      </EuiTextColor>
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    justifyContent="spaceBetween"
+    wrap={true}
+  >
+    <EuiFlexItem
+      className="homRecentlyAccessed__flexItem"
+      grow={false}
+    >
+      <EuiFlexGroup>
+        <EuiFlexItem
+          className="homRecentlyAccessed__item"
+          grow={false}
+          style={
+            Object {
+              "minWidth": "3.9000000000000004em",
+            }
+          }
+        >
+          <EuiToolTip
+            anchorClassName="homRecentlyAccessed__anchor"
+            content="label0"
+            delay="regular"
+            position="bottom"
+          >
+            <EuiLink
+              className="homRecentlyAccessed__longLink"
+              href="link0"
+            >
+              label0
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+        <EuiFlexItem
+          className="homRecentlyAccessed__separator"
+          grow={false}
+        >
+          <EuiText>
+            <EuiIcon
+              color="subdued"
+              type="dot"
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem
+          className="homRecentlyAccessed__item"
+          grow={false}
+          style={
+            Object {
+              "minWidth": "3.9000000000000004em",
+            }
+          }
+        >
+          <EuiToolTip
+            anchorClassName="homRecentlyAccessed__anchor"
+            content="label1"
+            delay="regular"
+            position="bottom"
+          >
+            <EuiLink
+              className="homRecentlyAccessed__longLink"
+              href="link1"
+            >
+              label1
+            </EuiLink>
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    />
+  </EuiFlexGroup>
+</EuiPanel>
+`;

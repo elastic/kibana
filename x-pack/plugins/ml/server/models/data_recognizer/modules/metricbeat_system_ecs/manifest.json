@@ -1,0 +1,51 @@
+{
+  "id": "metricbeat_system_ecs",
+  "title": "Metricbeat System",
+  "description": "Detect anomalies in Metricbeat System data (ECS)",
+  "type": "Metricbeat data.",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "metricbeat-*",
+  "query": {
+    "bool": {
+      "filter": {
+        "terms": {
+          "event.dataset": [
+            "system.cpu",
+            "system.filesystem"
+          ]
+        }
+      }
+    }
+  },
+  "jobs": [
+    {
+      "id": "max_disk_utilization_ecs",
+      "file": "max_disk_utilization_ecs.json"
+    },
+    {
+      "id": "metricbeat_outages_ecs",
+      "file": "metricbeat_outages_ecs.json"
+    },
+    {
+      "id": "high_mean_cpu_iowait_ecs",
+      "file": "high_mean_cpu_iowait_ecs.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-max_disk_utilization_ecs",
+      "file": "datafeed_max_disk_utilization_ecs.json",
+      "job_id": "max_disk_utilization_ecs"
+    },
+    {
+      "id": "datafeed-metricbeat_outages_ecs",
+      "file": "datafeed_metricbeat_outages_ecs.json",
+      "job_id": "metricbeat_outages_ecs"
+    },
+    {
+      "id": "datafeed-high_mean_cpu_iowait_ecs",
+      "file": "datafeed_high_mean_cpu_iowait_ecs.json",
+      "job_id": "high_mean_cpu_iowait_ecs"
+    }
+  ]
+}

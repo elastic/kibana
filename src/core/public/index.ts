@@ -35,12 +35,15 @@
  * @packageDocumentation
  */
 
+import './index.scss';
+
 import {
   ChromeBadge,
   ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
@@ -54,11 +57,11 @@ import {
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
+  NavType,
 } from './chrome';
-import { FatalErrorsSetup, FatalErrorInfo } from './fatal_errors';
+import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
-import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
@@ -66,7 +69,6 @@ import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-export { PackageInfo, EnvironmentMode } from '../server/types';
 import {
   IContextContainer,
   IContextProvider,
@@ -76,19 +78,45 @@ import {
   HandlerParameters,
 } from './context';
 
+export { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
 export { CoreContext, CoreSystem } from './core_system';
-export { RecursiveReadonly } from '../utils';
+export { DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  AppCategory,
+  UiSettingsParams,
+  UserProvidedValues,
+  UiSettingsType,
+  ImageValidation,
+  StringValidation,
+  StringValidationRegex,
+  StringValidationRegexString,
+} from '../types';
 
 export {
   ApplicationSetup,
   ApplicationStart,
   App,
-  AppBase,
   AppMount,
   AppMountDeprecated,
   AppUnmount,
   AppMountContext,
   AppMountParameters,
+  AppLeaveHandler,
+  AppLeaveActionType,
+  AppLeaveAction,
+  AppLeaveDefaultAction,
+  AppLeaveConfirmAction,
+  AppStatus,
+  AppNavLinkStatus,
+  AppMeta,
+  AppUpdatableFields,
+  AppUpdater,
+  AppSearchDeepLink,
+  PublicAppInfo,
+  PublicAppMetaInfo,
+  PublicAppSearchDeepLinkInfo,
+  ScopedHistory,
+  NavigateToAppOptions,
 } from './application';
 
 export {
@@ -104,40 +132,57 @@ export {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
   SavedObjectsClientContract,
   SavedObjectsClient,
   SimpleSavedObject,
   SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
   SavedObjectsImportRetry,
+  SavedObjectsNamespaceType,
 } from './saved_objects';
 
 export {
   HttpHeadersInit,
   HttpRequestInit,
+  HttpFetchError,
   HttpFetchOptions,
+  HttpFetchOptionsWithPath,
   HttpFetchQuery,
-  HttpErrorResponse,
-  HttpErrorRequest,
+  HttpInterceptorResponseError,
+  HttpInterceptorRequestError,
   HttpInterceptor,
-  IHttpResponse,
+  HttpResponse,
   HttpHandler,
   IBasePath,
   IAnonymousPaths,
+  IExternalUrl,
   IHttpInterceptController,
   IHttpFetchError,
   IHttpResponseInterceptorOverrides,
 } from './http';
 
-export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
+export {
+  OverlayStart,
+  OverlayBannersStart,
+  OverlayRef,
+  OverlayFlyoutStart,
+  OverlayFlyoutOpenOptions,
+  OverlayModalOpenOptions,
+  OverlayModalConfirmOptions,
+  OverlayModalStart,
+} from './overlays';
 
 export {
   Toast,
@@ -147,13 +192,21 @@ export {
   ToastInputFields,
   ToastsSetup,
   ToastsStart,
+  ToastOptions,
   ErrorToastOptions,
 } from './notifications';
 
-export { MountPoint, UnmountCallback } from './types';
+export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+
+export { URL_MAX_LENGTH } from './core_app';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
+ *
+ * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
+ *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
+ * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
+ *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
  *
  * @public
  *
@@ -161,7 +214,7 @@ export { MountPoint, UnmountCallback } from './types';
  * navigation in the generated docs until there's a fix for
  * https://github.com/Microsoft/web-build-tools/issues/1237
  */
-export interface CoreSetup<TPluginsStart extends object = object> {
+export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
   /**
@@ -180,20 +233,27 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform. Use the legacy platform API instead.
+   * in the new platform.
    * @deprecated
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
-
-  /**
-   * Allows plugins to get access to APIs available in start inside async
-   * handlers, such as {@link App.mount}. Promise will not resolve until Core
-   * and plugin dependencies have completed `start`.
-   */
-  getStartServices(): Promise<[CoreStart, TPluginsStart]>;
+  /** {@link StartServicesAccessor} */
+  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
 }
+
+/**
+ * Allows plugins to get access to APIs available in start inside async
+ * handlers, such as {@link App.mount}. Promise will not resolve until Core
+ * and plugin dependencies have completed `start`.
+ *
+ * @public
+ */
+export type StartServicesAccessor<
+  TPluginsStart extends object = object,
+  TStart = unknown
+> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -223,45 +283,17 @@ export interface CoreStart {
   overlays: OverlayStart;
   /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
+  /** {@link FatalErrorsStart} */
+  fatalErrors: FatalErrorsStart;
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform. Use the legacy platform API instead.
+   * in the new platform.
    * @deprecated
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
-}
-
-/**
- * Setup interface exposed to the legacy platform via the `ui/new_platform` module.
- *
- * @remarks
- * Some methods are not supported in the legacy platform and while present to make this type compatibile with
- * {@link CoreSetup}, unsupported methods will throw exceptions when called.
- *
- * @public
- * @deprecated
- */
-export interface LegacyCoreSetup extends CoreSetup<any> {
-  /** @deprecated */
-  injectedMetadata: InjectedMetadataSetup;
-}
-
-/**
- * Start interface exposed to the legacy platform via the `ui/new_platform` module.
- *
- * @remarks
- * Some methods are not supported in the legacy platform and while present to make this type compatibile with
- * {@link CoreStart}, unsupported methods will throw exceptions when called.
- *
- * @public
- * @deprecated
- */
-export interface LegacyCoreStart extends CoreStart {
-  /** @deprecated */
-  injectedMetadata: InjectedMetadataStart;
 }
 
 export {
@@ -271,6 +303,7 @@ export {
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
@@ -293,10 +326,10 @@ export {
   DocLinksStart,
   FatalErrorInfo,
   FatalErrorsSetup,
+  FatalErrorsStart,
   HttpSetup,
   HttpStart,
   I18nStart,
-  LegacyNavLink,
   NotificationsSetup,
   NotificationsStart,
   Plugin,
@@ -306,4 +339,7 @@ export {
   PluginOpaqueId,
   IUiSettingsClient,
   UiSettingsState,
+  NavType,
 };
+
+export { __kbnBootstrap__ } from './kbn_bootstrap';

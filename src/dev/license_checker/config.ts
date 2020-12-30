@@ -21,8 +21,10 @@
 // used as dependencies or dev dependencies
 export const LICENSE_WHITELIST = [
   'Elastic-License',
+  '0BSD',
   '(BSD-2-Clause OR MIT OR Apache-2.0)',
   '(BSD-2-Clause OR MIT)',
+  '(BSD-3-Clause AND Apache-2.0)',
   '(GPL-2.0 OR MIT)',
   '(MIT AND CC-BY-3.0)',
   '(MIT AND Zlib)',
@@ -44,6 +46,7 @@ export const LICENSE_WHITELIST = [
   'BSD*',
   'BSD-2-Clause',
   'BSD-3-Clause AND MIT',
+  '(MIT AND BSD-3-Clause)',
   'BSD-3-Clause OR MIT',
   'BSD-3-Clause',
   '(BSD-3-Clause OR GPL-2.0)',
@@ -77,31 +80,11 @@ export const DEV_ONLY_LICENSE_WHITELIST = ['MPL-2.0'];
 
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
-  'cycle@1.0.3': ['CC0-1.0'], // conversion to a public-domain like license
-  'jsts@1.1.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
+  'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
 
-  // TODO can be removed once we upgrade past elasticsearch-browser@14.0.0
-  'elasticsearch-browser@13.0.1': ['Apache-2.0'],
-
-  // TODO can be removed once we upgrade past colors.js@1.0.0
-  'colors@0.5.1': ['MIT'],
-
-  // TODO can be removed once we upgrade past map-stream@0.5.0
-  'map-stream@0.1.0': ['MIT'],
-
-  'uglify-js@2.2.5': ['BSD'],
-  'png-js@0.1.1': ['MIT'],
-  'sha.js@2.4.11': ['BSD-3-Clause AND MIT'],
-
-  // TODO can be removed if the ISSUE#239 is accepted on the source
+  // TODO can be removed if the https://github.com/jindw/xmldom/issues/239 is released
   'xmldom@0.1.27': ['MIT'],
-
-  // TODO can be removed if the PR#9 is accepted on the source
-  'pause-stream@0.0.11': ['MIT'],
-
-  // TODO can be removed once we upgrade past or equal pdf-image@2.0.1
-  'pdf-image@1.1.0': ['MIT'],
 
   // TODO can be removed once we upgrade the use of walk dependency past or equal to v2.3.14
   'walk@2.3.9': ['MIT'],

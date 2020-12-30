@@ -23,22 +23,22 @@ const mockKeystoreData =
   'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
 jest.mock('fs', () => ({
-  readFileSync: jest.fn().mockImplementation(path => {
+  readFileSync: jest.fn().mockImplementation((path) => {
     if (!path.includes('nonexistent')) {
       return JSON.stringify(mockKeystoreData);
     }
 
     throw { code: 'ENOENT' };
   }),
-  existsSync: jest.fn().mockImplementation(path => {
+  existsSync: jest.fn().mockImplementation((path) => {
     return !path.includes('nonexistent');
   }),
 }));
 
 import sinon from 'sinon';
-import { Keystore } from '../legacy/server/keystore';
+import { Keystore } from '../cli//keystore';
 import { list } from './list';
-import Logger from '../cli_plugin/lib/logger';
+import { Logger } from '../cli_plugin/lib/logger';
 
 describe('Kibana keystore', () => {
   describe('list', () => {

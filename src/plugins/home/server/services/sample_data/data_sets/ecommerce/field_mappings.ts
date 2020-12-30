@@ -173,4 +173,11 @@ export const fieldMappings = {
       city_name: { type: 'keyword' },
     },
   },
+  event: {
+    properties: {
+      dataset: {
+        type: 'keyword',
+      },
+    },
+  },
 };

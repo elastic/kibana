@@ -19,16 +19,12 @@
 
 import { PluginFunctionalProviderContext } from '../../services';
 
-// eslint-disable-next-line import/no-default-export
-export default function({ getService }: PluginFunctionalProviderContext) {
+export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
 
   describe('server plugins', function describeIndexTests() {
     it('extend request handler context', async () => {
-      await supertest
-        .get('/core_plugin_b')
-        .expect(200)
-        .expect('Pong via plugin A: true');
+      await supertest.get('/core_plugin_b').expect(200).expect('Pong via plugin A: true');
     });
 
     it('extend request handler context with validation', async () => {
@@ -55,14 +51,14 @@ export default function({ getService }: PluginFunctionalProviderContext) {
         });
     });
 
-    it('renders core application explicitly', async () => {
-      await supertest.get('/requestcontext/render/core').expect(200, /app:core/);
-    });
-
-    it('renders legacy application', async () => {
+    it('sets request.isSystemRequest when kbn-system-request header is set', async () => {
       await supertest
-        .get('/requestcontext/render/core_plugin_legacy')
-        .expect(200, /app:core_plugin_legacy/);
+        .post('/core_plugin_b/system_request')
+        .set('kbn-xsrf', 'anything')
+        .set('kbn-system-request', 'true')
+        .send()
+        .expect(200)
+        .expect('System request? true');
     });
   });
 }

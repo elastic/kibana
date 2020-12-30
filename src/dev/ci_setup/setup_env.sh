@@ -14,7 +14,7 @@ cacheDir="$HOME/.kibana"
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
-export NODE_OPTIONS="$NODE_OPTIONS --throw-deprecation --max-old-space-size=4096"
+export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY
@@ -24,14 +24,9 @@ export NODE_OPTIONS="$NODE_OPTIONS --throw-deprecation --max-old-space-size=4096
 ###
 export FORCE_COLOR=1
 
+### APM tracking
 ###
-### The @babel/register cache collects the build output from each file in
-### a map, in memory, and then when the process exits it writes that to the
-### babel cache file as a JSON encoded object. Stringifying that object
-### causes OOMs on CI regularly enough that we need to find another solution,
-### and until we do we need to disable the cache
-###
-export BABEL_DISABLE_CACHE=true
+export ELASTIC_APM_ENVIRONMENT=ci
 
 ###
 ### check that we seem to be in a kibana project
@@ -53,26 +48,28 @@ export PARENT_DIR="$parentDir"
 kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
 export KIBANA_PKG_BRANCH="$kbnBranch"
 
+export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
+
 ###
 ### download node
 ###
+nodeVersion="$(cat "$dir/.node-version")"
+nodeDir="$cacheDir/node/$nodeVersion"
+nodeBin="$nodeDir/bin"
+classifier="x64.tar.gz"
+
 UNAME=$(uname)
 OS="linux"
 if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
   OS="win"
+  nodeBin="$HOME/node"
+  classifier="x64.zip"
+elif [[ "$UNAME" == "Darwin" ]]; then
+  OS="darwin"
 fi
 echo " -- Running on OS: $OS"
 
-nodeVersion="$(cat "$dir/.node-version")"
-nodeDir="$cacheDir/node/$nodeVersion"
-
-if [[ "$OS" == "win" ]]; then
-  nodeBin="$HOME/node"
-  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
-else
-  nodeBin="$nodeDir/bin"
-  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
-fi
+nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$nodeVersion/node-v$nodeVersion-${OS}-${classifier}"
 
 if [[ "$installNode" == "true" ]]; then
   echo " -- node: version=v${nodeVersion} dir=$nodeDir"
@@ -126,9 +123,19 @@ export PATH="$PATH:$yarnGlobalDir"
 # use a proxy to fetch chromedriver/geckodriver asset
 export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
-
+export RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
 
 export CHECKS_REPORTER_ACTIVE=false
+
+# This is mainly for release-manager builds, which run in an environment that doesn't have Chrome installed
+if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
+  echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
+  export DETECT_CHROMEDRIVER_VERSION=true
+  export CHROMEDRIVER_FORCE_DOWNLOAD=true
+else
+  echo "Chrome not detected, installing default chromedriver binary for the package version"
+fi
 
 ### only run on pr jobs for elastic/kibana, checks-reporter doesn't work for other repos
 if [[ "$ghprbPullId" && "$ghprbGhRepository" == 'elastic/kibana' ]] ; then
@@ -152,7 +159,7 @@ export -f checks-reporter-with-killswitch
 
 source "$KIBANA_DIR/src/dev/ci_setup/load_env_keys.sh"
 
-ES_DIR="$PARENT_DIR/elasticsearch"
+ES_DIR="$WORKSPACE/elasticsearch"
 ES_JAVA_PROP_PATH=$ES_DIR/.ci/java-versions.properties
 
 if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then

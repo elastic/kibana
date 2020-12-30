@@ -24,11 +24,13 @@ export const WorkpadElementSchema = schema.object({
 
 export const WorkpadPageSchema = schema.object({
   elements: schema.arrayOf(WorkpadElementSchema),
-  groups: schema.arrayOf(
-    schema.object({
-      id: schema.string(),
-      position: PositionSchema,
-    })
+  groups: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+        position: PositionSchema,
+      })
+    )
   ),
   id: schema.string(),
   style: schema.recordOf(schema.string(), schema.string()),
@@ -49,12 +51,19 @@ export const WorkpadAssetSchema = schema.object({
   value: schema.string(),
 });
 
+export const WorkpadVariable = schema.object({
+  name: schema.string(),
+  value: schema.oneOf([schema.string(), schema.number(), schema.boolean()]),
+  type: schema.string(),
+});
+
 export const WorkpadSchema = schema.object({
   '@created': schema.maybe(schema.string()),
   '@timestamp': schema.maybe(schema.string()),
   assets: schema.maybe(schema.recordOf(schema.string(), WorkpadAssetSchema)),
   colors: schema.arrayOf(schema.string()),
   css: schema.string(),
+  variables: schema.arrayOf(WorkpadVariable),
   height: schema.number(),
   id: schema.string(),
   isWriteable: schema.maybe(schema.boolean()),

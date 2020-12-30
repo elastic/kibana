@@ -24,37 +24,25 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
-import {
-  IDataPluginServices,
-  TimeRange,
-  Query,
-  esFilters,
-  IIndexPattern,
-  TimeHistoryContract,
-  FilterBar,
-  SavedQuery,
-  SavedQueryMeta,
-  SaveQueryForm,
-  SavedQueryManagementComponent,
-  SavedQueryAttributes,
-} from '../..';
-import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
+
+import QueryBarTopRow from '../query_string_input/query_bar_top_row';
+import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
+import { IDataPluginServices } from '../../types';
+import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
+import { FilterBar } from '../filter_bar/filter_bar';
+import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
+import { SavedQueryManagementComponent } from '../saved_query_management';
 
 interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
   timeHistory: TimeHistoryContract;
   // Filter bar
-  onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
-  filters?: esFilters.Filter[];
-  // Date picker
-  dateRangeFrom?: string;
-  dateRangeTo?: string;
+  onFiltersUpdated?: (filters: Filter[]) => void;
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  isRefreshPaused?: boolean;
-  refreshInterval?: number;
 }
 
 export interface SearchBarOwnProps {
@@ -69,13 +57,19 @@ export interface SearchBarOwnProps {
   showFilterBar?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
+  filters?: Filter[];
+  // Date picker
+  isRefreshPaused?: boolean;
+  refreshInterval?: number;
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
   onQueryChange?: (payload: { dateRange: TimeRange; query?: Query }) => void;
-  onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update
@@ -84,6 +78,9 @@ export interface SearchBarOwnProps {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  indicateNoData?: boolean;
+  // Track UI Metrics
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -232,9 +229,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   // member-ordering rules conflict with use-before-declaration rules
-  /* eslint-disable */
   public ro = new ResizeObserver(this.setFilterBarHeight);
-  /* eslint-enable */
 
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
@@ -339,6 +334,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             },
           });
         }
+        if (this.props.trackUiMetric) {
+          this.props.trackUiMetric(METRIC_TYPE.CLICK, `${this.services.appName}:query_submitted`);
+        }
       }
     );
   };
@@ -411,6 +409,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
           dataTestSubj={this.props.dataTestSubj}
+          indicateNoData={this.props.indicateNoData}
         />
       );
     }
@@ -418,18 +417,19 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     let filterBar;
     if (this.shouldRenderFilterBar()) {
       const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
       });
       filterBar = (
         <div
           id="GlobalFilterGroup"
-          ref={node => {
+          ref={(node) => {
             this.filterBarWrapperRef = node;
           }}
           className={filterGroupClasses}
         >
           <div
-            ref={node => {
+            ref={(node) => {
               this.filterBarRef = node;
             }}
           >
@@ -438,6 +438,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
+              appName={this.services.appName}
+              trackUiMetric={this.props.trackUiMetric}
             />
           </div>
         </div>
@@ -445,7 +447,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     return (
-      <div className="globalQueryBar">
+      <div className="globalQueryBar" data-test-subj="globalQueryBar">
         {queryBar}
         {filterBar}
 
@@ -462,7 +464,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         {this.state.showSaveNewQueryModal ? (
           <SaveQueryForm
             savedQueryService={this.savedQueryService}
-            onSave={savedQueryMeta => this.onSave(savedQueryMeta, true)}
+            onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
             showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
@@ -473,4 +475,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 }
 
-export const SearchBar = injectI18n(withKibana(SearchBarUI));
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default injectI18n(withKibana(SearchBarUI));

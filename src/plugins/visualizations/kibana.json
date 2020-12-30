@@ -1,9 +1,16 @@
 {
   "id": "visualizations",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": [
-    "expressions"
-  ]
+    "data",
+    "expressions",
+    "uiActions",
+    "embeddable",
+    "inspector",
+    "savedObjects"
+  ],
+  "optionalPlugins": ["usageCollection"],
+  "requiredBundles": ["kibanaUtils", "discover"]
 }

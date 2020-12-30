@@ -29,26 +29,23 @@ describe('IndexPatternsApiClient', () => {
     indexPatternsApiClient = new IndexPatternsApiClient(http);
   });
 
-  test('uses the right URI to fetch fields for time patterns', async function() {
+  test('uses the right URI to fetch fields for time patterns', async function () {
     const expectedPath = '/api/index_patterns/_fields_for_time_pattern';
 
-    await indexPatternsApiClient.getFieldsForTimePattern();
+    await indexPatternsApiClient.getFieldsForTimePattern({
+      pattern: 'blah',
+      metaFields: [],
+      lookBack: 5,
+      interval: '',
+    });
 
     expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));
   });
 
-  test('uses the right URI to fetch fields for wildcard', async function() {
+  test('uses the right URI to fetch fields for wildcard', async function () {
     const expectedPath = '/api/index_patterns/_fields_for_wildcard';
 
-    await indexPatternsApiClient.getFieldsForWildcard();
-
-    expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));
-  });
-
-  test('uses the right URI to fetch fields for wildcard given a type', async function() {
-    const expectedPath = '/api/index_patterns/rollup/_fields_for_wildcard';
-
-    await indexPatternsApiClient.getFieldsForWildcard({ type: 'rollup' });
+    await indexPatternsApiClient.getFieldsForWildcard({ pattern: 'blah' });
 
     expect(fetchSpy).toHaveBeenCalledWith(expectedPath, expect.any(Object));
   });

@@ -45,11 +45,9 @@ export async function extractUntrackedMessagesTask({
   const availablePaths = Object.values(config.paths).flat();
   const ignore = availablePaths.concat([
     '**/build/**',
-    '**/webpackShims/**',
     '**/__fixtures__/**',
     '**/packages/kbn-i18n/**',
-    '**/packages/kbn-plugin-generator/sao_template/**',
-    '**/packages/kbn-ui-framework/generator-kui/**',
+    '**/packages/kbn-plugin-generator/template/**',
     '**/target/**',
     '**/test/**',
     '**/scripts/**',
@@ -67,10 +65,10 @@ export async function extractUntrackedMessagesTask({
     for (const [entries, extractFunction] of categorizedEntries) {
       const files = await Promise.all(
         filterEntries(entries, config.exclude)
-          .filter(entry => {
+          .filter((entry) => {
             const normalizedEntry = normalizePath(entry);
             return !availablePaths.some(
-              availablePath =>
+              (availablePath) =>
                 normalizedEntry.startsWith(`${normalizePath(availablePath)}/`) ||
                 normalizePath(availablePath) === normalizedEntry
             );
@@ -93,7 +91,7 @@ export async function extractUntrackedMessagesTask({
 }
 
 export function extractUntrackedMessages(inputPaths: string[]) {
-  return inputPaths.map(inputPath => ({
+  return inputPaths.map((inputPath) => ({
     title: `Checking untracked messages in ${inputPath}`,
     task: async (context: { reporter: ErrorReporter; config: I18nConfig }) => {
       const { reporter, config } = context;

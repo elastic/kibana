@@ -54,7 +54,19 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
      * @param element element that wraps up option
      */
     private async clickOption(isMouseClick: boolean, element: WebElementWrapper): Promise<void> {
-      return isMouseClick ? await element.clickMouseButton() : await element.click();
+      // element.click causes scrollIntoView which causes combobox to close, using _webElement.click instead
+      return isMouseClick ? await element.clickMouseButton() : await element._webElement.click();
+    }
+
+    /**
+     * Finds combobox element options
+     *
+     * @param comboBoxSelector data-test-subj selector
+     */
+    public async getOptions(comboBoxSelector: string) {
+      const comboBoxElement = await testSubjects.find(comboBoxSelector);
+      await this.openOptionsList(comboBoxElement);
+      return await find.allByCssSelector('.euiFilterSelectItem', WAIT_FOR_EXISTS_TIME);
     }
 
     /**
@@ -89,7 +101,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
           await this.clickOption(options.clickWithMouse, selectOptions[0]);
         } else {
           // if it doesn't find the item which text starts with value, it will choose the first option
-          const firstOption = await find.byCssSelector('.euiFilterSelectItem');
+          const firstOption = await find.byCssSelector('.euiFilterSelectItem', 5000);
           await this.clickOption(options.clickWithMouse, firstOption);
         }
       } else {
@@ -199,7 +211,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await comboBox.parseDomContent();
       return $('.euiComboBoxPill')
         .toArray()
-        .map(option => $(option).text());
+        .map((option) => $(option).text());
     }
 
     /**
@@ -217,7 +229,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
           return;
         }
 
-        const clearBtn = await comboBox.findByCssSelector('[data-test-subj="comboBoxClearButton"]');
+        const clearBtn = await comboBox.findByTestSubject('comboBoxClearButton');
         await clearBtn.click();
 
         const clearButtonStillExists = await this.doesClearButtonExist(comboBox);
@@ -229,8 +241,8 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     }
 
     public async doesClearButtonExist(comboBoxElement: WebElementWrapper): Promise<boolean> {
-      const found = await comboBoxElement.findAllByCssSelector(
-        '[data-test-subj="comboBoxClearButton"]',
+      const found = await comboBoxElement.findAllByTestSubject(
+        'comboBoxClearButton',
         WAIT_FOR_EXISTS_TIME
       );
       return found.length > 0;
@@ -263,10 +275,10 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
       const isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList');
       if (!isOptionsListOpen) {
-        const toggleBtn = await comboBoxElement.findByCssSelector(
-          '[data-test-subj="comboBoxToggleListButton"]'
-        );
-        await toggleBtn.click();
+        await retry.try(async () => {
+          const toggleBtn = await comboBoxElement.findByTestSubject('comboBoxInput');
+          await toggleBtn.click();
+        });
       }
     }
 
@@ -284,7 +296,7 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
       const $ = await comboBoxElement.parseDomContent();
       const selectedOptions = $('.euiComboBoxPill')
         .toArray()
-        .map(option => $(option).text());
+        .map((option) => $(option).text());
       return selectedOptions.length === 1 && selectedOptions[0] === value;
     }
 

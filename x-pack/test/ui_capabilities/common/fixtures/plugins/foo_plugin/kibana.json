@@ -1,0 +1,8 @@
+{
+  "id": "foo_plugin",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "requiredPlugins": ["features"],
+  "server": true,
+  "ui": true
+}

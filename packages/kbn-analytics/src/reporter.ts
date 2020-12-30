@@ -18,7 +18,13 @@
  */
 
 import { wrapArray } from './util';
-import { Metric, createUiStatsMetric, trackUsageAgent, UiStatsMetricType } from './metrics';
+import {
+  Metric,
+  createUiCounterMetric,
+  trackUsageAgent,
+  UiCounterMetricType,
+  ApplicationUsageMetric,
+} from './metrics';
 
 import { Storage, ReportStorageManager } from './storage';
 import { Report, ReportManager } from './report';
@@ -35,7 +41,7 @@ export type ReportHTTP = (report: Report) => Promise<void>;
 
 export class Reporter {
   checkInterval: number;
-  private interval: any;
+  private interval?: NodeJS.Timer;
   private http: ReportHTTP;
   private reportManager: ReportManager;
   private storageManager: ReportStorageManager;
@@ -47,7 +53,6 @@ export class Reporter {
     const { http, storage, debug, checkInterval = 90000, storageKey = 'analytics' } = config;
     this.http = http;
     this.checkInterval = checkInterval;
-    this.interval = null;
     this.storageManager = new ReportStorageManager(storageKey, storage);
     const storedReport = this.storageManager.get();
     this.reportManager = new ReportManager(storedReport);
@@ -68,7 +73,7 @@ export class Reporter {
   public start = () => {
     if (!this.interval) {
       this.interval = setTimeout(() => {
-        this.interval = null;
+        this.interval = undefined;
         this.sendReports();
       }, this.checkInterval);
     }
@@ -81,15 +86,15 @@ export class Reporter {
     }
   }
 
-  public reportUiStats = (
+  public reportUiCounter = (
     appName: string,
-    type: UiStatsMetricType,
+    type: UiCounterMetricType,
     eventNames: string | string[],
     count?: number
   ) => {
-    const metrics = wrapArray(eventNames).map(eventName => {
+    const metrics = wrapArray(eventNames).map((eventName) => {
       this.log(`${type} Metric -> (${appName}:${eventName}):`);
-      const report = createUiStatsMetric({ type, appName, eventName, count });
+      const report = createUiCounterMetric({ type, appName, eventName, count });
       this.log(report);
       return report;
     });
@@ -101,6 +106,11 @@ export class Reporter {
     const report = trackUsageAgent(appName);
     this.saveToReport([report]);
   };
+
+  public reportApplicationUsage(appUsageReport: ApplicationUsageMetric) {
+    this.log(`Reporting application usage for ${appUsageReport.appId}, ${appUsageReport.viewId}`);
+    this.saveToReport([appUsageReport]);
+  }
 
   public sendReports = async () => {
     if (!this.reportManager.isReportEmpty()) {

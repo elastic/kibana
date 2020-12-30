@@ -4,4 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SecurityAuditLogger } from './audit_logger';
+export { AuditService, AuditServiceSetup, AuditLogger, LegacyAuditLogger } from './audit_service';
+export {
+  AuditEvent,
+  EventCategory,
+  EventType,
+  EventOutcome,
+  userLoginEvent,
+  httpRequestEvent,
+  savedObjectEvent,
+  spaceAuditEvent,
+  SavedObjectAction,
+  SpaceAuditAction,
+} from './audit_events';
+export { SecurityAuditLogger } from './security_audit_logger';

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 // 400 - badRequest
 const CODE_BAD_REQUEST = 'SavedObjectsClient/badRequest';
@@ -33,16 +33,18 @@ const CODE_REQUEST_ENTITY_TOO_LARGE = 'SavedObjectsClient/requestEntityTooLarge'
 const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
 // 409 - Conflict
 const CODE_CONFLICT = 'SavedObjectsClient/conflict';
+// 429 - Too Many Requests
+const CODE_TOO_MANY_REQUESTS = 'SavedObjectsClient/tooManyRequests';
+// 400 - Es Cannot Execute Script
+const CODE_ES_CANNOT_EXECUTE_SCRIPT = 'SavedObjectsClient/esCannotExecuteScript';
 // 503 - Es Unavailable
 const CODE_ES_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
-// 503 - Unable to automatically create index because of action.auto_create_index setting
-const CODE_ES_AUTO_CREATE_INDEX_ERROR = 'SavedObjectsClient/autoCreateIndex';
 // 500 - General Error
 const CODE_GENERAL_ERROR = 'SavedObjectsClient/generalError';
 
 const code = Symbol('SavedObjectsClientErrorCode');
 
-export interface DecoratedError extends Boom {
+export interface DecoratedError extends Boom.Boom {
   [code]?: string;
 }
 
@@ -152,8 +154,35 @@ export class SavedObjectsErrorHelpers {
     return decorate(error, CODE_CONFLICT, 409, reason);
   }
 
+  public static createConflictError(type: string, id: string, reason?: string) {
+    return SavedObjectsErrorHelpers.decorateConflictError(
+      Boom.conflict(`Saved object [${type}/${id}] conflict`),
+      reason
+    );
+  }
+
   public static isConflictError(error: Error | DecoratedError) {
     return isSavedObjectsClientError(error) && error[code] === CODE_CONFLICT;
+  }
+
+  public static decorateTooManyRequestsError(error: Error, reason?: string) {
+    return decorate(error, CODE_TOO_MANY_REQUESTS, 429, reason);
+  }
+
+  public static createTooManyRequestsError(type: string, id: string) {
+    return SavedObjectsErrorHelpers.decorateTooManyRequestsError(Boom.tooManyRequests());
+  }
+
+  public static isTooManyRequestsError(error: Error | DecoratedError) {
+    return isSavedObjectsClientError(error) && error[code] === CODE_TOO_MANY_REQUESTS;
+  }
+
+  public static decorateEsCannotExecuteScriptError(error: Error, reason?: string) {
+    return decorate(error, CODE_ES_CANNOT_EXECUTE_SCRIPT, 400, reason);
+  }
+
+  public static isEsCannotExecuteScriptError(error: Error | DecoratedError) {
+    return isSavedObjectsClientError(error) && error[code] === CODE_ES_CANNOT_EXECUTE_SCRIPT;
   }
 
   public static decorateEsUnavailableError(error: Error, reason?: string) {
@@ -162,18 +191,6 @@ export class SavedObjectsErrorHelpers {
 
   public static isEsUnavailableError(error: Error | DecoratedError) {
     return isSavedObjectsClientError(error) && error[code] === CODE_ES_UNAVAILABLE;
-  }
-
-  public static createEsAutoCreateIndexError() {
-    const error = Boom.serverUnavailable('Automatic index creation failed');
-    error.output.payload.attributes = error.output.payload.attributes || {};
-    error.output.payload.attributes.code = 'ES_AUTO_CREATE_INDEX_ERROR';
-
-    return decorate(error, CODE_ES_AUTO_CREATE_INDEX_ERROR, 503);
-  }
-
-  public static isEsAutoCreateIndexError(error: Error | DecoratedError) {
-    return isSavedObjectsClientError(error) && error[code] === CODE_ES_AUTO_CREATE_INDEX_ERROR;
   }
 
   public static decorateGeneralError(error: Error, reason?: string) {

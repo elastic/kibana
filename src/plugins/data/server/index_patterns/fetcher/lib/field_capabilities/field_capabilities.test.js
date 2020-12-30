@@ -44,13 +44,15 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
 
   // assert that the stub was called with the exact `args`, using === matching
   const calledWithExactly = (stub, args, matcher = sinon.match.same) => {
-    sinon.assert.calledWithExactly(stub, ...args.map(arg => matcher(arg)));
+    sinon.assert.calledWithExactly(stub, ...args.map((arg) => matcher(arg)));
   };
 
   const stubDeps = (options = {}) => {
-    const { esResponse = {}, fieldsFromFieldCaps = [], mergeOverrides = identity } = options;
+    const { esResponse = [], fieldsFromFieldCaps = [], mergeOverrides = identity } = options;
 
-    sandbox.stub(callFieldCapsApiNS, 'callFieldCapsApi').callsFake(async () => esResponse);
+    sandbox
+      .stub(callFieldCapsApiNS, 'callFieldCapsApi')
+      .callsFake(async () => ({ body: esResponse }));
     sandbox.stub(readFieldCapsResponseNS, 'readFieldCapsResponse').returns(fieldsFromFieldCaps);
     sandbox.stub(mergeOverridesNS, 'mergeOverrides').callsFake(mergeOverrides);
   };
@@ -61,7 +63,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
 
       await getFieldCapabilities(footballs[0], footballs[1]);
       sinon.assert.calledOnce(callFieldCapsApi);
-      calledWithExactly(callFieldCapsApi, [footballs[0], footballs[1]]);
+      calledWithExactly(callFieldCapsApi, [footballs[0], footballs[1], undefined]);
     });
   });
 
@@ -83,10 +85,10 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
       const sortedLetters = sortBy(letters);
 
       stubDeps({
-        fieldsFromFieldCaps: shuffle(letters.map(name => ({ name }))),
+        fieldsFromFieldCaps: shuffle(letters.map((name) => ({ name }))),
       });
 
-      const fieldNames = (await getFieldCapabilities()).map(field => field.name);
+      const fieldNames = (await getFieldCapabilities()).map((field) => field.name);
       expect(fieldNames).toEqual(sortedLetters);
     });
   });
@@ -99,7 +101,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
 
       const resp = await getFieldCapabilities(undefined, undefined, ['meta1', 'meta2']);
       expect(resp).toHaveLength(4);
-      expect(resp.map(field => field.name)).toEqual(['bar', 'foo', 'meta1', 'meta2']);
+      expect(resp.map((field) => field.name)).toEqual(['bar', 'foo', 'meta1', 'meta2']);
     });
   });
 
@@ -115,7 +117,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
     });
 
     describe('ensures that every field has property:', () => {
-      properties.forEach(property => {
+      properties.forEach((property) => {
         it(property, async () => {
           const field = createField();
           delete field[property];
@@ -131,7 +133,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
 
           // ensure field object was not mutated
           expect(field).not.toHaveProperty(property);
-          Object.keys(field).forEach(key => {
+          Object.keys(field).forEach((key) => {
             // ensure response field has original values from field
             expect(resp[0][key]).toBe(footballs[0]);
           });

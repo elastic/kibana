@@ -6,10 +6,10 @@
 
 import { NotificationsSetup, Toast, HttpSetup, ToastInput } from 'src/core/public';
 import { BroadcastChannel } from 'broadcast-channel';
+import { SessionInfo } from '../../common/types';
 import { createToast as createIdleTimeoutToast } from './session_idle_timeout_warning';
 import { createToast as createLifespanToast } from './session_lifespan_warning';
 import { ISessionExpired } from './session_expired';
-import { SessionInfo } from '../types';
 
 /**
  * Client session timeout is decreased by this number so that Kibana server
@@ -104,9 +104,8 @@ export class SessionTimeout implements ISessionTimeout {
    */
   private fetchSessionInfoAndResetTimers = async (extend = false) => {
     const method = extend ? 'POST' : 'GET';
-    const headers = extend ? {} : { 'kbn-system-api': 'true' };
     try {
-      const result = await this.http.fetch(SESSION_ROUTE, { method, headers });
+      const result = await this.http.fetch(SESSION_ROUTE, { method, asSystemRequest: !extend });
 
       this.handleSessionInfoAndResetTimers(result);
 
@@ -128,7 +127,7 @@ export class SessionTimeout implements ISessionTimeout {
     this.sessionInfo = sessionInfo;
     // save the provider name in session storage, we will need it when we log out
     const key = `${this.tenant}/session_provider`;
-    sessionStorage.setItem(key, sessionInfo.provider);
+    sessionStorage.setItem(key, sessionInfo.provider.name);
 
     const { timeout, isLifespanTimeout } = this.getTimeout();
     if (timeout == null) {
@@ -141,13 +140,21 @@ export class SessionTimeout implements ISessionTimeout {
     const timeoutVal = timeout - WARNING_MS - GRACE_PERIOD_MS - SESSION_CHECK_MS;
     if (timeoutVal > 0 && !isLifespanTimeout) {
       // we should check for the latest session info before the warning displays
-      this.fetchTimer = window.setTimeout(this.fetchSessionInfoAndResetTimers, timeoutVal);
+      this.startTimer(
+        (timeoutID) => (this.fetchTimer = timeoutID),
+        this.fetchSessionInfoAndResetTimers,
+        timeoutVal
+      );
     }
-    this.warningTimer = window.setTimeout(
+
+    this.startTimer(
+      (timeoutID) => (this.warningTimer = timeoutID),
       this.showWarning,
       Math.max(timeout - WARNING_MS - GRACE_PERIOD_MS, 0)
     );
-    this.expirationTimer = window.setTimeout(
+
+    this.startTimer(
+      (timeoutID) => (this.expirationTimer = timeoutID),
       () => this.sessionExpired.logout(),
       Math.max(timeout - GRACE_PERIOD_MS, 0)
     );
@@ -207,4 +214,28 @@ export class SessionTimeout implements ISessionTimeout {
     }
     this.warningToast = this.notifications.toasts.add(toast);
   };
+
+  /**
+   * Starts a timer that uses a native `setTimeout` under the hood. When `timeout` is larger
+   * than the maximum supported one then method calls itself recursively as many times as needed.
+   * @param updater Method that is supposed to update a reference to a native timer ID that can be
+   * used with native `clearTimeout`. It's essential for the larger timeouts when `setTimeout` is
+   * called multiple times and timer ID changes.
+   * when timer ID changes
+   * @param callback A function to be executed after the timer expires.
+   * @param timeout The time, in milliseconds the timer should wait before the specified function is
+   * executed.
+   */
+  private startTimer(updater: (timeoutID: number) => void, callback: () => void, timeout: number) {
+    // Max timeout is the largest possible 32-bit signed integer or 2,147,483,647 or 0x7fffffff.
+    const maxTimeout = 0x7fffffff;
+    updater(
+      timeout > maxTimeout
+        ? window.setTimeout(
+            () => this.startTimer(updater, callback, timeout - maxTimeout),
+            maxTimeout
+          )
+        : window.setTimeout(callback, timeout)
+    );
+  }
 }

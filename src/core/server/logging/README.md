@@ -1,4 +1,18 @@
 # Logging
+- [Loggers, Appenders and Layouts](#loggers-appenders-and-layouts)
+- [Logger hierarchy](#logger-hierarchy)
+- [Log level](#log-level)
+- [Layouts](#layouts)
+  - [Pattern layout](#pattern-layout)
+  - [JSON layout](#json-layout)
+- [Appenders](#appenders)
+  - [Rolling File Appender](#rolling-file-appender)
+    - [Triggering Policies](#triggering-policies)
+    - [Rolling strategies](#rolling-strategies)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Logging config migration](#logging-config-migration)
+- [Log record format changes](#log-record-format-changes)
 
 The way logging works in Kibana is inspired by `log4j 2` logging framework used by [Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html#logging).
 The main idea is to have consistent logging behaviour (configuration, log format etc.) across the entire Elastic Stack 
@@ -52,14 +66,202 @@ custom appenders, so one should always make the choice explicitly.
 
 There are two types of layout supported at the moment: `pattern` and `json`. 
 
-With `pattern` layout it's possible to define a string pattern with special placeholders wrapped into curly braces that
+### Pattern layout
+With `pattern` layout it's possible to define a string pattern with special placeholders `%conversion_pattern` (see the table below) that
 will be replaced with data from the actual log message. By default the following pattern is used: 
-`[{timestamp}][{level}][{context}] {message}`. Also `highlight` option can be enabled for `pattern` layout so that
+`[%date][%level][%logger]%meta %message`. Also `highlight` option can be enabled for `pattern` layout so that
 some parts of the log message are highlighted with different colors that may be quite handy if log messages are forwarded
 to the terminal with color support.
+`pattern` layout uses a sub-set of [log4j2 pattern syntax](https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout)
+and **doesn't implement** all `log4j2` capabilities. The conversions that are provided out of the box are:
 
+#### level
+Outputs the [level](#log-level) of the logging event.
+Example of `%level` output:
+```bash
+TRACE
+DEBUG
+INFO
+```
+
+##### logger
+Outputs the name of the logger that published the logging event.
+Example of `%logger` output:
+```bash
+server
+server.http
+server.http.Kibana
+```
+
+#### message
+Outputs the application supplied message associated with the logging event.
+
+#### meta
+Outputs the entries of `meta` object data in **json** format, if one is present in the event.
+Example of `%meta` output:
+```bash
+// Meta{from: 'v7', to: 'v8'}
+'{"from":"v7","to":"v8"}'
+// Meta empty object
+'{}'
+// no Meta provided
+''
+```
+
+##### date
+Outputs the date of the logging event. The date conversion specifier may be followed by a set of braces containing a name of predefined date format and canonical timezone name.
+Timezone name is expected to be one from [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+Example of `%date` output:
+
+| Conversion pattern                       | Example                                                          |
+| ---------------------------------------- | ---------------------------------------------------------------- |
+| `%date`                                  | `2012-02-01T14:30:22.011Z` uses `ISO8601` format by default      |
+| `%date{ISO8601}`                         | `2012-02-01T14:30:22.011Z`                                       |
+| `%date{ISO8601_TZ}`                      | `2012-02-01T09:30:22.011-05:00`   `ISO8601` with timezone        |
+| `%date{ISO8601_TZ}{America/Los_Angeles}` | `2012-02-01T06:30:22.011-08:00`                                  |
+| `%date{ABSOLUTE}`                        | `09:30:22.011`                                                   |
+| `%date{ABSOLUTE}{America/Los_Angeles}`   | `06:30:22.011`                                                   |
+| `%date{UNIX}`                            | `1328106622`                                                     |
+| `%date{UNIX_MILLIS}`                     | `1328106622011`                                                  |
+
+#### pid
+Outputs the process ID.
+
+### JSON layout
 With `json` layout log messages will be formatted as JSON strings that include timestamp, log level, context, message 
 text and any other metadata that may be associated with the log message itself.
+
+## Appenders
+
+### Rolling File Appender
+
+Similar to Log4j's `RollingFileAppender`, this appender will log into a file, and rotate it following a rolling
+strategy when the configured policy triggers.
+
+#### Triggering Policies
+
+The triggering policy determines when a rolling should occur.
+
+There are currently two policies supported: `size-limit` and `time-interval`.
+
+##### SizeLimitTriggeringPolicy
+
+This policy will rotate the file when it reaches a predetermined size.
+
+```yaml
+logging:
+  appenders:
+    rolling-file:
+      kind: rolling-file
+      path: /var/logs/kibana.log
+      policy:
+        kind: size-limit
+        size: 50mb
+      strategy:
+        //... 
+      layout:
+        kind: pattern
+```
+
+The options are:
+
+- `size`
+
+the maximum size the log file should reach before a rollover should be performed.
+
+The default value is `100mb`
+
+##### TimeIntervalTriggeringPolicy
+
+This policy will rotate the file every given interval of time.
+
+```yaml
+logging:
+  appenders:
+    rolling-file:
+      kind: rolling-file
+      path: /var/logs/kibana.log
+      policy:
+        kind: time-interval
+        interval: 10s
+        modulate: true
+      strategy:
+        //... 
+      layout:
+        kind: pattern
+```
+
+The options are:
+
+- `interval`
+
+How often a rollover should occur.
+
+The default value is `24h`
+
+- `modulate`
+ 
+Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary.
+ 
+For example, when true, if the interval is `4h` and the current hour is 3 am then the first rollover will occur at 4 am 
+and then next ones will occur at 8 am, noon, 4pm, etc.
+
+The default value is `true`.
+
+#### Rolling strategies
+
+The rolling strategy determines how the rollover should occur: both the naming of the rolled files,
+and their retention policy.
+
+There is currently one strategy supported: `numeric`.
+
+##### NumericRollingStrategy
+
+This strategy will suffix the file with a given pattern when rolling,
+and will retains a fixed amount of rolled files.
+
+```yaml
+logging:
+  appenders:
+    rolling-file:
+      kind: rolling-file
+      path: /var/logs/kibana.log
+      policy:
+        // ...
+      strategy:
+        kind: numeric
+        pattern: '-%i'
+        max: 2
+      layout:
+        kind: pattern
+```
+
+For example, with this configuration:
+
+- During the first rollover kibana.log is renamed to kibana-1.log. A new kibana.log file is created and starts
+  being written to.
+- During the second rollover kibana-1.log is renamed to kibana-2.log and kibana.log is renamed to kibana-1.log.
+  A new kibana.log file is created and starts being written to.
+- During the third and subsequent rollovers, kibana-2.log is deleted, kibana-1.log is renamed to kibana-2.log and
+  kibana.log is renamed to kibana-1.log. A new kibana.log file is created and starts being written to.
+
+The options are:
+
+- `pattern`
+
+The suffix to append to the file path when rolling. Must include `%i`, as this is the value
+that will be converted to the file index.
+
+for example, with `path: /var/logs/kibana.log` and `pattern: '-%i'`, the created rolling files
+will be `/var/logs/kibana-1.log`, `/var/logs/kibana-2.log`, and so on.
+
+The default value is `-%i`
+
+- `max`
+
+The maximum number of files to keep. Once this number is reached, oldest files will be deleted.
+
+The default value is `7`
 
 ## Configuration
 
@@ -88,7 +290,7 @@ logging:
       kind: console
       layout:
         kind: pattern
-        pattern: [{timestamp}][{level}] {message}
+        pattern: "[%date][%level] %message"
     json-file-appender:
       kind: file
       path: /var/log/kibana-json.log
@@ -101,7 +303,7 @@ logging:
     - context: plugins
       appenders: [custom]
       level: warn
-    - context: plugins.pid
+    - context: plugins.myPlugin
       level: info
     - context: server
       level: fatal
@@ -114,14 +316,14 @@ logging:
 
 Here is what we get with the config above:
 
-| Context       | Appenders                | Level |
-| ------------- |:------------------------:| -----:|
-| root          | console, file            | error |
-| plugins       | custom                   | warn  |
-| plugins.pid   | custom                   | info  |
-| server        | console, file            | fatal |
-| optimize      | console                  | error |
-| telemetry     | json-file-appender       | all   |
+| Context          | Appenders                | Level |
+| ---------------- |:------------------------:| -----:|
+| root             | console, file            | error |
+| plugins          | custom                   | warn  |
+| plugins.myPlugin | custom                   | info  |
+| server           | console, file            | fatal |
+| optimize         | console                  | error |
+| telemetry        | json-file-appender       | all   |
 
 
 The `root` logger has a dedicated configuration node since this context is special and should always exist. By 
@@ -179,3 +381,101 @@ The log will be less verbose with `warn` level for the `server` context:
 [2017-07-25T18:54:41.639Z][ERROR][server] Message with `error` log level.
 [2017-07-25T18:54:41.639Z][FATAL][server] Message with `fatal` log level.
 ```
+
+### Logging config migration
+Compatibility with the legacy logging system is assured until the end of the `v7` version.
+All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
+root appenders, make sure that it contains `default` appender to provide backward compatibility.
+**Note**: If you define an appender for a context, the log messages aren't handled by the
+`root` context anymore and not forwarded to the legacy logging service.
+ 
+#### logging.dest
+By default logs in *stdout*. With new Kibana logging you can use pre-existing `console` appender or
+define a custom one.
+```yaml
+logging:
+  loggers:
+    - context: plugins.myPlugin
+      appenders: [console]
+```
+Logs in a *file* if given file path. You should define a custom appender with `kind: file` 
+```yaml
+
+logging:
+  appenders:
+    file:
+      kind: file
+      path: /var/log/kibana.log
+      layout:
+        kind: pattern
+  loggers:
+    - context: plugins.myPlugin
+      appenders: [file]
+``` 
+#### logging.json
+Defines the format of log output. Logs in JSON if `true`. With new logging config you can adjust
+the output format with [layouts](#layouts).
+
+#### logging.quiet
+Suppresses all logging output other than error messages. With new logging, config can be achieved 
+with adjusting minimum required [logging level](#log-level).
+```yaml
+  loggers:
+    - context: plugins.myPlugin
+      appenders: [console]
+      level: error
+# or for all output
+logging.root.level: error
+```
+
+#### logging.silent:
+Suppresses all logging output.
+```yaml
+logging.root.level: off
+```
+
+#### logging.verbose:
+Logs all events
+```yaml
+logging.root.level: all
+```
+
+#### logging.timezone
+Set to the canonical timezone id to log events using that timezone. New logging config allows
+to [specify timezone](#date) for `layout: pattern`.
+```yaml
+logging:
+  appenders:
+    custom-console:
+      kind: console
+      layout:
+        kind: pattern
+        highlight: true
+        pattern: "[%level] [%date{ISO8601_TZ}{America/Los_Angeles}][%logger] %message"
+```
+
+#### logging.events
+Define a custom logger for a specific context.
+
+#### logging.filter
+TBD
+
+### Log record format changes
+
+| Parameter       | Platform log record in **pattern** format  | Legacy Platform log record **text** format |
+| --------------- | ------------------------------------------ | ------------------------------------------ |
+| @timestamp      | ISO8601 `2012-01-31T23:33:22.011Z`         | Absolute `23:33:22.011`                    |
+| context         | `parent.child`                             | `['parent', 'child']`                      |
+| level           | `DEBUG`                                    | `['debug']`                                |
+| meta            | stringified JSON object `{"to": "v8"}`     | N/A                                        |
+| pid             | can be configured as `%pid`                | N/A                                        |
+
+| Parameter       | Platform log record in **json** format     | Legacy Platform log record **json** format   |
+| --------------- | ------------------------------------------ | -------------------------------------------- |
+| @timestamp      | ISO8601_TZ `2012-01-31T23:33:22.011-05:00` | ISO8601 `2012-01-31T23:33:22.011Z`           |
+| context         | `context: parent.child`                    | `tags: ['parent', 'child']`                  |
+| level           | `level: DEBUG`                             | `tags: ['debug']`                            |
+| meta            | separate property `"meta": {"to": "v8"}`   | merged in log record  `{... "to": "v8"}`     |
+| pid             | `pid: 12345`                               | `pid: 12345`                                 |
+| type            | N/A                                        | `type: log`                                  |
+| error           | `{ message, name, stack }`                 | `{ message, name, stack, code, signal }`     |

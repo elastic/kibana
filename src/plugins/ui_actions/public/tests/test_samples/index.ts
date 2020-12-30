@@ -16,6 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { createRestrictedAction } from './restricted_action';
-export { createSayHelloAction } from './say_hello_action';
+
 export { createHelloWorldAction } from './hello_world_action';

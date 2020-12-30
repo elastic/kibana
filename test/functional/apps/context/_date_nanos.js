@@ -23,14 +23,16 @@ const TEST_INDEX_PATTERN = 'date-nanos';
 const TEST_DEFAULT_CONTEXT_SIZE = 1;
 const TEST_STEP_SIZE = 3;
 
-export default function({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const docTable = getService('docTable');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
 
   describe('context view for date_nanos', () => {
-    before(async function() {
+    before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await esArchiver.loadIfNeeded('date_nanos');
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
@@ -39,11 +41,12 @@ export default function({ getService, getPageObjects }) {
       });
     });
 
-    after(function unloadMakelogs() {
-      return esArchiver.unload('date_nanos');
+    after(async function unloadMakelogs() {
+      await security.testUser.restoreDefaults();
+      await esArchiver.unload('date_nanos');
     });
 
-    it('displays predessors - anchor - successors in right order ', async function() {
+    it('displays predessors - anchor - successors in right order ', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qj999Z');
       const actualRowsText = await docTable.getRowsText();
       const expectedRowsText = [
@@ -54,7 +57,7 @@ export default function({ getService, getPageObjects }) {
       expect(actualRowsText).to.eql(expectedRowsText);
     });
 
-    it('displays correctly when predecessors and successors are loaded', async function() {
+    it('displays correctly when predecessors and successors are loaded', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
       await PageObjects.context.clickPredecessorLoadMoreButton();
       await PageObjects.context.clickSuccessorLoadMoreButton();

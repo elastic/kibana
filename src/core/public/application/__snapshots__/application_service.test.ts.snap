@@ -1,0 +1,87 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`#start() getComponent returns renderable JSX tree 1`] = `
+<AppRouter
+  appStatuses$={
+    AnonymousSubject {
+      "_isScalar": false,
+      "closed": false,
+      "destination": AnonymousSubject {
+        "_isScalar": false,
+        "closed": false,
+        "destination": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "operator": MapOperator {
+          "project": [Function],
+          "thisArg": undefined,
+        },
+        "source": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "thrownError": null,
+      },
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "operator": [Function],
+      "source": AnonymousSubject {
+        "_isScalar": false,
+        "closed": false,
+        "destination": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "operator": MapOperator {
+          "project": [Function],
+          "thisArg": undefined,
+        },
+        "source": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "thrownError": null,
+      },
+      "thrownError": null,
+    }
+  }
+  history={
+    Object {
+      "push": [MockFunction],
+      "replace": [MockFunction],
+    }
+  }
+  mounters={Map {}}
+  setAppActionMenu={[Function]}
+  setAppLeaveHandler={[Function]}
+  setIsMounting={[Function]}
+/>
+`;

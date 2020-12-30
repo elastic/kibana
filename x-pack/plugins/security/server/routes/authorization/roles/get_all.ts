@@ -9,14 +9,16 @@ import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { ElasticsearchRole, transformElasticsearchRoleToRole } from './model';
 
-export function defineGetAllRolesRoutes({ router, authz, clusterClient }: RouteDefinitionParams) {
+export function defineGetAllRolesRoutes({ router, authz }: RouteDefinitionParams) {
   router.get(
     { path: '/api/security/role', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const elasticsearchRoles = (await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('shield.getRole')) as Record<string, ElasticsearchRole>;
+        const {
+          body: elasticsearchRoles,
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole<
+          Record<string, ElasticsearchRole>
+        >();
 
         // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.
         return response.ok({

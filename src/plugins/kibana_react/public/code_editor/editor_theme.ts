@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as monacoEditor from 'monaco-editor/esm/vs/editor/editor.api';
+import { monaco } from '@kbn/monaco';
 
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
@@ -27,7 +27,7 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 export function createTheme(
   euiTheme: typeof darkTheme | typeof lightTheme,
   selectionBackgroundColor: string
-): monacoEditor.editor.IStandaloneThemeData {
+): monaco.editor.IStandaloneThemeData {
   return {
     base: 'vs',
     inherit: true,
@@ -35,7 +35,7 @@ export function createTheme(
       {
         token: '',
         foreground: euiTheme.euiColorDarkestShade,
-        background: euiTheme.euiColorEmptyShade,
+        background: euiTheme.euiFormBackgroundColor,
       },
       { token: 'invalid', foreground: euiTheme.euiColorAccent },
       { token: 'emphasis', fontStyle: 'italic' },
@@ -94,13 +94,18 @@ export function createTheme(
     ],
     colors: {
       'editor.foreground': euiTheme.euiColorDarkestShade,
-      'editor.background': euiTheme.euiColorEmptyShade,
+      'editor.background': euiTheme.euiFormBackgroundColor,
       'editorLineNumber.foreground': euiTheme.euiColorDarkShade,
       'editorLineNumber.activeForeground': euiTheme.euiColorDarkShade,
       'editorIndentGuide.background': euiTheme.euiColorLightShade,
       'editor.selectionBackground': selectionBackgroundColor,
       'editorWidget.border': euiTheme.euiColorLightShade,
       'editorWidget.background': euiTheme.euiColorLightestShade,
+      'editorCursor.foreground': euiTheme.euiColorDarkestShade,
+      'editorSuggestWidget.selectedBackground': euiTheme.euiColorLightShade,
+      'list.hoverBackground': euiTheme.euiColorLightShade,
+      'list.highlightForeground': euiTheme.euiColorPrimary,
+      'editor.lineHighlightBorder': euiTheme.euiColorLightestShade,
     },
   };
 }

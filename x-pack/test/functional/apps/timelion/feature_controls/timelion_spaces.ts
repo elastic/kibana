@@ -6,7 +6,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'timelion', 'security', 'spaceSelector']);
@@ -38,9 +38,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).to.contain('Timelion');
       });
 
@@ -71,9 +69,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
-        const navLinks = (await appsMenu.readLinks()).map(
-          (link: Record<string, string>) => link.text
-        );
+        const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
         expect(navLinks).not.to.contain('Timelion');
       });
 
@@ -84,7 +80,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -101,7 +97,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -118,7 +114,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getBodyText();
+        const messageText = await PageObjects.common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

@@ -5,9 +5,9 @@
  */
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function({ loadTestFile }: FtrProviderContext) {
-  describe('console', function() {
-    this.tags('ciGroup3');
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('console', function () {
+    this.tags('ciGroup10');
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./searchprofiler_editor'));

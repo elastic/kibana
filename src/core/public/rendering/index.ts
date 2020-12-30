@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { RenderingService, RenderingStart } from './rendering_service';
+export { RenderingService } from './rendering_service';

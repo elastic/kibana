@@ -1,0 +1,76 @@
+[role="xpack"]
+[[resilient-action-type]]
+=== IBM Resilient action
+
+The IBM Resilient action type uses the https://developer.ibm.com/security/resilient/rest/[RESILIENT REST v2] to create IBM Resilient incidents.
+
+[float]
+[[resilient-connector-configuration]]
+==== Connector configuration
+
+IBM Resilient connectors have the following configuration properties:
+
+Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
+URL::       IBM Resilient instance URL.
+Organization ID:: IBM Resilient organization ID.
+API key ID::  The authentication key ID for HTTP Basic authentication.
+API key secret::  The authentication key secret for HTTP Basic authentication.
+
+[float]
+[[Preconfigured-resilient-configuration]]
+==== Preconfigured action type
+
+[source,text]
+--
+ my-resilient:
+   name: preconfigured-resilient-action-type
+   actionTypeId: .resilient
+   config:
+     apiUrl: https://elastic.resilient.net
+     orgId: ES
+   secrets:
+     apiKeyId: testuser
+     apiKeySecret: tokenkeystorevalue
+--
+
+`config` defines the action type specific to the configuration and contains the following properties:
+
+[cols="2*<"]
+|===
+
+| `apiUrl`
+| An address that corresponds to *URL*.
+
+| `orgId`
+| An ID that corresponds to *Organization ID*.
+
+|===
+
+`secrets` defines sensitive information for the action type:
+
+[cols="2*<"]
+|===
+
+| `apiKeyId`
+| A string that corresponds to *API key ID*.
+
+| `apiKeySecret`
+| A string that corresponds to *API Key secret*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+
+|===
+
+[[resilient-action-configuration]]
+==== Action configuration
+
+IBM Resilient actions have the following configuration properties:
+
+Incident types::              The incident types of the incident.
+Severity code::              The severity of the incident.
+Name::    A name for the issue, used for searching the contents of the knowledge base. 
+Description::          The details about the incident.
+Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
+
+[[configuring-resilient]]
+==== Configuring and testing IBM Resilient
+
+IBM Resilient offers https://www.ibm.com/security/intelligent-orchestration/resilient[Instances], which you can use to test incidents.

@@ -1,0 +1,12 @@
+{
+  "name": "event_log_fixture",
+  "version": "0.0.0",
+  "kibana": {
+    "version": "kibana"
+  },
+  "main": "target/test/plugin_api_integration/plugins/event_log",
+  "scripts": {
+    "kbn": "node ../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../../node_modules/.bin/tsc"
+  }
+}

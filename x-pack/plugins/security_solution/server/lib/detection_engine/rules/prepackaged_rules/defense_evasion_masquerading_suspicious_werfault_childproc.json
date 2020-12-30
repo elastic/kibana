@@ -1,0 +1,51 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "A suspicious WerFault child process was detected, which may indicate an attempt to run unnoticed. Verify process details such as command line, network connections, file writes and parent process details as well.",
+  "false_positives": [
+    "Custom Windows Error Reporting Debugger"
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Suspicious WerFault Child Process",
+  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:WerFault.exe and not process.name:(cofire.exe or psr.exe or VsJITDebugger.exe or TTTracer.exe or rundll32.exe)",
+  "references": [
+    "https://www.hexacorn.com/blog/2019/09/19/silentprocessexit-quick-look-under-the-hood/",
+    "https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Persistence/persistence_SilentProcessExit_ImageHijack_sysmon_13_1.evtx"
+  ],
+  "risk_score": 47,
+  "rule_id": "ac5012b8-8da8-440b-aaaf-aedafdea2dff",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

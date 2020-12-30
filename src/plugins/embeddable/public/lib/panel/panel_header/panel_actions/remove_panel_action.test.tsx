@@ -19,34 +19,34 @@
 
 import { EmbeddableOutput, isErrorEmbeddable } from '../../../';
 import { RemovePanelAction } from './remove_panel_action';
-import { EmbeddableFactory } from '../../../embeddables';
+import { EmbeddableStart } from '../../../../plugin';
 import {
+  MockFilter,
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddable,
   FilterableEmbeddableInput,
 } from '../../../test_samples/embeddables/filterable_embeddable';
 import { FilterableEmbeddableFactory } from '../../../test_samples/embeddables/filterable_embeddable_factory';
 import { FilterableContainer } from '../../../test_samples/embeddables/filterable_container';
-import { GetEmbeddableFactory, ViewMode } from '../../../types';
+import { ViewMode } from '../../../types';
 import { ContactCardEmbeddable } from '../../../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { embeddablePluginMock } from '../../../../mocks';
 
-const embeddableFactories = new Map<string, EmbeddableFactory>();
-embeddableFactories.set(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
-const getFactory: GetEmbeddableFactory = (id: string) => embeddableFactories.get(id);
-
+const { setup, doStart } = embeddablePluginMock.createInstance();
+setup.registerEmbeddableFactory(FILTERABLE_EMBEDDABLE, new FilterableEmbeddableFactory());
+const getFactory = doStart().getEmbeddableFactory;
 let container: FilterableContainer;
 let embeddable: FilterableEmbeddable;
 
 beforeEach(async () => {
-  const derivedFilter: esFilters.Filter = {
-    $state: { store: esFilters.FilterStateStore.APP_STATE },
+  const derivedFilter: MockFilter = {
+    $state: { store: 'appState' },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };
   container = new FilterableContainer(
     { id: 'hello', panels: {}, filters: [derivedFilter], viewMode: ViewMode.EDIT },
-    getFactory
+    getFactory as EmbeddableStart['getEmbeddableFactory']
   );
 
   const filterableEmbeddable = await container.addNewEmbeddable<

@@ -65,7 +65,7 @@ application.registerApp({
 });
 
 // Alerting
-alerting.registerType({
+alerts.registerType({
   id: 'myAlert',
   async execute(context, params, state) {
     const indexPatterns = await context.core.savedObjects.find('indexPattern');

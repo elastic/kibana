@@ -19,28 +19,28 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { AutocompleteSuggestion } from '../..';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
-import { SuggestionsComponent } from './suggestions_component';
+import SuggestionsComponent from './suggestions_component';
 
 const noop = () => {
   return;
 };
 
-const mockSuggestions: AutocompleteSuggestion[] = [
+const mockSuggestions: QuerySuggestion[] = [
   {
     description: 'This is not a helpful suggestion',
     end: 0,
     start: 42,
     text: 'as promised, not helpful',
-    type: 'value',
+    type: QuerySuggestionTypes.Value,
   },
   {
     description: 'This is another unhelpful suggestion',
     end: 0,
     start: 42,
     text: 'yep',
-    type: 'field',
+    type: QuerySuggestionTypes.Field,
   },
 ];
 
@@ -54,6 +54,7 @@ describe('SuggestionsComponent', () => {
         show={false}
         suggestions={mockSuggestions}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -69,6 +70,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={[]}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -84,6 +86,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -100,6 +103,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
@@ -116,13 +120,11 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
-    component
-      .find(SuggestionComponent)
-      .at(1)
-      .simulate('click');
+    component.find(SuggestionComponent).at(1).simulate('click');
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(mockSuggestions[1]);
   });
@@ -137,13 +139,11 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
+        queryBarRect={{ top: 0 } as DOMRect}
       />
     );
 
-    component
-      .find(SuggestionComponent)
-      .at(1)
-      .simulate('mouseenter');
+    component.find(SuggestionComponent).at(1).simulate('mouseenter');
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(1);
   });
