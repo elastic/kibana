@@ -34,10 +34,10 @@ interface FieldSelectProps {
   indexPattern: string;
   value: string;
   onChange: (options: Array<EuiComboBoxOptionOption<string>>) => void;
-  disabled: boolean;
-  restrict: string[];
-  placeholder: string;
-  uiRestrictions: TimeseriesUIRestrictions;
+  disabled?: boolean;
+  restrict?: string[];
+  placeholder?: string;
+  uiRestrictions?: TimeseriesUIRestrictions;
 }
 
 const isFieldTypeEnabled = (fieldRestrictions: string[], fieldType: string) =>
@@ -51,7 +51,7 @@ export function FieldSelect({
   type,
   fields,
   indexPattern = '',
-  value,
+  value = '',
   onChange,
   disabled = false,
   restrict = [],

@@ -40,8 +40,8 @@ import { createNumberHandler } from '../../lib/create_number_handler';
 import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
-import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
-import { MetricsItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../../../common/types';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { MetricsItemsSchema, PanelSchema, SanitizedFieldType } from '../../../../../common/types';
 import { DragHandleProps } from '../../../../types';
 import { PercentileHdr } from '../percentile_hdr';
 
@@ -49,10 +49,10 @@ const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
 
 interface PercentileRankAggProps {
   disableDelete: boolean;
-  fields: IFieldType[];
+  fields: Record<string, SanitizedFieldType[]>;
+  indexPattern: string;
   model: MetricsItemsSchema;
   panel: PanelSchema;
-  series: SeriesItemsSchema;
   siblings: MetricsItemsSchema[];
   dragHandleProps: DragHandleProps;
   onAdd(): void;
@@ -61,12 +61,10 @@ interface PercentileRankAggProps {
 }
 
 export const PercentileRankAgg = (props: PercentileRankAggProps) => {
-  const { series, panel, fields } = props;
+  const { panel, fields, indexPattern } = props;
   const defaults = { values: [''] };
   const model = { ...defaults, ...props.model };
 
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const htmlId = htmlIdGenerator();
   const isTablePanel = panel.type === 'table';
   const handleChange = createChangeHandler(props.onChange, model);
@@ -79,7 +77,6 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
       values,
     });
   };
-
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -121,7 +118,7 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
               type={model.type}
               restrict={RESTRICT_FIELDS}
               indexPattern={indexPattern}
-              value={model.field}
+              value={model.field ?? ''}
               onChange={handleSelectChange('field')}
             />
           </EuiFormRow>
