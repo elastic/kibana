@@ -16,8 +16,12 @@ export const RecoveredActionGroup: Readonly<ActionGroup<'recovered'>> = Object.f
   }),
 });
 
+export type ReservedActionGroups<RecoveryActionGroupId extends string> =
+  | RecoveryActionGroupId
+  | RecoveredActionGroupId;
+
 export function getBuiltinActionGroups<RecoveryActionGroupId extends string>(
   customRecoveryGroup?: ActionGroup<RecoveryActionGroupId>
-): [ActionGroup<RecoveryActionGroupId | RecoveredActionGroupId>] {
+): [ActionGroup<ReservedActionGroups<RecoveryActionGroupId>>] {
   return [customRecoveryGroup ?? RecoveredActionGroup];
 }
