@@ -23,12 +23,12 @@ import {
   UngroupedSearchQueryResponseRT,
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
-  AlertParamsRT,
+  alertParamsRT,
   isRatioAlertParams,
   hasGroupBy,
   getNumerator,
   getDenominator,
-  Criteria,
+  CountCriteria,
   CountAlertParams,
   RatioAlertParams,
 } from '../../../../common/alerting/logs/log_threshold/types';
@@ -67,7 +67,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
 
     try {
-      const validatedParams = decodeOrThrow(AlertParamsRT)(params);
+      const validatedParams = decodeOrThrow(alertParamsRT)(params);
 
       if (!isRatioAlertParams(validatedParams)) {
         await executeAlert(
@@ -174,7 +174,7 @@ async function executeRatioAlert(
 }
 
 const getESQuery = (
-  alertParams: Omit<AlertParams, 'criteria'> & { criteria: Criteria },
+  alertParams: Omit<AlertParams, 'criteria'> & { criteria: CountCriteria },
   timestampField: string,
   indexPattern: string
 ) => {
@@ -366,7 +366,7 @@ export const updateAlertInstance: AlertInstanceUpdater = (alertInstance, state, 
 };
 
 export const buildFiltersFromCriteria = (
-  params: Pick<AlertParams, 'timeSize' | 'timeUnit'> & { criteria: Criteria },
+  params: Pick<AlertParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string
 ) => {
   const { timeSize, timeUnit, criteria } = params;
@@ -417,7 +417,7 @@ export const buildFiltersFromCriteria = (
 };
 
 export const getGroupedESQuery = (
-  params: Pick<AlertParams, 'timeSize' | 'timeUnit' | 'groupBy'> & { criteria: Criteria },
+  params: Pick<AlertParams, 'timeSize' | 'timeUnit' | 'groupBy'> & { criteria: CountCriteria },
   timestampField: string,
   index: string
 ): object | undefined => {
@@ -475,7 +475,7 @@ export const getGroupedESQuery = (
 };
 
 export const getUngroupedESQuery = (
-  params: Pick<AlertParams, 'timeSize' | 'timeUnit'> & { criteria: Criteria },
+  params: Pick<AlertParams, 'timeSize' | 'timeUnit'> & { criteria: CountCriteria },
   timestampField: string,
   index: string
 ): object => {
@@ -509,7 +509,7 @@ type Filter = {
   [key in SupportedESQueryTypes]?: object;
 };
 
-const buildFiltersForCriteria = (criteria: Criteria) => {
+const buildFiltersForCriteria = (criteria: CountCriteria) => {
   let filters: Filter[] = [];
 
   criteria.forEach((criterion) => {
@@ -643,7 +643,7 @@ const getGroupedResults = async (
   return compositeGroupBuckets;
 };
 
-const createConditionsMessageForCriteria = (criteria: Criteria) => {
+const createConditionsMessageForCriteria = (criteria: CountCriteria) => {
   const parts = criteria.map((criterion, index) => {
     const { field, comparator, value } = criterion;
     return `${index === 0 ? '' : 'and'} ${field} ${comparator} ${value}`;
