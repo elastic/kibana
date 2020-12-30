@@ -46,7 +46,6 @@ export interface ReferenceEditorProps {
   currentIndexPattern: IndexPattern;
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
-  helpText?: EuiFormRowProps['helpText'];
   labelAppend?: EuiFormRowProps['labelAppend'];
 
   // Services
@@ -67,7 +66,6 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     validation,
     selectionStyle,
     dateRange,
-    helpText,
     labelAppend,
     ...services
   } = props;
@@ -261,7 +259,6 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
             })}
             fullWidth
             isInvalid={showFieldInvalid}
-            helpText={helpText}
             labelAppend={labelAppend}
           >
             <FieldSelect

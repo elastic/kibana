@@ -287,7 +287,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   // Need to workout early on the error to decide whether to show this or an help text
   const fieldErrorMessage =
-    selectedOperationDefinition?.input !== 'fullReference' &&
+    (selectedOperationDefinition?.input !== 'fullReference' ||
+      (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
     getErrorMessage(
       selectedColumn,
       Boolean(incompleteOperation),
