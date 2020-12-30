@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import type { VisParams } from 'src/plugins/visualizations/public';
+import type { VisParams, Schema } from 'src/plugins/visualizations/public';
 import type { IAggType, IAggConfig, AggGroupName } from 'src/plugins/data/public';
-import type { Schema } from 'src/plugins/visualizations/public';
 
 import type { EditorVisState } from './sidebar/state/reducers';
 
