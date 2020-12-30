@@ -9,6 +9,7 @@ import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '.
 import { IndexPatternLayer } from '../../../types';
 import {
   buildLabelFunction,
+  getErrorsForDateReference,
   checkForDateHistogram,
   dateBasedOperationToExpression,
   hasDateField,
@@ -52,15 +53,18 @@ export const counterRateOperation: OperationDefinition<
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
-  getPossibleOperation: () => {
-    return {
-      dataType: 'number',
-      isBucketed: false,
-      scale: 'ratio',
-    };
+  getPossibleOperation: (indexPattern) => {
+    if (hasDateField(indexPattern)) {
+      return {
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      };
+    }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale);
+    const ref = columns[column.references[0]];
+    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined, column.timeScale);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
@@ -69,7 +73,7 @@ export const counterRateOperation: OperationDefinition<
     const metric = layer.columns[referenceIds[0]];
     const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
     return {
-      label: ofName(metric?.label, timeScale),
+      label: ofName(metric && 'sourceField' in metric ? metric.sourceField : undefined, timeScale),
       dataType: 'number',
       operationType: 'counter_rate',
       isBucketed: false,
@@ -88,13 +92,22 @@ export const counterRateOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern) => {
     return hasDateField(newIndexPattern);
   },
-  getErrorMessage: (layer: IndexPatternLayer) => {
+  getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
+    return getErrorsForDateReference(
+      layer,
+      columnId,
+      i18n.translate('xpack.lens.indexPattern.counterRate', {
+        defaultMessage: 'Counter rate',
+      })
+    );
+  },
+  getDisabledStatus(indexPattern, layer) {
     return checkForDateHistogram(
       layer,
       i18n.translate('xpack.lens.indexPattern.counterRate', {
         defaultMessage: 'Counter rate',
       })
-    );
+    )?.join(', ');
   },
   timeScalingMode: 'mandatory',
 };

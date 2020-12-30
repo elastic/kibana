@@ -27,7 +27,14 @@ export const noopAlertType: AlertType = {
   producer: 'alerts',
 };
 
-export const alwaysFiringAlertType: AlertType = {
+export const alwaysFiringAlertType: AlertType<
+  { instances: Array<{ id: string; state: any }> },
+  {
+    globalStateValue: boolean;
+    groupInSeriesIndex: number;
+  },
+  { instanceStateValue: boolean; globalStateValue: boolean; groupInSeriesIndex: number }
+> = {
   id: 'test.always-firing',
   name: 'Always Firing',
   actionGroups: [
@@ -37,7 +44,7 @@ export const alwaysFiringAlertType: AlertType = {
   defaultActionGroupId: 'default',
   producer: 'alerts',
   minimumLicenseRequired: 'basic',
-  async executor(alertExecutorOptions: any) {
+  async executor(alertExecutorOptions) {
     const { services, state, params } = alertExecutorOptions;
 
     (params.instances || []).forEach((instance: { id: string; state: any }) => {

@@ -17,7 +17,7 @@ const policyResponses: Array<[string, string]> = [
     'configure_elasticsearch_connection',
     i18n.translate(
       'xpack.securitySolution.endpoint.details.policyResponse.configure_elasticsearch_connection',
-      { defaultMessage: 'Configure Elastic Search Connection' }
+      { defaultMessage: 'Configure Elasticsearch Connection' }
     ),
   ],
   [
@@ -162,7 +162,7 @@ const policyResponses: Array<[string, string]> = [
     'read_elasticsearch_config',
     i18n.translate(
       'xpack.securitySolution.endpoint.details.policyResponse.read_elasticsearch_config',
-      { defaultMessage: 'Read ElasticSearch Config' }
+      { defaultMessage: 'Read Elasticsearch Config' }
     ),
   ],
   [

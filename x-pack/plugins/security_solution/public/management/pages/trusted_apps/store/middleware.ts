@@ -95,20 +95,13 @@ const refreshListIfNeeded = async (
       store.dispatch(
         createTrustedAppsListResourceStateChangedAction({
           type: 'FailedResourceState',
-          error,
+          error: error.body,
           lastLoadedState: getLastLoadedListResourceState(store.getState()),
         })
       );
     }
   }
 };
-
-const createTrustedAppDeletionSubmissionResourceStateChanged = (
-  newState: Immutable<AsyncResourceState>
-): Immutable<TrustedAppDeletionSubmissionResourceStateChanged> => ({
-  type: 'trustedAppDeletionSubmissionResourceStateChanged',
-  payload: { newState },
-});
 
 const updateCreationDialogIfNeeded = (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>
@@ -167,13 +160,20 @@ const submitCreationIfNeeded = async (
       store.dispatch(
         createTrustedAppCreationSubmissionResourceStateChanged({
           type: 'FailedResourceState',
-          error,
+          error: error.body,
           lastLoadedState: getLastLoadedResourceState(submissionResourceState),
         })
       );
     }
   }
 };
+
+const createTrustedAppDeletionSubmissionResourceStateChanged = (
+  newState: Immutable<AsyncResourceState>
+): Immutable<TrustedAppDeletionSubmissionResourceStateChanged> => ({
+  type: 'trustedAppDeletionSubmissionResourceStateChanged',
+  payload: { newState },
+});
 
 const submitDeletionIfNeeded = async (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
@@ -209,7 +209,7 @@ const submitDeletionIfNeeded = async (
       store.dispatch(
         createTrustedAppDeletionSubmissionResourceStateChanged({
           type: 'FailedResourceState',
-          error,
+          error: error.body,
           lastLoadedState: getLastLoadedResourceState(submissionResourceState),
         })
       );
