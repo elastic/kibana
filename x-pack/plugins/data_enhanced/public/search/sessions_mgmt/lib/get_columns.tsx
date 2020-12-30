@@ -70,12 +70,16 @@ export const getColumns = (
       }),
       sortable: true,
       width: '20%',
-      render: (name: UISession['name'], { appId, url, id }) => {
-        return (
-          <EuiLink href={url} data-test-subj="session-mgmt-table-col-name">
-            <TableText>{name}</TableText>
-          </EuiLink>
-        );
+      render: (name: UISession['name'], { isViewable, url }) => {
+        if (isViewable) {
+          return (
+            <EuiLink href={url} data-test-subj="session-mgmt-table-col-name-viewable">
+              <TableText>{name}</TableText>
+            </EuiLink>
+          );
+        }
+
+        return <TableText data-test-subj="session-mgmt-table-col-name-plain">{name}</TableText>;
       },
     },
 

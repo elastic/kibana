@@ -13,8 +13,7 @@ import type { SharePluginStart } from 'src/plugins/share/public';
 import { SessionsMgmtConfigSchema } from '../';
 import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
 import type { BackgroundSessionSavedObjectAttributes } from '../../../../common';
-import type { UISession } from '../../../../common/search/sessions_mgmt';
-import { ACTION } from '../../../../common/search/sessions_mgmt';
+import { ACTION, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
@@ -52,9 +51,13 @@ const mapToUISession = (
     console.error(err);
   }
 
+  // viewable if available
+  const isViewable =
+    status !== STATUS.CANCELLED && status !== STATUS.EXPIRED && status !== STATUS.ERROR;
+
   return {
     id: savedObject.id,
-    isViewable: true, // always viewable
+    isViewable,
     name,
     appId,
     created,
@@ -141,17 +144,6 @@ export class SearchSessionsMgmtAPI {
         }),
       });
     }
-
-    return await this.fetchTableData();
-  }
-
-  // Cancel: not implemented
-  public async sendCancel(id: string): Promise<UISession[] | null> {
-    this.notifications.toasts.addError(new Error('Not implemented'), {
-      title: i18n.translate('xpack.data.mgmt.searchSessions.api.cancelError', {
-        defaultMessage: 'Failed to cancel the session!',
-      }),
-    });
 
     return await this.fetchTableData();
   }

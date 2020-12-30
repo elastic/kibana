@@ -11,8 +11,11 @@ import moment from 'moment';
 import * as Rx from 'rxjs';
 import sinon from 'sinon';
 import { coreMock } from 'src/core/public/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { SavedObjectsFindResponse } from 'src/core/server';
 import { SessionsClient } from 'src/plugins/data/public/search';
-import { SessionsMgmtConfigSchema } from '../';
+import type { SessionsMgmtConfigSchema } from '../';
+import { STATUS } from '../../../../common/search/sessions_mgmt';
 import { mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtAPI } from './api';
 
@@ -32,17 +35,16 @@ describe('Background Sessions Management API', () => {
     };
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
-    findSessions = sinon.stub(sessionsClient, 'find').callsFake(
-      async () =>
-        ({
-          saved_objects: [
-            {
-              id: 'hello-pizza-123',
-              attributes: { name: 'Veggie', appId: 'pizza', status: 'baked' },
-            },
-          ],
-        } as any) // can't reach the actual type from public
-    );
+    findSessions = sinon.stub(sessionsClient, 'find').callsFake(async () => {
+      return {
+        saved_objects: [
+          {
+            id: 'hello-pizza-123',
+            attributes: { name: 'Veggie', appId: 'pizza', status: 'baked' },
+          },
+        ],
+      } as SavedObjectsFindResponse;
+    });
   });
 
   describe('listing', () => {
@@ -68,6 +70,79 @@ describe('Background Sessions Management API', () => {
             "status": "baked",
             "url": "hello-cool-undefined-url",
           },
+        ]
+      `);
+    });
+
+    test('isViewable is calculated based on status', async () => {
+      findSessions.callsFake(async () => {
+        return {
+          saved_objects: [
+            {
+              id: 'hello-pizza-000',
+              attributes: { name: 'Veggie 1', appId: 'pizza', status: STATUS.IN_PROGRESS },
+            },
+            {
+              id: 'hello-pizza-123',
+              attributes: { name: 'Veggie 2', appId: 'pizza', status: STATUS.COMPLETE },
+            },
+            {
+              id: 'hello-pizza-456',
+              attributes: { name: 'Veggie B', appId: 'pizza', status: STATUS.EXPIRED },
+            },
+            {
+              id: 'hello-pizza-789',
+              attributes: { name: 'Veggie C', appId: 'pizza', status: STATUS.CANCELLED },
+            },
+            {
+              id: 'hello-pizza-999',
+              attributes: { name: 'Veggie X', appId: 'pizza', status: STATUS.ERROR },
+            },
+          ],
+        } as SavedObjectsFindResponse;
+      });
+
+      const api = new SearchSessionsMgmtAPI(
+        sessionsClient,
+        mockUrls,
+        mockCoreSetup.notifications,
+        mockConfig
+      );
+      const data = await api.fetchTableData();
+      expect(data).not.toBe(null);
+
+      expect(
+        data &&
+          data.map((session) => {
+            return [session.name, session.status, session.isViewable];
+          })
+      ).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "Veggie 1",
+            "in_progress",
+            true,
+          ],
+          Array [
+            "Veggie 2",
+            "complete",
+            true,
+          ],
+          Array [
+            "Veggie B",
+            "expired",
+            false,
+          ],
+          Array [
+            "Veggie C",
+            "cancelled",
+            false,
+          ],
+          Array [
+            "Veggie X",
+            "error",
+            false,
+          ],
         ]
       `);
     });
