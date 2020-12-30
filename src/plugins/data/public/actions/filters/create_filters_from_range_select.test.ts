@@ -29,12 +29,16 @@ import {
 } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
-import { RangeSelectContext } from '../../../../embeddable/public';
 
 describe('brushEvent', () => {
   const DAY_IN_MS = 24 * 60 * 60 * 1000;
   const JAN_01_2014 = 1388559600000;
-  let baseEvent: RangeSelectContext['data'];
+  let baseEvent: {
+    table: any;
+    column: number;
+    range: number[];
+    timeFieldName?: string;
+  };
 
   const mockField = {
     name: 'time',
