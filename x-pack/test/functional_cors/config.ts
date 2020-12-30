@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   };
 
   const { protocol, hostname } = kbnTestConfig.getUrlParts();
-  const pluginPort = await getPort({ port: 9000 });
+  const pluginPort = await getPort();
   const originUrl = Url.format({
     protocol,
     hostname,
