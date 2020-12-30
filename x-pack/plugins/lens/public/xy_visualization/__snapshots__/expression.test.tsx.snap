@@ -1,0 +1,1422 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`xy_expression XYChart component it renders area 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(SpecInstance)
+    baseTheme={Object {}}
+    legendPosition="top"
+    onBrushEnd={[Function]}
+    onElementClick={[Function]}
+    rotation={0}
+    showLegend={false}
+    showLegendExtra={false}
+    theme={
+      Object {
+        "background": Object {
+          "color": undefined,
+        },
+        "barSeriesStyle": Object {},
+      }
+    }
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "strokeWidth": 2,
+        "visible": true,
+      }
+    }
+    hide={false}
+    id="x"
+    position="bottom"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
+    groupId="left"
+    id="left"
+    key="left"
+    position="left"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="a"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
+    groupId="left"
+    id="d-a"
+    key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "b",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders bar 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(SpecInstance)
+    baseTheme={Object {}}
+    legendPosition="top"
+    onBrushEnd={[Function]}
+    onElementClick={[Function]}
+    rotation={0}
+    showLegend={false}
+    showLegendExtra={false}
+    theme={
+      Object {
+        "background": Object {
+          "color": undefined,
+        },
+        "barSeriesStyle": Object {},
+      }
+    }
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "strokeWidth": 2,
+        "visible": true,
+      }
+    }
+    hide={false}
+    id="x"
+    position="bottom"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
+    groupId="left"
+    id="left"
+    key="left"
+    position="left"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="a"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-a"
+    key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "b",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders horizontal bar 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(SpecInstance)
+    baseTheme={Object {}}
+    legendPosition="top"
+    onBrushEnd={[Function]}
+    onElementClick={[Function]}
+    rotation={90}
+    showLegend={false}
+    showLegendExtra={false}
+    theme={
+      Object {
+        "background": Object {
+          "color": undefined,
+        },
+        "barSeriesStyle": Object {},
+      }
+    }
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "strokeWidth": 2,
+        "visible": true,
+      }
+    }
+    hide={false}
+    id="x"
+    position="left"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
+    groupId="left"
+    id="left"
+    key="left"
+    position="bottom"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="a"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-a"
+    key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "b",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders line 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(SpecInstance)
+    baseTheme={Object {}}
+    legendPosition="top"
+    onBrushEnd={[Function]}
+    onElementClick={[Function]}
+    rotation={0}
+    showLegend={false}
+    showLegendExtra={false}
+    theme={
+      Object {
+        "background": Object {
+          "color": undefined,
+        },
+        "barSeriesStyle": Object {},
+      }
+    }
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "strokeWidth": 2,
+        "visible": true,
+      }
+    }
+    hide={false}
+    id="x"
+    position="bottom"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
+    groupId="left"
+    id="left"
+    key="left"
+    position="left"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="a"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
+    groupId="left"
+    id="d-a"
+    key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={Array []}
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "b",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders stacked area 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(SpecInstance)
+    baseTheme={Object {}}
+    legendPosition="top"
+    onBrushEnd={[Function]}
+    onElementClick={[Function]}
+    rotation={0}
+    showLegend={false}
+    showLegendExtra={false}
+    theme={
+      Object {
+        "background": Object {
+          "color": undefined,
+        },
+        "barSeriesStyle": Object {},
+      }
+    }
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "strokeWidth": 2,
+        "visible": true,
+      }
+    }
+    hide={false}
+    id="x"
+    position="bottom"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
+    groupId="left"
+    id="left"
+    key="left"
+    position="left"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="a"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
+    groupId="left"
+    id="d-a"
+    key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    enableHistogramMode={false}
+    fit={
+      Object {
+        "type": "none",
+      }
+    }
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "b",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders stacked bar 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(SpecInstance)
+    baseTheme={Object {}}
+    legendPosition="top"
+    onBrushEnd={[Function]}
+    onElementClick={[Function]}
+    rotation={0}
+    showLegend={false}
+    showLegendExtra={false}
+    theme={
+      Object {
+        "background": Object {
+          "color": undefined,
+        },
+        "barSeriesStyle": Object {},
+      }
+    }
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "strokeWidth": 2,
+        "visible": true,
+      }
+    }
+    hide={false}
+    id="x"
+    position="bottom"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
+    groupId="left"
+    id="left"
+    key="left"
+    position="left"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="a"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-a"
+    key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "b",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`xy_expression XYChart component it renders stacked horizontal bar 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(SpecInstance)
+    baseTheme={Object {}}
+    legendPosition="top"
+    onBrushEnd={[Function]}
+    onElementClick={[Function]}
+    rotation={90}
+    showLegend={false}
+    showLegendExtra={false}
+    theme={
+      Object {
+        "background": Object {
+          "color": undefined,
+        },
+        "barSeriesStyle": Object {},
+      }
+    }
+    tooltip={
+      Object {
+        "headerFormatter": [Function],
+      }
+    }
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "strokeWidth": 2,
+        "visible": true,
+      }
+    }
+    hide={false}
+    id="x"
+    position="left"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": true,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="c"
+  />
+  <Connect(SpecInstance)
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
+    groupId="left"
+    id="left"
+    key="left"
+    position="bottom"
+    style={
+      Object {
+        "axisTitle": Object {
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "visible": false,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    title="a"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-a"
+    key="0-0"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "a",
+      ]
+    }
+    yScaleType="linear"
+  />
+  <Connect(SpecInstance)
+    areaSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    color={[Function]}
+    data={
+      Array [
+        Object {
+          "a": 1,
+          "b": 2,
+          "c": "I",
+          "d": "Foo",
+        },
+        Object {
+          "a": 1,
+          "b": 5,
+          "c": "J",
+          "d": "Bar",
+        },
+      ]
+    }
+    displayValueSettings={
+      Object {
+        "hideClippedValue": true,
+        "isAlternatingValueLabel": false,
+        "isValueContainedInElement": true,
+        "showValueLabel": false,
+        "valueFormatter": [Function],
+      }
+    }
+    enableHistogramMode={false}
+    groupId="left"
+    id="d-b"
+    key="0-1"
+    lineSeriesStyle={
+      Object {
+        "point": Object {
+          "radius": 5,
+          "visible": false,
+        },
+      }
+    }
+    name={[Function]}
+    splitSeriesAccessors={
+      Array [
+        "d",
+      ]
+    }
+    stackAccessors={
+      Array [
+        "c",
+      ]
+    }
+    timeZone="UTC"
+    xAccessor="c"
+    xScaleType="ordinal"
+    yAccessors={
+      Array [
+        "b",
+      ]
+    }
+    yScaleType="linear"
+  />
+</Chart>
+`;

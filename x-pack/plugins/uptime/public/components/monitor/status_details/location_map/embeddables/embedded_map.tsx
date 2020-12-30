@@ -69,6 +69,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
 
   const input: MapEmbeddableInput = {
     id: uuid.v4(),
+    attributes: { title: '' },
     filters: [],
     hidePanelTitles: true,
     refreshConfig: {
@@ -130,7 +131,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
 
       if (embeddableObject && !isErrorEmbeddable(embeddableObject)) {
         embeddableObject.setRenderTooltipContent(renderTooltipContent);
-        await embeddableObject.setLayerList(getLayerList(upPoints, downPoints, colors));
+        embeddableObject.setLayerList(getLayerList(upPoints, downPoints, colors));
       }
 
       setEmbeddable(embeddableObject);

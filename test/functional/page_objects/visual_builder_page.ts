@@ -131,8 +131,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async enterMarkdown(markdown: string) {
-      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await this.clearMarkdown();
+      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
       await input.type(markdown);
       await PageObjects.common.sleep(3000);
     }
@@ -147,12 +147,18 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         const value = $('.ace_line').text();
         if (value.length > 0) {
           log.debug('Clearing text area input');
-          const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
-          await input.clearValueWithKeyboard();
+          this.waitForMarkdownTextAreaCleaned();
         }
 
         return value.length === 0;
       });
+    }
+
+    public async waitForMarkdownTextAreaCleaned() {
+      const input = await find.byCssSelector('.tvbMarkdownEditor__editor textarea');
+      await input.clearValueWithKeyboard();
+      const text = await this.getMarkdownText();
+      return text.length === 0;
     }
 
     public async getMarkdownText(): Promise<string> {
@@ -453,6 +459,14 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    public async waitForIndexPatternTimeFieldOptionsLoaded() {
+      await retry.waitFor('combobox options loaded', async () => {
+        const options = await comboBox.getOptions('metricsIndexPatternFieldsSelect');
+        log.debug(`-- optionsCount=${options.length}`);
+        return options.length > 0;
+      });
+    }
+
     public async selectIndexPatternTimeField(timeField: string) {
       await retry.try(async () => {
         await comboBox.clearInputField('metricsIndexPatternFieldsSelect');
@@ -541,7 +555,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async checkPreviewIsDisabled(): Promise<void> {
       log.debug(`Check no data message is present`);
-      await testSubjects.existOrFail('noTSVBDataMessage', { timeout: 5000 });
+      await testSubjects.existOrFail('timeseriesVis > visNoResult', { timeout: 5000 });
     }
 
     public async cloneSeries(nth: number = 0): Promise<void> {

@@ -16,7 +16,6 @@ import { TestProviders } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import * as i18n from './translations';
-
 describe('Category', () => {
   const timelineId = 'test';
   const selectedCategoryId = 'client';
@@ -41,6 +40,7 @@ describe('Category', () => {
           })}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}
+          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
         />
       </TestProviders>
@@ -70,12 +70,13 @@ describe('Category', () => {
           })}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}
+          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
         />
       </TestProviders>
     );
 
-    expect(wrapper.find('.euiTableCellContent__text').at(0).text()).toEqual(i18n.FIELD);
+    expect(wrapper.find('.euiTableCellContent__text').at(1).text()).toEqual(i18n.FIELD);
   });
 
   test('it renders the Description column header', () => {
@@ -97,11 +98,12 @@ describe('Category', () => {
           })}
           width={FIELDS_PANE_WIDTH}
           onCategorySelected={jest.fn()}
+          onUpdateColumns={jest.fn()}
           timelineId={timelineId}
         />
       </TestProviders>
     );
 
-    expect(wrapper.find('.euiTableCellContent__text').at(1).text()).toEqual(i18n.DESCRIPTION);
+    expect(wrapper.find('.euiTableCellContent__text').at(2).text()).toEqual(i18n.DESCRIPTION);
   });
 });

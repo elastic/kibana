@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { eventIDSafeVersion } from '../../../../plugins/security_solution/common/endpoint/models/event';
-import { SafeResolverRelatedEvents } from '../../../../plugins/security_solution/common/endpoint/types';
+import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
+import {
+  eventIDSafeVersion,
+  parentEntityIDSafeVersion,
+  timestampAsDateSafeVersion,
+} from '../../../../plugins/security_solution/common/endpoint/models/event';
+import { ResolverPaginatedEvents } from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   Tree,
@@ -17,7 +23,6 @@ import { compareArrays } from './common';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const resolver = getService('resolverGenerator');
-  const esArchiver = getService('esArchiver');
 
   const relatedEventsToGen = [
     { category: RelatedEventCategory.Driver, count: 2 },
@@ -41,173 +46,324 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
-  describe('related events route', () => {
+  describe('event route', () => {
+    let entityIDFilterArray: JsonObject[] | undefined;
+    let entityIDFilter: string | undefined;
     before(async () => {
-      await esArchiver.load('endpoint/resolver/api_feature');
       resolverTrees = await resolver.createTrees(treeOptions);
       // we only requested a single alert so there's only 1 tree
       tree = resolverTrees.trees[0];
+      entityIDFilterArray = [
+        { term: { 'process.entity_id': tree.origin.id } },
+        { bool: { must_not: { term: { 'event.category': 'process' } } } },
+      ];
+      entityIDFilter = JSON.stringify({
+        bool: {
+          filter: entityIDFilterArray,
+        },
+      });
     });
     after(async () => {
       await resolver.deleteData(resolverTrees);
-      await esArchiver.unload('endpoint/resolver/api_feature');
     });
 
-    describe('legacy events', () => {
-      const endpointID = '5a0c957f-b8e7-4538-965e-57e8bb86ad3a';
-      const entityID = '94042';
-      const cursor = 'eyJ0aW1lc3RhbXAiOjE1ODE0NTYyNTUwMDAsImV2ZW50SUQiOiI5NDA0MyJ9';
-
-      it('should return details for the root node', async () => {
-        const { body }: { body: SafeResolverRelatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.events.length).to.eql(1);
-        expect(body.entityID).to.eql(entityID);
-        expect(body.nextEvent).to.eql(null);
+    it('should filter events by event.id', async () => {
+      const filter = JSON.stringify({
+        bool: {
+          filter: [{ term: { 'event.id': tree.origin.relatedEvents[0]?.event?.id } }],
+        },
       });
-
-      it('returns no values when there is no more data', async () => {
-        const { body }: { body: SafeResolverRelatedEvents } = await supertest
-          // after is set to the document id of the last event so there shouldn't be any more after it
-          .post(
-            `/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}&afterEvent=${cursor}`
-          )
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.events).be.empty();
-        expect(body.entityID).to.eql(entityID);
-        expect(body.nextEvent).to.eql(null);
-      });
-
-      it('should return the first page of information when the cursor is invalid', async () => {
-        const { body }: { body: SafeResolverRelatedEvents } = await supertest
-          .post(
-            `/api/endpoint/resolver/${entityID}/events?legacyEndpointID=${endpointID}&afterEvent=blah`
-          )
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.entityID).to.eql(entityID);
-        expect(body.nextEvent).to.eql(null);
-      });
-
-      it('should return no results for an invalid endpoint ID', async () => {
-        const { body }: { body: SafeResolverRelatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/${entityID}/events?legacyEndpointID=foo`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.nextEvent).to.eql(null);
-        expect(body.entityID).to.eql(entityID);
-        expect(body.events).to.be.empty();
-      });
-
-      it('should error on invalid pagination values', async () => {
-        await supertest
-          .post(`/api/endpoint/resolver/${entityID}/events?events=0`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(400);
-        await supertest
-          .post(`/api/endpoint/resolver/${entityID}/events?events=20000`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(400);
-        await supertest
-          .post(`/api/endpoint/resolver/${entityID}/events?events=-1`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(400);
-      });
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter,
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(1);
+      expect(tree.origin.relatedEvents[0]?.event?.id).to.eql(body.events[0].event?.id);
+      expect(body.nextEvent).to.eql(null);
     });
 
-    describe('endpoint events', () => {
-      it('should not find any events', async () => {
-        const { body }: { body: SafeResolverRelatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/5555/events`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.nextEvent).to.eql(null);
-        expect(body.events).to.be.empty();
+    it('should not find any events when given an invalid entity id', async () => {
+      const filter = JSON.stringify({
+        bool: {
+          filter: [{ term: { 'process.entity_id': '5555' } }],
+        },
       });
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter,
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      expect(body.nextEvent).to.eql(null);
+      expect(body.events).to.be.empty();
+    });
 
-      it('should return details for the root node', async () => {
-        const { body }: { body: SafeResolverRelatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/${tree.origin.id}/events`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.events.length).to.eql(4);
-        compareArrays(tree.origin.relatedEvents, body.events, true);
-        expect(body.nextEvent).to.eql(null);
+    it('should return related events for the root node', async () => {
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(4);
+      compareArrays(tree.origin.relatedEvents, body.events, true);
+      expect(body.nextEvent).to.eql(null);
+    });
+
+    it('should allow for the events to be filtered', async () => {
+      const filter = JSON.stringify({
+        bool: {
+          filter: [
+            { term: { 'event.category': RelatedEventCategory.Driver } },
+            ...(entityIDFilterArray ?? []),
+          ],
+        },
       });
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter,
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(2);
+      compareArrays(tree.origin.relatedEvents, body.events);
+      expect(body.nextEvent).to.eql(null);
+      for (const event of body.events) {
+        expect(event.event?.category).to.be(RelatedEventCategory.Driver);
+      }
+    });
 
-      it('should allow for the events to be filtered', async () => {
-        const filter = `event.category:"${RelatedEventCategory.Driver}"`;
-        const { body }: { body: SafeResolverRelatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/${tree.origin.id}/events`)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            filter,
-          })
-          .expect(200);
-        expect(body.events.length).to.eql(2);
-        compareArrays(tree.origin.relatedEvents, body.events);
-        expect(body.nextEvent).to.eql(null);
-        for (const event of body.events) {
-          expect(event.event?.category).to.be(RelatedEventCategory.Driver);
-        }
-      });
+    it('should return paginated results for the root node', async () => {
+      let { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events?limit=2`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(2);
+      compareArrays(tree.origin.relatedEvents, body.events);
+      expect(body.nextEvent).not.to.eql(null);
 
-      it('should return paginated results for the root node', async () => {
-        let { body }: { body: SafeResolverRelatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/${tree.origin.id}/events?events=2`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.events.length).to.eql(2);
-        compareArrays(tree.origin.relatedEvents, body.events);
-        expect(body.nextEvent).not.to.eql(null);
+      ({ body } = await supertest
+        .post(`/api/endpoint/resolver/events?limit=2&afterEvent=${body.nextEvent}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200));
+      expect(body.events.length).to.eql(2);
+      compareArrays(tree.origin.relatedEvents, body.events);
+      expect(body.nextEvent).to.not.eql(null);
 
-        ({ body } = await supertest
-          .post(
-            `/api/endpoint/resolver/${tree.origin.id}/events?events=2&afterEvent=${body.nextEvent}`
-          )
-          .set('kbn-xsrf', 'xxx')
-          .expect(200));
-        expect(body.events.length).to.eql(2);
-        compareArrays(tree.origin.relatedEvents, body.events);
-        expect(body.nextEvent).to.not.eql(null);
+      ({ body } = await supertest
+        .post(`/api/endpoint/resolver/events?limit=2&afterEvent=${body.nextEvent}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200));
+      expect(body.events).to.be.empty();
+      expect(body.nextEvent).to.eql(null);
+    });
 
-        ({ body } = await supertest
-          .post(
-            `/api/endpoint/resolver/${tree.origin.id}/events?events=2&afterEvent=${body.nextEvent}`
-          )
-          .set('kbn-xsrf', 'xxx')
-          .expect(200));
-        expect(body.events).to.be.empty();
-        expect(body.nextEvent).to.eql(null);
-      });
+    it('should return the first page of information when the cursor is invalid', async () => {
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events?afterEvent=blah`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(4);
+      compareArrays(tree.origin.relatedEvents, body.events, true);
+      expect(body.nextEvent).to.eql(null);
+    });
 
-      it('should return the first page of information when the cursor is invalid', async () => {
-        const { body }: { body: SafeResolverRelatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/${tree.origin.id}/events?afterEvent=blah`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.events.length).to.eql(4);
-        compareArrays(tree.origin.relatedEvents, body.events, true);
-        expect(body.nextEvent).to.eql(null);
-      });
+    it('should sort the events in descending order', async () => {
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(4);
+      // these events are created in the order they are defined in the array so the newest one is
+      // the last element in the array so let's reverse it
+      const relatedEvents = tree.origin.relatedEvents.reverse();
+      for (let i = 0; i < body.events.length; i++) {
+        expect(body.events[i].event?.category).to.equal(relatedEvents[i].event?.category);
+        expect(eventIDSafeVersion(body.events[i])).to.equal(relatedEvents[i].event?.id);
+      }
+    });
 
-      it('should sort the events in descending order', async () => {
-        const { body }: { body: SafeResolverRelatedEvents } = await supertest
-          .post(`/api/endpoint/resolver/${tree.origin.id}/events`)
-          .set('kbn-xsrf', 'xxx')
-          .expect(200);
-        expect(body.events.length).to.eql(4);
-        // these events are created in the order they are defined in the array so the newest one is
-        // the last element in the array so let's reverse it
-        const relatedEvents = tree.origin.relatedEvents.reverse();
-        for (let i = 0; i < body.events.length; i++) {
-          expect(body.events[i].event?.category).to.equal(relatedEvents[i].event?.category);
-          expect(eventIDSafeVersion(body.events[i])).to.equal(relatedEvents[i].event?.id);
-        }
-      });
+    it('should only return data within the specified timeRange', async () => {
+      const from =
+        timestampAsDateSafeVersion(tree.origin.relatedEvents[0])?.toISOString() ??
+        new Date(0).toISOString();
+      const to = from;
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: entityIDFilter,
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from,
+            to,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(1);
+      expect(tree.origin.relatedEvents[0]?.event?.id).to.eql(body.events[0].event?.id);
+      expect(body.nextEvent).to.eql(null);
+    });
+
+    it('should not find events when using an incorrect index pattern', async () => {
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: entityIDFilter,
+          indexPatterns: ['doesnotexist-*'],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(0);
+      expect(body.nextEvent).to.eql(null);
+    });
+
+    it('should retrieve lifecycle events for multiple ids', async () => {
+      const originParentID = parentEntityIDSafeVersion(tree.origin.lifecycle[0]) ?? '';
+      expect(originParentID).to.not.be('');
+      const { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: JSON.stringify({
+            bool: {
+              filter: [
+                { terms: { 'process.entity_id': [tree.origin.id, originParentID] } },
+                { term: { 'event.category': 'process' } },
+              ],
+            },
+          }),
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      // 2 lifecycle events for the origin and 2 for the origin's parent
+      expect(body.events.length).to.eql(4);
+      expect(body.nextEvent).to.eql(null);
+    });
+
+    it('should paginate lifecycle events for multiple ids', async () => {
+      const originParentID = parentEntityIDSafeVersion(tree.origin.lifecycle[0]) ?? '';
+      expect(originParentID).to.not.be('');
+      let { body }: { body: ResolverPaginatedEvents } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .query({ limit: 2 })
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: JSON.stringify({
+            bool: {
+              filter: [
+                { terms: { 'process.entity_id': [tree.origin.id, originParentID] } },
+                { term: { 'event.category': 'process' } },
+              ],
+            },
+          }),
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200);
+      expect(body.events.length).to.eql(2);
+      expect(body.nextEvent).not.to.eql(null);
+
+      ({ body } = await supertest
+        .post(`/api/endpoint/resolver/events`)
+        .query({ limit: 3, afterEvent: body.nextEvent })
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          filter: JSON.stringify({
+            bool: {
+              filter: [
+                { terms: { 'process.entity_id': [tree.origin.id, originParentID] } },
+                { term: { 'event.category': 'process' } },
+              ],
+            },
+          }),
+          indexPatterns: [eventsIndexPattern],
+          timeRange: {
+            from: tree.startTime,
+            to: tree.endTime,
+          },
+        })
+        .expect(200));
+
+      expect(body.events.length).to.eql(2);
+      expect(body.nextEvent).to.eql(null);
     });
   });
 }

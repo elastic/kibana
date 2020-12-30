@@ -21,9 +21,11 @@
   "severity": "low",
   "tags": [
     "Elastic",
+    "Host",
     "Linux",
+    "Threat Detection",
     "ML"
   ],
   "type": "machine_learning",
-  "version": 2
+  "version": 3
 }

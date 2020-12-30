@@ -7,17 +7,13 @@
 import { JobParamsPanelCsv } from '../../export_types/csv_from_savedobject/types';
 import { CsvFromSavedObjectRequest } from '../generate_from_savedobject_immediate';
 
-export function getJobParamsFromRequest(
-  request: CsvFromSavedObjectRequest,
-  opts: { isImmediate: boolean }
-): JobParamsPanelCsv {
+export function getJobParamsFromRequest(request: CsvFromSavedObjectRequest): JobParamsPanelCsv {
   const { savedObjectType, savedObjectId } = request.params;
   const { timerange, state } = request.body;
 
   const post = timerange || state ? { timerange, state } : undefined;
 
   return {
-    isImmediate: opts.isImmediate,
     savedObjectType,
     savedObjectId,
     post,

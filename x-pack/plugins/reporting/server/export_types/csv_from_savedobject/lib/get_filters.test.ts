@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimeRangeParams } from '../../../types';
+import { TimeRangeParams } from '../../common';
 import { QueryFilter, SavedSearchObjectAttributes, SearchSourceFilter } from '../types';
 import { getFilters } from './get_filters';
 

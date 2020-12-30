@@ -40,21 +40,18 @@ export default function ({ getPageObjects, getService }) {
         operation: 'date_histogram',
         field: '@timestamp',
       });
-      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'avg',
         field: 'bytes',
       });
-      await PageObjects.lens.closeDimensionEditor();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
         operation: 'terms',
         field: 'ip',
       });
-      await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.save(title, saveAsNew, redirectToOrigin);
     }
 

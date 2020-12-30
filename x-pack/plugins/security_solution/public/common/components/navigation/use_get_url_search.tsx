@@ -4,17 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEqual } from 'lodash/fp';
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { makeMapStateToProps } from '../url_state/helpers';
 import { getSearch } from './helpers';
 import { SearchNavTab } from './types';
 
 export const useGetUrlSearch = (tab: SearchNavTab) => {
   const mapState = makeMapStateToProps();
-  const { urlState } = useSelector(mapState, isEqual);
+  const { urlState } = useDeepEqualSelector(mapState);
   const urlSearch = useMemo(() => getSearch(tab, urlState), [tab, urlState]);
   return urlSearch;
 };

@@ -20,6 +20,7 @@
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
 import ActualWatchpack from 'watchpack';
+import { lastValueFrom } from '@kbn/std';
 
 import { Bundle, ascending } from '../common';
 import { watchBundlesForChanges$ } from '../optimizer/watch_bundles_for_changes';
@@ -78,8 +79,8 @@ afterEach(async () => {
 it('notifies of changes and completes once all bundles have changed', async () => {
   expect.assertions(18);
 
-  const promise = watchBundlesForChanges$(bundleCacheEvent$, Date.now())
-    .pipe(
+  const promise = lastValueFrom(
+    watchBundlesForChanges$(bundleCacheEvent$, Date.now()).pipe(
       map((event, i) => {
         // each time we trigger a change event we get a 'changed detected' event
         if (i === 0 || i === 2 || i === 4 || i === 6) {
@@ -116,7 +117,7 @@ it('notifies of changes and completes once all bundles have changed', async () =
         }
       })
     )
-    .toPromise();
+  );
 
   expect(MockWatchPack.mock.instances).toHaveLength(1);
   const [watcher] = (MockWatchPack.mock.instances as any) as Array<jest.Mocked<ActualWatchpack>>;

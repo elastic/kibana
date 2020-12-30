@@ -40,23 +40,27 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.osqueryLogs.shortDescription', {
-      defaultMessage: 'Collect the result logs created by osqueryd.',
+      defaultMessage: 'Collect osquery logs in JSON format.',
     }),
     longDescription: i18n.translate('home.tutorials.osqueryLogs.longDescription', {
       defaultMessage:
-        'The `osquery` Filebeat module collects the JSON result logs collected by `osqueryd`. \
-[Learn more]({learnMoreLink}).',
+        'The  module collects and decodes the result logs written by \
+        [osqueryd](https://osquery.readthedocs.io/en/latest/introduction/using-osqueryd/) in \
+        the JSON format. To set up osqueryd follow the osquery installation instructions for \
+        your operating system and configure the `filesystem` logging driver (the default). \
+        Make sure UTC timestamps are enabled. \
+        [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-osquery.html',
       },
     }),
-    euiIconType: 'logoOsquery',
+    euiIconType: '/plugins/home/assets/logos/osquery.svg',
     artifacts: {
       dashboards: [
         {
           id: '69f5ae20-eb02-11e7-8f04-51231daa5b05-ecs',
           linkLabel: i18n.translate('home.tutorials.osqueryLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Osquery logs dashboard',
+            defaultMessage: 'Osquery Compliance Pack',
           }),
           isOverview: true,
         },
@@ -66,7 +70,6 @@ export function osqueryLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/osquery_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

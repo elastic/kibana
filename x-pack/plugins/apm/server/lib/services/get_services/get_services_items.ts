@@ -3,35 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Logger } from '@kbn/logging';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { PromiseReturnType } from '../../../../typings/common';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../helpers/setup_request';
 import { getServicesProjection } from '../../../projections/services';
-import {
-  getTransactionDurationAverages,
-  getAgentNames,
-  getTransactionRates,
-  getTransactionErrorRates,
-  getEnvironments,
-  getHealthStatuses,
-} from './get_services_items_stats';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
+import { getHealthStatuses } from './get_health_statuses';
+import { getServiceTransactionStats } from './get_service_transaction_stats';
 
-export type ServiceListAPIResponse = PromiseReturnType<typeof getServicesItems>;
-export type ServicesItemsSetup = Setup & SetupTimeRange & SetupUIFilters;
+export type ServicesItemsSetup = Setup & SetupTimeRange;
 export type ServicesItemsProjection = ReturnType<typeof getServicesProjection>;
 
 export async function getServicesItems({
   setup,
   searchAggregatedTransactions,
-  mlAnomaliesEnvironment,
+  logger,
 }: {
   setup: ServicesItemsSetup;
   searchAggregatedTransactions: boolean;
-  mlAnomaliesEnvironment?: string;
+  logger: Logger;
 }) {
   const params = {
     projection: getServicesProjection({
@@ -42,30 +31,23 @@ export async function getServicesItems({
     searchAggregatedTransactions,
   };
 
-  const [
-    transactionDurationAverages,
-    agentNames,
-    transactionRates,
-    transactionErrorRates,
-    environments,
-    healthStatuses,
-  ] = await Promise.all([
-    getTransactionDurationAverages(params),
-    getAgentNames(params),
-    getTransactionRates(params),
-    getTransactionErrorRates(params),
-    getEnvironments(params),
-    getHealthStatuses(params, mlAnomaliesEnvironment),
+  const [transactionStats, healthStatuses] = await Promise.all([
+    getServiceTransactionStats(params),
+    getHealthStatuses(params, setup.uiFilters.environment).catch((err) => {
+      logger.error(err);
+      return [];
+    }),
   ]);
 
-  const allMetrics = [
-    ...transactionDurationAverages,
-    ...agentNames,
-    ...transactionRates,
-    ...transactionErrorRates,
-    ...environments,
-    ...healthStatuses,
-  ];
+  const apmServices = transactionStats.map(({ serviceName }) => serviceName);
+
+  // make sure to exclude health statuses from services
+  // that are not found in APM data
+  const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
+    apmServices.includes(serviceName)
+  );
+
+  const allMetrics = [...transactionStats, ...matchedHealthStatuses];
 
   return joinByKey(allMetrics, 'serviceName');
 }

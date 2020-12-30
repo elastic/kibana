@@ -12,11 +12,12 @@ import { getTransformProgress, isCompletedBatchTransform } from './transform_sta
 
 const getRow = (statsId: string) => {
   return {
+    // @ts-expect-error mock data does not actually match TransformListRow type
     ...(mockTransformListRow as TransformListRow),
     stats: {
-      ...mockTransformStats.transforms.find(
-        (stats: TransformListRow['stats']) => stats.id === statsId
-      ),
+      ...(mockTransformStats.transforms as Array<TransformListRow['stats']>).find(
+        (stats) => stats.id === statsId
+      )!,
     },
   };
 };

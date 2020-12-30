@@ -16,16 +16,16 @@ import {
 import { ConfigType } from '../index';
 import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
 
-interface IConstructorDependencies {
+interface ConstructorDependencies {
   config: ConfigType;
   log: Logger;
 }
-interface IRequestParams<ResponseBody> {
+interface RequestParams<ResponseBody> {
   path: string;
   params?: object;
   hasValidData?: (body?: ResponseBody) => boolean;
 }
-interface IErrorResponse {
+interface ErrorResponse {
   message: string;
   attributes: {
     errors: string[];
@@ -48,7 +48,7 @@ export class EnterpriseSearchRequestHandler {
   private log: Logger;
   private headers: Record<string, string> = {};
 
-  constructor({ config, log }: IConstructorDependencies) {
+  constructor({ config, log }: ConstructorDependencies) {
     this.log = log;
     this.enterpriseSearchUrl = config.host as string;
   }
@@ -57,7 +57,7 @@ export class EnterpriseSearchRequestHandler {
     path,
     params = {},
     hasValidData = () => true,
-  }: IRequestParams<ResponseBody>) {
+  }: RequestParams<ResponseBody>) {
     return async (
       _context: RequestHandlerContext,
       request: KibanaRequest<unknown, unknown, unknown>,
@@ -69,7 +69,7 @@ export class EnterpriseSearchRequestHandler {
         const queryString = !this.isEmptyObj(queryParams)
           ? `?${querystring.stringify(queryParams)}`
           : '';
-        const url = encodeURI(this.enterpriseSearchUrl + path + queryString);
+        const url = encodeURI(this.enterpriseSearchUrl + path) + queryString;
 
         // Set up API options
         const { method } = request.route;
@@ -84,8 +84,12 @@ export class EnterpriseSearchRequestHandler {
         // Handle response headers
         this.setResponseHeaders(apiResponse);
 
-        // Handle authentication redirects
-        if (apiResponse.url.endsWith('/login') || apiResponse.url.endsWith('/ent/select')) {
+        // Handle unauthenticated users / authentication redirects
+        if (
+          apiResponse.status === 401 ||
+          apiResponse.url.endsWith('/login') ||
+          apiResponse.url.endsWith('/ent/select')
+        ) {
           return this.handleAuthenticationError(response);
         }
 
@@ -132,7 +136,7 @@ export class EnterpriseSearchRequestHandler {
     const contentType = apiResponse.headers.get('content-type') || '';
 
     // Default response
-    let body: IErrorResponse = {
+    let body: ErrorResponse = {
       message: statusText,
       attributes: { errors: [statusText] },
     };
@@ -213,6 +217,10 @@ export class EnterpriseSearchRequestHandler {
     return response.customError({ statusCode: 502, headers: this.headers, body: errorMessage });
   }
 
+  /**
+   * Note: Kibana auto logs users out when it receives a 401 response, so we want to catch and
+   * return 401 responses from Enterprise Search as a 502 so Kibana sessions aren't interrupted
+   */
   handleAuthenticationError(response: KibanaResponseFactory) {
     const errorMessage = 'Cannot authenticate Enterprise Search user';
 

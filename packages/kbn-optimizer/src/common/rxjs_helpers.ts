@@ -18,7 +18,8 @@
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap, tap, debounceTime, map } from 'rxjs/operators';
+import { mergeMap, tap, debounceTime, map, toArray } from 'rxjs/operators';
+import { firstValueFrom } from '@kbn/std';
 
 type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;
 type MapFn<T1, T2> = (item: T1, index: number) => T2;
@@ -73,3 +74,6 @@ export const debounceTimeBuffer = <T>(ms: number) =>
       })
     );
   });
+
+export const allValuesFrom = <T>(observable: Rx.Observable<T>) =>
+  firstValueFrom(observable.pipe(toArray()));

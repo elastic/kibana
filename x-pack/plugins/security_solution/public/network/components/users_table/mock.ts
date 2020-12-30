@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UsersData } from '../../../graphql/types';
+import { NetworkUsersStrategyResponse } from '../../../../common/search_strategy';
 
-export const mockUsersData: UsersData = {
+export const mockUsersData: NetworkUsersStrategyResponse = {
   edges: [
     {
       node: {
@@ -63,4 +63,5 @@ export const mockUsersData: UsersData = {
     fakeTotalCount: 3,
     showMorePagesIndicator: true,
   },
+  rawResponse: {} as NetworkUsersStrategyResponse['rawResponse'],
 };

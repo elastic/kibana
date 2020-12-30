@@ -11,39 +11,71 @@ import { i18n } from '@kbn/i18n';
 /* eslint-disable react/display-name */
 
 import React, { memo } from 'react';
-import { useResolverTheme } from '../assets';
+
+interface StyledSVGCube {
+  readonly isOrigin?: boolean;
+}
+import { useCubeAssets } from '../use_cube_assets';
+import { useSymbolIDs } from '../use_symbol_ids';
+import { NodeDataStatus } from '../../types';
 
 /**
  * Icon representing a process node.
  */
 export const CubeForProcess = memo(function ({
-  running,
+  className,
+  size = '2.15em',
+  state,
+  isOrigin,
   'data-test-subj': dataTestSubj,
 }: {
   'data-test-subj'?: string;
   /**
-   * True if the process represented by the node is still running.
+   * The state of the process's node data (for endpoint the process's lifecycle events)
    */
-  running: boolean;
+  state: NodeDataStatus;
+  /** The css size (px, em, etc...) for the width and height of the svg cube. Defaults to 2.15em */
+  size?: string;
+  isOrigin?: boolean;
+  className?: string;
 }) {
-  const { cubeAssetsForNode } = useResolverTheme();
-  const { cubeSymbol } = cubeAssetsForNode(!running, false);
+  const { cubeSymbol, strokeColor } = useCubeAssets(state, false);
+  const { processCubeActiveBacking } = useSymbolIDs();
 
   return (
-    <StyledSVG width="1.5em" height="1.5em" viewBox="0 0 1 1" data-test-subj={dataTestSubj}>
+    <StyledSVG
+      className={className}
+      width={size}
+      height={size}
+      viewBox="0 0 34 34"
+      data-test-subj={dataTestSubj}
+      isOrigin={isOrigin}
+    >
       <desc>
         {i18n.translate('xpack.securitySolution.resolver.node_icon', {
-          defaultMessage: '{running, select, true {Running Process} false {Terminated Process}}',
-          values: { running },
+          defaultMessage: `{state, select, running {Running Process} terminated {Terminated Process} loading {Loading Process} error {Error Process}}`,
+          values: { state },
         })}
       </desc>
+      {isOrigin && (
+        <use
+          xlinkHref={`#${processCubeActiveBacking}`}
+          fill="transparent"
+          x={0}
+          y={-1}
+          stroke={strokeColor}
+          strokeDashoffset={0}
+          width="100%"
+          height="100%"
+        />
+      )}
       <use
         role="presentation"
         xlinkHref={cubeSymbol}
-        x={0}
-        y={0}
-        width={1}
-        height={1}
+        x={5.25}
+        y={4.25}
+        width="70%"
+        height="70%"
         opacity="1"
         className="cube"
       />
@@ -51,8 +83,6 @@ export const CubeForProcess = memo(function ({
   );
 });
 
-const StyledSVG = styled.svg`
-  position: relative;
-  top: 0.4em;
-  margin-right: 0.25em;
+const StyledSVG = styled.svg<StyledSVGCube>`
+  margin-right: ${(props) => (props.isOrigin ? '0.15em' : 0)};
 `;

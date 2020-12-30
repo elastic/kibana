@@ -34,33 +34,36 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
         },
         my_index_signature_prop: {
           avg: {
-            type: 'number',
+            type: 'float',
           },
           count: {
-            type: 'number',
+            type: 'long',
           },
           max: {
-            type: 'number',
+            type: 'long',
           },
           min: {
-            type: 'number',
+            type: 'long',
           },
         },
         my_objects: {
           total: {
-            type: 'number',
+            type: 'long',
           },
           type: {
             type: 'boolean',
           },
         },
         my_array: {
-          total: {
-            type: 'number',
+          type: 'array',
+          items: {
+            total: {
+              type: 'long',
+            },
+            type: { type: 'boolean' },
           },
-          type: { type: 'boolean' },
         },
-        my_str_array: { type: 'keyword' },
+        my_str_array: { type: 'array', items: { type: 'keyword' } },
       },
     },
     fetch: {
@@ -75,11 +78,9 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
           type: 'StringKeyword',
         },
         my_index_signature_prop: {
-          '': {
-            '@@INDEX@@': {
-              kind: SyntaxKind.NumberKeyword,
-              type: 'NumberKeyword',
-            },
+          '@@INDEX@@': {
+            kind: SyntaxKind.NumberKeyword,
+            type: 'NumberKeyword',
           },
         },
         my_objects: {
@@ -93,18 +94,22 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
           },
         },
         my_array: {
-          total: {
-            kind: SyntaxKind.NumberKeyword,
-            type: 'NumberKeyword',
-          },
-          type: {
-            kind: SyntaxKind.BooleanKeyword,
-            type: 'BooleanKeyword',
+          items: {
+            total: {
+              kind: SyntaxKind.NumberKeyword,
+              type: 'NumberKeyword',
+            },
+            type: {
+              kind: SyntaxKind.BooleanKeyword,
+              type: 'BooleanKeyword',
+            },
           },
         },
         my_str_array: {
-          kind: SyntaxKind.StringKeyword,
-          type: 'StringKeyword',
+          items: {
+            kind: SyntaxKind.StringKeyword,
+            type: 'StringKeyword',
+          },
         },
       },
     },

@@ -18,7 +18,7 @@ const withTheme = (storyFn: () => ReactNode) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: true })}>{storyFn()}</ThemeProvider>
 );
 
-storiesOf('components/AndOrBadge', module)
+storiesOf('Components/AndOrBadge', module)
   .addDecorator(withTheme)
   .add('and', () => <AndOrBadge type="and" />)
   .add('or', () => <AndOrBadge type="or" />)

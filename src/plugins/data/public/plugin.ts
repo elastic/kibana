@@ -42,21 +42,13 @@ import {
   UiSettingsPublicToCommon,
 } from './index_patterns';
 import {
-  setFieldFormats,
   setIndexPatterns,
   setNotifications,
   setOverlays,
-  setQueryService,
   setSearchService,
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import { esaggs } from './search/expressions';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  APPLY_FILTER_TRIGGER,
-} from '../../ui_actions/public';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,
@@ -70,11 +62,18 @@ import {
   createValueClickAction,
   createSelectRangeAction,
 } from './actions';
-
+import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
-import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
+import { getIndexPatternLoad } from './index_patterns/expressions';
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { getTableViewDescription } from './utils/table_inspector_view';
+import { TriggerId } from '../../ui_actions/public';
 
 declare module '../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
+  }
+
   export interface ActionContextMapping {
     [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
     [ACTION_SELECT_RANGE]: SelectRangeActionContext;
@@ -95,9 +94,10 @@ export class DataPublicPlugin
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
+  private usageCollection: UsageCollectionSetup | undefined;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.searchService = new SearchService();
+    this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
@@ -106,43 +106,56 @@ export class DataPublicPlugin
 
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
-    { expressions, uiActions, usageCollection }: DataSetupDependencies
+    { bfetch, expressions, uiActions, usageCollection, inspector }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    expressions.registerFunction(esaggs);
-    expressions.registerFunction(indexPatternLoad);
+    expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
+
+    this.usageCollection = usageCollection;
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
       storage: this.storage,
     });
 
+    uiActions.registerTrigger(applyFilterTrigger);
+
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
     uiActions.addTriggerAction(
-      SELECT_RANGE_TRIGGER,
+      'SELECT_RANGE_TRIGGER' as TriggerId,
       createSelectRangeAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
     );
 
     uiActions.addTriggerAction(
-      VALUE_CLICK_TRIGGER,
+      'VALUE_CLICK_TRIGGER' as TriggerId,
       createValueClickAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
     );
 
     const searchService = this.searchService.setup(core, {
+      bfetch,
       usageCollection,
       expressions,
     });
 
+    inspector.registerView(
+      getTableViewDescription(() => ({
+        uiActions: startServices().plugins.uiActions,
+        uiSettings: startServices().core.uiSettings,
+        fieldFormats: startServices().self.fieldFormats,
+        isFilterable: startServices().self.search.aggs.datatableUtilities.isFilterable,
+      }))
+    );
+
     return {
-      autocomplete: this.autocomplete.setup(core),
+      autocomplete: this.autocomplete.setup(core, { timefilter: queryService.timefilter }),
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
@@ -159,7 +172,6 @@ export class DataPublicPlugin
     setUiSettings(uiSettings);
 
     const fieldFormats = this.fieldFormatsService.start();
-    setFieldFormats(fieldFormats);
 
     const indexPatterns = new IndexPatternsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
@@ -187,7 +199,6 @@ export class DataPublicPlugin
       savedObjectsClient: savedObjects.client,
       uiSettings,
     });
-    setQueryService(query);
 
     const search = this.searchService.start(core, { fieldFormats, indexPatterns });
     setSearchService(search);
@@ -213,12 +224,16 @@ export class DataPublicPlugin
       core,
       data: dataServices,
       storage: this.storage,
+      trackUiMetric: this.usageCollection?.reportUiCounter.bind(
+        this.usageCollection,
+        'data_plugin'
+      ),
     });
 
     return {
       ...dataServices,
       ui: {
-        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+        IndexPatternSelect: createIndexPatternSelect(indexPatterns),
         SearchBar,
       },
     };

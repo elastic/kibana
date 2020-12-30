@@ -22,10 +22,10 @@ import { i18n } from '@kbn/i18n';
 import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
-import { LegacyNavLink, LegacyServiceDiscoverPlugins } from '../legacy';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import type { InternalStatusServiceSetup } from '../status';
+import { IExternalUrlPolicy } from '../external_url';
 
 /** @internal */
 export interface RenderingMetadata {
@@ -41,6 +41,7 @@ export interface RenderingMetadata {
     branch: string;
     basePath: string;
     serverBasePath: string;
+    publicBaseUrl?: string;
     env: {
       mode: EnvironmentMode;
       packageInfo: PackageInfo;
@@ -50,6 +51,7 @@ export interface RenderingMetadata {
       translationsUrl: string;
     };
     csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
+    externalUrl: { policy: IExternalUrlPolicy[] };
     vars: Record<string, any>;
     uiPlugins: Array<{
       id: string;
@@ -57,16 +59,6 @@ export interface RenderingMetadata {
       config?: Record<string, unknown>;
     }>;
     legacyMetadata: {
-      app: { getId(): string };
-      bundleId: string;
-      nav: LegacyNavLink[];
-      version: string;
-      branch: string;
-      buildNum: number;
-      buildSha: string;
-      serverName: string;
-      devMode: boolean;
-      basePath: string;
       uiSettings: {
         defaults: Record<string, any>;
         user: Record<string, UserProvidedValues<any>>;
@@ -78,7 +70,6 @@ export interface RenderingMetadata {
 /** @internal */
 export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
-  legacyPlugins: LegacyServiceDiscoverPlugins;
   status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
 }
@@ -90,14 +81,6 @@ export interface IRenderOptions {
    * `true` by default.
    */
   includeUserSettings?: boolean;
-
-  /**
-   * Render the bootstrapped HTML content for an optional legacy application.
-   * Defaults to `core`.
-   * @deprecated for legacy use only, remove with ui_render_mixin
-   * @internal
-   */
-  app?: { getId(): string };
 
   /**
    * Inject custom vars into the page metadata.

@@ -1,19 +1,32 @@
 <div class="app-container">
-  <div id="setupModeNav"></div>
-  <kbn-top-nav
-    name="monitoringMain.navName"
-    app-name="'monitoring'"
-    show-search-bar="true"
-    show-auto-refresh-only="!monitoringMain.datePicker.enableTimeFilter"
-    show-date-picker="monitoringMain.datePicker.enableTimeFilter"
-    date-range-from="monitoringMain.datePicker.timeRange.from"
-    date-range-to="monitoringMain.datePicker.timeRange.to"
-    is-refresh-paused="monitoringMain.datePicker.refreshInterval.pause"
-    refresh-interval="monitoringMain.datePicker.refreshInterval.value"
-    on-refresh-change="monitoringMain.datePicker.onRefreshChange"
-    on-query-submit="monitoringMain.datePicker.onTimeUpdate"
-  >
-  </kbn-top-nav>
+  <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive">
+    <div class="euiFlexItem euiFlexItem--flexGrowZero">
+      <div class="euiFlexGroup euiFlexGroup--gutterNone euiFlexGroup--justifyContentSpaceEvenly euiFlexGroup--responsive euiFlexGroup--directionColumn">
+        <div class="euiFlexItem euiFlexItem--flexGrowZero"><div id="setupModeNav"></div></div>
+        <div class="euiFlexItem euiFlexItem--flexGrowZero monTopNavSecondItem">
+          <div data-test-subj="monitoringPageTitle" ng-if="pageTitle || monitoringMain.instance">
+            <h1 class="euiTitle euiTitle--xsmall">{{pageTitle || monitoringMain.instance}}</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="euiFlexItem euiFlexItem--flexGrowZero">
+      <kbn-top-nav
+        name="monitoringMain.navName"
+        app-name="'monitoring'"
+        show-search-bar="true"
+        show-auto-refresh-only="!monitoringMain.datePicker.enableTimeFilter"
+        show-date-picker="monitoringMain.datePicker.enableTimeFilter"
+        date-range-from="monitoringMain.datePicker.timeRange.from"
+        date-range-to="monitoringMain.datePicker.timeRange.to"
+        is-refresh-paused="monitoringMain.datePicker.refreshInterval.pause"
+        refresh-interval="monitoringMain.datePicker.refreshInterval.value"
+        on-refresh-change="monitoringMain.datePicker.onRefreshChange"
+        on-query-submit="monitoringMain.datePicker.onTimeUpdate"
+      >
+      </kbn-top-nav>
+    </div>
+  </div>
   <div>
     <div ng-if="monitoringMain.inElasticsearch" class="euiTabs" role="navigation">
       <a
@@ -62,7 +75,7 @@
         class="euiTab"
         ng-class="{'euiTab-isSelected': monitoringMain.isActiveTab('ml')}"
         i18n-id="xpack.monitoring.esNavigation.jobsLinkText"
-        i18n-default-message="Jobs"
+        i18n-default-message="Machine learning jobs"
       ></a>
       <a
         ng-if="(monitoringMain.isCcrEnabled || monitoringMain.isActiveTab('ccr')) && !monitoringMain.instance"
@@ -98,12 +111,6 @@
         i18n-default-message="Advanced"
       >
       </a>
-      <!-- ML Instance (for use later) -->
-      <a
-        ng-if="monitoringMain.instance && monitoringMain.name !== 'nodes' && monitoringMain.name !== 'indices'"
-        class="euiTab"
-        >{{ monitoringMain.instance }}</a
-      >
     </div>
 
     <div ng-if="monitoringMain.inKibana" class="euiTabs" role="navigation">
@@ -133,7 +140,6 @@
         i18n-id="xpack.monitoring.kibanaNavigation.instancesLinkText"
         i18n-default-message="Instances"
       ></a>
-      <a ng-if="monitoringMain.instance" class="euiTab">{{ monitoringMain.instance }}</a>
     </div>
 
     <div ng-if="monitoringMain.inApm" class="euiTabs" role="navigation">
@@ -161,7 +167,6 @@
         i18n-id="xpack.monitoring.apmNavigation.instancesLinkText"
         i18n-default-message="Instances"
       ></a>
-      <a ng-if="monitoringMain.instance" class="euiTab">{{ monitoringMain.instance }}</a>
     </div>
 
     <div ng-if="monitoringMain.inBeats" class="euiTabs" role="navigation">

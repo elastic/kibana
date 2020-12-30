@@ -11,9 +11,10 @@ import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
 import { getPageData } from './get_page_data';
 import template from './index.html';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Listing } from '../../../components/beats/listing/listing';
 import { SetupModeRenderer } from '../../../components/renderers';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { CODE_PATH_BEATS, BEATS_SYSTEM_ID } from '../../../../common/constants';
 
 uiRoutes.when('/beats/beats', {
@@ -37,6 +38,10 @@ uiRoutes.when('/beats/beats', {
 
       super({
         title: i18n.translate('xpack.monitoring.beats.routeTitle', { defaultMessage: 'Beats' }),
+        pageTitle: i18n.translate('xpack.monitoring.beats.listing.pageTitle', {
+          defaultMessage: 'Beats listing',
+        }),
+        telemetryPageViewTitle: 'beats_listing',
         storageKey: 'beats.beats',
         getPageData,
         reactNodeId: 'monitoringBeatsInstancesApp',
@@ -47,9 +52,6 @@ uiRoutes.when('/beats/beats', {
       this.data = $route.current.locals.pageData;
       this.scope = $scope;
       this.injector = $injector;
-
-      //Bypassing super.updateData, since this controller loads its own data
-      this._isDataInitialized = true;
 
       $scope.$watch(
         () => this.data,
@@ -65,7 +67,7 @@ uiRoutes.when('/beats/beats', {
           injector={this.injector}
           productName={BEATS_SYSTEM_ID}
           render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-            <Fragment>
+            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
               {flyoutComponent}
               <Listing
                 stats={this.data.stats}
@@ -76,7 +78,7 @@ uiRoutes.when('/beats/beats', {
                 onTableChange={this.onTableChange || onTableChange}
               />
               {bottomBarComponent}
-            </Fragment>
+            </SetupModeContext.Provider>
           )}
         />
       );

@@ -10,12 +10,10 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  SavedObjectsManagementColumn,
-  SavedObjectsManagementRecord,
-} from '../../../../../src/plugins/saved_objects_management/public';
+import { SavedObjectsManagementColumn } from '../../../../../src/plugins/saved_objects_management/public';
 import { SpaceTarget } from './types';
 import { SpacesManager } from '../spaces_manager';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { getSpaceColor } from '..';
 
 const SPACES_DISPLAY_COUNT = 5;
@@ -33,63 +31,76 @@ const ColumnDisplay = ({ namespaces, data }: ColumnDataProps) => {
     return null;
   }
 
-  const authorized = namespaces?.filter((namespace) => namespace !== '?') ?? [];
-  const authorizedSpaceTargets: SpaceTarget[] = [];
-  authorized.forEach((namespace) => {
-    const spaceTarget = data.get(namespace);
-    if (spaceTarget === undefined) {
-      // in the event that a new space was created after this page has loaded, fall back to displaying the space ID
-      authorizedSpaceTargets.push({
-        id: namespace,
-        name: namespace,
-        disabledFeatures: [],
-        isActiveSpace: false,
-      });
-    } else if (!spaceTarget.isActiveSpace) {
-      authorizedSpaceTargets.push(spaceTarget);
-    }
-  });
-  const unauthorizedCount = (namespaces?.filter((namespace) => namespace === '?') ?? []).length;
-  const unauthorizedTooltip = i18n.translate(
-    'xpack.spaces.management.shareToSpace.columnUnauthorizedLabel',
-    { defaultMessage: `You don't have permission to view these spaces.` }
-  );
+  const isSharedToAllSpaces = namespaces?.includes(ALL_SPACES_ID);
+  const unauthorizedCount = (namespaces?.filter((namespace) => namespace === UNKNOWN_SPACE) ?? [])
+    .length;
+  let displayedSpaces: SpaceTarget[];
+  let button: ReactNode = null;
 
-  const displayedSpaces = isExpanded
-    ? authorizedSpaceTargets
-    : authorizedSpaceTargets.slice(0, SPACES_DISPLAY_COUNT);
-  const showButton = authorizedSpaceTargets.length > SPACES_DISPLAY_COUNT;
+  if (isSharedToAllSpaces) {
+    displayedSpaces = [
+      {
+        id: ALL_SPACES_ID,
+        name: i18n.translate('xpack.spaces.management.shareToSpace.allSpacesLabel', {
+          defaultMessage: `* All spaces`,
+        }),
+        isActiveSpace: false,
+        color: '#D3DAE6',
+      },
+    ];
+  } else {
+    const authorized = namespaces?.filter((namespace) => namespace !== UNKNOWN_SPACE) ?? [];
+    const authorizedSpaceTargets: SpaceTarget[] = [];
+    authorized.forEach((namespace) => {
+      const spaceTarget = data.get(namespace);
+      if (spaceTarget === undefined) {
+        // in the event that a new space was created after this page has loaded, fall back to displaying the space ID
+        authorizedSpaceTargets.push({ id: namespace, name: namespace, isActiveSpace: false });
+      } else if (!spaceTarget.isActiveSpace) {
+        authorizedSpaceTargets.push(spaceTarget);
+      }
+    });
+    displayedSpaces = isExpanded
+      ? authorizedSpaceTargets
+      : authorizedSpaceTargets.slice(0, SPACES_DISPLAY_COUNT);
+
+    if (authorizedSpaceTargets.length > SPACES_DISPLAY_COUNT) {
+      button = isExpanded ? (
+        <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(false)}>
+          <FormattedMessage
+            id="xpack.spaces.management.shareToSpace.showLessSpacesLink"
+            defaultMessage="show less"
+          />
+        </EuiButtonEmpty>
+      ) : (
+        <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(true)}>
+          <FormattedMessage
+            id="xpack.spaces.management.shareToSpace.showMoreSpacesLink"
+            defaultMessage="+{count} more"
+            values={{
+              count: authorizedSpaceTargets.length + unauthorizedCount - displayedSpaces.length,
+            }}
+          />
+        </EuiButtonEmpty>
+      );
+    }
+  }
 
   const unauthorizedCountBadge =
-    (isExpanded || !showButton) && unauthorizedCount > 0 ? (
+    !isSharedToAllSpaces && (isExpanded || button === null) && unauthorizedCount > 0 ? (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={unauthorizedTooltip}>
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.spaces.management.shareToSpace.columnUnauthorizedLabel"
+              defaultMessage="You don't have permission to view these spaces."
+            />
+          }
+        >
           <EuiBadge color="#DDD">+{unauthorizedCount}</EuiBadge>
         </EuiToolTip>
       </EuiFlexItem>
     ) : null;
-
-  let button: ReactNode = null;
-  if (showButton) {
-    button = isExpanded ? (
-      <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(false)}>
-        <FormattedMessage
-          id="xpack.spaces.management.shareToSpace.showLessSpacesLink"
-          defaultMessage="show less"
-        />
-      </EuiButtonEmpty>
-    ) : (
-      <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(true)}>
-        <FormattedMessage
-          id="xpack.spaces.management.shareToSpace.showMoreSpacesLink"
-          defaultMessage="+{count} more"
-          values={{
-            count: authorizedSpaceTargets.length + unauthorizedCount - displayedSpaces.length,
-          }}
-        />
-      </EuiButtonEmpty>
-    );
-  }
 
   return (
     <EuiFlexGroup wrap responsive={false} gutterSize="xs">
@@ -117,7 +128,7 @@ export class ShareToSpaceSavedObjectsManagementColumn
     description: i18n.translate('xpack.spaces.management.shareToSpace.columnDescription', {
       defaultMessage: 'The other spaces that this object is currently shared to',
     }),
-    render: (namespaces: string[] | undefined, _object: SavedObjectsManagementRecord) => (
+    render: (namespaces: string[] | undefined) => (
       <ColumnDisplay namespaces={namespaces} data={this.data} />
     ),
   };

@@ -21,6 +21,7 @@ import './app.scss';
 import React, { useEffect } from 'react';
 import { Route, Switch, useLocation } from 'react-router-dom';
 
+import { AppMountParameters } from 'kibana/public';
 import { syncQueryStateWithUrl } from '../../../data/public';
 import { useKibana } from '../../../kibana_react/public';
 import { VisualizeServices } from './types';
@@ -32,7 +33,11 @@ import {
 } from './components';
 import { VisualizeConstants } from './visualize_constants';
 
-export const VisualizeApp = () => {
+export interface VisualizeAppProps {
+  onAppLeave: AppMountParameters['onAppLeave'];
+}
+
+export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
   const {
     services: {
       data: { query },
@@ -54,10 +59,10 @@ export const VisualizeApp = () => {
   return (
     <Switch>
       <Route exact path={`${VisualizeConstants.EDIT_BY_VALUE_PATH}`}>
-        <VisualizeByValueEditor />
+        <VisualizeByValueEditor onAppLeave={onAppLeave} />
       </Route>
       <Route path={[VisualizeConstants.CREATE_PATH, `${VisualizeConstants.EDIT_PATH}/:id`]}>
-        <VisualizeEditor />
+        <VisualizeEditor onAppLeave={onAppLeave} />
       </Route>
       <Route
         exact

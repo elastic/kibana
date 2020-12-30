@@ -60,7 +60,7 @@ async function ensureResolve(promise) {
 
 function mockEsBin({ exitCode, start }) {
   execa.mockImplementationOnce((cmd, args, options) =>
-    require.requireActual('execa')(
+    jest.requireActual('execa')(
       process.execPath,
       [
         require.resolve('./__fixtures__/es_bin.js'),

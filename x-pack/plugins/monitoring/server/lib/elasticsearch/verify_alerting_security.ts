@@ -26,7 +26,7 @@ export interface XPackUsageSecurity {
 export class AlertingSecurity {
   public static readonly getSecurityHealth = async (
     context: RequestHandlerContext,
-    encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+    encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup
   ): Promise<AlertingFrameworkHealth> => {
     const {
       security: {
@@ -43,7 +43,7 @@ export class AlertingSecurity {
 
     return {
       isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
-      hasPermanentEncryptionKey: !encryptedSavedObjects.usingEphemeralEncryptionKey,
+      hasPermanentEncryptionKey: !encryptedSavedObjects?.usingEphemeralEncryptionKey,
     };
   };
 }

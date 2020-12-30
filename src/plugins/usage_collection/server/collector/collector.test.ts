@@ -19,7 +19,6 @@
 
 import { loggingSystemMock } from '../../../../core/server/mocks';
 import { Collector } from './collector';
-import { UsageCollector } from './usage_collector';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -88,48 +87,6 @@ describe('collector', () => {
     });
   });
 
-  describe('formatForBulkUpload', () => {
-    it('should use the default formatter', () => {
-      const fetchOutput = { testPass: 100 };
-      const collector = new Collector(logger, {
-        type: 'my_test_collector',
-        isReady: () => false,
-        fetch: () => fetchOutput,
-      });
-      expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
-        type: 'my_test_collector',
-        payload: fetchOutput,
-      });
-    });
-
-    it('should use a custom formatter', () => {
-      const fetchOutput = { testPass: 100 };
-      const collector = new Collector(logger, {
-        type: 'my_test_collector',
-        isReady: () => false,
-        fetch: () => fetchOutput,
-        formatForBulkUpload: (a) => ({ type: 'other_value', payload: { nested: a } }),
-      });
-      expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
-        type: 'other_value',
-        payload: { nested: fetchOutput },
-      });
-    });
-
-    it("should use UsageCollector's default formatter", () => {
-      const fetchOutput = { testPass: 100 };
-      const collector = new UsageCollector(logger, {
-        type: 'my_test_collector',
-        isReady: () => false,
-        fetch: () => fetchOutput,
-      });
-      expect(collector.formatForBulkUpload(fetchOutput)).toStrictEqual({
-        type: 'kibana_stats',
-        payload: { usage: { my_test_collector: fetchOutput } },
-      });
-    });
-  });
-
   describe('schema TS validations', () => {
     // These tests below are used to ensure types inference is working as expected.
     // We don't intend to test any logic as such, just the relation between the types in `fetch` and `schema`.
@@ -153,7 +110,10 @@ describe('collector', () => {
         isReady: () => false,
         fetch: () => ({ testPass: [{ name: 'a', value: 100 }] }),
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
         },
       });
       expect(collector).toBeDefined();
@@ -166,7 +126,10 @@ describe('collector', () => {
         fetch: () => ({ testPass: [{ name: 'a', value: 100 }], otherProp: 1 }),
         // @ts-expect-error
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
         },
       });
       expect(collector).toBeDefined();
@@ -185,7 +148,10 @@ describe('collector', () => {
         },
         // @ts-expect-error
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
         },
       });
       expect(collector).toBeDefined();
@@ -203,7 +169,10 @@ describe('collector', () => {
           return { otherProp: 1 };
         },
         schema: {
-          testPass: { name: { type: 'keyword' }, value: { type: 'long' } },
+          testPass: {
+            type: 'array',
+            items: { name: { type: 'keyword' }, value: { type: 'long' } },
+          },
           otherProp: { type: 'long' },
         },
       });

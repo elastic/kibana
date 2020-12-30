@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiCallOut,
   EuiFlyoutHeader,
@@ -34,7 +35,6 @@ import {
 import { UseRequestResponse } from '../../../../../shared_imports';
 import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
-import { decodePathFromReactRouter } from '../../../../services/routing';
 import { useServices } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';
 import { TemplateTypeIndicator } from '../components';
@@ -103,11 +103,7 @@ export const TemplateDetailsContent = ({
   reload,
 }: Props) => {
   const { uiMetricService } = useServices();
-  const decodedTemplateName = decodePathFromReactRouter(templateName);
-  const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(
-    decodedTemplateName,
-    isLegacy
-  );
+  const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(templateName, isLegacy);
   const isCloudManaged = templateDetails?._kbnMeta.type === 'cloudManaged';
   const [templateToDelete, setTemplateToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
@@ -120,7 +116,7 @@ export const TemplateDetailsContent = ({
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="templateDetailsFlyoutTitle" data-test-subj="title">
-            {decodedTemplateName}
+            {templateName}
             {templateDetails && (
               <>
                 &nbsp;
@@ -161,9 +157,7 @@ export const TemplateDetailsContent = ({
     }
 
     if (templateDetails) {
-      const {
-        template: { settings, mappings, aliases },
-      } = templateDetails;
+      const { template: { settings, mappings, aliases } = {} } = templateDetails;
 
       const tabToComponentMap: Record<string, React.ReactNode> = {
         [SUMMARY_TAB_ID]: <TabSummary templateDetails={templateDetails} />,
@@ -210,7 +204,7 @@ export const TemplateDetailsContent = ({
             }).map((tab) => (
               <EuiTab
                 onClick={() => {
-                  uiMetricService.trackMetric('click', tabToUiMetricMap[tab.id]);
+                  uiMetricService.trackMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab.id]);
                   setActiveTab(tab.id);
                 }}
                 isSelected={tab.id === activeTab}
@@ -269,7 +263,6 @@ export const TemplateDetailsContent = ({
                 isOpen={isPopoverOpen}
                 closePopover={() => setIsPopOverOpen(false)}
                 panelPaddingSize="none"
-                withTitle
                 anchorPosition="rightUp"
                 repositionOnScroll
               >
@@ -305,8 +298,7 @@ export const TemplateDetailsContent = ({
                             defaultMessage: 'Delete',
                           }),
                           icon: 'trash',
-                          onClick: () =>
-                            setTemplateToDelete([{ name: decodedTemplateName, isLegacy }]),
+                          onClick: () => setTemplateToDelete([{ name: templateName, isLegacy }]),
                           disabled: isCloudManaged,
                         },
                       ],

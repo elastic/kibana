@@ -71,7 +71,7 @@ export interface PaginationInputPaginated {
 
 export interface DocValueFields {
   field: string;
-  format: string;
+  format?: string | null;
 }
 
 export interface Explanation {

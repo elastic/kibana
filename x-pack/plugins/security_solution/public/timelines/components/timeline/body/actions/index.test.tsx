@@ -5,32 +5,31 @@
  */
 import { mount } from 'enzyme';
 import React from 'react';
-import { useSelector } from 'react-redux';
 
 import { TestProviders, mockTimelineModel } from '../../../../../common/mock';
 import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import { Actions } from '.';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 
-jest.mock('react-redux', () => {
-  const origin = jest.requireActual('react-redux');
-  return {
-    ...origin,
-    useSelector: jest.fn(),
-  };
-});
+jest.mock('../../../../../common/hooks/use_selector', () => ({
+  useShallowEqualSelector: jest.fn(),
+}));
 
 describe('Actions', () => {
-  (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  beforeEach(() => {
+    (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
+  });
 
   test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
     const wrapper = mount(
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+          ariaRowindex={2}
           checked={false}
+          columnValues={'abc def'}
           expanded={false}
           eventId="abc"
-          loading={false}
           loadingEventIds={[]}
           onEventToggled={jest.fn()}
           onRowSelected={jest.fn()}
@@ -47,10 +46,11 @@ describe('Actions', () => {
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+          ariaRowindex={2}
           checked={false}
-          expanded={false}
+          columnValues={'abc def'}
           eventId="abc"
-          loading={false}
+          expanded={false}
           loadingEventIds={[]}
           onEventToggled={jest.fn()}
           onRowSelected={jest.fn()}
@@ -60,49 +60,5 @@ describe('Actions', () => {
     );
 
     expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
-  });
-
-  test('it renders a button for expanding the event', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Actions
-          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          checked={false}
-          expanded={false}
-          eventId="abc"
-          loading={false}
-          loadingEventIds={[]}
-          onEventToggled={jest.fn()}
-          onRowSelected={jest.fn()}
-          showCheckboxes={false}
-        />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="expand-event"]').exists()).toEqual(true);
-  });
-
-  test('it invokes onEventToggled when the button to expand an event is clicked', () => {
-    const onEventToggled = jest.fn();
-
-    const wrapper = mount(
-      <TestProviders>
-        <Actions
-          actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
-          checked={false}
-          expanded={false}
-          eventId="abc"
-          loading={false}
-          loadingEventIds={[]}
-          onEventToggled={onEventToggled}
-          onRowSelected={jest.fn()}
-          showCheckboxes={false}
-        />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="expand-event"]').first().simulate('click');
-
-    expect(onEventToggled).toBeCalled();
   });
 });

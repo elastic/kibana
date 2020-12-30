@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint complexity: ["error", 30]*/
+
 import React, { memo, useEffect, useState, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 import {
@@ -19,7 +21,9 @@ import {
   EuiSpacer,
   EuiFormRow,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   ExceptionListItemSchema,
@@ -30,7 +34,7 @@ import * as i18nCommon from '../../../translations';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
 import { Ecs } from '../../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
+import { osTypeArray, OsTypeArray } from '../../../../../common/shared_imports';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useKibana } from '../../../lib/kibana';
 import { ExceptionBuilderComponent } from '../builder';
@@ -47,28 +51,22 @@ import {
   defaultEndpointExceptionItems,
   entryHasListType,
   entryHasNonEcsType,
-  getMappedNonEcsValue,
 } from '../helpers';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
 import { ExceptionsBuilderExceptionItem } from '../types';
+import { useFetchIndex } from '../../../containers/source';
+import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
-export interface AddExceptionModalBaseProps {
+export interface AddExceptionModalProps {
   ruleName: string;
   ruleId: string;
   exceptionListType: ExceptionListType;
   ruleIndices: string[];
-  alertData?: {
-    ecsData: Ecs;
-    nonEcsData: TimelineNonEcsData[];
-  };
-}
-
-export interface AddExceptionModalProps extends AddExceptionModalBaseProps {
+  alertData?: Ecs;
+  alertStatus?: Status;
   onCancel: () => void;
   onConfirm: (didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
   onRuleChange?: () => void;
-  alertStatus?: Status;
 }
 
 const Modal = styled(EuiModal)`
@@ -111,8 +109,9 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   alertStatus,
 }: AddExceptionModalProps) {
   const { http } = useKibana().services;
+  const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
-  const { rule: maybeRule } = useRuleAsync(ruleId);
+  const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
   const [shouldCloseAlert, setShouldCloseAlert] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
@@ -122,15 +121,28 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const [
-    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
-
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    ruleIndices,
-    'rules'
+  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
+    signalIndexName,
+  ]);
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
+    memoSignalIndexName
   );
 
+  const memoMlJobIds = useMemo(
+    () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
+    [maybeRule]
+  );
+  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
+
+  const memoRuleIndices = useMemo(() => {
+    if (jobs.length > 0) {
+      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
+    } else {
+      return ruleIndices;
+    }
+  }, [jobs, ruleIndices]);
+
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
   const onError = useCallback(
     (error: Error): void => {
       addError(error, { title: i18n.ADD_EXCEPTION_ERROR });
@@ -164,10 +176,13 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
+      errorExists,
     }: {
       exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
-    }): void => {
+      errorExists: boolean;
+    }) => {
       setExceptionItemsToAdd(exceptionItems);
+      setErrorExists(errorExists);
     },
     [setExceptionItemsToAdd]
   );
@@ -219,13 +234,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   });
 
   const initialExceptionItems = useMemo((): ExceptionsBuilderExceptionItem[] => {
-    if (exceptionListType === 'endpoint' && alertData !== undefined && ruleExceptionList) {
-      return defaultEndpointExceptionItems(
-        exceptionListType,
-        ruleExceptionList.list_id,
-        ruleName,
-        alertData.nonEcsData
-      );
+    if (exceptionListType === 'endpoint' && alertData != null && ruleExceptionList) {
+      return defaultEndpointExceptionItems(ruleExceptionList.list_id, ruleName, alertData);
     } else {
       return [];
     }
@@ -274,17 +284,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldBulkCloseAlert]
   );
 
-  const retrieveAlertOsTypes = useCallback((): string[] => {
-    const osDefaults = ['windows', 'macos'];
-    if (alertData) {
-      const osTypes = getMappedNonEcsValue({
-        data: alertData.nonEcsData,
-        fieldName: 'host.os.family',
-      });
-      if (osTypes.length === 0) {
-        return osDefaults;
+  const retrieveAlertOsTypes = useCallback((): OsTypeArray => {
+    const osDefaults: OsTypeArray = ['windows', 'macos'];
+    if (alertData != null) {
+      const osTypes = alertData.host && alertData.host.os && alertData.host.os.family;
+      if (osTypeArray.is(osTypes) && osTypes != null && osTypes.length > 0) {
+        return osTypes;
       }
-      return osTypes;
+      return osDefaults;
     }
     return osDefaults;
   }, [alertData]);
@@ -305,10 +312,10 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [comment, exceptionItemsToAdd, exceptionListType, retrieveAlertOsTypes]);
 
   const onAddExceptionConfirm = useCallback((): void => {
-    if (addOrUpdateExceptionItems !== null) {
-      const alertIdToClose = shouldCloseAlert && alertData ? alertData.ecsData._id : undefined;
+    if (addOrUpdateExceptionItems != null) {
+      const alertIdToClose = shouldCloseAlert && alertData ? alertData._id : undefined;
       const bulkCloseIndex =
-        shouldBulkCloseAlert && signalIndexName !== null ? [signalIndexName] : undefined;
+        shouldBulkCloseAlert && signalIndexName != null ? [signalIndexName] : undefined;
       addOrUpdateExceptionItems(ruleId, enrichExceptionItems(), alertIdToClose, bulkCloseIndex);
     }
   }, [
@@ -324,17 +331,26 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   const isSubmitButtonDisabled = useMemo(
     (): boolean =>
       fetchOrCreateListError != null ||
-      exceptionItemsToAdd.every((item) => item.entries.length === 0),
-    [fetchOrCreateListError, exceptionItemsToAdd]
+      exceptionItemsToAdd.every((item) => item.entries.length === 0) ||
+      errorsExist,
+    [fetchOrCreateListError, exceptionItemsToAdd, errorsExist]
   );
+
+  const addExceptionMessage =
+    exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION;
+
+  const isRuleEQLSequenceStatement = useMemo((): boolean => {
+    if (maybeRule != null) {
+      return isEqlRule(maybeRule.type) && hasEqlSequenceQuery(maybeRule.query);
+    }
+    return false;
+  }, [maybeRule]);
 
   return (
     <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
         <ModalHeader>
-          <EuiModalHeaderTitle>
-            {exceptionListType === 'endpoint' ? i18n.ADD_ENDPOINT_EXCEPTION : i18n.ADD_EXCEPTION}
-          </EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{addExceptionMessage}</EuiModalHeaderTitle>
           <ModalHeaderSubtitle className="eui-textTruncate" title={ruleName}>
             {ruleName}
           </ModalHeaderSubtitle>
@@ -365,9 +381,20 @@ export const AddExceptionModal = memo(function AddExceptionModal({
           !isSignalIndexPatternLoading &&
           !isLoadingExceptionList &&
           !isIndexPatternLoading &&
+          !isRuleLoading &&
+          !mlJobLoading &&
           ruleExceptionList && (
             <>
               <ModalBodySection className="builder-section">
+                {isRuleEQLSequenceStatement && (
+                  <>
+                    <EuiCallOut
+                      data-test-subj="eql-sequence-callout"
+                      title={i18n.ADD_EXCEPTION_SEQUENCE_WARNING}
+                    />
+                    <EuiSpacer />
+                  </>
+                )}
                 <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
                 <EuiSpacer />
                 <ExceptionBuilderComponent
@@ -383,6 +410,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                   data-test-subj="alert-exception-builder"
                   id-aria="alert-exception-builder"
                   onChange={handleBuilderOnChange}
+                  ruleType={maybeRule?.type}
                 />
 
                 <EuiSpacer />
@@ -441,7 +469,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               isDisabled={isSubmitButtonDisabled}
               fill
             >
-              {i18n.ADD_EXCEPTION}
+              {addExceptionMessage}
             </EuiButton>
           </EuiModalFooter>
         )}

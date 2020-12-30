@@ -12,7 +12,12 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineSAMLRoutes({ router, logger, authc, basePath }: RouteDefinitionParams) {
+export function defineSAMLRoutes({
+  router,
+  logger,
+  getAuthenticationService,
+  basePath,
+}: RouteDefinitionParams) {
   // Generate two identical routes with new and deprecated URL and issue a warning if route with
   // deprecated URL is ever used.
   for (const path of ['/api/security/saml/callback', '/api/security/v1/saml']) {
@@ -38,7 +43,7 @@ export function defineSAMLRoutes({ router, logger, authc, basePath }: RouteDefin
 
         try {
           // When authenticating using SAML we _expect_ to redirect to the Kibana target location.
-          const authenticationResult = await authc.login(request, {
+          const authenticationResult = await getAuthenticationService().login(request, {
             provider: { type: SAMLAuthenticationProvider.type },
             value: {
               type: SAMLLogin.LoginWithSAMLResponse,

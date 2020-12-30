@@ -171,7 +171,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               value: bucket.key,
             }))
           : NO_LEGEND_DATA,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       [alertsData, selectedStackByOption.value, timelineId]
     );
 
@@ -221,24 +220,28 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     }, [alertsData]);
 
     useEffect(() => {
-      const converted = esQuery.buildEsQuery(
-        undefined,
-        query != null ? [query] : [],
-        filters?.filter((f) => f.meta.disabled === false) ?? [],
-        {
-          ...esQuery.getEsQueryConfig(kibana.services.uiSettings),
-          dateFormatTZ: undefined,
-        }
-      );
+      try {
+        const converted = esQuery.buildEsQuery(
+          undefined,
+          query != null ? [query] : [],
+          filters?.filter((f) => f.meta.disabled === false) ?? [],
+          {
+            ...esQuery.getEsQueryConfig(kibana.services.uiSettings),
+            dateFormatTZ: undefined,
+          }
+        );
 
-      setAlertsQuery(
-        getAlertsHistogramQuery(
-          selectedStackByOption.value,
-          from,
-          to,
-          !isEmpty(converted) ? [converted] : []
-        )
-      );
+        setAlertsQuery(
+          getAlertsHistogramQuery(
+            selectedStackByOption.value,
+            from,
+            to,
+            !isEmpty(converted) ? [converted] : []
+          )
+        );
+      } catch (e) {
+        setAlertsQuery(getAlertsHistogramQuery(selectedStackByOption.value, from, to, []));
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedStackByOption.value, from, to, query, filters]);
 

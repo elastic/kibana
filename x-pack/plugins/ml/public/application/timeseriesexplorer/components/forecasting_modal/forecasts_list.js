@@ -13,7 +13,7 @@ import React from 'react';
 
 import { EuiButtonIcon, EuiIcon, EuiInMemoryTable, EuiText, EuiToolTip } from '@elastic/eui';
 
-import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 

@@ -23,21 +23,23 @@ import { isColorDark } from '@elastic/eui';
 import { MetricVisValue } from './metric_vis_value';
 import { Input } from '../metric_vis_fn';
 import { FieldFormatsContentType, IFieldFormat } from '../../../data/public';
-import { KibanaDatatable } from '../../../expressions/public';
+import { Datatable } from '../../../expressions/public';
 import { getHeatmapColors } from '../../../charts/public';
 import { VisParams, MetricVisMetric } from '../types';
 import { getFormatService } from '../services';
 import { SchemaConfig } from '../../../visualizations/public';
 import { Range } from '../../../expressions/public';
 
+import './metric_vis.scss';
+
 export interface MetricVisComponentProps {
-  visParams: VisParams;
+  visParams: Pick<VisParams, 'metric' | 'dimensions'>;
   visData: Input;
   fireEvent: (event: any) => void;
   renderComplete: () => void;
 }
 
-export class MetricVisComponent extends Component<MetricVisComponentProps> {
+class MetricVisComponent extends Component<MetricVisComponentProps> {
   private getLabels() {
     const config = this.props.visParams.metric;
     const isPercentageMode = config.percentageMode;
@@ -107,7 +109,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     return fieldFormatter.convert(value, format);
   };
 
-  private processTableGroups(table: KibanaDatatable) {
+  private processTableGroups(table: Datatable) {
     const config = this.props.visParams.metric;
     const dimensions = this.props.visParams.dimensions;
     const isPercentageMode = config.percentageMode;
@@ -209,3 +211,7 @@ export class MetricVisComponent extends Component<MetricVisComponentProps> {
     return metricsHtml;
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { MetricVisComponent as default };

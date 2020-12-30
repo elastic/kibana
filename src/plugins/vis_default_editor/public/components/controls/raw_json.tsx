@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import 'brace/mode/json';
+
 import React, { useState, useMemo, useCallback } from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiCodeEditor, EuiScreenReaderOnly } from '@elastic/eui';
@@ -82,7 +84,7 @@ function RawJsonParamEditor({
       label={label}
       isInvalid={showValidation ? !isFieldValid : false}
       fullWidth={true}
-      compressed
+      display="rowCompressed"
     >
       <>
         <EuiCodeEditor

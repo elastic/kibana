@@ -10,11 +10,9 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
 import { getDefaultFetchPolicy } from '../../../../common/containers/helpers';
 import { QueryTemplate, QueryTemplateProps } from '../../../../common/containers/query_template';
-import { withKibana, WithKibanaProps } from '../../../../common/lib/kibana';
 
 import { HostOverviewQuery } from './host_overview.gql_query';
 import { GetHostOverviewQuery, HostItem } from '../../../../graphql/types';
@@ -42,7 +40,7 @@ export interface OwnProps extends QueryTemplateProps {
   endDate: string;
 }
 
-type HostsOverViewProps = OwnProps & HostOverviewReduxProps & WithKibanaProps;
+type HostsOverViewProps = OwnProps & HostOverviewReduxProps;
 
 class HostOverviewByNameComponentQuery extends QueryTemplate<
   HostsOverViewProps,
@@ -52,10 +50,10 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
   public render() {
     const {
       id = ID,
+      indexNames,
       isInspected,
       children,
       hostName,
-      kibana,
       skip,
       sourceId,
       startDate,
@@ -75,7 +73,7 @@ class HostOverviewByNameComponentQuery extends QueryTemplate<
             from: startDate,
             to: endDate,
           },
-          defaultIndex: kibana.services.uiSettings.get<string[]>(DEFAULT_INDEX_KEY),
+          defaultIndex: indexNames,
           inspect: isInspected,
         }}
       >
@@ -108,6 +106,5 @@ const makeMapStateToProps = () => {
 };
 
 export const HostOverviewByNameQuery = compose<React.ComponentClass<OwnProps>>(
-  connect(makeMapStateToProps),
-  withKibana
+  connect(makeMapStateToProps)
 )(HostOverviewByNameComponentQuery);

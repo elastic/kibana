@@ -47,6 +47,10 @@ Object.defineProperty(window, 'sessionStorage', {
   writable: true,
 });
 
+jest.mock('uuid', () => ({
+  v4: () => 'NEW_UUID',
+}));
+
 describe('NewsfeedApiDriver', () => {
   const kibanaVersion = '99.999.9-test_version'; // It'll remove the `-test_version` bit
   const userLanguage = 'en';
@@ -65,14 +69,18 @@ describe('NewsfeedApiDriver', () => {
 
     it('returns true if last fetch time precedes page load time', () => {
       sessionStoragetGet.throws('Wrong key passed!');
-      sessionStoragetGet.withArgs(NEWSFEED_LAST_FETCH_STORAGE_KEY).returns(322642800000); // 1980-03-23
+      sessionStoragetGet
+        .withArgs(`${NEWSFEED_LAST_FETCH_STORAGE_KEY}.NEW_UUID`)
+        .returns(322642800000); // 1980-03-23
       const driver = getDriver();
       expect(driver.shouldFetch()).toBe(true);
     });
 
     it('returns false if last fetch time is recent enough', () => {
       sessionStoragetGet.throws('Wrong key passed!');
-      sessionStoragetGet.withArgs(NEWSFEED_LAST_FETCH_STORAGE_KEY).returns(3005017200000); // 2065-03-23
+      sessionStoragetGet
+        .withArgs(`${NEWSFEED_LAST_FETCH_STORAGE_KEY}.NEW_UUID`)
+        .returns(3005017200000); // 2065-03-23
       const driver = getDriver();
       expect(driver.shouldFetch()).toBe(false);
     });
@@ -105,7 +113,7 @@ describe('NewsfeedApiDriver', () => {
 
     it('concatenates the previous hashes with the current', () => {
       localStorageGet.throws('Wrong key passed!');
-      localStorageGet.withArgs(NEWSFEED_HASH_SET_STORAGE_KEY).returns('happyness');
+      localStorageGet.withArgs(`${NEWSFEED_HASH_SET_STORAGE_KEY}.NEW_UUID`).returns('happyness');
       const driver = getDriver();
       const items: NewsfeedItem[] = [
         {
@@ -554,7 +562,7 @@ describe('getApi', () => {
 
   it('hasNew is false when service returns hashes that are all stored', (done) => {
     localStorageGet.throws('Wrong key passed!');
-    localStorageGet.withArgs(NEWSFEED_HASH_SET_STORAGE_KEY).returns('happyness');
+    localStorageGet.withArgs(`${NEWSFEED_HASH_SET_STORAGE_KEY}.NEW_UUID`).returns('happyness');
     const mockApiItems: ApiItem[] = [
       {
         title: { en: 'hasNew test' },

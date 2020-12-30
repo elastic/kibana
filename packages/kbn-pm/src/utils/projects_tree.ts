@@ -29,7 +29,7 @@ export function renderProjectsTree(rootPath: string, projects: Map<string, Proje
   return treeToString(createTreeStructure(projectsTree));
 }
 
-interface ITree {
+export interface ITree {
   name?: string;
   children?: ITreeChildren;
 }
@@ -41,7 +41,7 @@ type DirOrProjectName = string | typeof projectKey;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface IProjectsTree extends Map<DirOrProjectName, string | IProjectsTree> {}
 
-function treeToString(tree: ITree) {
+export function treeToString(tree: ITree) {
   return [tree.name].concat(childrenToStrings(tree.children, '')).join('\n');
 }
 

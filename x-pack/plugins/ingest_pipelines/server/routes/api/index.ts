@@ -15,3 +15,5 @@ export { registerPrivilegesRoute } from './privileges';
 export { registerDeleteRoute } from './delete';
 
 export { registerSimulateRoute } from './simulate';
+
+export { registerDocumentsRoute } from './documents';

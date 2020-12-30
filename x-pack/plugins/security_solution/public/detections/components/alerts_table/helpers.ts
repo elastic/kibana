@@ -5,13 +5,19 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { Filter, esKuery, KueryNode } from '../../../../../../../src/plugins/data/public';
+import {
+  Filter,
+  esKuery,
+  KueryNode,
+  esFilters,
+} from '../../../../../../../src/plugins/data/public';
 import {
   DataProvider,
   DataProviderType,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { DetailItem, TimelineType } from '../../../graphql/types';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { TimelineType } from '../../../graphql/types';
 
 interface FindValueToChangeInQuery {
   field: string;
@@ -49,7 +55,7 @@ const templateFields = [
  */
 export const getStringArray = (
   field: string,
-  data: DetailItem[],
+  data: TimelineEventsDetailsItem[],
   localConsole = console
 ): string[] => {
   const value: unknown | undefined = data.find((d) => d.field === field)?.values ?? null;
@@ -108,7 +114,7 @@ export const findValueToChangeInQuery = (
 
 export const replaceTemplateFieldFromQuery = (
   query: string,
-  eventData: DetailItem[],
+  eventData: TimelineEventsDetailsItem[],
   timelineType: TimelineType = TimelineType.default
 ): string => {
   if (timelineType === TimelineType.default) {
@@ -132,7 +138,7 @@ export const replaceTemplateFieldFromQuery = (
 
 export const replaceTemplateFieldFromMatchFilters = (
   filters: Filter[],
-  eventData: DetailItem[]
+  eventData: TimelineEventsDetailsItem[]
 ): Filter[] =>
   filters.map((filter) => {
     if (
@@ -151,7 +157,7 @@ export const replaceTemplateFieldFromMatchFilters = (
 
 export const reformatDataProviderWithNewValue = <T extends DataProvider | DataProvidersAnd>(
   dataProvider: T,
-  eventData: DetailItem[],
+  eventData: TimelineEventsDetailsItem[],
   timelineType: TimelineType = TimelineType.default
 ): T => {
   // Support for legacy "template-like" timeline behavior that is using hardcoded list of templateFields
@@ -201,7 +207,7 @@ export const reformatDataProviderWithNewValue = <T extends DataProvider | DataPr
 
 export const replaceTemplateFieldFromDataProviders = (
   dataProviders: DataProvider[],
-  eventData: DetailItem[],
+  eventData: TimelineEventsDetailsItem[],
   timelineType: TimelineType = TimelineType.default
 ): DataProvider[] =>
   dataProviders.map((dataProvider) => {
@@ -213,3 +219,30 @@ export const replaceTemplateFieldFromDataProviders = (
     }
     return newDataProvider;
   });
+
+export const buildTimeRangeFilter = (from: string, to: string): Filter[] => [
+  {
+    range: {
+      '@timestamp': {
+        gte: from,
+        lt: to,
+        format: 'strict_date_optional_time',
+      },
+    },
+    meta: {
+      type: 'range',
+      disabled: false,
+      negate: false,
+      alias: null,
+      key: '@timestamp',
+      params: {
+        gte: from,
+        lt: to,
+        format: 'strict_date_optional_time',
+      },
+    },
+    $state: {
+      store: esFilters.FilterStateStore.APP_STATE,
+    },
+  } as Filter,
+];

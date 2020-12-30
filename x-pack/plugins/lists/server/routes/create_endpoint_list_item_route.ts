@@ -37,13 +37,13 @@ export const createEndpointListItemRoute = (router: IRouter): void => {
       try {
         const {
           name,
-          _tags,
           tags,
           meta,
           comments,
           description,
           entries,
           item_id: itemId,
+          os_types: osTypes,
           type,
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
@@ -58,13 +58,13 @@ export const createEndpointListItemRoute = (router: IRouter): void => {
           });
         } else {
           const createdList = await exceptionLists.createEndpointListItem({
-            _tags,
             comments,
             description,
             entries,
             itemId,
             meta,
             name,
+            osTypes,
             tags,
             type,
           });

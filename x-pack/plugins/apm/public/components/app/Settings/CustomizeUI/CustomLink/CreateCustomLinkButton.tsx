@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export function CreateCustomLinkButton({ onClick }: { onClick: () => void }) {
   return (
-    <EuiButton color="primary" fill onClick={onClick}>
+    <EuiButton color="primary" fill iconType="plusInCircle" onClick={onClick}>
       {i18n.translate(
         'xpack.apm.settings.customizeUI.customLink.createCustomLink',
         { defaultMessage: 'Create custom link' }

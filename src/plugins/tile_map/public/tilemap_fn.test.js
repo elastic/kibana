@@ -41,7 +41,7 @@ import { convertToGeoJson } from '../../maps_legacy/public';
 describe('interpreter/functions#tilemap', () => {
   const fn = functionWrapper(createTileMapFn());
   const context = {
-    type: 'kibana_datatable',
+    type: 'datatable',
     rows: [{ 'col-0-1': 0 }],
     columns: [{ id: 'col-0-1', name: 'Count' }],
   };
@@ -80,13 +80,17 @@ describe('interpreter/functions#tilemap', () => {
   });
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(context, { visConfig: JSON.stringify(visConfig) });
+    const actual = fn(
+      context,
+      { visConfig: JSON.stringify(visConfig) },
+      { logDatatable: jest.fn() }
+    );
     expect(actual).toMatchSnapshot();
   });
 
   it('calls response handler with correct values', () => {
     const { geohash, metric, geocentroid } = visConfig.dimensions;
-    fn(context, { visConfig: JSON.stringify(visConfig) });
+    fn(context, { visConfig: JSON.stringify(visConfig) }, { logDatatable: jest.fn() });
     expect(convertToGeoJson).toHaveBeenCalledTimes(1);
     expect(convertToGeoJson).toHaveBeenCalledWith(context, {
       geohash,

@@ -143,7 +143,9 @@ describe('CreateIndexPatternWizard', () => {
   });
 
   test('invokes the provided services when creating an index pattern', async () => {
-    const create = jest.fn().mockImplementation(() => 'id');
+    const newIndexPatternAndSave = jest.fn().mockImplementation(async () => {
+      return indexPattern;
+    });
     const clear = jest.fn();
     mockContext.data.indexPatterns.clearCache = clear;
     const indexPattern = ({
@@ -151,11 +153,10 @@ describe('CreateIndexPatternWizard', () => {
       title: 'my-fake-index-pattern',
       timeFieldName: 'timestamp',
       fields: [],
-      create,
+      _fetchFields: jest.fn(),
     } as unknown) as IndexPattern;
-    mockContext.data.indexPatterns.make = async () => {
-      return indexPattern;
-    };
+    mockContext.data.indexPatterns.createAndSave = newIndexPatternAndSave;
+    mockContext.data.indexPatterns.setDefault = jest.fn();
 
     const component = createComponentWithContext(
       CreateIndexPatternWizard,
@@ -165,9 +166,8 @@ describe('CreateIndexPatternWizard', () => {
 
     component.setState({ indexPattern: 'foo' });
     await (component.instance() as CreateIndexPatternWizard).createIndexPattern(undefined, 'id');
-    expect(mockContext.uiSettings.get).toBeCalled();
-    expect(create).toBeCalled();
-    expect(clear).toBeCalledWith('id');
-    expect(routeComponentPropsMock.history.push).toBeCalledWith(`/patterns/id`);
+    expect(newIndexPatternAndSave).toBeCalled();
+    expect(clear).toBeCalledWith('1');
+    expect(routeComponentPropsMock.history.push).toBeCalledWith(`/patterns/1`);
   });
 });

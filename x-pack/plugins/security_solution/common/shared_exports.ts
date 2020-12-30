@@ -5,6 +5,7 @@
  */
 
 export { NonEmptyString } from './detection_engine/schemas/types/non_empty_string';
+export { DefaultArray } from './detection_engine/schemas/types/default_array';
 export { DefaultUuid } from './detection_engine/schemas/types/default_uuid';
 export { DefaultStringArray } from './detection_engine/schemas/types/default_string_array';
 export {
@@ -12,6 +13,7 @@ export {
   DefaultVersionNumberDecoded,
 } from './detection_engine/schemas/types/default_version_number';
 export { exactCheck } from './exact_check';
-export { getPaths, foldLeftRight } from './test_utils';
+export { getPaths, foldLeftRight, removeExternalLinkText } from './test_utils';
 export { validate, validateEither } from './validate';
 export { formatErrors } from './format_errors';
+export { migratePackagePolicyToV7110 } from './endpoint/policy/migrations/to_v7_11.0';

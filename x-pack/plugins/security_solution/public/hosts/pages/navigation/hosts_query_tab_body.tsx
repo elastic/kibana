@@ -18,7 +18,7 @@ export const HostsQueryTabBody = ({
   docValueFields,
   endDate,
   filterQuery,
-  indexPattern,
+  indexNames,
   skip,
   setQuery,
   startDate,
@@ -27,7 +27,7 @@ export const HostsQueryTabBody = ({
   const [
     loading,
     { hosts, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
-  ] = useAllHost({ docValueFields, endDate, filterQuery, skip, startDate, type });
+  ] = useAllHost({ docValueFields, endDate, filterQuery, indexNames, skip, startDate, type });
 
   return (
     <HostsTableManage
@@ -35,7 +35,6 @@ export const HostsQueryTabBody = ({
       data={hosts}
       fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       id={id}
-      indexPattern={indexPattern}
       inspect={inspect}
       isInspect={isInspected}
       loading={loading}

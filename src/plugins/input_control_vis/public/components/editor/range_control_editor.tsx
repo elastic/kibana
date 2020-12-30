@@ -24,7 +24,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IIndexPattern, IFieldType, IndexPatternSelect } from '../../../../data/public';
+import { IIndexPattern, IFieldType, IndexPatternSelectProps } from '../../../../data/public';
 import { InputControlVisDependencies } from '../../plugin';
 
 interface RangeControlEditorProps {
@@ -42,7 +42,7 @@ interface RangeControlEditorProps {
 }
 
 interface RangeControlEditorState {
-  IndexPatternSelect: ComponentType<IndexPatternSelect['props']> | null;
+  IndexPatternSelect: ComponentType<IndexPatternSelectProps> | null;
 }
 
 function filterField(field: IFieldType) {

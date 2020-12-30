@@ -20,23 +20,20 @@
 import { i18n } from '@kbn/i18n';
 
 import { Schemas } from '../../vis_default_editor/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
-import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { toExpressionAst } from './to_ast';
 
-// @ts-ignore
-import { createTagCloudVisualization } from './components/tag_cloud_visualization';
-import { TagCloudVisDependencies } from './plugin';
-
-export const createTagCloudVisTypeDefinition = (deps: TagCloudVisDependencies) => ({
+export const tagCloudVisTypeDefinition = {
   name: 'tagcloud',
-  title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
+  title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag cloud' }),
   icon: 'visTagCloud',
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter];
   },
   description: i18n.translate('visTypeTagCloud.vis.tagCloudDescription', {
-    defaultMessage: 'A group of words, sized according to their importance',
+    defaultMessage: 'Display word frequency with font size.',
   }),
   visConfig: {
     defaults: {
@@ -47,7 +44,7 @@ export const createTagCloudVisTypeDefinition = (deps: TagCloudVisDependencies) =
       showLabel: true,
     },
   },
-  visualization: createTagCloudVisualization(deps),
+  toExpressionAst,
   editorConfig: {
     collections: {
       scales: [
@@ -123,5 +120,4 @@ export const createTagCloudVisTypeDefinition = (deps: TagCloudVisDependencies) =
       },
     ]),
   },
-  useCustomNoDataScreen: true,
-});
+};

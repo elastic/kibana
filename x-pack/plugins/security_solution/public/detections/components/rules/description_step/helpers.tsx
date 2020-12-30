@@ -21,13 +21,19 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
+import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
 import { Threshold, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
-import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
+import {
+  subtechniquesOptions,
+  tacticsOptions,
+  techniquesOptions,
+} from '../../../mitre/mitre_tactics_techniques';
 
 import * as i18n from './translations';
 import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
@@ -49,6 +55,10 @@ const EuiBadgeWrap = (styled(EuiBadge)`
   }
 ` as unknown) as typeof EuiBadge;
 
+const Query = styled.div`
+  white-space: pre-wrap;
+`;
+
 export const buildQueryBarDescription = ({
   field,
   filters,
@@ -56,6 +66,7 @@ export const buildQueryBarDescription = ({
   query,
   savedId,
   indexPatterns,
+  queryLabel,
 }: BuildQueryBarDescription): ListItems[] => {
   let items: ListItems[] = [];
   if (!isEmpty(filters)) {
@@ -89,8 +100,8 @@ export const buildQueryBarDescription = ({
     items = [
       ...items,
       {
-        title: <>{i18n.QUERY_LABEL} </>,
-        description: <>{query} </>,
+        title: <>{queryLabel ?? i18n.QUERY_LABEL}</>,
+        description: <Query>{query}</Query>,
       },
     ];
   }
@@ -112,11 +123,16 @@ const ThreatEuiFlexGroup = styled(EuiFlexGroup)`
   }
 `;
 
+const SubtechniqueFlexItem = styled(EuiFlexItem)`
+  margin-left: ${({ theme }) => theme.eui.paddingSizes.m};
+`;
+
 const TechniqueLinkItem = styled(EuiButtonEmpty)`
   .euiIcon {
     width: 8px;
     height: 8px;
   }
+  align-self: flex-start;
 `;
 
 export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
@@ -138,20 +154,42 @@ export const buildThreatDescription = ({ label, threat }: BuildThreatDescription
                     {tactic != null ? tactic.text : ''}
                   </EuiLink>
                   <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                    {singleThreat.technique.map((technique, listIndex) => {
+                    {singleThreat.technique.map((technique, techniqueIndex) => {
                       const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
                       return (
-                        <EuiFlexItem key={myTechnique?.id ?? listIndex}>
+                        <EuiFlexItem key={myTechnique?.id ?? techniqueIndex}>
                           <TechniqueLinkItem
                             data-test-subj="threatTechniqueLink"
                             href={technique.reference}
                             target="_blank"
                             iconType={ListTreeIcon}
                             size="xs"
-                            flush="left"
                           >
                             {myTechnique != null ? myTechnique.label : ''}
                           </TechniqueLinkItem>
+                          <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
+                            {technique.subtechnique != null &&
+                              technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
+                                const mySubtechnique = subtechniquesOptions.find(
+                                  (t) => t.id === subtechnique.id
+                                );
+                                return (
+                                  <SubtechniqueFlexItem
+                                    key={mySubtechnique?.id ?? subtechniqueIndex}
+                                  >
+                                    <TechniqueLinkItem
+                                      data-test-subj="threatSubtechniqueLink"
+                                      href={subtechnique.reference}
+                                      target="_blank"
+                                      iconType={ListTreeIcon}
+                                      size="xs"
+                                    >
+                                      {mySubtechnique != null ? mySubtechnique.label : ''}
+                                    </TechniqueLinkItem>
+                                  </SubtechniqueFlexItem>
+                                );
+                              })}
+                          </EuiFlexGroup>
                         </EuiFlexItem>
                       );
                     })}
@@ -416,3 +454,40 @@ export const buildThresholdDescription = (label: string, threshold: Threshold): 
     ),
   },
 ];
+
+export const buildThreatMappingDescription = (
+  title: string,
+  threatMapping: ThreatMapping
+): ListItems[] => {
+  const description = threatMapping.reduce<string>(
+    (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
+      const matches = threatMap.entries.reduce<string>(
+        (accumItems, item, itemsIndex, { length: threatMapLength }) => {
+          if (threatMapLength === 1) {
+            return `${item.field} ${MATCHES} ${item.value}`;
+          } else if (itemsIndex === 0) {
+            return `(${item.field} ${MATCHES} ${item.value})`;
+          } else {
+            return `${accumItems} ${AND} (${item.field} ${MATCHES} ${item.value})`;
+          }
+        },
+        ''
+      );
+
+      if (threatMappingLength === 1) {
+        return `${matches}`;
+      } else if (threatMapIndex === 0) {
+        return `(${matches})`;
+      } else {
+        return `${accumThreatMaps} ${OR} (${matches})`;
+      }
+    },
+    ''
+  );
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};

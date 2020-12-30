@@ -4,64 +4,75 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { FC, ReactNode } from 'react';
+import { EuiBasicTable } from '@elastic/eui';
 // @ts-ignore
 import { formatDate } from '@elastic/eui/lib/services/format';
-
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import { i18n } from '@kbn/i18n';
 import { FieldDataCardProps } from '../field_data_card';
-import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
-
+import { ExpandedRowFieldHeader } from '../../../../stats_datagrid/components/expanded_row_field_header';
 const TIME_FORMAT = 'MMM D YYYY, HH:mm:ss.SSS';
+interface SummaryTableItem {
+  function: string;
+  display: ReactNode;
+  value: number | string | undefined | null;
+}
 
 export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
   const { stats } = config;
+  if (stats === undefined) return null;
 
-  const { count, sampleCount, earliest, latest } = stats;
-  const docsPercent = roundToDecimalPlace((count / sampleCount) * 100);
+  const { earliest, latest } = stats;
+
+  const summaryTableTitle = i18n.translate('xpack.ml.fieldDataCard.cardDate.summaryTableTitle', {
+    defaultMessage: 'Summary',
+  });
+  const summaryTableItems = [
+    {
+      function: 'earliest',
+      display: (
+        <FormattedMessage id="xpack.ml.fieldDataCard.cardDate.minLabel" defaultMessage="min" />
+      ),
+      value: formatDate(earliest, TIME_FORMAT),
+    },
+    {
+      function: 'latest',
+      display: (
+        <FormattedMessage
+          id="xpack.ml.fieldDataCard.cardDate.medianLabel"
+          defaultMessage="median"
+        />
+      ),
+      value: formatDate(latest, TIME_FORMAT),
+    },
+  ];
+  const summaryTableColumns = [
+    {
+      name: '',
+      render: (summaryItem: { display: ReactNode }) => summaryItem.display,
+      width: '75px',
+    },
+    {
+      field: 'value',
+      name: '',
+      render: (v: string) => <strong>{v}</strong>,
+    },
+  ];
 
   return (
-    <div className="mlFieldDataCard__stats">
-      <div>
-        <EuiText size="xs" color="subdued">
-          <EuiIcon type="document" />
-          &nbsp;
-          <FormattedMessage
-            id="xpack.ml.fieldDataCard.cardDate.documentsCountDescription"
-            defaultMessage="{count, plural, zero {# document} one {# document} other {# documents}} ({docsPercent}%)"
-            values={{
-              count,
-              docsPercent,
-            }}
-          />
-        </EuiText>
-      </div>
-
-      <EuiSpacer size="m" />
-
-      <div>
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardDate.earliestDescription"
-          defaultMessage="earliest {earliestFormatted}"
-          values={{
-            earliestFormatted: formatDate(earliest, TIME_FORMAT),
-          }}
-        />
-      </div>
-
-      <EuiSpacer size="s" />
-
-      <div>
-        <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardDate.latestDescription"
-          defaultMessage="latest {latestFormatted}"
-          values={{
-            latestFormatted: formatDate(latest, TIME_FORMAT),
-          }}
-        />
-      </div>
-    </div>
+    <>
+      <ExpandedRowFieldHeader>{summaryTableTitle}</ExpandedRowFieldHeader>
+      <EuiBasicTable<SummaryTableItem>
+        className={'mlDataVisualizerSummaryTable'}
+        data-test-subj={'mlDateSummaryTable'}
+        compressed
+        items={summaryTableItems}
+        columns={summaryTableColumns}
+        tableCaption={summaryTableTitle}
+        tableLayout="auto"
+      />
+    </>
   );
 };

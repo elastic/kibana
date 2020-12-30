@@ -184,7 +184,6 @@ export const LegendControls = ({
         closePopover={handleCancelClick}
         id="legendControls"
         button={buttonComponent}
-        withTitle
       >
         <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
         <EuiForm style={{ width: 500 }}>

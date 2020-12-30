@@ -7,7 +7,7 @@
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { LegacyClusterClient, KibanaRequest } from 'src/core/server';
-import { SpacesServiceSetup } from '../../spaces/server';
+import { SpacesServiceStart } from '../../spaces/server';
 
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
@@ -60,7 +60,7 @@ export type FindOptionsType = Pick<
 interface EventLogServiceCtorParams {
   esContext: EsContext;
   savedObjectGetter: SavedObjectGetter;
-  spacesService?: SpacesServiceSetup;
+  spacesService?: SpacesServiceStart;
   request: KibanaRequest;
 }
 
@@ -68,7 +68,7 @@ interface EventLogServiceCtorParams {
 export class EventLogClient implements IEventLogClient {
   private esContext: EsContext;
   private savedObjectGetter: SavedObjectGetter;
-  private spacesService?: SpacesServiceSetup;
+  private spacesService?: SpacesServiceStart;
   private request: KibanaRequest;
 
   constructor({ esContext, savedObjectGetter, spacesService, request }: EventLogServiceCtorParams) {
@@ -92,7 +92,7 @@ export class EventLogClient implements IEventLogClient {
     await this.savedObjectGetter(type, id);
 
     return await this.esContext.esAdapter.queryEventsBySavedObject(
-      this.esContext.esNames.alias,
+      this.esContext.esNames.indexPattern,
       namespace,
       type,
       id,

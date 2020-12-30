@@ -26,13 +26,20 @@ import { toMountPoint } from '../../../../kibana_react/public';
 import { ShardFailureModal } from './shard_failure_modal';
 import { ShardFailureRequest } from './shard_failure_types';
 
-interface Props {
+// @internal
+export interface ShardFailureOpenModalButtonProps {
   request: ShardFailureRequest;
   response: SearchResponse<any>;
   title: string;
 }
 
-export function ShardFailureOpenModalButton({ request, response, title }: Props) {
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default function ShardFailureOpenModalButton({
+  request,
+  response,
+  title,
+}: ShardFailureOpenModalButtonProps) {
   function onClick() {
     const modal = getOverlays().openModal(
       toMountPoint(

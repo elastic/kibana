@@ -17,11 +17,12 @@
  * under the License.
  */
 
-export { SearchSource, ISearchSource, SearchSourceDependencies } from './search_source';
 export { createSearchSource } from './create_search_source';
-export { SortDirection, EsQuerySortValue, SearchSourceFields } from './types';
 export { injectReferences } from './inject_references';
 export { extractReferences } from './extract_references';
 export { parseSearchSourceJSON } from './parse_json';
 export * from './fetch';
 export * from './legacy';
+export * from './search_source';
+export * from './search_source_service';
+export * from './types';

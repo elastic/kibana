@@ -31,6 +31,7 @@ import {
   SavedObjectsServiceSetup,
   OpsMetrics,
   Logger,
+  CoreUsageDataStart,
 } from '../../../core/server';
 import {
   registerApplicationUsageCollector,
@@ -39,6 +40,11 @@ import {
   registerOpsStatsCollector,
   registerUiMetricUsageCollector,
   registerCspCollector,
+  registerCoreUsageCollector,
+  registerLocalizationUsageCollector,
+  registerUiCountersUsageCollector,
+  registerUiCounterSavedObjectType,
+  registerUiCountersRollups,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -53,6 +59,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   private savedObjectsClient?: ISavedObjectsRepository;
   private uiSettingsClient?: IUiSettingsClient;
   private metric$: Subject<OpsMetrics>;
+  private coreUsageData?: CoreUsageDataStart;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -61,8 +68,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   }
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
-    this.registerUsageCollectors(usageCollection, coreSetup, this.metric$, (opts) =>
-      coreSetup.savedObjects.registerType(opts)
+    this.registerUsageCollectors(
+      usageCollection,
+      coreSetup,
+      this.metric$,
+      coreSetup.savedObjects.registerType.bind(coreSetup.savedObjects)
     );
   }
 
@@ -72,6 +82,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     const savedObjectsClient = new SavedObjectsClient(this.savedObjectsClient);
     this.uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     core.metrics.getOpsMetrics$().subscribe(this.metric$);
+    this.coreUsageData = core.coreUsageData;
   }
 
   public stop() {
@@ -86,6 +97,11 @@ export class KibanaUsageCollectionPlugin implements Plugin {
   ) {
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
+    const getCoreUsageDataService = () => this.coreUsageData!;
+
+    registerUiCounterSavedObjectType(coreSetup.savedObjects);
+    registerUiCountersRollups(this.logger.get('ui-counters'), getSavedObjectsClient);
+    registerUiCountersUsageCollector(usageCollection);
 
     registerOpsStatsCollector(usageCollection, metric$);
     registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
@@ -98,5 +114,7 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       getSavedObjectsClient
     );
     registerCspCollector(usageCollection, coreSetup.http);
+    registerCoreUsageCollector(usageCollection, getCoreUsageDataService);
+    registerLocalizationUsageCollector(usageCollection, coreSetup.i18n);
   }
 }

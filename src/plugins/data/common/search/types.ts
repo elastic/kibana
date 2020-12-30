@@ -18,22 +18,24 @@
  */
 
 import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../../common/search';
-
-export type ISearch = (
-  request: IKibanaSearchRequest,
-  options?: ISearchOptions
-) => Observable<IKibanaSearchResponse>;
+import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 
 export type ISearchGeneric = <
-  SearchStrategyRequest extends IEsSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IEsSearchResponse = IEsSearchResponse
+  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
 >(
   request: SearchStrategyRequest,
   options?: ISearchOptions
 ) => Observable<SearchStrategyResponse>;
 
-export interface IKibanaSearchResponse {
+export type ISearchCancelGeneric = (id: string, options?: ISearchOptions) => Promise<void>;
+
+export interface ISearchClient {
+  search: ISearchGeneric;
+  cancel: ISearchCancelGeneric;
+}
+
+export interface IKibanaSearchResponse<RawResponse = any> {
   /**
    * Some responses may contain a unique id to identify the request this response came from.
    */
@@ -50,16 +52,55 @@ export interface IKibanaSearchResponse {
    * that represents how progress is indicated.
    */
   loaded?: number;
+
+  /**
+   * Indicates whether search is still in flight
+   */
+  isRunning?: boolean;
+
+  /**
+   * Indicates whether the results returned are complete or partial
+   */
+  isPartial?: boolean;
+
+  /**
+   * The raw response returned by the internal search method (usually the raw ES response)
+   */
+  rawResponse: RawResponse;
 }
 
-export interface IKibanaSearchRequest {
+export interface IKibanaSearchRequest<Params = any> {
   /**
    * An id can be used to uniquely identify this request.
    */
   id?: string;
 
+  params?: Params;
+}
+
+export interface ISearchOptions {
   /**
-   * Optionally tell search strategies to output debug information.
+   * An `AbortSignal` that allows the caller of `search` to abort a search request.
    */
-  debug?: boolean;
+  abortSignal?: AbortSignal;
+  /**
+   * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
+   */
+  strategy?: string;
+
+  /**
+   * A session ID, grouping multiple search requests into a single session.
+   */
+  sessionId?: string;
+
+  /**
+   * Whether the session is already saved (i.e. sent to background)
+   */
+  isStored?: boolean;
+
+  /**
+   * Whether the session is restored (i.e. search requests should re-use the stored search IDs,
+   * rather than starting from scratch)
+   */
+  isRestore?: boolean;
 }

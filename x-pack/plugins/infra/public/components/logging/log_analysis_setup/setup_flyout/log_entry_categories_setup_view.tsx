@@ -6,6 +6,7 @@
 
 import { EuiSpacer, EuiSteps, EuiText, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import useMount from 'react-use/lib/useMount';
 import { useLogEntryCategoriesSetup } from '../../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { createInitialConfigurationStep } from '../initial_configuration_step';
 import { createProcessStep } from '../process_step';
@@ -14,8 +15,10 @@ export const LogEntryCategoriesSetupView: React.FC<{
   onClose: () => void;
 }> = ({ onClose }) => {
   const {
+    categoryQualityWarnings,
     cleanUpAndSetUp,
     endTime,
+    fetchJobStatus,
     isValidating,
     lastSetupErrorMessages,
     moduleDescriptor,
@@ -29,6 +32,10 @@ export const LogEntryCategoriesSetupView: React.FC<{
     validationErrors,
     viewResults,
   } = useLogEntryCategoriesSetup();
+
+  useMount(() => {
+    fetchJobStatus();
+  });
 
   const viewResultsAndClose = useCallback(() => {
     viewResults();
@@ -47,6 +54,7 @@ export const LogEntryCategoriesSetupView: React.FC<{
         setupStatus,
         setValidatedIndices,
         validationErrors,
+        previousQualityWarnings: categoryQualityWarnings,
       }),
       createProcessStep({
         cleanUpAndSetUp,
@@ -58,6 +66,7 @@ export const LogEntryCategoriesSetupView: React.FC<{
       }),
     ],
     [
+      categoryQualityWarnings,
       cleanUpAndSetUp,
       endTime,
       isValidating,

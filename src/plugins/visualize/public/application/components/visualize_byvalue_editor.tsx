@@ -32,26 +32,26 @@ import {
 } from '../utils';
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
+import { VisualizeAppProps } from '../app';
+import { VisualizeConstants } from '../..';
 
-export const VisualizeByValueEditor = () => {
+export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [embeddableId, setEmbeddableId] = useState<string>();
   const [valueInput, setValueInput] = useState<VisualizeInput>();
 
   useEffect(() => {
     const { originatingApp: value, embeddableId: embeddableIdValue, valueInput: valueInputValue } =
-      services.embeddable
-        .getStateTransfer(services.scopedHistory)
-        .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'embeddableId', 'valueInput'] }) ||
-      {};
+      services.embeddable.getStateTransfer().getIncomingEditorState() || {};
     setOriginatingApp(value);
     setValueInput(valueInputValue);
     setEmbeddableId(embeddableIdValue);
     if (!valueInputValue) {
-      history.back();
+      // if there is no value input to load, redirect to the visualize listing page.
+      services.history.replace(VisualizeConstants.LANDING_PAGE_PATH);
     }
   }, [services]);
 
@@ -100,6 +100,7 @@ export const VisualizeByValueEditor = () => {
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}
       embeddableId={embeddableId}
+      onAppLeave={onAppLeave}
     />
   );
 };

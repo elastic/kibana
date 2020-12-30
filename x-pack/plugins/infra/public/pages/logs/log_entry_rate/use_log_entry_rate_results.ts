@@ -12,6 +12,7 @@ import {
   LogEntryRatePartition,
   LogEntryRateAnomaly,
 } from '../../../../common/http_api/log_analysis';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryRateAPI } from './service_calls/get_log_entry_rate';
 
@@ -49,6 +50,7 @@ export const useLogEntryRateResults = ({
   bucketDuration: number;
   filteredDatasets?: string[];
 }) => {
+  const { services } = useKibanaContextForPlugin();
   const [logEntryRate, setLogEntryRate] = useState<LogEntryRateResults | null>(null);
 
   const [getLogEntryRateRequest, getLogEntryRate] = useTrackedPromise(
@@ -56,11 +58,14 @@ export const useLogEntryRateResults = ({
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
         return await callGetLogEntryRateAPI(
-          sourceId,
-          startTime,
-          endTime,
-          bucketDuration,
-          filteredDatasets
+          {
+            sourceId,
+            startTime,
+            endTime,
+            bucketDuration,
+            datasets: filteredDatasets,
+          },
+          services.http.fetch
         );
       },
       onResolve: ({ data }) => {

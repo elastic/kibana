@@ -17,9 +17,16 @@
  * under the License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { keyBy } from 'lodash';
 
-import { getFieldCapabilities, resolveTimePattern, createNoMatchingIndicesError } from './lib';
+import {
+  getFieldCapabilities,
+  resolveTimePattern,
+  createNoMatchingIndicesError,
+  getCapabilitiesForRollupIndices,
+  mergeCapabilitiesWithFields,
+} from './lib';
 
 export interface FieldDescriptor {
   aggregatable: boolean;
@@ -37,10 +44,12 @@ interface FieldSubType {
 }
 
 export class IndexPatternsFetcher {
-  private _callDataCluster: LegacyAPICaller;
+  private elasticsearchClient: ElasticsearchClient;
+  private allowNoIndices: boolean;
 
-  constructor(callDataCluster: LegacyAPICaller) {
-    this._callDataCluster = callDataCluster;
+  constructor(elasticsearchClient: ElasticsearchClient, allowNoIndices: boolean = false) {
+    this.elasticsearchClient = elasticsearchClient;
+    this.allowNoIndices = allowNoIndices;
   }
 
   /**
@@ -55,9 +64,45 @@ export class IndexPatternsFetcher {
   async getFieldsForWildcard(options: {
     pattern: string | string[];
     metaFields?: string[];
+    fieldCapsOptions?: { allow_no_indices: boolean };
+    type?: string;
+    rollupIndex?: string;
   }): Promise<FieldDescriptor[]> {
-    const { pattern, metaFields } = options;
-    return await getFieldCapabilities(this._callDataCluster, pattern, metaFields);
+    const { pattern, metaFields, fieldCapsOptions, type, rollupIndex } = options;
+    const fieldCapsResponse = await getFieldCapabilities(
+      this.elasticsearchClient,
+      pattern,
+      metaFields,
+      {
+        allow_no_indices: fieldCapsOptions
+          ? fieldCapsOptions.allow_no_indices
+          : this.allowNoIndices,
+      }
+    );
+    if (type === 'rollup' && rollupIndex) {
+      const rollupFields: FieldDescriptor[] = [];
+      const rollupIndexCapabilities = getCapabilitiesForRollupIndices(
+        (
+          await this.elasticsearchClient.rollup.getRollupIndexCaps({
+            index: rollupIndex,
+          })
+        ).body
+      )[rollupIndex].aggs;
+      const fieldCapsResponseObj = keyBy(fieldCapsResponse, 'name');
+
+      // Keep meta fields
+      metaFields!.forEach(
+        (field: string) =>
+          fieldCapsResponseObj[field] && rollupFields.push(fieldCapsResponseObj[field])
+      );
+
+      return mergeCapabilitiesWithFields(
+        rollupIndexCapabilities,
+        fieldCapsResponseObj,
+        rollupFields
+      );
+    }
+    return fieldCapsResponse;
   }
 
   /**
@@ -77,11 +122,11 @@ export class IndexPatternsFetcher {
     interval: string;
   }) {
     const { pattern, lookBack, metaFields } = options;
-    const { matches } = await resolveTimePattern(this._callDataCluster, pattern);
+    const { matches } = await resolveTimePattern(this.elasticsearchClient, pattern);
     const indices = matches.slice(0, lookBack);
     if (indices.length === 0) {
       throw createNoMatchingIndicesError(pattern);
     }
-    return await getFieldCapabilities(this._callDataCluster, indices, metaFields);
+    return await getFieldCapabilities(this.elasticsearchClient, indices, metaFields);
   }
 }

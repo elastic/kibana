@@ -6,49 +6,37 @@
 
 import { RunContext, TaskInstance } from '../task';
 
-/*
- * BeforeSaveMiddlewareParams is nearly identical to RunContext, but
- * taskInstance is before save (no _id property)
- *
- * taskInstance property is guaranteed to exist. The params can optionally
- * include fields from an "options" object passed as the 2nd parameter to
- * taskManager.schedule()
- */
-export interface BeforeSaveMiddlewareParams {
+type Mapper<T> = (params: T) => Promise<T>;
+interface BeforeSaveContext {
   taskInstance: TaskInstance;
 }
 
-export type BeforeSaveFunction = (
-  params: BeforeSaveMiddlewareParams
-) => Promise<BeforeSaveMiddlewareParams>;
-
-export type BeforeRunFunction = (params: RunContext) => Promise<RunContext>;
-export type BeforeMarkRunningFunction = (params: RunContext) => Promise<RunContext>;
+export type BeforeSaveContextFunction = Mapper<BeforeSaveContext>;
+export type BeforeRunContextFunction = Mapper<RunContext>;
 
 export interface Middleware {
-  beforeSave: BeforeSaveFunction;
-  beforeRun: BeforeRunFunction;
-  beforeMarkRunning: BeforeMarkRunningFunction;
+  beforeSave: BeforeSaveContextFunction;
+  beforeRun: BeforeRunContextFunction;
+  beforeMarkRunning: BeforeRunContextFunction;
 }
 
-export function addMiddlewareToChain(prevMiddleware: Middleware, middleware: Middleware) {
-  const beforeSave = middleware.beforeSave
-    ? (params: BeforeSaveMiddlewareParams) =>
-        middleware.beforeSave(params).then(prevMiddleware.beforeSave)
-    : prevMiddleware.beforeSave;
-
-  const beforeRun = middleware.beforeRun
-    ? (params: RunContext) => middleware.beforeRun(params).then(prevMiddleware.beforeRun)
-    : prevMiddleware.beforeRun;
-
-  const beforeMarkRunning = middleware.beforeMarkRunning
-    ? (params: RunContext) =>
-        middleware.beforeMarkRunning(params).then(prevMiddleware.beforeMarkRunning)
-    : prevMiddleware.beforeMarkRunning;
-
+export function addMiddlewareToChain(prev: Middleware, next: Partial<Middleware>) {
   return {
-    beforeSave,
-    beforeRun,
-    beforeMarkRunning,
+    beforeSave: next.beforeSave ? chain(prev.beforeSave, next.beforeSave) : prev.beforeSave,
+    beforeRun: next.beforeRun ? chain(prev.beforeRun, next.beforeRun) : prev.beforeRun,
+    beforeMarkRunning: next.beforeMarkRunning
+      ? chain(prev.beforeMarkRunning, next.beforeMarkRunning)
+      : prev.beforeMarkRunning,
+  };
+}
+
+const chain = <T>(prev: Mapper<T>, next: Mapper<T>): Mapper<T> => (params) =>
+  next(params).then(prev);
+
+export function createInitialMiddleware(): Middleware {
+  return {
+    beforeSave: async (saveOpts: BeforeSaveContext) => saveOpts,
+    beforeRun: async (runOpts: RunContext) => runOpts,
+    beforeMarkRunning: async (runOpts: RunContext) => runOpts,
   };
 }

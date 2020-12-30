@@ -39,8 +39,7 @@ export function createApplyTimeRangeSelectionAction(
 
       let [from, to] = data.times;
       from = from * 1000;
-      // extend bounds with the interval
-      to = to * 1000 + interval * 1000;
+      to = to * 1000;
 
       timefilter.setTime({
         from: moment(from),

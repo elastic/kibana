@@ -18,6 +18,7 @@
  */
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ChromeBadge, ChromeBrand, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
 
 const createStartContractMock = () => {
@@ -62,6 +63,8 @@ const createStartContractMock = () => {
     setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn(),
     setBreadcrumbs: jest.fn(),
+    getBreadcrumbsAppendExtension$: jest.fn(),
+    setBreadcrumbsAppendExtension: jest.fn(),
     getHelpExtension$: jest.fn(),
     setHelpExtension: jest.fn(),
     setHelpSupportUrl: jest.fn(),
@@ -75,6 +78,7 @@ const createStartContractMock = () => {
   startContract.getApplicationClasses$.mockReturnValue(new BehaviorSubject(['class-name']));
   startContract.getBadge$.mockReturnValue(new BehaviorSubject({} as ChromeBadge));
   startContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb]));
+  startContract.getBreadcrumbsAppendExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));

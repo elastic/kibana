@@ -24,6 +24,7 @@ export { mapToObject } from './map_to_object';
 export { merge } from './merge';
 export { pick } from './pick';
 export { withTimeout } from './promise';
-export { isRelativeUrl, modifyUrl, URLMeaningfulParts, ParsedQuery } from './url';
+export { isRelativeUrl, modifyUrl, getUrlOrigin, URLMeaningfulParts } from './url';
 export { unset } from './unset';
 export { getFlattenedObject } from './get_flattened_object';
+export * from './rxjs_7';

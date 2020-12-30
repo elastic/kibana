@@ -23,12 +23,12 @@ import { SplitByTermsUI } from './terms';
 
 jest.mock('@elastic/eui', () => ({
   htmlIdGenerator: jest.fn(() => () => '42'),
-  EuiFlexGroup: require.requireActual('@elastic/eui').EuiFlexGroup,
-  EuiFlexItem: require.requireActual('@elastic/eui').EuiFlexItem,
-  EuiFormRow: require.requireActual('@elastic/eui').EuiFormRow,
-  EuiFieldNumber: require.requireActual('@elastic/eui').EuiFieldNumber,
-  EuiComboBox: require.requireActual('@elastic/eui').EuiComboBox,
-  EuiFieldText: require.requireActual('@elastic/eui').EuiFieldText,
+  EuiFlexGroup: jest.requireActual('@elastic/eui').EuiFlexGroup,
+  EuiFlexItem: jest.requireActual('@elastic/eui').EuiFlexItem,
+  EuiFormRow: jest.requireActual('@elastic/eui').EuiFormRow,
+  EuiFieldNumber: jest.requireActual('@elastic/eui').EuiFieldNumber,
+  EuiComboBox: jest.requireActual('@elastic/eui').EuiComboBox,
+  EuiFieldText: jest.requireActual('@elastic/eui').EuiFieldText,
 }));
 
 describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js', () => {

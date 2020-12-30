@@ -12,27 +12,25 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup } from 'kibana/public';
-import { ManagementSetup } from 'src/plugins/management/public';
-import { MlStartDependencies } from '../../plugin';
+import type { CoreSetup } from 'kibana/public';
+import type { ManagementSetup } from 'src/plugins/management/public';
+import type { MlStartDependencies } from '../../plugin';
 
-import { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
+import type { ManagementAppMountParams } from '../../../../../../src/plugins/management/public';
 
 export function registerManagementSection(
-  management: ManagementSetup | undefined,
+  management: ManagementSetup,
   core: CoreSetup<MlStartDependencies>
 ) {
-  if (management !== undefined) {
-    return management.sections.section.insightsAndAlerting.registerApp({
-      id: 'jobsListLink',
-      title: i18n.translate('xpack.ml.management.jobsListTitle', {
-        defaultMessage: 'Machine Learning Jobs',
-      }),
-      order: 2,
-      async mount(params: ManagementAppMountParams) {
-        const { mountApp } = await import('./jobs_list');
-        return mountApp(core, params);
-      },
-    });
-  }
+  return management.sections.section.insightsAndAlerting.registerApp({
+    id: 'jobsListLink',
+    title: i18n.translate('xpack.ml.management.jobsListTitle', {
+      defaultMessage: 'Machine Learning Jobs',
+    }),
+    order: 2,
+    async mount(params: ManagementAppMountParams) {
+      const { mountApp } = await import('./jobs_list');
+      return mountApp(core, params);
+    },
+  });
 }

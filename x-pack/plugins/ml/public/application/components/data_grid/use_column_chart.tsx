@@ -67,7 +67,7 @@ export const getFieldType = (schema: EuiDataGridColumn['schema']): KBN_FIELD_TYP
 
 interface NumericDataItem {
   key: number;
-  key_as_string?: string;
+  key_as_string?: string | number;
   doc_count: number;
 }
 
@@ -89,13 +89,13 @@ export const isNumericChartData = (arg: any): arg is NumericChartData => {
   );
 };
 
-interface OrdinalDataItem {
+export interface OrdinalDataItem {
   key: string;
   key_as_string?: string;
   doc_count: number;
 }
 
-interface OrdinalChartData {
+export interface OrdinalChartData {
   type: 'ordinal' | 'boolean';
   cardinality: number;
   data: OrdinalDataItem[];
@@ -120,11 +120,14 @@ export const isUnsupportedChartData = (arg: any): arg is UnsupportedChartData =>
   return arg.hasOwnProperty('type') && arg.type === 'unsupported';
 };
 
-type ChartDataItem = NumericDataItem | OrdinalDataItem;
+export type ChartDataItem = NumericDataItem | OrdinalDataItem;
 export type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
 
 type LegendText = string | JSX.Element;
-const getLegendText = (chartData: ChartData): LegendText => {
+export const getLegendText = (
+  chartData: ChartData,
+  maxChartColumns = MAX_CHART_COLUMNS
+): LegendText => {
   if (chartData.type === 'unsupported') {
     return i18n.translate('xpack.ml.dataGridChart.histogramNotAvailable', {
       defaultMessage: 'Chart not supported.',
@@ -150,17 +153,17 @@ const getLegendText = (chartData: ChartData): LegendText => {
     );
   }
 
-  if (isOrdinalChartData(chartData) && chartData.cardinality <= MAX_CHART_COLUMNS) {
+  if (isOrdinalChartData(chartData) && chartData.cardinality <= maxChartColumns) {
     return i18n.translate('xpack.ml.dataGridChart.singleCategoryLegend', {
       defaultMessage: `{cardinality, plural, one {# category} other {# categories}}`,
       values: { cardinality: chartData.cardinality },
     });
   }
 
-  if (isOrdinalChartData(chartData) && chartData.cardinality > MAX_CHART_COLUMNS) {
+  if (isOrdinalChartData(chartData) && chartData.cardinality > maxChartColumns) {
     return i18n.translate('xpack.ml.dataGridChart.topCategoriesLegend', {
-      defaultMessage: `top {MAX_CHART_COLUMNS} of {cardinality} categories`,
-      values: { cardinality: chartData.cardinality, MAX_CHART_COLUMNS },
+      defaultMessage: `top {maxChartColumns} of {cardinality} categories`,
+      values: { cardinality: chartData.cardinality, maxChartColumns },
     });
   }
 
@@ -182,7 +185,8 @@ interface ColumnChart {
 
 export const useColumnChart = (
   chartData: ChartData,
-  columnType: EuiDataGridColumn
+  columnType: EuiDataGridColumn,
+  maxChartColumns?: number
 ): ColumnChart => {
   const fieldType = getFieldType(columnType.schema);
 
@@ -231,18 +235,20 @@ export const useColumnChart = (
   if (isOrdinalChartData(chartData)) {
     data = chartData.data.map((d: OrdinalDataItem) => ({
       ...d,
+      key_as_string: d.key_as_string ?? d.key,
       color: getColor(d),
     }));
   } else if (isNumericChartData(chartData)) {
     data = chartData.data.map((d: NumericDataItem) => ({
       ...d,
+      key_as_string: d.key_as_string || d.key,
       color: getColor(d),
     }));
   }
 
   return {
     data,
-    legendText: getLegendText(chartData),
+    legendText: getLegendText(chartData, maxChartColumns),
     xScaleType,
   };
 };

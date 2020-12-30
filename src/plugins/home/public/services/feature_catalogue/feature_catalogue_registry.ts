@@ -35,6 +35,8 @@ export interface FeatureCatalogueEntry {
   readonly title: string;
   /** {@link FeatureCatalogueCategory} to display this feature in. */
   readonly category: FeatureCatalogueCategory;
+  /** A tagline of feature displayed to the user. */
+  readonly subtitle?: string;
   /** One-line description of feature displayed to the user. */
   readonly description: string;
   /** EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement. */
@@ -47,6 +49,8 @@ export interface FeatureCatalogueEntry {
   readonly order?: number;
   /** Optional function to control visibility of this feature. */
   readonly visible?: () => boolean;
+  /** Unique string identifier of the solution this feature belongs to */
+  readonly solutionId?: string;
 }
 
 /** @public */
@@ -57,8 +61,10 @@ export interface FeatureCatalogueSolution {
   readonly title: string;
   /** The tagline of the solution displayed to the user. */
   readonly subtitle: string;
+  /** One-line description of the solution displayed to the user. */
+  readonly description?: string;
   /** A list of use cases for this solution displayed to the user. */
-  readonly descriptions: string[];
+  readonly appDescriptions: string[];
   /** EUI `IconType` for icon to be displayed to the user. EUI supports any known EUI icon, SVG URL, or ReactElement. */
   readonly icon: IconType;
   /** URL path to link to this future. Should not include the basePath. */
@@ -99,7 +105,7 @@ export class FeatureCatalogueRegistry {
     this.capabilities = capabilities;
   }
 
-  public get(): readonly FeatureCatalogueEntry[] {
+  public get(): FeatureCatalogueEntry[] {
     if (this.capabilities === null) {
       throw new Error('Catalogue entries are only available after start phase');
     }
@@ -112,7 +118,7 @@ export class FeatureCatalogueRegistry {
       .sort(compareByKey('title'));
   }
 
-  public getSolutions(): readonly FeatureCatalogueSolution[] {
+  public getSolutions(): FeatureCatalogueSolution[] {
     if (this.capabilities === null) {
       throw new Error('Catalogue entries are only available after start phase');
     }
@@ -120,6 +126,10 @@ export class FeatureCatalogueRegistry {
     return [...this.solutions.values()]
       .filter((solution) => capabilities.catalogue[solution.id] !== false)
       .sort(compareByKey('title'));
+  }
+
+  public removeFeature(appId: string) {
+    this.features.delete(appId);
   }
 }
 

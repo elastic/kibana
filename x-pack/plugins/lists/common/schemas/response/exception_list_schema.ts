@@ -7,7 +7,6 @@
 import * as t from 'io-ts';
 
 import {
-  _tags,
   _versionOrUndefined,
   created_at,
   created_by,
@@ -19,6 +18,7 @@ import {
   metaOrUndefined,
   name,
   namespace_type,
+  osTypeArray,
   tags,
   tie_breaker_id,
   updated_at,
@@ -28,7 +28,6 @@ import {
 
 export const exceptionListSchema = t.exact(
   t.type({
-    _tags,
     _version: _versionOrUndefined,
     created_at,
     created_by,
@@ -39,6 +38,7 @@ export const exceptionListSchema = t.exact(
     meta: metaOrUndefined,
     name,
     namespace_type,
+    os_types: osTypeArray,
     tags,
     tie_breaker_id,
     type: exceptionListType,

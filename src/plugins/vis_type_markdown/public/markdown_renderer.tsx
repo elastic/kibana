@@ -17,41 +17,29 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
-import { MarkdownVisWrapper } from './markdown_vis_controller';
-import { StartServicesGetter } from '../../kibana_utils/public';
+import { MarkdownVisRenderValue } from './markdown_fn';
 
-export const getMarkdownRenderer = (start: StartServicesGetter) => {
-  const markdownVisRenderer: () => ExpressionRenderDefinition = () => ({
-    name: 'markdown_vis',
-    displayName: 'markdown visualization',
-    reuseDomNode: true,
-    render: async (domNode: HTMLElement, config: any, handlers: any) => {
-      const { visConfig } = config;
+// @ts-ignore
+const MarkdownVisComponent = lazy(() => import('./markdown_vis_controller'));
 
-      const I18nContext = await start().core.i18n.Context;
+export const markdownVisRenderer: ExpressionRenderDefinition<MarkdownVisRenderValue> = {
+  name: 'markdown_vis',
+  displayName: 'markdown visualization',
+  reuseDomNode: true,
+  render: async (domNode, { visParams }, handlers) => {
+    handlers.onDestroy(() => {
+      unmountComponentAtNode(domNode);
+    });
 
-      handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
-      });
-
-      render(
-        <I18nContext>
-          <VisualizationContainer className="markdownVis">
-            <MarkdownVisWrapper
-              visParams={visConfig}
-              renderComplete={handlers.done}
-              fireEvent={handlers.event}
-            />
-          </VisualizationContainer>
-        </I18nContext>,
-        domNode
-      );
-    },
-  });
-
-  return markdownVisRenderer;
+    render(
+      <VisualizationContainer className="markdownVis" handlers={handlers}>
+        <MarkdownVisComponent {...visParams} renderComplete={handlers.done} />
+      </VisualizationContainer>,
+      domNode
+    );
+  },
 };

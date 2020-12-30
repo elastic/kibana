@@ -26,6 +26,52 @@ interface Node {
   parent_entity_id?: string;
 }
 
+describe('data generator data streams', () => {
+  it('creates a generator with default data streams', () => {
+    const generator = new EndpointDocGenerator('seed');
+    expect(generator.generateHostMetadata().data_stream).toEqual({
+      type: 'metrics',
+      dataset: 'endpoint.metadata',
+      namespace: 'default',
+    });
+    expect(generator.generatePolicyResponse().data_stream).toEqual({
+      type: 'metrics',
+      dataset: 'endpoint.policy',
+      namespace: 'default',
+    });
+    expect(generator.generateEvent().data_stream).toEqual({
+      type: 'logs',
+      dataset: 'endpoint.events.process',
+      namespace: 'default',
+    });
+    expect(generator.generateAlert().data_stream).toEqual({
+      type: 'logs',
+      dataset: 'endpoint.alerts',
+      namespace: 'default',
+    });
+  });
+
+  it('creates a generator with custom data streams', () => {
+    const metadataDataStream = { type: 'meta', dataset: 'dataset', namespace: 'name' };
+    const policyDataStream = { type: 'policy', dataset: 'fake', namespace: 'something' };
+    const eventsDataStream = { type: 'events', dataset: 'events stuff', namespace: 'name' };
+    const alertsDataStream = { type: 'alerts', dataset: 'alerts stuff', namespace: 'name' };
+    const generator = new EndpointDocGenerator('seed');
+    expect(generator.generateHostMetadata(0, metadataDataStream).data_stream).toStrictEqual(
+      metadataDataStream
+    );
+    expect(generator.generatePolicyResponse({ policyDataStream }).data_stream).toStrictEqual(
+      policyDataStream
+    );
+    expect(generator.generateEvent({ eventsDataStream }).data_stream).toStrictEqual(
+      eventsDataStream
+    );
+    expect(generator.generateAlert({ alertsDataStream }).data_stream).toStrictEqual(
+      alertsDataStream
+    );
+  });
+});
+
 describe('data generator', () => {
   let generator: EndpointDocGenerator;
   beforeEach(() => {
@@ -69,7 +115,7 @@ describe('data generator', () => {
 
   it('creates policy response documents', () => {
     const timestamp = new Date().getTime();
-    const hostPolicyResponse = generator.generatePolicyResponse(timestamp);
+    const hostPolicyResponse = generator.generatePolicyResponse({ ts: timestamp });
     expect(hostPolicyResponse['@timestamp']).toEqual(timestamp);
     expect(hostPolicyResponse.event.created).toEqual(timestamp);
     expect(hostPolicyResponse.Endpoint).not.toBeNull();
@@ -80,9 +126,10 @@ describe('data generator', () => {
 
   it('creates alert event documents', () => {
     const timestamp = new Date().getTime();
-    const alert = generator.generateAlert(timestamp);
+    const alert = generator.generateAlert({ ts: timestamp });
     expect(alert['@timestamp']).toEqual(timestamp);
     expect(alert.event?.action).not.toBeNull();
+    expect(alert.event?.code).not.toBeNull();
     expect(alert.Endpoint).not.toBeNull();
     expect(alert.agent).not.toBeNull();
     expect(alert.host).not.toBeNull();
@@ -221,6 +268,31 @@ describe('data generator', () => {
       }
     };
 
+    it('sets the start and end times correctly', () => {
+      const startOfEpoch = new Date(0);
+      let startTime = new Date(timestampSafeVersion(tree.allEvents[0]) ?? startOfEpoch);
+      expect(startTime).not.toEqual(startOfEpoch);
+      let endTime = new Date(timestampSafeVersion(tree.allEvents[0]) ?? startOfEpoch);
+      expect(startTime).not.toEqual(startOfEpoch);
+
+      for (const event of tree.allEvents) {
+        const currentEventTime = new Date(timestampSafeVersion(event) ?? startOfEpoch);
+        expect(currentEventTime).not.toEqual(startOfEpoch);
+        expect(tree.startTime.getTime()).toBeLessThanOrEqual(currentEventTime.getTime());
+        expect(tree.endTime.getTime()).toBeGreaterThanOrEqual(currentEventTime.getTime());
+        if (currentEventTime < startTime) {
+          startTime = currentEventTime;
+        }
+
+        if (currentEventTime > endTime) {
+          endTime = currentEventTime;
+        }
+      }
+      expect(startTime).toEqual(tree.startTime);
+      expect(endTime).toEqual(tree.endTime);
+      expect(endTime.getTime() - startTime.getTime()).toBeGreaterThanOrEqual(0);
+    });
+
     it('creates related events in ascending order', () => {
       // the order should not change since it should already be in ascending order
       const relatedEventsAsc = _.cloneDeep(tree.origin.relatedEvents).sort(
@@ -250,6 +322,30 @@ describe('data generator', () => {
       for (const level of tree.childrenLevels) {
         for (const node of level.values()) {
           expect(tree.children.get(node.id)).toEqual(node);
+        }
+      }
+    });
+
+    it('groups the children by their parent ID correctly', () => {
+      expect(tree.childrenByParent.size).toBe(13);
+      expect(tree.childrenByParent.get(tree.origin.id)?.size).toBe(3);
+
+      for (const value of tree.childrenByParent.values()) {
+        expect(value.size).toBe(3);
+      }
+
+      // loop over everything but the last level because those nodes won't be parents
+      for (let i = 0; i < tree.childrenLevels.length - 1; i++) {
+        const level = tree.childrenLevels[i];
+        // loop over all the nodes in a level
+        for (const id of level.keys()) {
+          // each node in the level should have 3 children
+          expect(tree.childrenByParent.get(id)?.size).toBe(3);
+
+          // let's make sure the children of this ID are actually in the next level and that they are the same reference
+          for (const [childID, childNode] of tree.childrenByParent.get(id)!.entries()) {
+            expect(tree.childrenLevels[i + 1].get(childID)).toBe(childNode);
+          }
         }
       }
     });

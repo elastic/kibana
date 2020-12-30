@@ -18,9 +18,8 @@
  */
 
 import React, { PureComponent, ChangeEvent } from 'react';
-import { InjectedIntlProps } from 'react-intl';
+import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n/react';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
   EuiButtonIcon,
@@ -36,6 +35,8 @@ import { ListControlEditor } from './list_control_editor';
 import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '../../editor_utils';
 import { IIndexPattern } from '../../../../data/public';
 import { InputControlVisDependencies } from '../../plugin';
+
+import './control_editor.scss';
 
 interface ControlEditorUiProps {
   controlIndex: number;

@@ -24,13 +24,12 @@ export const DEFAULT_INITIAL_APP_DATA = {
   },
   appSearch: {
     accountId: 'some-id-string',
-    onBoardingComplete: true,
+    onboardingComplete: true,
     role: {
       id: 'account_id:somestring|user_oid:somestring',
       roleType: 'owner',
       ability: {
         accessAllEngines: true,
-        destroy: ['session'],
         manage: ['account_credentials', 'account_engines'], // etc
         edit: ['LocoMoco::Account'], // etc
         view: ['Engine'], // etc

@@ -9,7 +9,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { AbstractLayer, ILayer } from '../../../../../../classes/layers/layer';
 import { AbstractSource, ISource } from '../../../../../../classes/sources/source';
-import { IStyle } from '../../../../../../classes/styles/style';
 
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 
@@ -17,28 +16,17 @@ let supportsFitToBounds: boolean;
 
 class MockSource extends AbstractSource implements ISource {}
 
-class MockStyle implements IStyle {
-  renderEditor() {
-    return null;
-  }
-
-  getType() {
-    return 'mockStyle';
-  }
-}
-
 class LayerMock extends AbstractLayer implements ILayer {
   constructor() {
     const sourceDescriptor = {
       type: 'mySourceType',
     };
     const source = new MockSource(sourceDescriptor);
-    const style = new MockStyle();
     const layerDescriptor = {
       id: 'testLayer',
       sourceDescriptor,
     };
-    super({ layerDescriptor, source, style });
+    super({ layerDescriptor, source });
   }
 
   async supportsFitToBounds(): Promise<boolean> {
@@ -47,19 +35,6 @@ class LayerMock extends AbstractLayer implements ILayer {
 
   isVisible() {
     return true;
-  }
-
-  getIconAndTooltipContent(zoom: number, isUsingSearch: boolean) {
-    return {
-      icon: <span>mockIcon</span>,
-      tooltipContent: `simulated tooltip content at zoom: ${zoom}`,
-      footnotes: [
-        {
-          icon: <span>mockFootnoteIcon</span>,
-          message: `simulated footnote at isUsingSearch: ${isUsingSearch}`,
-        },
-      ],
-    };
   }
 }
 
@@ -71,11 +46,9 @@ const defaultProps = {
   fitToBounds: () => {},
   isEditButtonDisabled: false,
   isReadOnly: false,
-  isUsingSearch: true,
   layer: new LayerMock(),
   removeLayer: () => {},
   toggleVisible: () => {},
-  zoom: 0,
 };
 
 describe('TOCEntryActionsPopover', () => {

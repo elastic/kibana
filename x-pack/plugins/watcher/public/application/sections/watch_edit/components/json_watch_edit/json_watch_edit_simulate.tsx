@@ -24,6 +24,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { XJsonMode } from '@kbn/ace';
+
+const xJsonMode = new XJsonMode();
 
 import { WatchHistoryItem } from '../../../../models/watch_history_item';
 
@@ -33,14 +36,16 @@ import {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../../common/types/watch_types';
-import { ErrableFormRow } from '../../../../components/form_errors';
+import { ErrableFormRow } from '../../../../components';
 import { executeWatch } from '../../../../lib/api';
 import { WatchContext } from '../../watch_context';
 import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
 import { getTimeUnitLabel } from '../../../../lib/get_time_unit_label';
 import { useAppContext } from '../../../../app_context';
 
-import { useXJsonMode } from '../../../../shared_imports';
+import { XJson } from '../../../../shared_imports';
+
+const { useXJsonMode } = XJson;
 
 const actionModeOptions = Object.keys(ACTION_MODES).map((mode) => ({
   text: ACTION_MODES[mode],
@@ -96,7 +101,7 @@ export const JsonWatchEditSimulate = ({
     ignoreCondition,
   } = executeDetails;
 
-  const { setXJson, convertToJson, xJsonMode, xJson } = useXJsonMode(alternativeInput);
+  const { setXJson, convertToJson, xJson } = useXJsonMode(alternativeInput);
 
   const columns = [
     {

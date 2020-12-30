@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
-import { L } from '../../../maps_legacy/public';
 
 /**
  * Map overlay: canvas layer with leaflet.heat plugin
@@ -30,17 +29,17 @@ import { L } from '../../../maps_legacy/public';
  * @param params {Object}
  */
 export class HeatmapMarkers extends EventEmitter {
-  constructor(featureCollection, options, zoom, max) {
+  constructor(featureCollection, options, zoom, max, leaflet) {
     super();
     this._geojsonFeatureCollection = featureCollection;
     const points = dataToHeatArray(featureCollection, max);
-    this._leafletLayer = new L.HeatLayer(points, options);
+    this._leafletLayer = new leaflet.HeatLayer(points, options);
     this._tooltipFormatter = options.tooltipFormatter;
     this._zoom = zoom;
     this._disableTooltips = false;
     this._getLatLng = _.memoize(
       function (feature) {
-        return L.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
+        return leaflet.latLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
       },
       function (feature) {
         // turn coords into a string for the memoize cache

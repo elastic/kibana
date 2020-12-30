@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { Annotation } from '../../../../plugins/observability/common/annotations';
-import { ESSearchHit } from '../../../../plugins/apm/typings/elasticsearch';
+import { ESSearchHit } from '../../../../typings/elasticsearch';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const DEFAULT_INDEX_NAME = 'observability-annotations';

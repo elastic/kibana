@@ -13,6 +13,15 @@ import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { Ip } from '.';
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+
 jest.mock('../../../common/components/link_to');
 
 describe('Port', () => {
@@ -43,7 +52,7 @@ describe('Port', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="draggable-content-destination.ip"]').find('a').first().props()
+      wrapper.find('[data-test-subj="draggable-truncatable-content"]').find('a').first().props()
         .href
     ).toEqual('/ip/10.1.2.3/source');
   });

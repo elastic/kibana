@@ -8,16 +8,6 @@ import { BaseParams, BasePayload } from '../../types';
 
 export type RawValue = string | object | null | undefined;
 
-interface DocValueField {
-  field: string;
-  format: string;
-}
-
-interface SortOptions {
-  order: string;
-  unmapped_type: string;
-}
-
 export interface IndexPatternSavedObject {
   title: string;
   timeFieldName: string;
@@ -28,25 +18,23 @@ export interface IndexPatternSavedObject {
   };
 }
 
-export interface JobParamsDiscoverCsv extends BaseParams {
-  browserTimezone: string;
-  indexPatternId: string;
-  title: string;
+interface BaseParamsCSV {
   searchRequest: SearchRequest;
   fields: string[];
   metaFields: string[];
   conflictedTypesFields: string[];
 }
 
-export interface TaskPayloadCSV extends BasePayload<JobParamsDiscoverCsv> {
-  browserTimezone: string;
-  basePath: string;
-  searchRequest: any;
-  fields: any;
-  indexPatternSavedObject: any;
-  metaFields: any;
-  conflictedTypesFields: any;
-}
+export type JobParamsCSV = BaseParamsCSV &
+  BaseParams & {
+    indexPatternId: string;
+  };
+
+// CSV create job method converts indexPatternID to indexPatternSavedObject
+export type TaskPayloadCSV = BaseParamsCSV &
+  BasePayload & {
+    indexPatternSavedObject: IndexPatternSavedObject;
+  };
 
 export interface SearchRequest {
   index: string;

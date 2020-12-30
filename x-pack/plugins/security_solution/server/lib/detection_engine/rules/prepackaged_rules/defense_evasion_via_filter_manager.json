@@ -4,18 +4,22 @@
   ],
   "description": "The Filter Manager Control Program (fltMC.exe) binary may be abused by adversaries to unload a filter driver and evade defenses.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Potential Evasion via Filter Manager",
-  "query": "event.code:1 and process.name:fltMC.exe",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:fltMC.exe",
   "risk_score": 21,
   "rule_id": "06dceabf-adca-48af-ac79-ffdf4c3b1e9a",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -35,5 +39,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

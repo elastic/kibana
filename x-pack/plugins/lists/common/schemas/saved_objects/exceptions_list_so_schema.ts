@@ -8,7 +8,6 @@ import * as t from 'io-ts';
 
 import { commentsArrayOrUndefined, entriesArrayOrUndefined } from '../types';
 import {
-  _tags,
   created_at,
   created_by,
   description,
@@ -20,6 +19,7 @@ import {
   list_type,
   metaOrUndefined,
   name,
+  osTypeArray,
   tags,
   tie_breaker_id,
   updated_by,
@@ -31,7 +31,6 @@ import {
  */
 export const exceptionListSoSchema = t.exact(
   t.type({
-    _tags,
     comments: commentsArrayOrUndefined,
     created_at,
     created_by,
@@ -43,6 +42,7 @@ export const exceptionListSoSchema = t.exact(
     list_type,
     meta: metaOrUndefined,
     name,
+    os_types: osTypeArray,
     tags,
     tie_breaker_id,
     type: t.union([exceptionListType, exceptionListItemType]),

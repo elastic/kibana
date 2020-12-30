@@ -31,12 +31,15 @@ import {
   AppUpdater,
   AppStatus,
   AppNavLinkStatus,
+  AppSearchDeepLink,
 } from '../../../core/public';
 
+import { MANAGEMENT_APP_ID } from '../common/contants';
 import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
+import { ManagementSection } from './utils';
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -45,7 +48,24 @@ interface ManagementSetupDependencies {
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
   private readonly managementSections = new ManagementSectionsService();
 
-  private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
+    const deepLinks: AppSearchDeepLink[] = Object.values(
+      this.managementSections.definedSections
+    ).map((section: ManagementSection) => ({
+      id: section.id,
+      title: section.title,
+      searchDeepLinks: section.getAppsEnabled().map((mgmtApp) => ({
+        id: mgmtApp.id,
+        title: mgmtApp.title,
+        path: mgmtApp.basePath,
+        meta: { ...mgmtApp.meta },
+      })),
+    }));
+
+    return {
+      meta: { searchDeepLinks: deepLinks },
+    };
+  });
 
   private hasAnyEnabledApps = true;
 
@@ -72,7 +92,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
     }
 
     core.application.register({
-      id: 'management',
+      id: MANAGEMENT_APP_ID,
       title: i18n.translate('management.stackManagement.title', {
         defaultMessage: 'Stack Management',
       }),

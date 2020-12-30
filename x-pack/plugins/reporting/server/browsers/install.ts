@@ -8,7 +8,7 @@ import del from 'del';
 import os from 'os';
 import path from 'path';
 import * as Rx from 'rxjs';
-import { LevelLogger } from '../lib';
+import { GenericLevelLogger } from '../lib/level_logger';
 import { paths } from './chromium/paths';
 import { ensureBrowserDownloaded } from './download';
 // @ts-ignore
@@ -46,7 +46,7 @@ export const getBinaryPath = (
  * archive. If there is an error extracting the archive an `ExtractError` is thrown
  */
 export function installBrowser(
-  logger: LevelLogger,
+  logger: GenericLevelLogger,
   chromiumPath: string = path.resolve(__dirname, '../../chromium'),
   platform: string = process.platform,
   architecture: string = os.arch()

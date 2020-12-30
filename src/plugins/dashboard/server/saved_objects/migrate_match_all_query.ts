@@ -21,6 +21,12 @@ import { SavedObjectMigrationFn } from 'kibana/server';
 import { get } from 'lodash';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
+/**
+ * This migration script is related to:
+ *   @link https://github.com/elastic/kibana/pull/62194
+ *   @link https://github.com/elastic/kibana/pull/14644
+ * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated we should execute it twice in 6.7.2 and 7.9.3
+ */
 export const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
 
@@ -31,6 +37,7 @@ export const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
       searchSource = JSON.parse(searchSourceJSON);
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
+      return doc;
     }
 
     if (searchSource.query?.match_all) {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UsageCollectionSetup, CollectorOptions } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCollectorOptions } from 'src/plugins/usage_collection/server';
 import { HttpServiceSetup, CspConfig } from '../../../../../core/server';
 
 interface Usage {
@@ -26,7 +26,7 @@ interface Usage {
   rulesChangedFromDefault: boolean;
 }
 
-export function createCspCollector(http: HttpServiceSetup): CollectorOptions<Usage> {
+export function createCspCollector(http: HttpServiceSetup): UsageCollectorOptions<Usage> {
   return {
     type: 'csp',
     isReady: () => true,

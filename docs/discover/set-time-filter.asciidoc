@@ -14,7 +14,7 @@ range in the histogram.
 Use the time filter to change the time range. By default, the time filter is set
 to the last 15 minutes.
 
-. Click image:images/time-filter-calendar.png[].
+. Click image:images/time-filter-calendar.png[Calendar icon].
 
 . Choose one of the following:
 
@@ -30,7 +30,7 @@ to the last 15 minutes.
 * *Refresh every* to specify an automatic refresh rate.
 +
 [role="screenshot"]
-image::images/Timepicker-View.png[Time filter menu]
+image::images/time-filter.png[Time filter menu]
 
 . To set the start and end times, click the bar next to the time filter.
 In the popup, select *Absolute*, *Relative* or *Now*, then specify the required
@@ -53,4 +53,4 @@ when you hover over a valid start point.
 * Click the dropdown, then select an interval.
 
 [role="screenshot"]
-image::images/Histogram-Time.png[Time range selector in Histogram]
+image::images/Histogram-Time.png[Time range selector in Histogram dropdown]

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { routeInitProvider } from '../../../lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
@@ -12,6 +13,7 @@ import { getPageData } from './get_page_data';
 import template from './index.html';
 import { KibanaInstances } from '../../../components/kibana/instances';
 import { SetupModeRenderer } from '../../../components/renderers';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import {
   KIBANA_SYSTEM_ID,
   CODE_PATH_KIBANA,
@@ -31,7 +33,12 @@ uiRoutes.when('/kibana/instances', {
   controller: class KibanaInstancesList extends MonitoringViewBaseEuiTableController {
     constructor($injector, $scope) {
       super({
-        title: 'Kibana Instances',
+        title: i18n.translate('xpack.monitoring.kibana.instances.routeTitle', {
+          defaultMessage: 'Kibana - Instances',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.kibana.instances.pageTitle', {
+          defaultMessage: 'Kibana instances',
+        }),
         storageKey: 'kibana.instances',
         getPageData,
         reactNodeId: 'monitoringKibanaInstancesApp',
@@ -52,7 +59,7 @@ uiRoutes.when('/kibana/instances', {
             injector={$injector}
             productName={KIBANA_SYSTEM_ID}
             render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-              <Fragment>
+              <SetupModeContext.Provider value={{ setupModeSupported: true }}>
                 {flyoutComponent}
                 <KibanaInstances
                   instances={this.data.kibanas}
@@ -64,7 +71,7 @@ uiRoutes.when('/kibana/instances', {
                   clusterStatus={this.data.clusterStatus}
                 />
                 {bottomBarComponent}
-              </Fragment>
+              </SetupModeContext.Provider>
             )}
           />
         );

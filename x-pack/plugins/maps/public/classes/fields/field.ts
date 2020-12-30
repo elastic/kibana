@@ -18,20 +18,22 @@ export interface IField {
   getSource(): IVectorSource;
   getOrigin(): FIELD_ORIGIN;
   isValid(): boolean;
-  getOrdinalFieldMetaRequest(): Promise<unknown>;
+  getExtendedStatsFieldMetaRequest(): Promise<unknown | null>;
+  getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null>;
   getCategoricalFieldMetaRequest(size: number): Promise<unknown>;
 
-  // Determines whether Maps-app can automatically determine the domain of the field-values
+  // Whether Maps-app can automatically determine the domain of the field-values
   // if this is not the case (e.g. for .mvt tiled data),
   // then styling properties that require the domain to be known cannot use this property.
   supportsAutoDomain(): boolean;
 
-  // Determinse wheter Maps-app can automatically deterime the domain of the field-values
+  // Whether Maps-app can automatically determine the domain of the field-values
   // _without_ having to retrieve the data as GeoJson
   // e.g. for ES-sources, this would use the extended_stats API
   supportsFieldMeta(): boolean;
 
   canReadFromGeoJson(): boolean;
+  isEqual(field: IField): boolean;
 }
 
 export class AbstractField implements IField {
@@ -84,7 +86,11 @@ export class AbstractField implements IField {
     return false;
   }
 
-  async getOrdinalFieldMetaRequest(): Promise<unknown> {
+  async getExtendedStatsFieldMetaRequest(): Promise<unknown> {
+    return null;
+  }
+
+  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
     return null;
   }
 
@@ -98,5 +104,9 @@ export class AbstractField implements IField {
 
   canReadFromGeoJson(): boolean {
     return true;
+  }
+
+  isEqual(field: IField) {
+    return this._origin === field.getOrigin() && this._fieldName === field.getName();
   }
 }

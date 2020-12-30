@@ -22,4 +22,5 @@ export interface AlertsComponentsProps
   stackByOptions?: MatrixHistogramOption[];
   defaultFilters?: Filter[];
   defaultStackByOption?: MatrixHistogramOption;
+  indexNames: string[];
 }

@@ -9,9 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
 import {
-  ConfigurationForm,
   DocumentFields,
+  RuntimeFieldsList,
   TemplatesForm,
+  ConfigurationForm,
   MultipleMappingsWarning,
 } from './components';
 import {
@@ -21,19 +22,22 @@ import {
   Mappings,
   MappingsConfiguration,
   MappingsTemplates,
+  RuntimeFields,
 } from './types';
 import { extractMappingsDefinition } from './lib';
 import { useMappingsState } from './mappings_state_context';
 import { useMappingsStateListener } from './use_state_listener';
-import { useIndexSettings } from './index_settings_context';
+import { useConfig } from './config_context';
+import { DocLinksStart } from './shared_imports';
 
-type TabName = 'fields' | 'advanced' | 'templates';
+type TabName = 'fields' | 'runtimeFields' | 'advanced' | 'templates';
 
 interface MappingsEditorParsedMetadata {
   parsedDefaultValue?: {
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
     templates: MappingsTemplates;
+    runtime: RuntimeFields;
   };
   multipleMappingsDeclared: boolean;
   mappingsType?: string;
@@ -43,12 +47,15 @@ interface Props {
   onChange: OnUpdateHandler;
   value?: { [key: string]: any };
   indexSettings?: IndexSettings;
+  docLinks: DocLinksStart;
 }
 
-export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Props) => {
-  const { parsedDefaultValue, multipleMappingsDeclared, mappingsType } = useMemo<
-    MappingsEditorParsedMetadata
-  >(() => {
+export const MappingsEditor = React.memo(({ onChange, value, docLinks, indexSettings }: Props) => {
+  const {
+    parsedDefaultValue,
+    multipleMappingsDeclared,
+    mappingsType,
+  } = useMemo<MappingsEditorParsedMetadata>(() => {
     const mappingsDefinition = extractMappingsDefinition(value);
 
     if (mappingsDefinition === null) {
@@ -60,11 +67,12 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
       _meta,
       _routing,
       dynamic,
+      properties,
+      runtime,
       /* eslint-disable @typescript-eslint/naming-convention */
       numeric_detection,
       date_detection,
       dynamic_date_formats,
-      properties,
       dynamic_templates,
     } = mappingsDefinition.mappings;
 
@@ -82,6 +90,7 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
       templates: {
         dynamic_templates,
       },
+      runtime,
     };
 
     return {
@@ -98,12 +107,7 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
    */
   useMappingsStateListener({ onChange, value: parsedDefaultValue, mappingsType });
 
-  // Update the Index settings context so it is available in the Global flyout
-  const { update: updateIndexSettings } = useIndexSettings();
-  if (indexSettings !== undefined) {
-    updateIndexSettings(indexSettings);
-  }
-
+  const { update: updateConfig } = useConfig();
   const state = useMappingsState();
   const [selectedTab, selectTab] = useState<TabName>('fields');
 
@@ -117,6 +121,14 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
       });
     }
   }, [multipleMappingsDeclared, onChange, value]);
+
+  useEffect(() => {
+    // Update the the config context so it is available globally (e.g in our Global flyout)
+    updateConfig({
+      docLinks,
+      indexSettings: indexSettings ?? {},
+    });
+  }, [updateConfig, docLinks, indexSettings]);
 
   const changeTab = async (tab: TabName) => {
     if (selectedTab === 'advanced') {
@@ -142,6 +154,7 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
 
   const tabToContentMap = {
     fields: <DocumentFields />,
+    runtimeFields: <RuntimeFieldsList />,
     templates: <TemplatesForm value={state.templates.defaultValue} />,
     advanced: <ConfigurationForm value={state.configuration.defaultValue} />,
   };
@@ -160,6 +173,15 @@ export const MappingsEditor = React.memo(({ onChange, value, indexSettings }: Pr
             >
               {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
                 defaultMessage: 'Mapped fields',
+              })}
+            </EuiTab>
+            <EuiTab
+              onClick={() => changeTab('runtimeFields')}
+              isSelected={selectedTab === 'runtimeFields'}
+              data-test-subj="formTab"
+            >
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.runtimeFieldsTabLabel', {
+                defaultMessage: 'Runtime fields',
               })}
             </EuiTab>
             <EuiTab

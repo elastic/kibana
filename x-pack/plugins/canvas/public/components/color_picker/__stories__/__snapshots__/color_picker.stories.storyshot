@@ -12,6 +12,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
         <button
           aria-label="white"
           className="euiLink euiLink--primary canvasColorPalette__dot"
+          disabled={false}
           onClick={[Function]}
           style={
             Object {
@@ -39,6 +40,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
         <button
           aria-label="#666"
           className="euiLink euiLink--primary canvasColorPalette__dot"
+          disabled={false}
           onClick={[Function]}
           style={
             Object {
@@ -66,6 +68,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
         <button
           aria-label="black"
           className="euiLink euiLink--primary canvasColorPalette__dot"
+          disabled={false}
           onClick={[Function]}
           style={
             Object {
@@ -93,6 +96,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
         <button
           aria-label="#abc"
           className="euiLink euiLink--primary canvasColorPalette__dot"
+          disabled={false}
           onClick={[Function]}
           style={
             Object {
@@ -120,6 +124,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
         <button
           aria-label="#def"
           className="euiLink euiLink--primary canvasColorPalette__dot"
+          disabled={false}
           onClick={[Function]}
           style={
             Object {
@@ -147,6 +152,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
         <button
           aria-label="#abcdef"
           className="euiLink euiLink--primary canvasColorPalette__dot"
+          disabled={false}
           onClick={[Function]}
           style={
             Object {
@@ -225,7 +231,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="plusInCircle"
@@ -239,7 +245,7 @@ exports[`Storyshots components/Color/ColorPicker interactive 1`] = `
           onClick={[Function]}
           type="button"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
             data-euiicon-type="minusInCircle"
@@ -283,6 +289,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
       <button
         aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -305,7 +312,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
               }
             }
           >
-            <div
+            <span
               className="selected-color"
               color="#333"
               data-euiicon-type="check"
@@ -316,6 +323,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
       <button
         aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -343,6 +351,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
       <button
         aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -370,6 +379,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
       <button
         aria-label="#abc"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -397,6 +407,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
       <button
         aria-label="#def"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -424,6 +435,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
       <button
         aria-label="#abcdef"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -506,7 +518,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="plusInCircle"
@@ -520,7 +532,7 @@ exports[`Storyshots components/Color/ColorPicker six colors 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="minusInCircle"
@@ -543,6 +555,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
       <button
         aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -570,6 +583,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
       <button
         aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -597,6 +611,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
       <button
         aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -624,6 +639,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
       <button
         aria-label="#abc"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -651,6 +667,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
       <button
         aria-label="#def"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -678,6 +695,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
       <button
         aria-label="#abcdef"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -760,7 +778,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="plusInCircle"
@@ -774,7 +792,7 @@ exports[`Storyshots components/Color/ColorPicker six colors, value missing 1`] =
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="minusInCircle"
@@ -797,6 +815,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
       <button
         aria-label="white"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -819,7 +838,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
               }
             }
           >
-            <div
+            <span
               className="selected-color"
               color="#333"
               data-euiicon-type="check"
@@ -830,6 +849,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
       <button
         aria-label="#666"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -857,6 +877,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
       <button
         aria-label="black"
         className="euiLink euiLink--primary canvasColorPalette__dot"
+        disabled={false}
         onClick={[Function]}
         style={
           Object {
@@ -939,7 +960,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="plusInCircle"
@@ -953,7 +974,7 @@ exports[`Storyshots components/Color/ColorPicker three colors 1`] = `
         onClick={[Function]}
         type="button"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
           data-euiicon-type="minusInCircle"

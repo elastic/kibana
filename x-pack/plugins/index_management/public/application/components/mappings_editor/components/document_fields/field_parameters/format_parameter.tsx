@@ -55,6 +55,7 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
         href: documentationService.getFormatLink(),
       }}
       defaultToggleValue={defaultToggleValue}
+      data-test-subj="formatParameter"
     >
       <UseField path="format" config={getFieldConfig('format')}>
         {(formatField) => {
@@ -81,6 +82,7 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
                   setComboBoxOptions([...comboBoxOptions, newOption]);
                 }}
                 fullWidth
+                data-test-subj="formatInput"
               />
             </EuiFormRow>
           );

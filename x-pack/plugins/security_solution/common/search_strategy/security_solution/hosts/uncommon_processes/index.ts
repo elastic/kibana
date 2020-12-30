@@ -7,6 +7,7 @@ import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/comm
 
 import { HostEcs } from '../../../../ecs/host';
 import { UserEcs } from '../../../../ecs/user';
+import { ProcessEcs } from '../../../../ecs/process';
 import {
   RequestOptionsPaginated,
   SortField,
@@ -20,56 +21,32 @@ import {
   Hits,
 } from '../../..';
 
-export interface HostUncommonProcessesRequestOptions extends RequestOptionsPaginated {
+export interface HostsUncommonProcessesRequestOptions extends RequestOptionsPaginated {
   sort: SortField;
   defaultIndex: string[];
 }
 
-export interface HostUncommonProcessesStrategyResponse extends IEsSearchResponse {
-  edges: UncommonProcessesEdges[];
+export interface HostsUncommonProcessesStrategyResponse extends IEsSearchResponse {
+  edges: HostsUncommonProcessesEdges[];
   totalCount: number;
   pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }
 
-export interface UncommonProcessesEdges {
-  node: UncommonProcessItem;
+export interface HostsUncommonProcessesEdges {
+  node: HostsUncommonProcessItem;
   cursor: CursorType;
 }
 
-export interface UncommonProcessItem {
+export interface HostsUncommonProcessItem {
   _id: string;
   instances: number;
-  process: ProcessEcsFields;
+  process: ProcessEcs;
   hosts: HostEcs[];
   user?: Maybe<UserEcs>;
 }
 
-export interface ProcessEcsFields {
-  hash?: Maybe<ProcessHashData>;
-  pid?: Maybe<number[]>;
-  name?: Maybe<string[]>;
-  ppid?: Maybe<number[]>;
-  args?: Maybe<string[]>;
-  entity_id?: Maybe<string[]>;
-  executable?: Maybe<string[]>;
-  title?: Maybe<string[]>;
-  thread?: Maybe<Thread>;
-  working_directory?: Maybe<string[]>;
-}
-
-export interface ProcessHashData {
-  md5?: Maybe<string[]>;
-  sha1?: Maybe<string[]>;
-  sha256?: Maybe<string[]>;
-}
-
-export interface Thread {
-  id?: Maybe<number[]>;
-  start?: Maybe<string[]>;
-}
-
-export interface UncommonProcessHit extends Hit {
+export interface HostsUncommonProcessHit extends Hit {
   total: TotalHit;
   host: Array<{
     id: string[] | undefined;
@@ -77,10 +54,10 @@ export interface UncommonProcessHit extends Hit {
   }>;
   _source: {
     '@timestamp': string;
-    process: ProcessEcsFields;
+    process: ProcessEcs;
   };
   cursor: string;
   sort: StringOrNumber[];
 }
 
-export type ProcessHits = Hits<TotalHit, UncommonProcessHit>;
+export type ProcessHits = Hits<TotalHit, HostsUncommonProcessHit>;

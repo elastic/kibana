@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export * from './esaggs';
 export * from './es_raw_response';
+export * from './esaggs';
 export * from './esdsl';
-export * from './utils';

@@ -9,16 +9,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import styled from 'styled-components';
 
-import { OverviewHostData } from '../../../graphql/types';
+import { HostsOverviewStrategyResponse } from '../../../../common/search_strategy';
 import { FormattedStat, StatGroup } from '../types';
 import { StatValue } from '../stat_value';
 
 interface OverviewHostProps {
-  data: OverviewHostData;
+  data: HostsOverviewStrategyResponse['overviewHost'];
   loading: boolean;
 }
 
-export const getOverviewHostStats = (data: OverviewHostData): FormattedStat[] => [
+export const getOverviewHostStats = (
+  data: HostsOverviewStrategyResponse['overviewHost']
+): FormattedStat[] => [
   {
     count: data.auditbeatAuditd ?? 0,
     title: (
@@ -207,7 +209,7 @@ const hostStatGroups: StatGroup[] = [
     name: (
       <FormattedMessage
         id="xpack.securitySolution.overview.hostStatGroupElasticEndpointSecurity"
-        defaultMessage="Elastic Endpoint Security"
+        defaultMessage="Endpoint Security"
       />
     ),
     statIds: [

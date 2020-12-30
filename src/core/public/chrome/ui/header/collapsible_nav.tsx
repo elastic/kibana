@@ -31,7 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { Fragment, useRef } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';

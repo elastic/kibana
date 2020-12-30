@@ -102,7 +102,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
   handleSubmit,
   resetProcessors,
 }) => {
-  const { testPipelineData, setCurrentTestPipelineData } = useTestPipelineContext();
+  const { testPipelineData, testPipelineDataDispatch } = useTestPipelineContext();
   const {
     testOutputPerProcessor,
     config: { selectedDocumentIndex, documents },
@@ -117,7 +117,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
     testOutputPerProcessor[selectedDocumentIndex][processor.id];
 
   const updateSelectedDocument = (index: number) => {
-    setCurrentTestPipelineData({
+    testPipelineDataDispatch({
       type: 'updateActiveDocument',
       payload: {
         config: {
@@ -234,6 +234,7 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
+                disabled={(!form.isValid && form.isSubmitted) || form.isSubmitting}
                 data-test-subj="submitButton"
                 onClick={async () => {
                   if (activeTab === 'output') {

@@ -26,7 +26,7 @@ const SnapshotNodeMetricOptionalRT = rt.partial({
 });
 
 const SnapshotNodeMetricRequiredRT = rt.type({
-  name: SnapshotMetricTypeRT,
+  name: rt.union([SnapshotMetricTypeRT, rt.string]),
 });
 
 export const SnapshotNodeMetricRT = rt.intersection([
@@ -99,7 +99,7 @@ export const SnapshotRequestRT = rt.intersection([
   rt.type({
     timerange: InfraTimerangeInputRT,
     metrics: rt.array(SnapshotMetricInputRT),
-    groupBy: SnapshotGroupByRT,
+    groupBy: rt.union([SnapshotGroupByRT, rt.null]),
     nodeType: ItemTypeRT,
     sourceId: rt.string,
   }),

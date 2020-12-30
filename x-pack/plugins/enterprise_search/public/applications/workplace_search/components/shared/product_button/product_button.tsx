@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useActions } from 'kea';
 
 import { EuiButton, EuiButtonProps, EuiLinkProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { sendTelemetry } from '../../../../shared/telemetry';
-import { KibanaContext, IKibanaContext } from '../../../../index';
+import { TelemetryLogic } from '../../../../shared/telemetry';
+import { getWorkplaceSearchUrl } from '../../../../shared/enterprise_search_url';
 
 export const ProductButton: React.FC = () => {
-  const {
-    externalUrl: { getWorkplaceSearchUrl },
-    http,
-  } = useContext(KibanaContext) as IKibanaContext;
+  const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const buttonProps = {
     fill: true,
@@ -26,9 +24,7 @@ export const ProductButton: React.FC = () => {
   buttonProps.href = getWorkplaceSearchUrl();
   buttonProps.target = '_blank';
   buttonProps.onClick = () =>
-    sendTelemetry({
-      http,
-      product: 'workplace_search',
+    sendWorkplaceSearchTelemetry({
       action: 'clicked',
       metric: 'header_launch_button',
     });

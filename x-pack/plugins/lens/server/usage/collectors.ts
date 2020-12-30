@@ -10,6 +10,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 
 import { LensUsage, LensTelemetryState } from './types';
+import { lensUsageSchema } from './schema';
 
 export function registerLensUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -20,9 +21,9 @@ export function registerLensUsageCollector(
     // mark lensUsageCollector as ready to collect when the TaskManager is ready
     isCollectorReady = true;
   });
-  const lensUsageCollector = usageCollection.makeUsageCollector({
+  const lensUsageCollector = usageCollection.makeUsageCollector<LensUsage>({
     type: 'lens',
-    fetch: async (): Promise<LensUsage> => {
+    async fetch() {
       try {
         const docs = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
@@ -55,6 +56,7 @@ export function registerLensUsageCollector(
       }
     },
     isReady: () => isCollectorReady,
+    schema: lensUsageSchema,
   });
 
   usageCollection.registerCollector(lensUsageCollector);

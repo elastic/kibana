@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Boom from '@hapi/boom';
 import {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
@@ -16,16 +17,19 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsUtils,
   ISavedObjectTypeRegistry,
-} from 'src/core/server';
-import { SpacesServiceSetup } from '../spaces_service/spaces_service';
+} from '../../../../../src/core/server';
+import { ALL_SPACES_ID } from '../../common/constants';
+import { SpacesServiceStart } from '../spaces_service/spaces_service';
 import { spaceIdToNamespace } from '../lib/utils/namespace';
-import { SpacesClient } from '../lib/spaces_client';
+import { ISpacesClient } from '../spaces_client';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
   request: any;
-  spacesService: SpacesServiceSetup;
+  getSpacesService: () => SpacesServiceStart;
   typeRegistry: ISavedObjectTypeRegistry;
 }
 
@@ -47,14 +51,16 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   private readonly client: SavedObjectsClientContract;
   private readonly spaceId: string;
   private readonly types: string[];
-  private readonly getSpacesClient: Promise<SpacesClient>;
+  private readonly spacesClient: ISpacesClient;
   public readonly errors: SavedObjectsClientContract['errors'];
 
   constructor(options: SpacesSavedObjectsClientOptions) {
-    const { baseClient, request, spacesService, typeRegistry } = options;
+    const { baseClient, request, getSpacesService, typeRegistry } = options;
+
+    const spacesService = getSpacesService();
 
     this.client = baseClient;
-    this.getSpacesClient = spacesService.scopedClient(request);
+    this.spacesClient = spacesService.createSpacesClient(request);
     this.spaceId = spacesService.getSpaceId(request);
     this.types = typeRegistry.getAllTypes().map((t) => t.name);
     this.errors = baseClient.errors;
@@ -163,20 +169,25 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
 
     let namespaces = options.namespaces;
     if (namespaces) {
-      const spacesClient = await this.getSpacesClient;
-      const availableSpaces = await spacesClient.getAll('findSavedObjects');
-      if (namespaces.includes('*')) {
-        namespaces = availableSpaces.map((space) => space.id);
-      } else {
-        namespaces = namespaces.filter((namespace) =>
-          availableSpaces.some((space) => space.id === namespace)
-        );
-      }
-      // This forbidden error allows this scenario to be consistent
-      // with the way the SpacesClient behaves when no spaces are authorized
-      // there.
-      if (namespaces.length === 0) {
-        throw this.errors.decorateForbiddenError(new Error());
+      try {
+        const availableSpaces = await this.spacesClient.getAll({ purpose: 'findSavedObjects' });
+        if (namespaces.includes(ALL_SPACES_ID)) {
+          namespaces = availableSpaces.map((space) => space.id);
+        } else {
+          namespaces = namespaces.filter((namespace) =>
+            availableSpaces.some((space) => space.id === namespace)
+          );
+        }
+        if (namespaces.length === 0) {
+          // return empty response, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
+          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+        }
+      } catch (err) {
+        if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
+          // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
+          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+        }
+        throw err;
       }
     } else {
       namespaces = [this.spaceId];
@@ -321,6 +332,25 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   ) {
     throwErrorIfNamespaceSpecified(options);
     return await this.client.bulkUpdate(objects, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Remove outward references to given object.
+   *
+   * @param type
+   * @param id
+   * @param options
+   */
+  public async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.removeReferencesTo(type, id, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });

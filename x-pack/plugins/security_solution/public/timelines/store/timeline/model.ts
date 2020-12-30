@@ -10,17 +10,18 @@ import { DataProvider } from '../../components/timeline/data_providers/data_prov
 import { Sort } from '../../components/timeline/body/sort';
 import { PinnedEvent } from '../../../graphql/types';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import { SerializedFilterQuery } from '../../../common/store/types';
 import type {
+  TimelineEventsType,
+  TimelineExpandedEvent,
   TimelineType,
   TimelineStatus,
   RowRendererId,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
-export type EventType = 'all' | 'raw' | 'alert' | 'signal';
-
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
 /** Uniquely identifies a column */
@@ -43,8 +44,12 @@ export interface ColumnHeaderOptions {
 }
 
 export interface TimelineModel {
+  /** The selected tab to displayed in the timeline */
+  activeTab: TimelineTabs;
   /** The columns displayed in the timeline */
   columns: ColumnHeaderOptions[];
+  /** Timeline saved object owner */
+  createdBy?: string;
   /** The sources of the event data shown in the timeline */
   dataProviders: DataProvider[];
   /** Events to not be rendered **/
@@ -52,11 +57,12 @@ export interface TimelineModel {
   /** A summary of the events and notes in this timeline */
   description: string;
   /** Typoe of event you want to see in this timeline */
-  eventType?: EventType;
+  eventType?: TimelineEventsType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
   /** A list of Ids of excluded Row Renderers */
   excludedRowRendererIds: RowRendererId[];
+  expandedEvent: TimelineExpandedEvent;
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
@@ -66,6 +72,8 @@ export interface TimelineModel {
   highlightedDropAndProviderId: string;
   /** Uniquely identifies the timeline */
   id: string;
+  /** TO DO sourcerer @X define this */
+  indexNames: string[];
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
   /** Events to be rendered as loading **/
@@ -84,7 +92,6 @@ export interface TimelineModel {
   /** the KQL query in the KQL bar */
   kqlQuery: {
     filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
   };
   /** Title */
   title: string;
@@ -104,6 +111,7 @@ export interface TimelineModel {
     start: string;
     end: string;
   };
+  showSaveModal?: boolean;
   savedQueryId?: string | null;
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
@@ -112,11 +120,11 @@ export interface TimelineModel {
   /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
   showCheckboxes: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
-  sort: Sort;
+  sort: Sort[];
   /** status: active | draft */
   status: TimelineStatus;
-  /** Persists the UI state (width) of the timeline flyover */
-  width: number;
+  /** updated saved object timestamp */
+  updated?: number;
   /** timeline is saving */
   isSaving: boolean;
   isLoading: boolean;
@@ -126,6 +134,7 @@ export interface TimelineModel {
 export type SubsetTimelineModel = Readonly<
   Pick<
     TimelineModel,
+    | 'activeTab'
     | 'columns'
     | 'dataProviders'
     | 'deletedEventIds'
@@ -133,9 +142,11 @@ export type SubsetTimelineModel = Readonly<
     | 'eventType'
     | 'eventIdToNoteIds'
     | 'excludedRowRendererIds'
+    | 'expandedEvent'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
+    | 'indexNames'
     | 'isFavorite'
     | 'isLive'
     | 'isSelectAllChecked'
@@ -156,7 +167,6 @@ export type SubsetTimelineModel = Readonly<
     | 'show'
     | 'showCheckboxes'
     | 'sort'
-    | 'width'
     | 'isSaving'
     | 'isLoading'
     | 'savedObjectId'
@@ -166,6 +176,7 @@ export type SubsetTimelineModel = Readonly<
 >;
 
 export interface TimelineUrl {
+  activeTab?: TimelineTabs;
   id: string;
   isOpen: boolean;
   graphEventId?: string;

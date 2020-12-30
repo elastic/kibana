@@ -20,25 +20,11 @@
 import { set } from '@elastic/safer-lodash-set';
 import { FieldHook } from '../types';
 
-export const unflattenObject = (object: any) =>
+export const unflattenObject = <T extends object = { [key: string]: any }>(object: object): T =>
   Object.entries(object).reduce((acc, [key, value]) => {
     set(acc, key, value);
     return acc;
-  }, {});
-
-export const flattenObject = (
-  object: Record<string, any>,
-  to: Record<string, any> = {},
-  paths: string[] = []
-): Record<string, any> =>
-  Object.entries(object).reduce((acc, [key, value]) => {
-    const updatedPaths = [...paths, key];
-    if (value !== null && !Array.isArray(value) && typeof value === 'object') {
-      return flattenObject(value, to, updatedPaths);
-    }
-    acc[updatedPaths.join('.')] = value;
-    return acc;
-  }, to);
+  }, {} as T);
 
 /**
  * Helper to map the object of fields to any of its value

@@ -19,11 +19,12 @@
 
 import cheerio from 'cheerio';
 
-export function getNoteFromDescription(descriptionHtml: string) {
+export function getNoteFromDescription(descriptionHtml: string, header: string) {
+  const re = new RegExp(`^(\\s*${header.toLowerCase()}(?:s)?\\s*:?\\s*)`, 'i');
   const $ = cheerio.load(descriptionHtml);
   for (const el of $('p,h1,h2,h3,h4,h5').toArray()) {
     const text = $(el).text();
-    const match = text.match(/^(\s*release note(?:s)?\s*:?\s*)/i);
+    const match = text.match(re);
 
     if (!match) {
       continue;

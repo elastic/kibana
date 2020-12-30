@@ -109,10 +109,10 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/api/ml/data_frame/analytics`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
       });
     });
 
@@ -147,10 +147,10 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/api/ml/data_frame/analytics/${jobId}_1`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
       });
     });
 
@@ -180,10 +180,10 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/api/ml/data_frame/analytics/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
       });
     });
 
@@ -230,9 +230,46 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/api/ml/data_frame/analytics/${jobId}_1/_stats`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .expect(404);
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+          .expect(403);
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
+      });
+    });
+
+    describe('GetDataFrameAnalyticsIdMap', () => {
+      it('should return a map of objects leading up to analytics job id', async () => {
+        const { body } = await supertest
+          .get(`/api/ml/data_frame/analytics/map/${jobId}_1`)
+          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+
+        expect(body).to.have.keys('elements', 'details', 'error');
+        // Index node, 2 job nodes (with same source index), and 2 edge nodes to connect them
+        expect(body.elements.length).to.eql(5);
+
+        for (const detailsId in body.details) {
+          if (detailsId.includes('analytics')) {
+            expect(body.details[detailsId]).to.have.keys('id', 'source', 'dest');
+          } else if (detailsId.includes('index')) {
+            const indexId = detailsId.replace('-index', '');
+            expect(body.details[detailsId][indexId]).to.have.keys('aliases', 'mappings');
+          }
+        }
+      });
+
+      it('should return empty results and an error message if the job does not exist', async () => {
+        const { body } = await supertest
+          .get(`/api/ml/data_frame/analytics/map/${jobId}_fake`)
+          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+
+        expect(body.elements.length).to.eql(0);
+        expect(body.details).to.eql({});
+        expect(body.error).to.eql(`No known job with id '${jobId}_fake'`);
+
+        expect(body).to.have.keys('elements', 'details', 'error');
       });
     });
   });

@@ -17,12 +17,11 @@ import {
 } from '@elastic/eui';
 
 import { EuiCallOut } from '@elastic/eui';
-import { BASE_PATH } from '../../../../common/constants';
 import { Pipeline } from '../../../../common/types';
-import { useKibana, SectionLoading } from '../../../shared_imports';
-import { PipelineForm } from '../../components';
+import { useKibana, SectionLoading, attemptToURIDecode } from '../../../shared_imports';
 
-import { attemptToURIDecode } from '../shared';
+import { getListPath } from '../../services/navigation';
+import { PipelineForm } from '../../components';
 
 interface MatchParams {
   name: string;
@@ -39,7 +38,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const decodedPipelineName = attemptToURIDecode(name);
+  const decodedPipelineName = attemptToURIDecode(name)!;
 
   const { error, data: pipeline, isLoading } = services.api.useLoadPipeline(decodedPipelineName);
 
@@ -56,11 +55,11 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
       return;
     }
 
-    history.push(BASE_PATH + `?pipeline=${encodeURIComponent(updatedPipeline.name)}`);
+    history.push(getListPath({ inspectedPipelineName: updatedPipeline.name }));
   };
 
   const onCancel = () => {
-    history.push(BASE_PATH);
+    history.push(getListPath());
   };
 
   useEffect(() => {

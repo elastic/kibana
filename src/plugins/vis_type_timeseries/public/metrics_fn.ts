@@ -17,37 +17,36 @@
  * under the License.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaContext, Render } from '../../expressions/public';
+import { KibanaContext } from '../../data/public';
+import { ExpressionFunctionDefinition, Render } from '../../expressions/public';
 
-// @ts-ignore
+import { PanelSchema, TimeseriesVisData } from '../common/types';
 import { metricsRequestHandler } from './request_handler';
 
 type Input = KibanaContext | null;
-type Output = Promise<Render<RenderValue>>;
+type Output = Promise<Render<TimeseriesRenderValue>>;
 
 interface Arguments {
   params: string;
   uiState: string;
-  savedObjectId: string | null;
 }
 
-type VisParams = Required<Arguments>;
+export type TimeseriesVisParams = PanelSchema;
 
-interface RenderValue {
-  visType: 'metrics';
-  visData: Input;
-  visConfig: VisParams;
-  uiState: any;
+export interface TimeseriesRenderValue {
+  visData: TimeseriesVisData | {};
+  visParams: TimeseriesVisParams;
 }
 
-export const createMetricsFn = (): ExpressionFunctionDefinition<
+export type TimeseriesExpressionFunctionDefinition = ExpressionFunctionDefinition<
   'tsvb',
   Input,
   Arguments,
   Output
-> => ({
+>;
+
+export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
   name: 'tsvb',
   type: 'render',
   inputTypes: ['kibana_context', 'null'],
@@ -65,37 +64,22 @@ export const createMetricsFn = (): ExpressionFunctionDefinition<
       default: '"{}"',
       help: '',
     },
-    savedObjectId: {
-      types: ['null', 'string'],
-      default: null,
-      help: '',
-    },
   },
   async fn(input, args) {
-    const params = JSON.parse(args.params);
-    const uiStateParams = JSON.parse(args.uiState);
-    const savedObjectId = args.savedObjectId;
-    const { PersistedState } = await import('../../visualizations/public');
-    const uiState = new PersistedState(uiStateParams);
+    const visParams: TimeseriesVisParams = JSON.parse(args.params);
+    const uiState = JSON.parse(args.uiState);
 
     const response = await metricsRequestHandler({
-      timeRange: get(input, 'timeRange', null),
-      query: get(input, 'query', null),
-      filters: get(input, 'filters', null),
-      visParams: params,
+      input,
+      visParams,
       uiState,
-      savedObjectId,
     });
-
-    response.visType = 'metrics';
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: 'timeseries_vis',
       value: {
-        uiState,
-        visType: 'metrics',
-        visConfig: params,
+        visParams,
         visData: response,
       },
     };

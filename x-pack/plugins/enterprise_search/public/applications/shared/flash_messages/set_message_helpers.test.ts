@@ -4,18 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mockHistory } from '../../__mocks__';
+jest.mock('../kibana', () => ({
+  KibanaLogic: { values: { history: mockHistory } },
+}));
+
 import {
   FlashMessagesLogic,
+  mountFlashMessagesLogic,
   setSuccessMessage,
   setErrorMessage,
   setQueuedSuccessMessage,
+  setQueuedErrorMessage,
 } from './';
 
 describe('Flash Message Helpers', () => {
   const message = 'I am a message';
 
   beforeEach(() => {
-    FlashMessagesLogic.mount();
+    mountFlashMessagesLogic();
   });
 
   it('setSuccessMessage()', () => {
@@ -47,6 +54,17 @@ describe('Flash Message Helpers', () => {
       {
         message,
         type: 'success',
+      },
+    ]);
+  });
+
+  it('setQueuedErrorMessage()', () => {
+    setQueuedErrorMessage(message);
+
+    expect(FlashMessagesLogic.values.queuedMessages).toEqual([
+      {
+        message,
+        type: 'error',
       },
     ]);
   });

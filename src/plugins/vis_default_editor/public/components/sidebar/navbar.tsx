@@ -20,32 +20,20 @@
 import React from 'react';
 import { EuiTabs, EuiTab } from '@elastic/eui';
 
-import { VisOptionsProps } from '../../vis_options_props';
-import { DefaultEditorDataTabProps } from './data_tab';
-
-export interface OptionTab {
-  editor: React.ComponentType<VisOptionsProps | DefaultEditorDataTabProps>;
-  name: string;
-  title: string;
-}
+import { OptionTab } from './use_option_tabs';
 
 interface DefaultEditorNavBarProps {
   optionTabs: OptionTab[];
-  selectedTab: string;
   setSelectedTab(name: string): void;
 }
 
-function DefaultEditorNavBar({
-  selectedTab,
-  setSelectedTab,
-  optionTabs,
-}: DefaultEditorNavBarProps) {
+function DefaultEditorNavBar({ setSelectedTab, optionTabs }: DefaultEditorNavBarProps) {
   return (
     <EuiTabs className="visEditorSidebar__nav" size="s">
-      {optionTabs.map(({ name, title }) => (
+      {optionTabs.map(({ name, title, isSelected = false }) => (
         <EuiTab
           key={name}
-          isSelected={selectedTab === name}
+          isSelected={isSelected}
           data-test-subj={`visEditorTab__${name}`}
           onClick={() => setSelectedTab(name)}
         >

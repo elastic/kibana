@@ -284,4 +284,47 @@ describe('execute()', () => {
           ]
     `);
   });
+
+  test('resolves with an error when an error occurs in the indexing operation', async () => {
+    const secrets = {};
+    // minimal params
+    const config = { index: 'index-value', refresh: false, executionTimeField: null };
+    const params = {
+      documents: [{ '': 'bob' }],
+    };
+
+    const actionId = 'some-id';
+
+    services.callCluster.mockResolvedValue({
+      took: 0,
+      errors: true,
+      items: [
+        {
+          index: {
+            _index: 'indexme',
+            _id: '7buTjHQB0SuNSiS9Hayt',
+            status: 400,
+            error: {
+              type: 'mapper_parsing_exception',
+              reason: 'failed to parse',
+              caused_by: {
+                type: 'illegal_argument_exception',
+                reason: 'field name cannot be an empty string',
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    expect(await actionType.executor({ actionId, config, secrets, params, services }))
+      .toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "error indexing documents",
+        "serviceMessage": "failed to parse (field name cannot be an empty string)",
+        "status": "error",
+      }
+    `);
+  });
 });

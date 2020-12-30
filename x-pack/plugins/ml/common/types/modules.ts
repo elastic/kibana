@@ -5,13 +5,14 @@
  */
 import { SavedObjectAttributes } from 'kibana/public';
 import { Datafeed, Job } from './anomaly_detection_jobs';
+import { ErrorType } from '../util/errors';
 
 export interface ModuleJob {
   id: string;
   config: Omit<Job, 'job_id'>;
 }
 
-export interface ModuleDataFeed {
+export interface ModuleDatafeed {
   id: string;
   config: Omit<Datafeed, 'datafeed_id'>;
 }
@@ -49,7 +50,7 @@ export interface Module {
   defaultIndexPattern: string;
   query: any;
   jobs: ModuleJob[];
-  datafeeds: ModuleDataFeed[];
+  datafeeds: ModuleDatafeed[];
   kibana: KibanaObjects;
 }
 
@@ -63,22 +64,13 @@ export interface KibanaObjectResponse extends ResultItem {
   error?: any;
 }
 
-export interface SetupError {
-  body: string;
-  msg: string;
-  path: string;
-  query: {};
-  response: string;
-  statusCode: number;
-}
-
 export interface DatafeedResponse extends ResultItem {
   started: boolean;
-  error?: SetupError;
+  error?: ErrorType;
 }
 
 export interface JobResponse extends ResultItem {
-  error?: SetupError;
+  error?: ErrorType;
 }
 
 export interface DataRecognizerConfigResponse {

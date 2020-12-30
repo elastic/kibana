@@ -28,10 +28,10 @@ export function stubbedSavedObjectIndexPattern(id: string | null = null) {
     type: 'index-pattern',
     attributes: {
       timeFieldName: 'timestamp',
-      customFormats: '{}',
+      customFormats: {},
       fields: mockLogstashFields,
       title: 'title',
     },
-    version: 2,
+    version: '2',
   };
 }

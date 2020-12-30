@@ -176,6 +176,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
     },
+    i18n: deps.i18n,
     logging: {
       configure: (config$) => deps.logging.configure(['plugins', plugin.name], config$),
     },
@@ -201,7 +202,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       register: deps.uiSettings.register,
     },
     getStartServices: () => plugin.startDependencies,
-    auditTrail: deps.auditTrail,
   };
 }
 
@@ -250,6 +250,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     uiSettings: {
       asScopedToClient: deps.uiSettings.asScopedToClient,
     },
-    auditTrail: deps.auditTrail,
+    coreUsageData: deps.coreUsageData,
   };
 }

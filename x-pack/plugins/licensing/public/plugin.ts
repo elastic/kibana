@@ -101,7 +101,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
         if (core.http.anonymousPaths.isAnonymous(window.location.pathname)) return httpResponse;
         if (httpResponse.response) {
           const signatureHeader = httpResponse.response.headers.get('kbn-license-sig');
-          if (this.prevSignature !== signatureHeader) {
+          if (typeof signatureHeader === 'string' && this.prevSignature !== signatureHeader) {
             if (!httpResponse.request!.url.includes(this.infoEndpoint)) {
               signatureUpdated$.next();
             }
@@ -117,7 +117,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     return {
       refresh: refreshManually,
       license$,
-      featureUsage: this.featureUsage.setup({ http: core.http }),
+      featureUsage: this.featureUsage.setup(),
     };
   }
 

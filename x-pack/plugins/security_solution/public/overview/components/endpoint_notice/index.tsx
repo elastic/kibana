@@ -33,7 +33,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
           </b>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.title"
-            defaultMessage="Elastic Endpoint Security (beta)"
+            defaultMessage="Endpoint Security (beta)"
           />
         </>
       }
@@ -49,7 +49,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
         <EuiButton onClick={handleGetStartedClick} href={endpointsLink}>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.tryButton"
-            defaultMessage="Try Elastic Endpoint Security (beta)"
+            defaultMessage="Try Endpoint Security (beta)"
           />
         </EuiButton>
         <EuiButtonEmpty onClick={onDismiss}>

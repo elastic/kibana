@@ -79,6 +79,43 @@ describe('getFormatWithAggs', () => {
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 
+  test('creates alternative format for range using the template parameter', () => {
+    const mapping = { id: 'range', params: { template: 'arrow_right' } };
+    const getFieldFormat = getFormatWithAggs(getFormat);
+    const format = getFieldFormat(mapping);
+
+    expect(format.convert({ gte: 1, lt: 20 })).toBe('1 → 20');
+    expect(getFormat).toHaveBeenCalledTimes(1);
+  });
+
+  test('handles Infinity values internally when no nestedFormatter is passed', () => {
+    const mapping = { id: 'range', params: { replaceInfinity: true } };
+    const getFieldFormat = getFormatWithAggs(getFormat);
+    const format = getFieldFormat(mapping);
+
+    expect(format.convert({ gte: -Infinity, lt: Infinity })).toBe('≥ −∞ and < +∞');
+    expect(getFormat).toHaveBeenCalledTimes(1);
+  });
+
+  test('lets Infinity values handling to nestedFormatter even when flag is on', () => {
+    const mapping = { id: 'range', params: { replaceInfinity: true, id: 'any' } };
+    const getFieldFormat = getFormatWithAggs(getFormat);
+    const format = getFieldFormat(mapping);
+
+    expect(format.convert({ gte: -Infinity, lt: Infinity })).toBe('≥ -Infinity and < Infinity');
+    expect(getFormat).toHaveBeenCalledTimes(1);
+  });
+
+  test('returns custom label for range if provided', () => {
+    const mapping = { id: 'range', params: {} };
+    const getFieldFormat = getFormatWithAggs(getFormat);
+    const format = getFieldFormat(mapping);
+
+    expect(format.convert({ gte: 1, lt: 20, label: 'custom' })).toBe('custom');
+    // underlying formatter is not called because custom label can be used directly
+    expect(getFormat).toHaveBeenCalledTimes(0);
+  });
+
   test('creates custom format for terms', () => {
     const mapping = {
       id: 'terms',

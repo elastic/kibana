@@ -10,7 +10,7 @@
  * And a minimum bucket span
  */
 
-import get from 'lodash/get';
+import { get } from 'lodash';
 
 export function polledDataCheckerFactory({ asCurrentUser }) {
   class PolledDataChecker {

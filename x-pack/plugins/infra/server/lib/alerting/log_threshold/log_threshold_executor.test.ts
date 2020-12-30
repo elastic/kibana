@@ -17,11 +17,11 @@ import {
 import {
   Comparator,
   AlertStates,
-  LogDocumentCountAlertParams,
+  AlertParams,
   Criterion,
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
-} from '../../../../common/alerting/logs/types';
+} from '../../../../common/alerting/logs/log_threshold/types';
 import { alertsMock } from '../../../../../alerts/server/mocks';
 
 // Mocks //
@@ -56,7 +56,7 @@ const negativeCriteria: Criterion[] = [
   { ...textField, comparator: Comparator.NOT_MATCH_PHRASE },
 ];
 
-const baseAlertParams: Pick<LogDocumentCountAlertParams, 'count' | 'timeSize' | 'timeUnit'> = {
+const baseAlertParams: Pick<AlertParams, 'count' | 'timeSize' | 'timeUnit'> = {
   count: {
     comparator: Comparator.GT,
     value: 5,
@@ -85,7 +85,7 @@ describe('Log threshold executor', () => {
   });
   describe('Criteria filter building', () => {
     test('Handles positive criteria', () => {
-      const alertParams: LogDocumentCountAlertParams = {
+      const alertParams: AlertParams = {
         ...baseAlertParams,
         criteria: positiveCriteria,
       };
@@ -140,7 +140,7 @@ describe('Log threshold executor', () => {
     });
 
     test('Handles negative criteria', () => {
-      const alertParams: LogDocumentCountAlertParams = {
+      const alertParams: AlertParams = {
         ...baseAlertParams,
         criteria: negativeCriteria,
       };
@@ -168,7 +168,7 @@ describe('Log threshold executor', () => {
     });
 
     test('Handles time range', () => {
-      const alertParams: LogDocumentCountAlertParams = { ...baseAlertParams, criteria: [] };
+      const alertParams: AlertParams = { ...baseAlertParams, criteria: [] };
       const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].gte).toBe('number');
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].lte).toBe('number');
@@ -183,7 +183,7 @@ describe('Log threshold executor', () => {
   describe('ES queries', () => {
     describe('Query generation', () => {
       test('Correctly generates ungrouped queries', () => {
-        const alertParams: LogDocumentCountAlertParams = {
+        const alertParams: AlertParams = {
           ...baseAlertParams,
           criteria: [...positiveCriteria, ...negativeCriteria],
         };
@@ -279,7 +279,7 @@ describe('Log threshold executor', () => {
       });
 
       test('Correctly generates grouped queries', () => {
-        const alertParams: LogDocumentCountAlertParams = {
+        const alertParams: AlertParams = {
           ...baseAlertParams,
           groupBy: ['host.name'],
           criteria: [...positiveCriteria, ...negativeCriteria],
@@ -300,25 +300,6 @@ describe('Log threshold executor', () => {
                         lte: expect.any(Number),
                         format: 'epoch_millis',
                       },
-                    },
-                  },
-                ],
-                must_not: [
-                  {
-                    term: {
-                      keywordField: {
-                        value: 'error',
-                      },
-                    },
-                  },
-                  {
-                    match: {
-                      textField: 'Something went wrong',
-                    },
-                  },
-                  {
-                    match_phrase: {
-                      textField: 'Something went wrong',
                     },
                   },
                 ],
@@ -380,6 +361,25 @@ describe('Log threshold executor', () => {
                               },
                             },
                           },
+                          {
+                            term: {
+                              keywordField: {
+                                value: 'error',
+                              },
+                            },
+                          },
+                          {
+                            match: {
+                              textField: 'Something went wrong',
+                            },
+                          },
+                          {
+                            match_phrase: {
+                              textField: 'Something went wrong',
+                            },
+                          },
+                        ],
+                        must_not: [
                           {
                             term: {
                               keywordField: {
@@ -467,6 +467,7 @@ describe('Log threshold executor', () => {
               conditions: ' numericField more than 10',
               group: null,
               matchingDocuments: 10,
+              isRatio: false,
             },
           },
         ]);
@@ -593,6 +594,7 @@ describe('Log threshold executor', () => {
               conditions: ' numericField more than 10',
               group: 'i-am-a-host-name-1, i-am-a-dataset-1',
               matchingDocuments: 10,
+              isRatio: false,
             },
           },
         ]);
@@ -612,6 +614,7 @@ describe('Log threshold executor', () => {
               conditions: ' numericField more than 10',
               group: 'i-am-a-host-name-3, i-am-a-dataset-3',
               matchingDocuments: 20,
+              isRatio: false,
             },
           },
         ]);

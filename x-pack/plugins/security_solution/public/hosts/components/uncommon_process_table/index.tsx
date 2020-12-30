@@ -7,10 +7,12 @@
 /* eslint-disable react/display-name */
 
 import React, { useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-import { UncommonProcessesEdges, UncommonProcessItem } from '../../../graphql/types';
-import { State } from '../../../common/store';
+import {
+  HostsUncommonProcessesEdges,
+  HostsUncommonProcessItem,
+} from '../../../../common/search_strategy';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../common/components/links';
@@ -19,9 +21,11 @@ import { Columns, ItemsPerRow, PaginatedTable } from '../../../common/components
 import * as i18n from './translations';
 import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 import { HostsType } from '../../store/model';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+
 const tableType = hostsModel.HostsTableType.uncommonProcesses;
-interface OwnProps {
-  data: UncommonProcessesEdges[];
+interface UncommonProcessTableProps {
+  data: HostsUncommonProcessesEdges[];
   fakeTotalCount: number;
   id: string;
   isInspect: boolean;
@@ -33,15 +37,13 @@ interface OwnProps {
 }
 
 export type UncommonProcessTableColumns = [
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>,
-  Columns<UncommonProcessesEdges>
+  Columns<HostsUncommonProcessesEdges>,
+  Columns<HostsUncommonProcessesEdges>,
+  Columns<HostsUncommonProcessesEdges>,
+  Columns<HostsUncommonProcessesEdges>,
+  Columns<HostsUncommonProcessesEdges>,
+  Columns<HostsUncommonProcessesEdges>
 ];
-
-type UncommonProcessTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -64,38 +66,47 @@ export const getArgs = (args: string[] | null | undefined): string | null => {
 
 const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
   ({
-    activePage,
     data,
     fakeTotalCount,
     id,
     isInspect,
-    limit,
     loading,
     loadPage,
     totalCount,
     showMorePagesIndicator,
-    updateTableActivePage,
-    updateTableLimit,
     type,
   }) => {
+    const dispatch = useDispatch();
+    const getUncommonProcessesSelector = useMemo(
+      () => hostsSelectors.uncommonProcessesSelector(),
+      []
+    );
+    const { activePage, limit } = useDeepEqualSelector((state) =>
+      getUncommonProcessesSelector(state, type)
+    );
+
     const updateLimitPagination = useCallback(
       (newLimit) =>
-        updateTableLimit({
-          hostsType: type,
-          limit: newLimit,
-          tableType,
-        }),
-      [type, updateTableLimit]
+        dispatch(
+          hostsActions.updateTableLimit({
+            hostsType: type,
+            limit: newLimit,
+            tableType,
+          })
+        ),
+      [type, dispatch]
     );
 
     const updateActivePage = useCallback(
       (newPage) =>
-        updateTableActivePage({
-          activePage: newPage,
-          hostsType: type,
-          tableType,
-        }),
-      [type, updateTableActivePage]
+        dispatch(
+          hostsActions.updateTableActivePage({
+            activePage: newPage,
+            hostsType: type,
+            tableType,
+          })
+        ),
+      [type, dispatch]
     );
 
     const columns = useMemo(() => getUncommonColumnsCurated(type), [type]);
@@ -126,21 +137,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
 
 UncommonProcessTableComponent.displayName = 'UncommonProcessTableComponent';
 
-const makeMapStateToProps = () => {
-  const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
-  return (state: State, { type }: OwnProps) => getUncommonProcessesSelector(state, type);
-};
-
-const mapDispatchToProps = {
-  updateTableActivePage: hostsActions.updateTableActivePage,
-  updateTableLimit: hostsActions.updateTableLimit,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const UncommonProcessTable = connector(UncommonProcessTableComponent);
+export const UncommonProcessTable = React.memo(UncommonProcessTableComponent);
 
 UncommonProcessTable.displayName = 'UncommonProcessTable';
 
@@ -212,7 +209,7 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
   },
 ];
 
-export const getHostNames = (node: UncommonProcessItem): string[] => {
+export const getHostNames = (node: HostsUncommonProcessItem): string[] => {
   if (node.hosts != null) {
     return node.hosts
       .filter((host) => host.name != null && host.name[0] != null)

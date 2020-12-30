@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode, EuiLink } from '@elastic/eui';
-import { useKibana } from '../../../../../shared_imports';
 
 import {
   Append,
@@ -46,6 +45,7 @@ import {
   UrlDecode,
   UserAgent,
   FormFieldsComponent,
+  UriParts,
 } from '../processor_form/processors';
 
 interface FieldDescriptor {
@@ -55,7 +55,7 @@ interface FieldDescriptor {
    * A sentence case label that can be displayed to users
    */
   label: string;
-  description?: string | ReactNode;
+  description?: string | ((esDocUrl: string) => ReactNode);
 }
 
 type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;
@@ -176,11 +176,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.enrich', {
       defaultMessage: 'Enrich',
     }),
-    description: function Description() {
-      const {
-        services: { documentation },
-      } = useKibana();
-      const esDocUrl = documentation.getEsDocsBasePath();
+    description: (esDocUrl) => {
       return (
         <FormattedMessage
           id="xpack.ingestPipelines.processors.description.enrich"
@@ -234,11 +230,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     label: i18n.translate('xpack.ingestPipelines.processors.label.grok', {
       defaultMessage: 'Grok',
     }),
-    description: function Description() {
-      const {
-        services: { documentation },
-      } = useKibana();
-      const esDocUrl = documentation.getEsDocsBasePath();
+    description: (esDocUrl) => {
       return (
         <FormattedMessage
           id="xpack.ingestPipelines.processors.description.grok"
@@ -445,6 +437,17 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     description: i18n.translate('xpack.ingestPipelines.processors.description.userAgent', {
       defaultMessage: "Extracts values from a browser's user agent string.",
+    }),
+  },
+  uri_parts: {
+    FieldsComponent: UriParts,
+    docLinkPath: '/uri-parts-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.uriPartsLabel', {
+      defaultMessage: 'URI parts',
+    }),
+    description: i18n.translate('xpack.ingestPipelines.processors.uriPartsDescription', {
+      defaultMessage:
+        'Parses a Uniform Resource Identifier (URI) string and extracts its components as an object.',
     }),
   },
 };

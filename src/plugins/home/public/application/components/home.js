@@ -20,18 +20,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiButtonEmpty,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import {
+  OverviewPageFooter,
+  OverviewPageHeader,
+} from '../../../../../../src/plugins/kibana_react/public';
+import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import { FeatureCatalogueCategory } from '../../services';
 import { getServices } from '../kibana_services';
 import { AddData } from './add_data';
-import { createAppNavigationHandler } from './app_navigation_handler';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
@@ -121,12 +120,9 @@ export class Home extends Component {
       .sort((directoryA, directoryB) => directoryA.order - directoryB.order);
 
   renderNormal() {
-    const { addBasePath, solutions } = this.props;
-
+    const { addBasePath, solutions, directories } = this.props;
+    const { trackUiMetric } = getServices();
     const devTools = this.findDirectoryById('console');
-    const stackManagement = this.findDirectoryById('stack-management');
-    const advancedSettings = this.findDirectoryById('advanced_settings');
-
     const addDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.DATA);
     const manageDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
 
@@ -136,68 +132,27 @@ export class Home extends Component {
     }
 
     return (
-      <main aria-labelledby="homHeader__title" className="homWrapper" data-test-subj="homeApp">
-        <header
-          className={`homHeader ${
-            solutions.length ? 'homHeader--hasSolutions' : 'homHeader--noSolutions'
-          }`}
-        >
-          <div className="homHeader__inner">
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h1 id="homHeader__title">
-                    <FormattedMessage id="home.pageHeader.title" defaultMessage="Home" />
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup className="homHeader__actions">
-                  <EuiFlexItem className="homHeader__actionItem">
-                    <EuiButtonEmpty href="#/tutorial_directory" iconType="indexOpen">
-                      {i18n.translate('home.pageHeader.addDataButtonLabel', {
-                        defaultMessage: 'Add data',
-                      })}
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-
-                  {stackManagement ? (
-                    <EuiFlexItem
-                      className="homHeader__actionItem"
-                      data-test-subj="homManagementActionItem"
-                    >
-                      <EuiButtonEmpty
-                        onClick={createAppNavigationHandler(stackManagement.path)}
-                        iconType="gear"
-                      >
-                        {i18n.translate('home.pageHeader.stackManagementButtonLabel', {
-                          defaultMessage: 'Manage',
-                        })}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  ) : null}
-
-                  {devTools ? (
-                    <EuiFlexItem className="homHeader__actionItem">
-                      <EuiButtonEmpty
-                        onClick={createAppNavigationHandler(devTools.path)}
-                        iconType="wrench"
-                      >
-                        {i18n.translate('home.pageHeader.devToolsButtonLabel', {
-                          defaultMessage: 'Dev tools',
-                        })}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        </header>
+      <main
+        aria-labelledby="kbnOverviewPageHeader__title"
+        className="homWrapper"
+        data-test-subj="homeApp"
+      >
+        <OverviewPageHeader
+          addBasePath={addBasePath}
+          overlap={solutions.length}
+          showDevToolsLink
+          showManagementLink
+          title={<FormattedMessage id="home.header.title" defaultMessage="Home" />}
+        />
 
         <div className="homContent">
-          {solutions.length && <SolutionsSection addBasePath={addBasePath} solutions={solutions} />}
+          {solutions.length ? (
+            <SolutionsSection
+              addBasePath={addBasePath}
+              solutions={solutions}
+              directories={directories}
+            />
+          ) : null}
 
           <EuiFlexGroup
             className={`homData ${
@@ -217,41 +172,16 @@ export class Home extends Component {
 
           <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-          <footer className="homFooter">
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                {advancedSettings && (
-                  <EuiButtonEmpty
-                    iconType="home"
-                    onClick={createAppNavigationHandler(
-                      '/app/management/kibana/settings#defaultRoute'
-                    )}
-                    size="xs"
-                  >
-                    <FormattedMessage
-                      id="home.changeHomeRouteLink"
-                      defaultMessage="Display a different page on log in"
-                    />
-                  </EuiButtonEmpty>
-                )}
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="allPlugins"
-                  href="#/feature_directory"
-                  size="xs"
-                  flush="right"
-                  iconType="apps"
-                >
-                  <FormattedMessage
-                    id="home.appDirectory.appDirectoryButtonLabel"
-                    defaultMessage="View app directory"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </footer>
+          <OverviewPageFooter
+            addBasePath={addBasePath}
+            path={HOME_APP_BASE_PATH}
+            onSetDefaultRoute={() => {
+              trackUiMetric(METRIC_TYPE.CLICK, 'set_home_as_default_route');
+            }}
+            onChangeDefaultRoute={() => {
+              trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
+            }}
+          />
         </div>
       </main>
     );
@@ -294,12 +224,14 @@ Home.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
+      subtitle: PropTypes.string,
       description: PropTypes.string.isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
       showOnHomePage: PropTypes.bool.isRequired,
       category: PropTypes.string.isRequired,
       order: PropTypes.number,
+      solutionId: PropTypes.string,
     })
   ),
   solutions: PropTypes.arrayOf(
@@ -307,7 +239,8 @@ Home.propTypes = {
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
       subtitle: PropTypes.string.isRequired,
-      descriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
+      description: PropTypes.string,
+      appDescriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
       order: PropTypes.number,

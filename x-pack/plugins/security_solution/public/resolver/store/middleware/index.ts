@@ -6,9 +6,12 @@
 
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { ResolverState, DataAccessLayer } from '../../types';
-import { ResolverRelatedEvents } from '../../../../common/endpoint/types';
 import { ResolverTreeFetcher } from './resolver_tree_fetcher';
+
 import { ResolverAction } from '../actions';
+import { RelatedEventsFetcher } from './related_events_fetcher';
+import { CurrentRelatedEventFetcher } from './current_related_event_fetcher';
+import { NodeDataFetcher } from './node_data_fetcher';
 
 type MiddlewareFactory<S = ResolverState> = (
   dataAccessLayer: DataAccessLayer
@@ -25,33 +28,16 @@ type MiddlewareFactory<S = ResolverState> = (
 export const resolverMiddlewareFactory: MiddlewareFactory = (dataAccessLayer: DataAccessLayer) => {
   return (api) => (next) => {
     const resolverTreeFetcher = ResolverTreeFetcher(dataAccessLayer, api);
+    const relatedEventsFetcher = RelatedEventsFetcher(dataAccessLayer, api);
+    const currentRelatedEventFetcher = CurrentRelatedEventFetcher(dataAccessLayer, api);
+    const nodeDataFetcher = NodeDataFetcher(dataAccessLayer, api);
     return async (action: ResolverAction) => {
       next(action);
 
       resolverTreeFetcher();
-
-      if (
-        action.type === 'userRequestedRelatedEventData' ||
-        action.type === 'appDetectedMissingEventData'
-      ) {
-        const entityIdToFetchFor = action.payload;
-        let result: ResolverRelatedEvents | undefined;
-        try {
-          result = await dataAccessLayer.relatedEvents(entityIdToFetchFor);
-        } catch {
-          api.dispatch({
-            type: 'serverFailedToReturnRelatedEventData',
-            payload: action.payload,
-          });
-        }
-
-        if (result) {
-          api.dispatch({
-            type: 'serverReturnedRelatedEventData',
-            payload: result,
-          });
-        }
-      }
+      relatedEventsFetcher();
+      nodeDataFetcher();
+      currentRelatedEventFetcher();
     };
   };
 };

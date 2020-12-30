@@ -5,12 +5,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FormDataProvider } from '../../../../shared_imports';
-import { MainType, SubType, Field } from '../../../../types';
+import { MainType, SubType, Field, DataTypeDefinition } from '../../../../types';
 import { TYPE_DEFINITION } from '../../../../constants';
 import { NameParameter, TypeParameter, SubTypeParameter } from '../../field_parameters';
+import { FieldBetaBadge } from '../field_beta_badge';
 import { FieldDescriptionSection } from './field_description_section';
 
 interface Props {
@@ -18,6 +19,25 @@ interface Props {
   isRootLevelField: boolean;
   isMultiField: boolean;
 }
+
+const getTypeDefinition = (type: MainType, subType: SubType): DataTypeDefinition | undefined => {
+  if (!type) {
+    return;
+  }
+
+  const typeDefinition = TYPE_DEFINITION[type];
+  const hasSubType = typeDefinition.subTypes !== undefined;
+
+  if (hasSubType) {
+    if (subType) {
+      return TYPE_DEFINITION[subType];
+    }
+
+    return;
+  }
+
+  return typeDefinition;
+};
 
 export const EditFieldHeaderForm = React.memo(
   ({ defaultValue, isRootLevelField, isMultiField }: Props) => {
@@ -56,27 +76,29 @@ export const EditFieldHeaderForm = React.memo(
         </EuiFlexGroup>
 
         {/* Field description */}
-        <FieldDescriptionSection isMultiField={isMultiField}>
-          <FormDataProvider pathsToWatch={['type', 'subType']}>
-            {({ type, subType }) => {
-              if (!type) {
-                return null;
-              }
-              const typeDefinition = TYPE_DEFINITION[type[0].value as MainType];
-              const hasSubType = typeDefinition.subTypes !== undefined;
+        <FormDataProvider pathsToWatch={['type', 'subType']}>
+          {({ type, subType }) => {
+            const typeDefinition = getTypeDefinition(
+              type[0].value as MainType,
+              subType && (subType[0].value as SubType)
+            );
+            const description = (typeDefinition?.description?.() as JSX.Element) ?? null;
 
-              if (hasSubType) {
-                if (subType) {
-                  const subTypeDefinition = TYPE_DEFINITION[subType as SubType];
-                  return (subTypeDefinition?.description?.() as JSX.Element) ?? null;
-                }
-                return null;
-              }
+            return (
+              <>
+                <EuiSpacer size="l" />
 
-              return typeDefinition.description?.() as JSX.Element;
-            }}
-          </FormDataProvider>
-        </FieldDescriptionSection>
+                {typeDefinition?.isBeta && <FieldBetaBadge />}
+
+                <EuiSpacer size="s" />
+
+                <FieldDescriptionSection isMultiField={isMultiField}>
+                  {description}
+                </FieldDescriptionSection>
+              </>
+            );
+          }}
+        </FormDataProvider>
       </>
     );
   }

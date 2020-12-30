@@ -18,52 +18,40 @@ import {
   EuiTextArea,
   EuiSelectableOption,
 } from '@elastic/eui';
-import { UrlDrilldownConfig, UrlDrilldownScope } from '../../types';
-import { compile } from '../../url_template';
-import { validateUrlTemplate } from '../../url_validation';
-import { buildScopeSuggestions } from '../../url_drilldown_scope';
+import { UrlDrilldownConfig } from '../../types';
 import './index.scss';
 import {
   txtAddVariableButtonTitle,
-  txtUrlPreviewHelpText,
   txtUrlTemplateSyntaxHelpLinkText,
   txtUrlTemplateVariablesHelpLinkText,
   txtUrlTemplateVariablesFilterPlaceholderText,
   txtUrlTemplateLabel,
   txtUrlTemplateOpenInNewTab,
   txtUrlTemplatePlaceholder,
-  txtUrlTemplatePreviewLabel,
-  txtUrlTemplatePreviewLinkText,
 } from './i18n';
 
 export interface UrlDrilldownCollectConfig {
   config: UrlDrilldownConfig;
+  variables: string[];
   onConfig: (newConfig: UrlDrilldownConfig) => void;
-  scope: UrlDrilldownScope;
   syntaxHelpDocsLink?: string;
   variablesHelpDocsLink?: string;
 }
 
 export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
   config,
+  variables,
   onConfig,
-  scope,
   syntaxHelpDocsLink,
   variablesHelpDocsLink,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [showUrlError, setShowUrlError] = React.useState(false);
   const urlTemplate = config.url.template ?? '';
-  const compiledUrl = React.useMemo(() => {
-    try {
-      return compile(urlTemplate, scope);
-    } catch {
-      return urlTemplate;
-    }
-  }, [urlTemplate, scope]);
-  const scopeVariables = React.useMemo(() => buildScopeSuggestions(scope), [scope]);
 
   function updateUrlTemplate(newUrlTemplate: string) {
     if (config.url.template !== newUrlTemplate) {
+      setShowUrlError(true);
       onConfig({
         ...config,
         url: {
@@ -73,18 +61,31 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
       });
     }
   }
-  const { error, isValid } = React.useMemo(
-    () => validateUrlTemplate({ template: urlTemplate }, scope),
-    [urlTemplate, scope]
-  );
   const isEmpty = !urlTemplate;
-  const isInvalid = !isValid && !isEmpty;
+  const isInvalid = showUrlError && isEmpty;
+  const variablesDropdown = (
+    <AddVariableButton
+      variables={variables}
+      variablesHelpLink={variablesHelpDocsLink}
+      onSelect={(variable: string) => {
+        if (textAreaRef.current) {
+          updateUrlTemplate(
+            urlTemplate.substr(0, textAreaRef.current!.selectionStart) +
+              `{{${variable}}}` +
+              urlTemplate.substr(textAreaRef.current!.selectionEnd)
+          );
+        } else {
+          updateUrlTemplate(urlTemplate + `{{${variable}}}`);
+        }
+      }}
+    />
+  );
+
   return (
     <>
       <EuiFormRow
         fullWidth
         isInvalid={isInvalid}
-        error={error}
         className={'uaeUrlDrilldownCollectConfig__urlTemplateFormRow'}
         label={txtUrlTemplateLabel}
         helpText={
@@ -94,23 +95,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
             </EuiLink>
           )
         }
-        labelAppend={
-          <AddVariableButton
-            variables={scopeVariables}
-            variablesHelpLink={variablesHelpDocsLink}
-            onSelect={(variable: string) => {
-              if (textAreaRef.current) {
-                updateUrlTemplate(
-                  urlTemplate.substr(0, textAreaRef.current!.selectionStart) +
-                    `{{${variable}}}` +
-                    urlTemplate.substr(textAreaRef.current!.selectionEnd)
-                );
-              } else {
-                updateUrlTemplate(urlTemplate + `{{${variable}}}`);
-              }
-            }}
-          />
-        }
+        labelAppend={variablesDropdown}
       >
         <EuiTextArea
           fullWidth
@@ -120,29 +105,9 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
           value={urlTemplate}
           placeholder={txtUrlTemplatePlaceholder}
           onChange={(event) => updateUrlTemplate(event.target.value)}
+          onBlur={() => setShowUrlError(true)}
           rows={3}
           inputRef={textAreaRef}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        label={txtUrlTemplatePreviewLabel}
-        labelAppend={
-          <EuiText size="xs">
-            <EuiLink href={compiledUrl} target="_blank" external>
-              {txtUrlTemplatePreviewLinkText}
-            </EuiLink>
-          </EuiText>
-        }
-        helpText={txtUrlPreviewHelpText}
-      >
-        <EuiTextArea
-          fullWidth
-          name="urlPreview"
-          data-test-subj="urlPreview"
-          value={compiledUrl}
-          disabled={true}
-          rows={3}
         />
       </EuiFormRow>
       <EuiFormRow hasChildLabel={false}>
@@ -189,7 +154,6 @@ function AddVariableButton({
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
-      withTitle
     >
       <EuiSelectable
         singleSelection={true}

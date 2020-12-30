@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { ReactNode } from 'react';
+import { Threats } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
   IIndexPattern,
   Filter,
   FilterManager,
 } from '../../../../../../../../src/plugins/data/public';
-import { IMitreEnterpriseAttack } from '../../../pages/detection_engine/rules/types';
 
 export interface ListItems {
   title: NonNullable<ReactNode>;
@@ -24,9 +24,10 @@ export interface BuildQueryBarDescription {
   query: string;
   savedId: string;
   indexPatterns?: IIndexPattern;
+  queryLabel?: string;
 }
 
 export interface BuildThreatDescription {
   label: string;
-  threat: IMitreEnterpriseAttack[];
+  threat: Threats;
 }

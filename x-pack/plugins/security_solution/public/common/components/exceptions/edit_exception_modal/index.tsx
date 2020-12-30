@@ -21,7 +21,9 @@ import {
   EuiText,
   EuiCallOut,
 } from '@elastic/eui';
-import { useFetchIndexPatterns } from '../../../../detections/containers/detection_engine/rules';
+
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
+import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import {
@@ -39,13 +41,13 @@ import { AddExceptionComments } from '../add_exception_comments';
 import {
   enrichExistingExceptionItemWithComments,
   enrichExceptionItemsWithOS,
-  getOperatingSystems,
   entryHasListType,
   entryHasNonEcsType,
   lowercaseHashValues,
 } from '../helpers';
 import { Loader } from '../../loader';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
+import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
 
 interface EditExceptionModalProps {
   ruleName: string;
@@ -98,7 +100,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
 }: EditExceptionModalProps) {
   const { http } = useKibana().services;
   const [comment, setComment] = useState('');
-  const { rule: maybeRule } = useRuleAsync(ruleId);
+  const [errorsExist, setErrorExists] = useState(false);
+  const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
   const [updateError, setUpdateError] = useState<ErrorInfo | null>(null);
   const [hasVersionConflict, setHasVersionConflict] = useState(false);
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
@@ -108,14 +111,28 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   >([]);
   const { addError, addSuccess } = useAppToasts();
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
-  const [
-    { isLoading: isSignalIndexPatternLoading, indexPatterns: signalIndexPatterns },
-  ] = useFetchIndexPatterns(signalIndexName !== null ? [signalIndexName] : [], 'signals');
-
-  const [{ isLoading: isIndexPatternLoading, indexPatterns }] = useFetchIndexPatterns(
-    ruleIndices,
-    'rules'
+  const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
+    signalIndexName,
+  ]);
+  const [isSignalIndexPatternLoading, { indexPatterns: signalIndexPatterns }] = useFetchIndex(
+    memoSignalIndexName
   );
+
+  const memoMlJobIds = useMemo(
+    () => (maybeRule?.machine_learning_job_id != null ? [maybeRule.machine_learning_job_id] : []),
+    [maybeRule]
+  );
+  const { loading: mlJobLoading, jobs } = useGetInstalledJob(memoMlJobIds);
+
+  const memoRuleIndices = useMemo(() => {
+    if (jobs.length > 0) {
+      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
+    } else {
+      return ruleIndices;
+    }
+  }, [jobs, ruleIndices]);
+
+  const [isIndexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
 
   const handleExceptionUpdateError = useCallback(
     (error: Error, statusCode: number | null, message: string | null) => {
@@ -190,17 +207,23 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   }, [shouldDisableBulkClose]);
 
   const isSubmitButtonDisabled = useMemo(
-    () => exceptionItemsToAdd.every((item) => item.entries.length === 0) || hasVersionConflict,
-    [exceptionItemsToAdd, hasVersionConflict]
+    () =>
+      exceptionItemsToAdd.every((item) => item.entries.length === 0) ||
+      hasVersionConflict ||
+      errorsExist,
+    [exceptionItemsToAdd, hasVersionConflict, errorsExist]
   );
 
   const handleBuilderOnChange = useCallback(
     ({
       exceptionItems,
+      errorExists,
     }: {
       exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+      errorExists: boolean;
     }) => {
       setExceptionItemsToAdd(exceptionItems);
+      setErrorExists(errorExists);
     },
     [setExceptionItemsToAdd]
   );
@@ -230,8 +253,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       },
     ];
     if (exceptionListType === 'endpoint') {
-      const osTypes = exceptionItem._tags ? getOperatingSystems(exceptionItem._tags) : [];
-      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
+      enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, exceptionItem.os_types));
     }
     return enriched;
   }, [exceptionItemsToAdd, exceptionItem, comment, exceptionListType]);
@@ -250,6 +272,13 @@ export const EditExceptionModal = memo(function EditExceptionModal({
     signalIndexName,
   ]);
 
+  const isRuleEQLSequenceStatement = useMemo((): boolean => {
+    if (maybeRule != null) {
+      return isEqlRule(maybeRule.type) && hasEqlSequenceQuery(maybeRule.query);
+    }
+    return false;
+  }, [maybeRule]);
+
   return (
     <EuiOverlayMask onClick={onCancel}>
       <Modal onClose={onCancel} data-test-subj="add-exception-modal">
@@ -266,59 +295,75 @@ export const EditExceptionModal = memo(function EditExceptionModal({
         {(addExceptionIsLoading || isIndexPatternLoading || isSignalIndexLoading) && (
           <Loader data-test-subj="loadingEditExceptionModal" size="xl" />
         )}
-        {!isSignalIndexLoading && !addExceptionIsLoading && !isIndexPatternLoading && (
-          <>
-            <ModalBodySection className="builder-section">
-              <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
-              <EuiSpacer />
-              <ExceptionBuilderComponent
-                exceptionListItems={[exceptionItem]}
-                listType={exceptionListType}
-                listId={exceptionItem.list_id}
-                listNamespaceType={exceptionItem.namespace_type}
-                ruleName={ruleName}
-                isOrDisabled
-                isAndDisabled={false}
-                isNestedDisabled={false}
-                data-test-subj="edit-exception-modal-builder"
-                id-aria="edit-exception-modal-builder"
-                onChange={handleBuilderOnChange}
-                indexPatterns={indexPatterns}
-              />
-
-              <EuiSpacer />
-
-              <AddExceptionComments
-                exceptionItemComments={exceptionItem.comments}
-                newCommentValue={comment}
-                newCommentOnChange={onCommentChange}
-              />
-            </ModalBodySection>
-            <EuiHorizontalRule />
-            <ModalBodySection>
-              <EuiFormRow fullWidth>
-                <EuiCheckbox
-                  data-test-subj="close-alert-on-add-edit-exception-checkbox"
-                  id="close-alert-on-add-edit-exception-checkbox"
-                  label={
-                    shouldDisableBulkClose ? i18n.BULK_CLOSE_LABEL_DISABLED : i18n.BULK_CLOSE_LABEL
-                  }
-                  checked={shouldBulkCloseAlert}
-                  onChange={onBulkCloseAlertCheckboxChange}
-                  disabled={shouldDisableBulkClose}
+        {!isSignalIndexLoading &&
+          !addExceptionIsLoading &&
+          !isIndexPatternLoading &&
+          !isRuleLoading &&
+          !mlJobLoading && (
+            <>
+              <ModalBodySection className="builder-section">
+                {isRuleEQLSequenceStatement && (
+                  <>
+                    <EuiCallOut
+                      data-test-subj="eql-sequence-callout"
+                      title={i18n.EDIT_EXCEPTION_SEQUENCE_WARNING}
+                    />
+                    <EuiSpacer />
+                  </>
+                )}
+                <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
+                <EuiSpacer />
+                <ExceptionBuilderComponent
+                  exceptionListItems={[exceptionItem]}
+                  listType={exceptionListType}
+                  listId={exceptionItem.list_id}
+                  listNamespaceType={exceptionItem.namespace_type}
+                  ruleName={ruleName}
+                  isOrDisabled
+                  isAndDisabled={false}
+                  isNestedDisabled={false}
+                  data-test-subj="edit-exception-modal-builder"
+                  id-aria="edit-exception-modal-builder"
+                  onChange={handleBuilderOnChange}
+                  indexPatterns={indexPatterns}
+                  ruleType={maybeRule?.type}
                 />
-              </EuiFormRow>
-              {exceptionListType === 'endpoint' && (
-                <>
-                  <EuiSpacer />
-                  <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
-                    {i18n.ENDPOINT_QUARANTINE_TEXT}
-                  </EuiText>
-                </>
-              )}
-            </ModalBodySection>
-          </>
-        )}
+
+                <EuiSpacer />
+
+                <AddExceptionComments
+                  exceptionItemComments={exceptionItem.comments}
+                  newCommentValue={comment}
+                  newCommentOnChange={onCommentChange}
+                />
+              </ModalBodySection>
+              <EuiHorizontalRule />
+              <ModalBodySection>
+                <EuiFormRow fullWidth>
+                  <EuiCheckbox
+                    data-test-subj="close-alert-on-add-edit-exception-checkbox"
+                    id="close-alert-on-add-edit-exception-checkbox"
+                    label={
+                      shouldDisableBulkClose
+                        ? i18n.BULK_CLOSE_LABEL_DISABLED
+                        : i18n.BULK_CLOSE_LABEL
+                    }
+                    checked={shouldBulkCloseAlert}
+                    onChange={onBulkCloseAlertCheckboxChange}
+                    disabled={shouldDisableBulkClose}
+                  />
+                </EuiFormRow>
+                {exceptionListType === 'endpoint' && (
+                  <>
+                    <EuiSpacer />
+                    <EuiText data-test-subj="edit-exception-endpoint-text" color="subdued" size="s">
+                      {i18n.ENDPOINT_QUARANTINE_TEXT}
+                    </EuiText>
+                  </>
+                )}
+              </ModalBodySection>
+            </>
+          )}
         {updateError != null && (
           <ModalBodySection>
             <ErrorCallout

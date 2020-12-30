@@ -6,7 +6,7 @@
 import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { useForm, Form, SerializerFunc } from '../../shared_imports';
+import { useForm, Form } from '../../shared_imports';
 import { GenericObject, MappingsConfiguration } from '../../types';
 import { useDispatch } from '../../mappings_state_context';
 import { DynamicMappingSection } from './dynamic_mapping_section';
@@ -19,7 +19,7 @@ interface Props {
   value?: MappingsConfiguration;
 }
 
-const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
+const formSerializer = (formData: GenericObject) => {
   const {
     dynamicMapping: {
       enabled: dynamicMappingsEnabled,
@@ -88,7 +88,7 @@ const formDeserializer = (formData: GenericObject) => {
 export const ConfigurationForm = React.memo(({ value }: Props) => {
   const isMounted = useRef(false);
 
-  const { form } = useForm<MappingsConfiguration>({
+  const { form } = useForm({
     schema: configurationFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,
@@ -108,7 +108,7 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
           validate,
           submitForm: submit,
         },
-      });
+      } as any);
     });
 
     return subscription.unsubscribe;
@@ -130,7 +130,7 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
 
       // Save a snapshot of the form state so we can get back to it when navigating back to the tab
       const configurationData = getFormData();
-      dispatch({ type: 'configuration.save', value: configurationData });
+      dispatch({ type: 'configuration.save', value: configurationData as any });
     };
   }, [getFormData, dispatch]);
 

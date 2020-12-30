@@ -8,31 +8,20 @@ import { resetContext } from 'kea';
 
 import { httpServiceMock } from 'src/core/public/mocks';
 
-import { HttpLogic } from './http_logic';
+import { HttpLogic, mountHttpLogic } from './http_logic';
 
 describe('HttpLogic', () => {
   const mockHttp = httpServiceMock.createSetupContract();
-  const DEFAULT_VALUES = {
-    http: null,
-    httpInterceptors: [],
-    errorConnecting: false,
-    readOnlyMode: false,
-  };
+  const mount = () => mountHttpLogic({ http: mockHttp });
 
   beforeEach(() => {
     jest.clearAllMocks();
     resetContext({});
   });
 
-  it('has expected default values', () => {
-    HttpLogic.mount();
-    expect(HttpLogic.values).toEqual(DEFAULT_VALUES);
-  });
-
-  describe('initializeHttp()', () => {
-    it('sets values based on passed props', () => {
-      HttpLogic.mount();
-      HttpLogic.actions.initializeHttp({
+  describe('mounts', () => {
+    it('sets values from props', () => {
+      mountHttpLogic({
         http: mockHttp,
         errorConnecting: true,
         readOnlyMode: true,
@@ -40,7 +29,7 @@ describe('HttpLogic', () => {
 
       expect(HttpLogic.values).toEqual({
         http: mockHttp,
-        httpInterceptors: [],
+        httpInterceptors: expect.any(Array),
         errorConnecting: true,
         readOnlyMode: true,
       });
@@ -49,7 +38,9 @@ describe('HttpLogic', () => {
 
   describe('setErrorConnecting()', () => {
     it('sets errorConnecting value', () => {
-      HttpLogic.mount();
+      mount();
+      expect(HttpLogic.values.errorConnecting).toEqual(false);
+
       HttpLogic.actions.setErrorConnecting(true);
       expect(HttpLogic.values.errorConnecting).toEqual(true);
 
@@ -60,7 +51,9 @@ describe('HttpLogic', () => {
 
   describe('setReadOnlyMode()', () => {
     it('sets readOnlyMode value', () => {
-      HttpLogic.mount();
+      mount();
+      expect(HttpLogic.values.readOnlyMode).toEqual(false);
+
       HttpLogic.actions.setReadOnlyMode(true);
       expect(HttpLogic.values.readOnlyMode).toEqual(true);
 
@@ -72,10 +65,8 @@ describe('HttpLogic', () => {
   describe('http interceptors', () => {
     describe('initializeHttpInterceptors()', () => {
       beforeEach(() => {
-        HttpLogic.mount();
+        mount();
         jest.spyOn(HttpLogic.actions, 'setHttpInterceptors');
-        HttpLogic.actions.initializeHttp({ http: mockHttp });
-        HttpLogic.actions.initializeHttpInterceptors();
       });
 
       it('calls http.intercept and sets an array of interceptors', () => {
@@ -165,7 +156,7 @@ describe('HttpLogic', () => {
     });
 
     it('sets httpInterceptors and calls all valid remove functions on unmount', () => {
-      const unmount = HttpLogic.mount();
+      const unmount = mount();
       const httpInterceptors = [jest.fn(), undefined, jest.fn()] as any;
 
       HttpLogic.actions.setHttpInterceptors(httpInterceptors);

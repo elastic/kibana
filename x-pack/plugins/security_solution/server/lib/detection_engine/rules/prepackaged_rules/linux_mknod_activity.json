@@ -16,15 +16,17 @@
   "name": "Mknod Process Activity",
   "query": "event.category:process and event.type:(start or process_started) and process.name:mknod",
   "references": [
-    "https://pen-testing.sans.org/blog/2013/05/06/netcat-without-e-no-problem"
+    "https://web.archive.org/web/20191218024607/https://pen-testing.sans.org/blog/2013/05/06/netcat-without-e-no-problem/"
   ],
   "risk_score": 21,
   "rule_id": "61c31c14-507f-4627-8c31-072556b89a9c",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection"
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

@@ -18,10 +18,8 @@
  */
 
 import moment from 'moment';
-import { of } from 'rxjs';
-
-import { LegacyAPICaller } from 'src/core/server';
-import { getUsageCollector } from './get_usage_collector';
+import { ElasticsearchClient } from 'src/core/server';
+import { getStats } from './get_usage_collector';
 
 const defaultMockSavedObjects = [
   {
@@ -121,29 +119,25 @@ const enlargedMockSavedObjects = [
 ];
 
 describe('Visualizations usage collector', () => {
-  const configMock = of({ kibana: { index: '' } });
-  const usageCollector = getUsageCollector(configMock);
-  const getMockCallCluster = (hits: unknown[]) =>
-    (() => Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
+  const mockIndex = '';
 
-  test('Should fit the shape', () => {
-    expect(usageCollector.type).toBe('visualization_types');
-    expect(usageCollector.isReady()).toBe(true);
-    expect(usageCollector.fetch).toEqual(expect.any(Function));
-  });
+  const getMockCallCluster = (hits: unknown[]) =>
+    ({
+      search: () => Promise.resolve({ body: { hits: { hits } } }) as unknown,
+    } as ElasticsearchClient);
 
   test('Returns undefined when no results found (undefined)', async () => {
-    const result = await usageCollector.fetch(getMockCallCluster(undefined as any));
-    expect(result).toBe(undefined);
+    const result = await getStats(getMockCallCluster(undefined as any), mockIndex);
+    expect(result).toBeUndefined();
   });
 
   test('Returns undefined when no results found (0 results)', async () => {
-    const result = await usageCollector.fetch(getMockCallCluster([]));
-    expect(result).toBe(undefined);
+    const result = await getStats(getMockCallCluster([]), mockIndex);
+    expect(result).toBeUndefined();
   });
 
   test('Summarizes visualizations response data', async () => {
-    const result = await usageCollector.fetch(getMockCallCluster(defaultMockSavedObjects));
+    const result = await getStats(getMockCallCluster(defaultMockSavedObjects), mockIndex);
 
     expect(result).toMatchObject({
       shell_beads: {
@@ -198,7 +192,7 @@ describe('Visualizations usage collector', () => {
       },
     };
 
-    const result = await usageCollector.fetch(getMockCallCluster(enlargedMockSavedObjects));
+    const result = await getStats(getMockCallCluster(enlargedMockSavedObjects), mockIndex);
 
     expect(result).toMatchObject(expectedStats);
   });

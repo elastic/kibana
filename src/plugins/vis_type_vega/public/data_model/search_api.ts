@@ -44,7 +44,7 @@ export class SearchAPI {
   ) {}
 
   search(searchRequests: SearchRequest[]) {
-    const { search } = this.dependencies.search;
+    const { search } = this.dependencies;
     const requestResponders: any = {};
 
     return combineLatest(
@@ -59,13 +59,18 @@ export class SearchAPI {
           requestResponders[requestId].json(params.body);
         }
 
-        return search({ params }, { abortSignal: this.abortSignal }).pipe(
-          tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
-          map((data) => ({
-            name: requestId,
-            rawResponse: data.rawResponse,
-          }))
-        );
+        return search
+          .search(
+            { params },
+            { abortSignal: this.abortSignal, sessionId: search.session.getSessionId() }
+          )
+          .pipe(
+            tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
+            map((data) => ({
+              name: requestId,
+              rawResponse: data.rawResponse,
+            }))
+          );
       })
     );
   }

@@ -9,15 +9,18 @@
 import { ReactElement } from 'react';
 
 import { Adapters } from 'src/plugins/inspector/public';
+import { GeoJsonProperties } from 'geojson';
 import { copyPersistentState } from '../../reducers/util';
 
 import { IField } from '../fields/field';
 import { FieldFormatter, MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import { AbstractSourceDescriptor } from '../../../common/descriptor_types';
 import { OnSourceChangeArgs } from '../../connected_components/layer_panel/view';
+import { LICENSED_FEATURES } from '../../licensed_features';
 
 export type SourceEditorArgs = {
   onChange: (...args: OnSourceChangeArgs[]) => void;
+  currentLayerType?: string;
 };
 
 export type ImmutableSourceProperty = {
@@ -50,26 +53,28 @@ export interface ISource {
   getImmutableProperties(): Promise<ImmutableSourceProperty[]>;
   getAttributions(): Promise<Attribution[]>;
   isESSource(): boolean;
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   supportsFitToBounds(): Promise<boolean>;
   showJoinEditor(): boolean;
   getJoinsDisabledReason(): string | null;
   cloneDescriptor(): AbstractSourceDescriptor;
   getFieldNames(): string[];
   getApplyGlobalQuery(): boolean;
+  getApplyGlobalTime(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
   getGeoGridPrecision(zoom: number): number;
-  getPreIndexedShape(): Promise<PreIndexedShape | null>;
+  getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null>;
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
   getMinZoom(): number;
   getMaxZoom(): number;
+  getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
 }
 
 export class AbstractSource implements ISource {
   readonly _descriptor: AbstractSourceDescriptor;
-  readonly _inspectorAdapters?: Adapters | undefined;
+  private readonly _inspectorAdapters?: Adapters;
 
   constructor(descriptor: AbstractSourceDescriptor, inspectorAdapters?: Adapters) {
     this._descriptor = descriptor;
@@ -126,12 +131,16 @@ export class AbstractSource implements ISource {
     return [];
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null {
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
     return null;
   }
 
   getApplyGlobalQuery(): boolean {
-    return !!this._descriptor.applyGlobalQuery;
+    return false;
+  }
+
+  getApplyGlobalTime(): boolean {
+    return false;
   }
 
   getIndexPatternIds(): string[] {
@@ -150,7 +159,7 @@ export class AbstractSource implements ISource {
     return false;
   }
 
-  getJoinsDisabledReason() {
+  getJoinsDisabledReason(): string | null {
     return null;
   }
 
@@ -159,7 +168,7 @@ export class AbstractSource implements ISource {
   }
 
   // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
-  async getPreIndexedShape(/* properties */): Promise<PreIndexedShape | null> {
+  async getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null> {
     return null;
   }
 
@@ -180,11 +189,15 @@ export class AbstractSource implements ISource {
     return false;
   }
 
-  getMinZoom() {
+  getMinZoom(): number {
     return MIN_ZOOM;
   }
 
-  getMaxZoom() {
+  getMaxZoom(): number {
     return MAX_ZOOM;
+  }
+
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
+    return [];
   }
 }

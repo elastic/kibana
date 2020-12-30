@@ -10,24 +10,46 @@ import { i18n } from '@kbn/i18n';
 import {
   FIELD_TYPES,
   UseField,
-  ComboBoxField,
+  UseArray,
   ToggleField,
   fieldValidators,
+  ValidationFunc,
+  ArrayItem,
 } from '../../../../../../shared_imports';
 
-import { XJsonEditor } from '../field_components';
+import { XJsonEditor, DragAndDropTextList } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldsConfig, to, from, EDITOR_PX_HEIGHT } from './shared';
 
-const { emptyField, isJsonField } = fieldValidators;
+const { isJsonField, emptyField } = fieldValidators;
+
+const i18nTexts = {
+  addPatternLabel: i18n.translate(
+    'xpack.ingestPipelines.pipelineEditor.grokForm.patternsAddPatternLabel',
+    { defaultMessage: 'Add pattern' }
+  ),
+};
+
+const valueRequiredMessage = i18n.translate(
+  'xpack.ingestPipelines.pipelineEditor.grokForm.patternsValueRequiredError',
+  { defaultMessage: 'A value is required.' }
+);
+
+const patternsValidation: ValidationFunc<any, string, ArrayItem[]> = ({ value, formData }) => {
+  if (value.length === 0) {
+    return {
+      message: valueRequiredMessage,
+    };
+  }
+};
+
+const patternValidation = emptyField(valueRequiredMessage);
 
 const fieldsConfig: FieldsConfig = {
   /* Required field configs */
   patterns: {
-    type: FIELD_TYPES.COMBO_BOX,
-    deserializer: to.arrayOfStrings,
     label: i18n.translate('xpack.ingestPipelines.pipelineEditor.grokForm.patternsFieldLabel', {
       defaultMessage: 'Patterns',
     }),
@@ -37,12 +59,7 @@ const fieldsConfig: FieldsConfig = {
     }),
     validations: [
       {
-        validator: emptyField(
-          i18n.translate(
-            'xpack.ingestPipelines.pipelineEditor.grokForm.patternsValueRequiredError',
-            { defaultMessage: 'A value is required.' }
-          )
-        ),
+        validator: patternsValidation as ValidationFunc,
       },
     ],
   },
@@ -103,7 +120,23 @@ export const Grok: FunctionComponent = () => {
         )}
       />
 
-      <UseField component={ComboBoxField} config={fieldsConfig.patterns} path="fields.patterns" />
+      <UseArray path="fields.patterns" validations={fieldsConfig.patterns.validations}>
+        {({ items, addItem, removeItem, moveItem, error }) => {
+          return (
+            <DragAndDropTextList
+              label={fieldsConfig.patterns.label!}
+              helpText={fieldsConfig.patterns.helpText}
+              error={error}
+              value={items}
+              onMove={moveItem}
+              onAdd={addItem}
+              onRemove={removeItem}
+              addLabel={i18nTexts.addPatternLabel}
+              textValidation={patternValidation}
+            />
+          );
+        }}
+      </UseArray>
 
       <UseField
         component={XJsonEditor}

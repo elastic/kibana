@@ -39,9 +39,10 @@ import {
   Agent,
   ElasticsearchAssetType,
   EsAssetReference,
-} from '../../../../../ingest_manager/common/types/models';
+} from '../../../../../fleet/common/types/models';
 import { createV1SearchResponse, createV2SearchResponse } from './support/test_support';
-import { PackageService } from '../../../../../ingest_manager/server/services';
+import { PackageService } from '../../../../../fleet/server/services';
+import { metadataTransformPrefix } from '../../../../common/endpoint/constants';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -54,7 +55,7 @@ describe('test endpoint route', () => {
   let routeHandler: RequestHandler<any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeConfig: RouteConfig<any, any, any, any>;
-  // tests assume that ingestManager is enabled, and thus agentService is available
+  // tests assume that fleet is enabled, and thus agentService is available
   let mockAgentService: Required<
     ReturnType<typeof createMockEndpointAppContextServiceStartContract>
   >['agentService'];
@@ -68,9 +69,7 @@ describe('test endpoint route', () => {
 
   beforeEach(() => {
     mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<
-      ILegacyClusterClient
-    >;
+    mockClusterClient = elasticsearchServiceMock.createLegacyClusterClient() as jest.Mocked<ILegacyClusterClient>;
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
     routerMock = httpServiceMock.createRouter();
@@ -175,7 +174,7 @@ describe('test endpoint route', () => {
             type: ElasticsearchAssetType.indexTemplate,
           },
           {
-            id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0',
+            id: `${metadataTransformPrefix}-0.16.0-dev.0`,
             type: ElasticsearchAssetType.transform,
           },
         ])

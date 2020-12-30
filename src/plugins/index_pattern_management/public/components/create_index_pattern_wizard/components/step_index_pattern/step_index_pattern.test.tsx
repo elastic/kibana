@@ -36,8 +36,8 @@ const mockIndexPatternCreationType = new IndexPatternCreationConfig({
 });
 
 jest.mock('../../lib/get_indices', () => ({
-  getIndices: ({}, {}, query: string) => {
-    if (query.startsWith('e')) {
+  getIndices: ({ pattern }: { pattern: string }) => {
+    if (pattern.startsWith('e')) {
       return [{ name: 'es', item: {} }];
     }
 

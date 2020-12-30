@@ -6,15 +6,10 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build"
   },
   "devDependencies": {
-    "typescript": "4.0.2",
-    "tsd": "^0.13.1"
-  },
-  "dependencies": {
-    "@kbn/utility-types": "1.0.0",
-    "lodash": "^4.17.15"
+    "@kbn/utility-types": "link:../kbn-utility-types"
   }
 }

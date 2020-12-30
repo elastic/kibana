@@ -4,20 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fireEvent, render, wait, RenderResult } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  waitFor,
+  RenderResult,
+} from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import * as apmApi from '../../../../../services/rest/createCallApmApi';
 import { License } from '../../../../../../../licensing/common/license';
-import * as hooks from '../../../../../hooks/useFetcher';
-import { LicenseContext } from '../../../../../context/LicenseContext';
+import * as hooks from '../../../../../hooks/use_fetcher';
+import { LicenseContext } from '../../../../../context/license/license_context';
 import { CustomLinkOverview } from '.';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../../utils/testHelpers';
-import * as saveCustomLink from './CustomLinkFlyout/saveCustomLink';
-import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
+import * as saveCustomLink from './CreateEditCustomLinkFlyout/saveCustomLink';
+import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 
 const data = [
   {
@@ -36,7 +41,7 @@ const data = [
 
 describe('CustomLink', () => {
   beforeAll(() => {
-    jest.spyOn(apmApi, 'callApmApi').mockReturnValue({});
+    jest.spyOn(apmApi, 'callApmApi').mockResolvedValue({});
   });
   afterAll(() => {
     jest.resetAllMocks();
@@ -181,7 +186,7 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(editButtons[0]);
       });
-      await wait(() =>
+      await waitFor(() =>
         expect(component.queryByText('Create link')).toBeInTheDocument()
       );
       await act(async () => {

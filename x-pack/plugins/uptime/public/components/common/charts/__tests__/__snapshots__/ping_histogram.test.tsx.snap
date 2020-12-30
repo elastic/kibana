@@ -273,7 +273,7 @@ exports[`PingHistogram component shallow renders the component without errors 1`
               "y": 1,
             },
           ],
-          "interval": "1s",
+          "minInterval": 60,
         }
       }
     />

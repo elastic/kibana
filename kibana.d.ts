@@ -28,7 +28,6 @@ export { Public, Server };
 /**
  * All exports from TS ambient definitions (where types are added for JS source in a .d.ts file).
  */
-import * as LegacyKibanaPluginSpec from './src/legacy/plugin_discovery/plugin_spec/plugin_spec_options';
 import * as LegacyKibanaServer from './src/legacy/server/kbn_server';
 
 /**
@@ -39,8 +38,4 @@ export namespace Legacy {
   export type Request = LegacyKibanaServer.Request;
   export type ResponseToolkit = LegacyKibanaServer.ResponseToolkit;
   export type Server = LegacyKibanaServer.Server;
-
-  export type InitPluginFunction = LegacyKibanaPluginSpec.InitPluginFunction;
-  export type UiExports = LegacyKibanaPluginSpec.UiExports;
-  export type PluginSpecOptions = LegacyKibanaPluginSpec.PluginSpecOptions;
 }

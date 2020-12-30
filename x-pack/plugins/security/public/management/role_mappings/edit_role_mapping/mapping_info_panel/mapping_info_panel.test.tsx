@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test/jest';
 import { Role, RoleMapping } from '../../../../../common/model';
 import { RolesAPIClient } from '../../../roles';
 import { DocumentationLinksService } from '../../documentation_links';

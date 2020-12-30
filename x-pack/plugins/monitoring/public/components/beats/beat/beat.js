@@ -133,9 +133,11 @@ export function Beat({ summary, metrics, ...props }) {
       <EuiPageBody>
         <EuiPanel>
           <SummaryStatus metrics={summarytStatsTop} data-test-subj="beatSummaryStatus01" />
-          <SummaryStatus metrics={summarytStatsBot} data-test-subj="beatSummaryStatus02" />
         </EuiPanel>
         <EuiSpacer size="m" />
+        <EuiPanel>
+          <SummaryStatus metrics={summarytStatsBot} data-test-subj="beatSummaryStatus02" />
+        </EuiPanel>
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (

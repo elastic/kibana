@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObjectMetaData } from 'src/plugins/saved_objects/public';
+import { SavedObjectMetaData, OnSaveProps } from 'src/plugins/saved_objects/public';
 import { first } from 'rxjs/operators';
 import { SavedObjectAttributes } from '../../../../core/public';
 import {
@@ -26,6 +26,7 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   IContainer,
+  AttributeService,
 } from '../../../embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
@@ -50,7 +51,7 @@ import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_obje
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { AttributeService } from '../../../dashboard/public';
+import { checkForDuplicateTitle } from '../../../saved_objects/public';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;
@@ -58,7 +59,7 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
-    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'dashboard'>
+    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'dashboard' | 'savedObjectsClient'>
   >;
 }
 
@@ -125,11 +126,14 @@ export class VisualizeEmbeddableFactory
     if (!this.attributeService) {
       this.attributeService = await this.deps
         .start()
-        .plugins.dashboard.getAttributeService<
+        .plugins.embeddable.getAttributeService<
           VisualizeSavedObjectAttributes,
           VisualizeByValueInput,
           VisualizeByReferenceInput
-        >(this.type, { customSaveMethod: this.onSave });
+        >(this.type, {
+          saveMethod: this.saveMethod.bind(this),
+          checkForDuplicateTitle: this.checkTitle.bind(this),
+        });
     }
     return this.attributeService!;
   }
@@ -183,10 +187,7 @@ export class VisualizeEmbeddableFactory
     }
   }
 
-  private async onSave(
-    type: string,
-    attributes: VisualizeSavedObjectAttributes
-  ): Promise<{ id: string }> {
+  private async saveMethod(attributes: VisualizeSavedObjectAttributes): Promise<{ id: string }> {
     try {
       const { title, savedVis } = attributes;
       const visObj = attributes.vis;
@@ -224,5 +225,25 @@ export class VisualizeEmbeddableFactory
     } catch (error) {
       throw error;
     }
+  }
+
+  public async checkTitle(props: OnSaveProps): Promise<true> {
+    const savedObjectsClient = await this.deps.start().core.savedObjects.client;
+    const overlays = await this.deps.start().core.overlays;
+    return checkForDuplicateTitle(
+      {
+        title: props.newTitle,
+        copyOnSave: false,
+        lastSavedTitle: '',
+        getEsType: () => this.type,
+        getDisplayName: this.getDisplayName || (() => this.type),
+      },
+      props.isTitleDuplicateConfirmed,
+      props.onTitleDuplicate,
+      {
+        savedObjectsClient,
+        overlays,
+      }
+    );
   }
 }

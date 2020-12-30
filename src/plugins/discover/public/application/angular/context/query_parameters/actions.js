@@ -19,6 +19,7 @@
 
 import _ from 'lodash';
 import { esFilters } from '../../../../../../data/public';
+import { popularizeField } from '../../../helpers/popularize_field';
 
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE, QUERY_PARAMETER_KEYS } from './constants';
 
@@ -56,7 +57,7 @@ export function getQueryParameterActions(filterManager, indexPatterns) {
     filterManager.addFilters(newFilters);
     if (indexPatterns) {
       const indexPattern = await indexPatterns.get(indexPatternId);
-      indexPattern.popularizeField(field.name, 1);
+      await popularizeField(indexPattern, field.name, indexPatterns);
     }
   };
 

@@ -4,6 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export interface CodeSignature {
+  subject_name: string[];
+  trusted: string[];
+}
+export interface Ext {
+  code_signature: CodeSignature[] | CodeSignature;
+}
+export interface Hash {
+  sha256: string[];
+}
+
 export interface FileEcs {
   name?: string[];
 
@@ -12,6 +23,8 @@ export interface FileEcs {
   target_path?: string[];
 
   extension?: string[];
+
+  Ext?: Ext;
 
   type?: string[];
 
@@ -34,4 +47,6 @@ export interface FileEcs {
   mtime?: string[];
 
   ctime?: string[];
+
+  hash?: Hash;
 }

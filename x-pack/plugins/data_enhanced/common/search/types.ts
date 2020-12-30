@@ -4,20 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEsSearchRequest } from '../../../../../src/plugins/data/common';
+import { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
+import { ApiResponse, TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
+
+import {
+  ISearchOptions,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+} from '../../../../../src/plugins/data/common';
 
 export const ENHANCED_ES_SEARCH_STRATEGY = 'ese';
 
-export interface IAsyncSearchRequest extends IEsSearchRequest {
-  /**
-   * The ID received from the response from the initial request
-   */
-  id?: string;
+export const EQL_SEARCH_STRATEGY = 'eql';
+
+export type EqlRequestParams = EqlSearch<Record<string, unknown>>;
+
+export interface EqlSearchStrategyRequest extends IKibanaSearchRequest<EqlRequestParams> {
+  options?: TransportRequestOptions;
 }
 
-export interface IEnhancedEsSearchRequest extends IEsSearchRequest {
+export type EqlSearchStrategyResponse<T = unknown> = IKibanaSearchResponse<ApiResponse<T>>;
+
+export interface IAsyncSearchOptions extends ISearchOptions {
   /**
-   * Used to determine whether to use the _rollups_search or a regular search endpoint.
+   * The number of milliseconds to wait between receiving a response and sending another request
    */
-  isRollup?: boolean;
+  pollInterval?: number;
 }

@@ -27,8 +27,6 @@ const defaultProps = {
   termFields: [],
   topHitsSplitField: null,
   topHitsSize: 1,
-  supportsMvt: true,
-  mvtDisabledReason: null,
 };
 
 describe('scaling form', () => {
@@ -53,18 +51,6 @@ describe('scaling form', () => {
   test('should render top hits form when scaling type is TOP_HITS', async () => {
     const component = shallow(
       <ScalingForm {...defaultProps} scalingType={SCALING_TYPES.TOP_HITS} />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
-  test('should disable mvt option when mvt is not supported', async () => {
-    const component = shallow(
-      <ScalingForm
-        {...defaultProps}
-        supportsMvt={false}
-        mvtDisabledReason={'Simulated mvt disabled'}
-      />
     );
 
     expect(component).toMatchSnapshot();

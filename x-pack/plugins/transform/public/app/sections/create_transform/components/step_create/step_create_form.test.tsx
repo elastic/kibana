@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { StepCreateForm } from './step_create_form';
+import { StepCreateForm, StepCreateFormProps } from './step_create_form';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../../app/app_dependencies');
@@ -15,10 +15,21 @@ jest.mock('../../../../../app/app_dependencies');
 describe('Transform: <StepCreateForm />', () => {
   test('Minimal initialization', () => {
     // Arrange
-    const props = {
+    const props: StepCreateFormProps = {
       createIndexPattern: false,
       transformId: 'the-transform-id',
-      transformConfig: {},
+      transformConfig: {
+        dest: {
+          index: 'the-destination-index',
+        },
+        pivot: {
+          group_by: {},
+          aggregations: {},
+        },
+        source: {
+          index: 'the-source-index',
+        },
+      },
       overrides: { created: false, started: false, indexPatternId: undefined },
       onChange() {},
     };

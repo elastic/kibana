@@ -50,7 +50,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
     name: i18n.translate(
       'xpack.security.management.editRole.spaceAwarePrivilegeForm.globalSpacesName',
       {
-        defaultMessage: '* Global (all spaces)',
+        defaultMessage: '* All Spaces',
       }
     ),
     color: '#D3DAE6',
@@ -198,7 +198,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
       >
         <FormattedMessage
           id="xpack.security.management.editRole.spacePrivilegeSection.addSpacePrivilegeButton"
-          defaultMessage="Add space privilege"
+          defaultMessage="Add Kibana privilege"
         />
       </EuiButton>
     );

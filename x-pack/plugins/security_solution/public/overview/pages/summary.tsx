@@ -13,8 +13,8 @@ import { ADD_DATA_PATH } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 
 export const Summary = React.memo(() => {
-  const docLinks = useKibana().services.docLinks;
-
+  const { docLinks, http } = useKibana().services;
+  const basePath = http.basePath.get();
   return (
     <EuiFlexItem>
       <EuiText>
@@ -39,7 +39,7 @@ export const Summary = React.memo(() => {
                 </EuiLink>
               ),
               data: (
-                <EuiLink href={ADD_DATA_PATH}>
+                <EuiLink href={`${basePath}${ADD_DATA_PATH}`}>
                   <FormattedMessage
                     id="xpack.securitySolution.overview.startedText.dataLinkText"
                     defaultMessage="ingesting data"

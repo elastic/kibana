@@ -16,8 +16,6 @@ import {
   SortField,
   SourceConfiguration,
   TimerangeInput,
-  Maybe,
-  HistogramType,
   DocValueFieldsInput,
 } from '../../graphql/types';
 
@@ -117,11 +115,6 @@ export interface RequestBasicOptions {
   filterQuery: ESQuery | undefined;
   defaultIndex: string[];
   docValueFields?: DocValueFieldsInput[];
-}
-
-export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
-  stackByField: Maybe<string>;
-  histogramType: HistogramType;
 }
 
 export interface RequestOptions extends RequestBasicOptions {

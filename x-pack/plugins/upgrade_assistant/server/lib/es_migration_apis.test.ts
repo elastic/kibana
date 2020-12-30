@@ -34,6 +34,7 @@ describe('getUpgradeAssistantStatus', () => {
   });
 
   beforeEach(() => {
+    // @ts-expect-error mock data is too loosely typed
     deprecationsResponse = _.cloneDeep(fakeDeprecations);
   });
 

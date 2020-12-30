@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { OnColumnRemoved } from '../../../events';
@@ -18,7 +18,7 @@ interface Props {
   header: ColumnHeaderOptions;
   isLoading: boolean;
   onColumnRemoved: OnColumnRemoved;
-  sort: Sort;
+  sort: Sort[];
 }
 
 /** Given a `header`, returns the `SortDirection` applicable to it */
@@ -26,27 +26,34 @@ interface Props {
 export const CloseButton = React.memo<{
   columnId: string;
   onColumnRemoved: OnColumnRemoved;
-}>(({ columnId, onColumnRemoved }) => (
-  <EuiButtonIcon
-    aria-label={i18n.REMOVE_COLUMN}
-    color="text"
-    data-test-subj="remove-column"
-    iconType="cross"
-    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+}>(({ columnId, onColumnRemoved }) => {
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
       // To avoid a re-sorting when you delete a column
       event.preventDefault();
       event.stopPropagation();
       onColumnRemoved(columnId);
-    }}
-  />
-));
+    },
+    [columnId, onColumnRemoved]
+  );
+
+  return (
+    <EuiButtonIcon
+      aria-label={i18n.REMOVE_COLUMN}
+      color="text"
+      data-test-subj="remove-column"
+      iconType="cross"
+      onClick={handleClick}
+    />
+  );
+});
 
 CloseButton.displayName = 'CloseButton';
 
 export const Actions = React.memo<Props>(({ header, onColumnRemoved, sort, isLoading }) => {
   return (
     <>
-      {sort.columnId === header.id && isLoading ? (
+      {sort.some((i) => i.columnId === header.id) && isLoading ? (
         <EventsHeadingExtra className="siemEventsHeading__extra--loading">
           <EventsLoading data-test-subj="timeline-loading-spinner" />
         </EventsHeadingExtra>

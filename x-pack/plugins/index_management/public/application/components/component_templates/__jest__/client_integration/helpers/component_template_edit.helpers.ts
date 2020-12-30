@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed, TestBed, TestBedConfig } from '../../../../../../../../../test_utils';
+import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { BASE_PATH } from '../../../../../../../common';
 import { ComponentTemplateEdit } from '../../../component_template_wizard';
 

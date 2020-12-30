@@ -27,7 +27,14 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
   const log = getService('log');
   const globalNav = getService('globalNav');
   const listingTable = getService('listingTable');
-  const { common, header, visEditor } = getPageObjects(['common', 'header', 'visEditor']);
+  const queryBar = getService('queryBar');
+  const elasticChart = getService('elasticChart');
+  const { common, header, visEditor, visChart } = getPageObjects([
+    'common',
+    'header',
+    'visEditor',
+    'visChart',
+  ]);
 
   /**
    * This page object contains the visualization type selection, the landing page,
@@ -47,6 +54,14 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       await listingTable.clickNewButton('createVisualizationPromptButton');
     }
 
+    public async clickAggBasedVisualizations() {
+      await testSubjects.click('visGroupAggBasedExploreLink');
+    }
+
+    public async goBackToGroups() {
+      await testSubjects.click('goBackLink');
+    }
+
     public async createVisualizationPromptButton() {
       await testSubjects.click('createVisualizationPromptButton');
     }
@@ -59,6 +74,21 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
         .map((chart) => $(chart).findTestSubject('visTypeTitle').text().trim());
     }
 
+    public async getPromotedVisTypes() {
+      const chartTypeField = await testSubjects.find('visNewDialogGroups');
+      const $ = await chartTypeField.parseDomContent();
+      const promotedVisTypes: string[] = [];
+      $('button')
+        .toArray()
+        .forEach((chart) => {
+          const title = $(chart).findTestSubject('visTypeTitle').text().trim();
+          if (title) {
+            promotedVisTypes.push(title);
+          }
+        });
+      return promotedVisTypes;
+    }
+
     public async waitForVisualizationSelectPage() {
       await retry.try(async () => {
         const visualizeSelectTypePage = await testSubjects.find('visNewDialogTypes');
@@ -68,9 +98,34 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
       });
     }
 
+    public async clickRefresh() {
+      if (await visChart.isNewChartUiEnabled()) {
+        await elasticChart.setNewChartUiDebugFlag();
+      }
+      await queryBar.clickQuerySubmitButton();
+    }
+
+    public async waitForGroupsSelectPage() {
+      await retry.try(async () => {
+        const visualizeSelectGroupStep = await testSubjects.find('visNewDialogGroups');
+        if (!(await visualizeSelectGroupStep.isDisplayed())) {
+          throw new Error('wait for vis groups select step');
+        }
+      });
+    }
+
     public async navigateToNewVisualization() {
       await common.navigateToApp('visualize');
+      await header.waitUntilLoadingHasFinished();
       await this.clickNewVisualization();
+      await this.waitForGroupsSelectPage();
+    }
+
+    public async navigateToNewAggBasedVisualization() {
+      await common.navigateToApp('visualize');
+      await header.waitUntilLoadingHasFinished();
+      await this.clickNewVisualization();
+      await this.clickAggBasedVisualizations();
       await this.waitForVisualizationSelectPage();
     }
 
@@ -361,6 +416,20 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     public async notLinkedToOriginatingApp() {
       await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('visualizesaveAndReturnButton');
+    }
+
+    public async cancelAndReturn(showConfirmModal: boolean) {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('visualizeCancelAndReturnButton');
+      await testSubjects.click('visualizeCancelAndReturnButton');
+      if (showConfirmModal) {
+        await retry.waitFor(
+          'confirm modal to show',
+          async () => await testSubjects.exists('appLeaveConfirmModal')
+        );
+        await testSubjects.exists('confirmModalConfirmButton');
+        await testSubjects.click('confirmModalConfirmButton');
+      }
     }
   }
 

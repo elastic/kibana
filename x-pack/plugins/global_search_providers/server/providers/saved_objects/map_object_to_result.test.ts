@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsFindResult, SavedObjectsType, SavedObjectTypeRegistry } from 'src/core/server';
+import {
+  SavedObjectsFindResult,
+  SavedObjectsType,
+  SavedObjectTypeRegistry,
+  Capabilities,
+} from 'src/core/server';
 import { mapToResult, mapToResults } from './map_object_to_result';
+import { SavedObjectReference } from 'src/core/types';
 
 const createType = (props: Partial<SavedObjectsType>): SavedObjectsType => {
   return {
@@ -19,12 +25,13 @@ const createType = (props: Partial<SavedObjectsType>): SavedObjectsType => {
 
 const createObject = <T>(
   props: Partial<SavedObjectsFindResult>,
-  attributes: T
+  attributes: T,
+  references: SavedObjectReference[] = []
 ): SavedObjectsFindResult<T> => {
   return {
     id: 'id',
     type: 'dashboard',
-    references: [],
+    references,
     score: 100,
     ...props,
     attributes,
@@ -37,6 +44,7 @@ describe('mapToResult', () => {
       name: 'dashboard',
       management: {
         defaultSearchField: 'title',
+        icon: 'dashboardApp',
         getInAppUrl: (obj) => ({ path: `/dashboard/${obj.id}`, uiCapabilitiesPath: '' }),
       },
     });
@@ -57,7 +65,9 @@ describe('mapToResult', () => {
       title: 'My dashboard',
       type: 'dashboard',
       url: '/dashboard/dash1',
+      icon: 'dashboardApp',
       score: 42,
+      meta: { tagIds: [] },
     });
   });
 
@@ -111,18 +121,17 @@ describe('mapToResult', () => {
 
 describe('mapToResults', () => {
   let typeRegistry: SavedObjectTypeRegistry;
+  let capabilities: Capabilities;
 
   beforeEach(() => {
     typeRegistry = new SavedObjectTypeRegistry();
-  });
 
-  it('converts savedObjects to results', () => {
     typeRegistry.registerType(
       createType({
         name: 'typeA',
         management: {
           defaultSearchField: 'title',
-          getInAppUrl: (obj) => ({ path: `/type-a/${obj.id}`, uiCapabilitiesPath: '' }),
+          getInAppUrl: (obj) => ({ path: `/type-a/${obj.id}`, uiCapabilitiesPath: 'test.typeA' }),
         },
       })
     );
@@ -131,7 +140,7 @@ describe('mapToResults', () => {
         name: 'typeB',
         management: {
           defaultSearchField: 'description',
-          getInAppUrl: (obj) => ({ path: `/type-b/${obj.id}`, uiCapabilitiesPath: 'foo' }),
+          getInAppUrl: (obj) => ({ path: `/type-b/${obj.id}`, uiCapabilitiesPath: 'test.typeB' }),
         },
       })
     );
@@ -140,11 +149,37 @@ describe('mapToResults', () => {
         name: 'typeC',
         management: {
           defaultSearchField: 'excerpt',
-          getInAppUrl: (obj) => ({ path: `/type-c/${obj.id}`, uiCapabilitiesPath: 'bar' }),
+          getInAppUrl: (obj) => ({ path: `/type-c/${obj.id}`, uiCapabilitiesPath: 'test.typeC' }),
+        },
+      })
+    );
+    typeRegistry.registerType(
+      createType({
+        name: 'inaccessibleType',
+        management: {
+          defaultSearchField: 'excerpt',
+          getInAppUrl: (obj) => ({
+            path: `/inaccessible-type/${obj.id}`,
+            uiCapabilitiesPath: 'test.inaccessibleType',
+          }),
         },
       })
     );
 
+    capabilities = {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      test: {
+        typeA: true,
+        typeB: true,
+        typeC: true,
+        inacessibleType: false,
+      },
+    };
+  });
+
+  it('converts savedObjects to results', () => {
     const results = [
       createObject(
         {
@@ -166,7 +201,12 @@ describe('mapToResults', () => {
         {
           excerpt: 'titleC',
           title: 'foo',
-        }
+        },
+        [
+          { name: 'tag A', type: 'tag', id: '1' },
+          { name: 'tag B', type: 'tag', id: '2' },
+          { name: 'not-tag', type: 'not-tag', id: '1' },
+        ]
       ),
       createObject(
         {
@@ -181,13 +221,14 @@ describe('mapToResults', () => {
       ),
     ];
 
-    expect(mapToResults(results, typeRegistry)).toEqual([
+    expect(mapToResults(results, typeRegistry, capabilities)).toEqual([
       {
         id: 'resultA',
         title: 'titleA',
         type: 'typeA',
         url: '/type-a/resultA',
         score: 100,
+        meta: { tagIds: [] },
       },
       {
         id: 'resultC',
@@ -195,6 +236,7 @@ describe('mapToResults', () => {
         type: 'typeC',
         url: '/type-c/resultC',
         score: 42,
+        meta: { tagIds: ['1', '2'] },
       },
       {
         id: 'resultB',
@@ -202,6 +244,45 @@ describe('mapToResults', () => {
         type: 'typeB',
         url: '/type-b/resultB',
         score: 69,
+        meta: { tagIds: [] },
+      },
+    ]);
+  });
+
+  it('filters results without permissions', () => {
+    const results = [
+      createObject(
+        {
+          id: 'resultA',
+          type: 'typeA',
+          score: 100,
+        },
+        {
+          title: 'titleA',
+          field: 'noise',
+        }
+      ),
+      createObject(
+        {
+          id: 'inaccessibleResult',
+          type: 'inaccessibleType',
+          score: 92,
+        },
+        {
+          excerpt: 'inaccessibleTitle',
+          title: 'inaccessible',
+        }
+      ),
+    ];
+
+    expect(mapToResults(results, typeRegistry, capabilities)).toEqual([
+      {
+        id: 'resultA',
+        title: 'titleA',
+        type: 'typeA',
+        url: '/type-a/resultA',
+        score: 100,
+        meta: { tagIds: [] },
       },
     ]);
   });

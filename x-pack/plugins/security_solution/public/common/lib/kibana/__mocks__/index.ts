@@ -12,9 +12,25 @@ import {
   createStartServicesMock,
   createWithKibanaMock,
 } from '../kibana_react.mock';
-
+const mockStartServicesMock = createStartServicesMock();
 export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => '8.0.0') };
-export const useKibana = jest.fn().mockReturnValue({ services: createStartServicesMock() });
+export const useKibana = jest.fn().mockReturnValue({
+  services: {
+    ...mockStartServicesMock,
+    data: {
+      ...mockStartServicesMock.data,
+      search: {
+        ...mockStartServicesMock.data.search,
+        search: jest.fn().mockImplementation(() => ({
+          subscribe: jest.fn().mockImplementation(() => ({
+            error: jest.fn(),
+            next: jest.fn(),
+          })),
+        })),
+      },
+    },
+  },
+});
 export const useUiSetting = jest.fn(createUseUiSettingMock());
 export const useUiSetting$ = jest.fn(createUseUiSetting$Mock());
 export const useHttp = jest.fn().mockReturnValue(createStartServicesMock().http);

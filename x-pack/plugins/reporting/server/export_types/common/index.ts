@@ -9,3 +9,21 @@ export { getConditionalHeaders } from './get_conditional_headers';
 export { getFullUrls } from './get_full_urls';
 export { omitBlockedHeaders } from './omit_blocked_headers';
 export { validateUrls } from './validate_urls';
+
+export interface TimeRangeParams {
+  timezone: string;
+  min?: Date | string | number | null;
+  max?: Date | string | number | null;
+}
+
+export interface ConditionalHeadersConditions {
+  protocol: string;
+  hostname: string;
+  port: number;
+  basePath: string;
+}
+
+export interface ConditionalHeaders {
+  headers: Record<string, string>;
+  conditions: ConditionalHeadersConditions;
+}

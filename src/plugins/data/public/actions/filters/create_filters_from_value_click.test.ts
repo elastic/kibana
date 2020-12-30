@@ -25,8 +25,10 @@ import {
 } from '../../../public';
 import { dataPluginMock } from '../../../public/mocks';
 import { setIndexPatterns, setSearchService } from '../../../public/services';
-import { createFiltersFromValueClickAction } from './create_filters_from_value_click';
-import { ValueClickContext } from '../../../../embeddable/public';
+import {
+  createFiltersFromValueClickAction,
+  ValueClickDataContext,
+} from './create_filters_from_value_click';
 
 const mockField = {
   name: 'bytes',
@@ -34,7 +36,7 @@ const mockField = {
 };
 
 describe('createFiltersFromValueClick', () => {
-  let dataPoints: ValueClickContext['data']['data'];
+  let dataPoints: ValueClickDataContext['data'];
 
   beforeEach(() => {
     dataPoints = [
@@ -45,12 +47,16 @@ describe('createFiltersFromValueClick', () => {
               name: 'test',
               id: '1-1',
               meta: {
-                type: 'histogram',
-                indexPatternId: 'logstash-*',
-                aggConfigParams: {
-                  field: 'bytes',
-                  interval: 30,
-                  otherBucket: true,
+                type: 'date',
+                source: 'esaggs',
+                sourceParams: {
+                  indexPatternId: 'logstash-*',
+                  type: 'histogram',
+                  params: {
+                    field: 'bytes',
+                    interval: 30,
+                    otherBucket: true,
+                  },
                 },
               },
             },
@@ -91,9 +97,7 @@ describe('createFiltersFromValueClick', () => {
   });
 
   test('handles an event when aggregations type is a terms', async () => {
-    if (dataPoints[0].table.columns[0].meta) {
-      dataPoints[0].table.columns[0].meta.type = 'terms';
-    }
+    (dataPoints[0].table.columns[0].meta.sourceParams as any).type = 'terms';
     const filters = await createFiltersFromValueClickAction({ data: dataPoints });
 
     expect(filters.length).toEqual(1);

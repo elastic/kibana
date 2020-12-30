@@ -14,14 +14,13 @@ export const createFeature = (
     excludeFromBaseAll?: boolean;
     excludeFromBaseRead?: boolean;
     privileges?: KibanaFeatureConfig['privileges'];
+    category?: KibanaFeatureConfig['category'];
   }
 ) => {
-  const { excludeFromBaseAll, excludeFromBaseRead, privileges, ...rest } = config;
+  const { excludeFromBaseAll, excludeFromBaseRead, privileges, category, ...rest } = config;
   return new KibanaFeature({
-    icon: 'discoverApp',
-    navLinkId: 'discover',
     app: [],
-    category: { id: 'foo', label: 'foo' },
+    category: category ?? { id: 'foo', label: 'foo' },
     catalogue: [],
     privileges:
       privileges === null

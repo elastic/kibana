@@ -21,37 +21,35 @@ import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { KIBANA_STATS_TYPE } from '../../../common/constants';
-import { getSavedObjectsCounts } from './get_saved_object_counts';
+import { getSavedObjectsCounts, KibanaSavedObjectCounts } from './get_saved_object_counts';
+
+interface KibanaUsage extends KibanaSavedObjectCounts {
+  index: string;
+}
 
 export function getKibanaUsageCollector(
   usageCollection: UsageCollectionSetup,
   legacyConfig$: Observable<SharedGlobalConfig>
 ) {
-  return usageCollection.makeUsageCollector({
+  return usageCollection.makeUsageCollector<KibanaUsage>({
     type: 'kibana',
     isReady: () => true,
-    async fetch(callCluster) {
+    schema: {
+      index: { type: 'keyword' },
+      dashboard: { total: { type: 'long' } },
+      visualization: { total: { type: 'long' } },
+      search: { total: { type: 'long' } },
+      index_pattern: { total: { type: 'long' } },
+      graph_workspace: { total: { type: 'long' } },
+      timelion_sheet: { total: { type: 'long' } },
+    },
+    async fetch({ esClient }) {
       const {
         kibana: { index },
       } = await legacyConfig$.pipe(take(1)).toPromise();
       return {
         index,
-        ...(await getSavedObjectsCounts(callCluster, index)),
-      };
-    },
-
-    /*
-     * Format the response data into a model for internal upload
-     * 1. Make this data part of the "kibana_stats" type
-     * 2. Organize the payload in the usage namespace of the data payload (usage.index, etc)
-     */
-    formatForBulkUpload: (result) => {
-      return {
-        type: KIBANA_STATS_TYPE,
-        payload: {
-          usage: result,
-        },
+        ...(await getSavedObjectsCounts(esClient, index)),
       };
     },
   });

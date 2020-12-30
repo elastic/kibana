@@ -278,7 +278,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
     );
 
     const RequestTab = () => {
-      const includeTypeName = doMappingsHaveType(template!.template.mappings);
+      const includeTypeName = doMappingsHaveType(template!.template?.mappings);
       const esApiEndpoint = isLegacy ? '_template' : '_index_template';
       const endpoint = `PUT ${esApiEndpoint}/${name || '<templateName>'}${
         includeTypeName ? '?include_type_name' : ''

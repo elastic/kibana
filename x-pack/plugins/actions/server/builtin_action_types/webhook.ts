@@ -16,6 +16,7 @@ import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from 
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { Logger } from '../../../../../src/core/server';
 import { request } from './lib/axios_utils';
+import { renderMustacheString } from '../lib/mustache_renderer';
 
 // config definition
 export enum WebhookMethods {
@@ -42,6 +43,7 @@ const configSchemaProps = {
     defaultValue: WebhookMethods.POST,
   }),
   headers: nullableType(HeadersSchema),
+  hasAuth: schema.boolean({ defaultValue: true }),
 };
 const ConfigSchema = schema.object(configSchemaProps);
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
@@ -90,7 +92,18 @@ export function getActionType({
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
+    renderParameterTemplates,
     executor: curry(executor)({ logger }),
+  };
+}
+
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>
+): ActionParamsType {
+  if (!params.body) return params;
+  return {
+    body: renderMustacheString(params.body, variables, 'json'),
   };
 }
 
@@ -128,12 +141,12 @@ export async function executor(
   execOptions: WebhookActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const { method, url, headers = {} } = execOptions.config;
+  const { method, url, headers = {}, hasAuth } = execOptions.config;
   const { body: data } = execOptions.params;
 
   const secrets: ActionTypeSecretsType = execOptions.secrets;
   const basicAuth =
-    isString(secrets.user) && isString(secrets.password)
+    hasAuth && isString(secrets.user) && isString(secrets.password)
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
 

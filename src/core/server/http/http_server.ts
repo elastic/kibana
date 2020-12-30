@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Server } from 'hapi';
-import HapiStaticFiles from 'inert';
+import { Server, ServerRoute } from '@hapi/hapi';
+import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
+import uuid from 'uuid';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
@@ -118,7 +119,7 @@ export class HttpServer {
     await this.server.register([HapiStaticFiles]);
     this.config = config;
 
-    const basePathService = new BasePath(config.basePath);
+    const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
     this.setupRequestStateAssignment(config);
@@ -166,8 +167,6 @@ export class HttpServer {
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
         this.log.debug(`registering route handler for [${route.path}]`);
-        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
-        const validate = isSafeMethod(route.method) ? undefined : { payload: true };
         const { authRequired, tags, body = {}, timeout } = route.options;
         const { accepts: allow, maxBytes, output, parse } = body;
 
@@ -175,57 +174,45 @@ export class HttpServer {
           xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
         };
 
-        // To work around https://github.com/hapijs/hapi/issues/4122 until v20, set the socket
-        // timeout on the route to a fake timeout only when the payload timeout is specified.
-        // Within the onPreAuth lifecycle of the route itself, we'll override the timeout with the
-        // real socket timeout.
-        const fakeSocketTimeout = timeout?.payload ? timeout.payload + 1 : undefined;
-
-        this.server.route({
+        const routeOpts: ServerRoute = {
           handler: route.handler,
           method: route.method,
           path: route.path,
           options: {
             auth: this.getAuthOption(authRequired),
             app: kibanaRouteOptions,
-            ext: {
-              onPreAuth: {
-                method: (request, h) => {
-                  // At this point, the socket timeout has only been set to work-around the HapiJS bug.
-                  // We need to either set the real per-route timeout or use the default idle socket timeout
-                  if (timeout?.idleSocket) {
-                    request.raw.req.socket.setTimeout(timeout.idleSocket);
-                  } else if (fakeSocketTimeout) {
-                    // NodeJS uses a socket timeout of `0` to denote "no timeout"
-                    request.raw.req.socket.setTimeout(this.config!.socketTimeout ?? 0);
-                  }
-
-                  return h.continue;
-                },
-              },
-            },
             tags: tags ? Array.from(tags) : undefined,
-            // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
-            // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
-            // validation applied in ./http_tools#getServerOptions
-            // (All NP routes are already required to specify their own validation in order to access the payload)
-            validate,
-            payload: [allow, maxBytes, output, parse, timeout?.payload].some(
-              (v) => typeof v !== 'undefined'
-            )
+            // @ts-expect-error Types are outdated and doesn't allow `payload.multipart` to be `true`
+            payload: [allow, maxBytes, output, parse, timeout?.payload].some((x) => x !== undefined)
               ? {
                   allow,
                   maxBytes,
                   output,
                   parse,
                   timeout: timeout?.payload,
+                  multipart: true,
                 }
               : undefined,
             timeout: {
-              socket: fakeSocketTimeout,
+              socket: timeout?.idleSocket ?? this.config!.socketTimeout,
             },
           },
-        });
+        };
+
+        // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
+        if (!isSafeMethod(route.method)) {
+          // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
+          // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
+          // validation applied in ./http_tools#getServerOptions
+          // (All NP routes are already required to specify their own validation in order to access the payload)
+          // TODO: Move the setting of the validate option back up to being set at `routeOpts` creation-time once
+          // https://github.com/hapijs/hoek/pull/365 is merged and released in @hapi/hoek v9.1.1. At that point I
+          // imagine the ts-error below will go away as well.
+          // @ts-expect-error "Property 'validate' does not exist on type 'RouteOptions'" <-- ehh?!? yes it does!
+          routeOpts.options!.validate = { payload: true };
+        }
+
+        this.server.route(routeOpts);
       }
     }
 
@@ -244,8 +231,11 @@ export class HttpServer {
       return;
     }
 
-    this.log.debug('stopping http server');
-    await this.server.stop();
+    const hasStarted = this.server.info.started > 0;
+    if (hasStarted) {
+      this.log.debug('stopping http server');
+      await this.server.stop();
+    }
   }
 
   private getAuthOption(
@@ -270,7 +260,7 @@ export class HttpServer {
     }
 
     this.registerOnPreRouting((request, response, toolkit) => {
-      const oldUrl = request.url.href!;
+      const oldUrl = request.url.pathname + request.url.search;
       const newURL = basePathService.remove(oldUrl);
       const shouldRedirect = newURL !== oldUrl;
       if (shouldRedirect) {
@@ -315,6 +305,7 @@ export class HttpServer {
       request.app = {
         ...(request.app ?? {}),
         requestId: getRequestId(request, config.requestId),
+        requestUuid: uuid.v4(),
       } as KibanaRequestState;
       return responseToolkit.continue;
     });

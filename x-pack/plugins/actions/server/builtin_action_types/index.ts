@@ -17,17 +17,22 @@ import { getActionType as getWebhookActionType } from './webhook';
 import { getActionType as getServiceNowActionType } from './servicenow';
 import { getActionType as getJiraActionType } from './jira';
 import { getActionType as getResilientActionType } from './resilient';
+import { getActionType as getTeamsActionType } from './teams';
 
 export function registerBuiltInActionTypes({
   actionsConfigUtils: configurationUtilities,
   actionTypeRegistry,
   logger,
+  publicBaseUrl,
 }: {
   actionsConfigUtils: ActionsConfigurationUtilities;
   actionTypeRegistry: ActionTypeRegistry;
   logger: Logger;
+  publicBaseUrl?: string;
 }) {
-  actionTypeRegistry.register(getEmailActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(
+    getEmailActionType({ logger, configurationUtilities, publicBaseUrl })
+  );
   actionTypeRegistry.register(getIndexActionType({ logger }));
   actionTypeRegistry.register(getPagerDutyActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getServerLogActionType({ logger }));
@@ -36,4 +41,5 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getServiceNowActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getJiraActionType({ logger, configurationUtilities }));
   actionTypeRegistry.register(getResilientActionType({ logger, configurationUtilities }));
+  actionTypeRegistry.register(getTeamsActionType({ logger, configurationUtilities }));
 }

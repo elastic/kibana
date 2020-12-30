@@ -23,6 +23,12 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [
@@ -37,6 +43,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 gte: 'now-5m',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },
@@ -51,6 +58,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 lte: 'today',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },
@@ -94,6 +102,12 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [
@@ -108,6 +122,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 gte: 'now-5m',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },
@@ -122,6 +137,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 lte: 'today',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },
@@ -166,6 +182,12 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [
@@ -180,6 +202,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 gte: 'now-5m',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },
@@ -194,6 +217,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 lte: 'today',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },
@@ -239,6 +263,12 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [
@@ -253,6 +283,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 gte: 'now-5m',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },
@@ -267,6 +298,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 lte: 'today',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },
@@ -311,6 +343,12 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [
@@ -325,6 +363,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 gte: 'now-5m',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },
@@ -339,6 +378,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 lte: 'today',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },
@@ -390,6 +430,7 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [{ field: '@timestamp', format: 'strict_date_optional_time' }],
         query: {
           bool: {
             filter: [
@@ -404,6 +445,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 gte: 'now-5m',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },
@@ -418,6 +460,7 @@ describe('create_signals', () => {
                             range: {
                               '@timestamp': {
                                 lte: 'today',
+                                format: 'strict_date_optional_time',
                               },
                             },
                           },

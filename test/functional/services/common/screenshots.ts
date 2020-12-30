@@ -40,7 +40,7 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
   const FAILURE_DIRECTORY = resolve(config.get('screenshots.directory'), 'failure');
   const BASELINE_DIRECTORY = resolve(config.get('screenshots.directory'), 'baseline');
 
-  if (process.env.CI !== 'true') {
+  if (process.env.CI !== 'true' && !process.env.stack_functional_integration) {
     await del([SESSION_DIRECTORY, FAILURE_DIRECTORY]);
   }
 
@@ -61,6 +61,8 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
 
       if (updateBaselines) {
         log.debug('Updating baseline snapshot');
+        // Make the directory if it doesn't exist
+        await mkdirAsync(dirname(baselinePath), { recursive: true });
         await writeFileAsync(baselinePath, readFileSync(sessionPath));
         return 0;
       } else {

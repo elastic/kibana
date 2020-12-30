@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "M92ScEJT9M9QusfIi3hpEb0AAAAAAAAA",
-    "index": "metrics-endpoint.metadata_current-default",
+    "index": "metrics-endpoint.metadata_current_default",
     "source": {
       "HostDetails": {
         "@timestamp": 1579881969541,
@@ -75,7 +75,7 @@
   "type": "doc",
   "value": {
     "id": "OU3RgCJaNnR90byeDEHutp8AAAAAAAAA",
-    "index": "metrics-endpoint.metadata_current-default",
+    "index": "metrics-endpoint.metadata_current_default",
     "source": {
       "HostDetails": {
         "@timestamp": 1579881969541,
@@ -151,7 +151,7 @@
   "type": "doc",
   "value": {
     "id": "YjqDCEuI6JmLeLOSyZx_NhMAAAAAAAAA",
-    "index": "metrics-endpoint.metadata_current-default",
+    "index": "metrics-endpoint.metadata_current_default",
     "source": {
       "HostDetails": {
         "@timestamp": 1579881969541,

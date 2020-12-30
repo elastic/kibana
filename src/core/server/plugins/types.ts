@@ -262,7 +262,7 @@ export interface Plugin<
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
   kibana: ['index', 'autocompleteTerminateAfter', 'autocompleteTimeout'] as const,
-  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'startupTimeout'] as const,
+  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,
   savedObjects: ['maxImportPayloadBytes'] as const,
 };

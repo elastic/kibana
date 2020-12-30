@@ -38,12 +38,12 @@ export async function makeSampleDataUsageCollector(
     fetch: fetchProvider(index),
     isReady: () => true,
     schema: {
-      installed: { type: 'keyword' },
+      installed: { type: 'array', items: { type: 'keyword' } },
       last_install_date: { type: 'date' },
       last_install_set: { type: 'keyword' },
       last_uninstall_date: { type: 'date' },
       last_uninstall_set: { type: 'keyword' },
-      uninstalled: { type: 'keyword' },
+      uninstalled: { type: 'array', items: { type: 'keyword' } },
     },
   });
 

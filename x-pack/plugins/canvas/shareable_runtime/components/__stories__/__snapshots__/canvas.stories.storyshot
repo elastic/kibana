@@ -1324,7 +1324,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                   rel=""
                   title="Powered by Elastic.co"
                 >
-                  <div
+                  <span
                     data-euiicon-type="logoElastic"
                     size="l"
                   />
@@ -1380,7 +1380,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                     onClick={[Function]}
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
                       data-euiicon-type="arrowLeft"
@@ -1394,6 +1394,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                   <button
                     className="euiButtonEmpty euiButtonEmpty--ghost euiButtonEmpty--small"
                     data-test-subj="pageControlsCurrentPage"
+                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -1429,7 +1430,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                     onClick={[Function]}
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
                       data-euiicon-type="arrowRight"
@@ -1445,7 +1446,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+                    className="euiPopover euiPopover--anchorUpRight"
                     id="settings"
                     onKeyDown={[Function]}
                     onMouseDown={[Function]}
@@ -1459,10 +1460,11 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost"
+                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiButtonIcon__icon"
                           data-euiicon-type="gear"
@@ -2806,7 +2808,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                   rel=""
                   title="Powered by Elastic.co"
                 >
-                  <div
+                  <span
                     data-euiicon-type="logoElastic"
                     size="l"
                   />
@@ -2862,7 +2864,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                     onClick={[Function]}
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
                       data-euiicon-type="arrowLeft"
@@ -2876,6 +2878,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                   <button
                     className="euiButtonEmpty euiButtonEmpty--ghost euiButtonEmpty--small"
                     data-test-subj="pageControlsCurrentPage"
+                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -2911,7 +2914,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                     onClick={[Function]}
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
                       data-euiicon-type="arrowRight"
@@ -2927,7 +2930,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+                    className="euiPopover euiPopover--anchorUpRight"
                     id="settings"
                     onKeyDown={[Function]}
                     onMouseDown={[Function]}
@@ -2941,10 +2944,11 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost"
+                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiButtonIcon__icon"
                           data-euiicon-type="gear"
@@ -3104,7 +3108,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                   rel=""
                   title="Powered by Elastic.co"
                 >
-                  <div
+                  <span
                     data-euiicon-type="logoElastic"
                     size="l"
                   />
@@ -3160,7 +3164,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                     onClick={[Function]}
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
                       data-euiicon-type="arrowLeft"
@@ -3174,6 +3178,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                   <button
                     className="euiButtonEmpty euiButtonEmpty--ghost euiButtonEmpty--small"
                     data-test-subj="pageControlsCurrentPage"
+                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
@@ -3208,7 +3213,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                     onClick={[Function]}
                     type="button"
                   >
-                    <div
+                    <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
                       data-euiicon-type="arrowRight"
@@ -3224,7 +3229,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
+                    className="euiPopover euiPopover--anchorUpRight"
                     id="settings"
                     onKeyDown={[Function]}
                     onMouseDown={[Function]}
@@ -3238,10 +3243,11 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost"
+                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >
-                        <div
+                        <span
                           aria-hidden="true"
                           className="euiButtonIcon__icon"
                           data-euiicon-type="gear"

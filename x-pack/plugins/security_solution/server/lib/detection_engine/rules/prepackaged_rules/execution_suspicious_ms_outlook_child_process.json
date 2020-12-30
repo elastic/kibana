@@ -17,7 +17,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -37,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

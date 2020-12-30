@@ -74,6 +74,6 @@ export const EDITOR_PX_HEIGHT = {
   large: 300,
 };
 
-export type FieldsConfig = Record<string, FieldConfig>;
+export type FieldsConfig = Record<string, FieldConfig<any>>;
 
 export type FormFieldsComponent = FunctionComponent<{ initialFieldValues?: Record<string, any> }>;

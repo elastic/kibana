@@ -192,7 +192,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
               </EuiSpacer>
               <EuiPanel>
                 <div
-                  className="euiPanel euiPanel--paddingMedium"
+                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
                 >
                   <EuiEmptyPrompt
                     actions={
@@ -269,7 +269,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                         size="xxl"
                         type="logoUptime"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="logoUptime"
                           size="xxl"
@@ -374,16 +374,24 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                 href="/app/home#/tutorial/uptimeMonitors"
                               >
                                 <EuiButtonDisplay
+                                  baseClassName="euiButton"
                                   color="primary"
                                   element="a"
                                   fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
                                     className="euiButton euiButton--primary euiButton--fill"
+                                    disabled={false}
                                     href="/app/home#/tutorial/uptimeMonitors"
                                     rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
                                     <EuiButtonContent
                                       className="euiButton__content"
@@ -424,15 +432,23 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                 href="/app/uptime/settings"
                               >
                                 <EuiButtonDisplay
+                                  baseClassName="euiButton"
                                   color="primary"
                                   element="a"
                                   href="/app/uptime/settings"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
                                     className="euiButton euiButton--primary"
+                                    disabled={false}
                                     href="/app/uptime/settings"
                                     rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
                                     <EuiButtonContent
                                       className="euiButton__content"
@@ -666,7 +682,7 @@ exports[`EmptyState component doesn't render child components when count is fals
               </EuiSpacer>
               <EuiPanel>
                 <div
-                  className="euiPanel euiPanel--paddingMedium"
+                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
                 >
                   <EuiEmptyPrompt
                     actions={
@@ -743,7 +759,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                         size="xxl"
                         type="logoUptime"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="logoUptime"
                           size="xxl"
@@ -848,16 +864,24 @@ exports[`EmptyState component doesn't render child components when count is fals
                                 href="/app/home#/tutorial/uptimeMonitors"
                               >
                                 <EuiButtonDisplay
+                                  baseClassName="euiButton"
                                   color="primary"
                                   element="a"
                                   fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
                                     className="euiButton euiButton--primary euiButton--fill"
+                                    disabled={false}
                                     href="/app/home#/tutorial/uptimeMonitors"
                                     rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
                                     <EuiButtonContent
                                       className="euiButton__content"
@@ -898,15 +922,23 @@ exports[`EmptyState component doesn't render child components when count is fals
                                 href="/app/uptime/settings"
                               >
                                 <EuiButtonDisplay
+                                  baseClassName="euiButton"
                                   color="primary"
                                   element="a"
                                   href="/app/uptime/settings"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
                                     className="euiButton euiButton--primary"
+                                    disabled={false}
                                     href="/app/uptime/settings"
                                     rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
                                     <EuiButtonContent
                                       className="euiButton__content"
@@ -1145,7 +1177,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
               </EuiSpacer>
               <EuiPanel>
                 <div
-                  className="euiPanel euiPanel--paddingMedium"
+                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
                 >
                   <EuiEmptyPrompt
                     actions={
@@ -1222,7 +1254,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                         size="xxl"
                         type="logoUptime"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="logoUptime"
                           size="xxl"
@@ -1327,16 +1359,24 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                 href="/app/home#/tutorial/uptimeMonitors"
                               >
                                 <EuiButtonDisplay
+                                  baseClassName="euiButton"
                                   color="primary"
                                   element="a"
                                   fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
                                     className="euiButton euiButton--primary euiButton--fill"
+                                    disabled={false}
                                     href="/app/home#/tutorial/uptimeMonitors"
                                     rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
                                     <EuiButtonContent
                                       className="euiButton__content"
@@ -1377,15 +1417,23 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                 href="/app/uptime/settings"
                               >
                                 <EuiButtonDisplay
+                                  baseClassName="euiButton"
                                   color="primary"
                                   element="a"
                                   href="/app/uptime/settings"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
                                     className="euiButton euiButton--primary"
+                                    disabled={false}
                                     href="/app/uptime/settings"
                                     rel="noreferrer"
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                   >
                                     <EuiButtonContent
                                       className="euiButton__content"
@@ -1707,7 +1755,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
             >
               <EuiPanel>
                 <div
-                  className="euiPanel euiPanel--paddingMedium"
+                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
                 >
                   <EuiEmptyPrompt
                     body={
@@ -1737,7 +1785,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
                         size="xxl"
                         type="securityApp"
                       >
-                        <div
+                        <span
                           color="subdued"
                           data-euiicon-type="securityApp"
                           size="xxl"

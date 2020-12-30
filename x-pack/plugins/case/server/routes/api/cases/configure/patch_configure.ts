@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -13,10 +13,15 @@ import {
   CasesConfigurePatchRt,
   CaseConfigureResponseRt,
   throwErrors,
+  ConnectorMappingsAttributes,
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { wrapError, escapeHatch } from '../../utils';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import {
+  transformCaseConnectorToEsConnector,
+  transformESConnectorToCaseConnector,
+} from '../helpers';
 
 export function initPatchCaseConfigure({ caseConfigureService, caseService, router }: RouteDeps) {
   router.patch(
@@ -35,8 +40,7 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
         );
 
         const myCaseConfigure = await caseConfigureService.find({ client });
-        const { version, ...queryWithoutVersion } = query;
-
+        const { version, connector, ...queryWithoutVersion } = query;
         if (myCaseConfigure.saved_objects.length === 0) {
           throw Boom.conflict(
             'You can not patch this configuration since you did not created first with a post.'
@@ -53,20 +57,44 @@ export function initPatchCaseConfigure({ caseConfigureService, caseService, rout
         const { username, full_name, email } = await caseService.getUser({ request, response });
 
         const updateDate = new Date().toISOString();
+
+        let mappings: ConnectorMappingsAttributes[] = [];
+        if (connector != null) {
+          if (!context.case) {
+            throw Boom.badRequest('RouteHandlerContext is not registered for cases');
+          }
+          const caseClient = context.case.getCaseClient();
+          const actionsClient = await context.actions?.getActionsClient();
+          if (actionsClient == null) {
+            throw Boom.notFound('Action client have not been found');
+          }
+          mappings = await caseClient.getMappings({
+            actionsClient,
+            caseClient,
+            connectorId: connector.id,
+            connectorType: connector.type,
+          });
+        }
         const patch = await caseConfigureService.patch({
           client,
           caseConfigureId: myCaseConfigure.saved_objects[0].id,
           updatedAttributes: {
             ...queryWithoutVersion,
+            ...(connector != null
+              ? { connector: transformCaseConnectorToEsConnector(connector) }
+              : {}),
             updated_at: updateDate,
             updated_by: { email, full_name, username },
           },
         });
-
         return response.ok({
           body: CaseConfigureResponseRt.encode({
             ...myCaseConfigure.saved_objects[0].attributes,
             ...patch.attributes,
+            connector: transformESConnectorToCaseConnector(
+              patch.attributes.connector ?? myCaseConfigure.saved_objects[0].attributes.connector
+            ),
+            mappings,
             version: patch.version ?? '',
           }),
         });

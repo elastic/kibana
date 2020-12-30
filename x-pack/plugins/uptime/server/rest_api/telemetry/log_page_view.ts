@@ -21,23 +21,18 @@ export const createLogPageViewRoute: UMRestApiRouteFactory = () => ({
       autoRefreshEnabled: schema.boolean(),
       autorefreshInterval: schema.number(),
       refreshTelemetryHistory: schema.maybe(schema.boolean()),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async (
-    { savedObjectsClient, callES, dynamicSettings },
-    _context,
-    request,
-    response
-  ): Promise<any> => {
+  handler: async ({ savedObjectsClient, uptimeEsClient, request }): Promise<any> => {
     const pageView = request.body as PageViewParams;
     if (pageView.refreshTelemetryHistory) {
       KibanaTelemetryAdapter.clearLocalTelemetry();
     }
-    await KibanaTelemetryAdapter.countNoOfUniqueMonitorAndLocations(callES, savedObjectsClient);
-    const pageViewResult = KibanaTelemetryAdapter.countPageView(pageView as PageViewParams);
-
-    return response.ok({
-      body: pageViewResult,
-    });
+    await KibanaTelemetryAdapter.countNoOfUniqueMonitorAndLocations(
+      uptimeEsClient,
+      savedObjectsClient
+    );
+    return KibanaTelemetryAdapter.countPageView(pageView as PageViewParams);
   },
 });

@@ -18,15 +18,36 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { ApiResponse } from '@elastic/elasticsearch';
 import { SearchResponse } from 'elasticsearch';
 import { FetchHandlers, SearchRequest } from '../fetch';
+
+interface MsearchHeaders {
+  index: string;
+  preference?: number | string;
+}
+
+interface MsearchRequest {
+  header: MsearchHeaders;
+  body: any;
+}
+
+// @internal
+export interface MsearchRequestBody {
+  searches: MsearchRequest[];
+}
+
+// @internal
+export interface MsearchResponse {
+  body: ApiResponse<{ responses: Array<SearchResponse<any>> }>;
+}
 
 // @internal
 export interface LegacyFetchHandlers {
   callMsearch: (params: {
-    body: SearchRequest;
+    body: MsearchRequestBody;
     signal: AbortSignal;
-  }) => Promise<Array<SearchResponse<any>>>;
+  }) => Promise<MsearchResponse>;
   loadingCount$: BehaviorSubject<number>;
 }
 

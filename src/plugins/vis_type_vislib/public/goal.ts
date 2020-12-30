@@ -19,22 +19,23 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { GaugeOptions } from './components/options';
-import { getGaugeCollections, GaugeTypes } from './utils/collections';
-import { createVislibVisController } from './vis_controller';
-import { VisTypeVislibDependencies } from './plugin';
-import { ColorModes, ColorSchemas } from '../../charts/public';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
+import { ColorMode, ColorSchemas } from '../../charts/public';
+import { BaseVisTypeOptions } from '../../visualizations/public';
 
-export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+import { getGaugeCollections, GaugeOptions } from './editor';
+import { toExpressionAst } from './to_ast';
+import { GaugeType, BasicVislibParams } from './types';
+
+export const goalVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'goal',
   title: i18n.translate('visTypeVislib.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',
   description: i18n.translate('visTypeVislib.goal.goalDescription', {
-    defaultMessage: 'A goal chart indicates how close you are to your final goal.',
+    defaultMessage: 'Track how a metric progresses to a goal.',
   }),
-  visualization: createVislibVisController(deps),
+  toExpressionAst,
   visConfig: {
     defaults: {
       addTooltip: true,
@@ -45,13 +46,13 @@ export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => 
         verticalSplit: false,
         autoExtend: false,
         percentageMode: true,
-        gaugeType: GaugeTypes.ARC,
+        gaugeType: GaugeType.Arc,
         gaugeStyle: 'Full',
         backStyle: 'Full',
         orientation: 'vertical',
         useRanges: false,
         colorSchema: ColorSchemas.GreenToRed,
-        gaugeColorMode: ColorModes.NONE,
+        gaugeColorMode: ColorMode.None,
         colorsRange: [{ from: 0, to: 10000 }],
         invertColors: false,
         labels: {
@@ -110,4 +111,4 @@ export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => 
     ]),
   },
   useCustomNoDataScreen: true,
-});
+};

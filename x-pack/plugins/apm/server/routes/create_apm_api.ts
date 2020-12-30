@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   staticIndexPatternRoute,
   dynamicIndexPatternRoute,
   apmIndexPatternTitleRoute,
 } from './index_pattern';
+import { createApi } from './create_api';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -21,6 +21,12 @@ import {
   serviceNodeMetadataRoute,
   serviceAnnotationsRoute,
   serviceAnnotationsCreateRoute,
+  serviceErrorGroupsRoute,
+  serviceThroughputRoute,
+  serviceDependenciesRoute,
+  serviceMetadataDetailsRoute,
+  serviceMetadataIconsRoute,
+  serviceInstancesRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -39,18 +45,24 @@ import {
 } from './settings/apm_indices';
 import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
-import { tracesRoute, tracesByIdRoute } from './traces';
-import { transactionByTraceIdRoute } from './transaction';
 import {
-  transactionGroupsBreakdownRoute,
-  transactionGroupsChartsRoute,
-  transactionGroupsDistributionRoute,
+  tracesRoute,
+  tracesByIdRoute,
+  rootTransactionByTraceIdRoute,
+} from './traces';
+import {
+  correlationsForSlowTransactionsRoute,
+  correlationsForFailedTransactionsRoute,
+} from './correlations';
+import {
+  transactionChartsBreakdownRoute,
+  transactionChartsDistributionRoute,
+  transactionChartsErrorRateRoute,
   transactionGroupsRoute,
-  transactionGroupsAvgDurationByCountry,
-  transactionGroupsAvgDurationByBrowser,
-  transactionSampleForGroupRoute,
-  transactionGroupsErrorRateRoute,
-} from './transaction_groups';
+  transactionGroupsOverviewRoute,
+  transactionLatencyChatsRoute,
+  transactionThroughputChatsRoute,
+} from './transactions';
 import {
   errorGroupsLocalFiltersRoute,
   metricsLocalFiltersRoute,
@@ -62,7 +74,6 @@ import {
   uiFiltersEnvironmentsRoute,
   rumOverviewLocalFiltersRoute,
 } from './ui_filters';
-import { createApi } from './create_api';
 import { serviceMapRoute, serviceMapServiceNodeRoute } from './service_map';
 import {
   createCustomLinkRoute,
@@ -72,16 +83,6 @@ import {
   customLinkTransactionRoute,
 } from './settings/custom_link';
 import {
-  rumClientMetricsRoute,
-  rumPageViewsTrendRoute,
-  rumPageLoadDistributionRoute,
-  rumPageLoadDistBreakdownRoute,
-  rumServicesRoute,
-  rumVisitorsBreakdownRoute,
-  rumWebCoreVitals,
-  rumLongTaskMetrics,
-} from './rum_client';
-import {
   observabilityOverviewHasDataRoute,
   observabilityOverviewRoute,
 } from './observability_overview';
@@ -90,6 +91,24 @@ import {
   createAnomalyDetectionJobsRoute,
   anomalyDetectionEnvironmentsRoute,
 } from './settings/anomaly_detection';
+import {
+  rumHasDataRoute,
+  rumClientMetricsRoute,
+  rumJSErrors,
+  rumLongTaskMetrics,
+  rumPageLoadDistBreakdownRoute,
+  rumPageLoadDistributionRoute,
+  rumPageViewsTrendRoute,
+  rumServicesRoute,
+  rumUrlSearch,
+  rumVisitorsBreakdownRoute,
+  rumWebCoreVitals,
+} from './rum_client';
+import {
+  transactionErrorRateChartPreview,
+  transactionErrorCountChartPreview,
+  transactionDurationChartPreview,
+} from './alerts/chart_preview';
 
 const createApmApi = () => {
   const api = createApi()
@@ -110,6 +129,12 @@ const createApmApi = () => {
     .add(serviceNodeMetadataRoute)
     .add(serviceAnnotationsRoute)
     .add(serviceAnnotationsCreateRoute)
+    .add(serviceErrorGroupsRoute)
+    .add(serviceThroughputRoute)
+    .add(serviceDependenciesRoute)
+    .add(serviceMetadataDetailsRoute)
+    .add(serviceMetadataIconsRoute)
+    .add(serviceInstancesRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)
@@ -120,6 +145,10 @@ const createApmApi = () => {
     .add(listAgentConfigurationEnvironmentsRoute)
     .add(listAgentConfigurationServicesRoute)
     .add(createOrUpdateAgentConfigurationRoute)
+
+    // Correlations
+    .add(correlationsForSlowTransactionsRoute)
+    .add(correlationsForFailedTransactionsRoute)
 
     // APM indices
     .add(apmIndexSettingsRoute)
@@ -133,16 +162,16 @@ const createApmApi = () => {
     // Traces
     .add(tracesRoute)
     .add(tracesByIdRoute)
+    .add(rootTransactionByTraceIdRoute)
 
-    // Transaction groups
-    .add(transactionGroupsBreakdownRoute)
-    .add(transactionGroupsChartsRoute)
-    .add(transactionGroupsDistributionRoute)
+    // Transactions
+    .add(transactionChartsBreakdownRoute)
+    .add(transactionChartsDistributionRoute)
+    .add(transactionChartsErrorRateRoute)
     .add(transactionGroupsRoute)
-    .add(transactionGroupsAvgDurationByBrowser)
-    .add(transactionGroupsAvgDurationByCountry)
-    .add(transactionSampleForGroupRoute)
-    .add(transactionGroupsErrorRateRoute)
+    .add(transactionGroupsOverviewRoute)
+    .add(transactionLatencyChatsRoute)
+    .add(transactionThroughputChatsRoute)
 
     // UI filters
     .add(errorGroupsLocalFiltersRoute)
@@ -153,9 +182,6 @@ const createApmApi = () => {
     .add(transactionsLocalFiltersRoute)
     .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute)
-
-    // Transaction
-    .add(transactionByTraceIdRoute)
 
     // Service map
     .add(serviceMapRoute)
@@ -168,7 +194,16 @@ const createApmApi = () => {
     .add(listCustomLinksRoute)
     .add(customLinkTransactionRoute)
 
-    // Rum Overview
+    // Observability dashboard
+    .add(observabilityOverviewHasDataRoute)
+    .add(observabilityOverviewRoute)
+
+    // Anomaly detection
+    .add(anomalyDetectionJobsRoute)
+    .add(createAnomalyDetectionJobsRoute)
+    .add(anomalyDetectionEnvironmentsRoute)
+
+    // User Experience app api routes
     .add(rumOverviewLocalFiltersRoute)
     .add(rumPageViewsTrendRoute)
     .add(rumPageLoadDistributionRoute)
@@ -177,16 +212,15 @@ const createApmApi = () => {
     .add(rumServicesRoute)
     .add(rumVisitorsBreakdownRoute)
     .add(rumWebCoreVitals)
+    .add(rumJSErrors)
+    .add(rumUrlSearch)
     .add(rumLongTaskMetrics)
+    .add(rumHasDataRoute)
 
-    // Observability dashboard
-    .add(observabilityOverviewHasDataRoute)
-    .add(observabilityOverviewRoute)
-
-    // Anomaly detection
-    .add(anomalyDetectionJobsRoute)
-    .add(createAnomalyDetectionJobsRoute)
-    .add(anomalyDetectionEnvironmentsRoute);
+    // Alerting
+    .add(transactionErrorCountChartPreview)
+    .add(transactionDurationChartPreview)
+    .add(transactionErrorRateChartPreview);
 
   return api;
 };

@@ -31,7 +31,7 @@ jest.mock('uuid', () => ({
 }));
 
 import supertest from 'supertest';
-import { Request, ResponseToolkit } from 'hapi';
+import { Request, ResponseToolkit } from '@hapi/hapi';
 import Joi from 'joi';
 
 import {
@@ -102,6 +102,9 @@ describe('timeouts', () => {
       host: '127.0.0.1',
       maxPayload: new ByteSizeValue(1024),
       ssl: {},
+      cors: {
+        enabled: false,
+      },
       compression: { enabled: true },
       requestId: {
         allowFromAnyIp: true,
@@ -136,6 +139,7 @@ describe('getServerOptions', () => {
           certificate: 'some-certificate-path',
         },
       }),
+      {} as any,
       {} as any
     );
 
@@ -143,7 +147,7 @@ describe('getServerOptions', () => {
       Object {
         "ca": undefined,
         "cert": "content-some-certificate-path",
-        "ciphers": "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
+        "ciphers": "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
         "honorCipherOrder": true,
         "key": "content-some-key-path",
         "passphrase": undefined,
@@ -165,6 +169,7 @@ describe('getServerOptions', () => {
           clientAuthentication: 'required',
         },
       }),
+      {} as any,
       {} as any
     );
 
@@ -175,7 +180,7 @@ describe('getServerOptions', () => {
           "content-ca-2",
         ],
         "cert": "content-some-certificate-path",
-        "ciphers": "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
+        "ciphers": "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA256:DHE-RSA-AES256-SHA256:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!SRP:!CAMELLIA",
         "honorCipherOrder": true,
         "key": "content-some-key-path",
         "passphrase": undefined,
@@ -184,6 +189,26 @@ describe('getServerOptions', () => {
         "secureOptions": 67108864,
       }
     `);
+  });
+
+  it('properly configures CORS when cors enabled', () => {
+    const httpConfig = new HttpConfig(
+      config.schema.validate({
+        cors: {
+          enabled: true,
+          allowCredentials: false,
+          allowOrigin: ['*'],
+        },
+      }),
+      {} as any,
+      {} as any
+    );
+
+    expect(getServerOptions(httpConfig).routes?.cors).toEqual({
+      credentials: false,
+      origin: ['*'],
+      headers: ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'],
+    });
   });
 });
 

@@ -24,6 +24,7 @@ import {
   AggsCommonStart,
   getCalculateAutoTimeExpression,
 } from '../../../common';
+
 import { AggsSetup, AggsStart } from './types';
 
 import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
@@ -68,6 +69,12 @@ export const searchAggsSetupMock = (): AggsSetup => ({
 
 const commonStartMock = (): AggsCommonStart => ({
   calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
+  getDateMetaByDatatableColumn: jest.fn(),
+  datatableUtilities: {
+    getIndexPattern: jest.fn(),
+    getAggConfig: jest.fn(),
+    isFilterable: jest.fn(),
+  },
   createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
     return new AggConfigs(indexPattern, configStates, {
       typesRegistry: mockAggTypesRegistry(),

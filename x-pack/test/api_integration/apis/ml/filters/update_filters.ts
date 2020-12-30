@@ -72,10 +72,10 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send(updateFilterRequestBody)
-        .expect(404);
+        .expect(403);
 
       // response should return not found
-      expect(body.error).to.eql('Not Found');
+      expect(body.error).to.eql('Forbidden');
 
       // and the filter should not be updated
       const response = await ml.api.getFilter(filterId);
@@ -92,9 +92,9 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .send(updateFilterRequestBody)
-        .expect(404);
+        .expect(403);
 
-      expect(body.error).to.eql('Not Found');
+      expect(body.error).to.eql('Forbidden');
 
       const response = await ml.api.getFilter(filterId);
       const updatedFilter = response.body.filters[0];

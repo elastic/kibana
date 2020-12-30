@@ -55,7 +55,7 @@ export async function getAnnotations({
   if (!searches.length) return { responses: [] };
 
   try {
-    const data = await searchStrategy.search(req.framework.core, req.requestContext, searches);
+    const data = await searchStrategy.search(req, searches);
 
     return annotations.reduce((acc, annotation, index) => {
       acc[annotation.id] = handleAnnotationResponseBy(data[index].rawResponse, annotation);

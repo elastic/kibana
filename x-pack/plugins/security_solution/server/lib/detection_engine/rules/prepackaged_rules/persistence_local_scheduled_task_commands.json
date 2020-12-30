@@ -20,7 +20,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
   ],
   "threat": [
     {
@@ -33,12 +36,12 @@
       "technique": [
         {
           "id": "T1053",
-          "name": "Scheduled Task",
+          "name": "Scheduled Task/Job",
           "reference": "https://attack.mitre.org/techniques/T1053/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

@@ -6,9 +6,18 @@
 
 import React, { Fragment } from 'react';
 import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { uniq, get } from 'lodash';
 import { EuiMonitoringTable } from '../../table';
-import { EuiLink, EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiPanel } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiPanel,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { Status } from './status';
 import { formatMetric } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
@@ -20,7 +29,7 @@ import { SetupModeBadge } from '../../setup_mode/badge';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 
-function getColumns(setupMode) {
+function getColumns(alerts, setupMode) {
   return [
     {
       name: i18n.translate('xpack.monitoring.apm.instances.nameTitle', {
@@ -118,7 +127,7 @@ function getColumns(setupMode) {
   ];
 }
 
-export function ApmServerInstances({ apms, setupMode }) {
+export function ApmServerInstances({ apms, alerts, setupMode }) {
   const { pagination, sorting, onTableChange, data } = apms;
 
   let setupModeCallout = null;
@@ -139,16 +148,24 @@ export function ApmServerInstances({ apms, setupMode }) {
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.apm.instances.heading"
+              defaultMessage="APM Instances"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
+        <EuiPanel>
+          <Status stats={data.stats} alerts={alerts} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
         <EuiPageContent>
-          <EuiPanel>
-            <Status stats={data.stats} />
-          </EuiPanel>
-          <EuiSpacer size="m" />
           {setupModeCallout}
           <EuiMonitoringTable
             className="apmInstancesTable"
             rows={data.apms}
-            columns={getColumns(setupMode)}
+            columns={getColumns(alerts, setupMode)}
             sorting={sorting}
             pagination={pagination}
             setupMode={setupMode}

@@ -13,10 +13,11 @@ exports[`Storyshots components/KeyboardShortcutsDoc default 1`] = `
       aria-label="Closes keyboard shortcuts reference"
       className="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
       data-test-subj="euiFlyoutCloseButton"
+      disabled={false}
       onClick={[Function]}
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
         className="euiButtonIcon__icon"
         data-euiicon-type="cross"

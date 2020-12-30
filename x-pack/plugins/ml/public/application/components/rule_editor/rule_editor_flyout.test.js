@@ -55,7 +55,7 @@ jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
   },
 }));
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { RuleEditorFlyout } from './rule_editor_flyout';

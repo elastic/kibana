@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 // 400 - badRequest
 const CODE_BAD_REQUEST = 'SavedObjectsClient/badRequest';
@@ -44,7 +44,7 @@ const CODE_GENERAL_ERROR = 'SavedObjectsClient/generalError';
 
 const code = Symbol('SavedObjectsClientErrorCode');
 
-export interface DecoratedError extends Boom {
+export interface DecoratedError extends Boom.Boom {
   [code]?: string;
 }
 
@@ -154,9 +154,10 @@ export class SavedObjectsErrorHelpers {
     return decorate(error, CODE_CONFLICT, 409, reason);
   }
 
-  public static createConflictError(type: string, id: string) {
+  public static createConflictError(type: string, id: string, reason?: string) {
     return SavedObjectsErrorHelpers.decorateConflictError(
-      Boom.conflict(`Saved object [${type}/${id}] conflict`)
+      Boom.conflict(`Saved object [${type}/${id}] conflict`),
+      reason
     );
   }
 

@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { SearchBar } from './search_bar';
+import SearchBar from './search_bar';
 
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -35,16 +35,14 @@ const mockTimeHistory = {
   },
 };
 
-jest.mock('..', () => {
+jest.mock('../filter_bar/filter_bar', () => {
   return {
     FilterBar: () => <div className="filterBar" />,
   };
 });
 
 jest.mock('../query_string_input/query_bar_top_row', () => {
-  return {
-    QueryBarTopRow: () => <div className="queryBar" />,
-  };
+  return () => <div className="queryBar" />;
 });
 
 const noop = jest.fn();

@@ -11,6 +11,8 @@ export const defaultHandlers: RendererHandlers = {
   destroy: () => action('destroy'),
   getElementId: () => 'element-id',
   getFilter: () => 'filter',
+  getRenderMode: () => 'display',
+  isSyncColorsEnabled: () => false,
   onComplete: (fn) => undefined,
   onEmbeddableDestroyed: action('onEmbeddableDestroyed'),
   onEmbeddableInputChange: action('onEmbeddableInputChange'),

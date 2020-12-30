@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { isInSetupMode } from './setup_mode';
 import { getClusterFromClusters } from './get_cluster_from_clusters';
@@ -13,7 +12,7 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
   const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
 
   function isOnPage(hash) {
-    return _.includes(window.location.hash, hash);
+    return window.location.hash.includes(hash);
   }
 
   /*
@@ -22,14 +21,14 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
    * the data just has a single cluster or
    * all the clusters are basic and this is the primary cluster
    */
-  return function routeInit({ codePaths, fetchAllClusters }) {
+  return function routeInit({ codePaths, fetchAllClusters, unsetGlobalState = false }) {
     const clusterUuid = fetchAllClusters ? null : globalState.cluster_uuid;
     return (
       monitoringClusters(clusterUuid, undefined, codePaths)
         // Set the clusters collection and current cluster in globalState
         .then((clusters) => {
           const inSetupMode = isInSetupMode();
-          const cluster = getClusterFromClusters(clusters, globalState);
+          const cluster = getClusterFromClusters(clusters, globalState, unsetGlobalState);
           if (!cluster && !inSetupMode) {
             window.history.replaceState(null, null, '#/no-data');
             return Promise.resolve();

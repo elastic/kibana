@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { NodeDetailStatus } from '../node_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
+import { AlertsCallout } from '../../../alerts/callout';
 
 export const AdvancedNode = ({ nodeSummary, metrics, alerts, ...props }) => {
   const metricsToShow = [
@@ -43,6 +44,7 @@ export const AdvancedNode = ({ nodeSummary, metrics, alerts, ...props }) => {
           <NodeDetailStatus stats={nodeSummary} alerts={alerts} />
         </EuiPanel>
         <EuiSpacer size="m" />
+        <AlertsCallout alerts={alerts} />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (

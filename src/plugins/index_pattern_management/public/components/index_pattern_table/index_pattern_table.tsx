@@ -88,6 +88,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     application,
     http,
     getMlCardState,
+    data,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
   const [creationOptions, setCreationOptions] = useState<IndexPatternCreationOption[]>([]);
@@ -122,24 +123,26 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const removeAliases = (item: MatchedItem) =>
     !((item as unknown) as ResolveIndexResponseItemAlias).indices;
 
+  const searchClient = data.search.search;
+
   const loadSources = () => {
-    getIndices(http, () => [], '*', false).then((dataSources) =>
+    getIndices({ http, pattern: '*', searchClient }).then((dataSources) =>
       setSources(dataSources.filter(removeAliases))
     );
-    getIndices(http, () => [], '*:*', false).then((dataSources) =>
+    getIndices({ http, pattern: '*:*', searchClient }).then((dataSources) =>
       setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
     );
   };
 
   useEffect(() => {
-    getIndices(http, () => [], '*', false).then((dataSources) => {
+    getIndices({ http, pattern: '*', searchClient }).then((dataSources) => {
       setSources(dataSources.filter(removeAliases));
       setIsLoadingSources(false);
     });
-    getIndices(http, () => [], '*:*', false).then((dataSources) =>
+    getIndices({ http, pattern: '*:*', searchClient }).then((dataSources) =>
       setRemoteClustersExist(!!dataSources.filter(removeAliases).length)
     );
-  }, [http, creationOptions]);
+  }, [http, creationOptions, searchClient]);
 
   chrome.docTitle.change(title);
 

@@ -43,10 +43,17 @@ interface Encoding {
   y: Coordinate;
 }
 
-interface AutoSize {
-  type: string;
-  contains: string;
-}
+type AutoSize =
+  | 'pad'
+  | 'fit'
+  | 'fit-x'
+  | 'fit-y'
+  | 'none'
+  | {
+      type: string;
+      contains: string;
+    }
+  | { signal: string };
 
 interface Padding {
   left: number;
@@ -75,8 +82,9 @@ interface Projection {
   name: string;
 }
 
-interface RequestDataObject {
+interface RequestDataObject<TUrlData = UrlObject> {
   name?: string;
+  url?: TUrlData;
   values: SearchResponse<unknown>;
 }
 
@@ -105,8 +113,8 @@ export interface VegaSpec {
   title?: string;
   autosize?: AutoSize;
   projections?: Projection[];
-  width?: number;
-  height?: number;
+  width?: number | 'container';
+  height?: number | 'container';
   padding?: number | Padding;
   _hostConfig?: KibanaConfig;
   config: VegaSpecConfig;
@@ -179,7 +187,7 @@ export interface CacheBounds {
   max: number;
 }
 
-interface Requests<TUrlData = UrlObject, TRequestDataObject = RequestDataObject> {
+interface Requests<TUrlData = UrlObject, TRequestDataObject = RequestDataObject<TUrlData>> {
   url: TUrlData;
   name: string;
   dataObject: TRequestDataObject;
@@ -200,6 +208,7 @@ export interface TooltipConfig {
   position?: ToolTipPositions;
   padding?: number | Padding;
   centerOnMark?: boolean | number;
+  textTruncate?: boolean;
 }
 
 export interface DstObj {

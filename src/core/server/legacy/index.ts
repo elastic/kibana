@@ -20,8 +20,6 @@
 /** @internal */
 export { ensureValidConfiguration } from './config';
 /** @internal */
-export { LegacyInternals } from './legacy_internals';
-/** @internal */
 export { LegacyService, ILegacyService } from './legacy_service';
 /** @internal */
 export * from './types';

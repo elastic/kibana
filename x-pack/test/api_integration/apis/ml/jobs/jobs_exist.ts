@@ -58,8 +58,8 @@ export default ({ getService }: FtrProviderContext) => {
         jobIds: Object.keys(responseBody),
       },
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
       },
     },
   ];

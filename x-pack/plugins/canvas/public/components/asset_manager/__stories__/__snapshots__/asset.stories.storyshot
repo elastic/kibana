@@ -12,13 +12,13 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall canvasAsset"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAsset"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
       >
         <figure
-          className="euiImage canvasAsset__img "
+          className="euiImage canvasAsset__img euiImage--original"
         >
           <img
             alt="Asset thumbnail"
@@ -70,12 +70,13 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
             <button
               aria-label="Create image element"
               className="euiButtonIcon euiButtonIcon--primary"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="vector"
@@ -103,9 +104,10 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               <button
                 aria-label="Download"
                 className="euiButtonIcon euiButtonIcon--primary"
+                disabled={false}
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
                   data-euiicon-type="sortDown"
@@ -134,9 +136,10 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
               <button
                 aria-label="Copy id to clipboard"
                 className="euiButtonIcon euiButtonIcon--primary"
+                disabled={false}
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
                   data-euiicon-type="copyClipboard"
@@ -158,12 +161,13 @@ exports[`Storyshots components/Assets/Asset airplane 1`] = `
             <button
               aria-label="Delete"
               className="euiButtonIcon euiButtonIcon--danger"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="trash"
@@ -190,13 +194,13 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
     className="euiFlexItem"
   >
     <div
-      className="euiPanel euiPanel--paddingSmall canvasAsset"
+      className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow canvasAsset"
     >
       <div
         className="canvasAsset__thumb canvasCheckered"
       >
         <figure
-          className="euiImage canvasAsset__img "
+          className="euiImage canvasAsset__img euiImage--original"
         >
           <img
             alt="Asset thumbnail"
@@ -248,12 +252,13 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
             <button
               aria-label="Create image element"
               className="euiButtonIcon euiButtonIcon--primary"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="vector"
@@ -281,9 +286,10 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               <button
                 aria-label="Download"
                 className="euiButtonIcon euiButtonIcon--primary"
+                disabled={false}
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
                   data-euiicon-type="sortDown"
@@ -312,9 +318,10 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
               <button
                 aria-label="Copy id to clipboard"
                 className="euiButtonIcon euiButtonIcon--primary"
+                disabled={false}
                 type="button"
               >
-                <div
+                <span
                   aria-hidden="true"
                   className="euiButtonIcon__icon"
                   data-euiicon-type="copyClipboard"
@@ -336,12 +343,13 @@ exports[`Storyshots components/Assets/Asset marker 1`] = `
             <button
               aria-label="Delete"
               className="euiButtonIcon euiButtonIcon--danger"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="trash"

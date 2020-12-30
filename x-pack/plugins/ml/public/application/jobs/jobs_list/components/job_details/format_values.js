@@ -5,10 +5,9 @@
  */
 
 import numeral from '@elastic/numeral';
-import { formatDate } from '@elastic/eui/lib/services/format';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { toLocaleString } from '../../../../util/string_utils';
-import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
+import { timeFormatter } from '../../../../../../common/util/date_utils';
 
 const DATA_FORMAT = '0.0 b';
 
@@ -29,7 +28,7 @@ export function formatValues([key, value]) {
     case 'latest_empty_bucket_timestamp':
     case 'latest_sparse_bucket_timestamp':
     case 'latest_bucket_timestamp':
-      value = formatDate(value, TIME_FORMAT);
+      value = timeFormatter(value);
       break;
 
     // data

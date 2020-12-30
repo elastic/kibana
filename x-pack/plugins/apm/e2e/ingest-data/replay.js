@@ -70,34 +70,40 @@ function incrementSpinnerCount({ success }) {
 }
 let iterIndex = 0;
 
-function setRumAgent(item) {
-  item.body = item.body.replace(
-    '"name":"client"',
-    '"name":"opbean-client-rum"'
-  );
+function setItemMetaAndHeaders(item) {
+  const headers = {
+    'content-type': 'application/x-ndjson',
+  };
+
+  if (SECRET_TOKEN) {
+    headers.Authorization = `Bearer ${SECRET_TOKEN}`;
+  }
+
+  if (item.url === '/intake/v2/rum/events') {
+    if (iterIndex === userAgents.length) {
+      // set some event agent to opbean
+      setRumAgent(item);
+      iterIndex = 0;
+    }
+    headers['User-Agent'] = userAgents[iterIndex];
+    headers['X-Forwarded-For'] = userIps[iterIndex];
+    iterIndex++;
+  }
+  return headers;
 }
 
-async function insertItem(item) {
+function setRumAgent(item) {
+  if (item.body) {
+    item.body = item.body.replace(
+      '"name":"client"',
+      '"name":"elastic-frontend"'
+    );
+  }
+}
+
+async function insertItem(item, headers) {
   try {
     const url = `${APM_SERVER_URL}${item.url}`;
-    const headers = {
-      'content-type': 'application/x-ndjson',
-    };
-
-    if (item.url === '/intake/v2/rum/events') {
-      if (iterIndex === userAgents.length) {
-        // set some event agent to opbean
-        setRumAgent(item);
-        iterIndex = 0;
-      }
-      headers['User-Agent'] = userAgents[iterIndex];
-      headers['X-Forwarded-For'] = userIps[iterIndex];
-      iterIndex++;
-    }
-
-    if (SECRET_TOKEN) {
-      headers.Authorization = `Bearer ${SECRET_TOKEN}`;
-    }
 
     await axios({
       method: item.method,
@@ -133,8 +139,9 @@ async function init() {
   await Promise.all(
     items.map(async (item) => {
       try {
+        const headers = setItemMetaAndHeaders(item);
         // retry 5 times with exponential backoff
-        await pRetry(() => limit(() => insertItem(item)), {
+        await pRetry(() => limit(() => insertItem(item, headers)), {
           retries: 5,
         });
         incrementSpinnerCount({ success: true });

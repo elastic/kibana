@@ -8,26 +8,31 @@ import { lazy } from 'react';
 import { ValidationResult, ActionTypeModel } from '../../../../types';
 import { connectorConfiguration } from './config';
 import logo from './logo.svg';
-import { JiraActionConnector, JiraActionParams } from './types';
+import { JiraActionConnector, JiraConfig, JiraSecrets, JiraActionParams } from './types';
 import * as i18n from './translations';
 import { isValidUrl } from '../../../lib/value_validators';
 
 const validateConnector = (action: JiraActionConnector): ValidationResult => {
-  const validationResult = { errors: {} };
-  const errors = {
-    apiUrl: new Array<string>(),
-    projectKey: new Array<string>(),
-    email: new Array<string>(),
-    apiToken: new Array<string>(),
+  const validationResult = {
+    errors: {
+      apiUrl: new Array<string>(),
+      projectKey: new Array<string>(),
+      email: new Array<string>(),
+      apiToken: new Array<string>(),
+    },
   };
-  validationResult.errors = errors;
+  const { errors } = validationResult;
 
   if (!action.config.apiUrl) {
     errors.apiUrl = [...errors.apiUrl, i18n.API_URL_REQUIRED];
   }
 
-  if (action.config.apiUrl && !isValidUrl(action.config.apiUrl, 'https:')) {
-    errors.apiUrl = [...errors.apiUrl, i18n.API_URL_INVALID];
+  if (action.config.apiUrl) {
+    if (!isValidUrl(action.config.apiUrl)) {
+      errors.apiUrl = [...errors.apiUrl, i18n.API_URL_INVALID];
+    } else if (!isValidUrl(action.config.apiUrl, 'https:')) {
+      errors.apiUrl = [...errors.apiUrl, i18n.API_URL_REQUIRE_HTTPS];
+    }
   }
 
   if (!action.config.projectKey) {
@@ -45,7 +50,7 @@ const validateConnector = (action: JiraActionConnector): ValidationResult => {
   return validationResult;
 };
 
-export function getActionType(): ActionTypeModel<JiraActionConnector, JiraActionParams> {
+export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraActionParams> {
   return {
     id: connectorConfiguration.id,
     iconClass: logo,
@@ -56,11 +61,15 @@ export function getActionType(): ActionTypeModel<JiraActionConnector, JiraAction
     validateParams: (actionParams: JiraActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
-        title: new Array<string>(),
+        summary: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (actionParams.subActionParams && !actionParams.subActionParams.title?.length) {
-        errors.title.push(i18n.TITLE_REQUIRED);
+      if (
+        actionParams.subActionParams &&
+        actionParams.subActionParams.incident &&
+        !actionParams.subActionParams.incident.summary?.length
+      ) {
+        errors.summary.push(i18n.SUMMARY_REQUIRED);
       }
       return validationResult;
     },

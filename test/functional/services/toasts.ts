@@ -63,13 +63,19 @@ export function ToastsProvider({ getService }: FtrProviderContext) {
       }
     }
 
-    private async getToastElement(index: number) {
+    public async getToastElement(index: number) {
       const list = await this.getGlobalToastList();
       return await list.findByCssSelector(`.euiToast:nth-child(${index})`);
     }
 
     private async getGlobalToastList() {
       return await testSubjects.find('globalToastList');
+    }
+
+    public async getToastCount() {
+      const list = await this.getGlobalToastList();
+      const toasts = await list.findAllByCssSelector(`.euiToast`);
+      return toasts.length;
     }
   }
 

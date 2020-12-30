@@ -5,15 +5,15 @@
  */
 
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { skip } from 'rxjs/operators';
+import { skip, take } from 'rxjs/operators';
 import * as Rx from 'rxjs';
 import { mount } from 'enzyme';
 import { TimeRangeEmbeddable, TimeRangeContainer, TIME_RANGE_EMBEDDABLE } from './test_helpers';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { ReactElement } from 'react';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 
-test('Removing custom time range from badge resets embeddable back to container time', async (done) => {
+test('Removing custom time range from badge resets embeddable back to container time', async () => {
   const container = new TimeRangeContainer(
     {
       timeRange: { from: 'now-15m', to: 'now' },
@@ -60,16 +60,16 @@ test('Removing custom time range from badge resets embeddable back to container 
   const wrapper = mount(openModal);
   findTestSubject(wrapper, 'removePerPanelTimeRangeButton').simulate('click');
 
-  const subscription = Rx.merge(child1.getInput$(), container.getOutput$(), container.getInput$())
-    .pipe(skip(4))
-    .subscribe(() => {
-      expect(child1.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
-      expect(child2.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
-      subscription.unsubscribe();
-      done();
-    });
+  const promise = Rx.merge(child1.getInput$(), container.getOutput$(), container.getInput$())
+    .pipe(skip(4), take(1))
+    .toPromise();
 
   container.updateInput({ timeRange: { from: 'now-10m', to: 'now-5m' } });
+
+  await promise;
+
+  expect(child1.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
+  expect(child2.getInput().timeRange).toEqual({ from: 'now-10m', to: 'now-5m' });
 });
 
 test(`badge is not compatible with embeddable that inherits from parent`, async () => {

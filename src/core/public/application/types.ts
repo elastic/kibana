@@ -81,7 +81,10 @@ export enum AppNavLinkStatus {
  * Defines the list of fields that can be updated via an {@link AppUpdater}.
  * @public
  */
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
+export type AppUpdatableFields = Pick<
+  App,
+  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'meta'
+>;
 
 /**
  * Updater for applications.
@@ -222,7 +225,7 @@ export interface App<HistoryLocationState = unknown> {
    * ```ts
    * core.application.register({
    *   id: 'my_app',
-   *   title: 'My App'
+   *   title: 'My App',
    *   exactRoute: true,
    *   mount: () => { ... },
    * })
@@ -232,18 +235,121 @@ export interface App<HistoryLocationState = unknown> {
    * ```
    */
   exactRoute?: boolean;
+
+  /**
+   * Meta data for an application that represent additional information for the app.
+   * See {@link AppMeta}
+   *
+   * @remarks
+   * Used to populate navigational search results (where available).
+   * Can be updated using the {@link App.updater$} observable. See {@link PublicAppSearchDeepLinkInfo} for more details.
+   *
+   * @example
+   * ```ts
+   * core.application.register({
+   *   id: 'my_app',
+   *   title: 'Translated title',
+   *   meta: {
+   *     keywords: ['translated keyword1', 'translated keyword2'],
+   *     searchDeepLinks: [
+   *     { id: 'sub1', title: 'Sub1', path: '/sub1', keywords: ['subpath1'] },
+   *     {
+   *       id: 'sub2',
+   *       title: 'Sub2',
+   *       searchDeepLinks: [
+   *         { id: 'subsub', title: 'SubSub', path: '/sub2/sub', keywords: ['subpath2'] }
+   *       ]
+   *     }
+   *   ],
+   *   },
+   *   mount: () => { ... }
+   * })
+   * ```
+   */
+  meta?: AppMeta;
 }
+
+/**
+ * Input type for meta data for an application.
+ *
+ * Meta fields include `keywords` and `searchDeepLinks`
+ * Keywords is an array of string with which to associate the app, must include at least one unique string as an array.
+ * `searchDeepLinks` is an array of links that represent secondary in-app locations for the app.
+ * @public
+ */
+export interface AppMeta {
+  /** Keywords to represent this application */
+  keywords?: string[];
+  /** Array of links that represent secondary in-app locations for the app. */
+  searchDeepLinks?: AppSearchDeepLink[];
+}
+
+/**
+ * Public information about a registered app's {@link AppMeta | keywords }
+ *
+ * @public
+ */
+export type PublicAppMetaInfo = Omit<AppMeta, 'keywords' | 'searchDeepLinks'> & {
+  keywords: string[];
+  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+};
+
+/**
+ * Public information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}
+ *
+ * @public
+ */
+export type PublicAppSearchDeepLinkInfo = Omit<
+  AppSearchDeepLink,
+  'searchDeepLinks' | 'keywords'
+> & {
+  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+  keywords: string[];
+};
+
+/**
+ * Input type for registering secondary in-app locations for an application.
+ *
+ * Deep links must include at least one of `path` or `searchDeepLinks`. A deep link that does not have a `path`
+ * represents a topological level in the application's hierarchy, but does not have a destination URL that is
+ * user-accessible.
+ * @public
+ */
+export type AppSearchDeepLink = {
+  /** Identifier to represent this sublink, should be unique for this application */
+  id: string;
+  /** Title to label represent this deep link */
+  title: string;
+} & (
+  | {
+      /** URL path to access this link, relative to the application's appRoute. */
+      path: string;
+      /** Optional array of links that are 'underneath' this section in the hierarchy */
+      searchDeepLinks?: AppSearchDeepLink[];
+      /** Optional keywords to match with in deep links search for the page at the path */
+      keywords?: string[];
+    }
+  | {
+      /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
+      path?: string;
+      /** Array links that are 'underneath' this section in this hierarchy. */
+      searchDeepLinks: AppSearchDeepLink[];
+      /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
+      keywords?: string[];
+    }
+);
 
 /**
  * Public information about a registered {@link App | application}
  *
  * @public
  */
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'meta'> & {
   // remove optional on fields populated with default values
   status: AppStatus;
   navLinkStatus: AppNavLinkStatus;
   appRoute: string;
+  meta: PublicAppMetaInfo;
 };
 
 /**
@@ -504,7 +610,10 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
  *
  * @public
  */
-export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
+export type AppLeaveHandler = (
+  factory: AppLeaveActionFactory,
+  nextAppId?: string
+) => AppLeaveAction;
 
 /**
  * Possible type of actions on application leave.
@@ -540,6 +649,7 @@ export interface AppLeaveConfirmAction {
   type: AppLeaveActionType.confirm;
   text: string;
   title?: string;
+  callback?: () => void;
 }
 
 /**
@@ -562,8 +672,10 @@ export interface AppLeaveActionFactory {
    *
    * @param text The text to display in the confirmation message
    * @param title (optional) title to display in the confirmation message
+   * @param callback (optional) to know that the user want to stay on the page
+   * so we can show to the user the right UX for him to saved his/her/their changes
    */
-  confirm(text: string, title?: string): AppLeaveConfirmAction;
+  confirm(text: string, title?: string, callback?: () => void): AppLeaveConfirmAction;
   /**
    * Returns a default action, resulting on executing the default behavior when
    * the user tries to leave an application
@@ -710,11 +822,17 @@ export interface ApplicationStart {
   navigateToApp(appId: string, options?: NavigateToAppOptions): Promise<void>;
 
   /**
-   * Navigate to given url, which can either be an absolute url or a relative path, in a SPA friendly way when possible.
+   * Navigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application
+   * within the current basePath).
    *
-   * If all these criteria are true for the given url:
+   * The method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be:
+   * - an absolute URL
+   * - an absolute path
+   * - a path relative to the current URL (window.location.href)
+   *
+   * If all these criteria are true for the given URL:
    * - (only for absolute URLs) The origin of the URL matches the origin of the browser's current location
-   * - The pathname of the URL starts with the current basePath (eg. /mybasepath/s/my-space)
+   * - The resolved pathname of the provided URL/path starts with the current basePath (eg. /mybasepath/s/my-space)
    * - The pathname segment after the basePath matches any known application route (eg. /app/<id>/ or any application's `appRoute` configuration)
    *
    * Then a SPA navigation will be performed using `navigateToApp` using the corresponding application and path.
@@ -727,23 +845,27 @@ export interface ApplicationStart {
    * // will call `application.navigateToApp('discover', { path: '/some-path?foo=bar'})`
    * application.navigateToUrl('https://kibana:8080/base-path/s/my-space/app/discover/some-path?foo=bar')
    * application.navigateToUrl('/base-path/s/my-space/app/discover/some-path?foo=bar')
+   * application.navigateToUrl('./discover/some-path?foo=bar')
    *
    * // will perform a full page reload using `window.location.assign`
    * application.navigateToUrl('https://elsewhere:8080/base-path/s/my-space/app/discover/some-path') // origin does not match
    * application.navigateToUrl('/app/discover/some-path') // does not include the current basePath
    * application.navigateToUrl('/base-path/s/my-space/app/unknown-app/some-path') // unknown application
+   * application.navigateToUrl('../discover') // resolve to `/base-path/s/my-space/discover` which is not a path of a known app.
+   * application.navigateToUrl('../../other-space/discover') // resolve to `/base-path/s/other-space/discover` which is not within the current basePath.
    * ```
    *
-   * @param url - an absolute url, or a relative path, to navigate to.
+   * @param url - an absolute URL, an absolute path or a relative path, to navigate to.
    */
   navigateToUrl(url: string): Promise<void>;
 
   /**
-   * Returns an URL to a given app, including the global base path.
-   * By default, the URL is relative (/basePath/app/my-app).
-   * Use the `absolute` option to generate an absolute url (http://host:port/basePath/app/my-app)
+   * Returns the absolute path (or URL) to a given app, including the global base path.
    *
-   * Note that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's location.
+   * By default, it returns the absolute path of the application (e.g `/basePath/app/my-app`).
+   * Use the `absolute` option to generate an absolute url instead (e.g `http://host:port/basePath/app/my-app`)
+   *
+   * Note that when generating absolute urls, the origin (protocol, host and port) are determined from the browser's current location.
    *
    * @param appId
    * @param options.path - optional path inside application to deep link to

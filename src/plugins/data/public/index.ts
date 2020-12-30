@@ -50,7 +50,7 @@ import {
   COMPARE_ALL_OPTIONS,
 } from '../common';
 
-import { FilterLabel } from './ui/filter_bar';
+import { FilterLabel } from './ui';
 
 import {
   generateFilters,
@@ -212,6 +212,16 @@ export {
   FieldFormat,
 } from '../common';
 
+/**
+ * Exporters (CSV)
+ */
+
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+};
+
 /*
  * Index patterns:
  */
@@ -225,10 +235,11 @@ import {
   ILLEGAL_CHARACTERS,
   isDefault,
   validateIndexPattern,
-  getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
 } from './index_patterns';
+
+export type { IndexPatternsService } from './index_patterns';
 
 // Index patterns namespace:
 export const indexPatterns = {
@@ -240,7 +251,6 @@ export const indexPatterns = {
   isFilterable,
   isNestedField,
   validate: validateIndexPattern,
-  getFromSavedObject,
   flattenHitWrapper,
   formatHitProvider,
 };
@@ -262,8 +272,12 @@ export {
   UI_SETTINGS,
   TypeMeta as IndexPatternTypeMeta,
   AggregationRestrictions as IndexPatternAggRestrictions,
+  IndexPatternSpec,
+  IndexPatternLoadExpressionFunctionDefinition,
   fieldList,
 } from '../common';
+
+export { DuplicateIndexPatternError } from '../common/index_patterns/errors';
 
 /*
  * Autocomplete query suggestions:
@@ -318,6 +332,7 @@ export {
   AggGroupLabels,
   AggGroupName,
   AggGroupNames,
+  AggFunctionsMapping,
   AggParam,
   AggParamOption,
   AggParamType,
@@ -333,6 +348,12 @@ export {
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
   // tabify
   TabbedAggColumn,
   TabbedAggRow,
@@ -353,28 +374,36 @@ export {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   injectSearchSourceReferences,
-  ISearch,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,
   ISearchGeneric,
   ISearchSource,
   parseSearchSourceJSON,
-  RequestTimeoutError,
-  SearchError,
   SearchInterceptor,
   SearchInterceptorDeps,
   SearchRequest,
   SearchSourceFields,
   SortDirection,
+  SessionState,
   // expression functions and types
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
+  // errors
+  SearchError,
+  SearchTimeoutError,
+  TimeoutErrorMode,
+  PainlessError,
 } from './search';
 
-export type { SearchSource } from './search';
+export type {
+  SearchSource,
+  ISessionService,
+  SearchSessionInfoProvider,
+  ISessionsClient,
+} from './search';
 
-export { ISearchOptions } from '../common';
+export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
 
 // Search namespace
 export const search = {
@@ -413,9 +442,9 @@ export {
   SearchBar,
   SearchBarProps,
   StatefulSearchBarProps,
-  FilterBar,
+  IndexPatternSelectProps,
   QueryStringInput,
-  IndexPatternSelect,
+  QueryStringInputProps,
 } from './ui';
 
 /**
@@ -454,8 +483,7 @@ export {
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
 export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
-
-export * from '../common/field_mapping';
+export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*
  * Plugin setup

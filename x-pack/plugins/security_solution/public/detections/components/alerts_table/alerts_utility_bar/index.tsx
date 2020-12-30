@@ -47,6 +47,17 @@ const UtilityBarFlexGroup = styled(EuiFlexGroup)`
   min-width: 175px;
 `;
 
+const BuildingBlockContainer = styled(EuiFlexItem)`
+  background: repeating-linear-gradient(
+    127deg,
+    rgba(245, 167, 0, 0.2),
+    rgba(245, 167, 0, 0.2) 1px,
+    rgba(245, 167, 0, 0.05) 2px,
+    rgba(245, 167, 0, 0.05) 10px
+  );
+  padding: ${({ theme }) => `${theme.eui.paddingSizes.xs}`};
+`;
+
 const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
   canUserCRUD,
   hasIndexWrite,
@@ -133,7 +144,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
 
   const UtilityBarAdditionalFiltersContent = (closePopover: () => void) => (
     <UtilityBarFlexGroup direction="column">
-      <EuiFlexItem>
+      <BuildingBlockContainer>
         <EuiCheckbox
           id="showBuildingBlockAlertsCheckbox"
           aria-label="showBuildingBlockAlerts"
@@ -146,9 +157,17 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
           data-test-subj="showBuildingBlockAlertsCheckbox"
           label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK}
         />
-      </EuiFlexItem>
+      </BuildingBlockContainer>
     </UtilityBarFlexGroup>
   );
+
+  const handleSelectAllAlertsClick = useCallback(() => {
+    if (!showClearSelection) {
+      selectAll();
+    } else {
+      clearSelection();
+    }
+  }, [clearSelection, selectAll, showClearSelection]);
 
   return (
     <>
@@ -184,14 +203,10 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
                 </UtilityBarAction>
 
                 <UtilityBarAction
+                  aria-label="selectAllAlerts"
+                  dataTestSubj="selectAllAlertsButton"
                   iconType={showClearSelection ? 'cross' : 'pagesSelect'}
-                  onClick={() => {
-                    if (!showClearSelection) {
-                      selectAll();
-                    } else {
-                      clearSelection();
-                    }
-                  }}
+                  onClick={handleSelectAllAlertsClick}
                 >
                   {showClearSelection
                     ? i18n.CLEAR_SELECTION

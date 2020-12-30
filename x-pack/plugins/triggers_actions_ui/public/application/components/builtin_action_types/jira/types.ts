@@ -4,41 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CasesConfigurationMapping } from '../case_mappings';
+import { UserConfiguredActionConnector } from '../../../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/jira/types';
 
-export interface JiraActionConnector {
-  config: JiraConfig;
-  secrets: JiraSecrets;
-}
+export type JiraActionConnector = UserConfiguredActionConnector<JiraConfig, JiraSecrets>;
 
 export interface JiraActionParams {
   subAction: string;
-  subActionParams: {
-    savedObjectId: string;
-    title: string;
-    description: string;
-    comments: Array<{ commentId: string; comment: string }>;
-    externalId: string | null;
-    issueType: string;
-    priority: string;
-    labels: string[];
-  };
+  subActionParams: ExecutorSubActionPushParams;
 }
 
-interface IncidentConfiguration {
-  mapping: CasesConfigurationMapping[];
-}
-
-interface JiraConfig {
+export interface JiraConfig {
   apiUrl: string;
   projectKey: string;
-  incidentConfiguration?: IncidentConfiguration;
-  isCaseOwned?: boolean;
 }
 
-interface JiraSecrets {
+export interface JiraSecrets {
   email: string;
   apiToken: string;
 }
-
-// to remove

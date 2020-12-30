@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { removeSignalsIndex } from './api_calls/rules';
+import { esArchiverLoadEmptyKibana } from './es_archiver';
+
 const primaryButton = 0;
 
 /**
@@ -23,14 +26,14 @@ export const drag = (subject: JQuery<HTMLElement>) => {
       clientY: subjectLocation.top,
       force: true,
     })
-    .wait(3000)
+    .wait(300)
     .trigger('mousemove', {
       button: primaryButton,
       clientX: subjectLocation.left + dndSloppyClickDetectionThreshold,
       clientY: subjectLocation.top,
       force: true,
     })
-    .wait(3000);
+    .wait(300);
 };
 
 /** Drags the subject being dragged on the specified drop target, but does not drop it  */
@@ -42,15 +45,44 @@ export const dragWithoutDrop = (dropTarget: JQuery<HTMLElement>) => {
 
 /** "Drops" the subject being dragged on the specified drop target  */
 export const drop = (dropTarget: JQuery<HTMLElement>) => {
+  const targetLocation = dropTarget[0].getBoundingClientRect();
   cy.wrap(dropTarget)
-    .trigger('mousemove', { button: primaryButton, force: true })
-    .wait(3000)
+    .trigger('mousemove', {
+      button: primaryButton,
+      clientX: targetLocation.left,
+      clientY: targetLocation.top,
+      force: true,
+    })
+    .wait(300)
     .trigger('mouseup', { force: true })
-    .wait(3000);
+    .wait(300);
 };
 
 export const reload = (afterReload: () => void) => {
   cy.reload();
   cy.contains('a', 'Security');
   afterReload();
+};
+
+export const cleanKibana = () => {
+  cy.exec(`curl -XDELETE "${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*" -k`);
+
+  // We wait until the kibana indexes are deleted
+  cy.waitUntil(() => {
+    cy.wait(500);
+    return cy
+      .request(`${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`)
+      .then((response) => JSON.stringify(response.body) === '{}');
+  });
+  esArchiverLoadEmptyKibana();
+
+  // We wait until the kibana indexes are created
+  cy.waitUntil(() => {
+    cy.wait(500);
+    return cy
+      .request(`${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`)
+      .then((response) => JSON.stringify(response.body) !== '{}');
+  });
+
+  removeSignalsIndex();
 };

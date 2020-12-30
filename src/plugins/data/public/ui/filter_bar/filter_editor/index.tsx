@@ -106,7 +106,11 @@ class FilterEditorUI extends Component<Props, State> {
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" onClick={this.toggleCustomEditor}>
+              <EuiButtonEmpty
+                size="xs"
+                data-test-subj="editQueryDSL"
+                onClick={this.toggleCustomEditor}
+              >
                 {this.state.isCustomEditorOpen ? (
                   <FormattedMessage
                     id="data.filter.filterEditor.editFilterValuesButtonLabel"
@@ -133,6 +137,7 @@ class FilterEditorUI extends Component<Props, State> {
 
             <EuiSwitch
               id="filterEditorCustomLabelSwitch"
+              data-test-subj="createCustomLabel"
               label={this.props.intl.formatMessage({
                 id: 'data.filter.filterEditor.createCustomLabelSwitchLabel',
                 defaultMessage: 'Create custom label?',
@@ -149,10 +154,12 @@ class FilterEditorUI extends Component<Props, State> {
                     id: 'data.filter.filterEditor.createCustomLabelInputLabel',
                     defaultMessage: 'Custom label',
                   })}
+                  fullWidth
                 >
                   <EuiFieldText
                     value={`${this.state.customLabel}`}
                     onChange={this.onCustomLabelChange}
+                    fullWidth
                   />
                 </EuiFormRow>
               </div>
@@ -213,12 +220,14 @@ class FilterEditorUI extends Component<Props, State> {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
+            fullWidth
             label={this.props.intl.formatMessage({
               id: 'data.filter.filterEditor.indexPatternSelectLabel',
               defaultMessage: 'Index Pattern',
             })}
           >
             <IndexPatternComboBox
+              fullWidth
               placeholder={this.props.intl.formatMessage({
                 id: 'data.filter.filterBar.indexPatternSelectPlaceholder',
                 defaultMessage: 'Select an index pattern',
@@ -240,7 +249,7 @@ class FilterEditorUI extends Component<Props, State> {
   private renderRegularEditor() {
     return (
       <div>
-        <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexGroup responsive={true} gutterSize="s">
           <EuiFlexItem grow={2}>{this.renderFieldInput()}</EuiFlexItem>
           <EuiFlexItem grow={false} style={{ flexBasis: 160 }}>
             {this.renderOperatorInput()}
@@ -258,12 +267,14 @@ class FilterEditorUI extends Component<Props, State> {
 
     return (
       <EuiFormRow
+        fullWidth
         label={this.props.intl.formatMessage({
           id: 'data.filter.filterEditor.fieldSelectLabel',
           defaultMessage: 'Field',
         })}
       >
         <FieldComboBox
+          fullWidth
           id="fieldInput"
           isDisabled={!selectedIndexPattern}
           placeholder={this.props.intl.formatMessage({
@@ -276,7 +287,6 @@ class FilterEditorUI extends Component<Props, State> {
           onChange={this.onFieldChange}
           singleSelection={{ asPlainText: true }}
           isClearable={false}
-          className="globalFilterEditor__fieldInput"
           data-test-subj="filterFieldSuggestionList"
         />
       </EuiFormRow>
@@ -288,12 +298,14 @@ class FilterEditorUI extends Component<Props, State> {
     const operators = selectedField ? getOperatorOptions(selectedField) : [];
     return (
       <EuiFormRow
+        fullWidth
         label={this.props.intl.formatMessage({
           id: 'data.filter.filterEditor.operatorSelectLabel',
           defaultMessage: 'Operator',
         })}
       >
         <OperatorComboBox
+          fullWidth
           isDisabled={!selectedField}
           placeholder={
             selectedField
@@ -321,6 +333,7 @@ class FilterEditorUI extends Component<Props, State> {
   private renderCustomEditor() {
     return (
       <EuiFormRow
+        fullWidth
         label={i18n.translate('data.filter.filterEditor.queryDslLabel', {
           defaultMessage: 'Elasticsearch Query DSL',
         })}
@@ -353,6 +366,7 @@ class FilterEditorUI extends Component<Props, State> {
             value={this.state.params}
             onChange={this.onParamsChange}
             data-test-subj="phraseValueInput"
+            fullWidth
           />
         );
       case 'phrases':
@@ -362,6 +376,7 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             values={this.state.params}
             onChange={this.onParamsChange}
+            fullWidth
           />
         );
       case 'range':
@@ -370,6 +385,7 @@ class FilterEditorUI extends Component<Props, State> {
             field={this.state.selectedField}
             value={this.state.params}
             onChange={this.onParamsChange}
+            fullWidth
           />
         );
     }

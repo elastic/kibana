@@ -10,7 +10,24 @@ Selecting a <<services,*service*>> brings you to the *transactions* overview.
 [role="screenshot"]
 image::apm/images/apm-transactions-overview.png[Example view of transactions table in the APM app in Kibana]
 
-The *time spent by span type*, *transaction duration*, and *requests per minute* chart display information on all transactions associated with the selected service:
+The *transaction duration*, *transactions per minute*, *transaction error rate*, and *time spent by span type*
+charts display information on all transactions associated with the selected service:
+
+*Transaction duration*::
+Response times for this service, broken down into average, 95th, and 99th percentile.
+If there's a weird spike that you'd like to investigate,
+you can simply zoom in on the graph - this will adjust the specific time range,
+and all of the data on the page will update accordingly.
+
+*Transactions per minute*::
+Visualize response codes: `2xx`, `3xx`, `4xx`, etc.,
+and is useful for determining if you're serving more of one code than you typically do.
+Like in the Transaction duration graph, you can zoom in on anomalies to further investigate them.
+
+*Transaction error rate*::
+Visualize the total number of transactions with errors divided by the total number of transactions.
+Any unexpected increases, decreases, or irregular patterns can be investigated further
+with the <<errors,errors overview>>.
 
 *Time spent by span type*::
 Visualize where your application is spending most of its time.
@@ -21,17 +38,6 @@ The time a transaction took to complete is also recorded and displayed on the ch
 This could be a sign that the agent does not have auto-instrumentation for whatever was happening during that time.
 +
 It's important to note that if you have asynchronous spans, the sum of all span times may exceed the duration of the transaction.
-
-*Transaction duration*::
-Response times for this service, broken down into average, 95th, and 99th percentile.
-If there's a weird spike that you'd like to investigate,
-you can simply zoom in on the graph - this will adjust the specific time range,
-and all of the data on the page will update accordingly.
-
-*Requests per minute*::
-Visualize response codes: `2xx`, `3xx`, `4xx`, etc.,
-and is useful for determining if you're serving more of one code than you typically do.
-Like in the Transaction duration graph, you can zoom in on anomalies to further investigate them.
 
 [[transactions-table]]
 ==== Transactions table
@@ -61,42 +67,45 @@ refer to the documentation for each {apm-agents-ref}[APM Agent] you've implement
 ==== RUM Transaction overview
 
 The transaction overview page is customized for the JavaScript RUM Agent.
-This page highlights things like *page load times*, *transactions per minute*, and even the *average page load duration distribution by country*.
+Specifically, the page highlights *page load times* for your service:
 
 [role="screenshot"]
 image::apm/images/apm-geo-ui.png[average page load duration distribution]
 
-This data is available due to the geo-ip and user agent pipelines being enabled by default,
-which allows for the capture of geo-location and user agent data.
-These visualizations make it easy for you to visualize performance information about your
-end-users' experience based on their location.
+Additional RUM goodies, like core vitals, and visitor breakdown by browser, location, and device,
+are available in the Observability User Experience tab.
+// To do
+// Add link to the Observability UE docs when complete
 
 [[transaction-details]]
 ==== Transaction details
 
 Selecting a transaction group will bring you to the *transaction* details.
-Transaction details include a high-level overview of the time spent by span type,
-transaction group duration, requests per minute, and transaction group duration distribution.
-It's important to note that all of these graphs show data from every transaction within the selected transaction group.
+This page is visually similar to the transaction overview, but it shows data from all transactions within
+the selected transaction group.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-response-dist.png[Example view of response time distribution]
 
 Up to ten sampled transactions are also displayed.
-These sampled transactions are based on your selection in the *Transactions duration distribution*.
-You can update the sampled transactions by selecting a new _bucket_ in the transactions duration distribution graph.
-The number of requests per bucket is displayed when hovering over the graph, and the selected bucket is highlighted to stand out.
+These sampled transactions are based on the _bucket_ selection in the *Transactions duration distribution* chart.
+You can update the sampled transactions by selecting a new _bucket_.
+The number of requests per bucket is displayed when hovering over the graph,
+and the selected bucket is highlighted to stand out.
+
+The screenshot below shows a typical distribution, and indicates most of our requests were served quickly--awesome!
+It's the requests on the right, the ones taking longer than average, that we probably want to focus on.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-duration-dist.png[Example view of transactions duration distribution graph]
 
-This graph shows a typical distribution, and indicates most of our requests were served quickly--awesome!
-It's the requests on the right, the ones taking longer than average, that we probably want to focus on.
-
-When you select one of these buckets,
+When you select a bucket,
 you're presented with up to ten trace samples.
-Each sample has a trace timeline waterfall that shows what a typical request in that bucket was doing.
-By investigating this timeline waterfall, we can hopefully determine _why_ this request was slow and then implement a fix.
+Each sample has a trace timeline waterfall that shows how a typical request in that bucket executed.
+This waterfall is useful for understanding the parent/child hierarchy of transactions and spans,
+and ultimately determining _why_ a request was slow.
+For large waterfalls, expand problematic transactions and collapse well-performing ones
+for easier problem isolation and troubleshooting.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-sample.png[Example view of transactions sample]

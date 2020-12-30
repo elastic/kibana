@@ -76,6 +76,7 @@ export function resultsServiceProvider(
     criteriaFields: any[],
     earliestMs: number,
     latestMs: number,
-    intervalMs: number
+    intervalMs: number,
+    actualPlotFunctionIfMetric?: string
   ): Promise<any>;
 };

@@ -6,7 +6,7 @@
 
 import { appendSearch } from './helpers';
 
-export const getCaseUrl = (search: string | null) => `${appendSearch(search ?? undefined)}`;
+export const getCaseUrl = (search?: string | null) => `${appendSearch(search ?? undefined)}`;
 
 export const getCaseDetailsUrl = ({ id, search }: { id: string; search?: string | null }) =>
   `/${encodeURIComponent(id)}${appendSearch(search ?? undefined)}`;

@@ -19,6 +19,7 @@ export const buildEventsHistogramQuery = ({
   timerange: { from, to },
   defaultIndex,
   stackByField = 'event.action',
+  threshold,
 }: MatrixHistogramRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -54,6 +55,25 @@ export const buildEventsHistogramQuery = ({
             missing: stackByField?.endsWith('.ip') ? '0.0.0.0' : i18n.ALL_OTHERS,
           }
         : {};
+
+    if (threshold != null) {
+      return {
+        eventActionGroup: {
+          terms: {
+            field: threshold.field ?? stackByField,
+            ...(threshold.field != null ? {} : missing),
+            order: {
+              _count: 'desc',
+            },
+            size: 10,
+            min_doc_count: threshold.value,
+          },
+          aggs: {
+            events: dateHistogram,
+          },
+        },
+      };
+    }
 
     return {
       eventActionGroup: {

@@ -64,9 +64,9 @@ describe('ensureAuthorized', () => {
 
   test('ensures the user has privileges to use the operation on the Actions Saved Object type', async () => {
     const { authorization } = mockSecurity();
-    const checkPrivileges: jest.MockedFunction<ReturnType<
-      typeof authorization.checkPrivilegesDynamicallyWithRequest
-    >> = jest.fn();
+    const checkPrivileges: jest.MockedFunction<
+      ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+    > = jest.fn();
     authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     const actionsAuthorization = new ActionsAuthorization({
       request,
@@ -105,9 +105,9 @@ describe('ensureAuthorized', () => {
 
   test('ensures the user has privileges to execute an Actions Saved Object type', async () => {
     const { authorization } = mockSecurity();
-    const checkPrivileges: jest.MockedFunction<ReturnType<
-      typeof authorization.checkPrivilegesDynamicallyWithRequest
-    >> = jest.fn();
+    const checkPrivileges: jest.MockedFunction<
+      ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+    > = jest.fn();
     authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     const actionsAuthorization = new ActionsAuthorization({
       request,
@@ -156,9 +156,9 @@ describe('ensureAuthorized', () => {
 
   test('throws if user lacks the required privieleges', async () => {
     const { authorization } = mockSecurity();
-    const checkPrivileges: jest.MockedFunction<ReturnType<
-      typeof authorization.checkPrivilegesDynamicallyWithRequest
-    >> = jest.fn();
+    const checkPrivileges: jest.MockedFunction<
+      ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+    > = jest.fn();
     authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     const actionsAuthorization = new ActionsAuthorization({
       request,
@@ -198,9 +198,9 @@ describe('ensureAuthorized', () => {
 
   test('exempts users from requiring privileges to execute actions when authorizationMode is Legacy', async () => {
     const { authorization, authentication } = mockSecurity();
-    const checkPrivileges: jest.MockedFunction<ReturnType<
-      typeof authorization.checkPrivilegesDynamicallyWithRequest
-    >> = jest.fn();
+    const checkPrivileges: jest.MockedFunction<
+      ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
+    > = jest.fn();
     authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     const actionsAuthorization = new ActionsAuthorization({
       request,

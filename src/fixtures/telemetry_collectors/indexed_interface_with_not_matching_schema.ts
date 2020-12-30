@@ -41,8 +41,9 @@ export const myCollector = makeUsageCollector<Usage>({
     return { something: { count_2: 2 } };
   },
   schema: {
+    // @ts-expect-error Intentionally missing count_2
     something: {
-      count_1: { type: 'long' }, // Intentionally missing count_2
+      count_1: { type: 'long' },
     },
   },
 });

@@ -5,13 +5,14 @@
  */
 
 import {
-  Connector,
+  ActionConnector,
   CasesConfigureResponse,
   CasesConfigureRequest,
+  ConnectorTypes,
 } from '../../../../../case/common/api';
-import { CaseConfigure, CasesConfigurationMapping } from './types';
+import { CaseConfigure, CaseConnectorMapping } from './types';
 
-export const mapping: CasesConfigurationMapping[] = [
+export const mappings: CaseConnectorMapping[] = [
   {
     source: 'title',
     target: 'short_description',
@@ -20,7 +21,7 @@ export const mapping: CasesConfigurationMapping[] = [
   {
     source: 'description',
     target: 'description',
-    actionType: 'append',
+    actionType: 'overwrite',
   },
   {
     source: 'comments',
@@ -28,46 +29,23 @@ export const mapping: CasesConfigurationMapping[] = [
     actionType: 'append',
   },
 ];
-export const connectorsMock: Connector[] = [
+export const connectorsMock: ActionConnector[] = [
   {
     id: 'servicenow-1',
     actionTypeId: '.servicenow',
     name: 'My Connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
-      incidentConfiguration: {
-        mapping,
-      },
-      isCaseOwned: true,
     },
     isPreconfigured: false,
   },
   {
-    id: 'servicenow-2',
-    actionTypeId: '.servicenow',
+    id: 'resilient-2',
+    actionTypeId: '.resilient',
     name: 'My Connector 2',
     config: {
-      apiUrl: 'https://instance2.service-now.com',
-      incidentConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'short_description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
-      },
-      isCaseOwned: true,
+      apiUrl: 'https://test/',
+      orgId: '201',
     },
     isPreconfigured: false,
   },
@@ -77,25 +55,6 @@ export const connectorsMock: Connector[] = [
     name: 'Jira',
     config: {
       apiUrl: 'https://instance.atlassian.ne',
-      incidentConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'summary',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
-      },
     },
     isPreconfigured: false,
   },
@@ -104,26 +63,40 @@ export const connectorsMock: Connector[] = [
 export const caseConfigurationResposeMock: CasesConfigureResponse = {
   created_at: '2020-04-06T13:03:18.657Z',
   created_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
-  connector_id: '123',
-  connector_name: 'My Connector',
+  connector: {
+    id: '123',
+    name: 'My connector',
+    type: ConnectorTypes.jira,
+    fields: null,
+  },
   closure_type: 'close-by-pushing',
+  mappings: [],
   updated_at: '2020-04-06T14:03:18.657Z',
   updated_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',
 };
 
 export const caseConfigurationMock: CasesConfigureRequest = {
-  connector_id: '123',
-  connector_name: 'My Connector',
+  connector: {
+    id: '123',
+    name: 'My connector',
+    type: ConnectorTypes.jira,
+    fields: null,
+  },
   closure_type: 'close-by-user',
 };
 
 export const caseConfigurationCamelCaseResponseMock: CaseConfigure = {
   createdAt: '2020-04-06T13:03:18.657Z',
   createdBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
-  connectorId: '123',
-  connectorName: 'My Connector',
+  connector: {
+    id: '123',
+    name: 'My connector',
+    type: ConnectorTypes.jira,
+    fields: null,
+  },
   closureType: 'close-by-pushing',
+  mappings: [],
   updatedAt: '2020-04-06T14:03:18.657Z',
   updatedBy: { username: 'elastic', fullName: 'Elastic', email: 'elastic@elastic.co' },
   version: 'WzHJ12',

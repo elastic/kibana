@@ -19,14 +19,14 @@
 
 import { min, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { L, KibanaMapLayer, MapTypes } from '../../maps_legacy/public';
+import { KibanaMapLayer, MapTypes } from '../../maps_legacy/public';
 import { HeatmapMarkers } from './markers/heatmap';
 import { ScaledCirclesMarkers } from './markers/scaled_circles';
 import { ShadedCirclesMarkers } from './markers/shaded_circles';
 import { GeohashGridMarkers } from './markers/geohash_grid';
 
 export class GeohashLayer extends KibanaMapLayer {
-  constructor(featureCollection, featureCollectionMetaData, options, zoom, kibanaMap) {
+  constructor(featureCollection, featureCollectionMetaData, options, zoom, kibanaMap, leaflet) {
     super();
 
     this._featureCollection = featureCollection;
@@ -35,7 +35,8 @@ export class GeohashLayer extends KibanaMapLayer {
     this._geohashOptions = options;
     this._zoom = zoom;
     this._kibanaMap = kibanaMap;
-    const geojson = L.geoJson(this._featureCollection);
+    this._leaflet = leaflet;
+    const geojson = this._leaflet.geoJson(this._featureCollection);
     this._bounds = geojson.getBounds();
     this._createGeohashMarkers();
     this._lastBounds = null;
@@ -56,7 +57,8 @@ export class GeohashLayer extends KibanaMapLayer {
           this._featureCollectionMetaData,
           markerOptions,
           this._zoom,
-          this._kibanaMap
+          this._kibanaMap,
+          this._leaflet
         );
         break;
       case MapTypes.ShadedCircleMarkers:
@@ -65,7 +67,8 @@ export class GeohashLayer extends KibanaMapLayer {
           this._featureCollectionMetaData,
           markerOptions,
           this._zoom,
-          this._kibanaMap
+          this._kibanaMap,
+          this._leaflet
         );
         break;
       case MapTypes.ShadedGeohashGrid:
@@ -74,7 +77,8 @@ export class GeohashLayer extends KibanaMapLayer {
           this._featureCollectionMetaData,
           markerOptions,
           this._zoom,
-          this._kibanaMap
+          this._kibanaMap,
+          this._leaflet
         );
         break;
       case MapTypes.Heatmap:
@@ -95,7 +99,8 @@ export class GeohashLayer extends KibanaMapLayer {
             tooltipFormatter: this._geohashOptions.tooltipFormatter,
           },
           this._zoom,
-          this._featureCollectionMetaData.max
+          this._featureCollectionMetaData.max,
+          this._leaflet
         );
         break;
       default:
@@ -126,9 +131,15 @@ export class GeohashLayer extends KibanaMapLayer {
     if (this._geohashOptions.fetchBounds) {
       const geoHashBounds = await this._geohashOptions.fetchBounds();
       if (geoHashBounds) {
-        const northEast = L.latLng(geoHashBounds.top_left.lat, geoHashBounds.bottom_right.lon);
-        const southWest = L.latLng(geoHashBounds.bottom_right.lat, geoHashBounds.top_left.lon);
-        return L.latLngBounds(southWest, northEast);
+        const northEast = this._leaflet.latLng(
+          geoHashBounds.top_left.lat,
+          geoHashBounds.bottom_right.lon
+        );
+        const southWest = this._leaflet.latLng(
+          geoHashBounds.bottom_right.lat,
+          geoHashBounds.top_left.lon
+        );
+        return this._leaflet.latLngBounds(southWest, northEast);
       }
     }
 

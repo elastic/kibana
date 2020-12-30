@@ -19,3 +19,9 @@ export { OnDoneLoadJsonHandler, LoadFromJsonButton } from './load_from_json';
 export { TestPipelineActions } from './test_pipeline';
 
 export { PipelineProcessorsItemTooltip, Position } from './pipeline_processors_editor_item_tooltip';
+
+export { ProcessorsEmptyPrompt } from './processors_empty_prompt';
+
+export { ProcessorsHeader } from './processors_header';
+
+export { OnFailureProcessorsTitle } from './on_failure_processors_title';

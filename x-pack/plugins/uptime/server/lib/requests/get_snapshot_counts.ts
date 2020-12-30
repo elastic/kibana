@@ -8,6 +8,7 @@ import { UMElasticsearchQueryFn } from '../adapters';
 import { CONTEXT_DEFAULTS } from '../../../common/constants';
 import { Snapshot } from '../../../common/runtime_types';
 import { QueryContext } from './search';
+import { ESFilter } from '../../../../../typings/elasticsearch';
 
 export interface GetSnapshotCountParams {
   dateRangeStart: string;
@@ -16,15 +17,13 @@ export interface GetSnapshotCountParams {
 }
 
 export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Snapshot> = async ({
-  callES,
-  dynamicSettings: { heartbeatIndices },
+  uptimeEsClient,
   dateRangeStart,
   dateRangeEnd,
   filters,
 }): Promise<Snapshot> => {
   const context = new QueryContext(
-    callES,
-    heartbeatIndices,
+    uptimeEsClient,
     dateRangeStart,
     dateRangeEnd,
     CONTEXT_DEFAULTS.CURSOR_PAGINATION,
@@ -39,13 +38,12 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
 };
 
 const statusCount = async (context: QueryContext): Promise<Snapshot> => {
-  const res = await context.search({
-    index: context.heartbeatIndices,
+  const { body: res } = await context.search({
     body: statusCountBody(await context.dateAndCustomFilters()),
   });
 
   return (
-    res.aggregations?.counts?.value ?? {
+    (res.aggregations?.counts?.value as Snapshot) ?? {
       total: 0,
       up: 0,
       down: 0,
@@ -53,7 +51,7 @@ const statusCount = async (context: QueryContext): Promise<Snapshot> => {
   );
 };
 
-const statusCountBody = (filters: any): any => {
+const statusCountBody = (filters: ESFilter[]) => {
   return {
     size: 0,
     query: {

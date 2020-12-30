@@ -16,9 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { NameList } from 'elasticsearch';
-import { IndexPattern, Query } from '../..';
-import { Filter } from '../../../common';
+import { Query } from '../..';
+import { Filter } from '../../es_query';
+import { IndexPattern } from '../../index_patterns';
+import { SearchSource } from './search_source';
+
+/**
+ * search source interface
+ * @public
+ */
+export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
+
+/**
+ * high level search service
+ * @public
+ */
+export interface ISearchStartSearchSource {
+  /**
+   * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
+   * @param fields
+   */
+  create: (fields?: SearchSourceFields) => Promise<ISearchSource>;
+  /**
+   * creates empty {@link SearchSource}
+   */
+  createEmpty: () => ISearchSource;
+}
 
 export type EsQuerySearchAfter = [string | number, string | number];
 
@@ -33,6 +58,13 @@ export interface SortDirectionNumeric {
 }
 
 export type EsQuerySortValue = Record<string, SortDirection | SortDirectionNumeric>;
+
+interface SearchField {
+  [key: string]: SearchFieldValue;
+}
+
+// @internal
+export type SearchFieldValue = string | SearchField;
 
 /**
  * search source fields
@@ -61,7 +93,16 @@ export interface SearchSourceFields {
   size?: number;
   source?: NameList;
   version?: boolean;
-  fields?: NameList;
+  /**
+   * Retrieve fields via the search Fields API
+   */
+  fields?: SearchFieldValue[];
+  /**
+   * Retreive fields directly from _source (legacy behavior)
+   *
+   * @deprecated It is recommended to use `fields` wherever possible.
+   */
+  fieldsFromSource?: NameList;
   /**
    * {@link IndexPatternService}
    */
@@ -74,8 +115,6 @@ export interface SearchSourceFields {
 export interface SearchSourceOptions {
   callParentStartHandlers?: boolean;
 }
-
-export { ISearchSource } from './search_source';
 
 export interface SortOptions {
   mode?: 'min' | 'max' | 'sum' | 'avg' | 'median';

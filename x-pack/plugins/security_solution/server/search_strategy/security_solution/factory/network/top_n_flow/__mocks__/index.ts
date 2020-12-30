@@ -11,6 +11,7 @@ import {
   FlowTargetSourceDest,
   NetworkQueries,
   NetworkTopNFlowRequestOptions,
+  NetworkTopNFlowStrategyResponse,
   NetworkTopTablesFields,
 } from '../../../../../../../common/search_strategy';
 
@@ -554,7 +555,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
   loaded: 21,
 };
 
-export const formattedSearchStrategyResponse = {
+export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = {
   edges: [
     {
       node: {
@@ -579,13 +580,16 @@ export const formattedSearchStrategyResponse = {
           ip: '35.232.239.42',
           location: {
             geo: {
-              continent_name: 'North America',
-              region_iso_code: 'US-VA',
-              country_iso_code: 'US',
-              region_name: 'Virginia',
-              location: { lon: -77.2481, lat: 38.6583 },
+              continent_name: ['North America'],
+              region_iso_code: ['US-VA'],
+              country_iso_code: ['US'],
+              region_name: ['Virginia'],
+              location: {
+                lon: [-77.2481],
+                lat: [38.6583],
+              },
             },
-            flowTarget: 'source',
+            flowTarget: FlowTargetSourceDest.source,
           },
           autonomous_system: { number: 15169, name: 'Google LLC' },
           flows: 922,
@@ -603,14 +607,17 @@ export const formattedSearchStrategyResponse = {
           ip: '151.101.200.204',
           location: {
             geo: {
-              continent_name: 'North America',
-              region_iso_code: 'US-VA',
-              city_name: 'Ashburn',
-              country_iso_code: 'US',
-              region_name: 'Virginia',
-              location: { lon: -77.4728, lat: 39.0481 },
+              continent_name: ['North America'],
+              region_iso_code: ['US-VA'],
+              city_name: ['Ashburn'],
+              country_iso_code: ['US'],
+              region_name: ['Virginia'],
+              location: {
+                lon: [-77.4728],
+                lat: [39.0481],
+              },
             },
-            flowTarget: 'source',
+            flowTarget: FlowTargetSourceDest.source,
           },
           autonomous_system: { number: 54113, name: 'Fastly' },
           flows: 2,
@@ -628,14 +635,17 @@ export const formattedSearchStrategyResponse = {
           ip: '91.189.92.39',
           location: {
             geo: {
-              continent_name: 'Europe',
-              region_iso_code: 'GB-ENG',
-              city_name: 'London',
-              country_iso_code: 'GB',
-              region_name: 'England',
-              location: { lon: -0.0961, lat: 51.5132 },
+              continent_name: ['Europe'],
+              region_iso_code: ['GB-ENG'],
+              city_name: ['London'],
+              country_iso_code: ['GB'],
+              region_name: ['England'],
+              location: {
+                lon: [-0.0961],
+                lat: [51.5132],
+              },
             },
-            flowTarget: 'source',
+            flowTarget: FlowTargetSourceDest.source,
           },
           autonomous_system: { number: 41231, name: 'Canonical Group Limited' },
           flows: 1,
@@ -668,14 +678,17 @@ export const formattedSearchStrategyResponse = {
           ip: '151.101.248.204',
           location: {
             geo: {
-              continent_name: 'North America',
-              region_iso_code: 'US-VA',
-              city_name: 'Ashburn',
-              country_iso_code: 'US',
-              region_name: 'Virginia',
-              location: { lon: -77.539, lat: 39.018 },
+              continent_name: ['North America'],
+              region_iso_code: ['US-VA'],
+              city_name: ['Ashburn'],
+              country_iso_code: ['US'],
+              region_name: ['Virginia'],
+              location: {
+                lon: [-77.539],
+                lat: [39.018],
+              },
             },
-            flowTarget: 'source',
+            flowTarget: FlowTargetSourceDest.source,
           },
           autonomous_system: { number: 54113, name: 'Fastly' },
           flows: 6,
@@ -693,13 +706,16 @@ export const formattedSearchStrategyResponse = {
           ip: '35.196.129.83',
           location: {
             geo: {
-              continent_name: 'North America',
-              region_iso_code: 'US-VA',
-              country_iso_code: 'US',
-              region_name: 'Virginia',
-              location: { lon: -77.2481, lat: 38.6583 },
+              continent_name: ['North America'],
+              region_iso_code: ['US-VA'],
+              country_iso_code: ['US'],
+              region_name: ['Virginia'],
+              location: {
+                lon: [-77.2481],
+                lat: [38.6583],
+              },
             },
-            flowTarget: 'source',
+            flowTarget: FlowTargetSourceDest.source,
           },
           autonomous_system: { number: 15169, name: 'Google LLC' },
           flows: 1,
@@ -717,11 +733,14 @@ export const formattedSearchStrategyResponse = {
           ip: '151.101.2.217',
           location: {
             geo: {
-              continent_name: 'North America',
-              country_iso_code: 'US',
-              location: { lon: -97.822, lat: 37.751 },
+              continent_name: ['North America'],
+              country_iso_code: ['US'],
+              location: {
+                lon: [-97.822],
+                lat: [37.751],
+              },
             },
-            flowTarget: 'source',
+            flowTarget: FlowTargetSourceDest.source,
           },
           autonomous_system: { number: 54113, name: 'Fastly' },
           flows: 24,
@@ -739,14 +758,17 @@ export const formattedSearchStrategyResponse = {
           ip: '91.189.91.38',
           location: {
             geo: {
-              continent_name: 'North America',
-              region_iso_code: 'US-MA',
-              city_name: 'Boston',
-              country_iso_code: 'US',
-              region_name: 'Massachusetts',
-              location: { lon: -71.0631, lat: 42.3562 },
+              continent_name: ['North America'],
+              region_iso_code: ['US-MA'],
+              city_name: ['Boston'],
+              country_iso_code: ['US'],
+              region_name: ['Massachusetts'],
+              location: {
+                lon: [-71.0631],
+                lat: [42.3562],
+              },
             },
-            flowTarget: 'source',
+            flowTarget: FlowTargetSourceDest.source,
           },
           autonomous_system: { number: 41231, name: 'Canonical Group Limited' },
           flows: 1,
@@ -764,11 +786,14 @@ export const formattedSearchStrategyResponse = {
           ip: '193.228.91.123',
           location: {
             geo: {
-              continent_name: 'North America',
-              country_iso_code: 'US',
-              location: { lon: -97.822, lat: 37.751 },
+              continent_name: ['North America'],
+              country_iso_code: ['US'],
+              location: {
+                lon: [-97.822],
+                lat: [37.751],
+              },
             },
-            flowTarget: 'source',
+            flowTarget: FlowTargetSourceDest.source,
           },
           autonomous_system: { number: 133766, name: 'YHSRV.LLC' },
           flows: 33,
@@ -846,6 +871,7 @@ export const formattedSearchStrategyResponse = {
   },
   pageInfo: { activePage: 0, fakeTotalCount: 50, showMorePagesIndicator: true },
   totalCount: 738,
+  rawResponse: {} as NetworkTopNFlowStrategyResponse['rawResponse'],
 };
 
 export const expectedDsl = {

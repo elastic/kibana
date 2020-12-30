@@ -8,7 +8,7 @@ import { ShareToSpaceSavedObjectsManagementAction } from './share_saved_objects_
 // import { ShareToSpaceSavedObjectsManagementColumn } from './share_saved_objects_to_space_column';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 import { ShareSavedObjectsToSpaceService } from '.';
-import { notificationServiceMock } from 'src/core/public/mocks';
+import { coreMock, notificationServiceMock } from 'src/core/public/mocks';
 import { savedObjectsManagementPluginMock } from '../../../../../src/plugins/saved_objects_management/public/mocks';
 
 describe('ShareSavedObjectsToSpaceService', () => {
@@ -18,6 +18,7 @@ describe('ShareSavedObjectsToSpaceService', () => {
         spacesManager: spacesManagerMock.create(),
         notificationsSetup: notificationServiceMock.createSetupContract(),
         savedObjectsManagementSetup: savedObjectsManagementPluginMock.createSetupContract(),
+        getStartServices: coreMock.createSetup().getStartServices,
       };
 
       const service = new ShareSavedObjectsToSpaceService();

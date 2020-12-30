@@ -7,7 +7,7 @@
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { Capabilities } from 'src/core/public';
 import { KibanaFeature } from '../../../../../features/public';
 import { Role } from '../../../../common/model';
@@ -30,7 +30,6 @@ const buildFeatures = () => {
     new KibanaFeature({
       id: 'feature1',
       name: 'Feature 1',
-      icon: 'addDataApp',
       app: ['feature1App'],
       category: { id: 'foo', label: 'foo' },
       privileges: {
@@ -55,7 +54,6 @@ const buildFeatures = () => {
     new KibanaFeature({
       id: 'feature2',
       name: 'Feature 2',
-      icon: 'addDataApp',
       app: ['feature2App'],
       category: { id: 'foo', label: 'foo' },
       privileges: {

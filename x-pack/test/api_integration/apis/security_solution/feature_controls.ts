@@ -19,35 +19,21 @@ const introspectionQuery = gql`
 `;
 
 export default function ({ getService }: FtrProviderContext) {
-  const config = getService('config');
-  const supertest = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
   const clientFactory = getService('securitySolutionGraphQLClientFactory');
 
-  const expectGraphQL404 = (result: any) => {
+  const expectGraphQL403 = (result: any) => {
     expect(result.response).to.be(undefined);
     expect(result.error).not.to.be(undefined);
     expect(result.error).to.have.property('networkError');
-    expect(result.error.networkError).to.have.property('statusCode', 404);
+    expect(result.error.networkError).to.have.property('statusCode', 403);
   };
 
   const expectGraphQLResponse = (result: any) => {
     expect(result.error).to.be(undefined);
     expect(result.response).to.have.property('data');
     expect(result.response.data).to.be.an('object');
-  };
-
-  const expectGraphIQL404 = (result: any) => {
-    expect(result.error).to.be(undefined);
-    expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 404);
-  };
-
-  const expectGraphIQLResponse = (result: any) => {
-    expect(result.error).to.be(undefined);
-    expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 200);
   };
 
   const executeGraphQLQuery = async (username: string, password: string, spaceId?: string) => {
@@ -71,22 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
   };
 
-  const executeGraphIQLRequest = async (username: string, password: string, spaceId?: string) => {
-    const basePath = spaceId ? `/s/${spaceId}` : '';
-
-    return supertest
-      .get(`${basePath}/api/security_solution/graphql/graphiql`)
-      .auth(username, password)
-      .then((response: any) => ({ error: undefined, response }))
-      .catch((error: any) => ({ error, response: undefined }));
-  };
-
   describe('feature controls', () => {
-    let isProd = false;
-    before(() => {
-      const kbnConfig = config.get('servers.kibana');
-      isProd = kbnConfig.hostname === 'localhost' && kbnConfig.port === 5620 ? false : true;
-    });
     it(`APIs can't be accessed by user with no privileges`, async () => {
       const username = 'logstash_read';
       const roleName = 'logstash_read';
@@ -101,10 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const graphQLResult = await executeGraphQLQuery(username, password);
-        expectGraphQL404(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password);
-        expectGraphIQL404(graphQLIResult);
+        expectGraphQL403(graphQLResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -133,13 +101,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const graphQLResult = await executeGraphQLQuery(username, password);
         expectGraphQLResponse(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password);
-        if (!isProd) {
-          expectGraphIQLResponse(graphQLIResult);
-        } else {
-          expectGraphIQL404(graphQLIResult);
-        }
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -170,10 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const graphQLResult = await executeGraphQLQuery(username, password);
-        expectGraphQL404(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password);
-        expectGraphIQL404(graphQLIResult);
+        expectGraphQL403(graphQLResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -232,21 +190,11 @@ export default function ({ getService }: FtrProviderContext) {
       it('user_1 can access APIs in space_1', async () => {
         const graphQLResult = await executeGraphQLQuery(username, password, space1Id);
         expectGraphQLResponse(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password, space1Id);
-        if (!isProd) {
-          expectGraphIQLResponse(graphQLIResult);
-        } else {
-          expectGraphIQL404(graphQLIResult);
-        }
       });
 
       it(`user_1 can't access APIs in space_2`, async () => {
         const graphQLResult = await executeGraphQLQuery(username, password, space2Id);
-        expectGraphQL404(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password, space2Id);
-        expectGraphIQL404(graphQLIResult);
+        expectGraphQL403(graphQLResult);
       });
     });
   });

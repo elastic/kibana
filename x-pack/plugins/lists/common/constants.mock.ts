@@ -5,6 +5,7 @@
  */
 import moment from 'moment';
 
+import { OsTypeArray } from './schemas/common';
 import { EntriesArray } from './schemas/types';
 import { EndpointEntriesArray } from './schemas/types/endpoint';
 export const DATE_NOW = '2020-04-20T15:25:31.830Z';
@@ -35,10 +36,12 @@ export const TYPE = 'ip';
 export const VALUE = '127.0.0.1';
 export const VALUE_2 = '255.255.255';
 export const NAMESPACE_TYPE = 'single';
+export const NESTED_FIELD = 'parent.field';
 
 // Exception List specific
 export const ID = 'uuid_here';
 export const ITEM_ID = 'some-list-item-id';
+export const DETECTION_TYPE = 'detection';
 export const ENDPOINT_TYPE = 'endpoint';
 export const FIELD = 'host.name';
 export const OPERATOR = 'included';
@@ -68,7 +71,7 @@ export const ENDPOINT_ENTRIES: EndpointEntriesArray = [
   { field: 'some.not.nested.field', operator: 'included', type: 'match', value: 'some value' },
 ];
 export const ITEM_TYPE = 'simple';
-export const _TAGS = [];
+export const OS_TYPES: OsTypeArray = ['windows'];
 export const TAGS = [];
 export const COMMENTS = [];
 export const FILTER = 'name:Nicolas Bourbaki';

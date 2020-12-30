@@ -17,11 +17,41 @@
  * under the License.
  */
 
-import { get } from 'lodash';
-import { GeohashLayer } from './geohash_layer';
+import { get, round } from 'lodash';
 import { getFormatService, getQueryService, getKibanaLegacy } from './services';
-import { scaleBounds, geoContains, mapTooltipProvider } from '../../maps_legacy/public';
+import {
+  geoContains,
+  mapTooltipProvider,
+  lazyLoadMapsLegacyModules,
+} from '../../maps_legacy/public';
 import { tooltipFormatter } from './tooltip_formatter';
+
+function scaleBounds(bounds) {
+  const scale = 0.5; // scale bounds by 50%
+
+  const topLeft = bounds.top_left;
+  const bottomRight = bounds.bottom_right;
+  let latDiff = round(Math.abs(topLeft.lat - bottomRight.lat), 5);
+  const lonDiff = round(Math.abs(bottomRight.lon - topLeft.lon), 5);
+  // map height can be zero when vis is first created
+  if (latDiff === 0) latDiff = lonDiff;
+
+  const latDelta = latDiff * scale;
+  let topLeftLat = round(topLeft.lat, 5) + latDelta;
+  if (topLeftLat > 90) topLeftLat = 90;
+  let bottomRightLat = round(bottomRight.lat, 5) - latDelta;
+  if (bottomRightLat < -90) bottomRightLat = -90;
+  const lonDelta = lonDiff * scale;
+  let topLeftLon = round(topLeft.lon, 5) - lonDelta;
+  if (topLeftLon < -180) topLeftLon = -180;
+  let bottomRightLon = round(bottomRight.lon, 5) + lonDelta;
+  if (bottomRightLon > 180) bottomRightLon = 180;
+
+  return {
+    top_left: { lat: topLeftLat, lon: topLeftLon },
+    bottom_right: { lat: bottomRightLat, lon: bottomRightLon },
+  };
+}
 
 export const createTileMapVisualization = (dependencies) => {
   const { getZoomPrecision, getPrecision, BaseMapsVisualization } = dependencies;
@@ -43,19 +73,19 @@ export const createTileMapVisualization = (dependencies) => {
       };
       const bounds = this._kibanaMap.getBounds();
       const mapCollar = scaleBounds(bounds);
-      if (!geoContains(geohashAgg.aggConfigParams.boundingBox, mapCollar)) {
+      if (!geoContains(geohashAgg.sourceParams.params.boundingBox, mapCollar)) {
         updateVarsObject.data.boundingBox = {
           top_left: mapCollar.top_left,
           bottom_right: mapCollar.bottom_right,
         };
       } else {
-        updateVarsObject.data.boundingBox = geohashAgg.aggConfigParams.boundingBox;
+        updateVarsObject.data.boundingBox = geohashAgg.sourceParams.params.boundingBox;
       }
       // todo: autoPrecision should be vis parameter, not aggConfig one
       const zoomPrecision = getZoomPrecision();
-      updateVarsObject.data.precision = geohashAgg.aggConfigParams.autoPrecision
+      updateVarsObject.data.precision = geohashAgg.sourceParams.params.autoPrecision
         ? zoomPrecision[this.vis.getUiState().get('mapZoom')]
-        : getPrecision(geohashAgg.aggConfigParams.precision);
+        : getPrecision(geohashAgg.sourceParams.params.precision);
 
       this.vis.eventsSubject.next(updateVarsObject);
     };
@@ -88,8 +118,8 @@ export const createTileMapVisualization = (dependencies) => {
           return;
         }
         const isAutoPrecision =
-          typeof geohashAgg.aggConfigParams.autoPrecision === 'boolean'
-            ? geohashAgg.aggConfigParams.autoPrecision
+          typeof geohashAgg.sourceParams.params.autoPrecision === 'boolean'
+            ? geohashAgg.sourceParams.params.autoPrecision
             : true;
         if (!isAutoPrecision) {
           return;
@@ -147,7 +177,9 @@ export const createTileMapVisualization = (dependencies) => {
       this._recreateGeohashLayer();
     }
 
-    _recreateGeohashLayer() {
+    async _recreateGeohashLayer() {
+      const { GeohashLayer } = await import('./geohash_layer');
+
       if (this._geohashLayer) {
         this._kibanaMap.removeLayer(this._geohashLayer);
         this._geohashLayer = null;
@@ -158,7 +190,8 @@ export const createTileMapVisualization = (dependencies) => {
         this._geoJsonFeatureCollectionAndMeta.meta,
         geohashOptions,
         this._kibanaMap.getZoomLevel(),
-        this._kibanaMap
+        this._kibanaMap,
+        (await lazyLoadMapsLegacyModules()).L
       );
       this._kibanaMap.addLayer(this._geohashLayer);
     }
@@ -210,7 +243,7 @@ export const createTileMapVisualization = (dependencies) => {
       }
 
       const indexPatternName = agg.indexPatternId;
-      const field = agg.aggConfigParams.field;
+      const field = agg.field;
       const filter = { meta: { negate: false, index: indexPatternName } };
       filter[filterName] = { ignore_unmapped: true };
       filter[filterName][field] = filterData;
@@ -231,7 +264,7 @@ export const createTileMapVisualization = (dependencies) => {
       const DEFAULT = false;
       const agg = this._getGeoHashAgg();
       if (agg) {
-        return get(agg, 'aggConfigParams.isFilteredByCollar', DEFAULT);
+        return get(agg, 'sourceParams.params.isFilteredByCollar', DEFAULT);
       } else {
         return DEFAULT;
       }

@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 
 import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../plugins/case/common/constants';
-import { postCaseReq, defaultUser, postCommentReq } from '../../../common/lib/mock';
+import { postCaseReq, defaultUser, postCommentUserReq } from '../../../common/lib/mock';
 import {
   deleteCases,
   deleteCasesUserActions,
@@ -18,14 +18,26 @@ import {
   getConfiguration,
   getServiceNowConnector,
 } from '../../../common/lib/utils';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const kibanaServer = getService('kibanaServer');
   const es = getService('es');
 
   describe('push_case', () => {
     const actionsRemover = new ActionsRemover(supertest);
+
+    let servicenowSimulatorURL: string = '<could not determine kibana url>';
+    before(() => {
+      servicenowSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
+      );
+    });
 
     afterEach(async () => {
       await deleteCases(es);
@@ -39,35 +51,51 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: connector } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getServiceNowConnector())
+        .send({
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        })
         .expect(200);
 
       actionsRemover.add('default', connector.id, 'action', 'actions');
-
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
-        .send(getConfiguration(connector.id))
+        .send(
+          getConfiguration({
+            id: connector.id,
+            name: connector.name,
+            type: connector.actionTypeId,
+          })
+        )
         .expect(200);
-
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
+        .send({
+          ...postCaseReq,
+          connector: getConfiguration({
+            id: connector.id,
+            name: connector.name,
+            type: connector.actionTypeId,
+            fields: { urgency: null, impact: null, severity: null },
+          }).connector,
+        })
         .expect(200);
 
       const { body } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/_push`)
         .set('kbn-xsrf', 'true')
         .send({
-          connector_id: configure.connector_id,
-          connector_name: configure.connector_name,
+          connector_id: configure.connector.id,
+          connector_name: configure.connector.name,
           external_id: 'external_id',
           external_title: 'external_title',
           external_url: 'external_url',
         })
         .expect(200);
-      expect(body.connector_id).to.eql(configure.connector_id);
+
+      expect(body.connector.id).to.eql(configure.connector.id);
       expect(body.external_service.pushed_by).to.eql(defaultUser);
     });
 
@@ -75,7 +103,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: connector } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'true')
-        .send(getServiceNowConnector())
+        .send({
+          ...getServiceNowConnector(),
+          config: { apiUrl: servicenowSimulatorURL },
+        })
         .expect(200);
 
       actionsRemover.add('default', connector.id, 'action', 'actions');
@@ -83,21 +114,35 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
-        .send(getConfiguration(connector.id))
+        .send(
+          getConfiguration({
+            id: connector.id,
+            name: connector.name,
+            type: connector.actionTypeId,
+          })
+        )
         .expect(200);
 
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
+        .send({
+          ...postCaseReq,
+          connector: getConfiguration({
+            id: connector.id,
+            name: connector.name,
+            type: connector.actionTypeId,
+            fields: { urgency: null, impact: null, severity: null },
+          }).connector,
+        })
         .expect(200);
 
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/_push`)
         .set('kbn-xsrf', 'true')
         .send({
-          connector_id: configure.connector_id,
-          connector_name: configure.connector_name,
+          connector_id: configure.connector.id,
+          connector_name: configure.connector.name,
           external_id: 'external_id',
           external_title: 'external_title',
           external_url: 'external_url',
@@ -107,19 +152,21 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentUserReq)
+        .expect(200);
 
       const { body } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/_push`)
         .set('kbn-xsrf', 'true')
         .send({
-          connector_id: configure.connector_id,
-          connector_name: configure.connector_name,
+          connector_id: configure.connector.id,
+          connector_name: configure.connector.name,
           external_id: 'external_id',
           external_title: 'external_title',
           external_url: 'external_url',
         })
         .expect(200);
+
       expect(body.comments[0].pushed_by).to.eql(defaultUser);
     });
 
@@ -136,6 +183,7 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(404);
     });
+
     it('unhappy path - 400s when bad data supplied', async () => {
       await supertest
         .post(`${CASES_URL}/fake-id/_push`)
@@ -145,17 +193,20 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(400);
     });
+
     it('unhappy path = 409s when case is closed', async () => {
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
         .send(getConfiguration())
         .expect(200);
+
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
+
       await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -169,12 +220,13 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         })
         .expect(200);
+
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/_push`)
         .set('kbn-xsrf', 'true')
         .send({
-          connector_id: configure.connector_id,
-          connector_name: configure.connector_name,
+          connector_id: configure.connector.id,
+          connector_name: configure.connector.name,
           external_id: 'external_id',
           external_title: 'external_title',
           external_url: 'external_url',

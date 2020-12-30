@@ -15,16 +15,19 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
+  CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
 } from '../../../saved_object_types';
 
 export const createMockSavedObjectsRepository = ({
   caseSavedObject = [],
   caseCommentSavedObject = [],
   caseConfigureSavedObject = [],
+  caseMappingsSavedObject = [],
 }: {
   caseSavedObject?: any[];
   caseCommentSavedObject?: any[];
   caseConfigureSavedObject?: any[];
+  caseMappingsSavedObject?: any[];
 }) => {
   const mockSavedObjectsClientContract = ({
     bulkGet: jest.fn((objects: SavedObjectsBulkGetObject[]) => {
@@ -39,7 +42,15 @@ export const createMockSavedObjectsRepository = ({
           }
           const result = caseSavedObject.filter((s) => s.id === id);
           if (!result.length) {
-            throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+            return {
+              id,
+              type,
+              error: {
+                statusCode: 404,
+                error: 'Not Found',
+                message: 'Saved object [cases/not-exist] not found',
+              },
+            };
           }
           return result[0];
         }),
@@ -95,6 +106,14 @@ export const createMockSavedObjectsRepository = ({
       ) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundError('Error thrown for testing');
       }
+      if (findArgs.type === CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT && caseMappingsSavedObject[0]) {
+        return {
+          page: 1,
+          per_page: 5,
+          total: 1,
+          saved_objects: caseMappingsSavedObject,
+        };
+      }
 
       if (findArgs.type === CASE_CONFIGURE_SAVED_OBJECT) {
         return {
@@ -127,7 +146,7 @@ export const createMockSavedObjectsRepository = ({
 
       if (
         type === CASE_CONFIGURE_SAVED_OBJECT &&
-        attributes.connector_id === 'throw-error-create'
+        attributes.connector.id === 'throw-error-create'
       ) {
         throw SavedObjectsErrorHelpers.createBadRequestError('Error thrown for testing');
       }
@@ -151,7 +170,7 @@ export const createMockSavedObjectsRepository = ({
           id: 'mock-configuration',
           attributes,
           updated_at: '2020-04-09T09:43:51.778Z',
-          version: attributes.connector_id === 'no-version' ? undefined : 'WzksMV0=',
+          version: attributes.connector.id === 'no-version' ? undefined : 'WzksMV0=',
         };
 
         caseConfigureSavedObject = [newConfiguration];
@@ -194,7 +213,7 @@ export const createMockSavedObjectsRepository = ({
           type,
           updated_at: '2019-11-22T22:50:55.191Z',
           attributes,
-          version: attributes.connector_id === 'no-version' ? undefined : 'WzE3LDFd',
+          version: attributes.connector?.id === 'no-version' ? undefined : 'WzE3LDFd',
         };
       }
 

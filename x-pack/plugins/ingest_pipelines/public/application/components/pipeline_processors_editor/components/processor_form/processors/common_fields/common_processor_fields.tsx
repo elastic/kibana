@@ -6,6 +6,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import { PainlessLang } from '@kbn/monaco';
 
 import {
   FieldConfig,
@@ -18,7 +19,7 @@ import {
 import { TextEditor } from '../../field_components';
 import { to, from, EDITOR_PX_HEIGHT } from '../shared';
 
-const ignoreFailureConfig: FieldConfig = {
+const ignoreFailureConfig: FieldConfig<any> = {
   defaultValue: false,
   deserializer: to.booleanOrUndef,
   serializer: from.undefinedIfValue(false),
@@ -56,6 +57,8 @@ const tagConfig: FieldConfig = {
 };
 
 export const CommonProcessorFields: FunctionComponent = () => {
+  const suggestionProvider = PainlessLang.getSuggestionProvider('processor_conditional');
+
   return (
     <section>
       <UseField
@@ -63,7 +66,8 @@ export const CommonProcessorFields: FunctionComponent = () => {
         component={TextEditor}
         componentProps={{
           editorProps: {
-            languageId: 'painless',
+            languageId: PainlessLang.ID,
+            suggestionProvider,
             height: EDITOR_PX_HEIGHT.extraSmall,
             options: {
               lineNumbers: 'off',

@@ -21,7 +21,8 @@ import { Executor } from './executor';
 import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
 import { Execution } from '../execution';
-import { parseExpression } from '../ast';
+import { ExpressionAstFunction, parseExpression } from '../ast';
+import { MigrateFunction } from '../../../kibana_utils/common/persistable_state';
 
 describe('Executor', () => {
   test('can instantiate', () => {
@@ -149,6 +150,68 @@ describe('Executor', () => {
         const execution = executor.createExecution('foo bar="baz"');
 
         expect((execution.context as any).foo).toBe(foo);
+      });
+    });
+  });
+
+  describe('.inject', () => {
+    const executor = new Executor();
+
+    const injectFn = jest.fn().mockImplementation((args, references) => args);
+    const extractFn = jest.fn().mockReturnValue({ args: {}, references: [] });
+    const migrateFn = jest.fn().mockImplementation((args) => args);
+
+    const fooFn = {
+      name: 'foo',
+      help: 'test',
+      args: {
+        bar: {
+          types: ['string'],
+          help: 'test',
+        },
+      },
+      extract: (state: ExpressionAstFunction['arguments']) => {
+        return extractFn(state);
+      },
+      inject: (state: ExpressionAstFunction['arguments']) => {
+        return injectFn(state);
+      },
+      migrations: {
+        '7.10.0': (((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+          return migrateFn(state, version);
+        }) as any) as MigrateFunction,
+        '7.10.1': (((state: ExpressionAstFunction, version: string): ExpressionAstFunction => {
+          return migrateFn(state, version);
+        }) as any) as MigrateFunction,
+      },
+      fn: jest.fn(),
+    };
+    executor.registerFunction(fooFn);
+
+    test('calls inject function for every expression function in expression', () => {
+      executor.inject(
+        parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}'),
+        []
+      );
+      expect(injectFn).toBeCalledTimes(5);
+    });
+
+    describe('.extract', () => {
+      test('calls extract function for every expression function in expression', () => {
+        executor.extract(
+          parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}')
+        );
+        expect(extractFn).toBeCalledTimes(5);
+      });
+    });
+
+    describe('.migrate', () => {
+      test('calls migrate function for every expression function in expression', () => {
+        executor.migrate(
+          parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}'),
+          '7.10.0'
+        );
+        expect(migrateFn).toBeCalledTimes(5);
       });
     });
   });

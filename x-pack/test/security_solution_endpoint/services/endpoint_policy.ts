@@ -15,11 +15,14 @@ import {
   GetPackagePoliciesResponse,
   GetFullAgentPolicyResponse,
   GetPackagesResponse,
-} from '../../../plugins/ingest_manager/common';
+} from '../../../plugins/fleet/common';
 import { factory as policyConfigFactory } from '../../../plugins/security_solution/common/endpoint/models/policy_config';
 import { Immutable } from '../../../plugins/security_solution/common/endpoint/types';
 
-const INGEST_API_ROOT = '/api/ingest_manager';
+// NOTE: import path below should be the deep path to the actual module - else we get CI errors
+import { pkgKeyFromPackageInfo } from '../../../plugins/fleet/public/applications/fleet/services/pkg_key_from_package_info';
+
+const INGEST_API_ROOT = '/api/fleet';
 const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
 const INGEST_API_AGENT_POLICIES_DELETE = `${INGEST_API_AGENT_POLICIES}/delete`;
 const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
@@ -106,6 +109,14 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
   })();
 
   return {
+    /**
+     * Returns the endpoint package key for the currently installed package. This `pkgkey` can then
+     * be used to build URLs for Fleet pages or APIs
+     */
+    async getEndpointPkgKey() {
+      return pkgKeyFromPackageInfo((await retrieveEndpointPackageInfo())!);
+    },
+
     /**
      * Retrieves the full Agent policy, which mirrors what the Elastic Agent would get
      * once they checkin.

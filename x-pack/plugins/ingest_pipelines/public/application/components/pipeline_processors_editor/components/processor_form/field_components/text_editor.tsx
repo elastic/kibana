@@ -13,6 +13,8 @@ import {
   getFieldValidityAndErrorMessage,
 } from '../../../../../../shared_imports';
 
+import './text_editor.scss';
+
 interface Props {
   field: FieldHook<string>;
   editorProps: { [key: string]: any };
@@ -30,7 +32,11 @@ export const TextEditor: FunctionComponent<Props> = ({ field, editorProps }) => 
       error={errorMessage}
       fullWidth
     >
-      <EuiPanel paddingSize="s" hasShadow={false}>
+      <EuiPanel
+        className="pipelineProcessorsEditor__form__textEditor__panel"
+        paddingSize="s"
+        hasShadow={false}
+      >
         <CodeEditor value={value} onChange={setValue} {...(editorProps as any)} />
       </EuiPanel>
     </EuiFormRow>

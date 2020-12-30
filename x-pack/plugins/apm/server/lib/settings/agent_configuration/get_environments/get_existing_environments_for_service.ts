@@ -18,7 +18,8 @@ export async function getExistingEnvironmentsForService({
   serviceName: string | undefined;
   setup: Setup;
 }) {
-  const { internalClient, indices } = setup;
+  const { internalClient, indices, config } = setup;
+  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
   const bool = serviceName
     ? { filter: [{ term: { [SERVICE_NAME]: serviceName } }] }
@@ -34,7 +35,7 @@ export async function getExistingEnvironmentsForService({
           terms: {
             field: SERVICE_ENVIRONMENT,
             missing: ALL_OPTION_VALUE,
-            size: 50,
+            size: maxServiceEnvironments,
           },
         },
       },

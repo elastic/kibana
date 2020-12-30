@@ -19,30 +19,54 @@
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { hostname } from 'os';
+import url from 'url';
 
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
+import { ExternalUrlConfig, IExternalUrlConfig } from '../external_url';
 import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
+const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
 // before update to make sure it's in sync with validation rules in Legacy
 // https://github.com/elastic/kibana/blob/master/src/legacy/server/config/schema.js
 export const config = {
-  path: 'server',
+  path: 'server' as const,
   schema: schema.object(
     {
       name: schema.string({ defaultValue: () => hostname() }),
       autoListen: schema.boolean({ defaultValue: true }),
+      publicBaseUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       basePath: schema.maybe(
         schema.string({
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
-      cors: schema.boolean({ defaultValue: false }),
+      cors: schema.object(
+        {
+          enabled: schema.boolean({ defaultValue: false }),
+          allowCredentials: schema.boolean({ defaultValue: false }),
+          allowOrigin: schema.oneOf(
+            [
+              schema.arrayOf(hostURISchema, { minSize: 1 }),
+              schema.arrayOf(schema.literal('*'), { minSize: 1, maxSize: 1 }),
+            ],
+            {
+              defaultValue: ['*'],
+            }
+          ),
+        },
+        {
+          validate(value) {
+            if (value.allowCredentials === true && value.allowOrigin.includes('*')) {
+              return 'Cannot specify wildcard origin "*" with "credentials: true". Please provide a list of allowed origins.';
+            }
+          },
+        }
+      ),
       customResponseHeaders: schema.recordOf(schema.string(), schema.any(), {
         defaultValue: {},
       }),
@@ -82,7 +106,7 @@ export const config = {
       ),
       xsrf: schema.object({
         disableProtection: schema.boolean({ defaultValue: false }),
-        whitelist: schema.arrayOf(
+        allowlist: schema.arrayOf(
           schema.string({ validate: match(/^\//, 'must start with a slash') }),
           { defaultValue: [] }
         ),
@@ -106,6 +130,17 @@ export const config = {
         if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
           return 'cannot use [rewriteBasePath] when [basePath] is not specified';
         }
+
+        if (rawConfig.publicBaseUrl) {
+          const parsedUrl = url.parse(rawConfig.publicBaseUrl);
+          if (parsedUrl.query || parsedUrl.hash || parsedUrl.auth) {
+            return `[publicBaseUrl] may only contain a protocol, host, port, and pathname`;
+          }
+          if (parsedUrl.path !== (rawConfig.basePath ?? '/')) {
+            return `[publicBaseUrl] must contain the [basePath]: ${parsedUrl.path} !== ${rawConfig.basePath}`;
+          }
+        }
+
         if (!rawConfig.compression.enabled && rawConfig.compression.referrerWhitelist) {
           return 'cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false';
         }
@@ -134,23 +169,39 @@ export class HttpConfig {
   public keepaliveTimeout: number;
   public socketTimeout: number;
   public port: number;
-  public cors: boolean | { origin: string[] };
+  public cors: {
+    enabled: boolean;
+    allowCredentials: boolean;
+    allowOrigin: string[];
+  };
   public customResponseHeaders: Record<string, string | string[]>;
   public maxPayload: ByteSizeValue;
   public basePath?: string;
+  public publicBaseUrl?: string;
   public rewriteBasePath: boolean;
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
   public csp: ICspConfig;
-  public xsrf: { disableProtection: boolean; whitelist: string[] };
+  public externalUrl: IExternalUrlConfig;
+  public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
 
   /**
    * @internal
    */
-  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType) {
+  constructor(
+    rawHttpConfig: HttpConfigType,
+    rawCspConfig: CspConfigType,
+    rawExternalUrlConfig: ExternalUrlConfig
+  ) {
     this.autoListen = rawHttpConfig.autoListen;
-    this.host = rawHttpConfig.host;
+    // TODO: Consider dropping support for '0' in v8.0.0. This value is passed
+    // to hapi, which validates it. Prior to hapi v20, '0' was considered a
+    // valid host, however the validation logic internally in hapi was
+    // re-written for v20 and hapi no longer considers '0' a valid host. For
+    // details, see:
+    // https://github.com/elastic/kibana/issues/86716#issuecomment-749623781
+    this.host = rawHttpConfig.host === '0' ? '0.0.0.0' : rawHttpConfig.host;
     this.port = rawHttpConfig.port;
     this.cors = rawHttpConfig.cors;
     this.customResponseHeaders = Object.entries(rawHttpConfig.customResponseHeaders ?? {}).reduce(
@@ -165,12 +216,14 @@ export class HttpConfig {
     this.maxPayload = rawHttpConfig.maxPayload;
     this.name = rawHttpConfig.name;
     this.basePath = rawHttpConfig.basePath;
+    this.publicBaseUrl = rawHttpConfig.publicBaseUrl;
     this.keepaliveTimeout = rawHttpConfig.keepaliveTimeout;
     this.socketTimeout = rawHttpConfig.socketTimeout;
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
     this.csp = new CspConfig(rawCspConfig);
+    this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
   }

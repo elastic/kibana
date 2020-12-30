@@ -7,40 +7,32 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from 'src/core/public';
-import { IHttpProviderProps } from './http_provider';
 
 import { READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
-export interface IHttpValues {
+interface HttpValues {
   http: HttpSetup;
   httpInterceptors: Function[];
   errorConnecting: boolean;
   readOnlyMode: boolean;
 }
-export interface IHttpActions {
-  initializeHttp({ http, errorConnecting, readOnlyMode }: IHttpProviderProps): IHttpProviderProps;
+interface HttpActions {
   initializeHttpInterceptors(): void;
   setHttpInterceptors(httpInterceptors: Function[]): { httpInterceptors: Function[] };
   setErrorConnecting(errorConnecting: boolean): { errorConnecting: boolean };
   setReadOnlyMode(readOnlyMode: boolean): { readOnlyMode: boolean };
 }
 
-export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
+export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
   path: ['enterprise_search', 'http_logic'],
   actions: {
-    initializeHttp: (props) => props,
     initializeHttpInterceptors: () => null,
     setHttpInterceptors: (httpInterceptors) => ({ httpInterceptors }),
     setErrorConnecting: (errorConnecting) => ({ errorConnecting }),
     setReadOnlyMode: (readOnlyMode) => ({ readOnlyMode }),
   },
-  reducers: {
-    http: [
-      (null as unknown) as HttpSetup,
-      {
-        initializeHttp: (_, { http }) => http,
-      },
-    ],
+  reducers: ({ props }) => ({
+    http: [props.http, {}],
     httpInterceptors: [
       [],
       {
@@ -48,20 +40,18 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
       },
     ],
     errorConnecting: [
-      false,
+      props.errorConnecting || false,
       {
-        initializeHttp: (_, { errorConnecting }) => !!errorConnecting,
         setErrorConnecting: (_, { errorConnecting }) => errorConnecting,
       },
     ],
     readOnlyMode: [
-      false,
+      props.readOnlyMode || false,
       {
-        initializeHttp: (_, { readOnlyMode }) => !!readOnlyMode,
         setReadOnlyMode: (_, { readOnlyMode }) => readOnlyMode,
       },
     ],
-  },
+  }),
   listeners: ({ values, actions }) => ({
     initializeHttpInterceptors: () => {
       const httpInterceptors = [];
@@ -103,7 +93,10 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
       actions.setHttpInterceptors(httpInterceptors);
     },
   }),
-  events: ({ values }) => ({
+  events: ({ values, actions }) => ({
+    afterMount: () => {
+      actions.initializeHttpInterceptors();
+    },
     beforeUnmount: () => {
       values.httpInterceptors.forEach((removeInterceptorFn?: Function) => {
         if (removeInterceptorFn) removeInterceptorFn();
@@ -111,6 +104,20 @@ export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
     },
   }),
 });
+
+/**
+ * Mount/props helper
+ */
+interface HttpLogicProps {
+  http: HttpSetup;
+  errorConnecting?: boolean;
+  readOnlyMode?: boolean;
+}
+export const mountHttpLogic = (props: HttpLogicProps) => {
+  HttpLogic(props);
+  const unmount = HttpLogic.mount();
+  return unmount;
+};
 
 /**
  * Small helper that checks whether or not an http call is for an Enterprise Search API

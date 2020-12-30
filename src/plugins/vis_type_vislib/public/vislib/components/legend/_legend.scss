@@ -3,8 +3,6 @@
 // NOTE: Some of the styles attempt to align with the TSVB legend
 
 $visLegendWidth: 150px;
-$visColorPickerWidth: $euiSizeM * 10;
-$visLegendLineHeight: $euiSize;
 
 .visLegend__toggle {
   border-radius: $euiBorderRadius;
@@ -13,6 +11,7 @@ $visLegendLineHeight: $euiSize;
   left: 0;
   display: flex;
   padding: $euiSizeXS;
+  margin: $euiSizeS;
   background-color: $euiColorEmptyShade;
   transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance, background-color $euiAnimSpeedFast $euiAnimSlightResistance $euiAnimSpeedExtraSlow;
 
@@ -33,13 +32,13 @@ $visLegendLineHeight: $euiSize;
   height: 100%;
 }
 
-.visLib--legend-left {
+.vislib--legend-left {
   .visLegend__list {
     margin-bottom: $euiSizeL;
   }
 }
 
-.visLib--legend-bottom {
+.vislib--legend-bottom {
   .visLegend__list {
     margin-left: $euiSizeL;
   }
@@ -64,8 +63,8 @@ $visLegendLineHeight: $euiSize;
     }
   }
 
-  .visLib--legend-top &,
-  .visLib--legend-bottom & {
+  .vislib--legend-top &,
+  .vislib--legend-bottom & {
     width: auto;
     flex-direction: row;
     flex-wrap: wrap;
@@ -78,22 +77,5 @@ $visLegendLineHeight: $euiSize;
 
   &.hidden {
     visibility: hidden;
-  }
-}
-
-.visLegend__valueColorPicker {
-  width: ($euiSizeL * 8); // 8 columns
-}
-
-.visLegend__valueColorPickerDot {
-  cursor: pointer;
-
-  &:hover {
-    transform: scale(1.4);
-  }
-
-  &-isSelected {
-    border: $euiSizeXS solid;
-    border-radius: 100%;
   }
 }

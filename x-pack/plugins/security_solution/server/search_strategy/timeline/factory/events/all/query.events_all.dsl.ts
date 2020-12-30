@@ -12,11 +12,11 @@ import {
   TimelineEventsAllRequestOptions,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
-import { TIMELINE_EVENTS_FIELDS } from './constants';
 
 export const buildTimelineEventsAllQuery = ({
   defaultIndex,
   docValueFields,
+  fields,
   filterQuery,
   pagination: { activePage, querySize },
   sort,
@@ -27,38 +27,37 @@ export const buildTimelineEventsAllQuery = ({
   const getTimerangeFilter = (timerangeOption: TimerangeInput | undefined): TimerangeFilter[] => {
     if (timerangeOption) {
       const { to, from } = timerangeOption;
-      return [
-        {
-          range: {
-            '@timestamp': {
-              gte: from,
-              lte: to,
-              format: 'strict_date_optional_time',
+      return !isEmpty(to) && !isEmpty(from)
+        ? [
+            {
+              range: {
+                '@timestamp': {
+                  gte: from,
+                  lte: to,
+                  format: 'strict_date_optional_time',
+                },
+              },
             },
-          },
-        },
-      ];
+          ]
+        : [];
     }
     return [];
   };
 
   const filter = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
 
-  const getSortField = (sortField: SortField) => {
-    if (sortField.field) {
-      const field: string = sortField.field === 'timestamp' ? '@timestamp' : sortField.field;
-
-      return [{ [field]: sortField.direction }];
-    }
-    return [];
-  };
+  const getSortField = (sortFields: SortField[]) =>
+    sortFields.map((item) => {
+      const field: string = item.field === 'timestamp' ? '@timestamp' : item.field;
+      return { [field]: item.direction };
+    });
 
   const dslQuery = {
     allowNoIndices: true,
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       query: {
         bool: {
           filter,
@@ -68,7 +67,7 @@ export const buildTimelineEventsAllQuery = ({
       size: querySize,
       track_total_hits: true,
       sort: getSortField(sort),
-      _source: TIMELINE_EVENTS_FIELDS,
+      fields,
     },
   };
 

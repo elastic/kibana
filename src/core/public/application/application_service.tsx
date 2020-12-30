@@ -242,11 +242,19 @@ export class ApplicationService {
       appId,
       { path, state, replace = false }: NavigateToAppOptions = {}
     ) => {
-      if (await this.shouldNavigate(overlays)) {
+      const currentAppId = this.currentAppId$.value;
+      const navigatingToSameApp = currentAppId === appId;
+      const shouldNavigate = navigatingToSameApp
+        ? true
+        : await this.shouldNavigate(overlays, appId);
+
+      if (shouldNavigate) {
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
         }
-        this.appInternalStates.delete(this.currentAppId$.value!);
+        if (!navigatingToSameApp) {
+          this.appInternalStates.delete(this.currentAppId$.value!);
+        }
         this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
         this.currentAppId$.next(appId);
       }
@@ -326,18 +334,24 @@ export class ApplicationService {
     this.currentActionMenu$.next(currentActionMenu);
   };
 
-  private async shouldNavigate(overlays: OverlayStart): Promise<boolean> {
+  private async shouldNavigate(overlays: OverlayStart, nextAppId: string): Promise<boolean> {
     const currentAppId = this.currentAppId$.value;
     if (currentAppId === undefined) {
       return true;
     }
-    const action = getLeaveAction(this.appInternalStates.get(currentAppId)?.leaveHandler);
+    const action = getLeaveAction(
+      this.appInternalStates.get(currentAppId)?.leaveHandler,
+      nextAppId
+    );
     if (isConfirmAction(action)) {
       const confirmed = await overlays.openConfirm(action.text, {
         title: action.title,
         'data-test-subj': 'appLeaveConfirmModal',
       });
       if (!confirmed) {
+        if (action.callback) {
+          setTimeout(action.callback, 0);
+        }
         return false;
       }
     }

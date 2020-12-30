@@ -47,7 +47,7 @@ test('correctly creates default environment in dev mode.', () => {
     REPO_ROOT,
     getEnvOptions({
       configs: ['/test/cwd/config/kibana.yml'],
-      isDevClusterMaster: true,
+      isDevCliParent: true,
     })
   );
 
@@ -196,6 +196,18 @@ test('pluginSearchPaths contains x-pack/examples plugins path if --run-examples 
   );
 
   expect(env.pluginSearchPaths).toContain('/some/home/dir/x-pack/examples');
+});
+
+test('pluginSearchPaths does not contain x-pack/examples plugins path if --oss flag is true', () => {
+  const env = new Env(
+    '/some/home/dir',
+    packageInfos,
+    getEnvOptions({
+      cliArgs: { runExamples: true, oss: true },
+    })
+  );
+
+  expect(env.pluginSearchPaths).not.toContain('/some/home/dir/x-pack/examples');
 });
 
 test('pluginSearchPaths does not contains examples plugins path if --run-examples flag is false', () => {

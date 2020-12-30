@@ -1,5 +1,5 @@
 <timelion-app class="timApp app-container">
-  <span class="kuiLocalTitle">
+  <span class="timApp__title">
     <span class="timApp__stats" ng-show="stats">
       <span
         i18n-id="timelion.topNavMenu.statsDescription"
@@ -11,21 +11,7 @@
     </span>
   </span>
   <!-- Local nav. -->
-  <kbn-top-nav 
-    app-name="'timelion'"
-    config="topNavMenu"
-    show-search-bar="true"
-    show-search-bar-inline="true"
-    show-filter-bar="false"
-    show-query-input="false"
-    date-range-from="model.timeRange.from"
-    date-range-to="model.timeRange.to"
-    is-refresh-paused="model.refreshInterval.pause"
-    refresh-interval="model.refreshInterval.value"
-    on-refresh-change="onRefreshChange"
-    on-query-submit="onTimeUpdate">
-  </kbn-top-nav>
-
+  <timelion-top-nav top-nav-menu="topNavMenu" on-time-update="onTimeUpdate"></timelion-top-nav>
 
   <div class="timApp__menus">
     <timelion-deprecation></timelion-deprecation>
@@ -41,9 +27,9 @@
       <form
         role="form"
         ng-submit="updateChart()"
-        class="kuiFieldGroup kuiFieldGroup--alignTop kuiVerticalRhythm"
+        class="timApp__form"
       >
-        <div class="kuiFieldGroupSection kuiFieldGroupSection--wide">
+        <div class="timApp__expression">
           <timelion-expression-input
             sheet="expression"
             rows="1"
@@ -52,9 +38,8 @@
           ></timelion-expression-input>
         </div>
 
-        <div class="kuiFieldGroupSection">
+        <div>
           <timelion-interval
-            class="kuiVerticalRhythmSmall"
             model="state.interval"
             change-interval="changeInterval"
           ></timelion-interval>
@@ -62,14 +47,14 @@
           <button
             type="submit"
             aria-label="{{ ::'timelion.search.submitAriaLabel' | i18n: { defaultMessage: 'Search' } }}"
-            class="kuiButton kuiButton--primary fullWidth kuiVerticalRhythmSmall"
+            class="timApp__button fullWidth"
           >
-            <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-play"></span>
+            <icon type="'play'"></icon>
           </button>
         </div>
       </form>
 
-      <div class="kuiVerticalRhythm">
+      <div>
         <timelion-fullscreen
           ng-show="transient.fullscreen"
           transient="transient"

@@ -45,13 +45,21 @@ export default function ({ getService }) {
 
         const { body } = await supertest.get(uri).expect(200);
 
-        expect(body).to.eql({
-          dateFields: ['testCreatedField'],
-          keywordFields: ['testTagField'],
-          numericFields: ['testTotalField'],
-          doesMatchIndices: true,
-          doesMatchRollupIndices: false,
-        });
+        expect(Object.keys(body)).to.eql([
+          'doesMatchIndices',
+          'doesMatchRollupIndices',
+          'dateFields',
+          'numericFields',
+          'keywordFields',
+        ]);
+
+        expect(body.doesMatchIndices).to.be(true);
+        expect(body.doesMatchRollupIndices).to.be(false);
+        expect(body.dateFields).to.eql(['testCreatedField']);
+        expect(body.keywordFields).to.eql(['testTagField']);
+
+        // Allowing the test to account for future addition of doc_count
+        expect(body.numericFields.indexOf('testTotalField')).to.be.greaterThan(-1);
       });
 
       it("should not return any fields when the index pattern doesn't match any indices", async () => {

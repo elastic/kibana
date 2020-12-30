@@ -8,15 +8,16 @@
  * This module contains the logic that ensures we don't run too many
  * tasks at once in a given Kibana instance.
  */
+import { Observable } from 'rxjs';
 import moment, { Duration } from 'moment';
 import { performance } from 'perf_hooks';
 import { padStart } from 'lodash';
-import { Logger } from './types';
-import { TaskRunner } from './task_runner';
+import { Logger } from '../../../../src/core/server';
+import { TaskRunner } from './task_running';
 import { isTaskSavedObjectNotFoundError } from './lib/is_task_not_found_error';
 
 interface Opts {
-  maxWorkers: number;
+  maxWorkers$: Observable<number>;
   logger: Logger;
 }
 
@@ -31,7 +32,7 @@ const VERSION_CONFLICT_MESSAGE = 'Task has been claimed by another Kibana servic
  * Runs tasks in batches, taking costs into account.
  */
 export class TaskPool {
-  private maxWorkers: number;
+  private maxWorkers: number = 0;
   private running = new Set<TaskRunner>();
   private logger: Logger;
 
@@ -44,8 +45,11 @@ export class TaskPool {
    * @prop {Logger} logger - The task manager logger.
    */
   constructor(opts: Opts) {
-    this.maxWorkers = opts.maxWorkers;
     this.logger = opts.logger;
+    opts.maxWorkers$.subscribe((maxWorkers) => {
+      this.logger.debug(`Task pool now using ${maxWorkers} as the max worker value`);
+      this.maxWorkers = maxWorkers;
+    });
   }
 
   /**

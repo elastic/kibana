@@ -120,6 +120,15 @@ export class ApiService {
 
     return result;
   }
+
+  public async loadDocument(index: string, id: string) {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/documents/${encodeURIComponent(index)}/${encodeURIComponent(id)}`,
+      method: 'get',
+    });
+
+    return result;
+  }
 }
 
 export const apiService = new ApiService();

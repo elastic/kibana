@@ -5,6 +5,8 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import isEmpty from 'lodash/isEmpty';
 
 import './brace_imports';

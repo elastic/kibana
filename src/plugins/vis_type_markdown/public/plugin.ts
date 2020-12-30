@@ -24,10 +24,7 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { markdownVisDefinition } from './markdown_vis';
 import { createMarkdownVisFn } from './markdown_fn';
 import { ConfigSchema } from '../config';
-
-import './index.scss';
-import { getMarkdownRenderer } from './markdown_renderer';
-import { createStartServicesGetter } from '../../kibana_utils/public';
+import { markdownVisRenderer } from './markdown_renderer';
 
 /** @internal */
 export interface MarkdownPluginSetupDependencies {
@@ -44,9 +41,8 @@ export class MarkdownPlugin implements Plugin<void, void> {
   }
 
   public setup(core: CoreSetup, { expressions, visualizations }: MarkdownPluginSetupDependencies) {
-    const start = createStartServicesGetter(core.getStartServices);
     visualizations.createBaseVisualization(markdownVisDefinition);
-    expressions.registerRenderer(getMarkdownRenderer(start));
+    expressions.registerRenderer(markdownVisRenderer);
     expressions.registerFunction(createMarkdownVisFn);
   }
 

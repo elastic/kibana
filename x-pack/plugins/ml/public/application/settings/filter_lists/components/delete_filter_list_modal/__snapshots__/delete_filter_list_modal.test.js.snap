@@ -110,6 +110,7 @@ exports[`DeleteFilterListModal renders modal after clicking delete button 1`] = 
           values={Object {}}
         />
       }
+      data-test-subj="mlFilterListDeleteConfirmation"
       defaultFocusedButton="confirm"
       onCancel={[Function]}
       onConfirm={[Function]}

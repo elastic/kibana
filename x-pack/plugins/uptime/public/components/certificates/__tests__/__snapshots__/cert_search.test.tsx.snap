@@ -16,7 +16,7 @@ exports[`CertificatesSearch renders expected elements for valid props 1`] = `
     >
       <input
         aria-label="Search certificates"
-        class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch-isClearable"
+        class="euiFieldSearch euiFieldSearch--fullWidth"
         data-test-subj="uptimeCertSearch"
         placeholder="Search certificates"
         type="search"
@@ -27,7 +27,7 @@ exports[`CertificatesSearch renders expected elements for valid props 1`] = `
         <span
           class="euiFormControlLayoutCustomIcon"
         >
-          <div
+          <span
             aria-hidden="true"
             class="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="search"

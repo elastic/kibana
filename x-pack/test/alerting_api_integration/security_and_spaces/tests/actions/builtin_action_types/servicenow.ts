@@ -15,24 +15,6 @@ import {
   ExternalServiceSimulator,
 } from '../../../../common/fixtures/plugins/actions_simulators/server/plugin';
 
-const mapping = [
-  {
-    source: 'title',
-    target: 'short_description',
-    actionType: 'overwrite',
-  },
-  {
-    source: 'description',
-    target: 'description',
-    actionType: 'overwrite',
-  },
-  {
-    source: 'comments',
-    target: 'comments',
-    actionType: 'append',
-  },
-];
-
 // eslint-disable-next-line import/no-default-export
 export default function servicenowTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -42,8 +24,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
   const mockServiceNow = {
     config: {
       apiUrl: 'www.servicenowisinkibanaactions.com',
-      incidentConfiguration: { mapping },
-      isCaseOwned: true,
     },
     secrets: {
       password: 'elastic',
@@ -52,24 +32,20 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
     params: {
       subAction: 'pushToService',
       subActionParams: {
-        savedObjectId: '123',
-        createdAt: '2020-03-13T08:34:53.450Z',
-        createdBy: { fullName: 'Elastic User', username: 'elastic' },
+        incident: {
+          description: 'a description',
+          externalId: null,
+          impact: '1',
+          severity: '1',
+          short_description: 'a title',
+          urgency: '1',
+        },
         comments: [
           {
-            commentId: '456',
             comment: 'first comment',
-            createdAt: '2020-03-13T08:34:53.450Z',
-            createdBy: { fullName: 'Elastic User', username: 'elastic' },
-            updatedAt: null,
-            updatedBy: null,
+            commentId: '456',
           },
         ],
-        description: 'a description',
-        externalId: null,
-        title: 'a title',
-        updatedAt: '2020-06-17T04:37:45.147Z',
-        updatedBy: { fullName: null, username: 'elastic' },
       },
     },
   };
@@ -93,8 +69,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
-              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -107,8 +81,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           actionTypeId: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
-            incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-            isCaseOwned: true,
           },
         });
 
@@ -123,8 +95,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
           actionTypeId: '.servicenow',
           config: {
             apiUrl: servicenowSimulatorURL,
-            incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-            isCaseOwned: true,
           },
         });
       });
@@ -158,8 +128,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: 'http://servicenow.mynonexistent.com',
-              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
           })
@@ -183,8 +151,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
-              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-              isCaseOwned: true,
             },
           })
           .expect(400)
@@ -196,72 +162,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 'error validating action type secrets: [password]: expected value of type [string] but got [undefined]',
             });
           });
-      });
-
-      it('should create a servicenow action without incidentConfiguration', async () => {
-        await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
-            config: {
-              apiUrl: servicenowSimulatorURL,
-              isCaseOwned: true,
-            },
-            secrets: mockServiceNow.secrets,
-          })
-          .expect(200);
-      });
-
-      it('should respond with a 400 Bad Request when creating a servicenow action with empty mapping', async () => {
-        await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
-            config: {
-              apiUrl: servicenowSimulatorURL,
-              incidentConfiguration: { mapping: [] },
-              isCaseOwned: true,
-            },
-            secrets: mockServiceNow.secrets,
-          })
-          .expect(400)
-          .then((resp: any) => {
-            expect(resp.body).to.eql({
-              statusCode: 400,
-              error: 'Bad Request',
-              message:
-                'error validating action type config: [incidentConfiguration.mapping]: expected non-empty but got empty',
-            });
-          });
-      });
-
-      it('should respond with a 400 Bad Request when creating a servicenow action with wrong actionType', async () => {
-        await supertest
-          .post('/api/actions/action')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A servicenow action',
-            actionTypeId: '.servicenow',
-            config: {
-              apiUrl: servicenowSimulatorURL,
-              incidentConfiguration: {
-                mapping: [
-                  {
-                    source: 'title',
-                    target: 'description',
-                    actionType: 'non-supported',
-                  },
-                ],
-              },
-              isCaseOwned: true,
-            },
-            secrets: mockServiceNow.secrets,
-          })
-          .expect(400);
       });
     });
 
@@ -278,8 +178,6 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
             actionTypeId: '.servicenow',
             config: {
               apiUrl: servicenowSimulatorURL,
-              incidentConfiguration: mockServiceNow.config.incidentConfiguration,
-              isCaseOwned: true,
             },
             secrets: mockServiceNow.secrets,
           });
@@ -303,12 +201,36 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message: `error validating action params: Cannot read property 'Symbol(Symbol.iterator)' of undefined`,
-              });
+              expect(Object.keys(resp.body)).to.eql(['status', 'actionId', 'message', 'retry']);
+              expect(resp.body.actionId).to.eql(simulatedActionId);
+              expect(resp.body.status).to.eql('error');
+              expect(resp.body.retry).to.eql(false);
+              // Node.js 12 oddity:
+              //
+              // The first time after the server is booted, the error message will be:
+              //
+              //     undefined is not iterable (cannot read property Symbol(Symbol.iterator))
+              //
+              // After this, the error will be:
+              //
+              //     Cannot destructure property 'value' of 'undefined' as it is undefined.
+              //
+              // The error seems to come from the exact same place in the code based on the
+              // exact same circomstances:
+              //
+              //     https://github.com/elastic/kibana/blob/b0a223ebcbac7e404e8ae6da23b2cc6a4b509ff1/packages/kbn-config-schema/src/types/literal_type.ts#L28
+              //
+              // What triggers the error is that the `handleError` function expects its 2nd
+              // argument to be an object containing a `valids` property of type array.
+              //
+              // In this test the object does not contain a `valids` property, so hence the
+              // error.
+              //
+              // Why the error message isn't the same in all scenarios is unknown to me and
+              // could be a bug in V8.
+              expect(resp.body.message).to.match(
+                /^error validating action params: (undefined is not iterable \(cannot read property Symbol\(Symbol.iterator\)\)|Cannot destructure property 'value' of 'undefined' as it is undefined\.)$/
+              );
             });
         });
 
@@ -325,7 +247,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subAction]: expected value to equal [pushToService]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]',
               });
             });
         });
@@ -343,25 +265,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
-              });
-            });
-        });
-
-        it('should handle failing with a simulated success without savedObjectId', async () => {
-          await supertest
-            .post(`/api/actions/action/${simulatedActionId}/_execute`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              params: { subAction: 'pushToService', subActionParams: {} },
-            })
-            .then((resp: any) => {
-              expect(resp.body).to.eql({
-                actionId: simulatedActionId,
-                status: 'error',
-                retry: false,
-                message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.savedObjectId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -384,7 +288,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.title]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.short_description]: expected value of type [string] but got [undefined]',
               });
             });
         });
@@ -397,12 +301,11 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockServiceNow.params,
                 subActionParams: {
-                  ...mockServiceNow.params.subActionParams,
-                  savedObjectId: 'success',
-                  title: 'success',
-                  createdAt: 'success',
-                  createdBy: { username: 'elastic' },
-                  comments: [{}],
+                  incident: {
+                    ...mockServiceNow.params.subActionParams.incident,
+                    short_description: 'success',
+                  },
+                  comments: [{ comment: 'boo' }],
                 },
               },
             })
@@ -412,7 +315,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.commentId]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
               });
             });
         });
@@ -425,11 +328,10 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockServiceNow.params,
                 subActionParams: {
-                  ...mockServiceNow.params.subActionParams,
-                  savedObjectId: 'success',
-                  title: 'success',
-                  createdAt: 'success',
-                  createdBy: { username: 'elastic' },
+                  incident: {
+                    ...mockServiceNow.params.subActionParams.incident,
+                    short_description: 'success',
+                  },
                   comments: [{ commentId: 'success' }],
                 },
               },
@@ -440,7 +342,7 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getIncident]\n- [1.subAction]: expected value to equal [handshake]\n- [2.subActionParams.comments.0.comment]: expected value of type [string] but got [undefined]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]',
               });
             });
         });
@@ -455,12 +357,13 @@ export default function servicenowTest({ getService }: FtrProviderContext) {
               params: {
                 ...mockServiceNow.params,
                 subActionParams: {
-                  ...mockServiceNow.params.subActionParams,
+                  incident: mockServiceNow.params.subActionParams.incident,
                   comments: [],
                 },
               },
             })
             .expect(200);
+
           expect(proxyHaveBeenCalled).to.equal(true);
           expect(result).to.eql({
             status: 'ok',

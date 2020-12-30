@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .get(`${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`)
             .send();
           return status !== 404;
-        });
+        }, `${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`);
         const { body } = await supertest
           .get(`${LIST_ITEM_URL}?list_id=list_items.txt&value=127.0.0.1`)
           .send()

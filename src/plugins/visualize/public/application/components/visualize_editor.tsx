@@ -32,8 +32,9 @@ import {
 } from '../utils';
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
+import { VisualizeAppProps } from '../app';
 
-export const VisualizeEditor = () => {
+export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
   const { services } = useKibana<VisualizeServices>();
@@ -64,9 +65,7 @@ export const VisualizeEditor = () => {
 
   useEffect(() => {
     const { originatingApp: value } =
-      services.embeddable
-        .getStateTransfer(services.scopedHistory)
-        .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
+      services.embeddable.getStateTransfer().getIncomingEditorState() || {};
     setOriginatingApp(value);
   }, [services]);
 
@@ -91,6 +90,7 @@ export const VisualizeEditor = () => {
       visualizationIdFromUrl={visualizationIdFromUrl}
       setHasUnsavedChanges={setHasUnsavedChanges}
       visEditorRef={visEditorRef}
+      onAppLeave={onAppLeave}
     />
   );
 };

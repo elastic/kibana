@@ -63,6 +63,12 @@ describe('AggTypeMetricMedianProvider class', () => {
     expect(dsl.median.percentiles.percents).toEqual([50]);
   });
 
+  it('points to right value within multi metric for value bucket path', () => {
+    expect(aggConfigs.byId(METRIC_TYPES.MEDIAN)!.getValueBucketPath()).toEqual(
+      `${METRIC_TYPES.MEDIAN}.50`
+    );
+  });
+
   it('converts the response', () => {
     const agg = aggConfigs.getResponseAggs()[0];
 
@@ -75,5 +81,34 @@ describe('AggTypeMetricMedianProvider class', () => {
         },
       })
     ).toEqual(10);
+  });
+
+  it('produces the expected expression ast', () => {
+    const agg = aggConfigs.getResponseAggs()[0];
+    expect(agg.toExpressionAst()).toMatchInlineSnapshot(`
+      Object {
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "enabled": Array [
+                true,
+              ],
+              "field": Array [
+                "bytes",
+              ],
+              "id": Array [
+                "median",
+              ],
+              "schema": Array [
+                "metric",
+              ],
+            },
+            "function": "aggMedian",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
+      }
+    `);
   });
 });

@@ -19,7 +19,7 @@
 import { throwError, of } from 'rxjs';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';

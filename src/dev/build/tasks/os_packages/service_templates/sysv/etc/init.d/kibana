@@ -35,6 +35,7 @@ fi
 
 name=kibana
 program=/usr/share/kibana/bin/kibana
+args="--logging.dest=/var/log/kibana/kibana.log"
 pidfile="/var/run/kibana/$name.pid"
 
 [ -r /etc/default/$name ] && . /etc/default/$name
@@ -55,10 +56,6 @@ emit() {
 }
 
 start() {
-  [ ! -d "/var/log/kibana/" ] && mkdir "/var/log/kibana/"
-  chown "$user":"$group" "/var/log/kibana/"
-  chmod 2750 "/var/log/kibana/"
-
   [ ! -d "/var/run/kibana/" ] && mkdir "/var/run/kibana/"
   chown "$user":"$group" "/var/run/kibana/"
   chmod 755 "/var/run/kibana/"
@@ -66,8 +63,8 @@ start() {
   chroot --userspec "$user":"$group" "$chroot" sh -c "
 
     cd \"$chdir\"
-    exec \"$program\"
-  " >> /var/log/kibana/kibana.stdout 2>> /var/log/kibana/kibana.stderr &
+    exec \"$program $args\"
+  " >> /var/log/kibana/kibana.log  2>&1 &
 
   # Generate the pidfile from here. If we instead made the forked process
   # generate it there will be a race condition between the pidfile writing

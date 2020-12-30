@@ -157,6 +157,32 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
     }
+
+    describe(`Index Lifecycle`, () => {
+      it('should query across indicies matching the Event Log index pattern', async () => {
+        await esArchiver.load('event_log_multiple_indicies');
+
+        const id = `421f2511-5cd1-44fd-95df-e0df83e354d5`;
+
+        const {
+          body: { data, total },
+        } = await findEvents(undefined, id, {});
+
+        expect(data.length).to.be(6);
+        expect(total).to.be(6);
+
+        expect(data.map((foundEvent: IEvent) => foundEvent?.message)).to.eql([
+          'test 2020-10-28T15:19:53.825Z',
+          'test 2020-10-28T15:19:54.849Z',
+          'test 2020-10-28T15:19:54.881Z',
+          'test 2020-10-28T15:19:55.913Z',
+          'test 2020-10-28T15:19:55.938Z',
+          'test 2020-10-28T15:19:55.962Z',
+        ]);
+
+        await esArchiver.unload('event_log_multiple_indicies');
+      });
+    });
   });
 
   async function findEvents(

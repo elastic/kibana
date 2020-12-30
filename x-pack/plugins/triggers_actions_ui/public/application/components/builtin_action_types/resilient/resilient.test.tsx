@@ -68,7 +68,7 @@ describe('resilient connector validation', () => {
       errors: {
         apiUrl: ['URL is required.'],
         apiKeyId: [],
-        apiKeySecret: ['API key secret is required'],
+        apiKeySecret: ['Secret is required'],
         orgId: ['Organization ID is required'],
       },
     });
@@ -78,22 +78,22 @@ describe('resilient connector validation', () => {
 describe('resilient action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      subActionParams: { title: 'some title {{test}}' },
+      subActionParams: { incident: { name: 'some title {{test}}' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { title: [] },
+      errors: { name: [] },
     });
   });
 
   test('params validation fails when body is not valid', () => {
     const actionParams = {
-      subActionParams: { title: '' },
+      subActionParams: { incident: { name: '' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        title: ['Title is required.'],
+        name: ['Name is required.'],
       },
     });
   });

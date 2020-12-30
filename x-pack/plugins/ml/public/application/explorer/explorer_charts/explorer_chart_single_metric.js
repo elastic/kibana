@@ -17,7 +17,7 @@ import $ from 'jquery';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
-import { formatHumanReadableDateTime } from '../../util/date_utils';
+import { formatHumanReadableDateTime } from '../../../../common/util/date_utils';
 import { formatValue } from '../../formatters/format_value';
 import {
   getSeverityColor,

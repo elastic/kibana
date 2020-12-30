@@ -1,0 +1,90 @@
+@import '../../mixins';
+@import '../../variables';
+
+.lnsSuggestionPanel__title {
+  margin-left: $euiSizeXS / 2;
+}
+
+.lnsSuggestionPanel__suggestions {
+  @include euiScrollBar;
+  @include lnsOverflowShadowHorizontal;
+  padding-top: $euiSizeXS;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  display: flex;
+
+  // Padding / negative margins to make room for overflow shadow
+  padding-left: $euiSizeXS;
+  margin-left: -$euiSizeXS;
+  padding-bottom: $euiSizeXS;
+}
+
+.lnsSuggestionPanel__button {
+  position: relative; // Let the expression progress indicator position itself against the button
+  flex: 0 0 auto;
+  width: $lnsSuggestionWidth !important; // sass-lint:disable-line no-important
+  height: $lnsSuggestionHeight;
+  margin-right: $euiSizeS;
+  margin-left: $euiSizeXS / 2;
+  margin-bottom: $euiSizeXS / 2;
+
+  &:focus {
+    @include euiFocusRing;
+    transform: none !important; // sass-lint:disable-line no-important
+  }
+
+  .lnsSuggestionPanel__expressionRenderer {
+    position: static; // Let the progress indicator position itself against the button
+  }
+}
+
+.lnsSuggestionPanel__button-isSelected {
+  background-color: $euiColorLightestShade !important; // sass-lint:disable-line no-important
+  border-color: $euiColorMediumShade;
+
+  &:not(:focus) {
+    box-shadow: none !important; // sass-lint:disable-line no-important
+  }
+
+  &:focus {
+    @include euiFocusRing;
+  }
+
+  &:hover {
+    transform: none !important; // sass-lint:disable-line no-important
+  }
+}
+
+.lnsSuggestionPanel__suggestionIcon {
+  color: $euiColorDarkShade;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $euiSizeS;
+
+  &:not(:only-child) {
+    height: calc(100% - #{$euiSizeL});
+  }
+}
+
+.lnsSuggestionPanel__chartWrapper {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+}
+
+.lnsSuggestionPanel__chartWrapper--withLabel {
+  height: calc(100% - #{$euiSizeL});
+}
+
+.lnsSuggestionPanel__buttonLabel {
+  @include euiTextTruncate;
+  @include euiFontSizeXS;
+  display: block;
+  font-weight: $euiFontWeightBold;
+  text-align: center;
+  flex-grow: 0;
+}

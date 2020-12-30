@@ -66,8 +66,8 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('uptimeEnableAnomalyAlertBtn');
     },
 
-    async disableAnomalyAlertIsVisible() {
-      return await testSubjects.exists('uptimeDisableAnomalyAlertBtn');
+    async manageAnomalyAlertIsVisible() {
+      return await testSubjects.exists('uptimeManageAnomalyAlertBtn');
     },
 
     async changeAlertThreshold(level: string) {

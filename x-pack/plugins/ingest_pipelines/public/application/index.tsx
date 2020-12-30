@@ -9,6 +9,7 @@ import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { NotificationsSetup, IUiSettingsClient } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { SharePluginStart } from 'src/plugins/share/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 import { API_BASE_PATH } from '../../common/constants';
@@ -26,6 +27,7 @@ export interface AppServices {
   notifications: NotificationsSetup;
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;
+  urlGenerators: SharePluginStart['urlGenerators'];
 }
 
 export interface CoreServices {

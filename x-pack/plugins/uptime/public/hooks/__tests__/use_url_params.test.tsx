@@ -121,7 +121,7 @@ describe('useUrlParams', () => {
 
     expect(history.push).toHaveBeenCalledWith({
       pathname: '/',
-      search: 'dateRangeEnd=now&dateRangeStart=now-12&g=%22%22',
+      search: 'g=%22%22&dateRangeStart=now-12&dateRangeEnd=now',
     });
   });
 });

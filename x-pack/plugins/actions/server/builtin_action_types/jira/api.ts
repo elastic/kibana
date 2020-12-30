@@ -5,7 +5,6 @@
  */
 
 import {
-  ExternalServiceParams,
   PushToServiceApiHandlerArgs,
   HandshakeApiHandlerArgs,
   GetIncidentApiHandlerArgs,
@@ -13,27 +12,26 @@ import {
   Incident,
   GetFieldsByIssueTypeHandlerArgs,
   GetIssueTypesHandlerArgs,
-  PushToServiceApiParams,
+  GetIssuesHandlerArgs,
   PushToServiceResponse,
+  GetIssueHandlerArgs,
+  GetCommonFieldsHandlerArgs,
 } from './types';
 
-// TODO: to remove, need to support Case
-import { prepareFieldsForTransformation, transformFields, transformComments } from '../case/utils';
+const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};
 
-const handshakeHandler = async ({
-  externalService,
-  mapping,
-  params,
-}: HandshakeApiHandlerArgs) => {};
-
-const getIncidentHandler = async ({
-  externalService,
-  mapping,
-  params,
-}: GetIncidentApiHandlerArgs) => {};
+const getIncidentHandler = async ({ externalService, params }: GetIncidentApiHandlerArgs) => {
+  const res = await externalService.getIncident(params.externalId);
+  return res;
+};
 
 const getIssueTypesHandler = async ({ externalService }: GetIssueTypesHandlerArgs) => {
   const res = await externalService.getIssueTypes();
+  return res;
+};
+
+const getFieldsHandler = async ({ externalService }: GetCommonFieldsHandlerArgs) => {
+  const res = await externalService.getFields();
   return res;
 };
 
@@ -46,46 +44,26 @@ const getFieldsByIssueTypeHandler = async ({
   return res;
 };
 
+const getIssuesHandler = async ({ externalService, params }: GetIssuesHandlerArgs) => {
+  const { title } = params;
+  const res = await externalService.getIssues(title);
+  return res;
+};
+
+const getIssueHandler = async ({ externalService, params }: GetIssueHandlerArgs) => {
+  const { id } = params;
+  const res = await externalService.getIssue(id);
+  return res;
+};
+
 const pushToServiceHandler = async ({
   externalService,
-  mapping,
   params,
-  logger,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
-  const { externalId, comments } = params;
-  const updateIncident = externalId ? true : false;
-  const defaultPipes = updateIncident ? ['informationUpdated'] : ['informationCreated'];
-  let currentIncident: ExternalServiceParams | undefined;
+  const { comments } = params;
   let res: PushToServiceResponse;
-
-  if (externalId) {
-    try {
-      currentIncident = await externalService.getIncident(externalId);
-    } catch (ex) {
-      logger.debug(
-        `Retrieving Incident by id ${externalId} from Jira failed with exception: ${ex}`
-      );
-    }
-  }
-
-  let incident: Incident;
-  // TODO: should be removed later but currently keep it for the Case implementation support
-  if (mapping) {
-    const fields = prepareFieldsForTransformation({
-      externalCase: params.externalObject,
-      mapping,
-      defaultPipes,
-    });
-
-    incident = transformFields<PushToServiceApiParams, ExternalServiceParams, Incident>({
-      params,
-      fields,
-      currentIncident,
-    });
-  } else {
-    const { title, description, priority, labels, issueType } = params;
-    incident = { summary: title, description, priority, labels, issueType };
-  }
+  const { externalId, ...rest } = params.incident;
+  const incident: Incident = rest;
 
   if (externalId != null) {
     res = await externalService.updateIncident({
@@ -94,23 +72,13 @@ const pushToServiceHandler = async ({
     });
   } else {
     res = await externalService.createIncident({
-      incident: {
-        ...incident,
-      },
+      incident,
     });
   }
 
   if (comments && Array.isArray(comments) && comments.length > 0) {
-    if (mapping && mapping.get('comments')?.actionType === 'nothing') {
-      return res;
-    }
-
-    const commentsTransformed = mapping
-      ? transformComments(comments, ['informationAdded'])
-      : comments;
-
     res.comments = [];
-    for (const currentComment of commentsTransformed) {
+    for (const currentComment of comments) {
       const comment = await externalService.createComment({
         incidentId: res.id,
         comment: currentComment,
@@ -129,9 +97,12 @@ const pushToServiceHandler = async ({
 };
 
 export const api: ExternalServiceApi = {
+  getFields: getFieldsHandler,
   handshake: handshakeHandler,
   pushToService: pushToServiceHandler,
   getIncident: getIncidentHandler,
   issueTypes: getIssueTypesHandler,
   fieldsByIssueType: getFieldsByIssueTypeHandler,
+  issues: getIssuesHandler,
+  issue: getIssueHandler,
 };

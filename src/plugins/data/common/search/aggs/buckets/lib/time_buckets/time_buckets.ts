@@ -263,17 +263,15 @@ export class TimeBuckets {
       }
 
       const maxLength: number = this._timeBucketConfig['histogram:maxBars'];
-      const approxLen = Number(duration) / Number(interval);
+      const minInterval = calcAutoIntervalLessThan(maxLength, Number(duration));
 
       let scaled;
 
-      if (approxLen > maxLength) {
-        scaled = calcAutoIntervalLessThan(maxLength, Number(duration));
+      if (interval < minInterval) {
+        scaled = minInterval;
       } else {
         return interval;
       }
-
-      if (+scaled === +interval) return interval;
 
       interval = decorateInterval(interval);
       return Object.assign(scaled, {

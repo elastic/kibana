@@ -35,6 +35,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('returns the default space when explicitly referenced', async () => {
+      await supertest
+        .get('/s/default/internal/spaces/_active_space')
+        .set('kbn-xsrf', 'xxx')
+        .expect(200, {
+          id: 'default',
+          name: 'Default',
+          description: 'This is your default space!',
+          color: '#00bfb3',
+          disabledFeatures: [],
+          _reserved: true,
+        });
+    });
+
     it('returns the foo space', async () => {
       await supertest
         .get('/s/foo-space/internal/spaces/_active_space')

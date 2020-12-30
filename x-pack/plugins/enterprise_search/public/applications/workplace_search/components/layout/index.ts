@@ -5,3 +5,4 @@
  */
 
 export { WorkplaceSearchNav } from './nav';
+export { WorkplaceSearchHeaderActions } from './kibana_header_actions';

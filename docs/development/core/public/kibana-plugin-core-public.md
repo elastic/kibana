@@ -37,6 +37,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) to execute the default behaviour when leaving the application.<!-- -->See  |
 |  [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |  |
 |  [ApplicationStart](./kibana-plugin-core-public.applicationstart.md) |  |
+|  [AppMeta](./kibana-plugin-core-public.appmeta.md) | Input type for meta data for an application.<!-- -->Meta fields include <code>keywords</code> and <code>searchDeepLinks</code> Keywords is an array of string with which to associate the app, must include at least one unique string as an array. <code>searchDeepLinks</code> is an array of links that represent secondary in-app locations for the app. |
 |  [AppMountContext](./kibana-plugin-core-public.appmountcontext.md) | The context object received when applications are mounted to the DOM. Deprecated, use [CoreSetup.getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->. |
 |  [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) |  |
 |  [Capabilities](./kibana-plugin-core-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
@@ -44,6 +45,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeBrand](./kibana-plugin-core-public.chromebrand.md) |  |
 |  [ChromeDocTitle](./kibana-plugin-core-public.chromedoctitle.md) | APIs for accessing and updating the document title. |
 |  [ChromeHelpExtension](./kibana-plugin-core-public.chromehelpextension.md) |  |
+|  [ChromeHelpExtensionMenuCustomLink](./kibana-plugin-core-public.chromehelpextensionmenucustomlink.md) |  |
+|  [ChromeHelpExtensionMenuDiscussLink](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.md) |  |
+|  [ChromeHelpExtensionMenuDocumentationLink](./kibana-plugin-core-public.chromehelpextensionmenudocumentationlink.md) |  |
+|  [ChromeHelpExtensionMenuGitHubLink](./kibana-plugin-core-public.chromehelpextensionmenugithublink.md) |  |
 |  [ChromeNavControl](./kibana-plugin-core-public.chromenavcontrol.md) |  |
 |  [ChromeNavControls](./kibana-plugin-core-public.chromenavcontrols.md) | [APIs](./kibana-plugin-core-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
 |  [ChromeNavLink](./kibana-plugin-core-public.chromenavlink.md) |  |
@@ -73,6 +78,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IAnonymousPaths](./kibana-plugin-core-public.ianonymouspaths.md) | APIs for denoting paths as not requiring authentication |
 |  [IBasePath](./kibana-plugin-core-public.ibasepath.md) | APIs for manipulating the basePath on URL segments. |
 |  [IContextContainer](./kibana-plugin-core-public.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
+|  [IExternalUrl](./kibana-plugin-core-public.iexternalurl.md) | APIs for working with external URLs. |
+|  [IExternalUrlPolicy](./kibana-plugin-core-public.iexternalurlpolicy.md) | A policy describing whether access to an external destination is allowed. |
 |  [IHttpFetchError](./kibana-plugin-core-public.ihttpfetcherror.md) |  |
 |  [IHttpInterceptController](./kibana-plugin-core-public.ihttpinterceptcontroller.md) | Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-core-public.httpinterceptor.md)<!-- -->. |
 |  [IHttpResponseInterceptorOverrides](./kibana-plugin-core-public.ihttpresponseinterceptoroverrides.md) | Properties that can be returned by HttpInterceptor.request to override the response. |
@@ -82,6 +89,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [NotificationsSetup](./kibana-plugin-core-public.notificationssetup.md) |  |
 |  [NotificationsStart](./kibana-plugin-core-public.notificationsstart.md) |  |
 |  [OverlayBannersStart](./kibana-plugin-core-public.overlaybannersstart.md) |  |
+|  [OverlayFlyoutOpenOptions](./kibana-plugin-core-public.overlayflyoutopenoptions.md) |  |
+|  [OverlayFlyoutStart](./kibana-plugin-core-public.overlayflyoutstart.md) | APIs to open and manage fly-out dialogs. |
+|  [OverlayModalConfirmOptions](./kibana-plugin-core-public.overlaymodalconfirmoptions.md) |  |
+|  [OverlayModalOpenOptions](./kibana-plugin-core-public.overlaymodalopenoptions.md) |  |
+|  [OverlayModalStart](./kibana-plugin-core-public.overlaymodalstart.md) | APIs to open and manage modal dialogs. |
 |  [OverlayRef](./kibana-plugin-core-public.overlayref.md) | Returned by [OverlayStart](./kibana-plugin-core-public.overlaystart.md) methods for closing a mounted overlay. |
 |  [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |  |
 |  [Plugin](./kibana-plugin-core-public.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
@@ -98,6 +110,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.md) |  |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-public.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-core-public.savedobjectsfindoptions.md) |  |
+|  [SavedObjectsFindOptionsReference](./kibana-plugin-core-public.savedobjectsfindoptionsreference.md) |  |
 |  [SavedObjectsFindResponsePublic](./kibana-plugin-core-public.savedobjectsfindresponsepublic.md) | Return type of the Saved Objects <code>find()</code> method.<!-- -->\*Note\*: this type is different between the Public and Server Saved Objects clients. |
 |  [SavedObjectsImportAmbiguousConflictError](./kibana-plugin-core-public.savedobjectsimportambiguousconflicterror.md) | Represents a failure to import due to a conflict, which can be resolved in different ways with an overwrite. |
 |  [SavedObjectsImportConflictError](./kibana-plugin-core-public.savedobjectsimportconflicterror.md) | Represents a failure to import due to a conflict. |
@@ -132,14 +145,12 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) | A handler that will be executed before leaving the application, either when going to another application or when closing the browser tab or manually changing the url. Should return <code>confirm</code> to to prompt a message to the user before leaving the page, or <code>default</code> to keep the default behavior (doing nothing).<!-- -->See [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) for detailed usage examples. |
 |  [AppMount](./kibana-plugin-core-public.appmount.md) | A mount function called when the user navigates to this app's route. |
 |  [AppMountDeprecated](./kibana-plugin-core-public.appmountdeprecated.md) | A mount function called when the user navigates to this app's route. |
+|  [AppSearchDeepLink](./kibana-plugin-core-public.appsearchdeeplink.md) | Input type for registering secondary in-app locations for an application.<!-- -->Deep links must include at least one of <code>path</code> or <code>searchDeepLinks</code>. A deep link that does not have a <code>path</code> represents a topological level in the application's hierarchy, but does not have a destination URL that is user-accessible. |
 |  [AppUnmount](./kibana-plugin-core-public.appunmount.md) | A function called when an application should be unmounted from the page. This function should be synchronous. |
 |  [AppUpdatableFields](./kibana-plugin-core-public.appupdatablefields.md) | Defines the list of fields that can be updated via an [AppUpdater](./kibana-plugin-core-public.appupdater.md)<!-- -->. |
 |  [AppUpdater](./kibana-plugin-core-public.appupdater.md) | Updater for applications. see [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |
 |  [ChromeBreadcrumb](./kibana-plugin-core-public.chromebreadcrumb.md) |  |
-|  [ChromeHelpExtensionMenuCustomLink](./kibana-plugin-core-public.chromehelpextensionmenucustomlink.md) |  |
-|  [ChromeHelpExtensionMenuDiscussLink](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.md) |  |
-|  [ChromeHelpExtensionMenuDocumentationLink](./kibana-plugin-core-public.chromehelpextensionmenudocumentationlink.md) |  |
-|  [ChromeHelpExtensionMenuGitHubLink](./kibana-plugin-core-public.chromehelpextensionmenugithublink.md) |  |
+|  [ChromeHelpExtensionLinkBase](./kibana-plugin-core-public.chromehelpextensionlinkbase.md) |  |
 |  [ChromeHelpExtensionMenuLink](./kibana-plugin-core-public.chromehelpextensionmenulink.md) |  |
 |  [ChromeNavLinkUpdateableFields](./kibana-plugin-core-public.chromenavlinkupdateablefields.md) |  |
 |  [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) | FatalErrors stop the Kibana Public Core and displays a fatal error screen with details about the Kibana build and the error. |
@@ -154,6 +165,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-core-public.pluginopaqueid.md) |  |
 |  [PublicAppInfo](./kibana-plugin-core-public.publicappinfo.md) | Public information about a registered [application](./kibana-plugin-core-public.app.md) |
+|  [PublicAppMetaInfo](./kibana-plugin-core-public.publicappmetainfo.md) | Public information about a registered app's [keywords](./kibana-plugin-core-public.appmeta.md) |
+|  [PublicAppSearchDeepLinkInfo](./kibana-plugin-core-public.publicappsearchdeeplinkinfo.md) | Public information about a registered app's [searchDeepLinks](./kibana-plugin-core-public.appsearchdeeplink.md) |
 |  [PublicUiSettingsParams](./kibana-plugin-core-public.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) exposed to the client-side. |
 |  [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-core-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) |

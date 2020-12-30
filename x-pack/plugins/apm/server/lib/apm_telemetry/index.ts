@@ -6,7 +6,6 @@
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { DeepRequired } from 'utility-types';
 import {
   CoreSetup,
   Logger,
@@ -21,14 +20,14 @@ import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
-import { getApmTelemetryMapping } from '../../../common/apm_telemetry';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   collectDataTelemetry,
   CollectTelemetryParams,
 } from './collect_data_telemetry';
-import { APMDataTelemetry } from './types';
+import { APMUsage } from './types';
+import { apmSchema } from './schema';
 
 const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 
@@ -49,8 +48,7 @@ export async function createApmTelemetry({
 }) {
   taskManager.registerTaskDefinitions({
     [APM_TELEMETRY_TASK_NAME]: {
-      title: 'Collect APM telemetry',
-      type: APM_TELEMETRY_TASK_NAME,
+      title: 'Collect APM usage',
       createTaskRunner: () => {
         return {
           run: async () => {
@@ -107,9 +105,9 @@ export async function createApmTelemetry({
     );
   };
 
-  const collector = usageCollector.makeUsageCollector({
+  const collector = usageCollector.makeUsageCollector<APMUsage | {}>({
     type: 'apm',
-    schema: getApmTelemetryMapping(),
+    schema: apmSchema,
     fetch: async () => {
       try {
         const { kibanaVersion: storedKibanaVersion, ...data } = (
@@ -117,9 +115,7 @@ export async function createApmTelemetry({
             APM_TELEMETRY_SAVED_OBJECT_TYPE,
             APM_TELEMETRY_SAVED_OBJECT_ID
           )
-        ).attributes as { kibanaVersion: string } & DeepRequired<
-          APMDataTelemetry
-        >;
+        ).attributes as { kibanaVersion: string } & APMUsage;
 
         return data;
       } catch (err) {

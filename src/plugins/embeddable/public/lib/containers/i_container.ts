@@ -24,17 +24,9 @@ import {
   ErrorEmbeddable,
   IEmbeddable,
 } from '../embeddables';
+import { PanelState } from '../../../common/types';
 
-export interface PanelState<E extends EmbeddableInput & { id: string } = { id: string }> {
-  // The type of embeddable in this panel. Will be used to find the factory in which to
-  // load the embeddable.
-  type: string;
-
-  // Stores input for this embeddable that is specific to this embeddable. Other parts of embeddable input
-  // will be derived from the container's input. **Any state in here will override any state derived from
-  // the container.**
-  explicitInput: Partial<E> & { id: string };
-}
+export { PanelState };
 
 export interface ContainerOutput extends EmbeddableOutput {
   embeddableLoaded: { [key: string]: boolean };

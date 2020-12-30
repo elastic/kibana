@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 
 import { getListResponseMock } from '../../../../../lists/common/schemas/response/list_schema.mock';
 import { exportList, useDeleteList, useFindLists, ListSchema } from '../../../shared_imports';
@@ -46,7 +46,6 @@ describe('ValueListsModal', () => {
     );
 
     expect(container.find('EuiModal')).toHaveLength(0);
-    container.unmount();
   });
 
   it('renders modal if showModal is true', () => {
@@ -57,7 +56,6 @@ describe('ValueListsModal', () => {
     );
 
     expect(container.find('EuiModal')).toHaveLength(1);
-    container.unmount();
   });
 
   it('calls onClose when modal is closed', () => {
@@ -71,7 +69,6 @@ describe('ValueListsModal', () => {
     container.find('button[data-test-subj="value-lists-modal-close-action"]').simulate('click');
 
     expect(onClose).toHaveBeenCalled();
-    container.unmount();
   });
 
   it('renders ValueListsForm and an EuiTable', () => {
@@ -83,29 +80,27 @@ describe('ValueListsModal', () => {
 
     expect(container.find('ValueListsForm')).toHaveLength(1);
     expect(container.find('EuiBasicTable')).toHaveLength(1);
-    container.unmount();
   });
 
   describe('modal table actions', () => {
-    it('calls exportList when export is clicked', () => {
+    it('calls exportList when export is clicked', async () => {
       const container = mount(
         <TestProviders>
           <ValueListsModal showModal={true} onClose={jest.fn()} />
         </TestProviders>
       );
 
-      act(() => {
+      await waitFor(() => {
         container
           .find('button[data-test-subj="action-export-value-list"]')
           .first()
           .simulate('click');
-        container.unmount();
       });
 
       expect(exportList).toHaveBeenCalledWith(expect.objectContaining({ listId: 'some-list-id' }));
     });
 
-    it('calls deleteList when delete is clicked', () => {
+    it('calls deleteList when delete is clicked', async () => {
       const deleteListMock = jest.fn();
       (useDeleteList as jest.Mock).mockReturnValue({
         start: deleteListMock,
@@ -117,12 +112,11 @@ describe('ValueListsModal', () => {
         </TestProviders>
       );
 
-      act(() => {
+      await waitFor(() => {
         container
-          .find('button[data-test-subj="action-delete-value-list"]')
+          .find('button[data-test-subj="action-delete-value-list-some name"]')
           .first()
           .simulate('click');
-        container.unmount();
       });
 
       expect(deleteListMock).toHaveBeenCalledWith(expect.objectContaining({ id: 'some-list-id' }));

@@ -6,25 +6,21 @@
 
 export const mockLayerList = [
   {
-    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'b7af286d-2580-4f47-be93-9653d594ce7e',
-    label: null,
-    minZoom: 0,
-    maxZoom: 24,
-    alpha: 1,
-    visible: true,
-    style: { type: 'TILE' },
-    type: 'VECTOR_TILE',
-  },
-  {
     joins: [
       {
         leftField: 'iso2',
         right: {
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
           type: 'ES_TERM_SOURCE',
           id: '3657625d-17b0-41ef-99ba-3a2b2938655c',
           indexPatternTitle: 'apm-*',
           term: 'client.geo.country_iso_code',
+          whereQuery: {
+            language: 'kuery',
+            query:
+              'transaction.type : "page-load" and service.name : "undefined"',
+          },
           metrics: [
             {
               type: 'avg',
@@ -33,7 +29,6 @@ export const mockLayerList = [
             },
           ],
           indexPatternId: 'apm_static_index_pattern_id',
-          applyGlobalQuery: true,
         },
       },
     ],
@@ -41,7 +36,6 @@ export const mockLayerList = [
       type: 'EMS_FILE',
       id: 'world_countries',
       tooltipProperties: ['name'],
-      applyGlobalQuery: true,
     },
     style: {
       type: 'VECTOR',
@@ -91,10 +85,17 @@ export const mockLayerList = [
       {
         leftField: 'region_iso_code',
         right: {
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
           type: 'ES_TERM_SOURCE',
           id: 'e62a1b9c-d7ff-4fd4-a0f6-0fdc44bb9e41',
           indexPatternTitle: 'apm-*',
           term: 'client.geo.region_iso_code',
+          whereQuery: {
+            language: 'kuery',
+            query:
+              'transaction.type : "page-load" and service.name : "undefined"',
+          },
           metrics: [{ type: 'avg', field: 'transaction.duration.us' }],
           indexPatternId: 'apm_static_index_pattern_id',
         },

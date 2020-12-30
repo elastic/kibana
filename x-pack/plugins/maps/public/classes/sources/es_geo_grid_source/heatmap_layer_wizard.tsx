@@ -15,13 +15,14 @@ import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_re
 import { HeatmapLayer } from '../../layers/heatmap_layer/heatmap_layer';
 import { ESGeoGridSourceDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY, RENDER_AS } from '../../../../common/constants';
+import { HeatmapLayerIcon } from '../../layers/icons/heatmap_layer_icon';
 
 export const heatmapLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.esGridHeatmapDescription', {
     defaultMessage: 'Geospatial data grouped in grids to show density',
   }),
-  icon: 'logoElasticsearch',
+  icon: HeatmapLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: Partial<ESGeoGridSourceDescriptor>) => {
       if (!sourceConfig) {

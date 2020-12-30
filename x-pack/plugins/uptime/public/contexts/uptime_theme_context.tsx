@@ -26,11 +26,13 @@ export interface UptimeThemeContextValues {
 const defaultContext: UptimeThemeContextValues = {
   colors: {
     danger: euiLightVars.euiColorDanger,
+    dangerBehindText: euiDarkVars.euiColorVis9_behindText,
     mean: euiLightVars.euiColorPrimary,
     range: euiLightVars.euiFocusBackgroundColor,
     success: euiLightVars.euiColorSuccess,
     warning: euiLightVars.euiColorWarning,
     gray: euiLightVars.euiColorLightShade,
+    lightestShade: euiLightVars.euiColorLightestShade,
   },
   chartTheme: {
     baseTheme: LIGHT_THEME,
@@ -48,21 +50,25 @@ export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMo
   let colors: UptimeAppColors;
   if (darkMode) {
     colors = {
-      danger: euiDarkVars.euiColorDanger,
+      danger: euiDarkVars.euiColorVis9,
+      dangerBehindText: euiDarkVars.euiColorVis9_behindText,
       mean: euiDarkVars.euiColorPrimary,
       gray: euiDarkVars.euiColorLightShade,
       range: euiDarkVars.euiFocusBackgroundColor,
       success: euiDarkVars.euiColorSuccess,
       warning: euiDarkVars.euiColorWarning,
+      lightestShade: euiDarkVars.euiColorLightestShade,
     };
   } else {
     colors = {
-      danger: euiLightVars.euiColorDanger,
+      danger: euiLightVars.euiColorVis9,
+      dangerBehindText: euiLightVars.euiColorVis9_behindText,
       mean: euiLightVars.euiColorPrimary,
       gray: euiLightVars.euiColorLightShade,
       range: euiLightVars.euiFocusBackgroundColor,
       success: euiLightVars.euiColorSuccess,
       warning: euiLightVars.euiColorWarning,
+      lightestShade: euiLightVars.euiColorLightestShade,
     };
   }
   const value = useMemo(() => {

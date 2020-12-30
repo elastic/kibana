@@ -4,256 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { produce } from 'immer';
-import { AGENT_NAMES } from './agent_name';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { apmSchema } from '../server/lib/apm_telemetry/schema';
+
+function schemaToMapping(schemaLeaf: any): any {
+  // convert "array" definition to mapping
+  if (schemaLeaf.type === 'array') {
+    return schemaToMapping(schemaLeaf.items);
+  }
+
+  if (typeof schemaLeaf.type === 'string') {
+    return schemaLeaf;
+  }
+
+  return Object.entries<any>(schemaLeaf).reduce((acc, [key, value]) => {
+    const propMapping = schemaToMapping(value);
+
+    return {
+      ...acc,
+      [key]:
+        typeof propMapping.type === 'string'
+          ? propMapping
+          : { properties: propMapping },
+    };
+  }, {});
+}
 
 /**
- * Generate an object containing the mapping used for APM telemetry. Can be used
- * with the `upload-telemetry-data` script or to update the mapping in the
- * telemetry repository.
- *
- * This function breaks things up to make the mapping easier to understand.
+ * Generate an object containing the mapping used for APM telemetry based on the schema specified
+ * in the usage collector. Can be used with the `upload-telemetry-data` script or to update the
+ * mapping in the telemetry repository.
  */
 export function getApmTelemetryMapping() {
-  const keyword = {
-    type: 'keyword',
-    ignore_above: 1024,
-  };
-
-  const long = {
-    type: 'long',
-  };
-
-  const allProperties = {
-    properties: {
-      all: long,
-    },
-  };
-
-  const oneDayProperties = {
-    properties: {
-      '1d': long,
-    },
-  };
-
-  const oneDayAllProperties = {
-    properties: {
-      '1d': long,
-      all: long,
-    },
-  };
-
-  const msProperties = {
-    properties: {
-      ms: long,
-    },
-  };
-
-  const tookProperties = {
-    properties: {
-      took: msProperties,
-    },
-  };
-
-  const compositeNameVersionProperties = {
-    properties: {
-      composite: keyword,
-      name: keyword,
-      version: keyword,
-    },
-  };
-
-  const agentProperties = {
-    properties: { version: keyword },
-  };
-
-  const serviceProperties = {
-    properties: {
-      framework: compositeNameVersionProperties,
-      language: compositeNameVersionProperties,
-      runtime: compositeNameVersionProperties,
-    },
-  };
-
-  const aggregatedTransactionsProperties = {
-    properties: {
-      expected_metric_document_count: long,
-      transaction_count: long,
-      ratio: long,
-    },
-  };
-
-  return {
-    properties: {
-      agents: {
-        properties: AGENT_NAMES.reduce<Record<string, any>>(
-          (previousValue, currentValue) => {
-            previousValue[currentValue] = {
-              properties: {
-                agent: agentProperties,
-                service: serviceProperties,
-              },
-            };
-
-            return previousValue;
-          },
-          {}
-        ),
-      },
-      aggregated_transactions: {
-        properties: {
-          current_implementation: aggregatedTransactionsProperties,
-          no_observer_name: aggregatedTransactionsProperties,
-          with_country: aggregatedTransactionsProperties,
-        },
-      },
-      environments: {
-        properties: {
-          services_without_environment: long,
-          services_with_multiple_environments: long,
-          top_enviroments: keyword,
-        },
-      },
-      cloud: {
-        properties: {
-          availability_zone: keyword,
-          provider: keyword,
-          region: keyword,
-        },
-      },
-      counts: {
-        properties: {
-          agent_configuration: allProperties,
-          error: oneDayAllProperties,
-          max_error_groups_per_service: oneDayProperties,
-          max_transaction_groups_per_service: oneDayProperties,
-          metric: oneDayAllProperties,
-          onboarding: oneDayAllProperties,
-          services: oneDayProperties,
-          sourcemap: oneDayAllProperties,
-          span: oneDayAllProperties,
-          traces: oneDayProperties,
-          transaction: oneDayAllProperties,
-        },
-      },
-      cardinality: {
-        properties: {
-          client: {
-            properties: {
-              geo: {
-                properties: {
-                  country_iso_code: { properties: { rum: oneDayProperties } },
-                },
-              },
-            },
-          },
-          user_agent: {
-            properties: {
-              original: {
-                properties: {
-                  all_agents: oneDayProperties,
-                  rum: oneDayProperties,
-                },
-              },
-            },
-          },
-          transaction: {
-            properties: {
-              name: {
-                properties: {
-                  all_agents: oneDayProperties,
-                  rum: oneDayProperties,
-                },
-              },
-            },
-          },
-        },
-      },
-      has_any_services: {
-        type: 'boolean',
-      },
-      indices: {
-        properties: {
-          all: {
-            properties: {
-              total: {
-                properties: {
-                  docs: {
-                    properties: {
-                      count: long,
-                    },
-                  },
-                  store: {
-                    properties: {
-                      size_in_bytes: long,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          shards: {
-            properties: {
-              total: long,
-            },
-          },
-        },
-      },
-      integrations: {
-        properties: {
-          ml: {
-            properties: {
-              all_jobs_count: long,
-            },
-          },
-        },
-      },
-      retainment: {
-        properties: {
-          error: msProperties,
-          metric: msProperties,
-          onboarding: msProperties,
-          span: msProperties,
-          transaction: msProperties,
-        },
-      },
-      services_per_agent: {
-        properties: AGENT_NAMES.reduce<Record<string, any>>(
-          (previousValue, currentValue) => {
-            previousValue[currentValue] = { ...long, null_value: 0 };
-            return previousValue;
-          },
-          {}
-        ),
-      },
-      tasks: {
-        properties: {
-          aggregated_transactions: tookProperties,
-          agent_configuration: tookProperties,
-          agents: tookProperties,
-          cardinality: tookProperties,
-          cloud: tookProperties,
-          environments: tookProperties,
-          groupings: tookProperties,
-          indices_stats: tookProperties,
-          integrations: tookProperties,
-          processor_events: tookProperties,
-          services: tookProperties,
-          versions: tookProperties,
-        },
-      },
-      version: {
-        properties: {
-          apm_server: {
-            properties: {
-              major: long,
-              minor: long,
-              patch: long,
-            },
-          },
-        },
-      },
-    },
-  };
+  return { properties: schemaToMapping(apmSchema) };
 }
 
 /**

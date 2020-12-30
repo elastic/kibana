@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ExternalUrl, IExternalUrl } from './generate_external_url';
+export {
+  externalUrl,
+  getEnterpriseSearchUrl,
+  getAppSearchUrl,
+  getWorkplaceSearchUrl,
+} from './external_url';

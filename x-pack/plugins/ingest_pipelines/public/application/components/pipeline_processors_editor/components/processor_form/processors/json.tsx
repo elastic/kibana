@@ -6,7 +6,7 @@
 
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-
+import { get } from 'lodash';
 import {
   FIELD_TYPES,
   UseField,
@@ -44,8 +44,8 @@ export const Json: FunctionComponent = () => {
   const form = useFormContext();
   const [isAddToPathDisabled, setIsAddToPathDisabled] = useState<boolean>(false);
   useEffect(() => {
-    const subscription = form.subscribe(({ data: { raw: rawData } }) => {
-      const hasTargetField = !!rawData[TARGET_FIELD_PATH];
+    const subscription = form.subscribe(({ data: { internal } }) => {
+      const hasTargetField = !!get(internal, TARGET_FIELD_PATH);
       if (hasTargetField && !isAddToPathDisabled) {
         setIsAddToPathDisabled(true);
         form.getFields()[ADD_TO_ROOT_FIELD_PATH].setValue(false);

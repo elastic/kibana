@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export const UrlTemplateFlyout = ({ isVisible = false, onClose = () => {} }) => {
   return isVisible ? (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} data-test-subj={'urlTemplateFlyoutTestSubj'}>
       <EuiFlyoutBody>
         <EuiText>
           <h3>

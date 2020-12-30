@@ -4,84 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 // @ts-ignore no module definition
 import Puid from 'puid';
-import { JobStatuses } from '../../../constants';
-import { LayoutInstance } from '../layouts';
+import { JOB_STATUSES } from '../../../common/constants';
+import { ReportApiJSON, ReportDocumentHead, ReportSource } from '../../../common/types';
 
-/*
- * The document created by Reporting to store in the .reporting index
- */
-interface ReportingDocument {
-  _id: string;
-  _index: string;
-  _seq_no: unknown;
-  _primary_term: unknown;
-  jobtype: string;
-  created_by: string | false;
-  payload: {
-    headers: string; // encrypted headers
-    objectType: string;
-    layout?: LayoutInstance;
-  };
-  meta: unknown;
-  browser_type: string;
-  max_attempts: number;
-  timeout: number;
-
-  status: string;
-  attempts: number;
-  output?: unknown;
-  started_at?: string;
-  completed_at?: string;
-  created_at?: string;
-  priority?: number;
-  process_expiration?: string;
-}
-
-/*
- * The document created by Reporting to store as task parameters for Task
- * Manager to reference the report in .reporting
- */
 const puid = new Puid();
 
-export class Report implements Partial<ReportingDocument> {
+export class Report implements Partial<ReportSource> {
   public _index?: string;
   public _id: string;
   public _primary_term?: unknown; // set by ES
   public _seq_no: unknown; // set by ES
 
-  public readonly jobtype: string;
-  public readonly created_at?: string;
-  public readonly created_by?: string | false;
-  public readonly payload: {
-    headers: string; // encrypted headers
-    objectType: string;
-    layout?: LayoutInstance;
-  };
-  public readonly meta: unknown;
-  public readonly max_attempts: number;
-  public readonly browser_type?: string;
+  public readonly kibana_name: ReportSource['kibana_name'];
+  public readonly kibana_id: ReportSource['kibana_id'];
+  public readonly jobtype: ReportSource['jobtype'];
+  public readonly created_at: ReportSource['created_at'];
+  public readonly created_by: ReportSource['created_by'];
+  public readonly payload: ReportSource['payload'];
 
-  public readonly status: string;
-  public readonly attempts: number;
-  public readonly output?: unknown;
-  public readonly started_at?: string;
-  public readonly completed_at?: string;
-  public readonly process_expiration?: string;
-  public readonly priority?: number;
-  public readonly timeout?: number;
+  public readonly meta: ReportSource['meta'];
+  public readonly max_attempts: ReportSource['max_attempts'];
+  public readonly browser_type?: ReportSource['browser_type'];
+
+  public readonly status: ReportSource['status'];
+  public readonly attempts: ReportSource['attempts'];
+  public readonly output?: ReportSource['output'];
+  public readonly started_at?: ReportSource['started_at'];
+  public readonly completed_at?: ReportSource['completed_at'];
+  public readonly process_expiration?: ReportSource['process_expiration'];
+  public readonly priority?: ReportSource['priority'];
+  public readonly timeout?: ReportSource['timeout'];
 
   /*
    * Create an unsaved report
+   * Index string is required
    */
-  constructor(opts: Partial<ReportingDocument>) {
+  constructor(opts: Partial<ReportSource> & Partial<ReportDocumentHead>) {
     this._id = opts._id != null ? opts._id : puid.generate();
     this._index = opts._index;
     this._primary_term = opts._primary_term;
     this._seq_no = opts._seq_no;
 
     this.payload = opts.payload!;
+    this.kibana_name = opts.kibana_name!;
+    this.kibana_id = opts.kibana_id!;
     this.jobtype = opts.jobtype!;
     this.max_attempts = opts.max_attempts!;
     this.attempts = opts.attempts || 0;
@@ -89,13 +58,13 @@ export class Report implements Partial<ReportingDocument> {
     this.process_expiration = opts.process_expiration;
     this.timeout = opts.timeout;
 
-    this.created_at = opts.created_at;
-    this.created_by = opts.created_by;
-    this.meta = opts.meta;
+    this.created_at = opts.created_at || moment.utc().toISOString();
+    this.created_by = opts.created_by || false;
+    this.meta = opts.meta || { objectType: 'unknown' };
     this.browser_type = opts.browser_type;
     this.priority = opts.priority;
 
-    this.status = opts.status || JobStatuses.PENDING;
+    this.status = opts.status || JOB_STATUSES.PENDING;
     this.output = opts.output || null;
   }
 
@@ -141,10 +110,12 @@ export class Report implements Partial<ReportingDocument> {
   /*
    * Data structure for API responses
    */
-  toApiJSON() {
+  toApiJSON(): ReportApiJSON {
     return {
       id: this._id,
-      index: this._index,
+      index: this._index!,
+      kibana_name: this.kibana_name,
+      kibana_id: this.kibana_id,
       jobtype: this.jobtype,
       created_at: this.created_at,
       created_by: this.created_by,
@@ -161,3 +132,5 @@ export class Report implements Partial<ReportingDocument> {
     };
   }
 }
+
+export { ReportApiJSON, ReportSource };

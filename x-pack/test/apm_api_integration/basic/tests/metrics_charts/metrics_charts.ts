@@ -8,7 +8,6 @@ import { first } from 'lodash';
 import { MetricsChartsByAgentAPIResponse } from '../../../../../plugins/apm/server/lib/metrics/get_metrics_chart_data_by_agent';
 import { GenericMetricsChart } from '../../../../../plugins/apm/server/lib/metrics/transform_metrics_chart';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { expectSnapshot } from '../../../common/match_snapshot';
 
 interface ChartResponse {
   body: MetricsChartsByAgentAPIResponse;
@@ -19,8 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/77870
-  describe.skip('when data is loaded', () => {
+  describe('when data is loaded', () => {
     before(() => esArchiver.load('metrics_8.0.0'));
     after(() => esArchiver.unload('metrics_8.0.0'));
 
@@ -70,7 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .toMatchInline(`
               Array [
                 0.714,
-                0.38770000000000004,
+                0.3877,
                 0.75,
                 0.2543,
               ]
@@ -100,8 +98,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
               .toMatchInline(`
               Array [
-                0.7220939209255549,
-                0.7181735467963479,
+                0.722093920925555,
+                0.718173546796348,
               ]
             `);
           });
@@ -162,9 +160,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .toMatchInline(`
               Array [
                 0.203,
-                0.17877777777777779,
+                0.178777777777778,
                 0.01,
-                0.009000000000000001,
+                0.009,
               ]
             `);
           });
@@ -175,8 +173,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               Array [
                 0.193,
                 0.193,
-                0.009000000000000001,
-                0.009000000000000001,
+                0.009,
+                0.009,
               ]
             `);
           });
@@ -204,8 +202,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
               .toMatchInline(`
               Array [
-                0.7079247035578369,
-                0.7053959808411816,
+                0.707924703557837,
+                0.705395980841182,
               ]
             `);
           });
@@ -214,8 +212,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             const yValues = systemMemoryUsageChart?.series.map((serie) => first(serie.data)?.y);
             expectSnapshot(yValues).toMatchInline(`
               Array [
-                0.7079247035578369,
-                0.7079247035578369,
+                0.707924703557837,
+                0.707924703557837,
               ]
             `);
           });
@@ -244,7 +242,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
               .toMatchInline(`
               Array [
-                222501617.7777778,
+                222501617.777778,
                 374341632,
                 1560281088,
               ]
@@ -285,8 +283,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
               .toMatchInline(`
               Array [
-                138573397.33333334,
-                147677639.1111111,
+                138573397.333333,
+                147677639.111111,
               ]
             `);
           });
@@ -324,7 +322,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
               .toMatchInline(`
               Array [
-                44.44444444444444,
+                44.4444444444444,
                 45,
               ]
             `);
@@ -423,16 +421,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
           .toMatchInline(`
           Array [
-            0.11452389642649889,
-            0.11400237609041514,
+            0.114523896426499,
+            0.114002376090415,
           ]
         `);
 
         const yValues = systemMemoryUsageChart?.series.map((serie) => first(serie.data)?.y);
         expectSnapshot(yValues).toMatchInline(`
           Array [
-            0.11383724014063981,
-            0.11383724014063981,
+            0.11383724014064,
+            0.11383724014064,
           ]
         `);
       });

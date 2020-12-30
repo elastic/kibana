@@ -5,12 +5,23 @@
  */
 
 import { defaults } from 'lodash/fp';
+import { validate } from '../../../../common/validate';
 import { PartialAlert } from '../../../../../alerts/server';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PatchRulesOptions } from './types';
 import { addTags } from './add_tags';
-import { calculateVersion, calculateName, calculateInterval } from './utils';
+import { calculateVersion, calculateName, calculateInterval, removeUndefined } from './utils';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
+import { internalRuleUpdate } from '../schemas/rule_schemas';
+import { RuleTypeParams } from '../types';
+
+class PatchError extends Error {
+  public readonly statusCode: number;
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
 
 export const patchRules = async ({
   alertsClient,
@@ -18,6 +29,7 @@ export const patchRules = async ({
   buildingBlockType,
   savedObjectsClient,
   description,
+  eventCategoryOverride,
   falsePositives,
   enabled,
   query,
@@ -43,6 +55,13 @@ export const patchRules = async ({
   tags,
   threat,
   threshold,
+  threatFilters,
+  threatIndex,
+  threatQuery,
+  threatMapping,
+  threatLanguage,
+  concurrentSearches,
+  itemsPerSearch,
   timestampOverride,
   to,
   type,
@@ -53,7 +72,7 @@ export const patchRules = async ({
   anomalyThreshold,
   machineLearningJobId,
   actions,
-}: PatchRulesOptions): Promise<PartialAlert | null> => {
+}: PatchRulesOptions): Promise<PartialAlert<RuleTypeParams> | null> => {
   if (rule == null) {
     return null;
   }
@@ -62,6 +81,7 @@ export const patchRules = async ({
     author,
     buildingBlockType,
     description,
+    eventCategoryOverride,
     falsePositives,
     query,
     language,
@@ -85,6 +105,13 @@ export const patchRules = async ({
     tags,
     threat,
     threshold,
+    threatFilters,
+    threatIndex,
+    threatQuery,
+    threatMapping,
+    threatLanguage,
+    concurrentSearches,
+    itemsPerSearch,
     timestampOverride,
     to,
     type,
@@ -124,6 +151,13 @@ export const patchRules = async ({
       severityMapping,
       threat,
       threshold,
+      threatFilters,
+      threatIndex,
+      threatQuery,
+      threatMapping,
+      threatLanguage,
+      concurrentSearches,
+      itemsPerSearch,
       timestampOverride,
       to,
       type,
@@ -136,19 +170,29 @@ export const patchRules = async ({
     }
   );
 
-  const update = await alertsClient.update({
-    id: rule.id,
-    data: {
-      tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
-      throttle: null,
-      name: calculateName({ updatedName: name, originalName: rule.name }),
-      schedule: {
-        interval: calculateInterval(interval, rule.schedule.interval),
-      },
-      actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
-      params: nextParams,
+  const newRule = {
+    tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
+    throttle: null,
+    notifyWhen: null,
+    name: calculateName({ updatedName: name, originalName: rule.name }),
+    schedule: {
+      interval: calculateInterval(interval, rule.schedule.interval),
     },
-  });
+    actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
+    params: removeUndefined(nextParams),
+  };
+  const [validated, errors] = validate(newRule, internalRuleUpdate);
+  if (errors != null || validated === null) {
+    throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
+  }
+
+  /**
+   * TODO: Remove this use of `as` by utilizing the proper type
+   */
+  const update = (await alertsClient.update({
+    id: rule.id,
+    data: validated,
+  })) as PartialAlert<RuleTypeParams>;
 
   if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });

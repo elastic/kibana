@@ -11,11 +11,7 @@ import {
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
 import { ChartBase } from '../../../types';
 
@@ -54,7 +50,7 @@ export const percentCgroupMemoryUsedScript = {
   lang: 'painless',
   source: `
     /*
-      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants. 
+      When no limit is specified in the container, docker allows the app as much memory / swap memory as it wants.
       This number represents the max possible value for the limit field.
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
@@ -72,11 +68,15 @@ export const percentCgroupMemoryUsedScript = {
     `,
 };
 
-export async function getMemoryChartData(
-  setup: Setup & SetupTimeRange & SetupUIFilters,
-  serviceName: string,
-  serviceNodeName?: string
-) {
+export async function getMemoryChartData({
+  setup,
+  serviceName,
+  serviceNodeName,
+}: {
+  setup: Setup & SetupTimeRange;
+  serviceName: string;
+  serviceNodeName?: string;
+}) {
   const cgroupResponse = await fetchAndTransformMetrics({
     setup,
     serviceName,

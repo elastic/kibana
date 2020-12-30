@@ -35,6 +35,7 @@ interface BucketContainerProps {
   invalidMessage: string;
   onRemoveClick: () => void;
   removeTitle: string;
+  isNotRemovable?: boolean;
   children: React.ReactNode;
   dataTestSubj?: string;
 }
@@ -46,6 +47,7 @@ const BucketContainer = ({
   removeTitle,
   children,
   dataTestSubj,
+  isNotRemovable,
 }: BucketContainerProps) => {
   return (
     <EuiPanel paddingSize="none" data-test-subj={dataTestSubj}>
@@ -75,6 +77,7 @@ const BucketContainer = ({
             onClick={onRemoveClick}
             aria-label={removeTitle}
             title={removeTitle}
+            disabled={isNotRemovable}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -93,7 +96,13 @@ export const DraggableBucketContainer = ({
   children: React.ReactNode;
 } & BucketContainerProps) => {
   return (
-    <EuiDraggable spacing="m" index={idx} draggableId={id} disableInteractiveElementBlocking>
+    <EuiDraggable
+      style={{ marginBottom: 4 }}
+      spacing="none"
+      index={idx}
+      draggableId={id}
+      disableInteractiveElementBlocking
+    >
       {(provided) => <BucketContainer {...bucketContainerProps}>{children}</BucketContainer>}
     </EuiDraggable>
   );
@@ -131,7 +140,7 @@ export const DragDropBuckets = ({
   };
   return (
     <EuiDragDropContext onDragEnd={handleDragEnd} onDragStart={onDragStart}>
-      <EuiDroppable droppableId={droppableId} spacing="s">
+      <EuiDroppable droppableId={droppableId} spacing="none">
         {children}
       </EuiDroppable>
     </EuiDragDropContext>

@@ -8,34 +8,45 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
-import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
-import { TestProviders } from '../../mock/test_providers';
+import '../../mock/react_beautiful_dnd';
+import { mockDetailItemData, mockDetailItemDataId, TestProviders } from '../../mock';
 
-import { EventDetails, View } from './event_details';
+import { EventDetails, EventsViewType } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { defaultHeaders } from '../../mock/header';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { mockAlertDetailsData } from './__mocks__';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('../link_to');
-
 describe('EventDetails', () => {
   const mount = useMountAppended();
-  const onEventToggled = jest.fn();
   const defaultProps = {
     browserFields: mockBrowserFields,
-    columnHeaders: defaultHeaders,
     data: mockDetailItemData,
     id: mockDetailItemDataId,
-    view: 'table-view' as View,
-    onEventToggled,
-    onUpdateColumns: jest.fn(),
+    isAlert: false,
     onViewSelected: jest.fn(),
+    timelineTabType: TimelineTabs.query,
     timelineId: 'test',
-    toggleColumn: jest.fn(),
+    view: EventsViewType.summaryView,
   };
+
+  const alertsProps = {
+    ...defaultProps,
+    data: mockAlertDetailsData as TimelineEventsDetailsItem[],
+    isAlert: true,
+  };
+
   const wrapper = mount(
     <TestProviders>
       <EventDetails {...defaultProps} />
+    </TestProviders>
+  );
+
+  const alertsWrapper = mount(
+    <TestProviders>
+      <EventDetails {...alertsProps} />
     </TestProviders>
   );
 
@@ -63,12 +74,28 @@ describe('EventDetails', () => {
         wrapper.find('[data-test-subj="eventDetails"]').find('.euiTab-isSelected').first().text()
       ).toEqual('Table');
     });
+  });
 
-    test('it invokes `onEventToggled` when the collapse button is clicked', () => {
-      wrapper.find('[data-test-subj="collapse"]').first().simulate('click');
-      wrapper.update();
+  describe('alerts tabs', () => {
+    ['Summary', 'Table', 'JSON View'].forEach((tab) => {
+      test(`it renders the ${tab} tab`, () => {
+        expect(
+          alertsWrapper
+            .find('[data-test-subj="eventDetails"]')
+            .find('[role="tablist"]')
+            .containsMatchingElement(<span>{tab}</span>)
+        ).toBeTruthy();
+      });
+    });
 
-      expect(onEventToggled).toHaveBeenCalled();
+    test('the Summary tab is selected by default', () => {
+      expect(
+        alertsWrapper
+          .find('[data-test-subj="eventDetails"]')
+          .find('.euiTab-isSelected')
+          .first()
+          .text()
+      ).toEqual('Summary');
     });
   });
 });

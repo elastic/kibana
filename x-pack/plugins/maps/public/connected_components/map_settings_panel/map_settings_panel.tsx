@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MapSettings } from '../../reducers/map';
 import { NavigationPanel } from './navigation_panel';
 import { SpatialFiltersPanel } from './spatial_filters_panel';
+import { DisplayPanel } from './display_panel';
 import { MapCenter } from '../../../common/descriptor_types';
 
 interface Props {
@@ -65,6 +66,8 @@ export function MapSettingsPanel({
 
       <div className="mapLayerPanel__body">
         <div className="mapLayerPanel__bodyOverflow">
+          <DisplayPanel settings={settings} updateMapSetting={updateMapSetting} />
+          <EuiSpacer size="s" />
           <NavigationPanel
             center={center}
             settings={settings}

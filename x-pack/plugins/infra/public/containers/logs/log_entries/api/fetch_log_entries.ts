@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
-import { npStart } from '../../../../legacy_singletons';
+import type { HttpHandler } from 'src/core/public';
 
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 import {
   LOG_ENTRIES_PATH,
@@ -18,11 +15,11 @@ import {
   logEntriesResponseRT,
 } from '../../../../../common/http_api';
 
-export const fetchLogEntries = async (requestArgs: LogEntriesRequest) => {
-  const response = await npStart.http.fetch(LOG_ENTRIES_PATH, {
+export const fetchLogEntries = async (requestArgs: LogEntriesRequest, fetch: HttpHandler) => {
+  const response = await fetch(LOG_ENTRIES_PATH, {
     method: 'POST',
     body: JSON.stringify(logEntriesRequestRT.encode(requestArgs)),
   });
 
-  return pipe(logEntriesResponseRT.decode(response), fold(throwErrors(createPlainError), identity));
+  return decodeOrThrow(logEntriesResponseRT)(response);
 };

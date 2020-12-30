@@ -18,6 +18,7 @@
  */
 
 import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -40,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickDataTable');
       await PageObjects.visualize.clickDataTable();
       log.debug('clickNewSearch');
@@ -77,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addVisualization(vizName1);
 
       // hover and click on cell to filter
-      await PageObjects.visChart.filterOnTableCell('1', '2');
+      await PageObjects.visChart.filterOnTableCell(1, 2);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();

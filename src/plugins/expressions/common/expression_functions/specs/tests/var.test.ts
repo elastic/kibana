@@ -20,18 +20,18 @@
 import { functionWrapper } from './utils';
 import { variable } from '../var';
 import { ExecutionContext } from '../../../execution/types';
-import { KibanaContext } from '../../../expression_types';
 
 describe('expression_functions', () => {
   describe('var', () => {
     const fn = functionWrapper(variable);
-    let input: Partial<KibanaContext>;
+    let input: Partial<ReturnType<ExecutionContext['getSearchContext']>>;
     let context: ExecutionContext;
 
     beforeEach(() => {
       input = { timeRange: { from: '0', to: '1' } };
       context = {
-        getInitialInput: () => input,
+        getSearchContext: () => input,
+        getSearchSessionId: () => undefined,
         types: {},
         variables: { test: 1 },
         abortSignal: {} as any,

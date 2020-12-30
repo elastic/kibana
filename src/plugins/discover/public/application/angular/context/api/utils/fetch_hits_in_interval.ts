@@ -43,7 +43,8 @@ export async function fetchHitsInInterval(
   interval: IntervalValue[],
   searchAfter: EsQuerySearchAfter,
   maxCount: number,
-  nanosValue: string
+  nanosValue: string,
+  anchorId: string
 ): Promise<EsHitRecordList> {
   const range: RangeQuery = {
     format: 'strict_date_optional_time',
@@ -61,10 +62,19 @@ export async function fetchHitsInInterval(
     .setField('size', maxCount)
     .setField('query', {
       query: {
-        constant_score: {
-          filter: {
-            range: {
-              [timeField]: range,
+        bool: {
+          must: {
+            constant_score: {
+              filter: {
+                range: {
+                  [timeField]: range,
+                },
+              },
+            },
+          },
+          must_not: {
+            ids: {
+              values: [anchorId],
             },
           },
         },

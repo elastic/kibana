@@ -90,8 +90,9 @@ describe('config validation', () => {
   };
 
   test('config validation passes when only required fields are provided', () => {
-    const config: Record<string, string> = {
+    const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -101,9 +102,10 @@ describe('config validation', () => {
 
   test('config validation passes when valid methods are provided', () => {
     ['post', 'put'].forEach((method) => {
-      const config: Record<string, string> = {
+      const config: Record<string, string | boolean> = {
         url: 'http://mylisteningserver:9200/endpoint',
         method,
+        hasAuth: true,
       };
       expect(validateConfig(actionType, config)).toEqual({
         ...defaultValues,
@@ -127,8 +129,9 @@ describe('config validation', () => {
   });
 
   test('config validation passes when a url is specified', () => {
-    const config: Record<string, string> = {
+    const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -155,6 +158,7 @@ describe('config validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -184,6 +188,7 @@ describe('config validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      hasAuth: true,
     };
 
     expect(validateConfig(actionType, config)).toEqual({
@@ -263,6 +268,7 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
+      hasAuth: true,
     };
     await actionType.executor({
       actionId: 'some-id',
@@ -320,6 +326,7 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
+      hasAuth: false,
     };
     const secrets: ActionTypeSecretsType = { user: null, password: null };
     await actionType.executor({
@@ -365,5 +372,29 @@ describe('execute()', () => {
             "url": "https://abc.def/my-webhook",
           }
     `);
+  });
+
+  test('renders parameter templates as expected', async () => {
+    const rogue = `double-quote:"; line-break->\n`;
+
+    expect(actionType.renderParameterTemplates).toBeTruthy();
+    const paramsWithTemplates = {
+      body: '{"x": "{{rogue}}"}',
+    };
+    const variables = {
+      rogue,
+    };
+    const params = actionType.renderParameterTemplates!(paramsWithTemplates, variables);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let paramsObject: any;
+    try {
+      paramsObject = JSON.parse(`${params.body}`);
+    } catch (err) {
+      expect(err).toBe(null); // kinda weird, but test should fail if it can't parse
+    }
+
+    expect(paramsObject.x).toBe(rogue);
+    expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
   });
 });

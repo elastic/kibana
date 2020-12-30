@@ -20,14 +20,11 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { take } from 'rxjs/operators';
-
 import { i18n } from '@kbn/i18n';
 
 import { UiPlugins } from '../plugins';
-import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
-import { LegacyService } from '../legacy';
 import {
   IRenderOptions,
   RenderingSetupDeps,
@@ -36,36 +33,30 @@ import {
 } from './types';
 
 /** @internal */
-export class RenderingService implements CoreService<InternalRenderingServiceSetup> {
-  private legacyInternals?: LegacyService['legacyInternals'];
+export class RenderingService {
   constructor(private readonly coreContext: CoreContext) {}
 
   public async setup({
     http,
     status,
-    legacyPlugins,
     uiPlugins,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     return {
       render: async (
         request,
         uiSettings,
-        { app = { getId: () => 'core' }, includeUserSettings = true, vars }: IRenderOptions = {}
+        { includeUserSettings = true, vars }: IRenderOptions = {}
       ) => {
-        if (!this.legacyInternals) {
-          throw new Error('Cannot render before "start"');
-        }
         const env = {
           mode: this.coreContext.env.mode,
           packageInfo: this.coreContext.env.packageInfo,
         };
         const basePath = http.basePath.get(request);
-        const serverBasePath = http.basePath.serverBasePath;
+        const { serverBasePath, publicBaseUrl } = http.basePath;
         const settings = {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
         };
-        const appId = app.getId();
         const metadata: RenderingMetadata = {
           strictCsp: http.csp.strict,
           uiPublicUrl: `${basePath}/ui`,
@@ -81,13 +72,15 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
             branch: env.packageInfo.branch,
             basePath,
             serverBasePath,
+            publicBaseUrl,
             env,
             anonymousStatusPage: status.isStatusPageAnonymous(),
             i18n: {
               translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
             },
             csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
-            vars: vars ?? (await this.legacyInternals!.getVars('core', request)),
+            externalUrl: http.externalUrl,
+            vars: vars ?? {},
             uiPlugins: await Promise.all(
               [...uiPlugins.public].map(async ([id, plugin]) => ({
                 id,
@@ -96,16 +89,6 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
               }))
             ),
             legacyMetadata: {
-              app,
-              bundleId: `app:${appId}`,
-              nav: legacyPlugins.navLinks,
-              version: env.packageInfo.version,
-              branch: env.packageInfo.branch,
-              buildNum: env.packageInfo.buildNum,
-              buildSha: env.packageInfo.buildSha,
-              serverName: http.server.name,
-              devMode: env.mode.dev,
-              basePath,
               uiSettings: settings,
             },
           },
@@ -114,10 +97,6 @@ export class RenderingService implements CoreService<InternalRenderingServiceSet
         return `<!DOCTYPE html>${renderToStaticMarkup(<Template metadata={metadata} />)}`;
       },
     };
-  }
-
-  public async start({ legacy }: { legacy: LegacyService }) {
-    this.legacyInternals = legacy.legacyInternals;
   }
 
   public async stop() {}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { errors as elasticsearchErrors } from 'elasticsearch';
 import { kibanaResponseFactory } from 'src/core/server';
 import { ReportingCore } from '../';
@@ -69,8 +69,8 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
   /*
    * Error should already have been logged by the time we get here
    */
-  function handleError(res: typeof kibanaResponseFactory, err: Error | Boom) {
-    if (err instanceof Boom) {
+  function handleError(res: typeof kibanaResponseFactory, err: Error | Boom.Boom) {
+    if (err instanceof Boom.Boom) {
       return res.customError({
         statusCode: err.output.statusCode,
         body: err.output.payload.message,

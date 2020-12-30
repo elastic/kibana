@@ -8,7 +8,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import * as fixtures from '../../../test/fixtures';
-import { setupEnvironment } from '../helpers';
+import { setupEnvironment, BRANCH } from '../helpers';
 
 import { TEMPLATE_NAME, SETTINGS, ALIASES, MAPPINGS as DEFAULT_MAPPING } from './constants';
 import { setup } from './template_edit.helpers';
@@ -97,6 +97,60 @@ describe('<TemplateEdit />', () => {
       await actions.mappings.addField('field_1', 'text');
 
       expect(find('fieldsListItem').length).toBe(1);
+    });
+
+    it('allows you to save an unmodified template', async () => {
+      const { actions } = testBed;
+      // Logistics
+      await actions.completeStepOne();
+      // Component templates
+      await actions.completeStepTwo();
+      // Index settings
+      await actions.completeStepThree();
+      // Mappings
+      await actions.completeStepFour();
+      // Aliases
+      await actions.completeStepFive();
+
+      // Submit the form
+      await act(async () => {
+        actions.clickNextButton();
+      });
+
+      const latestRequest = server.requests[server.requests.length - 1];
+      const { version } = templateToEdit;
+
+      const expected = {
+        name: 'index_template_without_mappings',
+        indexPatterns: ['indexPattern1'],
+        version,
+        _kbnMeta: {
+          type: 'default',
+          isLegacy: templateToEdit._kbnMeta.isLegacy,
+          hasDatastream: false,
+        },
+      };
+
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+    });
+
+    it('allows you to view the "Request" tab of an unmodified template', async () => {
+      const { actions, exists } = testBed;
+
+      // Logistics
+      await actions.completeStepOne();
+      // Component templates
+      await actions.completeStepTwo();
+      // Index settings
+      await actions.completeStepThree();
+      // Mappings
+      await actions.completeStepFour();
+      // Aliases
+      await actions.completeStepFive();
+
+      await actions.review.selectTab('request');
+
+      expect(exists('requestTab')).toBe(true);
     });
   });
 
@@ -224,4 +278,68 @@ describe('<TemplateEdit />', () => {
       });
     });
   });
+
+  if (BRANCH === '7.x') {
+    describe('legacy index templates', () => {
+      const legacyTemplateToEdit = fixtures.getTemplate({
+        name: 'legacy_index_template',
+        indexPatterns: ['indexPattern1'],
+        isLegacy: true,
+        template: {
+          mappings: {
+            my_mapping_type: {},
+          },
+        },
+      });
+
+      beforeAll(() => {
+        httpRequestsMockHelpers.setLoadTemplateResponse(legacyTemplateToEdit);
+      });
+
+      beforeEach(async () => {
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        testBed.component.update();
+      });
+
+      it('persists mappings type', async () => {
+        const { actions } = testBed;
+        // Logistics
+        await actions.completeStepOne();
+        // Note: "step 2" (component templates) doesn't exist for legacy templates
+        // Index settings
+        await actions.completeStepThree();
+        // Mappings
+        await actions.completeStepFour();
+        // Aliases
+        await actions.completeStepFive();
+
+        // Submit the form
+        await act(async () => {
+          actions.clickNextButton();
+        });
+
+        const latestRequest = server.requests[server.requests.length - 1];
+
+        const { version, template, name, indexPatterns, _kbnMeta, order } = legacyTemplateToEdit;
+
+        const expected = {
+          name,
+          indexPatterns,
+          version,
+          order,
+          template: {
+            aliases: undefined,
+            mappings: template!.mappings,
+            settings: undefined,
+          },
+          _kbnMeta,
+        };
+
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+      });
+    });
+  }
 });

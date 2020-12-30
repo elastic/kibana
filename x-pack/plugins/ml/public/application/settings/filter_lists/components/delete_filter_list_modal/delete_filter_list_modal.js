@@ -86,6 +86,7 @@ export class DeleteFilterListModal extends Component {
             }
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+            data-test-subj={'mlFilterListDeleteConfirmation'}
           />
         </EuiOverlayMask>
       );

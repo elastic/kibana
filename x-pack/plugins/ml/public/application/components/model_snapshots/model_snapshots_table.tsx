@@ -13,7 +13,6 @@ import {
   EuiInMemoryTable,
   EuiLoadingSpinner,
   EuiBasicTableColumn,
-  formatDate,
 } from '@elastic/eui';
 
 import { checkPermission } from '../../capabilities/check_capabilities';
@@ -21,12 +20,12 @@ import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
 import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
 import { ml } from '../../services/ml_api_service';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../common/constants/states';
-import { TIME_FORMAT } from '../../../../common/constants/time_format';
 import { CloseJobConfirm } from './close_job_confirm';
 import {
   ModelSnapshot,
   CombinedJobWithStats,
 } from '../../../../common/types/anomaly_detection_jobs';
+import { timeFormatter } from '../../../../common/util/date_utils';
 
 interface Props {
   job: CombinedJobWithStats;
@@ -138,7 +137,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
         defaultMessage: 'Date created',
       }),
       dataType: 'date',
-      render: renderDate,
+      render: timeFormatter,
       sortable: true,
     },
     {
@@ -147,7 +146,7 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
         defaultMessage: 'Latest timestamp',
       }),
       dataType: 'date',
-      render: renderDate,
+      render: timeFormatter,
       sortable: true,
     },
     {
@@ -245,10 +244,6 @@ export const ModelSnapshotTable: FC<Props> = ({ job, refreshJobList }) => {
     </>
   );
 };
-
-function renderDate(date: number) {
-  return formatDate(date, TIME_FORMAT);
-}
 
 async function getCombinedJobState(jobId: string) {
   const jobs = await ml.jobs.jobs([jobId]);

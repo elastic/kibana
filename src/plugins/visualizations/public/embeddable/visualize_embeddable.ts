@@ -19,7 +19,6 @@
 
 import _, { get } from 'lodash';
 import { Subscription } from 'rxjs';
-import * as Rx from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
@@ -38,6 +37,7 @@ import {
   Adapters,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
+  AttributeService,
 } from '../../../../plugins/embeddable/public';
 import {
   IExpressionLoaderParams,
@@ -51,7 +51,6 @@ import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
 import { SavedObjectAttributes } from '../../../../core/types';
-import { AttributeService } from '../../../dashboard/public';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
 
@@ -72,6 +71,9 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -100,6 +102,7 @@ export class VisualizeEmbeddable
   private timeRange?: TimeRange;
   private query?: Query;
   private filters?: Filter[];
+  private searchSessionId?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression: string = '';
@@ -155,8 +158,11 @@ export class VisualizeEmbeddable
       .subscribe(this.updateHandler.bind(this));
 
     this.subscriptions.push(
-      Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
-        this.handleChanges();
+      this.getUpdated$().subscribe(() => {
+        const isDirty = this.handleChanges();
+        if (isDirty && this.handler) {
+          this.updateHandler();
+        }
       })
     );
 
@@ -167,7 +173,7 @@ export class VisualizeEmbeddable
         typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters;
     }
   }
-  public getVisualizationDescription() {
+  public getDescription() {
     return this.vis.description;
   }
 
@@ -220,7 +226,7 @@ export class VisualizeEmbeddable
     }
   }
 
-  public async handleChanges() {
+  private handleChanges(): boolean {
     this.transferCustomizationsToUiState();
 
     let dirty = false;
@@ -243,19 +249,16 @@ export class VisualizeEmbeddable
       dirty = true;
     }
 
-    // propagate the title to the output embeddable
-    // but only when the visualization is in edit/Visualize mode
-    if (!this.parent && this.vis.title !== this.output.title) {
-      this.updateOutput({ title: this.vis.title });
+    if (this.searchSessionId !== this.input.searchSessionId) {
+      this.searchSessionId = this.input.searchSessionId;
+      dirty = true;
     }
 
     if (this.vis.description && this.domNode) {
       this.domNode.setAttribute('data-description', this.vis.description);
     }
 
-    if (this.handler && dirty) {
-      this.updateHandler();
-    }
+    return dirty;
   }
 
   // this is a hack to make editor still work, will be removed once we clean up editor
@@ -380,6 +383,7 @@ export class VisualizeEmbeddable
         query: this.input.query,
         filters: this.input.filters,
       },
+      searchSessionId: this.input.searchSessionId,
       uiState: this.vis.uiState,
       inspectorAdapters: this.inspectorAdapters,
     };
@@ -400,6 +404,7 @@ export class VisualizeEmbeddable
   }
 
   private handleVisUpdate = async () => {
+    this.handleChanges();
     this.updateHandler();
   };
 

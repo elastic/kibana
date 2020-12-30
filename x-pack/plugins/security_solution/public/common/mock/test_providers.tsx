@@ -46,7 +46,7 @@ export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock(),
 });
-
+window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 const { storage } = createSecuritySolutionStorageMock();
 

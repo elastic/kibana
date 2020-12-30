@@ -40,6 +40,7 @@
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiScreenReaderOnly, EuiDelayRender } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FieldSetting } from '../../types';
 
 interface Props {
@@ -66,19 +67,34 @@ export class AdvancedSettingsVoiceAnnouncement extends Component<Props> {
     const filteredOptions = [...filteredSections];
     return (
       <EuiScreenReaderOnly>
-        <div role="region" aria-live="polite">
+        <div
+          role="region"
+          aria-live="polite"
+          aria-label={i18n.translate('advancedSettings.voiceAnnouncement.ariaLabel', {
+            defaultMessage: 'Advanced Settings results info',
+          })}
+        >
           <EuiDelayRender>
-            <FormattedMessage
-              id="advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage"
-              defaultMessage="You searched for {query}.
-                There {optionLenght, plural, one {is # option} other {are # options}}
-                in {sectionLenght, plural, one {# section} other {# sections}}"
-              values={{
-                query: this.props.queryText,
-                sectionLenght: filteredSections.length,
-                optionLenght: filteredOptions.length,
-              }}
-            />
+            {this.props.queryText ? (
+              <FormattedMessage
+                id="advancedSettings.voiceAnnouncement.searchResultScreenReaderMessage"
+                defaultMessage="You searched for {query}. There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
+                values={{
+                  query: this.props.queryText,
+                  sectionLenght: filteredSections.length,
+                  optionLenght: filteredOptions.length,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="advancedSettings.voiceAnnouncement.noSearchResultScreenReaderMessage"
+                defaultMessage="There {optionLenght, plural, one {is # option} other {are # options}} in {sectionLenght, plural, one {# section} other {# sections}}"
+                values={{
+                  sectionLenght: filteredSections.length,
+                  optionLenght: filteredOptions.length,
+                }}
+              />
+            )}
           </EuiDelayRender>
         </div>
       </EuiScreenReaderOnly>

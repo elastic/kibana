@@ -16,43 +16,55 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { coreMock } from '../../../../core/public/mocks';
 import { CoreSetup, CoreStart } from '../../../../core/public';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
+import { bfetchPluginMock } from '../../../bfetch/public/mocks';
 
 describe('Search service', () => {
   let searchService: SearchService;
   let mockCoreSetup: MockedKeys<CoreSetup>;
   let mockCoreStart: MockedKeys<CoreStart>;
+  const initializerContext = coreMock.createPluginInitializerContext();
+  initializerContext.config.get = jest.fn().mockReturnValue({
+    search: { aggs: { shardDelay: { enabled: false } } },
+  });
 
   beforeEach(() => {
-    searchService = new SearchService();
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
+    searchService = new SearchService(initializerContext);
   });
 
   describe('setup()', () => {
     it('exposes proper contract', async () => {
+      const bfetch = bfetchPluginMock.createSetupContract();
       const setup = searchService.setup(mockCoreSetup, ({
         packageInfo: { version: '8' },
+        bfetch,
         expressions: { registerFunction: jest.fn(), registerType: jest.fn() },
       } as unknown) as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('usageCollector');
       expect(setup).toHaveProperty('__enhance');
+      expect(setup).toHaveProperty('sessionsClient');
+      expect(setup).toHaveProperty('session');
     });
   });
 
   describe('start()', () => {
     it('exposes proper contract', async () => {
       const start = searchService.start(mockCoreStart, {
+        fieldFormats: {},
         indexPatterns: {},
       } as any);
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('search');
       expect(start).toHaveProperty('searchSource');
+      expect(start).toHaveProperty('sessionsClient');
+      expect(start).toHaveProperty('session');
     });
   });
 });

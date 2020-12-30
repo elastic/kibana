@@ -47,6 +47,7 @@ import {
   redirectToDetections,
   getActionMessageParams,
   userHasNoPermissions,
+  MaxWidthEuiFlexItem,
 } from '../helpers';
 import * as ruleI18n from '../translations';
 import { RuleStep, RuleStepsFormHooks, RuleStepsFormData, RuleStepsData } from '../types';
@@ -332,75 +333,79 @@ const EditRulePageComponent: FC = () => {
 
   return (
     <>
-      <WrapperPage restrictWidth>
-        <DetectionEngineHeaderPage
-          backOptions={{
-            href: getRuleDetailsUrl(ruleId ?? ''),
-            text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
-            pageId: SecurityPageName.detections,
-          }}
-          isLoading={isLoading}
-          title={i18n.PAGE_TITLE}
-        />
-        {invalidSteps.length > 0 && (
-          <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
-            <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
-              defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
-              values={{
-                countError: invalidSteps.length,
-                tabHasError: invalidSteps
-                  .map((t) => {
-                    if (t === RuleStep.aboutRule) {
-                      return ruleI18n.ABOUT;
-                    } else if (t === RuleStep.defineRule) {
-                      return ruleI18n.DEFINITION;
-                    } else if (t === RuleStep.scheduleRule) {
-                      return ruleI18n.SCHEDULE;
-                    } else if (t === RuleStep.ruleActions) {
-                      return ruleI18n.RULE_ACTIONS;
-                    }
-                    return t;
-                  })
-                  .join(', '),
+      <WrapperPage>
+        <EuiFlexGroup direction="row" justifyContent="spaceAround">
+          <MaxWidthEuiFlexItem>
+            <DetectionEngineHeaderPage
+              backOptions={{
+                href: getRuleDetailsUrl(ruleId ?? ''),
+                text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
+                pageId: SecurityPageName.detections,
               }}
-            />
-          </EuiCallOut>
-        )}
-
-        <EuiTabbedContent
-          initialSelectedTab={tabs[0]}
-          selectedTab={tabs.find((t) => t.id === activeStep)}
-          onTabClick={onTabClick}
-          tabs={tabs}
-        />
-
-        <EuiSpacer />
-
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="s"
-          justifyContent="flexEnd"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButton iconType="cross" onClick={goToDetailsRule}>
-              {i18n.CANCEL}
-            </EuiButton>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="ruleEditSubmitButton"
-              fill
-              onClick={onSubmit}
-              iconType="save"
               isLoading={isLoading}
-              isDisabled={loading}
+              title={i18n.PAGE_TITLE}
+            />
+            {invalidSteps.length > 0 && (
+              <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
+                <FormattedMessage
+                  id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
+                  defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
+                  values={{
+                    countError: invalidSteps.length,
+                    tabHasError: invalidSteps
+                      .map((t) => {
+                        if (t === RuleStep.aboutRule) {
+                          return ruleI18n.ABOUT;
+                        } else if (t === RuleStep.defineRule) {
+                          return ruleI18n.DEFINITION;
+                        } else if (t === RuleStep.scheduleRule) {
+                          return ruleI18n.SCHEDULE;
+                        } else if (t === RuleStep.ruleActions) {
+                          return ruleI18n.RULE_ACTIONS;
+                        }
+                        return t;
+                      })
+                      .join(', '),
+                  }}
+                />
+              </EuiCallOut>
+            )}
+
+            <EuiTabbedContent
+              initialSelectedTab={tabs[0]}
+              selectedTab={tabs.find((t) => t.id === activeStep)}
+              onTabClick={onTabClick}
+              tabs={tabs}
+            />
+
+            <EuiSpacer />
+
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              justifyContent="flexEnd"
+              responsive={false}
             >
-              {i18n.SAVE_CHANGES}
-            </EuiButton>
-          </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton iconType="cross" onClick={goToDetailsRule}>
+                  {i18n.CANCEL}
+                </EuiButton>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="ruleEditSubmitButton"
+                  fill
+                  onClick={onSubmit}
+                  iconType="save"
+                  isLoading={isLoading}
+                  isDisabled={loading}
+                >
+                  {i18n.SAVE_CHANGES}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </MaxWidthEuiFlexItem>
         </EuiFlexGroup>
       </WrapperPage>
 

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'src/core/server';
 import { TIMEOUT } from './constants';
 
 export interface NodeAggregation {
@@ -44,7 +44,7 @@ export interface NodesFeatureUsageResponse {
 }
 
 export type NodesUsageGetter = (
-  callCluster: LegacyAPICaller
+  esClient: ElasticsearchClient
 ) => Promise<{ nodes: NodeObj[] | Array<{}> }>;
 /**
  * Get the nodes usage data from the connected cluster.
@@ -54,16 +54,12 @@ export type NodesUsageGetter = (
  * The Nodes usage API was introduced in v6.0.0
  */
 export async function fetchNodesUsage(
-  callCluster: LegacyAPICaller
+  esClient: ElasticsearchClient
 ): Promise<NodesFeatureUsageResponse> {
-  const response = await callCluster('transport.request', {
-    method: 'GET',
-    path: '/_nodes/usage',
-    query: {
-      timeout: TIMEOUT,
-    },
+  const { body } = await esClient.nodes.usage<NodesFeatureUsageResponse>({
+    timeout: TIMEOUT,
   });
-  return response;
+  return body;
 }
 
 /**
@@ -71,8 +67,8 @@ export async function fetchNodesUsage(
  * @param callCluster APICaller
  * @returns Object containing array of modified usage information with the node_id nested within the data for that node.
  */
-export const getNodesUsage: NodesUsageGetter = async (callCluster) => {
-  const result = await fetchNodesUsage(callCluster);
+export const getNodesUsage: NodesUsageGetter = async (esClient) => {
+  const result = await fetchNodesUsage(esClient);
   const transformedNodes = Object.entries(result?.nodes || {}).map(([key, value]) => ({
     ...(value as NodeObj),
     node_id: key,

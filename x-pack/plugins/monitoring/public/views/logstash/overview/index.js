@@ -8,6 +8,7 @@
  * Logstash Overview
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { uiRoutes } from '../../../angular/helpers/routes';
 import { ajaxErrorHandlersProvider } from '../../../lib/ajax_error_handler';
 import { routeInitProvider } from '../../../lib/route_init';
@@ -52,6 +53,9 @@ uiRoutes.when('/logstash', {
     constructor($injector, $scope) {
       super({
         title: 'Logstash',
+        pageTitle: i18n.translate('xpack.monitoring.logstash.overview.pageTitle', {
+          defaultMessage: 'Logstash overview',
+        }),
         getPageData,
         reactNodeId: 'monitoringLogstashOverviewApp',
         $scope,

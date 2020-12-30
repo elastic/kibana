@@ -16,10 +16,11 @@ import {
   MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
-import { useFullScreen } from '../../../common/containers/use_full_screen';
+import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import * as i18n from '../translations';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -54,13 +55,14 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
   endDate,
   filterQuery,
+  indexNames,
   pageFilters,
   setQuery,
   startDate,
 }) => {
   const dispatch = useDispatch();
   const { initializeTimeline } = useManageTimeline();
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
   useEffect(() => {
     initializeTimeline({
       id: TimelineId.hostsPageEvents,
@@ -85,6 +87,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
           setQuery={setQuery}
           startDate={startDate}
           id={EVENTS_HISTOGRAM_ID}
+          indexNames={indexNames}
           {...histogramConfigs}
         />
       )}
@@ -92,6 +95,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
         defaultModel={eventsDefaultModel}
         end={endDate}
         id={TimelineId.hostsPageEvents}
+        scopeId={SourcererScopeName.default}
         start={startDate}
         pageFilters={pageFilters}
       />

@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`alertType alert type creation structure is the expected value 1`] = `
+Object {
+  "context": Array [
+    Object {
+      "description": "The entity ID of the document that triggered the alert",
+      "name": "entityId",
+    },
+    Object {
+      "description": "The alert interval end time this change was recorded",
+      "name": "timeOfDetection",
+    },
+    Object {
+      "description": "GeoJSON line connecting the two locations that were used to determine the crossing event",
+      "name": "crossingLine",
+    },
+    Object {
+      "description": "The most recently captured location of the entity",
+      "name": "toEntityLocation",
+    },
+    Object {
+      "description": "The time the entity was detected in the current boundary",
+      "name": "toEntityDateTime",
+    },
+    Object {
+      "description": "The id of the crossing entity document",
+      "name": "toEntityDocumentId",
+    },
+    Object {
+      "description": "The current boundary id containing the entity (if any)",
+      "name": "toBoundaryId",
+    },
+    Object {
+      "description": "The boundary (if any) the entity has crossed into and is currently located",
+      "name": "toBoundaryName",
+    },
+    Object {
+      "description": "The previously captured location of the entity",
+      "name": "fromEntityLocation",
+    },
+    Object {
+      "description": "The last time the entity was recorded in the previous boundary",
+      "name": "fromEntityDateTime",
+    },
+    Object {
+      "description": "The id of the crossing entity document",
+      "name": "fromEntityDocumentId",
+    },
+    Object {
+      "description": "The previous boundary id containing the entity (if any)",
+      "name": "fromBoundaryId",
+    },
+    Object {
+      "description": "The boundary (if any) the entity has crossed from and was previously located",
+      "name": "fromBoundaryName",
+    },
+  ],
+}
+`;

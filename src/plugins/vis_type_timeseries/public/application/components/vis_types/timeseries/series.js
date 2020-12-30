@@ -35,7 +35,7 @@ import {
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { PANEL_TYPES } from '../../../../../../../plugins/vis_type_timeseries/common/panel_types';
+import { PANEL_TYPES } from '../../../../../common/panel_types';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {
   const {
@@ -97,6 +97,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
       seriesBody = (
         <SeriesConfig
           fields={props.fields}
+          panel={panel}
           model={model}
           onChange={props.onChange}
           indexPatternForQuery={props.indexPatternForQuery}

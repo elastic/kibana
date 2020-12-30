@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Connector } from '../../../containers/configure/types';
-import { ReturnConnectors } from '../../../containers/configure/use_connectors';
+import { ActionConnector } from '../../../containers/configure/types';
+import { UseConnectorsResponse } from '../../../containers/configure/use_connectors';
 import { connectorsMock } from '../../../containers/configure/mock';
 import { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
-export { mapping } from '../../../containers/configure/mock';
-
-export const connectors: Connector[] = connectorsMock;
+import { ConnectorTypes } from '../../../../../../case/common/api';
+export { mappings } from '../../../containers/configure/mock';
+export const connectors: ActionConnector[] = connectorsMock;
 
 // x - pack / plugins / triggers_actions_ui;
 export const searchURL =
@@ -18,27 +18,35 @@ export const searchURL =
 
 export const useCaseConfigureResponse: ReturnUseCaseConfigure = {
   closureType: 'close-by-user',
-  connectorId: 'none',
-  connectorName: 'none',
+  connector: {
+    id: 'none',
+    name: 'none',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
   currentConfiguration: {
-    connectorId: 'none',
+    connector: {
+      id: 'none',
+      name: 'none',
+      type: ConnectorTypes.none,
+      fields: null,
+    },
     closureType: 'close-by-user',
-    connectorName: 'none',
   },
   firstLoad: false,
   loading: false,
-  mapping: null,
+  mappings: [],
   persistCaseConfigure: jest.fn(),
   persistLoading: false,
   refetchCaseConfigure: jest.fn(),
   setClosureType: jest.fn(),
   setConnector: jest.fn(),
   setCurrentConfiguration: jest.fn(),
-  setMapping: jest.fn(),
+  setMappings: jest.fn(),
   version: '',
 };
 
-export const useConnectorsResponse: ReturnConnectors = {
+export const useConnectorsResponse: UseConnectorsResponse = {
   loading: false,
   connectors,
   refetchConnectors: jest.fn(),

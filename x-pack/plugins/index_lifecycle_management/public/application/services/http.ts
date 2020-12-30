@@ -4,6 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/**
+ * TODO:
+ * IMPORTANT: Please see how {@link BreadcrumbService} is set up for an example of how these services should be set up
+ * in future. The pattern in this file is legacy and should be updated to conform to the plugin lifecycle.
+ */
+
 import { HttpSetup } from 'src/core/public';
 import {
   UseRequestConfig,
@@ -30,8 +36,8 @@ function getFullPath(path: string): string {
   return apiPrefix;
 }
 
-export function sendPost(path: string, payload: GenericObject) {
-  return _httpClient.post(getFullPath(path), { body: JSON.stringify(payload) });
+export function sendPost(path: string, payload: GenericObject, query?: GenericObject) {
+  return _httpClient.post(getFullPath(path), { body: JSON.stringify(payload), query });
 }
 
 export function sendGet(path: string, query?: GenericObject): any {

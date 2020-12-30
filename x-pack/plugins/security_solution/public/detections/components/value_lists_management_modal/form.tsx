@@ -21,7 +21,7 @@ import { useImportList, ListSchema, Type } from '../../../shared_imports';
 import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 
-const options: EuiSelectOption[] = [
+export const listFormOptions: EuiSelectOption[] = [
   {
     value: 'keyword',
     text: i18n.KEYWORDS_RADIO,
@@ -145,7 +145,8 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
           <EuiFlexItem>
             <EuiFormRow label={i18n.LIST_TYPES_RADIO_LABEL}>
               <EuiSelect
-                options={options}
+                data-test-subj="value-lists-form-select-type-action"
+                options={listFormOptions}
                 value={type}
                 onChange={handleRadioChange}
                 name="valueListType"

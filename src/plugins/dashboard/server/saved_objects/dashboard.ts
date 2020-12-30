@@ -18,9 +18,16 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
-import { dashboardSavedObjectTypeMigrations } from './dashboard_migrations';
+import {
+  createDashboardSavedObjectTypeMigrations,
+  DashboardSavedObjectTypeMigrationsDeps,
+} from './dashboard_migrations';
 
-export const dashboardSavedObjectType: SavedObjectsType = {
+export const createDashboardSavedObjectType = ({
+  migrationDeps,
+}: {
+  migrationDeps: DashboardSavedObjectTypeMigrationsDeps;
+}): SavedObjectsType => ({
   name: 'dashboard',
   hidden: false,
   namespaceType: 'single',
@@ -46,10 +53,10 @@ export const dashboardSavedObjectType: SavedObjectsType = {
       description: { type: 'text' },
       hits: { type: 'integer', index: false, doc_values: false },
       kibanaSavedObjectMeta: {
-        properties: { searchSourceJSON: { type: 'text', index: false, doc_values: false } },
+        properties: { searchSourceJSON: { type: 'text', index: false } },
       },
-      optionsJSON: { type: 'text', index: false, doc_values: false },
-      panelsJSON: { type: 'text', index: false, doc_values: false },
+      optionsJSON: { type: 'text', index: false },
+      panelsJSON: { type: 'text', index: false },
       refreshInterval: {
         properties: {
           display: { type: 'keyword', index: false, doc_values: false },
@@ -65,5 +72,5 @@ export const dashboardSavedObjectType: SavedObjectsType = {
       version: { type: 'integer' },
     },
   },
-  migrations: dashboardSavedObjectTypeMigrations,
-};
+  migrations: createDashboardSavedObjectTypeMigrations(migrationDeps),
+});

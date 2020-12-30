@@ -22,8 +22,10 @@ import $ from 'jquery';
 import _ from 'lodash';
 
 import { create } from '../create';
-import { collapseLiteralStrings } from '../../../../../../es_ui_shared/public';
+import { XJson } from '../../../../../../es_ui_shared/public';
 import editorInput1 from './editor_input1.txt';
+
+const { collapseLiteralStrings } = XJson;
 
 describe('Editor', () => {
   let input;

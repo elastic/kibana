@@ -18,7 +18,7 @@
  */
 
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { UI_SETTINGS } from '../../../common';
+import { CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../../../common';
 import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
@@ -28,6 +28,8 @@ import {
   getCalculateAutoTimeExpression,
 } from './';
 import { AggsCommonSetup, AggsCommonStart } from './types';
+import { getDateMetaByDatatableColumn } from './utils/time_column_meta';
+import { getDatatableColumnUtilities } from './utils/datatable_column_meta';
 
 /** @internal */
 export const aggsRequiredUiSettings = [
@@ -50,6 +52,8 @@ export interface AggsCommonSetupDependencies {
 /** @internal */
 export interface AggsCommonStartDependencies {
   getConfig: GetConfigFn;
+  getIndexPattern(id: string): Promise<IndexPattern>;
+  isDefaultTimezone: () => boolean;
 }
 
 /**
@@ -77,16 +81,37 @@ export class AggsCommonService {
     };
   }
 
-  public start({ getConfig }: AggsCommonStartDependencies): AggsCommonStart {
+  public start({
+    getConfig,
+    getIndexPattern,
+    isDefaultTimezone,
+  }: AggsCommonStartDependencies): AggsCommonStart {
     const aggTypesStart = this.aggTypesRegistry.start();
+    const calculateAutoTimeExpression = getCalculateAutoTimeExpression(getConfig);
+
+    const createAggConfigs = (
+      indexPattern: IndexPattern,
+      configStates?: CreateAggConfigParams[]
+    ) => {
+      return new AggConfigs(indexPattern, configStates, {
+        typesRegistry: aggTypesStart,
+      });
+    };
 
     return {
-      calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
-      createAggConfigs: (indexPattern, configStates = [], schemas) => {
-        return new AggConfigs(indexPattern, configStates, {
-          typesRegistry: aggTypesStart,
-        });
-      },
+      calculateAutoTimeExpression,
+      getDateMetaByDatatableColumn: getDateMetaByDatatableColumn({
+        calculateAutoTimeExpression,
+        getIndexPattern,
+        getConfig,
+        isDefaultTimezone,
+      }),
+      datatableUtilities: getDatatableColumnUtilities({
+        getIndexPattern,
+        createAggConfigs,
+        aggTypesStart,
+      }),
+      createAggConfigs,
       types: aggTypesStart,
     };
   }

@@ -36,9 +36,7 @@ interface StaticLookupItem {
   index: number;
 }
 
-export class StaticLookupFormatEditor extends DefaultFormatEditor<
-  StaticLookupFormatEditorFormatParams
-> {
+export class StaticLookupFormatEditor extends DefaultFormatEditor<StaticLookupFormatEditorFormatParams> {
   static formatId = 'static_lookup';
   onLookupChange = (newLookupParams: { value?: string; key?: string }, index: number) => {
     const lookupEntries = [...this.props.formatParams.lookupEntries];
@@ -52,7 +50,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
   };
 
   addLookup = () => {
-    const lookupEntries = [...this.props.formatParams.lookupEntries];
+    const lookupEntries = [...(this.props.formatParams.lookupEntries || [])];
     this.onChange({
       lookupEntries: [...lookupEntries, {}],
     });

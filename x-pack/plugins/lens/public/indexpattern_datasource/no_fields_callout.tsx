@@ -7,17 +7,35 @@ import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+const defaultNoFieldsMessageCopy = i18n.translate('xpack.lens.indexPatterns.noDataLabel', {
+  defaultMessage: 'There are no fields.',
+});
+
 export const NoFieldsCallout = ({
-  isAffectedByFieldFilter,
   existFieldsInIndex,
+  defaultNoFieldsMessage = defaultNoFieldsMessageCopy,
+  isAffectedByFieldFilter = false,
   isAffectedByTimerange = false,
   isAffectedByGlobalFilter = false,
 }: {
-  isAffectedByFieldFilter: boolean;
   existFieldsInIndex: boolean;
+  isAffectedByFieldFilter?: boolean;
+  defaultNoFieldsMessage?: string;
   isAffectedByTimerange?: boolean;
   isAffectedByGlobalFilter?: boolean;
 }) => {
+  if (!existFieldsInIndex) {
+    return (
+      <EuiCallOut
+        size="s"
+        color="warning"
+        title={i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
+          defaultMessage: 'No fields exist in this index pattern.',
+        })}
+      />
+    );
+  }
+
   return (
     <EuiCallOut
       size="s"
@@ -27,16 +45,10 @@ export const NoFieldsCallout = ({
           ? i18n.translate('xpack.lens.indexPatterns.noFilteredFieldsLabel', {
               defaultMessage: 'No fields match the selected filters.',
             })
-          : existFieldsInIndex
-          ? i18n.translate('xpack.lens.indexPatterns.noDataLabel', {
-              defaultMessage: `There are no available fields that contain data.`,
-            })
-          : i18n.translate('xpack.lens.indexPatterns.noFieldsLabel', {
-              defaultMessage: 'No fields exist in this index pattern.',
-            })
+          : defaultNoFieldsMessage
       }
     >
-      {existFieldsInIndex && (
+      {(isAffectedByTimerange || isAffectedByFieldFilter || isAffectedByGlobalFilter) && (
         <>
           <strong>
             {i18n.translate('xpack.lens.indexPatterns.noFields.tryText', {
@@ -45,28 +57,26 @@ export const NoFieldsCallout = ({
           </strong>
           <ul>
             {isAffectedByTimerange && (
-              <>
-                <li>
-                  {i18n.translate('xpack.lens.indexPatterns.noFields.extendTimeBullet', {
-                    defaultMessage: 'Extending the time range',
-                  })}
-                </li>
-              </>
+              <li>
+                {i18n.translate('xpack.lens.indexPatterns.noFields.extendTimeBullet', {
+                  defaultMessage: 'Extending the time range',
+                })}
+              </li>
             )}
-            {isAffectedByFieldFilter ? (
+            {isAffectedByFieldFilter && (
               <li>
                 {i18n.translate('xpack.lens.indexPatterns.noFields.fieldTypeFilterBullet', {
                   defaultMessage: 'Using different field filters',
                 })}
               </li>
-            ) : null}
-            {isAffectedByGlobalFilter ? (
+            )}
+            {isAffectedByGlobalFilter && (
               <li>
                 {i18n.translate('xpack.lens.indexPatterns.noFields.globalFiltersBullet', {
                   defaultMessage: 'Changing the global filters',
                 })}
               </li>
-            ) : null}
+            )}
           </ul>
         </>
       )}

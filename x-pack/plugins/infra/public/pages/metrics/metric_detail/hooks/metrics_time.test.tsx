@@ -7,7 +7,7 @@
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
-import { mountHook } from 'test_utils/enzyme_helpers';
+import { mountHook } from '@kbn/test/jest';
 import { ScopedHistory } from '../../../../../../../../src/core/public';
 import { useMetricsTime } from './use_metrics_time';
 

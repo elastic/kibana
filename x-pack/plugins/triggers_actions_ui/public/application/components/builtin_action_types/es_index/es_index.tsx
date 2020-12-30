@@ -6,9 +6,9 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
-import { EsIndexActionConnector, IndexActionParams } from '../types';
+import { EsIndexActionConnector, EsIndexConfig, IndexActionParams } from '../types';
 
-export function getActionType(): ActionTypeModel<EsIndexActionConnector, IndexActionParams> {
+export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexActionParams> {
   return {
     id: '.index',
     iconClass: 'indexOpen',

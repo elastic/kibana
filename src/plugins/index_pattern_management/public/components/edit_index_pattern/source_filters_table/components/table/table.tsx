@@ -30,7 +30,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { SourceFiltersTableFilter } from '../../types';
 
 const filterHeader = i18n.translate(
@@ -80,7 +80,7 @@ const cancelAria = i18n.translate(
 );
 
 export interface TableProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   items: SourceFiltersTableFilter[];
   deleteFilter: Function;
   fieldWildcardMatcher: Function;

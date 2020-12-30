@@ -451,6 +451,203 @@ export default ({ getService }: FtrProviderContext) => {
         dashboards: [] as string[],
       },
     },
+    {
+      testTitleSuffix:
+        'for uptime_heartbeat with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_heartbeat',
+      indexPattern: { name: 'ft_module_heartbeat', timeField: '@timestamp' },
+      module: 'uptime_heartbeat',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf13_',
+        indexPatternName: 'ft_module_heartbeat',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf13_high_latency_by_geo',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for auditbeat_process_hosts_ecs with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_auditbeat',
+      indexPattern: { name: 'ft_module_auditbeat', timeField: '@timestamp' },
+      module: 'auditbeat_process_hosts_ecs',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf14_',
+        indexPatternName: 'ft_module_auditbeat',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf14_hosts_high_count_process_events_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf14_hosts_rare_process_activity_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+        ],
+        searches: ['ml_auditbeat_hosts_process_events_ecs'] as string[],
+        visualizations: [
+          'ml_auditbeat_hosts_process_event_rate_by_process_ecs',
+          'ml_auditbeat_hosts_process_event_rate_vis_ecs',
+          'ml_auditbeat_hosts_process_occurrence_ecs',
+        ] as string[],
+        dashboards: [
+          'ml_auditbeat_hosts_process_event_rate_ecs',
+          'ml_auditbeat_hosts_process_explorer_ecs',
+        ] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for security_linux with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_security_endpoint',
+      indexPattern: { name: 'ft_logs-endpoint.events.*', timeField: '@timestamp' },
+      module: 'security_linux',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf15_',
+        indexPatternName: 'ft_logs-endpoint.events.*',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf15_v2_rare_process_by_host_linux_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf15_v2_linux_rare_metadata_user',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf15_v2_linux_rare_metadata_process',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf15_v2_linux_anomalous_user_name_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf15_v2_linux_anomalous_process_all_hosts_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf15_v2_linux_anomalous_network_port_activity_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for security_windows with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'ml/module_security_endpoint',
+      indexPattern: { name: 'ft_logs-endpoint.events.*', timeField: '@timestamp' },
+      module: 'security_windows',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf16_',
+        indexPatternName: 'ft_logs-endpoint.events.*',
+        startDatafeed: true,
+        end: Date.now(),
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf16_v2_rare_process_by_host_windows_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf16_v2_windows_anomalous_network_activity_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf16_v2_windows_anomalous_path_activity_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '10mb',
+          },
+          {
+            jobId: 'pf16_v2_windows_anomalous_process_all_hosts_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf16_v2_windows_anomalous_process_creation',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf16_v2_windows_anomalous_user_name_ecs',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf16_v2_windows_rare_metadata_process',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf16_v2_windows_rare_metadata_user',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+            modelMemoryLimit: '11mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
   ];
 
   const testDataListNegative = [
@@ -481,9 +678,9 @@ export default ({ getService }: FtrProviderContext) => {
         startDatafeed: false,
       },
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
-        message: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
+        message: 'Forbidden',
       },
     },
   ];

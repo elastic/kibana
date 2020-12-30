@@ -78,8 +78,23 @@ Put the dashboard in *Edit* mode, then use the following options:
 
 * To resize, click the resize control, then drag to the new dimensions.
 
-* To delete, open the panel menu, then select Delete from dashboard. When you delete a panel from the dashboard, the 
+* To delete, open the panel menu, then select *Delete from dashboard*. When you delete a panel from the dashboard, the 
 visualization or saved search from the panel is still available in Kibana.
+
+[float]
+[[sync-colors]]
+=== Synchronize colors
+
+By default, dashboard panels that share a non-gradient based color palette will synchronize their color assignment to improve readability.
+Color assignment is based on the series name, and the total number of colors is based on the number of unique series names.
+
+The color synchronizing logic can make the dashboard less readable when there are too many unique series names. It is possible to disable the synchronization behavior:
+
+. Put the dashboard in *Edit* mode. 
+
+. Click the "Options" button in the top navigation bar.
+
+. Disable "Sync color palettes across panels".
 
 [float]
 [[clone-panels]]

@@ -10,7 +10,7 @@ import { memoize } from 'lodash';
 import numeral from '@elastic/numeral';
 import { isValidIndexName } from '../../../../../../../common/util/es_utils';
 
-import { collapseLiteralStrings } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
+import { collapseLiteralStrings } from '../../../../../../../shared_imports';
 
 import { Action, ACTION } from './actions';
 import {
@@ -72,7 +72,7 @@ export function getModelMemoryLimitErrors(mmlValidationResult: any): string[] | 
     if (errorKey === 'min') {
       acc.push(
         i18n.translate('xpack.ml.dataframe.analytics.create.modelMemoryUnitsMinError', {
-          defaultMessage: 'Model memory limit cannot be lower than {mml}',
+          defaultMessage: 'Model memory limit is lower than estimated value {mml}',
           values: {
             mml: mmlValidationResult.min.minValue,
           },
@@ -425,12 +425,15 @@ const validateForm = (state: State): State => {
     dependentVariable === '';
 
   const mmlValidationResult = validateMml(estimatedModelMemoryLimit, modelMemoryLimit);
+  const mmlInvalid =
+    mmlValidationResult !== null &&
+    (mmlValidationResult.invalidUnits !== undefined || mmlValidationResult.required === true);
 
   state.form.modelMemoryLimitValidationResult = mmlValidationResult;
 
   state.isValid =
     !jobTypeEmpty &&
-    !mmlValidationResult &&
+    !mmlInvalid &&
     !jobIdEmpty &&
     jobIdValid &&
     !jobIdExists &&
@@ -546,8 +549,7 @@ export function reducer(state: State, action: Action): State {
     }
 
     case ACTION.SWITCH_TO_ADVANCED_EDITOR:
-      let { jobConfig } = state;
-      jobConfig = getJobConfigFromFormState(state.form);
+      const jobConfig = getJobConfigFromFormState(state.form);
       const shouldDisableSwitchToForm = isAdvancedConfig(jobConfig);
 
       return validateAdvancedEditor({

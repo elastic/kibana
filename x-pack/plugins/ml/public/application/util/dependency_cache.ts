@@ -4,25 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DataPublicPluginSetup } from 'src/plugins/data/public';
-import {
+import type { DataPublicPluginSetup } from 'src/plugins/data/public';
+import type {
   IUiSettingsClient,
   ChromeStart,
   SavedObjectsClientContract,
   ApplicationStart,
   HttpStart,
   I18nStart,
-} from 'kibana/public';
-import { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
-import {
   DocLinksStart,
   ToastsStart,
   OverlayStart,
   ChromeRecentlyAccessed,
   IBasePath,
 } from 'kibana/public';
-import { SharePluginStart } from 'src/plugins/share/public';
-import { SecurityPluginSetup } from '../../../../security/public';
+import type { IndexPatternsContract, DataPublicPluginStart } from 'src/plugins/data/public';
+import type { SharePluginStart } from 'src/plugins/share/public';
+import type { SecurityPluginSetup } from '../../../../security/public';
 
 export interface DependencyCache {
   timefilter: DataPublicPluginSetup['query']['timefilter'] | null;
@@ -203,7 +201,6 @@ export function getGetUrlGenerator() {
 }
 
 export function clearCache() {
-  console.log('clearing dependency cache'); // eslint-disable-line no-console
   Object.keys(cache).forEach((k) => {
     cache[k as keyof DependencyCache] = null;
   });

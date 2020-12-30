@@ -4,42 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { HttpStart, DocLinksStart, NotificationsStart, ApplicationStart } from 'src/core/public';
-import {
-  ConnectorAddFlyout,
-  ActionsConnectorsContextProvider,
-  TriggersAndActionsUIPublicPluginStart,
-} from '../../../../triggers_actions_ui/public';
+import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
 
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { getConnectorsAction } from '../../state/alerts/alerts';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   focusInput: () => void;
 }
 
 interface KibanaDeps {
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
-  application: ApplicationStart;
-  docLinks: DocLinksStart;
-  http: HttpStart;
-  notifications: NotificationsStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export const AddConnectorFlyout = ({ focusInput }: Props) => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
-
   const {
     services: {
-      triggers_actions_ui: { actionTypeRegistry },
-      application,
-      docLinks,
-      http,
-      notifications,
+      triggersActionsUi: { getAddConnectorFlyout },
     },
   } = useKibana<KibanaDeps>();
 
@@ -49,6 +35,16 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
     dispatch(getConnectorsAction.get());
     focusInput();
   }, [addFlyoutVisible, dispatch, focusInput]);
+
+  const ConnectorAddFlyout = useMemo(
+    () =>
+      getAddConnectorFlyout({
+        consumer: 'uptime',
+        onClose: () => setAddFlyoutVisibility(false),
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   return (
     <>
@@ -62,20 +58,7 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
           defaultMessage="Create connector"
         />
       </EuiButtonEmpty>
-      <ActionsConnectorsContextProvider
-        value={{
-          http,
-          docLinks,
-          actionTypeRegistry,
-          toastNotifications: notifications?.toasts,
-          capabilities: application?.capabilities,
-        }}
-      >
-        <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={setAddFlyoutVisibility}
-        />
-      </ActionsConnectorsContextProvider>
+      {addFlyoutVisible ? ConnectorAddFlyout : null}
     </>
   );
 };

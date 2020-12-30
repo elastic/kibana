@@ -22,7 +22,7 @@ Object {
       "y": 1,
     },
   ],
-  "interval": "1m",
+  "minInterval": 36000,
 }
 `;
 
@@ -48,7 +48,7 @@ Object {
       "y": 1,
     },
   ],
-  "interval": "1h",
+  "minInterval": 36000,
 }
 `;
 
@@ -62,7 +62,7 @@ Object {
       "y": 1,
     },
   ],
-  "interval": "10s",
+  "minInterval": 36000,
 }
 `;
 
@@ -82,6 +82,6 @@ Object {
       "y": 1,
     },
   ],
-  "interval": "1m",
+  "minInterval": 36000,
 }
 `;

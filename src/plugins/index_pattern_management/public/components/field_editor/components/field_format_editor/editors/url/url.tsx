@@ -36,6 +36,8 @@ import { FormatEditorSamples } from '../../samples';
 import { LabelTemplateFlyout } from './label_template_flyout';
 
 import { UrlTemplateFlyout } from './url_template_flyout';
+import type { IndexPatternManagmentContextValue } from '../../../../../../types';
+import { context as contextType } from '../../../../../../../../kibana_react/public';
 
 interface OnChangeParam {
   type: string;
@@ -66,13 +68,20 @@ export class UrlFormatEditor extends DefaultFormatEditor<
   UrlFormatEditorFormatParams,
   UrlFormatEditorFormatState
 > {
+  static contextType = contextType;
   static formatId = 'url';
-  iconPattern: string;
+  // TODO: @kbn/optimizer can't compile this
+  // declare context: IndexPatternManagmentContextValue;
+  context: IndexPatternManagmentContextValue | undefined;
+  private get sampleIconPath() {
+    const sampleIconPath = `/plugins/indexPatternManagement/assets/icons/{{value}}.png`;
+    return this.context?.services.http
+      ? this.context.services.http.basePath.prepend(sampleIconPath)
+      : sampleIconPath;
+  }
 
   constructor(props: FormatEditorProps<UrlFormatEditorFormatParams>) {
     super(props);
-
-    this.iconPattern = `/plugins/indexPatternManagement/assets/icons/{{value}}.png`;
 
     this.state = {
       ...this.state,
@@ -104,9 +113,9 @@ export class UrlFormatEditor extends DefaultFormatEditor<
       params.width = width;
       params.height = height;
       if (!urlTemplate) {
-        params.urlTemplate = this.iconPattern;
+        params.urlTemplate = this.sampleIconPath;
       }
-    } else if (newType !== 'img' && urlTemplate === this.iconPattern) {
+    } else if (newType !== 'img' && urlTemplate === this.sampleIconPath) {
       params.urlTemplate = undefined;
     }
     this.onChange(params);

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../../../test_utils';
+import { registerTestBed } from '@kbn/test/jest';
 import { getJob } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { DetailPanel } from './detail_panel';
@@ -18,7 +18,7 @@ import {
 } from '../../components';
 
 jest.mock('../../../../kibana_services', () => {
-  const services = require.requireActual('../../../../kibana_services');
+  const services = jest.requireActual('../../../../kibana_services');
   return {
     ...services,
     trackUiMetric: jest.fn(),

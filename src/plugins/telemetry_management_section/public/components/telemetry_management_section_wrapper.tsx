@@ -20,7 +20,7 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
-
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 // It should be this but the types are way too vague in the AdvancedSettings plugin `Record<string, any>`
 // type Props = Omit<TelemetryManagementSection['props'], 'telemetryService'>;
 type Props = any;
@@ -28,13 +28,17 @@ type Props = any;
 const TelemetryManagementSectionComponent = lazy(() => import('./telemetry_management_section'));
 
 export function telemetryManagementSectionWrapper(
-  telemetryService: TelemetryPluginSetup['telemetryService']
+  telemetryService: TelemetryPluginSetup['telemetryService'],
+  shouldShowSecuritySolutionUsageExample: () => boolean,
+  applicationUsageTracker?: UsageCollectionSetup['applicationUsageTracker']
 ) {
   const TelemetryManagementSectionWrapper = (props: Props) => (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <TelemetryManagementSectionComponent
         showAppliesSettingMessage={true}
         telemetryService={telemetryService}
+        applicationUsageTracker={applicationUsageTracker}
+        isSecurityExampleEnabled={shouldShowSecuritySolutionUsageExample}
         {...props}
       />
     </Suspense>

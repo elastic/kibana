@@ -27,9 +27,9 @@ import {
 } from './';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
 import { CoreContext } from '../core_context';
+import { CoreUsageDataSetup } from '../core_usage_data';
 import {
   ElasticsearchClient,
-  IClusterClient,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
 } from '../elasticsearch';
@@ -52,7 +52,6 @@ import { SavedObjectsSerializer } from './serialization';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
-import { createMigrationEsClient } from './migrations/core/';
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -253,6 +252,7 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsSetupDeps {
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
+  coreUsageData: CoreUsageDataSetup;
 }
 
 interface WrappedClientFactoryWrapper {
@@ -288,6 +288,7 @@ export class SavedObjectsService
     this.logger.debug('Setting up SavedObjects service');
 
     this.setupDeps = setupDeps;
+    const { http, elasticsearch, coreUsageData } = setupDeps;
 
     const savedObjectsConfig = await this.coreContext.configService
       .atPath<SavedObjectsConfigType>('savedObjects')
@@ -299,8 +300,11 @@ export class SavedObjectsService
       .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
 
+    coreUsageData.registerType(this.typeRegistry);
+
     registerRoutes({
-      http: setupDeps.http,
+      http,
+      coreUsageData,
       logger: this.logger,
       config: this.config,
       migratorPromise: this.migrator$.pipe(first()).toPromise(),
@@ -309,7 +313,7 @@ export class SavedObjectsService
     return {
       status$: calculateStatus$(
         this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
-        setupDeps.elasticsearch.status$
+        elasticsearch.status$
       ),
       setClientFactoryProvider: (provider) => {
         if (this.started) {
@@ -359,7 +363,7 @@ export class SavedObjectsService
     const migrator = this.createMigrator(
       kibanaConfig,
       this.config.migration,
-      elasticsearch.client,
+      elasticsearch.client.asInternalUser,
       migrationsRetryDelay
     );
 
@@ -456,7 +460,7 @@ export class SavedObjectsService
   private createMigrator(
     kibanaConfig: KibanaConfigType,
     savedObjectsConfig: SavedObjectsMigrationConfigType,
-    client: IClusterClient,
+    client: ElasticsearchClient,
     migrationsRetryDelay?: number
   ): IKibanaMigrator {
     return new KibanaMigrator({
@@ -465,7 +469,8 @@ export class SavedObjectsService
       kibanaVersion: this.coreContext.env.packageInfo.version,
       savedObjectsConfig,
       kibanaConfig,
-      client: createMigrationEsClient(client.asInternalUser, this.logger, migrationsRetryDelay),
+      client,
+      migrationsRetryDelay,
     });
   }
 }

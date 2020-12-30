@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface IEsSearchRequest extends IKibanaSearchRequest 
+export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> 
 ```
 
 ## Properties
@@ -15,5 +15,4 @@ export interface IEsSearchRequest extends IKibanaSearchRequest
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [indexType](./kibana-plugin-plugins-data-server.iessearchrequest.indextype.md) | <code>string</code> |  |
-|  [params](./kibana-plugin-plugins-data-server.iessearchrequest.params.md) | <code>ISearchRequestParams</code> |  |
 

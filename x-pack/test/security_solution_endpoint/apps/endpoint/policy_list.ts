@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     it('displays page title', async () => {
       const policyTitle = await testSubjects.getVisibleText('header-page-title');
-      expect(policyTitle).to.equal('Policies BETA');
+      expect(policyTitle).to.equal('Policies');
     });
     it('shows header create policy button', async () => {
       const createButtonTitle = await testSubjects.getVisibleText('headerCreateNewPolicyButton');
@@ -140,7 +140,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const newPolicyName = `endpoint policy ${Date.now()}`;
         await pageObjects.ingestManagerCreatePackagePolicy.selectAgentPolicy();
         await pageObjects.ingestManagerCreatePackagePolicy.setPackagePolicyName(newPolicyName);
-        await (await pageObjects.ingestManagerCreatePackagePolicy.findDSaveButton()).click();
+        await (await pageObjects.ingestManagerCreatePackagePolicy.findSaveButton()).click();
         await pageObjects.ingestManagerCreatePackagePolicy.waitForSaveSuccessNotification();
         await pageObjects.policy.ensureIsOnPolicyPage();
         await policyTestResources.deletePolicyByName(newPolicyName);

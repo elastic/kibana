@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import { SavedObjectMigrationFn } from 'kibana/server';
 import { cloneDeep, get, omit, has, flow } from 'lodash';
+
+import { SavedObjectMigrationFn } from 'kibana/server';
+
+import { ChartType } from '../../../vis_type_xy/common';
 import { DEFAULT_QUERY_LANGUAGE } from '../../../data/common';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -655,6 +658,12 @@ const migrateTableSplits: SavedObjectMigrationFn<any, any> = (doc) => {
   }
 };
 
+/**
+ * This migration script is related to:
+ *   @link https://github.com/elastic/kibana/pull/62194
+ *   @link https://github.com/elastic/kibana/pull/14644
+ * This is only a problem when you import an object from 5.x into 6.x but to be sure that all saved objects migrated we should execute it twice in 6.7.2 and 7.9.3
+ */
 const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
 
@@ -665,6 +674,7 @@ const migrateMatchAllQuery: SavedObjectMigrationFn<any, any> = (doc) => {
       searchSource = JSON.parse(searchSourceJSON);
     } catch (e) {
       // Let it go, the data is invalid and we'll leave it as is
+      return doc;
     }
 
     if (searchSource.query?.match_all) {
@@ -750,6 +760,98 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+// [Data table visualization] Enable toolbar by default
+const enableDataTableVisToolbar: SavedObjectMigrationFn<any, any> = (doc) => {
+  let visState;
+
+  try {
+    visState = JSON.parse(doc.attributes.visState);
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+
+  if (visState?.type === 'table') {
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify({
+          ...visState,
+          params: {
+            ...visState.params,
+            showToolbar: true,
+          },
+        }),
+      },
+    };
+  }
+
+  return doc;
+};
+
+/**
+ * Decorate axes with default label filter value
+ */
+const decorateAxes = <T extends { labels: { filter?: boolean } }>(
+  axes: T[],
+  fallback: boolean
+): T[] =>
+  axes.map((axis) => ({
+    ...axis,
+    labels: {
+      ...axis.labels,
+      filter: axis.labels.filter ?? fallback,
+    },
+  }));
+
+/**
+ * Migrate vislib bar, line and area charts to use new vis_type_xy plugin
+ */
+const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (
+      visState &&
+      [ChartType.Area, ChartType.Line, ChartType.Histogram].includes(visState?.params?.type)
+    ) {
+      const isHorizontalBar = visState.type === 'horizontal_bar';
+      const isLineOrArea =
+        visState?.params?.type === ChartType.Area || visState?.params?.type === ChartType.Line;
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify({
+            ...visState,
+            params: {
+              ...visState.params,
+              categoryAxes:
+                visState.params.categoryAxes &&
+                decorateAxes(visState.params.categoryAxes, !isHorizontalBar),
+              valueAxes:
+                visState.params.valueAxes &&
+                decorateAxes(visState.params.valueAxes, isHorizontalBar),
+              isVislibVis: true,
+              detailedTooltip: true,
+              ...(isLineOrArea && {
+                fittingFunction: 'zero',
+              }),
+            },
+          }),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -781,5 +883,8 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.4.2': flow(transformSplitFiltersStringToQueryObject),
   '7.7.0': flow(migrateOperatorKeyTypo, migrateSplitByChartRow),
   '7.8.0': flow(migrateTsvbDefaultColorPalettes),
+  '7.9.3': flow(migrateMatchAllQuery),
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
+  '7.11.0': flow(enableDataTableVisToolbar),
+  '7.12.0': flow(migrateVislibAreaLineBarTypes),
 };

@@ -8,7 +8,7 @@ import { getBuckets } from '../get_buckets';
 import { APMConfig } from '../../../..';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 
-describe('timeseriesFetcher', () => {
+describe('get buckets', () => {
   let clientSpy: jest.Mock;
 
   beforeEach(async () => {
@@ -41,7 +41,10 @@ describe('timeseriesFetcher', () => {
             get: () => 'myIndex',
           }
         ) as APMConfig,
-        uiFiltersES: [
+        uiFilters: {
+          environment: 'prod',
+        },
+        esFilter: [
           {
             term: { 'service.environment': 'prod' },
           },

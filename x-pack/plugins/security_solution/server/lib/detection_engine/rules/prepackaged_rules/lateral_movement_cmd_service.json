@@ -1,0 +1,54 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies use of sc.exe to create, modify, or start services on remote hosts. This could be indicative of adversary lateral movement but will be noisy if commonly done by admins.",
+  "from": "now-9m",
+  "index": [
+    "logs-endpoint.events.*",
+    "winlogbeat-*"
+  ],
+  "language": "eql",
+  "license": "Elastic License",
+  "name": "Service Command Lateral Movement",
+  "query": "sequence by process.entity_id with maxspan=1m\n  [process where event.type in (\"start\", \"process_started\") and\n                               /* uncomment once in winlogbeat */\n     (process.name == \"sc.exe\" /* or process.pe.original_file_name == \"sc.exe\" */ ) and\n                                                   /* case insensitive */\n      wildcard(process.args, \"\\\\\\\\*\") and wildcard(process.args, \"binPath=*\", \"binpath=*\") and\n      (process.args : \"create\" or\n       process.args : \"config\" or\n       process.args : \"failure\" or\n       process.args : \"start\")]\n  [network where process.name : \"sc.exe\" and destination.ip != \"127.0.0.1\"]\n",
+  "risk_score": 21,
+  "rule_id": "d61cbcf8-1bc1-4cff-85ba-e7b21c5beedc",
+  "severity": "low",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Lateral Movement"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/"
+        },
+        {
+          "id": "T1050",
+          "name": "New Service",
+          "reference": "https://attack.mitre.org/techniques/T1050/"
+        },
+        {
+          "id": "T1035",
+          "name": "Service Execution",
+          "reference": "https://attack.mitre.org/techniques/T1035/"
+        }
+      ]
+    }
+  ],
+  "type": "eql",
+  "version": 1
+}

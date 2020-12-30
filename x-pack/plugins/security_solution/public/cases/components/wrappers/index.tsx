@@ -5,22 +5,21 @@
  */
 
 import styled from 'styled-components';
-import { gutterTimeline } from '../../../common/lib/helpers';
 
 export const WhitePageWrapper = styled.div`
   background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border-top: ${({ theme }) => theme.eui.euiBorderThin};
-  height: 100%;
-  min-height: 100vh;
+  flex: 1 1 auto;
 `;
 
 export const SectionWrapper = styled.div`
   box-sizing: content-box;
   margin: 0 auto;
   max-width: 1175px;
+  width: 100%;
 `;
 
 export const HeaderWrapper = styled.div`
-  padding: ${({ theme }) => `${theme.eui.paddingSizes.l} ${gutterTimeline} 0
-  ${theme.eui.paddingSizes.l}`};
+  padding: ${({ theme }) =>
+    `${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 0 ${theme.eui.paddingSizes.l}`};
 `;

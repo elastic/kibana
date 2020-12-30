@@ -16,6 +16,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
+import classNames from 'classnames';
 import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 
@@ -23,6 +24,7 @@ interface Props {
   stats: any;
   fieldFormat?: any;
   barColor?: 'primary' | 'secondary' | 'danger' | 'subdued' | 'accent';
+  compressed?: boolean;
 }
 
 function getPercentLabel(docCount: number, topValuesSampleSize: number): string {
@@ -34,7 +36,7 @@ function getPercentLabel(docCount: number, topValuesSampleSize: number): string 
   }
 }
 
-export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor }) => {
+export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed }) => {
   const {
     topValues,
     topValuesSampleSize,
@@ -43,32 +45,42 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor }) => {
     isTopValuesSampled,
   } = stats;
   const progressBarMax = isTopValuesSampled === true ? topValuesSampleSize : count;
-
   return (
-    <Fragment>
-      {topValues.map((value: any) => (
-        <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
-          <EuiFlexItem grow={false} style={{ width: 100 }} className="eui-textTruncate">
-            <EuiToolTip content={kibanaFieldFormat(value.key, fieldFormat)} position="right">
-              <EuiText size="xs" textAlign="right" color="subdued">
-                {kibanaFieldFormat(value.key, fieldFormat)}
+    <div data-test-subj="mlFieldDataTopValues">
+      {Array.isArray(topValues) &&
+        topValues.map((value: any) => (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" key={value.key}>
+            <EuiFlexItem
+              grow={false}
+              className={classNames(
+                'eui-textTruncate',
+                'mlTopValuesValueLabelContainer',
+                `mlTopValuesValueLabelContainer--${compressed === true ? 'small' : 'large'}`
+              )}
+            >
+              <EuiToolTip content={kibanaFieldFormat(value.key, fieldFormat)} position="right">
+                <EuiText size="xs" textAlign={'right'} color="subdued">
+                  {kibanaFieldFormat(value.key, fieldFormat)}
+                </EuiText>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem data-test-subj="mlFieldDataTopValueBar">
+              <EuiProgress value={value.doc_count} max={progressBarMax} color={barColor} size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              className={classNames('eui-textTruncate', 'mlTopValuesPercentLabelContainer')}
+            >
+              <EuiText size="xs" textAlign="left" color="subdued">
+                {getPercentLabel(value.doc_count, progressBarMax)}
               </EuiText>
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiProgress value={value.doc_count} max={progressBarMax} color={barColor} size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ width: 70 }} className="eui-textTruncate">
-            <EuiText size="xs" textAlign="left" color="subdued">
-              {getPercentLabel(value.doc_count, progressBarMax)}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ))}
       {isTopValuesSampled === true && (
         <Fragment>
           <EuiSpacer size="xs" />
-          <EuiText size="xs">
+          <EuiText size="xs" textAlign={'left'}>
             <FormattedMessage
               id="xpack.ml.fieldDataCard.topValues.calculatedFromSampleDescription"
               defaultMessage="Calculated from sample of {topValuesSamplerShardSize} documents per shard"
@@ -79,6 +91,6 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor }) => {
           </EuiText>
         </Fragment>
       )}
-    </Fragment>
+    </div>
   );
 };

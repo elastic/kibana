@@ -13,6 +13,8 @@ import { Legacy } from '../legacy_shims';
 import { PromiseWithCancel } from '../../common/cancel_promise';
 import { SetupModeFeature } from '../../common/enums';
 import { updateSetupModeData, isSetupModeFeatureEnabled } from '../lib/setup_mode';
+import { AlertsContext } from '../alerts/context';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 /**
  * Given a timezone, this function will calculate the offset in milliseconds
@@ -78,6 +80,7 @@ export class MonitoringViewBaseController {
    */
   constructor({
     title = '',
+    pageTitle = '',
     api = '',
     apiUrlFn,
     getPageData: _getPageData = getPageData,
@@ -88,6 +91,7 @@ export class MonitoringViewBaseController {
     options = {},
     alerts = { shouldFetch: false, options: {} },
     fetchDataImmediately = true,
+    telemetryPageViewTitle = '',
   }) {
     const titleService = $injector.get('title');
     const $executor = $injector.get('$executor');
@@ -96,9 +100,12 @@ export class MonitoringViewBaseController {
 
     titleService($scope.cluster, title);
 
+    $scope.pageTitle = pageTitle;
+    this.setPageTitle = (title) => ($scope.pageTitle = title);
     $scope.pageData = this.data = { ...defaultData };
     this._isDataInitialized = false;
     this.reactNodeId = reactNodeId;
+    this.telemetryPageViewTitle = telemetryPageViewTitle || title;
 
     let deferTimer;
     let zoomInLevel = 0;
@@ -157,12 +164,12 @@ export class MonitoringViewBaseController {
       if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
         promises.push(updateSetupModeData());
       }
-      this.updateDataPromise = new PromiseWithCancel(Promise.all(promises));
+      this.updateDataPromise = new PromiseWithCancel(Promise.allSettled(promises));
       return this.updateDataPromise.promise().then(([pageData, alerts]) => {
         $scope.$apply(() => {
           this._isDataInitialized = true; // render will replace loading screen with the react component
-          $scope.pageData = this.data = pageData; // update the view's data with the fetch result
-          $scope.alerts = this.alerts = alerts;
+          $scope.pageData = this.data = pageData.value; // update the view's data with the fetch result
+          $scope.alerts = this.alerts = alerts && alerts.value ? alerts.value : {};
         });
       });
     };
@@ -204,6 +211,8 @@ export class MonitoringViewBaseController {
         deferTimer = setTimeout(() => addPopstateHandler(), 10);
       };
 
+      // Render loading state
+      this.renderReact(null, true);
       fetchDataImmediately && this.updateData();
     });
 
@@ -225,7 +234,7 @@ export class MonitoringViewBaseController {
     this.setTitle = (title) => titleService($scope.cluster, title);
   }
 
-  renderReact(component) {
+  renderReact(component, trackPageView = false) {
     const renderElement = document.getElementById(this.reactNodeId);
     if (!renderElement) {
       console.warn(`"#${this.reactNodeId}" element has not been added to the DOM yet`);
@@ -233,7 +242,17 @@ export class MonitoringViewBaseController {
     }
     const I18nContext = Legacy.shims.I18nContext;
     const wrappedComponent = (
-      <I18nContext>{!this._isDataInitialized ? <PageLoading /> : component}</I18nContext>
+      <KibanaContextProvider services={Legacy.shims.kibanaServices}>
+        <I18nContext>
+          <AlertsContext.Provider value={{ allAlerts: this.alerts }}>
+            {!this._isDataInitialized ? (
+              <PageLoading pageViewTitle={trackPageView ? this.telemetryPageViewTitle : null} />
+            ) : (
+              component
+            )}
+          </AlertsContext.Provider>
+        </I18nContext>
+      </KibanaContextProvider>
     );
     render(wrappedComponent, renderElement);
   }

@@ -205,7 +205,16 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertRegressionEvaluatePanelElementsExists();
           await ml.dataFrameAnalyticsResults.assertRegressionTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
+          await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+        });
+
+        it('displays the analytics job in the map view', async () => {
+          await ml.testExecution.logTestStep('should open the map view for created job');
+          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
+          await ml.dataFrameAnalyticsMap.assertMapElementsExists();
+          await ml.dataFrameAnalyticsMap.assertJobMapTitle(testData.jobId);
         });
       });
     }

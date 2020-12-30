@@ -248,16 +248,25 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             type="button"
           >
             <EuiButtonDisplay
+              baseClassName="euiButton"
               data-test-subj="enableCollectionEnabled"
+              disabled={false}
               element="button"
               fill={true}
+              isDisabled={false}
               onClick={[Function]}
               type="button"
             >
               <button
                 className="euiButton euiButton--primary euiButton--fill"
                 data-test-subj="enableCollectionEnabled"
+                disabled={false}
                 onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
                 type="button"
               >
                 <EuiButtonContent

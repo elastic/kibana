@@ -62,3 +62,18 @@ export const THRESHOLD_TYPE_DESCRIPTION = i18n.translate(
     defaultMessage: 'Aggregate query results to detect when number of matches exceeds threshold.',
   }
 );
+
+export const THREAT_MATCH_TYPE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.threatMatchTitle',
+  {
+    defaultMessage: 'Indicator Match',
+  }
+);
+
+export const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.ruleTypeField.threatMatchDescription',
+  {
+    defaultMessage:
+      'Use indicators from intelligence sources to detect matching events and alerts.',
+  }
+);

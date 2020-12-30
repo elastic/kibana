@@ -20,11 +20,18 @@
 import React, { Fragment } from 'react';
 import { History } from 'history';
 import { i18n } from '@kbn/i18n';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import ReactDOM from 'react-dom';
-import ReactMarkdown from 'react-markdown';
 
 import { ApplicationStart, HttpStart, ToastsSetup } from 'kibana/public';
 import { SavedObjectNotFound } from '..';
+
+const ReactMarkdown = React.lazy(() => import('react-markdown'));
+const ErrorRenderer = (props: { children: string }) => (
+  <React.Suspense fallback={<EuiLoadingSpinner />}>
+    <ReactMarkdown renderers={{ root: Fragment }} {...props} />
+  </React.Suspense>
+);
 
 interface Mapping {
   [key: string]: string | { app: string; path: string };
@@ -96,16 +103,7 @@ export function redirectWhenMissing({
         defaultMessage: 'Saved object is missing',
       }),
       text: (element: HTMLElement) => {
-        ReactDOM.render(
-          <ReactMarkdown
-            renderers={{
-              root: Fragment,
-            }}
-          >
-            {error.message}
-          </ReactMarkdown>,
-          element
-        );
+        ReactDOM.render(<ErrorRenderer>{error.message}</ErrorRenderer>, element);
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });

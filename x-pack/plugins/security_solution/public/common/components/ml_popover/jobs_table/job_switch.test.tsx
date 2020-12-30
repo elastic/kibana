@@ -7,6 +7,7 @@
 import { shallow, mount } from 'enzyme';
 import React from 'react';
 
+import { waitFor } from '@testing-library/react';
 import { JobSwitchComponent } from './job_switch';
 import { cloneDeep } from 'lodash/fp';
 import { mockSecurityJobs } from '../api.mock';
@@ -31,7 +32,7 @@ describe('JobSwitch', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  test('should call onJobStateChange when the switch is clicked to be true/open', () => {
+  test('should call onJobStateChange when the switch is clicked to be true/open', async () => {
     const wrapper = mount(
       <JobSwitchComponent
         job={securityJobs[0]}
@@ -46,12 +47,13 @@ describe('JobSwitch', () => {
       .simulate('click', {
         target: { checked: true },
       });
-
-    expect(onJobStateChangeMock.mock.calls[0][0].id).toEqual(
-      'linux_anomalous_network_activity_ecs'
-    );
-    expect(onJobStateChangeMock.mock.calls[0][1]).toEqual(1571022859393);
-    expect(onJobStateChangeMock.mock.calls[0][2]).toEqual(true);
+    await waitFor(() => {
+      expect(onJobStateChangeMock.mock.calls[0][0].id).toEqual(
+        'linux_anomalous_network_activity_ecs'
+      );
+      expect(onJobStateChangeMock.mock.calls[0][1]).toEqual(1571022859393);
+      expect(onJobStateChangeMock.mock.calls[0][2]).toEqual(true);
+    });
   });
 
   test('should have a switch when it is not in the loading state', () => {

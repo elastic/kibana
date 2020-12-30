@@ -6,11 +6,7 @@
 
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { Tree } from './tree';
-import {
-  SafeResolverAncestry,
-  SafeResolverEvent,
-  SafeResolverRelatedEvents,
-} from '../../../../../common/endpoint/types';
+import { SafeResolverAncestry, SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { entityIDSafeVersion } from '../../../../../common/endpoint/models/event';
 
 describe('Tree', () => {
@@ -44,21 +40,6 @@ describe('Tree', () => {
         expect(foundAncestor).not.toBeUndefined();
       });
       expect(tree.render().ancestry.nextAncestor).toEqual('hello');
-    });
-  });
-
-  describe('related events', () => {
-    it('adds related events to the tree', () => {
-      const root = generator.generateEvent();
-      const events: SafeResolverRelatedEvents = {
-        entityID: entityIDSafeVersion(root) ?? '',
-        events: Array.from(generator.relatedEventsGenerator(root)),
-        nextEvent: null,
-      };
-      const tree = new Tree(entityIDSafeVersion(root) ?? '', { relatedEvents: events });
-      const rendered = tree.render();
-      expect(rendered.relatedEvents.nextEvent).toBeNull();
-      expect(rendered.relatedEvents.events).toStrictEqual(events.events);
     });
   });
 });

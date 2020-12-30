@@ -23,12 +23,12 @@ import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
-import { DefaultEditorController } from '../../../../../vis_default_editor/public';
 
 import { getVisualizationInstance } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { SavedVisInstance, IEditorController, VisualizeServices } from '../../types';
 import { VisualizeConstants } from '../../visualize_constants';
+import { getDefaultEditor } from '../../../services';
 
 /**
  * This effect is responsible for instantiating a saved vis or creating a new one
@@ -44,7 +44,7 @@ export const useSavedVisInstance = (
     savedVisInstance?: SavedVisInstance;
     visEditorController?: IEditorController;
   }>({});
-  const visEditorRef = useRef<HTMLDivElement>(null);
+  const visEditorRef = useRef<HTMLDivElement | null>(null);
   const visId = useRef('');
 
   useEffect(() => {
@@ -102,16 +102,18 @@ export const useSavedVisInstance = (
 
         let visEditorController;
         // do not create editor in embeded mode
-        if (isChromeVisible) {
-          const Editor = vis.type.editor || DefaultEditorController;
-          visEditorController = new Editor(
-            visEditorRef.current,
-            vis,
-            eventEmitter,
-            embeddableHandler
-          );
-        } else if (visEditorRef.current) {
-          embeddableHandler.render(visEditorRef.current);
+        if (visEditorRef.current) {
+          if (isChromeVisible) {
+            const Editor = vis.type.editor || getDefaultEditor();
+            visEditorController = new Editor(
+              visEditorRef.current,
+              vis,
+              eventEmitter,
+              embeddableHandler
+            );
+          } else {
+            embeddableHandler.render(visEditorRef.current);
+          }
         }
 
         setState({

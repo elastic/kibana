@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table on the IP Details page 1`] = `
-<Connect(Component)
+<Memo(NetworkTopNFlowTableComponent)
   data={
     Array [
       Object {
@@ -9,7 +9,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
           "value": "8.8.8.8",
         },
         "node": Object {
-          "destination": null,
           "network": Object {
             "bytes_in": 3826633497,
             "bytes_out": 1083495734,
@@ -37,7 +36,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 "country_iso_code": Array [
                   "US",
                 ],
-                "country_name": null,
                 "region_iso_code": Array [
                   "US-CA",
                 ],
@@ -54,7 +52,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
           "value": "9.9.9.9",
         },
         "node": Object {
-          "destination": null,
           "network": Object {
             "bytes_in": 3826633497,
             "bytes_out": 1083495734,
@@ -83,7 +80,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 "country_iso_code": Array [
                   "MY",
                 ],
-                "country_name": null,
                 "region_iso_code": Array [
                   "MY-10",
                 ],
@@ -110,7 +106,7 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
 `;
 
 exports[`NetworkTopNFlow Table Component rendering it renders the default NetworkTopNFlow table on the Network page 1`] = `
-<Connect(Component)
+<Memo(NetworkTopNFlowTableComponent)
   data={
     Array [
       Object {
@@ -118,7 +114,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
           "value": "8.8.8.8",
         },
         "node": Object {
-          "destination": null,
           "network": Object {
             "bytes_in": 3826633497,
             "bytes_out": 1083495734,
@@ -146,7 +141,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 "country_iso_code": Array [
                   "US",
                 ],
-                "country_name": null,
                 "region_iso_code": Array [
                   "US-CA",
                 ],
@@ -163,7 +157,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
           "value": "9.9.9.9",
         },
         "node": Object {
-          "destination": null,
           "network": Object {
             "bytes_in": 3826633497,
             "bytes_out": 1083495734,
@@ -192,7 +185,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
                 "country_iso_code": Array [
                   "MY",
                 ],
-                "country_name": null,
                 "region_iso_code": Array [
                   "MY-10",
                 ],

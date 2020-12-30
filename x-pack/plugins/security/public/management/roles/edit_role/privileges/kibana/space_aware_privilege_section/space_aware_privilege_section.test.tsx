@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { RoleValidator } from '../../../validate_role';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import { PrivilegeSpaceTable } from './privilege_space_table';

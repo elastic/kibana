@@ -5,22 +5,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
+import { ApiResponse } from '@elastic/elasticsearch';
 
 import { IndexLifecyclePolicy, PolicyFromES } from '../../../../common/types';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-type PoliciesMap = {
+interface PoliciesMap {
   [K: string]: Omit<PolicyFromES, 'name'>;
-} & {
-  status?: number;
-};
+}
 function formatPolicies(policiesMap: PoliciesMap): PolicyFromES[] {
-  if (policiesMap.status === 404) {
-    return [];
-  }
-
   return Object.keys(policiesMap).reduce((accum: PolicyFromES[], lifecycleName: string) => {
     const policyEntry = policiesMap[lifecycleName];
     accum.push({
@@ -31,31 +26,25 @@ function formatPolicies(policiesMap: PoliciesMap): PolicyFromES[] {
   }, []);
 }
 
-async function fetchPolicies(callAsCurrentUser: LegacyAPICaller): Promise<PoliciesMap> {
-  const params = {
-    method: 'GET',
-    path: '/_ilm/policy',
+async function fetchPolicies(client: ElasticsearchClient): Promise<ApiResponse<PoliciesMap>> {
+  const options = {
     // we allow 404 since they may have no policies
     ignore: [404],
   };
 
-  return await callAsCurrentUser('transport.request', params);
+  return client.ilm.getLifecycle({}, options);
 }
 
-async function addLinkedIndices(callAsCurrentUser: LegacyAPICaller, policiesMap: PoliciesMap) {
-  if (policiesMap.status === 404) {
-    return policiesMap;
-  }
-  const params = {
-    method: 'GET',
-    path: '/*/_ilm/explain',
+async function addLinkedIndices(client: ElasticsearchClient, policiesMap: PoliciesMap) {
+  const options = {
     // we allow 404 since they may have no policies
     ignore: [404],
   };
 
-  const policyExplanation: {
+  const response = await client.ilm.explainLifecycle<{
     indices: { [indexName: string]: IndexLifecyclePolicy };
-  } = await callAsCurrentUser('transport.request', params);
+  }>({ index: '*' }, options);
+  const policyExplanation = response.body;
   Object.entries(policyExplanation.indices).forEach(([indexName, { policy }]) => {
     if (policy && policiesMap[policy]) {
       policiesMap[policy].linkedIndices = policiesMap[policy].linkedIndices || [];
@@ -68,30 +57,26 @@ const querySchema = schema.object({
   withIndices: schema.boolean({ defaultValue: false }),
 });
 
-export function registerFetchRoute({ router, license, lib }: RouteDependencies) {
+export function registerFetchRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/policies'), validate: { query: querySchema } },
     license.guardApiRoute(async (context, request, response) => {
       const query = request.query as typeof querySchema.type;
       const { withIndices } = query;
-      const { callAsCurrentUser } = context.core.elasticsearch.legacy.client;
+      const { asCurrentUser } = context.core.elasticsearch.client;
 
       try {
-        const policiesMap = await fetchPolicies(callAsCurrentUser);
+        const policiesResponse = await fetchPolicies(asCurrentUser);
+        if (policiesResponse.statusCode === 404) {
+          return response.ok({ body: [] });
+        }
+        const { body: policiesMap } = policiesResponse;
         if (withIndices) {
-          await addLinkedIndices(callAsCurrentUser, policiesMap);
+          await addLinkedIndices(asCurrentUser, policiesMap);
         }
-        const okResponse = { body: formatPolicies(policiesMap) };
-        return response.ok(okResponse);
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+        return response.ok({ body: formatPolicies(policiesMap) });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

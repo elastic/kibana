@@ -1,0 +1,25 @@
+post:
+  summary: Fleet - Agent - Bulk Upgrade
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/bulk_upgrade_agents.yaml
+    '400':
+      description: BAD REQUEST
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/upgrade_agent.yaml
+  operationId: post-fleet-agents-bulk-upgrade
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/bulk_upgrade_agents.yaml

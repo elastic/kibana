@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   return {
     /**
@@ -77,6 +78,22 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
+     * Finds and returns the Advanced Policy Show/Hide Button
+     */
+    async findAdvancedPolicyButton() {
+      await this.ensureIsOnDetailsPage();
+      return await testSubjects.find('advancedPolicyButton');
+    },
+
+    /**
+     * Finds and returns the linux connection_delay Advanced Policy field
+     */
+    async findAdvancedPolicyField() {
+      await this.ensureIsOnDetailsPage();
+      return await testSubjects.find('linux.advanced.agent.connection_delay');
+    },
+
+    /**
      * ensures that the Details Page is the currently display view
      */
     async ensureIsOnDetailsPage() {
@@ -88,6 +105,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async confirmAndSave() {
       await this.ensureIsOnDetailsPage();
+      await browser.scrollTop();
       await (await this.findSaveButton()).click();
       await testSubjects.existOrFail('policyDetailsConfirmModal');
       await pageObjects.common.clickConfirmOnModal();

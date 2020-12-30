@@ -36,7 +36,7 @@ This is required to encrypt parameters that must be secured, for example PagerDu
 If you have security enabled:
 
 * You must have
-application privileges to access Metrics, APM, Uptime, or SIEM.
+application privileges to access Metrics, APM, Uptime, or Security.
 * If you are using a self-managed deployment with security, you must have
 Transport Security Layer (TLS) enabled for communication <<configuring-tls-kib-es, between Elasticsearch and Kibana>>.
 Alerts uses API keys to secure background alert checks and actions,
@@ -89,8 +89,8 @@ image::user/alerting/images/pagerduty-integration.png[PagerDuty Integrations tab
 +
 * Create a connector as part of creating an alert by selecting PagerDuty in the *Actions*
 section of the alert configuration and selecting *Add new*.
-* Alternatively, create a connector by navigating to *Management* from the {kib} navbar and selecting
-*Alerts and Actions*. Then, select the *Connectors* tab, click the *Create connector* button, and select the PagerDuty option.
+* Alternatively, create a connector. To create a connector, open the main menu, click *Stack Management* >
+Alerts and Actions*, select *Connectors*, click *Create connector*, then select the PagerDuty option.
 
 . Configure the connector by giving it a name and entering the Integration Key, optionally entering a custom API URL.
 +
@@ -99,7 +99,7 @@ See <<pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and 
 
 . Save the Connector.
 
-. Create an alert using *Management > Alerts and Actions* or the application of your choice.
+. To create an alert, open the main menu, then click *Stack Management > Alerts and Actions* or the application of your choice.
 
 . Set up an action using your PagerDuty connector, by determining:
 +
@@ -120,7 +120,7 @@ To remove a PagerDuty connector from an alert, simply remove it
 from the *Actions* section of that alert, using the remove (x) icon.
 This will disable the integration for the particular alert.
 
-To delete the connector entirely, go to *Management > Alerts and Actions*.
+To delete the connector entirely, open the main menu, then click *Stack Management > Alerts and Actions*.
 Select the *Connectors* tab, and then click on the delete icon.
 This is an irreversible action and impacts all alerts that use this connector.
 

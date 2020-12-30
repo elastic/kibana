@@ -16,13 +16,11 @@ import {
 export const APM_FEATURE = {
   id: 'apm',
   name: i18n.translate('xpack.apm.featureRegistry.apmFeatureName', {
-    defaultMessage: 'APM and Client Side Monitoring',
+    defaultMessage: 'APM and User Experience',
   }),
   order: 900,
   category: DEFAULT_APP_CATEGORIES.observability,
-  icon: 'apmApp',
-  navLinkId: 'apm',
-  app: ['apm', 'csm', 'kibana'],
+  app: ['apm', 'ux', 'kibana'],
   catalogue: ['apm'],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -31,7 +29,7 @@ export const APM_FEATURE = {
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
-      app: ['apm', 'csm', 'kibana'],
+      app: ['apm', 'ux', 'kibana'],
       api: ['apm', 'apm_write'],
       catalogue: ['apm'],
       savedObject: {
@@ -47,7 +45,7 @@ export const APM_FEATURE = {
       ui: ['show', 'save', 'alerting:show', 'alerting:save'],
     },
     read: {
-      app: ['apm', 'csm', 'kibana'],
+      app: ['apm', 'ux', 'kibana'],
       api: ['apm'],
       catalogue: ['apm'],
       savedObject: {
@@ -55,7 +53,7 @@ export const APM_FEATURE = {
         read: [],
       },
       alerting: {
-        all: Object.values(AlertType),
+        read: Object.values(AlertType),
       },
       management: {
         insightsAndAlerting: ['triggersActions'],

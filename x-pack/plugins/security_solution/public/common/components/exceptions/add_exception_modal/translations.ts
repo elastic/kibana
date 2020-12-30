@@ -81,3 +81,11 @@ export const EXCEPTION_BUILDER_INFO = i18n.translate(
     defaultMessage: "Alerts are generated when the rule's conditions are met, except when:",
   }
 );
+
+export const ADD_EXCEPTION_SEQUENCE_WARNING = i18n.translate(
+  'xpack.securitySolution.exceptions.addException.sequenceWarning',
+  {
+    defaultMessage:
+      "This rule's query contains an EQL sequence statement. The exception created will apply to all events in the sequence.",
+  }
+);

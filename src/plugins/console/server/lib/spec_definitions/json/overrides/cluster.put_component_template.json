@@ -1,0 +1,19 @@
+{
+  "cluster.put_component_template": {
+    "data_autocomplete_rules": {
+      "settings": {
+        "__scope_link": "put_settings"
+      },
+      "aliases": {
+        "__template": {
+          "NAME": {}
+        }
+      },
+      "version":"",
+      "_meta": {},
+      "mappings": {
+        "__scope_link": "put_mapping"
+      }
+    }
+  }
+}

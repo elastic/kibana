@@ -7,7 +7,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import numeral from '@elastic/numeral';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
-import { useFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
 
 import { AlertsComponentsProps } from './types';
 import { AlertsTable } from './alerts_table';
@@ -24,12 +24,13 @@ const AlertsViewComponent: React.FC<AlertsComponentsProps> = ({
   deleteQuery,
   endDate,
   filterQuery,
+  indexNames,
   pageFilters,
   setQuery,
   startDate,
 }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const { globalFullScreen } = useFullScreen();
+  const { globalFullScreen } = useGlobalFullScreen();
 
   const getSubtitle = useCallback(
     (totalCount: number) =>
@@ -62,6 +63,7 @@ const AlertsViewComponent: React.FC<AlertsComponentsProps> = ({
           endDate={endDate}
           filterQuery={filterQuery}
           id={ID}
+          indexNames={indexNames}
           setQuery={setQuery}
           startDate={startDate}
           {...alertsHistogramConfigs}

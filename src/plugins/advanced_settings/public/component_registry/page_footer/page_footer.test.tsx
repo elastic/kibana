@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
 
 import { PageFooter } from './page_footer';
 

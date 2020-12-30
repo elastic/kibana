@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { noop } from 'lodash/fp';
+import { isEmpty, noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { inputsModel } from '../../../common/store';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import {
   DocValueFields,
@@ -18,6 +17,8 @@ import {
   TimelineEventsDetailsRequestOptions,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/public';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 export interface EventsArgs {
   detailsData: TimelineEventsDetailsItem[] | null;
 }
@@ -35,10 +36,9 @@ export const useTimelineEventsDetails = ({
   eventId,
   skip,
 }: UseTimelineEventsDetailsProps): [boolean, EventsArgs['detailsData']] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
   const [
     timelineDetailsRequest,
@@ -50,7 +50,11 @@ export const useTimelineEventsDetails = ({
   );
 
   const timelineDetailsSearch = useCallback(
-    (request: TimelineEventsDetailsRequestOptions) => {
+    (request: TimelineEventsDetailsRequestOptions | null) => {
+      if (request == null || skip || isEmpty(request.eventId)) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -66,13 +70,13 @@ export const useTimelineEventsDetails = ({
           )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setTimelineDetailsResponse(response.data || []);
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -81,8 +85,13 @@ export const useTimelineEventsDetails = ({
                 searchSubscription$.unsubscribe();
               }
             },
-            error: () => {
-              notifications.toasts.addDanger('Failed to run search');
+            error: (msg) => {
+              if (!didCancel) {
+                setLoading(false);
+              }
+              if (!(msg instanceof AbortError)) {
+                notifications.toasts.addDanger('Failed to run search');
+              }
             },
           });
       };
@@ -94,30 +103,27 @@ export const useTimelineEventsDetails = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
     setTimelineDetailsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex,
         docValueFields,
         indexName,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [defaultIndex, docValueFields, eventId, indexName, skip]);
+  }, [docValueFields, eventId, indexName]);
 
   useEffect(() => {
-    if (timelineDetailsRequest) {
-      timelineDetailsSearch(timelineDetailsRequest);
-    }
+    timelineDetailsSearch(timelineDetailsRequest);
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
   return [loading, timelineDetailsResponse];

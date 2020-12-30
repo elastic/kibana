@@ -48,20 +48,43 @@ export function getFormatWithAggs(getFieldFormat: GetFieldFormat): GetFieldForma
     const customFormats: Record<string, () => IFieldFormat> = {
       range: () => {
         const RangeFormat = FieldFormat.from((range: any) => {
+          if (range.label) {
+            return range.label;
+          }
           const nestedFormatter = params as SerializedFieldFormat;
           const format = getFieldFormat({
             id: nestedFormatter.id,
             params: nestedFormatter.params,
           });
+
           const gte = '\u2265';
           const lt = '\u003c';
+          let fromValue = format.convert(range.gte);
+          let toValue = format.convert(range.lt);
+          // In case of identity formatter and a specific flag, replace Infinity values by specific strings
+          if (params.replaceInfinity && nestedFormatter.id == null) {
+            const FROM_PLACEHOLDER = '\u2212\u221E';
+            const TO_PLACEHOLDER = '+\u221E';
+            fromValue = isFinite(range.gte) ? fromValue : FROM_PLACEHOLDER;
+            toValue = isFinite(range.lt) ? toValue : TO_PLACEHOLDER;
+          }
+
+          if (params.template === 'arrow_right') {
+            return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessageArrowRight', {
+              defaultMessage: '{from} → {to}',
+              values: {
+                from: fromValue,
+                to: toValue,
+              },
+            });
+          }
           return i18n.translate('data.aggTypes.buckets.ranges.rangesFormatMessage', {
             defaultMessage: '{gte} {from} and {lt} {to}',
             values: {
               gte,
-              from: format.convert(range.gte),
+              from: fromValue,
               lt,
-              to: format.convert(range.lt),
+              to: toValue,
             },
           });
         });

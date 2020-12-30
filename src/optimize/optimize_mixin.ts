@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 
 import { createBundlesRoute } from './bundles_route';
 import { getNpUiPluginPublicDirs } from './np_ui_plugin_public_dirs';

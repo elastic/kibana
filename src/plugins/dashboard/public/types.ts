@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import { Query, Filter } from 'src/plugins/data/public';
 import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/public';
-import { SavedDashboardPanel730ToLatest } from '../common';
-import { ViewMode } from './embeddable_plugin';
+import { Query, Filter } from './services/data';
+import { ViewMode } from './services/embeddable';
 
-export interface DashboardCapabilities {
-  showWriteControls: boolean;
-  createNew: boolean;
-}
+import { SavedDashboardPanel } from '../common/types';
+export { SavedDashboardPanel };
 
 // TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
 export type SavedObjectAttribute =
@@ -71,24 +68,22 @@ export interface Field {
 
 export type NavAction = (anchorElement?: any) => void;
 
-/**
- * This should always represent the latest dashboard panel shape, after all possible migrations.
- */
-export type SavedDashboardPanel = SavedDashboardPanel730ToLatest;
-
 export interface DashboardAppState {
   panels: SavedDashboardPanel[];
   fullScreenMode: boolean;
   title: string;
   description: string;
+  tags: string[];
   timeRestore: boolean;
   options: {
     hidePanelTitles: boolean;
     useMargins: boolean;
+    syncColors?: boolean;
   };
   query: Query | string;
   filters: Filter[];
   viewMode: ViewMode;
+  expandedPanelId?: string;
   savedQuery?: string;
 }
 

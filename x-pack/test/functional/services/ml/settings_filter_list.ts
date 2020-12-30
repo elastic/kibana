@@ -7,9 +7,14 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MlCommonUI } from './common_ui';
 
-export function MachineLearningSettingsFilterListProvider({ getService }: FtrProviderContext) {
+export function MachineLearningSettingsFilterListProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   return {
     async parseFilterListTable() {
@@ -17,7 +22,7 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
       const $ = await table.parseDomContent();
       const rows = [];
 
-      for (const tr of $.findTestSubjects('~mlFilterListsRow').toArray()) {
+      for (const tr of $.findTestSubjects('~mlFilterListRow').toArray()) {
         const $tr = $(tr);
 
         const inUseSubject = $tr
@@ -53,6 +58,14 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
     rowSelector(filterId: string, subSelector?: string) {
       const row = `~mlFilterListsTable > ~row-${filterId}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
+    },
+
+    async assertFilterListRowExists(filterId: string) {
+      return await testSubjects.existOrFail(this.rowSelector(filterId));
+    },
+
+    async assertFilterListRowNotExists(filterId: string) {
+      return await testSubjects.missingOrFail(this.rowSelector(filterId));
     },
 
     async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
@@ -101,6 +114,12 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
       await this.assertFilterListRowSelected(filterId, false);
     },
 
+    async selectFilterListRowEditLink(filterId: string) {
+      await this.assertFilterListRowExists(filterId);
+      await testSubjects.click(this.rowSelector(filterId, `mlEditFilterListLink`));
+      await testSubjects.existOrFail('mlPageFilterListEdit');
+    },
+
     async assertCreateFilterListButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled('mlFilterListsButtonCreate');
       expect(isEnabled).to.eql(
@@ -111,6 +130,10 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
       );
     },
 
+    async assertDeleteFilterListButtonExists() {
+      await testSubjects.existOrFail('mlFilterListsDeleteButton');
+    },
+
     async assertDeleteFilterListButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled('mlFilterListsDeleteButton');
       expect(isEnabled).to.eql(
@@ -119,6 +142,16 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
           expectedValue ? 'enabled' : 'disabled'
         }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
       );
+    },
+
+    async deleteFilterList() {
+      await this.assertDeleteFilterListButtonExists();
+      await this.assertDeleteFilterListButtonEnabled(true);
+      await testSubjects.click('mlFilterListsDeleteButton');
+      await testSubjects.existOrFail('mlFilterListsDeleteButton');
+      await testSubjects.existOrFail('mlFilterListDeleteConfirmation');
+      await testSubjects.click('confirmModalConfirmButton');
+      await testSubjects.missingOrFail('mlFilterListDeleteConfirmation');
     },
 
     async openFilterListEditForm(filterId: string) {
@@ -136,11 +169,21 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
       );
     },
 
-    async assertAddItemButtonEnabled(expectedValue: boolean) {
-      const isEnabled = await testSubjects.isEnabled('mlFilterListAddItemButton');
+    async assertOpenNewItemsPopoverButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlFilterListOpenNewItemsPopoverButton');
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "add item" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
+    async assertAddItemsButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlFilterListOpenNewItemsPopoverButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "add" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
           isEnabled ? 'enabled' : 'disabled'
         }')`
       );
@@ -156,9 +199,23 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
       );
     },
 
+    async assertSaveFilterListButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlFilterListSaveButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "save filter list" button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
+    },
+
     filterItemSelector(filterItem: string, subSelector?: string) {
       const row = `mlGridItem ${filterItem}`;
       return !subSelector ? row : `${row} > ${subSelector}`;
+    },
+
+    async assertFilterItemNotExists(filterItem: string) {
+      await testSubjects.missingOrFail(this.filterItemSelector(filterItem));
     },
 
     async assertFilterItemExists(filterItem: string) {
@@ -189,12 +246,84 @@ export function MachineLearningSettingsFilterListProvider({ getService }: FtrPro
       await this.assertFilterItemSelected(filterItem, true);
     },
 
+    async deleteFilterItem(filterItem: string) {
+      await testSubjects.existOrFail('mlFilterListDeleteItemButton');
+      await this.selectFilterItem(filterItem);
+      await testSubjects.click('mlFilterListDeleteItemButton');
+      await this.assertFilterItemNotExists(filterItem);
+    },
+
     async deselectFilterItem(filterItem: string) {
       if ((await this.isFilterItemSelected(filterItem)) === true) {
         await testSubjects.click(this.filterItemSelector(filterItem));
       }
 
       await this.assertFilterItemSelected(filterItem, false);
+    },
+
+    async navigateToFilterListCreationPage() {
+      await this.assertCreateFilterListButtonEnabled(true);
+      await testSubjects.click('mlFilterListsButtonCreate');
+      await testSubjects.existOrFail('mlPageFilterListEdit');
+    },
+
+    async assertFilterListIdValue(expectedValue: string) {
+      const subj = 'mlNewFilterListIdInput';
+      const actualFilterListId = await testSubjects.getAttribute(subj, 'value');
+      expect(actualFilterListId).to.eql(
+        expectedValue,
+        `Filter list id should be '${expectedValue}' (got '${actualFilterListId}')`
+      );
+    },
+
+    async setFilterListId(filterId: string) {
+      const subj = 'mlNewFilterListIdInput';
+      await mlCommonUI.setValueWithChecks(subj, filterId, {
+        clearWithKeyboard: true,
+      });
+      await this.assertFilterListIdValue(filterId);
+    },
+
+    async setFilterListDescription(description: string) {
+      await this.assertEditDescriptionButtonEnabled(true);
+      await testSubjects.click('mlFilterListEditDescriptionButton');
+      await testSubjects.existOrFail('mlFilterListDescriptionInput');
+      await mlCommonUI.setValueWithChecks('mlFilterListDescriptionInput', description, {
+        clearWithKeyboard: true,
+      });
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await this.assertFilterListDescriptionValue(description);
+    },
+
+    async addFilterListKeywords(keywords: string[]) {
+      await this.assertOpenNewItemsPopoverButtonEnabled(true);
+      await testSubjects.click('mlFilterListOpenNewItemsPopoverButton');
+      await mlCommonUI.setValueWithChecks('mlFilterListAddItemTextArea', keywords.join('\n'), {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.existOrFail('mlFilterListAddItemsButton');
+      await this.assertAddItemsButtonEnabled(true);
+      await testSubjects.click('mlFilterListAddItemsButton');
+
+      for (let index = 0; index < keywords.length; index++) {
+        await this.assertFilterItemExists(keywords[index]);
+      }
+    },
+
+    async assertFilterListDescriptionValue(expectedDescription: string) {
+      const actualFilterListDescription = await testSubjects.getVisibleText(
+        'mlNewFilterListDescriptionText'
+      );
+      expect(actualFilterListDescription).to.eql(
+        expectedDescription,
+        `Filter list description should be '${expectedDescription}' (got '${actualFilterListDescription}')`
+      );
+    },
+
+    async saveFilterList() {
+      await this.assertSaveFilterListButtonEnabled(true);
+      await testSubjects.click('mlFilterListSaveButton');
+      await testSubjects.existOrFail('mlPageFilterListManagement');
     },
   };
 }

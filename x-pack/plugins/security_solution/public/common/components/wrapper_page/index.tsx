@@ -9,33 +9,29 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { CommonProps } from '@elastic/eui';
 
-import { useFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { gutterTimeline } from '../../lib/helpers';
 import { AppGlobalStyle } from '../page/index';
 
 const Wrapper = styled.div`
   padding: ${(props) => `${props.theme.eui.paddingSizes.l}`};
 
-  &.siemWrapperPage--restrictWidthDefault,
-  &.siemWrapperPage--restrictWidthCustom {
-    box-sizing: content-box;
-    margin: 0 auto;
-  }
-
-  &.siemWrapperPage--restrictWidthDefault {
-    max-width: 1000px;
-  }
-
   &.siemWrapperPage--fullHeight {
     height: 100%;
-  }
-
-  &.siemWrapperPage--withTimeline {
-    padding-right: ${gutterTimeline};
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
   }
 
   &.siemWrapperPage--noPadding {
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+  }
+
+  &.siemWrapperPage--withTimeline {
+    padding-bottom: ${gutterTimeline};
   }
 `;
 
@@ -52,13 +48,12 @@ interface WrapperPageProps {
 const WrapperPageComponent: React.FC<WrapperPageProps & CommonProps> = ({
   children,
   className,
-  restrictWidth,
   style,
   noPadding,
   noTimeline,
   ...otherProps
 }) => {
-  const { globalFullScreen, setGlobalFullScreen } = useFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   useEffect(() => {
     setGlobalFullScreen(false); // exit full screen mode on page load
   }, [setGlobalFullScreen]);
@@ -68,20 +63,10 @@ const WrapperPageComponent: React.FC<WrapperPageProps & CommonProps> = ({
     'siemWrapperPage--noPadding': noPadding,
     'siemWrapperPage--withTimeline': !noTimeline,
     'siemWrapperPage--fullHeight': globalFullScreen,
-    'siemWrapperPage--restrictWidthDefault':
-      restrictWidth && typeof restrictWidth === 'boolean' && restrictWidth === true,
-    'siemWrapperPage--restrictWidthCustom': restrictWidth && typeof restrictWidth !== 'boolean',
   });
 
-  let customStyle: WrapperPageProps['style'];
-
-  if (restrictWidth && typeof restrictWidth !== 'boolean') {
-    const value = typeof restrictWidth === 'number' ? `${restrictWidth}px` : restrictWidth;
-    customStyle = { ...style, maxWidth: value };
-  }
-
   return (
-    <Wrapper className={classes} style={customStyle || style} {...otherProps}>
+    <Wrapper className={classes} style={style} {...otherProps}>
       {children}
       <AppGlobalStyle />
     </Wrapper>

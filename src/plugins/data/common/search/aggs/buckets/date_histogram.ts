@@ -27,6 +27,7 @@ import { intervalOptions, autoInterval, isAutoInterval } from './_interval_optio
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { aggDateHistogramFnName } from './date_histogram_fn';
 import { ExtendedBounds } from './lib/extended_bounds';
 import { TimeBuckets } from './lib/time_buckets';
 
@@ -34,6 +35,7 @@ import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 import { BaseAggParams } from '../types';
 import { dateHistogramInterval } from '../utils';
+import { inferTimeZone } from '../utils';
 
 /** @internal */
 export type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;
@@ -86,6 +88,7 @@ export const getDateHistogramBucketAgg = ({
 }: DateHistogramBucketAggDependencies) =>
   new BucketAggType<IBucketDateHistogramAggConfig>({
     name: BUCKET_TYPES.DATE_HISTOGRAM,
+    expressionName: aggDateHistogramFnName,
     title: i18n.translate('data.search.aggs.buckets.dateHistogramTitle', {
       defaultMessage: 'Date Histogram',
     }),
@@ -146,7 +149,7 @@ export const getDateHistogramBucketAgg = ({
         type: 'field',
         filterFieldTypes: KBN_FIELD_TYPES.DATE,
         default(agg: IBucketDateHistogramAggConfig) {
-          return agg.getIndexPattern().timeFieldName;
+          return agg.getIndexPattern().getTimeField?.()?.name;
         },
         onChange(agg: IBucketDateHistogramAggConfig) {
           if (isAutoInterval(get(agg, 'params.interval')) && !agg.fieldIsTimeField()) {
@@ -235,25 +238,7 @@ export const getDateHistogramBucketAgg = ({
         // time_zones being persisted into saved_objects
         serialize: noop,
         write(agg, output) {
-          // If a time_zone has been set explicitly always prefer this.
-          let tz = agg.params.time_zone;
-          if (!tz && agg.params.field) {
-            // If a field has been configured check the index pattern's typeMeta if a date_histogram on that
-            // field requires a specific time_zone
-            tz = get(agg.getIndexPattern(), [
-              'typeMeta',
-              'aggs',
-              'date_histogram',
-              agg.params.field.name,
-              'time_zone',
-            ]);
-          }
-          if (!tz) {
-            // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
-            const detectedTimezone = moment.tz.guess();
-            const tzOffset = moment().format('Z');
-            tz = isDefaultTimezone() ? detectedTimezone || tzOffset : getConfig('dateFormat:tz');
-          }
+          const tz = inferTimeZone(agg.params, agg.getIndexPattern(), isDefaultTimezone, getConfig);
           output.params.time_zone = tz;
         },
       },

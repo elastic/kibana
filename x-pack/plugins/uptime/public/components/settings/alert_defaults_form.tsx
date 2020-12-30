@@ -29,7 +29,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_acti
 type ConnectorOption = EuiComboBoxOptionOption<string>;
 
 interface KibanaDeps {
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 const ConnectorSpan = styled.span`
@@ -51,7 +51,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
 }) => {
   const {
     services: {
-      triggers_actions_ui: { actionTypeRegistry },
+      triggersActionsUi: { actionTypeRegistry },
     },
   } = useKibana<KibanaDeps>();
   const { focusConnectorField } = useGetUrlParams();

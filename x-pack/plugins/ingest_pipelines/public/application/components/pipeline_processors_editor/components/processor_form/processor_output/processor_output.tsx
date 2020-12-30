@@ -32,8 +32,7 @@ export interface Props {
 
 const i18nTexts = {
   tabDescription: i18n.translate('xpack.ingestPipelines.processorOutput.descriptionText', {
-    defaultMessage:
-      'View how the processor affects the ingest document as it passes through the pipeline.',
+    defaultMessage: 'Preview changes to the test document.',
   }),
   skippedCalloutTitle: i18n.translate('xpack.ingestPipelines.processorOutput.skippedCalloutTitle', {
     defaultMessage: 'The processor was not run.',
@@ -68,7 +67,7 @@ const i18nTexts = {
   processorIgnoredErrorTitle: i18n.translate(
     'xpack.ingestPipelines.processorOutput.ignoredErrorCodeBlockLabel',
     {
-      defaultMessage: 'There was an error that was ignored',
+      defaultMessage: 'There was an ignored error',
     }
   ),
   documentsDropdownLabel: i18n.translate(

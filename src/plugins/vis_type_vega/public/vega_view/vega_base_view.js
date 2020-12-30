@@ -27,7 +27,8 @@ import { i18n } from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { esFilters } from '../../../data/public';
 
-import { getEnableExternalUrls } from '../services';
+import { getEnableExternalUrls, getData } from '../services';
+import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
 vega.scheme('elastic', euiPaletteColorBlind());
 
@@ -63,9 +64,8 @@ export class VegaBaseView {
     this._parser = opts.vegaParser;
     this._serviceSettings = opts.serviceSettings;
     this._filterManager = opts.filterManager;
-    this._applyFilter = opts.applyFilter;
+    this._fireEvent = opts.fireEvent;
     this._timefilter = opts.timefilter;
-    this._findIndex = opts.findIndex;
     this._view = null;
     this._vegaViewConfig = null;
     this._$messages = null;
@@ -125,6 +125,48 @@ export class VegaBaseView {
     } catch (err) {
       this.onError(err);
     }
+  }
+
+  /**
+   * Find index pattern by its title, if not given, gets it from spec or a defaults one
+   * @param {string} [index]
+   * @returns {Promise<string>} index id
+   */
+  async findIndex(index) {
+    const { indexPatterns } = getData();
+    let idxObj;
+
+    if (index) {
+      [idxObj] = await indexPatterns.find(index);
+      if (!idxObj) {
+        throw new Error(
+          i18n.translate('visTypeVega.vegaParser.baseView.indexNotFoundErrorMessage', {
+            defaultMessage: 'Index {index} not found',
+            values: { index: `"${index}"` },
+          })
+        );
+      }
+    } else {
+      [idxObj] = await extractIndexPatternsFromSpec(
+        this._parser.isVegaLite ? this._parser.vlspec : this._parser.spec
+      );
+
+      if (!idxObj) {
+        const defaultIdx = await indexPatterns.getDefault();
+
+        if (defaultIdx) {
+          idxObj = defaultIdx;
+        } else {
+          throw new Error(
+            i18n.translate('visTypeVega.vegaParser.baseView.unableToFindDefaultIndexErrorMessage', {
+              defaultMessage: 'Unable to find default index',
+            })
+          );
+        }
+      }
+    }
+
+    return idxObj.id;
   }
 
   createViewConfig() {
@@ -193,9 +235,8 @@ export class VegaBaseView {
     // This might be due to https://github.com/jquery/jquery/issues/3808
     // Which is being fixed as part of jQuery 3.3.0
     const heightExtraPadding = 6;
-    const width = Math.max(0, this._$container.width() - this._parser.paddingWidth);
-    const height =
-      Math.max(0, this._$container.height() - this._parser.paddingHeight) - heightExtraPadding;
+    const width = Math.max(0, this._$container.width());
+    const height = Math.max(0, this._$container.height()) - heightExtraPadding;
 
     if (view.width() !== width || view.height() !== height) {
       view.width(width).height(height);
@@ -262,10 +303,10 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async addFilterHandler(query, index) {
-    const indexId = await this._findIndex(index);
+    const indexId = await this.findIndex(index);
     const filter = esFilters.buildQueryFilter(query, indexId);
 
-    this._applyFilter({ filters: [filter] });
+    this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
   }
 
   /**
@@ -273,7 +314,7 @@ export class VegaBaseView {
    * @param {string} [index] as defined in Kibana, or default if missing
    */
   async removeFilterHandler(query, index) {
-    const indexId = await this._findIndex(index);
+    const indexId = await this.findIndex(index);
     const filterToRemove = esFilters.buildQueryFilter(query, indexId);
 
     const currentFilters = this._filterManager.getFilters();
@@ -302,19 +343,22 @@ export class VegaBaseView {
   setTimeFilterHandler(start, end) {
     const { from, to, mode } = VegaBaseView._parseTimeRange(start, end);
 
-    this._applyFilter({
-      timeFieldName: '*',
-      filters: [
-        {
-          range: {
-            '*': {
-              mode,
-              gte: from,
-              lte: to,
+    this._fireEvent({
+      name: 'applyFilter',
+      data: {
+        timeFieldName: '*',
+        filters: [
+          {
+            range: {
+              '*': {
+                mode,
+                gte: from,
+                lte: to,
+              },
             },
           },
-        },
-      ],
+        ],
+      },
     });
   }
 

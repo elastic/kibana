@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export * from './adapters';
+export {
+  Adapters,
+  RequestAdapter,
+  RequestStatistic,
+  RequestStatistics,
+  RequestStatus,
+  RequestResponder,
+} from './adapters';

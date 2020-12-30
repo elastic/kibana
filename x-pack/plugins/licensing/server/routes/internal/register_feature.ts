@@ -16,22 +16,26 @@ export function registerRegisterFeatureRoute(
     {
       path: '/internal/licensing/feature_usage/register',
       validate: {
-        body: schema.object({
-          featureName: schema.string(),
-          licenseType: schema.string({
-            validate: (value) => {
-              if (!(value in LICENSE_TYPE)) {
-                return `Invalid license type: ${value}`;
-              }
-            },
-          }),
-        }),
+        body: schema.arrayOf(
+          schema.object({
+            featureName: schema.string(),
+            licenseType: schema.string({
+              validate: (value) => {
+                if (!(value in LICENSE_TYPE)) {
+                  return `Invalid license type: ${value}`;
+                }
+              },
+            }),
+          })
+        ),
       },
     },
     async (context, request, response) => {
-      const { featureName, licenseType } = request.body;
+      const registrations = request.body;
 
-      featureUsageSetup.register(featureName, licenseType as LicenseType);
+      registrations.forEach(({ featureName, licenseType }) => {
+        featureUsageSetup.register(featureName, licenseType as LicenseType);
+      });
 
       return response.ok({
         body: {

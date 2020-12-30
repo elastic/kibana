@@ -21,20 +21,26 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core
 import {
   ExpressionsService,
   ExpressionsServiceSetup,
-  ExpressionsServiceStart,
   ExecutionContext,
+  ExpressionsServiceStart,
 } from '../common';
 import { setRenderersRegistry, setNotifications, setExpressionsService } from './services';
 import { ReactExpressionRenderer } from './react_expression_renderer';
-import { ExpressionLoader, loader } from './loader';
+import { ExpressionLoader, IExpressionLoader, loader } from './loader';
 import { render, ExpressionRenderHandler } from './render';
 
+/**
+ * Expressions public setup contract, extends {@link ExpressionsServiceSetup}
+ */
 export type ExpressionsSetup = ExpressionsServiceSetup;
 
+/**
+ * Expressions public start contrect, extends {@link ExpressionServiceStart}
+ */
 export interface ExpressionsStart extends ExpressionsServiceStart {
   ExpressionLoader: typeof ExpressionLoader;
   ExpressionRenderHandler: typeof ExpressionRenderHandler;
-  loader: typeof loader;
+  loader: IExpressionLoader;
   ReactExpressionRenderer: typeof ReactExpressionRenderer;
   render: typeof render;
 }

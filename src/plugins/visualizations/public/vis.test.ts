@@ -121,7 +121,7 @@ describe('Vis Class', function () {
     });
 
     it('should return true for hierarchical vis (like pie)', function () {
-      vis.type.hierarchicalData = true;
+      (vis.type as any).hierarchicalData = true;
       expect(vis.isHierarchical()).toBe(true);
     });
   });

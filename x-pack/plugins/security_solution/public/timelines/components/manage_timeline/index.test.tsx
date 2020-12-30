@@ -33,33 +33,33 @@ describe('useTimelineManager', () => {
       expect(isStringifiedComparisonEqual(uninitializedTimeline, timelineDefaults)).toBeTruthy();
     });
   });
-
-  it('getIndexToAddById', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseTimelineManager>(() =>
-        useTimelineManager()
-      );
-      await waitForNextUpdate();
-      const data = result.current.getIndexToAddById(testId);
-      expect(data).toEqual(timelineDefaults.indexToAdd);
-    });
-  });
-
-  it('setIndexToAdd', async () => {
-    await act(async () => {
-      const indexToAddArgs = { id: testId, indexToAdd: ['example'] };
-      const { result, waitForNextUpdate } = renderHook<string, UseTimelineManager>(() =>
-        useTimelineManager()
-      );
-      await waitForNextUpdate();
-      result.current.initializeTimeline({
-        id: testId,
-      });
-      result.current.setIndexToAdd(indexToAddArgs);
-      const data = result.current.getIndexToAddById(testId);
-      expect(data).toEqual(indexToAddArgs.indexToAdd);
-    });
-  });
+  // TO DO sourcerer
+  // it('getIndexToAddById', async () => {
+  //   await act(async () => {
+  //     const { result, waitForNextUpdate } = renderHook<string, UseTimelineManager>(() =>
+  //       useTimelineManager()
+  //     );
+  //     await waitForNextUpdate();
+  //     const data = result.current.getIndexToAddById(testId);
+  //     expect(data).toEqual(timelineDefaults.indexToAdd);
+  //   });
+  // });
+  //
+  // it('setIndexToAdd', async () => {
+  //   await act(async () => {
+  //     const indexToAddArgs = { id: testId, indexToAdd: ['example'] };
+  //     const { result, waitForNextUpdate } = renderHook<string, UseTimelineManager>(() =>
+  //       useTimelineManager()
+  //     );
+  //     await waitForNextUpdate();
+  //     result.current.initializeTimeline({
+  //       id: testId,
+  //     });
+  //     result.current.setIndexToAdd(indexToAddArgs);
+  //     const data = result.current.getIndexToAddById(testId);
+  //     expect(data).toEqual(indexToAddArgs.indexToAdd);
+  //   });
+  // });
 
   it('setIsTimelineLoading', async () => {
     await act(async () => {

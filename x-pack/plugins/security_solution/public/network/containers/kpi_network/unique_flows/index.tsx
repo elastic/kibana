@@ -8,7 +8,6 @@ import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -20,7 +19,11 @@ import {
 import { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import { AbortError } from '../../../../../../../../src/plugins/data/common';
+import {
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -37,6 +40,7 @@ export interface NetworkKpiUniqueFlowsArgs {
 interface UseNetworkKpiUniqueFlows {
   filterQuery?: ESTermQuery | string;
   endDate: string;
+  indexNames: string[];
   skip?: boolean;
   startDate: string;
 }
@@ -44,31 +48,23 @@ interface UseNetworkKpiUniqueFlows {
 export const useNetworkKpiUniqueFlows = ({
   filterQuery,
   endDate,
+  indexNames,
   skip = false,
   startDate,
 }: UseNetworkKpiUniqueFlows): [boolean, NetworkKpiUniqueFlowsArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
-  const [networkKpiUniqueFlowsRequest, setNetworkKpiUniqueFlowsRequest] = useState<
-    NetworkKpiUniqueFlowsRequestOptions
-  >({
-    defaultIndex,
-    factoryQueryType: NetworkKpiQueries.uniqueFlows,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    networkKpiUniqueFlowsRequest,
+    setNetworkKpiUniqueFlowsRequest,
+  ] = useState<NetworkKpiUniqueFlowsRequestOptions | null>(null);
 
-  const [networkKpiUniqueFlowsResponse, setNetworkKpiUniqueFlowsResponse] = useState<
-    NetworkKpiUniqueFlowsArgs
-  >({
+  const [
+    networkKpiUniqueFlowsResponse,
+    setNetworkKpiUniqueFlowsResponse,
+  ] = useState<NetworkKpiUniqueFlowsArgs>({
     uniqueFlowId: 0,
     id: ID,
     inspect: {
@@ -80,7 +76,11 @@ export const useNetworkKpiUniqueFlows = ({
   });
 
   const networkKpiUniqueFlowsSearch = useCallback(
-    (request: NetworkKpiUniqueFlowsRequestOptions) => {
+    (request: NetworkKpiUniqueFlowsRequestOptions | null) => {
+      if (request == null || skip) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -96,7 +96,7 @@ export const useNetworkKpiUniqueFlows = ({
           )
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkKpiUniqueFlowsResponse((prevResponse) => ({
@@ -107,7 +107,7 @@ export const useNetworkKpiUniqueFlows = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -134,14 +134,15 @@ export const useNetworkKpiUniqueFlows = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
     setNetworkKpiUniqueFlowsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.uniqueFlows,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -149,12 +150,12 @@ export const useNetworkKpiUniqueFlows = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [defaultIndex, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     networkKpiUniqueFlowsSearch(networkKpiUniqueFlowsRequest);

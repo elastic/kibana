@@ -35,6 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.navigateTo();
     });
 
+    after(async () => {
+      await esArchiver.unload('logstash_functional');
+    });
+
     it('main view', async () => {
       await a11y.testAppSnapshot();
     });

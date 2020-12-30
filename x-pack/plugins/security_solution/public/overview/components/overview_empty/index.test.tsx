@@ -53,7 +53,7 @@ describe('OverviewEmpty', () => {
           description:
             'Protect your hosts with threat prevention, detection, and deep security data visibility.',
           fill: false,
-          label: 'Add Elastic Endpoint Security',
+          label: 'Add Endpoint Security',
           onClick: undefined,
           url: '/app/home#/tutorial_directory/security',
         },

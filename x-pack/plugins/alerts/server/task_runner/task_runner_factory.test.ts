@@ -8,16 +8,27 @@ import sinon from 'sinon';
 import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import {
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+  httpServiceMock,
+} from '../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../actions/server/mocks';
 import { alertsMock, alertsClientMock } from '../mocks';
 import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
+import { UntypedNormalizedAlertType } from '../alert_type_registry';
+import { alertTypeRegistryMock } from '../alert_type_registry.mock';
 
-const alertType = {
+const alertType: UntypedNormalizedAlertType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
+  recoveryActionGroup: {
+    id: 'recovered',
+    name: 'Recovered',
+  },
   executor: jest.fn(),
   producer: 'alerts',
 };
@@ -61,8 +72,10 @@ describe('Task Runner Factory', () => {
     encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
     logger: loggingSystemMock.create().get(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
-    getBasePath: jest.fn().mockReturnValue(undefined),
+    basePathService: httpServiceMock.createBasePath(),
     eventLogger: eventLoggerMock.create(),
+    internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
+    alertTypeRegistry: alertTypeRegistryMock.create(),
   };
 
   beforeEach(() => {

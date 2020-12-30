@@ -9,9 +9,9 @@ import styled from 'styled-components';
 
 import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { asDuration } from '../../../../../../../common/utils/formatters';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
-import { asDuration } from '../../../../../../utils/formatters';
 import { ErrorCount } from '../../ErrorCount';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';

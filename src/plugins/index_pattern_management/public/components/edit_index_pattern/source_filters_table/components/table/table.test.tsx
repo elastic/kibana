@@ -22,13 +22,13 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Table, TableProps, TableState } from './table';
 import { EuiTableFieldDataColumnType, keys } from '@elastic/eui';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { SourceFiltersTableFilter } from '../../types';
 
-const indexPattern = {} as IIndexPattern;
+const indexPattern = {} as IndexPattern;
 const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '' }];
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IndexPattern);
 
 const getTableColumnRender = (
   component: ShallowWrapper<TableProps, TableState, Table>,

@@ -79,7 +79,7 @@ const getColumns = (
         if (cluster.isSupported) {
           return (
             <EuiLink
-              href={getSafeForExternalLink(`#/overview?_g=(cluster_uuid:${cluster.cluster_uuid})`)}
+              href={getSafeForExternalLink(`#/overview`, { cluster_uuid: cluster.cluster_uuid })}
               data-test-subj="clusterLink"
             >
               {value}

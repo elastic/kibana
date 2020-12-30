@@ -28,7 +28,7 @@ To complete this tutorial, you'll need the following:
 *  **A space**: In this tutorial, use `Dev Mortgage` as the space
 name. See <<spaces-managing, spaces management>> for
 details on creating a space.
-*  **Data**:  You can use <<gs-get-data-into-kibana, sample data>> or
+*  **Data**:  You can use <<get-started, sample data>> or
 live data.  In the following steps, Filebeat and Metricbeat data are used.
 
 [float]
@@ -45,7 +45,7 @@ through in this tutorial:
 [float]
 ==== Create a role
 
-Open the menu, then go to *Stack Management > Security > Roles*
+Open the main menu, then click *Stack Management > Roles*
 for an overview of your roles.  This view provides actions
 for you to create, edit, and delete roles.
 
@@ -90,7 +90,7 @@ image::security/images/role-space-visualization.png["Associate space"]
 [float]
 ==== Create the developer user account with the proper roles
 
-. Open the menu, then go to *Stack Management > Security > Users*.
+. Open the main menu, then click *Stack Management > Users*.
 . Click **Create user**, then give the user the `dev-mortgage`
 and `monitoring-user` roles, which are required for *Stack Monitoring* users.
 

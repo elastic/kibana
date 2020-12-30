@@ -34,11 +34,11 @@ This enables your child application to share the same drag / drop context as the
 
 An item can be both draggable and droppable at the same time, but for simplicity's sake, we'll treat these two cases separately.
 
-To enable dragging an item, use `DragDrop` with both a `draggable` and a `value` attribute.
+To enable dragging an item, use `DragDrop` with both a `draggable` and a `value` attribute. Property `value` has to be of a type object with a unique `id` property.
 
 ```js
 <div className="field-list">
-  {fields.map(f => (
+  {fields.map((f) => (
     <DragDrop key={f.id} className="field-list-item" value={f} draggable>
       {f.name}
     </DragDrop>
@@ -52,18 +52,52 @@ To enable dropping, use `DragDrop` with both a `droppable` attribute and an `onD
 
 ```js
 const { dragging } = useContext(DragContext);
-  
+
 return (
   <DragDrop
     className="axis"
     droppable={dragging && canHandleDrop(dragging)}
-    onDrop={item => onChange([...items, item])}
+    onDrop={(item) => onChange([...items, item])}
   >
-    {items.map(x => <div>{x.name}</div>)}
+    {items.map((x) => (
+      <div>{x.name}</div>
+    ))}
   </DragDrop>
 );
 ```
 
-## Limitations
+### Reordering
 
-Currently this is a very simple drag / drop mechanism. We don't support reordering out of the box, though it could probably be built on top of this solution without modification of the core.
+To create a reordering group, surround the elements from the same group with a `ReorderProvider`:
+
+```js
+<ReorderProvider id="groupId">
+  ... elements from one group here ...
+</ReorderProvider>
+```
+
+The children `DragDrop` components must have props defined as in the example:
+
+```js
+<ReorderProvider id="groupId">
+  <div className="field-list">
+    {fields.map((f) => (
+      <DragDrop
+        key={f.id}
+        draggable
+        droppable
+        dragType="reorder"
+        dropType="reorder"
+        itemsInGroup={fields.map((f) => f.id)} // consists ids of all reorderable elements in the group, eg. ['3', '5', '1']
+        value={{
+          id: f.id,
+        }}
+        onDrop={/*handler*/}
+      >
+        {f.name}
+      </DragDrop>
+    ))}
+  </div>
+</ReorderProvider>
+```
+

@@ -24,10 +24,11 @@ import { SavedObject, SavedObjectLoader } from '../../../saved_objects/public';
 import {
   DataPublicPluginStart,
   IndexPatternsContract,
-  IIndexPattern,
   injectSearchSourceReferences,
+  IndexPatternSpec,
 } from '../../../data/public';
 import { FailedImport } from './process_import_response';
+import { DuplicateIndexPatternError, IndexPattern } from '../../../data/public';
 
 type SavedObjectsRawDoc = Record<string, any>;
 
@@ -70,11 +71,10 @@ function addJsonFieldToIndexPattern(
 async function importIndexPattern(
   doc: SavedObjectsRawDoc,
   indexPatterns: IndexPatternsContract,
-  overwriteAll: boolean,
+  overwriteAll: boolean = false,
   openConfirm: OverlayStart['openConfirm']
 ) {
   // TODO: consolidate this is the code in create_index_pattern_wizard.js
-  const emptyPattern = await indexPatterns.make();
   const {
     title,
     timeFieldName,
@@ -84,50 +84,53 @@ async function importIndexPattern(
     type,
     typeMeta,
   } = doc._source;
-  const importedIndexPattern = {
+  const indexPatternSpec: IndexPatternSpec = {
     id: doc._id,
     title,
     timeFieldName,
-  } as IIndexPattern;
+  };
+  let emptyPattern: IndexPattern;
   if (type) {
-    importedIndexPattern.type = type;
+    indexPatternSpec.type = type;
   }
-  addJsonFieldToIndexPattern(importedIndexPattern, fields, 'fields', title);
-  addJsonFieldToIndexPattern(importedIndexPattern, fieldFormatMap, 'fieldFormatMap', title);
-  addJsonFieldToIndexPattern(importedIndexPattern, sourceFilters, 'sourceFilters', title);
-  addJsonFieldToIndexPattern(importedIndexPattern, typeMeta, 'typeMeta', title);
-  Object.assign(emptyPattern, importedIndexPattern);
-
-  let newId = await emptyPattern.create(overwriteAll);
-  if (!newId) {
-    // We can override and we want to prompt for confirmation
-    const isConfirmed = await openConfirm(
-      i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteLabel', {
-        values: { title },
-        defaultMessage: "Are you sure you want to overwrite '{title}'?",
-      }),
-      {
-        title: i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteTitle', {
-          defaultMessage: 'Overwrite {type}?',
-          values: { type },
+  addJsonFieldToIndexPattern(indexPatternSpec, fields, 'fields', title);
+  addJsonFieldToIndexPattern(indexPatternSpec, fieldFormatMap, 'fieldFormatMap', title);
+  addJsonFieldToIndexPattern(indexPatternSpec, sourceFilters, 'sourceFilters', title);
+  addJsonFieldToIndexPattern(indexPatternSpec, typeMeta, 'typeMeta', title);
+  try {
+    emptyPattern = await indexPatterns.createAndSave(indexPatternSpec, overwriteAll, true);
+  } catch (err) {
+    if (err instanceof DuplicateIndexPatternError) {
+      // We can override and we want to prompt for confirmation
+      const isConfirmed = await openConfirm(
+        i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteLabel', {
+          values: { title },
+          defaultMessage: "Are you sure you want to overwrite '{title}'?",
         }),
-        confirmButtonText: i18n.translate(
-          'savedObjectsManagement.indexPattern.confirmOverwriteButton',
-          {
-            defaultMessage: 'Overwrite',
-          }
-        ),
-      }
-    );
+        {
+          title: i18n.translate('savedObjectsManagement.indexPattern.confirmOverwriteTitle', {
+            defaultMessage: 'Overwrite {type}?',
+            values: { type },
+          }),
+          confirmButtonText: i18n.translate(
+            'savedObjectsManagement.indexPattern.confirmOverwriteButton',
+            {
+              defaultMessage: 'Overwrite',
+            }
+          ),
+        }
+      );
 
-    if (isConfirmed) {
-      newId = (await emptyPattern.create(true)) as string;
-    } else {
-      return;
+      if (isConfirmed) {
+        emptyPattern = await indexPatterns.createAndSave(indexPatternSpec, true, true);
+      } else {
+        return;
+      }
     }
   }
-  indexPatterns.clearCache(newId);
-  return newId;
+
+  indexPatterns.clearCache(emptyPattern!.id);
+  return emptyPattern!.id;
 }
 
 async function importDocument(obj: SavedObject, doc: SavedObjectsRawDoc, overwriteAll: boolean) {

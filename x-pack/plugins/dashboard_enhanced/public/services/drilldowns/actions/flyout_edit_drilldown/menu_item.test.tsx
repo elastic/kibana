@@ -5,13 +5,11 @@
  */
 
 import React from 'react';
-import { render, cleanup, act } from '@testing-library/react/pure';
+import { render, act } from '@testing-library/react';
 import { MenuItem } from './menu_item';
 import { createStateContainer } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '../../../../../../ui_actions_enhanced/public';
 import { EnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
-
-afterEach(cleanup);
 
 test('<MenuItem/>', () => {
   const state = createStateContainer<{ events: object[] }>({ events: [] });

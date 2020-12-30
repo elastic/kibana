@@ -5,18 +5,20 @@
  */
 
 import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { PDF_JOB_TYPE } from '../../../../common/constants';
 import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPDF } from '../types';
+import { JobParamsPDF, TaskPayloadPDF } from '../types';
 // @ts-ignore no module def (deprecated module)
 import { compatibilityShimFactory } from './compatibility_shim';
 
-export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
-  JobParamsPDF
->> = function createJobFactoryFn(reporting, logger) {
+export const createJobFnFactory: CreateJobFnFactory<
+  CreateJobFn<JobParamsPDF, TaskPayloadPDF>
+> = function createJobFactoryFn(reporting, parentLogger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
+  const logger = parentLogger.clone([PDF_JOB_TYPE, 'create-job']);
   const compatibilityShim = compatibilityShimFactory(logger);
 
   // 7.x and below only
@@ -31,13 +33,13 @@ export const createJobFnFactory: CreateJobFnFactory<CreateJobFn<
 
     return {
       headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(req),
+      spaceId: reporting.getSpaceId(req, logger),
       browserTimezone,
       forceNow: new Date().toISOString(),
       layout,
       objects: relativeUrls.map((u) => ({ relativeUrl: u })), // 7.x only: `objects` in the payload
       title,
-      type: objectType, // 7.x only: this changes the shape of the job params object
+      objectType,
     };
   });
 };

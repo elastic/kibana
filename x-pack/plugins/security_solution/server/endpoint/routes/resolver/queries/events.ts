@@ -4,77 +4,56 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
-import { esKuery } from '../../../../../../../../src/plugins/data/server';
+import { IScopedClusterClient } from 'kibana/server';
+import { ApiResponse } from '@elastic/elasticsearch';
+import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { SafeResolverEvent } from '../../../../../common/endpoint/types';
-import { ResolverQuery } from './base';
 import { PaginationBuilder } from '../utils/pagination';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 
+interface TimeRange {
+  from: string;
+  to: string;
+}
+
 /**
- * Builds a query for retrieving related events for a node.
+ * Builds a query for retrieving events.
  */
-export class EventsQuery extends ResolverQuery<SafeResolverEvent[]> {
-  private readonly kqlQuery: JsonObject[] = [];
-
-  constructor(
-    private readonly pagination: PaginationBuilder,
-    indexPattern: string | string[],
-    endpointID?: string,
-    kql?: string
-  ) {
-    super(indexPattern, endpointID);
-    if (kql) {
-      this.kqlQuery.push(esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kql)));
-    }
+export class EventsQuery {
+  private readonly pagination: PaginationBuilder;
+  private readonly indexPatterns: string | string[];
+  private readonly timeRange: TimeRange;
+  constructor({
+    pagination,
+    indexPatterns,
+    timeRange,
+  }: {
+    pagination: PaginationBuilder;
+    indexPatterns: string | string[];
+    timeRange: TimeRange;
+  }) {
+    this.pagination = pagination;
+    this.indexPatterns = indexPatterns;
+    this.timeRange = timeRange;
   }
 
-  protected legacyQuery(endpointID: string, uniquePIDs: string[]): JsonObject {
+  private query(filters: JsonObject[]): JsonObject {
     return {
       query: {
         bool: {
           filter: [
-            ...this.kqlQuery,
+            ...filters,
             {
-              terms: { 'endgame.unique_pid': uniquePIDs },
-            },
-            {
-              term: { 'agent.id': endpointID },
-            },
-            {
-              term: { 'event.kind': 'event' },
-            },
-            {
-              bool: {
-                must_not: {
-                  term: { 'event.category': 'process' },
+              range: {
+                '@timestamp': {
+                  gte: this.timeRange.from,
+                  lte: this.timeRange.to,
+                  format: 'strict_date_optional_time',
                 },
               },
             },
-          ],
-        },
-      },
-      ...this.pagination.buildQueryFields('endgame.serial_event_id', 'desc'),
-    };
-  }
-
-  protected query(entityIDs: string[]): JsonObject {
-    return {
-      query: {
-        bool: {
-          filter: [
-            ...this.kqlQuery,
-            {
-              terms: { 'process.entity_id': entityIDs },
-            },
             {
               term: { 'event.kind': 'event' },
-            },
-            {
-              bool: {
-                must_not: {
-                  term: { 'event.category': 'process' },
-                },
-              },
             },
           ],
         },
@@ -83,7 +62,35 @@ export class EventsQuery extends ResolverQuery<SafeResolverEvent[]> {
     };
   }
 
-  formatResponse(response: SearchResponse<SafeResolverEvent>): SafeResolverEvent[] {
-    return this.getResults(response);
+  private buildSearch(filters: JsonObject[]) {
+    return {
+      body: this.query(filters),
+      index: this.indexPatterns,
+    };
+  }
+
+  private static buildFilters(filter: string | undefined): JsonObject[] {
+    if (filter === undefined) {
+      return [];
+    }
+
+    return [parseFilterQuery(filter)];
+  }
+
+  /**
+   * Searches ES for the specified events and format the response.
+   *
+   * @param client a client for searching ES
+   * @param filter an optional string representation of a raw Elasticsearch clause for filtering the results
+   */
+  async search(
+    client: IScopedClusterClient,
+    filter: string | undefined
+  ): Promise<SafeResolverEvent[]> {
+    const parsedFilters = EventsQuery.buildFilters(filter);
+    const response: ApiResponse<
+      SearchResponse<SafeResolverEvent>
+    > = await client.asCurrentUser.search(this.buildSearch(parsedFilters));
+    return response.body.hits.hits.map((hit) => hit._source);
   }
 }

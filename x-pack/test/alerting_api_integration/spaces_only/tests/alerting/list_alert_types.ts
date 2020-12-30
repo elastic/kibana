@@ -23,7 +23,10 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         (alertType: any) => alertType.id === 'test.noop'
       );
       expect(fixtureAlertType).to.eql({
-        actionGroups: [{ id: 'default', name: 'Default' }],
+        actionGroups: [
+          { id: 'default', name: 'Default' },
+          { id: 'recovered', name: 'Recovered' },
+        ],
         defaultActionGroupId: 'default',
         id: 'test.noop',
         name: 'Test: Noop',
@@ -32,7 +35,13 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           params: [],
           context: [],
         },
+        recoveryActionGroup: {
+          id: 'recovered',
+          name: 'Recovered',
+        },
         producer: 'alertsFixture',
+        minimumLicenseRequired: 'basic',
+        enabledInLicense: true,
       });
       expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
     });

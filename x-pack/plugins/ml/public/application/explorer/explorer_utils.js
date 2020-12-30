@@ -8,7 +8,7 @@
  * utils for Anomaly Explorer.
  */
 
-import { chain, get, union, uniq } from 'lodash';
+import { get, union, sortBy, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
 import {
@@ -198,7 +198,7 @@ export function getSelectionTimeRange(selectedCells, interval, bounds) {
     latestMs = bounds.max.valueOf();
     if (selectedCells.times[1] !== undefined) {
       // Subtract 1 ms so search does not include start of next bucket.
-      latestMs = (selectedCells.times[1] + interval) * 1000 - 1;
+      latestMs = selectedCells.times[1] * 1000 - 1;
     }
   }
 
@@ -279,17 +279,17 @@ export function getViewBySwimlaneOptions({
   const selectedJobIds = selectedJobs.map((d) => d.id);
 
   // Unique influencers for the selected job(s).
-  const viewByOptions = chain(
-    mlJobService.jobs.reduce((reducedViewByOptions, job) => {
-      if (selectedJobIds.some((jobId) => jobId === job.job_id)) {
-        return reducedViewByOptions.concat(job.analysis_config.influencers || []);
-      }
-      return reducedViewByOptions;
-    }, [])
-  )
-    .uniq()
-    .sortBy((fieldName) => fieldName.toLowerCase())
-    .value();
+  const viewByOptions = sortBy(
+    uniq(
+      mlJobService.jobs.reduce((reducedViewByOptions, job) => {
+        if (selectedJobIds.some((jobId) => jobId === job.job_id)) {
+          return reducedViewByOptions.concat(job.analysis_config.influencers || []);
+        }
+        return reducedViewByOptions;
+      }, [])
+    ),
+    (fieldName) => fieldName.toLowerCase()
+  );
 
   viewByOptions.push(VIEW_BY_JOB_LABEL);
   let viewBySwimlaneOptions = viewByOptions;
@@ -392,7 +392,7 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
 
   return new Promise((resolve) => {
     ml.annotations
-      .getAnnotations({
+      .getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,

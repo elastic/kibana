@@ -1,0 +1,47 @@
+post:
+  summary: Fleet - Agent - Enroll
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              action:
+                type: string
+              item:
+                $ref: ../components/schemas/agent.yaml
+  operationId: post-fleet-agents-enroll
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - PERMANENT
+                - EPHEMERAL
+                - TEMPORARY
+            shared_id:
+              type: string
+            metadata:
+              type: object
+              required:
+                - local
+                - user_provided
+              properties:
+                local:
+                  $ref: ../components/schemas/agent_metadata.yaml
+                user_provided:
+                  $ref: ../components/schemas/agent_metadata.yaml
+          required:
+            - type
+            - metadata
+  security:
+    - Enrollment API Key: []

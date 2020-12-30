@@ -15,7 +15,9 @@ import { convertMetricToMetricsAPIMetric } from './convert_metric_to_metrics_api
 export const convertRequestToMetricsAPIOptions = (
   options: MetricsExplorerRequestBody
 ): MetricsAPIRequest => {
-  const metrics = options.metrics.map(convertMetricToMetricsAPIMetric);
+  const metrics = options.metrics
+    .map(convertMetricToMetricsAPIMetric)
+    .filter(<M>(m: M): m is NonNullable<M> => !!m);
   const { limit, timerange, indexPattern } = options;
 
   const metricsApiOptions: MetricsAPIRequest = {

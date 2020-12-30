@@ -5,6 +5,7 @@
  */
 
 import expect from '@kbn/expect';
+import { CustomCheerioStatic } from 'test/functional/services/lib/web_element_wrapper/custom_cheerio_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const ENTER_KEY = '\uE007';
@@ -13,6 +14,24 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+
+  function getRowItemData(row: CheerioElement, $: CustomCheerioStatic) {
+    return {
+      name: $(row).findTestSubject('alertsTableCell-name').find('.euiTableCellContent').text(),
+      tagsText: $(row)
+        .findTestSubject('alertsTableCell-tagsText')
+        .find('.euiTableCellContent')
+        .text(),
+      alertType: $(row)
+        .findTestSubject('alertsTableCell-alertType')
+        .find('.euiTableCellContent')
+        .text(),
+      interval: $(row)
+        .findTestSubject('alertsTableCell-interval')
+        .find('.euiTableCellContent')
+        .text(),
+    };
+  }
 
   return {
     async getSectionHeadingText() {
@@ -78,21 +97,20 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       return $.findTestSubjects('alert-row')
         .toArray()
         .map((row) => {
+          return getRowItemData(row, $);
+        });
+    },
+    async getAlertsListWithStatus() {
+      const table = await find.byCssSelector('[data-test-subj="alertsList"] table');
+      const $ = await table.parseDomContent();
+      return $.findTestSubjects('alert-row')
+        .toArray()
+        .map((row) => {
+          const rowItem = getRowItemData(row, $);
           return {
-            name: $(row)
-              .findTestSubject('alertsTableCell-name')
-              .find('.euiTableCellContent')
-              .text(),
-            tagsText: $(row)
-              .findTestSubject('alertsTableCell-tagsText')
-              .find('.euiTableCellContent')
-              .text(),
-            alertType: $(row)
-              .findTestSubject('alertsTableCell-alertType')
-              .find('.euiTableCellContent')
-              .text(),
-            interval: $(row)
-              .findTestSubject('alertsTableCell-interval')
+            ...rowItem,
+            status: $(row)
+              .findTestSubject('alertsTableCell-status')
               .find('.euiTableCellContent')
               .text(),
           };

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../__mocks__/shallow_usecontext.mock';
+import '../../../__mocks__/enterprise_search_url.mock';
+
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -17,6 +18,6 @@ describe('WorkplaceSearchNav', () => {
 
     expect(wrapper.find(SideNav)).toHaveLength(1);
     expect(wrapper.find(SideNavLink).first().prop('to')).toEqual('/');
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('http://localhost:3002/ws/search');
+    expect(wrapper.find(SideNavLink)).toHaveLength(7);
   });
 });

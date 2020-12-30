@@ -20,7 +20,6 @@ interface ManageTimelineInit {
   filterManager?: FilterManager;
   footerText?: string;
   id: string;
-  indexToAdd?: string[] | null;
   loadingText?: string;
   selectAll?: boolean;
   queryFields?: string[];
@@ -34,7 +33,6 @@ interface ManageTimeline {
   filterManager?: FilterManager;
   footerText: string;
   id: string;
-  indexToAdd: string[] | null;
   isLoading: boolean;
   loadingText: string;
   queryFields: string[];
@@ -59,18 +57,12 @@ type ActionManageTimeline =
       payload: boolean;
     }
   | {
-      type: 'SET_INDEX_TO_ADD';
-      id: string;
-      payload: string[];
-    }
-  | {
       type: 'SET_SELECT_ALL';
       id: string;
       payload: boolean;
     };
 
 export const getTimelineDefaults = (id: string) => ({
-  indexToAdd: null,
   defaultModel: timelineDefaultModel,
   loadingText: i18n.LOADING_EVENTS,
   footerText: i18nF.TOTAL_COUNT_OF_EVENTS,
@@ -96,14 +88,6 @@ const reducerManageTimeline = (
           ...action.payload,
         },
       } as ManageTimelineById;
-    case 'SET_INDEX_TO_ADD':
-      return {
-        ...state,
-        [action.id]: {
-          ...state[action.id],
-          indexToAdd: action.payload,
-        },
-      } as ManageTimelineById;
     case 'SET_SELECT_ALL':
       return {
         ...state,
@@ -127,12 +111,10 @@ const reducerManageTimeline = (
 };
 
 export interface UseTimelineManager {
-  getIndexToAddById: (id: string) => string[] | null;
   getManageTimelineById: (id: string) => ManageTimeline;
   getTimelineFilterManager: (id: string) => FilterManager | undefined;
   initializeTimeline: (newTimeline: ManageTimelineInit) => void;
   isManagedTimeline: (id: string) => boolean;
-  setIndexToAdd: (indexToAddArgs: { id: string; indexToAdd: string[] }) => void;
   setIsTimelineLoading: (isLoadingArgs: { id: string; isLoading: boolean }) => void;
   setSelectAll: (selectAllArgs: { id: string; selectAll: boolean }) => void;
 }
@@ -163,14 +145,6 @@ export const useTimelineManager = (
     []
   );
 
-  const setIndexToAdd = useCallback(({ id, indexToAdd }: { id: string; indexToAdd: string[] }) => {
-    dispatch({
-      type: 'SET_INDEX_TO_ADD',
-      id,
-      payload: indexToAdd,
-    });
-  }, []);
-
   const setSelectAll = useCallback(({ id, selectAll }: { id: string; selectAll: boolean }) => {
     dispatch({
       type: 'SET_SELECT_ALL',
@@ -193,36 +167,23 @@ export const useTimelineManager = (
     },
     [initializeTimeline, state]
   );
-  const getIndexToAddById = useCallback(
-    (id: string): string[] | null => {
-      if (state[id] != null) {
-        return state[id].indexToAdd;
-      }
-      return getTimelineDefaults(id).indexToAdd;
-    },
-    [state]
-  );
   const isManagedTimeline = useCallback((id: string): boolean => state[id] != null, [state]);
 
   return {
-    getIndexToAddById,
     getManageTimelineById,
     getTimelineFilterManager,
     initializeTimeline,
     isManagedTimeline,
-    setIndexToAdd,
     setIsTimelineLoading,
     setSelectAll,
   };
 };
 
 const init = {
-  getIndexToAddById: (id: string) => null,
   getManageTimelineById: (id: string) => getTimelineDefaults(id),
   getTimelineFilterManager: () => undefined,
   initializeTimeline: () => noop,
   isManagedTimeline: () => false,
-  setIndexToAdd: () => undefined,
   setIsTimelineLoading: () => noop,
   setSelectAll: () => noop,
 };

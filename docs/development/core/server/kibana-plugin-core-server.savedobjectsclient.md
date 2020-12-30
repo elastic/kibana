@@ -35,5 +35,6 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [deleteFromNamespaces(type, id, namespaces, options)](./kibana-plugin-core-server.savedobjectsclient.deletefromnamespaces.md) |  | Removes namespaces from a SavedObject |
 |  [find(options)](./kibana-plugin-core-server.savedobjectsclient.find.md) |  | Find all SavedObjects matching the search query |
 |  [get(type, id, options)](./kibana-plugin-core-server.savedobjectsclient.get.md) |  | Retrieves a single object |
+|  [removeReferencesTo(type, id, options)](./kibana-plugin-core-server.savedobjectsclient.removereferencesto.md) |  | Updates all objects containing a reference to the given {<!-- -->type, id<!-- -->} tuple to remove the said reference. |
 |  [update(type, id, attributes, options)](./kibana-plugin-core-server.savedobjectsclient.update.md) |  | Updates an SavedObject |
 

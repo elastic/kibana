@@ -46,10 +46,21 @@ export { readConfigFile } from './functional_test_runner/lib/config/read_config_
 
 export { runFtrCli } from './functional_test_runner/cli';
 
-export { runFailedTestsReporterCli } from './failed_tests_reporter';
+export {
+  createAutoJUnitReporter,
+  runMochaCli,
+  setupJUnitReportGeneration,
+  escapeCdata,
+} from './mocha';
 
-export { makeJunitReportPath } from './junit_report_path';
+export { runFailedTestsReporterCli } from './failed_tests_reporter';
 
 export { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
 
 export * from './functional_test_runner';
+
+export { getUrl } from './jest/utils/get_url';
+
+export { runCheckJestConfigsCli } from './jest/run_check_jest_configs_cli';
+
+export { runJest } from './jest/run';

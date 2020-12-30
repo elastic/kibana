@@ -94,3 +94,7 @@ export const searchTextSelector = ({ ui: { searchText } }: AppState) => searchTe
 export const selectedFiltersSelector = ({ selectedFilters }: AppState) => selectedFilters;
 
 export const monitorIdSelector = ({ ui: { monitorId } }: AppState) => monitorId;
+
+export const journeySelector = ({ journeys }: AppState) => journeys;
+
+export const networkEventsSelector = ({ networkEvents }: AppState) => networkEvents;

@@ -88,7 +88,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   function renderMenu(className: string): ReactElement | null {
     if (!config || config.length === 0) return null;
     return (
-      <EuiHeaderLinks data-test-subj="top-nav" className={className}>
+      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
         {renderItems()}
       </EuiHeaderLinks>
     );

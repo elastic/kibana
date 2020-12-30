@@ -4,6 +4,8 @@
 
 ## IndexPatternField.script property
 
+Script field code
+
 <b>Signature:</b>
 
 ```typescript

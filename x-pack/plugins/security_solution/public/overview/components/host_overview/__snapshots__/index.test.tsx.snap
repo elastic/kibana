@@ -192,8 +192,10 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
       },
     }
   }
+  docValueFields={Array []}
   endDate="2019-06-18T06:00:00.000Z"
   id="hostOverview"
+  indexNames={Array []}
   isLoadingAnomaliesData={false}
   loading={false}
   narrowDateRange={[MockFunction]}

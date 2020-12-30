@@ -7,19 +7,13 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { FormDrilldownWizard } from './form_drilldown_wizard';
-import { render as renderTestingLibrary, fireEvent, cleanup } from '@testing-library/react/pure';
+import { render as renderTestingLibrary, fireEvent } from '@testing-library/react';
 import { txtNameOfDrilldown } from './i18n';
 import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
 
-afterEach(cleanup);
-
 const otherProps = {
   actionFactoryContext: { triggers: [] as TriggerId[] },
-  supportedTriggers: [
-    'VALUE_CLICK_TRIGGER',
-    'SELECT_RANGE_TRIGGER',
-    'FILTER_TRIGGER',
-  ] as TriggerId[],
+  triggers: ['VALUE_CLICK_TRIGGER', 'SELECT_RANGE_TRIGGER', 'FILTER_TRIGGER'] as TriggerId[],
   getTriggerInfo: (id: TriggerId) => ({ id } as Trigger),
   onSelectedTriggersChange: () => {},
 };

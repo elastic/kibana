@@ -4,38 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ALERT_ID } from '../screens/alerts';
+import { newRule } from '../objects/rule';
 import { PROVIDER_BADGE } from '../screens/timeline';
 
 import {
-  expandFirstAlert,
   investigateFirstAlertInTimeline,
+  waitForAlertsIndexToBeCreated,
   waitForAlertsPanelToBeLoaded,
 } from '../tasks/alerts';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { createCustomRuleActivated } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
+import { waitForAlertsToPopulate } from '../tasks/create_new_rule';
 import { loginAndWaitForPage } from '../tasks/login';
+import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
 describe('Alerts timeline', () => {
   beforeEach(() => {
-    esArchiverLoad('timeline_alerts');
+    cleanKibana();
     loginAndWaitForPage(DETECTIONS_URL);
-  });
-
-  afterEach(() => {
-    esArchiverUnload('timeline_alerts');
+    waitForAlertsPanelToBeLoaded();
+    waitForAlertsIndexToBeCreated();
+    createCustomRuleActivated(newRule);
+    refreshPage();
+    waitForAlertsToPopulate();
   });
 
   it('Investigate alert in default timeline', () => {
-    waitForAlertsPanelToBeLoaded();
-    expandFirstAlert();
-    cy.get(ALERT_ID)
+    investigateFirstAlertInTimeline();
+    cy.get(PROVIDER_BADGE)
       .first()
       .invoke('text')
       .then((eventId) => {
         investigateFirstAlertInTimeline();
-        cy.get(PROVIDER_BADGE).invoke('text').should('eql', `_id: "${eventId}"`);
+        cy.get(PROVIDER_BADGE).filter(':visible').should('have.text', eventId);
       });
   });
 });

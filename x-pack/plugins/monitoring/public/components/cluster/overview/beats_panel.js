@@ -96,7 +96,7 @@ export function BeatsPanel(props) {
             </EuiTitle>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.beatsPanel.totalEventsLabel"
                   defaultMessage="Total Events"
@@ -105,7 +105,7 @@ export function BeatsPanel(props) {
               <EuiDescriptionListDescription data-test-subj="beatsTotalEvents">
                 {formatMetric(props.totalEvents, '0.[0]a')}
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="eui-textBreakWord">
                 <FormattedMessage
                   id="xpack.monitoring.cluster.overview.beatsPanel.bytesSentLabel"
                   defaultMessage="Bytes Sent"
@@ -145,7 +145,11 @@ export function BeatsPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeMetricbeatMigrationTooltip}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  {setupModeMetricbeatMigrationTooltip}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">{beatTypes}</EuiDescriptionList>

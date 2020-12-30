@@ -11,9 +11,10 @@ import {
   ILegacyClusterClient,
 } from 'kibana/server';
 import { identity } from 'lodash';
+import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
 import { alertsClientMock, AlertsClientMock } from '../alerts_client.mock';
-import { AlertType } from '../../common';
+import { AlertsHealth, AlertType } from '../../common';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 
 export function mockHandlerArguments(
@@ -21,10 +22,13 @@ export function mockHandlerArguments(
     alertsClient = alertsClientMock.create(),
     listTypes: listTypesRes = [],
     esClient = elasticsearchServiceMock.createLegacyClusterClient(),
+    getFrameworkHealth,
   }: {
     alertsClient?: AlertsClientMock;
     listTypes?: AlertType[];
     esClient?: jest.Mocked<ILegacyClusterClient>;
+    getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
+      (() => Promise<AlertsHealth>);
   },
   req: unknown,
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
@@ -38,6 +42,7 @@ export function mockHandlerArguments(
         getAlertsClient() {
           return alertsClient || alertsClientMock.create();
         },
+        getFrameworkHealth,
       },
     } as unknown) as RequestHandlerContext,
     req as KibanaRequest<unknown, unknown, unknown>,

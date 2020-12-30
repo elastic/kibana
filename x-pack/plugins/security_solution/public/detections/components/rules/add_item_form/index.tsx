@@ -38,9 +38,9 @@ const MyEuiFormRow = styled(EuiFormRow)`
 `;
 
 export const MyAddItemButton = styled(EuiButtonEmpty)`
-  margin-top: 4px;
+  margin: 4px 0px;
 
-  &.euiButtonEmpty--xSmall {
+  &.euiButtonEmpty--small {
     font-size: 12px;
   }
 
@@ -53,7 +53,7 @@ export const MyAddItemButton = styled(EuiButtonEmpty)`
 MyAddItemButton.defaultProps = {
   flush: 'left',
   iconType: 'plusInCircle',
-  size: 'xs',
+  size: 's',
 };
 
 export const AddItem = ({
@@ -147,10 +147,7 @@ export const AddItem = ({
             ...(index === values.length - 1
               ? { inputRef: handleLastInputRef.bind(null, index) }
               : {}),
-            ...((inputsRef.current[index] != null && inputsRef.current[index].value !== item) ||
-            inputsRef.current[index] == null
-              ? { value: item }
-              : {}),
+            value: item,
             isInvalid: validate == null ? false : showValidation && validate(item),
           };
           return (

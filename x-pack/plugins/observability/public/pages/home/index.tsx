@@ -5,24 +5,20 @@
  */
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { fetchHasData } from '../../data_handler';
-import { useFetcher } from '../../hooks/use_fetcher';
+import { useHasData } from '../../hooks/use_has_data';
+import { LoadingObservability } from '../overview/loading_observability';
 
 export function HomePage() {
   const history = useHistory();
-  const { data = {} } = useFetcher(() => fetchHasData(), []);
-
-  const values = Object.values(data);
-  const hasSomeData = values.length ? values.some((hasData) => hasData) : null;
+  const { hasAnyData, isAllRequestsComplete } = useHasData();
 
   useEffect(() => {
-    if (hasSomeData === true) {
+    if (hasAnyData === true) {
       history.push({ pathname: '/overview' });
-    }
-    if (hasSomeData === false) {
+    } else if (hasAnyData === false && isAllRequestsComplete === true) {
       history.push({ pathname: '/landing' });
     }
-  }, [hasSomeData, history]);
+  }, [hasAnyData, isAllRequestsComplete, history]);
 
-  return <></>;
+  return <LoadingObservability />;
 }

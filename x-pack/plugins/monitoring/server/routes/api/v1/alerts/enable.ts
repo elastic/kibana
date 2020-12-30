@@ -44,7 +44,7 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
         const actionsClient = context.actions?.getActionsClient();
         const types = context.actions?.listTypes();
         if (!alertsClient || !actionsClient || !types) {
-          return response.notFound();
+          return response.ok({ body: undefined });
         }
 
         // Get or create the default log action

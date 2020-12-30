@@ -10,7 +10,6 @@ import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router } from 'react-router-dom';
-import 'react-vis/dist/style.css';
 import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
 import {
   KibanaContextProvider,
@@ -20,15 +19,15 @@ import {
 import { APMRouteDefinition } from '../application/routes';
 import { renderAsRedirectTo } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { RumHome } from '../components/app/RumDashboard/RumHome';
-import { ApmPluginContext } from '../context/ApmPluginContext';
-import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
-import { UrlParamsProvider } from '../context/UrlParamsContext';
+import { RumHome, UX_LABEL } from '../components/app/RumDashboard/RumHome';
+import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
+import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
 import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { px, units } from '../style/variables';
+import { createStaticIndexPattern } from '../services/rest/index_pattern';
 
 const CsmMainContainer = styled.div`
   padding: ${px(units.plus)};
@@ -39,8 +38,8 @@ export const rumRoutes: APMRouteDefinition[] = [
   {
     exact: true,
     path: '/',
-    render: renderAsRedirectTo('/csm'),
-    breadcrumb: 'Client Side Monitoring',
+    render: renderAsRedirectTo('/ux'),
+    breadcrumb: UX_LABEL,
   },
 ];
 
@@ -66,21 +65,23 @@ function CsmApp() {
 }
 
 export function CsmAppRoot({
+  appMountParameters,
   core,
   deps,
-  history,
   config,
-  corePlugins: { embeddable },
+  corePlugins: { embeddable, maps },
 }: {
+  appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ApmPluginSetupDeps;
-  history: AppMountParameters['history'];
   config: ConfigSchema;
   corePlugins: ApmPluginStartDeps;
 }) {
+  const { history } = appMountParameters;
   const i18nCore = core.i18n;
-  const plugins = deps;
+  const plugins = { ...deps, maps };
   const apmPluginContextValue = {
+    appMountParameters,
     config,
     core,
     plugins,
@@ -92,9 +93,7 @@ export function CsmAppRoot({
           <i18nCore.Context>
             <Router history={history}>
               <UrlParamsProvider>
-                <LoadingIndicatorProvider>
-                  <CsmApp />
-                </LoadingIndicatorProvider>
+                <CsmApp />
               </UrlParamsProvider>
             </Router>
           </i18nCore.Context>
@@ -111,17 +110,25 @@ export function CsmAppRoot({
 export const renderApp = (
   core: CoreStart,
   deps: ApmPluginSetupDeps,
-  { element, history }: AppMountParameters,
+  appMountParameters: AppMountParameters,
   config: ConfigSchema,
   corePlugins: ApmPluginStartDeps
 ) => {
+  const { element } = appMountParameters;
+
   createCallApmApi(core.http);
+
+  // Automatically creates static index pattern and stores as saved object
+  createStaticIndexPattern().catch((e) => {
+    // eslint-disable-next-line no-console
+    console.log('Error creating static index pattern', e);
+  });
 
   ReactDOM.render(
     <CsmAppRoot
+      appMountParameters={appMountParameters}
       core={core}
       deps={deps}
-      history={history}
       config={config}
       corePlugins={corePlugins}
     />,

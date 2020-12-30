@@ -29,7 +29,6 @@ import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 import { OBSERVABILITY_METRIC_TYPE } from './metric_select';
 import { DISPLAY } from './display_select';
 import { VectorStyle } from '../../../styles/vector/vector_style';
-// @ts-ignore
 import { EMSFileSource } from '../../../sources/ems_file_source';
 // @ts-ignore
 import { ESGeoGridSource } from '../../../sources/es_geo_grid_source';
@@ -51,7 +50,7 @@ function createDynamicFillColorDescriptor(
   return {
     type: STYLE_TYPE.DYNAMIC,
     options: {
-      ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR]!.options as ColorDynamicOptions),
+      ...(defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options as ColorDynamicOptions),
       field,
       color:
         layer === OBSERVABILITY_LAYER_TYPE.APM_RUM_PERFORMANCE ? 'Green to Red' : 'Yellow to Red',
@@ -162,7 +161,7 @@ export function createLayerDescriptor({
     const joinId = uuid();
     const joinKey = getJoinAggKey({
       aggType: metricsDescriptor.type,
-      aggFieldName: metricsDescriptor.field ? metricsDescriptor.field : '',
+      aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
       rightSourceId: joinId,
     });
     return VectorLayer.createDescriptor({
@@ -178,6 +177,8 @@ export function createLayerDescriptor({
             term: 'client.geo.country_iso_code',
             metrics: [metricsDescriptor],
             whereQuery: apmSourceQuery,
+            applyGlobalQuery: true,
+            applyGlobalTime: true,
           },
         },
       ],
@@ -218,19 +219,19 @@ export function createLayerDescriptor({
 
   const metricSourceKey = getSourceAggKey({
     aggType: metricsDescriptor.type,
-    aggFieldName: metricsDescriptor.field,
+    aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : undefined,
   });
   const metricStyleField = {
     name: metricSourceKey,
     origin: FIELD_ORIGIN.SOURCE,
   };
 
-  const styleProperties: VectorStylePropertiesDescriptor = {
+  const styleProperties: Partial<VectorStylePropertiesDescriptor> = {
     [VECTOR_STYLES.FILL_COLOR]: createDynamicFillColorDescriptor(layer, metricStyleField),
     [VECTOR_STYLES.ICON_SIZE]: {
       type: STYLE_TYPE.DYNAMIC,
       options: {
-        ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE]!.options as SizeDynamicOptions),
+        ...(defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options as SizeDynamicOptions),
         field: metricStyleField,
       },
     },

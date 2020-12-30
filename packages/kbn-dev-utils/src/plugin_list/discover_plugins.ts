@@ -24,12 +24,12 @@ import MarkdownIt from 'markdown-it';
 import cheerio from 'cheerio';
 import { REPO_ROOT } from '@kbn/utils';
 
-import { simpleKibanaPlatformPluginDiscovery } from '../simple_kibana_platform_plugin_discovery';
+import { simpleKibanaPlatformPluginDiscovery } from '../plugins';
 import { extractAsciidocInfo } from './extract_asciidoc_info';
 
 export interface Plugin {
   id: string;
-  relativeDir?: string;
+  relativeDir: string;
   relativeReadmePath?: string;
   readmeSnippet?: string;
   readmeAsciidocAnchor?: string;
@@ -38,7 +38,9 @@ export interface Plugin {
 export type Plugins = Plugin[];
 
 const getReadmeName = (directory: string) =>
-  Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.md');
+  Fs.readdirSync(directory).find(
+    (name) => name.toLowerCase() === 'readme.md' || name.toLowerCase() === 'readme.mdx'
+  );
 
 const getReadmeAsciidocName = (directory: string) =>
   Fs.readdirSync(directory).find((name) => name.toLowerCase() === 'readme.asciidoc');

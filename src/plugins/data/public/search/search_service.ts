@@ -17,16 +17,25 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  StartServicesAccessor,
+} from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
+import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
 import { handleResponse } from './fetch';
 import {
-  createSearchSource,
+  kibana,
+  kibanaContext,
+  kibanaContextFunction,
   ISearchGeneric,
-  SearchSource,
   SearchSourceDependencies,
+  SearchSourceService,
 } from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
@@ -34,11 +43,20 @@ import { IndexPatternsContract } from '../index_patterns/index_patterns';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { SearchUsageCollector, createUsageCollector } from './collectors';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { esdsl, esRawResponse } from './expressions';
+import { esdsl, esRawResponse, getEsaggs } from './expressions';
 import { ExpressionsSetup } from '../../../expressions/public';
+import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
+import { ConfigSchema } from '../../config';
+import {
+  SHARD_DELAY_AGG_NAME,
+  getShardDelayBucketAgg,
+} from '../../common/search/aggs/buckets/shard_delay';
+import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
+import { DataPublicPluginStart, DataStartDependencies } from '../types';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
+  bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   usageCollection?: UsageCollectionSetup;
 }
@@ -51,39 +69,70 @@ export interface SearchServiceStartDependencies {
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
+  private readonly searchSourceService = new SearchSourceService();
   private searchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
+  private sessionService!: ISessionService;
+  private sessionsClient!: ISessionsClient;
+
+  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     { http, getStartServices, notifications, uiSettings }: CoreSetup,
-    { expressions, usageCollection }: SearchServiceSetupDependencies
+    { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     this.usageCollector = createUsageCollector(getStartServices, usageCollection);
 
+    this.sessionsClient = new SessionsClient({ http });
+    this.sessionService = new SessionService(
+      this.initializerContext,
+      getStartServices,
+      this.sessionsClient
+    );
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
      * all pending search requests, as well as getting the number of pending search requests.
      */
     this.searchInterceptor = new SearchInterceptor({
+      bfetch,
       toasts: notifications.toasts,
       http,
       uiSettings,
       startServices: getStartServices(),
       usageCollector: this.usageCollector!,
+      session: this.sessionService,
     });
+
+    expressions.registerFunction(
+      getEsaggs({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
+    expressions.registerFunction(kibana);
+    expressions.registerFunction(kibanaContextFunction);
+    expressions.registerType(kibanaContext);
 
     expressions.registerFunction(esdsl);
     expressions.registerType(esRawResponse);
 
+    const aggs = this.aggsService.setup({
+      registerFunction: expressions.registerFunction,
+      uiSettings,
+    });
+
+    if (this.initializerContext.config.get().search.aggs.shardDelay.enabled) {
+      aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
+      expressions.registerFunction(aggShardDelay);
+    }
+
     return {
-      aggs: this.aggsService.setup({
-        registerFunction: expressions.registerFunction,
-        uiSettings,
-      }),
+      aggs,
       usageCollector: this.usageCollector!,
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
+      session: this.sessionService,
+      sessionsClient: this.sessionsClient,
     };
   }
 
@@ -109,24 +158,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     };
 
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings }),
+      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
       search,
-      searchSource: {
-        /**
-         * creates searchsource based on serialized search source fields
-         */
-        create: createSearchSource(indexPatterns, searchSourceDependencies),
-        /**
-         * creates an enpty search source
-         */
-        createEmpty: () => {
-          return new SearchSource({}, searchSourceDependencies);
-        },
+      showError: (e: Error) => {
+        this.searchInterceptor.showError(e);
       },
+      session: this.sessionService,
+      sessionsClient: this.sessionsClient,
+      searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
     };
   }
 
   public stop() {
     this.aggsService.stop();
+    this.searchSourceService.stop();
   }
 }

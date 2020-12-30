@@ -2,11 +2,13 @@
 [[alert-types]]
 == Alert types
 
-{kib} supplies alerts types in two ways: some are built into {kib}, while domain-specific alert types are registered by {kib} apps such as <<xpack-apm,*APM*>>, <<xpack-infra,*Metrics*>>, and <<xpack-uptime,*Uptime*>>.
+{kib} supplies alert types in two ways: some are built into {kib} (these are known as stack alerts), while domain-specific alert types are registered by {kib} apps such as <<xpack-apm,*APM*>>, <<metrics-app,*Metrics*>>, and <<uptime-app,*Uptime*>>.
 
-This section covers built-in alert types. For domain-specific alert types, refer to the documentation for that app. 
+This section covers stack alerts. For domain-specific alert types, refer to the documentation for that app.
+Users will need `all` access to the *Stack Alerts* feature to be able to create and edit any of the alerts listed below.
+See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to this feature. 
 
-Currently {kib} provides one built-in alert type: the <<alert-type-index-threshold>> type. 
+Currently {kib} provides one stack alert: the <<alert-type-index-threshold>> type.
 
 [float]
 [[alert-type-index-threshold]]

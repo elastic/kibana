@@ -23,6 +23,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { expressionsPluginMock } from '../../../../../plugins/expressions/public/mocks';
 import { BucketAggType, getAggTypes, MetricAggType } from '../../../common';
 import { fieldFormatsServiceMock } from '../../field_formats/mocks';
+import { dataPluginMock } from '../../mocks';
 
 import {
   AggsService,
@@ -46,6 +47,7 @@ describe('AggsService - public', () => {
     };
     startDeps = {
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
+      indexPatterns: dataPluginMock.createStartContract().indexPatterns,
       uiSettings,
     };
   });
@@ -86,10 +88,12 @@ describe('AggsService - public', () => {
   describe('start()', () => {
     test('exposes proper contract', () => {
       const start = service.start(startDeps);
-      expect(Object.keys(start).length).toBe(3);
+      expect(Object.keys(start).length).toBe(5);
       expect(start).toHaveProperty('calculateAutoTimeExpression');
+      expect(start).toHaveProperty('getDateMetaByDatatableColumn');
       expect(start).toHaveProperty('createAggConfigs');
       expect(start).toHaveProperty('types');
+      expect(start).toHaveProperty('datatableUtilities');
     });
 
     test('types registry returns initialized agg types', () => {

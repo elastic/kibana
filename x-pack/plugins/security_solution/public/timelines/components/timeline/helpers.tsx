@@ -7,6 +7,13 @@
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
+import {
+  handleSkipFocus,
+  elementOrChildrenHasFocus,
+  getFocusedAriaColindexCell,
+  getTableSkipFocus,
+  stopPropagationAndPreventDefault,
+} from '../../../common/components/accessibility/helpers';
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
 import {
@@ -22,6 +29,8 @@ import {
   EsQueryConfig,
   Filter,
 } from '../../../../../../../src/plugins/data/public';
+
+import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
 const isNumber = (value: string | number) => !isNaN(Number(value));
 
@@ -104,8 +113,6 @@ export const combineQueries = ({
   filters = [],
   kqlQuery,
   kqlMode,
-  start,
-  end,
   isEventViewer,
 }: {
   config: EsQueryConfig;
@@ -115,8 +122,6 @@ export const combineQueries = ({
   filters: Filter[];
   kqlQuery: Query;
   kqlMode: string;
-  start: string;
-  end: string;
   isEventViewer?: boolean;
 }): { filterQuery: string } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
@@ -169,3 +174,71 @@ export const showGlobalFilters = ({
   globalFullScreen: boolean;
   graphEventId: string | undefined;
 }): boolean => (globalFullScreen && resolverIsShowing(graphEventId) ? false : true);
+
+/**
+ * The `aria-colindex` of the Timeline actions column
+ */
+export const ACTIONS_COLUMN_ARIA_COL_INDEX = '1';
+
+/**
+ * Every column index offset by `2`, because, per https://www.w3.org/TR/wai-aria-practices-1.1/examples/grid/dataGrids.html
+ * the `aria-colindex` attribute starts at `1`, and the "actions column" is always the first column
+ */
+export const ARIA_COLUMN_INDEX_OFFSET = 2;
+
+export const EVENTS_COUNT_BUTTON_CLASS_NAME = 'local-events-count-button';
+
+/** Calculates the total number of pages in a (timeline) events view */
+export const calculateTotalPages = ({
+  itemsCount,
+  itemsPerPage,
+}: {
+  itemsCount: number;
+  itemsPerPage: number;
+}): number => (itemsCount === 0 || itemsPerPage === 0 ? 0 : Math.ceil(itemsCount / itemsPerPage));
+
+/** Returns true if the events table has focus */
+export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>
+  elementOrChildrenHasFocus(
+    containerElement?.querySelector<HTMLDivElement>(`.${EVENTS_TABLE_CLASS_NAME}`)
+  );
+
+/**
+ * This function has a side effect. It will skip focus "after" or "before"
+ * Timeline's events table, with exceptions as noted below.
+ *
+ * If the currently-focused table cell has additional focusable children,
+ * i.e. action buttons, draggables, or always-open popover content, the
+ * browser's "natural" focus management will determine which element is
+ * focused next.
+ */
+export const onTimelineTabKeyPressed = ({
+  containerElement,
+  keyboardEvent,
+  onSkipFocusBeforeEventsTable,
+  onSkipFocusAfterEventsTable,
+}: {
+  containerElement: HTMLElement | null;
+  keyboardEvent: React.KeyboardEvent;
+  onSkipFocusBeforeEventsTable: () => void;
+  onSkipFocusAfterEventsTable: () => void;
+}) => {
+  const { shiftKey } = keyboardEvent;
+
+  const eventsTableSkipFocus = getTableSkipFocus({
+    containerElement,
+    getFocusedCell: getFocusedAriaColindexCell,
+    shiftKey,
+    tableHasFocus,
+    tableClassName: EVENTS_TABLE_CLASS_NAME,
+  });
+
+  if (eventsTableSkipFocus !== 'SKIP_FOCUS_NOOP') {
+    stopPropagationAndPreventDefault(keyboardEvent);
+    handleSkipFocus({
+      onSkipFocusBackwards: onSkipFocusBeforeEventsTable,
+      onSkipFocusForward: onSkipFocusAfterEventsTable,
+      skipFocus: eventsTableSkipFocus,
+    });
+  }
+};

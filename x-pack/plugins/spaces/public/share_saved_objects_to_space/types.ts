@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsImportRetry, SavedObjectsImportResponse } from 'src/core/public';
-import { Space } from '..';
+import { GetSpaceResult } from '..';
 
 export interface ShareOptions {
   selectedSpaceIds: string[];
@@ -17,6 +17,7 @@ export interface ShareSavedObjectsToSpaceResponse {
   [spaceId: string]: SavedObjectsImportResponse;
 }
 
-export interface SpaceTarget extends Space {
+export interface SpaceTarget extends Omit<GetSpaceResult, 'disabledFeatures'> {
   isActiveSpace: boolean;
+  isPartiallyAuthorized?: boolean;
 }

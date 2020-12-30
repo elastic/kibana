@@ -19,6 +19,7 @@ const BadgeText = styled.div`
 interface Props {
   value: string[];
   onRemove: (val: string) => void;
+  name: string;
 }
 
 const removeFilterLabel = i18n.translate(
@@ -26,9 +27,9 @@ const removeFilterLabel = i18n.translate(
   { defaultMessage: 'Remove filter' }
 );
 
-function FilterBadgeList({ onRemove, value }: Props) {
+function FilterBadgeList({ onRemove, value, name }: Props) {
   return (
-    <EuiFlexGrid gutterSize="s">
+    <EuiFlexGrid gutterSize="s" id={`local-filter-values-${name}`}>
       {value.map((val) => (
         <EuiFlexItem key={val} grow={false}>
           <EuiBadge

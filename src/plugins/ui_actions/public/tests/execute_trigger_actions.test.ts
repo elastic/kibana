@@ -22,7 +22,7 @@ import { openContextMenu } from '../context_menu';
 import { uiActionsPluginMock } from '../mocks';
 import { Trigger } from '../triggers';
 import { TriggerId, ActionType } from '../types';
-import { wait } from '@testing-library/dom';
+import { waitFor } from '@testing-library/dom';
 
 jest.mock('../context_menu');
 
@@ -85,7 +85,7 @@ test('executes a single action mapped to a trigger', async () => {
   expect(executeFn).toBeCalledWith(expect.objectContaining(context));
 });
 
-test('throws an error if there are no compatible actions to execute', async () => {
+test("doesn't throw an error if there are no compatible actions to execute", async () => {
   const { setup, doStart } = uiActions;
   const trigger: Trigger = {
     id: 'MY-TRIGGER' as TriggerId,
@@ -98,9 +98,7 @@ test('throws an error if there are no compatible actions to execute', async () =
   const start = doStart();
   await expect(
     start.executeTriggerActions('MY-TRIGGER' as TriggerId, context)
-  ).rejects.toMatchObject(
-    new Error('No compatible actions found to execute for trigger [triggerId = MY-TRIGGER].')
-  );
+  ).resolves.toBeUndefined();
 });
 
 test('does not execute an incompatible action', async () => {
@@ -145,11 +143,36 @@ test('shows a context menu when more than one action is mapped to a trigger', as
 
   const start = doStart();
   const context = {};
-  await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
+  await start.getTrigger('MY-TRIGGER' as TriggerId)!.exec(context);
 
   jest.runAllTimers();
 
-  await wait(() => {
+  await waitFor(() => {
+    expect(executeFn).toBeCalledTimes(0);
+    expect(openContextMenu).toHaveBeenCalledTimes(1);
+  });
+});
+
+test('shows a context menu when there is only one action mapped to a trigger and "alwaysShowPopup" is set', async () => {
+  const { setup, doStart } = uiActions;
+  const trigger: Trigger = {
+    id: 'MY-TRIGGER' as TriggerId,
+    title: 'My trigger',
+  };
+  const action1 = createTestAction('test1', () => true);
+
+  setup.registerTrigger(trigger);
+  setup.addTriggerAction(trigger.id, action1);
+
+  expect(openContextMenu).toHaveBeenCalledTimes(0);
+
+  const start = doStart();
+  const context = {};
+  await start.getTrigger('MY-TRIGGER' as TriggerId)!.exec(context, true);
+
+  jest.runAllTimers();
+
+  await waitFor(() => {
     expect(executeFn).toBeCalledTimes(0);
     expect(openContextMenu).toHaveBeenCalledTimes(1);
   });
@@ -197,7 +220,7 @@ test("doesn't show a context menu for auto executable actions", async () => {
 
   jest.runAllTimers();
 
-  await wait(() => {
+  await waitFor(() => {
     expect(executeFn).toBeCalledTimes(2);
     expect(openContextMenu).toHaveBeenCalledTimes(0);
   });

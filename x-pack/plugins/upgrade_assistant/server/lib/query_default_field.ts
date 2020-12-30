@@ -5,7 +5,7 @@
  */
 
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { get } from 'lodash';
 
 import { MappingProperties } from './reindexing/types';

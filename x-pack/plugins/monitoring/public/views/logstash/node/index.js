@@ -76,6 +76,7 @@ uiRoutes.when('/logstash/node/:uuid', {
             alertTypeIds: [ALERT_LOGSTASH_VERSION_MISMATCH],
           },
         },
+        telemetryPageViewTitle: 'logstash_node',
       });
 
       $scope.$watch(
@@ -88,6 +89,15 @@ uiRoutes.when('/logstash/node/:uuid', {
           this.setTitle(
             i18n.translate('xpack.monitoring.logstash.node.routeTitle', {
               defaultMessage: 'Logstash - {nodeName}',
+              values: {
+                nodeName: data.nodeSummary.name,
+              },
+            })
+          );
+
+          this.setPageTitle(
+            i18n.translate('xpack.monitoring.logstash.node.pageTitle', {
+              defaultMessage: 'Logstash node: {nodeName}',
               values: {
                 nodeName: data.nodeSummary.name,
               },

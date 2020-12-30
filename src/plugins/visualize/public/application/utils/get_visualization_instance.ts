@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   SerializedVis,
   Vis,
@@ -28,6 +27,7 @@ import {
 import { SearchSourceFields } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
 import { cloneDeep } from 'lodash';
+import { ExpressionValueError } from 'src/plugins/expressions/public';
 import { createSavedSearchesLoader } from '../../../../discover/public';
 import { VisualizeServices } from '../types';
 
@@ -36,12 +36,10 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   visualizeServices: VisualizeServices
 ) => {
   const {
-    chrome,
     data,
-    overlays,
     createVisEmbeddableFromObject,
     savedObjects,
-    toastNotifications,
+    savedObjectsPublic,
   } = visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     timeRange: data.query.timefilter.timefilter.getTime(),
@@ -51,11 +49,9 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
 
   embeddableHandler.getOutput$().subscribe((output) => {
     if (output.error) {
-      toastNotifications.addError(output.error, {
-        title: i18n.translate('visualize.error.title', {
-          defaultMessage: 'Visualization error',
-        }),
-      });
+      data.search.showError(
+        ((output.error as unknown) as ExpressionValueError['error']).original || output.error
+      );
     }
   });
 
@@ -64,10 +60,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
   if (vis.data.savedSearchId) {
     savedSearch = await createSavedSearchesLoader({
       savedObjectsClient: savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      search: data.search,
-      chrome,
-      overlays,
+      savedObjects: savedObjectsPublic,
     }).get(vis.data.savedSearchId);
   }
 

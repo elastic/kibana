@@ -38,7 +38,7 @@ describe('getLoggingHref', () => {
         summary: {},
         summaryPings: [ping],
         timestamp: '123',
-        monitor: {},
+        monitor: { type: 'http' },
         url: {},
       },
     };

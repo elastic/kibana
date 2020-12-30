@@ -21,7 +21,7 @@ export declare class LegacyClusterClient implements ILegacyClusterClient
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(config, log, getAuditorFactory, getAuthHeaders)](./kibana-plugin-core-server.legacyclusterclient._constructor_.md) |  | Constructs a new instance of the <code>LegacyClusterClient</code> class |
+|  [(constructor)(config, log, getAuthHeaders)](./kibana-plugin-core-server.legacyclusterclient._constructor_.md) |  | Constructs a new instance of the <code>LegacyClusterClient</code> class |
 
 ## Properties
 

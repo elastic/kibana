@@ -9,6 +9,7 @@
 ```typescript
 readonly links: {
         readonly dashboard: {
+            readonly guide: string;
             readonly drilldowns: string;
             readonly drilldownsTriggerPicker: string;
             readonly urlDrilldownTemplateSyntax: string;
@@ -91,6 +92,7 @@ readonly links: {
             readonly gettingStarted: string;
         };
         readonly query: {
+            readonly eql: string;
             readonly luceneQuerySyntax: string;
             readonly queryDsl: string;
             readonly kueryQuerySyntax: string;
@@ -99,6 +101,8 @@ readonly links: {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
+        readonly ml: Record<string, string>;
+        readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
     };
 ```

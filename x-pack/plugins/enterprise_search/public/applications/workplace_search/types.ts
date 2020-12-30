@@ -6,20 +6,26 @@
 
 export * from '../../../common/types/workplace_search';
 
-export type TSpacerSize = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
+export type SpacerSizeTypes = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 
-export interface IGroup {
+export interface Group {
   id: string;
   name: string;
   createdAt: string;
   updatedAt: string;
-  contentSources: IContentSource[];
-  users: IUser[];
+  contentSources: ContentSource[];
+  users: User[];
   usersCount: number;
   color?: string;
 }
 
-export interface IUser {
+export interface GroupDetails extends Group {
+  contentSources: ContentSourceDetails[];
+  canEditGroup: boolean;
+  canDeleteGroup: boolean;
+}
+
+export interface User {
   id: string;
   name: string | null;
   initials: string;
@@ -30,13 +36,13 @@ export interface IUser {
   groupIds: string[];
 }
 
-export interface IContentSource {
+export interface ContentSource {
   id: string;
   serviceType: string;
   name: string;
 }
 
-export interface IContentSourceDetails extends IContentSource {
+export interface ContentSourceDetails extends ContentSource {
   status: string;
   statusMessage: string;
   documentCount: string;
@@ -46,4 +52,8 @@ export interface IContentSourceDetails extends IContentSource {
   errorReason: number;
   allowsReauth: boolean;
   boost: number;
+}
+
+export interface SourcePriority {
+  [id: string]: number;
 }

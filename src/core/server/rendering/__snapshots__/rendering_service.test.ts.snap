@@ -23,19 +23,17 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
-    "app": Object {},
-    "basePath": "/mock-server-basepath",
-    "branch": Any<String>,
-    "buildNum": Any<Number>,
-    "buildSha": Any<String>,
-    "bundleId": "app:core",
-    "devMode": true,
-    "nav": Array [],
-    "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -44,8 +42,8 @@ Object {
       },
       "user": Object {},
     },
-    "version": Any<String>,
   },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -76,19 +74,17 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
-    "app": Object {},
-    "basePath": "/mock-server-basepath",
-    "branch": Any<String>,
-    "buildNum": Any<Number>,
-    "buildSha": Any<String>,
-    "bundleId": "app:core",
-    "devMode": true,
-    "nav": Array [],
-    "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -97,8 +93,8 @@ Object {
       },
       "user": Object {},
     },
-    "version": Any<String>,
   },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -129,19 +125,17 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
-    "app": Object {},
-    "basePath": "/mock-server-basepath",
-    "branch": Any<String>,
-    "buildNum": Any<Number>,
-    "buildSha": Any<String>,
-    "bundleId": "app:core",
-    "devMode": true,
-    "nav": Array [],
-    "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -154,8 +148,8 @@ Object {
         },
       },
     },
-    "version": Any<String>,
   },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -186,19 +180,17 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/translations/en.json",
   },
   "legacyMetadata": Object {
-    "app": Object {},
-    "basePath": "",
-    "branch": Any<String>,
-    "buildNum": Any<Number>,
-    "buildSha": Any<String>,
-    "bundleId": "app:core",
-    "devMode": true,
-    "nav": Array [],
-    "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -207,8 +199,8 @@ Object {
       },
       "user": Object {},
     },
-    "version": Any<String>,
   },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},
@@ -239,19 +231,17 @@ Object {
       "version": Any<String>,
     },
   },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
   "i18n": Object {
     "translationsUrl": "/mock-server-basepath/translations/en.json",
   },
   "legacyMetadata": Object {
-    "app": Object {},
-    "basePath": "/mock-server-basepath",
-    "branch": Any<String>,
-    "buildNum": Any<Number>,
-    "buildSha": Any<String>,
-    "bundleId": "app:core",
-    "devMode": true,
-    "nav": Array [],
-    "serverName": "http-server-test",
     "uiSettings": Object {
       "defaults": Object {
         "registered": Object {
@@ -260,8 +250,8 @@ Object {
       },
       "user": Object {},
     },
-    "version": Any<String>,
   },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "uiPlugins": Array [],
   "vars": Object {},

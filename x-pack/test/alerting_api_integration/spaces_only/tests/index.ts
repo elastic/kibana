@@ -8,28 +8,26 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { Spaces } from '../scenarios';
 
 // eslint-disable-next-line import/no-default-export
-export default function alertingApiIntegrationTests({
-  loadTestFile,
-  getService,
-}: FtrProviderContext) {
-  const spacesService = getService('spaces');
-  const esArchiver = getService('esArchiver');
-
+export default function alertingApiIntegrationTests({ loadTestFile }: FtrProviderContext) {
   describe('alerting api integration spaces only', function () {
     this.tags('ciGroup9');
-
-    before(async () => {
-      for (const space of Object.values(Spaces)) {
-        if (space.id === 'default') continue;
-
-        const { id, name, disabledFeatures } = space;
-        await spacesService.create({ id, name, disabledFeatures });
-      }
-    });
-
-    after(async () => await esArchiver.unload('empty_kibana'));
 
     loadTestFile(require.resolve('./actions'));
     loadTestFile(require.resolve('./alerting'));
   });
+}
+
+export async function buildUp(getService: FtrProviderContext['getService']) {
+  const spacesService = getService('spaces');
+  for (const space of Object.values(Spaces)) {
+    if (space.id === 'default') continue;
+
+    const { id, name, disabledFeatures } = space;
+    await spacesService.create({ id, name, disabledFeatures });
+  }
+}
+
+export async function tearDown(getService: FtrProviderContext['getService']) {
+  const esArchiver = getService('esArchiver');
+  await esArchiver.unload('empty_kibana');
 }

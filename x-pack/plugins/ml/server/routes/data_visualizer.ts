@@ -80,7 +80,7 @@ function getHistogramsForFields(
 /**
  * Routes for the index data visualizer.
  */
-export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization) {
+export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup DataVisualizer
    *
@@ -104,7 +104,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -151,7 +151,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -216,7 +216,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },

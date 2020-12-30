@@ -1,0 +1,5 @@
+# APM OSS plugin
+
+OSS plugin for APM. Includes index configuration and tutorial resources.
+
+See <<../../x-pack/plugins/apm/readme.md,the X-Pack APM plugin README>> for information about the main APM plugin.

@@ -11,14 +11,17 @@ const VECTOR_SOURCE_ID = 'caffa63a-ebfb-466d-8ff6-d797975b88ab';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const security = getService('security');
 
   describe('mvt geoshape layer', () => {
     before(async () => {
+      await security.testUser.setRoles(['global_maps_all', 'geoshape_data_reader'], false);
       await PageObjects.maps.loadSavedMap('geo_shape_mvt');
     });
 
     after(async () => {
       await inspector.close();
+      await security.testUser.restoreDefaults();
     });
 
     it('should render with mvt-source', async () => {
@@ -26,7 +29,7 @@ export default function ({ getPageObjects, getService }) {
 
       //Source should be correct
       expect(mapboxStyle.sources[VECTOR_SOURCE_ID].tiles[0]).to.equal(
-        '/api/maps/mvt/getTile?x={x}&y={y}&z={z}&geometryFieldName=geometry&index=geo_shapes*&requestBody=(_source:(includes:!(geometry,prop1)),docvalue_fields:!(prop1),query:(bool:(filter:!((match_all:())),must:!(),must_not:!(),should:!())),script_fields:(),size:10000,stored_fields:!(geometry,prop1))'
+        '/api/maps/mvt/getTile?x={x}&y={y}&z={z}&geometryFieldName=geometry&index=geo_shapes*&requestBody=(_source:(includes:!(geometry,prop1)),docvalue_fields:!(prop1),query:(bool:(filter:!((match_all:())),must:!(),must_not:!(),should:!())),script_fields:(),size:10000,stored_fields:!(geometry,prop1))&geoFieldType=geo_shape'
       );
 
       //Should correctly load meta for style-rule (sigma is set to 1, opacity to 1)

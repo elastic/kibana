@@ -18,6 +18,7 @@
  */
 
 import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -135,15 +136,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.clickPanelOptions('metric');
         const fromTime = 'Oct 22, 2018 @ 00:00:00.000';
         const toTime = 'Oct 28, 2018 @ 23:59:59.999';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         // Sometimes popovers take some time to appear in Firefox (#71979)
         await retry.tryForTime(20000, async () => {
-          await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
           await PageObjects.visualBuilder.setIndexPatternValue('kibana_sample_data_flights');
-          await PageObjects.common.sleep(3000);
+          await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
           await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
-        expect(newValue).to.eql('10');
+        expect(newValue).to.eql('18');
       });
     });
 
@@ -173,9 +174,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.goBack();
 
         log.debug('Check timeseries chart and panel config is rendered');
-        await PageObjects.visualBuilder.checkTimeSeriesChartIsPresent();
-        await PageObjects.visualBuilder.checkTabIsSelected('timeseries');
-        await PageObjects.visualBuilder.checkPanelConfigIsPresent('timeseries');
+        await retry.try(async () => {
+          await PageObjects.visualBuilder.checkTimeSeriesChartIsPresent();
+          await PageObjects.visualBuilder.checkTabIsSelected('timeseries');
+          await PageObjects.visualBuilder.checkPanelConfigIsPresent('timeseries');
+        });
 
         log.debug('Go forward in browser history');
         await browser.goForward();

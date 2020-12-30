@@ -46,10 +46,12 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
+        notifyWhen: 'onThrottleInterval',
         muteAll: false,
         mutedInstanceIds: [],
         createdAt: response.body.createdAt,
         updatedAt: response.body.updatedAt,
+        executionStatus: response.body.executionStatus,
       });
       expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);

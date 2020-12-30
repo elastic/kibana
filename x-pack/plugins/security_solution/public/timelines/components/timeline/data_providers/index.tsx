@@ -7,35 +7,27 @@
 import { rgba } from 'polished';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import uuid from 'uuid';
 
-import { BrowserFields } from '../../../../common/containers/source';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import {
   droppableTimelineProvidersPrefix,
   IS_DRAGGING_CLASS_NAME,
 } from '../../../../common/components/drag_and_drop/helpers';
-import {
-  OnDataProviderEdited,
-  OnDataProviderRemoved,
-  OnToggleDataProviderEnabled,
-  OnToggleDataProviderExcluded,
-  OnToggleDataProviderType,
-} from '../events';
 
-import { DataProvider } from './data_provider';
 import { Empty } from './empty';
 import { Providers } from './providers';
 import { useManageTimeline } from '../../manage_timeline';
+import { timelineSelectors } from '../../../store/timeline';
+import { timelineDefaults } from '../../../store/timeline/defaults';
+
+import * as i18n from './translations';
 
 interface Props {
-  browserFields: BrowserFields;
   timelineId: string;
-  dataProviders: DataProvider[];
-  onDataProviderEdited: OnDataProviderEdited;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
-  onToggleDataProviderType: OnToggleDataProviderType;
 }
 
 const DropTargetDataProvidersContainer = styled.div`
@@ -61,18 +53,19 @@ const DropTargetDataProviders = styled.div`
   justify-content: center;
   padding-bottom: 2px;
   position: relative;
-  border: 0.2rem dashed ${(props) => props.theme.eui.euiColorMediumShade};
+  border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: 5px;
   padding: 5px 0;
   margin: 2px 0 2px 0;
   min-height: 100px;
   overflow-y: auto;
-  background-color: ${(props) => props.theme.eui.euiFormBackgroundColor};
+  background-color: ${({ theme }) => theme.eui.euiFormBackgroundColor};
 `;
 
 DropTargetDataProviders.displayName = 'DropTargetDataProviders';
 
-const getDroppableId = (id: string): string => `${droppableTimelineProvidersPrefix}${id}`;
+const getDroppableId = (id: string): string =>
+  `${droppableTimelineProvidersPrefix}${id}${uuid.v4()}`;
 
 /**
  * Renders the data providers section of the timeline.
@@ -91,48 +84,42 @@ const getDroppableId = (id: string): string => `${droppableTimelineProvidersPref
  * the user to drop anything with a facet count into
  * the data pro section.
  */
-export const DataProviders = React.memo<Props>(
-  ({
-    browserFields,
-    dataProviders,
+export const DataProviders = React.memo<Props>(({ timelineId }) => {
+  const { browserFields } = useSourcererScope(SourcererScopeName.timeline);
+  const { getManageTimelineById } = useManageTimeline();
+  const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
+    getManageTimelineById,
     timelineId,
-    onDataProviderEdited,
-    onDataProviderRemoved,
-    onToggleDataProviderEnabled,
-    onToggleDataProviderExcluded,
-    onToggleDataProviderType,
-  }) => {
-    const { getManageTimelineById } = useManageTimeline();
-    const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
-      getManageTimelineById,
-      timelineId,
-    ]);
-    return (
-      <DropTargetDataProvidersContainer className="drop-target-data-providers-container">
-        <DropTargetDataProviders
-          className="drop-target-data-providers"
-          data-test-subj="dataProviders"
-        >
-          {dataProviders != null && dataProviders.length ? (
-            <Providers
-              browserFields={browserFields}
-              timelineId={timelineId}
-              dataProviders={dataProviders}
-              onDataProviderEdited={onDataProviderEdited}
-              onDataProviderRemoved={onDataProviderRemoved}
-              onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-              onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-              onToggleDataProviderType={onToggleDataProviderType}
-            />
-          ) : (
-            <DroppableWrapper isDropDisabled={isLoading} droppableId={getDroppableId(timelineId)}>
-              <Empty browserFields={browserFields} timelineId={timelineId} />
-            </DroppableWrapper>
-          )}
-        </DropTargetDataProviders>
-      </DropTargetDataProvidersContainer>
-    );
-  }
-);
+  ]);
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const dataProviders = useDeepEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).dataProviders
+  );
+  const droppableId = useMemo(() => getDroppableId(timelineId), [timelineId]);
+
+  return (
+    <DropTargetDataProvidersContainer
+      aria-label={i18n.QUERY_AREA_ARIA_LABEL}
+      className="drop-target-data-providers-container"
+    >
+      <DropTargetDataProviders
+        className="drop-target-data-providers"
+        data-test-subj="dataProviders"
+      >
+        {dataProviders != null && dataProviders.length ? (
+          <Providers
+            browserFields={browserFields}
+            timelineId={timelineId}
+            dataProviders={dataProviders}
+          />
+        ) : (
+          <DroppableWrapper isDropDisabled={isLoading} droppableId={droppableId}>
+            <Empty browserFields={browserFields} timelineId={timelineId} />
+          </DroppableWrapper>
+        )}
+      </DropTargetDataProviders>
+    </DropTargetDataProvidersContainer>
+  );
+});
 
 DataProviders.displayName = 'DataProviders';

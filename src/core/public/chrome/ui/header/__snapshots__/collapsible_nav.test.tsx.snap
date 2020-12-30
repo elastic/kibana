@@ -56,6 +56,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -131,7 +132,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "category": Object {
             "euiIconType": "logoKibana",
             "id": "kibana",
-            "label": "Kibana",
+            "label": "Analytics",
             "order": 1000,
           },
           "data-test-subj": "discover",
@@ -187,7 +188,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "category": Object {
             "euiIconType": "logoKibana",
             "id": "kibana",
-            "label": "Kibana",
+            "label": "Analytics",
             "order": 1000,
           },
           "data-test-subj": "visualize",
@@ -201,7 +202,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
           "category": Object {
             "euiIconType": "logoKibana",
             "id": "kibana",
-            "label": "Kibana",
+            "label": "Analytics",
             "order": 1000,
           },
           "data-test-subj": "dashboard",
@@ -585,7 +586,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 className="euiListGroupItem__icon"
                                 type="home"
                               >
-                                <div
+                                <span
                                   className="euiListGroupItem__icon"
                                   data-euiicon-type="home"
                                 />
@@ -671,7 +672,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                         size="m"
                         type="arrowRight"
                       >
-                        <div
+                        <span
                           className="euiAccordion__icon euiAccordion__icon-isOpen"
                           data-euiicon-type="arrowRight"
                           size="m"
@@ -859,7 +860,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 isCollapsible={true}
                 key="kibana"
                 onToggle={[Function]}
-                title="Kibana"
+                title="Analytics"
               >
                 <EuiAccordion
                   arrowDisplay="right"
@@ -886,7 +887,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             className="euiCollapsibleNavGroup__title"
                             id="mockId__title"
                           >
-                            Kibana
+                            Analytics
                           </h3>
                         </EuiTitle>
                       </EuiFlexItem>
@@ -925,7 +926,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             size="m"
                             type="arrowRight"
                           >
-                            <div
+                            <span
                               className="euiAccordion__icon euiAccordion__icon-isOpen"
                               data-euiicon-type="arrowRight"
                               size="m"
@@ -953,7 +954,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     size="l"
                                     type="logoKibana"
                                   >
-                                    <div
+                                    <span
                                       data-euiicon-type="logoKibana"
                                       size="l"
                                     />
@@ -971,7 +972,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                       className="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
                                       id="mockId__title"
                                     >
-                                      Kibana
+                                      Analytics
                                     </h3>
                                   </EuiTitle>
                                 </div>
@@ -996,7 +997,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                               className="euiCollapsibleNavGroup__children"
                             >
                               <EuiListGroup
-                                aria-label="Primary navigation links, Kibana"
+                                aria-label="Primary navigation links, Analytics"
                                 color="subdued"
                                 gutterSize="none"
                                 listItems={
@@ -1031,7 +1032,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                 size="s"
                               >
                                 <ul
-                                  aria-label="Primary navigation links, Kibana"
+                                  aria-label="Primary navigation links, Analytics"
                                   className="euiListGroup"
                                   style={
                                     Object {
@@ -1215,7 +1216,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             size="m"
                             type="arrowRight"
                           >
-                            <div
+                            <span
                               className="euiAccordion__icon euiAccordion__icon-isOpen"
                               data-euiicon-type="arrowRight"
                               size="m"
@@ -1243,7 +1244,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     size="l"
                                     type="logoObservability"
                                   >
-                                    <div
+                                    <span
                                       data-euiicon-type="logoObservability"
                                       size="l"
                                     />
@@ -1466,7 +1467,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             size="m"
                             type="arrowRight"
                           >
-                            <div
+                            <span
                               className="euiAccordion__icon euiAccordion__icon-isOpen"
                               data-euiicon-type="arrowRight"
                               size="m"
@@ -1494,7 +1495,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     size="l"
                                     type="logoSecurity"
                                   >
-                                    <div
+                                    <span
                                       data-euiicon-type="logoSecurity"
                                       size="l"
                                     />
@@ -1678,7 +1679,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                             size="m"
                             type="arrowRight"
                           >
-                            <div
+                            <span
                               className="euiAccordion__icon euiAccordion__icon-isOpen"
                               data-euiicon-type="arrowRight"
                               size="m"
@@ -1706,7 +1707,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                     size="l"
                                     type="managementApp"
                                   >
-                                    <div
+                                    <span
                                       data-euiicon-type="managementApp"
                                       size="l"
                                     />
@@ -1900,7 +1901,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   data-test-subj="collapsible-nav-lock"
                                   type="button"
                                 >
-                                  <div
+                                  <span
                                     class="euiListGroupItem__icon"
                                     data-euiicon-type="lockOpen"
                                   />
@@ -1935,7 +1936,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                                   className="euiListGroupItem__icon"
                                   type="lockOpen"
                                 >
-                                  <div
+                                  <span
                                     className="euiListGroupItem__icon"
                                     data-euiicon-type="lockOpen"
                                   />
@@ -1973,6 +1974,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
             >
               <button
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiScreenReaderOnly--showOnFocus euiCollapsibleNav__closeButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -1994,7 +1996,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                       size="m"
                       type="cross"
                     >
-                      <div
+                      <span
                         className="euiButtonContent__icon"
                         data-euiicon-type="cross"
                         size="m"
@@ -2078,6 +2080,7 @@ exports[`CollapsibleNav renders the default nav 1`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -2313,6 +2316,7 @@ exports[`CollapsibleNav renders the default nav 2`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -2549,6 +2553,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
       "basePath": "/test",
       "get": [Function],
       "prepend": [Function],
+      "publicBaseUrl": undefined,
       "remove": [Function],
       "serverBasePath": "/test",
     }
@@ -2830,7 +2835,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                 className="euiListGroupItem__icon"
                                 type="home"
                               >
-                                <div
+                                <span
                                   className="euiListGroupItem__icon"
                                   data-euiicon-type="home"
                                 />
@@ -2916,7 +2921,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                         size="m"
                         type="arrowRight"
                       >
-                        <div
+                        <span
                           className="euiAccordion__icon euiAccordion__icon-isOpen"
                           data-euiicon-type="arrowRight"
                           size="m"
@@ -3053,7 +3058,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                   data-test-subj="collapsible-nav-lock"
                                   type="button"
                                 >
-                                  <div
+                                  <span
                                     class="euiListGroupItem__icon"
                                     data-euiicon-type="lock"
                                   />
@@ -3088,7 +3093,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                                   className="euiListGroupItem__icon"
                                   type="lock"
                                 >
-                                  <div
+                                  <span
                                     className="euiListGroupItem__icon"
                                     data-euiicon-type="lock"
                                   />
@@ -3126,6 +3131,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
             >
               <button
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiScreenReaderOnly--showOnFocus euiCollapsibleNav__closeButton"
+                disabled={false}
                 onClick={[Function]}
                 type="button"
               >
@@ -3147,7 +3153,7 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                       size="m"
                       type="cross"
                     >
-                      <div
+                      <span
                         className="euiButtonContent__icon"
                         data-euiicon-type="cross"
                         size="m"

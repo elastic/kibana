@@ -67,7 +67,7 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
       break;
     case 'sourceFilters':
       title = i18n.translate('indexPatternManagement.editIndexPattern.tabs.sourceHeader', {
-        defaultMessage: 'Source filters',
+        defaultMessage: 'Field filters',
       });
       break;
   }
@@ -117,7 +117,7 @@ export function getTabs(
 }
 
 export function getPath(field: IndexPatternField, indexPattern: IndexPattern) {
-  return `/patterns/${indexPattern?.id}/field/${field.name}`;
+  return `/patterns/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
 const allTypesDropDown = i18n.translate(

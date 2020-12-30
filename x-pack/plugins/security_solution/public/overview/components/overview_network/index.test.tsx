@@ -43,6 +43,12 @@ jest.mock('../../../common/lib/kibana', () => {
 
 const startDate = '2020-01-20T20:49:57.080Z';
 const endDate = '2020-01-21T20:49:57.080Z';
+const defaultProps = {
+  endDate,
+  startDate,
+  setQuery: jest.fn(),
+  indexNames: [],
+};
 
 const MOCKED_RESPONSE = {
   overviewNetwork: {
@@ -88,7 +94,7 @@ describe('OverviewNetwork', () => {
   test('it renders the expected widget title', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
@@ -101,7 +107,7 @@ describe('OverviewNetwork', () => {
     useNetworkOverviewMock.mockReturnValueOnce([true, { overviewNetwork: {} }]);
     const wrapper = mount(
       <TestProviders store={store}>
-        <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
@@ -111,7 +117,7 @@ describe('OverviewNetwork', () => {
   test('it renders the expected event count in the subtitle after loading events', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
@@ -123,7 +129,7 @@ describe('OverviewNetwork', () => {
   it('it renders View Network', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
@@ -133,7 +139,7 @@ describe('OverviewNetwork', () => {
   it('when click on View Network we call navigateToApp to make sure to navigate to right page', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 

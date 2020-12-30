@@ -17,10 +17,14 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { IEmbeddable } from '../../embeddable_plugin';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
+import { dashboardExpandPanelAction } from '../../dashboard_strings';
+import { IEmbeddable } from '../../services/embeddable';
+import { ActionByType, IncompatibleActionError } from '../../services/ui_actions';
+import {
+  DASHBOARD_CONTAINER_TYPE,
+  DashboardContainer,
+  DashboardContainerInput,
+} from '../embeddable';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 
@@ -33,7 +37,9 @@ function isExpanded(embeddable: IEmbeddable) {
     throw new IncompatibleActionError();
   }
 
-  return embeddable.id === embeddable.parent.getInput().expandedPanelId;
+  return (
+    embeddable.id === (embeddable.parent.getInput() as DashboardContainerInput).expandedPanelId
+  );
 }
 
 export interface ExpandPanelActionContext {
@@ -53,12 +59,8 @@ export class ExpandPanelAction implements ActionByType<typeof ACTION_EXPAND_PANE
     }
 
     return isExpanded(embeddable)
-      ? i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.expandedDisplayName', {
-          defaultMessage: 'Minimize',
-        })
-      : i18n.translate('dashboard.actions.toggleExpandPanelMenuItem.notExpandedDisplayName', {
-          defaultMessage: 'Full screen',
-        });
+      ? dashboardExpandPanelAction.getMinimizeTitle()
+      : dashboardExpandPanelAction.getMaximizeTitle();
   }
 
   public getIconType({ embeddable }: ExpandPanelActionContext) {

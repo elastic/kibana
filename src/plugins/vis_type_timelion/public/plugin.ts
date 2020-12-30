@@ -36,11 +36,11 @@ import { VisualizationsSetup } from '../../visualizations/public';
 
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
-import { setIndexPatterns, setSavedObjectsClient } from './helpers/plugin_services';
+import { setIndexPatterns, setSavedObjectsClient, setDataSearch } from './helpers/plugin_services';
 import { ConfigSchema } from '../config';
 
-import './index.scss';
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
+import { getTimelionVisRenderer } from './timelion_vis_renderer';
 
 /** @internal */
 export interface TimelionVisDependencies extends Partial<CoreStart> {
@@ -66,11 +66,16 @@ export interface VisTypeTimelionPluginStart {
   getArgValueSuggestions: typeof getArgValueSuggestions;
 }
 
+/** @public */
+export interface VisTypeTimelionPluginSetup {
+  isUiEnabled: boolean;
+}
+
 /** @internal */
 export class TimelionVisPlugin
   implements
     Plugin<
-      void,
+      VisTypeTimelionPluginSetup,
       VisTypeTimelionPluginStart,
       TimelionVisSetupDependencies,
       TimelionVisStartDependencies
@@ -88,15 +93,18 @@ export class TimelionVisPlugin
     };
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
-    visualizations.createReactVisualization(getTimelionVisDefinition(dependencies));
+    expressions.registerRenderer(getTimelionVisRenderer(dependencies));
+    visualizations.createBaseVisualization(getTimelionVisDefinition(dependencies));
+
+    return {
+      isUiEnabled: this.initializerContext.config.get().ui.enabled,
+    };
   }
 
   public start(core: CoreStart, plugins: TimelionVisStartDependencies) {
     setIndexPatterns(plugins.data.indexPatterns);
     setSavedObjectsClient(core.savedObjects.client);
-    if (this.initializerContext.config.get().ui.enabled === false) {
-      core.chrome.navLinks.update('timelion', { hidden: true });
-    }
+    setDataSearch(plugins.data.search);
 
     return {
       getArgValueSuggestions,

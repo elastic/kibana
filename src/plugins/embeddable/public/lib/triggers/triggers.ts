@@ -17,19 +17,20 @@
  * under the License.
  */
 
-import { KibanaDatatable } from '../../../../expressions';
-import { Trigger } from '../../../../ui_actions/public';
+import { i18n } from '@kbn/i18n';
+import { Datatable } from '../../../../expressions';
+import { Trigger, RowClickContext } from '../../../../ui_actions/public';
 import { IEmbeddable } from '..';
 
-export interface EmbeddableContext {
-  embeddable: IEmbeddable;
+export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable: T;
 }
 
 export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
   data: {
     data: Array<{
-      table: Pick<KibanaDatatable, 'rows' | 'columns'>;
+      table: Pick<Datatable, 'rows' | 'columns'>;
       column: number;
       row: number;
       value: any;
@@ -42,7 +43,7 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
 export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
   embeddable?: T;
   data: {
-    table: KibanaDatatable;
+    table: Datatable;
     column: number;
     range: number[];
     timeFieldName?: string;
@@ -51,7 +52,63 @@ export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
 
 export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
   | ValueClickContext<T>
-  | RangeSelectContext<T>;
+  | RangeSelectContext<T>
+  | RowClickContext;
+
+export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
+export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
+  id: CONTEXT_MENU_TRIGGER,
+  title: i18n.translate('embeddableApi.contextMenuTrigger.title', {
+    defaultMessage: 'Context menu',
+  }),
+  description: i18n.translate('embeddableApi.contextMenuTrigger.description', {
+    defaultMessage: 'A panel top-right corner context menu click.',
+  }),
+};
+
+export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
+export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
+  id: PANEL_BADGE_TRIGGER,
+  title: i18n.translate('embeddableApi.panelBadgeTrigger.title', {
+    defaultMessage: 'Panel badges',
+  }),
+  description: i18n.translate('embeddableApi.panelBadgeTrigger.description', {
+    defaultMessage: 'Actions appear in title bar when an embeddable loads in a panel.',
+  }),
+};
+
+export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
+export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
+  id: PANEL_NOTIFICATION_TRIGGER,
+  title: i18n.translate('embeddableApi.panelNotificationTrigger.title', {
+    defaultMessage: 'Panel notifications',
+  }),
+  description: i18n.translate('embeddableApi.panelNotificationTrigger.description', {
+    defaultMessage: 'Actions appear in top-right corner of a panel.',
+  }),
+};
+
+export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
+export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
+  id: SELECT_RANGE_TRIGGER,
+  title: i18n.translate('embeddableApi.selectRangeTrigger.title', {
+    defaultMessage: 'Range selection',
+  }),
+  description: i18n.translate('embeddableApi.selectRangeTrigger.description', {
+    defaultMessage: 'A range of values on the visualization',
+  }),
+};
+
+export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
+export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
+  id: VALUE_CLICK_TRIGGER,
+  title: i18n.translate('embeddableApi.valueClickTrigger.title', {
+    defaultMessage: 'Single click',
+  }),
+  description: i18n.translate('embeddableApi.valueClickTrigger.description', {
+    defaultMessage: 'A data point click on the visualization',
+  }),
+};
 
 export const isValueClickTriggerContext = (
   context: ChartActionContext
@@ -61,23 +118,13 @@ export const isRangeSelectTriggerContext = (
   context: ChartActionContext
 ): context is RangeSelectContext => context.data && 'range' in context.data;
 
-export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
-export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
-  id: CONTEXT_MENU_TRIGGER,
-  title: 'Context menu',
-  description: 'Triggered on top-right corner context-menu select.',
-};
+export const isRowClickTriggerContext = (context: ChartActionContext): context is RowClickContext =>
+  !!context.data &&
+  typeof context.data === 'object' &&
+  typeof (context as RowClickContext).data.rowIndex === 'number';
 
-export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
-export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
-  id: PANEL_BADGE_TRIGGER,
-  title: 'Panel badges',
-  description: 'Actions appear in title bar when an embeddable loads in a panel.',
-};
-
-export const PANEL_NOTIFICATION_TRIGGER = 'PANEL_NOTIFICATION_TRIGGER';
-export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
-  id: PANEL_NOTIFICATION_TRIGGER,
-  title: 'Panel notifications',
-  description: 'Actions appear in top-right corner of a panel.',
-};
+export const isContextMenuTriggerContext = (context: unknown): context is EmbeddableContext =>
+  !!context &&
+  typeof context === 'object' &&
+  !!(context as EmbeddableContext).embeddable &&
+  typeof (context as EmbeddableContext).embeddable === 'object';

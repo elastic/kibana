@@ -18,17 +18,25 @@
  */
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { OptedInNoticeBanner } from './opted_in_notice_banner';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { httpServiceMock } from '../../../../core/public/http/http_service.mock';
+
+const mockHttp = httpServiceMock.createStartContract();
 
 describe('OptInDetailsComponent', () => {
   it('renders as expected', () => {
-    expect(shallowWithIntl(<OptedInNoticeBanner onSeenBanner={() => {}} />)).toMatchSnapshot();
+    expect(
+      shallowWithIntl(<OptedInNoticeBanner onSeenBanner={() => {}} http={mockHttp} />)
+    ).toMatchSnapshot();
   });
 
   it('fires the "onSeenBanner" prop when a link is clicked', () => {
     const onLinkClick = jest.fn();
-    const component = shallowWithIntl(<OptedInNoticeBanner onSeenBanner={onLinkClick} />);
+    const component = shallowWithIntl(
+      <OptedInNoticeBanner onSeenBanner={onLinkClick} http={mockHttp} />
+    );
 
     const button = component.findWhere((n) => n.type() === EuiButton);
 

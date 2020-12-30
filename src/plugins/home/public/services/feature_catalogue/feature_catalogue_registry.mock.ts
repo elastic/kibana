@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   FeatureCatalogueRegistrySetup,
   FeatureCatalogueRegistry,
@@ -36,6 +36,7 @@ const createMock = (): jest.Mocked<PublicMethodsOf<FeatureCatalogueRegistry>> =>
     start: jest.fn(),
     get: jest.fn(() => []),
     getSolutions: jest.fn(() => []),
+    removeFeature: jest.fn(),
   };
   service.setup.mockImplementation(createSetupMock);
   return service;

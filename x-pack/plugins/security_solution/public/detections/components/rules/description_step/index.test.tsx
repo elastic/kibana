@@ -315,8 +315,10 @@ describe('description_step', () => {
           mockFilterManager
         );
 
-        expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL} </>);
-        expect(result[0].description).toEqual(<>{mockQueryBar.queryBar.query.query} </>);
+        expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL}</>);
+        expect(shallow(result[0].description as React.ReactElement).text()).toEqual(
+          mockQueryBar.queryBar.query.query
+        );
       });
     });
 

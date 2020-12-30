@@ -22,8 +22,10 @@ import {
   getPrePackagedRulesStatus,
 } from './api';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
-import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/update_rules_schema.mock';
+import {
+  getCreateRulesSchemaMock,
+  getUpdateRulesSchemaMock,
+} from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
 import { rulesMock } from './mock';
 import { buildEsQuery } from 'src/plugins/data/common';
@@ -64,7 +66,7 @@ describe('Detections Rules API', () => {
       await updateRule({ rule: payload, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
         body:
-          '{"description":"some description","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1"}',
+          '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","id":"04128c15-0d1b-4716-a4c5-46997ac7f3bd"}',
         method: 'PUT',
         signal: abortCtrl.signal,
       });
@@ -202,7 +204,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
         method: 'GET',
         query: {
-          filter: 'alert.attributes.tags: "hello" OR alert.attributes.tags: "world"',
+          filter: 'alert.attributes.tags: "hello" AND alert.attributes.tags: "world"',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -297,7 +299,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            'alert.attributes.name: ruleName AND alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND (alert.attributes.tags: "hello" OR alert.attributes.tags: "world")',
+            'alert.attributes.name: ruleName AND alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND (alert.attributes.tags: "hello" AND alert.attributes.tags: "world")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -411,7 +413,12 @@ describe('Detections Rules API', () => {
   describe('createPrepackagedRules', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue('unknown');
+      fetchMock.mockResolvedValue({
+        rules_installed: 0,
+        rules_updated: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
+      });
     });
 
     test('check parameter url when creating pre-packaged rules', async () => {
@@ -423,7 +430,12 @@ describe('Detections Rules API', () => {
     });
     test('happy path', async () => {
       const resp = await createPrepackagedRules({ signal: abortCtrl.signal });
-      expect(resp).toEqual(true);
+      expect(resp).toEqual({
+        rules_installed: 0,
+        rules_updated: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
+      });
     });
   });
 

@@ -49,6 +49,7 @@ const createTestCases = (overwrite: boolean) => {
   const group2 = [
     // when overwrite=true, all of the objects in this group are created successfully, so we can check the created object attributes
     CASES.NEW_MULTI_NAMESPACE_OBJ,
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...destinationId() },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...destinationId() },
@@ -78,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const es = getService('legacyEs');
 
-  const { addTests, createTestDefinitions, expectForbidden } = importTestSuiteFactory(
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } = importTestSuiteFactory(
     es,
     esArchiver,
     supertest
@@ -96,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
           createTestDefinitions(all, true, {
             createNewCopies,
             singleRequest,
-            responseBodyOverride: expectForbidden([
+            responseBodyOverride: expectSavedObjectForbidden([
               'dashboard',
               'globaltype',
               'isolatedtype',
@@ -123,7 +124,11 @@ export default function ({ getService }: FtrProviderContext) {
         createTestDefinitions(group1All, true, {
           overwrite,
           singleRequest,
-          responseBodyOverride: expectForbidden(['dashboard', 'globaltype', 'isolatedtype']),
+          responseBodyOverride: expectSavedObjectForbidden([
+            'dashboard',
+            'globaltype',
+            'isolatedtype',
+          ]),
         }),
         createTestDefinitions(group2, true, { overwrite, singleRequest }),
         createTestDefinitions(group3, true, { overwrite, singleRequest }),

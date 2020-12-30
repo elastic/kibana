@@ -105,6 +105,7 @@ export const TemplateForm = ({
     aliases: true,
   });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const indexTemplate = defaultValue ?? {
     name: '',
     indexPatterns: [],
@@ -117,7 +118,7 @@ export const TemplateForm = ({
   };
 
   const {
-    template: { settings, mappings, aliases },
+    template: { settings, mappings, aliases } = {},
     composedOf,
     _kbnMeta,
     ...logistics
@@ -170,18 +171,19 @@ export const TemplateForm = ({
   const cleanupTemplateObject = (template: TemplateDeserialized) => {
     const outputTemplate = { ...template };
 
-    if (outputTemplate.template.settings === undefined) {
-      delete outputTemplate.template.settings;
-    }
-    if (outputTemplate.template.mappings === undefined) {
-      delete outputTemplate.template.mappings;
-    }
-    if (outputTemplate.template.aliases === undefined) {
-      delete outputTemplate.template.aliases;
-    }
-    if (Object.keys(outputTemplate.template).length === 0) {
-      // @ts-expect-error
-      delete outputTemplate.template;
+    if (outputTemplate.template) {
+      if (outputTemplate.template.settings === undefined) {
+        delete outputTemplate.template.settings;
+      }
+      if (outputTemplate.template.mappings === undefined) {
+        delete outputTemplate.template.mappings;
+      }
+      if (outputTemplate.template.aliases === undefined) {
+        delete outputTemplate.template.aliases;
+      }
+      if (Object.keys(outputTemplate.template).length === 0) {
+        delete outputTemplate.template;
+      }
     }
 
     return outputTemplate;

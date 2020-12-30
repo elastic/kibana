@@ -113,6 +113,77 @@ describe('ExpressionRenderer', () => {
     instance.unmount();
   });
 
+  it('waits for debounce period if specified', () => {
+    jest.useFakeTimers();
+
+    const refreshSubject = new Subject();
+    const loaderUpdate = jest.fn();
+
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$: new Subject(),
+        data$: new Subject(),
+        loading$: new Subject(),
+        update: loaderUpdate,
+        destroy: jest.fn(),
+      };
+    });
+
+    const instance = mount(
+      <ReactExpressionRenderer reload$={refreshSubject} expression="" debounce={1000} />
+    );
+
+    instance.setProps({ expression: 'abc' });
+
+    expect(loaderUpdate).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(loaderUpdate).toHaveBeenCalledTimes(2);
+
+    instance.unmount();
+  });
+
+  it('waits for debounce period on other loader option change if specified', () => {
+    jest.useFakeTimers();
+
+    const refreshSubject = new Subject();
+    const loaderUpdate = jest.fn();
+
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$: new Subject(),
+        data$: new Subject(),
+        loading$: new Subject(),
+        update: loaderUpdate,
+        destroy: jest.fn(),
+      };
+    });
+
+    const instance = mount(
+      <ReactExpressionRenderer
+        reload$={refreshSubject}
+        expression=""
+        debounce={1000}
+        searchContext={{ from: 'now-15m', to: 'now' }}
+      />
+    );
+
+    instance.setProps({ searchContext: { from: 'now-30m', to: 'now' } });
+
+    expect(loaderUpdate).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(loaderUpdate).toHaveBeenCalledTimes(2);
+
+    instance.unmount();
+  });
+
   it('should display a custom error message if the user provides one and then remove it after successful render', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());
@@ -162,6 +233,38 @@ describe('ExpressionRenderer', () => {
     expect(instance.find('[data-test-subj="custom-error"]')).toHaveLength(0);
   });
 
+  it('should call onData$ prop on every data$ observable emission in loader', () => {
+    const dataSubject = new Subject();
+    const data$ = dataSubject.asObservable().pipe(share());
+
+    const newData = {};
+    const inspectData = {};
+    const onData$ = jest.fn();
+
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$: new Subject(),
+        data$,
+        loading$: new Subject(),
+        events$: new Subject(),
+        update: jest.fn(),
+        inspect: jest.fn(() => inspectData),
+      };
+    });
+
+    mount(<ReactExpressionRenderer expression="" onData$={onData$} />);
+
+    expect(onData$).toHaveBeenCalledTimes(0);
+
+    act(() => {
+      dataSubject.next(newData);
+    });
+
+    expect(onData$).toHaveBeenCalledTimes(1);
+    expect(onData$.mock.calls[0][0]).toBe(newData);
+    expect(onData$.mock.calls[0][1]).toBe(inspectData);
+  });
+
   it('should fire onEvent prop on every events$ observable emission in loader', () => {
     const dataSubject = new Subject();
     const data$ = dataSubject.asObservable().pipe(share());
@@ -200,5 +303,23 @@ describe('ExpressionRenderer', () => {
 
     expect(onEvent).toHaveBeenCalledTimes(1);
     expect(onEvent.mock.calls[0][0]).toBe(event);
+  });
+
+  it('should correctly assign classes to the wrapper node', () => {
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$: new Subject(),
+        data$: new Subject(),
+        loading$: new Subject(),
+        update: jest.fn(),
+        destroy: jest.fn(),
+      };
+    });
+
+    const instance = mount(<ReactExpressionRenderer className="myClassName" expression="" />);
+    // Counte is 2 because the class is applied to ReactExpressionRenderer + internal component
+    expect(instance.find('.myClassName').length).toBe(2);
+
+    instance.unmount();
   });
 });

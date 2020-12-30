@@ -27,7 +27,7 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.unload('maps/kibana');
     });
 
-    describe('', function () {
+    describe('', async function () {
       this.tags('ciGroup9');
       loadTestFile(require.resolve('./documents_source'));
       loadTestFile(require.resolve('./blended_vector_layer'));
@@ -47,6 +47,7 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./es_pew_pew_source'));
       loadTestFile(require.resolve('./joins'));
       loadTestFile(require.resolve('./mvt_scaling'));
+      loadTestFile(require.resolve('./mvt_super_fine'));
       loadTestFile(require.resolve('./add_layer_panel'));
       loadTestFile(require.resolve('./import_geojson'));
       loadTestFile(require.resolve('./layer_errors'));

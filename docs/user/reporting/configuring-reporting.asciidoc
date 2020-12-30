@@ -75,3 +75,4 @@ to point to a proxy host requires that the Kibana server has network access to
 the proxy.
 
 include::{kib-repo-dir}/user/security/reporting.asciidoc[]
+include::network-policy.asciidoc[]

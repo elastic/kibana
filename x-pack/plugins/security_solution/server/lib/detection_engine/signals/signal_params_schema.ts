@@ -8,12 +8,13 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 
-const signalSchema = schema.object({
+export const signalSchema = schema.object({
   anomalyThreshold: schema.maybe(schema.number()),
   author: schema.arrayOf(schema.string(), { defaultValue: [] }),
   buildingBlockType: schema.nullable(schema.string()),
   description: schema.string(),
   note: schema.nullable(schema.string()),
+  eventCategoryOverride: schema.maybe(schema.string()),
   falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
   from: schema.string(),
   ruleId: schema.string(),
@@ -49,9 +50,12 @@ const signalSchema = schema.object({
   exceptions_list: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))), // For backwards compatibility with customers that had a data bug in 7.8. Once we use a migration script please remove this.
   exceptionsList: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threatFilters: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-  threatIndex: schema.maybe(schema.string()),
+  threatIndex: schema.maybe(schema.arrayOf(schema.string())),
   threatQuery: schema.maybe(schema.string()),
   threatMapping: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  threatLanguage: schema.maybe(schema.string()),
+  concurrentSearches: schema.maybe(schema.number()),
+  itemsPerSearch: schema.maybe(schema.number()),
 });
 
 /**

@@ -7,18 +7,22 @@
     "Some normal use of this program, at varying levels of frequency, may originate from scripts, automation tools and frameworks. Usage by non-engineers and ordinary users is unusual."
   ],
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Whoami Process Activity",
-  "query": "process.name:whoami.exe and event.code:1",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:whoami.exe",
   "risk_score": 21,
   "rule_id": "ef862985-3f13-4262-a686-5f357bbb9bc2",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Discovery"
   ],
   "threat": [
     {
@@ -38,5 +42,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

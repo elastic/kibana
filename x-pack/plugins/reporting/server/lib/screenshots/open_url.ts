@@ -5,10 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { durationToNumber } from '../../../common/schema_utils';
 import { LevelLogger, startTrace } from '../';
+import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriver } from '../../browsers';
-import { CaptureConfig, ConditionalHeaders } from '../../types';
+import { ConditionalHeaders } from '../../export_types/common';
+import { CaptureConfig } from '../../types';
 
 export const openUrl = async (
   captureConfig: CaptureConfig,

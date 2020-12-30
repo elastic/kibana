@@ -6,8 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
-import { Query, Filter } from 'src/plugins/data/public';
 import styled from 'styled-components';
 
 import { AlertsByCategory } from '../components/alerts_by_category';
@@ -15,45 +13,45 @@ import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { useWithSource } from '../../common/containers/source';
+import { useFetchIndex } from '../../common/containers/source';
 
 import { EventsByDataset } from '../components/events_by_dataset';
 import { EventCounts } from '../components/event_counts';
 import { OverviewEmpty } from '../components/overview_empty';
 import { StatefulSidebar } from '../components/sidebar';
 import { SignalsByCategory } from '../components/signals_by_category';
-import { inputsSelectors, State } from '../../common/store';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
+import { inputsSelectors } from '../../common/store';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
-
-const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
-const NO_FILTERS: Filter[] = [];
+import { useSourcererScope } from '../../common/containers/sourcerer';
+import { Sourcerer } from '../../common/components/sourcerer';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 
 const SidebarFlexItem = styled(EuiFlexItem)`
   margin-right: 24px;
 `;
 
-const OverviewComponent: React.FC<PropsFromRedux> = ({
-  filters = NO_FILTERS,
-  query = DEFAULT_QUERY,
-  setAbsoluteRangeDatePicker,
-}) => {
+const OverviewComponent = () => {
+  const getGlobalFiltersQuerySelector = useMemo(
+    () => inputsSelectors.globalFiltersQuerySelector(),
+    []
+  );
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
+  const { from, deleteQuery, setQuery, to } = useGlobalTime();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
   }, []);
-
-  const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist, indexPattern } = useWithSource();
-  const { indicesExist: metadataIndexExists } = useWithSource(
-    'default',
-    endpointMetadataIndex,
-    true
-  );
+  const [, { indexExists: metadataIndexExists }] = useFetchIndex(endpointMetadataIndex, true);
   const { addMessage, hasMessage } = useMessagesStorage();
   const hasDismissEndpointNoticeMessage: boolean = useMemo(
     () => hasMessage('management', 'dismissEndpointNotice'),
@@ -81,6 +79,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                 <EuiSpacer size="l" />
               </>
             )}
+            <Sourcerer scope={SourcererScopeName.default} />
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
               <SidebarFlexItem grow={false}>
                 <StatefulSidebar />
@@ -92,9 +91,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                     <SignalsByCategory
                       filters={filters}
                       from={from}
-                      indexPattern={indexPattern}
                       query={query}
-                      setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                       setQuery={setQuery}
                       to={to}
                     />
@@ -107,6 +104,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                       filters={filters}
                       from={from}
                       indexPattern={indexPattern}
+                      indexNames={selectedPatterns}
                       query={query}
                       setQuery={setQuery}
                       to={to}
@@ -119,6 +117,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                       filters={filters}
                       from={from}
                       indexPattern={indexPattern}
+                      indexNames={selectedPatterns}
                       query={query}
                       setQuery={setQuery}
                       to={to}
@@ -129,6 +128,7 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
                     <EventCounts
                       filters={filters}
                       from={from}
+                      indexNames={selectedPatterns}
                       indexPattern={indexPattern}
                       query={query}
                       setQuery={setQuery}
@@ -149,22 +149,4 @@ const OverviewComponent: React.FC<PropsFromRedux> = ({
   );
 };
 
-const makeMapStateToProps = () => {
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-
-  const mapStateToProps = (state: State) => ({
-    query: getGlobalQuerySelector(state),
-    filters: getGlobalFiltersQuerySelector(state),
-  });
-
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = { setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker };
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const StatefulOverview = connector(React.memo(OverviewComponent));
+export const StatefulOverview = React.memo(OverviewComponent);

@@ -23,7 +23,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
 import { Space, getSpaceColor } from '../../../../../../../../spaces/public';
 import { FeaturesPrivileges, Role, copyRole } from '../../../../../../../common/model';
-import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { PrivilegeDisplay } from './privilege_display';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';
@@ -118,19 +117,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           const displayedSpaces = isExpanded ? spaces : spaces.slice(0, SPACES_DISPLAY_COUNT);
 
           let button = null;
-          if (record.isGlobal) {
-            button = (
-              <SpacesPopoverList
-                spaces={this.props.displaySpaces.filter((s) => s.id !== '*')}
-                buttonText={i18n.translate(
-                  'xpack.security.management.editRole.spacePrivilegeTable.showAllSpacesLink',
-                  {
-                    defaultMessage: 'show spaces',
-                  }
-                )}
-              />
-            );
-          } else if (spaces.length > displayedSpaces.length) {
+          if (spaces.length > displayedSpaces.length) {
             button = (
               <EuiButtonEmpty
                 size="xs"

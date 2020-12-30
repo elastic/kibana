@@ -4,44 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import styled from 'styled-components';
 
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
-import {
-  ColumnHeaderOptions,
-  SubsetTimelineModel,
-  TimelineModel,
-} from '../../../timelines/store/timeline/model';
-import { OnChangeItemsPerPage } from '../../../timelines/components/timeline/events';
+import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
 import { Filter } from '../../../../../../../src/plugins/data/public';
-import { useUiSetting } from '../../lib/kibana';
 import { EventsViewer } from './events_viewer';
-import { useFetchIndexPatterns } from '../../../detections/containers/detection_engine/rules/fetch_index_patterns';
 import { InspectButtonContainer } from '../inspect';
-import { useFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen } from '../../containers/use_full_screen';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useSourcererScope } from '../../containers/sourcerer';
+import { EventDetailsFlyout } from './event_details_flyout';
 
 const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : `${DEFAULT_EVENTS_VIEWER_HEIGHT}px`)};
+  flex: 1 1 auto;
   display: flex;
   width: 100%;
 `;
 
 export interface OwnProps {
-  defaultIndices?: string[];
   defaultModel: SubsetTimelineModel;
   end: string;
   id: string;
+  scopeId: SourcererScopeName;
   start: string;
   headerFilterGroup?: React.ReactNode;
   pageFilters?: Filter[];
+  onRuleChange?: () => void;
   utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
 }
 
@@ -52,9 +49,9 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   columns,
   dataProviders,
   deletedEventIds,
-  defaultIndices,
   deleteEventQuery,
   end,
+  expandedEvent,
   excludedRowRendererIds,
   filters,
   headerFilterGroup,
@@ -65,24 +62,23 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   kqlMode,
   pageFilters,
   query,
-  removeColumn,
+  onRuleChange,
   start,
+  scopeId,
   showCheckboxes,
   sort,
-  updateItemsPerPage,
-  upsertColumn,
   utilityBar,
   // If truthy, the graph viewer (Resolver) is showing
   graphEventId,
 }) => {
-  const [
-    { docValueFields, browserFields, indexPatterns, isLoading: isLoadingIndexPattern },
-  ] = useFetchIndexPatterns(
-    defaultIndices ?? useUiSetting<string[]>(DEFAULT_INDEX_KEY),
-    'events_viewer'
-  );
-
-  const { globalFullScreen } = useFullScreen();
+  const {
+    browserFields,
+    docValueFields,
+    indexPattern,
+    selectedPatterns,
+    loading: isLoadingIndexPattern,
+  } = useSourcererScope(scopeId);
+  const { globalFullScreen } = useGlobalFullScreen();
 
   useEffect(() => {
     if (createTimeline != null) {
@@ -90,6 +86,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         id,
         columns,
         excludedRowRendererIds,
+        indexNames: selectedPatterns,
         sort,
         itemsPerPage,
         showCheckboxes,
@@ -101,64 +98,45 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
-    (itemsChangedPerPage) => updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }),
-    [id, updateItemsPerPage]
-  );
-
-  const toggleColumn = useCallback(
-    (column: ColumnHeaderOptions) => {
-      const exists = columns.findIndex((c) => c.id === column.id) !== -1;
-
-      if (!exists && upsertColumn != null) {
-        upsertColumn({
-          column,
-          id,
-          index: 1,
-        });
-      }
-
-      if (exists && removeColumn != null) {
-        removeColumn({
-          columnId: column.id,
-          id,
-        });
-      }
-    },
-    [columns, id, upsertColumn, removeColumn]
-  );
-
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
 
   return (
-    <FullScreenContainer $isFullScreen={globalFullScreen}>
-      <InspectButtonContainer>
-        <EventsViewer
-          browserFields={browserFields}
-          columns={columns}
-          docValueFields={docValueFields}
-          id={id}
-          dataProviders={dataProviders!}
-          deletedEventIds={deletedEventIds}
-          end={end}
-          isLoadingIndexPattern={isLoadingIndexPattern}
-          filters={globalFilters}
-          headerFilterGroup={headerFilterGroup}
-          indexPattern={indexPatterns}
-          isLive={isLive}
-          itemsPerPage={itemsPerPage!}
-          itemsPerPageOptions={itemsPerPageOptions!}
-          kqlMode={kqlMode}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          query={query}
-          start={start}
-          sort={sort}
-          toggleColumn={toggleColumn}
-          utilityBar={utilityBar}
-          graphEventId={graphEventId}
-        />
-      </InspectButtonContainer>
-    </FullScreenContainer>
+    <>
+      <FullScreenContainer $isFullScreen={globalFullScreen}>
+        <InspectButtonContainer>
+          <EventsViewer
+            browserFields={browserFields}
+            columns={columns}
+            docValueFields={docValueFields}
+            id={id}
+            dataProviders={dataProviders!}
+            deletedEventIds={deletedEventIds}
+            end={end}
+            expandedEvent={expandedEvent}
+            isLoadingIndexPattern={isLoadingIndexPattern}
+            filters={globalFilters}
+            headerFilterGroup={headerFilterGroup}
+            indexNames={selectedPatterns}
+            indexPattern={indexPattern}
+            isLive={isLive}
+            itemsPerPage={itemsPerPage!}
+            itemsPerPageOptions={itemsPerPageOptions!}
+            kqlMode={kqlMode}
+            query={query}
+            onRuleChange={onRuleChange}
+            start={start}
+            sort={sort}
+            utilityBar={utilityBar}
+            graphEventId={graphEventId}
+          />
+        </InspectButtonContainer>
+      </FullScreenContainer>
+      <EventDetailsFlyout
+        browserFields={browserFields}
+        docValueFields={docValueFields}
+        timelineId={id}
+      />
+    </>
   );
 };
 
@@ -166,27 +144,29 @@ const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getEvents = timelineSelectors.getEventsByIdSelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const events: TimelineModel = getEvents(state, id) ?? defaultModel;
+    const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
     const {
       columns,
       dataProviders,
       deletedEventIds,
       excludedRowRendererIds,
+      expandedEvent,
+      graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
       sort,
       showCheckboxes,
-    } = events;
+    } = timeline;
 
     return {
       columns,
       dataProviders,
       deletedEventIds,
+      expandedEvent: expandedEvent?.query ?? {},
       excludedRowRendererIds,
       filters: getGlobalFiltersQuerySelector(state),
       id,
@@ -199,7 +179,7 @@ const makeMapStateToProps = () => {
       showCheckboxes,
       // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
       // `getTimeline` actually returns `TimelineModel | undefined`
-      graphEventId: (getTimeline(state, id) as TimelineModel | undefined)?.graphEventId,
+      graphEventId,
     };
   };
   return mapStateToProps;
@@ -208,9 +188,6 @@ const makeMapStateToProps = () => {
 const mapDispatchToProps = {
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
-  updateItemsPerPage: timelineActions.updateItemsPerPage,
-  removeColumn: timelineActions.removeColumn,
-  upsertColumn: timelineActions.upsertColumn,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
@@ -222,8 +199,8 @@ export const StatefulEventsViewer = connector(
     StatefulEventsViewerComponent,
     (prevProps, nextProps) =>
       prevProps.id === nextProps.id &&
+      prevProps.scopeId === nextProps.scopeId &&
       deepEqual(prevProps.columns, nextProps.columns) &&
-      deepEqual(prevProps.defaultIndices, nextProps.defaultIndices) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
       prevProps.deletedEventIds === nextProps.deletedEventIds &&

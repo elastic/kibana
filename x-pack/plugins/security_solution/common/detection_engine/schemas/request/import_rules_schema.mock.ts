@@ -86,7 +86,7 @@ export const getImportThreatMatchRulesSchemaMock = (ruleId = 'rule-1'): ImportRu
   risk_score: 55,
   language: 'kuery',
   rule_id: ruleId,
-  threat_index: 'index-123',
+  threat_index: ['index-123'],
   threat_mapping: [{ entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] }],
   threat_query: '*:*',
   threat_filters: [
@@ -136,7 +136,7 @@ export const getImportThreatMatchRulesSchemaDecodedMock = (): ImportRulesSchemaD
   rule_id: 'rule-1',
   immutable: false,
   threat_query: '*:*',
-  threat_index: 'index-123',
+  threat_index: ['index-123'],
   threat_mapping: [
     {
       entries: [

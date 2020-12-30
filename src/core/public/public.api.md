@@ -6,19 +6,19 @@
 
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
+import { EuiFlyoutSize } from '@elastic/eui';
 import { EuiGlobalToastListToast } from '@elastic/eui';
-import { ExclusiveUnion } from '@elastic/eui';
 import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -38,11 +38,12 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
-export function __kbnBootstrap__(): void;
+export function __kbnBootstrap__(): Promise<void>;
 
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> {
@@ -55,6 +56,7 @@ export interface App<HistoryLocationState = unknown> {
     exactRoute?: boolean;
     icon?: string;
     id: string;
+    meta?: AppMeta;
     mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
@@ -89,6 +91,8 @@ export enum AppLeaveActionType {
 // @public
 export interface AppLeaveConfirmAction {
     // (undocumented)
+    callback?: () => void;
+    // (undocumented)
     text: string;
     // (undocumented)
     title?: string;
@@ -107,7 +111,7 @@ export interface AppLeaveDefaultAction {
 // Warning: (ae-forgotten-export) The symbol "AppLeaveActionFactory" needs to be exported by the entry point index.d.ts
 //
 // @public
-export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
+export type AppLeaveHandler = (factory: AppLeaveActionFactory, nextAppId?: string) => AppLeaveAction;
 
 // @public (undocumented)
 export interface ApplicationSetup {
@@ -130,6 +134,12 @@ export interface ApplicationStart {
     navigateToUrl(url: string): Promise<void>;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
+}
+
+// @public
+export interface AppMeta {
+    keywords?: string[];
+    searchDeepLinks?: AppSearchDeepLink[];
 }
 
 // @public
@@ -175,6 +185,20 @@ export enum AppNavLinkStatus {
 }
 
 // @public
+export type AppSearchDeepLink = {
+    id: string;
+    title: string;
+} & ({
+    path: string;
+    searchDeepLinks?: AppSearchDeepLink[];
+    keywords?: string[];
+} | {
+    path?: string;
+    searchDeepLinks: AppSearchDeepLink[];
+    keywords?: string[];
+});
+
+// @public
 export enum AppStatus {
     accessible = 0,
     inaccessible = 1
@@ -184,7 +208,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'meta'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -234,32 +258,36 @@ export interface ChromeHelpExtension {
 }
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
-    linkType: 'custom';
+export type ChromeHelpExtensionLinkBase = Pick<EuiButtonEmptyProps, 'iconType' | 'target' | 'rel' | 'data-test-subj'>;
+
+// @public (undocumented)
+export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLinkBase {
     content: React.ReactNode;
-};
+    href: string;
+    linkType: 'custom';
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuDiscussLink = EuiButtonEmptyProps & {
+export interface ChromeHelpExtensionMenuDiscussLink extends ChromeHelpExtensionLinkBase {
+    href: string;
     linkType: 'discuss';
-    href: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
+export interface ChromeHelpExtensionMenuDocumentationLink extends ChromeHelpExtensionLinkBase {
+    href: string;
     linkType: 'documentation';
-    href: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
-    linkType: 'github';
+export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLinkBase {
     labels: string[];
+    linkType: 'github';
     title?: string;
-};
+}
 
 // @public (undocumented)
-export type ChromeHelpExtensionMenuLink = ExclusiveUnion<ChromeHelpExtensionMenuGitHubLink, ExclusiveUnion<ChromeHelpExtensionMenuDiscussLink, ExclusiveUnion<ChromeHelpExtensionMenuDocumentationLink, ChromeHelpExtensionMenuCustomLink>>>;
+export type ChromeHelpExtensionMenuLink = ChromeHelpExtensionMenuGitHubLink | ChromeHelpExtensionMenuDiscussLink | ChromeHelpExtensionMenuDocumentationLink | ChromeHelpExtensionMenuCustomLink;
 
 // @public (undocumented)
 export interface ChromeNavControl {
@@ -343,6 +371,8 @@ export interface ChromeStart {
     getBadge$(): Observable<ChromeBadge | undefined>;
     getBrand$(): Observable<ChromeBrand>;
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+    // Warning: (ae-forgotten-export) The symbol "ChromeBreadcrumbsAppendExtension" needs to be exported by the entry point index.d.ts
+    getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | undefined>;
     getCustomNavLink$(): Observable<Partial<ChromeNavLink> | undefined>;
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
@@ -355,6 +385,7 @@ export interface ChromeStart {
     setBadge(badge?: ChromeBadge): void;
     setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+    setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension): void;
     setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
     setHelpExtension(helpExtension?: ChromeHelpExtension): void;
     setHelpSupportUrl(url: string): void;
@@ -457,6 +488,7 @@ export interface DocLinksStart {
     // (undocumented)
     readonly links: {
         readonly dashboard: {
+            readonly guide: string;
             readonly drilldowns: string;
             readonly drilldownsTriggerPicker: string;
             readonly urlDrilldownTemplateSyntax: string;
@@ -539,6 +571,7 @@ export interface DocLinksStart {
             readonly gettingStarted: string;
         };
         readonly query: {
+            readonly eql: string;
             readonly luceneQuerySyntax: string;
             readonly queryDsl: string;
             readonly kueryQuerySyntax: string;
@@ -547,6 +580,8 @@ export interface DocLinksStart {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
+        readonly ml: Record<string, string>;
+        readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
     };
 }
@@ -619,8 +654,7 @@ export interface HttpFetchOptionsWithPath extends HttpFetchOptions {
 
 // @public (undocumented)
 export interface HttpFetchQuery {
-    // (undocumented)
-    [key: string]: string | number | boolean | undefined | Array<string | number | boolean | undefined>;
+    [key: string]: string | number | boolean | string[] | number[] | boolean[] | undefined | null;
 }
 
 // @public
@@ -701,6 +735,8 @@ export interface HttpSetup {
     anonymousPaths: IAnonymousPaths;
     basePath: IBasePath;
     delete: HttpHandler;
+    // (undocumented)
+    externalUrl: IExternalUrl;
     fetch: HttpHandler;
     get: HttpHandler;
     getLoadingCount$(): Observable<number>;
@@ -734,6 +770,7 @@ export interface IAnonymousPaths {
 export interface IBasePath {
     get: () => string;
     prepend: (url: string) => string;
+    readonly publicBaseUrl?: string;
     remove: (url: string) => string;
     // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "BasePath"
     readonly serverBasePath: string;
@@ -749,6 +786,18 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 //
 // @public
 export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: PartialExceptFor<HandlerContextType<THandler>, 'core'>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+
+// @public
+export interface IExternalUrl {
+    validateUrl(relativeOrAbsoluteUrl: string): URL | null;
+}
+
+// @public
+export interface IExternalUrlPolicy {
+    allow: boolean;
+    host?: string;
+    protocol?: string;
+}
 
 // @public (undocumented)
 export interface IHttpFetchError extends Error {
@@ -857,6 +906,64 @@ export interface OverlayBannersStart {
     replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 }
 
+// @public (undocumented)
+export interface OverlayFlyoutOpenOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+    // (undocumented)
+    maxWidth?: boolean | number | string;
+    // (undocumented)
+    ownFocus?: boolean;
+    // (undocumented)
+    size?: EuiFlyoutSize;
+}
+
+// @public
+export interface OverlayFlyoutStart {
+    open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+}
+
+// @public (undocumented)
+export interface OverlayModalConfirmOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    buttonColor?: EuiConfirmModalProps['buttonColor'];
+    // (undocumented)
+    cancelButtonText?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+    // (undocumented)
+    confirmButtonText?: string;
+    // (undocumented)
+    defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
+    maxWidth?: boolean | number | string;
+    // (undocumented)
+    title?: string;
+}
+
+// @public (undocumented)
+export interface OverlayModalOpenOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+}
+
+// @public
+export interface OverlayModalStart {
+    open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
+    openConfirm(message: MountPoint | string, options?: OverlayModalConfirmOptions): Promise<boolean>;
+}
+
 // @public
 export interface OverlayRef {
     close(): Promise<void>;
@@ -869,12 +976,8 @@ export interface OverlayStart {
     banners: OverlayBannersStart;
     // (undocumented)
     openConfirm: OverlayModalStart['openConfirm'];
-    // Warning: (ae-forgotten-export) The symbol "OverlayFlyoutStart" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     openFlyout: OverlayFlyoutStart['open'];
-    // Warning: (ae-forgotten-export) The symbol "OverlayModalStart" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     openModal: OverlayModalStart['open'];
 }
@@ -912,10 +1015,23 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'meta'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
+    meta: PublicAppMetaInfo;
+};
+
+// @public
+export type PublicAppMetaInfo = Omit<AppMeta, 'keywords' | 'searchDeepLinks'> & {
+    keywords: string[];
+    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+};
+
+// @public
+export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks' | 'keywords'> & {
+    searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+    keywords: string[];
 };
 
 // @public
@@ -1029,8 +1145,9 @@ export class SavedObjectsClient {
     }>) => Promise<SavedObjectsBatchResponse<unknown>>;
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
-    delete: (type: string, id: string) => ReturnType<SavedObjectsClientContract_2['delete']>;
+    delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => ReturnType<SavedObjectsClientContract_2['delete']>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
     find: <T = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T>>;
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
@@ -1051,18 +1168,14 @@ export interface SavedObjectsCreateOptions {
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
-    // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     filter?: string | KueryNode;
-    // (undocumented)
-    hasReference?: {
-        type: string;
-        id: string;
-    };
+    hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
+    hasReferenceOperator?: 'AND' | 'OR';
     // (undocumented)
     namespaces?: string[];
     // (undocumented)
@@ -1079,6 +1192,15 @@ export interface SavedObjectsFindOptions {
     sortOrder?: string;
     // (undocumented)
     type: string | string[];
+    typeToNamespacesMap?: Map<string, string[] | undefined>;
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindOptionsReference {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
 }
 
 // @public
@@ -1351,6 +1473,11 @@ export interface UiSettingsParams<T = unknown> {
     // Warning: (ae-forgotten-export) The symbol "DeprecationSettings" needs to be exported by the entry point index.d.ts
     deprecation?: DeprecationSettings;
     description?: string;
+    // @deprecated
+    metric?: {
+        type: UiCounterMetricType;
+        name: string;
+    };
     name?: string;
     optionLabels?: Record<string, string>;
     options?: string[];

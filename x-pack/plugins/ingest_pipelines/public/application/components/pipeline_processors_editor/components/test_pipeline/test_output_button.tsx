@@ -6,7 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
 import { EuiButton } from '@elastic/eui';
-import { TestPipelineFlyoutTab } from './test_pipeline_flyout_tabs';
+import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
 const i18nTexts = {
   buttonLabel: i18n.translate(

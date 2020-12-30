@@ -19,9 +19,8 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { InjectedIntlProps } from 'react-intl';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage, InjectedIntlProps } from '@kbn/i18n/react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { IIndexPattern, IFieldType } from '../../../../data/public';

@@ -6,18 +6,20 @@
 
 import React from 'react';
 
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import _camelCase from 'lodash/camelCase';
 
 import { images } from '../assets';
 
-interface ISourceIconProps {
+interface SourceIconProps {
   serviceType: string;
   name: string;
   className?: string;
   wrapped?: boolean;
 }
 
-export const SourceIcon: React.FC<ISourceIconProps> = ({
+export const SourceIcon: React.FC<SourceIconProps> = ({
   name,
   serviceType,
   className,

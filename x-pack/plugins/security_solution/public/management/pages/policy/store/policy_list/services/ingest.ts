@@ -8,21 +8,22 @@ import { HttpFetchOptions, HttpStart } from 'kibana/public';
 import {
   GetPackagePoliciesRequest,
   GetAgentStatusResponse,
+  GetAgentsResponse,
   DeletePackagePoliciesResponse,
   DeletePackagePoliciesRequest,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
-} from '../../../../../../../../ingest_manager/common';
+} from '../../../../../../../../fleet/common';
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
 import { NewPolicyData } from '../../../../../../../common/endpoint/types';
 
-const INGEST_API_ROOT = `/api/ingest_manager`;
+const INGEST_API_ROOT = `/api/fleet`;
 export const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
 export const INGEST_API_AGENT_POLICIES = `${INGEST_API_ROOT}/agent_policies`;
-const INGEST_API_FLEET = `${INGEST_API_ROOT}/fleet`;
-const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_FLEET}/agent-status`;
+const INGEST_API_FLEET_AGENT_STATUS = `${INGEST_API_ROOT}/agent-status`;
+export const INGEST_API_FLEET_AGENTS = `${INGEST_API_ROOT}/agents`;
 export const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
 const INGEST_API_DELETE_PACKAGE_POLICY = `${INGEST_API_PACKAGE_POLICIES}/delete`;
 
@@ -127,6 +128,26 @@ export const sendGetFleetAgentStatusForPolicy = (
     ...options,
     query: {
       policyId,
+    },
+  });
+};
+
+/**
+ * Get a status summary for all Agents that are currently assigned to a given agent policy
+ *
+ * @param http
+ * @param options
+ */
+export const sendGetFleetAgentsWithEndpoint = (
+  http: HttpStart,
+  options: Exclude<HttpFetchOptions, 'query'> = {}
+): Promise<GetAgentsResponse> => {
+  return http.get(INGEST_API_FLEET_AGENTS, {
+    ...options,
+    query: {
+      page: 1,
+      perPage: 1,
+      kuery: 'fleet-agents.packages : "endpoint"',
     },
   });
 };

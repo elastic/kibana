@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
 
 interface Props {
@@ -42,7 +42,6 @@ export const IndexPatternPrompt: FC<Props> = ({ destIndex }) => {
           }}
         />
       </EuiText>
-      <EuiSpacer size="m" />
     </>
   );
 };

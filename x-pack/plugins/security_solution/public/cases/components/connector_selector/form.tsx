@@ -4,46 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { isEmpty } from 'lodash/fp';
 import { EuiFormRow } from '@elastic/eui';
-import React, { useCallback, useEffect } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../../shared_imports';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
-import { Connector } from '../../../../../case/common/api/cases';
+import { ActionConnector } from '../../../../../case/common/api/cases';
 
 interface ConnectorSelectorProps {
-  connectors: Connector[];
+  connectors: ActionConnector[];
   dataTestSubj: string;
-  field: FieldHook;
-  idAria: string;
-  defaultValue?: string;
   disabled: boolean;
+  field: FieldHook<string>;
+  idAria: string;
+  isEdit: boolean;
   isLoading: boolean;
 }
 export const ConnectorSelector = ({
   connectors,
   dataTestSubj,
-  defaultValue,
+  disabled = false,
   field,
   idAria,
-  disabled = false,
+  isEdit = true,
   isLoading = false,
 }: ConnectorSelectorProps) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
-  useEffect(() => {
-    field.setValue(defaultValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValue]);
-
-  const handleContentChange = useCallback(
-    (newContent: string) => {
-      field.setValue(newContent);
-    },
-    [field]
-  );
-
-  return (
+  return isEdit ? (
     <EuiFormRow
       data-test-subj={dataTestSubj}
       describedByIds={idAria ? [idAria] : undefined}
@@ -56,11 +44,11 @@ export const ConnectorSelector = ({
     >
       <ConnectorsDropdown
         connectors={connectors}
-        selectedConnector={field.value as string}
         disabled={disabled}
         isLoading={isLoading}
-        onChange={handleContentChange}
+        onChange={field.setValue}
+        selectedConnector={isEmpty(field.value) ? 'none' : field.value}
       />
     </EuiFormRow>
-  );
+  ) : null;
 };

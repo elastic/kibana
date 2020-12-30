@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React, { FC, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Redirect } from 'react-router-dom';
 
-import { NavigateToPath } from '../../contexts/kibana';
+import type { NavigateToPath } from '../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../router';
 import { useResolver } from '../use_resolver';
-import { OverviewPage } from '../../overview';
 
 import { checkFullLicense } from '../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../capabilities/check_capabilities';
@@ -21,6 +20,8 @@ import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { useTimefilter } from '../../contexts/kibana';
 import { breadcrumbOnClickFactory, getBreadcrumbWithUrlForApp } from '../breadcrumbs';
+
+const OverviewPage = React.lazy(() => import('../../overview/overview_page'));
 
 export const overviewRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -52,7 +53,10 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
 
   return (
     <PageLoader context={context}>
-      <OverviewPage />
+      {/* No fallback yet, we don't show a loading spinner on an outer level until context is available either. */}
+      <Suspense fallback={null}>
+        <OverviewPage />
+      </Suspense>
     </PageLoader>
   );
 };

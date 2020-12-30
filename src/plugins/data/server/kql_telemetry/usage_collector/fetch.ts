@@ -18,7 +18,7 @@
  */
 
 import { get } from 'lodash';
-import { LegacyAPICaller } from 'kibana/server';
+import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
@@ -30,18 +30,22 @@ export interface Usage {
 }
 
 export function fetchProvider(index: string) {
-  return async (callCluster: LegacyAPICaller): Promise<Usage> => {
-    const [response, config] = await Promise.all([
-      callCluster('get', {
-        index,
-        id: 'kql-telemetry:kql-telemetry',
-        ignore: [404],
-      }),
-      callCluster('search', {
-        index,
-        body: { query: { term: { type: 'config' } } },
-        ignore: [404],
-      }),
+  return async ({ esClient }: CollectorFetchContext): Promise<Usage> => {
+    const [{ body: response }, { body: config }] = await Promise.all([
+      esClient.get(
+        {
+          index,
+          id: 'kql-telemetry:kql-telemetry',
+        },
+        { ignore: [404] }
+      ),
+      esClient.search(
+        {
+          index,
+          body: { query: { term: { type: 'config' } } },
+        },
+        { ignore: [404] }
+      ),
     ]);
 
     const queryLanguageConfigValue: string | null | undefined = get(

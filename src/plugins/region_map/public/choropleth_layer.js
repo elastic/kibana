@@ -33,7 +33,7 @@ const EMPTY_STYLE = {
   fillOpacity: 0,
 };
 
-export default class ChoroplethLayer extends KibanaMapLayer {
+export class ChoroplethLayer extends KibanaMapLayer {
   static _doInnerJoin(sortedMetrics, sortedGeojsonFeatures, joinField) {
     let j = 0;
     for (let i = 0; i < sortedGeojsonFeatures.length; i++) {
@@ -71,7 +71,16 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     }
   }
 
-  constructor(name, attribution, format, showAllShapes, meta, layerConfig, serviceSettings) {
+  constructor(
+    name,
+    attribution,
+    format,
+    showAllShapes,
+    meta,
+    layerConfig,
+    serviceSettings,
+    leaflet
+  ) {
     super();
     this._serviceSettings = serviceSettings;
     this._metrics = null;
@@ -84,9 +93,10 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._showAllShapes = showAllShapes;
     this._layerName = name;
     this._layerConfig = layerConfig;
+    this._leaflet = leaflet;
 
     // eslint-disable-next-line no-undef
-    this._leafletLayer = L.geoJson(null, {
+    this._leafletLayer = this._leaflet.geoJson(null, {
       onEachFeature: (feature, layer) => {
         layer.on('click', () => {
           this.emit('select', feature.properties[this._joinField]);
@@ -97,7 +107,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
             const tooltipContents = this._tooltipFormatter(feature);
             if (!location) {
               // eslint-disable-next-line no-undef
-              const leafletGeojson = L.geoJson(feature);
+              const leafletGeojson = this._leaflet.geoJson(feature);
               location = leafletGeojson.getBounds().getCenter();
             }
             this.emit('showTooltip', {
@@ -276,7 +286,8 @@ CORS configuration of the server permits requests from the Kibana application on
     showAllData,
     meta,
     layerConfig,
-    serviceSettings
+    serviceSettings,
+    leaflet
   ) {
     const clonedLayer = new ChoroplethLayer(
       name,
@@ -285,7 +296,8 @@ CORS configuration of the server permits requests from the Kibana application on
       showAllData,
       meta,
       layerConfig,
-      serviceSettings
+      serviceSettings,
+      leaflet
     );
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);
@@ -425,7 +437,7 @@ CORS configuration of the server permits requests from the Kibana application on
     const { min, max } = getMinMax(this._metrics);
 
     // eslint-disable-next-line no-undef
-    const boundsOfAllFeatures = new L.LatLngBounds();
+    const boundsOfAllFeatures = new this._leaflet.LatLngBounds();
     return {
       leafletStyleFunction: (geojsonFeature) => {
         const match = geojsonFeature.__kbnJoinedMetric;
@@ -433,7 +445,7 @@ CORS configuration of the server permits requests from the Kibana application on
           return emptyStyle();
         }
         // eslint-disable-next-line no-undef
-        const boundsOfFeature = L.geoJson(geojsonFeature).getBounds();
+        const boundsOfFeature = this._leaflet.geoJson(geojsonFeature).getBounds();
         boundsOfAllFeatures.extend(boundsOfFeature);
 
         return {

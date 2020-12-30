@@ -6,6 +6,8 @@
 
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
+import { ILicense } from '../../../../../../../licensing/common/types';
+import { unsetPolicyFeaturesAboveLicenseLevel } from '../../../../../../common/license/policy_config';
 import { PolicyDetailsState } from '../../types';
 import {
   Immutable,
@@ -20,6 +22,24 @@ import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 
 /** Returns the policy details */
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
+/** Returns current active license */
+export const licenseState = (state: Immutable<PolicyDetailsState>) => state.license;
+
+export const licensedPolicy: (
+  state: Immutable<PolicyDetailsState>
+) => Immutable<PolicyData> | undefined = createSelector(
+  policyDetails,
+  licenseState,
+  (policyData, license) => {
+    if (policyData) {
+      unsetPolicyFeaturesAboveLicenseLevel(
+        policyData?.inputs[0]?.config.policy.value,
+        license as ILicense
+      );
+    }
+    return policyData;
+  }
+);
 
 /**
  * Given a Policy Data (package policy) object, return back a new object with only the field
@@ -31,7 +51,43 @@ export const getPolicyDataForUpdate = (
 ): NewPolicyData | Immutable<NewPolicyData> => {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
-  return newPolicy;
+
+  // trim custom malware notification string
+  return {
+    ...newPolicy,
+    inputs: (newPolicy as Immutable<NewPolicyData>).inputs.map((input) => ({
+      ...input,
+      config: input.config && {
+        ...input.config,
+        policy: {
+          ...input.config.policy,
+          value: {
+            ...input.config.policy.value,
+            windows: {
+              ...input.config.policy.value.windows,
+              popup: {
+                ...input.config.policy.value.windows.popup,
+                malware: {
+                  ...input.config.policy.value.windows.popup.malware,
+                  message: input.config.policy.value.windows.popup.malware.message.trim(),
+                },
+              },
+            },
+            mac: {
+              ...input.config.policy.value.mac,
+              popup: {
+                ...input.config.policy.value.mac.popup,
+                malware: {
+                  ...input.config.policy.value.mac.popup.malware,
+                  message: input.config.policy.value.mac.popup.malware.message.trim(),
+                },
+              },
+            },
+          },
+        },
+      },
+    })),
+  };
 };
 
 /**
@@ -39,7 +95,7 @@ export const getPolicyDataForUpdate = (
  */
 export const policyDetailsForUpdate: (
   state: Immutable<PolicyDetailsState>
-) => Immutable<NewPolicyData> | undefined = createSelector(policyDetails, (policy) => {
+) => Immutable<NewPolicyData> | undefined = createSelector(licensedPolicy, (policy) => {
   if (policy) {
     return getPolicyDataForUpdate(policy);
   }
@@ -75,7 +131,7 @@ const defaultFullPolicy: Immutable<PolicyConfig> = policyConfigFactory();
  * Note: this will return a default full policy if the `policyItem` is `undefined`
  */
 export const fullPolicy: (s: Immutable<PolicyDetailsState>) => PolicyConfig = createSelector(
-  policyDetails,
+  licensedPolicy,
   (policyData) => {
     return policyData?.inputs[0]?.config?.policy?.value ?? defaultFullPolicy;
   }
@@ -103,19 +159,29 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
   (windows, mac, linux) => {
     return {
       windows: {
+        advanced: windows.advanced,
         events: windows.events,
         malware: windows.malware,
+        popup: windows.popup,
+        antivirus_registration: windows.antivirus_registration,
       },
       mac: {
+        advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
+        popup: mac.popup,
       },
       linux: {
+        advanced: linux.advanced,
         events: linux.events,
       },
     };
   }
 );
+
+export const isAntivirusRegistrationEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
+  return uiPolicyConfig.windows.antivirus_registration.enabled;
+});
 
 /** Returns the total number of possible windows eventing configurations */
 export const totalWindowsEvents = (state: PolicyDetailsState): number => {

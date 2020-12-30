@@ -5,25 +5,33 @@
  */
 
 import {
-  CLOSED_ALERTS_FILTER_BTN,
-  EXPAND_ALERT_BTN,
-  LOADING_ALERTS_PANEL,
-  MANAGE_ALERT_DETECTION_RULES_BTN,
-  OPENED_ALERTS_FILTER_BTN,
-  SEND_ALERT_TO_TIMELINE_BTN,
+  ADD_EXCEPTION_BTN,
+  ALERT_RISK_SCORE_HEADER,
   ALERTS,
   ALERT_CHECKBOX,
-  TIMELINE_CONTEXT_MENU_BTN,
   CLOSE_ALERT_BTN,
-  TAKE_ACTION_POPOVER_BTN,
   CLOSE_SELECTED_ALERTS_BTN,
+  CLOSED_ALERTS_FILTER_BTN,
+  EXPAND_ALERT_BTN,
   IN_PROGRESS_ALERTS_FILTER_BTN,
-  OPEN_ALERT_BTN,
-  OPEN_SELECTED_ALERTS_BTN,
+  LOADING_ALERTS_PANEL,
+  MANAGE_ALERT_DETECTION_RULES_BTN,
   MARK_ALERT_IN_PROGRESS_BTN,
   MARK_SELECTED_ALERTS_IN_PROGRESS_BTN,
+  OPEN_ALERT_BTN,
+  OPEN_SELECTED_ALERTS_BTN,
+  OPENED_ALERTS_FILTER_BTN,
+  SEND_ALERT_TO_TIMELINE_BTN,
+  TAKE_ACTION_POPOVER_BTN,
+  TIMELINE_CONTEXT_MENU_BTN,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
+import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
+
+export const addExceptionFromFirstAlert = () => {
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click();
+  cy.get(ADD_EXCEPTION_BTN).click();
+};
 
 export const closeFirstAlert = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
@@ -40,7 +48,10 @@ export const expandFirstAlert = () => {
 };
 
 export const goToClosedAlerts = () => {
-  cy.get(CLOSED_ALERTS_FILTER_BTN).click({ force: true });
+  cy.get(CLOSED_ALERTS_FILTER_BTN).click();
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const goToManageAlertsDetectionRules = () => {
@@ -49,6 +60,9 @@ export const goToManageAlertsDetectionRules = () => {
 
 export const goToOpenedAlerts = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
 export const openFirstAlert = () => {
@@ -62,7 +76,7 @@ export const openAlerts = () => {
 };
 
 export const goToInProgressAlerts = () => {
-  cy.get(IN_PROGRESS_ALERTS_FILTER_BTN).click({ force: true });
+  cy.get(IN_PROGRESS_ALERTS_FILTER_BTN).click();
 };
 
 export const markInProgressFirstAlert = () => {
@@ -81,12 +95,18 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
   }
 };
 
+export const sortRiskScore = () => {
+  cy.get(ALERT_RISK_SCORE_HEADER).click();
+  cy.get(TIMELINE_COLUMN_SPINNER).should('exist');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
+};
+
 export const investigateFirstAlertInTimeline = () => {
   cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
 };
 
 export const waitForAlerts = () => {
-  cy.get(REFRESH_BUTTON).invoke('text').should('not.equal', 'Updating');
+  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
 };
 
 export const waitForAlertsIndexToBeCreated = () => {

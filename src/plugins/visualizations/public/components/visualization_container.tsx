@@ -17,14 +17,40 @@
  * under the License.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, Suspense } from 'react';
+import { EuiLoadingChart } from '@elastic/eui';
+import classNames from 'classnames';
+import { VisualizationNoResults } from './visualization_noresults';
+import { IInterpreterRenderHandlers } from '../../../expressions/common';
 
 interface VisualizationContainerProps {
+  'data-test-subj'?: string;
   className?: string;
   children: ReactNode;
+  handlers: IInterpreterRenderHandlers;
+  showNoResult?: boolean;
 }
 
-export const VisualizationContainer = (props: VisualizationContainerProps) => {
-  const classes = `visualization ${props.className}`;
-  return <div className={classes}>{props.children}</div>;
+export const VisualizationContainer = ({
+  'data-test-subj': dataTestSubj = '',
+  className,
+  children,
+  handlers,
+  showNoResult = false,
+}: VisualizationContainerProps) => {
+  const classes = classNames('visualization', className);
+
+  const fallBack = (
+    <div className="visChart__spinner">
+      <EuiLoadingChart mono size="l" />
+    </div>
+  );
+
+  return (
+    <div data-test-subj={dataTestSubj} className={classes}>
+      <Suspense fallback={fallBack}>
+        {showNoResult ? <VisualizationNoResults onInit={() => handlers.done()} /> : children}
+      </Suspense>
+    </div>
+  );
 };

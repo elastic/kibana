@@ -54,5 +54,31 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         id: response.body.id,
       });
     });
+
+    it('should notify feature usage when creating a gold action type', async () => {
+      const testStart = new Date();
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'Noop action type',
+          actionTypeId: 'test.noop',
+          secrets: {},
+          config: {},
+        })
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, response.body.id, 'action', 'actions');
+
+      const {
+        body: { features },
+      } = await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/licensing/feature_usage`);
+      expect(features).to.be.an(Array);
+      const noopFeature = features.find(
+        (feature: { name: string }) => feature.name === 'Connector: Test: Noop'
+      );
+      expect(noopFeature).to.be.ok();
+      expect(noopFeature.last_used).to.be.a('string');
+      expect(new Date(noopFeature.last_used).getTime()).to.be.greaterThan(testStart.getTime());
+    });
   });
 }

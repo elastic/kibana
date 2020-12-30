@@ -8,32 +8,15 @@ import React from 'react';
 import axios from 'axios';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
-import { notificationServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
-
-import { LocationDescriptorObject } from 'history';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { usageCollectionPluginMock } from 'src/plugins/usage_collection/public/mocks';
 
-import { registerTestBed, TestBed } from '../../../../../../../test_utils';
-import { stubWebWorker } from '../../../../../../../test_utils/stub_web_worker';
-
-import {
-  breadcrumbService,
-  uiMetricService,
-  documentationService,
-  apiService,
-} from '../../../services';
-
-import {
-  ProcessorsEditorContextProvider,
-  Props,
-  GlobalOnFailureProcessorsEditor,
-  ProcessorsEditor,
-} from '../';
-import { TestPipelineActions } from '../';
-
+import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { stubWebWorker } from '@kbn/test/jest';
+import { uiMetricService, apiService } from '../../../services';
+import { Props } from '../';
 import { initHttpRequests } from './http_requests.helpers';
+import { ProcessorsEditorWithDeps } from './processors_editor';
 
 stubWebWorker();
 
@@ -81,31 +64,8 @@ jest.mock('react-virtualized', () => {
   };
 });
 
-const history = scopedHistoryMock.create();
-history.createHref.mockImplementation((location: LocationDescriptorObject) => {
-  return `${location.pathname}?${location.search}`;
-});
-
-const appServices = {
-  breadcrumbs: breadcrumbService,
-  metric: uiMetricService,
-  documentation: documentationService,
-  api: apiService,
-  notifications: notificationServiceMock.createSetupContract(),
-  history,
-  uiSettings: {},
-};
-
 const testBedSetup = registerTestBed<TestSubject>(
-  (props: Props) => (
-    <KibanaContextProvider services={appServices}>
-      <ProcessorsEditorContextProvider {...props}>
-        <TestPipelineActions />
-        <ProcessorsEditor />
-        <GlobalOnFailureProcessorsEditor />
-      </ProcessorsEditorContextProvider>
-    </KibanaContextProvider>
-  ),
+  (props: Props) => <ProcessorsEditorWithDeps {...props} />,
   {
     doMountAsync: false,
   }
@@ -174,9 +134,58 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       });
     },
 
+    clickDocumentsDropdown() {
+      act(() => {
+        find('documentsDropdown.documentsButton').simulate('click');
+      });
+      component.update();
+    },
+
+    clickEditDocumentsButton() {
+      act(() => {
+        find('editDocumentsButton').simulate('click');
+      });
+      component.update();
+    },
+
+    clickClearAllButton() {
+      act(() => {
+        find('clearAllDocumentsButton').simulate('click');
+      });
+      component.update();
+    },
+
+    async clickConfirmResetButton() {
+      const modal = document.body.querySelector(
+        '[data-test-subj="resetDocumentsConfirmationModal"]'
+      );
+      const confirmButton: HTMLButtonElement | null = modal!.querySelector(
+        '[data-test-subj="confirmModalConfirmButton"]'
+      );
+
+      await act(async () => {
+        confirmButton!.click();
+      });
+      component.update();
+    },
+
     async clickProcessor(processorSelector: string) {
       await act(async () => {
         find(`${processorSelector}.manageItemButton`).simulate('click');
+      });
+      component.update();
+    },
+
+    async toggleDocumentsAccordion() {
+      await act(async () => {
+        find('addDocumentsAccordion').simulate('click');
+      });
+      component.update();
+    },
+
+    async clickAddDocumentButton() {
+      await act(async () => {
+        find('addDocumentButton').simulate('click');
       });
       component.update();
     },
@@ -211,6 +220,7 @@ type TestSubject =
   | 'addDocumentsButton'
   | 'testPipelineFlyout'
   | 'documentsDropdown'
+  | 'documentsDropdown.documentsButton'
   | 'outputTab'
   | 'documentsEditor'
   | 'runPipelineButton'
@@ -229,4 +239,10 @@ type TestSubject =
   | 'configurationTab'
   | 'outputTab'
   | 'processorOutputTabContent'
+  | 'editDocumentsButton'
+  | 'clearAllDocumentsButton'
+  | 'addDocumentsAccordion'
+  | 'addDocumentButton'
+  | 'addDocumentError'
+  | 'addDocumentSuccess'
   | string;

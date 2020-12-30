@@ -15,7 +15,7 @@ import {
   EndpointDocGenerator,
   Event,
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
-import { InsertedEvents } from '../../services/resolver';
+import { InsertedEvents, processEventsIndex } from '../../services/resolver';
 import { createAncestryArray } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -34,9 +34,12 @@ export default function ({ getService }: FtrProviderContext) {
       let origin: Event;
       let genData: InsertedEvents;
       before(async () => {
-        origin = generator.generateEvent({ parentEntityID: 'a' });
+        origin = generator.generateEvent({
+          parentEntityID: 'a',
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
         setEntityIDEmptyString(origin);
-        genData = await resolver.insertEvents([origin]);
+        genData = await resolver.insertEvents([origin], processEventsIndex);
       });
 
       after(async () => {
@@ -63,10 +66,14 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         // construct a tree with an origin and two direct children. One child will not have an entity_id. That child
         // should not be returned by the backend.
-        origin = generator.generateEvent({ entityID: 'a' });
+        origin = generator.generateEvent({
+          entityID: 'a',
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
         childNoEntityID = generator.generateEvent({
           parentEntityID: entityIDSafeVersion(origin),
           ancestry: createAncestryArray([origin]),
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
         // force it to be empty
         setEntityIDEmptyString(childNoEntityID);
@@ -75,9 +82,10 @@ export default function ({ getService }: FtrProviderContext) {
           entityID: 'b',
           parentEntityID: entityIDSafeVersion(origin),
           ancestry: createAncestryArray([origin]),
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
         events = [origin, childNoEntityID, childWithEntityID];
-        genData = await resolver.insertEvents(events);
+        genData = await resolver.insertEvents(events, processEventsIndex);
       });
 
       after(async () => {
@@ -106,17 +114,20 @@ export default function ({ getService }: FtrProviderContext) {
         // entity_ids in the ancestry array. This is to make sure that the backend will not query for that event.
         ancestor2 = generator.generateEvent({
           entityID: '2',
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
         ancestor1 = generator.generateEvent({
           entityID: '1',
           parentEntityID: entityIDSafeVersion(ancestor2),
           ancestry: createAncestryArray([ancestor2]),
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         // we'll insert an event that doesn't have an entity id so if the backend does search for it, it should be
         // returned and our test should fail
         ancestorNoEntityID = generator.generateEvent({
           ancestry: createAncestryArray([ancestor2]),
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
         setEntityIDEmptyString(ancestorNoEntityID);
 
@@ -124,10 +135,11 @@ export default function ({ getService }: FtrProviderContext) {
           entityID: 'a',
           parentEntityID: entityIDSafeVersion(ancestor1),
           ancestry: ['', ...createAncestryArray([ancestor2])],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         events = [origin, ancestor1, ancestor2, ancestorNoEntityID];
-        genData = await resolver.insertEvents(events);
+        genData = await resolver.insertEvents(events, processEventsIndex);
       });
 
       after(async () => {

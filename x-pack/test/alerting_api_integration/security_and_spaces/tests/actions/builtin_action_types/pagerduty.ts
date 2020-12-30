@@ -163,7 +163,6 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         status: 'ok',
         actionId: simulatedActionId,
         data: {
-          dedup_key: `action:${simulatedActionId}`,
           message: 'Event processed',
           status: 'success',
         },

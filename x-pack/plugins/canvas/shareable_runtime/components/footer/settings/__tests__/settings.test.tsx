@@ -25,8 +25,8 @@ jest.mock('@elastic/eui/lib/services/accessibility', () => {
   };
 });
 jest.mock('@elastic/eui/lib/components/portal/portal', () => {
-  // eslint-disable-next-line no-shadow
-  const React = require.requireActual('react');
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  const React = jest.requireActual('react');
   return {
     EuiPortal: (props: any) => <div>{props.children}</div>,
   };

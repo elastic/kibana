@@ -4,29 +4,19 @@
   "private": true,
   "description": "Just some helpers for kibana plugin devs.",
   "license": "Apache-2.0",
+  "kibana": {
+    "devOnly": true
+  },
   "main": "target/index.js",
   "bin": {
     "plugin-helpers": "bin/plugin-helpers.js"
   },
   "scripts": {
-    "kbn:bootstrap": "rm -rf target && tsc",
-    "kbn:watch": "tsc --watch"
+    "kbn:bootstrap": "rm -rf target && ../../node_modules/.bin/tsc",
+    "kbn:watch": "../../node_modules/.bin/tsc --watch"
   },
   "dependencies": {
-    "@kbn/dev-utils": "1.0.0",
-    "@kbn/optimizer": "1.0.0",
-    "del": "^5.1.0",
-    "execa": "^4.0.2",
-    "gulp-zip": "^5.0.2",
-    "inquirer": "^1.2.2",
-    "load-json-file": "^6.2.0",
-    "vinyl-fs": "^3.0.3"
-  },
-  "devDependencies": {
-    "@types/extract-zip": "^1.6.2",
-    "@types/gulp-zip": "^4.0.1",
-    "@types/inquirer": "^6.5.0",
-    "extract-zip": "^2.0.1",
-    "typescript": "4.0.2"
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
+    "@kbn/optimizer": "link:../kbn-optimizer"
   }
 }

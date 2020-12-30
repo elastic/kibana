@@ -39,7 +39,7 @@ export interface AggTypeConfig<
   createFilter?: (aggConfig: TAggConfig, key: any, params?: any) => any;
   type?: string;
   dslName?: string;
-  expressionName?: string;
+  expressionName: string;
   makeLabel?: ((aggConfig: TAggConfig) => string) | (() => string);
   ordered?: any;
   hasNoDsl?: boolean;
@@ -54,12 +54,14 @@ export interface AggTypeConfig<
     aggConfigs: IAggConfigs,
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
-    inspectorRequestAdapter: RequestAdapter,
-    abortSignal?: AbortSignal
+    inspectorRequestAdapter?: RequestAdapter,
+    abortSignal?: AbortSignal,
+    searchSessionId?: string
   ) => Promise<any>;
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
+  getValueBucketPath?: (agg: TAggConfig) => string;
 }
 
 // TODO need to make a more explicit interface for this
@@ -88,12 +90,11 @@ export class AggType<
   dslName: string;
   /**
    * the name of the expression function that this aggType represents.
-   * TODO: this should probably be a required field.
    *
    * @property name
    * @type {string}
    */
-  expressionName?: string;
+  expressionName: string;
   /**
    * the user friendly name that will be shown in the ui for this aggType
    *
@@ -181,6 +182,8 @@ export class AggType<
    * @param searchSourceAggs - SearchSource aggregation configuration
    * @param resp - Response to the main request
    * @param nestedSearchSource - the new SearchSource that will be used to make post flight request
+   * @param abortSignal - `AbortSignal` to abort the request
+   * @param searchSessionId - searchSessionId to be used for grouping requests into a single search session
    * @return {Promise}
    */
   postFlightRequest: (
@@ -188,8 +191,9 @@ export class AggType<
     aggConfigs: IAggConfigs,
     aggConfig: TAggConfig,
     searchSource: ISearchSource,
-    inspectorRequestAdapter: RequestAdapter,
-    abortSignal?: AbortSignal
+    inspectorRequestAdapter?: RequestAdapter,
+    abortSignal?: AbortSignal,
+    searchSessionId?: string
   ) => Promise<any>;
   /**
    * Get the serialized format for the values produced by this agg type,
@@ -208,6 +212,10 @@ export class AggType<
 
   paramByName = (name: string) => {
     return this.params.find((p: TParam) => p.name === name);
+  };
+
+  getValueBucketPath = (agg: TAggConfig) => {
+    return agg.id;
   };
 
   /**
@@ -231,6 +239,10 @@ export class AggType<
 
     if (config.createFilter) {
       this.createFilter = config.createFilter;
+    }
+
+    if (config.getValueBucketPath) {
+      this.getValueBucketPath = config.getValueBucketPath;
     }
 
     if (config.params && config.params.length && config.params[0] instanceof BaseParamType) {

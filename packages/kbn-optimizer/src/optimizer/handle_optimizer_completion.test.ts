@@ -20,12 +20,11 @@
 import * as Rx from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
 
-import { Update } from '../common';
+import { Update, allValuesFrom } from '../common';
 
 import { OptimizerState } from './optimizer_state';
 import { OptimizerConfig } from './optimizer_config';
 import { handleOptimizerCompletion } from './handle_optimizer_completion';
-import { toArray } from 'rxjs/operators';
 
 const createUpdate$ = (phase: OptimizerState['phase']) =>
   Rx.of<Update<any, OptimizerState>>({
@@ -44,13 +43,12 @@ const config = (watch?: boolean) =>
     repoRoot: REPO_ROOT,
     watch,
   });
-const collect = <T>(stream: Rx.Observable<T>): Promise<T[]> => stream.pipe(toArray()).toPromise();
 
 it('errors if the optimizer completes when in watch mode', async () => {
   const update$ = createUpdate$('success');
 
   await expect(
-    collect(update$.pipe(handleOptimizerCompletion(config(true))))
+    allValuesFrom(update$.pipe(handleOptimizerCompletion(config(true))))
   ).rejects.toThrowErrorMatchingInlineSnapshot(
     `"optimizer unexpectedly completed when in watch mode"`
   );
@@ -60,7 +58,7 @@ it('errors if the optimizer completes in phase "issue"', async () => {
   const update$ = createUpdate$('issue');
 
   await expect(
-    collect(update$.pipe(handleOptimizerCompletion(config())))
+    allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
   ).rejects.toThrowErrorMatchingInlineSnapshot(`"webpack issue"`);
 });
 
@@ -68,7 +66,7 @@ it('errors if the optimizer completes in phase "initializing"', async () => {
   const update$ = createUpdate$('initializing');
 
   await expect(
-    collect(update$.pipe(handleOptimizerCompletion(config())))
+    allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
   ).rejects.toThrowErrorMatchingInlineSnapshot(
     `"optimizer unexpectedly exit in phase \\"initializing\\""`
   );
@@ -78,7 +76,7 @@ it('errors if the optimizer completes in phase "reallocating"', async () => {
   const update$ = createUpdate$('reallocating');
 
   await expect(
-    collect(update$.pipe(handleOptimizerCompletion(config())))
+    allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
   ).rejects.toThrowErrorMatchingInlineSnapshot(
     `"optimizer unexpectedly exit in phase \\"reallocating\\""`
   );
@@ -88,7 +86,7 @@ it('errors if the optimizer completes in phase "running"', async () => {
   const update$ = createUpdate$('running');
 
   await expect(
-    collect(update$.pipe(handleOptimizerCompletion(config())))
+    allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
   ).rejects.toThrowErrorMatchingInlineSnapshot(
     `"optimizer unexpectedly exit in phase \\"running\\""`
   );
@@ -98,7 +96,7 @@ it('passes through errors on the source stream', async () => {
   const error = new Error('foo');
   const update$ = Rx.throwError(error);
 
-  await expect(collect(update$.pipe(handleOptimizerCompletion(config())))).rejects.toThrowError(
-    error
-  );
+  await expect(
+    allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
+  ).rejects.toThrowError(error);
 });

@@ -11,6 +11,8 @@ experimental[] Import dashboards and corresponding saved objects.
 
 `POST <kibana host>:<port>/api/kibana/dashboards/import`
 
+`POST <kibana host>:<port>/s/<space-id>/api/kibana/dashboards/import`
+
 [[dashboard-api-import-params]]
 ==== Query parameters
 

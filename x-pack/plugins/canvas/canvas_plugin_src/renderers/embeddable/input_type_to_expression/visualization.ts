@@ -12,6 +12,10 @@ export function toExpression(input: VisualizeInput): string {
   expressionParts.push('savedVisualization');
   expressionParts.push(`id="${input.id}"`);
 
+  if (input.title !== undefined) {
+    expressionParts.push(`title="${input.title}"`);
+  }
+
   if (input.timeRange) {
     expressionParts.push(
       `timerange={timerange from="${input.timeRange.from}" to="${input.timeRange.to}"}`

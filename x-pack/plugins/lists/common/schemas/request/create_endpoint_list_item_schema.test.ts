@@ -174,19 +174,6 @@ describe('create_endpoint_list_item_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should pass validation when supplied an undefined for "_tags" but return an array and generate a correct body not counting the auto generated uuid', () => {
-    const inputPayload = getCreateEndpointListItemSchemaMock();
-    const outputPayload = getCreateEndpointListItemSchemaMock();
-    delete inputPayload._tags;
-    outputPayload._tags = [];
-    const decoded = createEndpointListItemSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    delete (message.schema as CreateEndpointListItemSchema).item_id;
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
-  });
-
   test('it should pass validation when supplied an undefined for "item_id" and auto generate a uuid', () => {
     const inputPayload = getCreateEndpointListItemSchemaMock();
     delete inputPayload.item_id;

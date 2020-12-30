@@ -20,11 +20,21 @@ describe('EventCounts', () => {
   const from = '2020-01-20T20:49:57.080Z';
   const to = '2020-01-21T20:49:57.080Z';
 
+  const testProps = {
+    filters: [],
+    from,
+    indexNames: [],
+    indexPattern: mockIndexPattern,
+    setQuery: jest.fn(),
+    to,
+    query: {
+      query: '',
+      language: 'kuery',
+    },
+  };
+
   test('it filters the `Host events` widget with a `host.name` `exists` filter', () => {
-    const wrapper = mount(
-      <EventCounts from={from} indexPattern={mockIndexPattern} setQuery={jest.fn()} to={to} />,
-      { wrappingComponent: TestProviders }
-    );
+    const wrapper = mount(<EventCounts {...testProps} />, { wrappingComponent: TestProviders });
 
     expect(
       (wrapper.find('Memo(OverviewHostComponent)').first().props() as OverviewHostProps).filterQuery
@@ -32,10 +42,7 @@ describe('EventCounts', () => {
   });
 
   test('it filters the `Network events` widget with a `source.ip` or `destination.ip` `exists` filter', () => {
-    const wrapper = mount(
-      <EventCounts from={from} indexPattern={mockIndexPattern} setQuery={jest.fn()} to={to} />,
-      { wrappingComponent: TestProviders }
-    );
+    const wrapper = mount(<EventCounts {...testProps} />, { wrappingComponent: TestProviders });
 
     expect(
       (wrapper.find('Memo(OverviewNetworkComponent)').first().props() as OverviewNetworkProps)

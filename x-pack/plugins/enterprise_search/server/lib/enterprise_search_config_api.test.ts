@@ -21,7 +21,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
     accessCheckTimeoutWarning: 100,
   };
   const mockRequest = {
-    url: { path: '/app/kibana' },
     headers: { authorization: '==someAuth' },
   };
   const mockDependencies = {
@@ -70,7 +69,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
           role_type: 'owner',
           ability: {
             access_all_engines: true,
-            destroy: ['session'],
             manage: ['account_credentials', 'account_engines'], // etc
             edit: ['LocoMoco::Account'], // etc
             view: ['Engine'], // etc
@@ -145,13 +143,12 @@ describe('callEnterpriseSearchConfigAPI', () => {
       },
       appSearch: {
         accountId: undefined,
-        onBoardingComplete: false,
+        onboardingComplete: false,
         role: {
           id: undefined,
           roleType: undefined,
           ability: {
             accessAllEngines: false,
-            destroy: [],
             manage: [],
             edit: [],
             view: [],
@@ -210,7 +207,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
     callEnterpriseSearchConfigAPI(mockDependencies);
     jest.advanceTimersByTime(150);
     expect(mockDependencies.log.warn).toHaveBeenCalledWith(
-      'Enterprise Search access check took over 100ms. Please ensure your Enterprise Search server is respondingly normally and not adversely impacting Kibana load speeds.'
+      'Enterprise Search access check took over 100ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.'
     );
 
     // Timeout

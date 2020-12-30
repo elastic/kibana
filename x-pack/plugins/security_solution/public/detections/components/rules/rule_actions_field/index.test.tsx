@@ -17,7 +17,7 @@ describe('RuleActionsField', () => {
   it('should not render ActionForm if no actions are supported', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        triggers_actions_ui: {
+        triggersActionsUi: {
           actionTypeRegistry: {},
         },
         application: {
@@ -31,13 +31,20 @@ describe('RuleActionsField', () => {
         },
       },
     });
+
+    const messageVariables = {
+      context: [],
+      state: [],
+      params: [],
+    };
+
     const Component = () => {
       const field = useFormFieldMock();
       const { form } = useForm();
 
       return (
         <Form form={form}>
-          <RuleActionsField euiFieldProps={{ options: [] }} field={field} />
+          <RuleActionsField field={field} messageVariables={messageVariables} />
         </Form>
       );
     };

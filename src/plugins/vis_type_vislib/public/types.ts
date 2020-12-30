@@ -17,80 +17,71 @@
  * under the License.
  */
 
-import { TimeMarker } from './vislib/visualizations/time_marker';
+import { $Values } from '@kbn/utility-types';
+import { Position } from '@elastic/charts';
+
+import { Labels } from '../../charts/public';
 import {
-  Positions,
-  ChartModes,
-  ChartTypes,
-  AxisModes,
-  AxisTypes,
-  InterpolationModes,
-  ScaleTypes,
-  ThresholdLineStyles,
-} from './utils/collections';
-import { Labels, Style } from '../../charts/public';
+  CategoryAxis,
+  Dimensions,
+  Grid,
+  SeriesParam,
+  ThresholdLine,
+  ValueAxis,
+} from '../../vis_type_xy/public';
+import { TimeMarker } from './vislib/visualizations/time_marker';
+
+/**
+ * Gauge title alignment
+ */
+export const Alignment = Object.freeze({
+  Automatic: 'automatic' as const,
+  Horizontal: 'horizontal' as const,
+  Vertical: 'vertical' as const,
+});
+export type Alignment = $Values<typeof Alignment>;
+
+export const GaugeType = Object.freeze({
+  Arc: 'Arc' as const,
+  Circle: 'Circle' as const,
+});
+export type GaugeType = $Values<typeof GaugeType>;
+
+export const VislibChartType = Object.freeze({
+  Histogram: 'histogram' as const,
+  HorizontalBar: 'horizontal_bar' as const,
+  Line: 'line' as const,
+  Pie: 'pie' as const,
+  Area: 'area' as const,
+  PointSeries: 'point_series' as const,
+  Heatmap: 'heatmap' as const,
+  Gauge: 'gauge' as const,
+  Goal: 'goal' as const,
+  Metric: 'metric' as const,
+});
+export type VislibChartType = $Values<typeof VislibChartType>;
 
 export interface CommonVislibParams {
   addTooltip: boolean;
-  legendPosition: Positions;
-}
-
-export interface Scale {
-  boundsMargin?: number | '';
-  defaultYExtents?: boolean;
-  max?: number | null;
-  min?: number | null;
-  mode?: AxisModes;
-  setYExtents?: boolean;
-  type: ScaleTypes;
-}
-
-interface ThresholdLine {
-  show: boolean;
-  value: number | null;
-  width: number | null;
-  style: ThresholdLineStyles;
-  color: string;
-}
-
-export interface Axis {
-  id: string;
-  labels: Labels;
-  position: Positions;
-  scale: Scale;
-  show: boolean;
-  style: Style;
-  title: { text: string };
-  type: AxisTypes;
-}
-
-export interface ValueAxis extends Axis {
-  name: string;
-}
-
-export interface SeriesParam {
-  data: { label: string; id: string };
-  drawLinesBetweenPoints: boolean;
-  interpolate: InterpolationModes;
-  lineWidth?: number;
-  mode: ChartModes;
-  show: boolean;
-  showCircles: boolean;
-  type: ChartTypes;
-  valueAxis: string;
+  addLegend: boolean;
+  legendPosition: Position;
+  dimensions: Dimensions;
 }
 
 export interface BasicVislibParams extends CommonVislibParams {
+  type: VislibChartType;
+  addLegend: boolean;
   addTimeMarker: boolean;
-  categoryAxes: Axis[];
+  categoryAxes: CategoryAxis[];
   orderBucketsBySum?: boolean;
   labels: Labels;
   thresholdLine: ThresholdLine;
   valueAxes: ValueAxis[];
-  grid: {
-    categoryLines: boolean;
-    valueAxis?: string;
+  grid: Grid;
+  gauge?: {
+    percentageMode: boolean;
   };
   seriesParams: SeriesParam[];
   times: TimeMarker[];
+  radiusRatio: number;
 }

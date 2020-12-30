@@ -89,3 +89,11 @@ export const VERSION_CONFLICT_ERROR_DESCRIPTION = i18n.translate(
       "It appears this exception was updated since you first selected to edit it. Try clicking 'Cancel' and editing the exception again.",
   }
 );
+
+export const EDIT_EXCEPTION_SEQUENCE_WARNING = i18n.translate(
+  'xpack.securitySolution.exceptions.editException.sequenceWarning',
+  {
+    defaultMessage:
+      "This rule's query contains an EQL sequence statement. The exception modified will apply to all events in the sequence.",
+  }
+);

@@ -4,11 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
+
+export interface ExplorerChartSeriesErrorMessages {
+  [key: string]: Set<JobId>;
+}
 export declare interface ExplorerChartsData {
   chartsPerRow: number;
   seriesToPlot: any[];
   tooManyBuckets: boolean;
   timeFieldName: string;
+  errorMessages: ExplorerChartSeriesErrorMessages;
 }
 
 export declare const getDefaultChartsData: () => ExplorerChartsData;

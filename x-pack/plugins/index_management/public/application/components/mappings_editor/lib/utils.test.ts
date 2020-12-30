@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../constants', () => ({ MAIN_DATA_TYPE_DEFINITION: {} }));
+jest.mock('../constants', () => {
+  const { TYPE_DEFINITION } = jest.requireActual('../constants');
+  return { MAIN_DATA_TYPE_DEFINITION: {}, TYPE_DEFINITION };
+});
 
-import { stripUndefinedValues } from './utils';
+import { stripUndefinedValues, getTypeLabelFromField } from './utils';
 
 describe('utils', () => {
   describe('stripUndefinedValues()', () => {
@@ -51,6 +54,26 @@ describe('utils', () => {
       };
 
       expect(stripUndefinedValues(dataIN)).toEqual(dataOUT);
+    });
+  });
+
+  describe('getTypeLabelFromField()', () => {
+    test('returns label for fields', () => {
+      expect(
+        getTypeLabelFromField({
+          type: 'keyword',
+        })
+      ).toBe('Keyword');
+    });
+
+    test(`returns a label prepended with 'Other' for unrecognized fields`, () => {
+      expect(
+        getTypeLabelFromField({
+          name: 'testField',
+          // @ts-ignore
+          type: 'hyperdrive',
+        })
+      ).toBe('Other: hyperdrive');
     });
   });
 });

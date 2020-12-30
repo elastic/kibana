@@ -1,21 +1,23 @@
 [[upgrade-assistant-api-default-field]]
-=== Add Default Field API
+=== Add default field API
+++++
+<titleabbrev>Add default field</titleabbrev>
+++++
 
-experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Upgrade Assistant concepts are stable, but the APIs for managing Upgrade Assistant are currently experimental.]
+experimental[] In {es} 7.0 and later, some query types, such as Simple Query String, have a limit to the number of fields they can query against. 
+To configure the cap in {es}, set the `indices.query.bool.max_clause_count` cluster setting, which is 1024 by default.
 
-Starting in Elasticsearch 7.0, some query types such as Simple Query String, have a limit to the number of fields they will query against. You can configure this cap in Elasticsearch by setting the `indices.query.bool.max_clause_count` cluster setting, which is 1024 by default.
+For indices with more fields than the cap, add the `index.query.default_field` index setting to inform {es} which 
+fields to use by default when no field is specified for a query. Use the add default field API to add the `index.query.default_field` setting to an {es} index.
 
-For indices with more fields than this cap, you can add the `index.query.default_field` index setting to inform Elasticsearch which fields to use by default when no field is specified for a query. This API assists in adding this setting to an index in Elasticsearch.
-
+[[upgrade-assistant-api-default-field-request]]
 ==== Request
 
-To add the `index.query.default_field` setting to an index, submit a POST request to the `/api/upgrade_assistant/add_query_default_field/<index>` endpoint:
-
-Note: You cannot access this endpoint via the Console in Kibana.
+To add the `index.query.default_field` setting to an {es} index, submit a POST request to `/api/upgrade_assistant/add_query_default_field/<index>`:
 
 [source,js]
 --------------------------------------------------
-GET /api/upgrade_assistant/add_query_default_field/myIndex
+POST /api/upgrade_assistant/add_query_default_field/myIndex
 {
   "fieldTypes": ["text", "keyword"], <1>
   "otherFields": ["myField.*"] <2>
@@ -23,15 +25,25 @@ GET /api/upgrade_assistant/add_query_default_field/myIndex
 --------------------------------------------------
 // KIBANA
 
-<1> An array of Elasticsearch field types to use to generate the list of fields. Required.
-<2> An array of additional field names, dot-deliminated. Optional.
+<1> A required array of {es} field types that generate the list of fields.
+<2> An optional array of additional field names, dot-deliminated.
 
-Kibana will add the `index.query.default_field` index setting to the specified index by generating an array of all fields from the index's mapping that are any of the types specified in `fieldTypes`. Optionally, any other fields specified in `otherFields` will be appended to the array of default fields.
+To add the `index.query.default_field` index setting to the specified index, {kib} generates an array of all fields from the index mapping.
+The fields contain the types specified in `fieldTypes`. {kib} appends any other fields specified in `otherFields` to the array of default fields.
 
-==== Response
+[[upgrade-assistant-api-default-field-response-codes]]
+==== Response codes
 
-A successful call returns a response code of `200` and a response body
-containing a JSON structure similar to the following example:
+`200`::
+  Indicates a successful call.
+
+ `400`::
+  Indicates that the index already has the `index.query.default_field` setting. No changes are made to the index. 
+
+[[upgrade-assistant-api-default-field-response-body]]
+==== Response body
+
+The response body contains a JSON structure, similar to the following:
 
 [source,js]
 --------------------------------------------------
@@ -40,11 +52,10 @@ containing a JSON structure similar to the following example:
 }
 --------------------------------------------------
 
-If the index already has the `index.query.default_field` setting, Kibana will respond with a 400 Bad Request error and make no changes to the index.
-
+[[upgrade-assistant-api-default-field-example]]
 ==== Example
 
-For an index with the following mappings:
+Your index contains following mappings:
 
 [source,js]
 --------------------------------------------------
@@ -68,11 +79,11 @@ GET /myIndex/_mappings
 --------------------------------------------------
 // CONSOLE
 
-Making this request to Kibana:
+Make the following request to {kib}:
 
 [source,js]
 --------------------------------------------------
-GET /api/upgrade_assistant/add_query_default_field/myIndex
+POST /api/upgrade_assistant/add_query_default_field/myIndex
 {
   "fieldTypes": ["text", "long"],
   "otherFields": ["field2"]
@@ -80,7 +91,7 @@ GET /api/upgrade_assistant/add_query_default_field/myIndex
 --------------------------------------------------
 // KIBANA
 
-Would result in the `index.query.default_field` setting being added with this value:
+The API returns the following:
 
 [source,js]
 --------------------------------------------------
@@ -99,4 +110,4 @@ GET /myIndex/_settings?flat_settings=true
 --------------------------------------------------
 // CONSOLE
 
-Kibana generated the `field1` and `nestedfield.field4` values based on the specified `fieldTypes` and then appended the `otherFields` to the array.
+{kib} generates the `field1` and `nestedfield.field4` values based on the specified `fieldTypes`, then appends the `otherFields` to the array.

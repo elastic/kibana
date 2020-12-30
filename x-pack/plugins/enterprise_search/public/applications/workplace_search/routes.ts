@@ -7,6 +7,7 @@
 import { generatePath } from 'react-router-dom';
 
 import { CURRENT_MAJOR_VERSION } from '../../../common/version';
+import { ENT_SEARCH_DOCS_PREFIX } from '../shared/constants';
 
 export const SETUP_GUIDE_PATH = '/setup_guide';
 
@@ -14,7 +15,6 @@ export const LEAVE_FEEDBACK_EMAIL = 'support@elastic.co';
 export const LEAVE_FEEDBACK_URL = `mailto:${LEAVE_FEEDBACK_EMAIL}?Subject=Elastic%20Workplace%20Search%20Feedback`;
 
 export const DOCS_PREFIX = `https://www.elastic.co/guide/en/workplace-search/${CURRENT_MAJOR_VERSION}`;
-export const ENT_SEARCH_DOCS_PREFIX = `https://www.elastic.co/guide/en/enterprise-search/${CURRENT_MAJOR_VERSION}`;
 export const DOCUMENT_PERMISSIONS_DOCS_URL = `${DOCS_PREFIX}/workplace-search-sources-document-permissions.html`;
 export const DOCUMENT_PERMISSIONS_SYNC_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-synchronizing`;
 export const PRIVATE_SOURCES_DOCS_URL = `${DOCUMENT_PERMISSIONS_DOCS_URL}#sources-permissions-org-private`;
@@ -50,9 +50,9 @@ export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
 export const USERS_PATH = `${ORG_PATH}/users`;
 export const SECURITY_PATH = `${ORG_PATH}/security`;
 
-export const GROUPS_PATH = `${ORG_PATH}/groups`;
+export const GROUPS_PATH = '/groups';
 export const GROUP_PATH = `${GROUPS_PATH}/:groupId`;
-export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source-prioritization`;
+export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source_prioritization`;
 
 export const SOURCES_PATH = '/sources';
 export const ORG_SOURCES_PATH = `${ORG_PATH}${SOURCES_PATH}`;
@@ -114,3 +114,6 @@ export const getContentSourcePath = (
   sourceId: string,
   isOrganization: boolean
 ): string => generatePath(isOrganization ? ORG_PATH + path : path, { sourceId });
+export const getGroupPath = (groupId: string) => generatePath(GROUP_PATH, { groupId });
+export const getGroupSourcePrioritizationPath = (groupId: string) =>
+  `${GROUPS_PATH}/${groupId}/source_prioritization`;

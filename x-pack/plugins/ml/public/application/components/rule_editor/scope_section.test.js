@@ -15,7 +15,7 @@ jest.mock('../../capabilities/check_capabilities', () => ({
   checkPermission: (privilege) => mockCheckPermission(privilege),
 }));
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { ScopeSection } from './scope_section';

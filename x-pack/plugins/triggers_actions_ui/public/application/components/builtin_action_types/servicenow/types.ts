@@ -4,38 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CasesConfigurationMapping } from '../case_mappings';
+import { UserConfiguredActionConnector } from '../../../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ExecutorSubActionPushParams } from '../../../../../../actions/server/builtin_action_types/servicenow/types';
 
-export interface ServiceNowActionConnector {
-  config: ServiceNowConfig;
-  secrets: ServiceNowSecrets;
-}
+export type ServiceNowActionConnector = UserConfiguredActionConnector<
+  ServiceNowConfig,
+  ServiceNowSecrets
+>;
 
 export interface ServiceNowActionParams {
   subAction: string;
-  subActionParams: {
-    savedObjectId: string;
-    title: string;
-    description: string;
-    comment: string;
-    externalId: string | null;
-    severity: string;
-    urgency: string;
-    impact: string;
-  };
+  subActionParams: ExecutorSubActionPushParams;
 }
 
-interface IncidentConfiguration {
-  mapping: CasesConfigurationMapping[];
-}
-
-interface ServiceNowConfig {
+export interface ServiceNowConfig {
   apiUrl: string;
-  incidentConfiguration?: IncidentConfiguration;
-  isCaseOwned?: boolean;
 }
 
-interface ServiceNowSecrets {
+export interface ServiceNowSecrets {
   username: string;
   password: string;
 }

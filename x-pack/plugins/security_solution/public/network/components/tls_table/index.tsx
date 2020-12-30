@@ -5,7 +5,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import { networkActions, networkModel, networkSelectors } from '../../store';
@@ -15,7 +15,7 @@ import {
   NetworkTlsFields,
   SortField,
 } from '../../../../common/search_strategy';
-import { State } from '../../../common/store';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import {
   Criteria,
   ItemsPerRow,
@@ -62,11 +62,8 @@ const TlsTableComponent: React.FC<TlsTableProps> = ({
   type,
 }) => {
   const dispatch = useDispatch();
-  const getTlsSelector = networkSelectors.tlsSelector();
-  const { activePage, limit, sort } = useSelector(
-    (state: State) => getTlsSelector(state, type),
-    shallowEqual
-  );
+  const getTlsSelector = useMemo(() => networkSelectors.tlsSelector(), []);
+  const { activePage, limit, sort } = useDeepEqualSelector((state) => getTlsSelector(state, type));
   const tableType: networkModel.TopTlsTableType =
     type === networkModel.NetworkType.page
       ? networkModel.NetworkTableType.tls

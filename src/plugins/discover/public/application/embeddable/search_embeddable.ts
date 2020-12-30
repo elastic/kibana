@@ -19,12 +19,12 @@
 import './search_embeddable.scss';
 import angular from 'angular';
 import _ from 'lodash';
-import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../../ui_actions/public';
+import { UiActionsStart } from '../../../../ui_actions/public';
 import { RequestAdapter, Adapters } from '../../../../inspector/public';
 import {
+  APPLY_FILTER_TRIGGER,
   esFilters,
   Filter,
   TimeRange,
@@ -36,6 +36,7 @@ import {
 import { Container, Embeddable } from '../../../../embeddable/public';
 import * as columnActions from '../angular/doc_table/actions/columns';
 import searchTemplate from './search_template.html';
+import searchTemplateGrid from './search_template_datagrid.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
 import { getSortForSearchSource } from '../angular/doc_table';
@@ -49,22 +50,29 @@ import {
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SavedSearch } from '../..';
 import { SAMPLE_SIZE_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
+import { DiscoverGridSettings } from '../components/discover_grid/types';
+import { DiscoverServices } from '../../build_services';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { getDefaultSort } from '../angular/doc_table/lib/get_default_sort';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
+  settings?: DiscoverGridSettings;
   description?: string;
   sort?: SortOrder[];
   sharedItemTitle?: string;
   inspectorAdapters?: Adapters;
   setSortOrder?: (sortPair: SortOrder[]) => void;
+  setColumns?: (columns: string[]) => void;
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
   filter?: (field: IFieldType, value: string[], operator: string) => void;
-  hits?: any[];
+  hits?: ElasticSearchHit[];
   indexPattern?: IndexPattern;
   totalHitCount?: number;
   isLoading?: boolean;
+  showTimeCol?: boolean;
 }
 
 interface SearchEmbeddableConfig {
@@ -76,6 +84,7 @@ interface SearchEmbeddableConfig {
   indexPatterns?: IndexPattern[];
   editable: boolean;
   filterManager: FilterManager;
+  services: DiscoverServices;
 }
 
 export class SearchEmbeddable
@@ -84,7 +93,7 @@ export class SearchEmbeddable
   private readonly savedSearch: SavedSearch;
   private $rootScope: ng.IRootScopeService;
   private $compile: ng.ICompileService;
-  private inspectorAdaptors: Adapters;
+  private inspectorAdapters: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
   private filtersSearchSource?: ISearchSource;
@@ -94,10 +103,12 @@ export class SearchEmbeddable
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
   private filterManager: FilterManager;
   private abortController?: AbortController;
+  private services: DiscoverServices;
 
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
   private prevQuery?: Query;
+  private prevSearchSessionId?: string;
 
   constructor(
     {
@@ -109,6 +120,7 @@ export class SearchEmbeddable
       indexPatterns,
       editable,
       filterManager,
+      services,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
     private readonly executeTriggerActions: UiActionsStart['executeTriggerActions'],
@@ -126,21 +138,21 @@ export class SearchEmbeddable
       },
       parent
     );
-
+    this.services = services;
     this.filterManager = filterManager;
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
-    this.inspectorAdaptors = {
+    this.inspectorAdapters = {
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
 
-    this.autoRefreshFetchSubscription = getServices()
-      .timefilter.getAutoRefreshFetch$()
+    this.autoRefreshFetchSubscription = this.services.timefilter
+      .getAutoRefreshFetch$()
       .subscribe(this.fetch);
 
-    this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
+    this.subscription = this.getUpdated$().subscribe(() => {
       this.panelTitle = this.output.title || '';
 
       if (this.searchScope) {
@@ -150,7 +162,7 @@ export class SearchEmbeddable
   }
 
   public getInspectorAdapters() {
-    return this.inspectorAdaptors;
+    return this.inspectorAdapters;
   }
 
   public getSavedSearch() {
@@ -165,7 +177,9 @@ export class SearchEmbeddable
     if (!this.searchScope) {
       throw new Error('Search scope not defined');
     }
-    this.searchInstance = this.$compile(searchTemplate)(this.searchScope);
+    this.searchInstance = this.$compile(
+      this.services.uiSettings.get('doc_table:legacy', true) ? searchTemplate : searchTemplateGrid
+    )(this.searchScope);
     const rootNode = angular.element(domNode);
     rootNode.append(this.searchInstance);
 
@@ -195,10 +209,17 @@ export class SearchEmbeddable
     const searchScope: SearchScope = (this.searchScope = this.$rootScope.$new());
 
     searchScope.description = this.savedSearch.description;
-    searchScope.inspectorAdapters = this.inspectorAdaptors;
+    searchScope.inspectorAdapters = this.inspectorAdapters;
 
     const { searchSource } = this.savedSearch;
     const indexPattern = (searchScope.indexPattern = searchSource.getField('index'))!;
+
+    if (!this.savedSearch.sort || !this.savedSearch.sort.length) {
+      this.savedSearch.sort = getDefaultSort(
+        indexPattern,
+        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+      );
+    }
 
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
@@ -221,7 +242,6 @@ export class SearchEmbeddable
       if (!searchScope.columns) {
         return;
       }
-      indexPattern.popularizeField(columnName, 1);
       const columns = columnActions.addColumn(searchScope.columns, columnName);
       this.updateInput({ columns });
     };
@@ -241,6 +261,15 @@ export class SearchEmbeddable
       const columns = columnActions.moveColumn(searchScope.columns, columnName, newIndex);
       this.updateInput({ columns });
     };
+
+    searchScope.setColumns = (columns: string[]) => {
+      this.updateInput({ columns });
+    };
+
+    if (this.savedSearch.grid) {
+      searchScope.settings = this.savedSearch.grid;
+    }
+    searchScope.showTimeCol = !this.services.uiSettings.get('doc_table:hideTimeColumn', false);
 
     searchScope.filter = async (field, value, operator) => {
       let filters = esFilters.generateFilters(
@@ -263,10 +292,13 @@ export class SearchEmbeddable
   }
 
   public reload() {
-    this.fetch();
+    if (this.searchScope)
+      this.pushContainerStateParamsToScope(this.searchScope, { forceFetch: true });
   }
 
   private fetch = async () => {
+    const searchSessionId = this.input.searchSessionId;
+
     if (!this.searchScope) return;
 
     const { searchSource } = this.savedSearch;
@@ -275,25 +307,29 @@ export class SearchEmbeddable
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
 
-    searchSource.setField('size', getServices().uiSettings.get(SAMPLE_SIZE_SETTING));
+    searchSource.setField('size', this.services.uiSettings.get(SAMPLE_SIZE_SETTING));
     searchSource.setField(
       'sort',
       getSortForSearchSource(
         this.searchScope.sort,
         this.searchScope.indexPattern,
-        getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
+        this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
       )
     );
 
     // Log request to inspector
-    this.inspectorAdaptors.requests.reset();
+    this.inspectorAdapters.requests!.reset();
     const title = i18n.translate('discover.embeddable.inspectorRequestDataTitle', {
       defaultMessage: 'Data',
     });
     const description = i18n.translate('discover.embeddable.inspectorRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
-    const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
+
+    const inspectorRequest = this.inspectorAdapters.requests!.start(title, {
+      description,
+      searchSessionId,
+    });
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
     searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
@@ -304,6 +340,7 @@ export class SearchEmbeddable
       // Make the request
       const resp = await searchSource.fetch({
         abortSignal: this.abortController.signal,
+        sessionId: searchSessionId,
       });
       this.updateOutput({ loading: false, error: undefined });
 
@@ -320,28 +357,39 @@ export class SearchEmbeddable
     }
   };
 
-  private pushContainerStateParamsToScope(searchScope: SearchScope) {
+  private pushContainerStateParamsToScope(
+    searchScope: SearchScope,
+    { forceFetch = false }: { forceFetch: boolean } = { forceFetch: false }
+  ) {
     const isFetchRequired =
       !esFilters.onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !_.isEqual(this.prevQuery, this.input.query) ||
       !_.isEqual(this.prevTimeRange, this.input.timeRange) ||
-      !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort);
+      !_.isEqual(searchScope.sort, this.input.sort || this.savedSearch.sort) ||
+      this.prevSearchSessionId !== this.input.searchSessionId;
 
     // If there is column or sort data on the panel, that means the original columns or sort settings have
     // been overridden in a dashboard.
     searchScope.columns = this.input.columns || this.savedSearch.columns;
-    searchScope.sort = this.input.sort || this.savedSearch.sort;
+    const savedSearchSort =
+      this.savedSearch.sort && this.savedSearch.sort.length
+        ? this.savedSearch.sort
+        : getDefaultSort(
+            this.searchScope?.indexPattern,
+            getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+          );
+    searchScope.sort = this.input.sort || savedSearchSort;
     searchScope.sharedItemTitle = this.panelTitle;
 
-    if (isFetchRequired) {
+    if (forceFetch || isFetchRequired) {
       this.filtersSearchSource!.setField('filter', this.input.filters);
       this.filtersSearchSource!.setField('query', this.input.query);
-
-      this.fetch();
 
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
       this.prevTimeRange = this.input.timeRange;
+      this.prevSearchSessionId = this.input.searchSessionId;
+      this.fetch();
     } else if (this.searchScope) {
       // trigger a digest cycle to make sure non-fetch relevant changes are propagated
       this.searchScope.$applyAsync();

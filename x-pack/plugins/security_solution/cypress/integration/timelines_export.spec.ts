@@ -5,37 +5,33 @@
  */
 
 import { exportTimeline, waitForTimelinesPanelToBeLoaded } from '../tasks/timelines';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { TIMELINES_URL } from '../urls/navigation';
-
-const EXPECTED_EXPORTED_TIMELINE_PATH = 'cypress/test_files/expected_timelines_export.ndjson';
+import { createTimeline } from '../tasks/api_calls/timelines';
+import { expectedExportedTimeline, timeline } from '../objects/timeline';
+import { cleanKibana } from '../tasks/common';
 
 describe('Export timelines', () => {
-  before(() => {
-    esArchiverLoad('timeline');
-    cy.server();
-    cy.route('POST', '**api/timeline/_export?file_name=timelines_export.ndjson*').as('export');
-  });
-
-  after(() => {
-    esArchiverUnload('timeline');
+  let timelineResponse: Cypress.Response;
+  let timelineId: string;
+  beforeEach(() => {
+    cleanKibana();
+    cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
+    createTimeline(timeline).then((response) => {
+      timelineResponse = response;
+      timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
+    });
   });
 
   it('Exports a custom timeline', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINES_URL);
     waitForTimelinesPanelToBeLoaded();
+    exportTimeline(timelineId);
 
-    cy.readFile(EXPECTED_EXPORTED_TIMELINE_PATH).then(($expectedExportedJson) => {
-      const parsedJson = JSON.parse($expectedExportedJson);
-      const timelineId = parsedJson.savedObjectId;
-      exportTimeline(timelineId);
-
-      cy.wait('@export').then((response) => {
-        cy.wrap(response.status).should('eql', 200);
-        cy.wrap(response.xhr.responseText).should('eql', $expectedExportedJson);
-      });
+    cy.wait('@export').then(({ response }) => {
+      cy.wrap(response!.statusCode).should('eql', 200);
+      cy.wrap(response!.body).should('eql', expectedExportedTimeline(timelineResponse));
     });
   });
 });

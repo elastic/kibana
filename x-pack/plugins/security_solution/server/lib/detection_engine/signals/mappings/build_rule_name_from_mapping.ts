@@ -10,10 +10,10 @@ import {
   Name,
   RuleNameOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { SignalSourceHit } from '../types';
+import { SignalSource } from '../types';
 
 interface BuildRuleNameFromMappingProps {
-  doc: SignalSourceHit;
+  eventSource: SignalSource;
   ruleName: Name;
   ruleNameMapping: RuleNameOverrideOrUndefined;
 }
@@ -24,13 +24,13 @@ interface BuildRuleNameFromMappingReturn {
 }
 
 export const buildRuleNameFromMapping = ({
-  doc,
+  eventSource,
   ruleName,
   ruleNameMapping,
 }: BuildRuleNameFromMappingProps): BuildRuleNameFromMappingReturn => {
   if (ruleNameMapping != null) {
     // TODO: Expand by verifying fieldType from index via doc._index
-    const mappedValue = get(ruleNameMapping, doc._source);
+    const mappedValue = get(ruleNameMapping, eventSource);
     if (t.string.is(mappedValue)) {
       return { ruleName: mappedValue, ruleNameMeta: { ruleNameOverridden: true } };
     }

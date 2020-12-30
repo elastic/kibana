@@ -22,15 +22,20 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggGeoCentroid';
+export const aggGeoCentroidFnName = 'aggGeoCentroid';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.GEO_CENTROID>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggGeoCentroidFnName,
+  Input,
+  AggArgs,
+  Output
+>;
 
 export const aggGeoCentroid = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggGeoCentroidFnName,
   help: i18n.translate('data.search.aggs.function.metrics.geo_centroid.help', {
     defaultMessage: 'Generates a serialized agg config for a Geo Centroid agg',
   }),

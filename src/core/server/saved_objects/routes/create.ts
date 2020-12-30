@@ -19,8 +19,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 
-export const registerCreateRoute = (router: IRouter) => {
+interface RouteDependencies {
+  coreUsageData: CoreUsageDataSetup;
+}
+
+export const registerCreateRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
   router.post(
     {
       path: '/{type}/{id?}',
@@ -44,15 +49,19 @@ export const registerCreateRoute = (router: IRouter) => {
               })
             )
           ),
+          initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
       const { overwrite } = req.query;
-      const { attributes, migrationVersion, references } = req.body;
+      const { attributes, migrationVersion, references, initialNamespaces } = req.body;
 
-      const options = { id, overwrite, migrationVersion, references };
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});
+
+      const options = { id, overwrite, migrationVersion, references, initialNamespaces };
       const result = await context.core.savedObjects.client.create(type, attributes, options);
       return res.ok({ body: result });
     })

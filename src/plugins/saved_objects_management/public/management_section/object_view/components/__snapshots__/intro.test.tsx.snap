@@ -25,7 +25,7 @@ exports[`Intro component renders correctly 1`] = `
           size="m"
           type="alert"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
             data-euiicon-type="alert"

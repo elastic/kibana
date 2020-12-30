@@ -37,7 +37,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     hideHistogramIfEmpty?: boolean;
     histogramType: MatrixHistogramType;
     id: string;
-    indexToAdd?: string[] | null;
     legendPosition?: Position;
     mapping?: MatrixHistogramMappingTypes;
     showSpacer?: boolean;
@@ -65,6 +64,7 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
+  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
@@ -72,7 +72,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   histogramType,
   hideHistogramIfEmpty = false,
   id,
-  indexToAdd,
+  indexNames,
+  isPtrIncluded,
   legendPosition,
   mapping,
   panelHeight = DEFAULT_PANEL_HEIGHT,
@@ -136,9 +137,11 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     errorMessage,
     filterQuery,
     histogramType,
-    indexToAdd,
+    indexNames,
     startDate,
     stackByField: selectedStackByOption.value,
+    isPtrIncluded,
+    docValueFields,
   });
 
   const titleWithStackByField = useMemo(

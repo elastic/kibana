@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { Observable } from 'rxjs';
 
 import {
@@ -30,7 +30,8 @@ import {
   httpServerMock,
   pluginInitializerContextConfigMock,
 } from '../../../../../../src/core/server/mocks';
-import { registerMsearchRoute, convertRequestBody } from './msearch';
+import { convertRequestBody } from './call_msearch';
+import { registerMsearchRoute } from './msearch';
 import { DataPluginStart } from '../../plugin';
 import { dataPluginMock } from '../../mocks';
 
@@ -49,7 +50,7 @@ describe('msearch route', () => {
 
   it('handler calls /_msearch with the given request', async () => {
     const response = { id: 'yay', body: { responses: [{ hits: { total: 5 } }] } };
-    const mockClient = { transport: { request: jest.fn().mockResolvedValue(response) } };
+    const mockClient = { msearch: jest.fn().mockResolvedValue(response) };
     const mockContext = {
       core: {
         elasticsearch: { client: { asCurrentUser: mockClient } },
@@ -70,11 +71,15 @@ describe('msearch route', () => {
     const handler = mockRouter.post.mock.calls[0][1];
     await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockClient.transport.request.mock.calls[0][0].method).toBe('GET');
-    expect(mockClient.transport.request.mock.calls[0][0].path).toBe('/_msearch');
-    expect(mockClient.transport.request.mock.calls[0][0].body).toEqual(
+    expect(mockClient.msearch.mock.calls[0][0].body).toEqual(
       convertRequestBody(mockBody as any, {})
     );
+    expect(mockClient.msearch.mock.calls[0][1].querystring).toMatchInlineSnapshot(`
+      Object {
+        "ignore_unavailable": true,
+        "max_concurrent_shard_requests": undefined,
+      }
+    `);
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: response,
@@ -89,7 +94,7 @@ describe('msearch route', () => {
       },
     };
     const mockClient = {
-      transport: { request: jest.fn().mockReturnValue(Promise.reject(response)) },
+      msearch: jest.fn().mockReturnValue(Promise.reject(response)),
     };
     const mockContext = {
       core: {
@@ -111,40 +116,11 @@ describe('msearch route', () => {
     const handler = mockRouter.post.mock.calls[0][1];
     await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockClient.transport.request).toBeCalled();
+    expect(mockClient.msearch).toBeCalled();
     expect(mockResponse.customError).toBeCalled();
 
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.body.message).toBe('oh no');
     expect(error.body.attributes.error).toBe('oops');
-  });
-
-  describe('convertRequestBody', () => {
-    it('combines header & body into proper msearch request', () => {
-      const request = {
-        searches: [{ header: { index: 'foo', preference: 0 }, body: { test: true } }],
-      };
-      expect(convertRequestBody(request, { timeout: '30000ms' })).toMatchInlineSnapshot(`
-        "{\\"ignore_unavailable\\":true,\\"index\\":\\"foo\\",\\"preference\\":0}
-        {\\"timeout\\":\\"30000ms\\",\\"test\\":true}
-        "
-      `);
-    });
-
-    it('handles multiple searches', () => {
-      const request = {
-        searches: [
-          { header: { index: 'foo', preference: 0 }, body: { test: true } },
-          { header: { index: 'bar', preference: 1 }, body: { hello: 'world' } },
-        ],
-      };
-      expect(convertRequestBody(request, { timeout: '30000ms' })).toMatchInlineSnapshot(`
-        "{\\"ignore_unavailable\\":true,\\"index\\":\\"foo\\",\\"preference\\":0}
-        {\\"timeout\\":\\"30000ms\\",\\"test\\":true}
-        {\\"ignore_unavailable\\":true,\\"index\\":\\"bar\\",\\"preference\\":1}
-        {\\"timeout\\":\\"30000ms\\",\\"hello\\":\\"world\\"}
-        "
-      `);
-    });
   });
 });

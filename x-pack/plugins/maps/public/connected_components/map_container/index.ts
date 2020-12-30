@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyAction, Dispatch } from 'redux';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { MapContainer } from './map_container';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
@@ -13,6 +14,7 @@ import {
   areLayersLoaded,
   getRefreshConfig,
   getMapInitError,
+  getMapSettings,
   getQueryableUniqueIndexPatternIds,
   isToolbarOverlayHidden,
 } from '../../selectors/map_selectors';
@@ -28,17 +30,18 @@ function mapStateToProps(state: MapStoreState) {
     mapInitError: getMapInitError(state),
     indexPatternIds: getQueryableUniqueIndexPatternIds(state),
     hideToolbarOverlay: isToolbarOverlayHidden(state),
+    backgroundColor: getMapSettings(state).backgroundColor,
   };
 }
 
-function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    triggerRefreshTimer: () => dispatch<any>(triggerRefreshTimer()),
+    triggerRefreshTimer: () => dispatch(triggerRefreshTimer()),
     exitFullScreen: () => {
       dispatch(exitFullScreen());
       getCoreChrome().setIsVisible(true);
     },
-    cancelAllInFlightRequests: () => dispatch<any>(cancelAllInFlightRequests()),
+    cancelAllInFlightRequests: () => dispatch(cancelAllInFlightRequests()),
   };
 }
 

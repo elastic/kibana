@@ -5,7 +5,6 @@
  */
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'src/core/server';
-import { INDEX_NAMES } from '../../../common/constants';
 import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
 
 import { checkLicense } from '../../lib/check_license';
@@ -25,10 +24,9 @@ export function registerPipelineDeleteRoute(router: IRouter) {
       router.handleLegacyErrors(async (context, request, response) => {
         const client = context.logstash!.esClient;
 
-        await client.callAsCurrentUser('delete', {
-          index: INDEX_NAMES.PIPELINES,
-          id: request.params.id,
-          refresh: 'wait_for',
+        await client.callAsCurrentUser('transport.request', {
+          path: '/_logstash/pipeline/' + encodeURIComponent(request.params.id),
+          method: 'DELETE',
         });
 
         return response.noContent();

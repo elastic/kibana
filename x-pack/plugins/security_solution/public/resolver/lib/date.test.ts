@@ -57,8 +57,8 @@ describe('date', () => {
     const almostAYear = new Date(initialTime + 11.9 * month).getTime();
     const threeYears = new Date(initialTime + 3 * year).getTime();
 
-    it('should return null if invalid times are given', () => {
-      expect(getFriendlyElapsedTime(initialTime, 'ImTimeless')).toEqual(null);
+    it('should return undefined if invalid times are given', () => {
+      expect(getFriendlyElapsedTime(initialTime, 'ImTimeless')).toEqual(undefined);
     });
 
     it('should return the correct singular relative time', () => {

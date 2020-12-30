@@ -4,14 +4,11 @@
   "ui": true,
   "server": true,
   "extraPublicDirs": [
-    "static/ace_x_json/hooks",
     "static/forms/components",
     "static/forms/helpers",
     "static/forms/hook_form_lib",
     "static/validators/string",
     "static/forms/helpers/field_validators/types"
   ],
-  "requiredBundles": [
-    "data"
-  ]
+  "requiredBundles": ["data"]
 }

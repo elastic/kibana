@@ -12,7 +12,7 @@ import {
   EuiToolTip,
   EuiButtonIcon,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { RecentTimelineHeader } from './header';
 import {
@@ -25,76 +25,110 @@ import { TimelineType } from '../../../../common/types/timeline';
 import { RecentTimelineCounts } from './counts';
 import * as i18n from './translations';
 
-export const RecentTimelines = React.memo<{
-  noTimelinesMessage: string;
+interface RecentTimelinesItemProps {
+  timeline: OpenTimelineResult;
   onOpenTimeline: OnOpenTimeline;
-  timelines: OpenTimelineResult[];
-}>(({ noTimelinesMessage, onOpenTimeline, timelines }) => {
-  if (timelines.length === 0) {
+  isLastItem: boolean;
+}
+
+const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
+  ({ timeline, onOpenTimeline, isLastItem }) => {
+    const handleClick = useCallback(
+      () =>
+        onOpenTimeline({
+          duplicate: true,
+          timelineId: `${timeline.savedObjectId}`,
+        }),
+      [onOpenTimeline, timeline.savedObjectId]
+    );
+
+    const render = useCallback(
+      (showHoverContent) => (
+        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={timeline} />
+            <RecentTimelineCounts timeline={timeline} />
+            {timeline.description && timeline.description.length && (
+              <EuiText color="subdued" size="xs">
+                {timeline.description}
+              </EuiText>
+            )}
+          </EuiFlexItem>
+
+          {showHoverContent && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  timeline.timelineType === TimelineType.default
+                    ? i18n.OPEN_AS_DUPLICATE
+                    : i18n.OPEN_AS_DUPLICATE_TEMPLATE
+                }
+              >
+                <EuiButtonIcon
+                  aria-label={
+                    timeline.timelineType === TimelineType.default
+                      ? i18n.OPEN_AS_DUPLICATE
+                      : i18n.OPEN_AS_DUPLICATE_TEMPLATE
+                  }
+                  data-test-subj="open-duplicate"
+                  isDisabled={timeline.savedObjectId == null}
+                  iconSize="s"
+                  iconType="copy"
+                  onClick={handleClick}
+                  size="s"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      ),
+      [handleClick, onOpenTimeline, timeline]
+    );
+
     return (
       <>
-        <EuiText color="subdued" size="s">
-          {noTimelinesMessage}
-        </EuiText>
+        <WithHoverActions render={render} />
+        <>{!isLastItem && <EuiSpacer size="l" />}</>
       </>
     );
   }
+);
 
-  return (
-    <>
-      {timelines.map((t, i) => (
-        <React.Fragment key={`${t.savedObjectId}-${i}`}>
-          <WithHoverActions
-            render={(showHoverContent) => (
-              <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={t} />
-                  <RecentTimelineCounts timeline={t} />
-                  {t.description && t.description.length && (
-                    <EuiText color="subdued" size="xs">
-                      {t.description}
-                    </EuiText>
-                  )}
-                </EuiFlexItem>
+RecentTimelinesItem.displayName = 'RecentTimelinesItem';
 
-                {showHoverContent && (
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={
-                        t.timelineType === TimelineType.default
-                          ? i18n.OPEN_AS_DUPLICATE
-                          : i18n.OPEN_AS_DUPLICATE_TEMPLATE
-                      }
-                    >
-                      <EuiButtonIcon
-                        aria-label={
-                          t.timelineType === TimelineType.default
-                            ? i18n.OPEN_AS_DUPLICATE
-                            : i18n.OPEN_AS_DUPLICATE_TEMPLATE
-                        }
-                        data-test-subj="open-duplicate"
-                        isDisabled={t.savedObjectId == null}
-                        iconSize="s"
-                        iconType="copy"
-                        onClick={() =>
-                          onOpenTimeline({
-                            duplicate: true,
-                            timelineId: `${t.savedObjectId}`,
-                          })
-                        }
-                        size="s"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            )}
+interface RecentTimelinesProps {
+  noTimelinesMessage: string;
+  onOpenTimeline: OnOpenTimeline;
+  timelines: OpenTimelineResult[];
+}
+
+export const RecentTimelines = React.memo<RecentTimelinesProps>(
+  ({ noTimelinesMessage, onOpenTimeline, timelines }) => {
+    const content = useMemo(
+      () =>
+        timelines.map((timeline, index) => (
+          <RecentTimelinesItem
+            key={`${timeline.savedObjectId}-${timeline.title}`}
+            timeline={timeline}
+            onOpenTimeline={onOpenTimeline}
+            isLastItem={index === timelines.length - 1}
           />
-          <>{i !== timelines.length - 1 && <EuiSpacer size="l" />}</>
-        </React.Fragment>
-      ))}
-    </>
-  );
-});
+        )),
+      [onOpenTimeline, timelines]
+    );
+
+    if (timelines.length === 0) {
+      return (
+        <>
+          <EuiText color="subdued" size="s">
+            {noTimelinesMessage}
+          </EuiText>
+        </>
+      );
+    }
+
+    return <>{content}</>;
+  }
+);
 
 RecentTimelines.displayName = 'RecentTimelines';

@@ -4,16 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from 'lodash/fp';
 import { useCallback, useState, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
 import { SetQuery, DeleteQuery } from './types';
 
 export const useGlobalTime = (clearAllQuery: boolean = true) => {
   const dispatch = useDispatch();
-  const { from, to } = useSelector(inputsSelectors.globalTimeRangeSelector);
+  const { from, to } = useDeepEqualSelector((state) =>
+    pick(['from', 'to'], inputsSelectors.globalTimeRangeSelector(state))
+  );
   const [isInitializing, setIsInitializing] = useState(true);
 
   const setQuery = useCallback(

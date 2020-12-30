@@ -31,33 +31,32 @@ import {
 
 export function systemLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'system';
-  const platforms = ['OSX', 'DEB', 'RPM'] as const;
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'systemLogs',
     name: i18n.translate('home.tutorials.systemLogs.nameTitle', {
       defaultMessage: 'System logs',
     }),
     moduleName,
-    category: TutorialsCategory.LOGGING,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.systemLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs written by the local Syslog server.',
+      defaultMessage: 'Collect system logs of common Unix/Linux based distributions.',
     }),
     longDescription: i18n.translate('home.tutorials.systemLogs.longDescription', {
       defaultMessage:
-        'The `system` Filebeat module collects and parses logs created by the system logging service of common \
-Unix/Linux based distributions. This module is not available on Windows. \
+        'The  module collects and parses logs created by the system logging service of common Unix/Linux based distributions. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-system.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/system.svg',
+    euiIconType: 'logoLogging',
     artifacts: {
       dashboards: [
         {
           id: 'Filebeat-syslog-dashboard-ecs',
           linkLabel: i18n.translate('home.tutorials.systemLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'System logs dashboard',
+            defaultMessage: 'System Syslog Dashboard',
           }),
           isOverview: true,
         },
@@ -67,7 +66,6 @@ Unix/Linux based distributions. This module is not available on Windows. \
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/system_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

@@ -19,9 +19,9 @@
 
 import { defaults, keyBy, sortBy } from 'lodash';
 
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { callFieldCapsApi } from '../es_api';
-import { FieldCapsResponse, readFieldCapsResponse } from './field_caps_response';
+import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
 import { FieldDescriptor } from '../../index_patterns_fetcher';
 
@@ -32,15 +32,17 @@ import { FieldDescriptor } from '../../index_patterns_fetcher';
  *  @param  {Function} callCluster bound function for accessing an es client
  *  @param  {Array}  [indices=[]]  the list of indexes to check
  *  @param  {Array}  [metaFields=[]] the list of internal fields to include
+ *  @param  {Object} fieldCapsOptions
  *  @return {Promise<Array<FieldDescriptor>>}
  */
 export async function getFieldCapabilities(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   indices: string | string[] = [],
-  metaFields: string[] = []
+  metaFields: string[] = [],
+  fieldCapsOptions?: { allow_no_indices: boolean }
 ) {
-  const esFieldCaps: FieldCapsResponse = await callFieldCapsApi(callCluster, indices);
-  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps), 'name');
+  const esFieldCaps = await callFieldCapsApi(callCluster, indices, fieldCapsOptions);
+  const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     .filter((name) => !name.startsWith('_'))

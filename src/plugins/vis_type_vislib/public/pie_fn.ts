@@ -18,29 +18,38 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+
 // @ts-ignore
 import { vislibSlicesResponseHandler } from './vislib/response_handler';
+import { PieVisParams } from './pie';
+import { VislibChartType } from './types';
+import { vislibVisName } from './vis_type_vislib_vis_fn';
+
+export const vislibPieName = 'vislib_pie_vis';
 
 interface Arguments {
   visConfig: string;
 }
 
-type VisParams = Required<Arguments>;
-
-interface RenderValue {
-  visConfig: VisParams;
+export interface PieRenderValue {
+  visType: Extract<VislibChartType, 'pie'>;
+  visData: unknown;
+  visConfig: PieVisParams;
 }
 
-export const createPieVisFn = (): ExpressionFunctionDefinition<
-  'kibana_pie',
-  KibanaDatatable,
+export type VisTypeVislibPieExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof vislibPieName,
+  Datatable,
   Arguments,
-  Render<RenderValue>
-> => ({
-  name: 'kibana_pie',
+  Render<PieRenderValue>
+>;
+
+export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition => ({
+  name: vislibPieName,
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   help: i18n.translate('visTypeVislib.functions.pie.help', {
     defaultMessage: 'Pie visualization',
   }),
@@ -48,23 +57,24 @@ export const createPieVisFn = (): ExpressionFunctionDefinition<
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      help: '',
+      help: 'vislib pie vis config',
     },
   },
-  fn(input, args) {
-    const visConfig = JSON.parse(args.visConfig);
-    const convertedData = vislibSlicesResponseHandler(input, visConfig.dimensions);
+  fn(input, args, handlers) {
+    const visConfig = JSON.parse(args.visConfig) as PieVisParams;
+    const visData = vislibSlicesResponseHandler(input, visConfig.dimensions);
+
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', input);
+    }
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: vislibVisName,
       value: {
-        visData: convertedData,
-        visType: 'pie',
+        visData,
         visConfig,
-        params: {
-          listenOnChange: true,
-        },
+        visType: VislibChartType.Pie,
       },
     };
   },

@@ -14,6 +14,7 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 import { SetAbsoluteRangeDatePicker } from '../types';
 import { NarrowDateRange } from '../../../common/components/ml/types';
+import { DocValueFields } from '../../../common/containers/source';
 
 interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   skip: boolean;
@@ -22,9 +23,12 @@ interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQue
   endDate: string;
   filterQuery?: string | ESTermQuery;
   narrowDateRange?: NarrowDateRange;
+  indexNames: string[];
 }
 
-export type NetworkComponentQueryProps = QueryTabBodyProps;
+export type NetworkComponentQueryProps = QueryTabBodyProps & {
+  docValueFields?: DocValueFields[];
+};
 
 export type IPsQueryTabBodyProps = QueryTabBodyProps & {
   indexPattern: IIndexPattern;
@@ -41,10 +45,12 @@ export type HttpQueryTabBodyProps = QueryTabBodyProps & {
 };
 
 export type NetworkRoutesProps = GlobalTimeArgs & {
+  docValueFields: DocValueFields[];
   networkPagePath: string;
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
   indexPattern: IIndexPattern;
+  indexNames: string[];
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 };
 

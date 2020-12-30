@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { TimefilterService, TimeHistoryContract, TimefilterContract } from '.';
 import { Observable } from 'rxjs';
 
@@ -26,6 +26,7 @@ const createSetupContractMock = () => {
   const timefilterMock: jest.Mocked<TimefilterContract> = {
     isAutoRefreshSelectorEnabled: jest.fn(),
     isTimeRangeSelectorEnabled: jest.fn(),
+    isTimeTouched: jest.fn(),
     getEnabledUpdated$: jest.fn(),
     getTimeUpdate$: jest.fn(),
     getRefreshIntervalUpdate$: jest.fn(),

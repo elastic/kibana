@@ -5,7 +5,10 @@
  */
 
 import { UMKibanaRouteWrapper } from './types';
-import { savedObjectsAdapter } from '../lib/saved_objects';
+import { createUptimeESClient } from '../lib/lib';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { KibanaResponse } from '../../../../../src/core/server/http/router';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
   ...uptimeRoute,
@@ -13,14 +16,43 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
     tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
   },
   handler: async (context, request, response) => {
-    const { callAsCurrentUser: callES } = context.core.elasticsearch.legacy.client;
+    const { client: esClient } = context.core.elasticsearch;
     const { client: savedObjectsClient } = context.core.savedObjects;
-    const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
-    return uptimeRoute.handler(
-      { callES, savedObjectsClient, dynamicSettings },
-      context,
+
+    const uptimeEsClient = createUptimeESClient({
       request,
-      response
-    );
+      savedObjectsClient,
+      esClient: esClient.asCurrentUser,
+    });
+
+    try {
+      const res = await uptimeRoute.handler({
+        uptimeEsClient,
+        savedObjectsClient,
+        context,
+        request,
+        response,
+      });
+
+      if (res instanceof KibanaResponse) {
+        return res;
+      }
+
+      return response.ok({
+        body: {
+          ...res,
+        },
+      });
+    } catch (e) {
+      // please don't remove this, this will be really helpful during debugging
+      /* eslint-disable-next-line no-console */
+      console.error(e);
+
+      return response.internalError({
+        body: {
+          message: e.message,
+        },
+      });
+    }
   },
 });

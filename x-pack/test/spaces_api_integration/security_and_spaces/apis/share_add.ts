@@ -12,7 +12,11 @@ import {
 import { TestUser } from '../../../saved_object_api_integration/common/lib/types';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
 import { TestInvoker } from '../../common/lib/types';
-import { shareAddTestSuiteFactory, ShareAddTestDefinition } from '../../common/suites/share_add';
+import {
+  shareAddTestSuiteFactory,
+  ShareAddTestDefinition,
+  ShareAddTestCase,
+} from '../../common/suites/share_add';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -33,6 +37,8 @@ const createTestCases = (spaceId: string) => {
     { ...CASES.SPACE_1_AND_SPACE_2, namespaces, ...fail404(spaceId === DEFAULT_SPACE_ID) },
     { ...CASES.ALL_SPACES, namespaces },
     { ...CASES.DOES_NOT_EXIST, namespaces, ...fail404() },
+    // Test case to check adding all spaces ("*") to a saved object
+    { ...CASES.EACH_SPACE, namespaces: ['*'] },
     // Test cases to check adding multiple namespaces to different saved objects that exist in one space
     // These are non-exhaustive, they only check cases for adding two additional namespaces to a saved object
     // More permutations are covered in the corresponding spaces_only test suite
@@ -57,13 +63,24 @@ const calculateSingleSpaceAuthZ = (
   testCases: ReturnType<typeof createTestCases>,
   spaceId: string
 ) => {
-  const targetsOtherSpace = testCases.filter(
-    (x) => !x.namespaces.includes(spaceId) || x.namespaces.length > 1
-  );
-  const tmp = testCases.filter((x) => !targetsOtherSpace.includes(x)); // doesn't target other space
-  const doesntExistInThisSpace = tmp.filter((x) => !x.existingNamespaces.includes(spaceId));
-  const existsInThisSpace = tmp.filter((x) => x.existingNamespaces.includes(spaceId));
-  return { targetsOtherSpace, doesntExistInThisSpace, existsInThisSpace };
+  const targetsAllSpaces: ShareAddTestCase[] = [];
+  const targetsOtherSpace: ShareAddTestCase[] = [];
+  const doesntExistInThisSpace: ShareAddTestCase[] = [];
+  const existsInThisSpace: ShareAddTestCase[] = [];
+
+  for (const testCase of testCases) {
+    const { namespaces, existingNamespaces } = testCase;
+    if (namespaces.includes('*')) {
+      targetsAllSpaces.push(testCase);
+    } else if (!namespaces.includes(spaceId) || namespaces.length > 1) {
+      targetsOtherSpace.push(testCase);
+    } else if (!existingNamespaces.includes(spaceId)) {
+      doesntExistInThisSpace.push(testCase);
+    } else {
+      existsInThisSpace.push(testCase);
+    }
+  }
+  return { targetsAllSpaces, targetsOtherSpace, doesntExistInThisSpace, existsInThisSpace };
 };
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: TestInvoker) {
@@ -77,18 +94,20 @@ export default function ({ getService }: TestInvoker) {
     const otherSpaceId = spaceId === DEFAULT_SPACE_ID ? SPACE_1_ID : DEFAULT_SPACE_ID;
     const otherSpace = calculateSingleSpaceAuthZ(testCases, otherSpaceId);
     return {
-      unauthorized: createTestDefinitions(testCases, true, { fail403Param: 'create' }),
+      unauthorized: createTestDefinitions(testCases, true),
       authorizedInSpace: [
-        createTestDefinitions(thisSpace.targetsOtherSpace, true, { fail403Param: 'create' }),
+        createTestDefinitions(thisSpace.targetsAllSpaces, true),
+        createTestDefinitions(thisSpace.targetsOtherSpace, true),
         createTestDefinitions(thisSpace.doesntExistInThisSpace, false),
         createTestDefinitions(thisSpace.existsInThisSpace, false),
       ].flat(),
       authorizedInOtherSpace: [
-        createTestDefinitions(otherSpace.targetsOtherSpace, true, { fail403Param: 'create' }),
-        // If the preflight GET request fails, it will return a 404 error; users who are authorized to create saved objects in the target
-        // space(s) but are not authorized to update saved objects in this space will see a 403 error instead of 404. This is a safeguard to
+        createTestDefinitions(thisSpace.targetsAllSpaces, true),
+        createTestDefinitions(otherSpace.targetsOtherSpace, true),
+        // If the preflight GET request fails, it will return a 404 error; users who are authorized to share saved objects in the target
+        // space(s) but are not authorized to share saved objects in this space will see a 403 error instead of 404. This is a safeguard to
         // prevent potential information disclosure of the spaces that a given saved object may exist in.
-        createTestDefinitions(otherSpace.doesntExistInThisSpace, true, { fail403Param: 'update' }),
+        createTestDefinitions(otherSpace.doesntExistInThisSpace, true),
         createTestDefinitions(otherSpace.existsInThisSpace, false),
       ].flat(),
       authorized: createTestDefinitions(testCases, false),

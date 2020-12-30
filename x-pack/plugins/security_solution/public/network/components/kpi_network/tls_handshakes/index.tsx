@@ -8,7 +8,7 @@ import React from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
 import { useNetworkKpiTlsHandshakes } from '../../../containers/kpi_network/tls_handshakes';
-import { KpiNetworkBaseComponentManage } from '../common';
+import { NetworkKpiBaseComponentManage } from '../common';
 import { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 
@@ -28,6 +28,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
 const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
   filterQuery,
   from,
+  indexNames,
   to,
   narrowDateRange,
   setQuery,
@@ -36,12 +37,13 @@ const NetworkKpiTlsHandshakesComponent: React.FC<NetworkKpiProps> = ({
   const [loading, { refetch, id, inspect, ...data }] = useNetworkKpiTlsHandshakes({
     filterQuery,
     endDate: to,
+    indexNames,
     startDate: from,
     skip,
   });
 
   return (
-    <KpiNetworkBaseComponentManage
+    <NetworkKpiBaseComponentManage
       data={data}
       id={id}
       inspect={inspect}

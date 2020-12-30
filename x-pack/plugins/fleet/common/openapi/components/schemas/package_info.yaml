@@ -1,0 +1,118 @@
+title: PackageInfo
+type: object
+properties:
+  name:
+    type: string
+  title:
+    type: string
+  version:
+    type: string
+  readme:
+    type: string
+  description:
+    type: string
+  type:
+    type: string
+  categories:
+    type: array
+    items:
+      type: string
+  requirement:
+    oneOf:
+      - properties:
+          kibana:
+            type: object
+            properties:
+              versions:
+                type: string
+      - properties:
+          elasticsearch:
+            type: object
+            properties:
+              versions:
+                type: string
+    type: object
+  screenshots:
+    type: array
+    items:
+      type: object
+      properties:
+        src:
+          type: string
+        path:
+          type: string
+        title:
+          type: string
+        size:
+          type: string
+        type:
+          type: string
+      required:
+        - src
+        - path
+  icons:
+    type: array
+    items:
+      type: string
+  assets:
+    type: array
+    items:
+      type: string
+  internal:
+    type: boolean
+  format_version:
+    type: string
+  data_streams:
+    type: array
+    items:
+      type: object
+      properties:
+        title:
+          type: string
+        name:
+          type: string
+        release:
+          type: string
+        ingeset_pipeline:
+          type: string
+        vars:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              default:
+                type: string
+            required:
+              - name
+              - default
+        type:
+          type: string
+        package:
+          type: string
+      required:
+        - title
+        - name
+        - release
+        - ingeset_pipeline
+        - type
+        - package
+  download:
+    type: string
+  path:
+    type: string
+  removable:
+    type: boolean
+required:
+  - name
+  - title
+  - version
+  - description
+  - type
+  - categories
+  - requirement
+  - assets
+  - format_version
+  - download
+  - path

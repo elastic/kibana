@@ -21,6 +21,7 @@ import * as ts from 'typescript';
 import * as path from 'path';
 import { extractCollectors, getProgramPaths } from './extract_collectors';
 import { parseTelemetryRC } from './config';
+import { allExtractedCollectors } from './__fixture__/all_extracted_collectors';
 
 describe('extractCollectors', () => {
   it('extracts collectors given rc file', async () => {
@@ -34,7 +35,7 @@ describe('extractCollectors', () => {
     const programPaths = await getProgramPaths(configs[0]);
 
     const results = [...extractCollectors(programPaths, tsConfig)];
-    expect(results).toHaveLength(7);
-    expect(results).toMatchSnapshot();
+    expect(results).toHaveLength(8);
+    expect(results).toStrictEqual(allExtractedCollectors);
   });
 });

@@ -6,7 +6,6 @@
 
 import { each } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import rison from 'rison-node';
 
 import { mlJobService } from '../../../services/job_service';
 import {
@@ -38,7 +37,9 @@ export function loadFullJob(jobId) {
 }
 
 export function isStartable(jobs) {
-  return jobs.some((j) => j.datafeedState === DATAFEED_STATE.STOPPED);
+  return jobs.some(
+    (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSING
+  );
 }
 
 export function isStoppable(jobs) {
@@ -49,7 +50,10 @@ export function isStoppable(jobs) {
 
 export function isClosable(jobs) {
   return jobs.some(
-    (j) => j.datafeedState === DATAFEED_STATE.STOPPED && j.jobState !== JOB_STATE.CLOSED
+    (j) =>
+      j.datafeedState === DATAFEED_STATE.STOPPED &&
+      j.jobState !== JOB_STATE.CLOSED &&
+      j.jobState !== JOB_STATE.CLOSING
   );
 }
 
@@ -309,8 +313,13 @@ export function filterJobs(jobs, clauses) {
     } else {
       // filter other clauses, i.e. the toggle group buttons
       if (Array.isArray(c.value)) {
-        // the groups value is an array of group ids
-        js = jobs.filter((job) => jobProperty(job, c.field).some((g) => c.value.indexOf(g) >= 0));
+        // if it's an array of job ids
+        if (c.field === 'id') {
+          js = jobs.filter((job) => c.value.indexOf(jobProperty(job, c.field)) >= 0);
+        } else {
+          // the groups value is an array of group ids
+          js = jobs.filter((job) => jobProperty(job, c.field).some((g) => c.value.indexOf(g) >= 0));
+        }
       } else {
         js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
       }
@@ -353,49 +362,7 @@ function jobProperty(job, prop) {
     job_state: 'jobState',
     datafeed_state: 'datafeedState',
     groups: 'groups',
+    id: 'id',
   };
   return job[propMap[prop]];
-}
-
-function getUrlVars(url) {
-  const vars = {};
-  url.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (_, key, value) {
-    vars[key] = value;
-  });
-  return vars;
-}
-
-export function getSelectedIdFromUrl(url) {
-  const result = {};
-  if (typeof url === 'string') {
-    const isGroup = url.includes('groupIds');
-    url = decodeURIComponent(url);
-
-    if (url.includes('mlManagement')) {
-      const urlParams = getUrlVars(url);
-      const decodedJson = rison.decode(urlParams.mlManagement);
-
-      if (isGroup) {
-        result.groupIds = decodedJson.groupIds;
-      } else {
-        result.jobId = decodedJson.jobId;
-      }
-    }
-  }
-  return result;
-}
-
-export function getGroupQueryText(groupIds) {
-  return `groups:(${groupIds.join(' or ')})`;
-}
-
-export function clearSelectedJobIdFromUrl(url) {
-  if (typeof url === 'string') {
-    url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && (url.includes('jobId') || url.includes('groupIds'))) {
-      const urlParams = getUrlVars(url);
-      const clearedParams = `jobs?_g=${urlParams._g}`;
-      window.history.replaceState({}, document.title, clearedParams);
-    }
-  }
 }

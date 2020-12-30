@@ -20,11 +20,11 @@
 import React from 'react';
 import {
   htmlIdGenerator,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
   EuiFormRow,
   EuiSpacer,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggSelect } from '../agg_select';
@@ -34,12 +34,16 @@ import { FieldSelect } from '../field_select';
 import { createChangeHandler } from '../../lib/create_change_handler';
 // @ts-ignore
 import { createSelectHandler } from '../../lib/create_select_handler';
+// @ts-ignore
+import { createNumberHandler } from '../../lib/create_number_handler';
+
 import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
 import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { MetricsItemsSchema, PanelSchema, SeriesItemsSchema } from '../../../../../common/types';
 import { DragHandleProps } from '../../../../types';
+import { PercentileHdr } from '../percentile_hdr';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM];
 
@@ -67,6 +71,7 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
   const isTablePanel = panel.type === 'table';
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
+  const handleNumberChange = createNumberHandler(handleChange);
 
   const handlePercentileRankValuesChange = (values: MetricsItemsSchema['values']) => {
     handleChange({
@@ -84,7 +89,7 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
       siblings={props.siblings}
       dragHandleProps={props.dragHandleProps}
     >
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGrid gutterSize="s" columns={2}>
         <EuiFlexItem>
           <EuiFormLabel htmlFor={htmlId('aggregation')}>
             <FormattedMessage
@@ -121,17 +126,32 @@ export const PercentileRankAgg = (props: PercentileRankAggProps) => {
             />
           </EuiFormRow>
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      {model.values && (
-        <PercentileRankValues
-          disableAdd={isTablePanel}
-          disableDelete={isTablePanel}
-          showOnlyLastRow={isTablePanel}
-          model={model.values}
-          onChange={handlePercentileRankValuesChange}
-        />
-      )}
+
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.percentileRank.values"
+                defaultMessage="Values"
+              />
+            }
+          >
+            <PercentileRankValues
+              disableAdd={isTablePanel}
+              disableDelete={isTablePanel}
+              showOnlyLastRow={isTablePanel}
+              model={model.values!}
+              onChange={handlePercentileRankValuesChange}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <PercentileHdr
+            value={model.numberOfSignificantValueDigits}
+            onChange={handleNumberChange('numberOfSignificantValueDigits')}
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
     </AggRow>
   );
 };

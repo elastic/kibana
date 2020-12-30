@@ -8,16 +8,19 @@ import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
-import { asPercent } from '../../../../../common/utils/formatters';
+import {
+  asDuration,
+  asPercent,
+  asTransactionRate,
+} from '../../../../../common/utils/formatters';
 import { ServiceNodeStats } from '../../../../../common/service_map';
-import { asDuration, tpmUnit } from '../../../../utils/formatters';
 
 export const ItemRow = styled('tr')`
   line-height: 2;
 `;
 
 export const ItemTitle = styled('td')`
-  color: ${({ theme }) => theme.eui.textColors.subdued};
+  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   padding-right: 1rem;
 `;
 
@@ -52,31 +55,25 @@ export function ServiceStatsList({
           defaultMessage: 'Req. per minute (avg.)',
         }
       ),
-      description: isNumber(transactionStats.avgRequestsPerMinute)
-        ? `${transactionStats.avgRequestsPerMinute.toFixed(2)} ${tpmUnit(
-            'request'
-          )}`
-        : null,
+      description: asTransactionRate(transactionStats.avgRequestsPerMinute),
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.errorRatePopoverStat', {
         defaultMessage: 'Trans. error rate (avg.)',
       }),
-      description: isNumber(avgErrorRate) ? asPercent(avgErrorRate, 1) : null,
+      description: asPercent(avgErrorRate, 1, ''),
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.avgCpuUsagePopoverStat', {
         defaultMessage: 'CPU usage (avg.)',
       }),
-      description: isNumber(avgCpuUsage) ? asPercent(avgCpuUsage, 1) : null,
+      description: asPercent(avgCpuUsage, 1, ''),
     },
     {
       title: i18n.translate('xpack.apm.serviceMap.avgMemoryUsagePopoverStat', {
         defaultMessage: 'Memory usage (avg.)',
       }),
-      description: isNumber(avgMemoryUsage)
-        ? asPercent(avgMemoryUsage, 1)
-        : null,
+      description: asPercent(avgMemoryUsage, 1, ''),
     },
   ];
 

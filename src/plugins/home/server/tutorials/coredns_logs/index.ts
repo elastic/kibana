@@ -31,7 +31,7 @@ import {
 
 export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'coredns';
-  const platforms = ['OSX', 'DEB', 'RPM'] as const;
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'corednsLogs',
     name: i18n.translate('home.tutorials.corednsLogs.nameTitle', {
@@ -40,12 +40,11 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.corednsLogs.shortDescription', {
-      defaultMessage: 'Collect the logs created by Coredns.',
+      defaultMessage: 'Collect CoreDNS logs.',
     }),
     longDescription: i18n.translate('home.tutorials.corednsLogs.longDescription', {
       defaultMessage:
-        'The `coredns` Filebeat module collects the logs from \
-[CoreDNS](https://coredns.io/manual/toc/). \
+        'This is a filebeat module for CoreDNS. It supports both standalone CoreDNS deployment and CoreDNS deployment in Kubernetes. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-coredns.html',
@@ -57,7 +56,7 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
         {
           id: '53aa1f70-443e-11e9-8548-ab7fbe04f038',
           linkLabel: i18n.translate('home.tutorials.corednsLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'CoreDNS logs dashboard',
+            defaultMessage: '[Filebeat CoreDNS] Overview',
           }),
           isOverview: true,
         },
@@ -67,7 +66,7 @@ export function corednsLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/coredns_logs/screenshot.jpg',
+    previewImagePath: '/plugins/home/assets/coredns_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

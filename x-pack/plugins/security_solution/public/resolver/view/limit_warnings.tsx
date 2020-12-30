@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { LimitWarningsEuiCallOut } from './styles';
 
 const lineageLimitMessage = (
   <FormattedMessage
@@ -15,11 +17,7 @@ const lineageLimitMessage = (
   />
 );
 
-const LineageTitleMessage = React.memo(function LineageTitleMessage({
-  numberOfEntries,
-}: {
-  numberOfEntries: number;
-}) {
+const LineageTitleMessage = React.memo(function ({ numberOfEntries }: { numberOfEntries: number }) {
   return (
     <FormattedMessage
       id="xpack.securitySolution.endpoint.resolver.relatedEventLimitTitle"
@@ -29,7 +27,7 @@ const LineageTitleMessage = React.memo(function LineageTitleMessage({
   );
 });
 
-const RelatedEventsLimitMessage = React.memo(function RelatedEventsLimitMessage({
+const RelatedEventsLimitMessage = React.memo(function ({
   category,
   numberOfEventsMissing,
 }: {
@@ -45,7 +43,7 @@ const RelatedEventsLimitMessage = React.memo(function RelatedEventsLimitMessage(
   );
 });
 
-const RelatedLimitTitleMessage = React.memo(function RelatedLimitTitleMessage({
+const RelatedLimitTitleMessage = React.memo(function ({
   category,
   numberOfEventsDisplayed,
 }: {
@@ -64,14 +62,12 @@ const RelatedLimitTitleMessage = React.memo(function RelatedLimitTitleMessage({
 /**
  * Limit warning for hitting the /events API limit
  */
-export const RelatedEventLimitWarning = React.memo(function RelatedEventLimitWarning({
-  className,
-  eventType,
+export const RelatedEventLimitWarning = React.memo(function ({
+  eventCategory,
   numberActuallyDisplayed,
   numberMissing,
 }: {
-  className?: string;
-  eventType: string;
+  eventCategory: string;
   numberActuallyDisplayed: number;
   numberMissing: number;
 }) {
@@ -79,40 +75,32 @@ export const RelatedEventLimitWarning = React.memo(function RelatedEventLimitWar
    * Based on API limits, all related events may not be displayed.
    */
   return (
-    <EuiCallOut
+    <LimitWarningsEuiCallOut
       size="s"
-      className={className}
       title={
         <RelatedLimitTitleMessage
-          category={eventType}
+          category={eventCategory}
           numberOfEventsDisplayed={numberActuallyDisplayed}
         />
       }
     >
       <p>
-        <RelatedEventsLimitMessage category={eventType} numberOfEventsMissing={numberMissing} />
+        <RelatedEventsLimitMessage category={eventCategory} numberOfEventsMissing={numberMissing} />
       </p>
-    </EuiCallOut>
+    </LimitWarningsEuiCallOut>
   );
 });
 
 /**
  * Limit warning for hitting a limit of nodes in the tree
  */
-export const LimitWarning = React.memo(function LimitWarning({
-  className,
-  numberDisplayed,
-}: {
-  className?: string;
-  numberDisplayed: number;
-}) {
+export const LimitWarning = React.memo(function ({ numberDisplayed }: { numberDisplayed: number }) {
   return (
-    <EuiCallOut
+    <LimitWarningsEuiCallOut
       size="s"
-      className={className}
       title={<LineageTitleMessage numberOfEntries={numberDisplayed} />}
     >
       <p>{lineageLimitMessage}</p>
-    </EuiCallOut>
+    </LimitWarningsEuiCallOut>
   );
 });

@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'kibana/public';
-import {
+import type { CoreSetup } from 'kibana/public';
+import type {
   SharePluginSetup,
   UrlGeneratorsDefinition,
   UrlGeneratorState,
 } from '../../../../../src/plugins/share/public';
-import { MlStartDependencies } from '../plugin';
+import type { MlStartDependencies } from '../plugin';
 import { ML_PAGES, ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
-import { MlUrlGeneratorState } from '../../common/types/ml_url_generator';
+import type { MlUrlGeneratorState } from '../../common/types/ml_url_generator';
 import {
   createAnomalyDetectionJobManagementUrl,
   createAnomalyDetectionCreateJobSelectType,
@@ -22,7 +22,9 @@ import {
 } from './anomaly_detection_urls_generator';
 import {
   createDataFrameAnalyticsJobManagementUrl,
+  createDataFrameAnalyticsCreateJobUrl,
   createDataFrameAnalyticsExplorationUrl,
+  createDataFrameAnalyticsMapUrl,
 } from './data_frame_analytics_urls_generator';
 import { createGenericMlUrl } from './common';
 import { createEditCalendarUrl, createEditFilterUrl } from './settings_urls_generator';
@@ -68,6 +70,11 @@ export class MlUrlGenerator implements UrlGeneratorsDefinition<typeof ML_APP_URL
         return createSingleMetricViewerUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE:
         return createDataFrameAnalyticsJobManagementUrl(appBasePath, mlUrlGeneratorState.pageState);
+      case ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB:
+        return createDataFrameAnalyticsCreateJobUrl(appBasePath, mlUrlGeneratorState.pageState);
+      case ML_PAGES.DATA_FRAME_ANALYTICS_MAP:
+        // @ts-ignore // TODO: fix type
+        return createDataFrameAnalyticsMapUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION:
         return createDataFrameAnalyticsExplorationUrl(appBasePath, mlUrlGeneratorState.pageState);
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB:
@@ -106,7 +113,7 @@ export function registerUrlGenerator(
   core: CoreSetup<MlStartDependencies>
 ) {
   const baseUrl = core.http.basePath.prepend('/app/ml');
-  share.urlGenerators.registerUrlGenerator(
+  return share.urlGenerators.registerUrlGenerator(
     new MlUrlGenerator({
       appBasePath: baseUrl,
       useHash: core.uiSettings.get('state:storeInSessionStorage'),

@@ -19,9 +19,7 @@ import { metadata } from './metadata';
 import { JobParamsPDF, TaskPayloadPDF } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
-  JobParamsPDF,
   CreateJobFn<JobParamsPDF>,
-  TaskPayloadPDF,
   RunTaskFn<TaskPayloadPDF>
 > => ({
   ...metadata,

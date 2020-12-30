@@ -12,7 +12,7 @@ interface Props {
   environments: string[];
 }
 export function EnvironmentBadge({ environments = [] }: Props) {
-  if (environments.length < 3) {
+  if (environments.length < 2) {
     return (
       <>
         {environments.map((env) => (

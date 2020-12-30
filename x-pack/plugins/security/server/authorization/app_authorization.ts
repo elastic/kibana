@@ -73,6 +73,6 @@ export function initAppAuthorization(
     }
 
     logger.debug(`not authorized for "${appId}"`);
-    return response.notFound();
+    return response.forbidden();
   });
 }

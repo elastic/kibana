@@ -10,8 +10,7 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { ThemeProvider } from 'styled-components';
 
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { mockOpenTimelineQueryResults } from '../../../../common/mock/timeline_results';
 import * as i18n from '../translations';

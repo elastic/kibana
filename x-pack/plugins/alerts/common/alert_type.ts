@@ -4,13 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LicenseType } from '../../licensing/common/types';
+
 export interface AlertType {
   id: string;
   name: string;
   actionGroups: ActionGroup[];
+  recoveryActionGroup: ActionGroup;
   actionVariables: string[];
   defaultActionGroupId: ActionGroup['id'];
   producer: string;
+  minimumLicenseRequired: LicenseType;
 }
 
 export interface ActionGroup {

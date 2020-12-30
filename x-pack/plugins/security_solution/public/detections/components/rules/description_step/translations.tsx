@@ -20,6 +20,13 @@ export const QUERY_LABEL = i18n.translate(
   }
 );
 
+export const THREAT_QUERY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.threatQueryLabel',
+  {
+    defaultMessage: 'Indicator index query',
+  }
+);
+
 export const SAVED_ID_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.savedIdLabel',
   {
@@ -58,7 +65,7 @@ export const THRESHOLD_TYPE_DESCRIPTION = i18n.translate(
 export const THREAT_MATCH_TYPE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.threatMatchRuleTypeDescription',
   {
-    defaultMessage: 'Threat Match',
+    defaultMessage: 'Indicator Match',
   }
 );
 

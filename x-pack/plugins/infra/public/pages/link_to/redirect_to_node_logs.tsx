@@ -5,10 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
 import flowRight from 'lodash/flowRight';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 import { HttpStart } from 'src/core/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { findInventoryFields } from '../../../common/inventory_models';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart } from '../../../../legacy_singletons';
+import type { HttpHandler } from 'src/core/public';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import {
   getLogEntryAnomaliesDatasetsRequestPayloadRT,
@@ -12,12 +12,18 @@ import {
   LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH,
 } from '../../../../../common/http_api/log_analysis';
 
+interface RequestArgs {
+  sourceId: string;
+  startTime: number;
+  endTime: number;
+}
+
 export const callGetLogEntryAnomaliesDatasetsAPI = async (
-  sourceId: string,
-  startTime: number,
-  endTime: number
+  requestArgs: RequestArgs,
+  fetch: HttpHandler
 ) => {
-  const response = await npStart.http.fetch(LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH, {
+  const { sourceId, startTime, endTime } = requestArgs;
+  const response = await fetch(LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH, {
     method: 'POST',
     body: JSON.stringify(
       getLogEntryAnomaliesDatasetsRequestPayloadRT.encode({

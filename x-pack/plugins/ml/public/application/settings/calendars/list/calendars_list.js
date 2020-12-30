@@ -108,10 +108,15 @@ export class CalendarsListUI extends Component {
       destroyModal = (
         <EuiOverlayMask>
           <EuiConfirmModal
+            data-test-subj={'mlCalendarDeleteConfirmation'}
             title={
               <FormattedMessage
-                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarTitle"
-                defaultMessage="Delete calendar"
+                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle"
+                defaultMessage="Delete {calendarsCount, plural, one {{calendarsList}} other {# calendars}}?"
+                values={{
+                  calendarsCount: selectedForDeletion.length,
+                  calendarsList: selectedForDeletion.map((c) => c.calendar_id).join(', '),
+                }}
               />
             }
             onCancel={this.closeDestroyModal}
@@ -130,18 +135,7 @@ export class CalendarsListUI extends Component {
             }
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarsDescription"
-                defaultMessage="Delete {calendarsCount, plural, one {this calendar} other {these calendars}}? {calendarsList}"
-                values={{
-                  calendarsCount: selectedForDeletion.length,
-                  calendarsList: selectedForDeletion.map((c) => c.calendar_id).join(', '),
-                }}
-              />
-            </p>
-          </EuiConfirmModal>
+          />
         </EuiOverlayMask>
       );
     }

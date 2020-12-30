@@ -6,12 +6,14 @@
 
 import {
   ResolverRelatedEvents,
-  ResolverTree,
   ResolverEntityIndex,
+  SafeResolverEvent,
+  ResolverNode,
+  ResolverSchema,
 } from '../../../../common/endpoint/types';
 import { mockEndpointEvent } from '../../mocks/endpoint_event';
 import { mockTreeWithNoAncestorsAnd2Children } from '../../mocks/resolver_tree';
-import { DataAccessLayer } from '../../types';
+import { DataAccessLayer, TimeRange } from '../../types';
 
 interface Metadata {
   /**
@@ -55,13 +57,21 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
       /**
        * Fetch related events for an entity ID
        */
-      relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
+      relatedEvents({
+        entityID,
+        timeRange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        timeRange: TimeRange;
+        indexPatterns: string[];
+      }): Promise<ResolverRelatedEvents> {
         return Promise.resolve({
           entityID,
           events: [
             mockEndpointEvent({
               entityID,
-              name: 'event',
+              processName: 'event',
               timestamp: 0,
             }),
           ],
@@ -69,17 +79,102 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         });
       },
 
+      async eventsWithEntityIDAndCategory({
+        entityID,
+        category,
+        after,
+        timeRange,
+        indexPatterns,
+      }: {
+        entityID: string;
+        category: string;
+        after?: string;
+        timeRange: TimeRange;
+        indexPatterns: string[];
+      }): Promise<{
+        events: SafeResolverEvent[];
+        nextEvent: string | null;
+      }> {
+        return {
+          events: [
+            mockEndpointEvent({
+              entityID,
+              eventCategory: category,
+            }),
+          ],
+          nextEvent: null,
+        };
+      },
+
+      async event({
+        nodeID,
+        eventID,
+        eventCategory,
+        eventTimestamp,
+        winlogRecordID,
+        timeRange,
+        indexPatterns,
+      }: {
+        nodeID: string;
+        eventCategory: string[];
+        eventTimestamp: string;
+        eventID?: string | number;
+        winlogRecordID: string;
+        timeRange: TimeRange;
+        indexPatterns: string[];
+      }): Promise<SafeResolverEvent | null> {
+        return mockEndpointEvent({
+          entityID: metadata.entityIDs.origin,
+          eventID,
+        });
+      },
+
+      /**
+       * Creates a fake event for each of the ids requested
+       */
+      async nodeData({
+        ids,
+        timeRange,
+        indexPatterns,
+        limit,
+      }: {
+        ids: string[];
+        timeRange: TimeRange;
+        indexPatterns: string[];
+        limit: number;
+      }): Promise<SafeResolverEvent[]> {
+        return ids.map((id: string) =>
+          mockEndpointEvent({
+            entityID: id,
+          })
+        );
+      },
+
       /**
        * Fetch a ResolverTree for a entityID
        */
-      resolverTree(): Promise<ResolverTree> {
-        return Promise.resolve(
-          mockTreeWithNoAncestorsAnd2Children({
-            originID: metadata.entityIDs.origin,
-            firstChildID: metadata.entityIDs.firstChild,
-            secondChildID: metadata.entityIDs.secondChild,
-          })
-        );
+      async resolverTree({
+        dataId,
+        schema,
+        timeRange,
+        indices,
+        ancestors,
+        descendants,
+      }: {
+        dataId: string;
+        schema: ResolverSchema;
+        timeRange: TimeRange;
+        indices: string[];
+        ancestors: number;
+        descendants: number;
+      }): Promise<ResolverNode[]> {
+        const { treeResponse } = mockTreeWithNoAncestorsAnd2Children({
+          originID: metadata.entityIDs.origin,
+          firstChildID: metadata.entityIDs.firstChild,
+          secondChildID: metadata.entityIDs.secondChild,
+        });
+
+        return Promise.resolve(treeResponse);
       },
 
       /**
@@ -88,7 +183,18 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
       entities({ indices }): Promise<ResolverEntityIndex> {
         // Only return values if the `indices` array contains exactly `'awesome_index'`
         if (indices.length === 1 && indices[0] === 'awesome_index') {
-          return Promise.resolve([{ entity_id: metadata.entityIDs.origin }]);
+          return Promise.resolve([
+            {
+              name: 'endpoint',
+              schema: {
+                id: 'process.entity_id',
+                parent: 'process.parent.entity_id',
+                ancestry: 'process.Ext.ancestry',
+                name: 'process.name',
+              },
+              id: metadata.entityIDs.origin,
+            },
+          ]);
         }
         return Promise.resolve([]);
       },

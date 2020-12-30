@@ -22,7 +22,8 @@ node scripts/functional_tests --assert-none-excluded \
   --include-tag ciGroup7 \
   --include-tag ciGroup8 \
   --include-tag ciGroup9 \
-  --include-tag ciGroup10
+  --include-tag ciGroup10 \
+  --include-tag ciGroup11
 
 echo " -> building and extracting default Kibana distributable for use in functional tests"
 cd "$KIBANA_DIR"

@@ -5,16 +5,18 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiText } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { DataSourceStrings } from '../../../i18n';
 
 const { DemoData: strings } = DataSourceStrings;
 
 const DemodataDatasource = () => (
-  <EuiText size="s">
-    <p>{strings.getDescription()}</p>
-  </EuiText>
+  <EuiCallOut title={strings.getHeading()} iconType="iInCircle">
+    <EuiText size="s">
+      <p>{strings.getDescription()}</p>
+    </EuiText>
+  </EuiCallOut>
 );
 
 export const demodata = () => ({

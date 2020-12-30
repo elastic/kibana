@@ -18,31 +18,37 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
+
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';
+import { BasicVislibParams, VislibChartType } from './types';
+
+export const vislibVisName = 'vislib_vis';
 
 interface Arguments {
-  type: string;
+  type: Exclude<VislibChartType, 'pie'>;
   visConfig: string;
 }
 
-type VisParams = Required<Arguments>;
-
-interface RenderValue {
-  visType: string;
-  visConfig: VisParams;
+export interface VislibRenderValue {
+  visType: Exclude<VislibChartType, 'pie'>;
+  visData: unknown;
+  visConfig: BasicVislibParams;
 }
 
-export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
-  'vislib',
-  KibanaDatatable,
+export type VisTypeVislibExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof vislibVisName,
+  Datatable,
   Arguments,
-  Render<RenderValue>
-> => ({
-  name: 'vislib',
+  Render<VislibRenderValue>
+>;
+
+export const createVisTypeVislibVisFn = (): VisTypeVislibExpressionFunctionDefinition => ({
+  name: vislibVisName,
   type: 'render',
-  inputTypes: ['kibana_datatable'],
+  inputTypes: ['datatable'],
   help: i18n.translate('visTypeVislib.functions.vislib.help', {
     defaultMessage: 'Vislib visualization',
   }),
@@ -55,23 +61,25 @@ export const createVisTypeVislibVisFn = (): ExpressionFunctionDefinition<
     visConfig: {
       types: ['string'],
       default: '"{}"',
-      help: '',
+      help: 'vislib vis config',
     },
   },
-  fn(context, args) {
-    const visConfigParams = JSON.parse(args.visConfig);
-    const convertedData = vislibSeriesResponseHandler(context, visConfigParams.dimensions);
+  fn(context, args, handlers) {
+    const visType = args.type as Exclude<VislibChartType, 'pie'>;
+    const visConfig = JSON.parse(args.visConfig) as BasicVislibParams;
+    const visData = vislibSeriesResponseHandler(context, visConfig.dimensions);
+
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', context);
+    }
 
     return {
       type: 'render',
-      as: 'visualization',
+      as: vislibVisName,
       value: {
-        visData: convertedData,
-        visType: args.type,
-        visConfig: visConfigParams,
-        params: {
-          listenOnChange: true,
-        },
+        visData,
+        visConfig,
+        visType,
       },
     };
   },

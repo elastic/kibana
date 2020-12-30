@@ -25,7 +25,6 @@ describe('GET /api/reporting/jobs/download', () => {
   let core: ReportingCore;
 
   const config = createMockConfig(createMockConfigSchema());
-
   const getHits = (...sources: any) => {
     return {
       hits: {
@@ -69,14 +68,14 @@ describe('GET /api/reporting/jobs/download', () => {
       jobType: 'unencodedJobType',
       jobContentExtension: 'csv',
       validLicenses: ['basic', 'gold'],
-    } as ExportTypeDefinition<unknown, unknown, unknown, unknown>);
+    } as ExportTypeDefinition);
     exportTypesRegistry.register({
       id: 'base64Encoded',
       jobType: 'base64EncodedJobType',
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
       validLicenses: ['basic', 'gold'],
-    } as ExportTypeDefinition<unknown, unknown, unknown, unknown>);
+    } as ExportTypeDefinition);
     core.getExportTypesRegistry = () => exportTypesRegistry;
   });
 

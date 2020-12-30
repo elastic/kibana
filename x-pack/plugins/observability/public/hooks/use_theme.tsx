@@ -5,7 +5,7 @@
  */
 import { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { EuiTheme } from '../../../../legacy/common/eui_styled_components';
+import { EuiTheme } from '../../../xpack_legacy/common';
 
 export function useTheme() {
   const theme: EuiTheme = useContext(ThemeContext);

@@ -4,30 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { Resizable, ResizeCallback } from 're-resizable';
 import deepEqual from 'fast-deep-equal';
+import { useDispatch } from 'react-redux';
 
+import { useDraggableKeyboardWrapper } from '../../../../../common/components/drag_and_drop/draggable_keyboard_wrapper_hook';
+import {
+  DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME,
+  getDraggableFieldId,
+} from '../../../../../common/components/drag_and_drop/helpers';
 import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
-import { getDraggableFieldId } from '../../../../../common/components/drag_and_drop/helpers';
-import { OnColumnRemoved, OnColumnSorted, OnFilterChange, OnColumnResized } from '../../events';
+import { OnFilterChange } from '../../events';
+import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import { Sort } from '../sort';
 
 import { Header } from './header';
+import { timelineActions } from '../../../../store/timeline';
 
 const RESIZABLE_ENABLE = { right: true };
 
 interface ColumneHeaderProps {
   draggableIndex: number;
   header: ColumnHeaderOptions;
-  onColumnRemoved: OnColumnRemoved;
-  onColumnSorted: OnColumnSorted;
-  onColumnResized: OnColumnResized;
   isDragging: boolean;
   onFilterChange?: OnFilterChange;
-  sort: Sort;
+  sort: Sort[];
   timelineId: string;
 }
 
@@ -36,12 +40,14 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   header,
   timelineId,
   isDragging,
-  onColumnRemoved,
-  onColumnResized,
-  onColumnSorted,
   onFilterChange,
   sort,
 }) => {
+  const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
+  const [, setClosePopOverTrigger] = useState(false);
+  const [, setHoverActionsOwnFocus] = useState<boolean>(false);
+
+  const dispatch = useDispatch();
   const resizableSize = useMemo(
     () => ({
       width: header.width,
@@ -65,9 +71,15 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
   );
   const handleResizeStop: ResizeCallback = useCallback(
     (e, direction, ref, delta) => {
-      onColumnResized({ columnId: header.id, delta: delta.width });
+      dispatch(
+        timelineActions.applyDeltaToColumnWidth({
+          columnId: header.id,
+          delta: delta.width,
+          id: timelineId,
+        })
+      );
     },
-    [header.id, onColumnResized]
+    [dispatch, header.id, timelineId]
   );
   const draggableId = useMemo(
     () =>
@@ -78,6 +90,47 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
     [timelineId, header.id]
   );
 
+  const DraggableContent = useCallback(
+    (dragProvided) => (
+      <EventsTh
+        data-test-subj="draggable-header"
+        {...dragProvided.draggableProps}
+        {...dragProvided.dragHandleProps}
+        ref={dragProvided.innerRef}
+      >
+        <EventsThContent>
+          <Header
+            timelineId={timelineId}
+            header={header}
+            onFilterChange={onFilterChange}
+            sort={sort}
+          />
+        </EventsThContent>
+      </EventsTh>
+    ),
+    [header, onFilterChange, sort, timelineId]
+  );
+
+  const onFocus = useCallback(() => {
+    keyboardHandlerRef.current?.focus();
+  }, []);
+
+  const handleClosePopOverTrigger = useCallback(() => {
+    setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
+  }, []);
+
+  const openPopover = useCallback(() => {
+    setHoverActionsOwnFocus(true);
+  }, []);
+
+  const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({
+    closePopover: handleClosePopOverTrigger,
+    draggableId,
+    fieldName: header.id,
+    keyboardHandlerRef,
+    openPopover,
+  });
+
   return (
     <Resizable
       enable={RESIZABLE_ENABLE}
@@ -86,34 +139,30 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
       handleComponent={resizableHandleComponent}
       onResizeStop={handleResizeStop}
     >
-      <Draggable
-        data-test-subj="draggable"
-        // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
-        disableInteractiveElementBlocking
-        draggableId={draggableId}
-        index={draggableIndex}
-        key={header.id}
+      <div
+        aria-colindex={
+          draggableIndex != null ? draggableIndex + ARIA_COLUMN_INDEX_OFFSET : undefined
+        }
+        className={DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME}
+        data-test-subj="draggableWrapperKeyboardHandler"
+        onClick={onFocus}
+        onBlur={onBlur}
+        onKeyDown={onKeyDown}
+        ref={keyboardHandlerRef}
+        role="columnheader"
+        tabIndex={0}
       >
-        {(dragProvided) => (
-          <EventsTh
-            data-test-subj="draggable-header"
-            {...dragProvided.draggableProps}
-            {...dragProvided.dragHandleProps}
-            ref={dragProvided.innerRef}
-          >
-            <EventsThContent>
-              <Header
-                timelineId={timelineId}
-                header={header}
-                onColumnRemoved={onColumnRemoved}
-                onColumnSorted={onColumnSorted}
-                onFilterChange={onFilterChange}
-                sort={sort}
-              />
-            </EventsThContent>
-          </EventsTh>
-        )}
-      </Draggable>
+        <Draggable
+          data-test-subj="draggable"
+          // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
+          disableInteractiveElementBlocking
+          draggableId={draggableId}
+          index={draggableIndex}
+          key={header.id}
+        >
+          {DraggableContent}
+        </Draggable>
+      </div>
     </Resizable>
   );
 };
@@ -124,10 +173,7 @@ export const ColumnHeader = React.memo(
     prevProps.draggableIndex === nextProps.draggableIndex &&
     prevProps.timelineId === nextProps.timelineId &&
     prevProps.isDragging === nextProps.isDragging &&
-    prevProps.onColumnRemoved === nextProps.onColumnRemoved &&
-    prevProps.onColumnResized === nextProps.onColumnResized &&
-    prevProps.onColumnSorted === nextProps.onColumnSorted &&
     prevProps.onFilterChange === nextProps.onFilterChange &&
-    prevProps.sort === nextProps.sort &&
+    deepEqual(prevProps.sort, nextProps.sort) &&
     deepEqual(prevProps.header, nextProps.header)
 );

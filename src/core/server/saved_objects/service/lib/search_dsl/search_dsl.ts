@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { IndexMapping } from '../../../mappings';
-import { getQueryParams } from './query_params';
+import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
 import { getSortingParams } from './sorting_params';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 
@@ -29,16 +29,15 @@ type KueryNode = any;
 interface GetSearchDslOptions {
   type: string | string[];
   search?: string;
-  defaultSearchOperator?: string;
+  defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
   rootSearchFields?: string[];
   sortField?: string;
   sortOrder?: string;
   namespaces?: string[];
-  hasReference?: {
-    type: string;
-    id: string;
-  };
+  typeToNamespacesMap?: Map<string, string[] | undefined>;
+  hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
+  hasReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
 }
 
@@ -56,7 +55,9 @@ export function getSearchDsl(
     sortField,
     sortOrder,
     namespaces,
+    typeToNamespacesMap,
     hasReference,
+    hasReferenceOperator,
     kueryNode,
   } = options;
 
@@ -70,15 +71,16 @@ export function getSearchDsl(
 
   return {
     ...getQueryParams({
-      mappings,
       registry,
       namespaces,
       type,
+      typeToNamespacesMap,
       search,
       searchFields,
       rootSearchFields,
       defaultSearchOperator,
       hasReference,
+      hasReferenceOperator,
       kueryNode,
     }),
     ...getSortingParams(mappings, type, sortField, sortOrder),

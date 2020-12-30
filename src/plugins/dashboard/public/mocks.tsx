@@ -23,9 +23,7 @@ export type Start = jest.Mocked<DashboardStart>;
 
 const createStartContract = (): DashboardStart => {
   // @ts-ignore
-  const startContract: DashboardStart = {
-    getAttributeService: jest.fn(),
-  };
+  const startContract: DashboardStart = {};
 
   return startContract;
 };

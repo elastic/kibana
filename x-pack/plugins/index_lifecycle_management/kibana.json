@@ -6,9 +6,11 @@
   "requiredPlugins": [
     "licensing",
     "management",
-    "features"
+    "features",
+    "share"
   ],
   "optionalPlugins": [
+    "cloud",
     "usageCollection",
     "indexManagement",
     "home"

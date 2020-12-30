@@ -7,7 +7,7 @@
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { esQuery } from '../../../../../../src/plugins/data/public';
@@ -19,17 +19,16 @@ import { HeaderPage } from '../../common/components/header_page';
 import { LastEventTime } from '../../common/components/last_event_time';
 import { SiemNavigation } from '../../common/components/navigation';
 
-import { KpiNetworkComponent } from '../components/kpi_network';
+import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { WrapperPage } from '../../common/components/wrapper_page';
-import { useFullScreen } from '../../common/containers/use_full_screen';
+import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { useWithSource } from '../../common/containers/source';
-import { LastEventIndexKey } from '../../graphql/types';
+import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
-import { State, inputsSelectors } from '../../common/store';
-import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
+import { inputsSelectors } from '../../common/store';
+import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { Display } from '../../hosts/pages/display';
 import { networkModel } from '../store';
@@ -43,22 +42,27 @@ import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { TimelineId } from '../../../common/types/timeline';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
-import { TimelineModel } from '../../timelines/store/timeline/model';
+import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 
-const sourceId = 'default';
+const NetworkComponent = React.memo<NetworkComponentProps>(
+  ({ networkPagePath, hasMlUserPermissions, capabilitiesFetched }) => {
+    const dispatch = useDispatch();
+    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const graphEventId = useShallowEqualSelector(
+      (state) =>
+        (getTimeline(state, TimelineId.networkPageExternalAlerts) ?? timelineDefaults).graphEventId
+    );
+    const getGlobalFiltersQuerySelector = useMemo(
+      () => inputsSelectors.globalFiltersQuerySelector(),
+      []
+    );
+    const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+    const query = useDeepEqualSelector(getGlobalQuerySelector);
+    const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
-const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
-  ({
-    filters,
-    graphEventId,
-    query,
-    setAbsoluteRangeDatePicker,
-    networkPagePath,
-    hasMlUserPermissions,
-    capabilitiesFetched,
-  }) => {
     const { to, from, setQuery, isInitializing } = useGlobalTime();
-    const { globalFullScreen } = useFullScreen();
+    const { globalFullScreen } = useGlobalFullScreen();
     const kibana = useKibana();
     const { tabName } = useParams<{ tabName: string }>();
 
@@ -75,16 +79,18 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
           return;
         }
         const [min, max] = x;
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        });
+        dispatch(
+          setAbsoluteRangeDatePicker({
+            id: 'global',
+            from: new Date(min).toISOString(),
+            to: new Date(max).toISOString(),
+          })
+        );
       },
-      [setAbsoluteRangeDatePicker]
+      [dispatch]
     );
 
-    const { indicesExist, indexPattern } = useWithSource(sourceId);
+    const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
     const filterQuery = convertToBuildEsQuery({
       config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -111,7 +117,13 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
               <Display show={!globalFullScreen}>
                 <HeaderPage
                   border
-                  subtitle={<LastEventTime indexKey={LastEventIndexKey.network} />}
+                  subtitle={
+                    <LastEventTime
+                      docValueFields={docValueFields}
+                      indexKey={LastEventIndexKey.network}
+                      indexNames={selectedPatterns}
+                    />
+                  }
                   title={i18n.PAGE_TITLE}
                 />
 
@@ -125,13 +137,14 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
 
                 <EuiSpacer />
 
-                <KpiNetworkComponent
+                <NetworkKpiComponent
                   filterQuery={filterQuery}
+                  from={from}
+                  indexNames={selectedPatterns}
+                  narrowDateRange={narrowDateRange}
                   setQuery={setQuery}
                   skip={isInitializing}
-                  from={from}
                   to={to}
-                  narrowDateRange={narrowDateRange}
                 />
               </Display>
 
@@ -146,10 +159,12 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
                   </Display>
 
                   <NetworkRoutes
+                    docValueFields={docValueFields}
                     filterQuery={tabsFilterQuery}
                     from={from}
                     isInitializing={isInitializing}
                     indexPattern={indexPattern}
+                    indexNames={selectedPatterns}
                     setQuery={setQuery}
                     setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
                     type={networkModel.NetworkType.page}
@@ -176,30 +191,4 @@ const NetworkComponent = React.memo<NetworkComponentProps & PropsFromRedux>(
 );
 NetworkComponent.displayName = 'NetworkComponent';
 
-const makeMapStateToProps = () => {
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State) => {
-    const timeline: TimelineModel =
-      getTimeline(state, TimelineId.networkPageExternalAlerts) ?? timelineDefaults;
-    const { graphEventId } = timeline;
-
-    return {
-      query: getGlobalQuerySelector(state),
-      filters: getGlobalFiltersQuerySelector(state),
-      graphEventId,
-    };
-  };
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = {
-  setAbsoluteRangeDatePicker: dispatchSetAbsoluteRangeDatePicker,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const Network = connector(NetworkComponent);
+export const Network = React.memo(NetworkComponent);

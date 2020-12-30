@@ -62,12 +62,13 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element to top layer"
               className="euiButtonIcon euiButtonIcon--text"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="sortUp"
@@ -88,12 +89,13 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element up one layer"
               className="euiButtonIcon euiButtonIcon--text"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="arrowUp"
@@ -114,12 +116,13 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element down one layer"
               className="euiButtonIcon euiButtonIcon--text"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="arrowDown"
@@ -140,12 +143,13 @@ exports[`Storyshots components/Sidebar/SidebarHeader with layer controls 1`] = `
             <button
               aria-label="Move element to bottom layer"
               className="euiButtonIcon euiButtonIcon--text"
+              disabled={false}
               onBlur={[Function]}
               onClick={[Function]}
               onFocus={[Function]}
               type="button"
             >
-              <div
+              <span
                 aria-hidden="true"
                 className="euiButtonIcon__icon"
                 data-euiicon-type="sortDown"

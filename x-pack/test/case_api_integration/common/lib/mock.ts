@@ -8,28 +8,52 @@ import {
   CasePostRequest,
   CaseResponse,
   CasesFindResponse,
+  CommentResponse,
+  ConnectorTypes,
+  CommentRequestUserType,
+  CommentRequestAlertType,
+  CommentType,
+  CaseStatuses,
 } from '../../../../plugins/case/common/api';
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
 export const postCaseReq: CasePostRequest = {
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
   tags: ['defacement'],
+  connector: {
+    id: 'none',
+    name: 'none',
+    type: ConnectorTypes.none,
+    fields: null,
+  },
+  settings: {
+    syncAlerts: true,
+  },
 };
 
-export const postCommentReq: { comment: string } = {
+export const postCommentUserReq: CommentRequestUserType = {
   comment: 'This is a cool comment',
+  type: CommentType.user,
 };
 
-export const postCaseResp = (id: string): Partial<CaseResponse> => ({
-  ...postCaseReq,
+export const postCommentAlertReq: CommentRequestAlertType = {
+  alertId: 'test-id',
+  index: 'test-index',
+  type: CommentType.alert,
+};
+
+export const postCaseResp = (
+  id: string,
+  req: CasePostRequest = postCaseReq
+): Partial<CaseResponse> => ({
+  ...req,
   id,
   comments: [],
   totalComment: 0,
-  connector_id: 'none',
   closed_by: null,
   created_by: defaultUser,
   external_service: null,
-  status: 'open',
+  status: CaseStatuses.open,
   updated_by: null,
 });
 
@@ -41,6 +65,16 @@ export const removeServerGeneratedPropertiesFromCase = (
   return rest;
 };
 
+export const removeServerGeneratedPropertiesFromComments = (
+  comments: CommentResponse[]
+): Array<Partial<CommentResponse>> => {
+  return comments.map((comment) => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { created_at, updated_at, version, ...rest } = comment;
+    return rest;
+  });
+};
+
 export const findCasesResp: CasesFindResponse = {
   page: 1,
   per_page: 20,
@@ -48,4 +82,5 @@ export const findCasesResp: CasesFindResponse = {
   cases: [],
   count_open_cases: 0,
   count_closed_cases: 0,
+  count_in_progress_cases: 0,
 };

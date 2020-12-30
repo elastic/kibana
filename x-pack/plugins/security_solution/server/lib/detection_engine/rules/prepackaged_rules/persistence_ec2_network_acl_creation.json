@@ -8,7 +8,8 @@
   ],
   "from": "now-60m",
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-aws*"
   ],
   "interval": "10m",
   "language": "kuery",
@@ -26,11 +27,12 @@
   "rule_id": "39144f38-5284-4f8e-a2ae-e3fd628d90b0",
   "severity": "low",
   "tags": [
-    "AWS",
     "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
     "SecOps",
-    "Network",
-    "Continuous Monitoring"
+    "Network Security"
   ],
   "threat": [
     {
@@ -50,5 +52,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

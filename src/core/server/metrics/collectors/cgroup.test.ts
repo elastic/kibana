@@ -18,6 +18,7 @@
  */
 
 import mockFs from 'mock-fs';
+import { loggerMock } from '@kbn/logging/target/mocks';
 import { OsCgroupMetricsCollector } from './cgroup';
 
 describe('OsCgroupMetricsCollector', () => {
@@ -30,8 +31,10 @@ describe('OsCgroupMetricsCollector', () => {
       },
     });
 
-    const collector = new OsCgroupMetricsCollector({});
+    const logger = loggerMock.create();
+    const collector = new OsCgroupMetricsCollector({ logger });
     expect(await collector.collect()).toEqual({});
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('collects default cgroup data', async () => {
@@ -51,7 +54,7 @@ throttled_time 666
       `,
     });
 
-    const collector = new OsCgroupMetricsCollector({});
+    const collector = new OsCgroupMetricsCollector({ logger: loggerMock.create() });
     expect(await collector.collect()).toMatchInlineSnapshot(`
       Object {
         "cpu": Object {
@@ -90,6 +93,7 @@ throttled_time 666
     });
 
     const collector = new OsCgroupMetricsCollector({
+      logger: loggerMock.create(),
       cpuAcctPath: 'xxcustomcpuacctxx',
       cpuPath: 'xxcustomcpuxx',
     });
@@ -111,5 +115,24 @@ throttled_time 666
         },
       }
     `);
+  });
+
+  it('returns empty object and logs error on an EACCES error', async () => {
+    mockFs({
+      '/proc/self/cgroup': `
+123:memory:/groupname
+123:cpu:/groupname
+123:cpuacct:/groupname
+      `,
+      '/sys/fs/cgroup': mockFs.directory({ mode: parseInt('0000', 8) }),
+    });
+
+    const logger = loggerMock.create();
+
+    const collector = new OsCgroupMetricsCollector({ logger });
+    expect(await collector.collect()).toEqual({});
+    expect(logger.error).toHaveBeenCalledWith(
+      "cgroup metrics could not be read due to error: [Error: EACCES, permission denied '/sys/fs/cgroup/cpuacct/groupname/cpuacct.usage']"
+    );
   });
 });

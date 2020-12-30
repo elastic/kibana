@@ -70,11 +70,9 @@ export function createRootWithSettings(
     configs: [],
     cliArgs: {
       dev: false,
-      open: false,
       quiet: false,
       silent: false,
       watch: false,
-      repl: false,
       basePath: false,
       runExamples: false,
       oss: true,
@@ -83,7 +81,7 @@ export function createRootWithSettings(
       dist: false,
       ...cliArgs,
     },
-    isDevClusterMaster: false,
+    isDevCliParent: false,
   });
 
   return new Root(
@@ -125,8 +123,11 @@ export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
  *  @param {Object} [settings={}] Any config overrides for this instance.
  *  @returns {Root}
  */
-export function createRootWithCorePlugins(settings = {}) {
-  return createRootWithSettings(defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS));
+export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+  return createRootWithSettings(
+    defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS),
+    cliArgs
+  );
 }
 
 /**

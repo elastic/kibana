@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ResolverRelatedEvents,
-  ResolverTree,
-  ResolverEntityIndex,
-} from '../../../../common/endpoint/types';
+import { ResolverNode, SafeResolverEvent } from './../../../../common/endpoint/types/index';
+
+import { ResolverRelatedEvents, ResolverEntityIndex } from '../../../../common/endpoint/types';
 import { DataAccessLayer } from '../../types';
 
-type PausableRequests = 'relatedEvents' | 'resolverTree' | 'entities';
+type PausableRequests =
+  | 'relatedEvents'
+  | 'resolverTree'
+  | 'entities'
+  | 'eventsWithEntityIDAndCategory'
+  | 'event'
+  | 'nodeData';
 
 interface Metadata<T> {
   /**
@@ -40,10 +44,16 @@ export function pausifyMock<T>({
   resume: (pausableRequests: PausableRequests[]) => void;
 } {
   let relatedEventsPromise = Promise.resolve();
+  let eventsWithEntityIDAndCategoryPromise = Promise.resolve();
+  let eventPromise = Promise.resolve();
+  let nodeDataPromise = Promise.resolve();
   let resolverTreePromise = Promise.resolve();
   let entitiesPromise = Promise.resolve();
 
   let relatedEventsResolver: (() => void) | null;
+  let eventsWithEntityIDAndCategoryResolver: (() => void) | null;
+  let eventResolver: (() => void) | null;
+  let nodeDataResolver: (() => void) | null;
   let resolverTreeResolver: (() => void) | null;
   let entitiesResolver: (() => void) | null;
 
@@ -53,10 +63,35 @@ export function pausifyMock<T>({
       const pauseRelatedEventsRequest = pausableRequests.includes('relatedEvents');
       const pauseResolverTreeRequest = pausableRequests.includes('resolverTree');
       const pauseEntitiesRequest = pausableRequests.includes('entities');
+      const pauseEventsWithEntityIDAndCategoryRequest = pausableRequests.includes(
+        'eventsWithEntityIDAndCategory'
+      );
+      const pauseEventRequest = pausableRequests.includes('event');
+      const pauseNodeDataRequest = pausableRequests.includes('nodeData');
 
       if (pauseRelatedEventsRequest && !relatedEventsResolver) {
         relatedEventsPromise = new Promise((resolve) => {
           relatedEventsResolver = resolve;
+        });
+      }
+      if (pauseEventsWithEntityIDAndCategoryRequest && !eventsWithEntityIDAndCategoryResolver) {
+        eventsWithEntityIDAndCategoryPromise = new Promise((resolve) => {
+          eventsWithEntityIDAndCategoryResolver = resolve;
+        });
+      }
+      if (pauseEventRequest && !eventResolver) {
+        eventPromise = new Promise((resolve) => {
+          eventResolver = resolve;
+        });
+      }
+      if (pauseRelatedEventsRequest && !relatedEventsResolver) {
+        relatedEventsPromise = new Promise((resolve) => {
+          relatedEventsResolver = resolve;
+        });
+      }
+      if (pauseNodeDataRequest && !nodeDataResolver) {
+        nodeDataPromise = new Promise((resolve) => {
+          nodeDataResolver = resolve;
         });
       }
       if (pauseResolverTreeRequest && !resolverTreeResolver) {
@@ -74,6 +109,11 @@ export function pausifyMock<T>({
       const resumeEntitiesRequest = pausableRequests.includes('entities');
       const resumeResolverTreeRequest = pausableRequests.includes('resolverTree');
       const resumeRelatedEventsRequest = pausableRequests.includes('relatedEvents');
+      const resumeEventsWithEntityIDAndCategoryRequest = pausableRequests.includes(
+        'eventsWithEntityIDAndCategory'
+      );
+      const resumeEventRequest = pausableRequests.includes('event');
+      const resumeNodeDataRequest = pausableRequests.includes('nodeData');
 
       if (resumeEntitiesRequest && entitiesResolver) {
         entitiesResolver();
@@ -87,8 +127,21 @@ export function pausifyMock<T>({
         relatedEventsResolver();
         relatedEventsResolver = null;
       }
+      if (resumeEventsWithEntityIDAndCategoryRequest && eventsWithEntityIDAndCategoryResolver) {
+        eventsWithEntityIDAndCategoryResolver();
+        eventsWithEntityIDAndCategoryResolver = null;
+      }
+      if (resumeEventRequest && eventResolver) {
+        eventResolver();
+        eventResolver = null;
+      }
+      if (resumeNodeDataRequest && nodeDataResolver) {
+        nodeDataResolver();
+        nodeDataResolver = null;
+      }
     },
     dataAccessLayer: {
+      ...dataAccessLayer,
       /**
        * Fetch related events for an entity ID
        */
@@ -98,9 +151,35 @@ export function pausifyMock<T>({
       },
 
       /**
+       * Fetch related events for an entity ID
+       */
+      async eventsWithEntityIDAndCategory(
+        ...args
+      ): Promise<{
+        events: SafeResolverEvent[];
+        nextEvent: string | null;
+      }> {
+        await eventsWithEntityIDAndCategoryPromise;
+        return dataAccessLayer.eventsWithEntityIDAndCategory(...args);
+      },
+
+      /**
+       * Fetch related events for an entity ID
+       */
+      async event(...args): Promise<SafeResolverEvent | null> {
+        await eventPromise;
+        return dataAccessLayer.event(...args);
+      },
+
+      async nodeData(...args): Promise<SafeResolverEvent[]> {
+        await nodeDataPromise;
+        return dataAccessLayer.nodeData(...args);
+      },
+
+      /**
        * Fetch a ResolverTree for a entityID
        */
-      async resolverTree(...args): Promise<ResolverTree> {
+      async resolverTree(...args): Promise<ResolverNode[]> {
         await resolverTreePromise;
         return dataAccessLayer.resolverTree(...args);
       },

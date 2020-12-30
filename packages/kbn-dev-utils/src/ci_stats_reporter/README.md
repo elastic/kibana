@@ -8,9 +8,22 @@ This class integrates with the `ciStats.trackBuild {}` Jenkins Pipeline function
 
 To create an instance of the reporter, import the class and call `CiStatsReporter.fromEnv(log)` (passing it a tooling log).
 
-#### `CiStatsReporter#metrics(metrics: Array<{ group: string, id: string, value: number }>)`
+#### `CiStatsReporter#metrics(metrics: Metric[])`
 
 Use this method to record metrics in the Kibana CI Stats service.
+
+```ts
+interface Metric {
+  group: string,
+  id: string,
+  value: number,
+  // optional limit, values which exceed the limit will fail PRs
+  limit?: number
+  // optional path, relative to the root of the repo, where config values
+  // are defined. Will be linked to in PRs which have overages.
+  limitConfigPath?: string
+}
+```
 
 Example:
 

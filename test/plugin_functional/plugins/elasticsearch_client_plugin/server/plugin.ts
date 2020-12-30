@@ -26,7 +26,7 @@ export class ElasticsearchClientPlugin implements Plugin {
       { path: '/api/elasticsearch_client_plugin/context/ping', validate: false },
       async (context, req, res) => {
         const { body } = await context.core.elasticsearch.client.asInternalUser.ping();
-        return res.ok({ body });
+        return res.ok({ body: JSON.stringify(body) });
       }
     );
     router.get(
@@ -34,14 +34,14 @@ export class ElasticsearchClientPlugin implements Plugin {
       async (context, req, res) => {
         const [coreStart] = await core.getStartServices();
         const { body } = await coreStart.elasticsearch.client.asInternalUser.ping();
-        return res.ok({ body });
+        return res.ok({ body: JSON.stringify(body) });
       }
     );
     router.get(
       { path: '/api/elasticsearch_client_plugin/custom_client/ping', validate: false },
       async (context, req, res) => {
         const { body } = await this.client!.asInternalUser.ping();
-        return res.ok({ body });
+        return res.ok({ body: JSON.stringify(body) });
       }
     );
   }

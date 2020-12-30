@@ -47,6 +47,7 @@ exports[`FilterListUsagePopover opens the popover onButtonClick 1`] = `
           labelType="label"
         >
           <EuiFieldText
+            data-test-subj="mlFilterListDescriptionInput"
             name="filter_list_description"
             onChange={[Function]}
             value="A list of known safe domains"
@@ -105,6 +106,7 @@ exports[`FilterListUsagePopover renders the popover with a description 1`] = `
           labelType="label"
         >
           <EuiFieldText
+            data-test-subj="mlFilterListDescriptionInput"
             name="filter_list_description"
             onChange={[Function]}
             value="A list of known safe domains"
@@ -163,6 +165,7 @@ exports[`FilterListUsagePopover renders the popover with no description 1`] = `
           labelType="label"
         >
           <EuiFieldText
+            data-test-subj="mlFilterListDescriptionInput"
             name="filter_list_description"
             onChange={[Function]}
           />

@@ -35,7 +35,7 @@ export async function SnapshotsProvider({ getService }: FtrProviderContext) {
   const SESSION_DIRECTORY = resolve(config.get('snapshots.directory'), 'session');
   const BASELINE_DIRECTORY = resolve(config.get('snapshots.directory'), 'baseline');
 
-  if (process.env.CI !== 'true') {
+  if (process.env.CI !== 'true' && !process.env.stack_functional_integration) {
     await del([SESSION_DIRECTORY]);
   }
 

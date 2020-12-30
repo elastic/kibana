@@ -6,22 +6,25 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { IInitialAppData } from '../../../common/types';
+import { InitialAppData } from '../../../common/types';
 import {
-  IOrganization,
-  IWorkplaceSearchInitialData,
-  IAccount,
+  Organization,
+  WorkplaceSearchInitialData,
+  Account,
 } from '../../../common/types/workplace_search';
 
-export interface IAppValues extends IWorkplaceSearchInitialData {
+interface AppValues extends WorkplaceSearchInitialData {
   hasInitialized: boolean;
   isFederatedAuth: boolean;
 }
-export interface IAppActions {
-  initializeAppData(props: IInitialAppData): IInitialAppData;
+interface AppActions {
+  initializeAppData(props: InitialAppData): InitialAppData;
 }
 
-export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
+const emptyOrg = {} as Organization;
+const emptyAccount = {} as Account;
+
+export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
   path: ['enterprise_search', 'workplace_search', 'app_logic'],
   actions: {
     initializeAppData: ({ workplaceSearch, isFederatedAuth }) => ({
@@ -43,15 +46,15 @@ export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
       },
     ],
     organization: [
-      {} as IOrganization,
+      emptyOrg,
       {
-        initializeAppData: (_, { workplaceSearch }) => workplaceSearch!.organization,
+        initializeAppData: (_, { workplaceSearch }) => workplaceSearch?.organization || emptyOrg,
       },
     ],
     account: [
-      {} as IAccount,
+      emptyAccount,
       {
-        initializeAppData: (_, { workplaceSearch }) => workplaceSearch!.account,
+        initializeAppData: (_, { workplaceSearch }) => workplaceSearch?.account || emptyAccount,
       },
     ],
   },

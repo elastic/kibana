@@ -38,20 +38,22 @@ export function registerLegacy(
       },
 
       userHandler(async (user, context, req, res) => {
-        const message = `The following URL is deprecated and will stop working in the next major version: ${req.url.path}`;
+        const message = `The following URL is deprecated and will stop working in the next major version: ${req.url.pathname}${req.url.search}`;
         logger.warn(message, ['deprecation']);
 
         try {
           const {
+            title,
             savedObjectId,
             browserTimezone,
-          }: { savedObjectId: string; browserTimezone: string } = req.params as any;
+          }: { title: string; savedObjectId: string; browserTimezone: string } = req.params as any;
           const queryString = querystring.stringify(req.query as any);
 
           return await handler(
             user,
             exportTypeId,
             {
+              title,
               objectType,
               savedObjectId,
               browserTimezone,

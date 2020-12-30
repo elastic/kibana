@@ -80,7 +80,13 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
 
   public setup({ http, notifications }: CoreSetup): TelemetryPluginSetup {
     const config = this.config;
-    this.telemetryService = new TelemetryService({ config, http, notifications });
+    const currentKibanaVersion = this.currentKibanaVersion;
+    this.telemetryService = new TelemetryService({
+      config,
+      http,
+      notifications,
+      currentKibanaVersion,
+    });
 
     this.telemetrySender = new TelemetrySender(this.telemetryService);
 
@@ -98,6 +104,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
     this.telemetryService.userCanChangeSettings = this.canUserChangeSettings;
 
     this.telemetryNotifications = new TelemetryNotifications({
+      http,
       overlays,
       telemetryService: this.telemetryService,
     });

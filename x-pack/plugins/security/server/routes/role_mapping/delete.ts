@@ -8,9 +8,7 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { wrapError } from '../../errors';
 import { RouteDefinitionParams } from '..';
 
-export function defineRoleMappingDeleteRoutes(params: RouteDefinitionParams) {
-  const { clusterClient, router } = params;
-
+export function defineRoleMappingDeleteRoutes({ router }: RouteDefinitionParams) {
   router.delete(
     {
       path: '/internal/security/role_mapping/{name}',
@@ -22,11 +20,11 @@ export function defineRoleMappingDeleteRoutes(params: RouteDefinitionParams) {
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const deleteResponse = await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('shield.deleteRoleMapping', {
-            name: request.params.name,
-          });
+        const {
+          body: deleteResponse,
+        } = await context.core.elasticsearch.client.asCurrentUser.security.deleteRoleMapping({
+          name: request.params.name,
+        });
         return response.ok({ body: deleteResponse });
       } catch (error) {
         const wrappedError = wrapError(error);

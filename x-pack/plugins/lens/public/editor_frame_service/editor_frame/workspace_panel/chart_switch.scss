@@ -16,3 +16,7 @@ img.lnsChartSwitch__chartIcon { // sass-lint:disable-line no-qualifying-elements
   // The large icons aren't square so max out the width to fill the height
   width: 100%;
 }
+
+.lnsChartSwitch__search {
+  width: 4 * $euiSizeXXL;
+}

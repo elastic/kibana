@@ -1,7 +1,7 @@
 [[explore-dashboard-data]]
 == Explore dashboard data
 
-Get a closer look at your data by inspecting elements and using drilldown actions.
+To get a closer look at your data, inspect data elements and explore the underlying data in *Discover*.
 
 [float]
 [[viewing-detailed-information]]
@@ -16,3 +16,4 @@ The data that displays depends on the element that you inspect.
 image:images/Dashboard_inspect.png[Inspect in dashboard]
 
 include::explore-underlying-data.asciidoc[]
+include::download-underlying-data.asciidoc[]

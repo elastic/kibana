@@ -29,7 +29,13 @@ interface Config {
   buildId: string;
 }
 
-export type CiStatsMetrics = Array<{ group: string; id: string; value: number }>;
+export type CiStatsMetrics = Array<{
+  group: string;
+  id: string;
+  value: number;
+  limit?: number;
+  limitConfigPath?: string;
+}>;
 
 function parseConfig(log: ToolingLog) {
   const configJson = process.env.KIBANA_CI_STATS_CONFIG;

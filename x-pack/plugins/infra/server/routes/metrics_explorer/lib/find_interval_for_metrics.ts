@@ -34,7 +34,8 @@ export const findIntervalForMetrics = async (
 
   const modules = await Promise.all(
     fields.map(
-      async (field) => await getDatasetForField(client, field as string, options.indexPattern)
+      async (field) =>
+        await getDatasetForField(client, field as string, options.indexPattern, options.timerange)
     )
   );
 

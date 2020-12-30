@@ -1,0 +1,47 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies an executable or script file remotely downloaded via a TeamViewer transfer session.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Remote File Copy via TeamViewer",
+  "query": "event.category:file and event.type:creation and process.name:TeamViewer.exe and file.extension:(exe or dll or scr or com or bat or ps1 or vbs or vbe or js or wsh or hta)",
+  "references": [
+    "https://blog.menasec.net/2019/11/hunting-for-suspicious-use-of.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "b25a7df2-120a-4db2-bd3f-3e4b86b24bee",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Command and Control"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0011",
+        "name": "Command and Control",
+        "reference": "https://attack.mitre.org/tactics/TA0011/"
+      },
+      "technique": [
+        {
+          "id": "T1105",
+          "name": "Ingress Tool Transfer",
+          "reference": "https://attack.mitre.org/techniques/T1105/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

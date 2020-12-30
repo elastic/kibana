@@ -18,15 +18,8 @@
  */
 import React, { ChangeEvent } from 'react';
 import { get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  htmlIdGenerator,
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiSpacer,
-} from '@elastic/eui';
+
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { AddDeleteButtons } from '../../add_delete_buttons';
 
@@ -50,8 +43,6 @@ export const MultiValueRow = ({
   disableAdd,
   disableDelete,
 }: MultiValueRowProps) => {
-  const htmlId = htmlIdGenerator();
-
   const onFieldNumberChange = (event: ChangeEvent<HTMLInputElement>) =>
     onChange({
       ...model,
@@ -59,17 +50,9 @@ export const MultiValueRow = ({
     });
 
   return (
-    <div className="tvbAggRow__multiValueRow">
-      <EuiFlexGroup responsive={false} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiFormLabel htmlFor={htmlId('value')}>
-            <FormattedMessage
-              id="visTypeTimeseries.multivalueRow.valueLabel"
-              defaultMessage="Value:"
-            />
-          </EuiFormLabel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+    <EuiPanel paddingSize="s" className="tvbAggRow__multiValueRow">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem>
           <EuiFieldNumber
             value={model.value === '' ? '' : Number(model.value)}
             placeholder="0"
@@ -82,11 +65,11 @@ export const MultiValueRow = ({
             onDelete={() => onDelete(model)}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
+            responsive={false}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
-    </div>
+    </EuiPanel>
   );
 };
 

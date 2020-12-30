@@ -10,7 +10,5 @@ import { State } from '../types';
 
 const selectDataProviders = (state: State): IdToDataProvider => state.dragAndDrop.dataProviders;
 
-export const dataProvidersSelector = createSelector(
-  selectDataProviders,
-  (dataProviders) => dataProviders
-);
+export const getDataProvidersSelector = () =>
+  createSelector(selectDataProviders, (dataProviders) => dataProviders);

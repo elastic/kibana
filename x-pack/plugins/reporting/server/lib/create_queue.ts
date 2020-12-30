@@ -5,13 +5,13 @@
  */
 
 import { ReportingCore } from '../core';
-import { JobSource, TaskRunResult } from '../types';
 import { createWorkerFactory } from './create_worker';
 // @ts-ignore
 import { Esqueue } from './esqueue';
 import { createTaggedLogger } from './esqueue/create_tagged_logger';
 import { LevelLogger } from './level_logger';
-import { ReportingStore } from './store';
+import { ReportDocument, ReportingStore } from './store';
+import { TaskRunResult } from './tasks';
 
 interface ESQueueWorker {
   on: (event: string, handler: any) => void;
@@ -32,7 +32,7 @@ export interface ESQueueInstance {
 
 // GenericWorkerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<ScheduledTaskParamsType>,
 type GenericWorkerFn<JobParamsType> = (
-  jobSource: JobSource<JobParamsType>,
+  jobSource: ReportDocument,
   ...workerRestArgs: any[]
 ) => void | Promise<TaskRunResult>;
 

@@ -24,7 +24,10 @@ const NEW_ATTRIBUTE_KEY = 'title'; // all type mappings include this attribute, 
 const NEW_ATTRIBUTE_VAL = `Updated attribute value ${Date.now()}`;
 
 const DOES_NOT_EXIST = Object.freeze({ type: 'dashboard', id: 'does-not-exist' });
-export const TEST_CASES = Object.freeze({ ...CASES, DOES_NOT_EXIST });
+export const TEST_CASES: Record<string, BulkUpdateTestCase> = Object.freeze({
+  ...CASES,
+  DOES_NOT_EXIST,
+});
 
 const createRequest = ({ type, id, namespace }: BulkUpdateTestCase) => ({
   type,
@@ -33,7 +36,7 @@ const createRequest = ({ type, id, namespace }: BulkUpdateTestCase) => ({
 });
 
 export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbiddenTypes('bulk_update');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_update');
   const expectResponseBody = (
     testCases: BulkUpdateTestCase | BulkUpdateTestCase[],
     statusCode: 200 | 403
@@ -41,7 +44,7 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
       const types = testCaseArray.map((x) => x.type);
-      await expectForbidden(types)(response);
+      await expectSavedObjectForbidden(types)(response);
     } else {
       // permitted
       const savedObjects = response.body.saved_objects;
@@ -121,6 +124,6 @@ export function bulkUpdateTestSuiteFactory(esArchiver: any, supertest: SuperTest
   return {
     addTests,
     createTestDefinitions,
-    expectForbidden,
+    expectSavedObjectForbidden,
   };
 }

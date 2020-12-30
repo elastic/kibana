@@ -11,7 +11,7 @@ export default function apiTest({ getService }: FtrProviderContext) {
   const apmReadUser = getService('supertestAsApmReadUser');
 
   function getJobs() {
-    return apmReadUser.get(`/api/apm/settings/anomaly-detection`).set('kbn-xsrf', 'foo');
+    return apmReadUser.get(`/api/apm/settings/anomaly-detection/jobs`).set('kbn-xsrf', 'foo');
   }
 
   function createJobs(environments: string[]) {
@@ -35,8 +35,8 @@ export default function apiTest({ getService }: FtrProviderContext) {
       it('returns an error because the user does not have access', async () => {
         const { body } = await createJobs(['production', 'staging']);
 
-        expect(body.statusCode).to.be(404);
-        expect(body.error).to.be('Not Found');
+        expect(body.statusCode).to.be(403);
+        expect(body.error).to.be('Forbidden');
       });
     });
   });

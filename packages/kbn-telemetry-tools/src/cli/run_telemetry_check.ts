@@ -88,7 +88,7 @@ export function runTelemetryCheck() {
           task: (context) => new Listr(checkCompatibleTypesTask(context), { exitOnError: true }),
         },
         {
-          enabled: (_) => !!ignoreStoredJson,
+          enabled: (_) => fix || !ignoreStoredJson,
           title: 'Checking Matching collector.schema against stored json files',
           task: (context) =>
             new Listr(checkMatchingSchemasTask(context, !fix), { exitOnError: true }),
@@ -96,7 +96,10 @@ export function runTelemetryCheck() {
         {
           enabled: (_) => fix,
           skip: ({ roots }: TaskContext) => {
-            return roots.every(({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length);
+            const noDiffs = roots.every(
+              ({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length
+            );
+            return noDiffs && 'No changes needed.';
           },
           title: 'Generating new telemetry mappings',
           task: (context) => new Listr(generateSchemasTask(context), { exitOnError: true }),
@@ -104,7 +107,10 @@ export function runTelemetryCheck() {
         {
           enabled: (_) => fix,
           skip: ({ roots }: TaskContext) => {
-            return roots.every(({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length);
+            const noDiffs = roots.every(
+              ({ esMappingDiffs }) => !esMappingDiffs || !esMappingDiffs.length
+            );
+            return noDiffs && 'No changes needed.';
           },
           title: 'Updating telemetry mapping files',
           task: (context) => new Listr(writeToFileTask(context), { exitOnError: true }),

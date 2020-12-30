@@ -3,9 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { DslQuery, Filter } from 'src/plugins/data/common';
+
 import { JsonObject } from '../../../../src/plugins/kibana_utils/common';
 
-export type ESQuery = ESRangeQuery | ESQueryStringQuery | ESMatchQuery | ESTermQuery | JsonObject;
+export type ESQuery =
+  | ESRangeQuery
+  | ESQueryStringQuery
+  | ESMatchQuery
+  | ESTermQuery
+  | ESBoolQuery
+  | JsonObject;
 
 export interface ESRangeQuery {
   range: {
@@ -36,4 +44,13 @@ export interface ESQueryStringQuery {
 
 export interface ESTermQuery {
   term: Record<string, string>;
+}
+
+export interface ESBoolQuery {
+  bool: {
+    must: DslQuery[];
+    filter: Filter[];
+    should: never[];
+    must_not: Filter[];
+  };
 }

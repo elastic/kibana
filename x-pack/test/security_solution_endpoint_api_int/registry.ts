@@ -6,7 +6,7 @@
 import path from 'path';
 
 import { defineDockerServersConfig } from '@kbn/test';
-import { dockerImage as ingestDockerImage } from '../ingest_manager_api_integration/config';
+import { dockerImage as ingestDockerImage } from '../fleet_api_integration/config';
 
 /**
  * This is used by CI to set the docker registry port
@@ -14,7 +14,7 @@ import { dockerImage as ingestDockerImage } from '../ingest_manager_api_integrat
  * will spin up a local docker package registry locally for you
  * if this is defined it takes precedence over the `packageRegistryOverride` variable
  */
-const dockerRegistryPort: string | undefined = process.env.INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT;
+const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
 /**
  * If you don't want to use the docker image version pinned below and instead want to run your own
@@ -60,9 +60,9 @@ export function createEndpointDockerConfig(
 export function getRegistryUrlFromTestEnv(): string | undefined {
   let registryUrl: string | undefined;
   if (dockerRegistryPort !== undefined) {
-    registryUrl = `--xpack.ingestManager.registryUrl=http://localhost:${dockerRegistryPort}`;
+    registryUrl = `--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`;
   } else if (packageRegistryOverride !== undefined) {
-    registryUrl = `--xpack.ingestManager.registryUrl=${packageRegistryOverride}`;
+    registryUrl = `--xpack.fleet.registryUrl=${packageRegistryOverride}`;
   }
   return registryUrl;
 }

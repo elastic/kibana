@@ -5,8 +5,11 @@
  */
 
 import sinon from 'sinon';
+import { of, Subject } from 'rxjs';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
-import { mockLogger, resolvable, sleep } from './test_utils';
+import { resolvable, sleep } from './test_utils';
+import { loggingSystemMock } from '../../../../src/core/server/mocks';
+import { Logger } from '../../../../src/core/server';
 import { asOk } from './lib/result_type';
 import { SavedObjectsErrorHelpers } from '../../../../src/core/server';
 import moment from 'moment';
@@ -14,8 +17,8 @@ import moment from 'moment';
 describe('TaskPool', () => {
   test('occupiedWorkers are a sum of running tasks', async () => {
     const pool = new TaskPool({
-      maxWorkers: 200,
-      logger: mockLogger(),
+      maxWorkers$: of(200),
+      logger: loggingSystemMock.create().get(),
     });
 
     const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
@@ -26,8 +29,8 @@ describe('TaskPool', () => {
 
   test('availableWorkers are a function of total_capacity - occupiedWorkers', async () => {
     const pool = new TaskPool({
-      maxWorkers: 10,
-      logger: mockLogger(),
+      maxWorkers$: of(10),
+      logger: loggingSystemMock.create().get(),
     });
 
     const result = await pool.run([{ ...mockTask() }, { ...mockTask() }, { ...mockTask() }]);
@@ -36,10 +39,22 @@ describe('TaskPool', () => {
     expect(pool.availableWorkers).toEqual(7);
   });
 
+  test('availableWorkers is 0 until maxWorkers$ pushes a value', async () => {
+    const maxWorkers$ = new Subject<number>();
+    const pool = new TaskPool({
+      maxWorkers$,
+      logger: loggingSystemMock.create().get(),
+    });
+
+    expect(pool.availableWorkers).toEqual(0);
+    maxWorkers$.next(10);
+    expect(pool.availableWorkers).toEqual(10);
+  });
+
   test('does not run tasks that are beyond its available capacity', async () => {
     const pool = new TaskPool({
-      maxWorkers: 2,
-      logger: mockLogger(),
+      maxWorkers$: of(2),
+      logger: loggingSystemMock.create().get(),
     });
 
     const shouldRun = mockRun();
@@ -58,9 +73,9 @@ describe('TaskPool', () => {
   });
 
   test('should log when marking a Task as running fails', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      maxWorkers: 2,
+      maxWorkers$: of(2),
       logger,
     });
 
@@ -71,7 +86,7 @@ describe('TaskPool', () => {
 
     const result = await pool.run([mockTask(), taskFailedToMarkAsRunning, mockTask()]);
 
-    expect(logger.error.mock.calls[0]).toMatchInlineSnapshot(`
+    expect((logger as jest.Mocked<Logger>).error.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "Failed to mark Task TaskType \\"shooooo\\" as running: Mark Task as running has failed miserably",
       ]
@@ -81,9 +96,9 @@ describe('TaskPool', () => {
   });
 
   test('should log when running a Task fails', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      maxWorkers: 3,
+      maxWorkers$: of(3),
       logger,
     });
 
@@ -94,7 +109,7 @@ describe('TaskPool', () => {
 
     const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
 
-    expect(logger.warn.mock.calls[0]).toMatchInlineSnapshot(`
+    expect((logger as jest.Mocked<Logger>).warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "Task TaskType \\"shooooo\\" failed in attempt to run: Run Task has failed miserably",
       ]
@@ -104,9 +119,9 @@ describe('TaskPool', () => {
   });
 
   test('should not log when running a Task fails due to the Task SO having been deleted while in flight', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      maxWorkers: 3,
+      maxWorkers$: of(3),
       logger,
     });
 
@@ -117,20 +132,18 @@ describe('TaskPool', () => {
 
     const result = await pool.run([mockTask(), taskFailedToRun, mockTask()]);
 
-    expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "Task TaskType \\"shooooo\\" failed in attempt to run: Saved object [task/foo] not found",
-      ]
-    `);
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Task TaskType "shooooo" failed in attempt to run: Saved object [task/foo] not found'
+    );
     expect(logger.warn).not.toHaveBeenCalled();
 
     expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
   });
 
   test('Running a task which fails still takes up capacity', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      maxWorkers: 1,
+      maxWorkers$: of(1),
       logger,
     });
 
@@ -147,8 +160,8 @@ describe('TaskPool', () => {
 
   test('clears up capacity when a task completes', async () => {
     const pool = new TaskPool({
-      maxWorkers: 1,
-      logger: mockLogger(),
+      maxWorkers$: of(1),
+      logger: loggingSystemMock.create().get(),
     });
 
     const firstWork = resolvable();
@@ -191,9 +204,9 @@ describe('TaskPool', () => {
   });
 
   test('run cancels expired tasks prior to running new tasks', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
-      maxWorkers: 2,
+      maxWorkers$: of(2),
       logger,
     });
 
@@ -248,10 +261,10 @@ describe('TaskPool', () => {
   });
 
   test('logs if cancellation errors', async () => {
-    const logger = mockLogger();
+    const logger = loggingSystemMock.create().get();
     const pool = new TaskPool({
       logger,
-      maxWorkers: 20,
+      maxWorkers$: of(20),
     });
 
     const cancelled = resolvable();
@@ -279,7 +292,7 @@ describe('TaskPool', () => {
     // Allow the task to cancel...
     await cancelled;
 
-    expect(logger.error.mock.calls[0][0]).toMatchInlineSnapshot(
+    expect((logger as jest.Mocked<Logger>).error.mock.calls[0][0]).toMatchInlineSnapshot(
       `"Failed to cancel task \\"shooooo!\\": Error: Dern!"`
     );
   });

@@ -18,44 +18,62 @@
  */
 
 import { ToolingLog } from '../tooling_log';
-import { KibanaConfig, KbnClientRequester, ReqOptions } from './kbn_client_requester';
+import { KbnClientRequester, ReqOptions } from './kbn_client_requester';
 import { KbnClientStatus } from './kbn_client_status';
 import { KbnClientPlugins } from './kbn_client_plugins';
 import { KbnClientVersion } from './kbn_client_version';
 import { KbnClientSavedObjects } from './kbn_client_saved_objects';
 import { KbnClientUiSettings, UiSettingValues } from './kbn_client_ui_settings';
 
+export interface KbnClientOptions {
+  url: string;
+  certificateAuthorities?: Buffer[];
+  log: ToolingLog;
+  uiSettingDefaults?: UiSettingValues;
+}
+
 export class KbnClient {
-  private readonly requester = new KbnClientRequester(this.log, this.kibanaConfig);
-  readonly status = new KbnClientStatus(this.requester);
-  readonly plugins = new KbnClientPlugins(this.status);
-  readonly version = new KbnClientVersion(this.status);
-  readonly savedObjects = new KbnClientSavedObjects(this.log, this.requester);
-  readonly uiSettings = new KbnClientUiSettings(this.log, this.requester, this.uiSettingDefaults);
+  readonly status: KbnClientStatus;
+  readonly plugins: KbnClientPlugins;
+  readonly version: KbnClientVersion;
+  readonly savedObjects: KbnClientSavedObjects;
+  readonly uiSettings: KbnClientUiSettings;
+
+  private readonly requester: KbnClientRequester;
+  private readonly log: ToolingLog;
+  private readonly uiSettingDefaults?: UiSettingValues;
 
   /**
    * Basic Kibana server client that implements common behaviors for talking
    * to the Kibana server from dev tooling.
-   *
-   * @param log ToolingLog
-   * @param kibanaUrls Array of kibana server urls to send requests to
-   * @param uiSettingDefaults Map of uiSetting values that will be merged with all uiSetting resets
    */
-  constructor(
-    private readonly log: ToolingLog,
-    private readonly kibanaConfig: KibanaConfig,
-    private readonly uiSettingDefaults?: UiSettingValues
-  ) {
-    if (!kibanaConfig.url) {
-      throw new Error('missing Kibana urls');
+  constructor(options: KbnClientOptions) {
+    if (!options.url) {
+      throw new Error('missing Kibana url');
     }
+    if (!options.log) {
+      throw new Error('missing ToolingLog');
+    }
+
+    this.log = options.log;
+    this.uiSettingDefaults = options.uiSettingDefaults;
+
+    this.requester = new KbnClientRequester(this.log, {
+      url: options.url,
+      certificateAuthorities: options.certificateAuthorities,
+    });
+    this.status = new KbnClientStatus(this.requester);
+    this.plugins = new KbnClientPlugins(this.status);
+    this.version = new KbnClientVersion(this.status);
+    this.savedObjects = new KbnClientSavedObjects(this.log, this.requester);
+    this.uiSettings = new KbnClientUiSettings(this.log, this.requester, this.uiSettingDefaults);
   }
 
   /**
    * Make a direct request to the Kibana server
    */
-  async request(options: ReqOptions) {
-    return await this.requester.request(options);
+  async request<T>(options: ReqOptions) {
+    return await this.requester.request<T>(options);
   }
 
   resolveUrl(relativeUrl: string) {

@@ -6,6 +6,7 @@
 
 import { KibanaServices } from '../../common/lib/kibana';
 
+import { ConnectorTypes, CommentType, CaseStatuses } from '../../../../case/common/api';
 import { CASES_URL } from '../../../../case/common/constants';
 
 import {
@@ -51,6 +52,7 @@ import {
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import * as i18n from './translations';
+import { getCaseConfigurePushUrl } from '../../../../case/common/api/helpers';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -137,7 +139,7 @@ describe('Case Configuration API', () => {
           ...DEFAULT_QUERY_PARAMS,
           reporters: [],
           tags: [],
-          status: 'open',
+          status: CaseStatuses.open,
         },
         signal: abortCtrl.signal,
       });
@@ -148,7 +150,7 @@ describe('Case Configuration API', () => {
           ...DEFAULT_FILTER_OPTIONS,
           reporters: [...respReporters, { username: null, full_name: null, email: null }],
           tags,
-          status: '',
+          status: CaseStatuses.open,
           search: 'hello',
         },
         queryParams: DEFAULT_QUERY_PARAMS,
@@ -161,6 +163,7 @@ describe('Case Configuration API', () => {
           reporters,
           tags: ['"coke"', '"pepsi"'],
           search: 'hello',
+          status: CaseStatuses.open,
         },
         signal: abortCtrl.signal,
       });
@@ -173,7 +176,7 @@ describe('Case Configuration API', () => {
           ...DEFAULT_FILTER_OPTIONS,
           reporters: [...respReporters, { username: null, full_name: null, email: null }],
           tags: weirdTags,
-          status: '',
+          status: CaseStatuses.open,
           search: 'hello',
         },
         queryParams: DEFAULT_QUERY_PARAMS,
@@ -186,6 +189,7 @@ describe('Case Configuration API', () => {
           reporters,
           tags: ['"("', '"\\"double\\""'],
           search: 'hello',
+          status: CaseStatuses.open,
         },
         signal: abortCtrl.signal,
       });
@@ -309,7 +313,7 @@ describe('Case Configuration API', () => {
     });
     const data = [
       {
-        status: 'closed',
+        status: CaseStatuses.closed,
         id: basicCase.id,
         version: basicCase.version,
       },
@@ -347,6 +351,7 @@ describe('Case Configuration API', () => {
         method: 'PATCH',
         body: JSON.stringify({
           comment: 'updated comment',
+          type: CommentType.user,
           id: basicCase.comments[0].id,
           version: basicCase.comments[0].version,
         }),
@@ -374,6 +379,15 @@ describe('Case Configuration API', () => {
       description: 'description',
       tags: ['tag'],
       title: 'title',
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
+      settings: {
+        syncAlerts: true,
+      },
     };
 
     test('check url, method, signal', async () => {
@@ -397,6 +411,7 @@ describe('Case Configuration API', () => {
     });
     const data = {
       comment: 'comment',
+      type: CommentType.user as const,
     };
 
     test('check url, method, signal', async () => {
@@ -440,18 +455,24 @@ describe('Case Configuration API', () => {
     });
     const connectorId = 'connectorId';
     test('check url, method, signal', async () => {
-      await pushToService(connectorId, casePushParams, abortCtrl.signal);
-      expect(fetchMock).toHaveBeenCalledWith(`/api/actions/action/${connectorId}/_execute`, {
+      await pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(`${getCaseConfigurePushUrl(connectorId)}`, {
         method: 'POST',
         body: JSON.stringify({
-          params: { subAction: 'pushToService', subActionParams: casePushParams },
+          connector_type: ConnectorTypes.jira,
+          params: casePushParams,
         }),
         signal: abortCtrl.signal,
       });
     });
 
     test('happy path', async () => {
-      const resp = await pushToService(connectorId, casePushParams, abortCtrl.signal);
+      const resp = await pushToService(
+        connectorId,
+        ConnectorTypes.jira,
+        casePushParams,
+        abortCtrl.signal
+      );
       expect(resp).toEqual(serviceConnector);
     });
 
@@ -464,7 +485,7 @@ describe('Case Configuration API', () => {
         message: 'not it',
       });
       await expect(
-        pushToService(connectorId, casePushParams, abortCtrl.signal)
+        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
 
@@ -476,7 +497,7 @@ describe('Case Configuration API', () => {
         message: theError,
       });
       await expect(
-        pushToService(connectorId, casePushParams, abortCtrl.signal)
+        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
 
@@ -487,7 +508,7 @@ describe('Case Configuration API', () => {
         status: 'error',
       });
       await expect(
-        pushToService(connectorId, casePushParams, abortCtrl.signal)
+        pushToService(connectorId, ConnectorTypes.jira, casePushParams, abortCtrl.signal)
       ).rejects.toMatchObject({ message: theError });
     });
   });

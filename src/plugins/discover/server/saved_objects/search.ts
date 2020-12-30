@@ -48,11 +48,12 @@ export const searchSavedObjectType: SavedObjectsType = {
       hits: { type: 'integer', index: false, doc_values: false },
       kibanaSavedObjectMeta: {
         properties: {
-          searchSourceJSON: { type: 'text', index: false, doc_values: false },
+          searchSourceJSON: { type: 'text', index: false },
         },
       },
       sort: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
+      grid: { type: 'object', enabled: false },
       version: { type: 'integer' },
     },
   },

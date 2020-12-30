@@ -49,13 +49,20 @@ interface Props {
 
 interface LabelOptions {
   title: string;
-  status: string;
+  status: FilterLabelStatus;
   message?: string;
 }
 
 const FILTER_ITEM_OK = '';
 const FILTER_ITEM_WARNING = 'warn';
 const FILTER_ITEM_ERROR = 'error';
+
+export type FilterLabelStatus =
+  | typeof FILTER_ITEM_OK
+  | typeof FILTER_ITEM_WARNING
+  | typeof FILTER_ITEM_ERROR;
+
+export const FILTER_EDITOR_WIDTH = 800;
 
 export function FilterItem(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -223,7 +230,7 @@ export function FilterItem(props: Props) {
       },
       {
         id: 1,
-        width: 420,
+        width: FILTER_EDITOR_WIDTH,
         content: (
           <div>
             <FilterEditor
@@ -260,7 +267,7 @@ export function FilterItem(props: Props) {
   }
 
   function getValueLabel(): LabelOptions {
-    const label = {
+    const label: LabelOptions = {
       title: '',
       message: '',
       status: FILTER_ITEM_OK,
@@ -326,6 +333,7 @@ export function FilterItem(props: Props) {
     <FilterView
       filter={filter}
       valueLabel={valueLabelConfig.title}
+      filterLabelStatus={valueLabelConfig.status}
       errorMessage={valueLabelConfig.message}
       className={getClasses(filter.meta.negate, valueLabelConfig)}
       iconOnClick={() => props.onRemove()}
@@ -345,7 +353,6 @@ export function FilterItem(props: Props) {
       }}
       button={badge}
       anchorPosition="downLeft"
-      withTitle={true}
       panelPaddingSize="none"
     >
       <EuiContextMenu initialPanelId={0} panels={getPanels()} />

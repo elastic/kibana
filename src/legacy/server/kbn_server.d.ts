@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 
 import {
   CoreSetup,
@@ -26,11 +26,10 @@ import {
   LoggerFactory,
   PackageInfo,
   LegacyServiceSetupDeps,
-  LegacyServiceDiscoverPlugins,
 } from '../../core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyConfig, ILegacyInternals } from '../../core/server/legacy';
+import { LegacyConfig } from '../../core/server/legacy';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { UiPlugins } from '../../core/server/plugins';
 
@@ -58,9 +57,7 @@ export interface PluginsSetup {
 
 export interface KibanaCore {
   __internals: {
-    elasticsearch: LegacyServiceSetupDeps['core']['elasticsearch'];
     hapiServer: LegacyServiceSetupDeps['core']['http']['server'];
-    legacy: ILegacyInternals;
     rendering: LegacyServiceSetupDeps['core']['rendering'];
     uiPlugins: UiPlugins;
   };
@@ -90,34 +87,21 @@ export interface NewPlatform {
   stop: null;
 }
 
-export type LegacyPlugins = Pick<
-  LegacyServiceDiscoverPlugins,
-  'pluginSpecs' | 'disabledPluginSpecs' | 'uiExports'
->;
-
 // eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: NewPlatform;
   public server: Server;
   public inject: Server['inject'];
-  public pluginSpecs: any[];
-  public uiBundles: any;
 
-  constructor(
-    settings: Record<string, any>,
-    config: KibanaConfig,
-    core: KibanaCore,
-    legacyPlugins: LegacyPlugins
-  );
+  constructor(settings: Record<string, any>, config: KibanaConfig, core: KibanaCore);
 
   public ready(): Promise<void>;
   public mixin(...fns: KbnMixinFunc[]): Promise<void>;
   public listen(): Promise<Server>;
   public close(): Promise<void>;
-  public afterPluginsInit(callback: () => void): void;
   public applyLoggingConfiguration(settings: any): void;
   public config: KibanaConfig;
 }
 
 // Re-export commonly used hapi types.
-export { Server, Request, ResponseToolkit } from 'hapi';
+export { Server, Request, ResponseToolkit } from '@hapi/hapi';

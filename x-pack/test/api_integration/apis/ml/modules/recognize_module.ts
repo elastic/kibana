@@ -115,6 +115,36 @@ export default ({ getService }: FtrProviderContext) => {
         moduleIds: [],
       },
     },
+    {
+      testTitleSuffix: 'for heartbeat dataset',
+      sourceDataArchive: 'ml/module_heartbeat',
+      indexPattern: 'ft_module_heartbeat',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['uptime_heartbeat'],
+      },
+    },
+    {
+      testTitleSuffix: 'for auditbeat dataset',
+      sourceDataArchive: 'ml/module_auditbeat',
+      indexPattern: 'ft_module_auditbeat',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['auditbeat_process_hosts_ecs', 'security_linux', 'siem_auditbeat'],
+      },
+    },
+    {
+      testTitleSuffix: 'for security endpoint dataset',
+      sourceDataArchive: 'ml/module_security_endpoint',
+      indexPattern: 'ft_logs-endpoint.events.*',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['security_linux', 'security_windows'],
+      },
+    },
   ];
 
   async function executeRecognizeModuleRequest(indexPattern: string, user: USER, rspCode: number) {

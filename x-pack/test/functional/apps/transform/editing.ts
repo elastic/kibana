@@ -99,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.testExecution.logTestStep(
           'should update the transform documents per second'
         );
+        await transform.editFlyout.openTransformEditAccordionAdvancedSettings();
         await transform.editFlyout.assertTransformEditFlyoutInputExists('DocsPerSecond');
         await transform.editFlyout.assertTransformEditFlyoutInputValue('DocsPerSecond', '');
         await transform.editFlyout.setTransformEditFlyoutInputValue(

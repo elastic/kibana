@@ -102,6 +102,7 @@ export class EditDescriptionPopover extends Component {
                   name="filter_list_description"
                   value={value}
                   onChange={this.onChange}
+                  data-test-subj={'mlFilterListDescriptionInput'}
                 />
               </EuiFormRow>
             </EuiForm>

@@ -30,18 +30,20 @@ export const isPanelViewAndParameters: (
     }),
   }),
   schema.object({
-    panelView: schema.literal('nodeEventsOfType' as const),
+    panelView: schema.literal('nodeEventsInCategory' as const),
     panelParameters: schema.object({
       nodeID: schema.string(),
-      eventType: schema.string(),
+      eventCategory: schema.string(),
     }),
   }),
   schema.object({
     panelView: schema.literal('eventDetail' as const),
     panelParameters: schema.object({
       nodeID: schema.string(),
-      eventType: schema.string(),
-      eventID: schema.string(),
+      eventCategory: schema.string(),
+      eventID: schema.oneOf([schema.string(), schema.literal(undefined), schema.number()]),
+      eventTimestamp: schema.string(),
+      winlogRecordID: schema.string(),
     }),
   }),
 ]);

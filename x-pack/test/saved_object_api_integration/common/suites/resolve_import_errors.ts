@@ -37,7 +37,7 @@ const NEW_ATTRIBUTE_VAL = `New attribute value ${Date.now()}`;
 //  * id: conflict_3
 //  * id: conflict_4a, originId: conflict_4
 // using the five conflict test case objects below, we can exercise various permutations of exact/inexact/ambiguous conflict scenarios
-export const TEST_CASES = Object.freeze({
+export const TEST_CASES: Record<string, ResolveImportErrorsTestCase> = Object.freeze({
   ...CASES,
   CONFLICT_1A_OBJ: Object.freeze({
     type: 'sharedtype',
@@ -94,7 +94,7 @@ export function resolveImportErrorsTestSuiteFactory(
   esArchiver: any,
   supertest: SuperTest<any>
 ) {
-  const expectForbidden = expectResponses.forbiddenTypes('bulk_create');
+  const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody = (
     testCases: ResolveImportErrorsTestCase | ResolveImportErrorsTestCase[],
     statusCode: 200 | 403,
@@ -106,7 +106,7 @@ export function resolveImportErrorsTestSuiteFactory(
     const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
     if (statusCode === 403) {
       const types = testCaseArray.map((x) => x.type);
-      await expectForbidden(types)(response);
+      await expectSavedObjectForbidden(types)(response);
     } else {
       // permitted
       const { success, successCount, successResults, errors } = response.body;
@@ -273,6 +273,6 @@ export function resolveImportErrorsTestSuiteFactory(
   return {
     addTests,
     createTestDefinitions,
-    expectForbidden,
+    expectSavedObjectForbidden,
   };
 }

@@ -20,7 +20,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { ExplorerLink } from './actions';
 import { getJobsFromGroup } from './utils';
 import { GroupsDictionary, Group } from './anomaly_detection_panel';

@@ -14,7 +14,7 @@ describe('buildRuleNameFromMapping', () => {
 
   test('rule name defaults to provided if mapping is incomplete', () => {
     const ruleName = buildRuleNameFromMapping({
-      doc: sampleDocNoSortId(),
+      eventSource: sampleDocNoSortId()._source,
       ruleName: 'rule-name',
       ruleNameMapping: 'message',
     });

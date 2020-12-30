@@ -5,7 +5,7 @@
  */
 import React, { FormEvent } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';
 import { ValueListsForm } from './form';
@@ -24,7 +24,7 @@ const mockSelectFile: <P>(container: ReactWrapper<P>, file: File) => Promise<voi
   file
 ) => {
   const fileChange = container.find('EuiFilePicker').prop('onChange');
-  act(() => {
+  await waitFor(() => {
     if (fileChange) {
       fileChange(({ item: () => file } as unknown) as FormEvent);
     }

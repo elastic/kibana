@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 import { CoreSetup } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { BASE_API_URL } from '../../common';
+import { PluginStartContract } from '../plugin';
 
 // This route is responsible for taking a batch of click events from the browser
 // and writing them to saved objects
-export async function initLensUsageRoute(setup: CoreSetup) {
+export async function initLensUsageRoute(setup: CoreSetup<PluginStartContract>) {
   const router = setup.http.createRouter();
   router.post(
     {
-      path: `${BASE_API_URL}/telemetry`,
+      path: `${BASE_API_URL}/stats`,
       validate: {
         body: schema.object({
           events: schema.mapOf(schema.string(), schema.mapOf(schema.string(), schema.number())),
@@ -70,7 +72,7 @@ export async function initLensUsageRoute(setup: CoreSetup) {
 
         return res.ok({ body: {} });
       } catch (e) {
-        if (e.status === 404) {
+        if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound();
         }
         if (e.isBoom) {

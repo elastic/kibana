@@ -49,7 +49,7 @@ import { getTabs, getPath, convertToEuiSelectOption } from './utils';
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: IndexPattern;
   fields: IndexPatternField[];
-  saveIndexPattern: DataPublicPluginStart['indexPatterns']['save'];
+  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
 }
 
 const searchAriaLabel = i18n.translate(
@@ -74,9 +74,11 @@ const filterPlaceholder = i18n.translate(
 );
 
 export function Tabs({ indexPattern, saveIndexPattern, fields, history, location }: TabsProps) {
-  const { uiSettings, indexPatternManagementStart, docLinks } = useKibana<
-    IndexPatternManagmentContext
-  >().services;
+  const {
+    uiSettings,
+    indexPatternManagementStart,
+    docLinks,
+  } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string>('');

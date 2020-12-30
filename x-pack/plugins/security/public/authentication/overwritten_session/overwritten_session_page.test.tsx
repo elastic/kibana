@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { act } from '@testing-library/react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { OverwrittenSessionPage } from './overwritten_session_page';
 
 import { coreMock } from '../../../../../../src/core/public/mocks';

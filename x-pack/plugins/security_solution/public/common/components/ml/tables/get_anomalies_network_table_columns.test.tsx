@@ -16,7 +16,6 @@ import { useMountAppended } from '../../../utils/use_mount_appended';
 
 const startDate = new Date(2001).toISOString();
 const endDate = new Date(3000).toISOString();
-
 describe('get_anomalies_network_table_columns', () => {
   const mount = useMountAppended();
 

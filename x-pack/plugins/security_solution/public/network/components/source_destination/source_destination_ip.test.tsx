@@ -7,6 +7,7 @@
 import { get } from 'lodash/fp';
 import React from 'react';
 
+import { removeExternalLinkText } from '../../../../common/test_utils';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
 import '../../../common/mock/match_media';
@@ -772,7 +773,7 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-content-source.ip"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
       '192.168.1.2'
     );
   });
@@ -823,7 +824,7 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-content-source.ip"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
       '192.168.1.2'
     );
   });
@@ -874,9 +875,9 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="draggable-content-destination.ip"]').first().text()
-    ).toEqual('10.1.2.3');
+    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
+      '10.1.2.3'
+    );
   });
 
   test('it renders the expected destination IP when type is `destination`, but the length of the destinationIp and destinationPort port arrays is different', () => {
@@ -925,9 +926,9 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="draggable-content-destination.ip"]').first().text()
-    ).toEqual('10.1.2.3');
+    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
+      '10.1.2.3'
+    );
   });
 
   test('it renders the expected source port when type is `source`, and both sourceIp and sourcePort are populated', () => {
@@ -976,9 +977,11 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()).toEqual(
-      '9987'
-    );
+    expect(
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
+      )
+    ).toEqual('9987');
   });
 
   test('it renders the expected destination port when type is `destination`, and both destinationIp and destinationPort are populated', () => {
@@ -1028,7 +1031,9 @@ describe('SourceDestinationIp', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
+      )
     ).toEqual('80');
   });
 
@@ -1078,9 +1083,11 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()).toEqual(
-      '9987'
-    );
+    expect(
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="draggable-content-source.port"]').first().text()
+      )
+    ).toEqual('9987');
   });
 
   test('it renders the expected destination port when type is `destination`, and only destinationPort is populated', () => {
@@ -1131,7 +1138,9 @@ describe('SourceDestinationIp', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
+      removeExternalLinkText(
+        wrapper.find('[data-test-subj="draggable-content-destination.port"]').first().text()
+      )
     ).toEqual('80');
   });
 

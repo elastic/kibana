@@ -67,6 +67,7 @@ export class ActionFactory<
   public readonly ReactCollectConfig = uiToReactComponent(this.CollectConfig);
   public readonly createConfig = this.def.createConfig;
   public readonly isConfigValid = this.def.isConfigValid;
+  public readonly migrations = this.def.migrations || {};
 
   public getIconType(context: FactoryContext): string | undefined {
     if (!this.def.getIconType) return undefined;

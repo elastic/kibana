@@ -4,13 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
 import { EnhancedDataServerPlugin } from './plugin';
+import { configSchema, ConfigSchema } from '../config';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    search: true,
+  },
+  schema: configSchema,
+};
+
+export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new EnhancedDataServerPlugin(initializerContext);
 }
 
-export { ENHANCED_ES_SEARCH_STRATEGY } from '../common';
+export { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 
 export { EnhancedDataServerPlugin as Plugin };

@@ -4,82 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import '../../__mocks__/shallow_useeffect.mock';
+import { mockTelemetryActions } from '../../__mocks__';
 
-import { httpServiceMock } from 'src/core/public/mocks';
-import { JSON_HEADER as headers } from '../../../../common/constants';
-import { mountWithKibanaContext } from '../../__mocks__';
+import React from 'react';
+import { shallow } from 'enzyme';
 
 import {
-  sendTelemetry,
   SendEnterpriseSearchTelemetry,
   SendAppSearchTelemetry,
   SendWorkplaceSearchTelemetry,
 } from './';
 
-describe('Shared Telemetry Helpers', () => {
-  const httpMock = httpServiceMock.createSetupContract();
-
+describe('Telemetry component helpers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('sendTelemetry', () => {
-    it('successfully calls the server-side telemetry endpoint', () => {
-      sendTelemetry({
-        http: httpMock,
-        product: 'enterprise_search',
-        action: 'viewed',
-        metric: 'setup_guide',
-      });
+  it('SendEnterpriseSearchTelemetry', () => {
+    shallow(<SendEnterpriseSearchTelemetry action="viewed" metric="page" />);
 
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
-        headers,
-        body: '{"product":"enterprise_search","action":"viewed","metric":"setup_guide"}',
-      });
-    });
-
-    it('throws an error if the telemetry endpoint fails', () => {
-      const httpRejectMock = sendTelemetry({
-        http: { put: () => Promise.reject() },
-      } as any);
-
-      expect(httpRejectMock).rejects.toThrow('Unable to send telemetry');
+    expect(mockTelemetryActions.sendTelemetry).toHaveBeenCalledWith({
+      action: 'viewed',
+      metric: 'page',
+      product: 'enterprise_search',
     });
   });
 
-  describe('React component helpers', () => {
-    it('SendEnterpriseSearchTelemetry component', () => {
-      mountWithKibanaContext(<SendEnterpriseSearchTelemetry action="viewed" metric="page" />, {
-        http: httpMock,
-      });
+  it('SendAppSearchTelemetry', () => {
+    shallow(<SendAppSearchTelemetry action="clicked" metric="button" />);
 
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
-        headers,
-        body: '{"product":"enterprise_search","action":"viewed","metric":"page"}',
-      });
+    expect(mockTelemetryActions.sendTelemetry).toHaveBeenCalledWith({
+      action: 'clicked',
+      metric: 'button',
+      product: 'app_search',
     });
+  });
 
-    it('SendAppSearchTelemetry component', () => {
-      mountWithKibanaContext(<SendAppSearchTelemetry action="clicked" metric="button" />, {
-        http: httpMock,
-      });
+  it('SendWorkplaceSearchTelemetry', () => {
+    shallow(<SendWorkplaceSearchTelemetry action="error" metric="not_found" />);
 
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
-        headers,
-        body: '{"product":"app_search","action":"clicked","metric":"button"}',
-      });
-    });
-
-    it('SendWorkplaceSearchTelemetry component', () => {
-      mountWithKibanaContext(<SendWorkplaceSearchTelemetry action="error" metric="not_found" />, {
-        http: httpMock,
-      });
-
-      expect(httpMock.put).toHaveBeenCalledWith('/api/enterprise_search/telemetry', {
-        headers,
-        body: '{"product":"workplace_search","action":"error","metric":"not_found"}',
-      });
+    expect(mockTelemetryActions.sendTelemetry).toHaveBeenCalledWith({
+      action: 'error',
+      metric: 'not_found',
+      product: 'workplace_search',
     });
   });
 });

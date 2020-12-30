@@ -14,12 +14,13 @@ import { UserRT } from '../user';
 const UserActionFieldRt = rt.array(
   rt.union([
     rt.literal('comment'),
-    rt.literal('connector_id'),
+    rt.literal('connector'),
     rt.literal('description'),
     rt.literal('pushed'),
     rt.literal('tags'),
     rt.literal('title'),
     rt.literal('status'),
+    rt.literal('settings'),
   ])
 );
 const UserActionRt = rt.union([

@@ -45,7 +45,7 @@ export const SolutionTitle: FC<Props> = ({ title, subtitle, iconType }) => (
         className="homSolutionPanel__icon"
       />
 
-      <EuiTitle className="eui-textInheritColor" size="s">
+      <EuiTitle className="homSolutionPanel__title eui-textInheritColor" size="s">
         <h3>{title}</h3>
       </EuiTitle>
 

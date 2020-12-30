@@ -33,7 +33,17 @@ interface Deps {
 export class PluginsStatusService {
   private readonly pluginStatuses = new Map<PluginName, Observable<ServiceStatus>>();
   private readonly update$ = new BehaviorSubject(true);
-  constructor(private readonly deps: Deps) {}
+  private readonly defaultInheritedStatus$: Observable<ServiceStatus>;
+
+  constructor(private readonly deps: Deps) {
+    this.defaultInheritedStatus$ = this.deps.core$.pipe(
+      map((coreStatus) => {
+        return getSummaryStatus(Object.entries(coreStatus), {
+          allAvailableSummary: `All dependencies are available`,
+        });
+      })
+    );
+  }
 
   public set(plugin: PluginName, status$: Observable<ServiceStatus>) {
     this.pluginStatuses.set(plugin, status$);
@@ -57,14 +67,24 @@ export class PluginsStatusService {
   }
 
   public getDerivedStatus$(plugin: PluginName): Observable<ServiceStatus> {
-    return combineLatest([this.deps.core$, this.getDependenciesStatus$(plugin)]).pipe(
-      map(([coreStatus, pluginStatuses]) => {
-        return getSummaryStatus(
-          [...Object.entries(coreStatus), ...Object.entries(pluginStatuses)],
-          {
-            allAvailableSummary: `All dependencies are available`,
-          }
-        );
+    return this.update$.pipe(
+      switchMap(() => {
+        // Only go up the dependency tree if any of this plugin's dependencies have a custom status
+        // Helps eliminate memory overhead of creating thousands of Observables unnecessarily.
+        if (this.anyCustomStatuses(plugin)) {
+          return combineLatest([this.deps.core$, this.getDependenciesStatus$(plugin)]).pipe(
+            map(([coreStatus, pluginStatuses]) => {
+              return getSummaryStatus(
+                [...Object.entries(coreStatus), ...Object.entries(pluginStatuses)],
+                {
+                  allAvailableSummary: `All dependencies are available`,
+                }
+              );
+            })
+          );
+        } else {
+          return this.defaultInheritedStatus$;
+        }
       })
     );
   }
@@ -94,5 +114,18 @@ export class PluginsStatusService {
         );
       })
     );
+  }
+
+  /**
+   * Determines whether or not this plugin or any plugin in it's dependency tree have a custom status registered.
+   */
+  private anyCustomStatuses(plugin: PluginName): boolean {
+    if (this.pluginStatuses.get(plugin)) {
+      return true;
+    }
+
+    return this.deps.pluginDependencies
+      .get(plugin)!
+      .reduce((acc, depName) => acc || this.anyCustomStatuses(depName), false as boolean);
   }
 }

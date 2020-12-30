@@ -18,8 +18,8 @@
  */
 
 import React from 'react';
-import { wait } from '@testing-library/dom';
-import { cleanup, render } from '@testing-library/react/pure';
+import { waitFor } from '@testing-library/dom';
+import { render } from '@testing-library/react';
 import {
   HelloWorldEmbeddable,
   HelloWorldEmbeddableFactoryDefinition,
@@ -29,8 +29,6 @@ import { EmbeddableRenderer } from './embeddable_renderer';
 import { embeddablePluginMock } from '../../mocks';
 
 describe('<EmbeddableRenderer/>', () => {
-  afterEach(cleanup);
-
   test('Render embeddable', () => {
     const embeddable = new HelloWorldEmbeddable({ id: 'hello' });
     const { getByTestId } = render(<EmbeddableRenderer embeddable={embeddable} />);
@@ -49,7 +47,7 @@ describe('<EmbeddableRenderer/>', () => {
       <EmbeddableRenderer factory={getFactory()} input={{ id: 'hello' }} />
     );
     expect(getByTestId('embedSpinner')).toBeInTheDocument();
-    await wait(() => !queryByTestId('embedSpinner')); // wait until spinner disappears
+    await waitFor(() => !queryByTestId('embedSpinner')); // wait until spinner disappears
     expect(getByTestId('helloWorldEmbeddable')).toBeInTheDocument();
   });
 });

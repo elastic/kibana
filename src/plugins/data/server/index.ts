@@ -49,6 +49,16 @@ export const esFilters = {
   isFilterDisabled,
 };
 
+/**
+ * Exporters (CSV)
+ */
+
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+};
+
 /*
  * esQuery and esKuery:
  */
@@ -133,16 +143,20 @@ export {
   IndexPatternsFetcher,
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
+  FieldDescriptor,
+  mergeCapabilitiesWithFields,
+  getCapabilitiesForRollupIndices,
 } from './index_patterns';
 
 export {
-  IIndexPattern,
   IFieldType,
   IFieldSubType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   IndexPatternAttributes,
   UI_SETTINGS,
+  IndexPattern,
+  IndexPatternLoadExpressionFunctionDefinition,
 } from '../common';
 
 /**
@@ -175,6 +189,7 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
+  calcAutoIntervalLessThan,
 } from '../common';
 
 export {
@@ -182,6 +197,7 @@ export {
   AggGroupLabels,
   AggGroupName,
   AggGroupNames,
+  AggFunctionsMapping,
   AggParam,
   AggParamOption,
   AggParamType,
@@ -197,6 +213,12 @@ export {
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
   // search
   ISearchOptions,
   IEsSearchRequest,
@@ -212,13 +234,18 @@ export {
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
-  toSnakeCase,
+  SearchStrategyDependencies,
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
+  toKibanaSearchResponse,
   shimHitsTotal,
   usageProvider,
+  searchUsageObserver,
+  shimAbortSignal,
   SearchUsage,
+  SessionService,
+  ISessionService,
 } from './search';
 
 // Search namespace
@@ -242,6 +269,7 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    calcAutoIntervalLessThan,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -286,6 +314,9 @@ export {
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     autocomplete: true,
+    search: true,
   },
   schema: configSchema,
 };
+
+export type { IndexPatternsServiceProvider as IndexPatternsService } from './index_patterns';

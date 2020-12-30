@@ -19,17 +19,21 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
-import { createTableVisFn } from './table_vis_fn';
-import { getTableVisTypeDefinition } from './table_vis_type';
 import { DataPublicPluginStart } from '../../data/public';
-import { setFormatService, setKibanaLegacy } from './services';
+import { setFormatService } from './services';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
+
+interface ClientConfigType {
+  legacyVisEnabled: boolean;
+}
 
 /** @internal */
 export interface TablePluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 /** @internal */
@@ -39,26 +43,31 @@ export interface TablePluginStartDependencies {
 }
 
 /** @internal */
-export class TableVisPlugin implements Plugin<Promise<void>, void> {
-  initializerContext: PluginInitializerContext;
-  createBaseVisualization: any;
+export class TableVisPlugin
+  implements
+    Plugin<Promise<void>, void, TablePluginSetupDependencies, TablePluginStartDependencies> {
+  initializerContext: PluginInitializerContext<ClientConfigType>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
   }
 
   public async setup(
-    core: CoreSetup,
-    { expressions, visualizations }: TablePluginSetupDependencies
+    core: CoreSetup<TablePluginStartDependencies>,
+    deps: TablePluginSetupDependencies
   ) {
-    expressions.registerFunction(createTableVisFn);
-    visualizations.createBaseVisualization(
-      getTableVisTypeDefinition(core, this.initializerContext)
-    );
+    const { legacyVisEnabled } = this.initializerContext.config.get();
+
+    if (legacyVisEnabled) {
+      const { registerLegacyVis } = await import('./legacy');
+      registerLegacyVis(core, deps, this.initializerContext);
+    } else {
+      const { registerTableVis } = await import('./register_vis');
+      registerTableVis(core, deps, this.initializerContext);
+    }
   }
 
-  public start(core: CoreStart, { data, kibanaLegacy }: TablePluginStartDependencies) {
+  public start(core: CoreStart, { data }: TablePluginStartDependencies) {
     setFormatService(data.fieldFormats);
-    setKibanaLegacy(kibanaLegacy);
   }
 }

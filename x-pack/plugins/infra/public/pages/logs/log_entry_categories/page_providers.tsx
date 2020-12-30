@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
 import { useLogSourceContext } from '../../../containers/logs/log_source';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
@@ -27,7 +28,7 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
       spaceId={space.id}
       timestampField={sourceConfiguration.configuration.fields.timestamp}
     >
-      {children}
+      <LogAnalysisSetupFlyoutStateProvider>{children}</LogAnalysisSetupFlyoutStateProvider>
     </LogEntryCategoriesModuleProvider>
   );
 };

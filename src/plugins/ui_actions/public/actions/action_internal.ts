@@ -20,7 +20,7 @@
 // @ts-ignore
 import React from 'react';
 import { Action, ActionContext as Context, ActionDefinition } from './action';
-import { Presentable } from '../util/presentable';
+import { Presentable, PresentableGrouping } from '../util/presentable';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { ActionType } from '../types';
 
@@ -36,6 +36,7 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   public readonly order: number = this.definition.order || 0;
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
+  public readonly grouping?: PresentableGrouping<Context<A>> = this.definition.grouping;
 
   public execute(context: Context<A>) {
     return this.definition.execute(context);

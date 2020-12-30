@@ -19,7 +19,7 @@
 
 import { Readable } from 'stream';
 
-import { toArray } from 'rxjs/operators';
+import { allValuesFrom } from '../common';
 
 import { observeStdio$ } from './observe_stdio';
 
@@ -27,18 +27,18 @@ it('notifies on every line, uncluding partial content at the end without a newli
   const chunks = [`foo\nba`, `r\nb`, `az`];
 
   await expect(
-    observeStdio$(
-      new Readable({
-        read() {
-          this.push(chunks.shift()!);
-          if (!chunks.length) {
-            this.push(null);
-          }
-        },
-      })
+    allValuesFrom(
+      observeStdio$(
+        new Readable({
+          read() {
+            this.push(chunks.shift()!);
+            if (!chunks.length) {
+              this.push(null);
+            }
+          },
+        })
+      )
     )
-      .pipe(toArray())
-      .toPromise()
   ).resolves.toMatchInlineSnapshot(`
           Array [
             "foo",

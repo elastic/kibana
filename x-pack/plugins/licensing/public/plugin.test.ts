@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { take } from 'rxjs/operators';
+import { take, toArray } from 'rxjs/operators';
 import { mountExpiredBannerMock } from './plugin.test.mocks';
 
 import { LicenseType } from '../common/types';
@@ -92,7 +92,7 @@ describe('licensing plugin', () => {
         expect(sessionStorage.getItem).toHaveBeenCalledWith(licensingSessionStorageKey);
       });
 
-      it('observable receives updated licenses', async (done) => {
+      it('observable receives updated licenses', async () => {
         const types: LicenseType[] = ['gold', 'platinum'];
 
         const sessionStorage = coreMock.createStorage();
@@ -104,27 +104,17 @@ describe('licensing plugin', () => {
           Promise.resolve(licenseMock.createLicense({ license: { type: types.shift() } }))
         );
 
-        await plugin.setup(coreSetup);
+        plugin.setup(coreSetup);
         const { refresh, license$ } = await plugin.start(coreStart);
+        const promise = license$.pipe(take(3), toArray()).toPromise();
 
-        let i = 0;
-        license$.subscribe((value) => {
-          i++;
-          if (i === 1) {
-            expect(value.type).toBe('basic');
-            refresh();
-          } else if (i === 2) {
-            expect(value.type).toBe('gold');
-            // since this is a synchronous subscription, we need to give the exhaustMap a chance
-            // to mark the subscription as complete before emitting another value on the Subject
-            process.nextTick(() => refresh());
-          } else if (i === 3) {
-            expect(value.type).toBe('platinum');
-            done();
-          } else {
-            throw new Error('unreachable');
-          }
-        });
+        await refresh();
+        await refresh();
+
+        const licenses = await promise;
+        expect(licenses[0].type).toBe('basic');
+        expect(licenses[1].type).toBe('gold');
+        expect(licenses[2].type).toBe('platinum');
       });
 
       it('saved fetched license & signature in session storage', async () => {
@@ -248,6 +238,46 @@ describe('licensing plugin', () => {
       await registeredInterceptor!.response!(httpResponse as any, null as any);
 
       expect(coreSetup.http.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('http interceptor does not trigger re-fetch if signature header is not present', async () => {
+      const sessionStorage = coreMock.createStorage();
+      plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
+
+      const coreSetup = coreMock.createSetup();
+
+      coreSetup.http.get.mockResolvedValue(licenseMock.createLicense({ signature: 'signature-1' }));
+
+      let registeredInterceptor: HttpInterceptor;
+      coreSetup.http.intercept.mockImplementation((interceptor: HttpInterceptor) => {
+        registeredInterceptor = interceptor;
+        return () => undefined;
+      });
+
+      await plugin.setup(coreSetup);
+      await plugin.start(coreStart);
+      expect(registeredInterceptor!.response).toBeDefined();
+
+      const httpResponse = {
+        response: {
+          headers: {
+            get(name: string) {
+              if (name === 'kbn-license-sig') {
+                return undefined;
+              }
+              throw new Error('unexpected header');
+            },
+          },
+        },
+        request: {
+          url: 'http://10.10.10.10:5601/api/hello',
+        },
+      };
+      expect(coreSetup.http.get).toHaveBeenCalledTimes(0);
+
+      await registeredInterceptor!.response!(httpResponse as any, null as any);
+
+      expect(coreSetup.http.get).toHaveBeenCalledTimes(0);
     });
 
     it('http interceptor does not trigger license re-fetch for anonymous pages', async () => {

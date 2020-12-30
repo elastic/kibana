@@ -69,18 +69,21 @@ Table of Contents
     - [`secrets`](#secrets-6)
     - [`params`](#params-6)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-1)
   - [Jira](#jira)
     - [`config`](#config-7)
     - [`secrets`](#secrets-7)
     - [`params`](#params-7)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
       - [`subActionParams (issueTypes)`](#subactionparams-issuetypes)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-2)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
   - [IBM Resilient](#ibm-resilient)
     - [`config`](#config-8)
     - [`secrets`](#secrets-8)
     - [`params`](#params-8)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-3)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-3)
 - [Command Line Utility](#command-line-utility)
 - [Developing New Action Types](#developing-new-action-types)
   - [licensing](#licensing)
@@ -274,12 +277,12 @@ Running the action by scheduling a task means that we will no longer have a user
 
 The following table describes the properties of the `options` object.
 
-| Property | Description                                                                                            | Type   |
-| -------- | ------------------------------------------------------------------------------------------------------ | ------ |
-| id       | The id of the action you want to execute.                                                              | string |
-| params   | The `params` value to give the action type executor.                                                   | object |
-| spaceId  | The space id the action is within.                                                                     | string |
-| apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string |
+| Property | Description                                                                                            | Type             |
+| -------- | ------------------------------------------------------------------------------------------------------ | ---------------- |
+| id       | The id of the action you want to execute.                                                              | string           |
+| params   | The `params` value to give the action type executor.                                                   | object           |
+| spaceId  | The space id the action is within.                                                                     | string           |
+| apiKey   | The Elasticsearch API key to use for context. (Note: only required and used when security is enabled). | string           |
 | source   | The source of the execution, either an HTTP request or a reference to a Saved Object.                  | object, optional |
 
 ## Example
@@ -308,11 +311,11 @@ This api runs the action and asynchronously returns the result of running the ac
 
 The following table describes the properties of the `options` object.
 
-| Property | Description                                                                          | Type   |
-| -------- | ------------------------------------------------------------------------------------ | ------ |
-| id       | The id of the action you want to execute.                                            | string |
-| params   | The `params` value to give the action type executor.                                 | object |
-| source   | The source of the execution, either an HTTP request or a reference to a Saved Object.| object, optional |
+| Property | Description                                                                           | Type             |
+| -------- | ------------------------------------------------------------------------------------- | ---------------- |
+| id       | The id of the action you want to execute.                                             | string           |
+| params   | The `params` value to give the action type executor.                                  | object           |
+| source   | The source of the execution, either an HTTP request or a reference to a Saved Object. | object, optional |
 
 ## Example
 
@@ -330,7 +333,7 @@ const result = await actionsClient.execute({
   },
   source: asSavedObjectExecutionSource({
     id: '573891ae-8c48-49cb-a197-0cd5ec34a88b',
-    type: 'alert'
+    type: 'alert',
   }),
 });
 ```
@@ -526,7 +529,7 @@ The PagerDuty action uses the [V2 Events API](https://v2.developer.pagerduty.com
 | Property    | Description                                                                                                                                                                                                                                                                                                             | Type                |
 | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
 | eventAction | One of `trigger` _(default)_, `resolve`, or `acknowlege`. See [event action](https://v2.developer.pagerduty.com/docs/events-api-v2#event-action) for more details.                                                                                                                                                      | string _(optional)_ |
-| dedupKey    | All actions sharing this key will be associated with the same PagerDuty alert. Used to correlate trigger and resolution. Defaults to `action:<action id>`. The maximum length is **255** characters. See [alert deduplication](https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication) for details. | string _(optional)_ |
+| dedupKey    | All actions sharing this key will be associated with the same PagerDuty alert. Used to correlate trigger and resolution. The maximum length is **255** characters. See [alert deduplication](https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication) for details.                                   | string _(optional)_ |
 | summary     | A text summary of the event, defaults to `No summary provided`. The maximum length is **1024** characters.                                                                                                                                                                                                              | string _(optional)_ |
 | source      | The affected system, preferably a hostname or fully qualified domain name. Defaults to `Kibana Action <action id>`.                                                                                                                                                                                                     | string _(optional)_ |
 | severity    | The perceived severity of on the affected system. This can be one of `critical`, `error`, `warning` or `info`_(default)_.                                                                                                                                                                                               | string _(optional)_ |
@@ -550,7 +553,6 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 | Property              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Type                |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------- |
 | apiUrl                | ServiceNow instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string              |
-| incidentConfiguration | Optional property and specific to **Cases only**. If defined, the object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the ServiceNow field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'short_description', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in ServiceNow and will be overwrite on each update. | object _(optional)_ |
 
 ### `secrets`
 
@@ -563,7 +565,7 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 
 | Property        | Description                                                                          | Type   |
 | --------------- | ------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, and `getIncident` | string |
 | subActionParams | The parameters of the sub action                                                     | object |
 
 #### `subActionParams (pushToService)`
@@ -580,6 +582,10 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 | urgency       | The name of the urgency in ServiceNow.                                                                                    | string _(optional)_   |
 | impact        | The name of the impact in ServiceNow.                                                                                     | string _(optional)_   |
 
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
+
 ---
 
 ## Jira
@@ -593,7 +599,6 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 | Property              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Type                |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
 | apiUrl                | Jira instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string              |
-| incidentConfiguration | Optional property and specific to **Cases only**. if defined, the object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the Jira field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'summary', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in Jira and will be overwrite on each update. | object _(optional)_ |
 
 ### `secrets`
 
@@ -606,7 +611,7 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 
 | Property        | Description                                                                                                             | Type   |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------- | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, `getIncident`, `issueTypes`, and `fieldsByIssueType` | string |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, `getIncident`, `issueTypes`, and `fieldsByIssueType` | string |
 | subActionParams | The parameters of the sub action                                                                                        | object |
 
 #### `subActionParams (pushToService)`
@@ -620,11 +625,16 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 | issueType     | The id of the issue type in Jira.                                                                                | string _(optional)_   |
 | priority      | The name of the priority in Jira. Example: `Medium`.                                                             | string _(optional)_   |
 | labels        | An array of labels.                                                                                              | string[] _(optional)_ |
+| parent        | The parent issue id or key. Only for `Sub-task` issue types.                                                     | string _(optional)_   |
 | comments      | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`     | object[] _(optional)_ |
 
 #### `subActionParams (issueTypes)`
 
 No parameters for `issueTypes` sub-action. Provide an empty object `{}`.
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
 
 #### `subActionParams (pushToService)`
 
@@ -641,7 +651,6 @@ ID: `.resilient`
 | Property              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Type   |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | apiUrl                | IBM Resilient instance URL.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | string |
-| incidentConfiguration | Optional property and specific to **Cases only**. If defined, the object should contain an attribute called `mapping`. A `mapping` is an array of objects. Each mapping object should be of the form `{ source: string, target: string, actionType: string }`. `source` is the Case field. `target` is the Jira field where `source` will be mapped to. `actionType` can be one of `nothing`, `overwrite` or `append`. For example the `{ source: 'title', target: 'summary', actionType: 'overwrite' }` record, inside mapping array, means that the title of a case will be mapped to the short description of an incident in IBM Resilient and will be overwrite on each update. | object |
 
 ### `secrets`
 
@@ -654,7 +663,7 @@ ID: `.resilient`
 
 | Property        | Description                                                                          | Type   |
 | --------------- | ------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, and `getIncident` | string |
 | subActionParams | The parameters of the sub action                                                     | object |
 
 #### `subActionParams (pushToService)`
@@ -668,6 +677,10 @@ ID: `.resilient`
 | externalId    | The id of the incident in IBM Resilient. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
 | incidentTypes | An array with the ids of IBM Resilient incident types.                                                                       | number[] _(optional)_ |
 | severityCode  | IBM Resilient id of the severity code.                                                                                       | number _(optional)_   |
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
 
 # Command Line Utility
 

@@ -3,14 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
 import {
-  SearchParamsMock,
+  ESSearchRequest,
+  ESSearchResponse,
+} from '../../../../../../typings/elasticsearch';
+import {
   inspectSearchParams,
+  SearchParamsMock,
 } from '../../../utils/test_helpers';
+import { getDerivedServiceAnnotations } from './get_derived_service_annotations';
+import multipleVersions from './__fixtures__/multiple_versions.json';
 import noVersions from './__fixtures__/no_versions.json';
 import oneVersion from './__fixtures__/one_version.json';
-import multipleVersions from './__fixtures__/multiple_versions.json';
 import versionsFirstSeen from './__fixtures__/versions_first_seen.json';
 
 describe('getServiceAnnotations', () => {
@@ -31,7 +35,14 @@ describe('getServiceAnnotations', () => {
             searchAggregatedTransactions: false,
           }),
         {
-          mockResponse: () => noVersions,
+          mockResponse: () =>
+            noVersions as ESSearchResponse<
+              unknown,
+              ESSearchRequest,
+              {
+                restTotalHitsAsInt: false;
+              }
+            >,
         }
       );
 
@@ -50,7 +61,14 @@ describe('getServiceAnnotations', () => {
             searchAggregatedTransactions: false,
           }),
         {
-          mockResponse: () => oneVersion,
+          mockResponse: () =>
+            oneVersion as ESSearchResponse<
+              unknown,
+              ESSearchRequest,
+              {
+                restTotalHitsAsInt: false;
+              }
+            >,
         }
       );
 
@@ -74,7 +92,14 @@ describe('getServiceAnnotations', () => {
             searchAggregatedTransactions: false,
           }),
         {
-          mockResponse: () => responses.shift(),
+          mockResponse: () =>
+            (responses.shift() as unknown) as ESSearchResponse<
+              unknown,
+              ESSearchRequest,
+              {
+                restTotalHitsAsInt: false;
+              }
+            >,
         }
       );
 

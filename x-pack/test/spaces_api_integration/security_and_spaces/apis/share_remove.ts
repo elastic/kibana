@@ -35,16 +35,20 @@ const createTestCases = (spaceId: string) => {
     { id: CASES.DEFAULT_AND_SPACE_1.id, namespaces, ...fail404(spaceId === SPACE_2_ID) },
     { id: CASES.DEFAULT_AND_SPACE_2.id, namespaces, ...fail404(spaceId === SPACE_1_ID) },
     { id: CASES.SPACE_1_AND_SPACE_2.id, namespaces, ...fail404(spaceId === DEFAULT_SPACE_ID) },
-    { id: CASES.ALL_SPACES.id, namespaces },
+    { id: CASES.EACH_SPACE.id, namespaces },
     { id: CASES.DOES_NOT_EXIST.id, namespaces, ...fail404() },
   ] as ShareRemoveTestCase[];
 
-  // Test cases to check removing all three namespaces from different saved objects that exist in two spaces
-  // These are non-exhaustive, they only check some cases -- each object will result in a 404, either because
-  // it never existed in the target namespace, or it was removed in one of the test cases above
-  // More permutations are covered in the corresponding spaces_only test suite
   namespaces = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
   const multipleSpaces = [
+    // Test case to check removing all spaces from a saved object that exists in all spaces;
+    // It fails the second time because the object no longer exists
+    { ...CASES.ALL_SPACES, namespaces: ['*'] },
+    { ...CASES.ALL_SPACES, namespaces: ['*'], ...fail404() },
+    // Test cases to check removing all three namespaces from different saved objects that exist in two spaces
+    // These are non-exhaustive, they only check some cases -- each object will result in a 404, either because
+    // it never existed in the target namespace, or it was removed in one of the test cases above
+    // More permutations are covered in the corresponding spaces_only test suite
     { id: CASES.DEFAULT_AND_SPACE_1.id, namespaces, ...fail404() },
     { id: CASES.DEFAULT_AND_SPACE_2.id, namespaces, ...fail404() },
     { id: CASES.SPACE_1_AND_SPACE_2.id, namespaces, ...fail404() },

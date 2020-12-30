@@ -24,9 +24,8 @@ import { VisTypeAlias } from '../vis_types';
 
 describe('saved_visualizations', () => {
   function testProps() {
-    const savedObjects = coreMock.createStart().savedObjects.client as jest.Mocked<
-      SavedObjectsClientContract
-    >;
+    const savedObjects = coreMock.createStart().savedObjects
+      .client as jest.Mocked<SavedObjectsClientContract>;
     (savedObjects.find as jest.Mock).mockImplementation(() => ({
       total: 0,
       savedObjects: [],
@@ -125,6 +124,28 @@ describe('saved_visualizations', () => {
       [
         {
           search: 'ahoythere*',
+        },
+      ],
+    ]);
+  });
+
+  it('searches with references', async () => {
+    const props = {
+      ...testProps(),
+      references: [
+        { type: 'foo', id: 'hello' },
+        { type: 'bar', id: 'dolly' },
+      ],
+    };
+    const { find } = props.savedObjectsClient;
+    await findListItems(props);
+    expect(find.mock.calls).toMatchObject([
+      [
+        {
+          hasReference: [
+            { type: 'foo', id: 'hello' },
+            { type: 'bar', id: 'dolly' },
+          ],
         },
       ],
     ]);

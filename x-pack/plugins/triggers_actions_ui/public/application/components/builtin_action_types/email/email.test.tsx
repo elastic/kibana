@@ -43,6 +43,7 @@ describe('connector validation', () => {
         port: 2323,
         host: 'localhost',
         test: 'test',
+        hasAuth: true,
       },
     } as EmailActionConnector;
 
@@ -72,6 +73,7 @@ describe('connector validation', () => {
         port: 2323,
         host: 'localhost',
         test: 'test',
+        hasAuth: false,
       },
     } as EmailActionConnector;
 
@@ -96,6 +98,7 @@ describe('connector validation', () => {
       name: 'email',
       config: {
         from: 'test@test.com',
+        hasAuth: true,
       },
     } as EmailActionConnector;
 
@@ -124,6 +127,7 @@ describe('connector validation', () => {
         port: 2323,
         host: 'localhost',
         test: 'test',
+        hasAuth: true,
       },
     } as EmailActionConnector;
 
@@ -152,6 +156,7 @@ describe('connector validation', () => {
         port: 2323,
         host: 'localhost',
         test: 'test',
+        hasAuth: true,
       },
     } as EmailActionConnector;
 

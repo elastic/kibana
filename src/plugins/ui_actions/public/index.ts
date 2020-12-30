@@ -33,20 +33,20 @@ export {
   IncompatibleActionError,
 } from './actions';
 export { buildContextMenuForActions } from './context_menu';
-export { Presentable as UiActionsPresentable } from './util';
+export {
+  Presentable as UiActionsPresentable,
+  PresentableGrouping as UiActionsPresentableGrouping,
+} from './util';
 export {
   Trigger,
   TriggerContext,
-  SELECT_RANGE_TRIGGER,
-  selectRangeTrigger,
-  VALUE_CLICK_TRIGGER,
-  valueClickTrigger,
-  APPLY_FILTER_TRIGGER,
-  applyFilterTrigger,
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeGeoFieldTrigger,
+  ROW_CLICK_TRIGGER,
+  rowClickTrigger,
+  RowClickContext,
 } from './triggers';
 export {
   TriggerContextMapping,
@@ -56,6 +56,7 @@ export {
   VisualizeFieldContext,
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
+  ACTION_VISUALIZE_LENS_FIELD,
 } from './types';
 export {
   ActionByType,

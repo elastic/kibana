@@ -4,7 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { newRule, existingRule } from '../objects/rule';
+import { formatMitreAttackDescription } from '../helpers/rules';
+import { newRule, existingRule, indexPatterns, editedRule, newOverrideRule } from '../objects/rule';
+import {
+  ALERT_RULE_METHOD,
+  ALERT_RULE_NAME,
+  ALERT_RULE_RISK_SCORE,
+  ALERT_RULE_SEVERITY,
+  ALERT_RULE_VERSION,
+  NUMBER_OF_ALERTS,
+} from '../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
@@ -12,20 +21,50 @@ import {
   RULE_NAME,
   RULES_ROW,
   RULES_TABLE,
+  RULE_SWITCH,
   SEVERITY,
   SHOWING_RULES_TEXT,
 } from '../screens/alerts_detection_rules';
 import {
+  ABOUT_CONTINUE_BTN,
+  ABOUT_EDIT_BUTTON,
+  ACTIONS_THROTTLE_INPUT,
+  CUSTOM_QUERY_INPUT,
+  DEFINE_CONTINUE_BUTTON,
+  DEFINE_EDIT_BUTTON,
+  DEFINE_INDEX_INPUT,
+  RISK_INPUT,
+  RULE_DESCRIPTION_INPUT,
+  RULE_NAME_INPUT,
+  SCHEDULE_INTERVAL_AMOUNT_INPUT,
+  SCHEDULE_INTERVAL_UNITS_INPUT,
+  SEVERITY_DROPDOWN,
+  TAGS_CLEAR_BUTTON,
+  TAGS_FIELD,
+} from '../screens/create_new_rule';
+import {
+  ADDITIONAL_LOOK_BACK_DETAILS,
+  ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
   ABOUT_RULE_DESCRIPTION,
+  CUSTOM_QUERY_DETAILS,
+  DEFINITION_DETAILS,
+  FALSE_POSITIVES_DETAILS,
+  getDetails,
+  removeExternalLinkText,
+  INDEX_PATTERNS_DETAILS,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
-  RULE_ABOUT_DETAILS_HEADER_TOGGLE,
+  MITRE_ATTACK_DETAILS,
+  REFERENCE_URLS_DETAILS,
+  RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
-  getDescriptionForTitle,
-  ABOUT_DETAILS,
-  DEFINITION_DETAILS,
+  RULE_TYPE_DETAILS,
+  RUNS_EVERY_DETAILS,
   SCHEDULE_DETAILS,
+  SEVERITY_DETAILS,
+  TAGS_DETAILS,
+  TIMELINE_TEMPLATE_DETAILS,
 } from '../screens/rule_details';
 
 import {
@@ -37,84 +76,81 @@ import {
   changeToThreeHundredRowsPerPage,
   deleteFirstRule,
   deleteSelectedRules,
+  editFirstRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   selectNumberOfRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
-  editFirstRule,
 } from '../tasks/alerts_detection_rules';
+import { createCustomRuleActivated } from '../tasks/api_calls/rules';
+import { createTimeline } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
+  fillAboutRule,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleWithImportedQueryAndContinue,
+  fillScheduleRuleAndContinue,
   goToAboutStepTab,
-  goToScheduleStepTab,
   goToActionsStepTab,
-  fillAboutRule,
+  goToScheduleStepTab,
+  waitForAlertsToPopulate,
+  waitForTheRuleToBeExecuted,
 } from '../tasks/create_new_rule';
-import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
+import { saveEditedRule, waitForKibana } from '../tasks/edit_rule';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
+import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
-import {
-  ACTIONS_THROTTLE_INPUT,
-  CUSTOM_QUERY_INPUT,
-  DEFINE_INDEX_INPUT,
-  RULE_NAME_INPUT,
-  RULE_DESCRIPTION_INPUT,
-  TAGS_FIELD,
-  SEVERITY_DROPDOWN,
-  RISK_INPUT,
-  SCHEDULE_INTERVAL_AMOUNT_INPUT,
-  SCHEDULE_INTERVAL_UNITS_INPUT,
-  DEFINE_EDIT_BUTTON,
-  DEFINE_CONTINUE_BUTTON,
-  ABOUT_EDIT_BUTTON,
-  ABOUT_CONTINUE_BTN,
-} from '../screens/create_new_rule';
-import { saveEditedRule } from '../tasks/edit_rule';
 
-describe('Detection rules, custom', () => {
-  before(() => {
-    esArchiverLoad('timeline');
+describe('Custom detection rules creation', () => {
+  const expectedUrls = newRule.referenceUrls.join('');
+  const expectedFalsePositives = newRule.falsePositivesExamples.join('');
+  const expectedTags = newRule.tags.join('');
+  const expectedMitre = formatMitreAttackDescription(newRule.mitre);
+  const expectedNumberOfRules = 1;
+
+  const rule = { ...newRule };
+
+  beforeEach(() => {
+    cleanKibana();
+    createTimeline(newRule.timeline).then((response) => {
+      rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
+    });
   });
 
-  after(() => {
-    esArchiverUnload('timeline');
-  });
-
-  it('Creates and activates a new custom rule', () => {
+  it('Creates and activates a new rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
     goToManageAlertsDetectionRules();
     waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
     goToCreateNewRule();
-    fillDefineCustomRuleWithImportedQueryAndContinue(newRule);
-    fillAboutRuleAndContinue(newRule);
+    fillDefineCustomRuleWithImportedQueryAndContinue(rule);
+    fillAboutRuleAndContinue(rule);
+    fillScheduleRuleAndContinue(rule);
 
     // expect define step to repopulate
     cy.get(DEFINE_EDIT_BUTTON).click();
-    cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', newRule.customQuery);
+    cy.get(CUSTOM_QUERY_INPUT).should('have.value', rule.customQuery);
     cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
     cy.get(DEFINE_CONTINUE_BUTTON).should('not.exist');
 
     // expect about step to populate
     cy.get(ABOUT_EDIT_BUTTON).click();
-    cy.get(RULE_NAME_INPUT).invoke('val').should('eq', newRule.name);
+    cy.get(RULE_NAME_INPUT).invoke('val').should('eql', rule.name);
     cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
     cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
 
     createAndActivateRule();
 
-    cy.get(CUSTOM_RULES_BTN).invoke('text').should('eql', 'Custom rules (1)');
+    cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    const expectedNumberOfRules = 1;
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
     });
@@ -124,227 +160,211 @@ describe('Detection rules, custom', () => {
     cy.get(RULES_TABLE).then(($table) => {
       cy.wrap($table.find(RULES_ROW).length).should('eql', 1);
     });
-    cy.get(RULE_NAME).invoke('text').should('eql', newRule.name);
-    cy.get(RISK_SCORE).invoke('text').should('eql', newRule.riskScore);
-    cy.get(SEVERITY).invoke('text').should('eql', newRule.severity);
-    cy.get('[data-test-subj="rule-switch"]').should('have.attr', 'aria-checked', 'true');
+    cy.get(RULE_NAME).should('have.text', rule.name);
+    cy.get(RISK_SCORE).should('have.text', rule.riskScore);
+    cy.get(SEVERITY).should('have.text', rule.severity);
+    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
 
-    let expectedUrls = '';
-    newRule.referenceUrls.forEach((url) => {
-      expectedUrls = expectedUrls + url;
-    });
-    let expectedFalsePositives = '';
-    newRule.falsePositivesExamples.forEach((falsePositive) => {
-      expectedFalsePositives = expectedFalsePositives + falsePositive;
-    });
-    let expectedTags = '';
-    newRule.tags.forEach((tag) => {
-      expectedTags = expectedTags + tag;
-    });
-    let expectedMitre = '';
-    newRule.mitre.forEach((mitre) => {
-      expectedMitre = expectedMitre + mitre.tactic;
-      mitre.techniques.forEach((technique) => {
-        expectedMitre = expectedMitre + technique;
-      });
-    });
-    const expectedIndexPatterns = [
-      'apm-*-transaction*',
-      'auditbeat-*',
-      'endgame-*',
-      'filebeat-*',
-      'logs-*',
-      'packetbeat-*',
-      'winlogbeat-*',
-    ];
-
-    cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${newRule.name} Beta`);
-
-    cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', newRule.description);
+    cy.get(RULE_NAME_HEADER).should('have.text', `${rule.name}`);
+    cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
-      getDescriptionForTitle('Severity').invoke('text').should('eql', newRule.severity);
-      getDescriptionForTitle('Risk score').invoke('text').should('eql', newRule.riskScore);
-      getDescriptionForTitle('Reference URLs').invoke('text').should('eql', expectedUrls);
-      getDescriptionForTitle('False positive examples')
-        .invoke('text')
-        .should('eql', expectedFalsePositives);
-      getDescriptionForTitle('MITRE ATT&CK').invoke('text').should('eql', expectedMitre);
-      getDescriptionForTitle('Tags').invoke('text').should('eql', expectedTags);
+      getDetails(SEVERITY_DETAILS).should('have.text', rule.severity);
+      getDetails(RISK_SCORE_DETAILS).should('have.text', rule.riskScore);
+      getDetails(REFERENCE_URLS_DETAILS).should((details) => {
+        expect(removeExternalLinkText(details.text())).equal(expectedUrls);
+      });
+      getDetails(FALSE_POSITIVES_DETAILS).should('have.text', expectedFalsePositives);
+      getDetails(MITRE_ATTACK_DETAILS).should((mitre) => {
+        expect(removeExternalLinkText(mitre.text())).equal(expectedMitre);
+      });
+      getDetails(TAGS_DETAILS).should('have.text', expectedTags);
     });
-
-    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
-    cy.get(ABOUT_INVESTIGATION_NOTES).invoke('text').should('eql', INVESTIGATION_NOTES_MARKDOWN);
-
+    cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+    cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDescriptionForTitle('Index patterns')
-        .invoke('text')
-        .should('eql', expectedIndexPatterns.join(''));
-      getDescriptionForTitle('Custom query')
-        .invoke('text')
-        .should('eql', `${newRule.customQuery} `);
-      getDescriptionForTitle('Rule type').invoke('text').should('eql', 'Query');
-      getDescriptionForTitle('Timeline template').invoke('text').should('eql', 'None');
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', indexPatterns.join(''));
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.customQuery);
+      getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
+      getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
+    });
+    cy.get(SCHEDULE_DETAILS).within(() => {
+      getDetails(RUNS_EVERY_DETAILS).should(
+        'have.text',
+        `${newRule.runsEvery.interval}${newRule.runsEvery.type}`
+      );
+      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
+        'have.text',
+        `${newRule.lookBack.interval}${newRule.lookBack.type}`
+      );
     });
 
-    cy.get(SCHEDULE_DETAILS).within(() => {
-      getDescriptionForTitle('Runs every').invoke('text').should('eql', '5m');
-      getDescriptionForTitle('Additional look-back time').invoke('text').should('eql', '1m');
-    });
+    waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
+
+    cy.get(NUMBER_OF_ALERTS).invoke('text').then(parseFloat).should('be.above', 0);
+    cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
+    cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
+    cy.get(ALERT_RULE_METHOD).first().should('have.text', 'query');
+    cy.get(ALERT_RULE_SEVERITY).first().should('have.text', rule.severity.toLowerCase());
+    cy.get(ALERT_RULE_RISK_SCORE).first().should('have.text', rule.riskScore);
   });
 });
 
-describe('Deletes custom rules', () => {
-  beforeEach(() => {
-    esArchiverLoad('custom_rules');
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
-    waitForAlertsPanelToBeLoaded();
-    waitForAlertsIndexToBeCreated();
-    goToManageAlertsDetectionRules();
-  });
-
-  after(() => {
-    esArchiverUnload('custom_rules');
-  });
-
-  it('Deletes one rule', () => {
-    cy.get(RULES_TABLE)
-      .find(RULES_ROW)
-      .then((rules) => {
-        const initialNumberOfRules = rules.length;
-        const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
-
-        cy.get(SHOWING_RULES_TEXT)
-          .invoke('text')
-          .should('eql', `Showing ${initialNumberOfRules} rules`);
-
-        deleteFirstRule();
-        waitForRulesToBeLoaded();
-
-        cy.get(RULES_TABLE).then(($table) => {
-          cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
-        });
-        cy.get(SHOWING_RULES_TEXT)
-          .invoke('text')
-          .should('eql', `Showing ${expectedNumberOfRulesAfterDeletion} rules`);
-        cy.get(CUSTOM_RULES_BTN)
-          .invoke('text')
-          .should('eql', `Custom rules (${expectedNumberOfRulesAfterDeletion})`);
-      });
-  });
-
-  it('Deletes more than one rule', () => {
-    cy.get(RULES_TABLE)
-      .find(RULES_ROW)
-      .then((rules) => {
-        const initialNumberOfRules = rules.length;
-        const numberOfRulesToBeDeleted = 3;
-        const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - numberOfRulesToBeDeleted;
-
-        selectNumberOfRules(numberOfRulesToBeDeleted);
-        deleteSelectedRules();
-        waitForRulesToBeLoaded();
-
-        cy.get(RULES_TABLE).then(($table) => {
-          cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
-        });
-        cy.get(SHOWING_RULES_TEXT)
-          .invoke('text')
-          .should('eql', `Showing ${expectedNumberOfRulesAfterDeletion} rule`);
-        cy.get(CUSTOM_RULES_BTN)
-          .invoke('text')
-          .should('eql', `Custom rules (${expectedNumberOfRulesAfterDeletion})`);
-      });
-  });
-
-  it('Allows a rule to be edited', () => {
-    editFirstRule();
-
-    // expect define step to populate
-    cy.get(CUSTOM_QUERY_INPUT).invoke('text').should('eq', existingRule.customQuery);
-    if (existingRule.index && existingRule.index.length > 0) {
-      cy.get(DEFINE_INDEX_INPUT).invoke('text').should('eq', existingRule.index.join(''));
-    }
-
-    goToAboutStepTab();
-
-    // expect about step to populate
-    cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
-    cy.get(RULE_DESCRIPTION_INPUT).invoke('text').should('eql', existingRule.description);
-    cy.get(TAGS_FIELD).invoke('text').should('eql', existingRule.tags.join(''));
-
-    cy.get(SEVERITY_DROPDOWN).invoke('text').should('eql', existingRule.severity);
-    cy.get(RISK_INPUT).invoke('val').should('eql', existingRule.riskScore);
-
-    goToScheduleStepTab();
-
-    // expect schedule step to populate
-    const intervalParts = existingRule.interval && existingRule.interval.match(/[0-9]+|[a-zA-Z]+/g);
-    if (intervalParts) {
-      const [amount, unit] = intervalParts;
-      cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', amount);
-      cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', unit);
-    } else {
-      throw new Error('Cannot assert scheduling info on a rule without an interval');
-    }
-
-    goToActionsStepTab();
-
-    cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
-
-    goToAboutStepTab();
-
-    const editedRule = {
-      ...existingRule,
-      severity: 'Medium',
-      description: 'Edited Rule description',
-    };
-
-    fillAboutRule(editedRule);
-    saveEditedRule();
-
-    const expectedTags = editedRule.tags.join('');
-    const expectedIndexPatterns =
-      editedRule.index && editedRule.index.length
-        ? editedRule.index
-        : [
-            'apm-*-transaction*',
-            'auditbeat-*',
-            'endgame-*',
-            'filebeat-*',
-            'logs-*',
-            'packetbeat-*',
-            'winlogbeat-*',
-          ];
-
-    cy.get(RULE_NAME_HEADER).invoke('text').should('eql', `${editedRule.name} Beta`);
-
-    cy.get(ABOUT_RULE_DESCRIPTION).invoke('text').should('eql', editedRule.description);
-    cy.get(ABOUT_DETAILS).within(() => {
-      getDescriptionForTitle('Severity').invoke('text').should('eql', editedRule.severity);
-      getDescriptionForTitle('Risk score').invoke('text').should('eql', editedRule.riskScore);
-      getDescriptionForTitle('Tags').invoke('text').should('eql', expectedTags);
+describe.skip('Custom detection rules deletion and edition', () => {
+  context('Deletion', () => {
+    beforeEach(() => {
+      cleanKibana();
+      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+      goToManageAlertsDetectionRules();
+      waitForAlertsIndexToBeCreated();
+      createCustomRuleActivated(newRule, 'rule1');
+      createCustomRuleActivated(newOverrideRule, 'rule2');
+      createCustomRuleActivated(existingRule, 'rule3');
+      refreshPage();
+      goToManageAlertsDetectionRules();
     });
 
-    cy.get(RULE_ABOUT_DETAILS_HEADER_TOGGLE).eq(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
-    cy.get(ABOUT_INVESTIGATION_NOTES).invoke('text').should('eql', editedRule.note);
+    it('Deletes one rule', () => {
+      cy.get(RULES_TABLE)
+        .find(RULES_ROW)
+        .then((rules) => {
+          const initialNumberOfRules = rules.length;
+          const expectedNumberOfRulesAfterDeletion = initialNumberOfRules - 1;
 
-    cy.get(DEFINITION_DETAILS).within(() => {
-      getDescriptionForTitle('Index patterns')
-        .invoke('text')
-        .should('eql', expectedIndexPatterns.join(''));
-      getDescriptionForTitle('Custom query')
-        .invoke('text')
-        .should('eql', `${editedRule.customQuery} `);
-      getDescriptionForTitle('Rule type').invoke('text').should('eql', 'Query');
-      getDescriptionForTitle('Timeline template').invoke('text').should('eql', 'None');
+          cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${initialNumberOfRules} rules`);
+
+          deleteFirstRule();
+          waitForRulesToBeLoaded();
+
+          cy.get(RULES_TABLE).then(($table) => {
+            cy.wrap($table.find(RULES_ROW).length).should(
+              'eql',
+              expectedNumberOfRulesAfterDeletion
+            );
+          });
+          cy.get(SHOWING_RULES_TEXT).should(
+            'have.text',
+            `Showing ${expectedNumberOfRulesAfterDeletion} rules`
+          );
+          cy.get(CUSTOM_RULES_BTN).should(
+            'have.text',
+            `Custom rules (${expectedNumberOfRulesAfterDeletion})`
+          );
+        });
     });
 
-    if (editedRule.interval) {
-      cy.get(SCHEDULE_DETAILS).within(() => {
-        getDescriptionForTitle('Runs every').invoke('text').should('eql', editedRule.interval);
+    it('Deletes more than one rule', () => {
+      cy.get(RULES_TABLE)
+        .find(RULES_ROW)
+        .then((rules) => {
+          const initialNumberOfRules = rules.length;
+          const numberOfRulesToBeDeleted = 2;
+          const expectedNumberOfRulesAfterDeletion =
+            initialNumberOfRules - numberOfRulesToBeDeleted;
+
+          selectNumberOfRules(numberOfRulesToBeDeleted);
+          deleteSelectedRules();
+          waitForRulesToBeLoaded();
+
+          cy.get(RULES_TABLE).then(($table) => {
+            cy.wrap($table.find(RULES_ROW).length).should(
+              'eql',
+              expectedNumberOfRulesAfterDeletion
+            );
+          });
+          cy.get(SHOWING_RULES_TEXT).should(
+            'have.text',
+            `Showing ${expectedNumberOfRulesAfterDeletion} rule`
+          );
+          cy.get(CUSTOM_RULES_BTN).should(
+            'have.text',
+            `Custom rules (${expectedNumberOfRulesAfterDeletion})`
+          );
+        });
+    });
+  });
+
+  context('Edition', () => {
+    const expectedEditedtags = editedRule.tags.join('');
+    const expectedEditedIndexPatterns =
+      editedRule.index && editedRule.index.length ? editedRule.index : indexPatterns;
+
+    beforeEach(() => {
+      cleanKibana();
+      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+      goToManageAlertsDetectionRules();
+      waitForAlertsIndexToBeCreated();
+      createCustomRuleActivated(existingRule, 'rule1');
+      refreshPage();
+      goToManageAlertsDetectionRules();
+    });
+
+    it('Allows a rule to be edited', () => {
+      editFirstRule();
+      waitForKibana();
+
+      // expect define step to populate
+      cy.get(CUSTOM_QUERY_INPUT).should('have.value', existingRule.customQuery);
+      if (existingRule.index && existingRule.index.length > 0) {
+        cy.get(DEFINE_INDEX_INPUT).should('have.text', existingRule.index.join(''));
+      }
+
+      goToAboutStepTab();
+
+      // expect about step to populate
+      cy.get(RULE_NAME_INPUT).invoke('val').should('eql', existingRule.name);
+      cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
+      cy.get(TAGS_FIELD).should('have.text', existingRule.tags.join(''));
+      cy.get(SEVERITY_DROPDOWN).should('have.text', existingRule.severity);
+      cy.get(RISK_INPUT).invoke('val').should('eql', existingRule.riskScore);
+
+      goToScheduleStepTab();
+
+      // expect schedule step to populate
+      const intervalParts =
+        existingRule.interval && existingRule.interval.match(/[0-9]+|[a-zA-Z]+/g);
+      if (intervalParts) {
+        const [amount, unit] = intervalParts;
+        cy.get(SCHEDULE_INTERVAL_AMOUNT_INPUT).invoke('val').should('eql', amount);
+        cy.get(SCHEDULE_INTERVAL_UNITS_INPUT).invoke('val').should('eql', unit);
+      } else {
+        throw new Error('Cannot assert scheduling info on a rule without an interval');
+      }
+
+      goToActionsStepTab();
+
+      cy.get(ACTIONS_THROTTLE_INPUT).invoke('val').should('eql', 'no_actions');
+
+      goToAboutStepTab();
+      cy.get(TAGS_CLEAR_BUTTON).click({ force: true });
+      fillAboutRule(editedRule);
+      saveEditedRule();
+
+      cy.get(RULE_NAME_HEADER).should('have.text', `${editedRule.name}`);
+      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', editedRule.description);
+      cy.get(ABOUT_DETAILS).within(() => {
+        getDetails(SEVERITY_DETAILS).should('have.text', editedRule.severity);
+        getDetails(RISK_SCORE_DETAILS).should('have.text', editedRule.riskScore);
+        getDetails(TAGS_DETAILS).should('have.text', expectedEditedtags);
       });
-    }
+      cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
+      cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', editedRule.note);
+      cy.get(DEFINITION_DETAILS).within(() => {
+        getDetails(INDEX_PATTERNS_DETAILS).should(
+          'have.text',
+          expectedEditedIndexPatterns.join('')
+        );
+        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', editedRule.customQuery);
+        getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
+        getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
+      });
+      if (editedRule.interval) {
+        cy.get(SCHEDULE_DETAILS).within(() => {
+          getDetails(RUNS_EVERY_DETAILS).should('have.text', editedRule.interval);
+        });
+      }
+    });
   });
 });

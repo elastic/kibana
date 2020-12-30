@@ -20,53 +20,46 @@
 import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
-import { i18n } from '@kbn/i18n';
 
+import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import {
   App,
-  AppMountParameters,
-  AppUpdater,
+  Plugin,
   CoreSetup,
   CoreStart,
-  Plugin,
+  AppUpdater,
+  ScopedHistory,
+  AppMountParameters,
+  DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   SavedObjectsClientContract,
-  ScopedHistory,
-} from 'src/core/public';
-import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import { UsageCollectionSetup } from '../../usage_collection/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableSetup,
-  EmbeddableStart,
-  SavedObjectEmbeddableInput,
-  EmbeddableInput,
-  PANEL_NOTIFICATION_TRIGGER,
-} from '../../embeddable/public';
-import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
-import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from '../../share/public';
-import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
+} from '../../../core/public';
 
-import { Start as InspectorStartContract } from '../../inspector/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
+import { createKbnUrlTracker } from './services/kibana_utils';
+import { UsageCollectionSetup } from './services/usage_collection';
+import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
+import { KibanaLegacySetup, KibanaLegacyStart } from './services/kibana_legacy';
+import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
+import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
+import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
+import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from './services/share';
+import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
 import {
   getSavedObjectFinder,
   SavedObjectLoader,
   SavedObjectsStart,
-  showSaveModal,
-} from '../../saved_objects/public';
+} from './services/saved_objects';
+import {
+  CONTEXT_MENU_TRIGGER,
+  EmbeddableSetup,
+  EmbeddableStart,
+  PANEL_NOTIFICATION_TRIGGER,
+} from './services/embeddable';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
   ExitFullScreenButtonProps,
-} from '../../kibana_react/public';
-import { createKbnUrlTracker, Storage } from '../../kibana_utils/public';
-import {
-  initAngularBootstrap,
-  KibanaLegacySetup,
-  KibanaLegacyStart,
-} from '../../kibana_legacy/public';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+} from './services/kibana_react';
 
 import {
   ACTION_CLONE_PANEL,
@@ -80,7 +73,6 @@ import {
   DashboardContainerFactoryDefinition,
   ExpandPanelAction,
   ExpandPanelActionContext,
-  RenderDeps,
   ReplacePanelAction,
   ReplacePanelActionContext,
   ACTION_UNLINK_FROM_LIBRARY,
@@ -100,14 +92,14 @@ import {
 } from './url_generator';
 import { createSavedDashboardLoader } from './saved_dashboards';
 import { DashboardConstants } from './dashboard_constants';
-import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
-import { AttributeService } from '.';
 import {
-  AttributeServiceOptions,
-  ATTRIBUTE_SERVICE_KEY,
-} from './attribute_service/attribute_service';
+  ACTION_EXPORT_CSV,
+  ExportContext,
+  ExportCSVAction,
+} from './application/actions/export_csv_action';
+import { dashboardFeatureCatalog } from './dashboard_strings';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -117,11 +109,11 @@ declare module '../../share/public' {
 
 export type DashboardUrlGenerator = UrlGeneratorContract<typeof DASHBOARD_APP_URL_GENERATOR>;
 
-interface DashboardFeatureFlagConfig {
+export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
 }
 
-interface SetupDependencies {
+export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
   embeddable: EmbeddableSetup;
   home?: HomePublicPluginSetup;
@@ -132,7 +124,7 @@ interface SetupDependencies {
   usageCollection?: UsageCollectionSetup;
 }
 
-interface StartDependencies {
+export interface DashboardStartDependencies {
   data: DataPublicPluginStart;
   kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
@@ -143,29 +135,16 @@ interface StartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
-export type Setup = void;
+export type DashboardSetup = void;
 
 export interface DashboardStart {
   getSavedDashboardLoader: () => SavedObjectLoader;
-  addEmbeddableToDashboard: (options: {
-    embeddableId: string;
-    embeddableType: string;
-  }) => void | undefined;
   dashboardUrlGenerator?: DashboardUrlGenerator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
-  getAttributeService: <
-    A extends { title: string },
-    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
-      [ATTRIBUTE_SERVICE_KEY]: A;
-    },
-    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
-  >(
-    type: string,
-    options?: AttributeServiceOptions<A>
-  ) => AttributeService<A, V, R>;
 }
 
 declare module '../../../plugins/ui_actions/public' {
@@ -176,40 +155,35 @@ declare module '../../../plugins/ui_actions/public' {
     [ACTION_ADD_TO_LIBRARY]: AddToLibraryActionContext;
     [ACTION_UNLINK_FROM_LIBRARY]: UnlinkFromLibraryActionContext;
     [ACTION_LIBRARY_NOTIFICATION]: LibraryNotificationActionContext;
+    [ACTION_EXPORT_CSV]: ExportContext;
   }
 }
 
 export class DashboardPlugin
-  implements Plugin<Setup, DashboardStart, SetupDependencies, StartDependencies> {
+  implements
+    Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
-  private getActiveUrl: (() => string) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
 
   private dashboardUrlGenerator?: DashboardUrlGenerator;
 
   public setup(
-    core: CoreSetup<StartDependencies, DashboardStart>,
+    core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     {
       share,
       uiActions,
       embeddable,
       home,
-      kibanaLegacy,
       urlForwarding,
       data,
       usageCollection,
-    }: SetupDependencies
-  ): Setup {
-    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<
-      DashboardFeatureFlagConfig
-    >();
-    const expandPanelAction = new ExpandPanelAction();
-    uiActions.registerAction(expandPanelAction);
-    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
+    }: DashboardSetupDependencies
+  ): DashboardSetup {
+    this.dashboardFeatureFlagConfig = this.initializerContext.config.get<DashboardFeatureFlagConfig>();
     const startServices = core.getStartServices();
 
     if (share) {
@@ -251,32 +225,37 @@ export class DashboardPlugin
         return <ExitFullScreenButtonUi {...props} />;
       };
       return {
-        capabilities: coreStart.application.capabilities,
-        application: coreStart.application,
+        SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
+        hideWriteControls: deps.kibanaLegacy.dashboardConfig.getHideWriteControls(),
         notifications: coreStart.notifications,
+        application: coreStart.application,
+        uiSettings: coreStart.uiSettings,
         overlays: coreStart.overlays,
         embeddable: deps.embeddable,
-        inspector: deps.inspector,
-        SavedObjectFinder: getSavedObjectFinder(coreStart.savedObjects, coreStart.uiSettings),
-        ExitFullScreenButton,
         uiActions: deps.uiActions,
+        inspector: deps.inspector,
+        http: coreStart.http,
+        ExitFullScreenButton,
       };
     };
 
-    const factory = new DashboardContainerFactoryDefinition(
-      getStartServices,
-      () => this.currentHistory!
-    );
-    embeddable.registerEmbeddableFactory(factory.type, factory);
-
-    const placeholderFactory = new PlaceholderEmbeddableFactory();
-    embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
+    if (share) {
+      this.dashboardUrlGenerator = share.urlGenerators.registerUrlGenerator(
+        createDashboardUrlGenerator(async () => {
+          const [coreStart, , selfStart] = await core.getStartServices();
+          return {
+            appBasePath: coreStart.application.getUrlForApp('dashboards'),
+            useHashedUrl: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            savedDashboardLoader: selfStart.getSavedDashboardLoader(),
+          };
+        })
+      );
+    }
 
     const {
       appMounted,
       appUnMounted,
       stop: stopUrlTracker,
-      getActiveUrl,
       restorePreviousUrl,
     } = createKbnUrlTracker({
       baseUrl: core.http.basePath.prepend('/app/dashboards'),
@@ -301,7 +280,12 @@ export class DashboardPlugin
       getHistory: () => this.currentHistory!,
     });
 
-    this.getActiveUrl = getActiveUrl;
+    const dashboardContainerFactory = new DashboardContainerFactoryDefinition(getStartServices);
+    embeddable.registerEmbeddableFactory(dashboardContainerFactory.type, dashboardContainerFactory);
+
+    const placeholderFactory = new PlaceholderEmbeddableFactory();
+    embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
+
     this.stopUrlTracking = () => {
       stopUrlTracker();
     };
@@ -309,66 +293,29 @@ export class DashboardPlugin
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboard',
-      order: -1001,
+      order: 2500,
       euiIconType: 'logoKibana',
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
-        const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         this.currentHistory = params.history;
-        appMounted();
-        const {
-          embeddable: embeddableStart,
-          navigation,
-          share: shareStart,
-          data: dataStart,
-          kibanaLegacy: { dashboardConfig },
-          urlForwarding: { navigateToDefaultApp, navigateToLegacyKibanaUrl },
-          savedObjects,
-        } = pluginsStart;
-
-        const deps: RenderDeps = {
-          pluginInitializerContext: this.initializerContext,
-          core: coreStart,
-          dashboardConfig,
-          navigateToDefaultApp,
-          navigateToLegacyKibanaUrl,
-          navigation,
-          share: shareStart,
-          data: dataStart,
-          savedObjectsClient: coreStart.savedObjects.client,
-          savedDashboards: dashboardStart.getSavedDashboardLoader(),
-          chrome: coreStart.chrome,
-          addBasePath: coreStart.http.basePath.prepend,
-          uiSettings: coreStart.uiSettings,
-          savedQueryService: dataStart.query.savedQueries,
-          embeddable: embeddableStart,
-          dashboardCapabilities: coreStart.application.capabilities.dashboard,
-          embeddableCapabilities: {
-            visualizeCapabilities: coreStart.application.capabilities.visualize,
-            mapsCapabilities: coreStart.application.capabilities.maps,
-          },
-          localStorage: new Storage(localStorage),
-          usageCollection,
-          scopedHistory: () => this.currentHistory!,
-          setHeaderActionMenu: params.setHeaderActionMenu,
-          savedObjects,
-          restorePreviousUrl,
-        };
-        // make sure the index pattern list is up to date
-        await dataStart.indexPatterns.clearCache();
-        const { renderApp } = await import('./application/application');
         params.element.classList.add('dshAppContainer');
-        const unmount = renderApp(params.element, params.appBasePath, deps);
-        return () => {
-          unmount();
-          appUnMounted();
-        };
+        const { mountApp } = await import('./application/dashboard_router');
+        appMounted();
+        return mountApp({
+          core,
+          appUnMounted,
+          usageCollection,
+          onAppLeave: params.onAppLeave,
+          initializerContext: this.initializerContext,
+          restorePreviousUrl,
+          element: params.element,
+          scopedHistory: this.currentHistory!,
+          setHeaderActionMenu: params.setHeaderActionMenu,
+        });
       },
     };
-
-    initAngularBootstrap();
 
     core.application.register(app);
     urlForwarding.forwardApp(
@@ -401,46 +348,28 @@ export class DashboardPlugin
     if (home) {
       home.featureCatalogue.register({
         id: DashboardConstants.DASHBOARD_ID,
-        title: i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
-          defaultMessage: 'Dashboard',
-        }),
-        description: i18n.translate('dashboard.featureCatalogue.dashboardDescription', {
-          defaultMessage: 'Display and share a collection of visualizations and saved searches.',
-        }),
+        title: dashboardFeatureCatalog.getTitle(),
+        subtitle: dashboardFeatureCatalog.getSubtitle(),
+        description: dashboardFeatureCatalog.getDescription(),
         icon: 'dashboardApp',
         path: `/app/dashboards#${DashboardConstants.LANDING_PAGE_PATH}`,
         showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
+        solutionId: 'kibana',
+        order: 100,
       });
     }
   }
 
-  private addEmbeddableToDashboard(
-    core: CoreStart,
-    { embeddableId, embeddableType }: { embeddableId: string; embeddableType: string }
-  ) {
-    if (!this.getActiveUrl) {
-      throw new Error('dashboard is not ready yet.');
-    }
-
-    const lastDashboardUrl = this.getActiveUrl();
-    const dashboardUrl = addEmbeddableToDashboardUrl(
-      lastDashboardUrl,
-      embeddableId,
-      embeddableType
-    );
-    core.application.navigateToApp('dashboards', { path: dashboardUrl });
-  }
-
-  public start(core: CoreStart, plugins: StartDependencies): DashboardStart {
+  public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     const { notifications } = core;
-    const {
-      uiActions,
-      data: { indexPatterns, search },
-      embeddable,
-    } = plugins;
+    const { uiActions, data, share } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
+
+    const expandPanelAction = new ExpandPanelAction();
+    uiActions.registerAction(expandPanelAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
 
     const changeViewAction = new ReplacePanelAction(
       core,
@@ -455,25 +384,29 @@ export class DashboardPlugin
     uiActions.registerAction(clonePanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
+    if (share) {
+      const ExportCSVPlugin = new ExportCSVAction({ core, data });
+      uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, ExportCSVPlugin);
+    }
+
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
-      const addToLibraryAction = new AddToLibraryAction();
+      const addToLibraryAction = new AddToLibraryAction({ toasts: notifications.toasts });
       uiActions.registerAction(addToLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
-      const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
+
+      const unlinkFromLibraryAction = new UnlinkFromLibraryAction({ toasts: notifications.toasts });
       uiActions.registerAction(unlinkFromLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
 
-      const libraryNotificationAction = new LibraryNotificationAction();
+      const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
     }
 
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
-      indexPatterns,
-      search,
-      chrome: core.chrome,
-      overlays: core.overlays,
+      savedObjects: plugins.savedObjects,
+      embeddableStart: plugins.embeddable,
     });
     const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
@@ -481,23 +414,11 @@ export class DashboardPlugin
 
     return {
       getSavedDashboardLoader: () => savedDashboardLoader,
-      addEmbeddableToDashboard: this.addEmbeddableToDashboard.bind(this, core),
       dashboardUrlGenerator: this.dashboardUrlGenerator,
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
-      getAttributeService: (type: string, options) =>
-        new AttributeService(
-          type,
-          showSaveModal,
-          core.savedObjects.client,
-          core.overlays,
-          core.i18n.Context,
-          core.notifications.toasts,
-          embeddable.getEmbeddableFactory,
-          options
-        ),
     };
   }
 

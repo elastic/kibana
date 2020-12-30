@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env/prebuilt_dev_only_entry');
+require('../src/setup_node_env/no_transpilation');
 require('@kbn/dev-utils/target/precommit_hook/cli');

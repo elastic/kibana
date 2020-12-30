@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -30,13 +30,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_URL_GENERATOR } from '../../../../common/constants/ml_url_generator';
-import { PLUGIN_ID } from '../../../../common/constants/app';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
+import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
-    'This selection contains too many buckets to be displayed.' +
-    'The dashboard is best viewed over a shorter time range.',
+    'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
 });
 const textViewButton = i18n.translate(
   'xpack.ml.explorer.charts.openInSingleMetricViewerButtonLabel',
@@ -60,18 +59,28 @@ function ExplorerChartContainer({
   severity,
   tooManyBuckets,
   wrapLabel,
-  navigateToApp,
   mlUrlGenerator,
+  basePath,
 }) {
-  const redirectToSingleMetricViewer = useCallback(async () => {
-    const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
-    addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, singleMetricViewerLink);
+  const [explorerSeriesLink, setExplorerSeriesLink] = useState();
 
-    await navigateToApp(PLUGIN_ID, {
-      path: singleMetricViewerLink,
-    });
-  }, [mlUrlGenerator]);
+  useEffect(() => {
+    let isCancelled = false;
+    const generateLink = async () => {
+      const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
+      if (!isCancelled) {
+        setExplorerSeriesLink(singleMetricViewerLink);
+      }
+    };
+    generateLink();
+    return () => {
+      isCancelled = true;
+    };
+  }, [mlUrlGenerator, series]);
 
+  const addToRecentlyAccessed = useCallback(() => {
+    addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, explorerSeriesLink);
+  }, [explorerSeriesLink]);
   const { detectorLabel, entityFields } = series;
 
   const chartType = getChartType(series);
@@ -121,16 +130,22 @@ function ExplorerChartContainer({
                 />
               </span>
             )}
-            <EuiToolTip position="top" content={textViewButton}>
-              <EuiButtonEmpty
-                iconSide="right"
-                iconType="visLine"
-                size="xs"
-                onClick={redirectToSingleMetricViewer}
-              >
-                <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
-              </EuiButtonEmpty>
-            </EuiToolTip>
+            {explorerSeriesLink && (
+              <EuiToolTip position="top" content={textViewButton}>
+                {/* href needs to be full link with base path while ChromeRecentlyAccessed requires only relative path */}
+                {/* disabling because we need button to behave as link and to have a callback */}
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiButtonEmpty
+                  iconSide="right"
+                  iconType="visLine"
+                  size="xs"
+                  href={`${basePath}/app/ml${explorerSeriesLink}`}
+                  onClick={addToRecentlyAccessed}
+                >
+                  <FormattedMessage id="xpack.ml.explorer.charts.viewLabel" defaultMessage="View" />
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            )}
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -176,17 +191,17 @@ export const ExplorerChartsContainerUI = ({
   severity,
   tooManyBuckets,
   kibana,
+  errorMessages,
 }) => {
   const {
     services: {
-      application: { navigateToApp },
-
+      http: { basePath },
       share: {
         urlGenerators: { getUrlGenerator },
       },
     },
   } = kibana;
-  const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+  const mlUrlGenerator = useMemo(() => getUrlGenerator(ML_APP_URL_GENERATOR), [getUrlGenerator]);
 
   // <EuiFlexGrid> doesn't allow a setting of `columns={1}` when chartsPerRow would be 1.
   // If that's the case we trick it doing that with the following settings:
@@ -194,27 +209,29 @@ export const ExplorerChartsContainerUI = ({
   const chartsColumns = chartsPerRow === 1 ? 0 : chartsPerRow;
 
   const wrapLabel = seriesToPlot.some((series) => isLabelLengthAboveThreshold(series));
-
   return (
-    <EuiFlexGrid columns={chartsColumns}>
-      {seriesToPlot.length > 0 &&
-        seriesToPlot.map((series) => (
-          <EuiFlexItem
-            key={getChartId(series)}
-            className="ml-explorer-chart-container"
-            style={{ minWidth: chartsWidth }}
-          >
-            <ExplorerChartContainer
-              series={series}
-              severity={severity}
-              tooManyBuckets={tooManyBuckets}
-              wrapLabel={wrapLabel}
-              navigateToApp={navigateToApp}
-              mlUrlGenerator={mlUrlGenerator}
-            />
-          </EuiFlexItem>
-        ))}
-    </EuiFlexGrid>
+    <>
+      <ExplorerChartsErrorCallOuts errorMessagesByType={errorMessages} />
+      <EuiFlexGrid columns={chartsColumns}>
+        {seriesToPlot.length > 0 &&
+          seriesToPlot.map((series) => (
+            <EuiFlexItem
+              key={getChartId(series)}
+              className="ml-explorer-chart-container"
+              style={{ minWidth: chartsWidth }}
+            >
+              <ExplorerChartContainer
+                series={series}
+                severity={severity}
+                tooManyBuckets={tooManyBuckets}
+                wrapLabel={wrapLabel}
+                mlUrlGenerator={mlUrlGenerator}
+                basePath={basePath.get()}
+              />
+            </EuiFlexItem>
+          ))}
+      </EuiFlexGrid>
+    </>
   );
 };
 

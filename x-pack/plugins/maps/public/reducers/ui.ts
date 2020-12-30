@@ -5,6 +5,8 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import { getMapsCapabilities } from '../kibana_services';
+
 import {
   UPDATE_FLYOUT,
   CLOSE_SET_VIEW,
@@ -38,7 +40,7 @@ export const DEFAULT_IS_LAYER_TOC_OPEN = true;
 export const DEFAULT_MAP_UI_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isFullScreen: false,
-  isReadOnly: false,
+  isReadOnly: !getMapsCapabilities().save,
   isLayerTOCOpen: DEFAULT_IS_LAYER_TOC_OPEN,
   isSetViewOpen: false,
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.

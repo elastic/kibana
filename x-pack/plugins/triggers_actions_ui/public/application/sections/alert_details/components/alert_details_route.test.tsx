@@ -10,14 +10,9 @@ import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from 'kibana/public';
 import { AlertDetailsRoute, getAlertData } from './alert_details_route';
 import { Alert } from '../../../../types';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
+jest.mock('../../../../common/lib/kibana');
 
-jest.mock('../../../app_context', () => {
-  const toastNotifications = jest.fn();
-  return {
-    useAppDependencies: jest.fn(() => ({ toastNotifications })),
-  };
-});
 describe('alert_details_route', () => {
   it('render a loader while fetching data', () => {
     const alert = mockAlert();
@@ -25,7 +20,7 @@ describe('alert_details_route', () => {
     expect(
       shallow(
         <AlertDetailsRoute {...mockRouterProps(alert)} {...mockApis()} />
-      ).containsMatchingElement(<EuiLoadingSpinner size="l" />)
+      ).containsMatchingElement(<CenterJustifiedSpinner />)
     ).toBeTruthy();
   });
 });
@@ -402,8 +397,13 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     updatedAt: new Date(),
     apiKeyOwner: null,
     throttle: null,
+    notifyWhen: null,
     muteAll: false,
     mutedInstanceIds: [],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
     ...overloads,
   };
 }

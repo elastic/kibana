@@ -25,11 +25,18 @@ const solutionEntry = {
   id: 'kibana',
   title: 'Kibana',
   subtitle: 'Visualize & analyze',
-  descriptions: ['Analyze data in dashboards'],
+  description: 'Explore and analyze your data',
+  appDescriptions: ['Analyze data in dashboards'],
   icon: 'logoKibana',
   path: 'kibana_landing_page',
   order: 1,
 };
+
+jest.mock('../../kibana_services', () => ({
+  getServices: () => ({
+    trackUiMetric: jest.fn(),
+  }),
+}));
 
 const addBasePathMock = (path: string) => (path ? path : 'path');
 

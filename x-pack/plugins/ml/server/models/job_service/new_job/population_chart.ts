@@ -118,7 +118,7 @@ function processSearchResults(resp: any, fields: string[]): ProcessedResults {
   return {
     success: true,
     results: tempResults,
-    totalResults: resp.hits.total,
+    totalResults: resp.hits.total.value,
   };
 }
 
@@ -135,7 +135,7 @@ function getPopulationSearchJsonFromConfig(
   const json = {
     index: indexPatternTitle,
     size: 0,
-    rest_total_hits_as_int: true,
+    track_total_hits: true,
     body: {
       query: {},
       aggs: {

@@ -66,7 +66,7 @@ describe('ApplicationService', () => {
         const { register } = service.setup(setupDeps);
 
         let resolveMount: () => void;
-        const promise = new Promise((resolve) => {
+        const promise = new Promise<void>((resolve) => {
           resolveMount = resolve;
         });
 
@@ -100,7 +100,7 @@ describe('ApplicationService', () => {
         const { register } = service.setup(setupDeps);
 
         let resolveMount: () => void;
-        const promise = new Promise((resolve) => {
+        const promise = new Promise<void>((resolve) => {
           resolveMount = resolve;
         });
 
@@ -258,6 +258,34 @@ describe('ApplicationService', () => {
       expect(history.entries.length).toEqual(2);
       expect(history.entries[1].pathname).toEqual('/app/app1');
     });
+
+    it('does not trigger navigation check if navigating to the current app', async () => {
+      startDeps.overlays.openConfirm.mockResolvedValue(false);
+
+      const { register } = service.setup(setupDeps);
+
+      register(Symbol(), {
+        id: 'app1',
+        title: 'App1',
+        mount: ({ onAppLeave }: AppMountParameters) => {
+          onAppLeave((actions) => actions.confirm('confirmation-message', 'confirmation-title'));
+          return () => undefined;
+        },
+      });
+
+      const { navigateToApp, getComponent } = await service.start(startDeps);
+
+      update = createRenderer(getComponent());
+
+      await act(async () => {
+        await navigate('/app/app1');
+        await navigateToApp('app1', { path: '/internal-path' });
+      });
+
+      expect(startDeps.overlays.openConfirm).not.toHaveBeenCalled();
+      expect(history.entries.length).toEqual(3);
+      expect(history.entries[2].pathname).toEqual('/app/app1/internal-path');
+    });
   });
 
   describe('registering action menus', () => {
@@ -331,6 +359,48 @@ describe('ApplicationService', () => {
       expect(await getValue(currentActionMenu$)).toBe(mounter2);
     });
 
+    it('does not update the observable value when navigating to the current app', async () => {
+      const { register } = service.setup(setupDeps);
+
+      let initialMount = true;
+      register(Symbol(), {
+        id: 'app1',
+        title: 'App1',
+        mount: async ({ setHeaderActionMenu }: AppMountParameters) => {
+          if (initialMount) {
+            setHeaderActionMenu(mounter1);
+            initialMount = false;
+          }
+          return () => undefined;
+        },
+      });
+
+      const { navigateToApp, getComponent, currentActionMenu$ } = await service.start(startDeps);
+      update = createRenderer(getComponent());
+
+      let mountedMenuCount = 0;
+      currentActionMenu$.subscribe(() => {
+        mountedMenuCount++;
+      });
+
+      await act(async () => {
+        await navigateToApp('app1');
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBe(mounter1);
+
+      await act(async () => {
+        await navigateToApp('app1');
+        await flushPromises();
+      });
+
+      expect(await getValue(currentActionMenu$)).toBe(mounter1);
+
+      // there is an initial 'undefined' emission
+      expect(mountedMenuCount).toBe(2);
+    });
+
     it('updates the observable value to undefined when switching to an application without action menu', async () => {
       const { register } = service.setup(setupDeps);
 
@@ -372,7 +442,7 @@ describe('ApplicationService', () => {
       const { register } = service.setup(setupDeps);
 
       let resolveMount: () => void;
-      const promise = new Promise((resolve) => {
+      const promise = new Promise<void>((resolve) => {
         resolveMount = resolve;
       });
 
@@ -410,7 +480,7 @@ describe('ApplicationService', () => {
       const { register } = service.setup(setupDeps);
 
       let resolveMount: () => void;
-      const promise = new Promise((resolve) => {
+      const promise = new Promise<void>((resolve) => {
         resolveMount = resolve;
       });
 

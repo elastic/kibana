@@ -53,6 +53,7 @@ const errorMessage = i18n.translate(
     defaultMessage: 'Invalid interval format.',
   }
 );
+const autoInterval = 'auto';
 
 function validateInterval(
   agg: any,
@@ -64,7 +65,7 @@ function validateInterval(
     return { isValid: true, interval: agg.buckets?.getInterval() };
   }
 
-  if (!value) {
+  if (!value || (value === autoInterval && !definedOption)) {
     return { isValid: false };
   }
 
@@ -110,21 +111,22 @@ function TimeIntervalParamEditor({
   const timeBase: string = get(editorConfig, 'interval.timeBase') as string;
   const options = timeBase
     ? []
-    : ((aggParam as any).options || []).reduce(
-        (filtered: ComboBoxOption[], option: AggParamOption) => {
-          if (option.enabled ? option.enabled(agg) : true) {
-            filtered.push({ label: option.display, key: option.val });
-          }
-          return filtered;
-        },
-        [] as ComboBoxOption[]
-      );
+    : (aggParam.options || []).reduce((filtered: ComboBoxOption[], option: AggParamOption) => {
+        if (option.enabled ? option.enabled(agg) : true) {
+          filtered.push({ label: option.display, key: option.val });
+        }
+        return filtered;
+      }, []);
 
   let selectedOptions: ComboBoxOption[] = [];
   let definedOption: ComboBoxOption | undefined;
   if (value) {
     definedOption = find(options, { key: value });
-    selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
+    selectedOptions = definedOption
+      ? [definedOption]
+      : value === autoInterval
+      ? []
+      : [{ label: value, key: 'custom' }];
   }
 
   const { isValid, error, interval } = validateInterval(agg, value, definedOption, timeBase);
@@ -165,7 +167,7 @@ function TimeIntervalParamEditor({
 
   return (
     <EuiFormRow
-      compressed
+      display="rowCompressed"
       error={error}
       fullWidth={true}
       helpText={helpText}

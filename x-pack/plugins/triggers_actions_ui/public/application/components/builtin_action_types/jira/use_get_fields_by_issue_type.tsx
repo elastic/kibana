@@ -23,7 +23,7 @@ interface Props {
     ToastsApi,
     'get$' | 'add' | 'remove' | 'addSuccess' | 'addWarning' | 'addDanger' | 'addError'
   >;
-  issueType: string;
+  issueType: string | undefined;
   actionConnector?: ActionConnector;
 }
 
@@ -72,6 +72,7 @@ export const useGetFieldsByIssueType = ({
         }
       } catch (error) {
         if (!didCancel) {
+          setIsLoading(false);
           toastNotifications.addDanger({
             title: i18n.FIELDS_API_ERROR,
             text: error.message,

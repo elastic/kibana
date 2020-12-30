@@ -18,8 +18,8 @@
  */
 import { openModal } from './shard_failure_open_modal_button.test.mocks';
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { ShardFailureOpenModalButton } from './shard_failure_open_modal_button';
+import { mountWithIntl } from '@kbn/test/jest';
+import ShardFailureOpenModalButton from './shard_failure_open_modal_button';
 import { shardFailureRequest } from './__mocks__/shard_failure_request';
 import { shardFailureResponse } from './__mocks__/shard_failure_response';
 import { findTestSubject } from '@elastic/eui/lib/test';

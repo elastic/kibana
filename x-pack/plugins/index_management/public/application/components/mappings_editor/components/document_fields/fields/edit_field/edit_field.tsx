@@ -91,8 +91,8 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit, updateF
           <FormDataProvider pathsToWatch={['type', 'subType']}>
             {({ type, subType }) => {
               const linkDocumentation =
-                documentationService.getTypeDocLink(subType?.[0].value) ||
-                documentationService.getTypeDocLink(type?.[0].value);
+                documentationService.getTypeDocLink(subType?.[0]?.value) ||
+                documentationService.getTypeDocLink(type?.[0]?.value);
 
               if (!linkDocumentation) {
                 return null;

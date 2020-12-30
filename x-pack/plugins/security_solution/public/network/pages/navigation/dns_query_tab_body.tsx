@@ -8,7 +8,7 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { getOr } from 'lodash/fp';
 
 import { NetworkDnsTable } from '../../components/network_dns_table';
-import { useNetworkDns, HISTOGRAM_ID } from '../../containers/network_dns';
+import { useNetworkDns } from '../../containers/network_dns';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
 import { NetworkComponentQueryProps } from './types';
@@ -20,6 +20,10 @@ import {
 import * as i18n from '../translations';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import { networkSelectors } from '../../store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
+
+const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 
@@ -43,13 +47,20 @@ export const histogramConfigs: Omit<MatrixHistogramConfigs, 'title'> = {
 
 const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   deleteQuery,
+  docValueFields,
   endDate,
   filterQuery,
+  indexNames,
   skip,
   startDate,
   setQuery,
   type,
 }) => {
+  const getNetworkDnsSelector = networkSelectors.dnsSelector();
+  const isPtrIncluded = useShallowEqualSelector(
+    (state) => getNetworkDnsSelector(state).isPtrIncluded
+  );
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
@@ -62,8 +73,10 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     loading,
     { totalCount, networkDns, pageInfo, loadPage, id, inspect, isInspected, refetch },
   ] = useNetworkDns({
+    docValueFields: docValueFields ?? [],
     endDate,
     filterQuery,
+    indexNames,
     skip,
     startDate,
     type,
@@ -85,9 +98,12 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
   return (
     <>
       <MatrixHistogram
+        id={HISTOGRAM_ID}
+        isPtrIncluded={isPtrIncluded}
+        docValueFields={docValueFields}
         endDate={endDate}
         filterQuery={filterQuery}
-        id={HISTOGRAM_ID}
+        indexNames={indexNames}
         setQuery={setQuery}
         showLegend={true}
         startDate={startDate}

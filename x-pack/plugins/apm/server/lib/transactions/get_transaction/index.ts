@@ -9,11 +9,7 @@ import {
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../../common/utils/range_filter';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { ProcessorEvent } from '../../../../common/processor_event';
 
 export async function getTransaction({
@@ -23,7 +19,7 @@ export async function getTransaction({
 }: {
   transactionId: string;
   traceId: string;
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
 }) {
   const { start, end, apmEventClient } = setup;
 

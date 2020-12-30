@@ -127,18 +127,6 @@ describe('update_endpoint_list_item_schema', () => {
     expect(message.schema).toEqual(outputPayload);
   });
 
-  test('it should accept an undefined for "_tags" but return an array', () => {
-    const inputPayload = getUpdateEndpointListItemSchemaMock();
-    const outputPayload = getUpdateEndpointListItemSchemaMock();
-    delete inputPayload._tags;
-    outputPayload._tags = [];
-    const decoded = updateEndpointListItemSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
-  });
-
   test('it should not allow an extra key to be sent in', () => {
     const payload: UpdateEndpointListItemSchema & {
       extraKey?: string;

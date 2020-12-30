@@ -19,6 +19,7 @@
 
 import * as Rx from 'rxjs';
 import { toArray, map } from 'rxjs/operators';
+import { lastValueFrom } from '@kbn/std';
 
 import { pipeClosure, debounceTimeBuffer, maybeMap, maybe } from './rxjs_helpers';
 
@@ -36,21 +37,21 @@ describe('pipeClosure()', () => {
       toArray()
     );
 
-    await expect(foo$.toPromise()).resolves.toMatchInlineSnapshot(`
+    await expect(lastValueFrom(foo$)).resolves.toMatchInlineSnapshot(`
             Array [
               1,
               2,
               3,
             ]
           `);
-    await expect(foo$.toPromise()).resolves.toMatchInlineSnapshot(`
+    await expect(lastValueFrom(foo$)).resolves.toMatchInlineSnapshot(`
             Array [
               2,
               4,
               6,
             ]
           `);
-    await expect(foo$.toPromise()).resolves.toMatchInlineSnapshot(`
+    await expect(lastValueFrom(foo$)).resolves.toMatchInlineSnapshot(`
             Array [
               3,
               6,
@@ -64,7 +65,7 @@ describe('maybe()', () => {
   it('filters out undefined values from the stream', async () => {
     const foo$ = Rx.of(1, undefined, 2, undefined, 3).pipe(maybe(), toArray());
 
-    await expect(foo$.toPromise()).resolves.toEqual([1, 2, 3]);
+    await expect(lastValueFrom(foo$)).resolves.toEqual([1, 2, 3]);
   });
 });
 
@@ -75,7 +76,7 @@ describe('maybeMap()', () => {
       toArray()
     );
 
-    await expect(foo$.toPromise()).resolves.toEqual([1, 3, 5]);
+    await expect(lastValueFrom(foo$)).resolves.toEqual([1, 3, 5]);
   });
 });
 

@@ -12,14 +12,18 @@ describe('#get', () => {
   [null, undefined, '', 1, true, {}].forEach((type: any) => {
     test(`type of ${JSON.stringify(type)} throws error`, () => {
       const savedObjectActions = new SavedObjectActions(version);
-      expect(() => savedObjectActions.get(type, 'foo-action')).toThrowErrorMatchingSnapshot();
+      expect(() => savedObjectActions.get(type, 'foo-action')).toThrowError(
+        'type is required and must be a string'
+      );
     });
   });
 
   [null, undefined, '', 1, true, {}].forEach((operation: any) => {
     test(`operation of ${JSON.stringify(operation)} throws error`, () => {
       const savedObjectActions = new SavedObjectActions(version);
-      expect(() => savedObjectActions.get('foo-type', operation)).toThrowErrorMatchingSnapshot();
+      expect(() => savedObjectActions.get('foo-type', operation)).toThrowError(
+        'operation is required and must be a string'
+      );
     });
   });
 

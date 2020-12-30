@@ -4,10 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { fullPolicy, isOnPolicyDetailsPage } from './selectors';
-import { Immutable, PolicyConfig, UIPolicyConfig } from '../../../../../../common/endpoint/types';
+import {
+  Immutable,
+  PolicyConfig,
+  UIPolicyConfig,
+  PolicyData,
+} from '../../../../../../common/endpoint/types';
 import { ImmutableReducer } from '../../../../../common/store';
 import { AppAction } from '../../../../../common/store/actions';
 import { PolicyDetailsState } from '../../types';
+
+const updatePolicyConfigInPolicyData = (
+  policyData: Immutable<PolicyData>,
+  policyConfig: Immutable<PolicyConfig>
+) => ({
+  ...policyData,
+  inputs: policyData.inputs.map((input) => ({
+    ...input,
+    config: input.config && {
+      ...input.config,
+      policy: {
+        ...input.config.policy,
+        value: policyConfig,
+      },
+    },
+  })),
+});
 
 /**
  * Return a fresh copy of initial state, since we mutate state in the reducer.
@@ -23,6 +45,7 @@ export const initialPolicyDetailsState: () => Immutable<PolicyDetailsState> = ()
     total: 0,
     other: 0,
   },
+  license: undefined,
 });
 
 export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppAction> = (
@@ -68,6 +91,13 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
       ...state,
       isLoading: true,
       updateApiError: undefined,
+    };
+  }
+
+  if (action.type === 'licenseChanged') {
+    return {
+      ...state,
+      license: action.payload,
     };
   }
 
@@ -124,6 +154,27 @@ export const policyDetailsReducer: ImmutableReducer<PolicyDetailsState, AppActio
     });
 
     return newState;
+  }
+
+  if (action.type === 'userChangedAntivirusRegistration') {
+    if (state.policyItem) {
+      const policyConfig = fullPolicy(state);
+
+      return {
+        ...state,
+        policyItem: updatePolicyConfigInPolicyData(state.policyItem, {
+          ...policyConfig,
+          windows: {
+            ...policyConfig.windows,
+            antivirus_registration: {
+              enabled: action.payload.enabled,
+            },
+          },
+        }),
+      };
+    } else {
+      return state;
+    }
   }
 
   return state;

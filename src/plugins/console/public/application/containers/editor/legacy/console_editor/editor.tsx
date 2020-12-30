@@ -182,6 +182,9 @@ function EditorUI({ initialTextValue }: EditorProps) {
       unsubscribeResizer();
       clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
+      if (editorInstanceRef.current) {
+        editorInstanceRef.current.getCoreEditor().destroy();
+      }
     };
   }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);
 

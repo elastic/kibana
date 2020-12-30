@@ -5,6 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ValuesType } from 'utility-types';
+import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../../ml/common';
 
 export enum AlertType {
   ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
@@ -27,6 +29,7 @@ export const ALERT_TYPES_CONFIG = {
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
+    minimumLicenseRequired: 'basic',
     producer: 'apm',
   },
   [AlertType.TransactionDuration]: {
@@ -35,6 +38,7 @@ export const ALERT_TYPES_CONFIG = {
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
+    minimumLicenseRequired: 'basic',
     producer: 'apm',
   },
   [AlertType.TransactionDurationAnomaly]: {
@@ -43,6 +47,7 @@ export const ALERT_TYPES_CONFIG = {
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
+    minimumLicenseRequired: 'basic',
     producer: 'apm',
   },
   [AlertType.TransactionErrorRate]: {
@@ -51,9 +56,45 @@ export const ALERT_TYPES_CONFIG = {
     }),
     actionGroups: [THRESHOLD_MET_GROUP],
     defaultActionGroupId: 'threshold_met',
+    minimumLicenseRequired: 'basic',
     producer: 'apm',
   },
 };
+
+export const ANOMALY_ALERT_SEVERITY_TYPES = [
+  {
+    type: ANOMALY_SEVERITY.CRITICAL,
+    label: i18n.translate('xpack.apm.alerts.anomalySeverity.criticalLabel', {
+      defaultMessage: 'critical',
+    }),
+    threshold: ANOMALY_THRESHOLD.CRITICAL,
+  },
+  {
+    type: ANOMALY_SEVERITY.MAJOR,
+    label: i18n.translate('xpack.apm.alerts.anomalySeverity.majorLabel', {
+      defaultMessage: 'major',
+    }),
+    threshold: ANOMALY_THRESHOLD.MAJOR,
+  },
+  {
+    type: ANOMALY_SEVERITY.MINOR,
+    label: i18n.translate('xpack.apm.alerts.anomalySeverity.minor', {
+      defaultMessage: 'minor',
+    }),
+    threshold: ANOMALY_THRESHOLD.MINOR,
+  },
+  {
+    type: ANOMALY_SEVERITY.WARNING,
+    label: i18n.translate('xpack.apm.alerts.anomalySeverity.warningLabel', {
+      defaultMessage: 'warning',
+    }),
+    threshold: ANOMALY_THRESHOLD.WARNING,
+  },
+] as const;
+
+export type AnomalyAlertSeverityType = ValuesType<
+  typeof ANOMALY_ALERT_SEVERITY_TYPES
+>['type'];
 
 // Server side registrations
 // x-pack/plugins/apm/server/lib/alerts/<alert>.ts

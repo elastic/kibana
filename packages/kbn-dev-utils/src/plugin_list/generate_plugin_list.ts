@@ -24,9 +24,11 @@ import { REPO_ROOT } from '@kbn/utils';
 
 import { Plugins } from './discover_plugins';
 
+const sortPlugins = (plugins: Plugins) => plugins.sort((a, b) => a.id.localeCompare(b.id));
+
 function* printPlugins(plugins: Plugins, includes: string[]) {
-  for (const plugin of plugins) {
-    const path = plugin.relativeReadmePath || plugin.relativeDir;
+  for (const plugin of sortPlugins(plugins)) {
+    const path = normalizePath(plugin.relativeReadmePath || plugin.relativeDir);
     yield '';
 
     if (plugin.readmeAsciidocAnchor) {
@@ -67,7 +69,7 @@ NOTE:
 [discrete]
 === src/plugins
 
-[%header,cols=2*] 
+[%header,cols=2*]
 |===
 |Name
 |Description
@@ -79,7 +81,7 @@ ${Array.from(printPlugins(ossPlugins, includes)).join('\n')}
 [discrete]
 === x-pack/plugins
 
-[%header,cols=2*] 
+[%header,cols=2*]
 |===
 |Name
 |Description

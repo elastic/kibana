@@ -33,7 +33,7 @@ describe('RecentCases', () => {
     wrapper.find(`[data-test-subj="no-cases-create-case"]`).first().simulate('click');
     expect(navigateToApp).toHaveBeenCalledWith('securitySolution:case', {
       path:
-        "/create?timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+        "/create?sourcerer=(default:!('apm-*-transaction*','auditbeat-*','endgame-*','filebeat-*','logs-*','packetbeat-*','winlogbeat-*'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
     });
   });
 });

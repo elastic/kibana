@@ -43,8 +43,6 @@ export class CanvasPlugin implements Plugin {
       name: 'Canvas',
       order: 300,
       category: DEFAULT_APP_CATEGORIES.kibana,
-      icon: 'canvasApp',
-      navLinkId: 'canvas',
       app: ['canvas', 'kibana'],
       catalogue: ['canvas'],
       privileges: {

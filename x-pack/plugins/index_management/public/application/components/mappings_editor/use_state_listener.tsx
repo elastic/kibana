@@ -11,8 +11,15 @@ import {
   MappingsConfiguration,
   MappingsTemplates,
   OnUpdateHandler,
+  RuntimeFields,
 } from './types';
-import { normalize, deNormalize, stripUndefinedValues } from './lib';
+import {
+  normalize,
+  deNormalize,
+  stripUndefinedValues,
+  normalizeRuntimeFields,
+  deNormalizeRuntimeFields,
+} from './lib';
 import { useMappingsState, useDispatch } from './mappings_state_context';
 
 interface Args {
@@ -21,6 +28,7 @@ interface Args {
     templates: MappingsTemplates;
     configuration: MappingsConfiguration;
     fields: { [key: string]: Field };
+    runtime: RuntimeFields;
   };
   mappingsType?: string;
 }
@@ -29,15 +37,21 @@ export const useMappingsStateListener = ({ onChange, value, mappingsType }: Args
   const state = useMappingsState();
   const dispatch = useDispatch();
 
-  const parsedFieldsDefaultValue = useMemo(() => normalize(value?.fields), [value?.fields]);
+  const { fields: mappedFields, runtime: runtimeFields } = value ?? {};
+
+  const parsedFieldsDefaultValue = useMemo(() => normalize(mappedFields), [mappedFields]);
+  const parsedRuntimeFieldsDefaultValue = useMemo(() => normalizeRuntimeFields(runtimeFields), [
+    runtimeFields,
+  ]);
+
   useEffect(() => {
     // If we are creating a new field, but haven't entered any name
     // it is valid and we can byPass its form validation (that requires a "name" to be defined)
     const isFieldFormVisible = state.fieldForm !== undefined;
     const emptyNameValue =
       isFieldFormVisible &&
-      (state.fieldForm!.data.raw.name === undefined ||
-        state.fieldForm!.data.raw.name.trim() === '');
+      (state.fieldForm!.data.internal.name === undefined ||
+        state.fieldForm!.data.internal.name.trim() === '');
 
     const bypassFieldFormValidation =
       state.documentFields.status === 'creatingField' && emptyNameValue;
@@ -51,6 +65,9 @@ export const useMappingsStateListener = ({ onChange, value, mappingsType }: Args
             ? state.fieldsJsonEditor.format()
             : deNormalize(state.fields);
 
+        // Get the runtime fields
+        const runtime = deNormalizeRuntimeFields(state.runtimeFields);
+
         const configurationData = state.configuration.data.format();
         const templatesData = state.templates.data.format();
 
@@ -61,8 +78,14 @@ export const useMappingsStateListener = ({ onChange, value, mappingsType }: Args
           }),
         };
 
+        // Mapped fields
         if (fields && Object.keys(fields).length > 0) {
           output.properties = fields;
+        }
+
+        // Runtime fields
+        if (runtime && Object.keys(runtime).length > 0) {
+          output.runtime = runtime;
         }
 
         if (Object.keys(output).length > 0) {
@@ -73,7 +96,11 @@ export const useMappingsStateListener = ({ onChange, value, mappingsType }: Args
               };
         }
 
-        return undefined;
+        return mappingsType === undefined
+          ? undefined
+          : {
+              [mappingsType]: {}, // We still need to preserve the mappings type even if no fields have been defined
+            };
       },
       validate: async () => {
         const configurationFormValidator =
@@ -127,7 +154,8 @@ export const useMappingsStateListener = ({ onChange, value, mappingsType }: Args
           status: parsedFieldsDefaultValue.rootLevelFields.length === 0 ? 'creatingField' : 'idle',
           editor: 'default',
         },
+        runtimeFields: parsedRuntimeFieldsDefaultValue,
       },
     });
-  }, [value, parsedFieldsDefaultValue, dispatch]);
+  }, [value, parsedFieldsDefaultValue, dispatch, parsedRuntimeFieldsDefaultValue]);
 };

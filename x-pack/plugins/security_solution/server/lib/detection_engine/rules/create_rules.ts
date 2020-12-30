@@ -9,6 +9,7 @@ import { Alert } from '../../../../../alerts/common';
 import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
+import { PartialFilter, RuleTypeParams } from '../types';
 
 export const createRules = async ({
   alertsClient,
@@ -17,6 +18,7 @@ export const createRules = async ({
   buildingBlockType,
   description,
   enabled,
+  eventCategoryOverride,
   falsePositives,
   from,
   query,
@@ -44,6 +46,9 @@ export const createRules = async ({
   threat,
   threatFilters,
   threatIndex,
+  threatLanguage,
+  concurrentSearches,
+  itemsPerSearch,
   threatQuery,
   threatMapping,
   threshold,
@@ -55,8 +60,8 @@ export const createRules = async ({
   version,
   exceptionsList,
   actions,
-}: CreateRulesOptions): Promise<Alert> => {
-  return alertsClient.create({
+}: CreateRulesOptions): Promise<Alert<RuleTypeParams>> => {
+  return alertsClient.create<RuleTypeParams>({
     data: {
       name,
       tags: addTags(tags, ruleId, immutable),
@@ -69,6 +74,7 @@ export const createRules = async ({
         description,
         ruleId,
         index,
+        eventCategoryOverride,
         falsePositives,
         from,
         immutable,
@@ -90,10 +96,16 @@ export const createRules = async ({
         severityMapping,
         threat,
         threshold,
-        threatFilters,
+        /**
+         * TODO: Fix typing inconsistancy between `RuleTypeParams` and `CreateRulesOptions`
+         */
+        threatFilters: threatFilters as PartialFilter[] | undefined,
         threatIndex,
         threatQuery,
+        concurrentSearches,
+        itemsPerSearch,
         threatMapping,
+        threatLanguage,
         timestampOverride,
         to,
         type,
@@ -106,6 +118,7 @@ export const createRules = async ({
       enabled,
       actions: actions.map(transformRuleToAlertAction),
       throttle: null,
+      notifyWhen: null,
     },
   });
 };

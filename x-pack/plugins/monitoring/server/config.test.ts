@@ -72,7 +72,6 @@ describe('config schema', () => {
             "logFetchCount": 10,
             "logQueries": false,
             "pingTimeout": "PT30S",
-            "preserveHost": true,
             "requestHeadersWhitelist": Array [
               "authorization",
             ],
@@ -87,7 +86,6 @@ describe('config schema', () => {
               "truststore": Object {},
               "verificationMode": "full",
             },
-            "startupTimeout": "PT5S",
           },
           "enabled": true,
           "logs": Object {

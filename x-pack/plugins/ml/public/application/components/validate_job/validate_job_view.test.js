@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { ValidateJob } from './validate_job_view';
@@ -27,6 +27,7 @@ const job = {
 };
 
 const getJobConfig = () => job;
+const getDuration = () => ({ start: 0, end: 1 });
 
 function prepareTest(messages) {
   const p = Promise.resolve(messages);
@@ -40,7 +41,9 @@ function prepareTest(messages) {
     },
   };
 
-  const component = <ValidateJob getJobConfig={getJobConfig} ml={ml} kibana={kibana} />;
+  const component = (
+    <ValidateJob getDuration={getDuration} getJobConfig={getJobConfig} ml={ml} kibana={kibana} />
+  );
 
   const wrapper = shallowWithIntl(component);
 

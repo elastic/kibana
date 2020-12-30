@@ -30,6 +30,7 @@ export interface OverviewNetworkProps {
   startDate: GlobalTimeArgs['from'];
   endDate: GlobalTimeArgs['to'];
   filterQuery?: ESQuery | string;
+  indexNames: string[];
   setQuery: GlobalTimeArgs['setQuery'];
 }
 
@@ -38,6 +39,7 @@ const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);
 const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   endDate,
   filterQuery,
+  indexNames,
   startDate,
   setQuery,
 }) => {
@@ -48,6 +50,7 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
   const [loading, { overviewNetwork, id, inspect, refetch }] = useNetworkOverview({
     endDate,
     filterQuery,
+    indexNames,
     startDate,
   });
 
@@ -86,34 +89,39 @@ const OverviewNetworkComponent: React.FC<OverviewNetworkProps> = ({
     [goToNetwork, formatUrl]
   );
 
+  const title = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.networkTitle"
+        defaultMessage="Network events"
+      />
+    ),
+    []
+  );
+
+  const subtitle = useMemo(
+    () =>
+      !isEmpty(overviewNetwork) ? (
+        <FormattedMessage
+          defaultMessage="Showing: {formattedNetworkEventsCount} {networkEventsCount, plural, one {event} other {events}}"
+          id="xpack.securitySolution.overview.overviewNetwork.networkSubtitle"
+          values={{
+            formattedNetworkEventsCount,
+            networkEventsCount,
+          }}
+        />
+      ) : (
+        <>{''}</>
+      ),
+    [formattedNetworkEventsCount, networkEventsCount, overviewNetwork]
+  );
+
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
         <EuiPanel data-test-subj="overview-network-query">
           <>
-            <HeaderSection
-              id={OverviewNetworkQueryId}
-              subtitle={
-                !isEmpty(overviewNetwork) ? (
-                  <FormattedMessage
-                    defaultMessage="Showing: {formattedNetworkEventsCount} {networkEventsCount, plural, one {event} other {events}}"
-                    id="xpack.securitySolution.overview.overviewNetwork.networkSubtitle"
-                    values={{
-                      formattedNetworkEventsCount,
-                      networkEventsCount,
-                    }}
-                  />
-                ) : (
-                  <>{''}</>
-                )
-              }
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.overview.networkTitle"
-                  defaultMessage="Network events"
-                />
-              }
-            >
+            <HeaderSection id={OverviewNetworkQueryId} subtitle={subtitle} title={title}>
               {networkPageButton}
             </HeaderSection>
 

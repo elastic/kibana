@@ -38,8 +38,10 @@ const createExecution = (
   const execution = new Execution({
     executor,
     ast: parseExpression(expression),
-    context,
-    debug,
+    params: {
+      ...context,
+      debug,
+    },
   });
   return execution;
 };
@@ -68,7 +70,7 @@ describe('Execution', () => {
   test('creates default ExecutionContext', () => {
     const execution = createExecution();
     expect(execution.context).toMatchObject({
-      getInitialInput: expect.any(Function),
+      getSearchContext: expect.any(Function),
       variables: expect.any(Object),
       types: expect.any(Object),
     });
@@ -143,6 +145,7 @@ describe('Execution', () => {
       const execution = new Execution({
         executor,
         expression,
+        params: {},
       });
       expect(execution.expression).toBe(expression);
     });
@@ -153,6 +156,7 @@ describe('Execution', () => {
       const execution = new Execution({
         ast: parseExpression(expression),
         executor,
+        params: {},
       });
       expect(execution.expression).toBe(expression);
     });
@@ -191,6 +195,18 @@ describe('Execution', () => {
       expect(typeof result).toBe('object');
     });
 
+    test('context.getKibanaRequest is a function if provided', async () => {
+      const { result } = (await run('introspectContext key="getKibanaRequest"', {
+        kibanaRequest: {},
+      })) as any;
+      expect(typeof result).toBe('function');
+    });
+
+    test('context.getKibanaRequest is undefined if not provided', async () => {
+      const { result } = (await run('introspectContext key="getKibanaRequest"')) as any;
+      expect(typeof result).toBe('undefined');
+    });
+
     test('unknown context key is undefined', async () => {
       const { result } = (await run('introspectContext key="foo"')) as any;
       expect(typeof result).toBe('undefined');
@@ -204,10 +220,10 @@ describe('Execution', () => {
   });
 
   describe('inspector adapters', () => {
-    test('by default, "data" and "requests" inspector adapters are available', async () => {
+    test('by default, "tables" and "requests" inspector adapters are available', async () => {
       const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
       expect(result).toMatchObject({
-        data: expect.any(Object),
+        tables: expect.any(Object),
         requests: expect.any(Object),
       });
     });
@@ -491,7 +507,7 @@ describe('Execution', () => {
         await execution.result;
 
         for (const node of execution.state.get().ast.chain) {
-          expect(node.debug?.fn.name).toBe('add');
+          expect(node.debug?.fn).toBe('add');
         }
       });
 
@@ -619,7 +635,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;
@@ -637,7 +653,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;
@@ -658,7 +674,7 @@ describe('Execution', () => {
         const execution = new Execution({
           executor,
           ast: parseExpression('add val=1 | throws | add val=3'),
-          debug: true,
+          params: { debug: true },
         });
         execution.start(0);
         await execution.result;
@@ -667,7 +683,7 @@ describe('Execution', () => {
 
         expect(node2.debug).toMatchObject({
           success: false,
-          fn: expect.any(Object),
+          fn: 'throws',
           input: expect.any(Object),
           args: expect.any(Object),
           error: expect.any(Object),

@@ -20,7 +20,7 @@ import { XJsonEditor } from '../field_components';
 import { Fields } from '../processor_form.container';
 import { EDITOR_PX_HEIGHT } from './shared';
 
-const customConfig: FieldConfig = {
+const customConfig: FieldConfig<any> = {
   type: FIELD_TYPES.TEXT,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.customForm.optionsFieldLabel', {
     defaultMessage: 'Configuration',

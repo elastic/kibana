@@ -8,7 +8,12 @@ import { lazy } from 'react';
 import { ValidationResult, ActionTypeModel } from '../../../../types';
 import { connectorConfiguration } from './config';
 import logo from './logo.svg';
-import { ServiceNowActionConnector, ServiceNowActionParams } from './types';
+import {
+  ServiceNowActionConnector,
+  ServiceNowConfig,
+  ServiceNowSecrets,
+  ServiceNowActionParams,
+} from './types';
 import * as i18n from './translations';
 import { isValidUrl } from '../../../lib/value_validators';
 
@@ -25,8 +30,12 @@ const validateConnector = (action: ServiceNowActionConnector): ValidationResult 
     errors.apiUrl = [...errors.apiUrl, i18n.API_URL_REQUIRED];
   }
 
-  if (action.config.apiUrl && !isValidUrl(action.config.apiUrl, 'https:')) {
-    errors.apiUrl = [...errors.apiUrl, i18n.API_URL_INVALID];
+  if (action.config.apiUrl) {
+    if (!isValidUrl(action.config.apiUrl)) {
+      errors.apiUrl = [...errors.apiUrl, i18n.API_URL_INVALID];
+    } else if (!isValidUrl(action.config.apiUrl, 'https:')) {
+      errors.apiUrl = [...errors.apiUrl, i18n.API_URL_REQUIRE_HTTPS];
+    }
   }
 
   if (!action.secrets.username) {
@@ -41,7 +50,8 @@ const validateConnector = (action: ServiceNowActionConnector): ValidationResult 
 };
 
 export function getActionType(): ActionTypeModel<
-  ServiceNowActionConnector,
+  ServiceNowConfig,
+  ServiceNowSecrets,
   ServiceNowActionParams
 > {
   return {
@@ -54,11 +64,15 @@ export function getActionType(): ActionTypeModel<
     validateParams: (actionParams: ServiceNowActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
-        title: new Array<string>(),
+        short_description: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (actionParams.subActionParams && !actionParams.subActionParams.title?.length) {
-        errors.title.push(i18n.TITLE_REQUIRED);
+      if (
+        actionParams.subActionParams &&
+        actionParams.subActionParams.incident &&
+        !actionParams.subActionParams.incident.short_description?.length
+      ) {
+        errors.short_description.push(i18n.TITLE_REQUIRED);
       }
       return validationResult;
     },

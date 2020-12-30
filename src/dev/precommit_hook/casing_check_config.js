@@ -30,6 +30,7 @@ export const IGNORE_FILE_GLOBS = [
   'docs/**/*',
   '**/bin/**/*',
   '**/+([A-Z_]).md',
+  '**/+([A-Z_]).mdx',
   '**/+([A-Z_]).asciidoc',
   '**/LICENSE',
   '**/*.txt',
@@ -48,15 +49,14 @@ export const IGNORE_FILE_GLOBS = [
   'Dockerfile*',
   'vars/*',
   '.ci/pipeline-library/**/*',
-
-  // Files in this directory must match a pre-determined name in some cases.
-  'x-pack/plugins/canvas/storybook/*',
+  'packages/kbn-test/jest-preset.js',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 
-  // filename is required by storybook
-  'packages/kbn-storybook/storybook_config/preview-head.html',
+  // Storybook has predetermined filesnames
+  '**/preview-body.html',
+  '**/preview-head.html',
 
   // filename required by api-extractor
   'api-documenter.json',
@@ -70,8 +70,11 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/apm/e2e/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
+
   // packages for the ingest manager's api integration tests could be valid semver which has dashes
-  'x-pack/test/ingest_manager_api_integration/apis/fixtures/test_packages/**/*',
+  'x-pack/test/fleet_api_integration/apis/fixtures/test_packages/**/*',
+
+  '.teamcity/**/*',
 ];
 
 /**
@@ -100,7 +103,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
-  'packages/kbn-ui-framework/generator-kui',
   'src/legacy/ui/public/flot-charts',
   'test/functional/fixtures/es_archiver/visualize_source-filters',
   'packages/kbn-pm/src/utils/__fixtures__/*',
@@ -145,9 +147,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/core/server/core_app/assets/favicons/mstile-310x310.png',
   'src/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
   'test/functional/apps/management/exports/_import_objects-conflicts.json',
-  'packages/kbn-ui-framework/doc_site/src/images/elastic-logo.svg',
-  'packages/kbn-ui-framework/doc_site/src/images/hint-arrow.svg',
-  'packages/kbn-ui-framework/doc_site/src/images/react-logo.svg',
   'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
   'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',

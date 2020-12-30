@@ -17,13 +17,36 @@
  * under the License.
  */
 
-import { GetFieldsOptions, IIndexPatternsApiClient } from '../../common/index_patterns/types';
+import { ElasticsearchClient } from 'kibana/server';
+import {
+  GetFieldsOptions,
+  IIndexPatternsApiClient,
+  GetFieldsOptionsTimePattern,
+} from '../../common/index_patterns/types';
+import { IndexPatternsFetcher } from './fetcher';
 
 export class IndexPatternsApiServer implements IIndexPatternsApiClient {
-  async getFieldsForTimePattern(options: GetFieldsOptions = {}) {
-    throw new Error('IndexPatternsApiServer - getFieldsForTimePattern not defined');
+  esClient: ElasticsearchClient;
+  constructor(elasticsearchClient: ElasticsearchClient) {
+    this.esClient = elasticsearchClient;
   }
-  async getFieldsForWildcard(options: GetFieldsOptions = {}) {
-    throw new Error('IndexPatternsApiServer - getFieldsForWildcard not defined');
+  async getFieldsForWildcard({
+    pattern,
+    metaFields,
+    type,
+    rollupIndex,
+    allowNoIndex,
+  }: GetFieldsOptions) {
+    const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
+    return await indexPatterns.getFieldsForWildcard({
+      pattern,
+      metaFields,
+      type,
+      rollupIndex,
+    });
+  }
+  async getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
+    const indexPatterns = new IndexPatternsFetcher(this.esClient);
+    return await indexPatterns.getFieldsForTimePattern(options);
   }
 }

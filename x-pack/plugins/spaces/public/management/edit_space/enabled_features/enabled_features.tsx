@@ -34,8 +34,6 @@ export class EnabledFeatures extends Component<Props, {}> {
 
     return (
       <SectionPanel
-        collapsible={false}
-        initiallyCollapsed={false}
         title={this.getPanelTitle()}
         description={description}
         data-test-subj="enabled-features-panel"

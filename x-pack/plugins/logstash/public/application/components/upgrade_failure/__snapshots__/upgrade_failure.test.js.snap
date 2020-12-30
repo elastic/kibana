@@ -123,7 +123,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
         paddingSize="l"
       >
         <div
-          className="euiPanel euiPanel--paddingLarge euiPageContent"
+          className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent"
         >
           <EuiEmptyPrompt
             actions={
@@ -180,7 +180,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                                 size="xl"
                                 type="alert"
                               >
-                                <div
+                                <span
                                   data-euiicon-type="alert"
                                   size="xl"
                                 />
@@ -266,14 +266,23 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                           onClick={[MockFunction]}
                         >
                           <EuiButtonDisplay
+                            baseClassName="euiButton"
+                            disabled={false}
                             element="button"
                             fill={true}
+                            isDisabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >
                             <button
                               className="euiButton euiButton--primary euiButton--fill"
+                              disabled={false}
                               onClick={[MockFunction]}
+                              style={
+                                Object {
+                                  "minWidth": undefined,
+                                }
+                              }
                               type="button"
                             >
                               <EuiButtonContent
@@ -312,6 +321,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                         >
                           <button
                             className="euiButtonEmpty euiButtonEmpty--primary"
+                            disabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >
@@ -479,7 +489,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
         paddingSize="l"
       >
         <div
-          className="euiPanel euiPanel--paddingLarge euiPageContent"
+          className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent"
         >
           <EuiEmptyPrompt
             actions={
@@ -536,7 +546,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                                 size="xl"
                                 type="alert"
                               >
-                                <div
+                                <span
                                   data-euiicon-type="alert"
                                   size="xl"
                                 />
@@ -622,14 +632,23 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                           onClick={[MockFunction]}
                         >
                           <EuiButtonDisplay
+                            baseClassName="euiButton"
+                            disabled={false}
                             element="button"
                             fill={true}
+                            isDisabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >
                             <button
                               className="euiButton euiButton--primary euiButton--fill"
+                              disabled={false}
                               onClick={[MockFunction]}
+                              style={
+                                Object {
+                                  "minWidth": undefined,
+                                }
+                              }
                               type="button"
                             >
                               <EuiButtonContent
@@ -668,6 +687,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                         >
                           <button
                             className="euiButtonEmpty euiButtonEmpty--primary"
+                            disabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >
@@ -835,7 +855,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
         paddingSize="l"
       >
         <div
-          className="euiPanel euiPanel--paddingLarge euiPageContent"
+          className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent"
         >
           <EuiEmptyPrompt
             actions={
@@ -892,7 +912,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                                 size="xl"
                                 type="alert"
                               >
-                                <div
+                                <span
                                   data-euiicon-type="alert"
                                   size="xl"
                                 />
@@ -978,14 +998,23 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                           onClick={[MockFunction]}
                         >
                           <EuiButtonDisplay
+                            baseClassName="euiButton"
+                            disabled={false}
                             element="button"
                             fill={true}
+                            isDisabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >
                             <button
                               className="euiButton euiButton--primary euiButton--fill"
+                              disabled={false}
                               onClick={[MockFunction]}
+                              style={
+                                Object {
+                                  "minWidth": undefined,
+                                }
+                              }
                               type="button"
                             >
                               <EuiButtonContent
@@ -1024,6 +1053,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                         >
                           <button
                             className="euiButtonEmpty euiButtonEmpty--primary"
+                            disabled={false}
                             onClick={[MockFunction]}
                             type="button"
                           >

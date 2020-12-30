@@ -8,11 +8,26 @@ import {
   Reducer,
   AnyAction,
   Middleware,
+  Action,
+  Store,
   Dispatch,
   PreloadedState,
   StateFromReducersMapObject,
   CombinedState,
 } from 'redux';
+
+import { AppMountParameters } from '../../../../../src/core/public';
+import { StartServices } from '../types';
+import { AppFrontendLibs } from '../common/lib/lib';
+
+/**
+ * The React properties used to render `SecurityApp` as well as the `element` to render it into.
+ */
+export interface RenderAppProps extends AppFrontendLibs, AppMountParameters {
+  services: StartServices;
+  store: Store<State, Action>;
+  SubPluginRoutes: React.FC;
+}
 
 import { State, SubPluginsInitReducer } from '../common/store';
 import { Immutable } from '../../common/endpoint/types';
@@ -31,7 +46,7 @@ export interface SecuritySubPlugin {
   storageTimelines?: Pick<TimelineState, 'timelineById'>;
 }
 
-type SecuritySubPluginKeyStore =
+export type SecuritySubPluginKeyStore =
   | 'hosts'
   | 'network'
   | 'timeline'

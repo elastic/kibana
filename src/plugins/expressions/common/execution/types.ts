@@ -17,20 +17,26 @@
  * under the License.
  */
 
-import { ExpressionType } from '../expression_types';
-import { Adapters, DataAdapter, RequestAdapter } from '../../../inspector/common';
-import { TimeRange, Query, Filter } from '../../../data/common';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { KibanaRequest } from 'src/core/server';
+
+import { ExpressionType, SerializableState } from '../expression_types';
+import { Adapters, RequestAdapter } from '../../../inspector/common';
 import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
+import { TablesAdapter } from '../util/tables_adapter';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
  * it provides various methods to perform side-effects.
  */
-export interface ExecutionContext<Input = unknown, InspectorAdapters extends Adapters = Adapters> {
+export interface ExecutionContext<
+  InspectorAdapters extends Adapters = Adapters,
+  ExecutionContextSearch extends SerializableState = SerializableState
+> {
   /**
-   * Get initial input with which execution started.
+   * Get search context of the expression.
    */
-  getInitialInput: () => Input;
+  getSearchContext: () => ExecutionContextSearch;
 
   /**
    * Context variables that can be consumed using `var` and `var_set` functions.
@@ -55,7 +61,14 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters extends Ada
   /**
    * Search context in which expression should operate.
    */
-  search?: ExecutionContextSearch;
+  getSearchSessionId: () => string | undefined;
+
+  /**
+   * Getter to retrieve the `KibanaRequest` object inside an expression function.
+   * Useful for functions which are running on the server and need to perform
+   * operations that are scoped to a specific user.
+   */
+  getKibanaRequest?: () => KibanaRequest;
 
   /**
    * Allows to fetch saved objects from ElasticSearch. In browser `getSavedObject`
@@ -77,11 +90,5 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters extends Ada
  */
 export interface DefaultInspectorAdapters extends Adapters {
   requests: RequestAdapter;
-  data: DataAdapter;
-}
-
-export interface ExecutionContextSearch {
-  filters?: Filter[];
-  query?: Query | Query[];
-  timeRange?: TimeRange;
+  tables: TablesAdapter;
 }

@@ -6,7 +6,6 @@
 
 import { IRouter } from 'kibana/server';
 
-import { SecurityPluginSetup } from '../../../security/server';
 import { ConfigType } from '../config';
 
 import {
@@ -23,6 +22,7 @@ import {
   deleteListIndexRoute,
   deleteListItemRoute,
   deleteListRoute,
+  exportExceptionListRoute,
   exportListItemRoute,
   findEndpointListItemRoute,
   findExceptionListItemRoute,
@@ -46,11 +46,7 @@ import {
   updateListRoute,
 } from '.';
 
-export const initRoutes = (
-  router: IRouter,
-  config: ConfigType,
-  security: SecurityPluginSetup | null | undefined
-): void => {
+export const initRoutes = (router: IRouter, config: ConfigType): void => {
   // lists
   createListRoute(router);
   readListRoute(router);
@@ -58,7 +54,7 @@ export const initRoutes = (
   deleteListRoute(router);
   patchListRoute(router);
   findListRoute(router);
-  readPrivilegesRoute(router, security);
+  readPrivilegesRoute(router);
 
   // list items
   createListItemRoute(router);
@@ -81,6 +77,7 @@ export const initRoutes = (
   updateExceptionListRoute(router);
   deleteExceptionListRoute(router);
   findExceptionListRoute(router);
+  exportExceptionListRoute(router);
 
   // exception list items
   createExceptionListItemRoute(router);

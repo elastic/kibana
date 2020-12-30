@@ -10,9 +10,7 @@
  * Viewer dashboard.
  */
 
-import each from 'lodash/each';
-import get from 'lodash/get';
-import find from 'lodash/find';
+import { each, get, find } from 'lodash';
 import moment from 'moment-timezone';
 
 import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
@@ -21,6 +19,7 @@ import { parseInterval } from '../../../../common/util/parse_interval';
 import { getBoundsRoundedToInterval, getTimeBucketsFromCache } from '../../util/time_buckets';
 
 import { CHARTS_POINT_TARGET, TIME_FIELD_NAME } from '../timeseriesexplorer_constants';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.
@@ -102,7 +101,8 @@ export function processDataForFocusAnomalies(
   chartData,
   anomalyRecords,
   aggregationInterval,
-  modelPlotEnabled
+  modelPlotEnabled,
+  functionDescription
 ) {
   const timesToAddPointsFor = [];
 
@@ -144,6 +144,12 @@ export function processDataForFocusAnomalies(
     // Look for a chart point with the same time as the record.
     // If none found, find closest time in chartData set.
     const recordTime = record[TIME_FIELD_NAME];
+    if (
+      record.function === ML_JOB_AGGREGATION.METRIC &&
+      record.function_description !== functionDescription
+    )
+      return;
+
     const chartPoint = findChartPointForAnomalyTime(chartData, recordTime, aggregationInterval);
     if (chartPoint !== undefined) {
       // If chart aggregation interval > bucket span, there may be more than
@@ -160,6 +166,10 @@ export function processDataForFocusAnomalies(
           // substitute the value with the record's actual so it won't plot as null/0
           if (chartPoint.value === null) {
             chartPoint.value = record.actual;
+          }
+
+          if (record.function === ML_JOB_AGGREGATION.METRIC) {
+            chartPoint.value = Array.isArray(record.actual) ? record.actual[0] : record.actual;
           }
 
           chartPoint.actual = record.actual;
