@@ -24,7 +24,7 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import type { IUrlParams } from '../../../../context/url_params_context/types';
 import { px, unit, units } from '../../../../style/variables';
-import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';

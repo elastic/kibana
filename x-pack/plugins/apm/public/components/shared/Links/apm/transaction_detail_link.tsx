@@ -8,6 +8,7 @@ import React from 'react';
 import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
+import { APMQueryParams } from '../url_helpers';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
@@ -16,6 +17,12 @@ interface Props extends APMLinkExtendProps {
   transactionName: string;
   transactionType: string;
 }
+
+const persistedFilters: Array<keyof APMQueryParams> = [
+  'latencyAggregationType',
+  'transactionResult',
+  'serviceVersion',
+];
 
 export function TransactionDetailLink({
   serviceName,
@@ -27,12 +34,6 @@ export function TransactionDetailLink({
 }: Props) {
   const { urlParams } = useUrlParams();
 
-  const persistedFilters = pickKeys(
-    urlParams,
-    'transactionResult',
-    'serviceVersion'
-  );
-
   return (
     <APMLink
       path={`/services/${serviceName}/transactions/view`}
@@ -41,7 +42,7 @@ export function TransactionDetailLink({
         transactionId,
         transactionName,
         transactionType,
-        ...persistedFilters,
+        ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
       }}
       {...rest}
     />

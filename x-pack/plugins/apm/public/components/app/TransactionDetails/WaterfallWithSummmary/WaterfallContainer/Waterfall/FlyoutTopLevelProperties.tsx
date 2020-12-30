@@ -11,7 +11,7 @@ import {
   TRANSACTION_NAME,
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
-import { TransactionDetailLink } from '../../../../../shared/Links/apm/TransactionDetailLink';
+import { TransactionDetailLink } from '../../../../../shared/Links/apm/transaction_detail_link';
 import { StickyProperties } from '../../../../../shared/StickyProperties';
 import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview';
 
