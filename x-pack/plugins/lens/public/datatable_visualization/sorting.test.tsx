@@ -6,9 +6,10 @@
 
 import { getSortingCriteria } from './sorting';
 import { FieldFormat } from 'src/plugins/data/public';
+import { DatatableColumnType } from 'src/plugins/expressions';
 
 function getMockFormatter() {
-  return (jest.fn(() => ({ convert: (v: unknown) => v as string })) as unknown) as FieldFormat;
+  return { convert: (v: unknown) => `${v as string}` } as FieldFormat;
 }
 
 function testSorting({
@@ -20,7 +21,7 @@ function testSorting({
   input: unknown[];
   output: unknown[];
   direction: 'asc' | 'desc';
-  type: 'number' | 'date' | 'range' | 'ip';
+  type: DatatableColumnType | 'range';
 }) {
   const datatable = input.map((v) => ({
     a: v,
@@ -52,6 +53,28 @@ describe('Data sorting criteria', () => {
           output: [0, now - 150000, now],
           direction,
           type: 'date',
+        });
+      });
+    }
+  });
+
+  describe('String or anything else as string', () => {
+    for (const direction of ['asc', 'desc'] as const) {
+      it(`should provide the string criteria for terms values (${direction})`, () => {
+        testSorting({
+          input: ['a', 'b', 'c', 'd', '12'],
+          output: ['12', 'a', 'b', 'c', 'd'],
+          direction,
+          type: 'string',
+        });
+      });
+
+      it(`should provide the string criteria for other types of values (${direction})`, () => {
+        testSorting({
+          input: [true, false, false],
+          output: [false, false, true],
+          direction,
+          type: 'boolean',
         });
       });
     }
