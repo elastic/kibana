@@ -43,7 +43,7 @@ export const TrustedAppsPage = memo(() => {
   const location = useTrustedAppsSelector(getCurrentLocation);
   const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
-  const doEntriesExist = useTrustedAppsSelector(entriesExist);
+  const doEntriesExist = useTrustedAppsSelector(entriesExist) === true;
   const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({ show: 'create' }));
   const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({ show: undefined }));
   const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({

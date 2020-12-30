@@ -167,6 +167,12 @@ export const checkingIfEntriesExist = (state: Immutable<TrustedAppsListPageState
   return state.entriesExist === 'loading';
 };
 
-export const entriesExist = (state: Immutable<TrustedAppsListPageState>): boolean => {
-  return state.entriesExist === true;
+export const entriesExist = (
+  state: Immutable<TrustedAppsListPageState>
+): TrustedAppsListPageState['entriesExist'] => {
+  return state.entriesExist;
 };
+
+export const trustedAppsListPageActive: (state: Immutable<TrustedAppsListPageState>) => boolean = (
+  state
+) => state.active;

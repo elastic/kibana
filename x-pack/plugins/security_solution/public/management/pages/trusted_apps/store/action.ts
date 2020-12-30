@@ -54,6 +54,10 @@ export type TrustedAppCreationDialogConfirmed = Action<'trustedAppCreationDialog
 
 export type TrustedAppCreationDialogClosed = Action<'trustedAppCreationDialogClosed'>;
 
+export type TrustedAppsExistResponse = Action<'trustedAppsExistResponse'> & {
+  payload: boolean;
+};
+
 export type TrustedAppsPageAction =
   | TrustedAppsListDataOutdated
   | TrustedAppsListResourceStateChanged
@@ -65,4 +69,5 @@ export type TrustedAppsPageAction =
   | TrustedAppCreationDialogStarted
   | TrustedAppCreationDialogFormStateUpdated
   | TrustedAppCreationDialogConfirmed
+  | TrustedAppsExistResponse
   | TrustedAppCreationDialogClosed;

@@ -47,6 +47,9 @@ import {
   getCreationDialogFormEntry,
   isCreationDialogLocation,
   isCreationDialogFormValid,
+  entriesExist,
+  getListTotalItemsCount,
+  trustedAppsListPageActive,
 } from './selectors';
 
 const createTrustedAppsListResourceStateChangedAction = (
@@ -217,6 +220,34 @@ const submitDeletionIfNeeded = async (
   }
 };
 
+const checkIfTrustedAppsExistIfNeeded = async (
+  store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const currentState = store.getState();
+
+  if (trustedAppsListPageActive(currentState)) {
+    const currentEntriesExistValue = entriesExist(currentState);
+    const currentListTotal = getListTotalItemsCount(currentState);
+
+    if (
+      currentEntriesExistValue === 'loading' ||
+      (currentListTotal === 0 && currentEntriesExistValue) ||
+      (currentListTotal > 0 && !currentEntriesExistValue)
+    ) {
+      const { total } = await trustedAppsService.getTrustedAppsList({
+        page: 1,
+        per_page: 1,
+      });
+
+      store.dispatch({
+        type: 'trustedAppsExistResponse',
+        payload: total > 0,
+      });
+    }
+  }
+};
+
 export const createTrustedAppsPageMiddleware = (
   trustedAppsService: TrustedAppsService
 ): ImmutableMiddleware<TrustedAppsListPageState, AppAction> => {
@@ -226,6 +257,7 @@ export const createTrustedAppsPageMiddleware = (
     // TODO: need to think if failed state is a good condition to consider need for refresh
     if (action.type === 'userChangedUrl' || action.type === 'trustedAppsListDataOutdated') {
       await refreshListIfNeeded(store, trustedAppsService);
+      await checkIfTrustedAppsExistIfNeeded(store, trustedAppsService);
     }
 
     if (action.type === 'userChangedUrl') {
