@@ -13,23 +13,39 @@ import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_reac
 
 import { LogStream } from './';
 import { DEFAULT_SOURCE_CONFIGURATION } from '../../test_utils/source_configuration';
-import { ENTRIES, ENTRIES_EMPTY } from '../../test_utils/entries';
+import { generateFakeEntries, ENTRIES_EMPTY } from '../../test_utils/entries';
 
-const startTimestamp = ENTRIES.data.topCursor.time;
-const endTimestamp = ENTRIES.data.bottomCursor.time;
+const startTimestamp = Date.now() - 1000 * 60 * 15;
+const endTimestamp = Date.now();
 
 // Mocks
-const fetch = function (url, params) {
+const fetch = function (url: string, params: any) {
   switch (url) {
     case '/api/infra/log_source_configurations/default':
       return DEFAULT_SOURCE_CONFIGURATION;
     case '/api/log_entries/entries':
       const body = JSON.parse(params.body);
+
       if (body.after?.time === body.endTimestamp || body.before?.time === body.startTimestamp) {
         return ENTRIES_EMPTY;
       } else {
-        return ENTRIES;
+        const entries = generateFakeEntries(
+          200,
+          body.startTimestamp,
+          body.endTimestamp,
+          body.columns || DEFAULT_SOURCE_CONFIGURATION.data.configuration.logColumns
+        );
+
+        return {
+          data: {
+            entries,
+            topCursor: entries[0].cursor,
+            bottomCursor: entries[entries.length - 1].cursor,
+            hasMoreBefore: false,
+          },
+        };
       }
+
     default:
       return {};
   }
