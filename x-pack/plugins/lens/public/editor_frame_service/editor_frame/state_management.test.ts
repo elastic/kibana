@@ -39,6 +39,7 @@ describe('editor_frame state management', () => {
         query: { query: '', language: 'lucene' },
         filters: [],
         showNoDataPopover: jest.fn(),
+        searchSessionId: 'sessionId',
       };
     });
 
