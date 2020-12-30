@@ -8,7 +8,13 @@ import './dimension_editor.scss';
 import _ from 'lodash';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSpacer, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiFormRowProps,
+  EuiSpacer,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -40,7 +46,8 @@ export interface ReferenceEditorProps {
   currentIndexPattern: IndexPattern;
   existingFields: IndexPatternPrivateState['existingFields'];
   dateRange: DateRange;
-  helpText?: React.ReactNode;
+  helpText?: EuiFormRowProps['helpText'];
+  labelAppend?: EuiFormRowProps['labelAppend'];
 
   // Services
   uiSettings: IUiSettingsClient;
@@ -61,6 +68,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     selectionStyle,
     dateRange,
     helpText,
+    labelAppend,
     ...services
   } = props;
 
@@ -254,6 +262,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
             fullWidth
             isInvalid={showFieldInvalid}
             helpText={helpText}
+            labelAppend={labelAppend}
           >
             <FieldSelect
               fieldIsInvalid={showFieldInvalid}

@@ -9,22 +9,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
+  EuiBasicTable,
+  EuiCode,
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiFieldNumber,
-  EuiSelect,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiTextColor,
-  EuiSpacer,
-  EuiCode,
-  EuiText,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiIcon,
-  EuiLink,
-  EuiBasicTable,
 } from '@elastic/eui';
 import { updateColumnParam } from '../layer_helpers';
 import { OperationDefinition } from './index';
@@ -38,7 +33,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
-import './date_histogram.scss';
+import { HelpPopover, HelpPopoverButton } from '../../help_popover';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -356,73 +351,66 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
   });
 
   return (
-    <EuiPopover
-      ownFocus
-      isOpen={isPopoverOpen}
+    <HelpPopover
+      anchorPosition="upCenter"
       button={
-        <EuiText size="xs" color="default">
-          <EuiLink onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
-            {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoHelpText', {
-              defaultMessage: 'How does it work?',
-            })}
-          </EuiLink>
-        </EuiText>
+        <HelpPopoverButton onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+          {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoHelpText', {
+            defaultMessage: 'How does it work?',
+          })}
+        </HelpPopoverButton>
       }
       closePopover={() => setIsPopoverOpen(false)}
-      anchorPosition="leftCenter"
-      panelClassName="lnsIndexPatternDimensionEditor__dateHistogramHelpPopover"
+      isOpen={isPopoverOpen}
+      title={i18n.translate('xpack.lens.indexPattern.dateHistogram.titleHelp', {
+        defaultMessage: 'How does the auto date histogram work?',
+      })}
     >
-      <EuiPopoverTitle>
-        <EuiIcon type="help" />
-        &nbsp;{' '}
-        {i18n.translate('xpack.lens.indexPattern.dateHistogram.titleHelp', {
-          defaultMessage: 'How does the auto date histogram work?',
+      <p>
+        {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBasicExplanation', {
+          defaultMessage: 'Splits a date field into buckets by interval.',
         })}
-      </EuiPopoverTitle>
-      <EuiText size="s" className="lnsIndexPatternDimensionEditor__dateHistogramContentPopover">
-        <p>
-          {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBasicExplanation', {
-            defaultMessage: 'Splits a date field into buckets by interval.',
-          })}
-        </p>
-        <p>
-          <FormattedMessage
-            id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
-            defaultMessage="The Lens editor chooses an automatic interval for you by dividing the selected time range by the 
+      </p>
+
+      <p>
+        <FormattedMessage
+          id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
+          defaultMessage="The Lens editor chooses an automatic interval for you by dividing the selected time range by the 
                   {targetBarSetting} Kibana advanced setting. The calculation tries to present “nice” time interval buckets. The maximum 
                   number of bars is set by the {maxBarSetting} value."
-            values={{
-              maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
-              targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,
-            }}
-          />
-        </p>
-        <p>
-          {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoAdvancedExplanation', {
-            defaultMessage: 'The specific interval follows this logic:',
-          })}
-        </p>
-        <EuiBasicTable
-          items={search.aggs.boundsDescendingRaw.map(({ bound, boundLabel, intervalLabel }) => ({
-            bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${boundLabel}`,
-            interval: intervalLabel,
-          }))}
-          columns={[
-            {
-              field: 'bound',
-              name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBoundHeader', {
-                defaultMessage: 'Target interval measured',
-              }),
-            },
-            {
-              field: 'interval',
-              name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoIntervalHeader', {
-                defaultMessage: 'Interval used',
-              }),
-            },
-          ]}
+          values={{
+            maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
+            targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,
+          }}
         />
-      </EuiText>
-    </EuiPopover>
+      </p>
+
+      <p>
+        {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoAdvancedExplanation', {
+          defaultMessage: 'The specific interval follows this logic:',
+        })}
+      </p>
+
+      <EuiBasicTable
+        items={search.aggs.boundsDescendingRaw.map(({ bound, boundLabel, intervalLabel }) => ({
+          bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${boundLabel}`,
+          interval: intervalLabel,
+        }))}
+        columns={[
+          {
+            field: 'bound',
+            name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBoundHeader', {
+              defaultMessage: 'Target interval measured',
+            }),
+          },
+          {
+            field: 'interval',
+            name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoIntervalHeader', {
+              defaultMessage: 'Interval used',
+            }),
+          },
+        ]}
+      />
+    </HelpPopover>
   );
 };
