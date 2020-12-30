@@ -177,23 +177,23 @@ export async function executor(
 
     if (error.response) {
       const {
-        status: statusCode,
-        statusText: errorText,
+        status,
+        statusText,
         headers: responseHeaders,
-        data: { message: errorMessage },
+        data: { message: responseMessage },
       } = error.response;
-      const errorMessageAsSuffix = errorMessage ? `: ${errorMessage}` : '';
-      const message = `[${statusCode}] ${errorText}${errorMessageAsSuffix}`;
+      const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
+      const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       // special handling for 5xx
-      if (statusCode >= 500) {
+      if (status >= 500) {
         return retryResult(actionId, message);
       }
 
       // special handling for rate limiting
-      if (statusCode === 429) {
+      if (status === 429) {
         return pipe(
           getRetryAfterIntervalFromHeaders(responseHeaders),
           map((retry) => retryResultSeconds(actionId, message, retry)),
