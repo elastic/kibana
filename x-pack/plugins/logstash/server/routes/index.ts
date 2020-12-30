@@ -12,7 +12,6 @@ import {
   registerPipelineSaveRoute,
 } from './pipeline';
 import { registerPipelinesListRoute, registerPipelinesDeleteRoute } from './pipelines';
-import { registerUpgradeRoute } from './upgrade';
 
 export function registerRoutes(router: IRouter, security?: SecurityPluginSetup) {
   registerClusterLoadRoute(router);
@@ -23,6 +22,4 @@ export function registerRoutes(router: IRouter, security?: SecurityPluginSetup) 
 
   registerPipelinesListRoute(router);
   registerPipelinesDeleteRoute(router);
-
-  registerUpgradeRoute(router);
 }
