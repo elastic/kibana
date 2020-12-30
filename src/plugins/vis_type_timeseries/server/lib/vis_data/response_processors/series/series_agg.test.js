@@ -91,15 +91,16 @@ describe('seriesAgg(resp, panel, series)', () => {
     };
   });
 
-  test('calls next when finished', () => {
+  test('calls next when finished', async () => {
     const next = jest.fn();
-    seriesAgg(resp, panel, series)(next)([]);
+    await seriesAgg(resp, panel, series, {})(next)([]);
     expect(next.mock.calls.length).toEqual(1);
   });
 
-  test('creates a series', () => {
-    const next = seriesAgg(resp, panel, series)((results) => results);
-    const results = stdMetric(resp, panel, series)(next)([]);
+  test('creates a series', async () => {
+    const next = await seriesAgg(resp, panel, series, {})((results) => results);
+    const results = await stdMetric(resp, panel, series, {})(next)([]);
+
     expect(results).toHaveLength(1);
 
     expect(results[0]).toEqual({

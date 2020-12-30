@@ -20,7 +20,7 @@
 import { getSplits } from './get_splits';
 
 describe('getSplits(resp, panel, series)', () => {
-  test('should return a splits for everything/filter group bys', () => {
+  test('should return a splits for everything/filter group bys', async () => {
     const resp = {
       aggregations: {
         SERIES: {
@@ -40,19 +40,20 @@ describe('getSplits(resp, panel, series)', () => {
         { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
       ],
     };
-    expect(getSplits(resp, panel, series)).toEqual([
+    expect(await getSplits(resp, panel, series, undefined)).toEqual([
       {
         id: 'SERIES',
         label: 'Overall Average of Average of cpu',
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
+        splitByLabel: 'Overall Average of Average of cpu',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 },
       },
     ]);
   });
 
-  test('should return a splits for terms group bys for top_n', () => {
+  test('should return a splits for terms group bys for top_n', async () => {
     const resp = {
       aggregations: {
         SERIES: {
@@ -84,7 +85,7 @@ describe('getSplits(resp, panel, series)', () => {
       ],
     };
     const panel = { type: 'top_n' };
-    expect(getSplits(resp, panel, series)).toEqual([
+    expect(await getSplits(resp, panel, series)).toEqual([
       {
         id: 'SERIES:example-01',
         key: 'example-01',
@@ -92,6 +93,7 @@ describe('getSplits(resp, panel, series)', () => {
         labelFormatted: '',
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
+        splitByLabel: 'Overall Average of Average of cpu',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 },
       },
@@ -102,13 +104,14 @@ describe('getSplits(resp, panel, series)', () => {
         labelFormatted: '',
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
+        splitByLabel: 'Overall Average of Average of cpu',
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 },
       },
     ]);
   });
 
-  test('should return a splits for terms group with label formatted by {{key}} placeholder', () => {
+  test('should return a splits for terms group with label formatted by {{key}} placeholder', async () => {
     const resp = {
       aggregations: {
         SERIES: {
@@ -141,7 +144,7 @@ describe('getSplits(resp, panel, series)', () => {
       ],
     };
     const panel = { type: 'top_n' };
-    expect(getSplits(resp, panel, series)).toEqual([
+    expect(await getSplits(resp, panel, series)).toEqual([
       {
         id: 'SERIES:example-01',
         key: 'example-01',
@@ -149,6 +152,7 @@ describe('getSplits(resp, panel, series)', () => {
         labelFormatted: '',
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
+        splitByLabel: 'Overall Average of Average of cpu',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 },
       },
@@ -159,13 +163,14 @@ describe('getSplits(resp, panel, series)', () => {
         labelFormatted: '',
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
+        splitByLabel: 'Overall Average of Average of cpu',
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 },
       },
     ]);
   });
 
-  test('should return a splits for terms group with labelFormatted if {{key}} placeholder is applied and key_as_string exists', () => {
+  test('should return a splits for terms group with labelFormatted if {{key}} placeholder is applied and key_as_string exists', async () => {
     const resp = {
       aggregations: {
         SERIES: {
@@ -200,7 +205,8 @@ describe('getSplits(resp, panel, series)', () => {
       ],
     };
     const panel = { type: 'top_n' };
-    expect(getSplits(resp, panel, series)).toEqual([
+
+    expect(await getSplits(resp, panel, series)).toEqual([
       {
         id: 'SERIES:example-01',
         key: 'example-01',
@@ -209,6 +215,7 @@ describe('getSplits(resp, panel, series)', () => {
         labelFormatted: '--false--',
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
+        splitByLabel: 'Overall Average of Average of cpu',
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 },
       },
@@ -220,6 +227,7 @@ describe('getSplits(resp, panel, series)', () => {
         labelFormatted: '--true--',
         meta: { bucketSize: 10 },
         color: 'rgb(255, 0, 0)',
+        splitByLabel: 'Overall Average of Average of cpu',
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 },
       },
@@ -247,7 +255,7 @@ describe('getSplits(resp, panel, series)', () => {
       },
     };
 
-    test('should return a splits with no color', () => {
+    test('should return a splits with no color', async () => {
       const series = {
         id: 'SERIES',
         color: '#F00',
@@ -260,7 +268,8 @@ describe('getSplits(resp, panel, series)', () => {
         ],
       };
       const panel = { type: 'timeseries' };
-      expect(getSplits(resp, panel, series)).toEqual([
+
+      expect(await getSplits(resp, panel, series)).toEqual([
         {
           id: 'SERIES:example-01',
           key: 'example-01',
@@ -268,6 +277,7 @@ describe('getSplits(resp, panel, series)', () => {
           labelFormatted: '',
           meta: { bucketSize: 10 },
           color: undefined,
+          splitByLabel: 'Overall Average of Average of cpu',
           timeseries: { buckets: [] },
           SIBAGG: { value: 1 },
         },
@@ -278,13 +288,14 @@ describe('getSplits(resp, panel, series)', () => {
           labelFormatted: '',
           meta: { bucketSize: 10 },
           color: undefined,
+          splitByLabel: 'Overall Average of Average of cpu',
           timeseries: { buckets: [] },
           SIBAGG: { value: 2 },
         },
       ]);
     });
 
-    test('should return gradient color', () => {
+    test('should return gradient color', async () => {
       const series = {
         id: 'SERIES',
         color: '#F00',
@@ -298,7 +309,8 @@ describe('getSplits(resp, panel, series)', () => {
         ],
       };
       const panel = { type: 'timeseries' };
-      expect(getSplits(resp, panel, series)).toEqual([
+
+      expect(await getSplits(resp, panel, series)).toEqual([
         expect.objectContaining({
           color: 'rgb(255, 0, 0)',
         }),
@@ -308,7 +320,7 @@ describe('getSplits(resp, panel, series)', () => {
       ]);
     });
 
-    test('should return rainbow color', () => {
+    test('should return rainbow color', async () => {
       const series = {
         id: 'SERIES',
         color: '#F00',
@@ -322,7 +334,8 @@ describe('getSplits(resp, panel, series)', () => {
         ],
       };
       const panel = { type: 'timeseries' };
-      expect(getSplits(resp, panel, series)).toEqual([
+
+      expect(await getSplits(resp, panel, series)).toEqual([
         expect.objectContaining({
           color: '#68BC00',
         }),
@@ -333,7 +346,7 @@ describe('getSplits(resp, panel, series)', () => {
     });
   });
 
-  test('should return a splits for filters group bys', () => {
+  test('should return a splits for filters group bys', async () => {
     const resp = {
       aggregations: {
         SERIES: {
@@ -360,7 +373,8 @@ describe('getSplits(resp, panel, series)', () => {
       metrics: [{ id: 'COUNT', type: 'count' }],
     };
     const panel = { type: 'timeseries' };
-    expect(getSplits(resp, panel, series)).toEqual([
+
+    expect(await getSplits(resp, panel, series)).toEqual([
       {
         id: 'SERIES:filter-1',
         key: 'filter-1',

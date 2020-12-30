@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { METRIC_TYPES } from '../../../../common/metric_types';
 
 import type { SanitizedFieldType } from '../../../../common/types';
@@ -33,7 +33,7 @@ interface FieldSelectProps {
   fields: Record<string, SanitizedFieldType[]>;
   indexPattern: string;
   value: string;
-  onChange: EuiComboBoxProps<string>['onChange'];
+  onChange: (options: Array<EuiComboBoxOptionOption<string>>) => void;
   disabled: boolean;
   restrict: string[];
   placeholder: string;
@@ -43,28 +43,26 @@ interface FieldSelectProps {
 const isFieldTypeEnabled = (fieldRestrictions: string[], fieldType: string) =>
   fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
 
+const defaultPlaceholder = i18n.translate('visTypeTimeseries.fieldSelect.selectFieldPlaceholder', {
+  defaultMessage: 'Select field...',
+});
+
 export function FieldSelect({
   type,
   fields,
-  indexPattern,
+  indexPattern = '',
   value,
   onChange,
-  disabled,
-  restrict,
-  placeholder,
+  disabled = false,
+  restrict = [],
+  placeholder = defaultPlaceholder,
   uiRestrictions,
 }: FieldSelectProps) {
-  const [options, setOptions] = useState<EuiComboBoxProps<string>['options']>([]);
-  const [selectedOptions, setSelectedOptions] = useState<
-    EuiComboBoxProps<string>['selectedOptions']
-  >([]);
-  const [actualPlaceholder, setActualPlaceholder] = useState<string>();
-
-  useEffect(() => {
-    const newSelectedOptions: EuiComboBoxProps<string>['selectedOptions'] = [];
-    let newPlaceholder = placeholder;
-    const newOptions: EuiComboBoxProps<string>['options'] = Object.values(
-      (fields[indexPattern] || []).reduce((acc, field) => {
+  const selectedOptions: Array<EuiComboBoxOptionOption<string>> = [];
+  let newPlaceholder = placeholder;
+  const options: EuiComboBoxProps<string>['options'] = Object.values(
+    (fields[indexPattern] || []).reduce<Record<string, EuiComboBoxOptionOption<string>>>(
+      (acc, field) => {
         if (placeholder === field?.name) {
           newPlaceholder = field.label ?? field.name;
         }
@@ -73,13 +71,15 @@ export function FieldSelect({
           isFieldTypeEnabled(restrict, field.type) &&
           isFieldEnabled(field.name, type, uiRestrictions)
         ) {
-          const item = {
+          const item: EuiComboBoxOptionOption<string> = {
             value: field.name,
             label: field.label ?? field.name,
           };
 
-          if (acc[field.type]) {
-            acc[field.type].options.push(item);
+          const fieldTypeOptions = acc[field.type]?.options;
+
+          if (fieldTypeOptions) {
+            fieldTypeOptions.push(item);
           } else {
             acc[field.type] = {
               options: [item],
@@ -88,25 +88,27 @@ export function FieldSelect({
           }
 
           if (value === item.value) {
-            newSelectedOptions.push(item);
+            selectedOptions.push(item);
           }
         }
 
         return acc;
-      }, {})
-    );
-    setOptions(newOptions);
-    setActualPlaceholder(newPlaceholder);
-    setSelectedOptions(newSelectedOptions);
-  }, [type, fields, indexPattern, value, restrict, placeholder, uiRestrictions]);
+      },
+      {}
+    )
+  );
 
   if (type === METRIC_TYPES.COUNT) {
     return null;
   }
 
+  if (value && !selectedOptions.length) {
+    onChange([]);
+  }
+
   return (
     <EuiComboBox
-      placeholder={actualPlaceholder}
+      placeholder={newPlaceholder}
       isDisabled={disabled}
       options={options}
       selectedOptions={selectedOptions}
@@ -115,12 +117,3 @@ export function FieldSelect({
     />
   );
 }
-
-FieldSelect.defaultProps = {
-  indexPattern: '',
-  disabled: false,
-  restrict: [],
-  placeholder: i18n.translate('visTypeTimeseries.fieldSelect.selectFieldPlaceholder', {
-    defaultMessage: 'Select field...',
-  }),
-};

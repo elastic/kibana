@@ -43,8 +43,4 @@ describe('extractIndexPatterns(vis)', () => {
   test('should return index patterns', () => {
     expect(extractIndexPatterns(panel, '')).toEqual(['*', 'example-1-*', 'example-2-*', 'notes-*']);
   });
-
-  test('should return index patterns that do not exist in visFields', () => {
-    expect(extractIndexPatterns(panel, '')).toEqual(['example-1-*', 'example-2-*', 'notes-*']);
-  });
 });

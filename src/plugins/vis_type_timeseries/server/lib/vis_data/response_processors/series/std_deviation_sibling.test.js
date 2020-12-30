@@ -77,15 +77,15 @@ describe('stdDeviationSibling(resp, panel, series)', () => {
     };
   });
 
-  test('calls next when finished', () => {
+  test('calls next when finished', async () => {
     const next = jest.fn();
-    stdDeviationSibling(resp, panel, series)(next)([]);
+    await stdDeviationSibling(resp, panel, series, {})(next)([]);
     expect(next.mock.calls.length).toEqual(1);
   });
 
-  test('creates a series', () => {
+  test('creates a series', async () => {
     const next = (results) => results;
-    const results = stdDeviationSibling(resp, panel, series)(next)([]);
+    const results = await stdDeviationSibling(resp, panel, series, {})(next)([]);
     expect(results).toHaveLength(1);
 
     expect(results[0]).toEqual({

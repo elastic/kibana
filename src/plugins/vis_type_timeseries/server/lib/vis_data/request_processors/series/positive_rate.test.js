@@ -51,19 +51,21 @@ describe('positiveRate(req, panel, series)', () => {
       },
     };
     uiSettings = {
-      barTargetUiSettings: 50,
+      get: async () => 50,
     };
   });
 
-  test('calls next when finished', () => {
+  test('calls next when finished', async () => {
     const next = jest.fn();
-    positiveRate(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
+    await positiveRate(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
+
     expect(next.mock.calls.length).toEqual(1);
   });
 
-  test('returns positive rate aggs', () => {
+  test('returns positive rate aggs', async () => {
     const next = (doc) => doc;
-    const doc = positiveRate(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
+    const doc = await positiveRate(req, panel, series, {}, {}, undefined, uiSettings)(next)({});
+
     expect(doc).toEqual({
       aggs: {
         test: {

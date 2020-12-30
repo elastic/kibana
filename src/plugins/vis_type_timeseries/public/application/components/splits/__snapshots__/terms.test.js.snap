@@ -45,7 +45,6 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
       >
         <FieldSelect
           data-test-subj="groupByField"
-          disabled={false}
           fields={
             Object {
               "kibana_sample_data_flights": Array [
@@ -64,8 +63,6 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
           }
           indexPattern="kibana_sample_data_flights"
           onChange={[Function]}
-          placeholder="Select field..."
-          restrict={Array []}
           type="terms"
           value="OriginCityName"
         />
@@ -174,6 +171,20 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
           }
           clearable={false}
           exclude={Array []}
+          fields={
+            Array [
+              Object {
+                "aggregatable": true,
+                "esTypes": Array [
+                  "keyword",
+                ],
+                "name": "OriginCityName",
+                "readFromDocValues": true,
+                "searchable": true,
+                "type": "string",
+              },
+            ]
+          }
           includeSiblings={false}
           metric={Object {}}
           onChange={[Function]}

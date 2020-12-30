@@ -19,7 +19,6 @@
 import { i18n } from '@kbn/i18n';
 import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
-import { indexPatterns } from '../../../../data/public';
 import { SanitizedFieldType } from '../../../common/types';
 
 export async function fetchFields(
@@ -34,22 +33,6 @@ export async function fetchFields(
     const defaultIndexPattern = await dataStart.indexPatterns.getDefault();
     const indexFields = await Promise.all(
       patterns.map(async (pattern) => {
-        const kibanaIndexPattern = (await dataStart.indexPatterns.find(pattern)).find(
-          (index) => index.title === pattern
-        );
-
-        if (kibanaIndexPattern) {
-          const fields = kibanaIndexPattern.fields.getAll();
-
-          return fields
-            .filter((field) => field.aggregatable && !indexPatterns.isNestedField(field))
-            .map((field) => ({
-              name: field.name,
-              label: field.customLabel ?? field.name,
-              type: field.type,
-            }));
-        }
-
         return coreStart.http.get(ROUTES.FIELDS, {
           query: {
             index: pattern,

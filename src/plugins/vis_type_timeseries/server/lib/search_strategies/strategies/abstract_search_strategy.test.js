@@ -26,7 +26,7 @@ describe('AbstractSearchStrategy', () => {
   let indexPattern;
 
   beforeEach(() => {
-    mockedFields = {};
+    mockedFields = [];
     req = {
       payload: {},
       pre: {
@@ -51,7 +51,7 @@ describe('AbstractSearchStrategy', () => {
   test('should return fields for wildcard', async () => {
     const fields = await abstractSearchStrategy.getFieldsForWildcard(req, indexPattern);
 
-    expect(fields).toBe(mockedFields);
+    expect(fields).toEqual(mockedFields);
     expect(req.pre.indexPatternsFetcher.getFieldsForWildcard).toHaveBeenCalledWith({
       pattern: indexPattern,
       metaFields: [],

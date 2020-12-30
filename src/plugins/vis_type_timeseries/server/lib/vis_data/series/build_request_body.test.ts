@@ -78,7 +78,7 @@ const body = JSON.parse(`
 `);
 
 describe('buildRequestBody(req)', () => {
-  test('returns a valid body', () => {
+  test('returns a valid body', async () => {
     const panel = body.panels[0];
     const series = panel.series[0];
     const getValidTimeInterval = jest.fn(() => '10s');
@@ -91,14 +91,16 @@ describe('buildRequestBody(req)', () => {
       queryStringOptions: {},
     };
     const indexPatternObject = {};
-    const doc = buildRequestBody(
+    const doc = await buildRequestBody(
       { payload: body },
       panel,
       series,
       config,
       indexPatternObject,
       capabilities,
-      { barTargetUiSettings: 50 }
+      {
+        get: async () => 50,
+      }
     );
 
     expect(doc).toEqual({
