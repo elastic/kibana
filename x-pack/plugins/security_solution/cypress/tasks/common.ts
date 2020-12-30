@@ -5,7 +5,7 @@
  */
 
 import { DEFAULT_SIGNALS_INDEX } from '../../common/constants';
-import { esArchiverLoadEmptyKibana } from './es_archiver';
+import { esArchiverResetKibana } from './es_archiver';
 
 const primaryButton = 0;
 
@@ -64,24 +64,14 @@ export const reload = () => {
 };
 
 export const cleanKibana = () => {
-  cy.exec(`curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*" -k`);
-
-  // We wait until the kibana indexes are deleted
-  cy.waitUntil(() => {
-    cy.wait(500);
-    return cy
-      .request(`${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`)
-      .then((response) => JSON.stringify(response.body) === '{}');
-  });
-  esArchiverLoadEmptyKibana();
+  esArchiverResetKibana();
+  cy.exec(`curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/${DEFAULT_SIGNALS_INDEX}\*" -k`);
 
   // We wait until the kibana indexes are created
   cy.waitUntil(() => {
-    cy.wait(500);
+    cy.wait(1000);
     return cy
       .request(`${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`)
       .then((response) => JSON.stringify(response.body) !== '{}');
   });
-
-  cy.exec(`curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/${DEFAULT_SIGNALS_INDEX}\*" -k`);
 };
