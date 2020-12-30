@@ -10,14 +10,20 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
 
 import { ViewType } from '../state';
-import { getCurrentLocation, getListTotalItemsCount } from '../store/selectors';
+import {
+  checkingIfEntriesExist,
+  getCurrentLocation,
+  getListTotalItemsCount,
+} from '../store/selectors';
 import { useTrustedAppsNavigateCallback, useTrustedAppsSelector } from './hooks';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { CreateTrustedAppFlyout } from './components/create_trusted_app_flyout';
@@ -34,6 +40,7 @@ export const TrustedAppsPage = memo(() => {
   const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
   const location = useTrustedAppsSelector(getCurrentLocation);
   const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
+  const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
   const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({ show: 'create' }));
   const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({ show: undefined }));
   const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
@@ -76,32 +83,38 @@ export const TrustedAppsPage = memo(() => {
       subtitle={ABOUT_TRUSTED_APPS}
       actions={addButton}
     >
-      <TrustedAppsNotifications />
-      <TrustedAppDeletionDialog />
-      {location.show === 'create' && (
-        <CreateTrustedAppFlyout
-          onClose={handleAddFlyoutClose}
-          size="m"
-          data-test-subj="addTrustedAppFlyout"
-        />
+      {isCheckingIfEntriesExists ? (
+        <EuiEmptyPrompt body={<EuiLoadingSpinner className="essentialAnimation" size="xl" />} />
+      ) : (
+        <>
+          <TrustedAppsNotifications />
+          <TrustedAppDeletionDialog />
+          {location.show === 'create' && (
+            <CreateTrustedAppFlyout
+              onClose={handleAddFlyoutClose}
+              size="m"
+              data-test-subj="addTrustedAppFlyout"
+            />
+          )}
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <ControlPanel
+                totalItemCount={totalItemsCount}
+                currentViewType={location.view_type}
+                onViewTypeChange={handleViewTypeChange}
+              />
+
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiHorizontalRule margin="none" />
+
+              {location.view_type === 'grid' && <TrustedAppsGrid />}
+              {location.view_type === 'list' && <TrustedAppsList />}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
       )}
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <ControlPanel
-            totalItemCount={totalItemsCount}
-            currentViewType={location.view_type}
-            onViewTypeChange={handleViewTypeChange}
-          />
-
-          <EuiSpacer size="m" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" />
-
-          {location.view_type === 'grid' && <TrustedAppsGrid />}
-          {location.view_type === 'list' && <TrustedAppsList />}
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </AdministrationListPage>
   );
 });

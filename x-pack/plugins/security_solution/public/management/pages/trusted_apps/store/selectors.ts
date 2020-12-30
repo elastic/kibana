@@ -162,3 +162,7 @@ export const getCreationError = (
 
   return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;
 };
+
+export const checkingIfEntriesExist = (state: Immutable<TrustedAppsListPageState>): boolean => {
+  return state.entriesExist === 'loading';
+};

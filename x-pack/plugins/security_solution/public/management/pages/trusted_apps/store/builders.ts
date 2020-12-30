@@ -40,6 +40,7 @@ export const initialCreationDialogState = (): TrustedAppsListPageState['creation
 });
 
 export const initialTrustedAppsPageState = (): TrustedAppsListPageState => ({
+  entriesExist: 'loading',
   listView: {
     listResourceState: { type: 'UninitialisedResourceState' },
     freshDataTimestamp: Date.now(),
