@@ -583,8 +583,9 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
         columnOrder: [...bucketedColumns, ...availableMetricColumns],
       };
 
-      if (availableReferenceColumns.length) {
-        // Don't remove buckets when dealing with any refs. This can break refs.
+      if (availableBucketedColumns.length <= 1 || availableReferenceColumns.length) {
+        // Don't simplify when dealing with single-bucket table. Also don't break
+        // reference-based columns by removing buckets.
         return [];
       } else if (availableMetricColumns.length > 1) {
         return [{ ...layer, columnOrder: [...bucketedColumns, availableMetricColumns[0]] }];
@@ -597,7 +598,6 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
       availableReferenceColumns.length
         ? []
         : availableMetricColumns.map((columnId) => {
-            // build suggestions with only metrics
             return { ...layer, columnOrder: [columnId] };
           })
     )
@@ -606,8 +606,7 @@ function createSimplifiedTableSuggestions(state: IndexPatternPrivateState, layer
         state,
         layerId,
         updatedLayer,
-        changeType:
-          layer.columnOrder.length === updatedLayer.columnOrder.length ? 'unchanged' : 'reduced',
+        changeType: 'reduced',
         label:
           updatedLayer.columnOrder.length === 1
             ? getMetricSuggestionTitle(updatedLayer, availableMetricColumns.length === 1)
