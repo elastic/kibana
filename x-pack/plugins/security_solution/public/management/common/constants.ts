@@ -18,8 +18,6 @@ export const MANAGEMENT_ROUTING_TRUSTED_APPS_PATH = `${MANAGEMENT_ROUTING_ROOT_P
 // --[ STORE ]---------------------------------------------------------------------------
 /** The SIEM global store namespace where the management state will be mounted */
 export const MANAGEMENT_STORE_GLOBAL_NAMESPACE: ManagementStoreGlobalNamespace = 'management';
-/** Namespace within the Management state where policy list state is maintained */
-export const MANAGEMENT_STORE_POLICY_LIST_NAMESPACE = 'policyList';
 /** Namespace within the Management state where policy details state is maintained */
 export const MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE = 'policyDetails';
 /** Namespace within the Management state where endpoint-host state is maintained */

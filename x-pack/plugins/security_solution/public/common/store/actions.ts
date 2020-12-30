@@ -5,7 +5,6 @@
  */
 
 import { EndpointAction } from '../../management/pages/endpoint_hosts/store/action';
-import { PolicyListAction } from '../../management/pages/policy/store/policy_list';
 import { PolicyDetailsAction } from '../../management/pages/policy/store/policy_details';
 import { TrustedAppsPageAction } from '../../management/pages/trusted_apps/store/action';
 
@@ -18,6 +17,5 @@ import { RoutingAction } from './routing';
 export type AppAction =
   | EndpointAction
   | RoutingAction
-  | PolicyListAction
   | PolicyDetailsAction
   | TrustedAppsPageAction;
