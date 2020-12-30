@@ -22,7 +22,7 @@ describe('StatusBadge', () => {
   it('displays failed message', () => {
     expect(shallowWithIntl(<StatusBadge status="failed" />)).toMatchInlineSnapshot(`
       <EuiBadge
-        color="#bd271e"
+        color="#ff7e62"
       >
         Failed
       </EuiBadge>
