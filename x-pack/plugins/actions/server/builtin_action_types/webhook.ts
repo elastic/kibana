@@ -177,10 +177,13 @@ export async function executor(
 
     if (error.response) {
       const {
+        status: statusCode,
+        statusText: errorText,
         headers: responseHeaders,
-        data: { statusCode, error: errorText, message: errorMessage },
+        data: { message: errorMessage },
       } = error.response;
-      const message = `[${statusCode}] ${errorText}: ${errorMessage}`;
+      const errorMessageAsSuffix = errorMessage ? `: ${errorMessage}` : '';
+      const message = `[${statusCode}] ${errorText}${errorMessageAsSuffix}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
