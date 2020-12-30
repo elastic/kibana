@@ -30,8 +30,8 @@ export interface BuildOptions {
   createArchives: boolean;
   createRpmPackage: boolean;
   createDebPackage: boolean;
-  createDockerPackage: boolean;
-  createDockerUbiPackage: boolean;
+  createDockerImages: boolean;
+  createDockerBundles: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
 }
@@ -106,11 +106,12 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateRpmPackage);
   }
   if (options.createDockerImages) {
-    // control w/ --docker or --skip-docker-ubi or --skip-os-packages
+    // control w/ --docker-images or --skip-os-packages
     await run(Tasks.CreateDockerImages);
   }
 
   if (options.createDockerBundles) {
+    // control w/ --docker-bundles or --skip-os-packages
     await run(Tasks.CreateDockerBundles);
   }
 
