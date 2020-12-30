@@ -79,7 +79,7 @@ const getStatusAttributes = ({
     case STATUS.EXPIRED:
       try {
         const expiredOnDate = dateString(session.expires!, timezone);
-        const expiredOnMessage = i18n.translate(
+        const toolTipContent = i18n.translate(
           'xpack.data.mgmt.searchSessions.status.message.expiredOn',
           {
             defaultMessage: 'Expired on {expiredOnDate}',
@@ -90,7 +90,7 @@ const getStatusAttributes = ({
         return {
           icon: <EuiIcon color="#9AA" type="clock" />,
           label: <TableText>{getStatusText(session.status)}</TableText>,
-          toolTipContent: expiredOnMessage,
+          toolTipContent,
         };
       } catch (err) {
         // eslint-disable-next-line no-console
@@ -121,7 +121,7 @@ const getStatusAttributes = ({
     case STATUS.COMPLETE:
       try {
         const expiresOnDate = dateString(session.expires!, timezone);
-        const expiresOnMessage = i18n.translate('xpack.data.mgmt.searchSessions.status.expiresOn', {
+        const toolTipContent = i18n.translate('xpack.data.mgmt.searchSessions.status.expiresOn', {
           defaultMessage: 'Expires on {expiresOnDate}',
           values: { expiresOnDate },
         });
@@ -130,7 +130,7 @@ const getStatusAttributes = ({
           textColor: 'secondary',
           icon: <EuiIcon color="secondary" type="checkInCircleFilled" />,
           label: <TableText>{getStatusText(session.status)}</TableText>,
-          toolTipContent: expiresOnMessage,
+          toolTipContent,
         };
       } catch (err) {
         // eslint-disable-next-line no-console

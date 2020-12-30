@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import moment from 'moment';
 import React from 'react';
 import { SessionsMgmtConfigSchema } from '../';
 import { ActionComplete, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
@@ -87,12 +86,12 @@ export const getColumns = (
         defaultMessage: 'Status',
       }),
       sortable: true,
-      render: (statusType: UISession['status'], session) => {
-        return <StatusIndicator session={session} timezone={timezone} />;
-      },
+      render: (statusType: UISession['status'], session) => (
+        <StatusIndicator session={session} timezone={timezone} />
+      ),
     },
 
-    // Started date, formatted in TZ from UI Settings
+    // Started date
     {
       field: 'created',
       name: i18n.translate('xpack.data.mgmt.searchSessions.table.headerStarted', {
@@ -115,7 +114,7 @@ export const getColumns = (
       },
     },
 
-    // Expiration date, also formatted. Shows a warning badge if expiration is soon
+    // Expiration date
     {
       field: 'expires',
       name: i18n.translate('xpack.data.mgmt.searchSessions.table.headerExpiration', {
@@ -147,23 +146,15 @@ export const getColumns = (
       },
     },
 
-    // Highlight Badge: if completed session expires soon, show a highlight badge
+    // Highlight Badge, if completed session expires soon
     {
       field: 'status',
       name: '',
       sortable: false,
-      render: (status, { id, expires }) => {
-        const tNow = moment.utc().valueOf();
-        const tFuture = moment.utc(expires).valueOf();
-        const durationToExpire = moment.duration(tFuture - tNow);
-        const expiresInDays = Math.floor(durationToExpire.asDays());
-        const sufficientDays = Math.ceil(moment.duration(config.expiresSoonWarning).asDays());
-
-        if (durationToExpire.valueOf() > 0 && expiresInDays <= sufficientDays) {
-          const { toolTipContent, statusContent } = getExpirationStatus(
-            durationToExpire,
-            expiresInDays
-          );
+      render: (status, { expires }) => {
+        const expirationStatus = getExpirationStatus(config, expires);
+        if (expirationStatus) {
+          const { toolTipContent, statusContent } = expirationStatus;
 
           return (
             <EuiToolTip content={toolTipContent}>

@@ -6,8 +6,18 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { SessionsMgmtConfigSchema } from '../';
 
-export const getExpirationStatus = (durationToExpire: moment.Duration, expiresInDays: number) => {
+export const getExpirationStatus = (config: SessionsMgmtConfigSchema, expires: string | null) => {
+  const tNow = moment.utc().valueOf();
+  const tFuture = moment.utc(expires).valueOf();
+
+  // NOTE this could end up negative. If server time is off from the browser's clock
+  // and the session was early expired when the browser refreshed the listing
+  const durationToExpire = moment.duration(tFuture - tNow);
+  const expiresInDays = Math.floor(durationToExpire.asDays());
+  const sufficientDays = Math.ceil(moment.duration(config.expiresSoonWarning).asDays());
+
   let toolTipContent = i18n.translate('xpack.data.mgmt.searchSessions.status.expiresSoonInDays', {
     defaultMessage: 'Expires in {numDays} days',
     values: { numDays: expiresInDays },
@@ -31,5 +41,7 @@ export const getExpirationStatus = (durationToExpire: moment.Duration, expiresIn
     );
   }
 
-  return { toolTipContent, statusContent };
+  if (durationToExpire.valueOf() > 0 && expiresInDays <= sufficientDays) {
+    return { toolTipContent, statusContent };
+  }
 };
