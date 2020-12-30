@@ -57,7 +57,10 @@ export const shorthandMap = {
   },
 };
 
-export const checkPrivileges = async (services: AlertServices, indices: string[]) =>
+export const checkPrivileges = async (
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
+  indices: string[]
+) =>
   services.callCluster('transport.request', {
     path: '/_security/user/_has_privileges',
     method: 'POST',

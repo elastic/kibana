@@ -20,6 +20,11 @@ export type ReservedActionGroups<RecoveryActionGroupId extends string> =
   | RecoveryActionGroupId
   | RecoveredActionGroupId;
 
+export type WithoutReservedActionGroups<
+  ActionGroupIds extends string,
+  RecoveryActionGroupId extends string
+> = ActionGroupIds extends ReservedActionGroups<RecoveryActionGroupId> ? never : ActionGroupIds;
+
 export function getBuiltinActionGroups<RecoveryActionGroupId extends string>(
   customRecoveryGroup?: ActionGroup<RecoveryActionGroupId>
 ): [ActionGroup<ReservedActionGroups<RecoveryActionGroupId>>] {

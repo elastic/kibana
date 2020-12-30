@@ -29,7 +29,7 @@ import {
   AlertExecutionStatusErrorReasons,
   AlertsHealth,
   AlertNotifyWhenType,
-  ReservedActionGroups,
+  WithoutReservedActionGroups,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -131,7 +131,7 @@ export interface AlertType<
      * Ensure that the reserved ActionGroups (such as `Recovered`) are not
      * available for scheduling in the Executor
      */
-    ActionGroupIds extends ReservedActionGroups<RecoveryActionGroupId> ? never : ActionGroupIds
+    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
   >;
   producer: string;
   actionVariables?: {

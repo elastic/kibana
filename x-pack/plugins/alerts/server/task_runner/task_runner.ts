@@ -44,6 +44,7 @@ import {
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
+  WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedAlertType } from '../alert_type_registry';
 
@@ -244,7 +245,7 @@ export class TaskRunner<
           alertInstanceFactory: createAlertInstanceFactory<
             InstanceState,
             InstanceContext,
-            ActionGroupIds
+            WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
           >(alertInstances),
         },
         params,
