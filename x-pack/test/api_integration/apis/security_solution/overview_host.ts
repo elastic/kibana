@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
         endgameSecurity: 4,
         filebeatSystemModule: 0,
         winlogbeatSecurity: 0,
-        winlogbeatMWSysmonOperational: null,
+        winlogbeatMWSysmonOperational: 0,
       };
 
       it('Make sure that we get OverviewHost data', async () => {
