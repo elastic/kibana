@@ -21,6 +21,7 @@ import {
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import {
@@ -328,27 +329,25 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                 <EuiFormRow
                   display="columnCompressed"
                   label={
-                    <EuiToolTip
-                      delay="long"
-                      position="top"
-                      content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
-                        defaultMessage: `Lens provides a set of fitting functions to apply specific behaviour if 
-                        there are missing values in an area or line chart. Missing values are drawn using dotted 
-                        lines, and will not fill missing values at the left side of the chart.`,
-                      })}
-                    >
-                      <span>
-                        {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                          defaultMessage: 'Missing values',
-                        })}{' '}
-                        <EuiIcon
-                          type="questionInCircle"
-                          color="subdued"
-                          size="s"
-                          className="eui-alignTop"
-                        />
-                      </span>
-                    </EuiToolTip>
+                    <>
+                      {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
+                        defaultMessage: 'Missing values',
+                      })}{' '}
+                      <EuiIconTip
+                        color="subdued"
+                        content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
+                          defaultMessage: `Lens provides a set of fitting functions to apply specific behaviour if 
+    there are missing values in an area or line chart. Missing values are drawn using dotted 
+    lines, and will not fill missing values at the left side of the chart.`,
+                        })}
+                        iconProps={{
+                          className: 'eui-alignTop',
+                        }}
+                        position="top"
+                        size="s"
+                        type="questionInCircle"
+                      />
+                    </>
                   }
                 >
                   <EuiSuperSelect
