@@ -202,7 +202,7 @@ async function invalidateApiKeys(
         apiKeyObj.id
       );
       const apiKeyId = decryptedApiKey.attributes.apiKeyId;
-      const response = await invalidateAPIKey({ ids: [apiKeyId] }, securityPluginStart);
+      const response = await invalidateAPIKey({ id: apiKeyId }, securityPluginStart);
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
         logger.error(`Failed to invalidate API Key [id="${apiKeyObj.attributes.apiKeyId}"]`);
       } else {
