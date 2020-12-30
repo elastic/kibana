@@ -160,6 +160,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         op: operationType,
         indexPattern: currentIndexPattern,
         field: currentField || undefined,
+        filterOperations: props.filterOperations,
       }),
       disabledStatus:
         definition.getDisabledStatus &&

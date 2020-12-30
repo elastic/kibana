@@ -351,6 +351,31 @@ describe('IndexPatternDimensionEditorPanel', () => {
     );
   });
 
+  it('should indicate when a transition is invalid due to filterOperations', () => {
+    wrapper = mount(
+      <IndexPatternDimensionEditorComponent
+        {...defaultProps}
+        state={getStateWithColumns({
+          col1: {
+            label: 'Unique count of source',
+            dataType: 'number',
+            isBucketed: false,
+            operationType: 'cardinality',
+            sourceField: 'source,',
+          },
+        })}
+        filterOperations={(meta) => meta.dataType === 'number' && !meta.isBucketed}
+      />
+    );
+
+    const items: EuiListGroupItemProps[] = wrapper.find(EuiListGroup).prop('listItems') || [];
+
+    expect(items.find(({ id }) => id === 'min')!['data-test-subj']).toContain('incompatible');
+    expect(items.find(({ id }) => id === 'cumulative_sum')!['data-test-subj']).toContain(
+      'incompatible'
+    );
+  });
+
   it('should indicate that reference-based operations are not compatible when they are incomplete', () => {
     wrapper = mount(
       <IndexPatternDimensionEditorComponent

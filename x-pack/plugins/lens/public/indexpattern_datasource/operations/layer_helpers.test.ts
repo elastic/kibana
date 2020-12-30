@@ -934,8 +934,7 @@ describe('state_helpers', () => {
         expect(result.columnOrder).toEqual(['id1', 'col1']);
         expect(result.columns).toEqual(
           expect.objectContaining({
-            // Label has been reset
-            id1: { ...expectedColumn, label: 'Count of records', customLabel: undefined },
+            id1: expectedColumn,
             col1: expect.any(Object),
           })
         );
