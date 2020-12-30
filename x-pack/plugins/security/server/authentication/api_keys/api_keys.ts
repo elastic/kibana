@@ -240,7 +240,7 @@ export class APIKeys {
         await this.clusterClient
           .asScoped(request)
           .asCurrentUser.security.invalidateApiKey<InvalidateAPIKeyResult>({
-            body: { id: params.id },
+            body: { ids: [params.id] },
           })
       ).body;
       this.logger.debug('API key was invalidated successfully as current user');
