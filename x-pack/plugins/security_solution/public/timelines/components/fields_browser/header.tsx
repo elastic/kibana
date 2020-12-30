@@ -156,6 +156,7 @@ export const Header = React.memo<Props>(
           onChange={onSearchInputChange}
           placeholder={i18n.FILTER_PLACEHOLDER}
           value={searchInput}
+          fullWidth
         />
       </SearchContainer>
       <CountRow filteredBrowserFields={filteredBrowserFields} />
