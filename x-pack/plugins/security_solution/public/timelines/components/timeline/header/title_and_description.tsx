@@ -33,12 +33,13 @@ import * as i18n from './translations';
 
 interface TimelineTitleAndDescriptionProps {
   closeSaveTimeline: () => void;
+  currentDescription: string;
+  currentTitle: string;
   initialFocus: 'title' | 'description';
-  openSaveTimeline: () => void;
   timelineId: string;
   showWarning?: boolean;
-  updateInitialTitle: (newTitle: string) => void;
-  updateInitialDescription: (newDescription: string) => void;
+  updateCurrentTitle: (newTitle: string) => void;
+  updateCurrentDescription: (newDescription: string) => void;
 }
 
 const Wrapper = styled(EuiModalBody)`
@@ -71,18 +72,19 @@ const usePrevious = (value: unknown) => {
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
   ({
     closeSaveTimeline,
+    currentDescription,
+    currentTitle,
     initialFocus,
-    openSaveTimeline,
     timelineId,
     showWarning,
-    updateInitialTitle,
-    updateInitialDescription,
+    updateCurrentTitle,
+    updateCurrentDescription,
   }) => {
     // TODO: Refactor to use useForm() instead
     const [isFormSubmitted, setFormSubmitted] = useState(false);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const timeline = useDeepEqualSelector((state) => getTimeline(state, timelineId));
-    const { isSaving, status, title, timelineType } = timeline;
+    const { isSaving, status, timelineType } = timeline;
     const prevIsSaving = usePrevious(isSaving);
     const dispatch = useDispatch();
     const handleCreateNewTimeline = useCreateTimeline({
@@ -95,15 +97,39 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     );
 
     const handleClick = useCallback(() => {
-      updateInitialTitle(timeline.title);
-      updateInitialDescription(timeline.description);
+      updateCurrentTitle(currentTitle);
+      updateCurrentDescription(currentDescription);
+
+      dispatch(
+        timelineActions.updateTitle({
+          id: timelineId,
+          title: currentTitle,
+        })
+      );
+
+      dispatch(
+        timelineActions.updateDescription({
+          id: timelineId,
+          description: currentDescription,
+        })
+      );
+
       // TODO: Refactor action to take only title and description as params not the whole timeline
       onSaveTimeline({
         ...timeline,
         id: timelineId,
       });
       setFormSubmitted(true);
-    }, [onSaveTimeline, timeline, timelineId, updateInitialTitle, updateInitialDescription]);
+    }, [
+      currentTitle,
+      currentDescription,
+      dispatch,
+      updateCurrentTitle,
+      updateCurrentDescription,
+      onSaveTimeline,
+      timelineId,
+      timeline,
+    ]);
 
     const handleCancel = useCallback(() => {
       if (showWarning) {
@@ -183,11 +209,13 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
               <EuiFormRow label={TIMELINE_TITLE}>
                 <Name
                   autoFocus={initialFocus === 'title'}
+                  currentTitle={currentTitle}
                   disableTooltip={true}
                   disableAutoSave={true}
                   disabled={isSaving}
                   data-test-subj="save-timeline-name"
                   timelineId={timelineId}
+                  updateCurrentTitle={updateCurrentTitle}
                 />
               </EuiFormRow>
               <EuiSpacer />
@@ -196,11 +224,13 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
               <EuiFormRow label={descriptionLabel}>
                 <Description
                   autoFocus={initialFocus === 'description'}
+                  currentDescription={currentDescription}
                   data-test-subj="save-timeline-description"
                   disableTooltip={true}
                   disableAutoSave={true}
                   disabled={isSaving}
                   timelineId={timelineId}
+                  updateCurrentDescription={updateCurrentDescription}
                 />
               </EuiFormRow>
               <EuiSpacer />
@@ -219,7 +249,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} component="span">
                   <EuiButton
-                    isDisabled={title.trim().length === 0 || isSaving}
+                    isDisabled={currentTitle.trim().length === 0 || isSaving}
                     fill={true}
                     onClick={handleClick}
                     data-test-subj="save-button"

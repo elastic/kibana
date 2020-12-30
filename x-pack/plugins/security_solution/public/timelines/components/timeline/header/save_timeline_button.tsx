@@ -36,21 +36,21 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
       pick(['title', 'description'], getTimeline(state, timelineId) ?? timelineDefaults)
     );
 
-    const [initialTitle, setInitialTitle] = useState(title);
-    const [initialDescription, setInitialDescription] = useState(description);
+    const [currentTitle, setCurrentTitle] = useState(title);
+    const [currentDescription, setCurrentDescription] = useState(description);
 
-    const updateInitialTitle = useCallback(
+    const updateCurrentTitle = useCallback(
       (newTitle = '') => {
-        setInitialTitle(newTitle);
+        setCurrentTitle(newTitle);
       },
-      [setInitialTitle]
+      [setCurrentTitle]
     );
 
-    const updateInitialDescription = useCallback(
+    const updateCurrentDescription = useCallback(
       (newDescription = '') => {
-        setInitialDescription(newDescription);
+        setCurrentDescription(newDescription);
       },
-      [setInitialDescription]
+      [setCurrentDescription]
     );
     const closeSaveTimeline = useCallback(() => {
       setShowSaveTimelineOverlay(false);
@@ -62,29 +62,13 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
           })
         );
       }
-
-      dispatch(
-        timelineActions.updateTitle({
-          id: timelineId,
-          title: initialTitle,
-          disableAutoSave: true,
-        })
-      );
-
-      dispatch(
-        timelineActions.updateDescription({
-          id: timelineId,
-          description: initialDescription,
-          disableAutoSave: true,
-        })
-      );
-    }, [dispatch, setShowSaveTimelineOverlay, show, timelineId, initialTitle, initialDescription]);
+    }, [dispatch, setShowSaveTimelineOverlay, show]);
 
     const openSaveTimeline = useCallback(() => {
       setShowSaveTimelineOverlay(true);
-      updateInitialTitle(title);
-      updateInitialDescription(description);
-    }, [description, title, updateInitialDescription, updateInitialTitle]);
+      updateCurrentTitle(title);
+      updateCurrentDescription(description);
+    }, [description, title, updateCurrentDescription, updateCurrentTitle]);
 
     const saveTimelineButtonIcon = useMemo(
       () => (
@@ -102,14 +86,15 @@ export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
       <>
         {saveTimelineButtonIcon}
         <TimelineTitleAndDescription
-          data-test-subj="save-timeline-modal-comp"
+          currentTitle={currentTitle}
+          currentDescription={currentDescription}
           closeSaveTimeline={closeSaveTimeline}
+          data-test-subj="save-timeline-modal-comp"
           initialFocus={initialFocus}
-          openSaveTimeline={openSaveTimeline}
-          timelineId={timelineId}
           showWarning={initialFocus === 'title' && show}
-          updateInitialTitle={updateInitialTitle}
-          updateInitialDescription={updateInitialDescription}
+          timelineId={timelineId}
+          updateCurrentTitle={updateCurrentTitle}
+          updateCurrentDescription={updateCurrentDescription}
         />
       </>
     ) : (

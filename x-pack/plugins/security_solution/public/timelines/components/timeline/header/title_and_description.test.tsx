@@ -32,11 +32,12 @@ describe('TimelineTitleAndDescription', () => {
     const props = {
       initialFocus: 'title' as const,
       closeSaveTimeline: jest.fn(),
+      currentDescription: '',
+      currentTitle: '',
+      updateCurrentTitle: jest.fn(),
+      updateCurrentDescription: jest.fn(),
       openSaveTimeline: jest.fn(),
       timelineId: 'timeline-1',
-      onSaveTimeline: jest.fn(),
-      updateTitle: jest.fn(),
-      updateDescription: jest.fn(),
     };
 
     const mockGetButton = jest.fn().mockReturnValue(<div data-test-subj="mock-discard-button" />);
@@ -111,8 +112,10 @@ describe('TimelineTitleAndDescription', () => {
       timelineId: 'timeline-1',
       toggleSaveTimeline: jest.fn(),
       onSaveTimeline: jest.fn(),
-      updateTitle: jest.fn(),
-      updateDescription: jest.fn(),
+      currentDescription: '',
+      currentTitle: '',
+      updateCurrentTitle: jest.fn(),
+      updateCurrentDescription: jest.fn(),
     };
 
     const mockGetButton = jest.fn().mockReturnValue(<div data-test-subj="mock-discard-button" />);
@@ -182,8 +185,10 @@ describe('TimelineTitleAndDescription', () => {
       timelineId: 'timeline-1',
       toggleSaveTimeline: jest.fn(),
       onSaveTimeline: jest.fn(),
-      updateTitle: jest.fn(),
-      updateDescription: jest.fn(),
+      currentDescription: '',
+      currentTitle: '',
+      updateCurrentTitle: jest.fn(),
+      updateCurrentDescription: jest.fn(),
       showWarning: true,
     };
 

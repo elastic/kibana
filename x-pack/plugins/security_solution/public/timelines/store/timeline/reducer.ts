@@ -380,7 +380,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: updateTimelineKqlMode({ id, kqlMode, timelineById: state.timelineById }),
   }))
-  .case(updateTitle, (state, { id, title, disableAutoSave }) => ({
+  .case(updateTitle, (state, { id, title }) => ({
     ...state,
     timelineById: updateTimelineTitle({ id, title, timelineById: state.timelineById }),
   }))

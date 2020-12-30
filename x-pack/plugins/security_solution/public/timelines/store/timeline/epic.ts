@@ -60,7 +60,6 @@ import {
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
   updateDataProviderType,
-  updateDescription,
   updateKqlMode,
   updateProviders,
   updateRange,
@@ -68,7 +67,6 @@ import {
   upsertColumn,
   updateIndexNames,
   updateTimeline,
-  updateTitle,
   updateAutoSaveMsg,
   setExcludedRowRendererIds,
   setFilters,
@@ -105,13 +103,11 @@ const timelineActionsType = [
   updateDataProviderExcluded.type,
   updateDataProviderKqlQuery.type,
   updateDataProviderType.type,
-  updateDescription.type,
   updateEventType.type,
   updateKqlMode.type,
   updateIndexNames.type,
   updateProviders.type,
   updateSort.type,
-  updateTitle.type,
   updateRange.type,
   upsertColumn.type,
 ];
@@ -181,8 +177,7 @@ export const createTimelineEpic = <State>(): Epic<
         } else if (
           timelineActionsType.includes(action.type) &&
           !timelineObj.isLoading &&
-          isItAtimelineAction(timelineId) &&
-          !get('payload.disableAutoSave', action)
+          isItAtimelineAction(timelineId)
         ) {
           return true;
         }

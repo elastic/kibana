@@ -5,7 +5,6 @@
  */
 
 import { EuiBadge, EuiButton, EuiButtonIcon, EuiToolTip, EuiTextArea } from '@elastic/eui';
-import { pick } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -75,6 +74,8 @@ interface DescriptionProps {
   disableAutoSave?: boolean;
   disableTooltip?: boolean;
   disabled?: boolean;
+  currentDescription: string;
+  updateCurrentDescription: (newDescription: string) => void;
 }
 
 export const Description = React.memo<DescriptionProps>(
@@ -84,25 +85,14 @@ export const Description = React.memo<DescriptionProps>(
     disableAutoSave = false,
     disableTooltip = false,
     disabled = false,
+    currentDescription,
+    updateCurrentDescription,
   }) => {
-    const dispatch = useDispatch();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-
-    const description = useShallowEqualSelector(
-      (state) => (getTimeline(state, timelineId) ?? timelineDefaults).description
-    );
-
     const onDescriptionChanged = useCallback(
       (e) => {
-        dispatch(
-          timelineActions.updateDescription({
-            id: timelineId,
-            description: e.target.value,
-            disableAutoSave,
-          })
-        );
+        updateCurrentDescription(e.target.value);
       },
-      [dispatch, disableAutoSave, timelineId]
+      [updateCurrentDescription]
     );
 
     const inputField = useMemo(
@@ -114,11 +104,11 @@ export const Description = React.memo<DescriptionProps>(
           fullWidth
           onChange={onDescriptionChanged}
           placeholder={i18n.DESCRIPTION}
-          value={description}
+          value={currentDescription}
           disabled={disabled}
         />
       ),
-      [autoFocus, description, onDescriptionChanged, disabled]
+      [autoFocus, onDescriptionChanged, currentDescription, disabled]
     );
 
     return (
@@ -145,6 +135,8 @@ interface NameProps {
   disableTooltip?: boolean;
   disabled?: boolean;
   timelineId: string;
+  currentTitle: string;
+  updateCurrentTitle: (newTitle: string) => void;
 }
 
 export const Name = React.memo<NameProps>(
@@ -154,21 +146,18 @@ export const Name = React.memo<NameProps>(
     disableTooltip = false,
     disabled = false,
     timelineId,
+    updateCurrentTitle,
+    currentTitle,
   }) => {
-    const dispatch = useDispatch();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
-    const { title, timelineType } = useDeepEqualSelector((state) =>
-      pick(['title', 'timelineType'], getTimeline(state, timelineId) ?? timelineDefaults)
+    const timelineType = useDeepEqualSelector(
+      (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
     );
 
-    const handleChange = useCallback(
-      (e) =>
-        dispatch(
-          timelineActions.updateTitle({ id: timelineId, title: e.target.value, disableAutoSave })
-        ),
-      [dispatch, timelineId, disableAutoSave]
-    );
+    const handleChange = useCallback((e) => updateCurrentTitle(e.target.value), [
+      updateCurrentTitle,
+    ]);
 
     const nameField = useMemo(
       () => (
@@ -182,10 +171,10 @@ export const Name = React.memo<NameProps>(
             timelineType === TimelineType.template ? i18n.UNTITLED_TEMPLATE : i18n.UNTITLED_TIMELINE
           }
           spellCheck={true}
-          value={title}
+          value={currentTitle}
         />
       ),
-      [autoFocus, handleChange, timelineType, title, disabled]
+      [autoFocus, handleChange, timelineType, disabled, currentTitle]
     );
 
     return (
