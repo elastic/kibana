@@ -26,8 +26,10 @@ function getIPCriteria(sortBy: string, directionFactor: number) {
   // Create a set of 8 function to sort based on the 8 IPv6 slots of an address
   // For IPv4 bring them to the IPv6 "mapped" format and then sort
   return (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => {
-    const ipA = getSafeIpAddress(rowA[sortBy] as string, directionFactor);
-    const ipB = getSafeIpAddress(rowB[sortBy] as string, directionFactor);
+    const ipAString = rowA[sortBy] as string;
+    const ipBString = rowB[sortBy] as string;
+    const ipA = getSafeIpAddress(ipAString, directionFactor);
+    const ipB = getSafeIpAddress(ipBString, directionFactor);
 
     // Now compare each part of the IPv6 address and exit when a value != 0 is found
     let i = 0;
@@ -39,7 +41,7 @@ function getIPCriteria(sortBy: string, directionFactor: number) {
 
     // in case of same address but written in different styles, sort by string length
     if (diff === 0) {
-      return directionFactor * ((rowA[sortBy] as string).length - (rowB[sortBy] as string).length);
+      return directionFactor * (ipAString.length - ipBString.length);
     }
     return directionFactor * diff;
   };
