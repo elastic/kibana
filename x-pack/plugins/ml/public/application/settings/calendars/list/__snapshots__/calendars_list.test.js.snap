@@ -71,5 +71,8 @@ exports[`CalendarsList Renders calendar list with calendars 1`] = `
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
+  <HelpMenu
+    docLink={[MockFunction]}
+  />
 </Fragment>
 `;

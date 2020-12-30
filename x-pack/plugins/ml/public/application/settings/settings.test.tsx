@@ -14,10 +14,25 @@ jest.mock('../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
 
+jest.mock('../components/help_menu', () => ({
+  HelpMenu: () => <div id="mockHelpMenu" />,
+}));
+
 jest.mock('../contexts/kibana', () => ({
   useNotifications: () => {
     return {
       toasts: { addDanger: jest.fn() },
+    };
+  },
+  useMlKibana: () => {
+    return {
+      services: {
+        docLinks: {
+          links: {
+            ml: { guide: jest.fn() },
+          },
+        },
+      },
     };
   },
 }));
