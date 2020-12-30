@@ -193,6 +193,7 @@ async function invalidateApiKeys(
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   securityPluginStart?: SecurityPluginStart
 ) {
+  // TODO: This could probably send a single request to ES now that the invalidate API supports multiple ids in a single request
   let totalInvalidated = 0;
   await Promise.all(
     apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
@@ -201,7 +202,7 @@ async function invalidateApiKeys(
         apiKeyObj.id
       );
       const apiKeyId = decryptedApiKey.attributes.apiKeyId;
-      const response = await invalidateAPIKey({ id: apiKeyId }, securityPluginStart);
+      const response = await invalidateAPIKey({ ids: [apiKeyId] }, securityPluginStart);
       if (response.apiKeysEnabled === true && response.result.error_count > 0) {
         logger.error(`Failed to invalidate API Key [id="${apiKeyObj.attributes.apiKeyId}"]`);
       } else {

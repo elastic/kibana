@@ -143,7 +143,7 @@ export class APIKeys {
     );
 
     try {
-      await this.clusterClient.asInternalUser.security.invalidateApiKey({ body: { id } });
+      await this.clusterClient.asInternalUser.security.invalidateApiKey({ body: { ids: [id] } });
       return true;
     } catch (e) {
       if (this.doesErrorIndicateAPIKeysAreDisabled(e)) {
@@ -268,7 +268,7 @@ export class APIKeys {
       // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
       result = (
         await this.clusterClient.asInternalUser.security.invalidateApiKey<InvalidateAPIKeyResult>({
-          body: { id: params.id },
+          body: { ids: [params.id] },
         })
       ).body;
       this.logger.debug('API key was invalidated successfully');
