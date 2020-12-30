@@ -17,7 +17,7 @@ import { refreshPage } from '../tasks/security_header';
 
 import { HOSTS_PAGE_TAB_URLS } from '../urls/navigation';
 
-describe('Pagination', () => {
+describe.skip('Pagination', () => {
   before(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
