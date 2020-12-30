@@ -17,9 +17,9 @@ interface Props {
   statusCode: string;
 }
 export const ResponseCodeColumn = ({ statusCode }: Props) => {
-  return (
+  return statusCode ? (
     <SpanWithMargin>
-      <EuiBadge>{statusCode}</EuiBadge>
+      <EuiBadge data-test-subj="pingResponseCode">{statusCode}</EuiBadge>
     </SpanWithMargin>
-  );
+  ) : null;
 };
