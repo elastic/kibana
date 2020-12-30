@@ -12,11 +12,11 @@ function isIPv6Address(ip: IPv4 | IPv6): ip is IPv6 {
   return ip.kind() === 'ipv6';
 }
 
-function getSafeIpAddress(ip: string) {
+function getSafeIpAddress(ip: string, directionFactor: number) {
   if (!ipaddr.isValid(ip)) {
     // for non valid IPs have the same behaviour as for now (we assume it's only the "Other" string)
-    // create a mock object which has all -Infinity values to be the last item
-    return { parts: Array(8).fill(-Infinity) };
+    // create a mock object which has all a special value to keep them always at the bottom of the list
+    return { parts: Array(8).fill(directionFactor * Infinity) };
   }
   const parsedIp = ipaddr.parse(ip);
   return isIPv6Address(parsedIp) ? parsedIp : parsedIp.toIPv4MappedAddress();
@@ -26,8 +26,8 @@ function getIPCriteria(sortBy: string, directionFactor: number) {
   // Create a set of 8 function to sort based on the 8 IPv6 slots of an address
   // For IPv4 bring them to the IPv6 "mapped" format and then sort
   return (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => {
-    const ipA = getSafeIpAddress(rowA[sortBy] as string);
-    const ipB = getSafeIpAddress(rowB[sortBy] as string);
+    const ipA = getSafeIpAddress(rowA[sortBy] as string, directionFactor);
+    const ipB = getSafeIpAddress(rowB[sortBy] as string, directionFactor);
 
     // Now compare each part of the IPv6 address and exit when a value != 0 is found
     let i = 0;

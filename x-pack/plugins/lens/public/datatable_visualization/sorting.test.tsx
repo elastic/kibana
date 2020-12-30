@@ -17,11 +17,13 @@ function testSorting({
   output,
   direction,
   type,
+  keepLast,
 }: {
   input: unknown[];
   output: unknown[];
   direction: 'asc' | 'desc';
   type: DatatableColumnType | 'range';
+  keepLast?: boolean; // special flag to handle values that should always be last no matter the direction
 }) {
   const datatable = input.map((v) => ({
     a: v,
@@ -29,6 +31,11 @@ function testSorting({
   const sorted = output.map((v) => ({ a: v }));
   if (direction === 'desc') {
     sorted.reverse();
+    if (keepLast) {
+      // Cycle shift of the first element
+      const firstEl = sorted.shift()!;
+      sorted.push(firstEl);
+    }
   }
   const criteria = getSortingCriteria(type, 'a', getMockFormatter(), direction);
   expect(datatable.sort(criteria)).toEqual(sorted);
@@ -138,10 +145,11 @@ describe('Data sorting criteria', () => {
 
       it(`should provide the IP criteria for IP values (mixed values with invalid "Other" field) - ${direction}`, () => {
         testSorting({
-          input: ['fc00::123', '192.168.1.50', '10.0.1.76', '8.8.8.8', '::1', 'Other'],
-          output: ['Other', '::1', '8.8.8.8', '10.0.1.76', '192.168.1.50', 'fc00::123'],
+          input: ['fc00::123', '192.168.1.50', 'Other', '10.0.1.76', '8.8.8.8', '::1'],
+          output: ['::1', '8.8.8.8', '10.0.1.76', '192.168.1.50', 'fc00::123', 'Other'],
           direction,
           type: 'ip',
+          keepLast: true,
         });
       });
     }
