@@ -7,7 +7,7 @@ import React from 'react';
 import { shallow, ShallowWrapper, mount } from 'enzyme';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { SortFieldTimeline, Direction } from '../../../../graphql/types';
-import { SelectableTimeline, ORIGINAL_PAGE_SIZE, SearchProps } from './';
+import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from './';
 
 const mockFetchAllTimeline = jest.fn();
 jest.mock('../../../containers/all', () => {
@@ -40,9 +40,7 @@ describe('SelectableTimeline', () => {
       });
 
       test('render placeholder', () => {
-        const searchProps: SearchProps = wrapper
-          .find('[data-test-subj="selectable-input"]')
-          .prop('searchProps');
+        const searchProps = wrapper.find('[data-test-subj="selectable-input"]').prop('searchProps');
         expect(searchProps.placeholder).toEqual('e.g. Timeline name or description');
       });
     });
@@ -58,9 +56,7 @@ describe('SelectableTimeline', () => {
       });
 
       test('render placeholder', () => {
-        const searchProps: SearchProps = wrapper
-          .find('[data-test-subj="selectable-input"]')
-          .prop('searchProps');
+        const searchProps = wrapper.find('[data-test-subj="selectable-input"]').prop('searchProps');
         expect(searchProps.placeholder).toEqual('e.g. Timeline template name or description');
       });
     });

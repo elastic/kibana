@@ -40,32 +40,6 @@ const MyEuiFlexItem = styled(EuiFlexItem)`
   white-space: nowrap;
 `;
 
-const MyEuiFlexGroup = styled(EuiFlexGroup)`
-  padding 0px 4px;
-`;
-
-// const EuiSelectableContainer = styled.div<{ isLoading: boolean }>`
-//   .euiSelectable {
-//     .euiFormControlLayout__childrenWrapper {
-//       display: flex;
-//     }
-//     ${({ isLoading }) => `${
-//       isLoading
-//         ? `
-//       .euiFormControlLayoutIcons {
-//         display: none;
-//       }
-//       .euiFormControlLayoutIcons.euiFormControlLayoutIcons--right {
-//         display: block;
-//         left: 12px;
-//         top: 12px;
-//       }`
-//         : ''
-//     }
-//     `}
-//   }
-// `;
-
 const StyledEuiFilterButton = styled(EuiFilterButton)`
   border-top: 0;
   border-bottom: 0;
