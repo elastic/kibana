@@ -39,6 +39,7 @@ export const getAgentPoliciesHandler: RequestHandler<
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
@@ -55,7 +56,7 @@ export const getAgentPoliciesHandler: RequestHandler<
     await bluebird.map(
       items,
       (agentPolicy: GetAgentPoliciesResponseItem) =>
-        listAgents(soClient, {
+        listAgents(soClient, esClient, {
           showInactive: false,
           perPage: 0,
           page: 1,
@@ -100,6 +101,7 @@ export const createAgentPolicyHandler: RequestHandler<
   TypeOf<typeof CreateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
@@ -109,7 +111,7 @@ export const createAgentPolicyHandler: RequestHandler<
       AgentPolicy,
       NewPackagePolicy | undefined
     >([
-      agentPolicyService.create(soClient, request.body, {
+      agentPolicyService.create(soClient, esClient, request.body, {
         user,
       }),
       // If needed, retrieve System package information and build a new package policy for the system package
@@ -126,7 +128,7 @@ export const createAgentPolicyHandler: RequestHandler<
     if (withSysMonitoring && newSysPackagePolicy !== undefined && agentPolicy !== undefined) {
       newSysPackagePolicy.policy_id = agentPolicy.id;
       newSysPackagePolicy.namespace = agentPolicy.namespace;
-      await packagePolicyService.create(soClient, callCluster, newSysPackagePolicy, {
+      await packagePolicyService.create(soClient, esClient, callCluster, newSysPackagePolicy, {
         user,
         bumpRevision: false,
       });
@@ -152,10 +154,12 @@ export const updateAgentPolicyHandler: RequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
     const agentPolicy = await agentPolicyService.update(
       soClient,
+      esClient,
       request.params.agentPolicyId,
       request.body,
       {
@@ -177,10 +181,12 @@ export const copyAgentPolicyHandler: RequestHandler<
   TypeOf<typeof CopyAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
     const agentPolicy = await agentPolicyService.copy(
       soClient,
+      esClient,
       request.params.agentPolicyId,
       request.body,
       {
@@ -203,9 +209,11 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   TypeOf<typeof DeleteAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
     const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
       soClient,
+      esClient,
       request.body.agentPolicyId
     );
     return response.ok({

@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract } from 'src/core/server';
-import { isAgentUpgradeable } from '../../../common';
-import { AGENT_SAVED_OBJECT_TYPE, AGENT_EVENT_SAVED_OBJECT_TYPE } from '../../constants';
+import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+
+import {
+  AGENT_SAVED_OBJECT_TYPE,
+  AGENT_EVENT_SAVED_OBJECT_TYPE,
+  AGENTS_INDEX,
+} from '../../constants';
 import { AgentSOAttributes, Agent, AgentEventSOAttributes, ListWithKuery } from '../../types';
-import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
+import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { savedObjectToAgent } from './saved_objects';
 import { appContextService } from '../../services';
+import { searchHitToAgent } from './helpers';
+import * as crudServiceSO from './crud_so';
+import * as crudServiceFleetServer from './crud_fleet_server';
 
 const ACTIVE_AGENT_CONDITION = `${AGENT_SAVED_OBJECT_TYPE}.attributes.active:true`;
 const INACTIVE_AGENT_CONDITION = `NOT (${ACTIVE_AGENT_CONDITION})`;
@@ -27,6 +34,7 @@ function _joinFilters(filters: string[], operator = 'AND') {
 
 export async function listAgents(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   options: ListWithKuery & {
     showInactive: boolean;
   }
@@ -36,48 +44,11 @@ export async function listAgents(
   page: number;
   perPage: number;
 }> {
-  const {
-    page = 1,
-    perPage = 20,
-    sortField = 'enrolled_at',
-    sortOrder = 'desc',
-    kuery,
-    showInactive = false,
-    showUpgradeable,
-  } = options;
-  const filters = [];
+  const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
 
-  if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
-  }
-
-  if (showInactive === false) {
-    filters.push(ACTIVE_AGENT_CONDITION);
-  }
-
-  let { saved_objects: agentSOs, total } = await soClient.find<AgentSOAttributes>({
-    type: AGENT_SAVED_OBJECT_TYPE,
-    filter: _joinFilters(filters),
-    sortField,
-    sortOrder,
-    page,
-    perPage,
-  });
-  // filtering for a range on the version string will not work,
-  // nor does filtering on a flattened field (local_metadata), so filter here
-  if (showUpgradeable) {
-    agentSOs = agentSOs.filter((agent) =>
-      isAgentUpgradeable(savedObjectToAgent(agent), appContextService.getKibanaVersion())
-    );
-    total = agentSOs.length;
-  }
-
-  return {
-    agents: agentSOs.map(savedObjectToAgent),
-    total,
-    page,
-    perPage,
-  };
+  return fleetServerEnabled
+    ? crudServiceFleetServer.listAgents(esClient, options)
+    : crudServiceSO.listAgents(soClient, options);
 }
 
 export async function listAllAgents(
@@ -89,28 +60,12 @@ export async function listAllAgents(
   agents: Agent[];
   total: number;
 }> {
-  const { sortField = 'enrolled_at', sortOrder = 'desc', kuery, showInactive = false } = options;
-  const filters = [];
+  // const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
 
-  if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
-  }
-
-  if (showInactive === false) {
-    filters.push(ACTIVE_AGENT_CONDITION);
-  }
-
-  const { saved_objects: agentSOs, total } = await findAllSOs<AgentSOAttributes>(soClient, {
-    type: AGENT_SAVED_OBJECT_TYPE,
-    kuery: _joinFilters(filters),
-    sortField,
-    sortOrder,
-  });
-
-  return {
-    agents: agentSOs.map(savedObjectToAgent),
-    total,
-  };
+  return crudServiceSO.listAllAgents(soClient, options);
+  // return fleetServerEnabled
+  //   ? crudServiceFleetServer.listAllAgents(esClient, options)
+  //   : crudServiceSO.listAllAgents(soClient, options);
 }
 
 export async function countInactiveAgents(
@@ -133,7 +88,22 @@ export async function countInactiveAgents(
   return total;
 }
 
-export async function getAgent(soClient: SavedObjectsClientContract, agentId: string) {
+export async function getAgent(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentId: string
+) {
+  const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
+
+  if (fleetServerEnabled) {
+    const agentHit = await esClient.get({
+      index: AGENTS_INDEX,
+      id: agentId,
+    });
+    const agent = searchHitToAgent(agentHit.body);
+    return agent;
+  }
+
   const agent = savedObjectToAgent(
     await soClient.get<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId)
   );
@@ -187,8 +157,12 @@ export async function updateAgent(
   });
 }
 
-export async function deleteAgent(soClient: SavedObjectsClientContract, agentId: string) {
-  const agent = await getAgent(soClient, agentId);
+export async function deleteAgent(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentId: string
+) {
+  const agent = await getAgent(soClient, esClient, agentId);
   if (agent.type === 'EPHEMERAL') {
     // Delete events
     let more = true;

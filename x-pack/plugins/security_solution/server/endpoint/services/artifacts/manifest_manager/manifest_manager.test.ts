@@ -191,7 +191,7 @@ describe('manifest_manager', () => {
       expect(packagePolicyService.update.mock.calls.length).toEqual(2);
 
       expect(
-        packagePolicyService.update.mock.calls[0][2].inputs[0].config!.artifact_manifest.value
+        packagePolicyService.update.mock.calls[0][3].inputs[0].config!.artifact_manifest.value
       ).toEqual({
         manifest_version: '1.0.1',
         schema_version: 'v1',

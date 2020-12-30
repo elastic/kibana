@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { AgentService } from '../../../../../../fleet/server';
 import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services';
 import { Agent } from '../../../../../../fleet/common/types/models';
@@ -20,6 +20,7 @@ const STATUS_QUERY_MAP = new Map([
 export async function findAgentIDsByStatus(
   agentService: AgentService,
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   status: string[],
   pageSize: number = 1000
 ): Promise<string[]> {
@@ -39,7 +40,7 @@ export async function findAgentIDsByStatus(
   let hasMore = true;
 
   while (hasMore) {
-    const agents = await agentService.listAgents(soClient, searchOptions(page++));
+    const agents = await agentService.listAgents(soClient, esClient, searchOptions(page++));
     result.push(...agents.agents.map((agent: Agent) => agent.id));
     hasMore = agents.agents.length > 0;
   }

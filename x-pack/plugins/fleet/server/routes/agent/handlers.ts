@@ -39,8 +39,10 @@ export const getAgentHandler: RequestHandler<
   TypeOf<typeof GetOneAgentRequestSchema.params>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   try {
-    const agent = await AgentService.getAgent(soClient, request.params.agentId);
+    const agent = await AgentService.getAgent(soClient, esClient, request.params.agentId);
 
     const body: GetOneAgentResponse = {
       item: {
@@ -98,8 +100,10 @@ export const deleteAgentHandler: RequestHandler<
   TypeOf<typeof DeleteAgentRequestSchema.params>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   try {
-    await AgentService.deleteAgent(soClient, request.params.agentId);
+    await AgentService.deleteAgent(soClient, esClient, request.params.agentId);
 
     const body = {
       action: 'deleted',
@@ -124,11 +128,13 @@ export const updateAgentHandler: RequestHandler<
   TypeOf<typeof UpdateAgentRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   try {
     await AgentService.updateAgent(soClient, request.params.agentId, {
       userProvidedMetatada: request.body.user_provided_metadata,
     });
-    const agent = await AgentService.getAgent(soClient, request.params.agentId);
+    const agent = await AgentService.getAgent(soClient, esClient, request.params.agentId);
 
     const body = {
       item: {
@@ -156,6 +162,7 @@ export const postAgentCheckinHandler: RequestHandler<
 > = async (context, request, response) => {
   try {
     const soClient = appContextService.getInternalUserSOClient(request);
+    const esClient = appContextService.getInternalUserESClient();
     const agent = await AgentService.authenticateAgentWithAccessToken(soClient, request);
     const abortController = new AbortController();
     request.events.aborted$.subscribe(() => {
@@ -164,6 +171,7 @@ export const postAgentCheckinHandler: RequestHandler<
     const signal = abortController.signal;
     const { actions } = await AgentService.agentCheckin(
       soClient,
+      esClient,
       agent,
       {
         events: request.body.events || [],
@@ -234,8 +242,10 @@ export const getAgentsHandler: RequestHandler<
   TypeOf<typeof GetAgentsRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   try {
-    const { agents, total, page, perPage } = await AgentService.listAgents(soClient, {
+    const { agents, total, page, perPage } = await AgentService.listAgents(soClient, esClient, {
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
@@ -326,10 +336,13 @@ export const getAgentStatusForAgentPolicyHandler: RequestHandler<
   TypeOf<typeof GetAgentStatusRequestSchema.query>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
+
   try {
     // TODO change path
     const results = await AgentService.getAgentStatusForAgentPolicy(
       soClient,
+      esClient,
       request.query.policyId,
       request.query.kuery
     );

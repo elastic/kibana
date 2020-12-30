@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { getAgentStatusById } from './status';
 import { AGENT_TYPE_PERMANENT } from '../../../common/constants';
 import { AgentSOAttributes } from '../../../common/types/models';
@@ -13,6 +13,7 @@ import { SavedObject } from 'kibana/server';
 describe('Agent status service', () => {
   it('should return inactive when agent is not active', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockSavedObjectsClient.get = jest.fn().mockReturnValue({
       id: 'id',
       type: AGENT_TYPE_PERMANENT,
@@ -22,12 +23,13 @@ describe('Agent status service', () => {
         user_provided_metadata: {},
       },
     } as SavedObject<AgentSOAttributes>);
-    const status = await getAgentStatusById(mockSavedObjectsClient, 'id');
+    const status = await getAgentStatusById(mockSavedObjectsClient, mockElasticsearchClient, 'id');
     expect(status).toEqual('inactive');
   });
 
   it('should return online when agent is active', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockSavedObjectsClient.get = jest.fn().mockReturnValue({
       id: 'id',
       type: AGENT_TYPE_PERMANENT,
@@ -38,12 +40,13 @@ describe('Agent status service', () => {
         user_provided_metadata: {},
       },
     } as SavedObject<AgentSOAttributes>);
-    const status = await getAgentStatusById(mockSavedObjectsClient, 'id');
+    const status = await getAgentStatusById(mockSavedObjectsClient, mockElasticsearchClient, 'id');
     expect(status).toEqual('online');
   });
 
   it('should return enrolling when agent is active but never checkin', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockSavedObjectsClient.get = jest.fn().mockReturnValue({
       id: 'id',
       type: AGENT_TYPE_PERMANENT,
@@ -53,12 +56,13 @@ describe('Agent status service', () => {
         user_provided_metadata: {},
       },
     } as SavedObject<AgentSOAttributes>);
-    const status = await getAgentStatusById(mockSavedObjectsClient, 'id');
+    const status = await getAgentStatusById(mockSavedObjectsClient, mockElasticsearchClient, 'id');
     expect(status).toEqual('enrolling');
   });
 
   it('should return unenrolling when agent is unenrolling', async () => {
     const mockSavedObjectsClient = savedObjectsClientMock.create();
+    const mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockSavedObjectsClient.get = jest.fn().mockReturnValue({
       id: 'id',
       type: AGENT_TYPE_PERMANENT,
@@ -70,7 +74,7 @@ describe('Agent status service', () => {
         user_provided_metadata: {},
       },
     } as SavedObject<AgentSOAttributes>);
-    const status = await getAgentStatusById(mockSavedObjectsClient, 'id');
+    const status = await getAgentStatusById(mockSavedObjectsClient, mockElasticsearchClient, 'id');
     expect(status).toEqual('unenrolling');
   });
 });

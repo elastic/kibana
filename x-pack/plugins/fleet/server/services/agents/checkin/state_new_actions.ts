@@ -21,7 +21,7 @@ import {
   timeout,
   take,
 } from 'rxjs/operators';
-import { SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
 import {
   Agent,
   AgentAction,
@@ -228,6 +228,7 @@ export function agentCheckinStateNewActionsFactory() {
 
   async function subscribeToNewActions(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     agent: Agent,
     options?: { signal: AbortSignal }
   ): Promise<AgentAction[]> {
@@ -262,7 +263,7 @@ export function agentCheckinStateNewActionsFactory() {
           (action) => action.type === 'INTERNAL_POLICY_REASSIGN'
         );
         if (hasConfigReassign) {
-          return from(getAgent(soClient, agent.id)).pipe(
+          return from(getAgent(soClient, esClient, agent.id)).pipe(
             concatMap((refreshedAgent) => {
               if (!refreshedAgent.policy_id) {
                 throw new Error('Agent does not have a policy assigned');

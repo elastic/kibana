@@ -5,7 +5,11 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObjectsBulkCreateObject,
+} from 'src/core/server';
 import {
   Agent,
   NewAgentEvent,
@@ -20,6 +24,7 @@ import { getAgentActionsForCheckin } from '../actions';
 
 export async function agentCheckin(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agent: Agent,
   data: {
     events: NewAgentEvent[];
@@ -54,7 +59,7 @@ export async function agentCheckin(
   }
 
   // Wait for new actions
-  actions = await agentCheckinState.subscribeToNewActions(soClient, agent, options);
+  actions = await agentCheckinState.subscribeToNewActions(soClient, esClient, agent, options);
 
   return { actions };
 }

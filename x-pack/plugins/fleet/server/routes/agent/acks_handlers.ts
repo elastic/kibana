@@ -18,6 +18,7 @@ export const postAgentAcksHandlerBuilder = function (
   return async (context, request, response) => {
     try {
       const soClient = ackService.getSavedObjectsClientContract(request);
+      const esClient = ackService.getElasticsearchClientContract();
       const agent = await ackService.authenticateAgentWithAccessToken(soClient, request);
       const agentEvents = request.body.events as AgentEvent[];
 
@@ -33,7 +34,12 @@ export const postAgentAcksHandlerBuilder = function (
         });
       }
 
-      const agentActions = await ackService.acknowledgeAgentActions(soClient, agent, agentEvents);
+      const agentActions = await ackService.acknowledgeAgentActions(
+        soClient,
+        esClient,
+        agent,
+        agentEvents
+      );
 
       if (agentActions.length > 0) {
         await ackService.saveAgentEvents(soClient, agentEvents);

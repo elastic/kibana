@@ -8,6 +8,7 @@ import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
+  ElasticsearchServiceStart,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -96,6 +97,7 @@ export interface FleetStartDeps {
 }
 
 export interface FleetAppContext {
+  elasticsearch: ElasticsearchServiceStart;
   encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   security?: SecurityPluginStart;
@@ -277,6 +279,7 @@ export class FleetPlugin
 
   public async start(core: CoreStart, plugins: FleetStartDeps): Promise<FleetStartContract> {
     await appContextService.start({
+      elasticsearch: core.elasticsearch,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
       security: plugins.security,

@@ -36,10 +36,12 @@ export const putSettingsHandler: RequestHandler<
   TypeOf<typeof PutSettingsRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
-    await agentPolicyService.bumpAllAgentPolicies(soClient, {
+    await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, {
       user: user || undefined,
     });
     const body = {

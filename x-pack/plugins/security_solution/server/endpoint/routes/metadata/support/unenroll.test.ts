@@ -4,18 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { findAllUnenrolledAgentIds } from './unenroll';
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+} from '../../../../../../../../src/core/server/mocks';
 import { AgentService } from '../../../../../../fleet/server/services';
 import { createMockAgentService } from '../../../../../../fleet/server/mocks';
 import { Agent } from '../../../../../../fleet/common/types/models';
 
 describe('test find all unenrolled Agent id', () => {
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
   let mockAgentService: jest.Mocked<AgentService>;
   beforeEach(() => {
     mockSavedObjectClient = savedObjectsClientMock.create();
+    mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockAgentService = createMockAgentService();
   });
 
@@ -53,7 +58,11 @@ describe('test find all unenrolled Agent id', () => {
           perPage: 1,
         })
       );
-    const agentIds = await findAllUnenrolledAgentIds(mockAgentService, mockSavedObjectClient);
+    const agentIds = await findAllUnenrolledAgentIds(
+      mockAgentService,
+      mockSavedObjectClient,
+      mockElasticsearchClient
+    );
     expect(agentIds).toBeTruthy();
     expect(agentIds).toEqual(['id1', 'id2']);
   });

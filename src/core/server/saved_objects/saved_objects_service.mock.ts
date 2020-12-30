@@ -37,7 +37,7 @@ import { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 type SavedObjectsServiceContract = PublicMethodsOf<SavedObjectsService>;
 
 const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {
-  const startContrat: jest.Mocked<SavedObjectsServiceStart> = {
+  const startContract: jest.Mocked<SavedObjectsServiceStart> = {
     getScopedClient: jest.fn(),
     createInternalRepository: jest.fn(),
     createScopedRepository: jest.fn(),
@@ -45,12 +45,12 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
     getTypeRegistry: jest.fn(),
   };
 
-  startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
-  startContrat.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
-  startContrat.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
-  startContrat.getTypeRegistry.mockReturnValue(typeRegistry ?? typeRegistryMock.create());
+  startContract.getScopedClient.mockReturnValue(savedObjectsClientMock.create());
+  startContract.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
+  startContract.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
+  startContract.getTypeRegistry.mockReturnValue(typeRegistry ?? typeRegistryMock.create());
 
-  return startContrat;
+  return startContract;
 };
 
 const createInternalStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegistry>) => {

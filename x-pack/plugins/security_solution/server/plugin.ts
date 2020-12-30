@@ -376,6 +376,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.policyWatcher = new PolicyWatcher(
       plugins.fleet!.packagePolicyService,
       core.savedObjects,
+      core.elasticsearch,
       this.logger
     );
     this.policyWatcher.start(licenseService);

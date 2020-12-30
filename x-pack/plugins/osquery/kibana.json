@@ -1,0 +1,15 @@
+{
+  "id": "osquery",
+  "version": "8.0.0",
+  "extraPublicDirs": ["common"],
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "osquery"],
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data", "dataEnhanced", "navigation"],
+  "optionalPlugins": [
+    "fleet",
+    "home"
+  ],
+"requiredBundles": ["kibanaUtils", "kibanaReact"]
+}

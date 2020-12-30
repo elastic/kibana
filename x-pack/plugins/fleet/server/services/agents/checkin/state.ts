@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { Agent } from '../../../types';
 import { appContextService } from '../../app_context';
 import { agentCheckinStateConnectedAgentsFactory } from './state_connected_agents';
@@ -35,6 +35,7 @@ function agentCheckinStateFactory() {
   return {
     subscribeToNewActions: async (
       soClient: SavedObjectsClientContract,
+      esClient: ElasticsearchClient,
       agent: Agent,
       options?: { signal: AbortSignal }
     ) => {
@@ -44,7 +45,7 @@ function agentCheckinStateFactory() {
 
       return agentConnected.wrapPromise(
         agent.id,
-        newActions.subscribeToNewActions(soClient, agent, options)
+        newActions.subscribeToNewActions(soClient, esClient, agent, options)
       );
     },
     start,
