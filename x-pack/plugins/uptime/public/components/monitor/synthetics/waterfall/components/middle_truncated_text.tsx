@@ -45,13 +45,13 @@ export const getChunks = (text: string) => {
 // Helper component for adding middle text truncation, e.g.
 // really-really-really-long....ompressed.js
 // Can be used to accomodate content in sidebar item rendering.
-export const MiddleTruncatedText = ({ text }: { text: string }) => {
+export const MiddleTruncatedText = ({ text, title }: { text: string; title: string }) => {
   const chunks = useMemo(() => {
     return getChunks(text);
   }, [text]);
 
   return (
-    <OuterContainer>
+    <OuterContainer title={title}>
       <InnerContainer>
         <FirstChunk>{chunks.first}</FirstChunk>
         <LastChunk>{chunks.last}</LastChunk>

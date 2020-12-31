@@ -28,11 +28,11 @@ const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   return (
     <>
       {!status || !isErrorStatusCode(status) ? (
-        <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
+        <MiddleTruncatedText text={`${index + 1}. ${item.url}`} title={`${item.url}`} />
       ) : (
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
-            <MiddleTruncatedText text={`${index + 1}. ${item.url}`} />
+            <MiddleTruncatedText text={`${index + 1}. ${item.url}`} title={`${item.url}`} />
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiBadge color="danger">{status}</EuiBadge>

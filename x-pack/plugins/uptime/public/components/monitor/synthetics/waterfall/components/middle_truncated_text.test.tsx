@@ -23,8 +23,11 @@ describe('getChunks', () => {
 
 describe('Component', () => {
   it('Renders correctly', () => {
-    expect(shallowWithIntl(<MiddleTruncatedText text={longString} />)).toMatchInlineSnapshot(`
-      <styled.div>
+    expect(shallowWithIntl(<MiddleTruncatedText text={longString} title={longString} />))
+      .toMatchInlineSnapshot(`
+      <styled.div
+        title="this-is-a-really-really-really-really-really-really-really-really-long-string.madeup.extension"
+      >
         <styled.div>
           <styled.span>
             this-is-a-really-really-really-really-really-really-really-really-long-string.made
