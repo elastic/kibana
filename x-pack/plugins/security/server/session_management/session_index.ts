@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { ILegacyClusterClient, Logger } from '../../../../../src/core/server';
+import type { ElasticsearchClient, Logger } from '../../../../../src/core/server';
 import type { AuthenticationProvider } from '../../common/model';
 import type { ConfigType } from '../config';
 
 export interface SessionIndexOptions {
-  readonly clusterClient: ILegacyClusterClient;
+  readonly elasticsearchClient: ElasticsearchClient;
   readonly kibanaIndexName: string;
   readonly config: Pick<ConfigType, 'session' | 'authc'>;
   readonly logger: Logger;
@@ -137,11 +137,10 @@ export class SessionIndex {
    */
   async get(sid: string) {
     try {
-      const response = await this.options.clusterClient.callAsInternalUser('get', {
-        id: sid,
-        ignore: [404],
-        index: this.indexName,
-      });
+      const { body: response } = await this.options.elasticsearchClient.get(
+        { id: sid, index: this.indexName },
+        { ignore: [404] }
+      );
 
       const docNotFound = response.found === false;
       const indexNotFound = response.status === 404;
@@ -176,9 +175,8 @@ export class SessionIndex {
     const { sid, ...sessionValueToStore } = sessionValue;
     try {
       const {
-        _primary_term: primaryTerm,
-        _seq_no: sequenceNumber,
-      } = await this.options.clusterClient.callAsInternalUser('create', {
+        body: { _primary_term: primaryTerm, _seq_no: sequenceNumber },
+      } = await this.options.elasticsearchClient.create({
         id: sid,
         // We cannot control whether index is created automatically during this operation or not.
         // But we can reduce probability of getting into a weird state when session is being created
@@ -203,15 +201,17 @@ export class SessionIndex {
   async update(sessionValue: Readonly<SessionIndexValue>) {
     const { sid, metadata, ...sessionValueToStore } = sessionValue;
     try {
-      const response = await this.options.clusterClient.callAsInternalUser('index', {
-        id: sid,
-        index: this.indexName,
-        body: sessionValueToStore,
-        ifSeqNo: metadata.sequenceNumber,
-        ifPrimaryTerm: metadata.primaryTerm,
-        refresh: 'wait_for',
-        ignore: [409],
-      });
+      const { body: response } = await this.options.elasticsearchClient.index(
+        {
+          id: sid,
+          index: this.indexName,
+          body: sessionValueToStore,
+          if_seq_no: metadata.sequenceNumber,
+          if_primary_term: metadata.primaryTerm,
+          refresh: 'wait_for',
+        },
+        { ignore: [409] }
+      );
 
       // We don't want to override changes that were made after we fetched session value or
       // re-create it if has been deleted already. If we detect such a case we discard changes and
@@ -242,12 +242,10 @@ export class SessionIndex {
     try {
       // We don't specify primary term and sequence number as delete should always take precedence
       // over any updates that could happen in the meantime.
-      await this.options.clusterClient.callAsInternalUser('delete', {
-        id: sid,
-        index: this.indexName,
-        refresh: 'wait_for',
-        ignore: [404],
-      });
+      await this.options.elasticsearchClient.delete(
+        { id: sid, index: this.indexName, refresh: 'wait_for' },
+        { ignore: [404] }
+      );
     } catch (err) {
       this.options.logger.error(`Failed to clear session value: ${err.message}`);
       throw err;
@@ -267,10 +265,11 @@ export class SessionIndex {
       // Check if required index template exists.
       let indexTemplateExists = false;
       try {
-        indexTemplateExists = await this.options.clusterClient.callAsInternalUser(
-          'indices.existsTemplate',
-          { name: sessionIndexTemplateName }
-        );
+        indexTemplateExists = (
+          await this.options.elasticsearchClient.indices.existsTemplate({
+            name: sessionIndexTemplateName,
+          })
+        ).body;
       } catch (err) {
         this.options.logger.error(
           `Failed to check if session index template exists: ${err.message}`
@@ -283,7 +282,7 @@ export class SessionIndex {
         this.options.logger.debug('Session index template already exists.');
       } else {
         try {
-          await this.options.clusterClient.callAsInternalUser('indices.putTemplate', {
+          await this.options.elasticsearchClient.indices.putTemplate({
             name: sessionIndexTemplateName,
             body: getSessionIndexTemplate(this.indexName),
           });
@@ -298,9 +297,9 @@ export class SessionIndex {
       // always enabled, so we create session index explicitly.
       let indexExists = false;
       try {
-        indexExists = await this.options.clusterClient.callAsInternalUser('indices.exists', {
-          index: this.indexName,
-        });
+        indexExists = (
+          await this.options.elasticsearchClient.indices.exists({ index: this.indexName })
+        ).body;
       } catch (err) {
         this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
         return reject(err);
@@ -311,9 +310,7 @@ export class SessionIndex {
         this.options.logger.debug('Session index already exists.');
       } else {
         try {
-          await this.options.clusterClient.callAsInternalUser('indices.create', {
-            index: this.indexName,
-          });
+          await this.options.elasticsearchClient.indices.create({ index: this.indexName });
           this.options.logger.debug('Successfully created session index.');
         } catch (err) {
           // There can be a race condition if index is created by another Kibana instance.
@@ -399,12 +396,14 @@ export class SessionIndex {
     }
 
     try {
-      const response = await this.options.clusterClient.callAsInternalUser('deleteByQuery', {
-        index: this.indexName,
-        refresh: 'wait_for',
-        ignore: [409, 404],
-        body: { query: { bool: { should: deleteQueries } } },
-      });
+      const { body: response } = await this.options.elasticsearchClient.deleteByQuery(
+        {
+          index: this.indexName,
+          refresh: true,
+          body: { query: { bool: { should: deleteQueries } } },
+        },
+        { ignore: [409, 404] }
+      );
 
       if (response.deleted > 0) {
         this.options.logger.debug(

@@ -5,20 +5,11 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import {
-  ILegacyCustomClusterClient,
-  ServiceStatusLevels,
-  CoreStatus,
-} from '../../../../../src/core/server';
+import { ServiceStatusLevels, CoreStatus } from '../../../../../src/core/server';
 import { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
-import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 import { ElasticsearchService } from './elasticsearch_service';
 
-import {
-  coreMock,
-  elasticsearchServiceMock,
-  loggingSystemMock,
-} from '../../../../../src/core/server/mocks';
+import { coreMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { nextTick } from '@kbn/test/jest';
 
@@ -30,35 +21,20 @@ describe('ElasticsearchService', () => {
 
   describe('setup()', () => {
     it('exposes proper contract', () => {
-      const mockCoreSetup = coreMock.createSetup();
-      const mockClusterClient = elasticsearchServiceMock.createLegacyCustomClusterClient();
-      mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
-
       expect(
         service.setup({
-          elasticsearch: mockCoreSetup.elasticsearch,
-          status: mockCoreSetup.status,
+          status: coreMock.createSetup().status,
           license: licenseMock.create(),
         })
-      ).toEqual({ clusterClient: mockClusterClient });
-
-      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledTimes(1);
-      expect(mockCoreSetup.elasticsearch.legacy.createClient).toHaveBeenCalledWith('security', {
-        plugins: [elasticsearchClientPlugin],
-      });
+      ).toBeUndefined();
     });
   });
 
   describe('start()', () => {
-    let mockClusterClient: ILegacyCustomClusterClient;
     let mockLicense: jest.Mocked<SecurityLicense>;
     let mockStatusSubject: BehaviorSubject<CoreStatus>;
     let mockLicenseSubject: BehaviorSubject<SecurityLicenseFeatures>;
     beforeEach(() => {
-      const mockCoreSetup = coreMock.createSetup();
-      mockClusterClient = elasticsearchServiceMock.createLegacyCustomClusterClient();
-      mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
-
       mockLicenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
       mockLicense = licenseMock.create();
       mockLicense.isEnabled.mockReturnValue(false);
@@ -71,20 +47,18 @@ describe('ElasticsearchService', () => {
         },
         savedObjects: { level: ServiceStatusLevels.unavailable, summary: 'Service is NOT working' },
       });
-      mockCoreSetup.status.core$ = mockStatusSubject;
+
+      const mockStatus = coreMock.createSetup().status;
+      mockStatus.core$ = mockStatusSubject;
 
       service.setup({
-        elasticsearch: mockCoreSetup.elasticsearch,
-        status: mockCoreSetup.status,
+        status: mockStatus,
         license: mockLicense,
       });
     });
 
     it('exposes proper contract', () => {
-      expect(service.start()).toEqual({
-        clusterClient: mockClusterClient,
-        watchOnlineStatus$: expect.any(Function),
-      });
+      expect(service.start()).toEqual({ watchOnlineStatus$: expect.any(Function) });
     });
 
     it('`watchOnlineStatus$` allows tracking of Elasticsearch status', () => {
@@ -197,26 +171,6 @@ describe('ElasticsearchService', () => {
       await nextTick();
       jest.runAllTimers();
       expect(mockHandler).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe('stop()', () => {
-    it('properly closes cluster client instance', () => {
-      const mockCoreSetup = coreMock.createSetup();
-      const mockClusterClient = elasticsearchServiceMock.createLegacyCustomClusterClient();
-      mockCoreSetup.elasticsearch.legacy.createClient.mockReturnValue(mockClusterClient);
-
-      service.setup({
-        elasticsearch: mockCoreSetup.elasticsearch,
-        status: mockCoreSetup.status,
-        license: licenseMock.create(),
-      });
-
-      expect(mockClusterClient.close).not.toHaveBeenCalled();
-
-      service.stop();
-
-      expect(mockClusterClient.close).toHaveBeenCalledTimes(1);
     });
   });
 });

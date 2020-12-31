@@ -10,12 +10,12 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for the session info.
  */
-export function defineSessionInfoRoutes({ router, logger, session }: RouteDefinitionParams) {
+export function defineSessionInfoRoutes({ router, logger, getSession }: RouteDefinitionParams) {
   router.get(
     { path: '/internal/security/session', validate: false },
     async (_context, request, response) => {
       try {
-        const sessionValue = await session.get(request);
+        const sessionValue = await getSession().get(request);
         if (sessionValue) {
           return response.ok({
             body: {

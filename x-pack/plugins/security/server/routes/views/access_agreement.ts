@@ -12,7 +12,7 @@ import { RouteDefinitionParams } from '..';
  * Defines routes required for the Access Agreement view.
  */
 export function defineAccessAgreementRoutes({
-  session,
+  getSession,
   httpResources,
   license,
   config,
@@ -46,7 +46,7 @@ export function defineAccessAgreementRoutes({
       // authenticated with the help of HTTP authentication), that means we should safely check if
       // we have it and can get a corresponding configuration.
       try {
-        const sessionValue = await session.get(request);
+        const sessionValue = await getSession().get(request);
         const accessAgreement =
           (sessionValue &&
             config.authc.providers[

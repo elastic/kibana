@@ -49,7 +49,10 @@ describe('Change password', () => {
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    session = routeParamsMock.session;
+
+    session = sessionMock.create();
+    routeParamsMock.getSession.mockReturnValue(session);
+
     authc = authenticationServiceMock.createStart();
     routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 

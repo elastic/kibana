@@ -6,6 +6,6 @@
 
 export { Session, SessionValue } from './session';
 export {
-  SessionManagementServiceSetup,
+  SessionManagementServiceStart,
   SessionManagementService,
 } from './session_management_service';

@@ -16,7 +16,7 @@ import { RouteDefinitionParams } from '..';
 
 export function defineChangeUserPasswordRoutes({
   getAuthenticationService,
-  session,
+  getSession,
   router,
 }: RouteDefinitionParams) {
   router.post(
@@ -37,7 +37,7 @@ export function defineChangeUserPasswordRoutes({
       const currentUser = getAuthenticationService().getCurrentUser(request);
       const isUserChangingOwnPassword =
         currentUser && currentUser.username === username && canUserChangePassword(currentUser);
-      const currentSession = isUserChangingOwnPassword ? await session.get(request) : null;
+      const currentSession = isUserChangingOwnPassword ? await getSession().get(request) : null;
 
       // If user is changing their own password they should provide a proof of knowledge their
       // current password via sending it in `Authorization: Basic base64(username:current password)`

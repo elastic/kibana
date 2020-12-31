@@ -14,7 +14,7 @@ function createSetupMock() {
   const mockAuthz = authorizationMock.create();
   return {
     audit: auditServiceMock.create(),
-    authc: authenticationServiceMock.createSetup(),
+    authc: { getCurrentUser: jest.fn() },
     authz: {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
