@@ -168,7 +168,6 @@ describe('find()', () => {
     expect(unsecuredSavedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
-          "fields": undefined,
           "filter": undefined,
           "type": "alert",
         },
@@ -203,63 +202,6 @@ describe('find()', () => {
       await expect(alertsClient.find({ options: {} })).rejects.toThrowErrorMatchingInlineSnapshot(
         `"not authorized"`
       );
-    });
-
-    test('ensures authorization even when the fields required to authorize are omitted from the find', async () => {
-      const ensureAlertTypeIsAuthorized = jest.fn();
-      const logSuccessfulAuthorization = jest.fn();
-      authorization.getFindAuthorizationFilter.mockResolvedValue({
-        ensureAlertTypeIsAuthorized,
-        logSuccessfulAuthorization,
-      });
-
-      unsecuredSavedObjectsClient.find.mockReset();
-      unsecuredSavedObjectsClient.find.mockResolvedValue({
-        total: 1,
-        per_page: 10,
-        page: 1,
-        saved_objects: [
-          {
-            id: '1',
-            type: 'alert',
-            attributes: {
-              actions: [],
-              alertTypeId: 'myType',
-              consumer: 'myApp',
-              tags: ['myTag'],
-            },
-            score: 1,
-            references: [],
-          },
-        ],
-      });
-
-      const alertsClient = new AlertsClient(alertsClientParams);
-      expect(await alertsClient.find({ options: { fields: ['tags'] } })).toMatchInlineSnapshot(`
-        Object {
-          "data": Array [
-            Object {
-              "actions": Array [],
-              "id": "1",
-              "notifyWhen": undefined,
-              "schedule": undefined,
-              "tags": Array [
-                "myTag",
-              ],
-            },
-          ],
-          "page": 1,
-          "perPage": 10,
-          "total": 1,
-        }
-      `);
-
-      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
-        fields: ['tags', 'alertTypeId', 'consumer'],
-        type: 'alert',
-      });
-      expect(ensureAlertTypeIsAuthorized).toHaveBeenCalledWith('myType', 'myApp');
-      expect(logSuccessfulAuthorization).toHaveBeenCalled();
     });
   });
 
