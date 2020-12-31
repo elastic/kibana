@@ -10,7 +10,6 @@ import {
   EuiSpacer,
   EuiButton,
   EuiLink,
-  EuiLoadingSpinner,
   EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
@@ -40,6 +39,7 @@ import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../.
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
@@ -355,13 +355,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       />
       <EuiSpacer size="m" />
       {/* Render the view based on if there's data or if they can save */}
-      {(isLoadingActions || isLoadingActionTypes) && (
-        <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+      {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
       {actionConnectorTableItems.length !== 0 && table}
       {actionConnectorTableItems.length === 0 &&
         canSave &&

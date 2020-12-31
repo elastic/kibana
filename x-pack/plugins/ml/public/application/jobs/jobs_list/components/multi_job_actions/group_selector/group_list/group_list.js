@@ -7,7 +7,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { EuiIcon, keys } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiIcon, keys } from '@elastic/eui';
 
 import { JobGroup } from '../../../job_group';
 
@@ -97,8 +97,14 @@ export class GroupList extends Component {
             onClick={() => this.selectGroup(g)}
             ref={(ref) => this.setRef(ref, index)}
           >
-            <Check group={g} selectedGroups={selectedGroups} />
-            <JobGroup name={g.id} />
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <JobGroup name={g.id} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <Check group={g} selectedGroups={selectedGroups} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </div>
         ))}
       </div>

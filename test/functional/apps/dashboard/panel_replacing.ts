@@ -70,6 +70,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('replaced panel persisted correctly when dashboard is hard refreshed', async () => {
       const currentUrl = await browser.getCurrentUrl();
       await browser.get(currentUrl, true);
+      const alert = await browser.getAlert();
+      await alert?.accept();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       const panelTitles = await PageObjects.dashboard.getPanelTitles();

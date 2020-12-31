@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 
-import { DocumentCreationModal } from '../document_creation';
+import { DocumentCreationFlyout } from '../document_creation';
 import { DocumentCreationButton } from './document_creation_button';
 
 describe('DocumentCreationButton', () => {
@@ -24,7 +24,7 @@ describe('DocumentCreationButton', () => {
 
   it('renders', () => {
     expect(wrapper.find(EuiButton).length).toEqual(1);
-    expect(wrapper.find(DocumentCreationModal).length).toEqual(1);
+    expect(wrapper.find(DocumentCreationFlyout).length).toEqual(1);
   });
 
   it('opens the document creation modes modal on click', () => {

@@ -30,7 +30,7 @@ describe('ShowCreationModes', () => {
     expect(wrapper.find(DocumentCreationButtons)).toHaveLength(1);
   });
 
-  it('closes the modal', () => {
+  it('closes the flyout', () => {
     wrapper.find(EuiButtonEmpty).simulate('click');
     expect(actions.closeDocumentCreation).toHaveBeenCalled();
   });

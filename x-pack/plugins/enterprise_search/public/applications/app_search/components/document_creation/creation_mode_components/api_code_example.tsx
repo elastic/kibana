@@ -11,10 +11,10 @@ import { useValues, useActions } from 'kea';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiButtonEmpty,
   EuiText,
   EuiLink,
@@ -23,6 +23,8 @@ import {
   EuiBadge,
   EuiCode,
   EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
@@ -30,39 +32,43 @@ import { EngineLogic } from '../../engine';
 import { EngineDetails } from '../../engine/types';
 
 import { DOCS_PREFIX } from '../../../routes';
-import { DOCUMENTS_API_JSON_EXAMPLE, MODAL_CANCEL_BUTTON } from '../constants';
+import {
+  DOCUMENTS_API_JSON_EXAMPLE,
+  FLYOUT_ARIA_LABEL_ID,
+  FLYOUT_CANCEL_BUTTON,
+} from '../constants';
 import { DocumentCreationLogic } from '../';
 
 export const ApiCodeExample: React.FC = () => (
   <>
-    <ModalHeader />
-    <ModalBody />
-    <ModalFooter />
+    <FlyoutHeader />
+    <FlyoutBody />
+    <FlyoutFooter />
   </>
 );
 
-export const ModalHeader: React.FC = () => {
+export const FlyoutHeader: React.FC = () => {
   return (
-    <EuiModalHeader>
-      <EuiModalHeaderTitle>
-        <h2>
+    <EuiFlyoutHeader hasBorder>
+      <EuiTitle size="m">
+        <h2 id={FLYOUT_ARIA_LABEL_ID}>
           {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.api.title', {
             defaultMessage: 'Indexing by API',
           })}
         </h2>
-      </EuiModalHeaderTitle>
-    </EuiModalHeader>
+      </EuiTitle>
+    </EuiFlyoutHeader>
   );
 };
 
-export const ModalBody: React.FC = () => {
+export const FlyoutBody: React.FC = () => {
   const { engineName, engine } = useValues(EngineLogic);
   const { apiKey } = engine as EngineDetails;
 
   const documentsApiUrl = getEnterpriseSearchUrl(`/api/as/v1/engines/${engineName}/documents`);
 
   return (
-    <EuiModalBody>
+    <EuiFlyoutBody>
       <EuiText color="subdued">
         <p>
           <FormattedMessage
@@ -91,8 +97,14 @@ export const ModalBody: React.FC = () => {
       </EuiText>
       <EuiSpacer />
       <EuiPanel hasShadow={false} paddingSize="s" className="eui-textBreakAll">
-        <EuiBadge color="primary">POST</EuiBadge>
-        <EuiCode transparentBackground>{documentsApiUrl}</EuiCode>
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="primary">POST</EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiCode transparentBackground>{documentsApiUrl}</EuiCode>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
       <EuiCodeBlock language="bash" fontSize="m" isCopyable>
         {dedent(`
@@ -113,16 +125,16 @@ export const ModalBody: React.FC = () => {
         # ]
       `)}
       </EuiCodeBlock>
-    </EuiModalBody>
+    </EuiFlyoutBody>
   );
 };
 
-export const ModalFooter: React.FC = () => {
+export const FlyoutFooter: React.FC = () => {
   const { closeDocumentCreation } = useActions(DocumentCreationLogic);
 
   return (
-    <EuiModalFooter>
-      <EuiButtonEmpty onClick={closeDocumentCreation}>{MODAL_CANCEL_BUTTON}</EuiButtonEmpty>
-    </EuiModalFooter>
+    <EuiFlyoutFooter>
+      <EuiButtonEmpty onClick={closeDocumentCreation}>{FLYOUT_CANCEL_BUTTON}</EuiButtonEmpty>
+    </EuiFlyoutFooter>
   );
 };

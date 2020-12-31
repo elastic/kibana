@@ -9,14 +9,14 @@ import { useActions } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 import {
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { MODAL_CANCEL_BUTTON } from '../constants';
+import { FLYOUT_ARIA_LABEL_ID, FLYOUT_CANCEL_BUTTON } from '../constants';
 import { DocumentCreationLogic, DocumentCreationButtons } from '../';
 
 export const ShowCreationModes: React.FC = () => {
@@ -24,22 +24,22 @@ export const ShowCreationModes: React.FC = () => {
 
   return (
     <>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h2>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id={FLYOUT_ARIA_LABEL_ID}>
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.documentCreation.showCreationModes.title',
               { defaultMessage: 'Add new documents' }
             )}
           </h2>
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
         <DocumentCreationButtons />
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeDocumentCreation}>{MODAL_CANCEL_BUTTON}</EuiButtonEmpty>
-      </EuiModalFooter>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiButtonEmpty onClick={closeDocumentCreation}>{FLYOUT_CANCEL_BUTTON}</EuiButtonEmpty>
+      </EuiFlyoutFooter>
     </>
   );
 };

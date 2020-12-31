@@ -6,12 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MODAL_CANCEL_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.documentCreation.modalCancel',
+export const FLYOUT_ARIA_LABEL_ID = 'documentCreationFlyoutHeadingId';
+
+export const FLYOUT_CANCEL_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.documentCreation.flyoutCancel',
   { defaultMessage: 'Cancel' }
 );
-export const MODAL_CONTINUE_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.documentCreation.modalContinue',
+export const FLYOUT_CONTINUE_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.documentCreation.flyoutContinue',
   { defaultMessage: 'Continue' }
 );
 
