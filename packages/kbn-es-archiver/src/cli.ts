@@ -282,6 +282,13 @@ export function runCli() {
       },
     })
     .command({
+      name: 'clean-kibana-indexes',
+      description: '[internal] Clean any Kibana indices.',
+      async run({ esArchiver }) {
+        await esArchiver.cleanKibanaIndexes();
+      },
+    })
+    .command({
       name: 'empty-kibana-index',
       description:
         '[internal] Delete any Kibana indices, and initialize the Kibana index as Kibana would do on startup.',

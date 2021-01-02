@@ -17,12 +17,23 @@
  * under the License.
  */
 
-export { createCreateIndexStream } from './create_index_stream';
-export { createDeleteIndexStream } from './delete_index_stream';
-export { createGenerateIndexRecordsStream } from './generate_index_records_stream';
-export {
-  migrateKibanaIndex,
-  deleteKibanaIndices,
-  cleanKibanaIndices,
-  createDefaultSpace,
-} from './kibana_index';
+import { Client } from 'elasticsearch';
+import { ToolingLog, KbnClient } from '@kbn/dev-utils';
+
+import { cleanKibanaIndices, createStats } from '../lib';
+
+export async function cleanKibanaIndexesAction({
+  client,
+  log,
+  kbnClient,
+}: {
+  client: Client;
+  log: ToolingLog;
+  kbnClient: KbnClient;
+}) {
+  const stats = createStats('cleanKibanaIndices', log);
+  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
+
+  await cleanKibanaIndices({ client, log, stats, kibanaPluginIds });
+  return stats;
+}

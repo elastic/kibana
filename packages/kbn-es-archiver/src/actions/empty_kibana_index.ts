@@ -20,7 +20,7 @@
 import { Client } from 'elasticsearch';
 import { ToolingLog, KbnClient } from '@kbn/dev-utils';
 
-import { createDefaultSpace, migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
+import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
 
 export async function emptyKibanaIndexAction({
   client,
@@ -34,7 +34,6 @@ export async function emptyKibanaIndexAction({
   const stats = createStats('emptyKibanaIndex', log);
 
   await deleteKibanaIndices({ client, stats, log });
-  await createDefaultSpace({ client, index: '.kibana' });
   await migrateKibanaIndex({ client, kbnClient });
   return stats;
 }

@@ -67,11 +67,11 @@ export const cleanKibana = () => {
   esArchiverResetKibana();
   cy.exec(`curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/${DEFAULT_SIGNALS_INDEX}\*" -k`);
 
-  // We wait until the kibana indexes are created
-  cy.waitUntil(() => {
-    cy.wait(1000);
-    return cy
-      .request(`${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`)
-      .then((response) => JSON.stringify(response.body) !== '{}');
-  });
+  // // We wait until the kibana indexes are created
+  // cy.waitUntil(() => {
+  //   cy.wait(1000);
+  //   return cy
+  //     .request(`${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`)
+  //     .then((response) => JSON.stringify(response.body) !== '{}');
+  // });
 };
