@@ -51,6 +51,7 @@ import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
   DrawState,
+  MapCenter,
   MapCenterAndZoom,
   MapExtent,
   MapRefreshConfig,
@@ -58,6 +59,12 @@ import {
 import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
+
+export interface MapExtentState {
+  zoom: number;
+  extent: MapExtent;
+  center: MapCenter;
+}
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -125,13 +132,13 @@ export function mapDestroyed() {
   };
 }
 
-export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExtent }) {
+export function mapExtentChanged(mapExtentState: MapExtentState) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     const dataFilters = getDataFilters(getState());
-    const { extent, zoom: newZoom } = newMapConstants;
+    const { extent, zoom: newZoom } = mapExtentState;
     const { buffer, zoom: currentZoom } = dataFilters;
 
     if (extent) {
@@ -162,7 +169,7 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
       type: MAP_EXTENT_CHANGED,
       mapState: {
         ...dataFilters,
-        ...newMapConstants,
+        ...mapExtentState,
       },
     });
 

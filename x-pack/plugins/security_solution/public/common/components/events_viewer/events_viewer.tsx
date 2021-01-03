@@ -6,15 +6,13 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { useDispatch } from 'react-redux';
 
 import { Direction } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
-import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
 import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
 import { HeaderSection } from '../header_section';
@@ -41,8 +39,13 @@ import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import { TimelineExpandedEvent, TimelineId } from '../../../../common/types/timeline';
+import {
+  TimelineExpandedEventType,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../../../timelines/components/timeline/styles';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -74,7 +77,9 @@ const TitleFlexGroup = styled(EuiFlexGroup)`
   margin-top: 8px;
 `;
 
-const EventsContainerLoading = styled.div`
+const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
+  className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
+}))`
   width: 100%;
   overflow: hidden;
   flex: 1;
@@ -107,7 +112,7 @@ interface Props {
   deletedEventIds: Readonly<string[]>;
   docValueFields: DocValueFields[];
   end: string;
-  expandedEvent: TimelineExpandedEvent;
+  expandedEvent: TimelineExpandedEventType;
   filters: Filter[];
   headerFilterGroup?: React.ReactNode;
   height?: number;
@@ -153,7 +158,6 @@ const EventsViewerComponent: React.FC<Props> = ({
   utilityBar,
   graphEventId,
 }) => {
-  const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
@@ -184,9 +188,6 @@ const EventsViewerComponent: React.FC<Props> = ({
     [justTitle]
   );
 
-  const prevCombinedQueries = useRef<{
-    filterQuery: string;
-  } | null>(null);
   const combinedQueries = combineQueries({
     config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
     dataProviders,
@@ -237,13 +238,6 @@ const EventsViewerComponent: React.FC<Props> = ({
     endDate: end,
     skip: !canQueryTimeline,
   });
-
-  useEffect(() => {
-    if (!deepEqual(prevCombinedQueries.current, combinedQueries)) {
-      prevCombinedQueries.current = combinedQueries;
-      dispatch(timelineActions.toggleExpandedEvent({ timelineId: id }));
-    }
-  }, [combinedQueries, dispatch, id]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -297,7 +291,10 @@ const EventsViewerComponent: React.FC<Props> = ({
             {utilityBar && !resolverIsShowing(graphEventId) && (
               <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
             )}
-            <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
+            <EventsContainerLoading
+              data-timeline-id={id}
+              data-test-subj={`events-container-loading-${loading}`}
+            >
               <TimelineRefetch
                 id={id}
                 inputId="global"
@@ -318,6 +315,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                     onRuleChange={onRuleChange}
                     refetch={refetch}
                     sort={sort}
+                    tabType={TimelineTabs.query}
                     totalPages={calculateTotalPages({
                       itemsCount: totalCountMinusDeleted,
                       itemsPerPage,

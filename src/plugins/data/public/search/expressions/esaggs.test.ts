@@ -72,7 +72,6 @@ describe('esaggs expression function - public', () => {
       types: {},
     };
     startDependencies = {
-      addFilters: jest.fn(),
       aggs: ({
         createAggConfigs: jest.fn().mockReturnValue({ foo: 'bar' }),
       } as unknown) as jest.Mocked<AggsStart>,
@@ -113,7 +112,6 @@ describe('esaggs expression function - public', () => {
 
     expect(handleEsaggsRequest).toHaveBeenCalledWith(null, args, {
       abortSignal: mockHandlers.abortSignal,
-      addFilters: startDependencies.addFilters,
       aggs: { foo: 'bar' },
       deserializeFieldFormat: startDependencies.deserializeFieldFormat,
       filters: undefined,
