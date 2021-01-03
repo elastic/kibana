@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { findAgentIDsByStatus } from './agent_status';
-import { savedObjectsClientMock } from '../../../../../../../../src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+} from '../../../../../../../../src/core/server/mocks';
 import { AgentService } from '../../../../../../fleet/server/services';
 import { createMockAgentService } from '../../../../../../fleet/server/mocks';
 import { Agent } from '../../../../../../fleet/common/types/models';
@@ -14,9 +17,11 @@ import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services'
 
 describe('test filtering endpoint hosts by agent status', () => {
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
   let mockAgentService: jest.Mocked<AgentService>;
   beforeEach(() => {
     mockSavedObjectClient = savedObjectsClientMock.create();
+    mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockAgentService = createMockAgentService();
   });
 
@@ -30,7 +35,12 @@ describe('test filtering endpoint hosts by agent status', () => {
       })
     );
 
-    const result = await findAgentIDsByStatus(mockAgentService, mockSavedObjectClient, ['online']);
+    const result = await findAgentIDsByStatus(
+      mockAgentService,
+      mockSavedObjectClient,
+      mockElasticsearchClient,
+      ['online']
+    );
     expect(result).toBeDefined();
   });
 
@@ -53,9 +63,14 @@ describe('test filtering endpoint hosts by agent status', () => {
         })
       );
 
-    const result = await findAgentIDsByStatus(mockAgentService, mockSavedObjectClient, ['offline']);
+    const result = await findAgentIDsByStatus(
+      mockAgentService,
+      mockSavedObjectClient,
+      mockElasticsearchClient,
+      ['offline']
+    );
     const offlineKuery = AgentStatusKueryHelper.buildKueryForOfflineAgents();
-    expect(mockAgentService.listAgents.mock.calls[0][1].kuery).toEqual(
+    expect(mockAgentService.listAgents.mock.calls[0][2].kuery).toEqual(
       expect.stringContaining(offlineKuery)
     );
     expect(result).toBeDefined();
@@ -81,13 +96,15 @@ describe('test filtering endpoint hosts by agent status', () => {
         })
       );
 
-    const result = await findAgentIDsByStatus(mockAgentService, mockSavedObjectClient, [
-      'unenrolling',
-      'error',
-    ]);
+    const result = await findAgentIDsByStatus(
+      mockAgentService,
+      mockSavedObjectClient,
+      mockElasticsearchClient,
+      ['unenrolling', 'error']
+    );
     const unenrollKuery = AgentStatusKueryHelper.buildKueryForUnenrollingAgents();
     const errorKuery = AgentStatusKueryHelper.buildKueryForErrorAgents();
-    expect(mockAgentService.listAgents.mock.calls[0][1].kuery).toEqual(
+    expect(mockAgentService.listAgents.mock.calls[0][2].kuery).toEqual(
       expect.stringContaining(`${unenrollKuery} OR ${errorKuery}`)
     );
     expect(result).toBeDefined();

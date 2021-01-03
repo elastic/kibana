@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
+import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
 import { AgentStatus, Agent, EsAssetReference } from '../types';
 import * as settingsService from './settings';
 import { getAgent, listAgents } from './agents';
@@ -53,7 +53,11 @@ export interface AgentService {
   /**
    * Return the status by the Agent's id
    */
-  getAgentStatusById(soClient: SavedObjectsClientContract, agentId: string): Promise<AgentStatus>;
+  getAgentStatusById(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    agentId: string
+  ): Promise<AgentStatus>;
   /**
    * List agents
    */

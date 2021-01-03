@@ -6,11 +6,16 @@
 
 import { postAgentAcksHandlerBuilder } from './acks_handlers';
 import {
+  ElasticsearchClient,
   KibanaResponseFactory,
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { httpServerMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  savedObjectsClientMock,
+} from '../../../../../../src/core/server/mocks';
 import { PostAgentAcksResponse } from '../../../common/types/rest_spec';
 import { AckEventSchema } from '../../types/models';
 import { AcksService } from '../../services/agents';
@@ -45,9 +50,11 @@ describe('test acks schema', () => {
 describe('test acks handlers', () => {
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
 
   beforeEach(() => {
     mockSavedObjectsClient = savedObjectsClientMock.create();
+    mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockResponse = httpServerMock.createResponseFactory();
   });
 
@@ -81,6 +88,7 @@ describe('test acks handlers', () => {
         id: 'agent',
       }),
       getSavedObjectsClientContract: jest.fn().mockReturnValueOnce(mockSavedObjectsClient),
+      getElasticsearchClientContract: jest.fn().mockReturnValueOnce(mockElasticsearchClient),
       saveAgentEvents: jest.fn(),
     } as jest.Mocked<AcksService>;
 

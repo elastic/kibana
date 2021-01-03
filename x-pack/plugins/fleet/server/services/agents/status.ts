@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { getAgent, listAgents } from './crud';
 import { AGENT_EVENT_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentStatus } from '../../types';
@@ -13,9 +13,10 @@ import { AgentStatusKueryHelper } from '../../../common/services';
 
 export async function getAgentStatusById(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentId: string
 ): Promise<AgentStatus> {
-  const agent = await getAgent(soClient, agentId);
+  const agent = await getAgent(soClient, esClient, agentId);
   return AgentStatusKueryHelper.getAgentStatus(agent);
 }
 
@@ -23,6 +24,7 @@ export const getAgentStatus = AgentStatusKueryHelper.getAgentStatus;
 
 export async function getAgentStatusForAgentPolicy(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   agentPolicyId?: string,
   filterKuery?: string
 ) {
@@ -33,7 +35,7 @@ export async function getAgentStatusForAgentPolicy(
       AgentStatusKueryHelper.buildKueryForErrorAgents(),
       AgentStatusKueryHelper.buildKueryForOfflineAgents(),
     ].map((kuery) =>
-      listAgents(soClient, {
+      listAgents(soClient, esClient, {
         showInactive: false,
         perPage: 0,
         page: 1,

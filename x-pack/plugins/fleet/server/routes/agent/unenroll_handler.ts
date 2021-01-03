@@ -18,9 +18,10 @@ export const postAgentUnenrollHandler: RequestHandler<
   TypeOf<typeof PostAgentUnenrollRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     if (request.body?.force === true) {
-      await AgentService.forceUnenrollAgent(soClient, request.params.agentId);
+      await AgentService.forceUnenrollAgent(soClient, esClient, request.params.agentId);
     } else {
       await AgentService.unenrollAgent(soClient, request.params.agentId);
     }

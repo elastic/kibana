@@ -39,13 +39,15 @@ export interface SetupStatus {
 
 export async function setupIngestManager(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
-  return awaitIfPending(async () => createSetupSideEffects(soClient, callCluster));
+  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient, callCluster));
 }
 
 async function createSetupSideEffects(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser
 ): Promise<SetupStatus> {
   const [
@@ -56,7 +58,7 @@ async function createSetupSideEffects(
     // packages installed by default
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
-    agentPolicyService.ensureDefaultAgentPolicy(soClient),
+    agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -109,6 +111,7 @@ async function createSetupSideEffects(
       if (!isInstalled) {
         await addPackageToAgentPolicy(
           soClient,
+          esClient,
           callCluster,
           installedPackage,
           agentPolicyWithPackagePolicies,
@@ -201,6 +204,7 @@ function generateRandomPassword() {
 
 async function addPackageToAgentPolicy(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   callCluster: CallESAsCurrentUser,
   packageToInstall: Installation,
   agentPolicy: AgentPolicy,
@@ -219,7 +223,7 @@ async function addPackageToAgentPolicy(
     agentPolicy.namespace
   );
 
-  await packagePolicyService.create(soClient, callCluster, newPackagePolicy, {
+  await packagePolicyService.create(soClient, esClient, callCluster, newPackagePolicy, {
     bumpRevision: false,
   });
 }
