@@ -6,6 +6,7 @@
 import Boom from '@hapi/boom';
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
+import { ESSearchHit } from '../../../../../typings/elasticsearch';
 import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -60,12 +61,7 @@ export async function listAllAgents(
   agents: Agent[];
   total: number;
 }> {
-  // const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
-
   return crudServiceSO.listAllAgents(soClient, options);
-  // return fleetServerEnabled
-  //   ? crudServiceFleetServer.listAllAgents(esClient, options)
-  //   : crudServiceSO.listAllAgents(soClient, options);
 }
 
 export async function countInactiveAgents(
@@ -96,7 +92,7 @@ export async function getAgent(
   const fleetServerEnabled = appContextService.getConfig()?.agents?.fleetServerEnabled;
 
   if (fleetServerEnabled) {
-    const agentHit = await esClient.get({
+    const agentHit = await esClient.get<ESSearchHit<AgentSOAttributes>>({
       index: AGENTS_INDEX,
       id: agentId,
     });

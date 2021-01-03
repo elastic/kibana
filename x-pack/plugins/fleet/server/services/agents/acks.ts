@@ -198,7 +198,7 @@ export async function saveAgentEvents(
 export interface AcksService {
   acknowledgeAgentActions: (
     soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient | undefined,
+    esClient: ElasticsearchClient,
     agent: Agent,
     actionIds: AgentEvent[]
   ) => Promise<AgentAction[]>;
@@ -210,7 +210,7 @@ export interface AcksService {
 
   getSavedObjectsClientContract: (kibanaRequest: KibanaRequest) => SavedObjectsClientContract;
 
-  getElasticsearchClientContract: () => ElasticsearchClient | undefined;
+  getElasticsearchClientContract: () => ElasticsearchClient;
 
   saveAgentEvents: (
     soClient: SavedObjectsClientContract,
