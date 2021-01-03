@@ -93,7 +93,7 @@ describe('TimelineTitleAndDescription', () => {
       const component = mount(<TimelineTitleAndDescription {...props} />, {
         wrappingComponent: TestProviders,
       });
-      expect(component.find('[data-test-subj="save-timeline-name"]').exists()).toEqual(true);
+      expect(component.find('[data-test-subj="save-timeline-title"]').exists()).toEqual(true);
     });
 
     test('Show description field', () => {
@@ -183,7 +183,7 @@ describe('TimelineTitleAndDescription', () => {
       const component = mount(<TimelineTitleAndDescription {...props} />, {
         wrappingComponent: TestProviders,
       });
-      expect(component.find('[data-test-subj="save-timeline-name"]').exists()).toEqual(true);
+      expect(component.find('[data-test-subj="save-timeline-title"]').exists()).toEqual(true);
     });
 
     test('Show description field', () => {

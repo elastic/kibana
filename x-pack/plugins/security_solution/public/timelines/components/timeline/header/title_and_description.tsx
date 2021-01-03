@@ -147,7 +147,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       () => ({
         'aria-label': i18n.TIMELINE_TITLE,
         autoFocus: initialFocus === 'title',
-        'data-test-subj': 'save-timeline-name',
+        'data-test-subj': 'save-timeline-title',
         disabled: isSaving,
         spellCheck: true,
         placeholder:
@@ -206,7 +206,12 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
             )}
             <Form form={form}>
               <EuiFlexItem grow={true}>
-                <CommonUseField path="title" fullWidth euiFieldProps={titleFieldProps} />
+                <CommonUseField
+                  path="title"
+                  fullWidth
+                  label={i18n.TITLE}
+                  euiFieldProps={titleFieldProps}
+                />
                 <EuiSpacer />
               </EuiFlexItem>
               <EuiFlexItem grow={true}>
