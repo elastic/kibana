@@ -198,7 +198,7 @@ export async function saveAgentEvents(
 export interface AcksService {
   acknowledgeAgentActions: (
     soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
+    esClient: ElasticsearchClient | undefined,
     agent: Agent,
     actionIds: AgentEvent[]
   ) => Promise<AgentAction[]>;
