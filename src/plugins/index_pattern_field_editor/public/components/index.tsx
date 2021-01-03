@@ -17,11 +17,17 @@
  * under the License.
  */
 
+import React from 'react';
+import { OverlayStart } from 'src/core/public';
 import { IndexPattern, IndexPatternField } from '../../../data/public';
+import { toMountPoint } from '../../../kibana_react/public';
 
 export const indexPatternFieldEditorFlyoutContent = (
+  openFlyout: OverlayStart['openFlyout'],
   indexPattern: IndexPattern,
   indexPatternField: IndexPatternField
 ) => {
+  // const a = toMountPoint(<div>hello</div>);
+  openFlyout(toMountPoint(<div>hello {indexPatternField.name}</div>));
   console.log('hello from async loaded component', indexPattern, indexPatternField);
 };
