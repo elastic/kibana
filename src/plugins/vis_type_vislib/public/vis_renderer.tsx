@@ -26,9 +26,13 @@ import { ChartsPluginSetup } from '../../charts/public';
 
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VislibRenderValue, vislibVisName } from './vis_type_vislib_vis_fn';
+import { VislibChartType } from './types';
+import { PieRenderValue } from './pie_fn';
 
-function shouldShowNoResultsMessage(visData: any, visType: string): boolean {
-  if (['goal', 'gauge'].includes(visType)) {
+const VislibWrapper = lazy(() => import('./vis_wrapper'));
+
+function shouldShowNoResultsMessage(visData: any, visType: VislibChartType): boolean {
+  if (['goal', 'gauge'].includes(visType as string)) {
     return false;
   }
 
@@ -38,13 +42,12 @@ function shouldShowNoResultsMessage(visData: any, visType: string): boolean {
   return Boolean(isZeroHits);
 }
 
-const VislibWrapper = lazy(() => import('./vis_wrapper'));
-
 export const getVislibVisRenderer: (
   core: VisTypeVislibCoreSetup,
   charts: ChartsPluginSetup
-) => ExpressionRenderDefinition<VislibRenderValue> = (core, charts) => ({
+) => ExpressionRenderDefinition<VislibRenderValue | PieRenderValue> = (core, charts) => ({
   name: vislibVisName,
+  displayName: 'Vislib visualization',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(config.visData, config.visType);

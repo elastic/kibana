@@ -43,7 +43,6 @@ export function NodeDataFetcher(
       return;
     }
 
-    const newID = selectors.refreshCount(state);
     /**
      * Dispatch an action indicating that we are going to request data for a set of nodes so that we can show a loading
      * state for those nodes in the UI.
@@ -55,7 +54,6 @@ export function NodeDataFetcher(
       type: 'appRequestingNodeData',
       payload: {
         requestedIDs: newIDsToRequest,
-        dataRequestID: newID,
       },
     });
 
@@ -76,7 +74,6 @@ export function NodeDataFetcher(
         type: 'serverFailedToReturnNodeData',
         payload: {
           requestedIDs: newIDsToRequest,
-          dataRequestID: newID,
         },
       });
     }
@@ -114,7 +111,6 @@ export function NodeDataFetcher(
            *  if that node is still in view we'll request its node data.
            */
           numberOfRequestedEvents: nodeDataLimit,
-          dataRequestID: newID,
         },
       });
     }

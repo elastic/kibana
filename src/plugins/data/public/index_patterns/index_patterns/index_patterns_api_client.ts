@@ -64,12 +64,13 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
     }).then((resp: any) => resp.fields);
   }
 
-  getFieldsForWildcard({ pattern, metaFields, type, rollupIndex }: GetFieldsOptions) {
+  getFieldsForWildcard({ pattern, metaFields, type, rollupIndex, allowNoIndex }: GetFieldsOptions) {
     return this._request(this._getUrl(['_fields_for_wildcard']), {
       pattern,
       meta_fields: metaFields,
       type,
       rollup_index: rollupIndex,
-    }).then((resp: any) => resp.fields);
+      allow_no_index: allowNoIndex,
+    }).then((resp: any) => resp.fields || []);
   }
 }

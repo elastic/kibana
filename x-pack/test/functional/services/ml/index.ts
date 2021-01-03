@@ -63,13 +63,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(context);
   const dataFrameAnalyticsMap = MachineLearningDataFrameAnalyticsMapProvider(context);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
+
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
+  const dataVisualizerTable = MachineLearningDataVisualizerTableProvider(context, commonUI);
+
   const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
-  const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(
-    context,
-    commonUI
-  );
-  const dataVisualizerTable = MachineLearningDataVisualizerTableProvider(context);
+  const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
 
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);

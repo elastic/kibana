@@ -12,7 +12,11 @@ import {
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
 } from 'src/core/server';
-import { PackagePolicy, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
+import {
+  PackagePolicy,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  UpdatePackagePolicy,
+} from '../../../../../fleet/common';
 import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 import { ILicense } from '../../../../../licensing/common/types';
 import {
@@ -91,18 +95,29 @@ export class PolicyWatcher {
         return;
       }
       response.items.forEach(async (policy) => {
-        const policyConfig = policy.inputs[0].config?.policy.value;
+        const updatePolicy: UpdatePackagePolicy = {
+          name: policy.name,
+          description: policy.description,
+          namespace: policy.namespace,
+          enabled: policy.enabled,
+          policy_id: policy.policy_id,
+          output_id: policy.output_id,
+          package: policy.package,
+          inputs: policy.inputs,
+          version: policy.version,
+        };
+        const policyConfig = updatePolicy.inputs[0].config?.policy.value;
         if (!isEndpointPolicyValidForLicense(policyConfig, license)) {
-          policy.inputs[0].config!.policy.value = unsetPolicyFeaturesAboveLicenseLevel(
+          updatePolicy.inputs[0].config!.policy.value = unsetPolicyFeaturesAboveLicenseLevel(
             policyConfig,
             license
           );
           try {
-            await this.policyService.update(this.soClient, policy.id, policy);
+            await this.policyService.update(this.soClient, policy.id, updatePolicy);
           } catch (e) {
             // try again for transient issues
             try {
-              await this.policyService.update(this.soClient, policy.id, policy);
+              await this.policyService.update(this.soClient, policy.id, updatePolicy);
             } catch (ee) {
               this.logger.warn(
                 `Unable to remove platinum features from policy ${policy.id}: ${ee.message}`
