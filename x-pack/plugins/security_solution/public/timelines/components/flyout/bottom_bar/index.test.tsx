@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
-import { TimelineTabs } from '../../../store/timeline/model';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { FlyoutBottomBar } from '.';
 
 describe('FlyoutBottomBar', () => {

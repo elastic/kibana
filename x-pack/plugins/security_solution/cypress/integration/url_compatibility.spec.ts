@@ -19,7 +19,7 @@ const ABSOLUTE_DATE = {
   startTime: '2019-08-01T20:03:29.186Z',
 };
 
-describe('URL compatibility', () => {
+describe.skip('URL compatibility', () => {
   before(() => {
     cleanKibana();
   });

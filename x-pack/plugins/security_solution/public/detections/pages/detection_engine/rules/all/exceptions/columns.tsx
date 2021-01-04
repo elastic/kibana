@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiButtonIcon, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
 import { History } from 'history';
 
+import { NamespaceType } from '../../../../../../../../lists/common';
 import { FormatUrl } from '../../../../../../common/components/link_to';
 import { LinkAnchor } from '../../../../../../common/components/links';
 import * as i18n from './translations';
@@ -16,7 +17,11 @@ import { ExceptionListInfo } from './use_all_exception_lists';
 import { getRuleDetailsUrl } from '../../../../../../common/components/link_to/redirect_to_detection_engine';
 
 export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionListInfo>;
-export type Func = (listId: string) => () => void;
+export type Func = (arg: {
+  id: string;
+  listId: string;
+  namespaceType: NamespaceType;
+}) => () => void;
 
 export const getAllExceptionListsColumns = (
   onExport: Func,
@@ -96,9 +101,13 @@ export const getAllExceptionListsColumns = (
     align: 'center',
     isExpander: false,
     width: '25px',
-    render: (list: ExceptionListInfo) => (
+    render: ({ id, list_id: listId, namespace_type: namespaceType }: ExceptionListInfo) => (
       <EuiButtonIcon
-        onClick={onExport(list.id)}
+        onClick={onExport({
+          id,
+          listId,
+          namespaceType,
+        })}
         aria-label="Export exception list"
         iconType="exportAction"
       />
@@ -108,10 +117,14 @@ export const getAllExceptionListsColumns = (
     align: 'center',
     width: '25px',
     isExpander: false,
-    render: (list: ExceptionListInfo) => (
+    render: ({ id, list_id: listId, namespace_type: namespaceType }: ExceptionListInfo) => (
       <EuiButtonIcon
         color="danger"
-        onClick={onDelete(list.id)}
+        onClick={onDelete({
+          id,
+          listId,
+          namespaceType,
+        })}
         aria-label="Delete exception list"
         iconType="trash"
       />
