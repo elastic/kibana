@@ -47,8 +47,5 @@ export const WorkplaceSearchNav: React.FC<Props> = ({ sourcesSubNav, groupsSubNa
       {NAV.SETTINGS}
     </SideNavLink>
     <EuiSpacer />
-    <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${SOURCES_PATH}`)}>
-      {NAV.PERSONAL_DASHBOARD}
-    </SideNavLink>
   </SideNav>
 );
