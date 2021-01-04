@@ -87,7 +87,11 @@ export const TrustedAppsPage = memo(() => {
       )}
 
       {doEntriesExist ? (
-        <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          data-test-subj="trustedAppsListPageContent"
+        >
           <EuiFlexItem grow={false}>
             <ControlPanel
               totalItemCount={totalItemsCount}
@@ -127,7 +131,10 @@ export const TrustedAppsPage = memo(() => {
       <TrustedAppsNotifications />
 
       {isCheckingIfEntriesExists ? (
-        <EuiEmptyPrompt body={<EuiLoadingSpinner className="essentialAnimation" size="xl" />} />
+        <EuiEmptyPrompt
+          data-test-subj="trustedAppsListLoader"
+          body={<EuiLoadingSpinner className="essentialAnimation" size="xl" />}
+        />
       ) : (
         content
       )}

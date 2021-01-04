@@ -15,6 +15,7 @@ export const EmptyState = memo<{
 }>(({ onAdd, isAddDisabled = false }) => {
   return (
     <EuiEmptyPrompt
+      data-test-subj="trustedAppEmptyState"
       iconType="plusInCircle"
       title={
         <h2>
