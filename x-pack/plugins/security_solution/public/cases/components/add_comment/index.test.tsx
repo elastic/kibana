@@ -35,7 +35,7 @@ const addCommentProps = {
   showLoading: false,
 };
 
-const defaultPostCommment = {
+const defaultPostComment = {
   isLoading: false,
   isError: false,
   postComment,
@@ -49,7 +49,7 @@ const sampleData: CommentRequest = {
 describe('AddComment ', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    usePostCommentMock.mockImplementation(() => defaultPostCommment);
+    usePostCommentMock.mockImplementation(() => defaultPostComment);
     jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
   });
 

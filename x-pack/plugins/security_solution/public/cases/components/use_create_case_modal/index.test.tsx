@@ -16,15 +16,6 @@ import { useCreateCaseModal, UseCreateCaseModalProps, UseCreateCaseModalReturned
 import { mockTimelineModel, TestProviders } from '../../../common/mock';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
-const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
-  return {
-    ...original,
-    useDispatch: () => mockDispatch,
-  };
-});
-
 jest.mock('../../../common/lib/kibana');
 jest.mock('../create/form_context', () => {
   return {
