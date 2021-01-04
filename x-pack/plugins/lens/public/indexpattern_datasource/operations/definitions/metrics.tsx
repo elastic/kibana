@@ -83,21 +83,24 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     },
     onOtherColumnChanged: (layer, thisColumnId, changedColumnId) =>
       optionalTimeScaling
-        ? adjustTimeScaleOnOtherColumnChange(layer, thisColumnId, changedColumnId)
-        : layer.columns[thisColumnId],
+        ? (adjustTimeScaleOnOtherColumnChange(layer, thisColumnId, changedColumnId) as T)
+        : (layer.columns[thisColumnId] as T),
     getDefaultLabel: (column, indexPattern, columns) =>
       labelLookup(getSafeName(column.sourceField, indexPattern), column),
-    buildColumn: ({ field, previousColumn }) => ({
-      label: labelLookup(field.displayName, previousColumn),
-      dataType: 'number',
-      operationType: type,
-      sourceField: field.name,
-      isBucketed: false,
-      scale: 'ratio',
-      timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
-      params:
-        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
-    }),
+    buildColumn: ({ field, previousColumn }) =>
+      ({
+        label: labelLookup(field.displayName, previousColumn),
+        dataType: 'number',
+        operationType: type,
+        sourceField: field.name,
+        isBucketed: false,
+        scale: 'ratio',
+        timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
+        params:
+          previousColumn && previousColumn.dataType === 'number'
+            ? previousColumn.params
+            : undefined,
+      } as T),
     onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,
