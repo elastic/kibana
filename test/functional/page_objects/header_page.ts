@@ -31,14 +31,16 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
   const defaultFindTimeout = config.get('timeouts.find');
 
   class HeaderPage {
-    public async clickDiscover() {
+    public async clickDiscover(ignoreAppLeaveWarning = false) {
       await appsMenu.clickLink('Discover', { category: 'kibana' });
+      await this.onAppLeaveWarning(ignoreAppLeaveWarning);
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
-    public async clickVisualize() {
+    public async clickVisualize(ignoreAppLeaveWarning = false) {
       await appsMenu.clickLink('Visualize', { category: 'kibana' });
+      await this.onAppLeaveWarning(ignoreAppLeaveWarning);
       await this.awaitGlobalLoadingIndicatorHidden();
       await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
         const firstBreadcrumb = await globalNav.getFirstBreadcrumb();
@@ -94,6 +96,17 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
     public async awaitKibanaChrome() {
       log.debug('awaitKibanaChrome');
       await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
+    }
+
+    public async onAppLeaveWarning(ignoreWarning = false) {
+      await retry.try(async () => {
+        const warning = await testSubjects.exists('confirmModalTitleText');
+        if (warning) {
+          await testSubjects.click(
+            ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+          );
+        }
+      });
     }
   }
 

@@ -83,7 +83,7 @@ export enum AppNavLinkStatus {
  */
 export type AppUpdatableFields = Pick<
   App,
-  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks'
+  'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'meta'
 >;
 
 /**
@@ -237,38 +237,75 @@ export interface App<HistoryLocationState = unknown> {
   exactRoute?: boolean;
 
   /**
-   * Array of links that represent secondary in-app locations for the app.
+   * Meta data for an application that represent additional information for the app.
+   * See {@link AppMeta}
    *
    * @remarks
    * Used to populate navigational search results (where available).
-   * Can be updated using the {@link App.updater$} observable. See {@link AppSubLink} for more details.
+   * Can be updated using the {@link App.updater$} observable. See {@link PublicAppSearchDeepLinkInfo} for more details.
    *
    * @example
-   * The `path` property on deep links should not include the application's `appRoute`:
    * ```ts
    * core.application.register({
    *   id: 'my_app',
-   *   title: 'My App',
-   *   searchDeepLinks: [
-   *     { id: 'sub1', title: 'Sub1', path: '/sub1' },
+   *   title: 'Translated title',
+   *   meta: {
+   *     keywords: ['translated keyword1', 'translated keyword2'],
+   *     searchDeepLinks: [
+   *     { id: 'sub1', title: 'Sub1', path: '/sub1', keywords: ['subpath1'] },
    *     {
    *       id: 'sub2',
    *       title: 'Sub2',
    *       searchDeepLinks: [
-   *         { id: 'subsub', title: 'SubSub', path: '/sub2/sub' }
+   *         { id: 'subsub', title: 'SubSub', path: '/sub2/sub', keywords: ['subpath2'] }
    *       ]
    *     }
    *   ],
-   *   mount: () => { ... },
+   *   },
+   *   mount: () => { ... }
    * })
    * ```
-   *
-   * Will produce deep links on these paths:
-   * - `/app/my_app/sub1`
-   * - `/app/my_app/sub2/sub`
    */
+  meta?: AppMeta;
+}
+
+/**
+ * Input type for meta data for an application.
+ *
+ * Meta fields include `keywords` and `searchDeepLinks`
+ * Keywords is an array of string with which to associate the app, must include at least one unique string as an array.
+ * `searchDeepLinks` is an array of links that represent secondary in-app locations for the app.
+ * @public
+ */
+export interface AppMeta {
+  /** Keywords to represent this application */
+  keywords?: string[];
+  /** Array of links that represent secondary in-app locations for the app. */
   searchDeepLinks?: AppSearchDeepLink[];
 }
+
+/**
+ * Public information about a registered app's {@link AppMeta | keywords }
+ *
+ * @public
+ */
+export type PublicAppMetaInfo = Omit<AppMeta, 'keywords' | 'searchDeepLinks'> & {
+  keywords: string[];
+  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+};
+
+/**
+ * Public information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}
+ *
+ * @public
+ */
+export type PublicAppSearchDeepLinkInfo = Omit<
+  AppSearchDeepLink,
+  'searchDeepLinks' | 'keywords'
+> & {
+  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+  keywords: string[];
+};
 
 /**
  * Input type for registering secondary in-app locations for an application.
@@ -289,35 +326,30 @@ export type AppSearchDeepLink = {
       path: string;
       /** Optional array of links that are 'underneath' this section in the hierarchy */
       searchDeepLinks?: AppSearchDeepLink[];
+      /** Optional keywords to match with in deep links search for the page at the path */
+      keywords?: string[];
     }
   | {
       /** Optional path to access this section. Omit if this part of the hierarchy does not have a page URL. */
       path?: string;
       /** Array links that are 'underneath' this section in this hierarchy. */
       searchDeepLinks: AppSearchDeepLink[];
+      /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
+      keywords?: string[];
     }
 );
-
-/**
- * Public information about a registered app's {@link AppSearchDeepLink | searchDeepLinks}
- *
- * @public
- */
-export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks'> & {
-  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
-};
 
 /**
  * Public information about a registered {@link App | application}
  *
  * @public
  */
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'meta'> & {
   // remove optional on fields populated with default values
   status: AppStatus;
   navLinkStatus: AppNavLinkStatus;
   appRoute: string;
-  searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+  meta: PublicAppMetaInfo;
 };
 
 /**

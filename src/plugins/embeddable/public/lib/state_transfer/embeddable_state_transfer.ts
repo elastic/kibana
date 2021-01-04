@@ -38,14 +38,20 @@ export const EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY = 'EMBEDDABLE_STATE_TRANSFER'
  * @public
  */
 export class EmbeddableStateTransfer {
+  public isTransferInProgress: boolean;
   private storage: Storage;
 
   constructor(
     private navigateToApp: ApplicationStart['navigateToApp'],
+    currentAppId$: ApplicationStart['currentAppId$'],
     private appList?: ReadonlyMap<string, PublicAppInfo> | undefined,
     customStorage?: Storage
   ) {
     this.storage = customStorage ? customStorage : new Storage(sessionStorage);
+    this.isTransferInProgress = false;
+    currentAppId$.subscribe(() => {
+      this.isTransferInProgress = false;
+    });
   }
 
   /**
@@ -105,6 +111,7 @@ export class EmbeddableStateTransfer {
       state: EmbeddableEditorState;
     }
   ): Promise<void> {
+    this.isTransferInProgress = true;
     await this.navigateToWithState<EmbeddableEditorState>(appId, EMBEDDABLE_EDITOR_STATE_KEY, {
       ...options,
       appendToExistingState: true,
@@ -119,6 +126,7 @@ export class EmbeddableStateTransfer {
     appId: string,
     options?: { path?: string; state: EmbeddablePackageState }
   ): Promise<void> {
+    this.isTransferInProgress = true;
     await this.navigateToWithState<EmbeddablePackageState>(appId, EMBEDDABLE_PACKAGE_STATE_KEY, {
       ...options,
       appendToExistingState: true,

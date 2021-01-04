@@ -10,7 +10,7 @@ import {
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
 } from '../../../../../src/plugins/embeddable/public';
-import { RefreshInterval } from '../../../../../src/plugins/data/common';
+import { RefreshInterval, Query, Filter, TimeRange } from '../../../../../src/plugins/data/common';
 import { MapCenterAndZoom } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { MapSettings } from '../reducers/map';
@@ -27,6 +27,9 @@ interface MapEmbeddableState {
   mapSettings?: Partial<MapSettings>;
   hiddenLayers?: string[];
   hideFilterActions?: boolean;
+  filters?: Filter[];
+  query?: Query;
+  timeRange?: TimeRange;
 }
 export type MapByValueInput = {
   attributes: MapSavedObjectAttributes;

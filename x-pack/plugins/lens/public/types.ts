@@ -20,12 +20,11 @@ import { DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
+import { TriggerContext, VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import {
   SELECT_RANGE_TRIGGER,
-  TriggerContext,
   VALUE_CLICK_TRIGGER,
-  VisualizeFieldContext,
-} from '../../../../src/plugins/ui_actions/public';
+} from '../../../../src/plugins/embeddable/public';
 import type {
   LensSortActionData,
   LENS_EDIT_SORT_ACTION,
@@ -47,6 +46,7 @@ export interface EditorFrameProps {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  searchSessionId: string;
   initialContext?: VisualizeFieldContext;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
@@ -457,6 +457,7 @@ export interface FramePublicAPI {
   dateRange: DateRange;
   query: Query;
   filters: Filter[];
+  searchSessionId: string;
 
   /**
    * A map of all available palettes (keys being the ids).
