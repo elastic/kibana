@@ -36,8 +36,6 @@ const ReactMenuItem: React.FC = () => {
 
 const UiMenuItem = reactToUiComponent(ReactMenuItem);
 
-// Casting to ActionType is a hack - in a real situation use
-// declare module and add this id to ActionContextMapping.
 export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 
 export function createHelloWorldAction(overlays: CoreStart['overlays']): Action {

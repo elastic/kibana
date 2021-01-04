@@ -237,7 +237,6 @@ describe('UiActionsService', () => {
     test(`throws an error with an invalid trigger ID`, async () => {
       const service = new UiActionsService();
 
-      // Without the cast "as TriggerId" typescript will happily throw an error!
       await expect(service.getTriggerCompatibleActions('I do not exist', {})).rejects.toMatchObject(
         new Error('Trigger [triggerId = I do not exist] does not exist.')
       );
