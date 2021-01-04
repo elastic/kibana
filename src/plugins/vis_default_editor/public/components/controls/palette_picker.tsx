@@ -44,7 +44,7 @@ export function PalettePicker<ParamName extends string>({
       })}
     >
       <EuiColorPalettePicker
-        data-test-subj="piePalettePicker"
+        data-test-subj="visEditorPalettePicker"
         compressed
         palettes={palettes
           .getAll()

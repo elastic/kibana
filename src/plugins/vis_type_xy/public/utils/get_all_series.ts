@@ -35,11 +35,11 @@ export const getAllSeries = (
     let seriesName = '';
     splitAccessors?.forEach(({ accessor, formatter }) => {
       if (!accessor) return;
-      const temp = formatter ? formatter(row[accessor]) : row[accessor];
+      const name = formatter ? formatter(row[accessor]) : row[accessor];
       if (seriesName) {
-        seriesName += ` - ${temp}`;
+        seriesName += ` - ${name}`;
       } else {
-        seriesName = temp;
+        seriesName = name;
       }
     });
     if (!allSeries.includes(seriesName)) {

@@ -84,6 +84,9 @@ export interface ExecutionContext<
     id: string
   ) => Promise<SavedObject<T>>;
 
+  /**
+   * Returns the state (true|false) of the sync colors across panels switch.
+   */
   isSyncColorsEnabled?: () => boolean;
 }
 
