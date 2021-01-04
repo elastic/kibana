@@ -56,13 +56,14 @@ getAngularModule().directive('contextApp', function ContextApp() {
 });
 
 function ContextAppController($scope, Private) {
-  const { filterManager, indexPatterns, uiSettings } = getServices();
+  const { filterManager, indexPatterns, uiSettings, navigation } = getServices();
   const queryParameterActions = getQueryParameterActions(filterManager, indexPatterns);
   const queryActions = Private(QueryActionsProvider);
   this.state = createInitialState(
     parseInt(uiSettings.get(CONTEXT_STEP_SETTING), 10),
     getFirstSortableField(this.indexPattern, uiSettings.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING))
   );
+  this.topNavMenu = navigation.ui.TopNavMenu;
 
   this.actions = _.mapValues(
     {
