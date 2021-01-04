@@ -21,6 +21,8 @@ import { TrustedAppsHttpService, TrustedAppsService } from '../service';
 import {
   AsyncResourceState,
   getLastLoadedResourceState,
+  isLoadedResourceState,
+  isLoadingResourceState,
   isStaleResourceState,
   StaleResourceState,
   TrustedAppsListData,
@@ -50,6 +52,7 @@ import {
   entriesExist,
   getListTotalItemsCount,
   trustedAppsListPageActive,
+  entriesExistState,
 } from './selectors';
 
 const createTrustedAppsListResourceStateChangedAction = (
@@ -225,24 +228,40 @@ const checkIfTrustedAppsExistIfNeeded = async (
   trustedAppsService: TrustedAppsService
 ) => {
   const currentState = store.getState();
+  const currentEntriesExistState = entriesExistState(currentState);
 
-  if (trustedAppsListPageActive(currentState)) {
-    const currentEntriesExistValue = entriesExist(currentState);
+  if (
+    trustedAppsListPageActive(currentState) &&
+    !isLoadingResourceState(currentEntriesExistState)
+  ) {
     const currentListTotal = getListTotalItemsCount(currentState);
+    const currentDoEntriesExist = entriesExist(currentState);
 
     if (
-      currentEntriesExistValue === 'loading' ||
-      (currentListTotal === 0 && currentEntriesExistValue) ||
-      (currentListTotal > 0 && !currentEntriesExistValue)
+      !isLoadedResourceState(currentEntriesExistState) ||
+      (currentListTotal === 0 && currentDoEntriesExist) ||
+      (currentListTotal > 0 && !currentDoEntriesExist)
     ) {
-      const { total } = await trustedAppsService.getTrustedAppsList({
-        page: 1,
-        per_page: 1,
+      store.dispatch({
+        type: 'trustedAppsExistResponse',
+        payload: { type: 'LoadingResourceState', previousState: currentEntriesExistState },
       });
+
+      let doTheyExist: boolean;
+      try {
+        const { total } = await trustedAppsService.getTrustedAppsList({
+          page: 1,
+          per_page: 1,
+        });
+        doTheyExist = total > 0;
+      } catch (e) {
+        // If a failure occurs, lets assume entries exits so that the UI is not blocked to the user
+        doTheyExist = true;
+      }
 
       store.dispatch({
         type: 'trustedAppsExistResponse',
-        payload: total > 0,
+        payload: { type: 'LoadedResourceState', data: doTheyExist },
       });
     }
   }

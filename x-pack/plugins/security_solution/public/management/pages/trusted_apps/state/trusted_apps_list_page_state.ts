@@ -35,7 +35,7 @@ export interface TrustedAppsListPageState {
   /** Represents if trusted apps entries exist, regardless of whether the list is showing results
    * or not (which could use filtering in the future)
    */
-  entriesExist: 'loading' | boolean;
+  entriesExist: AsyncResourceState<boolean>;
   listView: {
     listResourceState: AsyncResourceState<TrustedAppsListData>;
     freshDataTimestamp: number;

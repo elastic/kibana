@@ -36,7 +36,7 @@ import {
   initialDeletionDialogState,
   initialTrustedAppsPageState,
 } from './builders';
-import { entriesExist } from './selectors';
+import { entriesExistState } from './selectors';
 
 type StateReducer = ImmutableReducer<TrustedAppsListPageState, AppAction>;
 type CaseReducer<T extends AppAction> = (
@@ -145,7 +145,7 @@ const userChangedUrl: CaseReducer<UserChangedUrl> = (state, action) => {
 };
 
 const updateEntriesExists: CaseReducer<TrustedAppsExistResponse> = (state, { payload }) => {
-  if (entriesExist(state) !== payload) {
+  if (entriesExistState(state) !== payload) {
     return {
       ...state,
       entriesExist: payload,

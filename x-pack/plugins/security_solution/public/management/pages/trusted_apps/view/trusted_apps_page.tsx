@@ -72,7 +72,7 @@ export const TrustedAppsPage = memo(() => {
     </EuiButton>
   );
 
-  const content = doEntriesExist ? (
+  const content = (
     <>
       <TrustedAppsNotifications />
       <TrustedAppDeletionDialog />
@@ -83,26 +83,29 @@ export const TrustedAppsPage = memo(() => {
           data-test-subj="addTrustedAppFlyout"
         />
       )}
-      <EuiFlexGroup direction="column" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <ControlPanel
-            totalItemCount={totalItemsCount}
-            currentViewType={location.view_type}
-            onViewTypeChange={handleViewTypeChange}
-          />
 
-          <EuiSpacer size="m" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHorizontalRule margin="none" />
+      {doEntriesExist ? (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <ControlPanel
+              totalItemCount={totalItemsCount}
+              currentViewType={location.view_type}
+              onViewTypeChange={handleViewTypeChange}
+            />
 
-          {location.view_type === 'grid' && <TrustedAppsGrid />}
-          {location.view_type === 'list' && <TrustedAppsList />}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <EuiSpacer size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiHorizontalRule margin="none" />
+
+            {location.view_type === 'grid' && <TrustedAppsGrid />}
+            {location.view_type === 'list' && <TrustedAppsList />}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EmptyState onAdd={handleAddButtonClick} />
+      )}
     </>
-  ) : (
-    <EmptyState onAdd={handleAddButtonClick} />
   );
 
   return (
