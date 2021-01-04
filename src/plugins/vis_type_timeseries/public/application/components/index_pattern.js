@@ -203,7 +203,6 @@ export const IndexPattern = ({
             })}
           >
             <FieldSelect
-              data-test-subj="metricsIndexPatternFieldsSelect"
               restrict={RESTRICT_FIELDS}
               value={model[timeFieldName]}
               disabled={disabled}

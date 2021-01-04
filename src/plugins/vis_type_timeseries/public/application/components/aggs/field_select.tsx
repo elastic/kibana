@@ -108,6 +108,7 @@ export function FieldSelect({
 
   return (
     <EuiComboBox
+      data-test-subj="metricsIndexPatternFieldsSelect"
       placeholder={newPlaceholder}
       isDisabled={disabled}
       options={options}
