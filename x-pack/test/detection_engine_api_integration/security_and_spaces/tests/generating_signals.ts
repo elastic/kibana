@@ -201,8 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // ES PROMOTION FAILURE: http://github.com/elastic/kibana/issues/86709
-      describe.skip('EQL Rules', () => {
+      describe('EQL Rules', () => {
         it('generates signals from EQL sequences in the expected form', async () => {
           const rule: EqlCreateSchema = {
             ...getRuleForSignalTesting(['auditbeat-*']),
