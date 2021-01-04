@@ -28,9 +28,12 @@ import {
   SavedObjectReference,
 } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
-import { SavedObjectsResolveImportErrorsOptions, ISavedObjectTypeRegistry } from '..';
+import { ISavedObjectTypeRegistry } from '..';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
-import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
+import {
+  resolveSavedObjectsImportErrors,
+  ResolveSavedObjectsImportErrorsOptions,
+} from './resolve_import_errors';
 
 import {
   validateRetries,
@@ -92,7 +95,7 @@ describe('#importSavedObjectsFromStream', () => {
   const setupOptions = (
     retries: SavedObjectsImportRetry[] = [],
     createNewCopies: boolean = false
-  ): SavedObjectsResolveImportErrorsOptions => {
+  ): ResolveSavedObjectsImportErrorsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();

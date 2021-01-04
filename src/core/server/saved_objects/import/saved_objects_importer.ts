@@ -17,43 +17,16 @@
  * under the License.
  */
 
-import { Readable } from 'stream';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientContract, SavedObjectsImportRetry } from '../types';
+import { SavedObjectsClientContract } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { importSavedObjectsFromStream } from './import_saved_objects';
 import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
-import { SavedObjectsImportResponse } from './types';
-
-/**
- * Options to control the import operation.
- * @public
- */
-export interface SavedObjectsImportOptions {
-  /** The stream of {@link SavedObject | saved objects} to import */
-  readStream: Readable;
-  /** If true, will override existing object if present. Note: this has no effect when used with the `createNewCopies` option. */
-  overwrite: boolean;
-  /** if specified, will import in given namespace, else will import as global object */
-  namespace?: string;
-  /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
-  createNewCopies: boolean;
-}
-
-/**
- * Options to control the "resolve import" operation.
- * @public
- */
-export interface SavedObjectsResolveImportErrorsOptions {
-  /** The stream of {@link SavedObject | saved objects} to resolve errors from */
-  readStream: Readable;
-  /** saved object import references to retry */
-  retries: SavedObjectsImportRetry[];
-  /** if specified, will import in given namespace */
-  namespace?: string;
-  /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
-  createNewCopies: boolean;
-}
+import {
+  SavedObjectsImportResponse,
+  SavedObjectsImportOptions,
+  SavedObjectsResolveImportErrorsOptions,
+} from './types';
 
 /**
  * @public

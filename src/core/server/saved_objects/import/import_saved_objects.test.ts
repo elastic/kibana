@@ -26,9 +26,9 @@ import {
   SavedObjectsImportError,
 } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
-import { SavedObjectsImportOptions, ISavedObjectTypeRegistry } from '..';
+import { ISavedObjectTypeRegistry } from '..';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
-import { importSavedObjectsFromStream } from './import_saved_objects';
+import { importSavedObjectsFromStream, ImportSavedObjectsOptions } from './import_saved_objects';
 
 import {
   collectSavedObjects,
@@ -81,7 +81,7 @@ describe('#importSavedObjectsFromStream', () => {
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
 
-  const setupOptions = (createNewCopies: boolean = false): SavedObjectsImportOptions => {
+  const setupOptions = (createNewCopies: boolean = false): ImportSavedObjectsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();

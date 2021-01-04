@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mockUuidv4 } from '../../import/__mocks__';
+import { mockUuidv4 } from '../../import/lib/__mocks__';
 import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerResolveImportErrorsRoute } from '../resolve_import_errors';
