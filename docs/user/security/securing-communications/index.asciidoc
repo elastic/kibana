@@ -28,7 +28,7 @@ hostname verification will trust it. You can set one or more SANs to the {kib} s
 address. When choosing the SAN, you should pick whichever attribute you will be using to connect to {kib} in your browser, which is likely
 the FQDN in a production environment.
 
-You may choose to generate a signed certificate and private key using the [`elasticsearch-certutil`] tool.
+You may choose to generate a signed certificate and private key using the {ref}/certutil.html[`elasticsearch-certutil`] tool.
 For example:
 
 [source,sh]
@@ -103,7 +103,7 @@ server.ssl.enabled: true
 
 . Restart {kib}.
 
-After making these changes, you must always access {kib} via HTTPS. For example, https://localhost.
+After making these changes, you must always access {kib} via HTTPS. For example, https://localhost:5601.
 
 [[configuring-tls-kib-es]]
 ==== Encrypt traffic between {kib} and {es}
@@ -166,8 +166,8 @@ If your PKCS#12 file is encrypted, add the decryption password to your <<secure-
 bin/kibana-keystore add elasticsearch.ssl.truststore.password
 --------------------------------------------------------------------------------
 
-TIP: If your PKCS#12 file isn't protected with a password, depending on how it was generated, you may need to set
-`elasticsearch.ssl.truststore.password` to an empty string.
+TIP: If you used `elasticsearch-certutil` to generate a PKCS#12 file and you did not specify a password, the file is encrypted, and you need
+to set server.ssl.keystore.password to an empty string.
 --
 
 +
