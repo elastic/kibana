@@ -272,7 +272,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
     return <span>{columnId === ACTUAL_CLASS_ID ? cellValue : accuracy}</span>;
   };
 
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const docLink = docLinks.links.ml.classificationEvaluation;
 
   const showTrailingColumns = columnsData.length > MAX_COLUMNS;
   const extraColumns = columnsData.length - MAX_COLUMNS;
@@ -300,7 +300,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
             iconType="help"
             iconSide="left"
             color="primary"
-            href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-dfanalytics-evaluate.html#ml-dfanalytics-classification`}
+            href={docLink}
           >
             {i18n.translate(
               'xpack.ml.dataframe.analytics.classificationExploration.classificationDocsLink',
