@@ -10,6 +10,7 @@ import {
   EuiPageBody,
   EuiPageSideBar,
   EuiSideNav,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
@@ -41,15 +42,21 @@ export function Settings({ children, location }: SettingsProps) {
       >
         <ActionMenu />
       </HeaderMenuPortal>
-      <HomeLink>
-        <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-          {i18n.translate('xpack.apm.settings.returnLinkLabel', {
-            defaultMessage: 'Return to inventory',
-          })}
-        </EuiButtonEmpty>
-      </HomeLink>
       <EuiPage>
         <EuiPageSideBar>
+          <HomeLink>
+            <EuiButtonEmpty
+              flush="left"
+              size="s"
+              color="primary"
+              iconType="arrowLeft"
+            >
+              {i18n.translate('xpack.apm.settings.returnLinkLabel', {
+                defaultMessage: 'Return to inventory',
+              })}
+            </EuiButtonEmpty>
+            <EuiSpacer size="s" />
+          </HomeLink>
           <EuiSideNav
             items={[
               {
