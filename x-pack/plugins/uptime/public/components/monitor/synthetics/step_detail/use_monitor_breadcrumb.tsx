@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import moment from 'moment';
+import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { JourneyState } from '../../../../state/reducers/journey';
 import { Ping } from '../../../../../common/runtime_types/ping';
