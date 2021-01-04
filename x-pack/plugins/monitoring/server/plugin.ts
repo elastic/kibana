@@ -337,6 +337,7 @@ export class Plugin {
               }
             },
             server: {
+              route: () => {},
               config: legacyConfigWrapper,
               newPlatform: {
                 setup: {
