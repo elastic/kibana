@@ -40,7 +40,11 @@ export function fetchAnchorProvider(indexPatterns, searchSource) {
         },
         language: 'lucene',
       })
-      .setField('sort', sort);
+      .setField('sort', sort)
+      // This query is missing a time filter, so it hits every shard. This parameter
+      // lets us skip shards as soon as we find a match, and can improve performance
+      // when the document is in the latest shards.
+      .setField('terminate_after', 1);
 
     const response = await searchSource.fetch();
 
