@@ -75,8 +75,6 @@ export const EngineRouter: React.FC = () => {
   const { engineName: engineNameParam } = useParams() as { engineName: string };
   const engineBreadcrumb = [ENGINES_TITLE, engineNameParam];
 
-  const isEngineInStateStale = () => engineName !== engineNameParam;
-
   useEffect(() => {
     setEngineName(engineNameParam);
     initializeEngine();
@@ -93,7 +91,8 @@ export const EngineRouter: React.FC = () => {
     return <Redirect to={ENGINES_PATH} />;
   }
 
-  if (isEngineInStateStale() || dataLoading) return <Loading />;
+  const isLoadingNewEngine = engineName !== engineNameParam;
+  if (isLoadingNewEngine || dataLoading) return <Loading />;
 
   return (
     <Switch>
