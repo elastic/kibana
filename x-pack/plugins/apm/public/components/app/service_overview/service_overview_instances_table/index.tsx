@@ -236,7 +236,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
     status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING;
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h2>

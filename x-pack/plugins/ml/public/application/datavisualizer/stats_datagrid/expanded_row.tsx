@@ -60,7 +60,7 @@ export const DataVisualizerFieldExpandedRow = ({ item }: { item: FieldVisConfig 
   return (
     <div
       className="mlDataVisualizerFieldExpandedRow"
-      data-test-subj={`mlDataVisualizerFieldExpandedRow ${fieldName} ${type}`}
+      data-test-subj={`mlDataVisualizerFieldExpandedRow-${fieldName}`}
     >
       {loading === true ? <LoadingIndicator /> : getCardContent()}
     </div>

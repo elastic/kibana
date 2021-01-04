@@ -631,7 +631,7 @@ export class JobCreator {
     return JSON.stringify(this._datafeed_config, null, 2);
   }
 
-  private _initPerPartitionCategorization() {
+  protected _initPerPartitionCategorization() {
     if (this._job_config.analysis_config.per_partition_categorization === undefined) {
       this._job_config.analysis_config.per_partition_categorization = {};
     }

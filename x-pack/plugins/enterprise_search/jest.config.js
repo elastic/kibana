@@ -8,4 +8,11 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/enterprise_search'],
+  collectCoverage: true,
+  coverageReporters: ['text'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/plugins/enterprise_search/**/*.{ts,tsx}',
+    '!<rootDir>/x-pack/plugins/enterprise_search/public/*.ts',
+    '!<rootDir>/x-pack/plugins/enterprise_search/server/*.ts',
+  ],
 };

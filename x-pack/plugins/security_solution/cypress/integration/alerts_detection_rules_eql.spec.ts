@@ -56,14 +56,14 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
-  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { createTimeline } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -77,7 +77,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Detection rules, EQL', () => {
+describe.skip('Detection rules, EQL', () => {
   const expectedUrls = eqlRule.referenceUrls.join('');
   const expectedFalsePositives = eqlRule.falsePositivesExamples.join('');
   const expectedTags = eqlRule.tags.join('');
@@ -87,15 +87,11 @@ describe('Detection rules, EQL', () => {
 
   const rule = { ...eqlRule };
 
-  before(() => {
+  beforeEach(() => {
+    cleanKibana();
     createTimeline(eqlRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  after(() => {
-    deleteTimeline(rule.timeline.id!);
-    deleteRule();
   });
 
   it('Creates and activates a new EQL rule', () => {
@@ -177,20 +173,16 @@ describe('Detection rules, EQL', () => {
   });
 });
 
-describe('Detection rules, sequence EQL', () => {
+describe.skip('Detection rules, sequence EQL', () => {
   const expectedNumberOfRules = 1;
   const expectedNumberOfSequenceAlerts = 1;
   const rule = { ...eqlSequenceRule };
 
-  before(() => {
+  beforeEach(() => {
+    cleanKibana();
     createTimeline(eqlSequenceRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  afterEach(() => {
-    deleteTimeline(eqlSequenceRule.timeline.id!);
-    deleteRule();
   });
 
   it('Creates and activates a new EQL rule with a sequence', () => {

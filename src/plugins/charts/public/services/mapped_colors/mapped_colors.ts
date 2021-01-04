@@ -37,15 +37,15 @@ export class MappedColors {
   private _mapping: any;
 
   constructor(
-    private uiSettings: CoreSetup['uiSettings'],
+    private uiSettings?: CoreSetup['uiSettings'],
     private colorPaletteFn: (num: number) => string[] = createColorPalette
   ) {
     this._oldMap = {};
     this._mapping = {};
   }
 
-  private getConfigColorMapping() {
-    return _.mapValues(this.uiSettings.get(COLOR_MAPPING_SETTING), standardizeColor);
+  private getConfigColorMapping(): Record<string, string> {
+    return _.mapValues(this.uiSettings?.get(COLOR_MAPPING_SETTING) || {}, standardizeColor);
   }
 
   public get oldMap(): any {
