@@ -5,16 +5,11 @@
  */
 
 import moment from 'moment';
-import {
-  ISavedObjectsRepository,
-  SavedObjectsClientContract,
-  ElasticsearchClient,
-} from 'kibana/server';
+import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
 import { savedObjectsAdapter } from '../../saved_objects';
-import { UptimeESClient, isUptimeESClient, createUptimeESClient } from '../../lib';
+import { UptimeESClient, createUptimeESClient } from '../../lib';
 
 interface UptimeTelemetryCollector {
   [key: number]: UptimeTelemetry;
@@ -130,7 +125,7 @@ export class KibanaTelemetryAdapter {
   }
 
   public static async countNoOfUniqueMonitorAndLocations(
-    callCluster: ElasticsearchClient | UptimeESClient,
+    callCluster: UptimeESClient,
     savedObjectsClient: ISavedObjectsRepository | SavedObjectsClientContract
   ) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
@@ -192,9 +187,7 @@ export class KibanaTelemetryAdapter {
       },
     };
 
-    const { body: result } = isUptimeESClient(callCluster)
-      ? await callCluster.search(params)
-      : await callCluster.search<ESSearchResponse<unknown, typeof params>>(params);
+    const { body: result } = await callCluster.search(params);
 
     const numberOfUniqueMonitors: number = result?.aggregations?.unique_monitors?.value ?? 0;
     const numberOfUniqueLocations: number = result?.aggregations?.unique_locations?.value ?? 0;
