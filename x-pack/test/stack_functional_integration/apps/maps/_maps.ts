@@ -5,8 +5,13 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-export default function ({ getService, getPageObjects, updateBaselines }) {
+export default function ({
+  getService,
+  getPageObjects,
+  updateBaselines,
+}: FtrProviderContext & { updateBaselines: boolean }) {
   const screenshot = getService('screenshots');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'maps']);
@@ -15,7 +20,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     before(async function () {
       // this navigateToActualURL takes the place of navigating to the maps landing page,
       // filtering on the map name, selecting it and setting the timepicker
-      //await PageObjects.common.navigateToActualUrl(
+      // await PageObjects.common.navigateToActualUrl(
       //  'maps',
       //  '7f72db90-4a8d-11eb-9e7a-8996af36387e#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),' +
       //    'time:(from:now-1y,to:now))&_a=(filters:!())',
@@ -23,7 +28,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       //    ensureCurrentUrl: false,
       //    shouldLoginIfPrompted: true,
       //  }
-      //);
+      // );
       await PageObjects.maps.loadSavedMap('EMS Test');
       await PageObjects.common.sleep(2000);
       await browser.setScreenshotSize(1000, 1000);
