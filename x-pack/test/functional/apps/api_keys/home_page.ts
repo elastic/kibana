@@ -13,7 +13,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const testSubjects = getService('testSubjects');
 
-  describe('Home page', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/87163
+  describe.skip('Home page', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin']);
       await pageObjects.common.navigateToApp('apiKeys');

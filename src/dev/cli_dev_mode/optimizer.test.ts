@@ -191,8 +191,8 @@ it('is ready when optimizer phase is success or issue and logs in familiar forma
   const lines = await linesPromise;
   expect(lines).toMatchInlineSnapshot(`
     Array [
-      "[2mnp bld[22m    log   [timestamp] [[36msuccess[39m][[95m@kbn/optimizer[39m] 0 bundles compiled successfully after 0 sec",
-      "[2mnp bld[22m    log   [timestamp] [error][[95m@kbn/optimizer[39m] webpack compile errors",
+      " [2mnp bld[22m    log   [timestamp] [[36msuccess[39m][[95m@kbn/optimizer[39m] 0 bundles compiled successfully after 0 sec",
+      " [2mnp bld[22m    log   [timestamp] [error][[95m@kbn/optimizer[39m] webpack compile errors",
     ]
   `);
 });

@@ -20,14 +20,17 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 
-import { SelectOption, SwitchOption } from '../../../../../../charts/public';
+import { SelectOption, SwitchOption } from '../../../../../../vis_default_editor/public';
 
 import { ChartType } from '../../../../../common';
 import { VisParams } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
+import { getTrackUiMetric } from '../../../../services';
 
 export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>) {
+  const trackUiMetric = getTrackUiMetric();
   const { stateParams, setValue, vis, aggs } = props;
 
   const hasLineChart = stateParams.seriesParams.some(
@@ -49,7 +52,12 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
         })}
         paramName="detailedTooltip"
         value={stateParams.detailedTooltip}
-        setValue={setValue}
+        setValue={(paramName, value) => {
+          if (trackUiMetric) {
+            trackUiMetric(METRIC_TYPE.CLICK, 'detailed_tooltip_switched');
+          }
+          setValue(paramName, value);
+        }}
       />
 
       {hasLineChart && (
@@ -61,7 +69,12 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
           options={vis.type.editorConfig.collections.fittingFunctions}
           paramName="fittingFunction"
           value={stateParams.fittingFunction}
-          setValue={setValue}
+          setValue={(paramName, value) => {
+            if (trackUiMetric) {
+              trackUiMetric(METRIC_TYPE.CLICK, 'fitting_function_selected');
+            }
+            setValue(paramName, value);
+          }}
         />
       )}
     </>

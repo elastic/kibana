@@ -11,10 +11,9 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { AppLeaveHandler } from '../../../../../../../src/core/public';
-import { TimelineId, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { timelineActions } from '../../store/timeline';
-import { TimelineTabs } from '../../store/timeline/model';
 import { FlyoutBottomBar } from './bottom_bar';
 import { Pane } from './pane';
 import { getTimelineShowStatusByIdSelector } from './selectors';
