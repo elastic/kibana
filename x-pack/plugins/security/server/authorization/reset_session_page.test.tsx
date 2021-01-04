@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { EnvironmentMode } from 'src/core/server';
 import { ResetSessionPage } from './reset_session_page';
 
 jest.mock('../../../../../src/core/server/rendering/views/fonts', () => ({
@@ -13,12 +14,30 @@ jest.mock('../../../../../src/core/server/rendering/views/fonts', () => ({
 }));
 
 describe('ResetSessionPage', () => {
-  it('renders as expected', async () => {
+  it('renders as expected in prod mode', async () => {
+    const environmentMode = { prod: true } as EnvironmentMode;
+
     const body = renderToStaticMarkup(
       <ResetSessionPage
         logoutUrl="/path/to/logout"
         styleSheetPaths={['/some-css-file.css', '/some-other-css-file.css']}
         basePath="/path/to/base"
+        environmentMode={environmentMode}
+      />
+    );
+
+    expect(body).toMatchSnapshot();
+  });
+
+  it('renders as expected in non-prod mode', async () => {
+    const environmentMode = { prod: false } as EnvironmentMode;
+
+    const body = renderToStaticMarkup(
+      <ResetSessionPage
+        logoutUrl="/path/to/logout"
+        styleSheetPaths={['/some-css-file.css', '/some-other-css-file.css']}
+        basePath="/path/to/base"
+        environmentMode={environmentMode}
       />
     );
 

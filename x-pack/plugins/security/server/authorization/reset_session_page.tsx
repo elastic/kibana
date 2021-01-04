@@ -19,6 +19,8 @@ import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/al
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
+import { EnvironmentMode } from 'src/core/server';
+
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fonts } from '../../../../../src/core/server/rendering/views/fonts';
 
@@ -29,16 +31,21 @@ appendIconComponentCache({
   alert: EuiIconAlert,
 });
 
+interface ResetSessionPageParams {
+  logoutUrl: string;
+  styleSheetPaths: string[];
+  basePath: string;
+  environmentMode: EnvironmentMode;
+}
+
 export function ResetSessionPage({
   logoutUrl,
   styleSheetPaths,
   basePath,
-}: {
-  logoutUrl: string;
-  styleSheetPaths: string[];
-  basePath: string;
-}) {
+  environmentMode,
+}: ResetSessionPageParams) {
   const uiPublicUrl = `${basePath}/ui`;
+  const faviconFile = environmentMode.prod ? 'favicon' : 'favicon_dev';
   return (
     <html lang={i18n.getLocale()}>
       <head>
@@ -47,8 +54,12 @@ export function ResetSessionPage({
         ))}
         <Fonts url={uiPublicUrl} />
         {/* The alternate icon is a fallback for Safari which does not yet support SVG favicons */}
-        <link rel="alternate icon" type="image/png" href={`${uiPublicUrl}/favicons/favicon.png`} />
-        <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/favicon.svg`} />
+        <link
+          rel="alternate icon"
+          type="image/png"
+          href={`${uiPublicUrl}/favicons/${faviconFile}.png`}
+        />
+        <link rel="icon" type="image/svg+xml" href={`${uiPublicUrl}/favicons/${faviconFile}.svg`} />
         <script src={`${basePath}/internal/security/reset_session_page.js`} />
         <meta name="theme-color" content="#ffffff" />
         <meta name="color-scheme" content="light dark" />

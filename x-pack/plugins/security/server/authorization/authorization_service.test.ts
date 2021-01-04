@@ -38,6 +38,8 @@ const mockCheckPrivilegesDynamicallyWithRequest = Symbol();
 const mockCheckSavedObjectsPrivilegesWithRequest = Symbol();
 const mockPrivilegesService = Symbol();
 const mockAuthorizationMode = Symbol();
+const mockInitializerContext = coreMock.createPluginInitializerContext();
+
 beforeEach(() => {
   mockCheckPrivilegesWithRequestFactory.mockReturnValue(mockCheckPrivilegesWithRequest);
   mockCheckPrivilegesDynamicallyWithRequestFactory.mockReturnValue(
@@ -72,14 +74,13 @@ it(`#setup returns exposed services`, () => {
     license: mockLicense,
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
-    packageVersion: 'some-version',
-    buildNumber: 42,
+    initializerContextEnvironment: mockInitializerContext.env,
     features: mockFeaturesSetup,
     getSpacesService: mockGetSpacesService,
     getCurrentUser: jest.fn(),
   });
 
-  expect(authz.actions.version).toBe('version:some-version');
+  expect(authz.actions.version).toBe(`version:${mockInitializerContext.env.packageInfo.version}`);
   expect(authz.applicationName).toBe(application);
 
   expect(authz.checkPrivilegesWithRequest).toBe(mockCheckPrivilegesWithRequest);
@@ -131,8 +132,7 @@ describe('#start', () => {
       license: licenseMock.create(),
       loggers: loggingSystemMock.create(),
       kibanaIndexName,
-      packageVersion: 'some-version',
-      buildNumber: 42,
+      initializerContextEnvironment: mockInitializerContext.env,
       features: featuresPluginMock.createSetup(),
       getSpacesService: jest
         .fn()
@@ -203,8 +203,7 @@ it('#stop unsubscribes from license and ES updates.', async () => {
     license: licenseMock.create(),
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
-    packageVersion: 'some-version',
-    buildNumber: 42,
+    initializerContextEnvironment: mockInitializerContext.env,
     features: featuresPluginMock.createSetup(),
     getSpacesService: jest
       .fn()

@@ -20,6 +20,7 @@ import {
   HttpServiceSetup,
   CapabilitiesSetup,
   IClusterClient,
+  PluginInitializerContext,
 } from '../../../../../src/core/server';
 
 import {
@@ -59,8 +60,7 @@ export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
 export { featurePrivilegeIterator } from './privileges';
 
 interface AuthorizationServiceSetupParams {
-  packageVersion: string;
-  buildNumber: number;
+  initializerContextEnvironment: PluginInitializerContext['env'];
   http: HttpServiceSetup;
   capabilities: CapabilitiesSetup;
   getClusterClient: () => Promise<IClusterClient>;
@@ -98,8 +98,7 @@ export class AuthorizationService {
   setup({
     http,
     capabilities,
-    packageVersion,
-    buildNumber,
+    initializerContextEnvironment,
     getClusterClient,
     license,
     loggers,
@@ -112,7 +111,7 @@ export class AuthorizationService {
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
 
     const mode = authorizationModeFactory(license);
-    const actions = new Actions(packageVersion);
+    const actions = new Actions(initializerContextEnvironment.packageInfo.version);
     this.privileges = privilegesFactory(actions, features, license);
 
     const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
@@ -169,7 +168,7 @@ export class AuthorizationService {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
         const basePath = http.basePath.get(request);
         const next = `${basePath}${request.url.pathname}${request.url.search}`;
-        const regularBundlePath = `${basePath}/${buildNumber}/bundles`;
+        const regularBundlePath = `${basePath}/${initializerContextEnvironment.packageInfo.buildNum}/bundles`;
 
         const logoutUrl = http.basePath.prepend(
           `/api/security/logout?${querystring.stringify({ next })}`
@@ -186,6 +185,7 @@ export class AuthorizationService {
             logoutUrl={logoutUrl}
             styleSheetPaths={styleSheetPaths}
             basePath={basePath}
+            environmentMode={initializerContextEnvironment.mode}
           />
         );
 
