@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiScreenReaderOnly, EuiText } from '@elastic/eui';
+import { EuiText, EuiScreenReaderOnly } from '@elastic/eui';
 import React from 'react';
 
 import * as i18n from './translations';
@@ -23,14 +23,14 @@ const TooltipWithKeyboardShortcutComponent = ({
   showShortcut,
 }: Props) => (
   <>
-    <div>{content}</div>
+    <div data-test-subj="content">{content}</div>
     {additionalScreenReaderOnlyContext !== '' && (
-      <EuiScreenReaderOnly>
+      <EuiScreenReaderOnly data-test-subj="additionalScreenReaderOnlyContext">
         <p>{additionalScreenReaderOnlyContext}</p>
       </EuiScreenReaderOnly>
     )}
     {showShortcut && (
-      <EuiText color="subdued" size="s" textAlign="center">
+      <EuiText color="subdued" data-test-subj="shortcut" size="s" textAlign="center">
         <span>{i18n.PRESS}</span>
         {'\u00a0'}
         <span className="euiBadge euiBadge--hollow">{shortcut}</span>

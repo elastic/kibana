@@ -8,6 +8,7 @@ import React, { ComponentType, memo } from 'react';
 import { CoreStart } from 'kibana/public';
 import { combineReducers, createStore, compose, applyMiddleware } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
+import { CurrentLicense } from '../../../../../common/components/current_license';
 import { StartPlugins } from '../../../../../types';
 import { managementReducer } from '../../../../store/reducer';
 import { managementMiddlewareFactory } from '../../../../store/middleware';
@@ -57,7 +58,9 @@ export const withSecurityContext = <P extends {}>({
 
     return (
       <ReduxStoreProvider store={store}>
-        <WrappedComponent {...props} />
+        <CurrentLicense>
+          <WrappedComponent {...props} />
+        </CurrentLicense>
       </ReduxStoreProvider>
     );
   });

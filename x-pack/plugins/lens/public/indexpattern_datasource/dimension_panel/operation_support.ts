@@ -49,7 +49,7 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
           supportedFieldsByOperation[operation.operationType] = new Set();
         }
         supportedFieldsByOperation[operation.operationType]?.add(operation.field);
-      } else if (operation.type === 'none') {
+      } else {
         supportedOperationsWithoutField.add(operation.operationType);
       }
     });
