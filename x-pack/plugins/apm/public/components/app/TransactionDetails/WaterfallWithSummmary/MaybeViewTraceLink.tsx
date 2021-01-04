@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
 import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
@@ -18,6 +19,7 @@ export const MaybeViewTraceLink = ({
   transaction: ITransaction;
   waterfall: IWaterfall;
 }) => {
+  const latencyAggregationType = useLatencyAggregationType();
   const viewFullTraceButtonLabel = i18n.translate(
     'xpack.apm.transactionDetails.viewFullTraceButtonLabel',
     {
@@ -77,6 +79,7 @@ export const MaybeViewTraceLink = ({
           traceId={rootTransaction.trace.id}
           transactionName={rootTransaction.transaction.name}
           transactionType={rootTransaction.transaction.type}
+          latencyAggregationType={latencyAggregationType}
         >
           <EuiButton iconType="apmTrace">{viewFullTraceButtonLabel}</EuiButton>
         </TransactionDetailLink>

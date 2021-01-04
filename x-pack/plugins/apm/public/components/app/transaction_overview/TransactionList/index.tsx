@@ -8,6 +8,7 @@ import { EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import {
   asMillisecondDuration,
@@ -40,6 +41,7 @@ interface Props {
 }
 
 export function TransactionList({ items, isLoading }: Props) {
+  const latencyAggregationType = useLatencyAggregationType();
   const columns: Array<ITableColumn<TransactionGroup>> = useMemo(
     () => [
       {
@@ -58,6 +60,7 @@ export function TransactionList({ items, isLoading }: Props) {
               serviceName={serviceName}
               transactionName={transactionName}
               transactionType={transactionType}
+              latencyAggregationType={latencyAggregationType}
             >
               <EuiToolTip
                 id="transaction-name-link-tooltip"
@@ -134,7 +137,7 @@ export function TransactionList({ items, isLoading }: Props) {
         render: (value: number) => <ImpactBar value={value} />,
       },
     ],
-    []
+    [latencyAggregationType]
   );
 
   const noItemsMessage = (

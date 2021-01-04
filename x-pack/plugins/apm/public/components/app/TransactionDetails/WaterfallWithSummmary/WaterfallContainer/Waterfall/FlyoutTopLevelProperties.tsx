@@ -11,15 +11,18 @@ import {
   TRANSACTION_NAME,
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
+import { useLatencyAggregationType } from '../../../../../../hooks/use_latency_Aggregation_type';
+import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview';
 import { TransactionDetailLink } from '../../../../../shared/Links/apm/transaction_detail_link';
 import { StickyProperties } from '../../../../../shared/StickyProperties';
-import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview';
 
 interface Props {
   transaction?: Transaction;
 }
 
 export function FlyoutTopLevelProperties({ transaction }: Props) {
+  const latencyAggregationType = useLatencyAggregationType();
+
   if (!transaction) {
     return null;
   }
@@ -51,6 +54,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           traceId={transaction.trace.id}
           transactionName={transaction.transaction.name}
           transactionType={transaction.transaction.type}
+          latencyAggregationType={latencyAggregationType}
         >
           {transaction.transaction.name}
         </TransactionDetailLink>

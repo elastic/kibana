@@ -187,6 +187,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
                 serviceName={serviceName}
                 transactionName={name}
                 transactionType={type}
+                latencyAggregationType={latencyAggregationType}
               >
                 {name}
               </TransactionDetailLink>
@@ -282,7 +283,10 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <TransactionOverviewLink serviceName={serviceName}>
+            <TransactionOverviewLink
+              serviceName={serviceName}
+              latencyAggregationType={latencyAggregationType}
+            >
               {i18n.translate(
                 'xpack.apm.serviceOverview.transactionsTableLinkText',
                 {

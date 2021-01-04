@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
@@ -16,10 +17,10 @@ interface Props extends APMLinkExtendProps {
   transactionId?: string;
   transactionName: string;
   transactionType: string;
+  latencyAggregationType?: LatencyAggregationType;
 }
 
 const persistedFilters: Array<keyof APMQueryParams> = [
-  'latencyAggregationType',
   'transactionResult',
   'serviceVersion',
 ];
@@ -30,6 +31,7 @@ export function TransactionDetailLink({
   transactionId,
   transactionName,
   transactionType,
+  latencyAggregationType,
   ...rest
 }: Props) {
   const { urlParams } = useUrlParams();
@@ -42,6 +44,7 @@ export function TransactionDetailLink({
         transactionId,
         transactionName,
         transactionType,
+        ...(latencyAggregationType ? { latencyAggregationType } : {}),
         ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
       }}
       {...rest}
