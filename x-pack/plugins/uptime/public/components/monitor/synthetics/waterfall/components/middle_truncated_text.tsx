@@ -6,6 +6,7 @@
 
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 
 const OuterContainer = styled.div`
   width: 100%;
@@ -13,7 +14,7 @@ const OuterContainer = styled.div`
   position: relative;
 `;
 
-const InnerContainer = styled.div`
+const InnerContainer = styled.span`
   position: absolute;
   top: 0;
   bottom: 0;
@@ -45,17 +46,24 @@ export const getChunks = (text: string) => {
 // Helper component for adding middle text truncation, e.g.
 // really-really-really-long....ompressed.js
 // Can be used to accomodate content in sidebar item rendering.
-export const MiddleTruncatedText = ({ text, title }: { text: string; title: string }) => {
+export const MiddleTruncatedText = ({ text }: { text: string }) => {
   const chunks = useMemo(() => {
     return getChunks(text);
   }, [text]);
 
   return (
-    <OuterContainer title={title}>
-      <InnerContainer>
-        <FirstChunk>{chunks.first}</FirstChunk>
-        <LastChunk>{chunks.last}</LastChunk>
-      </InnerContainer>
-    </OuterContainer>
+    <>
+      <OuterContainer>
+        <EuiScreenReaderOnly>
+          <span data-test-subj="middleTruncatedTextSROnly">{text}</span>
+        </EuiScreenReaderOnly>
+        <EuiToolTip content={text} position="top" data-test-subj="middleTruncatedTextToolTip">
+          <InnerContainer aria-hidden={true}>
+            <FirstChunk>{chunks.first}</FirstChunk>
+            <LastChunk>{chunks.last}</LastChunk>
+          </InnerContainer>
+        </EuiToolTip>
+      </OuterContainer>
+    </>
   );
 };
