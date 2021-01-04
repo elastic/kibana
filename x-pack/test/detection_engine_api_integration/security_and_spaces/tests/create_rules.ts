@@ -204,7 +204,9 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
-    describe('missing timestamps', () => {
+
+    // FAILING ES SNAPSHOT: https://github.com/elastic/kibana/issues/87180
+    describe.skip('missing timestamps', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
         // to edit these files run the following script
