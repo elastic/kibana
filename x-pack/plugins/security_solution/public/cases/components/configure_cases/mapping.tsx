@@ -41,7 +41,9 @@ const MappingComponent: React.FC<MappingProps> = ({
       <EuiFlexItem grow={false}>
         <EuiText size="xs">
           <h4>{i18n.FIELD_MAPPING_TITLE(selectedConnector.name)}</h4>
-          <EuiTextColor color={fieldMappingDesc.color}>{fieldMappingDesc.desc}</EuiTextColor>
+          <EuiTextColor data-test-subj="field-mapping-desc" color={fieldMappingDesc.color}>
+            {fieldMappingDesc.desc}
+          </EuiTextColor>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
