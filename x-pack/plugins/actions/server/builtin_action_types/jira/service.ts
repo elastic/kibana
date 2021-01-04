@@ -181,7 +181,11 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to get incident with id ${id}. Error: ${
             error.message
-          } Reason: ${createErrorMessage(error.response?.data)}`
+          } Reason: ${createErrorMessage(
+            error.response?.data ?? error.response?.statusText
+              ? { errors: { ok: error.response?.statusText }, errorMessages: null }
+              : null
+          )}`
         )
       );
     }
@@ -234,7 +238,9 @@ export const createExternalService = (
         getErrorMessage(
           i18n.NAME,
           `Unable to create incident. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
+            error.response?.data ?? error.response?.statusText
+              ? { errors: { ok: error.response?.statusText }, errorMessages: null }
+              : null
           )}`
         )
       );
@@ -276,7 +282,11 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to update incident with id ${incidentId}. Error: ${
             error.message
-          }. Reason: ${createErrorMessage(error.response?.data)}`
+          }. Reason: ${createErrorMessage(
+            error.response?.data ?? error.response?.statusText
+              ? { errors: { ok: error.response?.statusText }, errorMessages: null }
+              : null
+          )}`
         )
       );
     }
@@ -307,7 +317,11 @@ export const createExternalService = (
           i18n.NAME,
           `Unable to create comment at incident with id ${incidentId}. Error: ${
             error.message
-          }. Reason: ${createErrorMessage(error.response?.data)}`
+          }. Reason: ${createErrorMessage(
+            error.response?.data ?? error.response?.statusText
+              ? { errors: { ok: error.response?.statusText }, errorMessages: null }
+              : null
+          )}`
         )
       );
     }
@@ -329,7 +343,9 @@ export const createExternalService = (
         getErrorMessage(
           i18n.NAME,
           `Unable to get capabilities. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
+            error.response?.data ?? error.response?.statusText
+              ? { errors: { ok: error.response?.statusText }, errorMessages: null }
+              : null
           )}`
         )
       );
@@ -368,7 +384,9 @@ export const createExternalService = (
         getErrorMessage(
           i18n.NAME,
           `Unable to get issue types. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
+            error.response?.data ?? error.response?.statusText
+              ? { errors: { ok: error.response?.statusText }, errorMessages: null }
+              : null
           )}`
         )
       );
@@ -413,7 +431,9 @@ export const createExternalService = (
         getErrorMessage(
           i18n.NAME,
           `Unable to get fields. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
+            error.response?.data ?? error.response?.statusText
+              ? { errors: { ok: error.response?.statusText }, errorMessages: null }
+              : null
           )}`
         )
       );
@@ -464,7 +484,9 @@ export const createExternalService = (
         getErrorMessage(
           i18n.NAME,
           `Unable to get issues. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
+            error.response?.data ?? error.response?.statusText
+              ? { errors: { ok: error.response?.statusText }, errorMessages: null }
+              : null
           )}`
         )
       );
@@ -488,7 +510,9 @@ export const createExternalService = (
         getErrorMessage(
           i18n.NAME,
           `Unable to get issue with id ${id}. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
+            error.response?.data ?? error.response?.statusText
+              ? { errors: { ok: error.response?.statusText }, errorMessages: null }
+              : null
           )}`
         )
       );
