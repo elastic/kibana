@@ -22,6 +22,8 @@ import { buildRouteValidation } from '../../../../utils/build_validation/route_v
 import { transformBulkError, createBulkErrorObject, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
+import { RuleTypeParams } from '../../types';
+import { Alert } from '../../../../../../alerts/common';
 
 export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
   router.post(
@@ -95,9 +97,12 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 });
               }
 
-              const createdRule = await alertsClient.create({
+              /**
+               * TODO: Remove this use of `as` by utilizing the proper type
+               */
+              const createdRule = (await alertsClient.create({
                 data: internalRule,
-              });
+              })) as Alert<RuleTypeParams>;
 
               const ruleActions = await updateRulesNotifications({
                 ruleAlertId: createdRule.id,

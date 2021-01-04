@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FC } from 'react';
+import React from 'react';
 
 import { TimeRangeBounds } from '../explorer/explorer_utils';
 
-declare const TimeSeriesExplorer: FC<{
+interface Props {
   appStateHandler: (action: string, payload: any) => void;
   autoZoomDuration: number;
   bounds: TimeRangeBounds;
@@ -21,4 +21,7 @@ declare const TimeSeriesExplorer: FC<{
   tableInterval: string;
   tableSeverity: number;
   zoom?: { from?: string; to?: string };
-}>;
+}
+
+// eslint-disable-next-line react/prefer-stateless-function
+declare class TimeSeriesExplorer extends React.Component<Props, any> {}
