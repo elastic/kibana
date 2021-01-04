@@ -30,7 +30,8 @@ export interface BuildOptions {
   createArchives: boolean;
   createRpmPackage: boolean;
   createDebPackage: boolean;
-  createDockerImages: boolean;
+  createDockerUBI: boolean;
+  createDockerCentOS: boolean;
   createDockerContexts: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
@@ -105,9 +106,14 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     // control w/ --rpm or --skip-os-packages
     await run(Tasks.CreateRpmPackage);
   }
-  if (options.createDockerImages) {
-    // control w/ --docker-images or --skip-os-packages
-    await run(Tasks.CreateDockerImages);
+  if (options.createDockerUBI) {
+    // control w/ --docker-images or --skip-docker-ubi or --skip-os-packages
+    await run(Tasks.CreateDockerUBI);
+  }
+
+  if (options.createDockerCentOS) {
+    // control w/ --docker-images or --skip-docker-centos or --skip-os-packages
+    await run(Tasks.CreateDockerCentOS);
   }
 
   if (options.createDockerContexts) {

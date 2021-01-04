@@ -60,8 +60,8 @@ export const CreateRpmPackage: Task = {
   },
 };
 
-export const CreateDockerImages: Task = {
-  description: 'Creating Docker images',
+export const CreateDockerCentOS: Task = {
+  description: 'Creating Docker CentOS image',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
@@ -76,8 +76,14 @@ export const CreateDockerImages: Task = {
       architecture: 'aarch64',
       image: true,
     });
+  },
+};
 
-    if (build.isOss()) {
+export const CreateDockerUBI: Task = {
+  description: 'Creating Docker UBI image',
+
+  async run(config, log, build) {
+    if (!build.isOss()) {
       await runDockerGenerator(config, log, build, {
         ubi: true,
         context: false,

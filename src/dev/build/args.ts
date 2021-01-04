@@ -34,6 +34,8 @@ export function readCliArgs(argv: string[]) {
       'deb',
       'docker-images',
       'docker-contexts',
+      'skip-docker-ubi',
+      'skip-docker-centos',
       'release',
       'skip-node-download',
       'verbose',
@@ -112,7 +114,9 @@ export function readCliArgs(argv: string[]) {
     createArchives: !Boolean(flags['skip-archives']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
-    createDockerImages: isOsPackageDesired('docker-images'),
+    createDockerCentOS:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-centos']),
+    createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: isOsPackageDesired('docker-contexts'),
     targetAllPlatforms: Boolean(flags['all-platforms']),
   };
