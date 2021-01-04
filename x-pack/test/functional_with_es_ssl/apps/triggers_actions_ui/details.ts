@@ -307,21 +307,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const testRunUuid = uuid.v4();
 
       it('should show and update deleted connectors', async () => {
-        const action = await alerting.actions.createAction({
+        const action = await createAction({
           name: `slack-${testRunUuid}-${0}`,
-          actionTypeId: '.slack',
-          config: {},
-          secrets: {
-            webhookUrl: 'https://test',
-          },
         });
 
         await pageObjects.common.navigateToApp('triggersActions');
-        const alert = await alerting.alerts.createAlertWithActions(
-          testRunUuid,
-          'test.always-firing',
-          {},
-          [
+        const alert = await createAlwaysFiringAlert({
+          name: testRunUuid,
+          actions: [
             {
               group: 'default',
               id: action.id,
@@ -332,8 +325,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               id: action.id,
               params: { level: 'info', message: ' {{context.message}}' },
             },
-          ]
-        );
+          ],
+        });
+
         // refresh to see alert
         await browser.refresh();
         await pageObjects.header.waitUntilLoadingHasFinished();
