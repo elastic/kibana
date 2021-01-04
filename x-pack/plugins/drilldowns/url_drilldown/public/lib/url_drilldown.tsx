@@ -104,7 +104,8 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
 
   public readonly createConfig = () => ({
     url: { template: '' },
-    openInNewTab: false,
+    openInNewTab: true,
+    encodeUrl: true,
   });
 
   public readonly isConfigValid = (config: Config): config is Config => {
@@ -133,7 +134,12 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   private buildUrl(config: Config, context: ActionContext): string {
-    const url = urlDrilldownCompileUrl(config.url.template, this.getRuntimeVariables(context));
+    const doEncode = config.encodeUrl ?? true;
+    const url = urlDrilldownCompileUrl(
+      config.url.template,
+      this.getRuntimeVariables(context),
+      doEncode
+    );
     return url;
   }
 
