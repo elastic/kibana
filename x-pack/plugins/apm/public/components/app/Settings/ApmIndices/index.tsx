@@ -211,6 +211,7 @@ export function ApmIndices() {
                     fullWidth
                   >
                     <EuiFieldText
+                      disabled={!canSave}
                       fullWidth
                       name={configurationName}
                       placeholder={defaultValue}
