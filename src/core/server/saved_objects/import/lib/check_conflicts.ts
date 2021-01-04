@@ -24,7 +24,7 @@ import {
   SavedObjectsImportError,
   SavedObjectError,
   SavedObjectsImportRetry,
-} from '../types';
+} from '../../types';
 
 interface CheckConflictsParams {
   objects: Array<SavedObject<{ title?: string }>>;

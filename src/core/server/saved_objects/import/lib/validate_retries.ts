@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { SavedObjectsImportRetry } from './types';
+import { SavedObjectsImportRetry } from '../types';
 import { getNonUniqueEntries } from './get_non_unique_entries';
-import { SavedObjectsErrorHelpers } from '..';
+import { SavedObjectsErrorHelpers } from '../../service';
 
 export const validateRetries = (retries: SavedObjectsImportRetry[]) => {
   const nonUniqueRetryObjects = getNonUniqueEntries(retries);

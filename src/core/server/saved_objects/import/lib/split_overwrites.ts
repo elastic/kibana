@@ -17,17 +17,26 @@
  * under the License.
  */
 
-export { ISavedObjectsImporter, SavedObjectsImporter } from './saved_objects_importer';
-export {
-  SavedObjectsImportResponse,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportError,
-  SavedObjectsImportOptions,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsImportRetry,
-} from './types';
+import { SavedObject } from '../../types';
+import { SavedObjectsImportRetry } from '../types';
+
+export function splitOverwrites<T>(
+  savedObjects: Array<SavedObject<T>>,
+  retries: SavedObjectsImportRetry[]
+) {
+  const objectsToOverwrite: Array<SavedObject<T>> = [];
+  const objectsToNotOverwrite: Array<SavedObject<T>> = [];
+  const overwrites = retries
+    .filter((retry) => retry.overwrite)
+    .map((retry) => `${retry.type}:${retry.id}`);
+
+  for (const savedObject of savedObjects) {
+    if (overwrites.includes(`${savedObject.type}:${savedObject.id}`)) {
+      objectsToOverwrite.push(savedObject);
+    } else {
+      objectsToNotOverwrite.push(savedObject);
+    }
+  }
+
+  return { objectsToOverwrite, objectsToNotOverwrite };
+}

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { savedObjectsClientMock } from '../../mocks';
+import { savedObjectsClientMock } from '../../../mocks';
 import { createSavedObjects } from './create_saved_objects';
-import { SavedObjectsClientContract, SavedObject, SavedObjectsImportError } from '../types';
-import { SavedObjectsErrorHelpers } from '..';
+import { SavedObjectsClientContract, SavedObject, SavedObjectsImportError } from '../../types';
+import { SavedObjectsErrorHelpers } from '../../service';
 import { extractErrors } from './extract_errors';
 
 type CreateSavedObjectsParams = Parameters<typeof createSavedObjects>[0];

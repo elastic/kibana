@@ -322,8 +322,8 @@ export {
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-  importSavedObjectsFromStream,
-  resolveSavedObjectsImportErrors,
+  SavedObjectsImporter,
+  ISavedObjectsImporter,
 } from './saved_objects';
 
 export {

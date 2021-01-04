@@ -18,8 +18,8 @@
  */
 
 import { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
-import { savedObjectsClientMock } from '../../mocks';
-import { SavedObjectsErrorHelpers } from '..';
+import { savedObjectsClientMock } from '../../../mocks';
+import { SavedObjectsErrorHelpers } from '../../service';
 
 describe('getNonExistingReferenceAsKeys()', () => {
   const savedObjectsClient = savedObjectsClientMock.create();

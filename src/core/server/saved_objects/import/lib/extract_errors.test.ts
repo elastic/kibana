@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { SavedObject } from '../types';
+import { SavedObject } from '../../types';
 import { extractErrors } from './extract_errors';
-import { SavedObjectsErrorHelpers } from '..';
-import { CreatedObject } from './types';
+import { SavedObjectsErrorHelpers } from '../../service';
+import { CreatedObject } from '../types';
 
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {

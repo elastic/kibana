@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObject } from '../types';
-import { SavedObjectsImportError, CreatedObject } from './types';
+import { SavedObject } from '../../types';
+import { SavedObjectsImportError, CreatedObject } from '../types';
 
 export function extractErrors(
   // TODO: define saved object type

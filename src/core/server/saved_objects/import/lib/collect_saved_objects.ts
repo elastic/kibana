@@ -25,11 +25,11 @@ import {
   createPromiseFromStreams,
 } from '@kbn/utils';
 
-import { SavedObject } from '../types';
+import { SavedObject } from '../../types';
 import { createLimitStream } from './create_limit_stream';
-import { SavedObjectsImportError } from './types';
+import { SavedObjectsImportError } from '../types';
 import { getNonUniqueEntries } from './get_non_unique_entries';
-import { SavedObjectsErrorHelpers } from '..';
+import { SavedObjectsErrorHelpers } from '../../service';
 
 interface CollectSavedObjectsOptions {
   readStream: Readable;

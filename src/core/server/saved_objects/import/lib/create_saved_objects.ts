@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { SavedObject, SavedObjectsClientContract, SavedObjectsImportError } from '../types';
+import { SavedObject, SavedObjectsClientContract, SavedObjectsImportError } from '../../types';
 import { extractErrors } from './extract_errors';
-import { CreatedObject } from './types';
+import { CreatedObject } from '../types';
 
 interface CreateSavedObjectsParams<T> {
   objects: Array<SavedObject<T>>;

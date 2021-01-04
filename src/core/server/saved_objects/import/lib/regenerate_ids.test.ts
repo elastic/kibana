@@ -19,7 +19,7 @@
 
 import { mockUuidv4 } from './__mocks__';
 import { regenerateIds } from './regenerate_ids';
-import { SavedObject } from '../types';
+import { SavedObject } from '../../types';
 
 describe('#regenerateIds', () => {
   const objects = ([

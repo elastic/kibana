@@ -17,12 +17,17 @@
  * under the License.
  */
 
-import { SavedObject } from '../types';
-import { SavedObjectsImportRetry } from './types';
+import { v4 as uuidv4 } from 'uuid';
+import { SavedObject } from '../../types';
 
-export function createObjectsFilter(retries: SavedObjectsImportRetry[]) {
-  const retryKeys = new Set<string>(retries.map((retry) => `${retry.type}:${retry.id}`));
-  return (obj: SavedObject) => {
-    return retryKeys.has(`${obj.type}:${obj.id}`);
-  };
-}
+/**
+ * Takes an array of saved objects and returns an importIdMap of randomly-generated new IDs.
+ *
+ * @param objects The saved objects to generate new IDs for.
+ */
+export const regenerateIds = (objects: SavedObject[]) => {
+  const importIdMap = objects.reduce((acc, object) => {
+    return acc.set(`${object.type}:${object.id}`, { id: uuidv4(), omitOriginId: true });
+  }, new Map<string, { id: string; omitOriginId?: boolean }>());
+  return importIdMap;
+};

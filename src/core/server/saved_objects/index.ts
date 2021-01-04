@@ -19,7 +19,21 @@
 
 export * from './service';
 
-export * from './import';
+export {
+  ISavedObjectsImporter,
+  SavedObjectsImporter,
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsResolveImportErrorsOptions,
+} from './import';
 
 export {
   SavedObjectExporter,

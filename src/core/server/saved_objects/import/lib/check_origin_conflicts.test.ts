@@ -24,11 +24,11 @@ import {
   SavedObject,
   SavedObjectsImportRetry,
   SavedObjectsImportError,
-} from '../types';
+} from '../../types';
 import { checkOriginConflicts, getImportIdMapForRetries } from './check_origin_conflicts';
-import { savedObjectsClientMock } from '../../mocks';
-import { typeRegistryMock } from '../saved_objects_type_registry.mock';
-import { ISavedObjectTypeRegistry } from '..';
+import { savedObjectsClientMock } from '../../../mocks';
+import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckOriginConflictsParams = Parameters<typeof checkOriginConflicts>[0];

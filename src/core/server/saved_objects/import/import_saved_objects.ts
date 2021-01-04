@@ -17,17 +17,17 @@
  * under the License.
  */
 
-import { collectSavedObjects } from './collect_saved_objects';
 import {
   SavedObjectsImportError,
   SavedObjectsImportResponse,
   SavedObjectsImportOptions,
 } from './types';
-import { validateReferences } from './validate_references';
-import { checkOriginConflicts } from './check_origin_conflicts';
-import { createSavedObjects } from './create_saved_objects';
-import { checkConflicts } from './check_conflicts';
-import { regenerateIds } from './regenerate_ids';
+import { validateReferences } from './lib/validate_references';
+import { checkOriginConflicts } from './lib/check_origin_conflicts';
+import { createSavedObjects } from './lib/create_saved_objects';
+import { checkConflicts } from './lib/check_conflicts';
+import { regenerateIds } from './lib/regenerate_ids';
+import { collectSavedObjects } from './lib/collect_saved_objects';
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more

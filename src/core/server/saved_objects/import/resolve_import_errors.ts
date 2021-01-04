@@ -16,22 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { collectSavedObjects } from './collect_saved_objects';
-import { createObjectsFilter } from './create_objects_filter';
-import { splitOverwrites } from './split_overwrites';
+
+import { SavedObject } from '../types';
 import {
   SavedObjectsImportError,
   SavedObjectsImportResponse,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportSuccess,
 } from './types';
-import { regenerateIds } from './regenerate_ids';
-import { validateReferences } from './validate_references';
-import { validateRetries } from './validate_retries';
-import { createSavedObjects } from './create_saved_objects';
-import { getImportIdMapForRetries } from './check_origin_conflicts';
-import { SavedObject } from '../types';
-import { checkConflicts } from './check_conflicts';
+import {
+  collectSavedObjects,
+  createObjectsFilter,
+  splitOverwrites,
+  regenerateIds,
+  validateReferences,
+  validateRetries,
+  createSavedObjects,
+  getImportIdMapForRetries,
+  checkConflicts,
+} from './lib';
 
 /**
  * Resolve and return saved object import errors.

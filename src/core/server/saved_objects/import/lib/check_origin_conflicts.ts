@@ -24,8 +24,8 @@ import {
   SavedObjectsClientContract,
   SavedObjectsImportError,
   SavedObjectsImportRetry,
-} from '../types';
-import { ISavedObjectTypeRegistry } from '..';
+} from '../../types';
+import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 interface CheckOriginConflictsParams {
   objects: Array<SavedObject<{ title?: string }>>;

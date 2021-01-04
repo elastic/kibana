@@ -18,7 +18,7 @@
  */
 
 import { validateRetries } from './validate_retries';
-import { SavedObjectsImportRetry } from '.';
+import { SavedObjectsImportRetry } from '../types';
 
 import { getNonUniqueEntries } from './get_non_unique_entries';
 jest.mock('./get_non_unique_entries');

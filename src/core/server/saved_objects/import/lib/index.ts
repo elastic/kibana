@@ -17,26 +17,15 @@
  * under the License.
  */
 
-import { SavedObject } from '../types';
-import { SavedObjectsImportRetry } from './types';
-
-export function splitOverwrites<T>(
-  savedObjects: Array<SavedObject<T>>,
-  retries: SavedObjectsImportRetry[]
-) {
-  const objectsToOverwrite: Array<SavedObject<T>> = [];
-  const objectsToNotOverwrite: Array<SavedObject<T>> = [];
-  const overwrites = retries
-    .filter((retry) => retry.overwrite)
-    .map((retry) => `${retry.type}:${retry.id}`);
-
-  for (const savedObject of savedObjects) {
-    if (overwrites.includes(`${savedObject.type}:${savedObject.id}`)) {
-      objectsToOverwrite.push(savedObject);
-    } else {
-      objectsToNotOverwrite.push(savedObject);
-    }
-  }
-
-  return { objectsToOverwrite, objectsToNotOverwrite };
-}
+export { checkConflicts } from './check_conflicts';
+export { checkOriginConflicts, getImportIdMapForRetries } from './check_origin_conflicts';
+export { collectSavedObjects } from './collect_saved_objects';
+export { createLimitStream } from './create_limit_stream';
+export { createObjectsFilter } from './create_objects_filter';
+export { createSavedObjects } from './create_saved_objects';
+export { extractErrors } from './extract_errors';
+export { getNonUniqueEntries } from './get_non_unique_entries';
+export { regenerateIds } from './regenerate_ids';
+export { splitOverwrites } from './split_overwrites';
+export { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
+export { validateRetries } from './validate_retries';

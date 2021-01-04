@@ -18,10 +18,10 @@
  */
 
 import { mockUuidv4 } from './__mocks__';
-import { savedObjectsClientMock } from '../../mocks';
+import { savedObjectsClientMock } from '../../../mocks';
 import { SavedObjectReference, SavedObjectsImportRetry } from 'kibana/public';
-import { SavedObjectsClientContract, SavedObject } from '../types';
-import { SavedObjectsErrorHelpers } from '..';
+import { SavedObjectsClientContract, SavedObject } from '../../types';
+import { SavedObjectsErrorHelpers } from '../../service';
 import { checkConflicts } from './check_conflicts';
 
 type SavedObjectType = SavedObject<{ title?: string }>;

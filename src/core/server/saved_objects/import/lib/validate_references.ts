@@ -18,8 +18,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { SavedObject, SavedObjectsClientContract } from '../types';
-import { SavedObjectsImportError, SavedObjectsImportRetry } from './types';
+import { SavedObject, SavedObjectsClientContract } from '../../types';
+import { SavedObjectsImportError, SavedObjectsImportRetry } from '../types';
 
 const REF_TYPES_TO_VLIDATE = ['index-pattern', 'search'];
 
