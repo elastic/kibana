@@ -166,10 +166,26 @@ describe('when on integration detail', () => {
 
     it('should link to integration policy detail when an integration policy is clicked', async () => {
       await mockedApi.waitForApi();
-      const firstPolicy = renderResult.getByTestId('integrationNameLink') as HTMLAnchorElement;
+      const firstPolicy = renderResult.getAllByTestId(
+        'integrationNameLink'
+      )[0] as HTMLAnchorElement;
       expect(firstPolicy.href).toEqual(
         'http://localhost/mock/app/fleet#/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
       );
+    });
+
+    it('should NOT show link for agent count if it is zero', async () => {
+      await mockedApi.waitForApi();
+      const firstRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[0];
+      expect(firstRowAgentCount.textContent).toEqual('0');
+      expect(firstRowAgentCount.tagName).not.toEqual('A');
+    });
+
+    it('should show link for agent count if greater than zero', async () => {
+      await mockedApi.waitForApi();
+      const secondRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[1];
+      expect(secondRowAgentCount.textContent).toEqual('100');
+      expect(secondRowAgentCount.tagName).toEqual('A');
     });
   });
 });
@@ -522,8 +538,87 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_at: '2020-12-09T13:46:31.013Z',
         updated_by: 'elastic',
       },
+      {
+        id: 'e3t37031-2907-44f6-89d2-5555555555',
+        version: 'WrrrMiwxXQ==',
+        name: 'nginx-2',
+        description: '',
+        namespace: 'default',
+        policy_id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
+        enabled: true,
+        output_id: '',
+        inputs: [
+          {
+            type: 'logfile',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'nginx.access' },
+                vars: { paths: { value: ['/var/log/nginx/access.log*'], type: 'text' } },
+                id: 'logfile-nginx.access-e8a37031-2907-44f6-89d2-98bd493f60dc',
+                compiled_stream: {
+                  paths: ['/var/log/nginx/access.log*'],
+                  exclude_files: ['.gz$'],
+                  processors: [{ add_locale: null }],
+                },
+              },
+              {
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'nginx.error' },
+                vars: { paths: { value: ['/var/log/nginx/error.log*'], type: 'text' } },
+                id: 'logfile-nginx.error-e8a37031-2907-44f6-89d2-98bd493f60dc',
+                compiled_stream: {
+                  paths: ['/var/log/nginx/error.log*'],
+                  exclude_files: ['.gz$'],
+                  multiline: {
+                    pattern: '^\\d{4}\\/\\d{2}\\/\\d{2} ',
+                    negate: true,
+                    match: 'after',
+                  },
+                  processors: [{ add_locale: null }],
+                },
+              },
+              {
+                enabled: false,
+                data_stream: { type: 'logs', dataset: 'nginx.ingress_controller' },
+                vars: { paths: { value: ['/var/log/nginx/ingress.log*'], type: 'text' } },
+                id: 'logfile-nginx.ingress_controller-e8a37031-2907-44f6-89d2-98bd493f60dc',
+              },
+            ],
+          },
+          {
+            type: 'nginx/metrics',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'metrics', dataset: 'nginx.stubstatus' },
+                vars: {
+                  period: { value: '10s', type: 'text' },
+                  server_status_path: { value: '/nginx_status', type: 'text' },
+                },
+                id: 'nginx/metrics-nginx.stubstatus-e8a37031-2907-44f6-89d2-98bd493f60dc',
+                compiled_stream: {
+                  metricsets: ['stubstatus'],
+                  hosts: ['http://127.0.0.1:80'],
+                  period: '10s',
+                  server_status_path: '/nginx_status',
+                },
+              },
+            ],
+            vars: { hosts: { value: ['http://127.0.0.1:80'], type: 'text' } },
+          },
+        ],
+        package: { name: 'nginx', title: 'Nginx', version: '0.3.7' },
+        revision: 3,
+        created_at: '2020-12-09T13:46:31.013Z',
+        created_by: 'elastic',
+        updated_at: '2020-12-09T13:46:31.013Z',
+        updated_by: 'elastic',
+      },
     ],
-    total: 1,
+    total: 2,
     page: 1,
     perPage: 20,
   };
@@ -548,8 +643,22 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         updated_by: 'elastic',
         agents: 0,
       },
+      {
+        id: '125c1b70-3976-11eb-ad1c-3baa423085y6',
+        name: 'EU Healthy agents',
+        namespace: 'default',
+        description: 'Protect EU from COVID',
+        status: 'active',
+        package_policies: ['e8a37031-2907-44f6-89d2-98bd493f60cd'],
+        is_default: false,
+        monitoring_enabled: ['logs', 'metrics'],
+        revision: 2,
+        updated_at: '2020-12-09T13:46:31.840Z',
+        updated_by: 'elastic',
+        agents: 100,
+      },
     ],
-    total: 1,
+    total: 2,
     page: 1,
     perPage: 100,
   };
