@@ -23,4 +23,4 @@ export {
   SavedObjectsExportByTypeOptions,
   SavedObjectsExportResultDetails,
 } from './types';
-export { ISavedObjectExporter, SavedObjectExporter } from './saved_object_exporter';
+export { ISavedObjectsExporter, SavedObjectsExporter } from './saved_objects_exporter';

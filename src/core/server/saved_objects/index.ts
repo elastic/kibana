@@ -36,8 +36,8 @@ export {
 } from './import';
 
 export {
-  SavedObjectExporter,
-  ISavedObjectExporter,
+  SavedObjectsExporter,
+  ISavedObjectsExporter,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByTypeOptions,
   SavedObjectsExportByObjectOptions,

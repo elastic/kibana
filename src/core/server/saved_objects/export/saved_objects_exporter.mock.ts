@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { ISavedObjectExporter } from './saved_object_exporter';
+import { ISavedObjectsExporter } from './saved_objects_exporter';
 
 const createExporterMock = () => {
-  const mock: jest.Mocked<ISavedObjectExporter> = {
+  const mock: jest.Mocked<ISavedObjectsExporter> = {
     exportByObjects: jest.fn(),
     exportByTypes: jest.fn(),
   };
@@ -28,6 +28,6 @@ const createExporterMock = () => {
   return mock;
 };
 
-export const savedObjectExporterMock = {
+export const savedObjectsExporterMock = {
   create: createExporterMock,
 };

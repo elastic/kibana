@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectExporter } from './saved_object_exporter';
+import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
@@ -30,11 +30,11 @@ const exportSizeLimit = 500;
 
 describe('getSortedObjectsForExport()', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let exporter: SavedObjectExporter;
+  let exporter: SavedObjectsExporter;
 
   beforeEach(() => {
     savedObjectsClient = savedObjectsClientMock.create();
-    exporter = new SavedObjectExporter({ savedObjectsClient, exportSizeLimit });
+    exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit });
   });
 
   describe('#exportByTypes', () => {
@@ -542,7 +542,7 @@ describe('getSortedObjectsForExport()', () => {
     });
 
     test('export selected types throws error when exceeding exportSizeLimit', async () => {
-      exporter = new SavedObjectExporter({ savedObjectsClient, exportSizeLimit: 1 });
+      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1 });
 
       savedObjectsClient.find.mockResolvedValueOnce({
         total: 2,
@@ -747,7 +747,7 @@ describe('getSortedObjectsForExport()', () => {
     });
 
     test('export selected objects throws error when exceeding exportSizeLimit', async () => {
-      exporter = new SavedObjectExporter({ savedObjectsClient, exportSizeLimit: 1 });
+      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1 });
 
       const exportOpts = {
         objects: [

@@ -24,7 +24,7 @@ import { SavedObjectsClientContract } from './saved_objects/types';
 import {
   InternalSavedObjectsServiceStart,
   ISavedObjectTypeRegistry,
-  ISavedObjectExporter,
+  ISavedObjectsExporter,
   ISavedObjectsImporter,
 } from './saved_objects';
 import {
@@ -69,7 +69,7 @@ class CoreSavedObjectsRouteHandlerContext {
   ) {}
   #scopedSavedObjectsClient?: SavedObjectsClientContract;
   #typeRegistry?: ISavedObjectTypeRegistry;
-  #exporter?: ISavedObjectExporter;
+  #exporter?: ISavedObjectsExporter;
   #importer?: ISavedObjectsImporter;
 
   public get client() {

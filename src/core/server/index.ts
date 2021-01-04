@@ -58,7 +58,7 @@ import {
   ISavedObjectTypeRegistry,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
-  ISavedObjectExporter,
+  ISavedObjectsExporter,
   ISavedObjectsImporter,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
@@ -318,8 +318,8 @@ export {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectsUtils,
-  SavedObjectExporter,
-  ISavedObjectExporter,
+  SavedObjectsExporter,
+  ISavedObjectsExporter,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
@@ -404,7 +404,7 @@ export interface RequestHandlerContext {
     savedObjects: {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
-      exporter: ISavedObjectExporter;
+      exporter: ISavedObjectsExporter;
       importer: ISavedObjectsImporter;
     };
     elasticsearch: {

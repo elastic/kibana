@@ -33,12 +33,12 @@ import {
 /**
  * @public
  */
-export type ISavedObjectExporter = PublicMethodsOf<SavedObjectExporter>;
+export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
 
 /**
  * @public
  */
-export class SavedObjectExporter {
+export class SavedObjectsExporter {
   private savedObjectsClient: SavedObjectsClientContract;
   private exportSizeLimit: number;
 

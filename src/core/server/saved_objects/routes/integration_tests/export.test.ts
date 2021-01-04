@@ -27,7 +27,7 @@ import { createListStream } from '@kbn/utils';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
 import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
-import { savedObjectExporterMock } from '../../export/saved_object_exporter.mock';
+import { savedObjectsExporterMock } from '../../export/saved_objects_exporter.mock';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { registerExportRoute } from '../export';
 import { setupServer, createExportableType } from '../test_utils';
@@ -44,7 +44,7 @@ describe('POST /api/saved_objects/_export', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
-  let exporter: ReturnType<typeof savedObjectExporterMock.create>;
+  let exporter: ReturnType<typeof savedObjectsExporterMock.create>;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());

@@ -49,7 +49,7 @@ import {
 import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
-import { SavedObjectExporter, ISavedObjectExporter } from './export';
+import { SavedObjectsExporter, ISavedObjectsExporter } from './export';
 import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
@@ -215,9 +215,9 @@ export interface SavedObjectsServiceStart {
    */
   createSerializer: () => SavedObjectsSerializer;
   /**
-   * Creates a {@link ISavedObjectExporter | exporter} bound to given client.
+   * Creates a {@link ISavedObjectsExporter | exporter} bound to given client.
    */
-  createExporter: (client: SavedObjectsClientContract) => ISavedObjectExporter;
+  createExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
   /**
    * Creates a {@link ISavedObjectsImporter | importer} bound to given client.
    */
@@ -462,7 +462,7 @@ export class SavedObjectsService
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
       createExporter: (savedObjectsClient) =>
-        new SavedObjectExporter({
+        new SavedObjectsExporter({
           savedObjectsClient,
           exportSizeLimit: this.config!.maxImportExportSize,
         }),
