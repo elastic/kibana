@@ -13,6 +13,7 @@ import { SlackAction } from './slack_action';
 import { WebhookAction } from './webhook_action';
 import { IndexAction } from './index_action';
 import { PagerDutyAction } from './pagerduty_action';
+import { SwimlaneAction } from './swimlane_action';
 import { JiraAction } from './jira_action';
 import { UnknownAction } from './unknown_action';
 
@@ -23,6 +24,7 @@ set(ActionTypes, ACTION_TYPES.SLACK, SlackAction);
 set(ActionTypes, ACTION_TYPES.WEBHOOK, WebhookAction);
 set(ActionTypes, ACTION_TYPES.INDEX, IndexAction);
 set(ActionTypes, ACTION_TYPES.PAGERDUTY, PagerDutyAction);
+set(ActionTypes, ACTION_TYPES.SWIMLANE, SwimlaneAction);
 set(ActionTypes, ACTION_TYPES.JIRA, JiraAction);
 
 export class Action {

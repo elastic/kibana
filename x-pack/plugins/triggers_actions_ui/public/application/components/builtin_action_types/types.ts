@@ -38,6 +38,13 @@ export interface PagerDutyActionParams {
   class?: string;
 }
 
+export interface SwimlaneActionParams {
+  alertName: string;
+  tags: string;
+  comments: string;
+  severity: SeverityActionOptions;
+}
+
 export interface IndexActionParams {
   documents: Array<Record<string, any>>;
 }
@@ -98,6 +105,22 @@ export interface PagerDutySecrets {
 export type PagerDutyActionConnector = UserConfiguredActionConnector<
   PagerDutyConfig,
   PagerDutySecrets
+>;
+
+
+export interface SwimlaneConfig {
+  apiUrl: string;
+  appId: string;
+  username: string;
+}
+
+export interface SwimlaneSecrets {
+  apiToken: string;
+}
+
+export type SwimlaneActionConnector = UserConfiguredActionConnector<
+  SwimlaneConfig,
+  SwimlaneSecrets
 >;
 
 export interface SlackSecrets {

@@ -22,6 +22,7 @@ describe('settings module', () => {
           expect(actionTypes.slack.enabled).to.be(false);
           expect(actionTypes.jira.enabled).to.be(false);
           expect(actionTypes.pagerduty.enabled).to.be(false);
+          expect(actionTypes.swimlane.enabled).to.be(false);
         });
       });
 
@@ -96,6 +97,7 @@ describe('settings module', () => {
         expect(json.action_types.slack.enabled).to.be(false);
         expect(json.action_types.jira.enabled).to.be(false);
         expect(json.action_types.pagerduty.enabled).to.be(false);
+        expect(json.action_types.swimlane.enabled).to.be(false);
       });
     });
   });

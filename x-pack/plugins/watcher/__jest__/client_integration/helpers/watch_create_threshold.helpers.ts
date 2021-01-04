@@ -25,7 +25,7 @@ export interface WatchCreateThresholdTestBed extends TestBed<WatchCreateThreshol
     clickSubmitButton: () => void;
     clickAddActionButton: () => void;
     clickActionLink: (
-      actionType: 'logging' | 'email' | 'webhook' | 'index' | 'slack' | 'jira' | 'pagerduty'
+      actionType: 'logging' | 'email' | 'webhook' | 'index' | 'slack' | 'jira' | 'pagerduty' | 'swimlane'
     ) => void;
     clickSimulateButton: () => void;
   };
@@ -51,7 +51,7 @@ export const setup = async (): Promise<WatchCreateThresholdTestBed> => {
   };
 
   const clickActionLink = (
-    actionType: 'logging' | 'email' | 'webhook' | 'index' | 'slack' | 'jira' | 'pagerduty'
+    actionType: 'logging' | 'email' | 'webhook' | 'index' | 'slack' | 'jira' | 'pagerduty' | 'swimlane'
   ) => {
     testBed.find(`${actionType}ActionButton`).simulate('click');
   };

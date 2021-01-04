@@ -158,6 +158,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.email',
   '.slack',
   '.pagerduty',
+  '.swimlane',
   '.webhook',
 ];
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions';

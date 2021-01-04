@@ -11,6 +11,7 @@ type IndexActionType = 'index';
 type SlackActionType = 'slack';
 type JiraActionType = 'jira';
 type PagerDutyActionType = 'pagerduty';
+type SwimlaneActionType = 'swimlane';
 
 export interface BaseAction {
   id: string;
@@ -50,6 +51,12 @@ export interface PagerDutyAction extends BaseAction {
   description: string;
 }
 
+export interface SwimlaneAction extends BaseAction {
+  type: SwimlaneActionType;
+  iconClass: 'apps';
+  description: string;
+}
+
 export interface WebhookAction extends BaseAction {
   type: WebhookActionType;
   iconClass: 'logoWebhook';
@@ -84,4 +91,5 @@ export type ActionType =
   | IndexAction
   | SlackAction
   | JiraAction
-  | PagerDutyAction;
+  | PagerDutyAction
+  | SwimlaneAction;

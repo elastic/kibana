@@ -19,5 +19,7 @@ export const ACTION_TYPES: { [key: string]: string } = {
 
   PAGERDUTY: 'pagerduty',
 
+  SWIMLANE: 'swimlane', 
+
   UNKNOWN: 'unknown/invalid',
 };
