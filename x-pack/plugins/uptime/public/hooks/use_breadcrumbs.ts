@@ -16,11 +16,26 @@ import { PLUGIN } from '../../common/constants/plugin';
 
 const EMPTY_QUERY = '?';
 
-export const makeBaseBreadcrumb = (
-  href: string,
-  navigateToHref?: (url: string) => Promise<void>,
-  params?: UptimeUrlParams
-): EuiBreadcrumb => {
+function handleBreadcrumbClick(
+  breadcrumbs: ChromeBreadcrumb[],
+  navigateToHref?: (url: string) => Promise<void>
+) {
+  return breadcrumbs.map((bc) => ({
+    ...bc,
+    ...(bc.href
+      ? {
+          onClick: (event) => {
+            if (navigateToHref) {
+              event.preventDefault();
+              navigateToHref(bc.href);
+            }
+          },
+        }
+      : {}),
+  }));
+}
+
+export const makeBaseBreadcrumb = (href: string, params?: UptimeUrlParams): EuiBreadcrumb => {
   if (params) {
     const crumbParams: Partial<UptimeUrlParams> = { ...params };
     // We don't want to encode this values because they are often set to Date.now(), the relative
@@ -36,12 +51,6 @@ export const makeBaseBreadcrumb = (
       defaultMessage: 'Uptime',
     }),
     href,
-    onClick: (event) => {
-      if (href && navigateToHref) {
-        event.preventDefault();
-        navigateToHref(href);
-      }
-    },
   };
 };
 
@@ -51,9 +60,12 @@ export const useBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   const setBreadcrumbs = kibana.services.chrome?.setBreadcrumbs;
   const appPath = kibana.services.application?.getUrlForApp(PLUGIN.ID) ?? '';
   const navigate = kibana.services.application?.navigateToUrl;
+
   useEffect(() => {
     if (setBreadcrumbs) {
-      setBreadcrumbs([makeBaseBreadcrumb(appPath, navigate, params)].concat(extraCrumbs));
+      setBreadcrumbs(
+        handleBreadcrumbClick([makeBaseBreadcrumb(appPath, params)].concat(extraCrumbs), navigate)
+      );
     }
   }, [appPath, extraCrumbs, navigate, params, setBreadcrumbs]);
 };
