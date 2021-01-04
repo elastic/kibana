@@ -89,9 +89,9 @@ describe('NewTimeline', () => {
 
 describe('Description', () => {
   const props = {
-    description: 'xxx',
     timelineId: 'timeline-1',
-    updateDescription: jest.fn(),
+    currentDescription: '',
+    updateCurrentDescription: jest.fn(),
   };
 
   test('should render tooltip', () => {
@@ -125,8 +125,8 @@ describe('Name', () => {
   const props = {
     timelineId: 'timeline-1',
     timelineType: TimelineType.default,
-    title: 'xxx',
-    updateTitle: jest.fn(),
+    currentTitle: 'xxx',
+    updateCurrentTitle: jest.fn(),
   };
 
   beforeAll(() => {
