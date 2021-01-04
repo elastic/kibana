@@ -114,7 +114,7 @@ export function ElasticChartProvider({ getService }: FtrProviderContext) {
       dataTestSubj?: string,
       match: number = 0
     ): Promise<DebugState | null> {
-      const chart = await this.getChart(dataTestSubj, match);
+      const chart = await this.getChart(dataTestSubj, undefined, match);
 
       try {
         const visContainer = await chart.findByCssSelector('.echChartStatus');

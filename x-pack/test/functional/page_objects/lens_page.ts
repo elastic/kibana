@@ -497,10 +497,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await elasticChart.getChartDebugData('lnsWorkspace');
     },
 
-    async getDashboardPanelChartDebugState(panelIndex: number) {
-      return await elasticChart.getChartDebugData(undefined, panelIndex);
-    },
-
     /**
      * Gets text of the specified datatable header cell
      *
