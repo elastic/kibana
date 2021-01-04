@@ -84,7 +84,7 @@ describe('AddComment ', () => {
   });
 
   it('should render spinner and disable submit when loading', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostCommment, isLoading: true }));
+    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
@@ -100,7 +100,7 @@ describe('AddComment ', () => {
   });
 
   it('should disable submit button when disabled prop passed', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostCommment, isLoading: true }));
+    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
