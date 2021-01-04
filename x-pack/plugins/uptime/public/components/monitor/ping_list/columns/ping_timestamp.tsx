@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
-  EuiLink,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -132,9 +131,8 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
           </EuiFlexGroup>
         )}
       </div>
-      <EuiLink className="eui-textNoWrap" href={'/step/details'}>
-        {getShortTimeStamp(moment(timestamp))}
-      </EuiLink>
+      {/* TODO: Add link to details page once it's available */}
+      <span className="eui-textNoWrap">{getShortTimeStamp(moment(timestamp))}</span>
       <EuiSpacer size="s" />
     </>
   );
