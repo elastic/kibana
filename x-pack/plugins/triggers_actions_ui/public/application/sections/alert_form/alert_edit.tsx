@@ -19,6 +19,7 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
+import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   ActionTypeRegistryContract,
@@ -53,7 +54,7 @@ export const AlertEdit = ({
   metadata,
 }: AlertEditProps) => {
   const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
-    alert: initialAlert,
+    alert: cloneDeep(initialAlert),
   });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasActionsDisabled, setHasActionsDisabled] = useState<boolean>(false);
