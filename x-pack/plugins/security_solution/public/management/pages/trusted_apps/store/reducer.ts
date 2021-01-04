@@ -195,7 +195,7 @@ export const trustedAppsPageReducer: StateReducer = (
     case 'userChangedUrl':
       return userChangedUrl(state, action);
 
-    case 'trustedAppsExistResponse':
+    case 'trustedAppsExistStateChanged':
       return updateEntriesExists(state, action);
   }
 

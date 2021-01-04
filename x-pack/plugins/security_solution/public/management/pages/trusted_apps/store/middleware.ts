@@ -243,7 +243,7 @@ const checkIfTrustedAppsExistIfNeeded = async (
       (currentListTotal > 0 && !currentDoEntriesExist)
     ) {
       store.dispatch({
-        type: 'trustedAppsExistResponse',
+        type: 'trustedAppsExistStateChanged',
         payload: { type: 'LoadingResourceState', previousState: currentEntriesExistState },
       });
 
@@ -260,7 +260,7 @@ const checkIfTrustedAppsExistIfNeeded = async (
       }
 
       store.dispatch({
-        type: 'trustedAppsExistResponse',
+        type: 'trustedAppsExistStateChanged',
         payload: { type: 'LoadedResourceState', data: doTheyExist },
       });
     }

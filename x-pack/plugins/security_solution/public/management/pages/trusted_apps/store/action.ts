@@ -54,7 +54,7 @@ export type TrustedAppCreationDialogConfirmed = Action<'trustedAppCreationDialog
 
 export type TrustedAppCreationDialogClosed = Action<'trustedAppCreationDialogClosed'>;
 
-export type TrustedAppsExistResponse = Action<'trustedAppsExistResponse'> & {
+export type TrustedAppsExistResponse = Action<'trustedAppsExistStateChanged'> & {
   payload: AsyncResourceState<boolean>;
 };
 
