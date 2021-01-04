@@ -50,6 +50,8 @@ export const TrustedAppsPage = memo(() => {
     view_type: viewType,
   }));
 
+  const showCreateFlyout = location.show === 'create';
+
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {
       return <BackToExternalAppButton {...routeState} />;
@@ -61,7 +63,7 @@ export const TrustedAppsPage = memo(() => {
     <EuiButton
       fill
       iconType="plusInCircle"
-      isDisabled={location.show === 'create'}
+      isDisabled={showCreateFlyout}
       onClick={handleAddButtonClick}
       data-test-subj="trustedAppsListAddButton"
     >
@@ -76,7 +78,7 @@ export const TrustedAppsPage = memo(() => {
     <>
       <TrustedAppsNotifications />
       <TrustedAppDeletionDialog />
-      {location.show === 'create' && (
+      {showCreateFlyout && (
         <CreateTrustedAppFlyout
           onClose={handleAddFlyoutClose}
           size="m"
@@ -103,7 +105,7 @@ export const TrustedAppsPage = memo(() => {
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <EmptyState onAdd={handleAddButtonClick} />
+        <EmptyState onAdd={handleAddButtonClick} isAddDisabled={showCreateFlyout} />
       )}
     </>
   );
@@ -120,7 +122,7 @@ export const TrustedAppsPage = memo(() => {
       }
       headerBackComponent={backButton}
       subtitle={ABOUT_TRUSTED_APPS}
-      actions={addButton}
+      actions={doEntriesExist ? addButton : <></>}
     >
       {isCheckingIfEntriesExists ? (
         <EuiEmptyPrompt body={<EuiLoadingSpinner className="essentialAnimation" size="xl" />} />

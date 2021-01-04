@@ -5,11 +5,46 @@
  */
 
 import React, { memo } from 'react';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const EmptyState = memo<{
   onAdd: () => void;
-}>(() => {
-  return <h1>{'empty'}</h1>;
+  /** Should the Add button be disabled */
+  isAddDisabled?: boolean;
+}>(({ onAdd, isAddDisabled = false }) => {
+  return (
+    <EuiEmptyPrompt
+      iconType="plusInCircle"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.securitySolution.trustedapps.listEmptyState.title"
+            defaultMessage="Add your first trusted application"
+          />
+        </h2>
+      }
+      body={
+        <FormattedMessage
+          id="xpack.securitySolution.trustedapps.listEmptyState.message"
+          defaultMessage="There are currently no trusted applications on your endpoint."
+        />
+      }
+      actions={
+        <EuiButton
+          fill
+          isDisabled={isAddDisabled}
+          onClick={onAdd}
+          data-test-subj="trustedAppsListAddButton"
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.trustedapps.list.addButton"
+            defaultMessage="Add Trusted Application"
+          />
+        </EuiButton>
+      }
+    />
+  );
 });
 
 EmptyState.displayName = 'EmptyState';
