@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { services as xpackFunctionalServices } from '../../functional/services';
-import { AlertsServiceProvider } from './alerting';
-
-export const services = {
-  ...xpackFunctionalServices,
-  alerting: AlertsServiceProvider,
-};
+export { Errors } from './errors';
+export { Summary } from './summary';
