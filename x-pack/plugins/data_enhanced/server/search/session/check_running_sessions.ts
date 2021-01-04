@@ -50,6 +50,8 @@ export async function checkRunningSessions(
         const sessionStatus = getSessionStatus(searchStatuses);
         if (sessionStatus !== BackgroundSessionStatus.IN_PROGRESS) {
           session.attributes.status = sessionStatus;
+          const firstError = searchStatuses.filter((searchInfo) => searchInfo.status === undefined);
+          session.attributes.error = firstError ? firstError[0].error : undefined;
           updatedSessions.push(session);
         }
       })

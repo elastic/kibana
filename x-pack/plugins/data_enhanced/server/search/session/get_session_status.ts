@@ -5,14 +5,15 @@
  */
 
 import { BackgroundSessionStatus } from '../../../common';
+import { SearchStatusInfo } from './get_search_status';
 import { SearchStatus } from './types';
 
-export function getSessionStatus(searchStatuses: SearchStatus[]): BackgroundSessionStatus {
-  if (searchStatuses.some((item) => item === SearchStatus.ERROR)) {
+export function getSessionStatus(searchStatuses: SearchStatusInfo[]): BackgroundSessionStatus {
+  if (searchStatuses.some((item) => item.status === SearchStatus.ERROR)) {
     return BackgroundSessionStatus.ERROR;
   } else if (
     searchStatuses.length > 0 &&
-    searchStatuses.every((item) => item === SearchStatus.COMPLETE)
+    searchStatuses.every((item) => item.status === SearchStatus.COMPLETE)
   ) {
     return BackgroundSessionStatus.COMPLETE;
   } else {
