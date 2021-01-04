@@ -36,7 +36,7 @@ export const FleetApp: React.FunctionComponent = () => {
           title={
             <FormattedMessage
               id="xpack.fleet.agentsInitializationErrorMessageTitle"
-              defaultMessage="Unable to initialize Fleet Agents"
+              defaultMessage="Unable to initialize central management for Elastic Agents"
             />
           }
           error={fleetStatus.error}
