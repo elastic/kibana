@@ -76,10 +76,11 @@ export const setMockActions = (actions: object) => {
  * import { LogicMounter } from '../../../__mocks__/kea.mock';
  * import { SomeLogic } from './';
  *
- * const { mount } = new LogicMounter(SomeLogic);
+ * const { mount, unmount } = new LogicMounter(SomeLogic);
  *
  * it('some test', () => {
  *   mount({ someValue: 'hello' });
+ *   unmount();
  * });
  */
 import { resetContext, Logic, LogicInput } from 'kea';
@@ -90,6 +91,7 @@ interface LogicFile {
 }
 export class LogicMounter {
   private logicFile: LogicFile;
+  private unmountFn!: Function;
 
   constructor(logicFile: LogicFile) {
     this.logicFile = logicFile;
@@ -109,6 +111,13 @@ export class LogicMounter {
   // Automatically reset context & mount the logic file
   public mount = (values?: object) => {
     this.resetContext(values);
-    this.logicFile.mount();
+    const unmount = this.logicFile.mount();
+    this.unmountFn = unmount;
+    return unmount; // Keep Kea behavior of returning an unmount fn from mount
+  };
+
+  // Also add unmount as a class method that can be destructured on init without becoming stale later
+  public unmount = () => {
+    this.unmountFn();
   };
 }
