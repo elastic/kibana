@@ -479,10 +479,6 @@ describe('Jira service', () => {
         comment: {
           comment: 'comment',
           commentId: 'comment-1',
-          createdBy: null,
-          createdAt: null,
-          updatedAt: null,
-          updatedBy: null,
         },
       });
 
@@ -507,10 +503,6 @@ describe('Jira service', () => {
         comment: {
           comment: 'comment',
           commentId: 'comment-1',
-          createdBy: null,
-          createdAt: null,
-          updatedAt: null,
-          updatedBy: null,
         },
       });
 
@@ -536,10 +528,6 @@ describe('Jira service', () => {
           comment: {
             comment: 'comment',
             commentId: 'comment-1',
-            createdBy: null,
-            createdAt: null,
-            updatedAt: null,
-            updatedBy: null,
           },
         })
       ).rejects.toThrow(

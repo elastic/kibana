@@ -97,10 +97,18 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
               >
                 {label !== undefined && value !== undefined && (
                   <>
-                    <EuiText size="xs" color="subdued">
-                      <p>{label}</p>
-                    </EuiText>
-                    <EuiBadge>{value}</EuiBadge>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          <p>{label}</p>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge>{value}</EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </>
                 )}
                 {label === undefined && (

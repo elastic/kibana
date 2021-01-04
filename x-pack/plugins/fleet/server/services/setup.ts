@@ -13,7 +13,6 @@ import {
   ensureInstalledDefaultPackages,
   ensurePackagesCompletedInstall,
 } from './epm/packages/install';
-import { ensureDefaultIndices } from './epm/kibana/index_pattern/install';
 import {
   packageToPackagePolicy,
   PackagePolicy,
@@ -58,7 +57,6 @@ async function createSetupSideEffects(
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient),
-    ensureDefaultIndices(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -139,7 +137,7 @@ export async function setupFleet(
       cluster: ['monitor', 'manage_api_key'],
       indices: [
         {
-          names: ['logs-*', 'metrics-*', 'events-*', '.ds-logs-*', '.ds-metrics-*', '.ds-events-*'],
+          names: ['logs-*', 'metrics-*', 'traces-*', '.ds-logs-*', '.ds-metrics-*', '.ds-traces-*'],
           privileges: ['write', 'create_index', 'indices:admin/auto_create'],
         },
       ],

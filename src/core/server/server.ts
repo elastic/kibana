@@ -166,6 +166,7 @@ export class Server {
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const coreUsageDataSetup = this.coreUsageData.setup({
+      http: httpSetup,
       metrics: metricsSetup,
       savedObjectsStartPromise: this.savedObjectsStartPromise,
     });

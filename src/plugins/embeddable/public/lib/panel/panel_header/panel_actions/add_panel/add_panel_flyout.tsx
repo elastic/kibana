@@ -153,7 +153,10 @@ export class AddPanelFlyout extends React.Component<Props, State> {
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>
-              <FormattedMessage id="embeddableApi.addPanel.Title" defaultMessage="Add panels" />
+              <FormattedMessage
+                id="embeddableApi.addPanel.Title"
+                defaultMessage="Add from library"
+              />
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>

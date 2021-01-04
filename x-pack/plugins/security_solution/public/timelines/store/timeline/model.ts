@@ -17,11 +17,11 @@ import type {
   TimelineType,
   TimelineStatus,
   RowRendererId,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
-
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
 /** Uniquely identifies a column */
@@ -41,13 +41,6 @@ export interface ColumnHeaderOptions {
   placeholder?: string;
   type?: string;
   width: number;
-}
-
-export enum TimelineTabs {
-  query = 'query',
-  graph = 'graph',
-  notes = 'notes',
-  pinned = 'pinned',
 }
 
 export interface TimelineModel {
@@ -118,6 +111,7 @@ export interface TimelineModel {
     start: string;
     end: string;
   };
+  showSaveModal?: boolean;
   savedQueryId?: string | null;
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;

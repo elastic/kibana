@@ -9,7 +9,7 @@ import { httpServiceMock } from 'src/core/server/mocks';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { verifyApiAccess } from '../lib/license_api_access';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { alertsClientMock } from '../alerts_client.mock';
 import { HealthStatus } from '../types';
@@ -45,7 +45,7 @@ describe('healthRoute', () => {
   it('registers the route', async () => {
     const router = httpServiceMock.createRouter();
 
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
     encryptedSavedObjects.usingEphemeralEncryptionKey = false;
     healthRoute(router, licenseState, encryptedSavedObjects);
@@ -58,7 +58,7 @@ describe('healthRoute', () => {
   it('queries the usage api', async () => {
     const router = httpServiceMock.createRouter();
 
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
     encryptedSavedObjects.usingEphemeralEncryptionKey = false;
     healthRoute(router, licenseState, encryptedSavedObjects);
@@ -87,7 +87,7 @@ describe('healthRoute', () => {
   it('evaluates whether Encrypted Saved Objects is using an ephemeral encryption key', async () => {
     const router = httpServiceMock.createRouter();
 
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
     encryptedSavedObjects.usingEphemeralEncryptionKey = true;
     healthRoute(router, licenseState, encryptedSavedObjects);
@@ -127,7 +127,7 @@ describe('healthRoute', () => {
   it('evaluates missing security info from the usage api to mean that the security plugin is disbled', async () => {
     const router = httpServiceMock.createRouter();
 
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
     encryptedSavedObjects.usingEphemeralEncryptionKey = false;
     healthRoute(router, licenseState, encryptedSavedObjects);
@@ -167,7 +167,7 @@ describe('healthRoute', () => {
   it('evaluates missing security http info from the usage api to mean that the security plugin is disbled', async () => {
     const router = httpServiceMock.createRouter();
 
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
     encryptedSavedObjects.usingEphemeralEncryptionKey = false;
     healthRoute(router, licenseState, encryptedSavedObjects);
@@ -207,7 +207,7 @@ describe('healthRoute', () => {
   it('evaluates security enabled, and missing ssl info from the usage api to mean that the user cannot generate keys', async () => {
     const router = httpServiceMock.createRouter();
 
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
     encryptedSavedObjects.usingEphemeralEncryptionKey = false;
     healthRoute(router, licenseState, encryptedSavedObjects);
@@ -247,7 +247,7 @@ describe('healthRoute', () => {
   it('evaluates security enabled, SSL info present but missing http info from the usage api to mean that the user cannot generate keys', async () => {
     const router = httpServiceMock.createRouter();
 
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
     encryptedSavedObjects.usingEphemeralEncryptionKey = false;
     healthRoute(router, licenseState, encryptedSavedObjects);
@@ -289,7 +289,7 @@ describe('healthRoute', () => {
   it('evaluates security and tls enabled to mean that the user can generate keys', async () => {
     const router = httpServiceMock.createRouter();
 
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup();
     encryptedSavedObjects.usingEphemeralEncryptionKey = false;
     healthRoute(router, licenseState, encryptedSavedObjects);

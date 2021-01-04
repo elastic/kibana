@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable } from '../../../embeddable/public';
 import { Trigger } from '.';
 import { Datatable } from '../../../expressions';
 
@@ -35,7 +34,9 @@ export const rowClickTrigger: Trigger<'ROW_CLICK_TRIGGER'> = {
 };
 
 export interface RowClickContext {
-  embeddable?: IEmbeddable;
+  // Need to make this unknown to prevent circular dependencies.
+  // Apps using this property will need to cast to `IEmbeddable`.
+  embeddable?: unknown;
   data: {
     /**
      * Row index, starting from 0, where user clicked.

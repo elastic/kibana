@@ -34,7 +34,6 @@ import { AggsStart, AggExpressionType } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 
 import { KibanaContext } from '../kibana_context_type';
-import { AddFilters } from './build_tabular_inspector_data';
 import { handleRequest, RequestHandlerParams } from './request_handler';
 
 const name = 'esaggs';
@@ -59,7 +58,6 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
 
 /** @internal */
 export interface EsaggsStartDependencies {
-  addFilters?: AddFilters;
   aggs: AggsStart;
   deserializeFieldFormat: FormatFactory;
   indexPatterns: IndexPatternsContract;

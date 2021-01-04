@@ -44,6 +44,7 @@ readonly links: {
         readonly aggs: {
             readonly date_histogram: string;
             readonly date_range: string;
+            readonly date_format_pattern: string;
             readonly filter: string;
             readonly filters: string;
             readonly geohash_grid: string;
@@ -101,12 +102,14 @@ readonly links: {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
-        readonly ml: {
-            readonly guide: string;
-            readonly anomalyDetection: string;
-            readonly anomalyDetectionJobs: string;
-            readonly dataFrameAnalytics: string;
-        };
+        readonly ml: Record<string, string>;
+        readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
+        readonly apis: Record<string, string>;
+        readonly observability: Record<string, string>;
+        readonly alerting: Record<string, string>;
+        readonly maps: Record<string, string>;
+        readonly monitoring: Record<string, string>;
+        readonly security: Record<string, string>;
     };
 ```

@@ -39,7 +39,7 @@ export const fieldsRoutes = (framework: Framework) => {
           return res.customError({
             body: err.output.payload,
             statusCode: err.output.statusCode,
-            headers: err.output.headers,
+            headers: err.output.headers as { [key: string]: string },
           });
         }
 

@@ -255,6 +255,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       ],
       state: [...commonMonitorStateI18, ...commonStateTranslations],
     },
+    minimumLicenseRequired: 'basic',
     async executor({
       options: {
         params: rawParams,

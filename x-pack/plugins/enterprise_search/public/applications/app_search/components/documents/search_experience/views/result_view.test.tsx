@@ -9,6 +9,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ResultView } from '.';
+import { SchemaTypes } from '../../../../../shared/types';
 import { Result } from '../../../result/result';
 
 describe('ResultView', () => {
@@ -21,14 +22,24 @@ describe('ResultView', () => {
     },
     _meta: {
       id: '1',
-      scopedId: '1',
       score: 100,
       engine: 'my-engine',
     },
   };
 
+  const schema = {
+    title: 'string' as SchemaTypes,
+  };
+
   it('renders', () => {
-    const wrapper = shallow(<ResultView result={result} />);
-    expect(wrapper.find(Result).exists()).toBe(true);
+    const wrapper = shallow(
+      <ResultView result={result} schemaForTypeHighlights={schema} isMetaEngine={true} />
+    );
+    expect(wrapper.find(Result).props()).toEqual({
+      result,
+      shouldLinkToDetailPage: true,
+      schemaForTypeHighlights: schema,
+      isMetaEngine: true,
+    });
   });
 });

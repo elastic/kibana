@@ -321,5 +321,7 @@ function getAlertType(actionVariables: ActionVariables): AlertType {
     recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
     authorizedConsumers: {},
     producer: ALERTS_FEATURE_ID,
+    minimumLicenseRequired: 'basic',
+    enabledInLicense: true,
   };
 }

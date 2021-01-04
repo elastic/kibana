@@ -38,6 +38,12 @@ export const schema: FormSchema<FormInternal> = {
           defaultMessage: 'Enable rollover',
         }),
       },
+      isUsingDefaultRollover: {
+        defaultValue: true,
+        label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.isUsingDefaultRollover', {
+          defaultMessage: 'Use recommended defaults',
+        }),
+      },
       maxStorageSizeUnit: {
         defaultValue: 'gb',
       },
@@ -47,6 +53,10 @@ export const schema: FormSchema<FormInternal> = {
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,
         helpText: i18nTexts.editPolicy.bestCompressionFieldHelpText,
+      },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
     warm: {
@@ -75,6 +85,10 @@ export const schema: FormSchema<FormInternal> = {
       },
       allocationNodeAttribute: {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+      readonlyEnabled: {
+        defaultValue: false,
+        label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
     },
     cold: {

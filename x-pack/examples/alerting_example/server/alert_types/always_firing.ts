@@ -49,6 +49,7 @@ export const alertType: AlertType<
     { id: 'large', name: 'Large t-shirt' },
   ],
   defaultActionGroupId: DEFAULT_ACTION_GROUP,
+  minimumLicenseRequired: 'basic',
   async executor({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },

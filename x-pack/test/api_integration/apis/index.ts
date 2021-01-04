@@ -10,6 +10,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', function () {
     this.tags('ciGroup6');
 
+    loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./es'));
     loadTestFile(require.resolve('./security'));
     loadTestFile(require.resolve('./spaces'));

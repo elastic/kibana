@@ -59,6 +59,7 @@ export function registerErrorCountAlertType({
       ],
     },
     producer: 'apm',
+    minimumLicenseRequired: 'basic',
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
       const alertParams = params;

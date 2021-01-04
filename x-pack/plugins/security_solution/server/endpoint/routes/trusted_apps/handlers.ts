@@ -19,6 +19,7 @@ import {
   createTrustedApp,
   deleteTrustedApp,
   getTrustedAppsList,
+  getTrustedAppsSummary,
   MissingTrustedAppException,
 } from './service';
 
@@ -79,6 +80,23 @@ export const getTrustedAppsCreateRouteHandler = (
     try {
       return res.ok({
         body: await createTrustedApp(exceptionListClientFromContext(context), req.body),
+      });
+    } catch (error) {
+      logger.error(error);
+      return res.internalError({ body: error });
+    }
+  };
+};
+
+export const getTrustedAppsSummaryRouteHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<undefined, undefined, PostTrustedAppCreateRequest> => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
+  return async (context, req, res) => {
+    try {
+      return res.ok({
+        body: await getTrustedAppsSummary(exceptionListClientFromContext(context)),
       });
     } catch (error) {
       logger.error(error);

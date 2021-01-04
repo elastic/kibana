@@ -32,7 +32,7 @@ export async function getAnomalySeries({
   setup: Setup & SetupTimeRange;
   logger: Logger;
 }) {
-  const timeseriesDates = latencyTimeseries?.avg?.map(({ x }) => x);
+  const timeseriesDates = latencyTimeseries?.map(({ x }) => x);
 
   /*
    * don't fetch:

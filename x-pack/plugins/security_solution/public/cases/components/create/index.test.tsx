@@ -8,11 +8,13 @@ import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { TestProviders } from '../../../common/mock';
 
+import { CasePostRequest } from '../../../../../case/common/api';
+import { TestProviders } from '../../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
+import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { connectorsMock } from '../../containers/configure/mock';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
@@ -20,11 +22,13 @@ import { useGetIncidentTypes } from '../settings/resilient/use_get_incident_type
 import { useGetSeverity } from '../settings/resilient/use_get_severity';
 import { useGetIssueTypes } from '../settings/jira/use_get_issue_types';
 import { useGetFieldsByIssueType } from '../settings/jira/use_get_fields_by_issue_type';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { Create } from '.';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
+jest.mock('../../containers/configure/use_configure');
 jest.mock('../settings/resilient/use_get_incident_types');
 jest.mock('../settings/resilient/use_get_severity');
 jest.mock('../settings/jira/use_get_issue_types');
@@ -33,6 +37,7 @@ jest.mock('../settings/jira/use_get_single_issue');
 jest.mock('../settings/jira/use_get_issues');
 
 const useConnectorsMock = useConnectors as jest.Mock;
+const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
@@ -41,7 +46,7 @@ const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const postCase = jest.fn();
 
 const sampleTags = ['coke', 'pepsi'];
-const sampleData = {
+const sampleData: CasePostRequest = {
   description: 'what a great description',
   tags: sampleTags,
   title: 'what a cool title',
@@ -50,6 +55,9 @@ const sampleData = {
     id: 'none',
     name: 'none',
     type: ConnectorTypes.none,
+  },
+  settings: {
+    syncAlerts: true,
   },
 };
 
@@ -158,6 +166,7 @@ describe('Create case', () => {
     jest.resetAllMocks();
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useConnectorsMock.mockReturnValue(sampleConnectorData);
+    useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
@@ -262,6 +271,90 @@ describe('Create case', () => {
           wrapper.find(`[data-test-subj="create-case-loading-spinner"]`).exists()
         ).toBeTruthy();
       });
+    });
+
+    it('it should select the default connector set in the configuration', async () => {
+      useCaseConfigureMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        connector: {
+          id: 'servicenow-1',
+          name: 'SN',
+          type: ConnectorTypes.servicenow,
+          fields: null,
+        },
+        persistLoading: false,
+      }));
+
+      useConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        connectors: connectorsMock,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+
+      await fillForm(wrapper);
+      wrapper.update();
+
+      await act(async () => {
+        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+      });
+
+      await waitFor(() =>
+        expect(postCase).toBeCalledWith({
+          ...sampleData,
+          connector: {
+            fields: {
+              impact: null,
+              severity: null,
+              urgency: null,
+            },
+            id: 'servicenow-1',
+            name: 'My Connector',
+            type: '.servicenow',
+          },
+        })
+      );
+    });
+
+    it('it should default to none if the default connector does not exist in connectors', async () => {
+      useCaseConfigureMock.mockImplementation(() => ({
+        ...useCaseConfigureResponse,
+        connector: {
+          id: 'not-exist',
+          name: 'SN',
+          type: ConnectorTypes.servicenow,
+          fields: null,
+        },
+        persistLoading: false,
+      }));
+
+      useConnectorsMock.mockReturnValue({
+        ...sampleConnectorData,
+        connectors: connectorsMock,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <Router history={mockHistory}>
+            <Create />
+          </Router>
+        </TestProviders>
+      );
+
+      await fillForm(wrapper);
+      wrapper.update();
+
+      await act(async () => {
+        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
+      });
+
+      await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
     });
   });
 

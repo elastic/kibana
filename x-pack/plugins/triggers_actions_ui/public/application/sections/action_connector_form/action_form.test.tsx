@@ -174,9 +174,7 @@ describe('action_form', () => {
           id: '.servicenow',
           actionTypeId: '.servicenow',
           name: 'Non consumer connector',
-          config: {
-            isCaseOwned: true,
-          },
+          config: {},
           isPreconfigured: false,
         },
         {

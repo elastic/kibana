@@ -8,7 +8,6 @@
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
 import {
-  ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
   defaultPackages,
@@ -65,6 +64,7 @@ export enum ElasticsearchAssetType {
   indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
   transform = 'transform',
+  dataStreamIlmPolicy = 'data_stream_ilm_policy',
 }
 
 export type DataType = typeof dataTypes;
@@ -207,6 +207,8 @@ export type ElasticsearchAssetTypeToParts = Record<
 
 export interface RegistryDataStream {
   type: string;
+  ilm_policy?: string;
+  hidden?: boolean;
   dataset: string;
   title: string;
   release: string;
@@ -266,7 +268,6 @@ export type PackageInfo =
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
-  package_assets: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
@@ -296,10 +297,6 @@ export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
 };
 
-export type PackageAssetReference = Pick<SavedObjectReference, 'id'> & {
-  type: typeof ASSETS_SAVED_OBJECT_TYPE;
-};
-
 export type RequiredPackage = typeof requiredPackages;
 
 export type DefaultPackages = typeof defaultPackages;
@@ -319,7 +316,7 @@ export interface IndexTemplate {
     mappings: any;
     aliases: object;
   };
-  data_stream: object;
+  data_stream: { hidden?: boolean };
   composed_of: string[];
   _meta: object;
 }

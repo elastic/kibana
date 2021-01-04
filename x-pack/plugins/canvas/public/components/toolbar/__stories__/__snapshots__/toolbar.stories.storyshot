@@ -15,6 +15,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
       >
         <button
           className="euiButtonEmpty euiButtonEmpty--text"
+          disabled={false}
           onClick={[Function]}
           type="button"
         >
@@ -60,6 +61,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
       >
         <button
           className="euiButtonEmpty euiButtonEmpty--text"
+          disabled={false}
           onClick={[Function]}
           type="button"
         >
@@ -101,6 +103,7 @@ exports[`Storyshots components/Toolbar element selected 1`] = `
         <button
           className="euiButtonEmpty euiButtonEmpty--text"
           data-test-subj="canvasExpressionEditorButton"
+          disabled={false}
           onClick={[Function]}
           type="button"
         >
@@ -140,6 +143,7 @@ exports[`Storyshots components/Toolbar no element selected 1`] = `
       >
         <button
           className="euiButtonEmpty euiButtonEmpty--text"
+          disabled={false}
           onClick={[Function]}
           type="button"
         >
@@ -185,6 +189,7 @@ exports[`Storyshots components/Toolbar no element selected 1`] = `
       >
         <button
           className="euiButtonEmpty euiButtonEmpty--text"
+          disabled={false}
           onClick={[Function]}
           type="button"
         >

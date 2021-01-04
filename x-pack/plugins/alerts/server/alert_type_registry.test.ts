@@ -5,17 +5,27 @@
  */
 
 import { TaskRunnerFactory } from './task_runner';
-import { AlertTypeRegistry } from './alert_type_registry';
+import { AlertTypeRegistry, ConstructorOptions } from './alert_type_registry';
 import { AlertType } from './types';
 import { taskManagerMock } from '../../task_manager/server/mocks';
+import { ILicenseState } from './lib/license_state';
+import { licenseStateMock } from './lib/license_state.mock';
+import { licensingMock } from '../../licensing/server/mocks';
+let mockedLicenseState: jest.Mocked<ILicenseState>;
+let alertTypeRegistryParams: ConstructorOptions;
 
 const taskManager = taskManagerMock.createSetup();
-const alertTypeRegistryParams = {
-  taskManager,
-  taskRunnerFactory: new TaskRunnerFactory(),
-};
 
-beforeEach(() => jest.resetAllMocks());
+beforeEach(() => {
+  jest.resetAllMocks();
+  mockedLicenseState = licenseStateMock.create();
+  alertTypeRegistryParams = {
+    taskManager,
+    taskRunnerFactory: new TaskRunnerFactory(),
+    licenseState: mockedLicenseState,
+    licensing: licensingMock.createSetup(),
+  };
+});
 
 describe('has()', () => {
   test('returns false for unregistered alert types', () => {
@@ -35,6 +45,7 @@ describe('has()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -44,7 +55,7 @@ describe('has()', () => {
 
 describe('register()', () => {
   test('throws if AlertType Id contains invalid characters', () => {
-    const alertType = {
+    const alertType: AlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -54,6 +65,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -75,7 +87,7 @@ describe('register()', () => {
   });
 
   test('throws if AlertType Id isnt a string', () => {
-    const alertType = {
+    const alertType: AlertType = {
       id: (123 as unknown) as string,
       name: 'Test',
       actionGroups: [
@@ -85,6 +97,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -96,7 +109,7 @@ describe('register()', () => {
   });
 
   test('throws if AlertType action groups contains reserved group id', () => {
-    const alertType = {
+    const alertType: AlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -110,6 +123,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -123,7 +137,7 @@ describe('register()', () => {
   });
 
   test('allows an AlertType to specify a custom recovery group', () => {
-    const alertType = {
+    const alertType: AlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -139,6 +153,7 @@ describe('register()', () => {
       },
       executor: jest.fn(),
       producer: 'alerts',
+      minimumLicenseRequired: 'basic',
     };
     const registry = new AlertTypeRegistry(alertTypeRegistryParams);
     registry.register(alertType);
@@ -157,7 +172,7 @@ describe('register()', () => {
   });
 
   test('throws if the custom recovery group is contained in the AlertType action groups', () => {
-    const alertType = {
+    const alertType: AlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -175,6 +190,7 @@ describe('register()', () => {
         name: 'Back To Awesome',
       },
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -188,7 +204,7 @@ describe('register()', () => {
   });
 
   test('registers the executor with the task manager', () => {
-    const alertType = {
+    const alertType: AlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -198,6 +214,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -227,6 +244,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     };
@@ -248,6 +266,7 @@ describe('register()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -262,6 +281,7 @@ describe('register()', () => {
           },
         ],
         defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
         executor: jest.fn(),
         producer: 'alerts',
       })
@@ -282,6 +302,7 @@ describe('get()', () => {
         },
       ],
       defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -306,6 +327,7 @@ describe('get()', () => {
         "defaultActionGroupId": "default",
         "executor": [MockFunction],
         "id": "test",
+        "minimumLicenseRequired": "basic",
         "name": "Test",
         "producer": "alerts",
         "recoveryActionGroup": Object {
@@ -343,6 +365,7 @@ describe('list()', () => {
         },
       ],
       defaultActionGroupId: 'testActionGroup',
+      minimumLicenseRequired: 'basic',
       executor: jest.fn(),
       producer: 'alerts',
     });
@@ -366,7 +389,9 @@ describe('list()', () => {
             "state": Array [],
           },
           "defaultActionGroupId": "testActionGroup",
+          "enabledInLicense": false,
           "id": "test",
+          "minimumLicenseRequired": "basic",
           "name": "Test",
           "producer": "alerts",
           "recoveryActionGroup": Object {
@@ -413,12 +438,50 @@ describe('list()', () => {
   });
 });
 
+describe('ensureAlertTypeEnabled', () => {
+  let alertTypeRegistry: AlertTypeRegistry;
+
+  beforeEach(() => {
+    alertTypeRegistry = new AlertTypeRegistry(alertTypeRegistryParams);
+    alertTypeRegistry.register({
+      id: 'test',
+      name: 'Test',
+      actionGroups: [
+        {
+          id: 'default',
+          name: 'Default',
+        },
+      ],
+      defaultActionGroupId: 'default',
+      executor: jest.fn(),
+      producer: 'alerts',
+      minimumLicenseRequired: 'basic',
+      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+    });
+  });
+
+  test('should call ensureLicenseForAlertType on the license state', async () => {
+    alertTypeRegistry.ensureAlertTypeEnabled('test');
+    expect(mockedLicenseState.ensureLicenseForAlertType).toHaveBeenCalled();
+  });
+
+  test('should throw when ensureLicenseForAlertType throws', async () => {
+    mockedLicenseState.ensureLicenseForAlertType.mockImplementation(() => {
+      throw new Error('Fail');
+    });
+    expect(() =>
+      alertTypeRegistry.ensureAlertTypeEnabled('test')
+    ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+  });
+});
+
 function alertTypeWithVariables(id: string, context: string, state: string): AlertType {
-  const baseAlert = {
+  const baseAlert: AlertType = {
     id,
     name: `${id}-name`,
     actionGroups: [],
     defaultActionGroupId: id,
+    minimumLicenseRequired: 'basic',
     async executor() {},
     producer: 'alerts',
   };

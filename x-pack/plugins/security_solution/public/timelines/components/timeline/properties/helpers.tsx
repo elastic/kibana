@@ -4,16 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiToolTip,
-  EuiTextArea,
-} from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonIcon, EuiToolTip, EuiTextArea } from '@elastic/eui';
 import { pick } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
@@ -77,8 +70,8 @@ AddToFavoritesButtonComponent.displayName = 'AddToFavoritesButtonComponent';
 export const AddToFavoritesButton = React.memo(AddToFavoritesButtonComponent);
 
 interface DescriptionProps {
+  autoFocus?: boolean;
   timelineId: string;
-  isTextArea?: boolean;
   disableAutoSave?: boolean;
   disableTooltip?: boolean;
   disabled?: boolean;
@@ -86,8 +79,8 @@ interface DescriptionProps {
 
 export const Description = React.memo<DescriptionProps>(
   ({
+    autoFocus = false,
     timelineId,
-    isTextArea = false,
     disableAutoSave = false,
     disableTooltip = false,
     disabled = false,
@@ -113,28 +106,21 @@ export const Description = React.memo<DescriptionProps>(
     );
 
     const inputField = useMemo(
-      () =>
-        isTextArea ? (
-          <EuiTextArea
-            data-test-subj="timeline-description-textarea"
-            aria-label={i18n.TIMELINE_DESCRIPTION}
-            onChange={onDescriptionChanged}
-            placeholder={i18n.DESCRIPTION}
-            value={description}
-            disabled={disabled}
-          />
-        ) : (
-          <EuiFieldText
-            aria-label={i18n.TIMELINE_DESCRIPTION}
-            data-test-subj="timeline-description-input"
-            onChange={onDescriptionChanged}
-            placeholder={i18n.DESCRIPTION}
-            spellCheck={true}
-            value={description}
-          />
-        ),
-      [description, isTextArea, onDescriptionChanged, disabled]
+      () => (
+        <EuiTextArea
+          autoFocus={autoFocus}
+          data-test-subj="timeline-description-textarea"
+          aria-label={i18n.TIMELINE_DESCRIPTION}
+          fullWidth
+          onChange={onDescriptionChanged}
+          placeholder={i18n.DESCRIPTION}
+          value={description}
+          disabled={disabled}
+        />
+      ),
+      [autoFocus, description, onDescriptionChanged, disabled]
     );
+
     return (
       <DescriptionContainer data-test-subj="description-container">
         {disableTooltip ? (
@@ -170,7 +156,6 @@ export const Name = React.memo<NameProps>(
     timelineId,
   }) => {
     const dispatch = useDispatch();
-    const timelineNameRef = useRef<HTMLInputElement>(null);
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
     const { title, timelineType } = useDeepEqualSelector((state) =>
@@ -185,15 +170,10 @@ export const Name = React.memo<NameProps>(
       [dispatch, timelineId, disableAutoSave]
     );
 
-    useEffect(() => {
-      if (autoFocus && timelineNameRef && timelineNameRef.current) {
-        timelineNameRef.current.focus();
-      }
-    }, [autoFocus]);
-
     const nameField = useMemo(
       () => (
         <NameField
+          autoFocus={autoFocus}
           aria-label={i18n.TIMELINE_TITLE}
           data-test-subj="timeline-title-input"
           disabled={disabled}
@@ -203,10 +183,9 @@ export const Name = React.memo<NameProps>(
           }
           spellCheck={true}
           value={title}
-          inputRef={timelineNameRef}
         />
       ),
-      [handleChange, timelineType, title, disabled]
+      [autoFocus, handleChange, timelineType, title, disabled]
     );
 
     return (
@@ -246,6 +225,7 @@ export const NewTimeline = React.memo<NewTimelineProps>(
 NewTimeline.displayName = 'NewTimeline';
 
 interface NotesButtonProps {
+  ariaLabel?: string;
   showNotes: boolean;
   toggleShowNotes: () => void;
   toolTip?: string;
@@ -253,32 +233,46 @@ interface NotesButtonProps {
 }
 
 interface SmallNotesButtonProps {
+  ariaLabel?: string;
   toggleShowNotes: () => void;
   timelineType: TimelineTypeLiteral;
 }
 
-const SmallNotesButton = React.memo<SmallNotesButtonProps>(({ toggleShowNotes, timelineType }) => {
-  const isTemplate = timelineType === TimelineType.template;
+export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
 
-  return (
-    <EuiButtonIcon
-      aria-label={i18n.NOTES}
-      data-test-subj="timeline-notes-button-small"
-      iconType="editorComment"
-      onClick={toggleShowNotes}
-      isDisabled={isTemplate}
-    />
-  );
-});
+const SmallNotesButton = React.memo<SmallNotesButtonProps>(
+  ({ ariaLabel = i18n.NOTES, toggleShowNotes, timelineType }) => {
+    const isTemplate = timelineType === TimelineType.template;
+
+    return (
+      <EuiButtonIcon
+        aria-label={ariaLabel}
+        className={NOTES_BUTTON_CLASS_NAME}
+        data-test-subj="timeline-notes-button-small"
+        iconType="editorComment"
+        onClick={toggleShowNotes}
+        isDisabled={isTemplate}
+      />
+    );
+  }
+);
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 export const NotesButton = React.memo<NotesButtonProps>(
-  ({ showNotes, timelineType, toggleShowNotes, toolTip }) =>
+  ({ ariaLabel, showNotes, timelineType, toggleShowNotes, toolTip }) =>
     showNotes ? (
-      <SmallNotesButton toggleShowNotes={toggleShowNotes} timelineType={timelineType} />
+      <SmallNotesButton
+        ariaLabel={ariaLabel}
+        toggleShowNotes={toggleShowNotes}
+        timelineType={timelineType}
+      />
     ) : (
       <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
-        <SmallNotesButton toggleShowNotes={toggleShowNotes} timelineType={timelineType} />
+        <SmallNotesButton
+          ariaLabel={ariaLabel}
+          toggleShowNotes={toggleShowNotes}
+          timelineType={timelineType}
+        />
       </EuiToolTip>
     )
 );

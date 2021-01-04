@@ -98,6 +98,12 @@ interface AppReceivedNewExternalProperties {
      * Indices that the backend will use to find the document.
      */
     indices: string[];
+
+    shouldUpdate: boolean;
+    filters: {
+      from?: string;
+      to?: string;
+    };
   };
 }
 
