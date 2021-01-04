@@ -15,11 +15,11 @@ import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers
 import { MonitorPageTitle } from '../../monitor/monitor_title';
 
 interface Props {
-  showTabs?: boolean;
-  showDatePicker?: boolean;
-  showMonitorTitle?: boolean;
   includeSpacer?: boolean;
   showCertificateRefreshBtn?: boolean;
+  showDatePicker?: boolean;
+  showMonitorTitle?: boolean;
+  showTabs?: boolean;
 }
 
 const StyledPicker = styled(EuiFlexItem)`
@@ -39,11 +39,11 @@ const StyledPicker = styled(EuiFlexItem)`
 `;
 
 export const PageHeader = ({
-  showTabs = false,
-  showDatePicker = false,
-  showMonitorTitle = false,
   includeSpacer = false,
   showCertificateRefreshBtn = false,
+  showDatePicker = false,
+  showMonitorTitle = false,
+  showTabs = false,
 }: Props) => {
   return (
     <>
