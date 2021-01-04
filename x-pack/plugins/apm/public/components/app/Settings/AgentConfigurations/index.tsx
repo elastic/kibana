@@ -73,11 +73,18 @@ function CreateConfigurationButton() {
   const { basePath } = core.http;
   const { search } = useLocation();
   const href = createAgentConfigurationHref(search, basePath);
+  const canSave = core.application.capabilities.apm.save;
   return (
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" fill iconType="plusInCircle" href={href}>
+          <EuiButton
+            color="primary"
+            fill
+            iconType="plusInCircle"
+            href={href}
+            isDisabled={!canSave}
+          >
             {i18n.translate('xpack.apm.agentConfig.createConfigButtonLabel', {
               defaultMessage: 'Create configuration',
             })}
