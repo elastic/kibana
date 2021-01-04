@@ -61,7 +61,7 @@ You have two options for exporting saved objects.
 * Click *Export x objects*, and export objects by type.
 
 This action creates an NDJSON with all your saved objects.  By default,
-the NDJSON includes related objects. Exported dashboards include their associated index patterns.
+the NDJSON includes related child objects. Exported dashboards include their associated index patterns.
 
 [float]
 [role="xpack"]
@@ -73,7 +73,7 @@ and select *Copy to space*. From here, you can select the spaces in which to cop
 You can also select whether to automatically overwrite any conflicts in the target spaces, or
 resolve them manually.
 
-WARNING: The copy operation automatically includes related objects. If you don't want this behavior,
+WARNING: The copy operation automatically includes related child objects. If you don't want this behavior,
 use the <<spaces-api-copy-saved-objects, copy saved objects to space API>> instead.
 
 
