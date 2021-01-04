@@ -84,3 +84,19 @@ export default {
 export const Default: Story = () => {
   return <LogStream height={600} startTimestamp={startTimestamp} endTimestamp={endTimestamp} />;
 };
+
+export const CustomColumns: Story = () => {
+  return (
+    <LogStream
+      height={600}
+      startTimestamp={startTimestamp}
+      endTimestamp={endTimestamp}
+      columns={[
+        { type: 'timestamp' },
+        { type: 'field', field: 'host.name' },
+        { type: 'field', field: 'log.file.path' },
+        { type: 'message' },
+      ]}
+    />
+  );
+};
