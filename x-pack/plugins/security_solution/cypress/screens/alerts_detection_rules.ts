@@ -26,6 +26,8 @@ export const FIFTH_RULE = 4;
 
 export const FIRST_RULE = 0;
 
+export const FOURTH_RULE = 3;
+
 export const LOAD_PREBUILT_RULES_BTN = '[data-test-subj="load-prebuilt-rules"]';
 
 export const LOADING_INITIAL_PREBUILT_RULES_TABLE =
