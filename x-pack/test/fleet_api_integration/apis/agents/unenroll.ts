@@ -17,7 +17,8 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
 
-  describe('fleet_unenroll_agent', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/87166
+  describe.skip('fleet_unenroll_agent', () => {
     skipIfNoDockerRegistry(providerContext);
     let accessAPIKeyId: string;
     let outputAPIKeyId: string;

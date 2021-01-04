@@ -43,6 +43,7 @@ export interface EditorFrameProps {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  searchSessionId: string;
   initialContext?: VisualizeFieldContext;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
@@ -453,6 +454,7 @@ export interface FramePublicAPI {
   dateRange: DateRange;
   query: Query;
   filters: Filter[];
+  searchSessionId: string;
 
   /**
    * A map of all available palettes (keys being the ids).
