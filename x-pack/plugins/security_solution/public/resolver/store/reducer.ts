@@ -11,6 +11,7 @@ import { cameraReducer } from './camera/reducer';
 import { dataReducer } from './data/reducer';
 import { ResolverAction } from './actions';
 import { ResolverState, ResolverUIState } from '../types';
+import { panAnimationDuration } from './camera/scaling_constants';
 import { nodePosition } from '../models/indexed_process_tree/isometric_taxi_layout';
 
 const uiReducer: Reducer<ResolverUIState, ResolverAction> = (
@@ -57,8 +58,6 @@ const concernReducers = combineReducers({
   data: dataReducer,
   ui: uiReducer,
 });
-const animationDuration = 1000;
-
 export const resolverReducer: Reducer<ResolverState, ResolverAction> = (state, action) => {
   const nextState = concernReducers(state, action);
   if (action.type === 'userSelectedResolverNode' || action.type === 'userFocusedOnResolverNode') {
@@ -66,7 +65,12 @@ export const resolverReducer: Reducer<ResolverState, ResolverAction> = (state, a
     if (position) {
       const withAnimation: ResolverState = {
         ...nextState,
-        camera: animatePanning(nextState.camera, action.payload.time, position, animationDuration),
+        camera: animatePanning(
+          nextState.camera,
+          action.payload.time,
+          position,
+          panAnimationDuration
+        ),
       };
       return withAnimation;
     } else {

@@ -8,9 +8,9 @@ import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_
 import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
 import { urlSearch } from '../test_utilities/url_search';
+import { panAnimationDuration } from '../store/camera/scaling_constants';
 
 const resolverComponentInstanceID = 'useSyncSelectedNodeTestInstanceId';
-const animationDuration = 1000;
 
 describe(`Resolver: when analyzing a tree with 0 ancestors, 2 children, 2 related registry events, and 1 event of each other category on the origin, with the component instance ID: ${resolverComponentInstanceID}, and the origin node selected`, () => {
   let simulator: Simulator;
@@ -61,7 +61,7 @@ describe(`Resolver: when analyzing a tree with 0 ancestors, 2 children, 2 relate
 
       if (firstChildPrimaryButton) {
         firstChildPrimaryButton.simulate('click', { button: 0 });
-        simulator.runAnimationFramesTimeFromNow(animationDuration);
+        simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
       }
     });
 
@@ -84,7 +84,7 @@ describe(`Resolver: when analyzing a tree with 0 ancestors, 2 children, 2 relate
     describe('when the browser is returned to the previous url where the origin was selected by triggering the back button', () => {
       beforeEach(async () => {
         memoryHistory.goBack();
-        simulator.runAnimationFramesTimeFromNow(animationDuration);
+        simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
       });
 
       it('should show the origin node as the selected node', async () => {
@@ -109,11 +109,11 @@ describe(`Resolver: when analyzing a tree with 0 ancestors, 2 children, 2 relate
       beforeEach(async () => {
         // Return back to the origin being selected
         memoryHistory.goBack();
-        simulator.runAnimationFramesTimeFromNow(animationDuration);
+        simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
 
         // Then hit the 'forward' button to return back to the first child being selected
         memoryHistory.goForward();
-        simulator.runAnimationFramesTimeFromNow(animationDuration);
+        simulator.runAnimationFramesTimeFromNow(panAnimationDuration);
       });
 
       it('should show the firstChild node as the selected node', async () => {
