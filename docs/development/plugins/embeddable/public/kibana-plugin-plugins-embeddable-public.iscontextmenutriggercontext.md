@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-isContextMenuTriggerContext: (context: unknown) => context is EmbeddableContext
+isContextMenuTriggerContext: (context: unknown) => context is EmbeddableContext<IEmbeddable<import("..").EmbeddableInput, import("..").EmbeddableOutput>>
 ```
