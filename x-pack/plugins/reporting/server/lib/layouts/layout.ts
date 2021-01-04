@@ -33,10 +33,9 @@ export abstract class Layout {
     pageSizeParams: PageSizeParams
   ): CustomPageSize | PredefinedPageSize;
 
-  public abstract getViewport(itemsCount: number): ViewZoomWidthHeight | null;
-
   public abstract getBrowserZoom(): number;
 
+  // This is to set an initial window size for launching the browser
   public abstract getBrowserViewport(): Size;
 
   public abstract getCssOverridesPath(): string | undefined;

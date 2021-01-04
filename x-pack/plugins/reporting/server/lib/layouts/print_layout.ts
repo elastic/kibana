@@ -40,14 +40,6 @@ export class PrintLayout extends Layout implements LayoutInstance {
     return this.captureConfig.zoom;
   }
 
-  public getViewport(itemsCount: number) {
-    return {
-      zoom: this.captureConfig.zoom,
-      width: this.captureConfig.viewport.width,
-      height: this.captureConfig.viewport.height * itemsCount,
-    };
-  }
-
   public async positionElements(
     browser: HeadlessChromiumDriver,
     logger: LevelLogger

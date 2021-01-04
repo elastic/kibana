@@ -346,7 +346,6 @@ describe('Screenshot Observable Pipeline', () => {
       mockBrowserDriverFactory = await createMockBrowserDriverFactory(logger, {
         evaluate: mockBrowserEvaluate,
       });
-      mockLayout.getViewport = () => null;
 
       // test
       const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);

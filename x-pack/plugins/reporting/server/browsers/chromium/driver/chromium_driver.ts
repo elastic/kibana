@@ -27,7 +27,7 @@ interface WaitForSelectorOpts {
 
 interface EvaluateOpts {
   fn: EvaluateFn;
-  args?: SerializableOrJSHandle[];
+  args: SerializableOrJSHandle[];
 }
 
 interface EvaluateMetaOpts {

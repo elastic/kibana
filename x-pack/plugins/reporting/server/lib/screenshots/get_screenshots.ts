@@ -36,6 +36,7 @@ export const getScreenshots = async (
     const [height, width] = await browser.evaluate(
       {
         fn: () => [document.body.clientHeight, document.body.clientWidth],
+        args: [],
       },
       { context: 'resize for screenshot' },
       logger
@@ -43,11 +44,11 @@ export const getScreenshots = async (
 
     logger.debug(`Browser viewport: height: ${height}, width: ${width}`);
 
+    // Resize the viewport if the clip area is not visible
     if (
       height < item.position.boundingClientRect.height + item.position.boundingClientRect.top ||
       width < item.position.boundingClientRect.width + item.position.boundingClientRect.left
     ) {
-      // Resize viewport
       await browser.setViewport(
         {
           height: item.position.boundingClientRect.height + item.position.boundingClientRect.top,
