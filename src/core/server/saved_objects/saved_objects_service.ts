@@ -215,11 +215,11 @@ export interface SavedObjectsServiceStart {
    */
   createSerializer: () => SavedObjectsSerializer;
   /**
-   * Creates a {@link ISavedObjectsExporter | exporter} bound to given client.
+   * Creates an {@link ISavedObjectsExporter | exporter} bound to given client.
    */
   createExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
   /**
-   * Creates a {@link ISavedObjectsImporter | importer} bound to given client.
+   * Creates an {@link ISavedObjectsImporter | importer} bound to given client.
    */
   createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
   /**

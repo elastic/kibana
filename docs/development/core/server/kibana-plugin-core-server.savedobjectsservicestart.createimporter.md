@@ -4,7 +4,7 @@
 
 ## SavedObjectsServiceStart.createImporter property
 
-Creates a [importer](./kibana-plugin-core-server.isavedobjectsimporter.md) bound to given client.
+Creates an [importer](./kibana-plugin-core-server.isavedobjectsimporter.md) bound to given client.
 
 <b>Signature:</b>
 
