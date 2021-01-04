@@ -18,11 +18,21 @@
  */
 
 import * as React from 'react';
+import { monaco } from '@kbn/monaco';
+import { CodeEditor, Props as CodeEditorProps } from '../code_editor/code_editor';
+
+monaco.languages.setMonarchTokensProvider('handlebars_url', {
+  tokenizer: {
+    root: [[/\{\{[^\}]+\}\}/, 'comment']],
+  },
+});
+monaco.languages.register({ id: 'handlebars_url' });
 
 export interface UrlTemplateEditorProps {
   value: string;
+  onChange: CodeEditorProps['onChange'];
 }
 
-export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({ value }) => {
-  return <div>{value}</div>;
+export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({ value, onChange }) => {
+  return <CodeEditor languageId="handlebars_url" height={250} value={value} onChange={onChange} />;
 };

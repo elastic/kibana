@@ -18,10 +18,10 @@
  */
 
 import { storiesOf } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import React from 'react';
+import { UrlTemplateEditor } from './url_template_editor';
 
-storiesOf('UrlTemplateEditor', module).add('default', () => <div>test...</div>, {
-  info: {
-    text: 'Info description goes here....',
-  },
-});
+storiesOf('UrlTemplateEditor', module).add('default', () => (
+  <UrlTemplateEditor value={'http://elastic.co/{{event.value}}'} onChange={action('onChange')} />
+));
