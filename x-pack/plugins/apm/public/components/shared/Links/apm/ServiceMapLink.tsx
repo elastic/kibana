@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
+import { APMLinkExtendProps, useAPMHref } from './APMLink';
 
 function pathFor(serviceName?: string) {
   return serviceName ? `/services/${serviceName}/service-map` : '/service-map';
@@ -19,6 +20,6 @@ interface ServiceMapLinkProps extends APMLinkExtendProps {
 }
 
 export function ServiceMapLink({ serviceName, ...rest }: ServiceMapLinkProps) {
-  const path = pathFor(serviceName);
-  return <APMLink path={path} {...rest} />;
+  const href = useServiceMapHref(serviceName);
+  return <EuiLink href={href} {...rest} />;
 }

@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { pickKeys } from '../../../../../common/utils/pick_keys';
-import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APMQueryParams } from '../url_helpers';
+import { APMLinkExtendProps, useAPMHref } from './APMLink';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
@@ -18,22 +17,11 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'latencyAggregationType',
 ];
 
-function getTransactionOverviewPath(serviceName: string) {
-  return `/services/${serviceName}/transactions`;
-}
-
 export function useTransactionsOverviewHref(serviceName: string) {
-  return useAPMHref(getTransactionOverviewPath(serviceName), persistedFilters);
+  return useAPMHref(`/services/${serviceName}/transactions`, persistedFilters);
 }
 
 export function TransactionOverviewLink({ serviceName, ...rest }: Props) {
-  const { urlParams } = useUrlParams();
-
-  return (
-    <APMLink
-      path={getTransactionOverviewPath(serviceName)}
-      query={pickKeys(urlParams as APMQueryParams, ...persistedFilters)}
-      {...rest}
-    />
-  );
+  const href = useTransactionsOverviewHref(serviceName);
+  return <EuiLink href={href} {...rest} />;
 }
