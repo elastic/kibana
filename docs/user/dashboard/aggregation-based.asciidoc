@@ -1,5 +1,5 @@
 [[add-aggregation-based-visualization-panels]]
-== Add aggregation-based visualization panels
+== Create aggregation-based visualization panels
 
 Aggregation-based visualization panels allow you to visualize aggregated data from a <<save-open-search,saved search>> or <<index-patterns, index pattern>>. 
 

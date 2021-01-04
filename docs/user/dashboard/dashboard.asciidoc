@@ -3,27 +3,41 @@
 
 [partintro]
 --
+**_Visualize your data with dashboards._**
 
-Use dashboards to visualize and analyze your data. A dashboard is a collection of panels that display the data from one or more <<index-patterns, index patterns>>. 
-Each panel displays your data in a supported panel type, such as charts, tables, maps, and more. 
+The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<index-patterns, index patterns>> into a collection of panels 
+that bring clarity to your data, tell a story about your data, and allow you to focus on only the data that's important to you. Configure each panel to display your data in a supported chart, table, map, and more, 
+then compare the panels side-by-side to identify the patterns and connections in your data. 
 
-Dashboards are helpful for when you want to:
+Dashboards support many types of panels, and provide several ways to create panels, including:
 
-* Identify patterns in your data
+* <<create-panels-with-lens,Lens>> &mdash; The drag and drop editor that creates visualizations of your data. *Lens* is recommended for most users.
 
-* Compare the data from multiple index patterns
+* <<maps,Maps>> &mdash; Displays your geographical data. 
 
-* Tell a story about your data
+* <<add-panels-with-advanced-editors,Advanced editors>> &mdash; Manually create panels of your data with the *TSVB*, *Vega*, and *Timelion* editors. 
+
+* <<add-aggregation-based-visualization-panels,Aggregation-based visualization panels>> &mdash; Manually create panels based on <<aggregation-reference,aggregations>>.
+
+* <<enhance-dashboards,Tools>> &mdash; Add context to your panels with <<add-text,text>>, or filter the data in real-time with <<add-controls,*Controls*>> . 
+
+* <<save-your-search,Saved search>> &mdash; Add a saved search from *Discover*.
+
+* <<xpack-ml-anomalies,Machine Learning>> &mdash; Create a panel with your machine learning anomaly detection data.
 
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
 
-[[tsvb]]
+[float]
+[[create-the-dashboard]]
+== Create dashboards
+
+Dashboards provide you with the space where you add panels of your data to create a story. You can begin with an empty dashboard, or open an existing dashboard. 
 
 [float]
-== Minimum requirements
+=== Minimum requirements
 
-To build dashboards, you must meet the minimum requirements. 
+To create dashboards, you must meet the minimum requirements. 
 
 * If you need to set up {kib}, use https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 
@@ -36,16 +50,27 @@ to create or save dashboards. The options to create and save dashboards are not 
 refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [float]
-[[create-the-dashboard]]
-== Create dashboards
+=== Start with an empty dashboard
 
-Open an empty dashboard, then create panels of your data using the *Lens* visualization builder. 
+. Open the main menu, then click *Dashboard*.
 
-. Open the main menu, then click *Dashboard*, then click *Create dashboard*.
-+
-To open an existing dashboard, click the dashboard you want to view.
+. Click *Create dashboard*.
 
-. To create a panel, click *Create panel*, then click *Lens* on the *New visualization* window.
+[float]
+=== Open an existing dashboard
+
+To build and add to a dashboard that's already been started, open an existing dashboard.
+
+. Open the main menu, then click *Dashboard*.
+
+. Click the dashboard *Title* you want to open.
+
+[float]
+=== Create panels
+
+Choose the type of panel you want to create, then save the panel to the dashboard.
+
+. To create a panel, click *Create panel*, then click the panel type on the *New visualization* window.
 +
 To add a saved panel, click *Add from library*, then select the panel you want to add. When a panel contains a stored query, both queries are applied.
 
@@ -100,19 +125,25 @@ image::images/lens_end_to_end_1_1.png[New visualization popover]
 +
 The list of fields are dependent on the <<index-patterns,index pattern>>, <<set-time-filter,time filter>>, and field filters. 
 
-*Lens* shows a summary depending on the type of data: date fields show the time distribution, string fields show the top 10 values, and numeric fields show a detailed summary with the top 10 values and a value distribution.
+[float]
+=== View the data summaries
+
+For each field, *Lens* shows a summary depending on the type of data. Date fields show the time distribution, string fields show the top 10 values, 
+and numeric fields show a detailed summary with the top 10 values and a value distribution.
+
+To view the data summary for a field, click *i* next to the field.
 
 [role="screenshot"]
 image::images/lens_data_info_documents.png[Data summary analyzed documents]
 
 *Lens* uses a sample of 5,000 documents to perform the field analysis. The bottom line of the summary shows the percentage of sampled documents over all available documents.
 
-When *Lens* presents the top 10 values distribution, it also shows the percentage of "Other" values. For array value fields, the percentage distribution is considers each value in the array separate.
+When *Lens* presents the top 10 values distribution, it also shows the percentage of *Other* values. For array value fields, the percentage distribution considers each value in the array as separate.
 
 [role="screenshot"]
 image::images/lens_data_info_other.png[Data summary window with Other]
 
-NOTE: the sum of all the entries and "Other" may be above 100% by a small amount, that is due to a rounding problem when presenting all values as integers.
+NOTE: The sum of all the *Other* fields can equal more than 100% by a small amount.
 
 [discrete]
 [[metric-vis]]
@@ -263,22 +294,22 @@ display the *Unique visitors* data along a second y-axis, then change the format
 
 . From the editor, click *Unique visitors* in the line chart layer.
 
-.. For *Axis side*, click *Right*.
+. For *Axis side*, click *Right*.
+
+. Click *Close*.
 
 [float]
 [[change-the-visualization-type]]
 ==== Change the visualization type
 
-.. Click *Close*.
-
 . From the editor, click *Average of bytes* in the area chart layer. 
 
-.. From the *Value format* dropdown, select *Bytes (1024)*. 
+. From the *Value format* dropdown, select *Bytes (1024)*. 
 +
 [role="screenshot"]
 image::images/lens_end_to_end_3_4.png[Multiaxis chart]
 
-.. Click *Close*.
+. Click *Close*.
 
 [discrete]
 [[lens-legend-position]]
@@ -510,22 +541,6 @@ image::images/lens_end_to_end_7_3.png[Group other values as Other]
 . *Save* the panel, enter `Traffic Source For Top 3 Countries` in the *Title* field, then add the panel to the dashboard.
 
 [float]
-[[save-dashboards]]
-== Save the dashboard
-
-When you have finished adding and arranging panels, save the dashboard.
-
-. From the toolbar, click *Save*.
-
-. Enter the dashboard *Title* and optional *Description*.
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. To save the specified time filter, select *Store time with dashboard*. 
-
-. Click *Save*.
-
-[float]
 == What's next?
 
 That's it! You've created a dashboard that gives you a complete picture of the data from your web server.
@@ -534,6 +549,7 @@ That's it! You've created a dashboard that gives you a complete picture of the d
 image::images/lens_end_to_end_dashboard.png[Final dashboard vis]
 
 [float]
+[[tsvb]]
 === Add more panels
 
 To add other types of panels to your dashboard:

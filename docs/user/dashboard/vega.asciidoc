@@ -1,5 +1,5 @@
 [[vega]]
-=== Create custom panels with Vega
+=== Create panels with Vega
 
 With *Vega*, you configure the visualization panels by editing the *Vega* and *Vega-Lite* specs.
 
