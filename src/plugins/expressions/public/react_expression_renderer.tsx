@@ -91,7 +91,12 @@ export const ReactExpressionRenderer = ({
   );
   const [debouncedExpression, setDebouncedExpression] = useState(expression);
   const [waitingForDebounceToComplete, setDebouncePending] = useState(false);
+  const firstRender = useRef(true);
   useShallowCompareEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
     if (debounce === undefined) {
       return;
     }
@@ -211,10 +216,9 @@ export const ReactExpressionRenderer = ({
     }
   }, [state.error]);
 
-  const classes = classNames('expExpressionRenderer', {
+  const classes = classNames('expExpressionRenderer', className, {
     'expExpressionRenderer-isEmpty': state.isEmpty,
     'expExpressionRenderer-hasError': !!state.error,
-    className,
   });
 
   const expressionStyles: React.CSSProperties = {};

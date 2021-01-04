@@ -56,7 +56,6 @@ function getComponent({
 }: {
   selected?: boolean;
   showDetails?: boolean;
-  useShortDots?: boolean;
   field?: IndexPatternField;
 }) {
   const indexPattern = getStubIndexPattern(

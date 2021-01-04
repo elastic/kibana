@@ -8,6 +8,30 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../plugin';
 
+export function registerDocumentsRoutes({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.post(
+    {
+      path: '/api/app_search/engines/{engineName}/documents',
+      validate: {
+        params: schema.object({
+          engineName: schema.string(),
+        }),
+        body: schema.object({
+          documents: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/as/engines/${request.params.engineName}/documents/new`,
+      })(context, request, response);
+    }
+  );
+}
+
 export function registerDocumentRoutes({
   router,
   enterpriseSearchRequestHandler,
