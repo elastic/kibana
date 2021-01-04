@@ -12,14 +12,11 @@ import {
   EuiSpacer,
   EuiFieldText,
   EuiFormRow,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiErrorBoundary,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { HttpSetup, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { ReducerAction } from './connector_reducer';
 import {
   ActionConnector,
@@ -28,6 +25,8 @@ import {
   UserConfiguredActionConnector,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { useKibana } from '../../../common/lib/kibana';
+import { SectionLoading } from '../../components/section_loading';
 
 export function validateBaseProperties(actionObject: ActionConnector) {
   const validationResult = { errors: {} };
@@ -59,10 +58,7 @@ interface ActionConnectorProps<
     body: { message: string; error: string };
   };
   errors: IErrorObject;
-  http: HttpSetup;
   actionTypeRegistry: ActionTypeRegistryContract;
-  docLinks: DocLinksStart;
-  capabilities: ApplicationStart['capabilities'];
   consumer?: string;
 }
 
@@ -72,12 +68,13 @@ export const ActionConnectorForm = ({
   actionTypeName,
   serverError,
   errors,
-  http,
   actionTypeRegistry,
-  docLinks,
-  capabilities,
   consumer,
 }: ActionConnectorProps) => {
+  const {
+    docLinks,
+    application: { capabilities },
+  } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
 
   const setActionProperty = (key: string, value: any) => {
@@ -179,26 +176,27 @@ export const ActionConnectorForm = ({
             </h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <Suspense
-            fallback={
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          >
-            <FieldsComponent
-              action={connector}
-              errors={errors}
-              readOnly={!canSave}
-              editActionConfig={setActionConfigProperty}
-              editActionSecrets={setActionSecretsProperty}
-              http={http}
-              docLinks={docLinks}
-              consumer={consumer}
-            />
-          </Suspense>
+          <EuiErrorBoundary>
+            <Suspense
+              fallback={
+                <SectionLoading>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription"
+                    defaultMessage="Loading connector settings…"
+                  />
+                </SectionLoading>
+              }
+            >
+              <FieldsComponent
+                action={connector}
+                errors={errors}
+                readOnly={!canSave}
+                editActionConfig={setActionConfigProperty}
+                editActionSecrets={setActionSecretsProperty}
+                consumer={consumer}
+              />
+            </Suspense>
+          </EuiErrorBoundary>
         </>
       ) : null}
     </EuiForm>

@@ -11,6 +11,8 @@ import { HttpLogic } from '../../../shared/http';
 import { EngineLogic } from '../engine';
 import { flashAPIErrors, setQueuedSuccessMessage } from '../../../shared/flash_messages';
 import { FieldDetails } from './types';
+import { KibanaLogic } from '../../../shared/kibana';
+import { ENGINE_DOCUMENTS_PATH, getEngineRoute } from '../../routes';
 
 interface DocumentDetailLogicValues {
   dataLoading: boolean;
@@ -65,13 +67,17 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
 
       try {
         const { http } = HttpLogic.values;
-        // TODO: Handle 404s
         const response = await http.get(
           `/api/app_search/engines/${engineName}/documents/${documentId}`
         );
         actions.setFields(response.fields);
       } catch (e) {
-        flashAPIErrors(e);
+        // If an error occurs trying to load this document, it will typically be a 404, or some other
+        // error that will prevent the page from loading, so redirect to the documents page and
+        // show the error
+        flashAPIErrors(e, { isQueued: true });
+        const engineRoute = getEngineRoute(engineName);
+        KibanaLogic.values.navigateToUrl(engineRoute + ENGINE_DOCUMENTS_PATH);
       }
     },
     deleteDocument: async ({ documentId }) => {
@@ -82,7 +88,8 @@ export const DocumentDetailLogic = kea<DocumentDetailLogicType>({
           const { http } = HttpLogic.values;
           await http.delete(`/api/app_search/engines/${engineName}/documents/${documentId}`);
           setQueuedSuccessMessage(DELETE_SUCCESS);
-          // TODO Handle routing after success
+          const engineRoute = getEngineRoute(engineName);
+          KibanaLogic.values.navigateToUrl(engineRoute + ENGINE_DOCUMENTS_PATH);
         } catch (e) {
           flashAPIErrors(e);
         }

@@ -81,7 +81,8 @@ describe('<ComponentTemplateEdit />', () => {
     expect(nameInput.props().disabled).toEqual(true);
   });
 
-  describe('form payload', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/84906
+  describe.skip('form payload', () => {
     it('should send the correct payload with changed values', async () => {
       const { actions, component, form } = testBed;
 

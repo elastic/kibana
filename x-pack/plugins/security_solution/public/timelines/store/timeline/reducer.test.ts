@@ -5,7 +5,7 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 
 import {
   IS_OPERATOR,
@@ -68,6 +68,7 @@ const basicDataProvider: DataProvider = {
   kqlQuery: '',
 };
 const basicTimeline: TimelineModel = {
+  activeTab: TimelineTabs.query,
   columns: [],
   dataProviders: [{ ...basicDataProvider }],
   dateRange: {
@@ -91,7 +92,7 @@ const basicTimeline: TimelineModel = {
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50],
   kqlMode: 'filter',
-  kqlQuery: { filterQuery: null, filterQueryDraft: null },
+  kqlQuery: { filterQuery: null },
   loadingEventIds: [],
   noteIds: [],
   pinnedEventIds: {},
@@ -100,10 +101,12 @@ const basicTimeline: TimelineModel = {
   selectedEventIds: {},
   show: true,
   showCheckboxes: false,
-  sort: {
-    columnId: '@timestamp',
-    sortDirection: Direction.desc,
-  },
+  sort: [
+    {
+      columnId: '@timestamp',
+      sortDirection: Direction.desc,
+    },
+  ],
   status: TimelineStatus.active,
   templateTimelineId: null,
   templateTimelineVersion: null,
@@ -952,10 +955,12 @@ describe('Timeline', () => {
     beforeAll(() => {
       update = updateTimelineSort({
         id: 'foo',
-        sort: {
-          columnId: 'some column',
-          sortDirection: Direction.desc,
-        },
+        sort: [
+          {
+            columnId: 'some column',
+            sortDirection: Direction.desc,
+          },
+        ],
         timelineById: timelineByIdMock,
       });
     });
@@ -963,8 +968,8 @@ describe('Timeline', () => {
       expect(update).not.toBe(timelineByIdMock);
     });
 
-    test('should update the timeline range', () => {
-      expect(update.foo.sort).toEqual({ columnId: 'some column', sortDirection: Direction.desc });
+    test('should update the sort attribute', () => {
+      expect(update.foo.sort).toEqual([{ columnId: 'some column', sortDirection: Direction.desc }]);
     });
   });
 

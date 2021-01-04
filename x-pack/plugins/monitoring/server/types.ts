@@ -17,6 +17,7 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { CloudSetup } from '../../cloud/server';
+import { ElasticsearchSource } from '../common/types/es';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -78,30 +79,61 @@ export interface IBulkUploader {
 export interface LegacyRequest {
   logger: Logger;
   getLogger: (...scopes: string[]) => Logger;
-  payload: unknown;
+  payload: {
+    [key: string]: any;
+  };
+  params: {
+    [key: string]: string;
+  };
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
   getAlertsClient: () => any;
   getActionsClient: () => any;
-  server: {
-    config: () => {
-      get: (key: string) => string | undefined;
+  server: LegacyServer;
+}
+
+export interface LegacyServer {
+  route: (params: any) => void;
+  config: () => {
+    get: (key: string) => string | undefined;
+  };
+  newPlatform: {
+    setup: {
+      plugins: PluginsSetup;
     };
-    newPlatform: {
-      setup: {
-        plugins: PluginsSetup;
+  };
+  plugins: {
+    monitoring: {
+      info: MonitoringLicenseService;
+    };
+    elasticsearch: {
+      getCluster: (
+        name: string
+      ) => {
+        callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
       };
     };
-    plugins: {
-      monitoring: {
-        info: MonitoringLicenseService;
-      };
-      elasticsearch: {
-        getCluster: (
-          name: string
-        ) => {
-          callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
+  };
+}
+
+export interface ElasticsearchResponse {
+  hits?: {
+    hits: ElasticsearchResponseHit[];
+    total: {
+      value: number;
+    };
+  };
+}
+
+export interface ElasticsearchResponseHit {
+  _source: ElasticsearchSource;
+  inner_hits?: {
+    [field: string]: {
+      hits?: {
+        hits: ElasticsearchResponseHit[];
+        total: {
+          value: number;
         };
       };
     };

@@ -39,14 +39,19 @@ export function getBucketIdentifier(row: DatatableRow, groupColumns?: string[]) 
  * @param outputColumnId Id of the output column
  * @param inputColumnId Id of the input column
  * @param outputColumnName Optional name of the output column
+ * @param options Optional options, set `allowColumnOverwrite` to true to not raise an exception if the output column exists already
  */
 export function buildResultColumns(
   input: Datatable,
   outputColumnId: string,
   inputColumnId: string,
-  outputColumnName: string | undefined
+  outputColumnName: string | undefined,
+  options: { allowColumnOverwrite: boolean } = { allowColumnOverwrite: false }
 ) {
-  if (input.columns.some((column) => column.id === outputColumnId)) {
+  if (
+    !options.allowColumnOverwrite &&
+    input.columns.some((column) => column.id === outputColumnId)
+  ) {
     throw new Error(
       i18n.translate('expressions.functions.seriesCalculations.columnConflictMessage', {
         defaultMessage:

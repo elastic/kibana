@@ -8,7 +8,7 @@ import {
   AssetReference,
   CategorySummaryList,
   Installable,
-  RegistryPackage,
+  RegistrySearchResult,
   PackageInfo,
 } from '../models/epm';
 
@@ -30,14 +30,7 @@ export interface GetPackagesRequest {
 }
 
 export interface GetPackagesResponse {
-  response: Array<
-    Installable<
-      Pick<
-        RegistryPackage,
-        'name' | 'title' | 'version' | 'description' | 'type' | 'icons' | 'download' | 'path'
-      >
-    >
-  >;
+  response: Array<Installable<RegistrySearchResult>>;
 }
 
 export interface GetLimitedPackagesResponse {

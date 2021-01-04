@@ -17,9 +17,8 @@ import {
   TestProviders,
   SUB_PLUGINS_REDUCER,
 } from '../../../../../common/mock';
-import { RuleDetailsPageComponent } from './index';
+import { RuleDetailsPage } from './index';
 import { createStore, State } from '../../../../../common/store';
-import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
 import { useUserData } from '../../../../components/user_info';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
 import { useParams } from 'react-router-dom';
@@ -82,17 +81,9 @@ describe('RuleDetailsPageComponent', () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <Router history={mockHistory}>
-          <RuleDetailsPageComponent
-            graphEventId={undefined}
-            query={{ query: '', language: 'language' }}
-            filters={[]}
-            setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
-          />
+          <RuleDetailsPage />
         </Router>
-      </TestProviders>,
-      {
-        wrappingComponent: TestProviders,
-      }
+      </TestProviders>
     );
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="header-page-title"]').exists()).toBe(true);

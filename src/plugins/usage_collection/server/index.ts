@@ -29,6 +29,7 @@ export {
   Collector,
   CollectorFetchContext,
 } from './collector';
+
 export { UsageCollectionSetup } from './plugin';
 export { config } from './config';
 export const plugin = (initializerContext: PluginInitializerContext) =>

@@ -25,6 +25,8 @@ import { ManifestManager } from './services/artifacts/manifest_manager/manifest_
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
 import { MetadataRequestContext } from './routes/metadata/handlers';
+// import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { LicenseService } from '../../common/license/license';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -58,9 +60,7 @@ export const createMockEndpointAppContextService = (
 /**
  * Creates a mocked input contract for the `EndpointAppContextService#start()` method
  */
-export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
-  EndpointAppContextServiceStartContract
-> => {
+export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<EndpointAppContextServiceStartContract> => {
   const factory = new AppClientFactory();
   const config = createMockConfig();
   factory.setup({ getSpaceId: () => 'mockSpace', config });
@@ -74,6 +74,7 @@ export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
     security: securityMock.createSetup(),
     alerts: alertsMock.createStart(),
     config,
+    licenseService: new LicenseService(),
     registerIngestCallback: jest.fn<
       ReturnType<FleetStartContract['registerExternalCallback']>,
       Parameters<FleetStartContract['registerExternalCallback']>

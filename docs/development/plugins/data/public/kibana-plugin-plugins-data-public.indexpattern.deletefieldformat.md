@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-deleteFieldFormat: (fieldName: string) => void;
+readonly deleteFieldFormat: (fieldName: string) => void;
 ```

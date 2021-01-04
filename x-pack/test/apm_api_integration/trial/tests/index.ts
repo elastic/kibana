@@ -13,7 +13,10 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
     describe('Services', function () {
       loadTestFile(require.resolve('./services/annotations'));
       loadTestFile(require.resolve('./services/top_services.ts'));
-      loadTestFile(require.resolve('./services/transaction_groups_charts'));
+    });
+
+    describe('Transactions', function () {
+      loadTestFile(require.resolve('./transactions/latency'));
     });
 
     describe('Settings', function () {
@@ -37,6 +40,7 @@ export default function observabilityApiIntegrationTests({ loadTestFile }: FtrPr
       loadTestFile(require.resolve('./csm/page_views.ts'));
       loadTestFile(require.resolve('./csm/js_errors.ts'));
       loadTestFile(require.resolve('./csm/has_rum_data.ts'));
+      loadTestFile(require.resolve('./csm/page_load_dist.ts'));
     });
   });
 }

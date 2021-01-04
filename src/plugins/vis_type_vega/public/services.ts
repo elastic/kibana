@@ -17,12 +17,7 @@
  * under the License.
  */
 
-import {
-  CoreStart,
-  SavedObjectsStart,
-  NotificationsStart,
-  IUiSettingsClient,
-} from 'src/core/public';
+import { CoreStart, NotificationsStart, IUiSettingsClient } from 'src/core/public';
 
 import { DataPublicPluginStart } from '../../data/public';
 import { createGetterSetter } from '../../kibana_utils/public';
@@ -39,10 +34,6 @@ export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClie
 export const [getInjectedMetadata, setInjectedMetadata] = createGetterSetter<
   CoreStart['injectedMetadata']
 >('InjectedMetadata');
-
-export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObjectsStart>(
-  'SavedObjects'
-);
 
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
   enableExternalUrls: boolean;

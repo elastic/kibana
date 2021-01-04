@@ -697,7 +697,7 @@ describe('#start()', () => {
       // Create an app and a promise that allows us to control when the app completes mounting
       const createWaitingApp = (props: Partial<App>): [App, () => void] => {
         let finishMount: () => void;
-        const mountPromise = new Promise((resolve) => (finishMount = resolve));
+        const mountPromise = new Promise<void>((resolve) => (finishMount = resolve));
         const app = {
           id: 'some-id',
           title: 'some-title',
@@ -753,6 +753,19 @@ describe('#start()', () => {
           0,
         ]
       `);
+    });
+
+    it('should call private function shouldNavigate with overlays and the nextAppId', async () => {
+      service.setup(setupDeps);
+      const shouldNavigateSpy = jest.spyOn(service as any, 'shouldNavigate');
+
+      const { navigateToApp } = await service.start(startDeps);
+
+      await navigateToApp('myTestApp');
+      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myTestApp');
+
+      await navigateToApp('myOtherApp');
+      expect(shouldNavigateSpy).toHaveBeenCalledWith(startDeps.overlays, 'myOtherApp');
     });
 
     describe('when `replace` option is true', () => {

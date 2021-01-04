@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./health_route'));
     loadTestFile(require.resolve('./task_management'));
+    loadTestFile(require.resolve('./task_management_removed_types'));
   });
 }

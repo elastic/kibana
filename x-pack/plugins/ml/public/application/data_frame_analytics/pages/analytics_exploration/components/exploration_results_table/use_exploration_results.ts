@@ -20,7 +20,6 @@ import {
   getDataGridSchemasFromFieldTypes,
   getFieldType,
   showDataGridColumnChartErrorMessageToast,
-  useDataGrid,
   useRenderCellValue,
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
@@ -38,6 +37,7 @@ import { isRegressionAnalysis } from '../../../../common/analytics';
 import { extractErrorMessage } from '../../../../../../../common/util/errors';
 import { useTrainedModelsApiService } from '../../../../../services/ml_api_service/trained_models';
 import { FeatureImportanceBaseline } from '../../../../../../../common/types/feature_importance';
+import { useExplorationDataGrid } from './use_exploration_data_grid';
 
 export const useExplorationResults = (
   indexPattern: IndexPattern | undefined,
@@ -64,19 +64,14 @@ export const useExplorationResults = (
       )
     );
   }
-  const dataGrid = useDataGrid(
+  const dataGrid = useExplorationDataGrid(
     columns,
-    25,
     // reduce default selected rows from 20 to 8 for performance reasons.
     8,
     // by default, hide feature-importance and top-classes columns and the doc id copy
     (d) =>
       !d.includes(`.${FEATURE_IMPORTANCE}.`) && !d.includes(`.${TOP_CLASSES}.`) && d !== ML__ID_COPY
   );
-
-  useEffect(() => {
-    dataGrid.resetPagination();
-  }, [JSON.stringify(searchQuery)]);
 
   // The pattern using `didCancel` allows us to abort out of date remote request.
   // We wrap `didCancel` in a object so we can mutate the value as it's being

@@ -23,7 +23,6 @@ export function registerMonitoringTelemetryCollection(
 ) {
   const monitoringStatsCollector = usageCollection.makeStatsCollector<
     UsageStatsPayload[],
-    unknown,
     true,
     MonitoringCollectorOptions
   >({

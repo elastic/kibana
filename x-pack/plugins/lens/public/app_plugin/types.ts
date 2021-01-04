@@ -33,7 +33,11 @@ import {
   VisualizeFieldContext,
   ACTION_VISUALIZE_LENS_FIELD,
 } from '../../../../../src/plugins/ui_actions/public';
-import { EmbeddableEditorState } from '../../../../../src/plugins/embeddable/public';
+import {
+  EmbeddableEditorState,
+  EmbeddableStateTransfer,
+} from '../../../../../src/plugins/embeddable/public';
+import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { EditorFrameInstance } from '..';
 
 export interface LensAppState {
@@ -51,15 +55,12 @@ export interface LensAppState {
   // Determines whether the lens editor shows the 'save and return' button, and the originating app breadcrumb.
   isLinkedToOriginatingApp?: boolean;
 
-  // Properties needed to interface with TopNav
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
   isSaveable: boolean;
+  activeData?: TableInspectorAdapter;
+  searchSessionId: string;
 }
 
 export interface RedirectToOriginProps {
@@ -74,6 +75,7 @@ export interface LensAppProps {
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   redirectTo: (savedObjectId?: string) => void;
   redirectToOrigin?: (props?: RedirectToOriginProps) => void;
+  redirectToDashboard?: (input: LensEmbeddableInput, dashboardId: string) => void;
 
   // The initial input passed in by the container when editing. Can be either by reference or by value.
   initialInput?: LensEmbeddableInput;
@@ -97,6 +99,7 @@ export interface LensAppServices {
   uiSettings: IUiSettingsClient;
   application: ApplicationStart;
   notifications: NotificationsStart;
+  stateTransfer: EmbeddableStateTransfer;
   navigation: NavigationPublicPluginStart;
   attributeService: LensAttributeService;
   savedObjectsClient: SavedObjectsStart['client'];
@@ -111,4 +114,5 @@ export interface LensTopNavActions {
   saveAndReturn: () => void;
   showSaveModal: () => void;
   cancel: () => void;
+  exportToCSV: () => void;
 }

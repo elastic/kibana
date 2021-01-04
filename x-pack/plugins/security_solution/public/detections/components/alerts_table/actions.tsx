@@ -242,10 +242,6 @@ export const sendAlertToTimelineAction = async ({
                 },
                 serializedQuery: convertKueryToElasticSearchQuery(query),
               },
-              filterQueryDraft: {
-                kind: timeline.kqlQuery?.filterQuery?.kuery?.kind ?? 'kuery',
-                expression: query,
-              },
             },
             noteIds: notes?.map((n) => n.noteId) ?? [],
             show: true,
@@ -300,12 +296,6 @@ export const sendAlertToTimelineAction = async ({
             serializedQuery: ecsData.signal?.rule?.query?.length
               ? ecsData.signal?.rule?.query[0]
               : '',
-          },
-          filterQueryDraft: {
-            kind: ecsData.signal?.rule?.language?.length
-              ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
-              : 'kuery',
-            expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
           },
         },
       },
@@ -365,10 +355,6 @@ export const sendAlertToTimelineAction = async ({
               expression: '',
             },
             serializedQuery: '',
-          },
-          filterQueryDraft: {
-            kind: 'kuery',
-            expression: '',
           },
         },
       },

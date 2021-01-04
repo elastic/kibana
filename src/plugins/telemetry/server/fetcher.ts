@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import moment from 'moment';
 import { Observable, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
 // @ts-ignore
@@ -213,7 +212,6 @@ export class FetcherTask {
   private async fetchTelemetry() {
     return await this.telemetryCollectionManager!.getStats({
       unencrypted: false,
-      timestamp: moment().valueOf(),
     });
   }
 

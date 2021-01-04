@@ -158,7 +158,7 @@ export class HeadlessChromiumDriver {
   ): Promise<ElementHandle<Element>> {
     const { timeout } = opts;
     logger.debug(`waitForSelector ${selector}`);
-    const resp = await this.page.waitFor(selector, { timeout }); // override default 30000ms
+    const resp = await this.page.waitForSelector(selector, { timeout }); // override default 30000ms
     logger.debug(`waitForSelector ${selector} resolved`);
     return resp;
   }

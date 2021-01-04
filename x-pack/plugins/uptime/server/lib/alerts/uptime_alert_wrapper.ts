@@ -4,28 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import { AlertExecutorOptions, AlertType, AlertTypeState } from '../../../../alerts/server';
+import { SavedObjectsClientContract } from 'kibana/server';
+import {
+  AlertExecutorOptions,
+  AlertInstanceState,
+  AlertInstanceContext,
+} from '../../../../alerts/server';
 import { savedObjectsAdapter } from '../saved_objects';
 import { DynamicSettings } from '../../../common/runtime_types';
+import { createUptimeESClient, UptimeESClient } from '../lib';
+import { UptimeAlertTypeFactory, UptimeAlertTypeParam, UptimeAlertTypeState } from './types';
 
-export interface UptimeAlertType extends Omit<AlertType, 'executor' | 'producer'> {
+export interface UptimeAlertType
+  extends Omit<ReturnType<UptimeAlertTypeFactory>, 'executor' | 'producer'> {
   executor: ({
     options,
-    esClient,
+    uptimeEsClient,
     dynamicSettings,
   }: {
-    options: AlertExecutorOptions;
-    esClient: ElasticsearchClient;
+    options: AlertExecutorOptions<
+      UptimeAlertTypeParam,
+      UptimeAlertTypeState,
+      AlertInstanceState,
+      AlertInstanceContext
+    >;
+    uptimeEsClient: UptimeESClient;
     dynamicSettings: DynamicSettings;
     savedObjectsClient: SavedObjectsClientContract;
-  }) => Promise<AlertTypeState | void>;
+  }) => Promise<UptimeAlertTypeState | void>;
 }
 
 export const uptimeAlertWrapper = (uptimeAlert: UptimeAlertType) => ({
   ...uptimeAlert,
   producer: 'uptime',
-  executor: async (options: AlertExecutorOptions) => {
+  executor: async (
+    options: AlertExecutorOptions<
+      UptimeAlertTypeParam,
+      UptimeAlertTypeState,
+      AlertInstanceState,
+      AlertInstanceContext
+    >
+  ) => {
     const {
       services: { scopedClusterClient: esClient, savedObjectsClient },
     } = options;
@@ -34,6 +53,8 @@ export const uptimeAlertWrapper = (uptimeAlert: UptimeAlertType) => ({
       options.services.savedObjectsClient
     );
 
-    return uptimeAlert.executor({ options, esClient, dynamicSettings, savedObjectsClient });
+    const uptimeEsClient = createUptimeESClient({ esClient, savedObjectsClient });
+
+    return uptimeAlert.executor({ options, dynamicSettings, uptimeEsClient, savedObjectsClient });
   },
 });

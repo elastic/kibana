@@ -42,6 +42,7 @@ export interface NewPackagePolicyInput {
 
 export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams'> {
   streams: PackagePolicyInputStream[];
+  compiled_input?: any;
 }
 
 export interface NewPackagePolicy {

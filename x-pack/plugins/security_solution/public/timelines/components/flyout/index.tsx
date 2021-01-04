@@ -4,27 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiFocusTrap } from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { DataProvider } from '../timeline/data_providers/data_provider';
-import { FlyoutButton } from './button';
-import { Pane } from './pane';
-import { timelineActions, timelineSelectors } from '../../store/timeline';
+import { AppLeaveHandler } from '../../../../../../../src/core/public';
+import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-
-export const Badge = (styled(EuiBadge)`
-  position: absolute;
-  padding-left: 4px;
-  padding-right: 4px;
-  right: 0%;
-  top: 0%;
-  border-bottom-left-radius: 5px;
-` as unknown) as typeof EuiBadge;
-
-Badge.displayName = 'Badge';
+import { timelineActions } from '../../store/timeline';
+import { FlyoutBottomBar } from './bottom_bar';
+import { Pane } from './pane';
+import { getTimelineShowStatusByIdSelector } from './selectors';
 
 const Visible = styled.div<{ show?: boolean }>`
   visibility: ${({ show }) => (show ? 'visible' : 'hidden')};
@@ -34,38 +26,65 @@ Visible.displayName = 'Visible';
 
 interface OwnProps {
   timelineId: string;
-  usersViewing: string[];
+  onAppLeave: (handler: AppLeaveHandler) => void;
 }
 
-const DEFAULT_DATA_PROVIDERS: DataProvider[] = [];
-const DEFAULT_TIMELINE_BY_ID = {};
-
-const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, usersViewing }) => {
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+const FlyoutComponent: React.FC<OwnProps> = ({ timelineId, onAppLeave }) => {
   const dispatch = useDispatch();
-  const { dataProviders = DEFAULT_DATA_PROVIDERS, show = false } = useDeepEqualSelector(
-    (state) => getTimeline(state, timelineId) ?? DEFAULT_TIMELINE_BY_ID
-  );
-  const handleClose = useCallback(
-    () => dispatch(timelineActions.showTimeline({ id: timelineId, show: false })),
-    [dispatch, timelineId]
-  );
-  const handleOpen = useCallback(
-    () => dispatch(timelineActions.showTimeline({ id: timelineId, show: true })),
-    [dispatch, timelineId]
+  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
+  const { activeTab, show, status: timelineStatus, updated } = useDeepEqualSelector((state) =>
+    getTimelineShowStatus(state, timelineId)
   );
 
+  useEffect(() => {
+    onAppLeave((actions, nextAppId) => {
+      if (show) {
+        dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
+      }
+      // Confirm when the user has made any changes to a timeline
+      if (
+        !(nextAppId ?? '').includes('securitySolution') &&
+        timelineStatus === TimelineStatus.draft &&
+        updated != null
+      ) {
+        const showSaveTimelineModal = () => {
+          dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: true }));
+          dispatch(
+            timelineActions.setActiveTabTimeline({
+              id: TimelineId.active,
+              activeTab: TimelineTabs.query,
+            })
+          );
+          dispatch(
+            timelineActions.toggleModalSaveTimeline({
+              id: TimelineId.active,
+              showModalSaveTimeline: true,
+            })
+          );
+        };
+
+        return actions.confirm(
+          i18n.translate('xpack.securitySolution.timeline.unsavedWorkMessage', {
+            defaultMessage: 'Leave Timeline with unsaved work?',
+          }),
+          i18n.translate('xpack.securitySolution.timeline.unsavedWorkTitle', {
+            defaultMessage: 'Unsaved changes',
+          }),
+          showSaveTimelineModal
+        );
+      } else {
+        return actions.default();
+      }
+    });
+  }, [dispatch, onAppLeave, show, timelineStatus, updated]);
   return (
     <>
-      <Visible show={show}>
-        <Pane onClose={handleClose} timelineId={timelineId} usersViewing={usersViewing} />
-      </Visible>
-      <FlyoutButton
-        dataProviders={dataProviders}
-        show={!show}
-        timelineId={timelineId}
-        onOpen={handleOpen}
-      />
+      <EuiFocusTrap disabled={!show}>
+        <Visible show={show}>
+          <Pane timelineId={timelineId} />
+        </Visible>
+      </EuiFocusTrap>
+      <FlyoutBottomBar activeTab={activeTab} timelineId={timelineId} showDataproviders={!show} />
     </>
   );
 };

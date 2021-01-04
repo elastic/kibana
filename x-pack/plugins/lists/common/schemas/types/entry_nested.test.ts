@@ -86,7 +86,7 @@ describe('entriesNested', () => {
           value: ['some host name'],
         },
       ],
-      field: 'host.name',
+      field: 'parent.field',
       type: 'nested',
     });
   });
@@ -105,7 +105,7 @@ describe('entriesNested', () => {
           type: 'exists',
         },
       ],
-      field: 'host.name',
+      field: 'parent.field',
       type: 'nested',
     });
   });

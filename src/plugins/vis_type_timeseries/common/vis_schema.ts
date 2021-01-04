@@ -175,6 +175,7 @@ export const seriesItems = schema.object({
   separate_axis: numberIntegerOptional,
   seperate_axis: numberIntegerOptional,
   series_index_pattern: stringOptionalNullable,
+  series_max_bars: numberIntegerOptional,
   series_time_field: stringOptionalNullable,
   series_interval: stringOptionalNullable,
   series_drop_last_bucket: numberIntegerOptional,
@@ -229,6 +230,7 @@ export const panel = schema.object({
   ignore_global_filters: numberOptional,
   ignore_global_filter: numberOptional,
   index_pattern: stringRequired,
+  max_bars: numberIntegerOptional,
   interval: stringRequired,
   isModelInvalid: schema.maybe(schema.boolean()),
   legend_position: stringOptionalNullable,
@@ -251,7 +253,14 @@ export const panel = schema.object({
   ),
   time_field: stringOptionalNullable,
   time_range_mode: stringOptionalNullable,
-  type: stringRequired,
+  type: schema.oneOf([
+    schema.literal('table'),
+    schema.literal('gauge'),
+    schema.literal('markdown'),
+    schema.literal('top_n'),
+    schema.literal('timeseries'),
+    schema.literal('metric'),
+  ]),
 });
 
 export const visPayloadSchema = schema.object({
@@ -267,7 +276,6 @@ export const visPayloadSchema = schema.object({
       })
     ),
   }),
-  savedObjectId: schema.maybe(schema.string()),
   timerange: schema.object({
     timezone: stringRequired,
     min: stringRequired,

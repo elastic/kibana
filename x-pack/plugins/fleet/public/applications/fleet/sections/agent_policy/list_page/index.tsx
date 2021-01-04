@@ -34,7 +34,7 @@ import {
   useUrlParams,
   useBreadcrumbs,
 } from '../../../hooks';
-import { SearchBar } from '../../../components';
+import { LinkAndRevision, SearchBar } from '../../../components';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
 import { CreateAgentPolicyFlyout } from './components';
 
@@ -129,26 +129,13 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         }),
         width: '20%',
         render: (name: string, agentPolicy: AgentPolicy) => (
-          <EuiFlexGroup gutterSize="s" alignItems="baseline" style={{ minWidth: 0 }}>
-            <EuiFlexItem grow={false} className="eui-textTruncate">
-              <EuiLink
-                className="eui-textTruncate"
-                href={getHref('policy_details', { policyId: agentPolicy.id })}
-                title={name || agentPolicy.id}
-              >
-                {name || agentPolicy.id}
-              </EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem grow={true}>
-              <EuiText color="subdued" size="xs" style={{ whiteSpace: 'nowrap' }}>
-                <FormattedMessage
-                  id="xpack.fleet.agentPolicyList.revisionNumber"
-                  defaultMessage="rev. {revNumber}"
-                  values={{ revNumber: agentPolicy.revision }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <LinkAndRevision
+            href={getHref('policy_details', { policyId: agentPolicy.id })}
+            title={name || agentPolicy.id}
+            revision={agentPolicy.revision}
+          >
+            {name || agentPolicy.id}
+          </LinkAndRevision>
         ),
       },
       {

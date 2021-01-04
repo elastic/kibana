@@ -320,7 +320,12 @@ export type SeverityMappingOrUndefined = t.TypeOf<typeof severityMappingOrUndefi
 export const status = t.keyof({ open: null, closed: null, 'in-progress': null });
 export type Status = t.TypeOf<typeof status>;
 
-export const job_status = t.keyof({ succeeded: null, failed: null, 'going to run': null });
+export const job_status = t.keyof({
+  succeeded: null,
+  failed: null,
+  'going to run': null,
+  'partial failure': null,
+});
 export type JobStatus = t.TypeOf<typeof job_status>;
 
 export const conflicts = t.keyof({ abort: null, proceed: null });
@@ -408,31 +413,50 @@ export const threat_tactic = t.type({
   name: threat_tactic_name,
   reference: threat_tactic_reference,
 });
+export type ThreatTactic = t.TypeOf<typeof threat_tactic>;
+export const threat_subtechnique_id = t.string;
+export const threat_subtechnique_name = t.string;
+export const threat_subtechnique_reference = t.string;
+export const threat_subtechnique = t.type({
+  id: threat_subtechnique_id,
+  name: threat_subtechnique_name,
+  reference: threat_subtechnique_reference,
+});
+export type ThreatSubtechnique = t.TypeOf<typeof threat_subtechnique>;
+export const threat_subtechniques = t.array(threat_subtechnique);
 export const threat_technique_id = t.string;
 export const threat_technique_name = t.string;
 export const threat_technique_reference = t.string;
-export const threat_technique = t.exact(
-  t.type({
-    id: threat_technique_id,
-    name: threat_technique_name,
-    reference: threat_technique_reference,
-  })
-);
-export const threat_techniques = t.array(threat_technique);
-export const threat = t.array(
+export const threat_technique = t.intersection([
   t.exact(
     t.type({
-      framework: threat_framework,
-      tactic: threat_tactic,
-      technique: threat_techniques,
+      id: threat_technique_id,
+      name: threat_technique_name,
+      reference: threat_technique_reference,
     })
-  )
+  ),
+  t.exact(
+    t.partial({
+      subtechnique: threat_subtechniques,
+    })
+  ),
+]);
+export type ThreatTechnique = t.TypeOf<typeof threat_technique>;
+export const threat_techniques = t.array(threat_technique);
+export const threat = t.exact(
+  t.type({
+    framework: threat_framework,
+    tactic: threat_tactic,
+    technique: threat_techniques,
+  })
 );
-
 export type Threat = t.TypeOf<typeof threat>;
 
-export const threatOrUndefined = t.union([threat, t.undefined]);
-export type ThreatOrUndefined = t.TypeOf<typeof threatOrUndefined>;
+export const threats = t.array(threat);
+export type Threats = t.TypeOf<typeof threats>;
+
+export const threatsOrUndefined = t.union([threats, t.undefined]);
+export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 
 export const threshold = t.exact(
   t.type({

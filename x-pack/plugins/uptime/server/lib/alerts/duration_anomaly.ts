@@ -82,7 +82,8 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _li
       context: [],
       state: [...durationAnomalyTranslations.actionVariables, ...commonStateTranslations],
     },
-    async executor({ options, esClient, savedObjectsClient, dynamicSettings }) {
+    minimumLicenseRequired: 'basic',
+    async executor({ options, uptimeEsClient, savedObjectsClient, dynamicSettings }) {
       const {
         services: { alertInstanceFactory },
         state,
@@ -96,8 +97,7 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _li
 
       if (foundAnomalies) {
         const monitorInfo = await getLatestMonitor({
-          dynamicSettings,
-          callES: esClient,
+          uptimeEsClient,
           dateStart: 'now-15m',
           dateEnd: 'now',
           monitorId: params.monitorId,

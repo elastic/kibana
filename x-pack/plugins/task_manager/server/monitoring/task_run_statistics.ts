@@ -92,10 +92,9 @@ export function createTaskRunAggregator(
   );
 
   const resultFrequencyQueue = createRunningAveragedStat<FillPoolResult>(runningAverageWindowSize);
-  const taskPollingEvents$: Observable<Pick<
-    TaskRunStat,
-    'polling'
-  >> = taskPollingLifecycle.events.pipe(
+  const taskPollingEvents$: Observable<
+    Pick<TaskRunStat, 'polling'>
+  > = taskPollingLifecycle.events.pipe(
     filter(
       (taskEvent: TaskLifecycleEvent) =>
         isTaskPollingCycleEvent(taskEvent) && isOk<FillPoolResult, unknown>(taskEvent.event)

@@ -182,7 +182,9 @@ exports[`item_details_card ItemDetailsPropertySummary should render correctly 1`
   <Styled(EuiDescriptionListTitle)>
     name 1
   </Styled(EuiDescriptionListTitle)>
-  <Styled(EuiDescriptionListDescription)>
+  <Styled(EuiDescriptionListDescription)
+    className="eui-textBreakWord"
+  >
     value 1
   </Styled(EuiDescriptionListDescription)>
 </Fragment>

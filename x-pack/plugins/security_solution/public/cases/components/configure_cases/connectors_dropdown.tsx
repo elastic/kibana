@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSuperSelect } from '@elastic/eui
 import styled from 'styled-components';
 
 import { ActionConnector } from '../../containers/configure/types';
-import { connectorsConfiguration } from '../../../common/lib/connectors/config';
+import { connectorsConfiguration } from '../connectors';
 import * as i18n from './translations';
 
 export interface Props {

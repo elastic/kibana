@@ -60,7 +60,7 @@ describe('Task Run Statistics', () => {
       });
     }
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       taskRunAggregator
         .pipe(
           // skip initial stat which is just initialized data which
@@ -128,7 +128,7 @@ describe('Task Run Statistics', () => {
       }
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       taskRunAggregator
         .pipe(
           // skip initial stat which is just initialized data which
@@ -224,7 +224,7 @@ describe('Task Run Statistics', () => {
       runningAverageWindowSize
     );
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       taskRunAggregator
         .pipe(
           // skip initial stat which is just initialized data which
@@ -303,7 +303,7 @@ describe('Task Run Statistics', () => {
       runningAverageWindowSize
     );
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       taskRunAggregator
         .pipe(
           // skip initial stat which is just initialized data which
@@ -394,7 +394,7 @@ describe('Task Run Statistics', () => {
       runningAverageWindowSize
     );
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       taskRunAggregator
         .pipe(
           // skip initial stat which is just initialized data which

@@ -7,7 +7,7 @@
 import { Observable, from, EMPTY } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { HttpStart } from 'src/core/public';
-import { GlobalSearchResult } from '../../common/types';
+import { GlobalSearchResult, GlobalSearchProviderFindParams } from '../../common/types';
 import { GlobalSearchFindOptions } from './types';
 
 interface ServerFetchResponse {
@@ -24,7 +24,7 @@ interface ServerFetchResponse {
  */
 export const fetchServerResults = (
   http: HttpStart,
-  term: string,
+  params: GlobalSearchProviderFindParams,
   { preference, aborted$ }: GlobalSearchFindOptions
 ): Observable<GlobalSearchResult[]> => {
   let controller: AbortController | undefined;
@@ -36,7 +36,7 @@ export const fetchServerResults = (
   }
   return from(
     http.post<ServerFetchResponse>('/internal/global_search/find', {
-      body: JSON.stringify({ term, options: { preference } }),
+      body: JSON.stringify({ params, options: { preference } }),
       signal: controller?.signal,
     })
   ).pipe(

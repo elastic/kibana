@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createStream } from './agent';
+import { compileTemplate } from './agent';
 
-describe('createStream', () => {
+describe('compileTemplate', () => {
   it('should work', () => {
     const streamTemplate = `
 input: log
@@ -27,7 +27,7 @@ hidden_password: {{password}}
       password: { type: 'password', value: '' },
     };
 
-    const output = createStream(vars, streamTemplate);
+    const output = compileTemplate(vars, streamTemplate);
     expect(output).toEqual({
       input: 'log',
       paths: ['/usr/local/var/log/nginx/access.log'],
@@ -67,7 +67,7 @@ foo: bar
       password: { type: 'password', value: '' },
     };
 
-    const output = createStream(vars, streamTemplate);
+    const output = compileTemplate(vars, streamTemplate);
     expect(output).toEqual({
       input: 'redis/metrics',
       metricsets: ['key'],
@@ -114,7 +114,7 @@ hidden_password: {{password}}
         tags: { value: ['foo', 'bar', 'forwarded'] },
       };
 
-      const output = createStream(vars, streamTemplate);
+      const output = compileTemplate(vars, streamTemplate);
       expect(output).toEqual({
         input: 'log',
         paths: ['/usr/local/var/log/nginx/access.log'],
@@ -133,7 +133,7 @@ hidden_password: {{password}}
         tags: { value: ['foo', 'bar'] },
       };
 
-      const output = createStream(vars, streamTemplate);
+      const output = compileTemplate(vars, streamTemplate);
       expect(output).toEqual({
         input: 'log',
         paths: ['/usr/local/var/log/nginx/access.log'],
@@ -157,7 +157,7 @@ input: logs
       },
     };
 
-    const output = createStream(vars, streamTemplate);
+    const output = compileTemplate(vars, streamTemplate);
     expect(output).toEqual({
       input: 'logs',
     });

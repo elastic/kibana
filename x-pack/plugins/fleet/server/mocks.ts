@@ -15,7 +15,7 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
   return {
     encryptedSavedObjectsStart: encryptedSavedObjectsMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
-    security: securityMock.createSetup(),
+    security: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
     isProductionMode: true,
     kibanaVersion: '8.0.0',
@@ -25,7 +25,7 @@ export const createAppContextStartContractMock = (): FleetAppContext => {
 
 export const createPackagePolicyServiceMock = () => {
   return {
-    assignPackageStream: jest.fn(),
+    compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
@@ -34,6 +34,7 @@ export const createPackagePolicyServiceMock = () => {
     getByIDs: jest.fn(),
     list: jest.fn(),
     update: jest.fn(),
+    runExternalCallbacks: jest.fn(),
   } as jest.Mocked<PackagePolicyServiceInterface>;
 };
 

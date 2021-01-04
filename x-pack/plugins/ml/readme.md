@@ -68,30 +68,32 @@ These data sets are now ready be analyzed in ML jobs in Kibana.
 
 ### Jest tests
 
-Run the test following jest tests from `kibana/x-pack`.
+Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
+
+Run the test following jest tests from `kibana/x-pack/plugins/ml`.
 
 New snapshots, all plugins:   
 
 ```
-node scripts/jest
+yarn test:jest
 ```
  
 Update snapshots for the ML plugin: 
 
 ```
-node scripts/jest plugins/ml -u
+yarn test:jest -u
 ```
 
 Update snapshots for a specific directory only: 
 
 ```
-node scripts/jest plugins/ml/public/application/settings/filter_lists
+yarn test:jest public/application/settings/filter_lists
 ```
 
 Run tests with verbose output: 
 
 ```
-node scripts/jest plugins/ml --verbose
+yarn test:jest --verbose
 ```
 
 ### Functional tests

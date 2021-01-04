@@ -23,11 +23,6 @@ You do not need to configure any additional settings to use the
   screens, and authorization using <<kibana-privileges>>. To disable
   {security-features} entirely, see
   {ref}/security-settings.html[{es} security settings].
-
-| `xpack.security.audit.enabled`
-  | Set to `true` to enable audit logging for security events. By default, it is set
-  to `false`. For more details see <<xpack-security-audit-logging>>.
-
 |===
 
 [float]
@@ -163,6 +158,51 @@ In addition to <<authentication-provider-settings,the settings that are valid fo
 |===
 
 [float]
+[[anonymous-authentication-provider-settings]]
+===== Anonymous authentication provider settings
+
+In addition to <<authentication-provider-settings,the settings that are valid for all providers>>, you can specify the following settings:
+
+[NOTE]
+============
+You can configure only one anonymous provider per {kib} instance.
+============
+
+[cols="2*<"]
+|===
+| `xpack.security.authc.providers.`
+`anonymous.<provider-name>.credentials` {ess-icon}
+| Credentials that {kib} should use internally to authenticate anonymous requests to {es}. Possible values are: username and password, API key, or the constant `elasticsearch_anonymous_user` if you want to leverage {ref}/anonymous-access.html[{es} anonymous access].
+
+2+a| For example:
+
+[source,yaml]
+----------------------------------------
+# Username and password credentials
+xpack.security.authc.providers.anonymous.anonymous1:
+  credentials:
+    username: "anonymous_service_account"
+    password: "anonymous_service_account_password"
+
+# API key (concatenated and base64-encoded)
+xpack.security.authc.providers.anonymous.anonymous1:
+  credentials:
+    apiKey: "VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw=="
+
+# API key (as returned from Elasticsearch API)
+xpack.security.authc.providers.anonymous.anonymous1:
+  credentials:
+    apiKey.id: "VuaCfGcBCdbkQm-e5aOx"
+    apiKey.key: "ui2lp2axTNmsyakw9tvNnw"
+
+# Elasticsearch anonymous access
+xpack.security.authc.providers.anonymous.anonymous1:
+  credentials: "elasticsearch_anonymous_user"
+----------------------------------------
+
+|===
+
+[float]
 [[http-authentication-settings]]
 ===== HTTP authentication settings
 
@@ -280,12 +320,11 @@ In high-availability deployments, make sure you use the same encryption and decr
 | [[xpack-encryptedSavedObjects-keyRotation-decryptionOnlyKeys]] `xpack.encryptedSavedObjects.`
 `keyRotation.decryptionOnlyKeys`
 | An optional list of previously used encryption keys. Like <<xpack-encryptedSavedObjects-encryptionKey, `xpack.encryptedSavedObjects.encryptionKey`>>, these must be at least 32 characters in length. {kib} doesn't use these keys for encryption, but may still require them to decrypt some existing saved objects. Use this setting if you wish to change your encryption key, but don't want to lose access to saved objects that were previously encrypted with a different key.
-
 |===
 
 [float]
 [[audit-logging-settings]]
-===== Audit logging settings
+==== Audit logging settings
 
 You can enable audit logging to support compliance, accountability, and security. When enabled, {kib} will capture:
 
@@ -296,19 +335,19 @@ You can enable audit logging to support compliance, accountability, and security
 For more details and a reference of audit events, refer to <<xpack-security-audit-logging>>.
 
 [cols="2*<"]
-|===
-| `xpack.security.audit.enabled`
+|======
+| `xpack.security.audit.enabled` {ess-icon}
 | Set to `true` to enable audit logging for security events. *Default:* `false`
-|===
+|======
 
 [float]
 [[ecs-audit-logging-settings]]
-===== ECS audit logging settings
+==== ECS audit logging settings
 
 To enable the <<xpack-security-ecs-audit-logging, ECS audit logger>>, specify where you want to write the audit events using `xpack.security.audit.appender`.
 
-[cols="2*<"]
-|===
+[cols="2*<,*50"]
+|======
 | `xpack.security.audit.appender`
 | Optional. Specifies where audit logs should be written to and how they should be formatted.
 
@@ -317,53 +356,135 @@ To enable the <<xpack-security-ecs-audit-logging, ECS audit logger>>, specify wh
 [source,yaml]
 ----------------------------------------
 xpack.security.audit.appender:
-  kind: file
-  path: /path/to/audit.log
+  kind: rolling-file
+  path: ./audit.log
+  policy:
+    kind: time-interval
+    interval: 24h <1>
+  strategy:
+    kind: numeric
+    max: 10 <2>
   layout:
     kind: json
 ----------------------------------------
+<1> Rotates log files every 24 hours.
+<2> Keeps maximum of 10 log files before deleting older ones.
 
 | `xpack.security.audit.appender.kind`
-| Required. Specifies where audit logs should be written to. Allowed values are `console` or `file`.
-|===
+| Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`. 
 
-[float]
-[[audit-logging-file-appender]]
-===== File appender
-
-The file appender can be configured using the following settings:
-
-[cols="2*<"]
-|===
-| `xpack.security.audit.appender.path`
-| Required. Full file path the log file should be written to.
+Refer to <<audit-logging-file-appender>> and <<audit-logging-rolling-file-appender>> for appender specific settings.
 
 | `xpack.security.audit.appender.layout.kind`
 | Required. Specifies how audit logs should be formatted. Allowed values are `json` or `pattern`.
-|===
+
+Refer to <<audit-logging-pattern-layout>> for layout specific settings.
+
+2+a| 
+[TIP]
+============
+We recommend using `json` format to allow ingesting {kib} audit logs into {es} using Filebeat.
+============
+
+|======
 
 [float]
-[[audit-logging-pattern-layout]]
-===== Pattern layout
+[[audit-logging-file-appender,file appender]]
+===== File appender
 
-The pattern layout can be configured using the following settings:
+The `file` appender writes to a file and can be configured using the following settings:
 
 [cols="2*<"]
-|===
-| `xpack.security.audit.appender.layout.highlight`
-| Optional. Set to `true` to enable highlighting log messages with colors.
+|======
+| `xpack.security.audit.appender.path`
+| Required. Full file path the log file should be written to.
+|======
 
+[float]
+[[audit-logging-rolling-file-appender, rolling file appender]]
+===== Rolling file appender
+
+The `rolling-file` appender writes to a file and rotates it using a rolling strategy, when a particular policy is triggered:
+
+[cols="2*<"]
+|======
+| `xpack.security.audit.appender.path`
+| Required. Full file path the log file should be written to.
+
+| `xpack.security.audit.appender.policy.kind`
+| Specifies when a rollover should occur. Allowed values are `size-limit` and `time-interval`. *Default:* `time-interval`.
+
+Refer to <<audit-logging-size-limit-policy>> and <<audit-logging-time-interval-policy>> for policy specific settings.
+| `xpack.security.audit.appender.strategy.kind`
+| Specifies how the rollover should occur. Only allowed value is currently `numeric`. *Default:* `numeric`
+
+Refer to <<audit-logging-numeric-strategy>> for strategy specific settings.
+|======
+
+[float]
+[[audit-logging-size-limit-policy, size limit policy]]
+===== Size limit triggering policy
+
+The `size-limit` triggering policy will rotate the file when it reaches a certain size:
+
+[cols="2*<"]
+|======
+| `xpack.security.audit.appender.policy.size`
+| Maximum size the log file should reach before a rollover should be performed. *Default:* `100mb`
+|======
+
+[float]
+[[audit-logging-time-interval-policy, time interval policy]]
+===== Time interval triggering policy
+
+The `time-interval` triggering policy will rotate the file every given interval of time:
+
+[cols="2*<"]
+|======
+| `xpack.security.audit.appender.policy.interval`
+| How often a rollover should occur. *Default:* `24h`
+
+| `xpack.security.audit.appender.policy.modulate`
+| Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary. *Default:* `true`
+|======
+
+[float]
+[[audit-logging-numeric-strategy, numeric strategy]]
+===== Numeric rolling strategy
+
+The `numeric` rolling strategy will suffix the log file with a given pattern when rolling over, and will retain a fixed number of rolled files:
+
+[cols="2*<"]
+|======
+| `xpack.security.audit.appender.strategy.pattern`
+| Suffix to append to the file name when rolling over. Must include `%i`. *Default:* `-%i`
+
+| `xpack.security.audit.appender.strategy.max`
+| Maximum number of files to keep. Once this number is reached, oldest files will be deleted. *Default:* `7`
+|======
+
+[float]
+[[audit-logging-pattern-layout, pattern layout]]
+===== Pattern layout
+
+The `pattern` layout outputs a string, formatted using a pattern with special placeholders, which will be replaced with data from the actual log message:
+
+[cols="2*<"]
+|======
 | `xpack.security.audit.appender.layout.pattern`
 | Optional. Specifies how the log line should be formatted. *Default:* `[%date][%level][%logger]%meta %message`
-|===
+
+| `xpack.security.audit.appender.layout.highlight`
+| Optional. Set to `true` to enable highlighting log messages with colors.
+|======
 
 [float]
 [[audit-logging-ignore-filters]]
 ===== Ignore filters
 
 [cols="2*<"]
-|===
-| `xpack.security.audit.ignore_filters[]`
+|======
+| `xpack.security.audit.ignore_filters[]` {ess-icon}
 | List of filters that determine which events should be excluded from the audit log. An event will get filtered out if at least one of the provided filters matches.
 
 2+a| For example:
@@ -378,15 +499,15 @@ xpack.security.audit.ignore_filters:
 <1> Filters out HTTP request events
 <2> Filters out any data write events
 
-| `xpack.security.audit.ignore_filters[].actions[]`
+| `xpack.security.audit.ignore_filters[].actions[]` {ess-icon}
 | List of values matched against the `event.action` field of an audit event. Refer to <<xpack-security-audit-logging>> for a list of available events.
 
-| `xpack.security.audit.ignore_filters[].categories[]`
+| `xpack.security.audit.ignore_filters[].categories[]` {ess-icon}
 | List of values matched against the `event.category` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-category.html[ECS categorization field] for allowed values.
 
-| `xpack.security.audit.ignore_filters[].types[]`
+| `xpack.security.audit.ignore_filters[].types[]` {ess-icon}
 | List of values matched against the `event.type` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-type.html[ECS type field] for allowed values.
 
-| `xpack.security.audit.ignore_filters[].outcomes[]`
+| `xpack.security.audit.ignore_filters[].outcomes[]` {ess-icon}
 | List of values matched against the `event.outcome` field of an audit event. Refer to https://www.elastic.co/guide/en/ecs/1.5/ecs-allowed-values-event-outcome.html[ECS outcome field] for allowed values.
-|===
+|======

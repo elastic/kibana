@@ -26,9 +26,14 @@ import {
   exportValueList,
 } from '../tasks/lists';
 import { VALUE_LISTS_TABLE, VALUE_LISTS_ROW, VALUE_LISTS_MODAL_ACTIVATOR } from '../screens/lists';
+import { cleanKibana } from '../tasks/common';
 
 describe('value lists', () => {
   describe('management modal', () => {
+    before(() => {
+      cleanKibana();
+    });
+
     beforeEach(() => {
       loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
       waitForAlertsPanelToBeLoaded();
@@ -148,7 +153,7 @@ describe('value lists', () => {
 
       it('deletes a "ip_range" from an uploaded file', () => {
         const listName = 'cidr_list.txt';
-        importValueList(listName, 'ip_range');
+        importValueList(listName, 'ip_range', ['192.168.100.0']);
         openValueListsModal();
         deleteValueListsFile(listName);
         cy.get(VALUE_LISTS_TABLE)
@@ -160,62 +165,61 @@ describe('value lists', () => {
     });
 
     describe('export list types', () => {
-      beforeEach(() => {
-        cy.server();
-        cy.route('POST', '**/api/lists/items/_export?list_id=*').as('exportList');
-      });
-
       it('exports a "keyword" list from an uploaded file', () => {
         const listName = 'value_list.txt';
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
         importValueList('value_list.txt', 'keyword');
         openValueListsModal();
         exportValueList();
-        cy.wait('@exportList').then((xhr) => {
+        cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
-            expect(xhr.responseBody).to.contain(lineOne);
-            expect(xhr.responseBody).to.contain(lineTwo);
+            expect(response!.body).to.contain(lineOne);
+            expect(response!.body).to.contain(lineTwo);
           });
         });
       });
 
       it('exports a "text" list from an uploaded file', () => {
         const listName = 'value_list.txt';
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
         importValueList(listName, 'text');
         openValueListsModal();
         exportValueList();
-        cy.wait('@exportList').then((xhr) => {
+        cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
-            expect(xhr.responseBody).to.contain(lineOne);
-            expect(xhr.responseBody).to.contain(lineTwo);
+            expect(response!.body).to.contain(lineOne);
+            expect(response!.body).to.contain(lineTwo);
           });
         });
       });
 
       it('exports a "ip" list from an uploaded file', () => {
         const listName = 'ip_list.txt';
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
         importValueList(listName, 'ip');
         openValueListsModal();
         exportValueList();
-        cy.wait('@exportList').then((xhr) => {
+        cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne, lineTwo] = list.split('\n');
-            expect(xhr.responseBody).to.contain(lineOne);
-            expect(xhr.responseBody).to.contain(lineTwo);
+            expect(response!.body).to.contain(lineOne);
+            expect(response!.body).to.contain(lineTwo);
           });
         });
       });
 
       it('exports a "ip_range" list from an uploaded file', () => {
         const listName = 'cidr_list.txt';
-        importValueList(listName, 'ip_range');
+        cy.intercept('POST', `/api/lists/items/_export?list_id=${listName}`).as('exportList');
+        importValueList(listName, 'ip_range', ['192.168.100.0']);
         openValueListsModal();
         exportValueList();
-        cy.wait('@exportList').then((xhr) => {
+        cy.wait('@exportList').then(({ response }) => {
           cy.fixture(listName).then((list: string) => {
             const [lineOne] = list.split('\n');
-            expect(xhr.responseBody).to.contain(lineOne);
+            expect(response!.body).to.contain(lineOne);
           });
         });
       });

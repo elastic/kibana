@@ -24,15 +24,19 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 import { nextTick } from '@kbn/test/jest';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
-import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
+import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-} from '../../../embeddable_plugin_test_samples';
-import { KibanaContextProvider } from '../../../../../kibana_react/public';
+import { KibanaContextProvider } from '../../../services/kibana_react';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { applicationServiceMock } from '../../../../../../core/public/mocks';
+import {
+  applicationServiceMock,
+  coreMock,
+  uiSettingsServiceMock,
+} from '../../../../../../core/public/mocks';
+import {
+  ContactCardEmbeddableFactory,
+  CONTACT_CARD_EMBEDDABLE,
+} from '../../../../../embeddable/public/lib/test_samples';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -40,7 +44,7 @@ const ExitFullScreenButton = () => <div data-test-subj="exitFullScreenModeText">
 
 function getProps(
   props?: Partial<DashboardViewportProps>
-): { props: DashboardViewportProps; options: DashboardContainerOptions } {
+): { props: DashboardViewportProps; options: DashboardContainerServices } {
   const { setup, doStart } = embeddablePluginMock.createInstance();
   setup.registerEmbeddableFactory(
     CONTACT_CARD_EMBEDDABLE,
@@ -48,8 +52,10 @@ function getProps(
   );
 
   const start = doStart();
-  const options: DashboardContainerOptions = {
+  const options: DashboardContainerServices = {
     application: applicationServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreMock.createStart().http,
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
       getEmbeddablePanel: jest.fn(),
@@ -86,7 +92,6 @@ function getProps(
   dashboardContainer = new DashboardContainer(input, options);
   const defaultTestProps: DashboardViewportProps = {
     container: dashboardContainer,
-    PanelComponent: () => <div />,
   };
 
   return {
@@ -125,9 +130,8 @@ test('renders DashboardViewport with no visualizations', () => {
 });
 
 test('renders DashboardEmptyScreen', () => {
-  const renderEmptyScreen = jest.fn();
-  const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
-  props.container.updateInput({ isEmptyState: true });
+  const { props, options } = getProps();
+  props.container.updateInput({ panels: {} });
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
@@ -137,7 +141,6 @@ test('renders DashboardEmptyScreen', () => {
   );
   const dashboardEmptyScreenDiv = component.find('.dshDashboardEmptyScreen');
   expect(dashboardEmptyScreenDiv.length).toBe(1);
-  expect(renderEmptyScreen).toHaveBeenCalled();
 
   component.unmount();
 });
@@ -169,10 +172,8 @@ test('renders exit full screen button when in full screen mode', async () => {
 });
 
 test('renders exit full screen button when in full screen mode and empty screen', async () => {
-  const renderEmptyScreen = jest.fn();
-  renderEmptyScreen.mockReturnValue(React.createElement('div'));
-  const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
-  props.container.updateInput({ isEmptyState: true, isFullScreenMode: true });
+  const { props, options } = getProps();
+  props.container.updateInput({ panels: {}, isFullScreenMode: true });
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
@@ -180,7 +181,7 @@ test('renders exit full screen button when in full screen mode and empty screen'
       </KibanaContextProvider>
     </I18nProvider>
   );
-  expect((component.find('.dshDashboardEmptyScreen').childAt(0).type() as any).name).toBe(
+  expect((component.find('.dshDashboardViewport').childAt(0).type() as any).name).toBe(
     'ExitFullScreenButton'
   );
 
@@ -188,7 +189,7 @@ test('renders exit full screen button when in full screen mode and empty screen'
   component.update();
   await nextTick();
 
-  expect((component.find('.dshDashboardEmptyScreen').childAt(0).type() as any).name).not.toBe(
+  expect((component.find('.dshDashboardViewport').childAt(0).type() as any).name).not.toBe(
     'ExitFullScreenButton'
   );
 

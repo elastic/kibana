@@ -1,19 +1,5 @@
 {
   "name": "@kbn/ui-framework",
   "version": "1.0.0",
-  "license": "Apache-2.0",
-  "scripts": {
-    "build": "../../node_modules/.bin/grunt prodBuild",
-    "docSiteStart": "../../node_modules/.bin/grunt docSiteStart",
-    "docSiteBuild": "../../node_modules/.bin/grunt docSiteBuild"
-  },
-  "kibana": {
-    "build": {
-      "intermediateBuildDirectory": "target"
-    }
-  },
-  "devDependencies": {
-    "@kbn/babel-preset": "link:../kbn-babel-preset",
-    "@kbn/optimizer": "link:../kbn-optimizer"
-  }
+  "license": "Apache-2.0"
 }

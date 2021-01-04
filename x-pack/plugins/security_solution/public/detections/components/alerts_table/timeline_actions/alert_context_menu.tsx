@@ -7,11 +7,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import {
-  EuiText,
   EuiButtonIcon,
+  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
-  EuiContextMenuItem,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { getOr } from 'lodash/fp';
@@ -19,11 +20,9 @@ import { getOr } from 'lodash/fp';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
-import { Status, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { isThresholdRule } from '../../../../../common/detection_engine/utils';
-import { isMlRule } from '../../../../../common/machine_learning/helpers';
+import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { timelineActions } from '../../../../timelines/store/timeline';
-import { EventsTd, EventsTdContent } from '../../../../timelines/components/timeline/styles';
+import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../../../timelines/components/timeline/helpers';
 import { FILTER_OPEN, FILTER_CLOSED, FILTER_IN_PROGRESS } from '../alerts_filter_group';
 import { updateAlertStatusAction } from '../actions';
@@ -42,6 +41,7 @@ import { useUserData } from '../../user_info';
 import { ExceptionListType } from '../../../../../common/shared_imports';
 
 interface AlertContextMenuProps {
+  ariaLabel?: string;
   disabled: boolean;
   ecsRowData: Ecs;
   refetch: inputsModel.Refetch;
@@ -50,6 +50,7 @@ interface AlertContextMenuProps {
 }
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
+  ariaLabel = i18n.MORE_ACTIONS,
   disabled,
   ecsRowData,
   refetch,
@@ -75,11 +76,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       '',
     [ecsRowData]
   );
-  const ruleIndices = useMemo(
-    (): string[] =>
-      (ecsRowData.signal?.rule && ecsRowData.signal.rule.index) ?? DEFAULT_INDEX_PATTERN,
-    [ecsRowData]
-  );
+  const ruleIndices = useMemo((): string[] => {
+    if (
+      ecsRowData.signal?.rule &&
+      ecsRowData.signal.rule.index &&
+      ecsRowData.signal.rule.index.length > 0
+    ) {
+      return ecsRowData.signal.rule.index;
+    } else {
+      return DEFAULT_INDEX_PATTERN;
+    }
+  }, [ecsRowData]);
 
   const { addWarning } = useAppToasts();
 
@@ -284,14 +291,16 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 
   const button = (
-    <EuiButtonIcon
-      aria-label="context menu"
-      data-test-subj="timeline-context-menu-button"
-      size="s"
-      iconType="boxesHorizontal"
-      onClick={onButtonClick}
-      disabled={disabled}
-    />
+    <EuiToolTip position="top" content={i18n.MORE_ACTIONS}>
+      <EuiButtonIcon
+        aria-label={ariaLabel}
+        data-test-subj="timeline-context-menu-button"
+        size="s"
+        iconType="boxesHorizontal"
+        onClick={onButtonClick}
+        disabled={disabled}
+      />
+    </EuiToolTip>
   );
 
   const handleAddEndpointExceptionClick = useCallback((): void => {
@@ -318,12 +327,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setOpenAddExceptionModal('detection');
   }, [closePopover]);
 
-  const areExceptionsAllowed = useMemo((): boolean => {
-    const ruleTypes = getOr([], 'signal.rule.type', ecsRowData);
-    const [ruleType] = ruleTypes as Type[];
-    return !isMlRule(ruleType) && !isThresholdRule(ruleType);
-  }, [ecsRowData]);
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const addExceptionComponent = (
     <EuiContextMenuItem
@@ -332,9 +335,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="add-exception-menu-item"
       id="addException"
       onClick={handleAddExceptionClick}
-      disabled={!canUserCRUD || !hasIndexWrite || !areExceptionsAllowed}
+      disabled={!canUserCRUD || !hasIndexWrite}
     >
-      <EuiText size="m">{i18n.ACTION_ADD_EXCEPTION}</EuiText>
+      <EuiText data-test-subj="addExceptionButton" size="m">
+        {i18n.ACTION_ADD_EXCEPTION}
+      </EuiText>
     </EuiContextMenuItem>
   );
 
@@ -367,7 +372,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   return (
     <>
-      <EventsTd key="actions-context-menu">
+      <div key="actions-context-menu">
         <EventsTdContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
           <EuiPopover
             id="singlePanel"
@@ -381,7 +386,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             <ContextMenuPanel items={items} />
           </EuiPopover>
         </EventsTdContent>
-      </EventsTd>
+      </div>
       {exceptionModalType != null && ruleId != null && ecsRowData != null && (
         <AddExceptionModal
           ruleName={ruleName}

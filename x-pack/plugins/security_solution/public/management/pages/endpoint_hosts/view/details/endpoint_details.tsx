@@ -14,6 +14,8 @@ import {
   EuiListGroupItem,
   EuiIcon,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -105,22 +107,23 @@ export const EndpointDetails = memo(
 
     const agentDetailsWithFlyoutPath = `${agentDetailsAppPath}${openReassignFlyoutSearch}`;
     const agentDetailsWithFlyoutUrl = `${agentDetailsUrl}${openReassignFlyoutSearch}`;
-    const handleReassignEndpointsClick = useNavigateToAppEventHandler<
-      AgentDetailsReassignPolicyAction
-    >(ingestAppId, {
-      path: agentDetailsWithFlyoutPath,
-      state: {
-        onDoneNavigateTo: [
-          'securitySolution:administration',
-          {
-            path: getEndpointDetailsPath({
-              name: 'endpointDetails',
-              selected_endpoint: details.agent.id,
-            }),
-          },
-        ],
-      },
-    });
+    const handleReassignEndpointsClick = useNavigateToAppEventHandler<AgentDetailsReassignPolicyAction>(
+      ingestAppId,
+      {
+        path: agentDetailsWithFlyoutPath,
+        state: {
+          onDoneNavigateTo: [
+            'securitySolution:administration',
+            {
+              path: getEndpointDetailsPath({
+                name: 'endpointDetails',
+                selected_endpoint: details.agent.id,
+              }),
+            },
+          ],
+        },
+      }
+    );
 
     const policyStatusClickHandler = useNavigateByRouterEventHandler(policyResponseRoutePath);
 
@@ -138,7 +141,31 @@ export const EndpointDetails = memo(
               >
                 {details.Endpoint.policy.applied.name}
               </EndpointPolicyLink>
-              {isPolicyOutOfDate(details.Endpoint.policy.applied, policyInfo) && <OutOfDate />}
+              <EuiFlexGroup gutterSize="s" alignItems="baseline">
+                {details.Endpoint.policy.applied.endpoint_policy_version && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText
+                      color="subdued"
+                      size="xs"
+                      style={{ whiteSpace: 'nowrap' }}
+                      data-test-subj="policyDetailsRevNo"
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.details.policy.revisionNumber"
+                        defaultMessage="rev. {revNumber}"
+                        values={{
+                          revNumber: details.Endpoint.policy.applied.endpoint_policy_version,
+                        }}
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+                {isPolicyOutOfDate(details.Endpoint.policy.applied, policyInfo) && (
+                  <EuiFlexItem grow={false}>
+                    <OutOfDate />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </>
           ),
         },

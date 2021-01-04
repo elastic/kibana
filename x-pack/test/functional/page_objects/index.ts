@@ -37,6 +37,7 @@ import { RoleMappingsPageProvider } from './role_mappings_page';
 import { SpaceSelectorPageProvider } from './space_selector_page';
 import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 import { TagManagementPageProvider } from './tag_management_page';
+import { NavigationalSearchProvider } from './navigational_search';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -72,4 +73,5 @@ export const pageObjects = {
   lens: LensPageProvider,
   roleMappings: RoleMappingsPageProvider,
   ingestPipelines: IngestPipelinesPageProvider,
+  navigationalSearch: NavigationalSearchProvider,
 };

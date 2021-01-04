@@ -81,7 +81,9 @@ describe('IBM Resilient service', () => {
   beforeAll(() => {
     service = createExternalService(
       {
-        config: { apiUrl: 'https://resilient.elastic.co', orgId: '201' },
+        // The trailing slash at the end of the url is intended.
+        // All API calls need to have the trailing slash removed.
+        config: { apiUrl: 'https://resilient.elastic.co/', orgId: '201' },
         secrets: { apiKeyId: 'keyId', apiKeySecret: 'secret' },
       },
       logger
@@ -448,10 +450,6 @@ describe('IBM Resilient service', () => {
         comment: {
           comment: 'comment',
           commentId: 'comment-1',
-          createdBy: null,
-          createdAt: null,
-          updatedAt: null,
-          updatedBy: null,
         },
       });
 
@@ -475,10 +473,6 @@ describe('IBM Resilient service', () => {
         comment: {
           comment: 'comment',
           commentId: 'comment-1',
-          createdBy: null,
-          createdAt: null,
-          updatedAt: null,
-          updatedBy: null,
         },
       });
 
@@ -508,10 +502,6 @@ describe('IBM Resilient service', () => {
           comment: {
             comment: 'comment',
             commentId: 'comment-1',
-            createdBy: null,
-            createdAt: null,
-            updatedAt: null,
-            updatedBy: null,
           },
         })
       ).rejects.toThrow(

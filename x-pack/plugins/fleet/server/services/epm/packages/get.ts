@@ -7,13 +7,18 @@
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
 import { isPackageLimited, installationStatuses } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import { ArchivePackage, InstallSource, RegistryPackage, ValueOf } from '../../../../common/types';
-import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
+import {
+  ArchivePackage,
+  InstallSource,
+  RegistryPackage,
+  EpmPackageAdditions,
+} from '../../../../common/types';
+import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
 import { getArchivePackage } from '../archive';
 
-export { fetchFile as getFile, SearchParams } from '../registry';
+export { getFile, SearchParams } from '../registry';
 
 function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
@@ -84,26 +89,6 @@ export async function getPackageSavedObjects(
   });
 }
 
-export async function getPackageKeysByStatus(
-  savedObjectsClient: SavedObjectsClientContract,
-  status: ValueOf<InstallationStatus>
-) {
-  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
-  return allPackages.reduce<Array<{ pkgName: string; pkgVersion: string }>>((acc, pkg) => {
-    if (pkg.status === status) {
-      if (pkg.status === installationStatuses.Installed) {
-        // if we're looking for installed packages grab the version from the saved object because `getPackages` will
-        // return the latest package information from the registry
-        acc.push({ pkgName: pkg.name, pkgVersion: pkg.savedObject.attributes.version });
-      } else {
-        acc.push({ pkgName: pkg.name, pkgVersion: pkg.version });
-      }
-    }
-
-    return acc;
-  }, []);
-}
-
 export async function getPackageInfo(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -118,19 +103,23 @@ export async function getPackageInfo(options: {
   const getPackageRes = await getPackageFromSource({
     pkgName,
     pkgVersion,
-    pkgInstallSource: savedObject?.attributes.install_source,
+    pkgInstallSource:
+      savedObject?.attributes.version === pkgVersion
+        ? savedObject?.attributes.install_source
+        : 'registry',
   });
   const paths = getPackageRes.paths;
   const packageInfo = getPackageRes.packageInfo;
 
   // add properties that aren't (or aren't yet) on the package
-  const updated = {
-    ...packageInfo,
+  const additions: EpmPackageAdditions = {
     latestVersion: latestPackage.version,
     title: packageInfo.title || nameAsTitle(packageInfo.name),
     assets: Registry.groupPathsByService(paths || []),
     removable: !isRequiredPackage(pkgName),
   };
+  const updated = { ...packageInfo, ...additions };
+
   return createInstallableFrom(updated, savedObject);
 }
 
@@ -139,7 +128,10 @@ export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
   pkgInstallSource?: InstallSource;
-}): Promise<{ paths: string[] | undefined; packageInfo: RegistryPackage | ArchivePackage }> {
+}): Promise<{
+  paths: string[] | undefined;
+  packageInfo: RegistryPackage | ArchivePackage;
+}> {
   const { pkgName, pkgVersion, pkgInstallSource } = options;
   // TODO: Check package storage before checking registry
   let res;
@@ -147,14 +139,16 @@ export async function getPackageFromSource(options: {
     res = getArchivePackage({
       name: pkgName,
       version: pkgVersion,
-      installSource: pkgInstallSource,
     });
-    if (!res.packageInfo)
-      throw new Error(`installed package ${pkgName}-${pkgVersion} does not exist in cache`);
   } else {
     res = await Registry.getRegistryPackage(pkgName, pkgVersion);
   }
-  return res;
+  if (!res.packageInfo || !res.paths)
+    throw new Error(`package info for ${pkgName}-${pkgVersion} does not exist`);
+  return {
+    paths: res.paths,
+    packageInfo: res.packageInfo,
+  };
 }
 
 export async function getInstallationObject(options: {

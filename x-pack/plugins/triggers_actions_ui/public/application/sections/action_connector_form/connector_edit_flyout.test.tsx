@@ -6,14 +6,14 @@
 import * as React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import ConnectorEditFlyout from './connector_edit_flyout';
-import { AppContextProvider } from '../../app_context';
+import { useKibana } from '../../../common/lib/kibana';
 
+jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
-let deps: any;
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('connector_edit_flyout', () => {
   beforeAll(async () => {
@@ -23,21 +23,13 @@ describe('connector_edit_flyout', () => {
         application: { capabilities },
       },
     ] = await mockes.getStartServices();
-    deps = {
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
-        },
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        show: true,
+        save: false,
+        delete: false,
       },
-      actionTypeRegistry,
-      alertTypeRegistry: {} as any,
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
 
@@ -69,24 +61,16 @@ describe('connector_edit_flyout', () => {
     };
     actionTypeRegistry.get.mockReturnValue(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
-
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
     const wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <ActionsConnectorsContextProvider
-          value={{
-            http: deps.http,
-            toastNotifications: deps.toastNotifications,
-            capabilities: deps.capabilities,
-            actionTypeRegistry: deps.actionTypeRegistry,
-            reloadConnectors: () => {
-              return new Promise<void>(() => {});
-            },
-            docLinks: deps.docLinks,
-          }}
-        >
-          <ConnectorEditFlyout initialConnector={connector} onClose={() => {}} />
-        </ActionsConnectorsContextProvider>
-      </AppContextProvider>
+      <ConnectorEditFlyout
+        initialConnector={connector}
+        onClose={() => {}}
+        reloadConnectors={() => {
+          return new Promise<void>(() => {});
+        }}
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
 
     const connectorNameField = wrapper.find('[data-test-subj="nameInput"]');
@@ -122,24 +106,17 @@ describe('connector_edit_flyout', () => {
     };
     actionTypeRegistry.get.mockReturnValue(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
 
     const wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <ActionsConnectorsContextProvider
-          value={{
-            http: deps.http,
-            toastNotifications: deps.toastNotifications,
-            capabilities: deps.capabilities,
-            actionTypeRegistry: deps.actionTypeRegistry,
-            reloadConnectors: () => {
-              return new Promise<void>(() => {});
-            },
-            docLinks: deps.docLinks,
-          }}
-        >
-          <ConnectorEditFlyout initialConnector={connector} onClose={() => {}} />
-        </ActionsConnectorsContextProvider>
-      </AppContextProvider>
+      <ConnectorEditFlyout
+        initialConnector={connector}
+        onClose={() => {}}
+        reloadConnectors={() => {
+          return new Promise<void>(() => {});
+        }}
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
 
     const preconfiguredBadge = wrapper.find('[data-test-subj="preconfiguredBadge"]');

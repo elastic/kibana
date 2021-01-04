@@ -111,8 +111,8 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewEngineDocuments && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(engineRoute + ENGINE_DOCUMENTS_PATH)}
+          to={engineRoute + ENGINE_DOCUMENTS_PATH}
+          shouldShowActiveForSubroutes={true}
           data-test-subj="EngineDocumentsLink"
         >
           {DOCUMENTS_TITLE}
@@ -153,7 +153,7 @@ export const EngineNav: React.FC = () => {
           </EuiFlexGroup>
         </SideNavLink>
       )}
-      {canViewEngineCrawler && !isMetaEngine && !isSampleEngine && (
+      {canViewEngineCrawler && !isMetaEngine && (
         <SideNavLink
           isExternal
           to={getAppSearchUrl(engineRoute + ENGINE_CRAWLER_PATH)}

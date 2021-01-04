@@ -22,7 +22,6 @@ import {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
-  IMitreEnterpriseAttack,
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
@@ -30,6 +29,7 @@ import {
   SeverityMapping,
   Type,
   Severity,
+  Threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
@@ -177,7 +177,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
-    threat: threat as IMitreEnterpriseAttack[],
+    threat: threat as Threats,
   };
 };
 
@@ -377,7 +377,12 @@ export const getActionMessageParams = memoizeOne(
       state: [{ name: 'signals_count', description: 'state.signals_count' }],
       params: [],
       context: [
-        { name: 'results_link', description: 'context.results_link' },
+        {
+          name: 'results_link',
+          description: 'context.results_link',
+          useWithTripleBracesInTemplates: true,
+        },
+        { name: 'alerts', description: 'context.alerts' },
         ...actionMessageRuleParams.map((param) => {
           const extendedParam = `rule.${param}`;
           return { name: extendedParam, description: `context.${extendedParam}` };

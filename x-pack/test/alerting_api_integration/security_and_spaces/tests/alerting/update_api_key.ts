@@ -19,6 +19,7 @@ import {
 
 // eslint-disable-next-line import/no-default-export
 export default function createUpdateApiKeyTests({ getService }: FtrProviderContext) {
+  const retry = getService('retry');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
@@ -301,17 +302,19 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
 
-          await supertest
-            .put(
-              `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
-            )
-            .set('kbn-xsrf', 'foo')
-            .send({
-              attributes: {
-                name: 'bar',
-              },
-            })
-            .expect(200);
+          await retry.try(async () => {
+            await supertest
+              .put(
+                `${getUrlPrefix(space.id)}/api/alerts_fixture/saved_object/alert/${createdAlert.id}`
+              )
+              .set('kbn-xsrf', 'foo')
+              .send({
+                attributes: {
+                  name: 'bar',
+                },
+              })
+              .expect(200);
+          });
 
           const response = await alertUtils.getUpdateApiKeyRequest(createdAlert.id);
 

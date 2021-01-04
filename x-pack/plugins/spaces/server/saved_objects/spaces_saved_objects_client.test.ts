@@ -209,9 +209,9 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         };
         baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const spacesClient = spacesService.createSpacesClient(null as any) as jest.Mocked<
-          SpacesClient
-        >;
+        const spacesClient = spacesService.createSpacesClient(
+          null as any
+        ) as jest.Mocked<SpacesClient>;
         spacesClient.getAll.mockImplementation(() =>
           Promise.resolve([
             { id: 'ns-1', name: '', disabledFeatures: [] },
@@ -240,9 +240,9 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         };
         baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const spacesClient = spacesService.createSpacesClient(null as any) as jest.Mocked<
-          SpacesClient
-        >;
+        const spacesClient = spacesService.createSpacesClient(
+          null as any
+        ) as jest.Mocked<SpacesClient>;
         spacesClient.getAll.mockImplementation(() =>
           Promise.resolve([
             { id: 'ns-1', name: '', disabledFeatures: [] },
@@ -271,9 +271,9 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         };
         baseClient.find.mockReturnValue(Promise.resolve(expectedReturnValue));
 
-        const spacesClient = spacesService.createSpacesClient(null as any) as jest.Mocked<
-          SpacesClient
-        >;
+        const spacesClient = spacesService.createSpacesClient(
+          null as any
+        ) as jest.Mocked<SpacesClient>;
         spacesClient.getAll.mockImplementation(() =>
           Promise.resolve([
             { id: 'ns-1', name: '', disabledFeatures: [] },

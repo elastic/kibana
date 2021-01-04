@@ -13,15 +13,17 @@ import {
   DataProviderType,
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import { SerializedFilterQuery } from '../../../common/store/types';
 
 import { KqlMode, TimelineModel, ColumnHeaderOptions } from './model';
 import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import {
   TimelineEventsType,
-  TimelineExpandedEvent,
+  TimelineExpandedEventType,
   TimelineTypeLiteral,
   RowRendererId,
+  TimelineExpandedEvent,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 import { InsertTimeline } from './types';
 
@@ -35,9 +37,10 @@ export const addNoteToEvent = actionCreator<{ id: string; noteId: string; eventI
   'ADD_NOTE_TO_EVENT'
 );
 
-interface ToggleExpandedEvent {
+export interface ToggleExpandedEvent {
+  event?: TimelineExpandedEventType;
+  tabType?: TimelineTabs;
   timelineId: string;
-  event: TimelineExpandedEvent;
 }
 export const toggleExpandedEvent = actionCreator<ToggleExpandedEvent>('TOGGLE_EXPANDED_EVENT');
 
@@ -70,10 +73,9 @@ export interface TimelineInput {
   indexNames: string[];
   kqlQuery?: {
     filterQuery: SerializedFilterQuery | null;
-    filterQueryDraft: KueryFilterQuery | null;
   };
   show?: boolean;
-  sort?: Sort;
+  sort?: Sort[];
   showCheckboxes?: boolean;
   timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string | null;
@@ -181,11 +183,6 @@ export const updateDescription = actionCreator<{
 
 export const updateKqlMode = actionCreator<{ id: string; kqlMode: KqlMode }>('UPDATE_KQL_MODE');
 
-export const setKqlFilterQueryDraft = actionCreator<{
-  id: string;
-  filterQueryDraft: KueryFilterQuery;
-}>('SET_KQL_FILTER_QUERY_DRAFT');
-
 export const applyKqlFilterQuery = actionCreator<{
   id: string;
   filterQuery: SerializedFilterQuery;
@@ -222,7 +219,7 @@ export const updateRange = actionCreator<{ id: string; start: string; end: strin
   'UPDATE_RANGE'
 );
 
-export const updateSort = actionCreator<{ id: string; sort: Sort }>('UPDATE_SORT');
+export const updateSort = actionCreator<{ id: string; sort: Sort[] }>('UPDATE_SORT');
 
 export const updateAutoSaveMsg = actionCreator<{
   timelineId: string | null;
@@ -285,3 +282,13 @@ export const updateIndexNames = actionCreator<{
   id: string;
   indexNames: string[];
 }>('UPDATE_INDEXES_NAME');
+
+export const setActiveTabTimeline = actionCreator<{
+  id: string;
+  activeTab: TimelineTabs;
+}>('SET_ACTIVE_TAB_TIMELINE');
+
+export const toggleModalSaveTimeline = actionCreator<{
+  id: string;
+  showModalSaveTimeline: boolean;
+}>('TOGGLE_MODAL_SAVE_TIMELINE');

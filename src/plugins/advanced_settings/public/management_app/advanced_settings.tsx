@@ -22,7 +22,7 @@ import { Subscription } from 'rxjs';
 import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import { useParams } from 'react-router-dom';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { CallOuts } from './components/call_outs';
 import { Search } from './components/search';
 import { Form } from './components/form';
@@ -40,7 +40,7 @@ interface AdvancedSettingsProps {
   dockLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   componentRegistry: ComponentRegistry['start'];
-  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 
 interface AdvancedSettingsComponentProps extends AdvancedSettingsProps {

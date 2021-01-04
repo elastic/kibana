@@ -113,27 +113,24 @@ export default new Chainable('legend', {
     defaultMessage: 'Set the position and style of the legend on the plot',
   }),
   fn: function legendFn(args) {
-    return alter(args, function (
-      eachSeries,
-      position,
-      columns,
-      showTime = true,
-      timeFormat = DEFAULT_TIME_FORMAT
-    ) {
-      eachSeries._global = eachSeries._global || {};
-      eachSeries._global.legend = eachSeries._global.legend || {};
-      eachSeries._global.legend.noColumns = columns;
-      eachSeries._global.legend.showTime = showTime;
-      eachSeries._global.legend.timeFormat = timeFormat;
+    return alter(
+      args,
+      function (eachSeries, position, columns, showTime = true, timeFormat = DEFAULT_TIME_FORMAT) {
+        eachSeries._global = eachSeries._global || {};
+        eachSeries._global.legend = eachSeries._global.legend || {};
+        eachSeries._global.legend.noColumns = columns;
+        eachSeries._global.legend.showTime = showTime;
+        eachSeries._global.legend.timeFormat = timeFormat;
 
-      if (position === false) {
-        eachSeries._global.legend.show = false;
-        eachSeries._global.legend.showTime = false;
-      } else {
-        eachSeries._global.legend.position = position;
+        if (position === false) {
+          eachSeries._global.legend.show = false;
+          eachSeries._global.legend.showTime = false;
+        } else {
+          eachSeries._global.legend.position = position;
+        }
+
+        return eachSeries;
       }
-
-      return eachSeries;
-    });
+    );
   },
 });

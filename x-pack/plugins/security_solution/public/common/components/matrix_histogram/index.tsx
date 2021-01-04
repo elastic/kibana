@@ -58,12 +58,13 @@ const HeaderChildrenFlexItem = styled(EuiFlexItem)`
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
   flex-direction: column;
-  ${({ height }) => (height != null ? `height: ${height}px;` : '')}
+  ${({ height }) => (height != null ? `min-height: ${height}px;` : '')}
 `;
 
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
+  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
@@ -72,6 +73,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   hideHistogramIfEmpty = false,
   id,
   indexNames,
+  isPtrIncluded,
   legendPosition,
   mapping,
   panelHeight = DEFAULT_PANEL_HEIGHT,
@@ -138,6 +140,8 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     indexNames,
     startDate,
     stackByField: selectedStackByOption.value,
+    isPtrIncluded,
+    docValueFields,
   });
 
   const titleWithStackByField = useMemo(

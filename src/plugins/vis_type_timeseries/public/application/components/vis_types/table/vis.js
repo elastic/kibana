@@ -46,7 +46,7 @@ function getColor(rules, colorKey, value) {
   return color;
 }
 
-export class TableVis extends Component {
+class TableVis extends Component {
   constructor(props) {
     super(props);
 
@@ -260,3 +260,7 @@ TableVis.propTypes = {
   pageNumber: PropTypes.number,
   getConfig: PropTypes.func,
 };
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TableVis as default };

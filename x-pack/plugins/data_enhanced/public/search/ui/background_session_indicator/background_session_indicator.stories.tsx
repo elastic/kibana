@@ -7,24 +7,33 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { BackgroundSessionIndicator } from './background_session_indicator';
-import { BackgroundSessionViewState } from '../connected_background_session_indicator';
+import { SessionState } from '../../../../../../../src/plugins/data/public';
 
 storiesOf('components/BackgroundSessionIndicator', module).add('default', () => (
   <>
     <div>
-      <BackgroundSessionIndicator state={BackgroundSessionViewState.Loading} />
+      <BackgroundSessionIndicator state={SessionState.Loading} />
     </div>
     <div>
-      <BackgroundSessionIndicator state={BackgroundSessionViewState.Completed} />
+      <BackgroundSessionIndicator state={SessionState.Completed} />
     </div>
     <div>
-      <BackgroundSessionIndicator state={BackgroundSessionViewState.BackgroundLoading} />
+      <BackgroundSessionIndicator state={SessionState.BackgroundLoading} />
     </div>
     <div>
-      <BackgroundSessionIndicator state={BackgroundSessionViewState.BackgroundCompleted} />
+      <BackgroundSessionIndicator state={SessionState.BackgroundCompleted} />
     </div>
     <div>
-      <BackgroundSessionIndicator state={BackgroundSessionViewState.Restored} />
+      <BackgroundSessionIndicator state={SessionState.Restored} />
+    </div>
+    <div>
+      <BackgroundSessionIndicator
+        state={SessionState.Completed}
+        disabled={true}
+        disabledReasonText={
+          'Send to background capability is unavailable when auto-refresh is enabled'
+        }
+      />
     </div>
   </>
 ));

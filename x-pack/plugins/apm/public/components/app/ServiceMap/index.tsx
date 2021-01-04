@@ -13,10 +13,10 @@ import {
   isActivePlatinumLicense,
   SERVICE_MAP_TIMEOUT_ERROR,
 } from '../../../../common/service_map';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { useLicense } from '../../../hooks/useLicense';
-import { useTheme } from '../../../hooks/useTheme';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useLicenseContext } from '../../../context/license/use_license_context';
+import { useTheme } from '../../../hooks/use_theme';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { DatePicker } from '../../shared/DatePicker';
 import { LicensePrompt } from '../../shared/LicensePrompt';
@@ -70,7 +70,7 @@ export function ServiceMap({
   serviceName,
 }: PropsWithChildren<ServiceMapProps>) {
   const theme = useTheme();
-  const license = useLicense();
+  const license = useLicenseContext();
   const { urlParams } = useUrlParams();
 
   const { data = { elements: [] }, status, error } = useFetcher(() => {

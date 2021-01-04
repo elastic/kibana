@@ -5,10 +5,13 @@
  */
 
 import React from 'react';
+import { coreMock } from 'src/core/public/mocks';
 import { ManageMLJobComponent } from '../manage_ml_job';
 import * as redux from 'react-redux';
 import { renderWithRouter, shallowWithRouter } from '../../../../lib';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 
+const core = coreMock.createStart();
 describe('Manage ML Job', () => {
   it('shallow renders without errors', () => {
     jest.spyOn(redux, 'useSelector').mockReturnValue(true);
@@ -25,7 +28,11 @@ describe('Manage ML Job', () => {
     jest.spyOn(redux, 'useSelector').mockReturnValue(true);
 
     const wrapper = renderWithRouter(
-      <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />
+      <KibanaContextProvider
+        services={{ ...core, triggersActionsUi: { getEditAlertFlyout: jest.fn() } }}
+      >
+        <ManageMLJobComponent hasMLJob={true} onEnableJob={jest.fn()} onJobDelete={jest.fn()} />
+      </KibanaContextProvider>
     );
     expect(wrapper).toMatchSnapshot();
   });

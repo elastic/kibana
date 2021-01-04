@@ -7,16 +7,12 @@
 import { IRouter } from 'kibana/server';
 import { merge } from 'lodash/fp';
 
-import { SecurityPluginSetup } from '../../../security/server';
 import { LIST_PRIVILEGES_URL } from '../../common/constants';
 import { buildSiemResponse, readPrivileges, transformError } from '../siem_server_deps';
 
 import { getListClient } from './utils';
 
-export const readPrivilegesRoute = (
-  router: IRouter,
-  security: SecurityPluginSetup | null | undefined
-): void => {
+export const readPrivilegesRoute = (router: IRouter): void => {
   router.get(
     {
       options: {
@@ -44,7 +40,7 @@ export const readPrivilegesRoute = (
             lists: clusterPrivilegesLists,
           },
           {
-            is_authenticated: security?.authc.isAuthenticated(request) ?? false,
+            is_authenticated: request.auth.isAuthenticated ?? false,
           }
         );
         return response.ok({ body: privileges });

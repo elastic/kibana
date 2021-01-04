@@ -24,4 +24,4 @@ export {
   mergeCapabilitiesWithFields,
   getCapabilitiesForRollupIndices,
 } from './fetcher';
-export { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns_service';
+export { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './index_patterns_service';

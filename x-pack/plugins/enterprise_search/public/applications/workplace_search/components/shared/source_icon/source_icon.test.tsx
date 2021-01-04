@@ -7,19 +7,21 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { EuiIcon } from '@elastic/eui';
+
 import { SourceIcon } from './';
 
 describe('SourceIcon', () => {
   it('renders unwrapped icon', () => {
     const wrapper = shallow(<SourceIcon name="foo" serviceType="custom" />);
 
-    expect(wrapper.find('img')).toHaveLength(1);
+    expect(wrapper.find(EuiIcon)).toHaveLength(1);
     expect(wrapper.find('.user-group-source')).toHaveLength(0);
   });
 
   it('renders wrapped icon', () => {
     const wrapper = shallow(<SourceIcon name="foo" wrapped serviceType="custom" />);
 
-    expect(wrapper.find('.user-group-source')).toHaveLength(1);
+    expect(wrapper.find('.wrapped-icon')).toHaveLength(1);
   });
 });

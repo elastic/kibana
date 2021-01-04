@@ -7,8 +7,13 @@ import React, { useCallback, useReducer, useMemo, useState, useEffect } from 're
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAlertsContext } from '../../context/alerts_context';
-import { Alert, AlertAction, IErrorObject } from '../../../types';
+import {
+  ActionTypeRegistryContract,
+  Alert,
+  AlertAction,
+  AlertTypeRegistryContract,
+  IErrorObject,
+} from '../../../types';
 import { AlertForm, isValidAlert, validateBaseProperties } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
@@ -17,23 +22,30 @@ import { ConfirmAlertSave } from './confirm_alert_save';
 import { hasShowActionsCapability } from '../../lib/capabilities';
 import AlertAddFooter from './alert_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
+import { useKibana } from '../../../common/lib/kibana';
 
-interface AlertAddProps {
+export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
-  addFlyoutVisible: boolean;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  alertTypeRegistry: AlertTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onClose: () => void;
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Alert>;
+  reloadAlerts?: () => Promise<void>;
+  metadata?: MetaData;
 }
 
-export const AlertAdd = ({
+const AlertAdd = ({
   consumer,
-  addFlyoutVisible,
-  setAddFlyoutVisibility,
+  alertTypeRegistry,
+  actionTypeRegistry,
+  onClose,
   canChangeTrigger,
   alertTypeId,
   initialValues,
+  reloadAlerts,
+  metadata,
 }: AlertAddProps) => {
   const initialAlert: InitialAlert = useMemo(
     () => ({
@@ -45,6 +57,7 @@ export const AlertAdd = ({
       },
       actions: [],
       tags: [],
+      notifyWhen: 'onActionGroupChange',
       ...(initialValues ? initialValues : {}),
     }),
     [alertTypeId, consumer, initialValues]
@@ -65,14 +78,10 @@ export const AlertAdd = ({
   };
 
   const {
-    reloadAlerts,
     http,
-    toastNotifications,
-    alertTypeRegistry,
-    actionTypeRegistry,
-    docLinks,
-    capabilities,
-  } = useAlertsContext();
+    notifications: { toasts },
+    application: { capabilities },
+  } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
 
@@ -81,9 +90,9 @@ export const AlertAdd = ({
   }, [alertTypeId]);
 
   const closeFlyout = useCallback(() => {
-    setAddFlyoutVisibility(false);
     setAlert(initialAlert);
-  }, [initialAlert, setAddFlyoutVisibility]);
+    onClose();
+  }, [initialAlert, onClose]);
 
   const saveAlertAndCloseFlyout = async () => {
     const savedAlert = await onSaveAlert();
@@ -95,10 +104,6 @@ export const AlertAdd = ({
       }
     }
   };
-
-  if (!addFlyoutVisible) {
-    return null;
-  }
 
   const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
   const errors = {
@@ -127,7 +132,7 @@ export const AlertAdd = ({
     try {
       if (isValidAlert(alert, errors)) {
         const newAlert = await createAlert({ http, alert });
-        toastNotifications.addSuccess(
+        toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
             defaultMessage: 'Created alert "{alertName}"',
             values: {
@@ -138,7 +143,7 @@ export const AlertAdd = ({
         return newAlert;
       }
     } catch (errorRes) {
-      toastNotifications.addDanger(
+      toasts.addDanger(
         errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
             defaultMessage: 'Cannot create alert.',
@@ -166,7 +171,7 @@ export const AlertAdd = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <HealthContextProvider>
-          <HealthCheck docLinks={docLinks} http={http} inFlyout={true} waitForCheck={false}>
+          <HealthCheck inFlyout={true} waitForCheck={false}>
             <EuiFlyoutBody>
               <AlertForm
                 alert={alert}
@@ -179,6 +184,9 @@ export const AlertAdd = ({
                     defaultMessage: 'create',
                   }
                 )}
+                actionTypeRegistry={actionTypeRegistry}
+                alertTypeRegistry={alertTypeRegistry}
+                metadata={metadata}
               />
             </EuiFlyoutBody>
             <AlertAddFooter

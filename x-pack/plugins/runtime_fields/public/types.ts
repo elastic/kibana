@@ -31,7 +31,9 @@ export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 export interface RuntimeField {
   name: string;
   type: RuntimeType;
-  script: string;
+  script: {
+    source: string;
+  };
 }
 
 export interface ComboBoxOption<T = unknown> {

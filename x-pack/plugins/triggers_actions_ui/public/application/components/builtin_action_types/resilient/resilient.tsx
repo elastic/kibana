@@ -69,11 +69,15 @@ export function getActionType(): ActionTypeModel<
     validateParams: (actionParams: ResilientActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
-        title: new Array<string>(),
+        name: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (actionParams.subActionParams && !actionParams.subActionParams.title?.length) {
-        errors.title.push(i18n.TITLE_REQUIRED);
+      if (
+        actionParams.subActionParams &&
+        actionParams.subActionParams.incident &&
+        !actionParams.subActionParams.incident.name?.length
+      ) {
+        errors.name.push(i18n.NAME_REQUIRED);
       }
       return validationResult;
     },

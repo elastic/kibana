@@ -22,7 +22,7 @@ import {
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { CustomLinkList } from './CustomLinkList';
 import { CustomLinkToolbar } from './CustomLinkToolbar';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { LoadingStatePrompt } from '../../LoadingStatePrompt';
 import { px } from '../../../../style/variables';
 import { CreateEditCustomLinkFlyout } from '../../../app/Settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout';

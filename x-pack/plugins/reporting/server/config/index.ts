@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { PluginConfigDescriptor } from 'kibana/server';
 import { ConfigSchema, ReportingConfigType } from './schema';
 export { buildConfig } from './config';
@@ -20,5 +21,14 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
     unused('poll.jobCompletionNotifier.intervalErrorMultiplier'),
     unused('poll.jobsRefresh.intervalErrorMultiplier'),
     unused('kibanaApp'),
+    (settings, fromPath, log) => {
+      const reporting = get(settings, fromPath);
+      if (reporting?.index) {
+        log(
+          `"${fromPath}.index" is deprecated. Multitenancy by changing "kibana.index" will not be supported starting in 8.0. See https://ela.st/kbn-remove-legacy-multitenancy for more details`
+        );
+      }
+      return settings;
+    },
   ],
 };

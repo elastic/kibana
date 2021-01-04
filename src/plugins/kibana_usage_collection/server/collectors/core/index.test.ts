@@ -29,7 +29,7 @@ import { CoreUsageData } from 'src/core/server/';
 const logger = loggingSystemMock.createLogger();
 
 describe('telemetry_core', () => {
-  let collector: Collector<unknown, unknown>;
+  let collector: Collector<unknown>;
 
   const usageCollectionMock = createUsageCollectionSetupMock();
   usageCollectionMock.makeUsageCollector.mockImplementation((config) => {

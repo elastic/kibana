@@ -122,7 +122,7 @@ export async function handleInstallPackageFailure({
   callCluster,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  error: IngestManagerError | Boom | Error;
+  error: IngestManagerError | Boom.Boom | Error;
   pkgName: string;
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
@@ -313,7 +313,6 @@ async function installPackageByUpload({
   setPackageInfo({
     name: packageInfo.name,
     version: packageInfo.version,
-    installSource,
     packageInfo,
   });
 

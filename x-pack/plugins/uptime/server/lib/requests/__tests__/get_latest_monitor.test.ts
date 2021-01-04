@@ -6,7 +6,7 @@
 
 import { getLatestMonitor } from '../get_latest_monitor';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
+import { getUptimeESMockClient } from './helper';
 
 describe('getLatestMonitor', () => {
   let expectedGetLatestSearchParams: any;
@@ -38,7 +38,7 @@ describe('getLatestMonitor', () => {
           },
         },
         size: 1,
-        _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error'],
+        _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error', 'tags'],
         sort: {
           '@timestamp': { order: 'desc' },
         },
@@ -69,12 +69,12 @@ describe('getLatestMonitor', () => {
   });
 
   it('returns data in expected shape', async () => {
-    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
     mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
 
     const result = await getLatestMonitor({
-      callES: mockEsClient,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       dateStart: 'now-1h',
       dateEnd: 'now',
       monitorId: 'testMonitor',

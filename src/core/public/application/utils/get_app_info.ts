@@ -17,9 +17,16 @@
  * under the License.
  */
 
-import { App, AppNavLinkStatus, AppStatus, PublicAppInfo } from '../types';
+import {
+  App,
+  AppNavLinkStatus,
+  AppStatus,
+  AppSearchDeepLink,
+  PublicAppInfo,
+  PublicAppSearchDeepLinkInfo,
+} from '../types';
 
-export function getAppInfo(app: App<unknown>): PublicAppInfo {
+export function getAppInfo(app: App): PublicAppInfo {
   const navLinkStatus =
     app.navLinkStatus === AppNavLinkStatus.default
       ? app.status === AppStatus.inaccessible
@@ -32,5 +39,30 @@ export function getAppInfo(app: App<unknown>): PublicAppInfo {
     status: app.status!,
     navLinkStatus,
     appRoute: app.appRoute!,
+    meta: {
+      keywords: app.meta?.keywords ?? [],
+      searchDeepLinks: getSearchDeepLinkInfos(app, app.meta?.searchDeepLinks),
+    },
   };
+}
+
+function getSearchDeepLinkInfos(
+  app: App,
+  searchDeepLinks?: AppSearchDeepLink[]
+): PublicAppSearchDeepLinkInfo[] {
+  if (!searchDeepLinks) {
+    return [];
+  }
+
+  return searchDeepLinks.map(
+    (rawDeepLink): PublicAppSearchDeepLinkInfo => {
+      return {
+        id: rawDeepLink.id,
+        title: rawDeepLink.title,
+        path: rawDeepLink.path,
+        keywords: rawDeepLink.keywords ?? [],
+        searchDeepLinks: getSearchDeepLinkInfos(app, rawDeepLink.searchDeepLinks),
+      };
+    }
+  );
 }

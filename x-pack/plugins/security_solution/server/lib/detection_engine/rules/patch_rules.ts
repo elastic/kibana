@@ -13,6 +13,7 @@ import { addTags } from './add_tags';
 import { calculateVersion, calculateName, calculateInterval, removeUndefined } from './utils';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 import { internalRuleUpdate } from '../schemas/rule_schemas';
+import { RuleTypeParams } from '../types';
 
 class PatchError extends Error {
   public readonly statusCode: number;
@@ -71,7 +72,7 @@ export const patchRules = async ({
   anomalyThreshold,
   machineLearningJobId,
   actions,
-}: PatchRulesOptions): Promise<PartialAlert | null> => {
+}: PatchRulesOptions): Promise<PartialAlert<RuleTypeParams> | null> => {
   if (rule == null) {
     return null;
   }
@@ -172,6 +173,7 @@ export const patchRules = async ({
   const newRule = {
     tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
     throttle: null,
+    notifyWhen: null,
     name: calculateName({ updatedName: name, originalName: rule.name }),
     schedule: {
       interval: calculateInterval(interval, rule.schedule.interval),
@@ -184,10 +186,13 @@ export const patchRules = async ({
     throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
   }
 
-  const update = await alertsClient.update({
+  /**
+   * TODO: Remove this use of `as` by utilizing the proper type
+   */
+  const update = (await alertsClient.update({
     id: rule.id,
     data: validated,
-  });
+  })) as PartialAlert<RuleTypeParams>;
 
   if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });

@@ -56,6 +56,9 @@ export class ESTermSource extends AbstractESAggSource {
     }
     return {
       ...normalizedDescriptor,
+      indexPatternTitle: descriptor.indexPatternTitle
+        ? descriptor.indexPatternTitle
+        : descriptor.indexPatternId,
       term: descriptor.term!,
       type: SOURCE_TYPES.ES_TERM_SOURCE,
     };
@@ -64,7 +67,7 @@ export class ESTermSource extends AbstractESAggSource {
   private readonly _termField: ESDocField;
   readonly _descriptor: ESTermSourceDescriptor;
 
-  constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters: Adapters) {
+  constructor(descriptor: ESTermSourceDescriptor, inspectorAdapters?: Adapters) {
     const sourceDescriptor = ESTermSource.createDescriptor(descriptor);
     super(sourceDescriptor, inspectorAdapters);
     this._descriptor = sourceDescriptor;
@@ -99,13 +102,13 @@ export class ESTermSource extends AbstractESAggSource {
     });
   }
 
-  getAggLabel(aggType: AGG_TYPE, fieldName: string) {
+  getAggLabel(aggType: AGG_TYPE, fieldLabel: string): string {
     return aggType === AGG_TYPE.COUNT
       ? i18n.translate('xpack.maps.source.esJoin.countLabel', {
           defaultMessage: `Count of {indexPatternTitle}`,
           values: { indexPatternTitle: this._descriptor.indexPatternTitle },
         })
-      : super.getAggLabel(aggType, fieldName);
+      : super.getAggLabel(aggType, fieldLabel);
   }
 
   async getPropertiesMap(

@@ -5,6 +5,7 @@
  */
 
 import { IHttpFetchError } from 'kibana/public';
+import { DefaultMalwareMessage } from '../../../../../../common/endpoint/models/policy_config';
 import { PolicyDetailsState, UpdatePolicyResponse } from '../../types';
 import {
   policyIdFromParams,
@@ -17,7 +18,7 @@ import {
   sendGetPackagePolicy,
   sendGetFleetAgentStatusForPolicy,
   sendPutPackagePolicy,
-} from '../policy_list/services/ingest';
+} from '../services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 
@@ -25,7 +26,6 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
   coreStart
 ) => {
   const http = coreStart.http;
-
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
@@ -38,10 +38,8 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
         policyItem = (await sendGetPackagePolicy(http, id)).item;
         // sets default user notification message if policy config message is empty
         if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
-          policyItem.inputs[0].config.policy.value.windows.popup.malware.message =
-            'Elastic Security { action } { filename }';
-          policyItem.inputs[0].config.policy.value.mac.popup.malware.message =
-            'Elastic Security { action } { filename }';
+          policyItem.inputs[0].config.policy.value.windows.popup.malware.message = DefaultMalwareMessage;
+          policyItem.inputs[0].config.policy.value.mac.popup.malware.message = DefaultMalwareMessage;
         }
       } catch (error) {
         dispatch({

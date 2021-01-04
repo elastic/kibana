@@ -12,10 +12,12 @@ import {
   MONITOR_ROUTE,
   OVERVIEW_ROUTE,
   SETTINGS_ROUTE,
+  STEP_DETAIL_ROUTE,
 } from '../common/constants';
-import { MonitorPage, NotFoundPage, SettingsPage } from './pages';
+import { MonitorPage, StepDetailPage, NotFoundPage, SettingsPage } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
+import { PageHeader } from './components/common/header/page_header';
 
 interface RouteProps {
   path: string;
@@ -51,6 +53,13 @@ const Routes: RouteProps[] = [
   },
   {
     title: baseTitle,
+    path: STEP_DETAIL_ROUTE,
+    component: StepDetailPage,
+    dataTestSubj: 'uptimeStepDetailPage',
+    telemetryId: UptimePage.StepDetail,
+  },
+  {
+    title: baseTitle,
     path: OVERVIEW_ROUTE,
     component: OverviewPage,
     dataTestSubj: 'uptimeOverviewPage',
@@ -72,16 +81,19 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 
 export const PageRouter: FC = () => {
   return (
-    <Switch>
-      {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
-        <Route path={path} key={telemetryId}>
-          <div data-test-subj={dataTestSubj}>
-            <RouteInit title={title} path={path} telemetryId={telemetryId} />
-            <RouteComponent />
-          </div>
-        </Route>
-      ))}
-      <Route component={NotFoundPage} />
-    </Switch>
+    <>
+      <PageHeader />
+      <Switch>
+        {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
+          <Route path={path} key={telemetryId} exact={true}>
+            <div data-test-subj={dataTestSubj}>
+              <RouteInit title={title} path={path} telemetryId={telemetryId} />
+              <RouteComponent />
+            </div>
+          </Route>
+        ))}
+        <Route component={NotFoundPage} />
+      </Switch>
+    </>
   );
 };

@@ -9,11 +9,11 @@ import React from 'react';
 import moment from 'moment';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { MostRecentError } from '../most_recent_error';
-import { MonitorDetails, MonitorError } from '../../../../../../common/runtime_types';
+import { MonitorDetails, PingError } from '../../../../../../common/runtime_types';
 
 describe('MostRecentError component', () => {
   let monitorDetails: MonitorDetails;
-  let monitorError: MonitorError;
+  let monitorError: PingError;
 
   beforeAll(() => {
     moment.prototype.fromNow = jest.fn(() => '5 days ago');

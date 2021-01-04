@@ -30,7 +30,7 @@ import {
   StyledLabelContainer,
   StyledButtonTextContainer,
 } from './styles';
-import * as eventModel from '../../../../common/endpoint/models/event';
+import * as nodeModel from '../../../../common/endpoint/models/node';
 import * as selectors from '../../store/selectors';
 import { Breadcrumbs } from './breadcrumbs';
 import { CubeForProcess } from './cube_for_process';
@@ -90,13 +90,13 @@ export const NodeList = memo(() => {
     useCallback((state: ResolverState) => {
       const { processNodePositions } = selectors.layout(state);
       const view: ProcessTableView[] = [];
-      for (const processEvent of processNodePositions.keys()) {
-        const name = eventModel.processNameSafeVersion(processEvent);
-        const nodeID = eventModel.entityIDSafeVersion(processEvent);
+      for (const treeNode of processNodePositions.keys()) {
+        const name = nodeModel.nodeName(treeNode);
+        const nodeID = nodeModel.nodeID(treeNode);
         if (nodeID !== undefined) {
           view.push({
             name,
-            timestamp: eventModel.timestampAsDateSafeVersion(processEvent),
+            timestamp: nodeModel.timestampAsDate(treeNode),
             nodeID,
           });
         }
@@ -119,7 +119,8 @@ export const NodeList = memo(() => {
 
   const children = useSelector(selectors.hasMoreChildren);
   const ancestors = useSelector(selectors.hasMoreAncestors);
-  const showWarning = children === true || ancestors === true;
+  const generations = useSelector(selectors.hasMoreGenerations);
+  const showWarning = children === true || ancestors === true || generations === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
     <StyledPanel>
@@ -141,9 +142,7 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
   const isOrigin = useSelector((state: ResolverState) => {
     return selectors.originID(state) === nodeID;
   });
-  const isTerminated = useSelector((state: ResolverState) =>
-    nodeID === undefined ? false : selectors.isProcessTerminated(state)(nodeID)
-  );
+  const nodeState = useSelector((state: ResolverState) => selectors.nodeDataStatus(state)(nodeID));
   const { descriptionText } = useColors();
   const linkProps = useLinkProps({ panelView: 'nodeDetail', panelParameters: { nodeID } });
   const dispatch: (action: ResolverAction) => void = useDispatch();
@@ -162,7 +161,12 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
     [timestamp, linkProps, dispatch, nodeID]
   );
   return (
-    <EuiButtonEmpty onClick={handleOnClick} href={linkProps.href}>
+    <EuiButtonEmpty
+      onClick={handleOnClick}
+      href={linkProps.href}
+      data-test-subj="resolver:node-list:node-link"
+      data-test-node-id={nodeID}
+    >
       {name === undefined ? (
         <EuiBadge color="warning">
           {i18n.translate(
@@ -175,7 +179,7 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
       ) : (
         <StyledButtonTextContainer>
           <CubeForProcess
-            running={!isTerminated}
+            state={nodeState}
             isOrigin={isOrigin}
             data-test-subj="resolver:node-list:node-link:icon"
           />

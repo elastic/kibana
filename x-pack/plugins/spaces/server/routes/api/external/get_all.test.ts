@@ -22,6 +22,7 @@ import { initGetAllSpacesApi } from './get_all';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { ObjectType } from '@kbn/config-schema';
 import { SpacesClientService } from '../../../spaces_client';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 
 describe('GET /spaces/space', () => {
   const spacesSavedObjects = createSpaces();
@@ -47,6 +48,8 @@ describe('GET /spaces/space', () => {
       basePath: httpService.basePath,
     });
 
+    const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
+
     const clientServiceStart = clientService.start(coreStart);
 
     const spacesServiceStart = service.start({
@@ -60,6 +63,7 @@ describe('GET /spaces/space', () => {
       getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
+      usageStatsServicePromise,
     });
 
     return {

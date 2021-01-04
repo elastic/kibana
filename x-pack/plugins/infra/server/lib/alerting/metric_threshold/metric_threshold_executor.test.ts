@@ -6,14 +6,14 @@
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { Comparator, AlertStates } from './types';
 import * as mocks from './test_mocks';
-import { ResolvedActionGroup } from '../../../../../alerts/common';
-import { AlertExecutorOptions } from '../../../../../alerts/server';
+import { RecoveredActionGroup } from '../../../../../alerts/common';
 import {
   alertsMock,
   AlertServicesMock,
   AlertInstanceMock,
 } from '../../../../../alerts/server/mocks';
 import { InfraSources } from '../../sources';
+import { MetricThresholdAlertExecutorOptions } from './register_metric_threshold_alert_type';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -23,11 +23,23 @@ interface AlertTestInstance {
 
 let persistAlertInstances = false;
 
+const mockOptions = {
+  alertId: '',
+  startedAt: new Date(),
+  previousStartedAt: null,
+  state: {},
+  spaceId: '',
+  name: '',
+  tags: [],
+  createdBy: null,
+  updatedBy: null,
+};
+
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
-      executor({
+      executor(({
         services,
         params: {
           sourceId,
@@ -39,7 +51,10 @@ describe('The metric threshold alert type', () => {
             },
           ],
         },
-      });
+        /**
+         * TODO: Remove this use of `as` by utilizing a proper type
+         */
+      } as unknown) as MetricThresholdAlertExecutorOptions);
     test('alerts as expected with the > comparator', async () => {
       await execute(Comparator.GT, [0.75]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
@@ -109,6 +124,7 @@ describe('The metric threshold alert type', () => {
   describe('querying with a groupBy parameter', () => {
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           groupBy: 'something',
@@ -159,6 +175,7 @@ describe('The metric threshold alert type', () => {
       groupBy: string = ''
     ) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           groupBy,
@@ -216,6 +233,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           criteria: [
@@ -242,6 +260,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           criteria: [
@@ -268,6 +287,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           criteria: [
@@ -294,6 +314,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = (alertOnNoData: boolean) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           criteria: [
@@ -323,6 +344,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = () =>
       executor({
+        ...mockOptions,
         services,
         params: {
           criteria: [
@@ -348,6 +370,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = (threshold: number[]) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           criteria: [
@@ -367,7 +390,7 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
       expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute([2]);
-      expect(mostRecentAction(instanceID).id).toBe(ResolvedActionGroup.id);
+      expect(mostRecentAction(instanceID).id).toBe(RecoveredActionGroup.id);
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
     test('does not continue to send a recovery alert if the metric is still OK', async () => {
@@ -383,7 +406,7 @@ describe('The metric threshold alert type', () => {
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
       expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
       await execute([2]);
-      expect(mostRecentAction(instanceID).id).toBe(ResolvedActionGroup.id);
+      expect(mostRecentAction(instanceID).id).toBe(RecoveredActionGroup.id);
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
   });
@@ -392,6 +415,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = () =>
       executor({
+        ...mockOptions,
         services,
         params: {
           sourceId: 'default',
@@ -435,10 +459,7 @@ const mockLibs: any = {
   configuration: createMockStaticConfiguration({}),
 };
 
-const executor = createMetricThresholdExecutor(mockLibs) as (opts: {
-  params: AlertExecutorOptions['params'];
-  services: { callCluster: AlertExecutorOptions['params']['callCluster'] };
-}) => Promise<void>;
+const executor = createMetricThresholdExecutor(mockLibs);
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
 services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {

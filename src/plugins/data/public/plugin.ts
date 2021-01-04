@@ -48,12 +48,6 @@ import {
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import { getEsaggs } from './search/expressions';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  APPLY_FILTER_TRIGGER,
-} from '../../ui_actions/public';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,
@@ -67,12 +61,18 @@ import {
   createValueClickAction,
   createSelectRangeAction,
 } from './actions';
-
+import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
-import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
+import { getIndexPatternLoad } from './index_patterns/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { getTableViewDescription } from './utils/table_inspector_view';
+import { TriggerId } from '../../ui_actions/public';
 
 declare module '../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
+  }
+
   export interface ActionContextMapping {
     [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
     [ACTION_SELECT_RANGE]: SelectRangeActionContext;
@@ -105,26 +105,11 @@ export class DataPublicPlugin
 
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
-    { expressions, uiActions, usageCollection }: DataSetupDependencies
+    { bfetch, expressions, uiActions, usageCollection, inspector }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    expressions.registerFunction(indexPatternLoad);
-    expressions.registerFunction(
-      getEsaggs({
-        getStartDependencies: async () => {
-          const [, , self] = await core.getStartServices();
-          const { fieldFormats, indexPatterns, query, search } = self;
-          return {
-            addFilters: query.filterManager.addFilters.bind(query.filterManager),
-            aggs: search.aggs,
-            deserializeFieldFormat: fieldFormats.deserialize.bind(fieldFormats),
-            indexPatterns,
-            searchSource: search.searchSource,
-          };
-        },
-      })
-    );
+    expressions.registerFunction(getIndexPatternLoad({ getStartServices: core.getStartServices }));
 
     this.usageCollection = usageCollection;
 
@@ -133,28 +118,40 @@ export class DataPublicPlugin
       storage: this.storage,
     });
 
+    uiActions.registerTrigger(applyFilterTrigger);
+
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
     uiActions.addTriggerAction(
-      SELECT_RANGE_TRIGGER,
+      'SELECT_RANGE_TRIGGER' as TriggerId,
       createSelectRangeAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
     );
 
     uiActions.addTriggerAction(
-      VALUE_CLICK_TRIGGER,
+      'VALUE_CLICK_TRIGGER' as TriggerId,
       createValueClickAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
     );
 
     const searchService = this.searchService.setup(core, {
+      bfetch,
       usageCollection,
       expressions,
     });
+
+    inspector.registerView(
+      getTableViewDescription(() => ({
+        uiActions: startServices().plugins.uiActions,
+        uiSettings: startServices().core.uiSettings,
+        fieldFormats: startServices().self.fieldFormats,
+        isFilterable: startServices().self.search.aggs.datatableUtilities.isFilterable,
+      }))
+    );
 
     return {
       autocomplete: this.autocomplete.setup(core, { timefilter: queryService.timefilter }),
@@ -222,13 +219,16 @@ export class DataPublicPlugin
       core,
       data: dataServices,
       storage: this.storage,
-      trackUiMetric: this.usageCollection?.reportUiStats.bind(this.usageCollection, 'data_plugin'),
+      trackUiMetric: this.usageCollection?.reportUiCounter.bind(
+        this.usageCollection,
+        'data_plugin'
+      ),
     });
 
     return {
       ...dataServices,
       ui: {
-        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+        IndexPatternSelect: createIndexPatternSelect(indexPatterns),
         SearchBar,
       },
     };

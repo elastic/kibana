@@ -4,4 +4,5 @@ set -euo pipefail
 
 source "$(dirname "${0}")/../util.sh"
 
-yarn run grunt run:licenses
+checks-reporter-with-killswitch "Check Licenses" \
+  node scripts/check_licenses --dev

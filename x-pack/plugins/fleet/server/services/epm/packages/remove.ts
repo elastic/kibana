@@ -23,6 +23,7 @@ import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { packagePolicyService, appContextService } from '../..';
 import { splitPkgKey } from '../registry';
 import { deletePackageCache } from '../archive';
+import { deleteIlms } from '../elasticsearch/datastream_ilm/remove';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -66,7 +67,6 @@ export async function removeInstallation(options: {
   deletePackageCache({
     name: pkgName,
     version: pkgVersion,
-    installSource: installation.install_source,
   });
 
   // successful delete's in SO client return {}. return something more useful
@@ -91,6 +91,8 @@ function deleteESAssets(installedObjects: EsAssetReference[], callCluster: CallE
       return deleteTemplate(callCluster, id);
     } else if (assetType === ElasticsearchAssetType.transform) {
       return deleteTransforms(callCluster, [id]);
+    } else if (assetType === ElasticsearchAssetType.dataStreamIlmPolicy) {
+      return deleteIlms(callCluster, [id]);
     }
   });
 }

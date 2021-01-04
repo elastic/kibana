@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
+import { aggSumFnName } from './sum_fn';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { BaseAggParams } from '../types';
@@ -34,6 +35,7 @@ export interface AggParamsSum extends BaseAggParams {
 export const getSumMetricAgg = () => {
   return new MetricAggType({
     name: METRIC_TYPES.SUM,
+    expressionName: aggSumFnName,
     title: sumTitle,
     makeLabel(aggConfig) {
       return i18n.translate('data.search.aggs.metrics.sumLabel', {

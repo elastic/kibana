@@ -135,6 +135,20 @@ export class IndexPatternsService {
     return this.savedObjectsCache.map((obj) => obj?.attributes?.title);
   };
 
+  find = async (search: string, size: number = 10): Promise<IndexPattern[]> => {
+    const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+      type: 'index-pattern',
+      fields: ['title'],
+      search,
+      searchFields: ['title'],
+      perPage: size,
+    });
+    const getIndexPatternPromises = savedObjects.map(async (savedObject) => {
+      return await this.get(savedObject.id);
+    });
+    return await Promise.all(getIndexPatternPromises);
+  };
+
   /**
    * Get list of index pattern ids with titles
    * @param refresh Force refresh of index pattern list
@@ -197,22 +211,6 @@ export class IndexPatternsService {
     }
   };
 
-  private isFieldRefreshRequired(specs?: IndexPatternFieldMap): boolean {
-    if (!specs) {
-      return true;
-    }
-
-    return Object.values(specs).every((spec) => {
-      // See https://github.com/elastic/kibana/pull/8421
-      const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
-
-      // See https://github.com/elastic/kibana/pull/11969
-      const hasDocValuesFlag = 'readFromDocValues' in spec;
-
-      return !hasFieldCaps || !hasDocValuesFlag;
-    });
-  }
-
   /**
    * Get field list by providing { pattern }
    * @param options
@@ -224,6 +222,7 @@ export class IndexPatternsService {
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
+      allowNoIndex: options.allowNoIndex,
     });
   };
 
@@ -283,10 +282,21 @@ export class IndexPatternsService {
     options: GetFieldsOptions,
     fieldAttrs: FieldAttrs = {}
   ) => {
-    const scriptdFields = Object.values(fields).filter((field) => field.scripted);
+    const fieldsAsArr = Object.values(fields);
+    const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
     try {
+      let updatedFieldList: FieldSpec[];
       const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
-      return this.fieldArrayToMap([...newFields, ...scriptdFields], fieldAttrs);
+
+      // If allowNoIndex, only update field list if field caps finds fields. To support
+      // beats creating index pattern and dashboard before docs
+      if (!options.allowNoIndex || (newFields && newFields.length > 5)) {
+        updatedFieldList = [...newFields, ...scriptedFields];
+      } else {
+        updatedFieldList = fieldsAsArr;
+      }
+
+      return this.fieldArrayToMap(updatedFieldList, fieldAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -299,8 +309,8 @@ export class IndexPatternsService {
           values: { id, title },
         }),
       });
+      throw err;
     }
-    return fields;
   };
 
   /**
@@ -309,7 +319,11 @@ export class IndexPatternsService {
    */
   fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
-      collector[field.name] = { ...field, customLabel: fieldAttrs?.[field.name]?.customLabel };
+      collector[field.name] = {
+        ...field,
+        customLabel: fieldAttrs?.[field.name]?.customLabel,
+        count: fieldAttrs?.[field.name]?.count,
+      };
       return collector;
     }, {});
 
@@ -332,6 +346,7 @@ export class IndexPatternsService {
         typeMeta,
         type,
         fieldAttrs,
+        allowNoIndex,
       },
     } = savedObject;
 
@@ -353,6 +368,7 @@ export class IndexPatternsService {
       type,
       fieldFormats: parsedFieldFormatMap,
       fieldAttrs: parsedFieldAttrs,
+      allowNoIndex,
     };
   };
 
@@ -372,25 +388,21 @@ export class IndexPatternsService {
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
 
-    const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
-    let isSaveRequired = isFieldRefreshRequired;
     try {
-      spec.fields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecMap(
-            spec.fields || {},
-            id,
-            spec.title as string,
-            {
-              pattern: title as string,
-              metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-              type,
-              rollupIndex: typeMeta?.params?.rollupIndex,
-            },
-            spec.fieldAttrs
-          )
-        : spec.fields;
+      spec.fields = await this.refreshFieldSpecMap(
+        spec.fields || {},
+        id,
+        spec.title as string,
+        {
+          pattern: title as string,
+          metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+          type,
+          rollupIndex: typeMeta?.params?.rollup_index,
+          allowNoIndex: spec.allowNoIndex,
+        },
+        spec.fieldAttrs
+      );
     } catch (err) {
-      isSaveRequired = false;
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({
           title: (err as any).message,
@@ -412,23 +424,6 @@ export class IndexPatternsService {
       : {};
 
     const indexPattern = await this.create(spec, true);
-    if (isSaveRequired) {
-      try {
-        this.updateSavedObject(indexPattern);
-      } catch (err) {
-        this.onError(err, {
-          title: i18n.translate('data.indexPatterns.fetchFieldSaveErrorTitle', {
-            defaultMessage:
-              'Error saving after fetching fields for index pattern {title} (ID: {id})',
-            values: {
-              id: indexPattern.id,
-              title: indexPattern.title,
-            },
-          }),
-        });
-      }
-    }
-
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
   };
@@ -476,14 +471,14 @@ export class IndexPatternsService {
   /**
    * Create a new index pattern and save it right away
    * @param spec
-   * @param override Overwrite if existing index pattern exists
-   * @param skipFetchFields
+   * @param override Overwrite if existing index pattern exists.
+   * @param skipFetchFields Whether to skip field refresh step.
    */
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
     await this.createSavedObject(indexPattern, override);
-    await this.setDefault(indexPattern.id as string);
+    await this.setDefault(indexPattern.id!);
     return indexPattern;
   }
 
