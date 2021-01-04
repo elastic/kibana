@@ -188,6 +188,18 @@ describe('deserializer and serializer', () => {
     expect(result.phases.warm!.actions.readonly).toBeUndefined();
   });
 
+  it('allows force merge and readonly actions to be configured in hot with default rollover enabled', () => {
+    formInternal._meta.hot.isUsingDefaultRollover = true;
+    formInternal._meta.hot.bestCompression = false;
+    formInternal.phases.hot!.actions.forcemerge = undefined;
+    formInternal._meta.hot.readonlyEnabled = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.readonly).toBeUndefined();
+    expect(result.phases.hot!.actions.forcemerge).toBeUndefined();
+  });
+
   it('removes set priority if it is disabled in the form', () => {
     delete formInternal.phases.hot!.actions.set_priority;
     delete formInternal.phases.warm!.actions.set_priority;
@@ -220,13 +232,14 @@ describe('deserializer and serializer', () => {
     expect(result.phases.cold!.actions.allocate!.exclude).toBeUndefined();
   });
 
-  it('removes forcemerge and rollover config when rollover is disabled in hot phase', () => {
+  it('removes forcemerge, readonly, and rollover config when rollover is disabled in hot phase', () => {
     formInternal._meta.hot.useRollover = false;
 
     const result = serializer(formInternal);
 
     expect(result.phases.hot!.actions.rollover).toBeUndefined();
     expect(result.phases.hot!.actions.forcemerge).toBeUndefined();
+    expect(result.phases.hot!.actions.readonly).toBeUndefined();
   });
 
   it('removes min_age from warm when rollover is enabled', () => {

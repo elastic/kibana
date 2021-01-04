@@ -42,23 +42,26 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
 
     if (draft.phases.hot?.actions) {
       const hotPhaseActions = draft.phases.hot.actions;
-      if (_meta.hot.isUsingDefaultRollover) {
-        hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
-      } else if (hotPhaseActions.rollover && _meta.hot.useRollover) {
-        if (updatedPolicy.phases.hot!.actions.rollover?.max_age) {
-          hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
-        } else {
-          delete hotPhaseActions.rollover.max_age;
-        }
 
-        if (typeof updatedPolicy.phases.hot!.actions.rollover?.max_docs !== 'number') {
-          delete hotPhaseActions.rollover.max_docs;
-        }
-
-        if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
-          hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
+      if (hotPhaseActions.rollover && _meta.hot.useRollover) {
+        if (_meta.hot.isUsingDefaultRollover) {
+          hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
         } else {
-          delete hotPhaseActions.rollover.max_size;
+          if (updatedPolicy.phases.hot!.actions.rollover?.max_age) {
+            hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
+          } else {
+            delete hotPhaseActions.rollover.max_age;
+          }
+
+          if (typeof updatedPolicy.phases.hot!.actions.rollover?.max_docs !== 'number') {
+            delete hotPhaseActions.rollover.max_docs;
+          }
+
+          if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
+            hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
+          } else {
+            delete hotPhaseActions.rollover.max_size;
+          }
         }
 
         if (!updatedPolicy.phases.hot!.actions?.forcemerge) {
