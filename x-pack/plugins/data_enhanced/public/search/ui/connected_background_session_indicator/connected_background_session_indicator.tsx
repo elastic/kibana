@@ -54,7 +54,7 @@ export const createConnectedBackgroundSessionIndicator = ({
     if (getCapabilitiesByAppId(application.capabilities, appId)?.storeSearchSession !== true) {
       disabled = true;
       disabledReasonText = i18n.translate('xpack.data.backgroundSessionIndicator.noCapability', {
-        defaultMessage: "You don't have permissions to Send to background.",
+        defaultMessage: "You don't have permissions to send to background.",
       });
     }
 
