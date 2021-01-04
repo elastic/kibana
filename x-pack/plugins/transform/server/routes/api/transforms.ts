@@ -57,6 +57,7 @@ import { addBasePath } from '../index';
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import { isLatestTransform } from '../../../common/types/transform';
 
 enum TRANSFORM_ACTIONS {
   STOP = 'stop',
@@ -531,9 +532,29 @@ const previewTransformHandler: RequestHandler<
   PostTransformsPreviewRequestSchema
 > = async (ctx, req, res) => {
   try {
+    const reqBody = req.body;
     const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
-      body: req.body,
+      body: reqBody,
     });
+    if (isLatestTransform(reqBody)) {
+      // for the latest transform mappings properties have to be retrieved from the source
+      const fieldCapsResponse = await ctx.core.elasticsearch.client.asCurrentUser.fieldCaps({
+        index: reqBody.source.index,
+        fields: '*',
+        include_unmapped: false,
+      });
+
+      const fields = Object.entries(
+        fieldCapsResponse.body.fields as Record<string, Record<string, Record<string, any>>>
+      )
+        .filter(([fieldName]) => !fieldName.startsWith('_'))
+        .reduce((acc, [fieldName, fieldCaps]) => {
+          acc[fieldName] = { type: Object.values(fieldCaps)[0].type };
+          return acc;
+        }, {} as Record<string, { type: string }>);
+
+      body.generated_dest_index.mappings.properties = fields;
+    }
     return res.ok({ body });
   } catch (e) {
     return res.customError(wrapError(wrapEsError(e)));
