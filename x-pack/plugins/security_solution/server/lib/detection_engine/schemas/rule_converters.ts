@@ -143,6 +143,7 @@ export const convertCreateAPIToInternalSchema = (
     enabled: input.enabled ?? true,
     actions: input.throttle === 'rule' ? (input.actions ?? []).map(transformRuleToAlertAction) : [],
     throttle: null,
+    notifyWhen: null,
   };
 };
 

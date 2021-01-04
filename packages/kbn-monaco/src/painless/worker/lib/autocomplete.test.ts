@@ -23,31 +23,15 @@ import {
   getStaticSuggestions,
   getFieldSuggestions,
   getClassMemberSuggestions,
-  getPrimitives,
   getConstructorSuggestions,
   getKeywords,
+  getTypeSuggestions,
   Suggestion,
 } from './autocomplete';
 
 const keywords: PainlessCompletionItem[] = getKeywords();
 
 const testSuggestions: Suggestion[] = [
-  {
-    properties: undefined,
-    constructorDefinition: undefined,
-    documentation: 'Primitive: boolean',
-    insertText: 'boolean',
-    kind: 'type',
-    label: 'boolean',
-  },
-  {
-    properties: undefined,
-    constructorDefinition: undefined,
-    documentation: 'Primitive: int',
-    insertText: 'int',
-    kind: 'type',
-    label: 'int',
-  },
   {
     properties: [
       {
@@ -98,18 +82,6 @@ describe('Autocomplete lib', () => {
         isIncomplete: false,
         suggestions: [
           {
-            documentation: 'Primitive: boolean',
-            insertText: 'boolean',
-            kind: 'type',
-            label: 'boolean',
-          },
-          {
-            documentation: 'Primitive: int',
-            insertText: 'int',
-            kind: 'type',
-            label: 'int',
-          },
-          {
             documentation: 'Class: Math',
             insertText: 'Math',
             kind: 'class',
@@ -122,6 +94,7 @@ describe('Autocomplete lib', () => {
             label: 'ArithmeticException',
           },
           ...keywords,
+          ...getTypeSuggestions(),
         ],
       });
     });
@@ -146,12 +119,6 @@ describe('Autocomplete lib', () => {
         (suggestion) => suggestion.label === 'emit'
       );
       expect(Boolean(emitSuggestion)).toBe(true);
-    });
-  });
-
-  describe('getPrimitives()', () => {
-    test('returns primitive values', () => {
-      expect(getPrimitives(testSuggestions)).toEqual(['boolean', 'int']);
     });
   });
 

@@ -6,7 +6,14 @@
 import React, { useState, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow, EuiFieldText, EuiComboBox, EuiText, EuiCodeEditor } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSwitch,
+  EuiFieldText,
+  EuiComboBox,
+  EuiText,
+  EuiCodeEditor,
+} from '@elastic/eui';
 import { RegistryVarsEntry } from '../../../../types';
 
 import 'brace/mode/yaml';
@@ -23,6 +30,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   const { multi, required, type, title, name, description } = varDef;
   const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
   const errors = isInvalid ? varErrors : null;
+  const fieldLabel = title || name;
 
   const field = useMemo(() => {
     if (multi) {
@@ -59,6 +67,18 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
         />
       );
     }
+    if (type === 'bool') {
+      return (
+        <EuiSwitch
+          label={fieldLabel}
+          checked={value}
+          showLabel={false}
+          onChange={(e) => onChange(e.target.checked)}
+          onBlur={() => setIsDirty(true)}
+        />
+      );
+    }
+
     return (
       <EuiFieldText
         isInvalid={isInvalid}
@@ -67,15 +87,18 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
         onBlur={() => setIsDirty(true)}
       />
     );
-  }, [isInvalid, multi, onChange, type, value]);
+  }, [isInvalid, multi, onChange, type, value, fieldLabel]);
+
+  // Boolean cannot be optional by default set to false
+  const isOptional = type !== 'bool' && !required;
 
   return (
     <EuiFormRow
       isInvalid={isInvalid}
       error={errors}
-      label={title || name}
+      label={fieldLabel}
       labelAppend={
-        !required ? (
+        isOptional ? (
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"

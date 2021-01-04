@@ -16,6 +16,7 @@ import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from 
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { Logger } from '../../../../../src/core/server';
 import { request } from './lib/axios_utils';
+import { renderMustacheString } from '../lib/mustache_renderer';
 
 // config definition
 export enum WebhookMethods {
@@ -91,7 +92,18 @@ export function getActionType({
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
+    renderParameterTemplates,
     executor: curry(executor)({ logger }),
+  };
+}
+
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>
+): ActionParamsType {
+  if (!params.body) return params;
+  return {
+    body: renderMustacheString(params.body, variables, 'json'),
   };
 }
 

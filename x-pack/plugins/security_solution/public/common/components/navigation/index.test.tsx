@@ -14,7 +14,7 @@ import { navTabs } from '../../../app/home/home_navigations';
 import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
-import { TimelineTabs } from '../../../timelines/store/timeline/model';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');

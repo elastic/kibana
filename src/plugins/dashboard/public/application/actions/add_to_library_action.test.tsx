@@ -16,26 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  isErrorEmbeddable,
-  IContainer,
-  ReferenceOrValueEmbeddable,
-  EmbeddableInput,
-} from '../../embeddable_plugin';
+
+import { AddToLibraryAction } from '.';
 import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
+
+import { CoreStart } from 'kibana/public';
+
+import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+
 import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
+  EmbeddableInput,
+  ErrorEmbeddable,
+  IContainer,
+  isErrorEmbeddable,
+  ReferenceOrValueEmbeddable,
+  ViewMode,
+} from '../../services/embeddable';
+import {
   ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
-import { coreMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
-import { AddToLibraryAction } from '.';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ErrorEmbeddable, ViewMode } from '../../../../embeddable/public';
+  CONTACT_CARD_EMBEDDABLE,
+} from '../../services/embeddable_test_samples';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -60,6 +65,8 @@ beforeEach(async () => {
     overlays: coreStart.overlays,
     savedObjectMetaData: {} as any,
     uiActions: {} as any,
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    http: coreStart.http,
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);

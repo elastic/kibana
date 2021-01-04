@@ -30,12 +30,14 @@ interface Props extends PhraseSuggestorProps {
   value?: string;
   onChange: (value: string | number | boolean) => void;
   intl: InjectedIntl;
+  fullWidth?: boolean;
 }
 
 class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
   public render() {
     return (
       <EuiFormRow
+        fullWidth={this.props.fullWidth}
         label={this.props.intl.formatMessage({
           id: 'data.filter.filterEditor.valueInputLabel',
           defaultMessage: 'Value',
@@ -45,6 +47,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
           this.renderWithSuggestions()
         ) : (
           <ValueInputType
+            fullWidth={this.props.fullWidth}
             placeholder={this.props.intl.formatMessage({
               id: 'data.filter.filterEditor.valueInputPlaceholder',
               defaultMessage: 'Enter a value',
@@ -60,12 +63,13 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
 
   private renderWithSuggestions() {
     const { suggestions } = this.state;
-    const { value, intl, onChange } = this.props;
+    const { value, intl, onChange, fullWidth } = this.props;
     // there are cases when the value is a number, this would cause an exception
     const valueAsStr = String(value);
     const options = value ? uniq([valueAsStr, ...suggestions]) : suggestions;
     return (
       <StringComboBox
+        fullWidth={fullWidth}
         placeholder={intl.formatMessage({
           id: 'data.filter.filterEditor.valueSelectPlaceholder',
           defaultMessage: 'Select a value',

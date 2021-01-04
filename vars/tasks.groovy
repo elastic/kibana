@@ -75,7 +75,7 @@ def functionalOss(Map params = [:]) {
     }
 
     if (config.serverIntegration) {
-      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/server_integration.sh'))
+      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/test/server_integration.sh'))
     }
   }
 }
@@ -121,7 +121,9 @@ def functionalXpack(Map params = [:]) {
       'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
       'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
     ]) {
-      task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
+      }
     }
   }
 }

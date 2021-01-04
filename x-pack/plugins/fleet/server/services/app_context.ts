@@ -11,7 +11,7 @@ import {
   EncryptedSavedObjectsPluginSetup,
 } from '../../../encrypted_saved_objects/server';
 import packageJSON from '../../../../../package.json';
-import { SecurityPluginSetup } from '../../../security/server';
+import { SecurityPluginStart } from '../../../security/server';
 import { FleetConfigType } from '../../common';
 import { ExternalCallback, ExternalCallbacksStorage, FleetAppContext } from '../plugin';
 import { CloudSetup } from '../../../cloud/server';
@@ -19,7 +19,7 @@ import { CloudSetup } from '../../../cloud/server';
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
   private encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup | undefined;
-  private security: SecurityPluginSetup | undefined;
+  private security: SecurityPluginStart | undefined;
   private config$?: Observable<FleetConfigType>;
   private configSubject$?: BehaviorSubject<FleetConfigType>;
   private savedObjects: SavedObjectsServiceStart | undefined;

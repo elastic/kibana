@@ -12,7 +12,7 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
-import { LicenseState } from '../lib/license_state';
+import { ILicenseState } from '../lib/license_state';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { BASE_ALERT_API_PATH } from '../../common';
 
@@ -20,7 +20,7 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const getAlertRoute = (router: IRouter, licenseState: LicenseState) => {
+export const getAlertRoute = (router: IRouter, licenseState: ILicenseState) => {
   router.get(
     {
       path: `${BASE_ALERT_API_PATH}/alert/{id}`,

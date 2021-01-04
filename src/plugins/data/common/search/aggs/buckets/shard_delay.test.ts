@@ -64,19 +64,24 @@ describe('Shard Delay Agg', () => {
     const aggConfigs = getAggConfigs();
     expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
       Object {
-        "arguments": Object {
-          "delay": Array [
-            "5s",
-          ],
-          "enabled": Array [
-            true,
-          ],
-          "id": Array [
-            "1",
-          ],
-        },
-        "function": "aggShardDelay",
-        "type": "function",
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "delay": Array [
+                "5s",
+              ],
+              "enabled": Array [
+                true,
+              ],
+              "id": Array [
+                "1",
+              ],
+            },
+            "function": "aggShardDelay",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
       }
     `);
   });

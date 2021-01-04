@@ -8,10 +8,81 @@ import {
   ResolverTree,
   ResolverNodeStats,
   ResolverLifecycleNode,
-  ResolverChildNode,
   SafeResolverEvent,
+  NewResolverTree,
+  ResolverNode,
+  EventStats,
+  ResolverSchema,
 } from '../../../common/endpoint/types';
-import * as eventModel from '../../../common/endpoint/models/event';
+import * as nodeModel from '../../../common/endpoint/models/node';
+
+/**
+ * These values are only exported for testing. They should not be used directly. Instead use the functions below.
+ */
+
+/**
+ * The limit for the ancestors in the server request when the ancestry field is defined in the schema.
+ */
+export const ancestorsWithAncestryField = 200;
+/**
+ * The limit for the ancestors in the server request when the ancestry field is not defined in the schema.
+ */
+export const ancestorsWithoutAncestryField = 20;
+/**
+ * The limit for the generations in the server request when the ancestry field is defined. Essentially this means
+ * that the generations field will be ignored when the ancestry field is defined.
+ */
+export const generationsWithAncestryField = 0;
+/**
+ * The limit for the generations in the server request when the ancestry field is not defined.
+ */
+export const generationsWithoutAncestryField = 10;
+/**
+ * The limit for the descendants in the server request.
+ */
+export const descendantsLimit = 500;
+
+/**
+ * Returns the number of ancestors we should use when requesting a tree from the server
+ * depending on whether the schema received from the server has the ancestry field defined.
+ */
+export function ancestorsRequestAmount(schema: ResolverSchema | undefined) {
+  return schema?.ancestry !== undefined
+    ? ancestorsWithAncestryField
+    : ancestorsWithoutAncestryField;
+}
+
+/**
+ * Returns the number of generations we should use when requesting a tree from the server
+ * depending on whether the schema received from the server has the ancestry field defined.
+ */
+export function generationsRequestAmount(schema: ResolverSchema | undefined) {
+  return schema?.ancestry !== undefined
+    ? generationsWithAncestryField
+    : generationsWithoutAncestryField;
+}
+
+/**
+ * The number of the descendants to use in a request to the server for a resolver tree.
+ */
+export function descendantsRequestAmount() {
+  return descendantsLimit;
+}
+
+/**
+ * This returns a map of nodeIDs to the associated stats provided by the datasource.
+ */
+export function nodeStats(tree: NewResolverTree): Map<ResolverNode['id'], EventStats> {
+  const stats = new Map();
+
+  for (const node of tree.nodes) {
+    if (node.stats) {
+      const nodeID = nodeModel.nodeID(node);
+      stats.set(nodeID, node.stats);
+    }
+  }
+  return stats;
+}
 
 /**
  * ResolverTree is a type returned by the server.
@@ -20,6 +91,8 @@ import * as eventModel from '../../../common/endpoint/models/event';
 /**
  * This returns the 'LifecycleNodes' of the tree. These nodes have
  * the entityID and stats for a process. Used by `relatedEventsStats`.
+ *
+ * @deprecated use indexed_process_tree instead
  */
 function lifecycleNodes(tree: ResolverTree): ResolverLifecycleNode[] {
   return [tree, ...tree.children.childNodes, ...tree.ancestry.ancestors];
@@ -27,6 +100,8 @@ function lifecycleNodes(tree: ResolverTree): ResolverLifecycleNode[] {
 
 /**
  * All the process events
+ *
+ * @deprecated use nodeData instead
  */
 export function lifecycleEvents(tree: ResolverTree) {
   const events: SafeResolverEvent[] = [...tree.lifecycle];
@@ -41,15 +116,17 @@ export function lifecycleEvents(tree: ResolverTree) {
 
 /**
  * This returns a map of entity_ids to stats for the related events and alerts.
+ *
+ * @deprecated use indexed_process_tree instead
  */
 export function relatedEventsStats(tree: ResolverTree): Map<string, ResolverNodeStats> {
-  const nodeStats: Map<string, ResolverNodeStats> = new Map();
+  const nodeRelatedEventStats: Map<string, ResolverNodeStats> = new Map();
   for (const node of lifecycleNodes(tree)) {
     if (node.stats) {
-      nodeStats.set(node.entityID, node.stats);
+      nodeRelatedEventStats.set(node.entityID, node.stats);
     }
   }
-  return nodeStats;
+  return nodeRelatedEventStats;
 }
 
 /**
@@ -59,74 +136,23 @@ export function relatedEventsStats(tree: ResolverTree): Map<string, ResolverNode
  * make a malformed ResolverTree for the purposes of the tests, so long as it is flattened in a predictable way.
  */
 export function mock({
-  events,
-  cursors = { childrenNextChild: null, ancestryNextAncestor: null },
-  children = [],
+  nodes,
 }: {
   /**
    * Events represented by the ResolverTree.
    */
-  events: SafeResolverEvent[];
-  children?: ResolverChildNode[];
-  /**
-   * Optionally provide cursors for the 'children' and 'ancestry' edges.
-   */
-  cursors?: { childrenNextChild: string | null; ancestryNextAncestor: string | null };
-}): ResolverTree | null {
-  if (events.length === 0) {
+  nodes: ResolverNode[];
+}): NewResolverTree | null {
+  if (nodes.length === 0) {
     return null;
   }
-  const first = events[0];
-  const entityID = eventModel.entityIDSafeVersion(first);
-  if (!entityID) {
-    throw new Error('first mock event must include an entityID.');
+  const originNode = nodes[0];
+  const originID = nodeModel.nodeID(originNode);
+  if (!originID) {
+    throw new Error('first mock event must include an nodeID.');
   }
   return {
-    entityID,
-    // Required
-    children: {
-      childNodes: children,
-      nextChild: cursors.childrenNextChild,
-    },
-    // Required
-    relatedEvents: {
-      events: [],
-      nextEvent: null,
-    },
-    // Required
-    relatedAlerts: {
-      alerts: [],
-      nextAlert: null,
-    },
-    // Required
-    ancestry: {
-      ancestors: [],
-      nextAncestor: cursors.ancestryNextAncestor,
-    },
-    // Normally, this would have only certain events, but for testing purposes, it will have all events, since
-    // the position of events in the ResolverTree is irrelevant.
-    lifecycle: events,
-    // Required
-    stats: {
-      events: {
-        total: 0,
-        byCategory: {},
-      },
-      totalAlerts: 0,
-    },
+    originID,
+    nodes,
   };
-}
-
-/**
- * `true` if there are more children to fetch.
- */
-export function hasMoreChildren(resolverTree: ResolverTree): boolean {
-  return resolverTree.children.nextChild !== null;
-}
-
-/**
- * `true` if there are more ancestors to fetch.
- */
-export function hasMoreAncestors(resolverTree: ResolverTree): boolean {
-  return resolverTree.ancestry.nextAncestor !== null;
 }

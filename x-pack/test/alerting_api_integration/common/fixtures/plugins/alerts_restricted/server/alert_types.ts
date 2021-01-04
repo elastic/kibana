@@ -18,6 +18,7 @@ export function defineAlertTypes(
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsRestrictedFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     recoveryActionGroup: { id: 'restrictedRecovered', name: 'Restricted Recovery' },
     async executor({ services, params, state }: AlertExecutorOptions) {},
   };
@@ -27,6 +28,7 @@ export function defineAlertTypes(
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsRestrictedFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     async executor({ services, params, state }: AlertExecutorOptions) {},
   };
   alerts.registerType(noopRestrictedAlertType);

@@ -124,6 +124,7 @@ describe('ElasticsearchVersionMismatchAlert', () => {
           {
             cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
             ccs: undefined,
+            nodeName: 'Elasticsearch node alert',
             ui: {
               isFiring: true,
               message: {

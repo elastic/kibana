@@ -27,7 +27,7 @@ export interface TreeOptions {
   descendantLevels: number;
   descendants: number;
   ancestors: number;
-  timerange: {
+  timeRange: {
     from: string;
     to: string;
   };
@@ -76,7 +76,7 @@ export class Fetcher {
     const query = new StatsQuery({
       indexPatterns: options.indexPatterns,
       schema: options.schema,
-      timerange: options.timerange,
+      timeRange: options.timeRange,
     });
 
     const eventStats = await query.search(this.client, statsIDs);
@@ -136,7 +136,7 @@ export class Fetcher {
     const query = new LifecycleQuery({
       schema: options.schema,
       indexPatterns: options.indexPatterns,
-      timerange: options.timerange,
+      timeRange: options.timeRange,
     });
 
     let nodes = options.nodes;
@@ -182,7 +182,7 @@ export class Fetcher {
     const query = new DescendantsQuery({
       schema: options.schema,
       indexPatterns: options.indexPatterns,
-      timerange: options.timerange,
+      timeRange: options.timeRange,
     });
 
     let nodes: NodeID[] = options.nodes;

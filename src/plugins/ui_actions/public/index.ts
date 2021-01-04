@@ -40,16 +40,13 @@ export {
 export {
   Trigger,
   TriggerContext,
-  SELECT_RANGE_TRIGGER,
-  selectRangeTrigger,
-  VALUE_CLICK_TRIGGER,
-  valueClickTrigger,
-  APPLY_FILTER_TRIGGER,
-  applyFilterTrigger,
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
   visualizeGeoFieldTrigger,
+  ROW_CLICK_TRIGGER,
+  rowClickTrigger,
+  RowClickContext,
 } from './triggers';
 export {
   TriggerContextMapping,

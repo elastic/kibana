@@ -26,6 +26,12 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
       name: LEGACY_ALERT_DETAILS[ALERT_LOGSTASH_VERSION_MISMATCH].label,
       legacy: {
         watchName: 'logstash_version_mismatch',
+        nodeNameLabel: i18n.translate(
+          'xpack.monitoring.alerts.logstashVersionMismatch.nodeNameLabel',
+          {
+            defaultMessage: 'Logstash node alert',
+          }
+        ),
         changeDataValues: { severity: AlertSeverity.Warning },
       },
       interval: '1d',

@@ -100,6 +100,17 @@ export class Session {
   }
 
   /**
+   * Extracts session id for the specified request.
+   * @param request Request instance to get session value for.
+   */
+  async getSID(request: KibanaRequest) {
+    const sessionCookieValue = await this.options.sessionCookie.get(request);
+    if (sessionCookieValue) {
+      return sessionCookieValue.sid;
+    }
+  }
+
+  /**
    * Extracts session value for the specified request. Under the hood it can clear session if it is
    * invalid or created by the legacy versions of Kibana.
    * @param request Request instance to get session value for.

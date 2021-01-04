@@ -136,6 +136,7 @@ export {
   DeleteDocumentResponse,
 } from './elasticsearch';
 export * from './elasticsearch/legacy/api_types';
+export { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
 export {
   AuthenticationHandler,
   AuthHeaders,

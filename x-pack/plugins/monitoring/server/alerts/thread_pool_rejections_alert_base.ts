@@ -13,8 +13,8 @@ import {
   AlertThreadPoolRejectionsState,
   AlertMessageTimeToken,
   AlertMessageLinkToken,
-  CommonAlertFilter,
   ThreadPoolRejectionsAlertParams,
+  CommonAlertFilter,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';

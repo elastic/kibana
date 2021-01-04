@@ -19,19 +19,13 @@ import { DocumentCreationButton } from '../document_creation_button';
 import { AppLogic } from '../../../app_logic';
 import { EngineLogic } from '../../engine';
 import { DOCS_PREFIX } from '../../../routes';
-
-// TODO This is temporary until we create real Result type
-interface Result {
-  [key: string]: {
-    raw: string | string[] | number | number[] | undefined;
-  };
-}
+import { Result } from '../../result/types';
 
 export const SearchExperienceContent: React.FC = () => {
   const { resultSearchTerm, totalResults, wasSearched } = useSearchContextState();
 
   const { myRole } = useValues(AppLogic);
-  const { engineName, isMetaEngine } = useValues(EngineLogic);
+  const { isMetaEngine, engine } = useValues(EngineLogic);
 
   if (!wasSearched) return null;
 
@@ -49,8 +43,14 @@ export const SearchExperienceContent: React.FC = () => {
         <EuiSpacer />
         <Results
           titleField="id"
-          resultView={(props: { result: Result }) => {
-            return <ResultView {...props} engineName={engineName} />;
+          resultView={({ result }: { result: Result }) => {
+            return (
+              <ResultView
+                result={result}
+                schemaForTypeHighlights={engine.schema}
+                isMetaEngine={isMetaEngine}
+              />
+            );
           }}
         />
         <EuiSpacer />

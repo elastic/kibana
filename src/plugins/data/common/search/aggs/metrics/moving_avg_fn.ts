@@ -83,7 +83,6 @@ export const aggMovingAvg = (): FunctionDefinition => ({
     },
     buckets_path: {
       types: ['string'],
-      required: true,
       help: i18n.translate('data.search.aggs.metrics.derivative.buckets_path.help', {
         defaultMessage: 'Path to the metric of interest',
       }),

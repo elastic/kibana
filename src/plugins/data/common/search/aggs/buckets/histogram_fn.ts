@@ -72,7 +72,7 @@ export const aggHistogram = (): FunctionDefinition => ({
       }),
     },
     interval: {
-      types: ['string'],
+      types: ['number', 'string'],
       required: true,
       help: i18n.translate('data.search.aggs.buckets.histogram.interval.help', {
         defaultMessage: 'Interval to use for this aggregation',

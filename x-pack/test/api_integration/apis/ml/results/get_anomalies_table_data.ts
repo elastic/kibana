@@ -55,9 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.cleanMlIndices();
     });
 
-    // Failing ES snapshot promotion after a ml-cpp change
-    // See https://github.com/elastic/kibana/issues/85363
-    it.skip('should fetch anomalies table data', async () => {
+    it('should fetch anomalies table data', async () => {
       const requestBody = {
         jobIds: [JOB_CONFIG.job_id],
         criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
@@ -78,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       expect(body.interval).to.eql('hour');
-      expect(body.anomalies.length).to.eql(12);
+      expect(body.anomalies.length).to.eql(13);
     });
 
     it('should validate request body', async () => {

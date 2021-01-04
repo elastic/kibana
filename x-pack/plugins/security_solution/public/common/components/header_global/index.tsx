@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { OutPortal } from 'react-reverse-portal';
 
 import { navTabs } from '../../../app/home/home_navigations';
-import { useFullScreen } from '../../containers/use_full_screen';
+import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
 import { SecurityPageName } from '../../../app/types';
 import { getAppOverviewUrl } from '../link_to';
 import { MlPopover } from '../ml_popover/ml_popover';
@@ -68,7 +68,8 @@ export const HeaderGlobal = React.memo(
   forwardRef<HTMLDivElement, HeaderGlobalProps>(
     ({ hideDetectionEngine = false, isFixed = true }, ref) => {
       const { globalHeaderPortalNode } = useGlobalHeaderPortal();
-      const { globalFullScreen, timelineFullScreen } = useFullScreen();
+      const { globalFullScreen } = useGlobalFullScreen();
+      const { timelineFullScreen } = useTimelineFullScreen();
       const search = useGetUrlSearch(navTabs.overview);
       const { application, http } = useKibana().services;
       const { navigateToApp } = application;

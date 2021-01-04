@@ -1,0 +1,104 @@
+{
+  "id": "security_linux",
+  "title": "Security: Linux",
+  "description": "Detect suspicious activity using ECS Linux events. Tested with Auditbeat and the Elastic agent.",
+  "type": "linux data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "auditbeat-*,logs-endpoint.events.*",
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "host.os.type": {
+              "query": "linux",
+              "operator": "OR"
+            }
+          }
+        },
+        {
+          "match": {
+            "host.os.family": {
+              "query": "debian",
+              "operator": "OR"
+            }
+          }
+        },
+        {
+          "match": {
+            "host.os.family": {
+              "query": "redhat",
+              "operator": "OR"
+            }
+          }
+        },
+        {
+          "match": {
+            "host.os.family": {
+              "query": "suse",
+              "operator": "OR"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "v2_rare_process_by_host_linux_ecs",
+      "file": "v2_rare_process_by_host_linux_ecs.json"
+    },
+    {
+      "id": "v2_linux_rare_metadata_user",
+      "file": "v2_linux_rare_metadata_user.json"
+    },
+    {
+      "id": "v2_linux_rare_metadata_process",
+      "file": "v2_linux_rare_metadata_process.json"
+    },
+    {
+      "id": "v2_linux_anomalous_user_name_ecs",
+      "file": "v2_linux_anomalous_user_name_ecs.json"
+    },
+    {
+      "id": "v2_linux_anomalous_process_all_hosts_ecs",
+      "file": "v2_linux_anomalous_process_all_hosts_ecs.json"
+    },
+    {
+      "id": "v2_linux_anomalous_network_port_activity_ecs",
+      "file": "v2_linux_anomalous_network_port_activity_ecs.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-v2_rare_process_by_host_linux_ecs",
+      "file": "datafeed_v2_rare_process_by_host_linux_ecs.json",
+      "job_id": "v2_rare_process_by_host_linux_ecs"
+    },
+    {
+      "id": "datafeed-v2_linux_rare_metadata_user",
+      "file": "datafeed_v2_linux_rare_metadata_user.json",
+      "job_id": "v2_linux_rare_metadata_user"
+    },
+    {
+      "id": "datafeed-v2_linux_rare_metadata_process",
+      "file": "datafeed_v2_linux_rare_metadata_process.json",
+      "job_id": "v2_linux_rare_metadata_process"
+    },
+    {
+      "id": "datafeed-v2_linux_anomalous_user_name_ecs",
+      "file": "datafeed_v2_linux_anomalous_user_name_ecs.json",
+      "job_id": "v2_linux_anomalous_user_name_ecs"
+    },
+    {
+      "id": "datafeed-v2_linux_anomalous_process_all_hosts_ecs",
+      "file": "datafeed_v2_linux_anomalous_process_all_hosts_ecs.json",
+      "job_id": "v2_linux_anomalous_process_all_hosts_ecs"
+    },
+    {
+      "id": "datafeed-v2_linux_anomalous_network_port_activity_ecs",
+      "file": "datafeed_v2_linux_anomalous_network_port_activity_ecs.json",
+      "job_id": "v2_linux_anomalous_network_port_activity_ecs"
+    }
+  ]
+}

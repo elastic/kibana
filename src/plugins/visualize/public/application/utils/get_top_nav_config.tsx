@@ -77,6 +77,7 @@ export const getTopNavConfig = (
   {
     application,
     chrome,
+    embeddable,
     history,
     share,
     setActiveUrl,
@@ -137,6 +138,8 @@ export const getTopNavConfig = (
         } else {
           if (setOriginatingApp && originatingApp && newlyCreated) {
             setOriginatingApp(undefined);
+            // remove editor state so the connection is still broken after reload
+            stateTransfer.clearEditorState();
           }
           chrome.docTitle.change(savedVis.lastSavedTitle);
           chrome.setBreadcrumbs(getEditBreadcrumbs(savedVis.lastSavedTitle));

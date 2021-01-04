@@ -79,6 +79,7 @@ export class RenderingService {
               translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
             },
             csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
+            externalUrl: http.externalUrl,
             vars: vars ?? {},
             uiPlugins: await Promise.all(
               [...uiPlugins.public].map(async ([id, plugin]) => ({

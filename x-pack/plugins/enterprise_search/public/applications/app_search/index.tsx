@@ -26,6 +26,7 @@ import {
   ROLE_MAPPINGS_PATH,
   ENGINES_PATH,
   ENGINE_PATH,
+  LIBRARY_PATH,
 } from './routes';
 
 import { SetupGuide } from './components/setup_guide';
@@ -35,6 +36,7 @@ import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { Settings, SETTINGS_TITLE } from './components/settings';
 import { Credentials, CREDENTIALS_TITLE } from './components/credentials';
 import { ROLE_MAPPINGS_TITLE } from './components/role_mappings';
+import { Library } from './components/library';
 
 export const AppSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -66,6 +68,11 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
+      {process.env.NODE_ENV === 'development' && (
+        <Route path={LIBRARY_PATH}>
+          <Library />
+        </Route>
+      )}
       <Route path={ENGINE_PATH}>
         <Layout navigation={<AppSearchNav subNav={<EngineNav />} />} readOnlyMode={readOnlyMode}>
           <EngineRouter />

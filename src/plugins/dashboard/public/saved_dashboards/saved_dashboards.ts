@@ -18,9 +18,11 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/public';
-import { SavedObjectLoader, SavedObjectsStart } from '../../../../plugins/saved_objects/public';
+
+import { EmbeddableStart } from '../services/embeddable';
+import { SavedObjectLoader, SavedObjectsStart } from '../services/saved_objects';
+
 import { createSavedDashboardClass } from './saved_dashboard';
-import { EmbeddableStart } from '../../../embeddable/public';
 
 interface Services {
   savedObjectsClient: SavedObjectsClientContract;

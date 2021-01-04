@@ -71,12 +71,6 @@ export interface MetricsFetchDataResponse extends FetchDataResponse {
     hosts: Stat;
     cpu: Stat;
     memory: Stat;
-    inboundTraffic: Stat;
-    outboundTraffic: Stat;
-  };
-  series: {
-    inboundTraffic: Series;
-    outboundTraffic: Series;
   };
 }
 

@@ -1,0 +1,8 @@
+{
+  "id": "kibana_cors_test",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["test", "cors"],
+  "server": true,
+  "ui": false
+}

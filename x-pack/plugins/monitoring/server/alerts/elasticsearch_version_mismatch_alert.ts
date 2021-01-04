@@ -26,6 +26,12 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
       name: LEGACY_ALERT_DETAILS[ALERT_ELASTICSEARCH_VERSION_MISMATCH].label,
       legacy: {
         watchName: 'elasticsearch_version_mismatch',
+        nodeNameLabel: i18n.translate(
+          'xpack.monitoring.alerts.elasticsearchVersionMismatch.nodeNameLabel',
+          {
+            defaultMessage: 'Elasticsearch node alert',
+          }
+        ),
         changeDataValues: { severity: AlertSeverity.Warning },
       },
       interval: '1d',

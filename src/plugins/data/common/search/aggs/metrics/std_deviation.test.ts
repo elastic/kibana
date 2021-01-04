@@ -91,19 +91,24 @@ describe('AggTypeMetricStandardDeviationProvider class', () => {
     );
     expect(responseAggs[0].toExpressionAst()).toMatchInlineSnapshot(`
       Object {
-        "arguments": Object {
-          "enabled": Array [
-            true,
-          ],
-          "id": Array [
-            "std_dev.std_lower",
-          ],
-          "schema": Array [
-            "metric",
-          ],
-        },
-        "function": "aggStdDeviation",
-        "type": "function",
+        "chain": Array [
+          Object {
+            "arguments": Object {
+              "enabled": Array [
+                true,
+              ],
+              "id": Array [
+                "std_dev.std_lower",
+              ],
+              "schema": Array [
+                "metric",
+              ],
+            },
+            "function": "aggStdDeviation",
+            "type": "function",
+          },
+        ],
+        "type": "expression",
       }
     `);
   });

@@ -1,0 +1,112 @@
+{
+  "id": "security_windows",
+  "title": "Security: Windows",
+  "description": "Detects suspicious activity using ECS Windows events. Tested with Winlogbeat and the Elastic agent.",
+  "type": "windows data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "winlogbeat-*,logs-endpoint.events.*",
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "host.os.family": {
+                    "query": "windows",
+                    "operator": "OR"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "host.os.type": {
+                    "query": "windows",
+                    "operator": "OR"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "jobs": [
+    {
+      "id": "v2_rare_process_by_host_windows_ecs",
+      "file": "v2_rare_process_by_host_windows_ecs.json"
+    },
+    {
+      "id": "v2_windows_anomalous_network_activity_ecs",
+      "file": "v2_windows_anomalous_network_activity_ecs.json"
+    },
+    {
+      "id": "v2_windows_anomalous_path_activity_ecs",
+      "file": "v2_windows_anomalous_path_activity_ecs.json"
+    },
+    {
+      "id": "v2_windows_anomalous_process_all_hosts_ecs",
+      "file": "v2_windows_anomalous_process_all_hosts_ecs.json"
+    },
+    {
+      "id": "v2_windows_anomalous_process_creation",
+      "file": "v2_windows_anomalous_process_creation.json"
+    },
+    {
+      "id": "v2_windows_anomalous_user_name_ecs",
+      "file": "v2_windows_anomalous_user_name_ecs.json"
+    },
+    {
+      "id": "v2_windows_rare_metadata_process",
+      "file": "v2_windows_rare_metadata_process.json"
+    },
+    {
+      "id": "v2_windows_rare_metadata_user",
+      "file": "v2_windows_rare_metadata_user.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-v2_rare_process_by_host_windows_ecs",
+      "file": "datafeed_v2_rare_process_by_host_windows_ecs.json",
+      "job_id": "v2_rare_process_by_host_windows_ecs"
+    },
+    {
+      "id": "datafeed-v2_windows_anomalous_network_activity_ecs",
+      "file": "datafeed_v2_windows_anomalous_network_activity_ecs.json",
+      "job_id": "v2_windows_anomalous_network_activity_ecs"
+    },
+    {
+      "id": "datafeed-v2_windows_anomalous_path_activity_ecs",
+      "file": "datafeed_v2_windows_anomalous_path_activity_ecs.json",
+      "job_id": "v2_windows_anomalous_path_activity_ecs"
+    },
+    {
+      "id": "datafeed-v2_windows_anomalous_process_all_hosts_ecs",
+      "file": "datafeed_v2_windows_anomalous_process_all_hosts_ecs.json",
+      "job_id": "v2_windows_anomalous_process_all_hosts_ecs"
+    },
+    {
+      "id": "datafeed-v2_windows_anomalous_process_creation",
+      "file": "datafeed_v2_windows_anomalous_process_creation.json",
+      "job_id": "v2_windows_anomalous_process_creation"
+    },
+    {
+      "id": "datafeed-v2_windows_anomalous_user_name_ecs",
+      "file": "datafeed_v2_windows_anomalous_user_name_ecs.json",
+      "job_id": "v2_windows_anomalous_user_name_ecs"
+    },
+    {
+      "id": "datafeed-v2_windows_rare_metadata_process",
+      "file": "datafeed_v2_windows_rare_metadata_process.json",
+      "job_id": "v2_windows_rare_metadata_process"
+    },
+    {
+      "id": "datafeed-v2_windows_rare_metadata_user",
+      "file": "datafeed_v2_windows_rare_metadata_user.json",
+      "job_id": "v2_windows_rare_metadata_user"
+    }
+  ]
+}

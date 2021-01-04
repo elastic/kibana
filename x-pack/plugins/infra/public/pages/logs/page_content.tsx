@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
 
@@ -24,9 +24,12 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
+import { HeaderMenuPortal } from '../../../../observability/public';
+import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
+  const { setHeaderActionMenu } = useContext(HeaderActionMenuContext);
 
   const { initialize } = useLogSourceContext();
 
@@ -66,6 +69,28 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
       <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
 
+      {setHeaderActionMenu && (
+        <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+          <EuiFlexGroup gutterSize={'none'} alignItems={'center'} responsive={false}>
+            <EuiFlexItem grow={false}>
+              <AlertDropdown />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={kibana.services?.application?.getUrlForApp(
+                  '/home#/tutorial_directory/logging'
+                )}
+                size="s"
+                color="primary"
+                iconType="plusInCircle"
+              >
+                {ADD_DATA_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </HeaderMenuPortal>
+      )}
+
       <Header
         breadcrumbs={[
           {
@@ -78,19 +103,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
           <EuiFlexItem>
             <RoutedTabs tabs={[streamTab, anomaliesTab, logCategoriesTab, settingsTab]} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AlertDropdown />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              href={kibana.services?.application?.getUrlForApp('/home#/tutorial_directory/logging')}
-              size="s"
-              color="primary"
-              iconType="plusInCircle"
-            >
-              {ADD_DATA_LABEL}
-            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </AppNavigation>

@@ -37,6 +37,7 @@ import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
 import { configMock } from '../config/mocks';
+import { ExternalUrlConfig } from '../external_url';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
@@ -105,6 +106,7 @@ const createInternalSetupContractMock = () => {
     registerStaticDir: jest.fn(),
     basePath: createBasePathMock(),
     csp: CspConfig.DEFAULT,
+    externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     getAuthHeaders: jest.fn(),
     getServerInfo: jest.fn(),

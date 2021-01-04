@@ -21,7 +21,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import { ReadOnlyCallOut } from '../../../components/rules/read_only_callout';
+import { ReadOnlyRulesCallOut } from '../../../components/callouts/read_only_rules_callout';
 import { ValueListsModal } from '../../../components/value_lists_management_modal';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import {
@@ -155,7 +155,7 @@ const RulesPageComponent: React.FC = () => {
 
   return (
     <>
-      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <ReadOnlyRulesCallOut />
       <ValueListsModal
         showModal={showValueListsModal}
         onClose={() => setShowValueListsModal(false)}

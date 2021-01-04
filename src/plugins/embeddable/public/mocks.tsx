@@ -34,7 +34,6 @@ import { coreMock } from '../../../core/public/mocks';
 import { UiActionsService } from './lib/ui_actions';
 import { CoreStart } from '../../../core/public';
 import { Start as InspectorStart } from '../../inspector/public';
-import { dataPluginMock } from '../../data/public/mocks';
 
 import { inspectorPluginMock } from '../../inspector/public/mocks';
 import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
@@ -81,6 +80,7 @@ export const createEmbeddablePanelMock = ({
 
 export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTransfer> => {
   return {
+    clearEditorState: jest.fn(),
     getIncomingEditorState: jest.fn(),
     getIncomingEmbeddablePackage: jest.fn(),
     navigateToEditor: jest.fn(),
@@ -125,7 +125,6 @@ const createStartContract = (): Start => {
     inject: jest.fn(),
     migrate: jest.fn(),
     EmbeddablePanel: jest.fn(),
-    getEmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getAttributeService: jest.fn(),
   };
@@ -136,13 +135,11 @@ const createInstance = (setupPlugins: Partial<EmbeddableSetupDependencies> = {})
   const plugin = new EmbeddablePublicPlugin({} as any);
   const setup = plugin.setup(coreMock.createSetup(), {
     uiActions: setupPlugins.uiActions || uiActionsPluginMock.createSetupContract(),
-    data: dataPluginMock.createSetupContract(),
   });
   const doStart = (startPlugins: Partial<EmbeddableStartDependencies> = {}) =>
     plugin.start(coreMock.createStart(), {
       uiActions: startPlugins.uiActions || uiActionsPluginMock.createStartContract(),
       inspector: inspectorPluginMock.createStartContract(),
-      data: dataPluginMock.createStartContract(),
     });
   return {
     plugin,

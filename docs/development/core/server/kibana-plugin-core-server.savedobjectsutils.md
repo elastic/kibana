@@ -24,5 +24,5 @@ export declare class SavedObjectsUtils
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
 |  [generateId()](./kibana-plugin-core-server.savedobjectsutils.generateid.md) | <code>static</code> | Generates a random ID for a saved objects. |
-|  [isRandomId(id)](./kibana-plugin-core-server.savedobjectsutils.israndomid.md) | <code>static</code> | Validates that a saved object ID matches UUID format. |
+|  [isRandomId(id)](./kibana-plugin-core-server.savedobjectsutils.israndomid.md) | <code>static</code> | Validates that a saved object ID has been randomly generated. |
 
