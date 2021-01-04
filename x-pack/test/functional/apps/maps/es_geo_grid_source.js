@@ -14,7 +14,6 @@ export default function ({ getPageObjects, getService }) {
 
   describe('layer geo grid aggregation source', () => {
     const EXPECTED_NUMBER_FEATURES_ZOOMED_OUT = 4;
-    const EXPECTED_NUMBER_FEATURES_ZOOMED_IN = 12;
     const DATA_CENTER_LON = -98;
     const DATA_CENTER_LAT = 38;
 
@@ -115,9 +114,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('should decorate feature properties with scaled doc_count property', async () => {
         const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
-          EXPECTED_NUMBER_FEATURES_ZOOMED_IN
-        );
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(6);
 
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
           expect(properties.hasOwnProperty(HEATMAP_PROP_NAME)).to.be(true);
@@ -194,9 +191,7 @@ export default function ({ getPageObjects, getService }) {
 
       it('should decorate feature properties with metrics properterties', async () => {
         const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
-          EXPECTED_NUMBER_FEATURES_ZOOMED_IN
-        );
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(12);
 
         mapboxStyle.sources[LAYER_ID].data.features.forEach(({ properties }) => {
           expect(properties.hasOwnProperty(MAX_OF_BYTES_PROP_NAME)).to.be(true);
