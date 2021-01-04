@@ -18,7 +18,7 @@ import {
   sendGetPackagePolicy,
   sendGetFleetAgentStatusForPolicy,
   sendPutPackagePolicy,
-} from '../policy_list/services/ingest';
+} from '../services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 
