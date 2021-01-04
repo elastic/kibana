@@ -129,12 +129,16 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
           }
 
           if (exceptionsListsRef[id] != null && exceptionsListsRef[id].rules.length === 0) {
-            deleteExceptionList({
+            await deleteExceptionList({
               id,
               namespaceType,
               onError: handleDeleteError,
               onSuccess: handleDeleteSuccess,
             });
+
+            if (refreshExceptions != null) {
+              refreshExceptions();
+            }
           } else {
             setReferenceModalState({
               contentText: i18n.referenceErrorMessage(exceptionsListsRef[id].rules.length),

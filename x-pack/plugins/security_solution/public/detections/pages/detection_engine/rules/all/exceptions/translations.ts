@@ -121,7 +121,7 @@ export const REFERENCE_MODAL_CANCEL_BUTTON = i18n.translate(
 export const REFERENCE_MODAL_CONFIRM_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.referenceModalDeleteButton',
   {
-    defaultMessage: 'Remove value list',
+    defaultMessage: 'Remove exceptions list',
   }
 );
 
