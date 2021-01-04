@@ -7,4 +7,5 @@
 import { APP_OVERVIEW_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
 
-export const getAppOverviewUrl = (search?: string) => `${APP_OVERVIEW_PATH}${appendSearch(search)}`;
+export const getAppOverviewUrl = (basePath: string, search?: string) =>
+  `${basePath}${APP_OVERVIEW_PATH}${appendSearch(search)}`;

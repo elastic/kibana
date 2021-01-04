@@ -93,7 +93,7 @@ export const HeaderGlobal = React.memo(
               <FlexItem>
                 <EuiFlexGroup alignItems="center" responsive={false}>
                   <FlexItem grow={false}>
-                    <LinkAnchor onClick={goToOverview} href={getAppOverviewUrl(search)}>
+                    <LinkAnchor onClick={goToOverview} href={getAppOverviewUrl(basePath, search)}>
                       <EuiIcon aria-label={i18n.SECURITY_SOLUTION} type="logoSecurity" size="l" />
                     </LinkAnchor>
                   </FlexItem>

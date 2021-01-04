@@ -6,6 +6,7 @@
 
 import { getOr, omit } from 'lodash/fp';
 
+import { IBasePath } from 'kibana/public';
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
 import { APP_NAME } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
@@ -32,20 +33,23 @@ import { GetUrlForApp, SearchNavTab } from '../types';
 export const setBreadcrumbs = (
   spyState: RouteSpyState & TabNavigationProps,
   chrome: StartServices['chrome'],
-  getUrlForApp: GetUrlForApp
+  getUrlForApp: GetUrlForApp,
+  basePath: IBasePath
 ) => {
-  const breadcrumbs = getBreadcrumbsForRoute(spyState, getUrlForApp);
+  const breadcrumbs = getBreadcrumbsForRoute(spyState, getUrlForApp, basePath);
   if (breadcrumbs) {
     chrome.setBreadcrumbs(breadcrumbs);
   }
 };
 
-export const siemRootBreadcrumb: ChromeBreadcrumb[] = [
-  {
-    text: APP_NAME,
-    href: getAppOverviewUrl(),
-  },
-];
+const fullSiemRootBreadcrumb = (basePath: IBasePath): ChromeBreadcrumb[] => {
+  return [
+    {
+      text: APP_NAME,
+      href: getAppOverviewUrl(basePath.get()),
+    },
+  ];
+};
 
 const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpyState =>
   spyState != null && spyState.pageName === SecurityPageName.network;
@@ -68,9 +72,11 @@ const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRoute
 // eslint-disable-next-line complexity
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps,
-  getUrlForApp: GetUrlForApp
+  getUrlForApp: GetUrlForApp,
+  basePath: IBasePath
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
+  const siemRootBreadcrumb = fullSiemRootBreadcrumb(basePath);
   if (isHostsRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'host', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];

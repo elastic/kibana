@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import deepEqual from 'fast-deep-equal';
-
+import { IBasePath } from 'kibana/public';
 import { useKibana } from '../../lib/kibana';
 import { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
@@ -34,6 +34,7 @@ export const SiemNavigationComponent: React.FC<
   const {
     chrome,
     application: { getUrlForApp },
+    http: { basePath },
   } = useKibana().services;
 
   useEffect(() => {
@@ -56,7 +57,8 @@ export const SiemNavigationComponent: React.FC<
           timerange: urlState.timerange,
         },
         chrome,
-        getUrlForApp
+        getUrlForApp,
+        basePath
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
