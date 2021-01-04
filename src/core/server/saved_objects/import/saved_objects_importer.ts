@@ -33,6 +33,9 @@ import {
  */
 export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
 
+/**
+ * @public
+ */
 export class SavedObjectsImporter {
   private savedObjectsClient: SavedObjectsClientContract;
   private typeRegistry: ISavedObjectTypeRegistry;

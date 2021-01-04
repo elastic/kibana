@@ -30,7 +30,7 @@ export interface SavedObjectExportBaseOptions {
 }
 
 /**
- * Options for the {@link SavedObjectExporter.exportByTypes | export by type API}
+ * Options for the {@link SavedObjectsExporter.exportByTypes | export by type API}
  *
  * @public
  */
@@ -44,7 +44,7 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
 }
 
 /**
- * Options for the {@link SavedObjectExporter.exportByObjects | export by objects API}
+ * Options for the {@link SavedObjectsExporter.exportByObjects | export by objects API}
  *
  * @public
  */
