@@ -25,7 +25,7 @@ import {
   sendGetEndpointSecurityPackage,
   sendGetAgentPolicyList,
   sendGetFleetAgentsWithEndpoint,
-} from '../../policy/store/policy_list/services/ingest';
+} from '../../policy/store/services/ingest';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
 import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
 import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
