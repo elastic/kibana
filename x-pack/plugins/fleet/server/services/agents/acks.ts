@@ -210,7 +210,7 @@ export interface AcksService {
 
   getSavedObjectsClientContract: (kibanaRequest: KibanaRequest) => SavedObjectsClientContract;
 
-  getElasticsearchClientContract: () => ElasticsearchClient | undefined;
+  getElasticsearchClientContract: () => ElasticsearchClient;
 
   saveAgentEvents: (
     soClient: SavedObjectsClientContract,

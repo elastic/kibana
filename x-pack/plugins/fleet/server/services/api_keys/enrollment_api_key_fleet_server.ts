@@ -59,7 +59,7 @@ export async function listEnrollmentApiKeys(
     size: perPage,
     sort: 'created_at:desc',
     track_total_hits: true,
-    // TODO support kuery
+    q: kuery,
   });
 
   const items = res.body.hits.hits.map(esDocToEnrollmentApiKey);

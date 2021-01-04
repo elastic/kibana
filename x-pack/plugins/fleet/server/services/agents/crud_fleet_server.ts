@@ -65,10 +65,6 @@ export async function listAgents(
     filters.push(ACTIVE_AGENT_CONDITION);
   }
 
-  console.log('---');
-  console.log(_joinFilters(filters));
-  console.log('---');
-
   const res = await esClient.search({
     index: AGENTS_INDEX,
     from: (page - 1) * perPage,

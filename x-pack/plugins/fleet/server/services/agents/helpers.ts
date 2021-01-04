@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Agent } from '../../types';
+import { ESSearchHit } from '../../../../../typings/elasticsearch';
+import { Agent, AgentSOAttributes } from '../../types';
 
-export function searchHitToAgent(hit): Agent {
+export function searchHitToAgent(hit: ESSearchHit<AgentSOAttributes>): Agent {
   return {
     id: hit._id,
     ...hit._source,
