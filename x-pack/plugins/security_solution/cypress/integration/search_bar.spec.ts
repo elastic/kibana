@@ -13,7 +13,7 @@ import { HOSTS_URL } from '../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 import { cleanKibana } from '../tasks/common';
 
-describe('SearchBar', () => {
+describe.skip('SearchBar', () => {
   before(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
