@@ -50,8 +50,6 @@ import {
   PromiseServiceCreator,
   registerListenEventListener,
   watchMultiDecorator,
-  createTopNavDirective,
-  createTopNavHelper,
 } from '../../kibana_legacy/public';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
@@ -98,7 +96,6 @@ export function initializeInnerAngularModule(
     createLocalI18nModule();
     createLocalPrivateModule();
     createLocalPromiseModule();
-    createLocalTopNavModule(navigation);
     createLocalStorageModule();
     createPagerFactoryModule();
     createDocTableModule();
@@ -131,7 +128,6 @@ export function initializeInnerAngularModule(
       'discoverI18n',
       'discoverPrivate',
       'discoverPromise',
-      'discoverTopNav',
       'discoverLocalStorageProvider',
       'discoverDocTable',
       'discoverPagerFactory',
@@ -149,13 +145,6 @@ function createLocalPromiseModule() {
 
 function createLocalPrivateModule() {
   angular.module('discoverPrivate', []).provider('Private', PrivateProvider);
-}
-
-function createLocalTopNavModule(navigation: NavigationStart) {
-  angular
-    .module('discoverTopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {
