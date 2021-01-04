@@ -20,9 +20,9 @@ export async function fetchServicePathsFromTraceIds(
   const { apmEventClient } = setup;
 
   // make sure there's a range so ES can skip shards
-  const day = 24 * 60 * 60 * 1000;
-  const start = setup.start - day;
-  const end = setup.end + day;
+  const dayInMs = 24 * 60 * 60 * 1000;
+  const start = setup.start - dayInMs;
+  const end = setup.end + dayInMs;
 
   const serviceMapParams = {
     apm: {
@@ -38,9 +38,7 @@ export async function fetchServicePathsFromTraceIds(
                 [TRACE_ID]: traceIds,
               },
             },
-            {
-              range: rangeFilter(start, end),
-            },
+            { range: rangeFilter(start, end) },
           ],
         },
       },
