@@ -5,8 +5,8 @@
  */
 
 import { createSelector } from 'reselect';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { selectNotesById } from '../../../../common/store/app/selectors';
-import { TimelineTabs } from '../../../store/timeline/model';
 import { selectTimeline } from '../../../store/timeline/selectors';
 
 export const getActiveTabSelector = () =>
@@ -18,5 +18,11 @@ export const getShowTimelineSelector = () =>
 export const getPinnedEventSelector = () =>
   createSelector(selectTimeline, (timeline) => Object.keys(timeline?.pinnedEventIds ?? {}).length);
 
+export const getNoteIdsSelector = () =>
+  createSelector(selectTimeline, (timeline) => timeline?.noteIds ?? []);
+
+export const getEventIdToNoteIdsSelector = () =>
+  createSelector(selectTimeline, (timeline) => timeline?.eventIdToNoteIds ?? {});
+
 export const getNotesSelector = () =>
-  createSelector(selectNotesById, (notesById) => Object.keys(notesById ?? {}).length);
+  createSelector(selectNotesById, (notesById) => Object.values(notesById));

@@ -60,7 +60,7 @@ getAngularModule().directive('contextApp', function ContextApp() {
 });
 
 function ContextAppController($scope, Private) {
-  const { filterManager, indexPatterns, uiSettings } = getServices();
+  const { filterManager, indexPatterns, uiSettings, navigation } = getServices();
   const queryParameterActions = getQueryParameterActions(filterManager, indexPatterns);
   const queryActions = Private(QueryActionsProvider);
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
@@ -69,6 +69,7 @@ function ContextAppController($scope, Private) {
     getFirstSortableField(this.indexPattern, uiSettings.get(CONTEXT_TIE_BREAKER_FIELDS_SETTING)),
     useNewFieldsApi
   );
+  this.topNavMenu = navigation.ui.TopNavMenu;
 
   this.actions = _.mapValues(
     {
