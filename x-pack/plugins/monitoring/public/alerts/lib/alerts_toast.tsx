@@ -72,7 +72,7 @@ const showUnableToDisableWatcherClusterAlertsError = () => {
           external
           target="_blank"
         >
-          {i18n.translate('xpack.monitoring.healthCheck.encryptionErrorAction', {
+          {i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.action', {
             defaultMessage: 'Learn more.',
           })}
         </EuiLink>
