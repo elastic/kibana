@@ -287,7 +287,7 @@ describe('BackgroundSessionService', () => {
       await service.trackId(
         searchRequest,
         searchId,
-        { sessionId, isStored },
+        { sessionId, isStored, strategy: MOCK_STRATEGY },
         { savedObjectsClient }
       );
 
@@ -318,6 +318,7 @@ describe('BackgroundSessionService', () => {
 
       const [setSessionId, setParams] = setSpy.mock.calls[0];
       expect(setParams.ids.get(requestHash).id).toBe(searchId);
+      expect(setParams.ids.get(requestHash).strategy).toBe(MOCK_STRATEGY);
       expect(setSessionId).toBe(sessionId);
     });
 
