@@ -1,0 +1,14 @@
+{
+  "name": "Rule 2",
+  "description": "Sample rule with multiple exception list",
+  "rule_id": "query-with-multiple-exception-list",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "query",
+  "query": "host.name: *",
+  "interval": "30s",
+  "exceptions_list": [
+    { "id": "detection_list_1", "list_id": "detection_list_1", "namespace_type": "single", "type": "detection" },
+    { "id": "detection_list_2", "list_id": "detection_list_2", "namespace_type": "single", "type": "detection" }
+  ]
+}
