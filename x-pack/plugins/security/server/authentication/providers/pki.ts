@@ -41,6 +41,34 @@ function canStartNewSession(request: KibanaRequest) {
 }
 
 /**
+ * Returns a stringified version of a certificate, including metadata
+ * @param peerCertificate DetailedPeerCertificate instance.
+ */
+function stringifyCertificate(peerCertificate: DetailedPeerCertificate) {
+  const {
+    subject,
+    issuer,
+    issuerCertificate,
+    subjectaltname,
+    valid_from: validFrom,
+    valid_to: validTo,
+  } = peerCertificate;
+
+  // The issuerCertificate field can be an Object, null, or (in some edge cases) undefined. This distinction can be useful for
+  // troubleshooting mutual TLS connection problems, so we include it in the stringified certificate that is printed to the debug logs.
+  let issuerCertType: string;
+  if (issuerCertificate === undefined) {
+    issuerCertType = 'undefined';
+  } else if (issuerCertificate === null) {
+    issuerCertType = 'null';
+  } else {
+    issuerCertType = 'object';
+  }
+
+  return JSON.stringify({ subject, issuer, issuerCertType, subjectaltname, validFrom, validTo });
+}
+
+/**
  * Provider that supports PKI request authentication.
  */
 export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
@@ -267,7 +295,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
 
     while (certificate && Object.keys(certificate).length > 0) {
       certificateChain.push(certificate.raw.toString('base64'));
-      certificateStrings.push(this.stringifyCertificate(certificate));
+      certificateStrings.push(stringifyCertificate(certificate));
 
       // For self-signed certificates, `issuerCertificate` may be a circular reference.
       if (certificate === certificate.issuerCertificate) {
@@ -287,27 +315,5 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug(`Peer certificate chain: [${certificateStrings.join(', ')}]`);
 
     return { certificateChain, isChainIncomplete };
-  }
-
-  private stringifyCertificate(peerCertificate: DetailedPeerCertificate) {
-    const {
-      subject,
-      issuer,
-      issuerCertificate,
-      subjectaltname,
-      valid_from: validFrom,
-      valid_to: validTo,
-    } = peerCertificate;
-
-    let issuerCertType: string;
-    if (issuerCertificate === undefined) {
-      issuerCertType = 'undefined';
-    } else if (issuerCertificate === null) {
-      issuerCertType = 'null';
-    } else {
-      issuerCertType = 'object';
-    }
-
-    return JSON.stringify({ subject, issuer, issuerCertType, subjectaltname, validFrom, validTo });
   }
 }
