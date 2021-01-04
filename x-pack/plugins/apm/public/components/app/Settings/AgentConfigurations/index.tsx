@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiToolTip } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -78,17 +79,30 @@ function CreateConfigurationButton() {
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            color="primary"
-            fill
-            iconType="plusInCircle"
-            href={href}
-            isDisabled={!canSave}
+          <EuiToolTip
+            content={
+              !canSave &&
+              i18n.translate(
+                'xpack.apm.agentConfig.configurationsPanelTitle.noPermissionTooltipLabel',
+                {
+                  defaultMessage:
+                    "Your user role doesn't have permissions to create agent configurations",
+                }
+              )
+            }
           >
-            {i18n.translate('xpack.apm.agentConfig.createConfigButtonLabel', {
-              defaultMessage: 'Create configuration',
-            })}
-          </EuiButton>
+            <EuiButton
+              color="primary"
+              fill
+              iconType="plusInCircle"
+              href={href}
+              isDisabled={!canSave}
+            >
+              {i18n.translate('xpack.apm.agentConfig.createConfigButtonLabel', {
+                defaultMessage: 'Create configuration',
+              })}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
