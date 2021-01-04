@@ -27,7 +27,7 @@ interface WaitForSelectorOpts {
 
 interface EvaluateOpts {
   fn: EvaluateFn;
-  args: SerializableOrJSHandle[];
+  args?: SerializableOrJSHandle[];
 }
 
 interface EvaluateMetaOpts {
@@ -195,18 +195,14 @@ export class HeadlessChromiumDriver {
     }
   }
 
+  // NOTE: dimensions must be given in the base pixels sizes, not pre-scaled by the zoom factor.
   public async setViewport(
     { width, height, zoom }: ViewZoomWidthHeight,
     logger: LevelLogger
   ): Promise<void> {
     logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
 
-    await this.page.setViewport({
-      width: Math.floor(width / zoom),
-      height: Math.floor(height / zoom),
-      deviceScaleFactor: zoom,
-      isMobile: false,
-    });
+    await this.page.setViewport({ width, height, deviceScaleFactor: zoom, isMobile: false });
   }
 
   private registerListeners(conditionalHeaders: ConditionalHeaders, logger: LevelLogger) {

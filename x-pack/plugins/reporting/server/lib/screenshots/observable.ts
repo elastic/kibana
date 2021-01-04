@@ -86,13 +86,9 @@ export function screenshotsObservableFactory(
                 );
               }),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
-              mergeMap(async (itemsCount) => {
-                const viewport = layout.getViewport(itemsCount) || getDefaultViewPort();
-                await Promise.all([
-                  driver.setViewport(viewport, logger),
-                  waitForVisualizations(captureConfig, driver, itemsCount, layout, logger),
-                ]);
-              }),
+              mergeMap(async (itemsCount) =>
+                waitForVisualizations(captureConfig, driver, itemsCount, layout, logger)
+              ),
               mergeMap(async () => {
                 // Waiting till _after_ elements have rendered before injecting our CSS
                 // allows for them to be displayed properly in many cases
@@ -132,8 +128,9 @@ export function screenshotsObservableFactory(
 
                   const elements = data.elementsPositionAndAttributes
                     ? data.elementsPositionAndAttributes
-                    : getDefaultElementPosition(layout.getViewport(1));
-                  const screenshots = await getScreenshots(driver, elements, logger);
+                    : getDefaultElementPosition(getDefaultViewPort());
+
+                  const screenshots = await getScreenshots(driver, layout, elements, logger);
                   const { timeRange, error: setupError } = data;
                   return {
                     timeRange,

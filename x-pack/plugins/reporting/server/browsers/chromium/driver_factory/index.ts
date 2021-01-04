@@ -63,8 +63,11 @@ export class HeadlessChromiumDriverFactory {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
       const logger = pLogger.clone(['browser-driver']);
       logger.info(`Creating browser page driver`);
+      logger.debug(`viewport: ${JSON.stringify(viewport)}`);
+      logger.debug(`viewport: ${browserTimezone}`);
 
       const chromiumArgs = this.getChromiumArgs(viewport);
+      logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
       let browser: puppeteer.Browser;
       let page: puppeteer.Page;
