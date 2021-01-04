@@ -5,6 +5,7 @@
  */
 
 import React, { memo, useState, useCallback, useMemo } from 'react';
+import uuid from 'uuid';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -20,9 +21,24 @@ import { ActionIconItem } from '../../../timelines/components/timeline/body/acti
 import * as i18n from './translations';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
-import { displaySuccessToast, useStateToaster } from '../../../common/components/toasters';
+import { AppToast, useStateToaster } from '../../../common/components/toasters';
 import { useCreateCaseModal } from '../use_create_case_modal';
 import { useAllCasesModal } from '../use_all_cases_modal';
+
+const createUpdateSuccessToaster = (theCase: Case): AppToast => {
+  const toast: AppToast = {
+    id: uuid.v4(),
+    color: 'success',
+    iconType: 'check',
+    title: i18n.CASE_CREATED_SUCCESS_TOAST(theCase.title),
+  };
+
+  if (theCase.settings.syncAlerts) {
+    return { ...toast, text: i18n.CASE_CREATED_SUCCESS_TOAST_TEXT };
+  }
+
+  return toast;
+};
 
 interface AddToCaseActionProps {
   ariaLabel?: string;
@@ -53,7 +69,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
           alertId: eventId,
           index: eventIndex ?? '',
         },
-        () => displaySuccessToast(i18n.CASE_CREATED_SUCCESS_TOAST(theCase.title), dispatchToaster)
+        () => dispatchToaster({ type: 'addToaster', toast: createUpdateSuccessToaster(theCase) })
       );
     },
     [postComment, eventId, eventIndex, dispatchToaster]
