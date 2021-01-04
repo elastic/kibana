@@ -290,7 +290,7 @@ describe('workspace_panel', () => {
     const onData = expressionRendererMock.mock.calls[0][0].onData$!;
 
     const tableData = { table1: { columns: [], rows: [] } };
-    onData(undefined, { tables: tableData });
+    onData(undefined, { tables: { tables: tableData } });
 
     expect(dispatch).toHaveBeenCalledWith({ type: 'UPDATE_ACTIVE_DATA', tables: tableData });
   });

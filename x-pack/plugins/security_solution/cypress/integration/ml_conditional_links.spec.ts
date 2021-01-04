@@ -5,6 +5,7 @@
  */
 
 import { KQL_INPUT } from '../screens/security_header';
+import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
@@ -25,6 +26,10 @@ import {
 } from '../urls/ml_conditional_links';
 
 describe('ml conditional links', () => {
+  before(() => {
+    cleanKibana();
+  });
+
   it('sets the KQL from a single IP with a value for the query', () => {
     loginAndWaitForPageWithoutDateRange(mlNetworkSingleIpKqlQuery);
     cy.get(KQL_INPUT)

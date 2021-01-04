@@ -82,6 +82,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
     <EuiFlexGroup gutterSize="none">
       <ButtonWrapper grow={false}>
         <StyledEuiButtonEmpty
+          aria-label={i18n.TIMELINE_TOGGLE_BUTTON_ARIA_LABEL({ isOpen, title })}
           flush="both"
           data-test-subj="flyoutOverlay"
           size="s"

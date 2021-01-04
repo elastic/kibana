@@ -38,6 +38,7 @@ interface ProviderItemBadgeProps {
   toggleTypeProvider: () => void;
   val: string | number;
   type?: DataProviderType;
+  wrapperRef?: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
@@ -59,6 +60,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     toggleTypeProvider,
     val,
     type = DataProviderType.default,
+    wrapperRef,
   }) => {
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const timelineType = useShallowEqualSelector((state) => {
@@ -81,7 +83,8 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
 
     const closePopover = useCallback(() => {
       setIsPopoverOpen(false);
-    }, []);
+      wrapperRef?.current?.focus();
+    }, [wrapperRef]);
 
     const onToggleEnabledProvider = useCallback(() => {
       toggleEnabledProvider();

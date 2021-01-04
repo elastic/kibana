@@ -45,6 +45,7 @@ import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
+import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
@@ -55,14 +56,11 @@ import {
   buildAlertsRuleIdFilter,
   buildShowBuildingBlockFilter,
 } from '../../../../components/alerts_table/default_config';
-import { NoWriteAlertsCallOut } from '../../../../components/no_write_alerts_callout';
-import * as detectionI18n from '../../translations';
-import { ReadOnlyCallOut } from '../../../../components/rules/read_only_callout';
+import { ReadOnlyAlertsCallOut } from '../../../../components/callouts/read_only_alerts_callout';
+import { ReadOnlyRulesCallOut } from '../../../../components/callouts/read_only_rules_callout';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { getStepsData, redirectToDetections, userHasNoPermissions } from '../helpers';
-import * as ruleI18n from '../translations';
-import * as i18n from './translations';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
 import { inputsSelectors } from '../../../../../common/store/inputs';
@@ -94,7 +92,9 @@ import {
   isBoolean,
 } from '../../../../../common/utils/privileges';
 
-import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
+import * as detectionI18n from '../../translations';
+import * as ruleI18n from '../translations';
+import * as i18n from './translations';
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -427,8 +427,8 @@ const RuleDetailsPageComponent = () => {
 
   return (
     <>
-      {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
-      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <ReadOnlyAlertsCallOut />
+      <ReadOnlyRulesCallOut />
       {indicesExist ? (
         <>
           <EuiWindowEvent event="resize" handler={noop} />

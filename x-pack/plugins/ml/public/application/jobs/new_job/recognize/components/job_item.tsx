@@ -21,6 +21,7 @@ import { ModuleJobUI } from '../page';
 import { SETUP_RESULTS_WIDTH } from './module_jobs';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
 import { JobOverride } from '../../../../../../common/types/modules';
+import { extractErrorMessage } from '../../../../../../common/util/errors';
 
 interface JobItemProps {
   job: ModuleJobUI;
@@ -94,13 +95,13 @@ export const JobItem: FC<JobItemProps> = memo(
 
           {setupResult && setupResult.error && (
             <EuiText size="xs" color="danger">
-              {setupResult.error.msg}
+              {extractErrorMessage(setupResult.error)}
             </EuiText>
           )}
 
           {datafeedResult && datafeedResult.error && (
             <EuiText size="xs" color="danger">
-              {datafeedResult.error.msg}
+              {extractErrorMessage(datafeedResult.error)}
             </EuiText>
           )}
         </EuiFlexItem>

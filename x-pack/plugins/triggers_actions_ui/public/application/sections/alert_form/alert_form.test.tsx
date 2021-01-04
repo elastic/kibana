@@ -26,7 +26,6 @@ describe('alert_form', () => {
   const alertType = {
     id: 'my-alert-type',
     iconClass: 'test',
-    name: 'test-alert',
     description: 'Alert when testing',
     documentationUrl: 'https://localhost.local/docs',
     validate: (): ValidationResult => {
@@ -36,7 +35,7 @@ describe('alert_form', () => {
     requiresAppContext: false,
   };
 
-  const actionType = {
+  const actionType = actionTypeRegistryMock.createMockActionTypeModel({
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
@@ -48,13 +47,11 @@ describe('alert_form', () => {
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
-  };
+  });
 
   const alertTypeNonEditable = {
     id: 'non-edit-alert-type',
     iconClass: 'test',
-    name: 'non edit alert',
     description: 'test',
     documentationUrl: null,
     validate: (): ValidationResult => {
@@ -67,7 +64,6 @@ describe('alert_form', () => {
   const disabledByLicenseAlertType = {
     id: 'disabled-by-license',
     iconClass: 'test',
-    name: 'test-alert',
     description: 'Alert when testing',
     documentationUrl: 'https://localhost.local/docs',
     validate: (): ValidationResult => {
@@ -306,7 +302,6 @@ describe('alert_form', () => {
         {
           id: 'same-consumer-producer-alert-type',
           iconClass: 'test',
-          name: 'test-alert',
           description: 'test',
           documentationUrl: null,
           validate: (): ValidationResult => {
@@ -318,7 +313,6 @@ describe('alert_form', () => {
         {
           id: 'other-consumer-producer-alert-type',
           iconClass: 'test',
-          name: 'test-alert',
           description: 'test',
           documentationUrl: null,
           validate: (): ValidationResult => {

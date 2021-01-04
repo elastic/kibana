@@ -31,10 +31,14 @@ import { timelineDefaults } from '../../store/timeline/defaults';
 import { isFullScreen } from '../timeline/body/column_headers';
 import { updateTimelineGraphEventId } from '../../../timelines/store/timeline/actions';
 import { Resolver } from '../../../resolver/view';
-
+import {
+  isLoadingSelector,
+  startSelector,
+  endSelector,
+} from '../../../common/components/super_date_picker/selectors';
+import * as i18n from './translations';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
-import * as i18n from './translations';
 
 const OverlayContainer = styled.div`
   ${({ $restrictWidth }: { $restrictWidth: boolean }) =>
@@ -119,6 +123,31 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
 
   const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
+  const getStartSelector = useMemo(() => startSelector(), []);
+  const getEndSelector = useMemo(() => endSelector(), []);
+  const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
+  const isActive = useMemo(() => timelineId === TimelineId.active, [timelineId]);
+  const shouldUpdate = useDeepEqualSelector((state) => {
+    if (isActive) {
+      return getIsLoadingSelector(state.inputs.timeline);
+    } else {
+      return getIsLoadingSelector(state.inputs.global);
+    }
+  });
+  const from = useDeepEqualSelector((state) => {
+    if (isActive) {
+      return getStartSelector(state.inputs.timeline);
+    } else {
+      return getStartSelector(state.inputs.global);
+    }
+  });
+  const to = useDeepEqualSelector((state) => {
+    if (isActive) {
+      return getEndSelector(state.inputs.timeline);
+    } else {
+      return getEndSelector(state.inputs.global);
+    }
+  });
 
   const fullScreen = useMemo(
     () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
@@ -173,6 +202,8 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
           databaseDocumentID={graphEventId}
           resolverComponentInstanceID={timelineId}
           indices={indices}
+          shouldUpdate={shouldUpdate}
+          filters={{ from, to }}
         />
       ) : (
         <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>

@@ -14,6 +14,8 @@ import {
   EuiButtonProps,
   EuiLinkAnchorProps,
   EuiPanel,
+  EuiCard,
+  EuiCardProps,
 } from '@elastic/eui';
 import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
@@ -112,5 +114,17 @@ export const EuiPanelTo: React.FC<ReactRouterEuiPanelProps> = ({
 }) => (
   <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
     <EuiPanel {...rest} />
+  </ReactRouterHelper>
+);
+
+type ReactRouterEuiCardProps = ReactRouterProps & EuiCardProps;
+export const EuiCardTo: React.FC<ReactRouterEuiCardProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
+    <EuiCard {...rest} />
   </ReactRouterHelper>
 );

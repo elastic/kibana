@@ -52,7 +52,6 @@ describe('alert_edit', () => {
     const alertType = {
       id: 'my-alert-type',
       iconClass: 'test',
-      name: 'test-alert',
       description: 'test',
       documentationUrl: null,
       validate: (): ValidationResult => {
@@ -62,7 +61,7 @@ describe('alert_edit', () => {
       requiresAppContext: false,
     };
 
-    const actionTypeModel = {
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
@@ -74,8 +73,7 @@ describe('alert_edit', () => {
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
 
     const alert: Alert = {
       id: 'ab5661e0-197e-45ee-b477-302d89193b5e',

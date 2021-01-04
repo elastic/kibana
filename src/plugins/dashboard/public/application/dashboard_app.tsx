@@ -45,6 +45,7 @@ import { removeQueryParam } from '../services/kibana_utils';
 import { IndexPattern } from '../services/data';
 import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardContainerInput } from '.';
+import { leaveConfirmStrings } from '../dashboard_strings';
 
 export interface DashboardAppProps {
   history: History;
@@ -64,8 +65,9 @@ export function DashboardApp({
     core,
     onAppLeave,
     uiSettings,
-    indexPatterns: indexPatternService,
+    embeddable,
     dashboardCapabilities,
+    indexPatterns: indexPatternService,
   } = useKibana<DashboardAppServices>().services;
 
   const [lastReloadTime, setLastReloadTime] = useState(0);
@@ -196,9 +198,14 @@ export function DashboardApp({
       return;
     }
     onAppLeave((actions) => {
-      if (dashboardStateManager?.getIsDirty()) {
-        // TODO: Finish App leave handler with overrides when redirecting to an editor.
-        // return actions.confirm(leaveConfirmStrings.leaveSubtitle, leaveConfirmStrings.leaveTitle);
+      if (
+        dashboardStateManager?.getIsDirty() &&
+        !embeddable.getStateTransfer().isTransferInProgress
+      ) {
+        return actions.confirm(
+          leaveConfirmStrings.getLeaveSubtitle(),
+          leaveConfirmStrings.getLeaveTitle()
+        );
       }
       return actions.default();
     });
@@ -206,7 +213,7 @@ export function DashboardApp({
       // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
       onAppLeave((actions) => actions.default());
     };
-  }, [dashboardStateManager, dashboardContainer, onAppLeave]);
+  }, [dashboardStateManager, dashboardContainer, onAppLeave, embeddable]);
 
   // Refresh the dashboard container when lastReloadTime changes
   useEffect(() => {
