@@ -23,7 +23,7 @@ import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesRangeInput } from './values_range_input';
-import { getInvalidFieldMessage } from '../helpers';
+import { getEsAggsSuffix, getInvalidFieldMessage } from '../helpers';
 import type { IndexPatternLayer } from '../../../types';
 
 function ofName(name?: string) {
@@ -119,7 +119,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       params: {
         size: previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
         orderBy: existingMetricColumn
-          ? { type: 'column', columnId: existingMetricColumn }
+          ? {
+              type: 'column',
+              columnId: existingMetricColumn,
+            }
           : { type: 'alphabetical' },
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
         otherBucket: !indexPattern.hasRestrictions,
@@ -127,14 +130,18 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  toEsAggsFn: (column, columnId, _indexPattern) => {
+  toEsAggsFn: (column, columnId, _indexPattern, layer) => {
     return buildExpressionFunction<AggFunctionsMapping['aggTerms']>('aggTerms', {
       id: columnId,
       enabled: true,
       schema: 'segment',
       field: column.sourceField,
       orderBy:
-        column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
+        column.params.orderBy.type === 'alphabetical'
+          ? '_key'
+          : `${column.params.orderBy.columnId}${getEsAggsSuffix(
+              layer.columns[column.params.orderBy.columnId]
+            )}`,
       order: column.params.orderDirection,
       size: column.params.size,
       otherBucket: Boolean(column.params.otherBucket),

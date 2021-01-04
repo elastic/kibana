@@ -8,13 +8,13 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { TimelineId } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../../common/containers/source';
 import {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions, TimelineTabs } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { OnPinEvent, OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
@@ -92,7 +92,10 @@ const StatefulEventComponent: React.FC<Props> = ({
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedEvent = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedEvent
+    (state) =>
+      (getTimeline(state, timelineId) ?? timelineDefaults).expandedEvent[
+        tabType ?? TimelineTabs.query
+      ] ?? {}
   );
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
   const notesById = useDeepEqualSelector(getNotesByIds);
@@ -153,6 +156,7 @@ const StatefulEventComponent: React.FC<Props> = ({
 
     dispatch(
       timelineActions.toggleExpandedEvent({
+        tabType,
         timelineId,
         event: {
           eventId,
@@ -161,10 +165,10 @@ const StatefulEventComponent: React.FC<Props> = ({
       })
     );
 
-    if (timelineId === TimelineId.active) {
+    if (timelineId === TimelineId.active && tabType === TimelineTabs.query) {
       activeTimeline.toggleExpandedEvent({ eventId, indexName });
     }
-  }, [dispatch, event._id, event._index, timelineId]);
+  }, [dispatch, event._id, event._index, tabType, timelineId]);
 
   const associateNote = useCallback(
     (noteId: string) => {
