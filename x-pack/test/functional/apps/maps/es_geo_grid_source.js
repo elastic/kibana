@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }) {
 
   describe('layer geo grid aggregation source', () => {
     const EXPECTED_NUMBER_FEATURES_ZOOMED_OUT = 4;
-    const EXPECTED_NUMBER_FEATURES_ZOOMED_IN = 6;
+    const EXPECTED_NUMBER_FEATURES_ZOOMED_IN = 12;
     const DATA_CENTER_LON = -98;
     const DATA_CENTER_LAT = 38;
 
