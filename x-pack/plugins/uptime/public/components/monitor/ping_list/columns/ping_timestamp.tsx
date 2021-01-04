@@ -31,6 +31,7 @@ const StepImage = styled(EuiImage)`
       align-self: center;
       margin-left: 8px;
       margin-top: 8px;
+      text-decoration: none !important;
     }
   }
 `;
