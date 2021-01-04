@@ -298,7 +298,7 @@ export class BackgroundSessionService implements ISessionService {
 
   // TODO: Throw an error if this session doesn't belong to this user
   public find = (
-    options: SavedObjectsFindOptions,
+    options: Omit<SavedObjectsFindOptions, 'type'>,
     { savedObjectsClient }: BackgroundSessionDependencies
   ) => {
     return savedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
