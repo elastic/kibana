@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { validateObject } from './validate_object';
+import { ensureNoUnsafeProperties } from './ensure_no_unsafe_properties';
 
 test(`fails on circular references`, () => {
   const foo: Record<string, any> = {};
   foo.myself = foo;
 
   expect(() =>
-    validateObject({
+    ensureNoUnsafeProperties({
       payload: foo,
     })
   ).toThrowErrorMatchingInlineSnapshot(`"circular reference detected"`);
@@ -57,7 +57,7 @@ test(`fails on circular references`, () => {
       [property]: value,
     };
     test(`can submit ${JSON.stringify(obj)}`, () => {
-      expect(() => validateObject(obj)).not.toThrowError();
+      expect(() => ensureNoUnsafeProperties(obj)).not.toThrowError();
     });
   });
 });
@@ -74,6 +74,6 @@ test(`fails on circular references`, () => {
   JSON.parse(`{ "foo": { "bar": { "constructor": { "prototype" : null } } } }`),
 ].forEach((value) => {
   test(`can't submit ${JSON.stringify(value)}`, () => {
-    expect(() => validateObject(value)).toThrowErrorMatchingSnapshot();
+    expect(() => ensureNoUnsafeProperties(value)).toThrowErrorMatchingSnapshot();
   });
 });
