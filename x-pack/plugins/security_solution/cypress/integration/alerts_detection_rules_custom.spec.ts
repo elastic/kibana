@@ -212,7 +212,7 @@ describe('Custom detection rules creation', () => {
   });
 });
 
-describe('Custom detection rules deletion and edition', () => {
+describe.skip('Custom detection rules deletion and edition', () => {
   context('Deletion', () => {
     beforeEach(() => {
       cleanKibana();
