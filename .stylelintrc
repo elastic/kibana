@@ -17,4 +17,6 @@ rules:
       - transition
       - width
       - display
+  # ($var / 2) rather than ($var/2)
   function-calc-no-unspaced-operator: true
+  block-opening-brace-space-before: always

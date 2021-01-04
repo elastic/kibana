@@ -47,7 +47,7 @@
         display: block;
       }
     }
-    & > li.has-body.active  {
+    & > li.has-body.active {
       & > a {
         border-radius: $euiBorderRadius $euiBorderRadius 0px 0px;
       }
