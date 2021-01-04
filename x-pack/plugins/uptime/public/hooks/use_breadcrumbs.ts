@@ -6,7 +6,7 @@
 
 import { ChromeBreadcrumb } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { useEffect } from 'react';
+import { MouseEvent, useEffect } from 'react';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { UptimeUrlParams } from '../lib/helper';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
@@ -24,8 +24,8 @@ function handleBreadcrumbClick(
     ...bc,
     ...(bc.href
       ? {
-          onClick: (event) => {
-            if (navigateToHref) {
+          onClick: (event: MouseEvent) => {
+            if (navigateToHref && bc.href) {
               event.preventDefault();
               navigateToHref(bc.href);
             }

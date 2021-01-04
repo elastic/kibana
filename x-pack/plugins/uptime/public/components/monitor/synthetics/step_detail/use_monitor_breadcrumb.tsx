@@ -23,7 +23,7 @@ export const useMonitorBreadcrumb = ({ journey, activeStep }: Props) => {
   const appPath = kibana.services.application?.getUrlForApp(PLUGIN.ID) ?? '';
 
   useBreadcrumbs([
-    ...(activeStep?.monitor?.name
+    ...(activeStep?.monitor
       ? [
           {
             text: activeStep?.monitor?.name || activeStep?.monitor.id,
