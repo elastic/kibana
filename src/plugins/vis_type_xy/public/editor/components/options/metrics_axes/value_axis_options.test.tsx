@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 
 import { Position } from '@elastic/charts';
 
-import { TextInputOption } from '../../../../../../charts/public';
+import { TextInputOption } from '../../../../../../vis_default_editor/public';
 
 import { ValueAxis, ScaleType } from '../../../../types';
 import { LabelOptions } from './label_options';
