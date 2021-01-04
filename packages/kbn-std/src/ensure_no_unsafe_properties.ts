@@ -31,7 +31,7 @@ const hasOwnProperty = (obj: any, property: string) =>
 const isObject = (obj: any) => typeof obj === 'object' && obj !== null;
 
 // we're using a stack instead of recursion so we aren't limited by the call stack
-export function validateObject(obj: any) {
+export function ensureNoUnsafeProperties(obj: any) {
   if (!isObject(obj)) {
     return;
   }
