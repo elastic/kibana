@@ -25,9 +25,9 @@ export function generateFakeEntries(
   const entries: LogEntry[] = [];
   const timestampStep = Math.floor((endTimestamp - startTimestamp) / count);
   for (let i = 0; i < count; i++) {
-    const timestamp = startTimestamp + timestampStep * i;
+    const timestamp = i === count - 1 ? endTimestamp : startTimestamp + timestampStep * i;
     entries.push({
-      id: faker.random.uuid(),
+      id: `entry-${i}`,
       context: {},
       cursor: { time: timestamp, tiebreaker: i },
       columns: columns.map((column) => {
