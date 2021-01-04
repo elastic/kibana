@@ -141,7 +141,6 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
     <FormFlyout
       title={i18n.translate('xpack.security.management.users.changePasswordFlyout.title', {
         defaultMessage: 'Change password',
-        values: { username },
       })}
       onCancel={onCancel}
       onSubmit={form.submit}
