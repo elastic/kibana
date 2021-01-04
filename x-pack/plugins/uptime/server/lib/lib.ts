@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  KibanaRequest,
+  ISavedObjectsRepository,
+} from 'kibana/server';
 import chalk from 'chalk';
 import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
@@ -41,7 +46,7 @@ export function createUptimeESClient({
 }: {
   esClient: ElasticsearchClient;
   request?: KibanaRequest;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
 }) {
   const { _debug = false } = (request?.query as { _debug: boolean }) ?? {};
 

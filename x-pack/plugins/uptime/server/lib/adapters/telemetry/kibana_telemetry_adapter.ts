@@ -14,7 +14,7 @@ import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_c
 import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
 import { savedObjectsAdapter } from '../../saved_objects';
-import { UptimeESClient, isUptimeESClient } from '../../lib';
+import { UptimeESClient, isUptimeESClient, createUptimeESClient } from '../../lib';
 
 interface UptimeTelemetryCollector {
   [key: number]: UptimeTelemetry;
@@ -76,7 +76,8 @@ export class KibanaTelemetryAdapter {
       fetch: async ({ esClient }: CollectorFetchContext) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
-          await this.countNoOfUniqueMonitorAndLocations(esClient, savedObjectsClient);
+          const uptimeEsClient = createUptimeESClient({ esClient, savedObjectsClient });
+          await this.countNoOfUniqueMonitorAndLocations(uptimeEsClient, savedObjectsClient);
         }
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
