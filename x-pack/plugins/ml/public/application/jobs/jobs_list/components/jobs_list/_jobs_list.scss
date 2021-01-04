@@ -68,10 +68,10 @@
     }
 
     .euiContextMenuPanel {
-       .euiContextMenuItem {
-         white-space: nowrap;
-       }
-       .euiContextMenuItem:last-child:not(.euiContextMenuItem-isDisabled) {
+      .euiContextMenuItem {
+        white-space: nowrap;
+      }
+      .euiContextMenuItem:last-child:not(.euiContextMenuItem-isDisabled) {
         color: $euiColorDanger;
       }
     }

@@ -2,6 +2,7 @@
   "rules": {
     "number-leading-zero": "never",
     "color-hex-case": "upper",
-    "string-quotes": "single"
+    "string-quotes": "single",
+    "indentation": 2
   }
 }
