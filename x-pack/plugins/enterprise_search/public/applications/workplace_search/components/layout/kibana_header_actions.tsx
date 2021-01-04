@@ -15,13 +15,23 @@ export const WorkplaceSearchHeaderActions: React.FC = () => {
   if (!externalUrl.enterpriseSearchUrl) return null;
 
   return (
-    <EuiButtonEmpty
-      href={getWorkplaceSearchUrl('/search')}
-      target="_blank"
-      iconType="search"
-      style={{ marginRight: 5 }}
-    >
+    <>
+      <EuiButtonEmpty
+        href={getWorkplaceSearchUrl('/sources')}
+        target="_blank"
+        iconType="user"
+        style={{ marginRight: 5 }}
+      >
+        <EuiText size="s">{NAV.PERSONAL_DASHBOARD}</EuiText>
+      </EuiButtonEmpty>
+      <EuiButtonEmpty
+        href={getWorkplaceSearchUrl('/search')}
+        target="_blank"
+        iconType="search"
+        style={{ marginRight: 5 }}
+      >
         <EuiText size="s">{NAV.SEARCH}</EuiText>
-    </EuiButtonEmpty>
+      </EuiButtonEmpty>
+    </>
   );
 };
