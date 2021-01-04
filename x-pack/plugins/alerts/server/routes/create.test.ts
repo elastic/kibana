@@ -49,7 +49,7 @@ describe('createAlertRoute', () => {
     ],
   };
 
-  const createResult: Alert = {
+  const createResult: Alert<{ bar: boolean }> = {
     ...mockedAlert,
     enabled: true,
     muteAll: false,
