@@ -101,7 +101,7 @@ Contains representations of data used across different tests; our domain objects
 
 Contains the elements we want to interact with in our tests.
 
-Each file inside the tasks folder represents a screen in our application. When the screens are complex, e.g. Hosts with its multiple tabs, the page is represented by a folder and the different important parts are represented by files.
+Each file inside the screens folder represents a screen in our application. When the screens are complex, e.g. Hosts with its multiple tabs, the page is represented by a folder and the different important parts are represented by files.
 
 Example:
 
