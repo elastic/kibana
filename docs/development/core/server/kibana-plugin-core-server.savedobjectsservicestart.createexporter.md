@@ -4,10 +4,10 @@
 
 ## SavedObjectsServiceStart.createExporter property
 
-Creates a [exporter](./kibana-plugin-core-server.isavedobjectexporter.md) bound to given client.
+Creates a [exporter](./kibana-plugin-core-server.isavedobjectsexporter.md) bound to given client.
 
 <b>Signature:</b>
 
 ```typescript
-createExporter: (client: SavedObjectsClientContract) => ISavedObjectExporter;
+createExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
 ```

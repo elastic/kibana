@@ -24,9 +24,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LegacyElasticsearchErrorHelpers](./kibana-plugin-core-server.legacyelasticsearcherrorhelpers.md) | Helpers for working with errors returned from the Elasticsearch service.Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as <code>body.error.header[WWW-Authenticate]</code> |
 |  [LegacyScopedClusterClient](./kibana-plugin-core-server.legacyscopedclusterclient.md) | Serves the same purpose as the normal [cluster client](./kibana-plugin-core-server.iclusterclient.md) but exposes an additional <code>asCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>asInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API instead. |
 |  [RouteValidationError](./kibana-plugin-core-server.routevalidationerror.md) | Error to return when the validation is not successful. |
-|  [SavedObjectExporter](./kibana-plugin-core-server.savedobjectexporter.md) |  |
 |  [SavedObjectsClient](./kibana-plugin-core-server.savedobjectsclient.md) |  |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-core-server.savedobjectserrorhelpers.md) |  |
+|  [SavedObjectsExporter](./kibana-plugin-core-server.savedobjectsexporter.md) |  |
+|  [SavedObjectsImporter](./kibana-plugin-core-server.savedobjectsimporter.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-core-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-core-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-core-server.savedobjectsanitizeddoc.md) documents to the other kind. |
 |  [SavedObjectsUtils](./kibana-plugin-core-server.savedobjectsutils.md) |  |
@@ -38,13 +39,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [AuthResultType](./kibana-plugin-core-server.authresulttype.md) |  |
 |  [AuthStatus](./kibana-plugin-core-server.authstatus.md) | Status indicating an outcome of the authentication. |
-
-## Functions
-
-|  Function | Description |
-|  --- | --- |
-|  [importSavedObjectsFromStream({ readStream, objectLimit, overwrite, createNewCopies, savedObjectsClient, typeRegistry, namespace, })](./kibana-plugin-core-server.importsavedobjectsfromstream.md) | Import saved objects from given stream. See the [options](./kibana-plugin-core-server.savedobjectsimportoptions.md) for more detailed information. |
-|  [resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, createNewCopies, })](./kibana-plugin-core-server.resolvesavedobjectsimporterrors.md) | Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations. |
 
 ## Interfaces
 
@@ -164,8 +158,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsDeleteFromNamespacesOptions](./kibana-plugin-core-server.savedobjectsdeletefromnamespacesoptions.md) |  |
 |  [SavedObjectsDeleteFromNamespacesResponse](./kibana-plugin-core-server.savedobjectsdeletefromnamespacesresponse.md) |  |
 |  [SavedObjectsDeleteOptions](./kibana-plugin-core-server.savedobjectsdeleteoptions.md) |  |
-|  [SavedObjectsExportByObjectOptions](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) | Options for the [export by objects API](./kibana-plugin-core-server.savedobjectexporter.exportbyobjects.md) |
-|  [SavedObjectsExportByTypeOptions](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.md) | Options for the [export by type API](./kibana-plugin-core-server.savedobjectexporter.exportbytypes.md) |
+|  [SavedObjectsExportByObjectOptions](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) | Options for the [export by objects API](./kibana-plugin-core-server.savedobjectsexporter.exportbyobjects.md) |
+|  [SavedObjectsExportByTypeOptions](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.md) | Options for the [export by type API](./kibana-plugin-core-server.savedobjectsexporter.exportbytypes.md) |
 |  [SavedObjectsExportResultDetails](./kibana-plugin-core-server.savedobjectsexportresultdetails.md) | Structure of the export result details entry |
 |  [SavedObjectsFindOptions](./kibana-plugin-core-server.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindOptionsReference](./kibana-plugin-core-server.savedobjectsfindoptionsreference.md) |  |
@@ -251,7 +245,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ILegacyCustomClusterClient](./kibana-plugin-core-server.ilegacycustomclusterclient.md) | Represents an Elasticsearch cluster API client created by a plugin. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [LegacyClusterClient](./kibana-plugin-core-server.legacyclusterclient.md)<!-- -->. |
 |  [ILegacyScopedClusterClient](./kibana-plugin-core-server.ilegacyscopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [LegacyScopedClusterClient](./kibana-plugin-core-server.legacyscopedclusterclient.md)<!-- -->. |
 |  [IsAuthenticated](./kibana-plugin-core-server.isauthenticated.md) | Returns authentication status for a request. |
-|  [ISavedObjectExporter](./kibana-plugin-core-server.isavedobjectexporter.md) |  |
+|  [ISavedObjectsExporter](./kibana-plugin-core-server.isavedobjectsexporter.md) |  |
+|  [ISavedObjectsImporter](./kibana-plugin-core-server.isavedobjectsimporter.md) |  |
 |  [ISavedObjectsRepository](./kibana-plugin-core-server.isavedobjectsrepository.md) | See [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |
 |  [ISavedObjectTypeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) | See [SavedObjectTypeRegistry](./kibana-plugin-core-server.savedobjecttyperegistry.md) for documentation. |
 |  [KibanaRequestRouteOptions](./kibana-plugin-core-server.kibanarequestrouteoptions.md) | Route options: If 'GET' or 'OPTIONS' method, body options won't be returned. |

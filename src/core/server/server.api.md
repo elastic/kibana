@@ -1121,9 +1121,6 @@ export interface ImageValidation {
     };
 }
 
-// @public
-export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, createNewCopies, savedObjectsClient, typeRegistry, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
-
 // @public @deprecated (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
@@ -1156,7 +1153,10 @@ export interface IRouter {
 export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
 
 // @public (undocumented)
-export type ISavedObjectExporter = PublicMethodsOf<SavedObjectExporter>;
+export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
+
+// @public (undocumented)
+export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
 
 // @public
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
@@ -1895,7 +1895,8 @@ export interface RequestHandlerContext {
         savedObjects: {
             client: SavedObjectsClientContract;
             typeRegistry: ISavedObjectTypeRegistry;
-            exporter: ISavedObjectExporter;
+            exporter: ISavedObjectsExporter;
+            importer: ISavedObjectsImporter;
         };
         elasticsearch: {
             client: IScopedClusterClient;
@@ -1917,9 +1918,6 @@ export type RequestHandlerContextProvider<TContextName extends keyof RequestHand
 
 // @public
 export type RequestHandlerWrapper = <P, Q, B, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Method, ResponseFactory>) => RequestHandler<P, Q, B, Method, ResponseFactory>;
-
-// @public
-export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, createNewCopies, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 
 // @public
 export type ResponseError = string | Error | {
@@ -2057,16 +2055,6 @@ export interface SavedObjectExportBaseOptions {
     includeReferencesDeep?: boolean;
     namespace?: string;
 }
-
-// @public (undocumented)
-export class SavedObjectExporter {
-    constructor({ savedObjectsClient, exportSizeLimit, }: {
-        savedObjectsClient: SavedObjectsClientContract;
-        exportSizeLimit: number;
-    });
-    exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<import("stream").Readable>;
-    exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<import("stream").Readable>;
-    }
 
 // @public
 export interface SavedObjectMigrationContext {
@@ -2383,6 +2371,16 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
     types: string[];
 }
 
+// @public (undocumented)
+export class SavedObjectsExporter {
+    constructor({ savedObjectsClient, exportSizeLimit, }: {
+        savedObjectsClient: SavedObjectsClientContract;
+        exportSizeLimit: number;
+    });
+    exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<import("stream").Readable>;
+    exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<import("stream").Readable>;
+    }
+
 // @public
 export interface SavedObjectsExportResultDetails {
     exportedCount: number;
@@ -2470,6 +2468,17 @@ export interface SavedObjectsImportConflictError {
     type: 'conflict';
 }
 
+// @public (undocumented)
+export class SavedObjectsImporter {
+    constructor({ savedObjectsClient, typeRegistry, importSizeLimit, }: {
+        savedObjectsClient: SavedObjectsClientContract;
+        typeRegistry: ISavedObjectTypeRegistry;
+        importSizeLimit: number;
+    });
+    import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+    }
+
 // @public
 export interface SavedObjectsImportError {
     // (undocumented)
@@ -2503,11 +2512,8 @@ export interface SavedObjectsImportMissingReferencesError {
 export interface SavedObjectsImportOptions {
     createNewCopies: boolean;
     namespace?: string;
-    objectLimit: number;
     overwrite: boolean;
     readStream: Readable;
-    savedObjectsClient: SavedObjectsClientContract;
-    typeRegistry: ISavedObjectTypeRegistry;
 }
 
 // @public
@@ -2674,11 +2680,8 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsResolveImportErrorsOptions {
     createNewCopies: boolean;
     namespace?: string;
-    objectLimit: number;
     readStream: Readable;
     retries: SavedObjectsImportRetry[];
-    savedObjectsClient: SavedObjectsClientContract;
-    typeRegistry: ISavedObjectTypeRegistry;
 }
 
 // @public
@@ -2701,7 +2704,8 @@ export interface SavedObjectsServiceSetup {
 
 // @public
 export interface SavedObjectsServiceStart {
-    createExporter: (client: SavedObjectsClientContract) => ISavedObjectExporter;
+    createExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+    createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
     createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
     createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;
     createSerializer: () => SavedObjectsSerializer;
