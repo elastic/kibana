@@ -6,9 +6,10 @@
 
 import moment from 'moment';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
+import { useKibana, useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { JourneyState } from '../../../../state/reducers/journey';
 import { Ping } from '../../../../../common/runtime_types/ping';
+import { PLUGIN } from '../../../../../common/constants/plugin';
 
 interface Props {
   journey: JourneyState;
@@ -18,12 +19,15 @@ interface Props {
 export const useMonitorBreadcrumb = ({ journey, activeStep }: Props) => {
   const [dateFormat] = useUiSetting$<string>('dateFormat');
 
+  const kibana = useKibana();
+  const appPath = kibana.services.application?.getUrlForApp(PLUGIN.ID) ?? '';
+
   useBreadcrumbs([
     ...(activeStep?.monitor?.name
       ? [
           {
             text: activeStep?.monitor?.name || activeStep?.monitor.id,
-            href: `/app/uptime/monitor/${btoa(activeStep?.monitor.id)}`,
+            href: `${appPath}/monitor/${btoa(activeStep?.monitor.id)}`,
           },
         ]
       : []),
