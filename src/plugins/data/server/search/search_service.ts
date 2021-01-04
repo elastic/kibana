@@ -323,7 +323,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ) => {
     const strategy = this.getSearchStrategy(options.strategy);
     if (!strategy.extend) {
-      throw new Error(`Search strategy ${options.strategy} does not support extend`);
+      throw new KbnServerError(`Search strategy ${options.strategy} does not support extend`, 400);
     }
     return strategy.extend(id, keepAlive, options, deps);
   };
