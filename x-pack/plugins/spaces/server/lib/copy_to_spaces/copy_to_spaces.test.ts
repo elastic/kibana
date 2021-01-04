@@ -19,17 +19,6 @@ import {
 } from 'src/core/server/mocks';
 import { copySavedObjectsToSpacesFactory } from './copy_to_spaces';
 
-// Mock out circular dependency
-jest.mock('../../../../../../src/core/server/saved_objects/es_query', () => {});
-
-jest.mock('../../../../../../src/core/server', () => {
-  return {
-    ...(jest.requireActual('../../../../../../src/core/server') as Record<string, unknown>),
-    importSavedObjectsFromStream: jest.fn(),
-  };
-});
-import { importSavedObjectsFromStream } from '../../../../../../src/core/server';
-
 interface SetupOpts {
   objects: Array<{ type: string; id: string; attributes: Record<string, any> }>;
   exportByObjectsImpl?: (opts: SavedObjectsExportByObjectOptions) => Promise<Readable>;
@@ -71,10 +60,12 @@ describe('copySavedObjectsToSpaces', () => {
 
     const savedObjectsClient = savedObjectsClientMock.create();
     const savedObjectsExporter = savedObjectsServiceMock.createExporter();
+    const savedObjectsImporter = savedObjectsServiceMock.createImporter();
     const typeRegistry = savedObjectsTypeRegistryMock.create();
     coreStart.savedObjects.getScopedClient.mockReturnValue(savedObjectsClient);
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
     coreStart.savedObjects.createExporter.mockReturnValue(savedObjectsExporter);
+    coreStart.savedObjects.createImporter.mockReturnValue(savedObjectsImporter);
 
     typeRegistry.getImportableAndExportableTypes.mockReturnValue([
       // don't need to include all types, just need a positive case (agnostic) and a negative case (non-agnostic)
@@ -111,37 +102,34 @@ describe('copySavedObjectsToSpaces', () => {
       );
     });
 
-    (importSavedObjectsFromStream as jest.Mock).mockImplementation(
-      async (opts: SavedObjectsImportOptions) => {
-        const defaultImpl = async () => {
-          // namespace-agnostic types should be filtered out before import
-          const filteredObjects = setupOpts.objects.filter(({ type }) => type !== 'globaltype');
-          await expectStreamToContainObjects(opts.readStream, filteredObjects);
-          const response: SavedObjectsImportResponse = {
-            success: true,
-            successCount: filteredObjects.length,
-            successResults: [
-              ('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess,
-            ],
-          };
-
-          return Promise.resolve(response);
+    savedObjectsImporter.import.mockImplementation(async (opts) => {
+      const defaultImpl = async () => {
+        // namespace-agnostic types should be filtered out before import
+        const filteredObjects = setupOpts.objects.filter(({ type }) => type !== 'globaltype');
+        await expectStreamToContainObjects(opts.readStream, filteredObjects);
+        const response: SavedObjectsImportResponse = {
+          success: true,
+          successCount: filteredObjects.length,
+          successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
         };
 
-        return setupOpts.importSavedObjectsFromStreamImpl?.(opts) ?? defaultImpl();
-      }
-    );
+        return Promise.resolve(response);
+      };
+
+      return setupOpts.importSavedObjectsFromStreamImpl?.(opts) ?? defaultImpl();
+    });
 
     return {
       savedObjects: coreStart.savedObjects,
       savedObjectsClient,
       savedObjectsExporter,
+      savedObjectsImporter,
       typeRegistry,
     };
   };
 
   it('uses the Saved Objects Service to perform an export followed by a series of imports', async () => {
-    const { savedObjects, savedObjectsClient, savedObjectsExporter, typeRegistry } = setup({
+    const { savedObjects, savedObjectsExporter, savedObjectsImporter } = setup({
       objects: mockExportResults,
     });
 
@@ -192,17 +180,14 @@ describe('copySavedObjectsToSpaces', () => {
 
     const importOptions = {
       createNewCopies: false,
-      objectLimit: EXPORT_LIMIT,
       overwrite: true,
       readStream: expect.any(Readable),
-      savedObjectsClient,
-      typeRegistry,
     };
-    expect(importSavedObjectsFromStream).toHaveBeenNthCalledWith(1, {
+    expect(savedObjectsImporter.import).toHaveBeenNthCalledWith(1, {
       ...importOptions,
       namespace: 'destination1',
     });
-    expect(importSavedObjectsFromStream).toHaveBeenNthCalledWith(2, {
+    expect(savedObjectsImporter.import).toHaveBeenNthCalledWith(2, {
       ...importOptions,
       namespace: 'destination2',
     });

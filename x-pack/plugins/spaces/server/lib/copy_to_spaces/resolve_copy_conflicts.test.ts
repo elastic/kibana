@@ -19,17 +19,6 @@ import {
 } from 'src/core/server/mocks';
 import { resolveCopySavedObjectsToSpacesConflictsFactory } from './resolve_copy_conflicts';
 
-// Mock out circular dependency
-jest.mock('../../../../../../src/core/server/saved_objects/es_query', () => {});
-
-jest.mock('../../../../../../src/core/server', () => {
-  return {
-    ...(jest.requireActual('../../../../../../src/core/server') as Record<string, unknown>),
-    resolveSavedObjectsImportErrors: jest.fn(),
-  };
-});
-import { resolveSavedObjectsImportErrors } from '../../../../../../src/core/server';
-
 interface SetupOpts {
   objects: Array<{ type: string; id: string; attributes: Record<string, any> }>;
   exportByObjectsImpl?: (opts: SavedObjectsExportByObjectOptions) => Promise<Readable>;
@@ -71,9 +60,11 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
     const savedObjectsClient = savedObjectsClientMock.create();
     const typeRegistry = savedObjectsTypeRegistryMock.create();
     const savedObjectsExporter = savedObjectsServiceMock.createExporter();
+    const savedObjectsImporter = savedObjectsServiceMock.createImporter();
     coreStart.savedObjects.getScopedClient.mockReturnValue(savedObjectsClient);
     coreStart.savedObjects.getTypeRegistry.mockReturnValue(typeRegistry);
     coreStart.savedObjects.createExporter.mockReturnValue(savedObjectsExporter);
+    coreStart.savedObjects.createImporter.mockReturnValue(savedObjectsImporter);
 
     typeRegistry.getImportableAndExportableTypes.mockReturnValue([
       // don't need to include all types, just need a positive case (agnostic) and a negative case (non-agnostic)
@@ -110,38 +101,35 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
       );
     });
 
-    (resolveSavedObjectsImportErrors as jest.Mock).mockImplementation(
-      async (opts: SavedObjectsResolveImportErrorsOptions) => {
-        const defaultImpl = async () => {
-          // namespace-agnostic types should be filtered out before import
-          const filteredObjects = setupOpts.objects.filter(({ type }) => type !== 'globaltype');
-          await expectStreamToContainObjects(opts.readStream, filteredObjects);
+    savedObjectsImporter.resolveImportErrors.mockImplementation(async (opts) => {
+      const defaultImpl = async () => {
+        // namespace-agnostic types should be filtered out before import
+        const filteredObjects = setupOpts.objects.filter(({ type }) => type !== 'globaltype');
+        await expectStreamToContainObjects(opts.readStream, filteredObjects);
 
-          const response: SavedObjectsImportResponse = {
-            success: true,
-            successCount: filteredObjects.length,
-            successResults: [
-              ('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess,
-            ],
-          };
-
-          return response;
+        const response: SavedObjectsImportResponse = {
+          success: true,
+          successCount: filteredObjects.length,
+          successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
         };
 
-        return setupOpts.resolveSavedObjectsImportErrorsImpl?.(opts) ?? defaultImpl();
-      }
-    );
+        return response;
+      };
+
+      return setupOpts.resolveSavedObjectsImportErrorsImpl?.(opts) ?? defaultImpl();
+    });
 
     return {
       savedObjects: coreStart.savedObjects,
       savedObjectsClient,
       savedObjectsExporter,
+      savedObjectsImporter,
       typeRegistry,
     };
   };
 
   it('uses the Saved Objects Service to perform an export followed by a series of conflict resolution calls', async () => {
-    const { savedObjects, savedObjectsClient, savedObjectsExporter, typeRegistry } = setup({
+    const { savedObjects, savedObjectsExporter, savedObjectsImporter } = setup({
       objects: mockExportResults,
     });
 
@@ -196,17 +184,14 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
     const importOptions = {
       createNewCopies: false,
-      objectLimit: EXPORT_LIMIT,
       readStream: expect.any(Readable),
-      savedObjectsClient,
-      typeRegistry,
     };
-    expect(resolveSavedObjectsImportErrors).toHaveBeenNthCalledWith(1, {
+    expect(savedObjectsImporter.resolveImportErrors).toHaveBeenNthCalledWith(1, {
       ...importOptions,
       namespace: 'destination1',
       retries: [{ ...retries.destination1[0], replaceReferences: [] }],
     });
-    expect(resolveSavedObjectsImportErrors).toHaveBeenNthCalledWith(2, {
+    expect(savedObjectsImporter.resolveImportErrors).toHaveBeenNthCalledWith(2, {
       ...importOptions,
       namespace: 'destination2',
       retries: [{ ...retries.destination2[0], replaceReferences: [] }],

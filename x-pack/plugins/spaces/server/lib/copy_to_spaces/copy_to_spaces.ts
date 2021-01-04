@@ -6,7 +6,6 @@
 
 import { SavedObject, KibanaRequest, CoreStart } from 'src/core/server';
 import { Readable } from 'stream';
-import { importSavedObjectsFromStream } from '../../../../../../src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, CopyResponse } from './types';
 import { createReadableStreamFromArray } from './lib/readable_stream_from_array';
@@ -20,10 +19,11 @@ export function copySavedObjectsToSpacesFactory(
   getImportExportObjectLimit: () => number,
   request: KibanaRequest
 ) {
-  const { getTypeRegistry, getScopedClient, createExporter } = savedObjects;
+  const { getTypeRegistry, getScopedClient, createExporter, createImporter } = savedObjects;
 
   const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
   const savedObjectsExporter = createExporter(savedObjectsClient);
+  const savedObjectsImporter = createImporter(savedObjectsClient);
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,
@@ -45,12 +45,9 @@ export function copySavedObjectsToSpacesFactory(
     options: CopyOptions
   ) => {
     try {
-      const importResponse = await importSavedObjectsFromStream({
+      const importResponse = await savedObjectsImporter.import({
         namespace: spaceIdToNamespace(spaceId),
-        objectLimit: getImportExportObjectLimit(),
         overwrite: options.overwrite,
-        savedObjectsClient,
-        typeRegistry: getTypeRegistry(),
         readStream: objectsStream,
         createNewCopies: options.createNewCopies,
       });

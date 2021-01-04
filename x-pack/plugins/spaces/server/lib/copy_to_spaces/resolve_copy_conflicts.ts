@@ -6,7 +6,6 @@
 
 import { Readable } from 'stream';
 import { SavedObject, CoreStart, KibanaRequest, SavedObjectsImportRetry } from 'src/core/server';
-import { resolveSavedObjectsImportErrors } from '../../../../../../src/core/server';
 import { spaceIdToNamespace } from '../utils/namespace';
 import { CopyOptions, ResolveConflictsOptions, CopyResponse } from './types';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
@@ -20,10 +19,11 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
   getImportExportObjectLimit: () => number,
   request: KibanaRequest
 ) {
-  const { getTypeRegistry, getScopedClient, createExporter } = savedObjects;
+  const { getTypeRegistry, getScopedClient, createExporter, createImporter } = savedObjects;
 
   const savedObjectsClient = getScopedClient(request, COPY_TO_SPACES_SAVED_OBJECTS_CLIENT_OPTS);
   const savedObjectsExporter = createExporter(savedObjectsClient);
+  const savedObjectsImporter = createImporter(savedObjectsClient);
 
   const exportRequestedObjects = async (
     sourceSpaceId: string,
@@ -45,11 +45,8 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
     createNewCopies: boolean
   ) => {
     try {
-      const importResponse = await resolveSavedObjectsImportErrors({
+      const importResponse = await savedObjectsImporter.resolveImportErrors({
         namespace: spaceIdToNamespace(spaceId),
-        objectLimit: getImportExportObjectLimit(),
-        savedObjectsClient,
-        typeRegistry: getTypeRegistry(),
         readStream: objectsStream,
         retries,
         createNewCopies,
