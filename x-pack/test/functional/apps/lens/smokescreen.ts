@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
-  const retry = getService('retry');
 
   describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
@@ -223,11 +222,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.closeDimensionEditor();
 
-      await retry.tryForTime(3000, async () => {
-        const data = await PageObjects.lens.getCurrentChartDebugState();
-        expect(data?.axes?.y.length).to.eql(2);
-        expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(true);
-      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const data = await PageObjects.lens.getCurrentChartDebugState();
+      expect(data?.axes?.y.length).to.eql(2);
+      expect(data?.axes?.y.some(({ position }) => position === 'right')).to.eql(true);
     });
 
     it('should show value labels on bar charts when enabled', async () => {
@@ -235,20 +234,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.toggleToolbarPopover('lnsValuesButton');
       await testSubjects.click('lnsXY_valueLabels_inside');
 
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
       // check for value labels
-      await retry.tryForTime(3000, async () => {
-        const data = await PageObjects.lens.getCurrentChartDebugState();
-        expect(data?.bars?.[0].labels).not.to.eql(0);
-      });
+      let data = await PageObjects.lens.getCurrentChartDebugState();
+      expect(data?.bars?.[0].labels).not.to.eql(0);
 
       // switch to stacked bar chart
       await PageObjects.lens.switchToVisualization('bar_stacked');
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
       // check for value labels
-      await retry.tryForTime(3000, async () => {
-        const data = await PageObjects.lens.getCurrentChartDebugState();
-        expect(data?.bars?.[0].labels.length).to.eql(0);
-      });
+      data = await PageObjects.lens.getCurrentChartDebugState();
+      expect(data?.bars?.[0].labels.length).to.eql(0);
     });
 
     it('should override axis title', async () => {
@@ -257,19 +255,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.tryForTime(3000, async () => {
-        const data = await PageObjects.lens.getCurrentChartDebugState();
-        expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
-      });
+      let data = await PageObjects.lens.getCurrentChartDebugState();
+      expect(data?.axes?.y?.[0].title).to.eql(axisTitle);
 
       // hide the gridlines
       await testSubjects.click('lnsshowyLeftAxisGridlines');
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.tryForTime(3000, async () => {
-        const data = await PageObjects.lens.getCurrentChartDebugState();
-        expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
-      });
+      data = await PageObjects.lens.getCurrentChartDebugState();
+      expect(data?.axes?.y?.[0].gridlines.length).to.eql(0);
     });
 
     it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {

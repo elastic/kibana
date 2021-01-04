@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
