@@ -6,7 +6,7 @@
 
 import './expression.scss';
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -604,6 +604,34 @@ export function DatatableComponent(props: DatatableRenderProps) {
     [formatters, firstTableRef]
   );
 
+  const onColumnResize = useCallback(
+    (eventData) => {
+      // directly set the local state of the component to make sure the visualization re-renders immediately,
+      // re-layouting and taking up all of the available space.
+      setColumnConfig({
+        ...columnConfig,
+        columnWidth: [
+          ...(columnConfig.columnWidth || []).filter(
+            ({ columnId }) => columnId !== eventData.columnId
+          ),
+          {
+            columnId: eventData.columnId,
+            width: eventData.width,
+            type: 'lens_datatable_column_width',
+          },
+        ],
+      });
+      if (onEditAction) {
+        return onEditAction({
+          action: 'resize',
+          columnId: eventData.columnId,
+          width: eventData.width,
+        });
+      }
+    },
+    [onEditAction, setColumnConfig, columnConfig]
+  );
+
   if (isEmpty) {
     return <EmptyPlaceholder icon={LensIconChartDatatable} />;
   }
@@ -661,15 +689,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
             }
           },
         }}
-        onColumnResize={(eventData) => {
-          if (onEditAction) {
-            return onEditAction({
-              action: 'resize',
-              columnId: eventData.columnId,
-              width: eventData.width,
-            });
-          }
-        }}
+        onColumnResize={onColumnResize}
         toolbarVisibility={false}
       />
     </VisualizationContainer>
