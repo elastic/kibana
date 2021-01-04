@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { chunk, omit } from 'lodash';
+import { chunk, pick } from 'lodash';
 import uuid from 'uuid';
 import { UserAtSpaceScenarios } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
@@ -288,6 +288,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
         it('should handle find alert request with executionStatus field appropriately', async () => {
           const myTag = uuid.v4();
+          const fieldsToCompare = ['id', 'tags', 'actions', 'executionStatus'];
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
             .set('kbn-xsrf', 'foo')
@@ -320,7 +321,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .get(
               `${getUrlPrefix(
                 space.id
-              )}/api/alerts/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags","executionStatus"]&sort_field=createdAt`
+              )}/api/alerts/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&sort_field=createdAt`
             )
             .auth(user.username, user.password);
 
@@ -347,13 +348,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.body.perPage).to.be.greaterThan(0);
               expect(response.body.total).to.be.greaterThan(0);
               const [matchFirst, matchSecond] = response.body.data;
-              expect(omit(matchFirst, 'updatedAt')).to.eql({
+              expect(pick(matchFirst, fieldsToCompare)).to.eql({
                 id: createdAlert.id,
                 actions: [],
                 tags: [myTag],
                 executionStatus: matchFirst.executionStatus,
               });
-              expect(omit(matchSecond, 'updatedAt')).to.eql({
+              expect(pick(matchSecond, fieldsToCompare)).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
                 tags: [myTag],
