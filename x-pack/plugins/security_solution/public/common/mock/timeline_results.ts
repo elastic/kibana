@@ -5,14 +5,19 @@
  */
 import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
 
-import { TimelineId, TimelineType, TimelineStatus } from '../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../common/types/timeline';
 
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
 import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
 import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
 import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import { TimelineModel, TimelineTabs } from '../../timelines/store/timeline/model';
+import { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 
 export interface MockedProvidedQuery {

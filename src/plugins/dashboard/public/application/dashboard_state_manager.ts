@@ -404,6 +404,15 @@ export class DashboardStateManager {
     this.stateContainer.transitions.setOption('useMargins', useMargins);
   }
 
+  public getSyncColors() {
+    // Existing dashboards that don't define this should default to true.
+    return this.appState.options.syncColors === undefined ? true : this.appState.options.syncColors;
+  }
+
+  public setSyncColors(syncColors: boolean) {
+    this.stateContainer.transitions.setOption('syncColors', syncColors);
+  }
+
   public getHidePanelTitles() {
     return this.appState.options.hidePanelTitles;
   }
