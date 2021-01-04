@@ -212,7 +212,9 @@ describe('helpers', () => {
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
       expect(result[0].title).toEqual('Mitre Attack');
-      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual('');
+      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
+        i18n.UNKNOWN_TACTIC
+      );
       expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
         'Audio Capture (T1123)'
       );
@@ -234,7 +236,9 @@ describe('helpers', () => {
       expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
         'Collection (TA0009)'
       );
-      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual('');
+      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
+        i18n.UNKNOWN_TECHNIQUE
+      );
     });
 
     test('returns empty technique link if no corresponding subtechnique id found', () => {
@@ -265,7 +269,9 @@ describe('helpers', () => {
       expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
         'Audio Capture (T1123)'
       );
-      expect(wrapper.find('[data-test-subj="threatSubtechniqueLink"]').text()).toEqual('');
+      expect(wrapper.find('[data-test-subj="threatSubtechniqueLink"]').text()).toEqual(
+        i18n.UNKNOWN_SUBTECHNIQUE
+      );
     });
 
     test('returns with corresponding tactic, technique, and subtechnique link text', () => {
