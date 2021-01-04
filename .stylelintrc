@@ -37,3 +37,8 @@ rules:
   #   - always-multi-line
   #   - except:
   #     - inside-block-and-after-rule
+
+  # camelCase mixin, function, and variable names
+  scss/at-mixin-pattern: "^[a-z][a-zA-Z0-9]+$"
+  scss/at-function-pattern: "^[a-z][a-zA-Z0-9]+$"
+  scss/dollar-variable-pattern: "^[a-z][a-zA-Z0-9]+$"
