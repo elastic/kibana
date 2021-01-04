@@ -33,7 +33,7 @@ export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       try {
-        const { sourceId, nodeType } = pipe(
+        const { sourceId, nodeType, currentTime } = pipe(
           InventoryMetaRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
@@ -42,11 +42,13 @@ export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
           requestContext.core.savedObjects.client,
           sourceId
         );
+
         const awsMetadata = await getCloudMetadata(
           framework,
           requestContext,
           configuration,
-          nodeType
+          nodeType,
+          currentTime
         );
 
         return response.ok({

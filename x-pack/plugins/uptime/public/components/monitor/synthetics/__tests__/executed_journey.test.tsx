@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ExecutedJourney } from '../executed_journey';
 import { Ping } from '../../../../../common/runtime_types';
@@ -206,6 +206,7 @@ describe('ExecutedJourney component', () => {
         direction="column"
       >
         <ExecutedStep
+          checkGroup="check_group"
           index={0}
           key="0"
           step={
@@ -230,6 +231,7 @@ describe('ExecutedJourney component', () => {
           }
         />
         <ExecutedStep
+          checkGroup="check_group"
           index={1}
           key="1"
           step={

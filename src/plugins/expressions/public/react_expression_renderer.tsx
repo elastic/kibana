@@ -41,6 +41,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
   onEvent?: (event: ExpressionRendererEvent) => void;
+  onData$?: <TData, TInspectorAdapters>(data: TData, adapters?: TInspectorAdapters) => void;
   /**
    * An observable which can be used to re-run the expression without destroying the component
    */
@@ -71,6 +72,7 @@ export const ReactExpressionRenderer = ({
   renderError,
   expression,
   onEvent,
+  onData$,
   reload$,
   debounce,
   ...expressionLoaderOptions
@@ -88,21 +90,28 @@ export const ReactExpressionRenderer = ({
     null
   );
   const [debouncedExpression, setDebouncedExpression] = useState(expression);
-  useEffect(() => {
+  const [waitingForDebounceToComplete, setDebouncePending] = useState(false);
+  const firstRender = useRef(true);
+  useShallowCompareEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
     if (debounce === undefined) {
       return;
     }
+    setDebouncePending(true);
     const handler = setTimeout(() => {
       setDebouncedExpression(expression);
+      setDebouncePending(false);
     }, debounce);
 
     return () => {
       clearTimeout(handler);
     };
-  }, [expression, debounce]);
+  }, [expression, expressionLoaderOptions, debounce]);
 
   const activeExpression = debounce !== undefined ? debouncedExpression : expression;
-  const waitingForDebounceToComplete = debounce !== undefined && expression !== debouncedExpression;
 
   /* eslint-disable react-hooks/exhaustive-deps */
   // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()
@@ -135,6 +144,13 @@ export const ReactExpressionRenderer = ({
         })
       );
     }
+    if (onData$) {
+      subs.push(
+        expressionLoaderRef.current.data$.subscribe((newData) => {
+          onData$(newData, expressionLoaderRef.current?.inspect());
+        })
+      );
+    }
     subs.push(
       expressionLoaderRef.current.loading$.subscribe(() => {
         hasHandledErrorRef.current = false;
@@ -159,7 +175,12 @@ export const ReactExpressionRenderer = ({
 
       errorRenderHandlerRef.current = null;
     };
-  }, [hasCustomRenderErrorHandler, onEvent]);
+  }, [
+    hasCustomRenderErrorHandler,
+    onEvent,
+    expressionLoaderOptions.renderMode,
+    expressionLoaderOptions.syncColors,
+  ]);
 
   useEffect(() => {
     const subscription = reload$?.subscribe(() => {
@@ -173,12 +194,16 @@ export const ReactExpressionRenderer = ({
   // Re-fetch data automatically when the inputs change
   useShallowCompareEffect(
     () => {
-      if (expressionLoaderRef.current) {
+      // only update the loader if the debounce period is over
+      if (expressionLoaderRef.current && !waitingForDebounceToComplete) {
         expressionLoaderRef.current.update(activeExpression, expressionLoaderOptions);
       }
     },
-    // when expression is changed by reference and when any other loaderOption is changed by reference
-    [{ activeExpression, ...expressionLoaderOptions }]
+    // when debounced, wait for debounce status to change to update loader.
+    // Otherwise, update when expression is changed by reference and when any other loaderOption is changed by reference
+    debounce === undefined
+      ? [{ activeExpression, ...expressionLoaderOptions }]
+      : [{ waitingForDebounceToComplete }]
   );
 
   /* eslint-enable react-hooks/exhaustive-deps */
@@ -191,10 +216,9 @@ export const ReactExpressionRenderer = ({
     }
   }, [state.error]);
 
-  const classes = classNames('expExpressionRenderer', {
+  const classes = classNames('expExpressionRenderer', className, {
     'expExpressionRenderer-isEmpty': state.isEmpty,
     'expExpressionRenderer-hasError': !!state.error,
-    className,
   });
 
   const expressionStyles: React.CSSProperties = {};

@@ -27,12 +27,21 @@ export const EmailParamsFields = ({
   const [addCC, setAddCC] = useState<boolean>(false);
   const [addBCC, setAddBCC] = useState<boolean>(false);
 
+  const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
+    [boolean, string | undefined]
+  >([false, defaultMessage]);
   useEffect(() => {
-    if (!message && defaultMessage && defaultMessage.length > 0) {
+    if (
+      !actionParams?.message ||
+      (isUsingDefault &&
+        actionParams?.message === defaultMessageUsed &&
+        defaultMessageUsed !== defaultMessage)
+    ) {
+      setDefaultMessageUsage([true, defaultMessage]);
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [defaultMessage]);
 
   return (
     <Fragment>

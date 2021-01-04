@@ -25,8 +25,6 @@ import {
 import { createMockedRestrictedIndexPattern, createMockedIndexPattern } from './mocks';
 import { documentField } from './document_field';
 
-jest.mock('./operations');
-
 const createMockStorage = (lastData?: Record<string, string>) => {
   return {
     get: jest.fn().mockImplementation(() => lastData),
@@ -285,15 +283,10 @@ describe('loader', () => {
         } as unknown) as Pick<IndexPatternsContract, 'get'>,
       });
 
-      expect(
-        cache.foo.fields.find((f: IndexPatternField) => f.name === 'bytes')!.aggregationRestrictions
-      ).toEqual({
+      expect(cache.foo.getFieldByName('bytes')!.aggregationRestrictions).toEqual({
         sum: { agg: 'sum' },
       });
-      expect(
-        cache.foo.fields.find((f: IndexPatternField) => f.name === 'timestamp')!
-          .aggregationRestrictions
-      ).toEqual({
+      expect(cache.foo.getFieldByName('timestamp')!.aggregationRestrictions).toEqual({
         date_histogram: { agg: 'date_histogram', fixed_interval: 'm' },
       });
     });
@@ -342,9 +335,7 @@ describe('loader', () => {
         } as unknown) as Pick<IndexPatternsContract, 'get'>,
       });
 
-      expect(cache.foo.fields.find((f: IndexPatternField) => f.name === 'timestamp')!.meta).toEqual(
-        true
-      );
+      expect(cache.foo.getFieldByName('timestamp')!.meta).toEqual(true);
     });
   });
 

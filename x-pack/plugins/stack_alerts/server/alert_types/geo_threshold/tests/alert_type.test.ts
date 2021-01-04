@@ -8,15 +8,13 @@ import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
 import { getAlertType, GeoThresholdParams } from '../alert_type';
 
 describe('alertType', () => {
-  const service = {
-    logger: loggingSystemMock.create().get(),
-  };
+  const logger = loggingSystemMock.create().get();
 
-  const alertType = getAlertType(service);
+  const alertType = getAlertType(logger);
 
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.geo-threshold');
-    expect(alertType.name).toBe('Geo tracking threshold');
+    expect(alertType.name).toBe('Tracking threshold');
     expect(alertType.actionGroups).toEqual([
       { id: 'tracking threshold met', name: 'Tracking threshold met' },
     ]);

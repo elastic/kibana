@@ -6,18 +6,18 @@
 
 import Boom from '@hapi/boom';
 import { Type } from '@kbn/config-schema';
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
+import { kibanaResponseFactory } from '../../../../../../src/core/server';
 import { LicenseCheck } from '../../../../licensing/server';
 import { defineInvalidateApiKeysRoutes } from './invalidate';
 
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
 
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;
   apiResponses?: Array<() => Promise<unknown>>;
   payload?: Record<string, any>;
-  asserts: { statusCode: number; result?: Record<string, any>; apiArguments?: unknown[][] };
+  asserts: { statusCode: number; result?: Record<string, any>; apiArguments?: unknown[] };
 }
 
 describe('Invalidate API keys', () => {
@@ -27,10 +27,15 @@ describe('Invalidate API keys', () => {
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockRouteDefinitionParams.clusterClient.asScoped.mockReturnValue(mockScopedClusterClient);
+      const mockContext = {
+        core: coreMock.createRequestHandlerContext(),
+        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
+      };
+
       for (const apiResponse of apiResponses) {
-        mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(apiResponse);
+        mockContext.core.elasticsearch.client.asCurrentUser.security.invalidateApiKey.mockImplementationOnce(
+          (async () => ({ body: await apiResponse() })) as any
+        );
       }
 
       defineInvalidateApiKeysRoutes(mockRouteDefinitionParams);
@@ -43,9 +48,6 @@ describe('Invalidate API keys', () => {
         body: payload !== undefined ? (validate as any).body.validate(payload) : undefined,
         headers,
       });
-      const mockContext = ({
-        licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-      } as unknown) as RequestHandlerContext;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(asserts.statusCode);
@@ -53,13 +55,10 @@ describe('Invalidate API keys', () => {
 
       if (Array.isArray(asserts.apiArguments)) {
         for (const apiArguments of asserts.apiArguments) {
-          expect(mockRouteDefinitionParams.clusterClient.asScoped).toHaveBeenCalledWith(
-            mockRequest
-          );
-          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith(...apiArguments);
+          expect(
+            mockContext.core.elasticsearch.client.asCurrentUser.security.invalidateApiKey
+          ).toHaveBeenCalledWith(apiArguments);
         }
-      } else {
-        expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
       }
       expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
     });
@@ -128,7 +127,7 @@ describe('Invalidate API keys', () => {
         isAdmin: true,
       },
       asserts: {
-        apiArguments: [['shield.invalidateAPIKey', { body: { id: 'si8If24B1bKsmSLTAhJV' } }]],
+        apiArguments: [{ body: { id: 'si8If24B1bKsmSLTAhJV' } }],
         statusCode: 200,
         result: {
           itemsInvalidated: [],
@@ -152,7 +151,7 @@ describe('Invalidate API keys', () => {
         isAdmin: true,
       },
       asserts: {
-        apiArguments: [['shield.invalidateAPIKey', { body: { id: 'si8If24B1bKsmSLTAhJV' } }]],
+        apiArguments: [{ body: { id: 'si8If24B1bKsmSLTAhJV' } }],
         statusCode: 200,
         result: {
           itemsInvalidated: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }],
@@ -168,9 +167,7 @@ describe('Invalidate API keys', () => {
         isAdmin: false,
       },
       asserts: {
-        apiArguments: [
-          ['shield.invalidateAPIKey', { body: { id: 'si8If24B1bKsmSLTAhJV', owner: true } }],
-        ],
+        apiArguments: [{ body: { id: 'si8If24B1bKsmSLTAhJV', owner: true } }],
         statusCode: 200,
         result: {
           itemsInvalidated: [{ id: 'si8If24B1bKsmSLTAhJV', name: 'my-api-key' }],
@@ -195,8 +192,8 @@ describe('Invalidate API keys', () => {
       },
       asserts: {
         apiArguments: [
-          ['shield.invalidateAPIKey', { body: { id: 'si8If24B1bKsmSLTAhJV' } }],
-          ['shield.invalidateAPIKey', { body: { id: 'ab8If24B1bKsmSLTAhNC' } }],
+          { body: { id: 'si8If24B1bKsmSLTAhJV' } },
+          { body: { id: 'ab8If24B1bKsmSLTAhNC' } },
         ],
         statusCode: 200,
         result: {

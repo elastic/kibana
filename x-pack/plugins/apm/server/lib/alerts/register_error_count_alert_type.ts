@@ -17,10 +17,10 @@ import {
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { ESSearchResponse } from '../../../typings/elasticsearch';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
+import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
   alerts: AlertingPlugin['setup'];
@@ -59,6 +59,7 @@ export function registerErrorCountAlertType({
       ],
     },
     producer: 'apm',
+    minimumLicenseRequired: 'basic',
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
       const alertParams = params;
@@ -66,6 +67,7 @@ export function registerErrorCountAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
+      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.errorIndices'],
@@ -100,6 +102,7 @@ export function registerErrorCountAlertType({
                 environments: {
                   terms: {
                     field: SERVICE_ENVIRONMENT,
+                    size: maxServiceEnvironments,
                   },
                 },
               },
@@ -108,11 +111,7 @@ export function registerErrorCountAlertType({
         },
       };
 
-      const response: ESSearchResponse<
-        unknown,
-        typeof searchParams
-      > = await services.callCluster('search', searchParams);
-
+      const response = await alertingEsClient(services, searchParams);
       const errorCount = response.hits.total.value;
 
       if (errorCount > alertParams.threshold) {

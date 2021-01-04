@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PaletteOutput } from 'src/plugins/charts/public';
 import { LensMultiTable } from '../types';
 
 export interface SharedLayerState {
@@ -24,6 +25,7 @@ export type LayerState = SharedLayerState & {
 export interface PieVisualizationState {
   shape: 'donut' | 'pie' | 'treemap';
   layers: LayerState[];
+  palette?: PaletteOutput;
 }
 
 export type PieExpressionArgs = SharedLayerState & {
@@ -31,6 +33,7 @@ export type PieExpressionArgs = SharedLayerState & {
   description?: string;
   shape: 'pie' | 'donut' | 'treemap';
   hideLabels: boolean;
+  palette: PaletteOutput;
 };
 
 export interface PieExpressionProps {

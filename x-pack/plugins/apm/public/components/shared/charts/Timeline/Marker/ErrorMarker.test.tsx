@@ -8,7 +8,7 @@ import { fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react-hooks';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { MockApmPluginContextWrapper } from '../../../../../context/ApmPluginContext/MockApmPluginContext';
+import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import {
   expectTextsInDocument,
   renderWithTheme,

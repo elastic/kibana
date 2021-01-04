@@ -18,24 +18,30 @@ export interface MinAgeField {
 }
 
 export interface ForcemergeFields {
-  forceMergeEnabled: boolean;
   bestCompression: boolean;
 }
 
 interface HotPhaseMetaFields extends ForcemergeFields {
   useRollover: boolean;
+  isUsingDefaultRollover: boolean;
   maxStorageSizeUnit?: string;
   maxAgeUnit?: string;
+  readonlyEnabled: boolean;
 }
 
 interface WarmPhaseMetaFields extends DataAllocationMetaFields, MinAgeField, ForcemergeFields {
   enabled: boolean;
   warmPhaseOnRollover: boolean;
+  readonlyEnabled: boolean;
 }
 
 interface ColdPhaseMetaFields extends DataAllocationMetaFields, MinAgeField {
   enabled: boolean;
   freezeEnabled: boolean;
+}
+
+interface DeletePhaseMetaFields extends MinAgeField {
+  enabled: boolean;
 }
 
 /**
@@ -50,5 +56,6 @@ export interface FormInternal extends SerializedPolicy {
     hot: HotPhaseMetaFields;
     warm: WarmPhaseMetaFields;
     cold: ColdPhaseMetaFields;
+    delete: DeletePhaseMetaFields;
   };
 }

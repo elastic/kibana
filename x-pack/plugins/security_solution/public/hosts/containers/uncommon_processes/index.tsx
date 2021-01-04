@@ -6,14 +6,10 @@
 
 import deepEqual from 'fast-deep-equal';
 import { noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  AbortError,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../src/plugins/data/common';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 
 import { inputsModel, State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
@@ -34,6 +30,7 @@ import * as i18n from './translations';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 
 const ID = 'hostsUncommonProcessesQuery';
 
@@ -67,8 +64,11 @@ export const useUncommonProcesses = ({
   startDate,
   type,
 }: UseUncommonProcesses): [boolean, UncommonProcessesArgs] => {
-  const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
-  const { activePage, limit } = useSelector((state: State) =>
+  const getUncommonProcessesSelector = useMemo(
+    () => hostsSelectors.uncommonProcessesSelector(),
+    []
+  );
+  const { activePage, limit } = useDeepEqualSelector((state: State) =>
     getUncommonProcessesSelector(state, type)
   );
   const { data, notifications } = useKibana().services;
@@ -78,24 +78,7 @@ export const useUncommonProcesses = ({
   const [
     uncommonProcessesRequest,
     setUncommonProcessesRequest,
-  ] = useState<HostsUncommonProcessesRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          docValueFields: docValueFields ?? [],
-          factoryQueryType: HostsQueries.uncommonProcesses,
-          filterQuery: createFilter(filterQuery),
-          id: ID,
-          pagination: generateTablePaginationOptions(activePage, limit),
-          timerange: {
-            interval: '12h',
-            from: startDate!,
-            to: endDate!,
-          },
-          sort: {} as SortField,
-        }
-      : null
-  );
+  ] = useState<HostsUncommonProcessesRequestOptions | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -135,7 +118,7 @@ export const useUncommonProcesses = ({
 
   const uncommonProcessesSearch = useCallback(
     (request: HostsUncommonProcessesRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -193,7 +176,7 @@ export const useUncommonProcesses = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -204,7 +187,6 @@ export const useUncommonProcesses = ({
         docValueFields: docValueFields ?? [],
         factoryQueryType: HostsQueries.uncommonProcesses,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -213,12 +195,12 @@ export const useUncommonProcesses = ({
         },
         sort: {} as SortField,
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, docValueFields, endDate, filterQuery, limit, skip, startDate]);
+  }, [activePage, indexNames, docValueFields, endDate, filterQuery, limit, startDate]);
 
   useEffect(() => {
     uncommonProcessesSearch(uncommonProcessesRequest);

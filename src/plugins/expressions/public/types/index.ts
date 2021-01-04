@@ -21,9 +21,11 @@ import { Adapters } from '../../../inspector/public';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
-  ExecutionContextSearch,
   ExpressionsService,
+  SerializableState,
+  RenderMode,
 } from '../../common';
+import { ExpressionRenderHandlerParams } from '../render';
 
 /**
  * @deprecated
@@ -42,7 +44,7 @@ export interface ExpressionInterpreter {
 }
 
 export interface IExpressionLoaderParams {
-  searchContext?: ExecutionContextSearch;
+  searchContext?: SerializableState;
   context?: ExpressionValue;
   variables?: Record<string, any>;
   // Enables debug tracking on each expression in the AST
@@ -54,6 +56,9 @@ export interface IExpressionLoaderParams {
   inspectorAdapters?: Adapters;
   onRenderError?: RenderErrorHandlerFnType;
   searchSessionId?: string;
+  renderMode?: RenderMode;
+  syncColors?: boolean;
+  hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
 }
 
 export interface ExpressionRenderError extends Error {

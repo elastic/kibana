@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { ActionsConnectorsContextProvider } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
 import { ValidationResult } from '../../../types';
+import { useKibana } from '../../../common/lib/kibana';
+jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('connector_add_flyout', () => {
-  let deps: any;
-
   beforeAll(async () => {
     const mockes = coreMock.createSetup();
     const [
@@ -22,25 +22,19 @@ describe('connector_add_flyout', () => {
         application: { capabilities },
       },
     ] = await mockes.getStartServices();
-    deps = {
-      http: mockes.http,
-      toastNotifications: mockes.notifications.toasts,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
-        },
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        show: true,
+        save: true,
+        delete: true,
       },
-      actionTypeRegistry,
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
 
   it('renders action type menu with proper EuiCards for registered action types', () => {
     const onActionTypeChange = jest.fn();
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
@@ -52,37 +46,24 @@ describe('connector_add_flyout', () => {
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          toastNotifications: deps!.toastNotifications,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
+      <ActionTypeMenu
+        onActionTypeChange={onActionTypeChange}
+        actionTypes={[
+          {
+            id: actionType.id,
+            enabled: true,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'basic',
           },
-          docLinks: deps!.docLinks,
-        }}
-      >
-        <ActionTypeMenu
-          onActionTypeChange={onActionTypeChange}
-          actionTypes={[
-            {
-              id: actionType.id,
-              enabled: true,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-          ]}
-        />
-      </ActionsConnectorsContextProvider>
+        ]}
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
 
     expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
@@ -90,7 +71,7 @@ describe('connector_add_flyout', () => {
 
   it(`doesn't renders action types that are disabled via config`, () => {
     const onActionTypeChange = jest.fn();
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
@@ -102,37 +83,24 @@ describe('connector_add_flyout', () => {
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          toastNotifications: deps!.toastNotifications,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
+      <ActionTypeMenu
+        onActionTypeChange={onActionTypeChange}
+        actionTypes={[
+          {
+            id: actionType.id,
+            enabled: false,
+            name: 'Test',
+            enabledInConfig: false,
+            enabledInLicense: true,
+            minimumLicenseRequired: 'gold',
           },
-          docLinks: deps!.docLinks,
-        }}
-      >
-        <ActionTypeMenu
-          onActionTypeChange={onActionTypeChange}
-          actionTypes={[
-            {
-              id: actionType.id,
-              enabled: false,
-              name: 'Test',
-              enabledInConfig: false,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'gold',
-            },
-          ]}
-        />
-      </ActionsConnectorsContextProvider>
+        ]}
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
 
     expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeFalsy();
@@ -140,7 +108,7 @@ describe('connector_add_flyout', () => {
 
   it(`renders action types as disabled when disabled by license`, () => {
     const onActionTypeChange = jest.fn();
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
@@ -152,37 +120,24 @@ describe('connector_add_flyout', () => {
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
-      <ActionsConnectorsContextProvider
-        value={{
-          http: deps!.http,
-          actionTypeRegistry: deps!.actionTypeRegistry,
-          capabilities: deps!.capabilities,
-          toastNotifications: deps!.toastNotifications,
-          reloadConnectors: () => {
-            return new Promise<void>(() => {});
+      <ActionTypeMenu
+        onActionTypeChange={onActionTypeChange}
+        actionTypes={[
+          {
+            id: actionType.id,
+            enabled: false,
+            name: 'Test',
+            enabledInConfig: true,
+            enabledInLicense: false,
+            minimumLicenseRequired: 'gold',
           },
-          docLinks: deps!.docLinks,
-        }}
-      >
-        <ActionTypeMenu
-          onActionTypeChange={onActionTypeChange}
-          actionTypes={[
-            {
-              id: actionType.id,
-              enabled: false,
-              name: 'Test',
-              enabledInConfig: true,
-              enabledInLicense: false,
-              minimumLicenseRequired: 'gold',
-            },
-          ]}
-        />
-      </ActionsConnectorsContextProvider>
+        ]}
+        actionTypeRegistry={actionTypeRegistry}
+      />
     );
 
     expect(wrapper.find('EuiToolTip [data-test-subj="my-action-type-card"]').exists()).toBeTruthy();

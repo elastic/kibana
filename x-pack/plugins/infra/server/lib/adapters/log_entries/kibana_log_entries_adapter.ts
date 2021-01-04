@@ -9,12 +9,11 @@ import { fold, map } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as runtimeTypes from 'io-ts';
-import { compact, first } from 'lodash';
+import { compact } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { JsonArray } from '../../../../common/typed_json';
 import {
   LogEntriesAdapter,
-  LogItemHit,
   LogEntriesParams,
   LogEntryDocument,
   LogEntryQuery,
@@ -35,8 +34,9 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     params: LogEntriesParams
-  ): Promise<LogEntryDocument[]> {
-    const { startTimestamp, endTimestamp, query, cursor, size, highlightTerm } = params;
+  ): Promise<{ documents: LogEntryDocument[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
+    const { startTimestamp, endTimestamp, query, cursor, highlightTerm } = params;
+    const size = params.size ?? LOG_ENTRIES_PAGE_SIZE;
 
     const { sortDirection, searchAfterClause } = processCursor(cursor);
 
@@ -72,7 +72,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       index: sourceConfiguration.logAlias,
       ignoreUnavailable: true,
       body: {
-        size: typeof size !== 'undefined' ? size : LOG_ENTRIES_PAGE_SIZE,
+        size: size + 1, // Extra one to test if it has more before or after
         track_total_hits: false,
         _source: false,
         fields,
@@ -104,8 +104,22 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       esQuery
     );
 
-    const hits = sortDirection === 'asc' ? esResult.hits.hits : esResult.hits.hits.reverse();
-    return mapHitsToLogEntryDocuments(hits, fields);
+    const hits = esResult.hits.hits;
+    const hasMore = hits.length > size;
+
+    if (hasMore) {
+      hits.pop();
+    }
+
+    if (sortDirection === 'desc') {
+      hits.reverse();
+    }
+
+    return {
+      documents: mapHitsToLogEntryDocuments(hits, fields),
+      hasMoreBefore: sortDirection === 'desc' ? hasMore : undefined,
+      hasMoreAfter: sortDirection === 'asc' ? hasMore : undefined,
+    };
   }
 
   public async getContainedLogSummaryBuckets(
@@ -183,41 +197,6 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       ),
       fold(constant([]), identity)
     );
-  }
-
-  public async getLogItem(
-    requestContext: RequestHandlerContext,
-    id: string,
-    sourceConfiguration: InfraSourceConfiguration
-  ) {
-    const search = (searchOptions: object) =>
-      this.framework.callWithRequest<LogItemHit, {}>(requestContext, 'search', searchOptions);
-
-    const params = {
-      index: sourceConfiguration.logAlias,
-      terminate_after: 1,
-      body: {
-        size: 1,
-        sort: [
-          { [sourceConfiguration.fields.timestamp]: 'desc' },
-          { [sourceConfiguration.fields.tiebreaker]: 'desc' },
-        ],
-        query: {
-          ids: {
-            values: [id],
-          },
-        },
-        fields: ['*'],
-        _source: false,
-      },
-    };
-
-    const response = await search(params);
-    const document = first(response.hits.hits);
-    if (!document) {
-      throw new Error('Document not found');
-    }
-    return document;
   }
 }
 

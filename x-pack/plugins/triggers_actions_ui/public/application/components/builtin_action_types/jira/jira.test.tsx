@@ -78,22 +78,22 @@ describe('jira connector validation', () => {
 describe('jira action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      subActionParams: { title: 'some title {{test}}' },
+      subActionParams: { incident: { summary: 'some title {{test}}' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { title: [] },
+      errors: { summary: [] },
     });
   });
 
   test('params validation fails when body is not valid', () => {
     const actionParams = {
-      subActionParams: { title: '' },
+      subActionParams: { incident: { summary: '' }, comments: [] },
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        title: ['Title is required.'],
+        summary: ['Summary is required.'],
       },
     });
   });

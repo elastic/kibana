@@ -16,7 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getVectorStyleLabel, getDisabledByMessage } from './get_vector_style_label';
 import { STYLE_TYPE, VECTOR_STYLES } from '../../../../../common/constants';
-import { FieldMetaOptions } from '../../../../../common/descriptor_types';
 import { IStyleProperty } from '../properties/style_property';
 import { StyleField } from '../style_fields_helper';
 
@@ -25,12 +24,12 @@ export interface Props<StaticOptions, DynamicOptions> {
   customStaticOptionLabel?: string;
   defaultStaticStyleOptions: StaticOptions;
   defaultDynamicStyleOptions: DynamicOptions;
-  disabled: boolean;
+  disabled?: boolean;
   disabledBy?: VECTOR_STYLES;
   fields: StyleField[];
   onDynamicStyleChange: (propertyName: VECTOR_STYLES, options: DynamicOptions) => void;
   onStaticStyleChange: (propertyName: VECTOR_STYLES, options: StaticOptions) => void;
-  styleProperty: IStyleProperty<any>;
+  styleProperty: IStyleProperty<StaticOptions | DynamicOptions>;
 }
 
 export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
@@ -42,7 +41,7 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
   _onTypeToggle = () => {
     if (this.props.styleProperty.isDynamic()) {
       // preserve current dynmaic style
-      this._prevDynamicStyleOptions = this.props.styleProperty.getOptions();
+      this._prevDynamicStyleOptions = this.props.styleProperty.getOptions() as DynamicOptions;
       // toggle to static style
       this.props.onStaticStyleChange(
         this.props.styleProperty.getStyleName(),
@@ -50,7 +49,7 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
       );
     } else {
       // preserve current static style
-      this._prevStaticStyleOptions = this.props.styleProperty.getOptions();
+      this._prevStaticStyleOptions = this.props.styleProperty.getOptions() as StaticOptions;
       // toggle to dynamic style
       this.props.onDynamicStyleChange(
         this.props.styleProperty.getStyleName(),
@@ -59,10 +58,10 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
     }
   };
 
-  _onFieldMetaOptionsChange = (fieldMetaOptions: FieldMetaOptions) => {
+  _onDataMappingChange = (updatedObjects: Partial<DynamicOptions>) => {
     const options = {
-      ...this.props.styleProperty.getOptions(),
-      fieldMetaOptions,
+      ...(this.props.styleProperty.getOptions() as DynamicOptions),
+      ...updatedObjects,
     };
     this.props.onDynamicStyleChange(this.props.styleProperty.getStyleName(), options);
   };
@@ -101,10 +100,6 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
   }
 
   render() {
-    const fieldMetaOptionsPopover = this.props.styleProperty.renderFieldMetaPopover(
-      this._onFieldMetaOptionsChange
-    );
-
     const staticDynamicSelect = this.renderStaticDynamicSelect();
 
     const stylePropertyForm =
@@ -127,7 +122,9 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
           {React.cloneElement(this.props.children, {
             staticDynamicSelect,
           })}
-          {fieldMetaOptionsPopover}
+          {(this.props.styleProperty as IStyleProperty<DynamicOptions>).renderDataMappingPopover(
+            this._onDataMappingChange
+          )}
         </Fragment>
       );
 

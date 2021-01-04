@@ -62,12 +62,7 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
 
-/**
- * @remarks
- * if changing this make sure to also change
- * $kbnGlobalFilterItemEditorWidth
- */
-export const FILTER_EDITOR_WIDTH = 420;
+export const FILTER_EDITOR_WIDTH = 800;
 
 export function FilterItem(props: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -76,19 +71,27 @@ export function FilterItem(props: Props) {
 
   useEffect(() => {
     const index = props.filter.meta.index;
+    let isSubscribed = true;
     if (index) {
       getIndexPatterns()
         .get(index)
         .then((indexPattern) => {
-          setIndexPatternExists(!!indexPattern);
+          if (isSubscribed) {
+            setIndexPatternExists(!!indexPattern);
+          }
         })
         .catch(() => {
-          setIndexPatternExists(false);
+          if (isSubscribed) {
+            setIndexPatternExists(false);
+          }
         });
-    } else {
+    } else if (isSubscribed) {
       // Allow filters without an index pattern and don't validate them.
       setIndexPatternExists(true);
     }
+    return () => {
+      isSubscribed = false;
+    };
   }, [props.filter.meta.index]);
 
   function handleBadgeClick(e: MouseEvent<HTMLInputElement>) {

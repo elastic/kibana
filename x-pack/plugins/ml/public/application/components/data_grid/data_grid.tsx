@@ -35,7 +35,11 @@ import {
 } from './common';
 import { UseIndexDataReturnType } from './types';
 import { DecisionPathPopover } from './feature_importance/decision_path_popover';
-import { FeatureImportance, TopClasses } from '../../../../common/types/feature_importance';
+import {
+  FeatureImportanceBaseline,
+  FeatureImportance,
+  TopClasses,
+} from '../../../../common/types/feature_importance';
 import { DEFAULT_RESULTS_FIELD } from '../../../../common/constants/data_frame_analytics';
 import { DataFrameAnalysisConfigType } from '../../../../common/types/data_frame_analytics';
 
@@ -50,7 +54,7 @@ export const DataGridTitle: FC<{ title: string }> = ({ title }) => (
 );
 
 interface PropsWithoutHeader extends UseIndexDataReturnType {
-  baseline?: number;
+  baseline?: FeatureImportanceBaseline;
   analysisType?: DataFrameAnalysisConfigType | 'unknown';
   resultsField?: string;
   dataTestSubj: string;
@@ -124,6 +128,7 @@ export const DataGrid: FC<Props> = memo(
               // if resultsField for some reason is not available then use ml
               const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
               let predictedValue: string | number | undefined;
+              let predictedProbability: number | undefined;
               let topClasses: TopClasses = [];
               if (
                 predictionFieldName !== undefined &&
@@ -132,6 +137,7 @@ export const DataGrid: FC<Props> = memo(
               ) {
                 predictedValue = row[`${mlResultsField}.${predictionFieldName}`];
                 topClasses = getTopClasses(row, mlResultsField);
+                predictedProbability = row[`${mlResultsField}.prediction_probability`];
               }
 
               const isClassTypeBoolean = topClasses.reduce(
@@ -149,6 +155,7 @@ export const DataGrid: FC<Props> = memo(
                 <DecisionPathPopover
                   analysisType={analysisType}
                   predictedValue={predictedValue}
+                  predictedProbability={predictedProbability}
                   baseline={baseline}
                   featureImportance={parsedFIArray}
                   topClasses={topClasses}

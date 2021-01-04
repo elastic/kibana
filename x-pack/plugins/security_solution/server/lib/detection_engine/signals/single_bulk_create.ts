@@ -4,16 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { countBy, isEmpty } from 'lodash';
+import { countBy, isEmpty, get } from 'lodash';
 import { performance } from 'perf_hooks';
 import { AlertServices } from '../../../../../alerts/server';
-import { SignalSearchResponse, BulkResponse, SignalHit, BaseSignalHit } from './types';
+import { SignalSearchResponse, BulkResponse, SignalHit, WrappedSignalHit } from './types';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { generateId, makeFloatString, errorAggregator } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { BuildRuleMessage } from './rule_messages';
 import { Logger } from '../../../../../../../src/core/server';
+import { isEventTypeSignal } from './build_event_type_signal';
 
 interface SingleBulkCreateParams {
   filteredEvents: SignalSearchResponse;
@@ -50,7 +51,7 @@ export const filterDuplicateRules = (
   signalSearchResponse: SignalSearchResponse
 ) => {
   return signalSearchResponse.hits.hits.filter((doc) => {
-    if (doc._source.signal == null) {
+    if (doc._source.signal == null || !isEventTypeSignal(doc)) {
       return true;
     } else {
       return !(
@@ -67,9 +68,9 @@ export const filterDuplicateRules = (
  * @param ruleId The rule id
  * @param signals The candidate new signals
  */
-export const filterDuplicateSignals = (ruleId: string, signals: SignalHit[]) => {
+export const filterDuplicateSignals = (ruleId: string, signals: WrappedSignalHit[]) => {
   return signals.filter(
-    (doc) => !doc.signal.ancestors.some((ancestor) => ancestor.rule === ruleId)
+    (doc) => !doc._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleId)
   );
 };
 
@@ -77,12 +78,14 @@ export interface SingleBulkCreateResponse {
   success: boolean;
   bulkCreateDuration?: string;
   createdItemsCount: number;
+  createdItems: SignalHit[];
   errors: string[];
 }
 
 export interface BulkInsertSignalsResponse {
   bulkCreateDuration: string;
   createdItemsCount: number;
+  createdItems: SignalHit[];
 }
 
 // Bulk Index documents.
@@ -110,7 +113,7 @@ export const singleBulkCreate = async ({
   logger.debug(buildRuleMessage(`about to bulk create ${filteredEvents.hits.hits.length} events`));
   if (filteredEvents.hits.hits.length === 0) {
     logger.debug(buildRuleMessage(`all events were duplicates`));
-    return { success: true, createdItemsCount: 0, errors: [] };
+    return { success: true, createdItemsCount: 0, createdItems: [], errors: [] };
   }
   // index documents after creating an ID based on the
   // source documents' originating index, and the original
@@ -163,7 +166,26 @@ export const singleBulkCreate = async ({
   );
   logger.debug(buildRuleMessage(`took property says bulk took: ${response.took} milliseconds`));
 
-  const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
+  const createdItems = filteredEvents.hits.hits
+    .map((doc) =>
+      buildBulkBody({
+        doc,
+        ruleParams,
+        id,
+        actions,
+        name,
+        createdAt,
+        createdBy,
+        updatedAt,
+        updatedBy,
+        interval,
+        enabled,
+        tags,
+        throttle,
+      })
+    )
+    .filter((_, index) => get(response.items[index], 'create.status') === 201);
+  const createdItemsCount = createdItems.length;
   const duplicateSignalsCount = countBy(response.items, 'create.status')['409'];
   const errorCountByMessage = errorAggregator(response, [409]);
 
@@ -183,6 +205,7 @@ export const singleBulkCreate = async ({
       success: false,
       bulkCreateDuration: makeFloatString(end - start),
       createdItemsCount,
+      createdItems,
     };
   } else {
     return {
@@ -190,13 +213,14 @@ export const singleBulkCreate = async ({
       success: true,
       bulkCreateDuration: makeFloatString(end - start),
       createdItemsCount,
+      createdItems,
     };
   }
 };
 
 // Bulk Index new signals.
 export const bulkInsertSignals = async (
-  signals: BaseSignalHit[],
+  signals: WrappedSignalHit[],
   logger: Logger,
   services: AlertServices,
   refresh: RefreshTypes
@@ -233,6 +257,9 @@ export const bulkInsertSignals = async (
   }
 
   const createdItemsCount = countBy(response.items, 'create.status')['201'] ?? 0;
+  const createdItems = signals
+    .map((doc) => doc._source)
+    .filter((_, index) => get(response.items[index], 'create.status') === 201);
   logger.debug(`bulk created ${createdItemsCount} signals`);
-  return { bulkCreateDuration: makeFloatString(end - start), createdItemsCount };
+  return { bulkCreateDuration: makeFloatString(end - start), createdItems, createdItemsCount };
 };

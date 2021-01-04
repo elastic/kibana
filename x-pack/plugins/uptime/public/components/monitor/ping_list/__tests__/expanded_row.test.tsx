@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl, renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { PingListExpandedRowComponent } from '../expanded_row';
 import { Ping } from '../../../../../common/runtime_types';

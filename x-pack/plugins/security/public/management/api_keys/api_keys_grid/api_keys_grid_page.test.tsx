@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { EuiCallOut } from '@elastic/eui';
@@ -25,7 +25,7 @@ const waitForRender = async (
   wrapper: ReactWrapper<any>,
   condition: (wrapper: ReactWrapper<any>) => boolean
 ) => {
-  return new Promise((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     const interval = setInterval(async () => {
       await Promise.resolve();
       wrapper.update();

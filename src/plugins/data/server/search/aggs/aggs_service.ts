@@ -19,7 +19,11 @@
 
 import { pick } from 'lodash';
 
-import { UiSettingsServiceStart, SavedObjectsClientContract } from 'src/core/server';
+import {
+  UiSettingsServiceStart,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+} from 'src/core/server';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import {
   AggsCommonService,
@@ -65,7 +69,10 @@ export class AggsService {
 
   public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
     return {
-      asScopedToClient: async (savedObjectsClient: SavedObjectsClientContract) => {
+      asScopedToClient: async (
+        savedObjectsClient: SavedObjectsClientContract,
+        elasticsearchClient: ElasticsearchClient
+      ) => {
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
         const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
@@ -79,11 +86,13 @@ export class AggsService {
         const {
           calculateAutoTimeExpression,
           getDateMetaByDatatableColumn,
+          datatableUtilities,
           types,
         } = this.aggsCommonService.start({
           getConfig,
-          getIndexPattern: (await indexPatterns.indexPatternsServiceFactory(savedObjectsClient))
-            .get,
+          getIndexPattern: (
+            await indexPatterns.indexPatternsServiceFactory(savedObjectsClient, elasticsearchClient)
+          ).get,
           isDefaultTimezone,
         });
 
@@ -122,7 +131,8 @@ export class AggsService {
         return {
           calculateAutoTimeExpression,
           getDateMetaByDatatableColumn,
-          createAggConfigs: (indexPattern, configStates = [], schemas) => {
+          datatableUtilities,
+          createAggConfigs: (indexPattern, configStates = []) => {
             return new AggConfigs(indexPattern, configStates, { typesRegistry });
           },
           types: typesRegistry,

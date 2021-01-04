@@ -20,6 +20,7 @@
 import { Server } from 'http';
 import { readFileSync } from 'fs';
 import supertest from 'supertest';
+import { omit } from 'lodash';
 
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { HttpConfig } from './http_config';
@@ -72,6 +73,9 @@ beforeEach(() => {
       allowFromAnyIp: true,
       ipAllowlist: [],
     },
+    cors: {
+      enabled: false,
+    },
   } as any;
 
   configWithSSL = {
@@ -79,7 +83,7 @@ beforeEach(() => {
     ssl: {
       enabled: true,
       certificate,
-      cipherSuites: ['cipherSuite'],
+      cipherSuites: ['TLS_AES_256_GCM_SHA384'],
       getSecureOptions: () => 0,
       key,
       redirectHttpFromPort: config.port + 1,
@@ -884,6 +888,53 @@ describe('conditional compression', () => {
       expect(response.header).not.toHaveProperty('content-encoding');
     });
   });
+
+  describe('response headers', () => {
+    it('allows to configure "keep-alive" header', async () => {
+      const { registerRouter, server: innerServer } = await server.setup({
+        ...config,
+        keepaliveTimeout: 100_000,
+      });
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.get({ path: '/', validate: false }, (context, req, res) =>
+        res.ok({ body: req.route })
+      );
+      registerRouter(router);
+
+      await server.start();
+      const response = await supertest(innerServer.listener)
+        .get('/')
+        .set('Connection', 'keep-alive')
+        .expect(200);
+
+      expect(response.header.connection).toBe('keep-alive');
+      expect(response.header['keep-alive']).toBe('timeout=100');
+    });
+
+    it('default headers', async () => {
+      const { registerRouter, server: innerServer } = await server.setup(config);
+
+      const router = new Router('', logger, enhanceWithContext);
+      router.get({ path: '/', validate: false }, (context, req, res) =>
+        res.ok({ body: req.route })
+      );
+      registerRouter(router);
+
+      await server.start();
+      const response = await supertest(innerServer.listener).get('/').expect(200);
+
+      const restHeaders = omit(response.header, ['date', 'content-length']);
+      expect(restHeaders).toMatchInlineSnapshot(`
+        Object {
+          "accept-ranges": "bytes",
+          "cache-control": "private, no-cache, no-store, must-revalidate",
+          "connection": "close",
+          "content-type": "application/json; charset=utf-8",
+        }
+      `);
+    });
+  });
 });
 
 test('exposes route details of incoming request to a route handler (POST + payload options)', async () => {
@@ -1163,7 +1214,7 @@ describe('timeout options', () => {
       router.get(
         {
           path: '/',
-          validate: { body: schema.any() },
+          validate: { body: schema.maybe(schema.any()) },
         },
         (context, req, res) => {
           return res.ok({
@@ -1196,7 +1247,7 @@ describe('timeout options', () => {
       router.get(
         {
           path: '/',
-          validate: { body: schema.any() },
+          validate: { body: schema.maybe(schema.any()) },
           options: { timeout: { idleSocket: 12000 } },
         },
         (context, req, res) => {

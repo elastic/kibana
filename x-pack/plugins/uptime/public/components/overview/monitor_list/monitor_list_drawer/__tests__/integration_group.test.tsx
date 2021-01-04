@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { MonitorSummary, makePing } from '../../../../../../common/runtime_types';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { IntegrationGroup, extractSummaryValues } from '../actions_popover/integration_group';
 
 describe('IntegrationGroup', () => {
@@ -17,7 +17,7 @@ describe('IntegrationGroup', () => {
       monitor_id: '12345',
       state: {
         summary: {},
-        monitor: {},
+        monitor: { type: 'http' },
         summaryPings: [],
         timestamp: '123',
         url: {},
@@ -48,7 +48,7 @@ describe('IntegrationGroup', () => {
         state: {
           timestamp: 'foo',
           summaryPings: [],
-          monitor: {},
+          monitor: { type: 'http' },
           summary: {
             up: 0,
             down: 0,

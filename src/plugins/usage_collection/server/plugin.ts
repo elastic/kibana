@@ -25,12 +25,12 @@ import {
   CoreStart,
   ISavedObjectsRepository,
   Plugin,
-} from 'kibana/server';
+} from 'src/core/server';
 import { ConfigType } from './config';
-import { CollectorSet } from './collector';
+import { CollectorSet, CollectorSetPublic } from './collector';
 import { setupRoutes } from './routes';
 
-export type UsageCollectionSetup = CollectorSet;
+export type UsageCollectionSetup = CollectorSetPublic;
 export class UsageCollectionPlugin implements Plugin<CollectorSet> {
   private readonly logger: Logger;
   private savedObjects?: ISavedObjectsRepository;

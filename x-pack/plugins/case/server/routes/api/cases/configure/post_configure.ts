@@ -32,6 +32,14 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
     },
     async (context, request, response) => {
       try {
+        if (!context.case) {
+          throw Boom.badRequest('RouteHandlerContext is not registered for cases');
+        }
+        const caseClient = context.case.getCaseClient();
+        const actionsClient = await context.actions?.getActionsClient();
+        if (actionsClient == null) {
+          throw Boom.notFound('Action client have not been found');
+        }
         const client = context.core.savedObjects.client;
         const query = pipe(
           CasesConfigureRequestRt.decode(request.body),
@@ -39,7 +47,6 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
         );
 
         const myCaseConfigure = await caseConfigureService.find({ client });
-
         if (myCaseConfigure.saved_objects.length > 0) {
           await Promise.all(
             myCaseConfigure.saved_objects.map((cc) =>
@@ -51,6 +58,12 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
         const { email, full_name, username } = await caseService.getUser({ request, response });
 
         const creationDate = new Date().toISOString();
+        const mappings = await caseClient.getMappings({
+          actionsClient,
+          caseClient,
+          connectorId: query.connector.id,
+          connectorType: query.connector.type,
+        });
         const post = await caseConfigureService.post({
           client,
           attributes: {
@@ -68,6 +81,7 @@ export function initPostCaseConfigure({ caseConfigureService, caseService, route
             ...post.attributes,
             // Reserve for future implementations
             connector: transformESConnectorToCaseConnector(post.attributes.connector),
+            mappings,
             version: post.version ?? '',
           }),
         });

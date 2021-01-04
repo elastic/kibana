@@ -42,7 +42,9 @@ describe('EmptyState component', () => {
 
   it(`renders error message when an error occurs`, () => {
     const errors: IHttpFetchError[] = [
-      new HttpFetchError('There was an error fetching your data.', 'error', {} as any),
+      new HttpFetchError('There was an error fetching your data.', 'error', {} as any, {} as any, {
+        body: { message: 'There was an error fetching your data.' },
+      }),
     ];
     const component = mountWithRouter(
       <EmptyStateComponent statesIndexStatus={null} errors={errors} loading={false}>

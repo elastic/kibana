@@ -4,8 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
 import { configSchema, ConfigSchema } from '../config';
+import { TriggersActionsPlugin } from './plugin';
+
+export { PluginStartContract } from './plugin';
+export {
+  TimeSeriesQuery,
+  CoreQueryParams,
+  CoreQueryParamsSchemaProperties,
+  validateCoreQueryBody,
+  MAX_INTERVALS,
+  MAX_GROUPS,
+  DEFAULT_GROUPS,
+} from './data';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
@@ -14,7 +26,4 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export const plugin = () => ({
-  setup() {},
-  start() {},
-});
+export const plugin = (ctx: PluginInitializerContext) => new TriggersActionsPlugin(ctx);

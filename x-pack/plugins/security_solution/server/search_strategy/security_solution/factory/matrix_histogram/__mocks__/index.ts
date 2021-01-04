@@ -1340,217 +1340,572 @@ export const mockDnsSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,
   isRunning: false,
   rawResponse: {
-    took: 150,
+    took: 36,
     timed_out: false,
-    _shards: { total: 21, successful: 21, skipped: 0, failed: 0 },
-    hits: { total: 0, max_score: 0, hits: [] },
+    _shards: {
+      total: 55,
+      successful: 55,
+      skipped: 38,
+      failed: 0,
+    },
+    hits: {
+      max_score: 0,
+      hits: [],
+      total: 0,
+    },
     aggregations: {
-      NetworkDns: {
+      dns_count: {
+        value: 3,
+      },
+      dns_name_query_count: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
         buckets: [
           {
-            key_as_string: '2020-09-08T15:00:00.000Z',
-            key: 1599577200000,
-            doc_count: 7083,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T15:45:00.000Z',
-            key: 1599579900000,
-            doc_count: 146148,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T16:30:00.000Z',
-            key: 1599582600000,
-            doc_count: 65025,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T17:15:00.000Z',
-            key: 1599585300000,
-            doc_count: 62317,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T18:00:00.000Z',
-            key: 1599588000000,
-            doc_count: 58223,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T18:45:00.000Z',
-            key: 1599590700000,
-            doc_count: 55712,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T19:30:00.000Z',
-            key: 1599593400000,
-            doc_count: 55328,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T20:15:00.000Z',
-            key: 1599596100000,
-            doc_count: 63878,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T21:00:00.000Z',
-            key: 1599598800000,
-            doc_count: 54151,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T21:45:00.000Z',
-            key: 1599601500000,
-            doc_count: 55170,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T22:30:00.000Z',
-            key: 1599604200000,
-            doc_count: 43115,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-08T23:15:00.000Z',
-            key: 1599606900000,
-            doc_count: 52204,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T00:00:00.000Z',
-            key: 1599609600000,
-            doc_count: 43609,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T00:45:00.000Z',
-            key: 1599612300000,
-            doc_count: 44825,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T01:30:00.000Z',
-            key: 1599615000000,
-            doc_count: 52374,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T02:15:00.000Z',
-            key: 1599617700000,
-            doc_count: 44667,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T03:00:00.000Z',
-            key: 1599620400000,
-            doc_count: 45231,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T03:45:00.000Z',
-            key: 1599623100000,
-            doc_count: 42871,
-            dns: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
+            key: 'google.com',
+            doc_count: 1,
+            unique_domains: {
+              value: 1,
+            },
+            dns_question_name: {
               buckets: [
-                { key: 'google.com', doc_count: 1, orderAgg: { value: 1 } },
-                { key: 'google.internal', doc_count: 1, orderAgg: { value: 1 } },
+                {
+                  key_as_string: '2020-11-12T01:13:31.395Z',
+                  key: 1605143611395,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:21:48.492Z',
+                  key: 1605144108492,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:30:05.589Z',
+                  key: 1605144605589,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:38:22.686Z',
+                  key: 1605145102686,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:46:39.783Z',
+                  key: 1605145599783,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:54:56.880Z',
+                  key: 1605146096880,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:03:13.977Z',
+                  key: 1605146593977,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:11:31.074Z',
+                  key: 1605147091074,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:19:48.171Z',
+                  key: 1605147588171,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:28:05.268Z',
+                  key: 1605148085268,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:36:22.365Z',
+                  key: 1605148582365,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:44:39.462Z',
+                  key: 1605149079462,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:52:56.559Z',
+                  key: 1605149576559,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:01:13.656Z',
+                  key: 1605150073656,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:09:30.753Z',
+                  key: 1605150570753,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:17:47.850Z',
+                  key: 1605151067850,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:26:04.947Z',
+                  key: 1605151564947,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:34:22.044Z',
+                  key: 1605152062044,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:42:39.141Z',
+                  key: 1605152559141,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:50:56.238Z',
+                  key: 1605153056238,
+                  doc_count: 1,
+                },
+                {
+                  key_as_string: '2020-11-12T03:59:13.335Z',
+                  key: 1605153553335,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:07:30.432Z',
+                  key: 1605154050432,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:15:47.529Z',
+                  key: 1605154547529,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:24:04.626Z',
+                  key: 1605155044626,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:32:21.723Z',
+                  key: 1605155541723,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:40:38.820Z',
+                  key: 1605156038820,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:48:55.917Z',
+                  key: 1605156535917,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:57:13.014Z',
+                  key: 1605157033014,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:05:30.111Z',
+                  key: 1605157530111,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:13:47.208Z',
+                  key: 1605158027208,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:22:04.305Z',
+                  key: 1605158524305,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:30:21.402Z',
+                  key: 1605159021402,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:38:38.499Z',
+                  key: 1605159518499,
+                  doc_count: 0,
+                },
               ],
+            },
+            dns_bytes_in: {
+              value: 0,
+            },
+            dns_bytes_out: {
+              value: 0,
             },
           },
           {
-            key_as_string: '2020-09-09T04:30:00.000Z',
-            key: 1599625800000,
-            doc_count: 41327,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+            key: 'google.internal',
+            doc_count: 1,
+            unique_domains: {
+              value: 1,
+            },
+            dns_question_name: {
+              buckets: [
+                {
+                  key_as_string: '2020-11-12T01:13:31.395Z',
+                  key: 1605143611395,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:21:48.492Z',
+                  key: 1605144108492,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:30:05.589Z',
+                  key: 1605144605589,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:38:22.686Z',
+                  key: 1605145102686,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:46:39.783Z',
+                  key: 1605145599783,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:54:56.880Z',
+                  key: 1605146096880,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:03:13.977Z',
+                  key: 1605146593977,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:11:31.074Z',
+                  key: 1605147091074,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:19:48.171Z',
+                  key: 1605147588171,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:28:05.268Z',
+                  key: 1605148085268,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:36:22.365Z',
+                  key: 1605148582365,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:44:39.462Z',
+                  key: 1605149079462,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:52:56.559Z',
+                  key: 1605149576559,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:01:13.656Z',
+                  key: 1605150073656,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:09:30.753Z',
+                  key: 1605150570753,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:17:47.850Z',
+                  key: 1605151067850,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:26:04.947Z',
+                  key: 1605151564947,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:34:22.044Z',
+                  key: 1605152062044,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:42:39.141Z',
+                  key: 1605152559141,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:50:56.238Z',
+                  key: 1605153056238,
+                  doc_count: 1,
+                },
+                {
+                  key_as_string: '2020-11-12T03:59:13.335Z',
+                  key: 1605153553335,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:07:30.432Z',
+                  key: 1605154050432,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:15:47.529Z',
+                  key: 1605154547529,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:24:04.626Z',
+                  key: 1605155044626,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:32:21.723Z',
+                  key: 1605155541723,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:40:38.820Z',
+                  key: 1605156038820,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:48:55.917Z',
+                  key: 1605156535917,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:57:13.014Z',
+                  key: 1605157033014,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:05:30.111Z',
+                  key: 1605157530111,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:13:47.208Z',
+                  key: 1605158027208,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:22:04.305Z',
+                  key: 1605158524305,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:30:21.402Z',
+                  key: 1605159021402,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:38:38.499Z',
+                  key: 1605159518499,
+                  doc_count: 0,
+                },
+              ],
+            },
+            dns_bytes_in: {
+              value: 0,
+            },
+            dns_bytes_out: {
+              value: 0,
+            },
           },
           {
-            key_as_string: '2020-09-09T05:15:00.000Z',
-            key: 1599628500000,
-            doc_count: 39860,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T06:00:00.000Z',
-            key: 1599631200000,
-            doc_count: 44061,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T06:45:00.000Z',
-            key: 1599633900000,
-            doc_count: 39193,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T07:30:00.000Z',
-            key: 1599636600000,
-            doc_count: 40909,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T08:15:00.000Z',
-            key: 1599639300000,
-            doc_count: 43293,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T09:00:00.000Z',
-            key: 1599642000000,
-            doc_count: 47640,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T09:45:00.000Z',
-            key: 1599644700000,
-            doc_count: 48605,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T10:30:00.000Z',
-            key: 1599647400000,
-            doc_count: 42072,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T11:15:00.000Z',
-            key: 1599650100000,
-            doc_count: 46398,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T12:00:00.000Z',
-            key: 1599652800000,
-            doc_count: 49378,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T12:45:00.000Z',
-            key: 1599655500000,
-            doc_count: 51171,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T13:30:00.000Z',
-            key: 1599658200000,
-            doc_count: 57911,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T14:15:00.000Z',
-            key: 1599660900000,
-            doc_count: 58909,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-          },
-          {
-            key_as_string: '2020-09-09T15:00:00.000Z',
-            key: 1599663600000,
-            doc_count: 62358,
-            dns: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+            key: 'windows.net',
+            doc_count: 1,
+            unique_domains: {
+              value: 1,
+            },
+            dns_question_name: {
+              buckets: [
+                {
+                  key_as_string: '2020-11-12T01:13:31.395Z',
+                  key: 1605143611395,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:21:48.492Z',
+                  key: 1605144108492,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:30:05.589Z',
+                  key: 1605144605589,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:38:22.686Z',
+                  key: 1605145102686,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:46:39.783Z',
+                  key: 1605145599783,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T01:54:56.880Z',
+                  key: 1605146096880,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:03:13.977Z',
+                  key: 1605146593977,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:11:31.074Z',
+                  key: 1605147091074,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:19:48.171Z',
+                  key: 1605147588171,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:28:05.268Z',
+                  key: 1605148085268,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:36:22.365Z',
+                  key: 1605148582365,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:44:39.462Z',
+                  key: 1605149079462,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T02:52:56.559Z',
+                  key: 1605149576559,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:01:13.656Z',
+                  key: 1605150073656,
+                  doc_count: 1,
+                },
+                {
+                  key_as_string: '2020-11-12T03:09:30.753Z',
+                  key: 1605150570753,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:17:47.850Z',
+                  key: 1605151067850,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:26:04.947Z',
+                  key: 1605151564947,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:34:22.044Z',
+                  key: 1605152062044,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:42:39.141Z',
+                  key: 1605152559141,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:50:56.238Z',
+                  key: 1605153056238,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T03:59:13.335Z',
+                  key: 1605153553335,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:07:30.432Z',
+                  key: 1605154050432,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:15:47.529Z',
+                  key: 1605154547529,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:24:04.626Z',
+                  key: 1605155044626,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:32:21.723Z',
+                  key: 1605155541723,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:40:38.820Z',
+                  key: 1605156038820,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:48:55.917Z',
+                  key: 1605156535917,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T04:57:13.014Z',
+                  key: 1605157033014,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:05:30.111Z',
+                  key: 1605157530111,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:13:47.208Z',
+                  key: 1605158027208,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:22:04.305Z',
+                  key: 1605158524305,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:30:21.402Z',
+                  key: 1605159021402,
+                  doc_count: 0,
+                },
+                {
+                  key_as_string: '2020-11-12T05:38:38.499Z',
+                  key: 1605159518499,
+                  doc_count: 0,
+                },
+              ],
+            },
+            dns_bytes_in: {
+              value: 0,
+            },
+            dns_bytes_out: {
+              value: 0,
+            },
           },
         ],
       },
@@ -1566,6 +1921,7 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
     dsl: [
       JSON.stringify(
         {
+          allowNoIndices: true,
           index: [
             'apm-*-transaction*',
             'auditbeat-*',
@@ -1575,20 +1931,50 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
           ignoreUnavailable: true,
           body: {
             aggregations: {
-              NetworkDns: {
-                date_histogram: { field: '@timestamp', fixed_interval: '2700000ms' },
+              dns_count: {
+                cardinality: {
+                  field: 'dns.question.registered_domain',
+                },
+              },
+              dns_name_query_count: {
+                terms: {
+                  field: 'dns.question.registered_domain',
+                  size: 1000000,
+                },
                 aggs: {
-                  dns: {
-                    terms: {
-                      field: 'dns.question.registered_domain',
-                      order: { orderAgg: 'desc' },
+                  dns_question_name: {
+                    date_histogram: {
+                      field: '@timestamp',
+                      fixed_interval: '2700000ms',
+                      min_doc_count: 0,
+                      extended_bounds: { min: 1599579675528, max: 1599666075529 },
+                    },
+                  },
+                  bucket_sort: {
+                    bucket_sort: {
+                      sort: [
+                        {
+                          unique_domains: {
+                            order: 'desc',
+                          },
+                        },
+                        {
+                          _key: {
+                            order: 'asc',
+                          },
+                        },
+                      ],
+                      from: 0,
                       size: 10,
                     },
-                    aggs: { orderAgg: { cardinality: { field: 'dns.question.name' } } },
+                  },
+                  unique_domains: {
+                    cardinality: {
+                      field: 'dns.question.name',
+                    },
                   },
                 },
               },
@@ -1596,7 +1982,18 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
             query: {
               bool: {
                 filter: [
-                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                  {
+                    bool: {
+                      must: [],
+                      filter: [
+                        {
+                          match_all: {},
+                        },
+                      ],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
                   {
                     range: {
                       '@timestamp': {
@@ -1607,11 +2004,20 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
                     },
                   },
                 ],
+                must_not: [
+                  {
+                    term: {
+                      'dns.question.type': {
+                        value: 'PTR',
+                      },
+                    },
+                  },
+                ],
               },
             },
-            size: 0,
-            track_total_hits: true,
           },
+          size: 0,
+          track_total_hits: false,
         },
         null,
         2
@@ -1619,8 +2025,105 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
     ],
   },
   matrixHistogramData: [
-    { x: 1599623100000, y: 1, g: 'google.com' },
-    { x: 1599623100000, y: 1, g: 'google.internal' },
+    { x: 1605143611395, y: 0, g: 'google.com' },
+    { x: 1605144108492, y: 0, g: 'google.com' },
+    { x: 1605144605589, y: 0, g: 'google.com' },
+    { x: 1605145102686, y: 0, g: 'google.com' },
+    { x: 1605145599783, y: 0, g: 'google.com' },
+    { x: 1605146096880, y: 0, g: 'google.com' },
+    { x: 1605146593977, y: 0, g: 'google.com' },
+    { x: 1605147091074, y: 0, g: 'google.com' },
+    { x: 1605147588171, y: 0, g: 'google.com' },
+    { x: 1605148085268, y: 0, g: 'google.com' },
+    { x: 1605148582365, y: 0, g: 'google.com' },
+    { x: 1605149079462, y: 0, g: 'google.com' },
+    { x: 1605149576559, y: 0, g: 'google.com' },
+    { x: 1605150073656, y: 0, g: 'google.com' },
+    { x: 1605150570753, y: 0, g: 'google.com' },
+    { x: 1605151067850, y: 0, g: 'google.com' },
+    { x: 1605151564947, y: 0, g: 'google.com' },
+    { x: 1605152062044, y: 0, g: 'google.com' },
+    { x: 1605152559141, y: 0, g: 'google.com' },
+    { x: 1605153056238, y: 1, g: 'google.com' },
+    { x: 1605153553335, y: 0, g: 'google.com' },
+    { x: 1605154050432, y: 0, g: 'google.com' },
+    { x: 1605154547529, y: 0, g: 'google.com' },
+    { x: 1605155044626, y: 0, g: 'google.com' },
+    { x: 1605155541723, y: 0, g: 'google.com' },
+    { x: 1605156038820, y: 0, g: 'google.com' },
+    { x: 1605156535917, y: 0, g: 'google.com' },
+    { x: 1605157033014, y: 0, g: 'google.com' },
+    { x: 1605157530111, y: 0, g: 'google.com' },
+    { x: 1605158027208, y: 0, g: 'google.com' },
+    { x: 1605158524305, y: 0, g: 'google.com' },
+    { x: 1605159021402, y: 0, g: 'google.com' },
+    { x: 1605159518499, y: 0, g: 'google.com' },
+    { x: 1605143611395, y: 0, g: 'google.internal' },
+    { x: 1605144108492, y: 0, g: 'google.internal' },
+    { x: 1605144605589, y: 0, g: 'google.internal' },
+    { x: 1605145102686, y: 0, g: 'google.internal' },
+    { x: 1605145599783, y: 0, g: 'google.internal' },
+    { x: 1605146096880, y: 0, g: 'google.internal' },
+    { x: 1605146593977, y: 0, g: 'google.internal' },
+    { x: 1605147091074, y: 0, g: 'google.internal' },
+    { x: 1605147588171, y: 0, g: 'google.internal' },
+    { x: 1605148085268, y: 0, g: 'google.internal' },
+    { x: 1605148582365, y: 0, g: 'google.internal' },
+    { x: 1605149079462, y: 0, g: 'google.internal' },
+    { x: 1605149576559, y: 0, g: 'google.internal' },
+    { x: 1605150073656, y: 0, g: 'google.internal' },
+    { x: 1605150570753, y: 0, g: 'google.internal' },
+    { x: 1605151067850, y: 0, g: 'google.internal' },
+    { x: 1605151564947, y: 0, g: 'google.internal' },
+    { x: 1605152062044, y: 0, g: 'google.internal' },
+    { x: 1605152559141, y: 0, g: 'google.internal' },
+    { x: 1605153056238, y: 1, g: 'google.internal' },
+    { x: 1605153553335, y: 0, g: 'google.internal' },
+    { x: 1605154050432, y: 0, g: 'google.internal' },
+    { x: 1605154547529, y: 0, g: 'google.internal' },
+    { x: 1605155044626, y: 0, g: 'google.internal' },
+    { x: 1605155541723, y: 0, g: 'google.internal' },
+    { x: 1605156038820, y: 0, g: 'google.internal' },
+    { x: 1605156535917, y: 0, g: 'google.internal' },
+    { x: 1605157033014, y: 0, g: 'google.internal' },
+    { x: 1605157530111, y: 0, g: 'google.internal' },
+    { x: 1605158027208, y: 0, g: 'google.internal' },
+    { x: 1605158524305, y: 0, g: 'google.internal' },
+    { x: 1605159021402, y: 0, g: 'google.internal' },
+    { x: 1605159518499, y: 0, g: 'google.internal' },
+    { x: 1605143611395, y: 0, g: 'windows.net' },
+    { x: 1605144108492, y: 0, g: 'windows.net' },
+    { x: 1605144605589, y: 0, g: 'windows.net' },
+    { x: 1605145102686, y: 0, g: 'windows.net' },
+    { x: 1605145599783, y: 0, g: 'windows.net' },
+    { x: 1605146096880, y: 0, g: 'windows.net' },
+    { x: 1605146593977, y: 0, g: 'windows.net' },
+    { x: 1605147091074, y: 0, g: 'windows.net' },
+    { x: 1605147588171, y: 0, g: 'windows.net' },
+    { x: 1605148085268, y: 0, g: 'windows.net' },
+    { x: 1605148582365, y: 0, g: 'windows.net' },
+    { x: 1605149079462, y: 0, g: 'windows.net' },
+    { x: 1605149576559, y: 0, g: 'windows.net' },
+    { x: 1605150073656, y: 1, g: 'windows.net' },
+    { x: 1605150570753, y: 0, g: 'windows.net' },
+    { x: 1605151067850, y: 0, g: 'windows.net' },
+    { x: 1605151564947, y: 0, g: 'windows.net' },
+    { x: 1605152062044, y: 0, g: 'windows.net' },
+    { x: 1605152559141, y: 0, g: 'windows.net' },
+    { x: 1605153056238, y: 0, g: 'windows.net' },
+    { x: 1605153553335, y: 0, g: 'windows.net' },
+    { x: 1605154050432, y: 0, g: 'windows.net' },
+    { x: 1605154547529, y: 0, g: 'windows.net' },
+    { x: 1605155044626, y: 0, g: 'windows.net' },
+    { x: 1605155541723, y: 0, g: 'windows.net' },
+    { x: 1605156038820, y: 0, g: 'windows.net' },
+    { x: 1605156535917, y: 0, g: 'windows.net' },
+    { x: 1605157033014, y: 0, g: 'windows.net' },
+    { x: 1605157530111, y: 0, g: 'windows.net' },
+    { x: 1605158027208, y: 0, g: 'windows.net' },
+    { x: 1605158524305, y: 0, g: 'windows.net' },
+    { x: 1605159021402, y: 0, g: 'windows.net' },
+    { x: 1605159518499, y: 0, g: 'windows.net' },
   ],
   totalCount: 0,
 };

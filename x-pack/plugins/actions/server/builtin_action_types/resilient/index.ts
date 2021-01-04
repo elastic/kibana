@@ -25,19 +25,17 @@ import {
   ResilientExecutorResultData,
   ExecutorSubActionGetIncidentTypesParams,
   ExecutorSubActionGetSeverityParams,
+  ExecutorSubActionCommonFieldsParams,
 } from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
-
-// TODO: to remove, need to support Case
-import { buildMap, mapParams } from '../case/utils';
 
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
-const supportedSubActions: string[] = ['pushToService', 'incidentTypes', 'severity'];
+const supportedSubActions: string[] = ['getFields', 'pushToService', 'incidentTypes', 'severity'];
 
 // action type definition
 export function getActionType(
@@ -103,23 +101,21 @@ async function executor(
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 
-    const { comments, externalId, ...restParams } = pushToServiceParams;
-    const mapping = config.incidentConfiguration
-      ? buildMap(config.incidentConfiguration.mapping)
-      : null;
-    const externalObject =
-      config.incidentConfiguration && mapping
-        ? mapParams<ExecutorSubActionPushParams>(restParams as ExecutorSubActionPushParams, mapping)
-        : {};
-
     data = await api.pushToService({
       externalService,
-      mapping,
-      params: { ...pushToServiceParams, externalObject },
+      params: pushToServiceParams,
       logger,
     });
 
     logger.debug(`response push to service for incident id: ${data.id}`);
+  }
+
+  if (subAction === 'getFields') {
+    const getFieldsParams = subActionParams as ExecutorSubActionCommonFieldsParams;
+    data = await api.getFields({
+      externalService,
+      params: getFieldsParams,
+    });
   }
 
   if (subAction === 'incidentTypes') {

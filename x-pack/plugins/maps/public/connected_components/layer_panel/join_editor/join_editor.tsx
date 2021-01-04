@@ -66,6 +66,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
         right: {
           id: uuid(),
           applyGlobalQuery: true,
+          applyGlobalTime: true,
         },
       } as JoinDescriptor,
     ]);

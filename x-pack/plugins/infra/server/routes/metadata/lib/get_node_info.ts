@@ -58,7 +58,7 @@ export const getNodeInfo = async (
     index: sourceConfiguration.metricAlias,
     body: {
       size: 1,
-      _source: ['host.*', 'cloud.*'],
+      _source: ['host.*', 'cloud.*', 'agent.*'],
       sort: [{ [timestampField]: 'desc' }],
       query: {
         bool: {

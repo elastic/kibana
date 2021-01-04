@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
@@ -16,6 +16,7 @@ import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/
 import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
+import { DataStreamsBadges } from '../data_stream_badges';
 
 interface Props {
   dataStreams?: DataStream[];
@@ -44,14 +45,17 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     }),
     truncateText: true,
     sortable: true,
-    render: (name: DataStream['name']) => {
+    render: (name: DataStream['name'], dataStream: DataStream) => {
       return (
-        <EuiLink
-          data-test-subj="nameLink"
-          {...reactRouterNavigate(history, getDataStreamDetailsLink(name))}
-        >
-          {name}
-        </EuiLink>
+        <Fragment>
+          <EuiLink
+            data-test-subj="nameLink"
+            {...reactRouterNavigate(history, getDataStreamDetailsLink(name))}
+          >
+            {name}
+          </EuiLink>
+          <DataStreamsBadges dataStream={dataStream} />
+        </Fragment>
       );
     },
   });
@@ -66,6 +70,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     render: (health: DataStream['health']) => {
       return <DataHealth health={health} />;
     },
+    width: '100px',
   });
 
   if (includeStats) {
@@ -86,12 +91,14 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     });
 
     columns.push({
-      field: 'storageSize',
+      field: 'storageSizeBytes',
       name: i18n.translate('xpack.idxMgmt.dataStreamList.table.storageSizeColumnTitle', {
         defaultMessage: 'Storage size',
       }),
       truncateText: true,
       sortable: true,
+      render: (storageSizeBytes: DataStream['storageSizeBytes'], dataStream: DataStream) =>
+        dataStream.storageSize,
     });
   }
 
@@ -121,7 +128,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteText', {
           defaultMessage: 'Delete',
         }),
-        description: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteDecription', {
+        description: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteDescription', {
           defaultMessage: 'Delete this data stream',
         }),
         icon: 'trash',
@@ -132,6 +139,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         },
         isPrimary: true,
         'data-test-subj': 'deleteDataStream',
+        available: ({ privileges: { delete_index: deleteIndex } }: DataStream) => deleteIndex,
       },
     ],
   });
@@ -158,9 +166,10 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       incremental: true,
     },
     toolsLeft:
-      selection.length > 0 ? (
+      selection.length > 0 &&
+      selection.every((dataStream: DataStream) => dataStream.privileges.delete_index) ? (
         <EuiButton
-          data-test-subj="deletDataStreamsButton"
+          data-test-subj="deleteDataStreamsButton"
           onClick={() => setDataStreamsToDelete(selection.map(({ name }: DataStream) => name))}
           color="danger"
         >
@@ -223,6 +232,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             defaultMessage="No data streams found"
           />
         }
+        tableLayout={'auto'}
       />
     </>
   );

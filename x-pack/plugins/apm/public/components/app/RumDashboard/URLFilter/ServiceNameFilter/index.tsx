@@ -8,7 +8,7 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUrlParams } from '../../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 
 interface Props {
@@ -65,7 +65,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
         prepend={i18n.translate(
           'xpack.apm.ux.localFilters.titles.webApplication',
           {
-            defaultMessage: 'Web Application',
+            defaultMessage: 'Web application',
           }
         )}
         isLoading={loading}

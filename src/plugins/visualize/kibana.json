@@ -13,12 +13,16 @@
     "dashboard",
     "uiActions"
   ],
-  "optionalPlugins": ["home", "share"],
+  "optionalPlugins": [
+    "home",
+    "share",
+    "savedObjectsTaggingOss"
+  ],
   "requiredBundles": [
     "kibanaUtils",
     "kibanaReact",
     "home",
-    "discover",
-    "visDefaultEditor"
+    "presentationUtil",
+    "discover"
   ]
 }

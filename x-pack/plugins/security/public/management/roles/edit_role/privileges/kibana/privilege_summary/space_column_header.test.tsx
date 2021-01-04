@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { SpaceColumnHeader } from './space_column_header';
 import { SpacesPopoverList } from '../../../spaces_popover_list';
 import { SpaceAvatar } from '../../../../../../../../spaces/public';

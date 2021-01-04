@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ILicense } from '../../../../../licensing/common/types';
 import {
   AppLocation,
   Immutable,
@@ -18,7 +19,7 @@ import {
   GetPackagePoliciesResponse,
   GetPackagesResponse,
   UpdatePackagePolicyResponse,
-} from '../../../../../ingest_manager/common';
+} from '../../../../../fleet/common';
 
 /**
  * Policy list store state
@@ -66,6 +67,8 @@ export interface PolicyDetailsState {
     success: boolean;
     error?: ServerApiError;
   };
+  /** current license */
+  license?: ILicense;
 }
 
 /**
@@ -74,68 +77,6 @@ export interface PolicyDetailsState {
 export interface PolicyListUrlSearchParams {
   page_index: number;
   page_size: number;
-}
-
-/**
- * Endpoint Policy configuration
- */
-export interface PolicyConfig {
-  windows: {
-    events: {
-      dll_and_driver_load: boolean;
-      dns: boolean;
-      file: boolean;
-      network: boolean;
-      process: boolean;
-      registry: boolean;
-      security: boolean;
-    };
-    malware: MalwareFields;
-    logging: {
-      stdout: string;
-      file: string;
-    };
-    advanced: PolicyConfigAdvancedOptions;
-  };
-  mac: {
-    events: {
-      file: boolean;
-      process: boolean;
-      network: boolean;
-    };
-    malware: MalwareFields;
-    logging: {
-      stdout: string;
-      file: string;
-    };
-    advanced: PolicyConfigAdvancedOptions;
-  };
-  linux: {
-    events: {
-      file: boolean;
-      process: boolean;
-      network: boolean;
-    };
-    logging: {
-      stdout: string;
-      file: string;
-    };
-    advanced: PolicyConfigAdvancedOptions;
-  };
-}
-
-interface PolicyConfigAdvancedOptions {
-  elasticsearch: {
-    indices: {
-      control: string;
-      event: string;
-      logging: string;
-    };
-    kernel: {
-      connect: boolean;
-      process: boolean;
-    };
-  };
 }
 
 export enum OS {

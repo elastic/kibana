@@ -26,6 +26,14 @@ export const registerFindRoute = (
   router: IRouter,
   managementServicePromise: Promise<ISavedObjectsManagement>
 ) => {
+  const referenceSchema = schema.object({
+    type: schema.string(),
+    id: schema.string(),
+  });
+  const searchOperatorSchema = schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
+    defaultValue: 'OR',
+  });
+
   router.get(
     {
       path: '/api/kibana/management/saved_objects/_find',
@@ -35,16 +43,12 @@ export const registerFindRoute = (
           page: schema.number({ min: 0, defaultValue: 1 }),
           type: schema.oneOf([schema.string(), schema.arrayOf(schema.string())]),
           search: schema.maybe(schema.string()),
-          defaultSearchOperator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
-            defaultValue: 'OR',
-          }),
+          defaultSearchOperator: searchOperatorSchema,
           sortField: schema.maybe(schema.string()),
           hasReference: schema.maybe(
-            schema.object({
-              type: schema.string(),
-              id: schema.string(),
-            })
+            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
           ),
+          hasReferenceOperator: searchOperatorSchema,
           fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),

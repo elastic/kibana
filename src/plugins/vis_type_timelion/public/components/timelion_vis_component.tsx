@@ -33,6 +33,8 @@ import {
   SERIES_ID_ATTR,
   colors,
   Axis,
+  ACTIVE_CURSOR,
+  eventBus,
 } from '../helpers/panel_utils';
 
 import { Series, Sheet } from '../helpers/timelion_request_handler';
@@ -40,7 +42,7 @@ import { tickFormatters } from '../helpers/tick_formatters';
 import { generateTicksProvider } from '../helpers/tick_generator';
 import { TimelionVisDependencies } from '../plugin';
 
-import './index.scss';
+import './timelion_vis.scss';
 
 interface CrosshairPlot extends jquery.flot.plot {
   setCrosshair: (pos: Position) => void;
@@ -338,16 +340,40 @@ function TimelionVisComponent({
     });
   }, [legendCaption, legendValueNumbers]);
 
-  const plotHoverHandler = useCallback(
-    (event: JQuery.TriggeredEvent, pos: Position) => {
-      if (!plot) {
-        return;
-      }
+  const plotHover = useCallback(
+    (pos: Position) => {
       (plot as CrosshairPlot).setCrosshair(pos);
       debouncedSetLegendNumbers(pos);
     },
     [plot, debouncedSetLegendNumbers]
   );
+
+  const plotHoverHandler = useCallback(
+    (event: JQuery.TriggeredEvent, pos: Position) => {
+      if (!plot) {
+        return;
+      }
+      plotHover(pos);
+      eventBus.trigger(ACTIVE_CURSOR, [event, pos]);
+    },
+    [plot, plotHover]
+  );
+
+  useEffect(() => {
+    const updateCursor = (_: any, event: JQuery.TriggeredEvent, pos: Position) => {
+      if (!plot) {
+        return;
+      }
+      plotHover(pos);
+    };
+
+    eventBus.on(ACTIVE_CURSOR, updateCursor);
+
+    return () => {
+      eventBus.off(ACTIVE_CURSOR, updateCursor);
+    };
+  }, [plot, plotHover]);
+
   const mouseLeaveHandler = useCallback(() => {
     if (!plot) {
       return;

@@ -7,8 +7,8 @@ import { ReactNode } from 'react';
 
 import { GenericObject } from './mappings_editor';
 
-import { FieldConfig } from '../shared_imports';
-import { PARAMETERS_DEFINITION, RUNTIME_FIELD_TYPES } from '../constants';
+import { FieldConfig, RuntimeField } from '../shared_imports';
+import { PARAMETERS_DEFINITION } from '../constants';
 
 export interface DataTypeDefinition {
   label: string;
@@ -36,7 +36,6 @@ export interface ParameterDefinition {
 }
 
 export type MainType =
-  | 'runtime'
   | 'text'
   | 'keyword'
   | 'numeric'
@@ -75,8 +74,6 @@ export type MainType =
 export type SubType = NumericType | RangeType;
 
 export type DataType = MainType | SubType;
-
-export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 export type NumericType =
   | 'long'
@@ -156,8 +153,6 @@ export type ParameterName =
   | 'depth_limit'
   | 'relations'
   | 'max_shingle_size'
-  | 'runtime_type'
-  | 'script'
   | 'value'
   | 'meta';
 
@@ -175,7 +170,6 @@ export interface Fields {
 interface FieldBasic {
   name: string;
   type: DataType;
-  runtime_type?: DataType;
   subType?: SubType;
   properties?: { [key: string]: Omit<Field, 'name'> };
   fields?: { [key: string]: Omit<Field, 'name'> };
@@ -224,4 +218,17 @@ export type ChildFieldName = 'properties' | 'fields';
 export interface AliasOption {
   id: string;
   label: string;
+}
+
+export interface RuntimeFields {
+  [name: string]: Omit<RuntimeField, 'name'>;
+}
+
+export interface NormalizedRuntimeField {
+  id: string;
+  source: RuntimeField;
+}
+
+export interface NormalizedRuntimeFields {
+  [id: string]: NormalizedRuntimeField;
 }

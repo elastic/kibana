@@ -13,42 +13,6 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
 
   return {
     /**
-     * Navigates to the Endpoint Policy List
-     */
-    async navigateToPolicyList() {
-      await pageObjects.common.navigateToUrlWithBrowserHistory(
-        'securitySolutionManagement',
-        '/policy'
-      );
-      await pageObjects.header.waitUntilLoadingHasFinished();
-    },
-
-    /**
-     * Finds and returns the Policy Details Page Save button
-     */
-    async findFirstActionsButton() {
-      await this.ensureIsOnPolicyPage();
-      return await testSubjects.find('policyActionsButton');
-    },
-
-    /**
-     * Finds and returns the Policy Details Page Save button
-     */
-    async launchAndFindDeleteModal() {
-      const actionsButton = await this.findFirstActionsButton();
-      await actionsButton.click();
-      await testSubjects.click('policyDeleteButton');
-      return await testSubjects.find('policyListDeleteModal');
-    },
-
-    /**
-     * ensures that the Policy Page is the currently display view
-     */
-    async ensureIsOnPolicyPage() {
-      await testSubjects.existOrFail('policyListPage');
-    },
-
-    /**
      * Navigates to the Endpoint Policy Details page
      *
      * @param policyId
@@ -75,6 +39,22 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     async findCancelButton() {
       await this.ensureIsOnDetailsPage();
       return await testSubjects.find('policyDetailsCancelButton');
+    },
+
+    /**
+     * Finds and returns the Advanced Policy Show/Hide Button
+     */
+    async findAdvancedPolicyButton() {
+      await this.ensureIsOnDetailsPage();
+      return await testSubjects.find('advancedPolicyButton');
+    },
+
+    /**
+     * Finds and returns the linux connection_delay Advanced Policy field
+     */
+    async findAdvancedPolicyField() {
+      await this.ensureIsOnDetailsPage();
+      return await testSubjects.find('linux.advanced.agent.connection_delay');
     },
 
     /**
@@ -113,14 +93,6 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
      */
     async findPackagePolicyEndpointCustomConfiguration(onEditPage: boolean = false) {
       return await testSubjects.find(`endpointPackagePolicy_${onEditPage ? 'edit' : 'create'}`);
-    },
-
-    /**
-     * Finds and returns the onboarding button displayed in empty List pages
-     */
-    async findOnboardingStartButton() {
-      await testSubjects.waitForEnabled('onboardingStartButton');
-      return await testSubjects.find('onboardingStartButton');
     },
   };
 }

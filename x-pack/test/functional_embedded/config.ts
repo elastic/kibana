@@ -23,12 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     kibana: {
       ...kibanaFunctionalConfig.get('servers.kibana'),
       protocol: 'https',
-      ssl: {
-        enabled: true,
-        key: Fs.readFileSync(KBN_KEY_PATH).toString('utf8'),
-        certificate: Fs.readFileSync(KBN_CERT_PATH).toString('utf8'),
-        certificateAuthorities: Fs.readFileSync(CA_CERT_PATH).toString('utf8'),
-      },
+      certificateAuthorities: [Fs.readFileSync(CA_CERT_PATH)],
     },
   };
 

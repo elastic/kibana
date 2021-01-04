@@ -31,7 +31,7 @@ import {
   from,
   enabled,
   tags,
-  threat,
+  threats,
   threshold,
   throttle,
   references,
@@ -50,6 +50,8 @@ import {
 } from '../common/schemas';
 import {
   threat_index,
+  concurrent_searches,
+  items_per_search,
   threat_query,
   threat_filters,
   threat_mapping,
@@ -96,7 +98,7 @@ export const patchRulesSchema = t.exact(
     severity_mapping,
     tags,
     to,
-    threat,
+    threat: threats,
     threshold,
     throttle,
     timestamp_override,
@@ -109,6 +111,8 @@ export const patchRulesSchema = t.exact(
     threat_filters,
     threat_mapping,
     threat_language,
+    concurrent_searches,
+    items_per_search,
   })
 );
 

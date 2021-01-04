@@ -10,16 +10,19 @@ import { expandHostStats, expandNetworkStats } from '../tasks/overview';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { OVERVIEW_URL } from '../urls/navigation';
-import { esArchiverUnload, esArchiverLoad } from '../tasks/es_archiver';
 
-describe.skip('Overview Page', () => {
+import overviewFixture from '../fixtures/overview_search_strategy.json';
+import emptyInstance from '../fixtures/empty_instance.json';
+import { cleanKibana } from '../tasks/common';
+
+describe('Overview Page', () => {
   before(() => {
-    cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
-    cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
-    loginAndWaitForPage(OVERVIEW_URL);
+    cleanKibana();
   });
 
   it('Host stats render with correct values', () => {
+    cy.stubSearchStrategyApi(overviewFixture, 'overviewHost');
+    loginAndWaitForPage(OVERVIEW_URL);
     expandHostStats();
 
     HOST_STATS.forEach((stat) => {
@@ -28,6 +31,8 @@ describe.skip('Overview Page', () => {
   });
 
   it('Network stats render with correct values', () => {
+    cy.stubSearchStrategyApi(overviewFixture, 'overviewNetwork');
+    loginAndWaitForPage(OVERVIEW_URL);
     expandNetworkStats();
 
     NETWORK_STATS.forEach((stat) => {
@@ -35,17 +40,10 @@ describe.skip('Overview Page', () => {
     });
   });
 
-  describe.skip('with no data', () => {
-    before(() => {
-      esArchiverUnload('auditbeat');
-      loginAndWaitForPage(OVERVIEW_URL);
-    });
-
-    after(() => {
-      esArchiverLoad('auditbeat');
-    });
-
+  describe('with no data', () => {
     it('Splash screen should be here', () => {
+      cy.stubSearchStrategyApi(emptyInstance, undefined, 'securitySolutionIndexFields');
+      loginAndWaitForPage(OVERVIEW_URL);
       cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
     });
   });

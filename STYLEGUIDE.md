@@ -589,6 +589,24 @@ Do not use setters, they cause more problems than they can solve.
 
 [sideeffect]: http://en.wikipedia.org/wiki/Side_effect_(computer_science)
 
+### Avoid circular dependencies
+
+As part of a future effort to use correct and idempotent build tools we need our code to be
+able to be represented as a directed acyclic graph. We must avoid having circular dependencies 
+both on code and type imports to achieve that. One of the most critical parts is the plugins 
+code. We've developed a tool to identify plugins with circular dependencies which 
+has allowed us to build a list of plugins who have circular dependencies 
+between each other. 
+
+When building plugins we should avoid importing from plugins 
+who are known to have circular dependencies at the moment as well as introducing 
+new circular dependencies. You can run the same tool we use on our CI locally by 
+typing `node scripts/find_plugins_with_circular_deps --debug`. It will error out in 
+case new circular dependencies has been added with your changes 
+(which will also happen in the CI) as well as print out the current list of
+the known circular dependencies which, as mentioned before, should not be imported 
+by your code until the circular dependencies on these have been solved. 
+
 ## SASS files
 
 When writing a new component, create a sibling SASS file of the same name and import directly into the **top** of the JS/TS component file. Doing so ensures the styles are never separated or lost on import and allows for better modularization (smaller individual plugin asset footprint).

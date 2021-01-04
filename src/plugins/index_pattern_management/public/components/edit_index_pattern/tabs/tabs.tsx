@@ -74,9 +74,11 @@ const filterPlaceholder = i18n.translate(
 );
 
 export function Tabs({ indexPattern, saveIndexPattern, fields, history, location }: TabsProps) {
-  const { uiSettings, indexPatternManagementStart, docLinks } = useKibana<
-    IndexPatternManagmentContext
-  >().services;
+  const {
+    uiSettings,
+    indexPatternManagementStart,
+    docLinks,
+  } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
   const [scriptedFieldLanguageFilter, setScriptedFieldLanguageFilter] = useState<string>('');

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-export const PANEL_TYPES = {
-  TABLE: 'table',
-  GAUGE: 'gauge',
-  MARKDOWN: 'markdown',
-  TOP_N: 'top_n',
-  TIMESERIES: 'timeseries',
-  METRIC: 'metric',
-};
+export enum PANEL_TYPES {
+  TABLE = 'table',
+  GAUGE = 'gauge',
+  MARKDOWN = 'markdown',
+  TOP_N = 'top_n',
+  TIMESERIES = 'timeseries',
+  METRIC = 'metric',
+}

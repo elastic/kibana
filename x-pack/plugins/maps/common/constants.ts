@@ -60,15 +60,11 @@ export enum LAYER_TYPE {
   TILED_VECTOR = 'TILED_VECTOR', // similar to a regular vector-layer, but it consumes the data as .mvt tilea iso GeoJson. It supports similar ad-hoc configurations like a regular vector layer (E.g. using IVectorStyle), although there is some loss of functionality  e.g. does not support term joining
 }
 
-export enum SORT_ORDER {
-  ASC = 'asc',
-  DESC = 'desc',
-}
-
 export enum SOURCE_TYPES {
   EMS_TMS = 'EMS_TMS',
   EMS_FILE = 'EMS_FILE',
   ES_GEO_GRID = 'ES_GEO_GRID',
+  ES_GEO_LINE = 'ES_GEO_LINE',
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
   ES_TERM_SOURCE = 'ES_TERM_SOURCE',
@@ -154,6 +150,7 @@ export enum AGG_TYPE {
   MIN = 'min',
   SUM = 'sum',
   TERMS = 'terms',
+  PERCENTILE = 'percentile',
   UNIQUE_COUNT = 'cardinality',
 }
 
@@ -175,6 +172,7 @@ export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
 export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 
 export const TOP_TERM_PERCENTAGE_SUFFIX = '__percentage';
+export const DEFAULT_PERCENTILE = 50;
 
 export const COUNT_PROP_LABEL = i18n.translate('xpack.maps.aggs.defaultCountLabel', {
   defaultMessage: 'count',
@@ -237,6 +235,11 @@ export enum SCALING_TYPES {
   MVT = 'MVT',
 }
 
+export enum FORMAT_TYPE {
+  GEOJSON = 'geojson',
+  TOPOJSON = 'topojson',
+}
+
 export enum MVT_FIELD_TYPE {
   STRING = 'String',
   NUMBER = 'Number',
@@ -268,6 +271,12 @@ export enum MB_LOOKUP_FUNCTION {
   GET = 'get',
   FEATURE_STATE = 'feature-state',
 }
+
+export enum DATA_MAPPING_FUNCTION {
+  INTERPOLATE = 'INTERPOLATE',
+  PERCENTILES = 'PERCENTILES',
+}
+export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
 export type RawValue = string | number | boolean | undefined | null;
 

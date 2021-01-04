@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
+
+import { CaseStatuses } from '../../../../../case/common/api';
 import { basicPush, getUserAction } from '../../containers/mock';
 import { getLabelTitle, getPushedServiceLabelTitle, getConnectorLabelTitle } from './helpers';
-import * as i18n from '../case_view/translations';
 import { mount } from 'enzyme';
 import { connectorsMock } from '../../containers/configure/mock';
+import * as i18n from './translations';
 
 describe('User action tree helpers', () => {
   const connectors = connectorsMock;
@@ -54,24 +56,24 @@ describe('User action tree helpers', () => {
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`);
   });
 
-  it('label title generated for update status to open', () => {
-    const action = { ...getUserAction(['status'], 'update'), newValue: 'open' };
+  it.skip('label title generated for update status to open', () => {
+    const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.open };
     const result: string | JSX.Element = getLabelTitle({
       action,
       field: 'status',
     });
 
-    expect(result).toEqual(`${i18n.REOPENED_CASE.toLowerCase()} ${i18n.CASE}`);
+    expect(result).toEqual(`${i18n.REOPEN_CASE.toLowerCase()} ${i18n.CASE}`);
   });
 
-  it('label title generated for update status to closed', () => {
-    const action = { ...getUserAction(['status'], 'update'), newValue: 'closed' };
+  it.skip('label title generated for update status to closed', () => {
+    const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.closed };
     const result: string | JSX.Element = getLabelTitle({
       action,
       field: 'status',
     });
 
-    expect(result).toEqual(`${i18n.CLOSED_CASE.toLowerCase()} ${i18n.CASE}`);
+    expect(result).toEqual(`${i18n.CLOSE_CASE.toLowerCase()} ${i18n.CASE}`);
   });
 
   it('label title generated for update comment', () => {

@@ -5,6 +5,7 @@
  */
 
 import { Type } from '@kbn/config-schema';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import {
   IRouter,
   kibanaResponseFactory,
@@ -12,10 +13,10 @@ import {
   RequestHandlerContext,
   RouteConfig,
 } from '../../../../../../src/core/server';
-import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
+import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import {
-  Authentication,
   AuthenticationResult,
+  AuthenticationServiceStart,
   DeauthenticationResult,
   OIDCLogin,
   SAMLLogin,
@@ -25,17 +26,19 @@ import { defineCommonRoutes } from './common';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 
 describe('Common authentication routes', () => {
   let router: jest.Mocked<IRouter>;
-  let authc: jest.Mocked<Authentication>;
+  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
   let license: jest.Mocked<SecurityLicense>;
   let mockContext: RequestHandlerContext;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
-    authc = routeParamsMock.authc;
     license = routeParamsMock.license;
+    authc = authenticationServiceMock.createStart();
+    routeParamsMock.getAuthenticationService.mockReturnValue(authc);
 
     mockContext = ({
       licensing: {

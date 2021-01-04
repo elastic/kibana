@@ -43,6 +43,11 @@ RUN chmod -R g=u /usr/share/kibana
 FROM {{{baseOSImage}}}
 EXPOSE 5601
 
+{{#ubi}}
+  # https://github.com/rpm-software-management/microdnf/issues/50
+  RUN mkdir -p /run/user/$(id -u)
+{{/ubi}}
+
 RUN for iter in {1..10}; do \
       {{packageManager}} update --setopt=tsflags=nodocs -y && \
       {{packageManager}} install --setopt=tsflags=nodocs -y \

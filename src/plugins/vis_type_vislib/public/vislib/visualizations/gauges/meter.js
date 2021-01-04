@@ -344,7 +344,9 @@ export class MeterGauge {
     const transformX = width / 2;
     const transformY = height / 2 > maxRadius ? height / 2 : maxRadius;
 
-    svg.attr('transform', `translate(${transformX}, ${transformY})`);
+    svg
+      .attr('transform', `translate(${transformX}, ${transformY})`)
+      .attr('data-test-subj', `visGauge__meter--${data.label}`);
 
     return series;
   }

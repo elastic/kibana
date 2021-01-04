@@ -35,7 +35,7 @@ export function createTheme(
       {
         token: '',
         foreground: euiTheme.euiColorDarkestShade,
-        background: euiTheme.euiColorEmptyShade,
+        background: euiTheme.euiFormBackgroundColor,
       },
       { token: 'invalid', foreground: euiTheme.euiColorAccent },
       { token: 'emphasis', fontStyle: 'italic' },
@@ -94,7 +94,7 @@ export function createTheme(
     ],
     colors: {
       'editor.foreground': euiTheme.euiColorDarkestShade,
-      'editor.background': euiTheme.euiColorEmptyShade,
+      'editor.background': euiTheme.euiFormBackgroundColor,
       'editorLineNumber.foreground': euiTheme.euiColorDarkShade,
       'editorLineNumber.activeForeground': euiTheme.euiColorDarkShade,
       'editorIndentGuide.background': euiTheme.euiColorLightShade,

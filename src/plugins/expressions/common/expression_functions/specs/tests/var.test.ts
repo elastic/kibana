@@ -20,12 +20,11 @@
 import { functionWrapper } from './utils';
 import { variable } from '../var';
 import { ExecutionContext } from '../../../execution/types';
-import { KibanaContext } from '../../../expression_types';
 
 describe('expression_functions', () => {
   describe('var', () => {
     const fn = functionWrapper(variable);
-    let input: Partial<KibanaContext>;
+    let input: Partial<ReturnType<ExecutionContext['getSearchContext']>>;
     let context: ExecutionContext;
 
     beforeEach(() => {

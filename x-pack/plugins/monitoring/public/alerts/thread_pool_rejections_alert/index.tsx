@@ -18,17 +18,21 @@ interface ThreadPoolTypes {
 
 interface ThreadPoolRejectionAlertDetails {
   label: string;
+  description: string;
   paramDetails: CommonAlertParamDetails;
 }
 
 export function createThreadPoolRejectionsAlertType(
-  alertType: string,
+  alertId: string,
   threadPoolAlertDetails: ThreadPoolRejectionAlertDetails
 ): AlertTypeModel {
   return {
-    id: alertType,
-    name: threadPoolAlertDetails.label,
+    id: alertId,
+    description: threadPoolAlertDetails.description,
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html`;
+    },
     alertParamsExpression: (props: Props) => (
       <>
         <EuiSpacer />

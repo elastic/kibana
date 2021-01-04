@@ -18,10 +18,15 @@
  */
 
 export {
+  AbortError,
+  abortSignalToPromise,
   createGetterSetter,
   fieldWildcardFilter,
   fieldWildcardMatcher,
   Get,
+  getCombinedAbortSignal,
   Set,
   url,
 } from '../common';
+
+export { KbnServerError, reportServerError } from './report_server_error';

@@ -192,7 +192,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
               </EuiSpacer>
               <EuiPanel>
                 <div
-                  className="euiPanel euiPanel--paddingMedium"
+                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
                 >
                   <EuiEmptyPrompt
                     actions={
@@ -379,6 +379,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                   element="a"
                                   fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
@@ -435,6 +436,7 @@ exports[`EmptyState component does not render empty state with appropriate base 
                                   color="primary"
                                   element="a"
                                   href="/app/uptime/settings"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
@@ -680,7 +682,7 @@ exports[`EmptyState component doesn't render child components when count is fals
               </EuiSpacer>
               <EuiPanel>
                 <div
-                  className="euiPanel euiPanel--paddingMedium"
+                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
                 >
                   <EuiEmptyPrompt
                     actions={
@@ -867,6 +869,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                                   element="a"
                                   fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
@@ -923,6 +926,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                                   color="primary"
                                   element="a"
                                   href="/app/uptime/settings"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
@@ -1173,7 +1177,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
               </EuiSpacer>
               <EuiPanel>
                 <div
-                  className="euiPanel euiPanel--paddingMedium"
+                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
                 >
                   <EuiEmptyPrompt
                     actions={
@@ -1360,6 +1364,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                   element="a"
                                   fill={true}
                                   href="/app/home#/tutorial/uptimeMonitors"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
@@ -1416,6 +1421,7 @@ exports[`EmptyState component notifies when index does not exist 1`] = `
                                   color="primary"
                                   element="a"
                                   href="/app/uptime/settings"
+                                  isDisabled={false}
                                   rel="noreferrer"
                                 >
                                   <a
@@ -1749,7 +1755,7 @@ exports[`EmptyState component renders error message when an error occurs 1`] = `
             >
               <EuiPanel>
                 <div
-                  className="euiPanel euiPanel--paddingMedium"
+                  className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
                 >
                   <EuiEmptyPrompt
                     body={

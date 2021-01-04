@@ -68,11 +68,17 @@ export const embeddableRendererFactory = (
 
         const embeddableObject = await factory.createFromSavedObject(input.id, input);
 
+        const palettes = await plugins.charts.palettes.getPalettes();
+
         embeddablesRegistry[uniqueId] = embeddableObject;
         ReactDOM.unmountComponentAtNode(domNode);
 
         const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
-          const updatedExpression = embeddableInputToExpression(updatedInput, embeddableType);
+          const updatedExpression = embeddableInputToExpression(
+            updatedInput,
+            embeddableType,
+            palettes
+          );
 
           if (updatedExpression) {
             handlers.onEmbeddableInputChange(updatedExpression);

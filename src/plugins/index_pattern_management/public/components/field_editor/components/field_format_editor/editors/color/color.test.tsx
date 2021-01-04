@@ -18,7 +18,7 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from '@kbn/test/jest';
 import { FieldFormat } from 'src/plugins/data/public';
 
 import { ColorFormatEditor } from './color';

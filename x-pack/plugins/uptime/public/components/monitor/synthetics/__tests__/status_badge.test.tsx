@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { StatusBadge } from '../status_badge';
 
@@ -22,7 +22,7 @@ describe('StatusBadge', () => {
   it('displays failed message', () => {
     expect(shallowWithIntl(<StatusBadge status="failed" />)).toMatchInlineSnapshot(`
       <EuiBadge
-        color="#bd271e"
+        color="#ff7e62"
       >
         Failed
       </EuiBadge>

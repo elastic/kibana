@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import * as fetcherHook from '../../../../../hooks/useFetcher';
+import * as fetcherHook from '../../../../../hooks/use_fetcher';
 import { KeyUXMetrics } from '../KeyUXMetrics';
 
 describe('KeyUXMetrics', () => {
@@ -23,7 +23,7 @@ describe('KeyUXMetrics', () => {
       <KeyUXMetrics
         loading={false}
         data={{
-          cls: '0.01',
+          cls: 0.01,
           fid: 6,
           lcp: 1701.1142857142856,
           tbt: 270.915,

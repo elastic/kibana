@@ -9,6 +9,10 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as t from 'io-ts';
 
+import {
+  FullResponseSchema,
+  fullResponseSchema,
+} from '../../../../../common/detection_engine/schemas/request';
 import { validate } from '../../../../../common/validate';
 import { findRulesSchema } from '../../../../../common/detection_engine/schemas/response/find_rules_schema';
 import {
@@ -27,9 +31,10 @@ import {
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transformFindAlerts, transform, transformAlertToRule } from './utils';
 import { RuleActions } from '../../rule_actions/types';
+import { RuleTypeParams } from '../../types';
 
 export const transformValidateFindAlerts = (
-  findResults: FindResult,
+  findResults: FindResult<RuleTypeParams>,
   ruleActions: Array<RuleActions | null>,
   ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
 ): [
@@ -59,7 +64,7 @@ export const transformValidateFindAlerts = (
 };
 
 export const transformValidate = (
-  alert: PartialAlert,
+  alert: PartialAlert<RuleTypeParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [RulesSchema | null, string | null] => {
@@ -71,9 +76,22 @@ export const transformValidate = (
   }
 };
 
+export const newTransformValidate = (
+  alert: PartialAlert<RuleTypeParams>,
+  ruleActions?: RuleActions | null,
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+): [FullResponseSchema | null, string | null] => {
+  const transformed = transform(alert, ruleActions, ruleStatus);
+  if (transformed == null) {
+    return [null, 'Internal error transforming'];
+  } else {
+    return validate(transformed, fullResponseSchema);
+  }
+};
+
 export const transformValidateBulkError = (
   ruleId: string,
-  alert: PartialAlert,
+  alert: PartialAlert<RuleTypeParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObjectsFindResponse<IRuleStatusSOAttributes>
 ): RulesSchema | BulkError => {

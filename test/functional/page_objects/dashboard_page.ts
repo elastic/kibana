@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { DashboardConstants } from '../../../src/plugins/dashboard/public/dashboard_constants';
-
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
@@ -38,10 +36,14 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
   const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   interface SaveDashboardOptions {
-    waitDialogIsClosed: boolean;
+    /**
+     * @default true
+     */
+    waitDialogIsClosed?: boolean;
     needsConfirm?: boolean;
     storeTimeWithDashboard?: boolean;
     saveAsNew?: boolean;
+    tags?: string[];
   }
 
   class DashboardPage {
@@ -125,9 +127,7 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
      */
     public async onDashboardLandingPage() {
       log.debug(`onDashboardLandingPage`);
-      return await testSubjects.exists('dashboardLandingPage', {
-        timeout: 5000,
-      });
+      return await listingTable.onListingPage('dashboard');
     }
 
     public async expectExistsDashboardLandingPage() {
@@ -137,15 +137,23 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async clickDashboardBreadcrumbLink() {
       log.debug('clickDashboardBreadcrumbLink');
-      await find.clickByCssSelector(`a[href="#${DashboardConstants.LANDING_PAGE_PATH}"]`);
-      await this.expectExistsDashboardLandingPage();
+      await testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
     }
 
-    public async gotoDashboardLandingPage() {
+    public async gotoDashboardLandingPage(ignorePageLeaveWarning = true) {
       log.debug('gotoDashboardLandingPage');
       const onPage = await this.onDashboardLandingPage();
       if (!onPage) {
         await this.clickDashboardBreadcrumbLink();
+        await retry.try(async () => {
+          const warning = await testSubjects.exists('confirmModalTitleText');
+          if (warning) {
+            await testSubjects.click(
+              ignorePageLeaveWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+            );
+          }
+        });
+        await this.expectExistsDashboardLandingPage();
       }
     }
 
@@ -341,6 +349,10 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
         await this.setSaveAsNewCheckBox(saveOptions.saveAsNew);
       }
 
+      if (saveOptions.tags) {
+        await this.selectDashboardTags(saveOptions.tags);
+      }
+
       await this.clickSave();
       if (saveOptions.waitDialogIsClosed) {
         await testSubjects.waitForDeleted(modalDialog);
@@ -349,6 +361,14 @@ export function DashboardPageProvider({ getService, getPageObjects }: FtrProvide
 
     public async ensureDuplicateTitleCallout() {
       await testSubjects.existOrFail('titleDupicateWarnMsg');
+    }
+
+    public async selectDashboardTags(tagNames: string[]) {
+      await testSubjects.click('savedObjectTagSelector');
+      for (const tagName of tagNames) {
+        await testSubjects.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
+      }
+      await testSubjects.click('savedObjectTitle');
     }
 
     /**

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { AlertInstance } from './alert_instance';
+import { PublicAlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertsClient } from './alerts_client';
@@ -27,11 +27,13 @@ import {
   AlertInstanceState,
   AlertExecutionStatuses,
   AlertExecutionStatusErrorReasons,
+  AlertsHealth,
+  AlertNotifyWhenType,
 } from '../common';
+import { LicenseType } from '../../licensing/server';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
-export type GetBasePathFunction = (spaceId?: string) => string;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 
 declare module 'src/core/server' {
@@ -39,11 +41,15 @@ declare module 'src/core/server' {
     alerting?: {
       getAlertsClient: () => AlertsClient;
       listTypes: AlertTypeRegistry['list'];
+      getFrameworkHealth: () => Promise<AlertsHealth>;
     };
   }
 }
 
 export interface Services {
+  /**
+   * @deprecated Use `scopedClusterClient` instead.
+   */
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
@@ -54,14 +60,14 @@ export interface AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > extends Services {
-  alertInstanceFactory: (id: string) => AlertInstance<InstanceState, InstanceContext>;
+  alertInstanceFactory: (id: string) => PublicAlertInstance<InstanceState, InstanceContext>;
 }
 
 export interface AlertExecutorOptions<
-  Params extends AlertTypeParams = AlertTypeParams,
-  State extends AlertTypeState = AlertTypeState,
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never
 > {
   alertId: string;
   startedAt: Date;
@@ -82,31 +88,48 @@ export interface ActionVariable {
   description: string;
 }
 
+export type ExecutorType<
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never
+> = (
+  options: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>
+) => Promise<State | void>;
+
+export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
+  validate: (object: unknown) => Params;
+}
 export interface AlertType<
-  Params extends AlertTypeParams = AlertTypeParams,
-  State extends AlertTypeState = AlertTypeState,
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never
 > {
   id: string;
   name: string;
   validate?: {
-    params?: { validate: (object: unknown) => Params };
+    params?: AlertTypeParamsValidator<Params>;
   };
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];
-  executor: ({
-    services,
-    params,
-    state,
-  }: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>) => Promise<State | void>;
+  recoveryActionGroup?: ActionGroup;
+  executor: ExecutorType<Params, State, InstanceState, InstanceContext>;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];
     state?: ActionVariable[];
     params?: ActionVariable[];
   };
+  minimumLicenseRequired: LicenseType;
 }
+
+export type UntypedAlertType = AlertType<
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
 
 export interface RawAlertAction extends SavedObjectAttributes {
   group: string;
@@ -131,7 +154,8 @@ export interface RawAlertExecutionStatus extends SavedObjectAttributes {
   };
 }
 
-export type PartialAlert = Pick<Alert, 'id'> & Partial<Omit<Alert, 'id'>>;
+export type PartialAlert<Params extends AlertTypeParams = never> = Pick<Alert<Params>, 'id'> &
+  Partial<Omit<Alert<Params>, 'id'>>;
 
 export interface RawAlert extends SavedObjectAttributes {
   enabled: boolean;
@@ -146,9 +170,11 @@ export interface RawAlert extends SavedObjectAttributes {
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: string;
+  updatedAt: string;
   apiKey: string | null;
   apiKeyOwner: string | null;
   throttle: string | null;
+  notifyWhen: AlertNotifyWhenType | null;
   muteAll: boolean;
   mutedInstanceIds: string[];
   meta?: AlertMeta;
@@ -159,6 +185,7 @@ export type AlertInfoParams = Pick<
   RawAlert,
   | 'params'
   | 'throttle'
+  | 'notifyWhen'
   | 'muteAll'
   | 'mutedInstanceIds'
   | 'name'
@@ -170,6 +197,24 @@ export type AlertInfoParams = Pick<
 export interface AlertingPlugin {
   setup: PluginSetupContract;
   start: PluginStartContract;
+}
+
+export interface AlertsConfigType {
+  healthCheck: {
+    interval: string;
+  };
+}
+
+export interface AlertsConfigType {
+  invalidateApiKeysTask: {
+    interval: string;
+    removalDelay: string;
+  };
+}
+
+export interface InvalidatePendingApiKey {
+  apiKeyId: string;
+  createdAt: string;
 }
 
 export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;

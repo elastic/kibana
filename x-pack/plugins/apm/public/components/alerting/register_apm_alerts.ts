@@ -14,11 +14,15 @@ export function registerApmAlerts(
 ) {
   alertTypeRegistry.register({
     id: AlertType.ErrorCount,
-    name: i18n.translate('xpack.apm.alertTypes.errorCount', {
-      defaultMessage: 'Error count threshold',
+    description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
+      defaultMessage:
+        'Alert when the number of errors in a service exceeds a defined threshold.',
     }),
     iconClass: 'bell',
-    alertParamsExpression: lazy(() => import('./ErrorCountAlertTrigger')),
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+    },
+    alertParamsExpression: lazy(() => import('./error_count_alert_trigger')),
     validate: () => ({
       errors: [],
     }),
@@ -38,12 +42,19 @@ export function registerApmAlerts(
 
   alertTypeRegistry.register({
     id: AlertType.TransactionDuration,
-    name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
-      defaultMessage: 'Transaction duration threshold',
-    }),
+    description: i18n.translate(
+      'xpack.apm.alertTypes.transactionDuration.description',
+      {
+        defaultMessage:
+          'Alert when the duration of a specific transaction type in a service exceeds a defined threshold.',
+      }
+    ),
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+    },
     alertParamsExpression: lazy(
-      () => import('./TransactionDurationAlertTrigger')
+      () => import('./transaction_duration_alert_trigger')
     ),
     validate: () => ({
       errors: [],
@@ -65,12 +76,19 @@ export function registerApmAlerts(
 
   alertTypeRegistry.register({
     id: AlertType.TransactionErrorRate,
-    name: i18n.translate('xpack.apm.alertTypes.transactionErrorRate', {
-      defaultMessage: 'Transaction error rate threshold',
-    }),
+    description: i18n.translate(
+      'xpack.apm.alertTypes.transactionErrorRate.description',
+      {
+        defaultMessage:
+          'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
+      }
+    ),
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+    },
     alertParamsExpression: lazy(
-      () => import('./TransactionErrorRateAlertTrigger')
+      () => import('./transaction_error_rate_alert_trigger')
     ),
     validate: () => ({
       errors: [],
@@ -92,12 +110,19 @@ export function registerApmAlerts(
 
   alertTypeRegistry.register({
     id: AlertType.TransactionDurationAnomaly,
-    name: i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly', {
-      defaultMessage: 'Transaction duration anomaly',
-    }),
+    description: i18n.translate(
+      'xpack.apm.alertTypes.transactionDurationAnomaly.description',
+      {
+        defaultMessage:
+          'Alert when the overall transaction duration of a service is considered anomalous.',
+      }
+    ),
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+    },
     alertParamsExpression: lazy(
-      () => import('./TransactionDurationAnomalyAlertTrigger')
+      () => import('./transaction_duration_anomaly_alert_trigger')
     ),
     validate: () => ({
       errors: [],

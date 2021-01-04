@@ -199,7 +199,7 @@ describe('useVisualizeAppState', () => {
 
       renderHook(() => useVisualizeAppState(mockServices, eventEmitter, savedVisInstance));
 
-      await new Promise((res) => {
+      await new Promise<void>((res) => {
         setTimeout(() => res());
       });
 

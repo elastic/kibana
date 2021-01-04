@@ -22,9 +22,8 @@ import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { Defer, now } from '../../../kibana_utils/common';
-import { toPromise } from '../../../data/common/utils/abort_utils';
-import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/common';
+import { abortSignalToPromise, Defer, now } from '../../../kibana_utils/common';
+import { RequestAdapter, Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
   ExpressionAstExpression,
@@ -35,11 +34,29 @@ import {
   ExpressionAstNode,
 } from '../ast';
 import { ExecutionContext, DefaultInspectorAdapters } from './types';
-import { getType, ExpressionValue } from '../expression_types';
+import { getType, ExpressionValue, Datatable } from '../expression_types';
 import { ArgumentType, ExpressionFunction } from '../expression_functions';
 import { getByAlias } from '../util/get_by_alias';
 import { ExecutionContract } from './execution_contract';
 import { ExpressionExecutionParams } from '../service';
+import { TablesAdapter } from '../util/tables_adapter';
+
+/**
+ * AbortController is not available in Node until v15, so we
+ * need to temporarily mock it for plugins using expressions
+ * on the server.
+ *
+ * TODO: Remove this once Kibana is upgraded to Node 15.
+ */
+const getNewAbortController = (): AbortController => {
+  try {
+    return new AbortController();
+  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const polyfill = require('abortcontroller-polyfill/dist/cjs-ponyfill');
+    return new polyfill.AbortController();
+  }
+};
 
 const createAbortErrorValue = () =>
   createError({
@@ -56,7 +73,7 @@ export interface ExecutionParams {
 
 const createDefaultInspectorAdapters = (): DefaultInspectorAdapters => ({
   requests: new RequestAdapter(),
-  data: new DataAdapter(),
+  tables: new TablesAdapter(),
 });
 
 export class Execution<
@@ -88,12 +105,12 @@ export class Execution<
   /**
    * AbortController to cancel this Execution.
    */
-  private readonly abortController = new AbortController();
+  private readonly abortController = getNewAbortController();
 
   /**
    * Promise that rejects if/when abort controller sends "abort" signal.
    */
-  private readonly abortRejection = toPromise(this.abortController.signal);
+  private readonly abortRejection = abortSignalToPromise(this.abortController.signal);
 
   /**
    * Races a given promise against the "abort" event of `abortController`.
@@ -150,13 +167,22 @@ export class Execution<
       ast,
     });
 
+    const inspectorAdapters =
+      execution.params.inspectorAdapters || createDefaultInspectorAdapters();
+
     this.context = {
       getSearchContext: () => this.execution.params.searchContext || {},
       getSearchSessionId: () => execution.params.searchSessionId,
+      getKibanaRequest: execution.params.kibanaRequest
+        ? () => execution.params.kibanaRequest
+        : undefined,
       variables: execution.params.variables || {},
       types: executor.getTypes(),
       abortSignal: this.abortController.signal,
-      inspectorAdapters: execution.params.inspectorAdapters || createDefaultInspectorAdapters(),
+      inspectorAdapters,
+      logDatatable: (name: string, datatable: Datatable) => {
+        inspectorAdapters.tables[name] = datatable;
+      },
       ...(execution.params as any).extraContext,
     };
   }
@@ -360,9 +386,12 @@ export class Execution<
 
     // Check for missing required arguments.
     for (const argDef of Object.values(argDefs)) {
-      const { aliases, default: argDefault, name: argName, required } = argDef as ArgumentType<
-        any
-      > & { name: string };
+      const {
+        aliases,
+        default: argDefault,
+        name: argName,
+        required,
+      } = argDef as ArgumentType<any> & { name: string };
       if (
         typeof argDefault !== 'undefined' ||
         !required ||

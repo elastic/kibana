@@ -43,6 +43,7 @@ import {
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
@@ -77,7 +78,7 @@ import {
   HandlerParameters,
 } from './context';
 
-export { PackageInfo, EnvironmentMode } from '../server/types';
+export { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
 export { CoreContext, CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
 export {
@@ -95,7 +96,6 @@ export {
   ApplicationSetup,
   ApplicationStart,
   App,
-  PublicAppInfo,
   AppMount,
   AppMountDeprecated,
   AppUnmount,
@@ -108,8 +108,13 @@ export {
   AppLeaveConfirmAction,
   AppStatus,
   AppNavLinkStatus,
+  AppMeta,
   AppUpdatableFields,
   AppUpdater,
+  AppSearchDeepLink,
+  PublicAppInfo,
+  PublicAppMetaInfo,
+  PublicAppSearchDeepLinkInfo,
   ScopedHistory,
   NavigateToAppOptions,
 } from './application';
@@ -131,6 +136,7 @@ export {
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
   SavedObjectsClientContract,
   SavedObjectsClient,
@@ -161,12 +167,22 @@ export {
   HttpHandler,
   IBasePath,
   IAnonymousPaths,
+  IExternalUrl,
   IHttpInterceptController,
   IHttpFetchError,
   IHttpResponseInterceptorOverrides,
 } from './http';
 
-export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';
+export {
+  OverlayStart,
+  OverlayBannersStart,
+  OverlayRef,
+  OverlayFlyoutStart,
+  OverlayFlyoutOpenOptions,
+  OverlayModalOpenOptions,
+  OverlayModalConfirmOptions,
+  OverlayModalStart,
+} from './overlays';
 
 export {
   Toast,
@@ -287,6 +303,7 @@ export {
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
+  ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,

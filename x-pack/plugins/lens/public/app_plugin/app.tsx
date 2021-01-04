@@ -7,10 +7,11 @@
 import './app.scss';
 
 import _ from 'lodash';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -19,13 +20,13 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   OnSaveProps,
   checkForDuplicateTitle,
-  SavedObjectSaveModalOrigin,
 } from '../../../../../src/plugins/saved_objects/public';
 import { injectFilterReferences } from '../persistence';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
   esFilters,
+  exporters,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
   syncQueryStateWithUrl,
@@ -33,6 +34,7 @@ import {
 import { LENS_EMBEDDABLE_TYPE, getFullPath } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
+import { SaveModal } from './save_modal';
 import {
   LensByReferenceInput,
   LensEmbeddableInput,
@@ -46,6 +48,7 @@ export function App({
   initialInput,
   incomingState,
   redirectToOrigin,
+  redirectToDashboard,
   setHeaderActionMenu,
   initialContext,
 }: LensAppProps) {
@@ -56,9 +59,11 @@ export function App({
     navigation,
     uiSettings,
     application,
+    stateTransfer,
     notifications,
     attributeService,
     savedObjectsClient,
+    savedObjectsTagging,
     getOriginatingAppName,
 
     // Temporarily required until the 'by value' paradigm is default.
@@ -66,20 +71,20 @@ export function App({
   } = useKibana<LensAppServices>().services;
 
   const [state, setState] = useState<LensAppState>(() => {
-    const currentRange = data.query.timefilter.timefilter.getTime();
     return {
       query: data.query.queryString.getQuery(),
-      filters: data.query.filterManager.getFilters(),
+      // Do not use app-specific filters from previous app,
+      // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
+      filters: !initialContext
+        ? data.query.filterManager.getGlobalFilters()
+        : data.query.filterManager.getFilters(),
       isLoading: Boolean(initialInput),
       indexPatternsForTopNav: [],
-      dateRange: {
-        fromDate: currentRange.from,
-        toDate: currentRange.to,
-      },
       isLinkedToOriginatingApp: Boolean(incomingState?.originatingApp),
       isSaveModalVisible: false,
       indicateNoData: false,
       isSaveable: false,
+      searchSessionId: data.search.session.start(),
     };
   });
 
@@ -98,9 +103,13 @@ export function App({
     state.indicateNoData,
     state.query,
     state.filters,
-    state.dateRange,
     state.indexPatternsForTopNav,
+    state.searchSessionId,
   ]);
+
+  // Need a stable reference for the frame component of the dateRange
+  const { from: fromDate, to: toDate } = data.query.timefilter.timefilter.getTime();
+  const currentDateRange = useMemo(() => ({ fromDate, toDate }), [fromDate, toDate]);
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -151,23 +160,34 @@ export function App({
 
     const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
       next: () => {
-        setState((s) => ({ ...s, filters: data.query.filterManager.getFilters() }));
+        setState((s) => ({
+          ...s,
+          filters: data.query.filterManager.getFilters(),
+          searchSessionId: data.search.session.start(),
+        }));
         trackUiEvent('app_filters_updated');
       },
     });
 
     const timeSubscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe({
       next: () => {
-        const currentRange = data.query.timefilter.timefilter.getTime();
         setState((s) => ({
           ...s,
-          dateRange: {
-            fromDate: currentRange.from,
-            toDate: currentRange.to,
-          },
+          searchSessionId: data.search.session.start(),
         }));
       },
     });
+
+    const autoRefreshSubscription = data.query.timefilter.timefilter
+      .getAutoRefreshFetch$()
+      .subscribe({
+        next: () => {
+          setState((s) => ({
+            ...s,
+            searchSessionId: data.search.session.start(),
+          }));
+        },
+      });
 
     const kbnUrlStateStorage = createKbnUrlStateStorage({
       history,
@@ -183,10 +203,12 @@ export function App({
       stopSyncingQueryServiceStateWithUrl();
       filterSubscription.unsubscribe();
       timeSubscription.unsubscribe();
+      autoRefreshSubscription.unsubscribe();
     };
   }, [
     data.query.filterManager,
     data.query.timefilter.timefilter,
+    data.search.session,
     notifications.toasts,
     uiSettings,
     data.query,
@@ -348,18 +370,27 @@ export function App({
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
       returnToOrigin: boolean;
+      dashboardId?: string | null;
       onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
       newDescription?: string;
+      newTags?: string[];
     },
     options: { saveToLibrary: boolean }
   ) => {
     if (!lastKnownDoc) {
       return;
     }
+
+    let references = lastKnownDoc.references;
+    if (savedObjectsTagging && saveProps.newTags) {
+      references = savedObjectsTagging.ui.updateTagsReferences(references, saveProps.newTags);
+    }
+
     const docToSave = {
       ...getLastKnownDocWithoutPinnedFilters()!,
       description: saveProps.newDescription,
       title: saveProps.newTitle,
+      references,
     };
 
     // Required to serialize filters in by value mode until
@@ -414,6 +445,13 @@ export function App({
         });
         redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
         return;
+      } else if (saveProps.dashboardId && redirectToDashboard) {
+        // disabling the validation on app leave because the document has been saved.
+        onAppLeave((actions) => {
+          return actions.default();
+        });
+        redirectToDashboard(newInput, saveProps.dashboardId);
+        return;
       }
 
       notifications.toasts.addSuccess(
@@ -439,6 +477,9 @@ export function App({
           isSaveModalVisible: false,
           isLinkedToOriginatingApp: false,
         }));
+        // remove editor state so the connection is still broken after reload
+        stateTransfer.clearEditorState();
+
         redirectTo(newInput.savedObjectId);
         return;
       }
@@ -465,16 +506,50 @@ export function App({
   const { TopNavMenu } = navigation.ui;
 
   const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
+  const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
+    defaultMessage: 'unsaved',
+  });
   const topNavConfig = getLensTopNavConfig({
     showSaveAndReturn: Boolean(
       state.isLinkedToOriginatingApp &&
         // Temporarily required until the 'by value' paradigm is default.
         (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
     ),
+    enableExportToCSV: Boolean(
+      state.isSaveable && state.activeData && Object.keys(state.activeData).length
+    ),
     isByValueMode: getIsByValueMode(),
     showCancel: Boolean(state.isLinkedToOriginatingApp),
     savingPermitted,
     actions: {
+      exportToCSV: () => {
+        if (!state.activeData) {
+          return;
+        }
+        const datatables = Object.values(state.activeData);
+        const content = datatables.reduce<Record<string, { content: string; type: string }>>(
+          (memo, datatable, i) => {
+            // skip empty datatables
+            if (datatable) {
+              const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+
+              memo[`${lastKnownDoc?.title || unsavedTitle}${postFix}.csv`] = {
+                content: exporters.datatableToCSV(datatable, {
+                  csvSeparator: uiSettings.get('csv:separator', ','),
+                  quoteValues: uiSettings.get('csv:quoteValues', true),
+                  formatFactory: data.fieldFormats.deserialize,
+                }),
+                type: exporters.CSV_MIME_TYPE,
+              };
+            }
+            return memo;
+          },
+          {}
+        );
+        if (content) {
+          downloadMultipleAs(content);
+        }
+      },
       saveAndReturn: () => {
         if (savingPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
@@ -508,6 +583,11 @@ export function App({
     },
   });
 
+  const tagsIds =
+    state.persistedDoc && savedObjectsTagging
+      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
+      : [];
+
   return (
     <>
       <div className="lnsApp">
@@ -527,21 +607,21 @@ export function App({
             appName={'lens'}
             onQuerySubmit={(payload) => {
               const { dateRange, query } = payload;
-              if (
-                dateRange.from !== state.dateRange.fromDate ||
-                dateRange.to !== state.dateRange.toDate
-              ) {
+              const currentRange = data.query.timefilter.timefilter.getTime();
+              if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
                 data.query.timefilter.timefilter.setTime(dateRange);
                 trackUiEvent('app_date_change');
               } else {
+                // Query has changed, renew the session id.
+                // Time change will be picked up by the time subscription
+                setState((s) => ({
+                  ...s,
+                  searchSessionId: data.search.session.start(),
+                }));
                 trackUiEvent('app_query_change');
               }
               setState((s) => ({
                 ...s,
-                dateRange: {
-                  fromDate: dateRange.from,
-                  toDate: dateRange.to,
-                },
                 query: query || s.query,
               }));
             }}
@@ -555,12 +635,6 @@ export function App({
               setState((s) => ({
                 ...s,
                 savedQuery: { ...savedQuery }, // Shallow query for reference issues
-                dateRange: savedQuery.attributes.timefilter
-                  ? {
-                      fromDate: savedQuery.attributes.timefilter.from,
-                      toDate: savedQuery.attributes.timefilter.to,
-                    }
-                  : s.dateRange,
               }));
             }}
             onClearSavedQuery={() => {
@@ -573,8 +647,8 @@ export function App({
               }));
             }}
             query={state.query}
-            dateRangeFrom={state.dateRange.fromDate}
-            dateRangeTo={state.dateRange.toDate}
+            dateRangeFrom={fromDate}
+            dateRangeTo={toDate}
             indicateNoData={state.indicateNoData}
           />
         </div>
@@ -583,7 +657,8 @@ export function App({
             className="lnsApp__frame"
             render={editorFrame.mount}
             nativeProps={{
-              dateRange: state.dateRange,
+              searchSessionId: state.searchSessionId,
+              dateRange: currentDateRange,
               query: state.query,
               filters: state.filters,
               savedQuery: state.savedQuery,
@@ -591,12 +666,15 @@ export function App({
               onError,
               showNoDataPopover,
               initialContext,
-              onChange: ({ filterableIndexPatterns, doc, isSaveable }) => {
+              onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
                 if (isSaveable !== state.isSaveable) {
                   setState((s) => ({ ...s, isSaveable }));
                 }
                 if (!_.isEqual(state.persistedDoc, doc)) {
                   setState((s) => ({ ...s, lastKnownDoc: doc }));
+                }
+                if (!_.isEqual(state.activeData, activeData)) {
+                  setState((s) => ({ ...s, activeData }));
                 }
 
                 // Update the cached index patterns if the user made a change to any of them
@@ -622,33 +700,28 @@ export function App({
           />
         )}
       </div>
-      {lastKnownDoc && state.isSaveModalVisible && (
-        <SavedObjectSaveModalOrigin
-          originatingApp={incomingState?.originatingApp}
-          onSave={(props) => runSave(props, { saveToLibrary: true })}
-          onClose={() => {
-            setState((s) => ({ ...s, isSaveModalVisible: false }));
-          }}
-          getAppNameFromId={() => getOriginatingAppName()}
-          documentInfo={{
-            id: lastKnownDoc.savedObjectId,
-            title: lastKnownDoc.title || '',
-            description: lastKnownDoc.description || '',
-          }}
-          returnToOriginSwitchLabel={
-            getIsByValueMode() && initialInput
-              ? i18n.translate('xpack.lens.app.updatePanel', {
-                  defaultMessage: 'Update panel on {originatingAppName}',
-                  values: { originatingAppName: getOriginatingAppName() },
-                })
-              : undefined
-          }
-          objectType={i18n.translate('xpack.lens.app.saveModalType', {
-            defaultMessage: 'Lens visualization',
-          })}
-          data-test-subj="lnsApp_saveModalOrigin"
-        />
-      )}
+      <SaveModal
+        isVisible={state.isSaveModalVisible}
+        originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+        allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
+        savedObjectsClient={savedObjectsClient}
+        savedObjectsTagging={savedObjectsTagging}
+        tagsIds={tagsIds}
+        onSave={runSave}
+        onClose={() => {
+          setState((s) => ({ ...s, isSaveModalVisible: false }));
+        }}
+        getAppNameFromId={() => getOriginatingAppName()}
+        lastKnownDoc={lastKnownDoc}
+        returnToOriginSwitchLabel={
+          getIsByValueMode() && initialInput
+            ? i18n.translate('xpack.lens.app.updatePanel', {
+                defaultMessage: 'Update panel on {originatingAppName}',
+                values: { originatingAppName: getOriginatingAppName() },
+              })
+            : undefined
+        }
+      />
     </>
   );
 }

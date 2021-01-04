@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { IntegrationLink } from '../actions_popover/integration_link';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 
 describe('IntegrationLink component', () => {
   it('renders without errors', () => {

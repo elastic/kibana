@@ -32,7 +32,7 @@ import { typeSpecs } from '../expression_types/specs';
 import { functionSpecs } from '../expression_functions/specs';
 import { getByAlias } from '../util';
 import { SavedObjectReference } from '../../../../core/types';
-import { PersistableState, SerializableState } from '../../../kibana_utils/common';
+import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
 import { ExpressionExecutionParams } from '../service';
 
 export interface ExpressionExecOptions {
@@ -88,22 +88,8 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
   }
 }
 
-const semverGte = (semver1: string, semver2: string) => {
-  const regex = /^([0-9]+)\.([0-9]+)\.([0-9]+)$/;
-  const matches1 = regex.exec(semver1) as RegExpMatchArray;
-  const matches2 = regex.exec(semver2) as RegExpMatchArray;
-
-  const [, major1, minor1, patch1] = matches1;
-  const [, major2, minor2, patch2] = matches2;
-
-  return (
-    major1 > major2 ||
-    (major1 === major2 && (minor1 > minor2 || (minor1 === minor2 && patch1 >= patch2)))
-  );
-};
-
 export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
-  implements PersistableState<ExpressionAstExpression> {
+  implements PersistableStateService<ExpressionAstExpression> {
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
@@ -269,18 +255,6 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
       const updatedAst = fn.migrations[version](link) as ExpressionAstFunction;
       link.arguments = updatedAst.arguments;
       link.type = updatedAst.type;
-    });
-  }
-
-  public migrateToLatest(ast: unknown, version: string) {
-    return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
-      for (const key of Object.keys(fn.migrations)) {
-        if (semverGte(key, version)) {
-          const updatedAst = fn.migrations[key](link) as ExpressionAstFunction;
-          link.arguments = updatedAst.arguments;
-          link.type = updatedAst.type;
-        }
-      }
     });
   }
 

@@ -71,6 +71,33 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
             },
           ],
         },
+        {
+          name: i18n.translate('xpack.features.ossFeatures.discoverSearchSessionsFeatureName', {
+            defaultMessage: 'Store Search Sessions',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'store_search_session',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.discoverStoreSearchSessionsPrivilegeName',
+                    {
+                      defaultMessage: 'Store Search Sessions',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['background-session'],
+                    read: [],
+                  },
+                  ui: ['storeSearchSession'],
+                },
+              ],
+            },
+          ],
+        },
       ],
     },
     {
@@ -88,7 +115,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           catalogue: ['visualize'],
           savedObject: {
             all: ['visualization', 'query', 'lens'],
-            read: ['index-pattern', 'search'],
+            read: ['index-pattern', 'search', 'tag'],
           },
           ui: ['show', 'delete', 'save', 'saveQuery'],
         },
@@ -97,7 +124,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           catalogue: ['visualize'],
           savedObject: {
             all: [],
-            read: ['index-pattern', 'search', 'visualization', 'query', 'lens'],
+            read: ['index-pattern', 'search', 'visualization', 'query', 'lens', 'tag'],
           },
           ui: ['show'],
         },
@@ -155,6 +182,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'canvas-workpad',
               'lens',
               'map',
+              'tag',
             ],
           },
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
@@ -174,6 +202,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'map',
               'dashboard',
               'query',
+              'tag',
             ],
           },
           ui: ['show'],
@@ -202,6 +231,33 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
                     read: [],
                   },
                   ui: ['createShortUrl'],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: i18n.translate('xpack.features.ossFeatures.dashboardSearchSessionsFeatureName', {
+            defaultMessage: 'Store Search Sessions',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'store_search_session',
+                  name: i18n.translate(
+                    'xpack.features.ossFeatures.dashboardStoreSearchSessionsPrivilegeName',
+                    {
+                      defaultMessage: 'Store Search Sessions',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: ['background-session'],
+                    read: [],
+                  },
+                  ui: ['storeSearchSession'],
                 },
               ],
             },

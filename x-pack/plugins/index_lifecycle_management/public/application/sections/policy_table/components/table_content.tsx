@@ -35,7 +35,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 import { getIndexListUri } from '../../../../../../index_management/public';
 import { PolicyFromES } from '../../../../../common/types';
-import { getPolicyPath } from '../../../services/navigation';
+import { getPolicyEditPath } from '../../../services/navigation';
 import { sortTable } from '../../../services';
 import { trackUiMetric } from '../../../services/ui_metric';
 
@@ -229,7 +229,7 @@ export const TableContent: React.FunctionComponent<Props> = ({
       return (
         <EuiLink
           data-test-subj="policyTablePolicyNameLink"
-          {...reactRouterNavigate(history, getPolicyPath(value as string), () =>
+          {...reactRouterNavigate(history, getPolicyEditPath(value as string), () =>
             trackUiMetric(METRIC_TYPE.CLICK, UIM_EDIT_CLICK)
           )}
         >

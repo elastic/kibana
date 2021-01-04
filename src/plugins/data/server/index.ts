@@ -49,6 +49,16 @@ export const esFilters = {
   isFilterDisabled,
 };
 
+/**
+ * Exporters (CSV)
+ */
+
+import { datatableToCSV, CSV_MIME_TYPE } from '../common';
+export const exporters = {
+  datatableToCSV,
+  CSV_MIME_TYPE,
+};
+
 /*
  * esQuery and esKuery:
  */
@@ -134,6 +144,8 @@ export {
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
+  mergeCapabilitiesWithFields,
+  getCapabilitiesForRollupIndices,
 } from './index_patterns';
 
 export {
@@ -144,6 +156,7 @@ export {
   IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
+  IndexPatternLoadExpressionFunctionDefinition,
 } from '../common';
 
 /**
@@ -176,6 +189,7 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
+  calcAutoIntervalLessThan,
 } from '../common';
 
 export {
@@ -183,6 +197,7 @@ export {
   AggGroupLabels,
   AggGroupName,
   AggGroupNames,
+  AggFunctionsMapping,
   AggParam,
   AggParamOption,
   AggParamType,
@@ -198,6 +213,12 @@ export {
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
   // search
   ISearchOptions,
   IEsSearchRequest,
@@ -213,15 +234,18 @@ export {
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
-  toSnakeCase,
-  getAsyncOptions,
+  SearchStrategyDependencies,
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
+  toKibanaSearchResponse,
   shimHitsTotal,
   usageProvider,
+  searchUsageObserver,
   shimAbortSignal,
   SearchUsage,
+  SessionService,
+  ISessionService,
 } from './search';
 
 // Search namespace
@@ -245,6 +269,7 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    calcAutoIntervalLessThan,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -294,4 +319,4 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export type { IndexPatternsService } from './index_patterns';
+export type { IndexPatternsServiceProvider as IndexPatternsService } from './index_patterns';

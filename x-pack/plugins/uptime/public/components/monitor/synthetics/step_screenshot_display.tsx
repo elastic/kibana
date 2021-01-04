@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useContext, useEffect, useRef, useState, FC } from 'react';
-import { useIntersection } from 'react-use';
+import useIntersection from 'react-use/lib/useIntersection';
 import { UptimeSettingsContext, UptimeThemeContext } from '../../../contexts';
 
 interface StepScreenshotDisplayProps {

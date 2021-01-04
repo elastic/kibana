@@ -6,7 +6,6 @@
 
 import {
   EMSFileSourceDescriptor,
-  EMSTMSSourceDescriptor,
   ESTermSourceDescriptor,
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
@@ -22,7 +21,7 @@ import {
 } from '../../../../../../maps/common/constants';
 
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../../../../src/plugins/apm_oss/public';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -43,6 +42,7 @@ const ES_TERM_SOURCE_COUNTRY: ESTermSourceDescriptor = {
   ],
   indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
   applyGlobalQuery: true,
+  applyGlobalTime: true,
 };
 
 const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
@@ -56,6 +56,8 @@ const ES_TERM_SOURCE_REGION: ESTermSourceDescriptor = {
     language: 'kuery',
   },
   indexPatternId: APM_STATIC_INDEX_PATTERN_ID,
+  applyGlobalQuery: true,
+  applyGlobalTime: true,
 };
 
 const getWhereQuery = (serviceName: string) => {
@@ -74,10 +76,6 @@ export const TRANSACTION_DURATION_REGION =
 export const TRANSACTION_DURATION_COUNTRY =
   '__kbnjoin__avg_of_transaction.duration.us__3657625d-17b0-41ef-99ba-3a2b2938655c';
 
-interface LayerDescriptor extends BaseLayerDescriptor {
-  sourceDescriptor: EMSTMSSourceDescriptor;
-}
-
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
   sourceDescriptor: EMSFileSourceDescriptor;
 }
@@ -86,18 +84,6 @@ export function useLayerList() {
   const { urlParams } = useUrlParams();
 
   const { serviceName } = urlParams;
-
-  const baseLayer: LayerDescriptor = {
-    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'b7af286d-2580-4f47-be93-9653d594ce7e',
-    label: null,
-    minZoom: 0,
-    maxZoom: 24,
-    alpha: 1,
-    visible: true,
-    style: { type: 'TILE' },
-    type: 'VECTOR_TILE',
-  };
 
   ES_TERM_SOURCE_COUNTRY.whereQuery = getWhereQuery(serviceName!);
 
@@ -158,7 +144,6 @@ export function useLayerList() {
       type: 'EMS_FILE',
       id: 'world_countries',
       tooltipProperties: [COUNTRY_NAME],
-      applyGlobalQuery: true,
     },
     style: getLayerStyle(TRANSACTION_DURATION_COUNTRY),
     id: 'e8d1d974-eed8-462f-be2c-f0004b7619b2',
@@ -195,8 +180,7 @@ export function useLayerList() {
   };
 
   return [
-    baseLayer,
     pageLoadDurationByCountryLayer,
     pageLoadDurationByAdminRegionLayer,
-  ];
+  ] as BaseLayerDescriptor[];
 }

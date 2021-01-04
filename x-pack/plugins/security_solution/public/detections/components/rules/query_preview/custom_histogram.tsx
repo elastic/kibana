@@ -69,7 +69,7 @@ export const PreviewCustomQueryHistogram = ({
       subtitle={subtitle}
       disclaimer={i18n.QUERY_PREVIEW_DISCLAIMER}
       isLoading={isLoading}
-      data-test-subj="queryPreviewCustomHistogram"
+      dataTestSubj="queryPreviewCustomHistogram"
     />
   );
 };

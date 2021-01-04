@@ -87,8 +87,9 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def kibanaPort = "61${parallelId}1"
   def esPort = "61${parallelId}2"
   def esTransportPort = "61${parallelId}3"
-  def ingestManagementPackageRegistryPort = "61${parallelId}4"
+  def fleetPackageRegistryPort = "61${parallelId}4"
   def alertingProxyPort = "61${parallelId}5"
+  def apmActive = githubPr.isPr() ? "false" : "true"
 
   withEnv([
     "CI_GROUP=${parallelId}",
@@ -100,8 +101,10 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "TEST_ES_URL=http://elastic:changeme@localhost:${esPort}",
     "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
     "KBN_NP_PLUGINS_BUILT=true",
-    "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
-    "ALERTING_PROXY_PORT=${alertingProxyPort}"
+    "FLEET_PACKAGE_REGISTRY_PORT=${fleetPackageRegistryPort}",
+    "ALERTING_PROXY_PORT=${alertingProxyPort}",
+    "ELASTIC_APM_ACTIVE=${apmActive}",
+    "ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1",
   ] + additionalEnvs) {
     closure()
   }
@@ -109,16 +112,16 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
 
 def functionalTestProcess(String name, Closure closure) {
   return {
-    withFunctionalTestEnv(["JOB=${name}"], closure)
+    notifyOnError {
+      withFunctionalTestEnv(["JOB=${name}"], closure)
+    }
   }
 }
 
 def functionalTestProcess(String name, String script) {
   return functionalTestProcess(name) {
-    notifyOnError {
-      retryable(name) {
-        runbld(script, "Execute ${name}")
-      }
+    retryable(name) {
+      runbld(script, "Execute ${name}")
     }
   }
 }
@@ -390,12 +393,7 @@ def scriptTaskDocker(description, script) {
 
 def buildDocker() {
   sh(
-    script: """
-      cp /usr/local/bin/runbld .ci/
-      cp /usr/local/bin/bash_standard_lib.sh .ci/
-      cd .ci
-      docker build -t kibana-ci -f ./Dockerfile .
-    """,
+    script: "./.ci/build_docker.sh",
     label: 'Build CI Docker image'
   )
 }

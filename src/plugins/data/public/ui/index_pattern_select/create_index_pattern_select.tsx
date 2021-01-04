@@ -20,12 +20,12 @@
 import _ from 'lodash';
 import React from 'react';
 
-import { SavedObjectsClientContract } from 'src/core/public';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 import { IndexPatternSelect, IndexPatternSelectProps } from './';
 
 // Takes in stateful runtime dependencies and pre-wires them to the component
-export function createIndexPatternSelect(savedObjectsClient: SavedObjectsClientContract) {
+export function createIndexPatternSelect(indexPatternService: IndexPatternsContract) {
   return (props: IndexPatternSelectProps) => (
-    <IndexPatternSelect {...props} savedObjectsClient={savedObjectsClient} />
+    <IndexPatternSelect {...props} indexPatternService={indexPatternService} />
   );
 }

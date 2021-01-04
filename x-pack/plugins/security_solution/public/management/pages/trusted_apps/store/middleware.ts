@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Immutable, PostTrustedAppCreateRequest } from '../../../../../common/endpoint/types';
+import {
+  Immutable,
+  PostTrustedAppCreateRequest,
+  TrustedApp,
+} from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import {
   ImmutableMiddleware,
@@ -23,7 +27,10 @@ import {
   TrustedAppsListPageState,
 } from '../state';
 
+import { defaultNewTrustedApp } from './builders';
+
 import {
+  TrustedAppCreationSubmissionResourceStateChanged,
   TrustedAppDeletionSubmissionResourceStateChanged,
   TrustedAppsListResourceStateChanged,
 } from './action';
@@ -35,9 +42,11 @@ import {
   getLastLoadedListResourceState,
   getCurrentLocationPageIndex,
   getCurrentLocationPageSize,
-  getTrustedAppCreateData,
-  isCreatePending,
   needsRefreshOfListData,
+  getCreationSubmissionResourceState,
+  getCreationDialogFormEntry,
+  isCreationDialogLocation,
+  isCreationDialogFormValid,
 } from './selectors';
 
 const createTrustedAppsListResourceStateChangedAction = (
@@ -86,8 +95,73 @@ const refreshListIfNeeded = async (
       store.dispatch(
         createTrustedAppsListResourceStateChangedAction({
           type: 'FailedResourceState',
-          error,
+          error: error.body,
           lastLoadedState: getLastLoadedListResourceState(store.getState()),
+        })
+      );
+    }
+  }
+};
+
+const updateCreationDialogIfNeeded = (
+  store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>
+) => {
+  const newEntry = getCreationDialogFormEntry(store.getState());
+  const shouldShow = isCreationDialogLocation(store.getState());
+
+  if (shouldShow && !newEntry) {
+    store.dispatch({
+      type: 'trustedAppCreationDialogStarted',
+      payload: { entry: defaultNewTrustedApp() },
+    });
+  } else if (!shouldShow && newEntry) {
+    store.dispatch({
+      type: 'trustedAppCreationDialogClosed',
+    });
+  }
+};
+
+const createTrustedAppCreationSubmissionResourceStateChanged = (
+  newState: Immutable<AsyncResourceState<TrustedApp>>
+): Immutable<TrustedAppCreationSubmissionResourceStateChanged> => ({
+  type: 'trustedAppCreationSubmissionResourceStateChanged',
+  payload: { newState },
+});
+
+const submitCreationIfNeeded = async (
+  store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const submissionResourceState = getCreationSubmissionResourceState(store.getState());
+  const isValid = isCreationDialogFormValid(store.getState());
+  const entry = getCreationDialogFormEntry(store.getState());
+
+  if (isStaleResourceState(submissionResourceState) && entry !== undefined && isValid) {
+    store.dispatch(
+      createTrustedAppCreationSubmissionResourceStateChanged({
+        type: 'LoadingResourceState',
+        previousState: submissionResourceState,
+      })
+    );
+
+    try {
+      store.dispatch(
+        createTrustedAppCreationSubmissionResourceStateChanged({
+          type: 'LoadedResourceState',
+          // TODO: try to remove the cast
+          data: (await trustedAppsService.createTrustedApp(entry as PostTrustedAppCreateRequest))
+            .data,
+        })
+      );
+      store.dispatch({
+        type: 'trustedAppsListDataOutdated',
+      });
+    } catch (error) {
+      store.dispatch(
+        createTrustedAppCreationSubmissionResourceStateChanged({
+          type: 'FailedResourceState',
+          error: error.body,
+          lastLoadedState: getLastLoadedResourceState(submissionResourceState),
         })
       );
     }
@@ -135,44 +209,10 @@ const submitDeletionIfNeeded = async (
       store.dispatch(
         createTrustedAppDeletionSubmissionResourceStateChanged({
           type: 'FailedResourceState',
-          error,
+          error: error.body,
           lastLoadedState: getLastLoadedResourceState(submissionResourceState),
         })
       );
-    }
-  }
-};
-
-const createTrustedApp = async (
-  store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
-  trustedAppsService: TrustedAppsService
-) => {
-  const { dispatch, getState } = store;
-
-  if (isCreatePending(getState())) {
-    try {
-      const newTrustedApp = getTrustedAppCreateData(getState());
-      const createdTrustedApp = (
-        await trustedAppsService.createTrustedApp(newTrustedApp as PostTrustedAppCreateRequest)
-      ).data;
-      dispatch({
-        type: 'serverReturnedCreateTrustedAppSuccess',
-        payload: {
-          type: 'success',
-          data: createdTrustedApp,
-        },
-      });
-      store.dispatch({
-        type: 'trustedAppsListDataOutdated',
-      });
-    } catch (error) {
-      dispatch({
-        type: 'serverReturnedCreateTrustedAppFailure',
-        payload: {
-          type: 'failure',
-          data: error.body || error,
-        },
-      });
     }
   }
 };
@@ -188,12 +228,16 @@ export const createTrustedAppsPageMiddleware = (
       await refreshListIfNeeded(store, trustedAppsService);
     }
 
-    if (action.type === 'trustedAppDeletionDialogConfirmed') {
-      await submitDeletionIfNeeded(store, trustedAppsService);
+    if (action.type === 'userChangedUrl') {
+      updateCreationDialogIfNeeded(store);
     }
 
-    if (action.type === 'userClickedSaveNewTrustedAppButton') {
-      createTrustedApp(store, trustedAppsService);
+    if (action.type === 'trustedAppCreationDialogConfirmed') {
+      await submitCreationIfNeeded(store, trustedAppsService);
+    }
+
+    if (action.type === 'trustedAppDeletionDialogConfirmed') {
+      await submitDeletionIfNeeded(store, trustedAppsService);
     }
   };
 };

@@ -11,7 +11,10 @@ import { SignalSearchResponse } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
-import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  SortOrderOrUndefined,
+  TimestampOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface SingleSearchAfterParams {
   aggregations?: unknown;
@@ -22,9 +25,11 @@ interface SingleSearchAfterParams {
   services: AlertServices;
   logger: Logger;
   pageSize: number;
+  sortOrder?: SortOrderOrUndefined;
   filter: unknown;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
+  excludeDocsWithTimestampOverride: boolean;
 }
 
 // utilize search_after for paging results into bulk.
@@ -38,8 +43,10 @@ export const singleSearchAfter = async ({
   filter,
   logger,
   pageSize,
+  sortOrder,
   timestampOverride,
   buildRuleMessage,
+  excludeDocsWithTimestampOverride,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;
@@ -53,8 +60,10 @@ export const singleSearchAfter = async ({
       to,
       filter,
       size: pageSize,
+      sortOrder,
       searchAfterSortId,
       timestampOverride,
+      excludeDocsWithTimestampOverride,
     });
 
     const start = performance.now();

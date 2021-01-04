@@ -2,14 +2,5 @@
   "name": "apm-scripts",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT",
-  "dependencies": {
-    "@elastic/elasticsearch": "7.10.0-rc.1",
-    "@octokit/rest": "^16.35.0",
-    "console-stamp": "^0.2.9",
-    "hdr-histogram-js": "^1.2.0"
-  },
-  "devDependencies": {
-    "@types/console-stamp": "^0.2.32"
-  }
+  "license": "MIT"
 }

@@ -14,7 +14,7 @@ import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kiban
 import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
 import { GROUP_PATH, GROUPS_PATH } from '../../routes';
-import { NAV } from './constants';
+import { NAV } from '../../constants';
 
 import { GroupsLogic } from './groups_logic';
 

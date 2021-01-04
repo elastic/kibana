@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { AvailabilityReporting } from '../availability_reporting';
 import { StatusTag } from '../location_status_tags';
 

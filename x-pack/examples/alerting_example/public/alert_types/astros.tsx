@@ -44,8 +44,9 @@ function isValueInEnum(enumeratin: Record<string, any>, value: any): boolean {
 export function getAlertType(): AlertTypeModel {
   return {
     id: 'example.people-in-space',
-    name: 'People Are In Space Right Now',
+    description: 'Alert when people are in space right now',
     iconClass: 'globe',
+    documentationUrl: null,
     alertParamsExpression: PeopleinSpaceExpression,
     validate: (alertParams: PeopleinSpaceParamsProps['alertParams']) => {
       const { outerSpaceCapacity, craft, op } = alertParams;
@@ -125,9 +126,9 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
   });
 
   const errorsCallout = flatten(
-    Object.entries(errors).map(([field, errs]: [string, string[]]) =>
-      errs.map((e) => (
-        <p>
+    Object.entries(errors).map(([field, errs]: [string, string[]], fieldIndex) =>
+      errs.map((e, index) => (
+        <p key={`astros-error-${fieldIndex}-${index}`}>
           <EuiTextColor color="accent">{field}:</EuiTextColor>`: ${errs}`
         </p>
       ))

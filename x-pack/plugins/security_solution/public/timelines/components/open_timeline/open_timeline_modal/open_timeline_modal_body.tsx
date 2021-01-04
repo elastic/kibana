@@ -38,7 +38,6 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     onToggleShowNotes,
     pageIndex,
     pageSize,
-    query,
     searchResults,
     selectedItems,
     sortDirection,

@@ -15,7 +15,7 @@ import { EuiFieldSearch, EuiFilterSelectItem, EuiCard, EuiPopoverTitle } from '@
 
 import { FilterableUsersList } from './filterable_users_list';
 
-import { IUser } from '../../../types';
+import { User } from '../../../types';
 
 const mockSetState = jest.fn();
 const useStateMock: any = (initState: any) => [initState, mockSetState];
@@ -96,7 +96,7 @@ describe('FilterableUsersList', () => {
   });
 
   it('handles hidden users when count is higher than 20', () => {
-    const _users = [] as IUser[];
+    const _users = [] as User[];
     const NUM_TOTAL_USERS = 30;
     const NUM_VISIBLE_USERS = 20;
 

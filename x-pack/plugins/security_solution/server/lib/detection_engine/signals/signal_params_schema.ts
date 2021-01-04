@@ -8,7 +8,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 
-const signalSchema = schema.object({
+export const signalSchema = schema.object({
   anomalyThreshold: schema.maybe(schema.number()),
   author: schema.arrayOf(schema.string(), { defaultValue: [] }),
   buildingBlockType: schema.nullable(schema.string()),
@@ -54,6 +54,8 @@ const signalSchema = schema.object({
   threatQuery: schema.maybe(schema.string()),
   threatMapping: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threatLanguage: schema.maybe(schema.string()),
+  concurrentSearches: schema.maybe(schema.number()),
+  itemsPerSearch: schema.maybe(schema.number()),
 });
 
 /**

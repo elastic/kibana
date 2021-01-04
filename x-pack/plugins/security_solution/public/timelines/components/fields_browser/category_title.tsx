@@ -4,20 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiScreenReaderOnly, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import { BrowserFields } from '../../../common/containers/source';
 import { getFieldBrowserCategoryTitleClassName, getFieldCount } from './helpers';
 import { CountBadge } from '../../../common/components/page';
+import { OnUpdateColumns } from '../timeline/events';
 
-const CountBadgeContainer = styled.div`
-  position: relative;
-  top: -3px;
-`;
-
-CountBadgeContainer.displayName = 'CountBadgeContainer';
+import { ViewAllButton } from './category_columns';
+import * as i18n from './translations';
 
 interface Props {
   /** The title of the category */
@@ -28,29 +24,41 @@ interface Props {
    * the filter input (as a substring).
    */
   filteredBrowserFields: BrowserFields;
+  onUpdateColumns: OnUpdateColumns;
+
   /** The timeline associated with this field browser */
   timelineId: string;
 }
 
 export const CategoryTitle = React.memo<Props>(
-  ({ filteredBrowserFields, categoryId, timelineId }) => (
+  ({ filteredBrowserFields, categoryId, onUpdateColumns, timelineId }) => (
     <EuiFlexGroup alignItems="center" data-test-subj="category-title-container" gutterSize="none">
       <EuiFlexItem grow={false}>
+        <EuiScreenReaderOnly data-test-subj="screenReaderOnlyCategory">
+          <p>{i18n.CATEGORY}</p>
+        </EuiScreenReaderOnly>
         <EuiTitle
           className={getFieldBrowserCategoryTitleClassName({ categoryId, timelineId })}
           data-test-subj="selected-category-title"
           size="xxs"
         >
-          <h5>{categoryId}</h5>
+          <h3>{categoryId}</h3>
         </EuiTitle>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <CountBadgeContainer>
-          <CountBadge data-test-subj="selected-category-count-badge" color="hollow">
-            {getFieldCount(filteredBrowserFields[categoryId])}
-          </CountBadge>
-        </CountBadgeContainer>
+        <CountBadge data-test-subj="selected-category-count-badge" color="hollow">
+          {getFieldCount(filteredBrowserFields[categoryId])}
+        </CountBadge>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <ViewAllButton
+          categoryId={categoryId}
+          browserFields={filteredBrowserFields}
+          onUpdateColumns={onUpdateColumns}
+          timelineId={timelineId}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   )

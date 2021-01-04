@@ -5,49 +5,35 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
   anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
-    <EuiToolTip
-      anchorClassName="mapLayTocActions__tooltipAnchor"
-      content={
-        <React.Fragment>
-          simulated tooltip content at zoom: 0
-          <div>
-            <span>
-              mockFootnoteIcon
-            </span>
-             
-            simulated footnote at isUsingSearch: true
-          </div>
-        </React.Fragment>
+    <Memo(Connect(TOCEntryButton))
+      displayName="layer 1"
+      escapedDisplayName="layer1"
+      layer={
+        LayerMock {
+          "_dataRequests": Array [],
+          "_descriptor": Object {
+            "__dataRequests": Array [],
+            "alpha": 0.75,
+            "id": "testLayer",
+            "label": null,
+            "maxZoom": 24,
+            "minZoom": 0,
+            "sourceDescriptor": Object {
+              "type": "mySourceType",
+            },
+            "style": null,
+            "visible": true,
+          },
+          "_source": MockSource {
+            "_descriptor": Object {
+              "type": "mySourceType",
+            },
+            "_inspectorAdapters": undefined,
+          },
+        }
       }
-      delay="regular"
-      position="top"
-      title="layer 1"
-    >
-      <EuiButtonEmpty
-        className="mapTocEntry__layerName eui-textLeft"
-        color="text"
-        data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-        flush="left"
-        onClick={[Function]}
-        size="xs"
-      >
-        <span
-          className="mapTocEntry__layerNameIcon"
-        >
-          <span>
-            mockIcon
-          </span>
-        </span>
-        layer 1
-         
-        <React.Fragment>
-          
-          <span>
-            mockFootnoteIcon
-          </span>
-        </React.Fragment>
-      </EuiButtonEmpty>
-    </EuiToolTip>
+      onClick={[Function]}
+    />
   }
   className="mapLayTocActions"
   closePopover={[Function]}
@@ -132,49 +118,35 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
   anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
-    <EuiToolTip
-      anchorClassName="mapLayTocActions__tooltipAnchor"
-      content={
-        <React.Fragment>
-          simulated tooltip content at zoom: 0
-          <div>
-            <span>
-              mockFootnoteIcon
-            </span>
-             
-            simulated footnote at isUsingSearch: true
-          </div>
-        </React.Fragment>
+    <Memo(Connect(TOCEntryButton))
+      displayName="layer 1"
+      escapedDisplayName="layer1"
+      layer={
+        LayerMock {
+          "_dataRequests": Array [],
+          "_descriptor": Object {
+            "__dataRequests": Array [],
+            "alpha": 0.75,
+            "id": "testLayer",
+            "label": null,
+            "maxZoom": 24,
+            "minZoom": 0,
+            "sourceDescriptor": Object {
+              "type": "mySourceType",
+            },
+            "style": null,
+            "visible": true,
+          },
+          "_source": MockSource {
+            "_descriptor": Object {
+              "type": "mySourceType",
+            },
+            "_inspectorAdapters": undefined,
+          },
+        }
       }
-      delay="regular"
-      position="top"
-      title="layer 1"
-    >
-      <EuiButtonEmpty
-        className="mapTocEntry__layerName eui-textLeft"
-        color="text"
-        data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-        flush="left"
-        onClick={[Function]}
-        size="xs"
-      >
-        <span
-          className="mapTocEntry__layerNameIcon"
-        >
-          <span>
-            mockIcon
-          </span>
-        </span>
-        layer 1
-         
-        <React.Fragment>
-          
-          <span>
-            mockFootnoteIcon
-          </span>
-        </React.Fragment>
-      </EuiButtonEmpty>
-    </EuiToolTip>
+      onClick={[Function]}
+    />
   }
   className="mapLayTocActions"
   closePopover={[Function]}
@@ -259,49 +231,36 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
   anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
-    <EuiToolTip
-      anchorClassName="mapLayTocActions__tooltipAnchor"
-      content={
-        <React.Fragment>
-          simulated tooltip content at zoom: 0
-          <div>
-            <span>
-              mockFootnoteIcon
-            </span>
-             
-            simulated footnote at isUsingSearch: true
-          </div>
-        </React.Fragment>
+    <Memo(Connect(TOCEntryButton))
+      displayName="layer 1"
+      escapedDisplayName="layer1"
+      layer={
+        LayerMock {
+          "_dataRequests": Array [],
+          "_descriptor": Object {
+            "__dataRequests": Array [],
+            "alpha": 0.75,
+            "id": "testLayer",
+            "label": null,
+            "maxZoom": 24,
+            "minZoom": 0,
+            "sourceDescriptor": Object {
+              "type": "mySourceType",
+            },
+            "style": null,
+            "visible": true,
+          },
+          "_source": MockSource {
+            "_descriptor": Object {
+              "type": "mySourceType",
+            },
+            "_inspectorAdapters": undefined,
+          },
+          "isVisible": [Function],
+        }
       }
-      delay="regular"
-      position="top"
-      title="layer 1"
-    >
-      <EuiButtonEmpty
-        className="mapTocEntry__layerName eui-textLeft"
-        color="text"
-        data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-        flush="left"
-        onClick={[Function]}
-        size="xs"
-      >
-        <span
-          className="mapTocEntry__layerNameIcon"
-        >
-          <span>
-            mockIcon
-          </span>
-        </span>
-        layer 1
-         
-        <React.Fragment>
-          
-          <span>
-            mockFootnoteIcon
-          </span>
-        </React.Fragment>
-      </EuiButtonEmpty>
-    </EuiToolTip>
+      onClick={[Function]}
+    />
   }
   className="mapLayTocActions"
   closePopover={[Function]}
@@ -386,49 +345,35 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
   anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
-    <EuiToolTip
-      anchorClassName="mapLayTocActions__tooltipAnchor"
-      content={
-        <React.Fragment>
-          simulated tooltip content at zoom: 0
-          <div>
-            <span>
-              mockFootnoteIcon
-            </span>
-             
-            simulated footnote at isUsingSearch: true
-          </div>
-        </React.Fragment>
+    <Memo(Connect(TOCEntryButton))
+      displayName="layer 1"
+      escapedDisplayName="layer1"
+      layer={
+        LayerMock {
+          "_dataRequests": Array [],
+          "_descriptor": Object {
+            "__dataRequests": Array [],
+            "alpha": 0.75,
+            "id": "testLayer",
+            "label": null,
+            "maxZoom": 24,
+            "minZoom": 0,
+            "sourceDescriptor": Object {
+              "type": "mySourceType",
+            },
+            "style": null,
+            "visible": true,
+          },
+          "_source": MockSource {
+            "_descriptor": Object {
+              "type": "mySourceType",
+            },
+            "_inspectorAdapters": undefined,
+          },
+        }
       }
-      delay="regular"
-      position="top"
-      title="layer 1"
-    >
-      <EuiButtonEmpty
-        className="mapTocEntry__layerName eui-textLeft"
-        color="text"
-        data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-        flush="left"
-        onClick={[Function]}
-        size="xs"
-      >
-        <span
-          className="mapTocEntry__layerNameIcon"
-        >
-          <span>
-            mockIcon
-          </span>
-        </span>
-        layer 1
-         
-        <React.Fragment>
-          
-          <span>
-            mockFootnoteIcon
-          </span>
-        </React.Fragment>
-      </EuiButtonEmpty>
-    </EuiToolTip>
+      onClick={[Function]}
+    />
   }
   className="mapLayTocActions"
   closePopover={[Function]}

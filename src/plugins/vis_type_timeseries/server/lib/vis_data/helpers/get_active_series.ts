@@ -29,7 +29,8 @@ export const getActiveSeries = (panel: PanelSchema) => {
   }
 
   // Toogle visibility functionality for 'gauge', 'markdown' is not accessible
-  const shouldNotApplyFilter = [PANEL_TYPES.GAUGE, PANEL_TYPES.MARKDOWN].includes(panel.type);
+  const shouldNotApplyFilter =
+    PANEL_TYPES.GAUGE === panel.type || PANEL_TYPES.MARKDOWN === panel.type;
 
   return visibleSeries.filter((series) => !series.hidden || shouldNotApplyFilter);
 };

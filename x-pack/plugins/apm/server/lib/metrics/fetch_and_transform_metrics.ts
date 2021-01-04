@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Unionize, Overwrite } from 'utility-types';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
-import { getMetricsDateHistogramParams } from '../helpers/metrics';
-import { ChartBase } from './types';
-import { transformDataToMetricsChart } from './transform_metrics_chart';
+import { Overwrite, Unionize } from 'utility-types';
+import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
 import { getMetricsProjection } from '../../projections/metrics';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
 import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
+import { getMetricsDateHistogramParams } from '../helpers/metrics';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { transformDataToMetricsChart } from './transform_metrics_chart';
+import { ChartBase } from './types';
 
 type MetricsAggregationMap = Unionize<{
   min: AggregationOptionsByType['min'];

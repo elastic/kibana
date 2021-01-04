@@ -9,13 +9,13 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { UserIcon } from '../../../components/shared/user_icon';
-import { IUser } from '../../../types';
+import { User } from '../../../types';
 
-interface IUserOptionItemProps {
-  user: IUser;
+interface UserOptionItemProps {
+  user: User;
 }
 
-export const UserOptionItem: React.FC<IUserOptionItemProps> = ({ user }) => (
+export const UserOptionItem: React.FC<UserOptionItemProps> = ({ user }) => (
   <EuiFlexGroup gutterSize="xs" justifyContent="flexStart" alignItems="center">
     <EuiFlexItem grow={false}>
       <UserIcon {...user} />

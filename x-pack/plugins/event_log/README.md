@@ -53,9 +53,10 @@ public setup(core: CoreSetup, { eventLog }: PluginSetupDependencies) {
 
 ### Unit tests
 
-From `kibana-root-folder/x-pack`, run:
-```bash
-$ node node scripts/jest plugins/event_log
+Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
+
+```
+yarn test:jest x-pack/plugins/event_log --watch
 ```
 
 ### API Integration tests

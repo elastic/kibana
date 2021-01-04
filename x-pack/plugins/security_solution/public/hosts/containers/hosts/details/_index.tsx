@@ -21,10 +21,10 @@ import {
 
 import * as i18n from './translations';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -61,25 +61,13 @@ export const useHostDetails = ({
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
   const [hostDetailsRequest, setHostDetailsRequest] = useState<HostDetailsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          hostName,
-          id,
-          factoryQueryType: HostsQueries.details,
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
+    null
   );
 
   const [hostDetailsResponse, setHostDetailsResponse] = useState<HostDetailsArgs>({
     endDate,
     hostDetails: {},
-    id: ID,
+    id,
     inspect: {
       dsl: [],
       response: [],
@@ -90,7 +78,7 @@ export const useHostDetails = ({
 
   const hostDetailsSearch = useCallback(
     (request: HostDetailsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -144,7 +132,7 @@ export const useHostDetails = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -154,19 +142,18 @@ export const useHostDetails = ({
         defaultIndex: indexNames,
         factoryQueryType: HostsQueries.details,
         hostName,
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [endDate, hostName, indexNames, startDate, skip]);
+  }, [endDate, hostName, indexNames, startDate]);
 
   useEffect(() => {
     hostDetailsSearch(hostDetailsRequest);

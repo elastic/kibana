@@ -24,7 +24,7 @@ import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
-} from '../../../../../../test_utils/public';
+} from '@kbn/test/jest';
 
 import { getMockUiState } from '../../../fixtures/mocks';
 import { getVis } from '../_vis_fixture';

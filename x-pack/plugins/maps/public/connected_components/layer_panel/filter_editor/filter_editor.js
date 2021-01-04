@@ -22,23 +22,26 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternService, getData } from '../../../kibana_services';
 import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
+import { GlobalTimeCheckbox } from '../../../components/global_time_checkbox';
 
 export class FilterEditor extends Component {
   state = {
     isPopoverOpen: false,
     indexPatterns: [],
+    isSourceTimeAware: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
     this._loadIndexPatterns();
+    this._loadSourceTimeAware();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  _loadIndexPatterns = async () => {
+  async _loadIndexPatterns() {
     // Filter only effects source so only load source indices.
     const indexPatternIds = this.props.layer.getSource().getIndexPatternIds();
     const indexPatterns = [];
@@ -58,7 +61,14 @@ export class FilterEditor extends Component {
     }
 
     this.setState({ indexPatterns });
-  };
+  }
+
+  async _loadSourceTimeAware() {
+    const isSourceTimeAware = await this.props.layer.getSource().isTimeAware();
+    if (this._isMounted) {
+      this.setState({ isSourceTimeAware });
+    }
+  }
 
   _toggle = () => {
     this.setState((prevState) => ({
@@ -77,6 +87,10 @@ export class FilterEditor extends Component {
 
   _onApplyGlobalQueryChange = (applyGlobalQuery) => {
     this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', applyGlobalQuery);
+  };
+
+  _onApplyGlobalTimeChange = (applyGlobalTime) => {
+    this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalTime', applyGlobalTime);
   };
 
   _renderQueryPopover() {
@@ -165,6 +179,15 @@ export class FilterEditor extends Component {
   }
 
   render() {
+    const globalTimeCheckbox = this.state.isSourceTimeAware ? (
+      <GlobalTimeCheckbox
+        label={i18n.translate('xpack.maps.filterEditor.applyGlobalTimeCheckboxLabel', {
+          defaultMessage: `Apply global time to layer data`,
+        })}
+        applyGlobalTime={this.props.layer.getSource().getApplyGlobalTime()}
+        setApplyGlobalTime={this._onApplyGlobalTimeChange}
+      />
+    ) : null;
     return (
       <Fragment>
         <EuiTitle size="xs">
@@ -191,6 +214,8 @@ export class FilterEditor extends Component {
           applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
         />
+
+        {globalTimeCheckbox}
       </Fragment>
     );
   }

@@ -7,7 +7,7 @@
 import React, { useContext, useMemo } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useUpdateEffect } from 'react-use';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { CreateTransformWizardContext } from '../../../../wizard/wizard';
 import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
 import { IndexPattern } from '../../../../../../../../../../../../src/plugins/data/public';

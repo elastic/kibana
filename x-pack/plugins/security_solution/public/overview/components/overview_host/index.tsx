@@ -84,33 +84,38 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
     [goToHost, formatUrl]
   );
 
+  const title = useMemo(
+    () => (
+      <FormattedMessage
+        id="xpack.securitySolution.overview.hostsTitle"
+        defaultMessage="Host events"
+      />
+    ),
+    []
+  );
+
+  const subtitle = useMemo(
+    () =>
+      !isEmpty(overviewHost) ? (
+        <FormattedMessage
+          defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
+          id="xpack.securitySolution.overview.overviewHost.hostsSubtitle"
+          values={{
+            hostEventsCount,
+            formattedHostEventsCount,
+          }}
+        />
+      ) : (
+        <>{''}</>
+      ),
+    [formattedHostEventsCount, hostEventsCount, overviewHost]
+  );
+
   return (
     <EuiFlexItem>
       <InspectButtonContainer>
         <EuiPanel>
-          <HeaderSection
-            id={OverviewHostQueryId}
-            subtitle={
-              !isEmpty(overviewHost) ? (
-                <FormattedMessage
-                  defaultMessage="Showing: {formattedHostEventsCount} {hostEventsCount, plural, one {event} other {events}}"
-                  id="xpack.securitySolution.overview.overviewHost.hostsSubtitle"
-                  values={{
-                    hostEventsCount,
-                    formattedHostEventsCount,
-                  }}
-                />
-              ) : (
-                <>{''}</>
-              )
-            }
-            title={
-              <FormattedMessage
-                id="xpack.securitySolution.overview.hostsTitle"
-                defaultMessage="Host events"
-              />
-            }
-          >
+          <HeaderSection id={OverviewHostQueryId} subtitle={subtitle} title={title}>
             <>{hostPageButton}</>
           </HeaderSection>
 

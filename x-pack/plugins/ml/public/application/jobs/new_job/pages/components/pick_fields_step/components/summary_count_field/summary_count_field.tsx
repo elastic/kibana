@@ -17,13 +17,23 @@ import {
 import { Description } from './description';
 
 export const SummaryCountField: FC = () => {
-  const { jobCreator: jc, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
+  const {
+    jobCreator: jc,
+    jobCreatorUpdate,
+    jobCreatorUpdated,
+    jobValidator,
+    jobValidatorUpdated,
+  } = useContext(JobCreatorContext);
 
   const jobCreator = jc as MultiMetricJobCreator | PopulationJobCreator | AdvancedJobCreator;
   const { fields } = newJobCapsService;
   const [summaryCountFieldName, setSummaryCountFieldName] = useState(
     jobCreator.summaryCountFieldName
   );
+  const [validation, setValidation] = useState(jobValidator.summaryCountField);
+  useEffect(() => {
+    setValidation(jobValidator.summaryCountField);
+  }, [jobValidatorUpdated]);
 
   useEffect(() => {
     jobCreator.summaryCountFieldName = summaryCountFieldName;
@@ -35,7 +45,7 @@ export const SummaryCountField: FC = () => {
   }, [jobCreatorUpdated]);
 
   return (
-    <Description>
+    <Description validation={validation}>
       <SummaryCountFieldSelect
         fields={fields}
         changeHandler={setSummaryCountFieldName}

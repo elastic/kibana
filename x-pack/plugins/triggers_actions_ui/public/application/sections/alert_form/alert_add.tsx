@@ -3,82 +3,96 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useReducer, useState, useEffect } from 'react';
-import { isObject } from 'lodash';
+import React, { useCallback, useReducer, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAlertsContext } from '../../context/alerts_context';
-import { Alert, AlertAction, IErrorObject } from '../../../types';
-import { AlertForm, validateBaseProperties } from './alert_form';
-import { alertReducer } from './alert_reducer';
+import {
+  ActionTypeRegistryContract,
+  Alert,
+  AlertAction,
+  AlertTypeRegistryContract,
+  IErrorObject,
+} from '../../../types';
+import { AlertForm, isValidAlert, validateBaseProperties } from './alert_form';
+import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
 import { ConfirmAlertSave } from './confirm_alert_save';
 import { hasShowActionsCapability } from '../../lib/capabilities';
 import AlertAddFooter from './alert_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
+import { useKibana } from '../../../common/lib/kibana';
 
-interface AlertAddProps {
+export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
-  addFlyoutVisible: boolean;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  alertTypeRegistry: AlertTypeRegistryContract;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  onClose: () => void;
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Alert>;
+  reloadAlerts?: () => Promise<void>;
+  metadata?: MetaData;
 }
 
-export const AlertAdd = ({
+const AlertAdd = ({
   consumer,
-  addFlyoutVisible,
-  setAddFlyoutVisibility,
+  alertTypeRegistry,
+  actionTypeRegistry,
+  onClose,
   canChangeTrigger,
   alertTypeId,
   initialValues,
+  reloadAlerts,
+  metadata,
 }: AlertAddProps) => {
-  const initialAlert = ({
-    params: {},
-    consumer,
-    alertTypeId,
-    schedule: {
-      interval: '1m',
-    },
-    actions: [],
-    tags: [],
-    ...(initialValues ? initialValues : {}),
-  } as unknown) as Alert;
+  const initialAlert: InitialAlert = useMemo(
+    () => ({
+      params: {},
+      consumer,
+      alertTypeId,
+      schedule: {
+        interval: '1m',
+      },
+      actions: [],
+      tags: [],
+      notifyWhen: 'onActionGroupChange',
+      ...(initialValues ? initialValues : {}),
+    }),
+    [alertTypeId, consumer, initialValues]
+  );
 
-  const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
+  const [{ alert }, dispatch] = useReducer(alertReducer as InitialAlertReducer, {
+    alert: initialAlert,
+  });
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isConfirmAlertSaveModalOpen, setIsConfirmAlertSaveModalOpen] = useState<boolean>(false);
 
-  const setAlert = (value: any) => {
+  const setAlert = (value: InitialAlert) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
-  const setAlertProperty = (key: string, value: any) => {
+
+  const setAlertProperty = <Key extends keyof Alert>(key: Key, value: Alert[Key] | null) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
   const {
-    reloadAlerts,
     http,
-    toastNotifications,
-    alertTypeRegistry,
-    actionTypeRegistry,
-    docLinks,
-    capabilities,
-  } = useAlertsContext();
+    notifications: { toasts },
+    application: { capabilities },
+  } = useKibana().services;
 
   const canShowActions = hasShowActionsCapability(capabilities);
 
   useEffect(() => {
-    setAlertProperty('alertTypeId', alertTypeId);
+    setAlertProperty('alertTypeId', alertTypeId ?? null);
   }, [alertTypeId]);
 
   const closeFlyout = useCallback(() => {
-    setAddFlyoutVisibility(false);
     setAlert(initialAlert);
-  }, [initialAlert, setAddFlyoutVisibility]);
+    onClose();
+  }, [initialAlert, onClose]);
 
   const saveAlertAndCloseFlyout = async () => {
     const savedAlert = await onSaveAlert();
@@ -91,16 +105,12 @@ export const AlertAdd = ({
     }
   };
 
-  if (!addFlyoutVisible) {
-    return null;
-  }
-
   const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
   const errors = {
     ...(alertType ? alertType.validate(alert.params).errors : []),
     ...validateBaseProperties(alert).errors,
   } as IErrorObject;
-  const hasErrors = parseErrors(errors);
+  const hasErrors = !isValidAlert(alert, errors);
 
   const actionsErrors: Array<{
     errors: IErrorObject;
@@ -120,18 +130,20 @@ export const AlertAdd = ({
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      const newAlert = await createAlert({ http, alert });
-      toastNotifications.addSuccess(
-        i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
-          defaultMessage: 'Created alert "{alertName}"',
-          values: {
-            alertName: newAlert.name,
-          },
-        })
-      );
-      return newAlert;
+      if (isValidAlert(alert, errors)) {
+        const newAlert = await createAlert({ http, alert });
+        toasts.addSuccess(
+          i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
+            defaultMessage: 'Created alert "{alertName}"',
+            values: {
+              alertName: newAlert.name,
+            },
+          })
+        );
+        return newAlert;
+      }
     } catch (errorRes) {
-      toastNotifications.addDanger(
+      toasts.addDanger(
         errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveErrorNotificationText', {
             defaultMessage: 'Cannot create alert.',
@@ -159,7 +171,7 @@ export const AlertAdd = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <HealthContextProvider>
-          <HealthCheck docLinks={docLinks} http={http} inFlyout={true} waitForCheck={false}>
+          <HealthCheck inFlyout={true} waitForCheck={false}>
             <EuiFlyoutBody>
               <AlertForm
                 alert={alert}
@@ -172,6 +184,9 @@ export const AlertAdd = ({
                     defaultMessage: 'create',
                   }
                 )}
+                actionTypeRegistry={actionTypeRegistry}
+                alertTypeRegistry={alertTypeRegistry}
+                metadata={metadata}
               />
             </EuiFlyoutBody>
             <AlertAddFooter
@@ -205,12 +220,6 @@ export const AlertAdd = ({
     </EuiPortal>
   );
 };
-
-const parseErrors: (errors: IErrorObject) => boolean = (errors) =>
-  !!Object.values(errors).find((errorList) => {
-    if (isObject(errorList)) return parseErrors(errorList as IErrorObject);
-    return errorList.length >= 1;
-  });
 
 // eslint-disable-next-line import/no-default-export
 export { AlertAdd as default };

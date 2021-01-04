@@ -8,10 +8,59 @@
 
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 import { useSymbolIDs } from './use_symbol_ids';
 import { usePaintServerIDs } from './use_paint_server_ids';
 
+const loadingProcessTitle = i18n.translate(
+  'xpack.securitySolution.resolver.symbolDefinitions.loadingProcess',
+  {
+    defaultMessage: 'Loading Process',
+  }
+);
+
+const errorProcessTitle = i18n.translate(
+  'xpack.securitySolution.resolver.symbolDefinitions.errorProcess',
+  {
+    defaultMessage: 'Error Process',
+  }
+);
+
+const runningProcessTitle = i18n.translate(
+  'xpack.securitySolution.resolver.symbolDefinitions.runningProcess',
+  {
+    defaultMessage: 'Running Process',
+  }
+);
+
+const triggerProcessTitle = i18n.translate(
+  'xpack.securitySolution.resolver.symbolDefinitions.triggerProcess',
+  {
+    defaultMessage: 'Trigger Process',
+  }
+);
+
+const terminatedProcessTitle = i18n.translate(
+  'xpack.securitySolution.resolver.symbolDefinitions.terminatedProcess',
+  {
+    defaultMessage: 'Terminated Process',
+  }
+);
+
+const terminatedTriggerProcessTitle = i18n.translate(
+  'xpack.securitySolution.resolver.symbolDefinitions.terminatedTriggerProcess',
+  {
+    defaultMessage: 'Terminated Trigger Process',
+  }
+);
+
+const hoveredProcessBackgroundTitle = i18n.translate(
+  'xpack.securitySolution.resolver.symbolDefinitions.hoveredProcessBackground',
+  {
+    defaultMessage: 'Hovered Process Background',
+  }
+);
 /**
  * PaintServers: Where color palettes, gradients, patterns and other similar concerns
  * are exposed to the component
@@ -20,6 +69,17 @@ const PaintServers = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
   const paintServerIDs = usePaintServerIDs();
   return (
     <>
+      <linearGradient
+        id={paintServerIDs.errorCube}
+        x1="10.2372"
+        y1="9.49068"
+        x2="46.5307"
+        y2="45.7844"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stopColor="#6D6D6D" />
+        <stop offset="1" stopColor="#B9B9B9" />
+      </linearGradient>
       <linearGradient
         id={paintServerIDs.runningProcessCube}
         x1="-381.23556"
@@ -124,8 +184,47 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
           paintOrder="normal"
         />
       </symbol>
+      <symbol id={symbolIDs.loadingCube} viewBox="0 0 88 100">
+        <title>{loadingProcessTitle}</title>
+        <path
+          d="M87.52127,25.129a3.79536,3.79536,0,0,0-1.43184-1.47165L45.91025.57471a3.83652,3.83652,0,0,0-3.8205,0L1.91039,23.65739A3.86308,3.86308,0,0,0,0,26.95V73.11541a3.79835,3.79835,0,0,0,1.9104,3.2925L42.08975,99.49067a3.83691,3.83691,0,0,0,3.8205,0L86.08943,76.40791A3.79852,3.79852,0,0,0,88,73.11541V26.95A3.77641,3.77641,0,0,0,87.52127,25.129Z"
+          fill={isDarkMode ? '#1d1e24' : 'white'}
+          stroke="#98A2B3"
+          strokeWidth="2"
+        />
+      </symbol>
+      <symbol id={symbolIDs.errorCube} viewBox="0 0 88 100">
+        <title>{errorProcessTitle}</title>
+        <path
+          d="M87.52127,25.129a3.79536,3.79536,0,0,0-1.43184-1.47165L45.91025.57471a3.83652,3.83652,0,0,0-3.8205,0L1.91039,23.65739A3.86308,3.86308,0,0,0,0,26.95V73.11541a3.79835,3.79835,0,0,0,1.9104,3.2925L42.08975,99.49067a3.83691,3.83691,0,0,0,3.8205,0L86.08943,76.40791A3.79852,3.79852,0,0,0,88,73.11541V26.95A3.77641,3.77641,0,0,0,87.52127,25.129Z"
+          transform="translate(0.00001 0)"
+          fill={`url(#${paintServerIDs.errorCube})`}
+        />
+        <g opacity="0.6">
+          <path
+            opacity={0.6}
+            d="M87.52113,24.73352a3.7956,3.7956,0,0,0-1.43182-1.47166L45.91012.17918a3.8365,3.8365,0,0,0-3.82049,0L1.91029,23.26186A3.86312,3.86312,0,0,0-.00009,26.55445V72.7199a3.79834,3.79834,0,0,0,1.91041,3.29249L42.08963,99.09514a3.83689,3.83689,0,0,0,3.82049,0L86.08931,76.01239a3.79852,3.79852,0,0,0,1.91056-3.29249V26.55445A3.77643,3.77643,0,0,0,87.52113,24.73352Z"
+            transform="translate(0.00013 0.39551)"
+            fill={`url(#${paintServerIDs.errorCube})`}
+          />
+          <path
+            opacity={0.4}
+            d="M.57134,24.52282a3.79906,3.79906,0,0,1,1.34824-1.32625L42.09878.11387a3.83708,3.83708,0,0,1,3.8208,0L86.09877,23.19655a3.79771,3.79771,0,0,1,1.43182,1.47165L44.00909,49.57182Z"
+            transform="translate(0.00013 0.39551)"
+            fill="#fff"
+            style={{ isolation: 'isolate' }}
+          />
+          <path
+            opacity={0.4}
+            d="M43.99972,49.63713V99.60449a3.83406,3.83406,0,0,1-1.91025-.50932L1.91029,76.01239A3.79835,3.79835,0,0,1-.00013,72.7199V26.55445A3.77431,3.77431,0,0,1,.562,24.5882Z"
+            transform="translate(0.00013 0.39551)"
+            fill="#353944"
+            style={{ isolation: 'isolate' }}
+          />
+        </g>
+      </symbol>
       <symbol id={symbolIDs.runningProcessCube} viewBox="0 0 88 100">
-        <title>{'Running Process'}</title>
+        <title>{runningProcessTitle}</title>
         <path
           d="M87.52127,25.129a3.79536,3.79536,0,0,0-1.43184-1.47165L45.91025.57471a3.83652,3.83652,0,0,0-3.8205,0L1.91039,23.65739A3.86308,3.86308,0,0,0,0,26.95V73.11541a3.79835,3.79835,0,0,0,1.9104,3.2925L42.08975,99.49067a3.83691,3.83691,0,0,0,3.8205,0L86.08943,76.40791A3.79852,3.79852,0,0,0,88,73.11541V26.95A3.77641,3.77641,0,0,0,87.52127,25.129Z"
           transform="translate(0.00001 0)"
@@ -185,7 +284,7 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
         />
       </symbol>
       <symbol id={symbolIDs.runningTriggerCube} viewBox="0 0 88 100">
-        <title>{'resolver_dark process running'}</title>
+        <title>{triggerProcessTitle}</title>
         <path
           d="M87.52127,25.129a3.79536,3.79536,0,0,0-1.43184-1.47165L45.91025.57471a3.83652,3.83652,0,0,0-3.8205,0L1.91039,23.65739A3.86308,3.86308,0,0,0,0,26.95V73.11541a3.79835,3.79835,0,0,0,1.9104,3.2925L42.08975,99.49067a3.83691,3.83691,0,0,0,3.8205,0L86.08943,76.40791A3.79852,3.79852,0,0,0,88,73.11541V26.95A3.77641,3.77641,0,0,0,87.52127,25.129Z"
           transform="translate(0.00001 0)"
@@ -245,7 +344,7 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
         />
       </symbol>
       <symbol viewBox="0 0 88 100" id={symbolIDs.terminatedProcessCube}>
-        <title>{'Terminated Process'}</title>
+        <title>{terminatedProcessTitle}</title>
         <path
           d="M87.52113,24.73352a3.7956,3.7956,0,0,0-1.43182-1.47166L45.91012.17918a3.8365,3.8365,0,0,0-3.82049,0L1.91029,23.26186A3.86312,3.86312,0,0,0-.00009,26.55445V72.7199a3.79834,3.79834,0,0,0,1.91041,3.29249L42.08963,99.09514a3.83689,3.83689,0,0,0,3.82049,0L86.08931,76.01239a3.79852,3.79852,0,0,0,1.91056-3.29249V26.55445A3.77643,3.77643,0,0,0,87.52113,24.73352Z"
           transform="translate(0.00013 0.39551)"
@@ -275,7 +374,7 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
         </g>
       </symbol>
       <symbol id={symbolIDs.terminatedTriggerCube} viewBox="0 0 88 100">
-        <title>{'Terminated Trigger Process'}</title>
+        <title>{terminatedTriggerProcessTitle}</title>
         {isDarkMode && (
           <path
             opacity="1"
@@ -316,7 +415,7 @@ const SymbolsAndShapes = memo(({ isDarkMode }: { isDarkMode: boolean }) => {
         </g>
       </symbol>
       <symbol viewBox="0 -3 88 106" id={symbolIDs.processCubeActiveBacking}>
-        <title>{'resolver active backing'}</title>
+        <title>{hoveredProcessBackgroundTitle}</title>
         <path
           d="m87.521 25.064a3.795 3.795 0 0 0-1.4313-1.4717l-40.164-23.083a3.8338 3.8338 0 0 0-3.8191 0l-40.165 23.083a3.8634 3.8634 0 0 0-1.9097 3.2926v46.165a3.7986 3.7986 0 0 0 1.9097 3.2925l40.164 23.083a3.8342 3.8342 0 0 0 3.8191 0l40.164-23.083a3.7988 3.7988 0 0 0 1.9099-3.2925v-46.165a3.7775 3.7775 0 0 0-0.47857-1.8209z"
           strokeWidth="2"

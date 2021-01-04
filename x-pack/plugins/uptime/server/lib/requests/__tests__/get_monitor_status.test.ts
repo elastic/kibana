@@ -5,8 +5,7 @@
  */
 
 import { getMonitorStatus } from '../get_monitor_status';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { setupMockEsCompositeQuery } from './helper';
+import { getUptimeESMockClient, setupMockEsCompositeQuery } from './helper';
 
 export interface BucketItemCriteria {
   monitorId: string;
@@ -42,7 +41,7 @@ const genBucketItem = ({
 
 describe('getMonitorStatus', () => {
   it('applies bool filters to params', async () => {
-    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [],
       genBucketItem
     );
@@ -77,9 +76,11 @@ describe('getMonitorStatus', () => {
         minimum_should_match: 1,
       },
     };
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     await getMonitorStatus({
-      callES,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       filters: exampleFilter,
       locations: [],
       numTimes: 5,
@@ -88,9 +89,8 @@ describe('getMonitorStatus', () => {
         to: 'now-1m',
       },
     });
-    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-    expect(method).toEqual('search');
+    expect(esMock.search).toHaveBeenCalledTimes(1);
+    const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -190,13 +190,15 @@ describe('getMonitorStatus', () => {
   });
 
   it('applies locations to params', async () => {
-    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [],
       genBucketItem
     );
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     await getMonitorStatus({
-      callES,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       locations: ['fairbanks', 'harrisburg'],
       numTimes: 1,
       timerange: {
@@ -204,9 +206,8 @@ describe('getMonitorStatus', () => {
         to: 'now',
       },
     });
-    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-    expect(method).toEqual('search');
+    expect(esMock.search).toHaveBeenCalledTimes(1);
+    const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -291,7 +292,7 @@ describe('getMonitorStatus', () => {
   });
 
   it('properly assigns filters for complex kuery filters', async () => {
-    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [{ bucketCriteria: [] }],
       genBucketItem
     );
@@ -352,13 +353,15 @@ describe('getMonitorStatus', () => {
         },
       },
     };
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     await getMonitorStatus({
-      callES,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       ...clientParameters,
     });
-    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    const [, params] = esMock.callAsCurrentUser.mock.calls[0];
+    expect(esMock.search).toHaveBeenCalledTimes(1);
+    const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -476,7 +479,7 @@ describe('getMonitorStatus', () => {
   });
 
   it('properly assigns filters for complex kuery filters object', async () => {
-    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [{ bucketCriteria: [] }],
       genBucketItem
     );
@@ -497,13 +500,15 @@ describe('getMonitorStatus', () => {
         },
       },
     };
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     await getMonitorStatus({
-      callES,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       ...clientParameters,
     });
-    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    const [, params] = esMock.callAsCurrentUser.mock.calls[0];
+    expect(esMock.search).toHaveBeenCalledTimes(1);
+    const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -581,7 +586,7 @@ describe('getMonitorStatus', () => {
   });
 
   it('fetches single page of results', async () => {
-    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [
         {
           bucketCriteria: [
@@ -617,14 +622,15 @@ describe('getMonitorStatus', () => {
         to: 'now-2m',
       },
     };
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     const result = await getMonitorStatus({
-      callES,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       ...clientParameters,
     });
-    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-    expect(method).toEqual('search');
+    expect(esMock.search).toHaveBeenCalledTimes(1);
+    const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -792,13 +798,15 @@ describe('getMonitorStatus', () => {
         ],
       },
     ];
-    const [callES] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       criteria,
       genBucketItem
     );
+
+    const { uptimeEsClient } = getUptimeESMockClient(esMock);
+
     const result = await getMonitorStatus({
-      callES,
-      dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+      uptimeEsClient,
       locations: [],
       numTimes: 5,
       timerange: {

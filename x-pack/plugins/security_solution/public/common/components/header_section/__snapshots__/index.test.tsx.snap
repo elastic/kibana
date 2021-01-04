@@ -7,7 +7,9 @@ exports[`HeaderSection it renders 1`] = `
   <EuiFlexGroup
     alignItems="center"
   >
-    <EuiFlexItem>
+    <EuiFlexItem
+      grow={true}
+    >
       <EuiFlexGroup
         alignItems="center"
         responsive={false}

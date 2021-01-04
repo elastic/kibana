@@ -67,6 +67,10 @@ export interface SlackActionParams {
   message: string;
 }
 
+export interface TeamsActionParams {
+  message: string;
+}
+
 export interface WebhookActionParams {
   body?: string;
 }
@@ -142,3 +146,9 @@ export interface WebhookSecrets {
 }
 
 export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig, WebhookSecrets>;
+
+export interface TeamsSecrets {
+  webhookUrl: string;
+}
+
+export type TeamsActionConnector = UserConfiguredActionConnector<unknown, TeamsSecrets>;

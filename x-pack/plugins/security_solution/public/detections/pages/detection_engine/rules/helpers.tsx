@@ -11,7 +11,7 @@ import { useLocation } from 'react-router-dom';
 
 import styled from 'styled-components';
 import { EuiFlexItem } from '@elastic/eui';
-import { ActionVariable } from '../../../../../../triggers_actions_ui/public';
+import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
@@ -22,7 +22,6 @@ import {
   AboutStepRule,
   AboutStepRuleDetails,
   DefineStepRule,
-  IMitreEnterpriseAttack,
   ScheduleStepRule,
   ActionsStepRule,
 } from './types';
@@ -30,6 +29,7 @@ import {
   SeverityMapping,
   Type,
   Severity,
+  Threats,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { severityOptions } from '../../../components/rules/step_about_rule/data';
 
@@ -177,7 +177,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
-    threat: threat as IMitreEnterpriseAttack[],
+    threat: threat as Threats,
   };
 };
 
@@ -366,21 +366,31 @@ export const getActionMessageRuleParams = (ruleType: Type): string[] => {
   return ruleParamsKeys;
 };
 
-export const getActionMessageParams = memoizeOne((ruleType: Type | undefined): ActionVariable[] => {
-  if (!ruleType) {
-    return [];
+export const getActionMessageParams = memoizeOne(
+  (ruleType: Type | undefined): ActionVariables => {
+    if (!ruleType) {
+      return { state: [], params: [] };
+    }
+    const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
+    // Prefixes are being added automatically by the ActionTypeForm
+    return {
+      state: [{ name: 'signals_count', description: 'state.signals_count' }],
+      params: [],
+      context: [
+        {
+          name: 'results_link',
+          description: 'context.results_link',
+          useWithTripleBracesInTemplates: true,
+        },
+        { name: 'alerts', description: 'context.alerts' },
+        ...actionMessageRuleParams.map((param) => {
+          const extendedParam = `rule.${param}`;
+          return { name: extendedParam, description: `context.${extendedParam}` };
+        }),
+      ],
+    };
   }
-  const actionMessageRuleParams = getActionMessageRuleParams(ruleType);
-
-  return [
-    { name: 'state.signals_count', description: 'state.signals_count' },
-    { name: '{context.results_link}', description: 'context.results_link' },
-    ...actionMessageRuleParams.map((param) => {
-      const extendedParam = `context.rule.${param}`;
-      return { name: extendedParam, description: extendedParam };
-    }),
-  ];
-});
+);
 
 // typed as null not undefined as the initial state for this value is null.
 export const userHasNoPermissions = (canUserCRUD: boolean | null): boolean =>

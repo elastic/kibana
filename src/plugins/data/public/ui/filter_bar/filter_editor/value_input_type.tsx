@@ -32,6 +32,7 @@ interface Props {
   intl: InjectedIntl;
   controlOnly?: boolean;
   className?: string;
+  fullWidth?: boolean;
 }
 
 class ValueInputTypeUI extends Component<Props> {
@@ -42,6 +43,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'string':
         inputElement = (
           <EuiFieldText
+            fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
@@ -53,6 +55,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'number':
         inputElement = (
           <EuiFieldNumber
+            fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={typeof value === 'string' ? parseFloat(value) : value}
             onChange={this.onChange}
@@ -64,6 +67,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'date':
         inputElement = (
           <EuiFieldText
+            fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
@@ -77,6 +81,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'ip':
         inputElement = (
           <EuiFieldText
+            fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
             onChange={this.onChange}
@@ -109,6 +114,7 @@ class ValueInputTypeUI extends Component<Props> {
             value={value}
             onChange={this.onBoolChange}
             className={this.props.className}
+            fullWidth={this.props.fullWidth}
           />
         );
         break;
