@@ -7,16 +7,22 @@
 import React from 'react';
 
 import { Result as ResultType } from '../../../result/types';
+import { Schema } from '../../../../../shared/types';
 import { Result } from '../../../result/result';
 
 export interface Props {
   result: ResultType;
+  schemaForTypeHighlights?: Schema;
 }
 
-export const ResultView: React.FC<Props> = ({ result }) => {
+export const ResultView: React.FC<Props> = ({ result, schemaForTypeHighlights }) => {
   return (
     <li>
-      <Result result={result} />
+      <Result
+        result={result}
+        shouldLinkToDetailPage={true}
+        schemaForTypeHighlights={schemaForTypeHighlights}
+      />
     </li>
   );
 };

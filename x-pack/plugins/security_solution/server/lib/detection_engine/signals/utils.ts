@@ -5,6 +5,7 @@
  */
 import { createHash } from 'crypto';
 import moment from 'moment';
+import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
 
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -660,4 +661,21 @@ export const createTotalHitsFromSearchResult = ({
       ? searchResult.hits.total
       : searchResult.hits.total.value;
   return totalHits;
+};
+
+export const calculateThresholdSignalUuid = (
+  ruleId: string,
+  startedAt: Date,
+  thresholdField: string,
+  key?: string
+): string => {
+  // used to generate constant Threshold Signals ID when run with the same params
+  const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
+
+  let baseString = `${ruleId}${startedAt}${thresholdField}`;
+  if (key != null) {
+    baseString = `${baseString}${key}`;
+  }
+
+  return uuidv5(baseString, NAMESPACE_ID);
 };

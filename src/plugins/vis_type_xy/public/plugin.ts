@@ -17,25 +17,30 @@
  * under the License.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  IUiSettingsClient,
-  PluginInitializerContext,
-} from 'kibana/public';
-
+import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup, VisualizationsStart } from '../../visualizations/public';
 import { ChartsPluginSetup } from '../../charts/public';
+import { DataPublicPluginStart } from '../../data/public';
 
-export interface VisTypeXyDependencies {
-  uiSettings: IUiSettingsClient;
-  charts: ChartsPluginSetup;
-}
+import { createVisTypeXyVisFn } from './xy_vis_fn';
+import {
+  setDataActions,
+  setFormatService,
+  setThemeService,
+  setColorsService,
+  setTimefilter,
+  setUISettings,
+  setDocLinks,
+} from './services';
+import { visTypesDefinitions } from './vis_types';
+import { LEGACY_CHARTS_LIBRARY } from '../common';
+import { xyVisRenderer } from './vis_renderer';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface VisTypeXyPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface VisTypeXyPluginStart {}
 
 /** @internal */
 export interface VisTypeXyPluginSetupDependencies {
@@ -48,40 +53,43 @@ export interface VisTypeXyPluginSetupDependencies {
 export interface VisTypeXyPluginStartDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['start']>;
   visualizations: VisualizationsStart;
+  data: DataPublicPluginStart;
 }
 
-type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies, void>;
+type VisTypeXyCoreSetup = CoreSetup<VisTypeXyPluginStartDependencies, VisTypeXyPluginStart>;
 
 /** @internal */
-export class VisTypeXyPlugin implements Plugin<VisTypeXyPluginSetup, void> {
-  constructor(public initializerContext: PluginInitializerContext) {}
-
+export class VisTypeXyPlugin
+  implements
+    Plugin<
+      VisTypeXyPluginSetup,
+      VisTypeXyPluginStart,
+      VisTypeXyPluginSetupDependencies,
+      VisTypeXyPluginStartDependencies
+    > {
   public async setup(
     core: VisTypeXyCoreSetup,
     { expressions, visualizations, charts }: VisTypeXyPluginSetupDependencies
   ) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      'The visTypeXy plugin is enabled\n\n',
-      'This may negatively alter existing vislib visualization configurations if saved.'
-    );
-    const visualizationDependencies: Readonly<VisTypeXyDependencies> = {
-      uiSettings: core.uiSettings,
-      charts,
-    };
+    if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, true)) {
+      setUISettings(core.uiSettings);
+      setThemeService(charts.theme);
+      setColorsService(charts.legacyColors);
 
-    const visTypeDefinitions: any[] = [];
-    const visFunctions: any = [];
-
-    visFunctions.forEach((fn: any) => expressions.registerFunction(fn));
-    visTypeDefinitions.forEach((vis: any) =>
-      visualizations.createBaseVisualization(vis(visualizationDependencies))
-    );
+      [createVisTypeXyVisFn].forEach(expressions.registerFunction);
+      expressions.registerRenderer(xyVisRenderer);
+      visTypesDefinitions.forEach(visualizations.createBaseVisualization);
+    }
 
     return {};
   }
 
-  public start(core: CoreStart, deps: VisTypeXyPluginStartDependencies) {
-    // nothing to do here
+  public start(core: CoreStart, { data }: VisTypeXyPluginStartDependencies) {
+    setFormatService(data.fieldFormats);
+    setDataActions(data.actions);
+    setTimefilter(data.query.timefilter.timefilter);
+    setDocLinks(core.docLinks);
+
+    return {};
   }
 }

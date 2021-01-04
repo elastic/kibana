@@ -15,6 +15,7 @@ import { Results } from '@elastic/react-search-ui';
 
 import { ResultView } from './views';
 import { Pagination } from './pagination';
+import { SchemaTypes } from '../../../../shared/types';
 import { SearchExperienceContent } from './search_experience_content';
 
 describe('SearchExperienceContent', () => {
@@ -27,6 +28,11 @@ describe('SearchExperienceContent', () => {
     engineName: 'engine1',
     isMetaEngine: false,
     myRole: { canManageEngineDocuments: true },
+    engine: {
+      schema: {
+        title: 'string' as SchemaTypes,
+      },
+    },
   };
 
   beforeEach(() => {
@@ -40,7 +46,7 @@ describe('SearchExperienceContent', () => {
     expect(wrapper.isEmptyRender()).toBe(false);
   });
 
-  it('passes engineName to the result view', () => {
+  it('passes engineName and schema to the result view', () => {
     const props = {
       result: {
         id: {
@@ -55,6 +61,9 @@ describe('SearchExperienceContent', () => {
         foo: {
           raw: 'bar',
         },
+      },
+      schemaForTypeHighlights: {
+        title: 'string' as SchemaTypes,
       },
     };
 

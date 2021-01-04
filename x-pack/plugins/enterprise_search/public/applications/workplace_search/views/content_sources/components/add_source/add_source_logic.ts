@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { keys, pickBy, isEmpty } from 'lodash';
+import { keys, pickBy } from 'lodash';
 
 import { kea, MakeLogicType } from 'kea';
 
@@ -18,10 +18,40 @@ import {
   FlashMessagesLogic,
 } from '../../../../../shared/flash_messages';
 
+import { staticSourceData } from '../../source_data';
+import { CUSTOM_SERVICE_TYPE } from '../../../../constants';
+
 import { AppLogic } from '../../../../app_logic';
 import { CustomSource } from '../../../../types';
 
+export interface AddSourceProps {
+  sourceIndex: number;
+  connect?: boolean;
+  configure?: boolean;
+  reAuthenticate?: boolean;
+}
+
+export enum AddSourceSteps {
+  ConfigIntroStep = 'Config Intro',
+  SaveConfigStep = 'Save Config',
+  ConfigCompletedStep = 'Config Completed',
+  ConnectInstanceStep = 'Connect Instance',
+  ConfigureCustomStep = 'Configure Custom',
+  ConfigureOauthStep = 'Configure Oauth',
+  SaveCustomStep = 'Save Custom',
+  ReAuthenticateStep = 'ReAuthenticate',
+}
+
 export interface AddSourceActions {
+  initializeAddSource: (addSourceProps: AddSourceProps) => { addSourceProps: AddSourceProps };
+  setAddSourceProps: ({
+    addSourceProps,
+  }: {
+    addSourceProps: AddSourceProps;
+  }) => {
+    addSourceProps: AddSourceProps;
+  };
+  setAddSourceStep(addSourceCurrentStep: AddSourceSteps): AddSourceSteps;
   setSourceConfigData(sourceConfigData: SourceConfigData): SourceConfigData;
   setSourceConnectData(sourceConnectData: SourceConnectData): SourceConnectData;
   setClientIdValue(clientIdValue: string): string;
@@ -55,7 +85,7 @@ export interface AddSourceActions {
   setButtonNotLoading(): void;
 }
 
-interface SourceConfigData {
+export interface SourceConfigData {
   serviceType: string;
   name: string;
   configured: boolean;
@@ -73,16 +103,18 @@ interface SourceConfigData {
   accountContextOnly?: boolean;
 }
 
-interface SourceConnectData {
+export interface SourceConnectData {
   oauthUrl: string;
   serviceType: string;
 }
 
-interface OrganizationsMap {
+export interface OrganizationsMap {
   [key: string]: string | boolean;
 }
 
 interface AddSourceValues {
+  addSourceProps: AddSourceProps;
+  addSourceCurrentStep: AddSourceSteps;
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
@@ -112,6 +144,11 @@ interface PreContentSourceResponse {
 export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceActions>>({
   path: ['enterprise_search', 'workplace_search', 'add_source_logic'],
   actions: {
+    initializeAddSource: (addSourceProps: AddSourceProps) => ({ addSourceProps }),
+    setAddSourceProps: ({ addSourceProps }: { addSourceProps: AddSourceProps }) => ({
+      addSourceProps,
+    }),
+    setAddSourceStep: (addSourceCurrentStep: AddSourceSteps) => addSourceCurrentStep,
     setSourceConfigData: (sourceConfigData: SourceConfigData) => sourceConfigData,
     setSourceConnectData: (sourceConnectData: SourceConnectData) => sourceConnectData,
     setClientIdValue: (clientIdValue: string) => clientIdValue,
@@ -145,6 +182,18 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     setButtonNotLoading: () => false,
   },
   reducers: {
+    addSourceProps: [
+      {} as AddSourceProps,
+      {
+        setAddSourceProps: (_, { addSourceProps }) => addSourceProps,
+      },
+    ],
+    addSourceCurrentStep: [
+      AddSourceSteps.ConfigIntroStep,
+      {
+        setAddSourceStep: (_, addSourceCurrentStep) => addSourceCurrentStep,
+      },
+    ],
     sourceConfigData: [
       {} as SourceConfigData,
       {
@@ -160,7 +209,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     dataLoading: [
       true,
       {
-        onInitializeSource: () => false,
         setSourceConfigData: () => false,
         resetSourceState: () => false,
         setPreContentSourceConfigData: () => false,
@@ -182,7 +230,6 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       true,
       {
         getPreContentSourceConfigData: () => true,
-        setSearchResults: () => false,
         setPreContentSourceConfigData: () => false,
       },
     ],
@@ -284,6 +331,12 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
     ],
   }),
   listeners: ({ actions, values }) => ({
+    initializeAddSource: ({ addSourceProps }) => {
+      const { serviceType } = staticSourceData[addSourceProps.sourceIndex];
+      actions.setAddSourceProps({ addSourceProps });
+      actions.setAddSourceStep(getFirstStep(addSourceProps));
+      actions.getSourceConfigData(serviceType);
+    },
     getSourceConfigData: async ({ serviceType }) => {
       const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
 
@@ -306,8 +359,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       const params = new URLSearchParams();
       if (subdomain) params.append('subdomain', subdomain);
       if (indexPermissions) params.append('index_permissions', indexPermissions.toString());
-
-      const paramsString = !isEmpty(params) ? `?${params}` : '';
+      const hasParams = params.has('subdomain') || params.has('index_permissions');
+      const paramsString = hasParams ? `?${params}` : '';
 
       try {
         const response = await HttpLogic.values.http.get(`${route}${paramsString}`);
@@ -375,6 +428,7 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         const response = await http(route, {
           body: JSON.stringify({ params }),
         });
+        if (successCallback) successCallback();
         if (isUpdating) {
           setSuccessMessage(
             i18n.translate(
@@ -386,10 +440,8 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
           );
         }
         actions.setSourceConfigData(response);
-        if (successCallback) successCallback();
       } catch (e) {
         flashAPIErrors(e);
-        if (!isUpdating) throw new Error(e);
       } finally {
         actions.setButtonNotLoading();
       }
@@ -432,10 +484,21 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
       } catch (e) {
         flashAPIErrors(e);
         if (errorCallback) errorCallback();
-        throw new Error('Auth Error');
       } finally {
         actions.setButtonNotLoading();
       }
     },
   }),
 });
+
+const getFirstStep = (props: AddSourceProps): AddSourceSteps => {
+  const { sourceIndex, connect, configure, reAuthenticate } = props;
+  const { serviceType } = staticSourceData[sourceIndex];
+  const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
+
+  if (isCustom) return AddSourceSteps.ConfigureCustomStep;
+  if (connect) return AddSourceSteps.ConnectInstanceStep;
+  if (configure) return AddSourceSteps.ConfigureOauthStep;
+  if (reAuthenticate) return AddSourceSteps.ReAuthenticateStep;
+  return AddSourceSteps.ConfigIntroStep;
+};

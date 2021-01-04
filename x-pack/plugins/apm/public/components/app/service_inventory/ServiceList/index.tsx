@@ -21,7 +21,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, px, truncate, unit } from '../../../../style/variables';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
-import { TransactionOverviewLink } from '../../../shared/Links/apm/TransactionOverviewLink';
+import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview';
 import { AgentIcon } from '../../../shared/AgentIcon';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
@@ -39,7 +39,7 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = styled(TransactionOverviewLink)`
+const AppLink = styled(ServiceOrTransactionsOverviewLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;

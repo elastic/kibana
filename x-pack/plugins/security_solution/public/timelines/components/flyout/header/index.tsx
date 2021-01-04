@@ -86,7 +86,13 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
   );
 
   return (
-    <StyledPanel borderRadius="none" grow={false} paddingSize="s" hasShadow={false}>
+    <StyledPanel
+      borderRadius="none"
+      grow={false}
+      paddingSize="s"
+      hasShadow={false}
+      data-test-subj="timeline-flyout-header-panel"
+    >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <AddTimelineButton timelineId={timelineId} />
         <EuiFlexItem grow>

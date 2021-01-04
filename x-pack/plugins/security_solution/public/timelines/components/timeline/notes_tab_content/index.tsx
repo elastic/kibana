@@ -122,9 +122,14 @@ interface NotesTabContentProps {
 const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const { createdBy, expandedEvent, status: timelineStatus } = useDeepEqualSelector((state) =>
+  const {
+    createdBy,
+    expandedEvent,
+    eventIdToNoteIds,
+    status: timelineStatus,
+  } = useDeepEqualSelector((state) =>
     pick(
-      ['createdBy', 'expandedEvent', 'status'],
+      ['createdBy', 'expandedEvent', 'eventIdToNoteIds', 'status'],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
@@ -192,7 +197,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
             <h3>{NOTES}</h3>
           </EuiTitle>
           <EuiSpacer />
-          <NotePreviews notes={notes} timelineId={timelineId} />
+          <NotePreviews eventIdToNoteIds={eventIdToNoteIds} notes={notes} timelineId={timelineId} />
           <EuiSpacer size="s" />
           {!isImmutable && (
             <AddNote associateNote={associateNote} newNote={newNote} updateNewNote={setNewNote} />

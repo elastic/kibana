@@ -233,6 +233,21 @@ describe('Task Runner', () => {
         "message": "alert executed: test:1: 'alert-name'",
       }
     `);
+
+    expect(
+      taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
+    ).toHaveBeenCalledWith(
+      'alert',
+      '1',
+      {
+        executionStatus: {
+          error: null,
+          lastExecutionDate: '1970-01-01T00:00:00.000Z',
+          status: 'ok',
+        },
+      },
+      { refresh: false, namespace: undefined }
+    );
   });
 
   test('actionsPlugin.execute is called per alert instance that is scheduled', async () => {

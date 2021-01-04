@@ -13,12 +13,12 @@ import {
   login,
   loginAndWaitForPageWithoutDateRange,
   waitForPageWithoutDateRange,
-  deleteRoleAndUser,
 } from '../tasks/login';
 import { waitForAlertsIndexToBeCreated } from '../tasks/alerts';
 import { goToRuleDetails } from '../tasks/alerts_detection_rules';
 import { createCustomRule, deleteCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown, dismissCallOut } from '../tasks/common/callouts';
+import { cleanKibana } from '../tasks/common';
 
 const loadPageAsReadOnlyUser = (url: string) => {
   waitForPageWithoutDateRange(url, ROLES.reader);
@@ -41,17 +41,13 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
   before(() => {
     // First, we have to open the app on behalf of a priviledged user in order to initialize it.
     // Otherwise the app will be disabled and show a "welcome"-like page.
+    cleanKibana();
+    removeSignalsIndex();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL, ROLES.platform_engineer);
     waitForAlertsIndexToBeCreated();
 
     // After that we can login as a read-only user.
     login(ROLES.reader);
-  });
-
-  after(() => {
-    deleteRoleAndUser(ROLES.reader);
-    deleteRoleAndUser(ROLES.platform_engineer);
-    removeSignalsIndex();
   });
 
   context('On Detections home page', () => {
@@ -95,7 +91,6 @@ describe('Detections > Callouts indicating read-only access to resources', () =>
   context('On Rule Details page', () => {
     beforeEach(() => {
       createCustomRule(newRule);
-
       loadPageAsReadOnlyUser(DETECTIONS_RULE_MANAGEMENT_URL);
       waitForPageTitleToBeShown();
       goToRuleDetails();

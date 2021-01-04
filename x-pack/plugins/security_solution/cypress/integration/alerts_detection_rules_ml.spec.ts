@@ -46,13 +46,14 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
-  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
+import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -64,15 +65,16 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Detection rules, machine learning', () => {
+describe.skip('Detection rules, machine learning', () => {
   const expectedUrls = machineLearningRule.referenceUrls.join('');
   const expectedFalsePositives = machineLearningRule.falsePositivesExamples.join('');
   const expectedTags = machineLearningRule.tags.join('');
   const expectedMitre = formatMitreAttackDescription(machineLearningRule.mitre);
   const expectedNumberOfRules = 1;
 
-  after(() => {
-    deleteRule();
+  before(() => {
+    cleanKibana();
+    removeSignalsIndex();
   });
 
   it('Creates and activates a new ml rule', () => {

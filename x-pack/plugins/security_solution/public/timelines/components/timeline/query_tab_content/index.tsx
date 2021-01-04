@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiTabbedContent,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutHeader,
@@ -45,7 +44,7 @@ import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
-import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import { TimelineModel, TimelineTabs } from '../../../../timelines/store/timeline/model';
 import { EventDetails } from '../event_details';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { HideShowContainer } from '../styles';
@@ -116,22 +115,6 @@ const VerticalRule = styled.div`
 
 VerticalRule.displayName = 'VerticalRule';
 
-const StyledEuiTabbedContent = styled(EuiTabbedContent)`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-
-  > [role='tabpanel'] {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-  }
-`;
-
-StyledEuiTabbedContent.displayName = 'StyledEuiTabbedContent';
-
 const EventsCountBadge = styled(EuiBadge)`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
@@ -150,6 +133,7 @@ const EMPTY_EVENTS: TimelineItem[] = [];
 export type Props = OwnProps & PropsFromRedux;
 
 export const QueryTabContentComponent: React.FC<Props> = ({
+  activeTab,
   columns,
   dataProviders,
   end,
@@ -163,6 +147,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   kqlMode,
   kqlQueryExpression,
   onEventClosed,
+  show,
   showCallOutUnauthorizedMsg,
   showEventDetails,
   start,
@@ -226,7 +211,12 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
     return [...columnFields, ...requiredFieldsForActions];
   }, [columns]);
-
+  const prevTimelineQuerySortField = useRef<
+    Array<{
+      field: string;
+      direction: Direction;
+    }>
+  >([]);
   const timelineQuerySortField = useMemo(
     () =>
       sort.map(({ columnId, sortDirection }) => ({
@@ -281,7 +271,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       prevCombinedQueries.current = combinedQueries;
       handleOnEventClosed();
     }
-  }, [combinedQueries, handleOnEventClosed]);
+    if (!deepEqual(prevTimelineQuerySortField.current, timelineQuerySortField)) {
+      prevTimelineQuerySortField.current = timelineQuerySortField;
+      handleOnEventClosed();
+    }
+  }, [combinedQueries, handleOnEventClosed, timelineQuerySortField]);
 
   return (
     <>
@@ -318,9 +312,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <TimelineHeaderContainer data-test-subj="timelineHeader">
                 <TimelineHeader
                   filterManager={filterManager}
+                  show={show && activeTab === TimelineTabs.query}
                   showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-                  timelineId={timelineId}
                   status={status}
+                  timelineId={timelineId}
                 />
               </TimelineHeaderContainer>
             </StyledEuiFlyoutHeader>
@@ -335,6 +330,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 id={timelineId}
                 refetch={refetch}
                 sort={sort}
+                tabType={TimelineTabs.query}
                 totalPages={calculateTotalPages({
                   itemsCount: totalCount,
                   itemsPerPage,
@@ -392,6 +388,7 @@ const makeMapStateToProps = () => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
+      activeTab,
       columns,
       dataProviders,
       eventType,
@@ -400,6 +397,7 @@ const makeMapStateToProps = () => {
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
+      show,
       sort,
       status,
       timelineType,
@@ -413,6 +411,7 @@ const makeMapStateToProps = () => {
         ? ' '
         : kqlQueryTimeline;
     return {
+      activeTab,
       columns,
       dataProviders,
       eventType: eventType ?? 'raw',
@@ -427,6 +426,7 @@ const makeMapStateToProps = () => {
       kqlQueryExpression,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       showEventDetails: !!expandedEvent.eventId,
+      show,
       sort,
       start: input.timerange.from,
       status,
@@ -460,6 +460,7 @@ const QueryTabContent = connector(
   React.memo(
     QueryTabContentComponent,
     (prevProps, nextProps) =>
+      prevProps.activeTab === nextProps.activeTab &&
       isTimerangeSame(prevProps, nextProps) &&
       prevProps.eventType === nextProps.eventType &&
       prevProps.isLive === nextProps.isLive &&
@@ -467,6 +468,7 @@ const QueryTabContent = connector(
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
       prevProps.onEventClosed === nextProps.onEventClosed &&
+      prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.showEventDetails === nextProps.showEventDetails &&
       prevProps.status === nextProps.status &&

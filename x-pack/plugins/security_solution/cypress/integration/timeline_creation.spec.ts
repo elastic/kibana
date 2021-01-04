@@ -11,7 +11,7 @@ import {
   NOTES_TAB_BUTTON,
   // NOTES_COUNT,
   NOTES_TEXT_AREA,
-  NOTE_BY_NOTE_ID,
+  NOTE_CONTENT,
   PIN_EVENT,
   TIMELINE_DESCRIPTION,
   TIMELINE_FILTER,
@@ -25,7 +25,8 @@ import {
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../screens/timelines';
-import { deleteTimeline, getTimelineById } from '../tasks/api_calls/timelines';
+import { getTimelineById } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
@@ -50,8 +51,8 @@ import { OVERVIEW_URL } from '../urls/navigation';
 describe.skip('Timelines', () => {
   let timelineId: string;
 
-  after(() => {
-    if (timelineId) deleteTimeline(timelineId);
+  before(() => {
+    cleanKibana();
   });
 
   it('Creates a timeline', () => {
@@ -104,7 +105,7 @@ describe.skip('Timelines', () => {
       getTimelineById(timelineId).then((singleTimeline) => {
         const noteId = singleTimeline!.body.data.getOneTimeline.notes[0].noteId;
 
-        cy.get(`${NOTE_BY_NOTE_ID(noteId)} p`).should('have.text', timeline.notes);
+        cy.get(NOTE_CONTENT(noteId)).should('have.text', timeline.notes);
       });
     });
   });

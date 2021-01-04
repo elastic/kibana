@@ -26,7 +26,6 @@ describe('alert_form', () => {
   const alertType = {
     id: 'my-alert-type',
     iconClass: 'test',
-    name: 'test-alert',
     description: 'Alert when testing',
     documentationUrl: 'https://localhost.local/docs',
     validate: (): ValidationResult => {
@@ -54,7 +53,6 @@ describe('alert_form', () => {
   const alertTypeNonEditable = {
     id: 'non-edit-alert-type',
     iconClass: 'test',
-    name: 'non edit alert',
     description: 'test',
     documentationUrl: null,
     validate: (): ValidationResult => {
@@ -67,7 +65,6 @@ describe('alert_form', () => {
   const disabledByLicenseAlertType = {
     id: 'disabled-by-license',
     iconClass: 'test',
-    name: 'test-alert',
     description: 'Alert when testing',
     documentationUrl: 'https://localhost.local/docs',
     validate: (): ValidationResult => {
@@ -306,7 +303,6 @@ describe('alert_form', () => {
         {
           id: 'same-consumer-producer-alert-type',
           iconClass: 'test',
-          name: 'test-alert',
           description: 'test',
           documentationUrl: null,
           validate: (): ValidationResult => {
@@ -318,7 +314,6 @@ describe('alert_form', () => {
         {
           id: 'other-consumer-producer-alert-type',
           iconClass: 'test',
-          name: 'test-alert',
           description: 'test',
           documentationUrl: null,
           validate: (): ValidationResult => {

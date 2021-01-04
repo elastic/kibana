@@ -94,7 +94,6 @@ describe('alert_add', () => {
     const alertType = {
       id: 'my-alert-type',
       iconClass: 'test',
-      name: 'test-alert',
       description: 'test',
       documentationUrl: null,
       validate: (): ValidationResult => {

@@ -16,6 +16,7 @@ import {
   FIELDS_BROWSER_SELECTED_CATEGORY_COUNT,
   FIELDS_BROWSER_SYSTEM_CATEGORIES_COUNT,
 } from '../screens/fields_browser';
+import { cleanKibana } from '../tasks/common';
 
 import {
   addsHostGeoCityNameToTimeline,
@@ -45,8 +46,9 @@ const defaultHeaders = [
 ];
 
 describe('Fields Browser', () => {
-  context('Fields Browser rendering', () => {
+  context.skip('Fields Browser rendering', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();
@@ -108,8 +110,9 @@ describe('Fields Browser', () => {
     });
   });
 
-  context('Editing the timeline', () => {
+  context.skip('Editing the timeline', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openTimelineUsingToggle();
       populateTimeline();

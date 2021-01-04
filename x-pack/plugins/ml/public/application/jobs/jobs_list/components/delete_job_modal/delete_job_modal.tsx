@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiLoadingSpinner,
+  EuiText,
 } from '@elastic/eui';
 
 import { deleteJobs } from '../utils';
@@ -103,7 +104,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                   </div>
                 </div>
               ) : (
-                <>
+                <EuiText>
                   <FormattedMessage
                     id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
                     defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
@@ -113,7 +114,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                       jobsCount: jobIds.length,
                     }}
                   />
-                </>
+                </EuiText>
               )}
             </p>
           </EuiModalBody>

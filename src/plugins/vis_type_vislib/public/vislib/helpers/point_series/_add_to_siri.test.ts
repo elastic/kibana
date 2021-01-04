@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import type { Dimension } from '../../../../../vis_type_xy/public';
+
 import { addToSiri, Serie } from './_add_to_siri';
 import { Point } from './_get_point';
-import { Dimension } from './point_series';
 
 describe('addToSiri', function () {
   it('creates a new series the first time it sees an id', function () {
