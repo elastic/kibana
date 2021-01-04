@@ -192,7 +192,7 @@ describe('connector_add_flyout', () => {
 
 let count = 0;
 function createActionType() {
-  return {
+  return actionTypeRegistryMock.createMockActionTypeModel({
     id: `my-action-type-${++count}`,
     iconClass: 'test',
     selectMessage: 'test',
@@ -204,6 +204,5 @@ function createActionType() {
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
-  };
+  });
 }

@@ -88,9 +88,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
       ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
     >
   > | null;
-  actionParamsFields: React.LazyExoticComponent<
-    ComponentType<ActionParamsProps<ActionParams>>
-  > | null;
+  actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
 }
 
 export interface GenericValidationResult<T> {

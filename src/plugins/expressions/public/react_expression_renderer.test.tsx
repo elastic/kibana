@@ -146,6 +146,35 @@ describe('ExpressionRenderer', () => {
     instance.unmount();
   });
 
+  it('should not update twice immediately after rendering', () => {
+    jest.useFakeTimers();
+
+    const refreshSubject = new Subject();
+    const loaderUpdate = jest.fn();
+
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$: new Subject(),
+        data$: new Subject(),
+        loading$: new Subject(),
+        update: loaderUpdate,
+        destroy: jest.fn(),
+      };
+    });
+
+    const instance = mount(
+      <ReactExpressionRenderer reload$={refreshSubject} expression="" debounce={1000} />
+    );
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(loaderUpdate).toHaveBeenCalledTimes(1);
+
+    instance.unmount();
+  });
+
   it('waits for debounce period on other loader option change if specified', () => {
     jest.useFakeTimers();
 
@@ -303,5 +332,23 @@ describe('ExpressionRenderer', () => {
 
     expect(onEvent).toHaveBeenCalledTimes(1);
     expect(onEvent.mock.calls[0][0]).toBe(event);
+  });
+
+  it('should correctly assign classes to the wrapper node', () => {
+    (ExpressionLoader as jest.Mock).mockImplementation(() => {
+      return {
+        render$: new Subject(),
+        data$: new Subject(),
+        loading$: new Subject(),
+        update: jest.fn(),
+        destroy: jest.fn(),
+      };
+    });
+
+    const instance = mount(<ReactExpressionRenderer className="myClassName" expression="" />);
+    // Counte is 2 because the class is applied to ReactExpressionRenderer + internal component
+    expect(instance.find('.myClassName').length).toBe(2);
+
+    instance.unmount();
   });
 });

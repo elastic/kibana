@@ -41,7 +41,7 @@ describe('alert_form', () => {
     requiresAppContext: false,
   };
 
-  const actionType = {
+  const actionType = actionTypeRegistryMock.createMockActionTypeModel({
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
@@ -60,8 +60,7 @@ describe('alert_form', () => {
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
-  };
+  });
 
   const alertTypeNonEditable = {
     id: 'non-edit-alert-type',

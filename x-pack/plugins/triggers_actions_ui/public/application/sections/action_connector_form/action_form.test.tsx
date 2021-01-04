@@ -121,20 +121,6 @@ describe('action_form', () => {
     actionParamsFields: mockedActionParamsFields,
   };
 
-  const actionTypeWithoutParams = {
-    id: 'my-action-type-without-params',
-    iconClass: 'test',
-    selectMessage: 'test',
-    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
-      return {};
-    },
-    validateParams: (): GenericValidationResult<unknown> => {
-      const validationResult = { errors: {} };
-      return validationResult;
-    },
-    actionConnectorFields: null,
-    actionParamsFields: null,
-  };
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('action_form in alert', () => {
@@ -213,7 +199,6 @@ describe('action_form', () => {
         disabledByLicenseActionType,
         disabledByActionType,
         preconfiguredOnly,
-        actionTypeWithoutParams,
       ]);
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockReturnValue(actionType);
@@ -328,14 +313,6 @@ describe('action_form', () => {
             {
               id: '.jira',
               name: 'Disabled by action type',
-              enabled: true,
-              enabledInConfig: true,
-              enabledInLicense: true,
-              minimumLicenseRequired: 'basic',
-            },
-            {
-              id: actionTypeWithoutParams.id,
-              name: 'Action type without params',
               enabled: true,
               enabledInConfig: true,
               enabledInLicense: true,
@@ -541,14 +518,6 @@ describe('action_form', () => {
           .find('EuiToolTip [data-test-subj="disabled-by-license-ActionTypeSelectOption"]')
           .exists()
       ).toBeTruthy();
-    });
-
-    it(`shouldn't render action types without params component`, async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        `[data-test-subj="${actionTypeWithoutParams.id}-ActionTypeSelectOption"]`
-      );
-      expect(actionOption.exists()).toBeFalsy();
     });
 
     it('recognizes actions with broken connectors', async () => {

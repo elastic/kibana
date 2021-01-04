@@ -64,7 +64,7 @@ export const createCustomLinkRoute = createRoute({
   params: t.type({
     body: payloadRt,
   }),
-  options: { tags: ['access:apm'] },
+  options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async ({ context, request }) => {
     if (!isActiveGoldLicense(context.licensing.license)) {
       throw Boom.forbidden(INVALID_LICENSE);
