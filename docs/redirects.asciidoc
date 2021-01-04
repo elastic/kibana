@@ -202,4 +202,4 @@ This page has moved. Refer to <<url-template-variables>>.
 [role="exclude",id="visualize"]
 == Visualize
 
-This page has been removed.
+This page has been removed. Refer to <<dashboard>>.
