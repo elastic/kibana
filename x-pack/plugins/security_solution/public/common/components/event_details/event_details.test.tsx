@@ -16,6 +16,7 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { TimelineTabs } from '../../../../common/types/timeline';
 import { waitFor } from '@testing-library/dom';
 
 jest.mock('../link_to');
@@ -27,6 +28,7 @@ describe('EventDetails', () => {
     id: mockDetailItemDataId,
     isAlert: false,
     onViewSelected: jest.fn(),
+    timelineTabType: TimelineTabs.query,
     timelineId: 'test',
     view: EventsViewType.summaryView,
   };
