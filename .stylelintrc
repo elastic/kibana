@@ -3,7 +3,7 @@ rules:
   color-hex-case: upper
   string-quotes: single
   indentation: 2
-  declaration-block-no-duplicate-properties: 
+  declaration-block-no-duplicate-properties:
     - true
     # We use some rare duplicate property values for browser variance
     - ignoreProperties:
@@ -17,3 +17,4 @@ rules:
       - transition
       - width
       - display
+  function-calc-no-unspaced-operator: true
