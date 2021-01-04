@@ -28,6 +28,9 @@ export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
 export const APP_ICON_SOLUTION = 'logoKibana';
+export const APP_NAME = i18n.translate('xpack.maps.visTypeAlias.title', {
+  defaultMessage: 'Maps',
+});
 export const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_PATH = `app/${APP_ID}`;
@@ -49,6 +52,9 @@ export function getNewMapPath() {
 }
 export function getExistingMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
+}
+export function getEditPath(id: string) {
+  return `/${MAP_PATH}/${id}`;
 }
 
 export enum LAYER_TYPE {
