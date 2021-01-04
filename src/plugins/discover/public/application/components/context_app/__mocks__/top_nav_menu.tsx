@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export { validateObject } from './validate_object';
+import React from 'react';
+
+export const TopNavMenuMock = () => <div>Hello World</div>;
