@@ -18,19 +18,7 @@ export default function ({
 
   describe('check Elastic Maps Server', function () {
     before(async function () {
-      // this navigateToActualURL takes the place of navigating to the maps landing page,
-      // filtering on the map name, selecting it and setting the timepicker
-      // await PageObjects.common.navigateToActualUrl(
-      //  'maps',
-      //  '7f72db90-4a8d-11eb-9e7a-8996af36387e#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),' +
-      //    'time:(from:now-1y,to:now))&_a=(filters:!())',
-      //  {
-      //    ensureCurrentUrl: false,
-      //    shouldLoginIfPrompted: true,
-      //  }
-      // );
       await PageObjects.maps.loadSavedMap('EMS Test');
-      await PageObjects.common.sleep(2000);
       await browser.setScreenshotSize(1000, 1000);
     });
 
@@ -39,6 +27,10 @@ export default function ({
         'ems_test',
         updateBaselines
       );
+      // This test should show about a 5% difference if it falls back to the online Elastic Maps Service
+      // and around 20% if the self-hosted doesn't load/work for some reason. This way we catch both scenarios.
+      // Any minor UI changes will be caught in the 1% difference that is allowed for without impacting the map.
+      // More info here: https://github.com/elastic/kibana/pull/87070
       expect(percentDifference).to.be.lessThan(0.01);
     });
   });
