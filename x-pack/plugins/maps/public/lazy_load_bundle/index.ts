@@ -68,6 +68,7 @@ interface LazyLoadedMapModules {
     metricAgg: string;
     metricFieldName?: string;
   }) => LayerDescriptor | null;
+  createBasemapLayerDescriptor: () => LayerDescriptor | null;
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
@@ -86,6 +87,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       registerSource,
       createTileMapLayerDescriptor,
       createRegionMapLayerDescriptor,
+      createBasemapLayerDescriptor,
     } = await import('./lazy');
 
     resolve({
@@ -98,6 +100,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       registerSource,
       createTileMapLayerDescriptor,
       createRegionMapLayerDescriptor,
+      createBasemapLayerDescriptor,
     });
   });
   return loadModulesPromise;

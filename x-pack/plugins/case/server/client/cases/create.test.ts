@@ -34,6 +34,9 @@ describe('create', () => {
           type: ConnectorTypes.jira,
           fields: { issueType: 'Task', priority: 'High', parent: null },
         },
+        settings: {
+          syncAlerts: true,
+        },
       } as CasePostRequest;
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -65,6 +68,9 @@ describe('create', () => {
         updated_at: null,
         updated_by: null,
         version: 'WzksMV0=',
+        settings: {
+          syncAlerts: true,
+        },
       });
 
       expect(
@@ -79,9 +85,9 @@ describe('create', () => {
               full_name: 'Awesome D00d',
               username: 'awesome',
             },
-            action_field: ['description', 'status', 'tags', 'title', 'connector'],
+            action_field: ['description', 'status', 'tags', 'title', 'connector', 'settings'],
             new_value:
-              '{"description":"This is a brand new case of a bad meanie defacing data","title":"Super Bad Security Issue","tags":["defacement"],"connector":{"id":"123","name":"Jira","type":".jira","fields":{"issueType":"Task","priority":"High","parent":null}}}',
+              '{"description":"This is a brand new case of a bad meanie defacing data","title":"Super Bad Security Issue","tags":["defacement"],"connector":{"id":"123","name":"Jira","type":".jira","fields":{"issueType":"Task","priority":"High","parent":null}},"settings":{"syncAlerts":true}}',
             old_value: null,
           },
           references: [
@@ -105,6 +111,9 @@ describe('create', () => {
           name: 'none',
           type: ConnectorTypes.none,
           fields: null,
+        },
+        settings: {
+          syncAlerts: true,
         },
       };
 
@@ -131,6 +140,9 @@ describe('create', () => {
         updated_at: null,
         updated_by: null,
         version: 'WzksMV0=',
+        settings: {
+          syncAlerts: true,
+        },
       });
     });
 
@@ -144,6 +156,9 @@ describe('create', () => {
           name: 'none',
           type: ConnectorTypes.none,
           fields: null,
+        },
+        settings: {
+          syncAlerts: true,
         },
       };
 
@@ -174,6 +189,9 @@ describe('create', () => {
         updated_at: null,
         updated_by: null,
         version: 'WzksMV0=',
+        settings: {
+          syncAlerts: true,
+        },
       });
     });
   });
@@ -323,6 +341,9 @@ describe('create', () => {
           type: ConnectorTypes.none,
           fields: null,
         },
+        settings: {
+          syncAlerts: true,
+        },
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -346,6 +367,9 @@ describe('create', () => {
           name: 'none',
           type: ConnectorTypes.none,
           fields: null,
+        },
+        settings: {
+          syncAlerts: true,
         },
       };
       const savedObjectsClient = createMockSavedObjectsRepository({

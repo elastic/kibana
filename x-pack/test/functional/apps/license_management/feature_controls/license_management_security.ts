@@ -55,13 +55,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should render the "Stack" section with License Management', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(3);
-        expect(sections[2]).to.eql({
-          sectionId: 'stack',
-          sectionLinks: ['license_management', 'upgrade_assistant'],
+      describe('[SkipCloud] global dashboard with license management user: skip cloud', function () {
+        this.tags('skipCloud');
+        it('should render the "Stack" section with License Management', async () => {
+          await PageObjects.common.navigateToApp('management');
+          const sections = await managementMenu.getSections();
+          expect(sections).to.have.length(3);
+          expect(sections[2]).to.eql({
+            sectionId: 'stack',
+            sectionLinks: ['license_management', 'upgrade_assistant'],
+          });
         });
       });
     });

@@ -25,8 +25,7 @@ import { TriggerId, TriggerContextMapping } from '../types';
  */
 export class TriggerContract<T extends TriggerId> {
   /**
-   * Unique name of the trigger as identified in `ui_actions` plugin trigger
-   * registry, such as "SELECT_RANGE_TRIGGER" or "VALUE_CLICK_TRIGGER".
+   * Unique name of the trigger as identified in `ui_actions` plugin trigger registry.
    */
   public readonly id: T;
 
@@ -49,7 +48,7 @@ export class TriggerContract<T extends TriggerId> {
   /**
    * Use this method to execute action attached to this trigger.
    */
-  public readonly exec = async (context: TriggerContextMapping[T]) => {
-    await this.internal.execute(context);
+  public readonly exec = async (context: TriggerContextMapping[T], alwaysShowPopup?: boolean) => {
+    await this.internal.execute(context, alwaysShowPopup);
   };
 }

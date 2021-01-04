@@ -33,7 +33,7 @@ export { EmbeddableInput };
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
   loading?: boolean;
-  // Whether the embeddable finshed loading with an error.
+  // Whether the embeddable finished loading with an error.
   error?: EmbeddableError;
   editUrl?: string;
   editApp?: string;

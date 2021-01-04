@@ -12,9 +12,6 @@ import {
   EuiSpacer,
   EuiFieldText,
   EuiFormRow,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiErrorBoundary,
   EuiTitle,
 } from '@elastic/eui';
@@ -29,6 +26,7 @@ import {
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
+import { SectionLoading } from '../../components/section_loading';
 
 export function validateBaseProperties(actionObject: ActionConnector) {
   const validationResult = { errors: {} };
@@ -181,11 +179,12 @@ export const ActionConnectorForm = ({
           <EuiErrorBoundary>
             <Suspense
               fallback={
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="m" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <SectionLoading>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription"
+                    defaultMessage="Loading connector settings…"
+                  />
+                </SectionLoading>
               }
             >
               <FieldsComponent

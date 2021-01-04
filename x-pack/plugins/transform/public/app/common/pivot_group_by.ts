@@ -52,17 +52,20 @@ interface GroupByDateHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
   field: EsFieldName;
   calendar_interval: string;
+  missing_bucket?: boolean;
 }
 
 interface GroupByHistogram extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM;
   field: EsFieldName;
   interval: string;
+  missing_bucket?: boolean;
 }
 
 interface GroupByTerms extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
   field: EsFieldName;
+  missing_bucket?: boolean;
 }
 
 export type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;

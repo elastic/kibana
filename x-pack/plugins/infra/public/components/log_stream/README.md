@@ -98,6 +98,74 @@ There are three column types:
     <td>A specific field specified in the `field` property.
 </table>
 
+### Custom column rendering
+
+Besides customizing what columns are shown, you can also customize how a column is rendered. You can customize the width of the column, the text of the header, and how each value is rendered within the cell
+
+#### `width` option
+
+The `width` modifies the width of the column. It can be a number (in pixels) or a string with a valid CSS value.
+
+```tsx
+<LogStream
+  startTimestamp={...}
+  endTimetsamp={...}
+  columns={[
+    { type: 'timestamp', width: 100 }, // Same as "100px"
+    { type: 'field', field: 'event.dataset', width: "50%" }
+  ]}
+/>
+```
+
+#### `header` option
+
+The `header` takes either a `boolean` value that specifies if the header should be rendered or not, or a `string` with the text to render.
+
+```tsx
+<LogStream
+  startTimestamp={...}
+  endTimetsamp={...}
+  columns={[
+    // Don't show anything in the header
+    { type: 'timestamp', header: false },
+    // Show a custom string in the header
+    { type: 'field', field: 'event.dataset', header: "Dataset of the event" }
+  ]}
+/>
+```
+
+The default is `true`, which render the default values for each column type:
+
+| Column type | Default value                         |
+| ----------- | ------------------------------------- |
+| `timestamp` | Date of the top-most visible log line |
+| `message`   | `"Message"` literal                   |
+| `field`     | Field name                            |
+
+#### `render` option
+
+The `render` takes a function to customize the rendering of the column. The first argument is the value of the column. The function must return a valid `ReactNode`.
+
+```tsx
+<LogStream
+  startTimestamp={...}
+  endTimetsamp={...}
+  columns={[
+    { type: 'timestamp', render: (timestamp) => <b>{new Date(timestamp).toString()}</b>; },
+    { type: 'field', field: 'log.level', render: (value) => value === 'warn' ? '⚠️' : 'ℹ️' }
+    { type: 'message', render: (message) => message.toUpperCase() }
+  ]}
+/>
+```
+
+The first argument's type depends on the column type.
+
+| Column type | Type of the `value`                                                    |
+| ----------- | ---------------------------------------------------------------------- |
+| `timestamp` | `number`. The epoch_millis of the log line                             |
+| `message`   | `string`. The processed log message                                    |
+| `field`     | `JsonValue`. The type of the field itself. Must be checked at runtime. |
+
 ### Considerations
 
 As mentioned in the prerequisites, the component relies on `kibana-react` to access kibana's core services. If this is not the case the component will throw an exception when rendering. We advise to use an `<EuiErrorBoundary>` in your component hierarchy to catch this error if necessary.

@@ -22,16 +22,17 @@ import { Case, CaseUserActions } from '../../containers/types';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
-import { ActionConnector } from '../../../../../case/common/api/cases';
+import { ActionConnector, CommentType } from '../../../../../case/common/api/cases';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
-import { OnUpdateFields } from '../case_view';
+import { Alert, OnUpdateFields } from '../case_view';
 import {
   getConnectorLabelTitle,
   getLabelTitle,
   getPushedServiceLabelTitle,
   getPushInfo,
   getUpdateAction,
+  getAlertComment,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -50,6 +51,8 @@ export interface UserActionTreeProps {
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
+  alerts: Record<string, Alert>;
+  onShowAlertDetails: (alertId: string, index: string) => void;
 }
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
@@ -78,6 +81,17 @@ const MyEuiCommentList = styled(EuiCommentList)`
         display: none;
       }
     }
+
+    & .comment-alert .euiCommentEvent {
+      background-color: ${theme.eui.euiColorLightestShade};
+      border: ${theme.eui.euiFlyoutBorder};
+      padding: 10px;
+      border-radius: ${theme.eui.paddingSizes.xs};
+    }
+
+    & .comment-alert .euiCommentEvent__headerData {
+      flex-grow: 1;
+    }
   `}
 `;
 
@@ -96,6 +110,8 @@ export const UserActionTree = React.memo(
     onUpdateField,
     updateCase,
     userCanCrud,
+    alerts,
+    onShowAlertDetails,
   }: UserActionTreeProps) => {
     const { commentId } = useParams<{ commentId?: string }>();
     const handlerTimeoutId = useRef(0);
@@ -105,6 +121,7 @@ export const UserActionTree = React.memo(
     const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
     const [manageMarkdownEditIds, setManangeMardownEditIds] = useState<string[]>([]);
+
     const handleManageMarkdownEditId = useCallback(
       (id: string) => {
         if (!manageMarkdownEditIds.includes(id)) {
@@ -264,7 +281,7 @@ export const UserActionTree = React.memo(
             // Comment creation
             if (action.commentId != null && action.action === 'create') {
               const comment = caseData.comments.find((c) => c.id === action.commentId);
-              if (comment != null) {
+              if (comment != null && comment.type === CommentType.user) {
                 return [
                   ...comments,
                   {
@@ -316,6 +333,9 @@ export const UserActionTree = React.memo(
                     ),
                   },
                 ];
+              } else if (comment != null && comment.type === CommentType.alert) {
+                const alert = alerts[comment.alertId];
+                return [...comments, getAlertComment({ action, alert, onShowAlertDetails })];
               }
             }
 
@@ -380,7 +400,7 @@ export const UserActionTree = React.memo(
               ];
             }
 
-            // title, description, comments, tags, status
+            // title, description, comment updates, tags
             if (
               action.actionField.length === 1 &&
               ['title', 'description', 'comment', 'tags', 'status'].includes(action.actionField[0])
@@ -412,6 +432,8 @@ export const UserActionTree = React.memo(
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         userCanCrud,
+        alerts,
+        onShowAlertDetails,
       ]
     );
 

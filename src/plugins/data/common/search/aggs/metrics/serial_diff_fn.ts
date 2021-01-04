@@ -77,7 +77,6 @@ export const aggSerialDiff = (): FunctionDefinition => ({
     },
     buckets_path: {
       types: ['string'],
-      required: true,
       help: i18n.translate('data.search.aggs.metrics.serial_diff.buckets_path.help', {
         defaultMessage: 'Path to the metric of interest',
       }),

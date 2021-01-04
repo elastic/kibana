@@ -10,7 +10,6 @@ import { SafeResolverEvent } from '../../../../common/endpoint/types';
 
 import { ResolverState, DataAccessLayer, PanelViewAndParameters } from '../../types';
 import * as selectors from '../selectors';
-import { createRange } from './../../models/time_range';
 import { ResolverAction } from '../actions';
 
 /**
@@ -48,6 +47,7 @@ export function CurrentRelatedEventFetcher(
       api.dispatch({
         type: 'appRequestedCurrentRelatedEventData',
       });
+      const timeRangeFilters = selectors.timeRangeFilters(state);
 
       let result: SafeResolverEvent | null = null;
       try {
@@ -58,7 +58,7 @@ export function CurrentRelatedEventFetcher(
           eventID: currentEventID,
           winlogRecordID,
           indexPatterns: indices,
-          timeRange: createRange(),
+          timeRange: timeRangeFilters,
         });
       } catch (error) {
         api.dispatch({

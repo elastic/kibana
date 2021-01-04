@@ -39,12 +39,16 @@ import { KueryFilterQueryKind } from '../../../common/store/model';
 import { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
-import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
-import { TimelineTabs } from '../../store/timeline/model';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
@@ -312,10 +316,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.default,
@@ -411,10 +417,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.template,
@@ -510,10 +518,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.default,
@@ -607,10 +617,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         title: '',
         timelineType: TimelineType.default,
@@ -745,10 +757,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         id: 'savedObject-1',
       });
@@ -912,10 +926,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.draft,
         id: 'savedObject-1',
       });
@@ -1007,10 +1023,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.immutable,
         title: 'Awesome Timeline',
         timelineType: TimelineType.template,
@@ -1106,10 +1124,12 @@ describe('helpers', () => {
         selectedEventIds: {},
         show: false,
         showCheckboxes: false,
-        sort: {
-          columnId: '@timestamp',
-          sortDirection: 'desc',
-        },
+        sort: [
+          {
+            columnId: '@timestamp',
+            sortDirection: 'desc',
+          },
+        ],
         status: TimelineStatus.active,
         title: 'Awesome Timeline',
         timelineType: TimelineType.default,
@@ -1486,11 +1506,13 @@ describe('helpers', () => {
         notes: [
           {
             created: new Date('2020-03-26T14:35:56.356Z'),
+            eventId: null,
             id: 'note-id',
             lastEdit: new Date('2020-03-26T14:35:56.356Z'),
             note: 'I am a note',
             user: 'unknown',
             saveObjectId: 'note-id',
+            timelineId: null,
             version: undefined,
           },
         ],

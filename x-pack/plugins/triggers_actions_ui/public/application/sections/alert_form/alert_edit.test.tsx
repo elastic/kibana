@@ -52,7 +52,6 @@ describe('alert_edit', () => {
     const alertType = {
       id: 'my-alert-type',
       iconClass: 'test',
-      name: 'test-alert',
       description: 'test',
       documentationUrl: null,
       validate: (): ValidationResult => {
@@ -103,6 +102,7 @@ describe('alert_edit', () => {
       tags: [],
       name: 'test alert',
       throttle: null,
+      notifyWhen: null,
       apiKeyOwner: null,
       createdBy: 'elastic',
       updatedBy: 'elastic',

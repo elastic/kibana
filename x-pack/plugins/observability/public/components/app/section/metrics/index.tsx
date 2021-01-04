@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AreaSeries, ScaleType, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -11,12 +10,9 @@ import React, { useContext } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
-import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { Series } from '../../../../typings';
-import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 
 interface Props {
@@ -72,12 +68,10 @@ export function MetricsSection({ bucketSize }: Props) {
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  const { appLink, stats, series } = data || {};
+  const { appLink, stats } = data || {};
 
   const cpuColor = theme.eui.euiColorVis7;
   const memoryColor = theme.eui.euiColorVis0;
-  const inboundTrafficColor = theme.eui.euiColorVis3;
-  const outboundTrafficColor = theme.eui.euiColorVis2;
 
   return (
     <SectionContainer
@@ -106,7 +100,7 @@ export function MetricsSection({ bucketSize }: Props) {
           <StyledStat
             title={numeral(stats?.cpu.value).format('0.0%')}
             description={i18n.translate('xpack.observability.overview.metrics.cpuUsage', {
-              defaultMessage: 'CPU Usage',
+              defaultMessage: 'CPU usage',
             })}
             isLoading={isLoading}
             color={cpuColor}
@@ -137,68 +131,7 @@ export function MetricsSection({ bucketSize }: Props) {
             </StyledProgress>
           </StyledStat>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <StyledStat
-            title={`${numeral(stats?.inboundTraffic.value).format('0.0b')}/s`}
-            description={i18n.translate('xpack.observability.overview.metrics.inboundTraffic', {
-              defaultMessage: 'Inbound traffic',
-            })}
-            isLoading={isLoading}
-            color={inboundTrafficColor}
-          >
-            <AreaChart
-              serie={series?.inboundTraffic}
-              isLoading={isLoading}
-              color={inboundTrafficColor}
-            />
-          </StyledStat>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <StyledStat
-            title={`${numeral(stats?.outboundTraffic.value).format('0.0b')}/s`}
-            description={i18n.translate('xpack.observability.overview.metrics.outboundTraffic', {
-              defaultMessage: 'Outbound traffic',
-            })}
-            isLoading={isLoading}
-            color={outboundTrafficColor}
-          >
-            <AreaChart
-              serie={series?.outboundTraffic}
-              isLoading={isLoading}
-              color={outboundTrafficColor}
-            />
-          </StyledStat>
-        </EuiFlexItem>
       </EuiFlexGroup>
     </SectionContainer>
-  );
-}
-
-function AreaChart({
-  serie,
-  isLoading,
-  color,
-}: {
-  serie?: Series;
-  isLoading: boolean;
-  color: string;
-}) {
-  const chartTheme = useChartTheme();
-
-  return (
-    <ChartContainer height={30} isInitialLoad={isLoading && !serie} iconSize="m">
-      <Settings theme={chartTheme} showLegend={false} tooltip="none" />
-      {serie && (
-        <AreaSeries
-          id="area"
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor={'x'}
-          yAccessors={['y']}
-          data={serie.coordinates}
-          color={color}
-        />
-      )}
-    </ChartContainer>
   );
 }

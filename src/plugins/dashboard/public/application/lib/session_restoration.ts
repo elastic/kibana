@@ -18,7 +18,7 @@
  */
 
 import { DASHBOARD_APP_URL_GENERATOR, DashboardUrlGeneratorState } from '../../url_generator';
-import { DataPublicPluginStart } from '../../../../data/public';
+import { DataPublicPluginStart } from '../../services/data';
 import { DashboardAppState } from '../../types';
 
 export function createSessionRestorationDataProvider(deps: {

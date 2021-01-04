@@ -24,7 +24,7 @@ import { CoreService } from 'src/core/types';
 import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
 import { CoreContext } from '../core_context';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { HttpConfigType } from '../http';
+import { HttpConfigType, InternalHttpServiceSetup } from '../http';
 import { LoggingConfigType } from '../logging';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import {
@@ -42,6 +42,7 @@ import { CoreUsageStatsClient } from './core_usage_stats_client';
 import { MetricsServiceSetup, OpsMetrics } from '..';
 
 export interface SetupDeps {
+  http: InternalHttpServiceSetup;
   metrics: MetricsServiceSetup;
   savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
 }
@@ -248,7 +249,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     };
   }
 
-  setup({ metrics, savedObjectsStartPromise }: SetupDeps) {
+  setup({ http, metrics, savedObjectsStartPromise }: SetupDeps) {
     metrics
       .getOpsMetrics$()
       .pipe(takeUntil(this.stop$))
@@ -300,7 +301,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
     const getClient = () => {
       const debugLogger = (message: string) => this.logger.debug(message);
 
-      return new CoreUsageStatsClient(debugLogger, internalRepositoryPromise);
+      return new CoreUsageStatsClient(debugLogger, http.basePath, internalRepositoryPromise);
     };
 
     this.coreUsageStatsClient = getClient();

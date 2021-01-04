@@ -8,6 +8,7 @@ import { PluginInitializerContext, PluginConfigDescriptor } from '../../../../sr
 import { Plugin, PluginSetup, PluginStart } from './plugin';
 import { configSchema, ConfigType } from './config';
 import { SIGNALS_INDEX_KEY } from '../common/constants';
+import { AppClient } from './types';
 
 export const plugin = (context: PluginInitializerContext) => {
   return new Plugin(context);
@@ -41,6 +42,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 };
 
 export { ConfigType, Plugin, PluginSetup, PluginStart };
+export { AppClient };
 
 // Exports to be shared with plugins such as x-pack/lists plugin
 export { deleteTemplate } from './lib/detection_engine/index/delete_template';

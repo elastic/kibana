@@ -11,7 +11,12 @@ import { useRouteMatch } from 'react-router-dom';
 import { UptimeDatePicker } from '../uptime_date_picker';
 import { SyntheticsCallout } from '../../overview/synthetics_callout';
 import { PageTabs } from './page_tabs';
-import { CERTIFICATES_ROUTE, MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
+import {
+  CERTIFICATES_ROUTE,
+  MONITOR_ROUTE,
+  SETTINGS_ROUTE,
+  STEP_DETAIL_ROUTE,
+} from '../../../../common/constants';
 import { CertRefreshBtn } from '../../certificates/cert_refresh_btn';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
 
@@ -34,11 +39,12 @@ const StyledPicker = styled(EuiFlexItem)`
 export const PageHeader = () => {
   const isCertRoute = useRouteMatch(CERTIFICATES_ROUTE);
   const isSettingsRoute = useRouteMatch(SETTINGS_ROUTE);
+  const isStepDetailRoute = useRouteMatch(STEP_DETAIL_ROUTE);
 
   const DatePickerComponent = () =>
     isCertRoute ? (
       <CertRefreshBtn />
-    ) : (
+    ) : isStepDetailRoute ? null : (
       <StyledPicker grow={false} style={{ flexBasis: 485 }}>
         <UptimeDatePicker />
       </StyledPicker>

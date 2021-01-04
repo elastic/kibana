@@ -5,6 +5,7 @@
  */
 
 import { TIMELINE_FLYOUT_HEADER, TIMELINE_DATA_PROVIDERS } from '../screens/timeline';
+import { cleanKibana } from '../tasks/common';
 
 import { dragFirstHostToTimeline, waitForAllHostsToBeLoaded } from '../tasks/hosts/all_hosts';
 import { loginAndWaitForPage } from '../tasks/login';
@@ -14,6 +15,7 @@ import { HOSTS_URL } from '../urls/navigation';
 
 describe('timeline flyout button', () => {
   before(() => {
+    cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });

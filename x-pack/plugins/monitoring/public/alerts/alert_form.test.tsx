@@ -71,7 +71,6 @@ describe('alert_form', () => {
   const alertType = {
     id: 'alert-type',
     iconClass: 'test',
-    name: 'test-alert',
     description: 'Testing',
     documentationUrl: 'https://...',
     validate: validationMethod,
@@ -156,6 +155,10 @@ describe('alert_form', () => {
     });
 
     it('should update throttle value', async () => {
+      wrapper.find('button[data-test-subj="notifyWhenSelect"]').simulate('click');
+      wrapper.update();
+      wrapper.find('button[data-test-subj="onThrottleInterval"]').simulate('click');
+      wrapper.update();
       const newThrottle = 17;
       const throttleField = wrapper.find('[data-test-subj="throttleInput"]');
       expect(throttleField.exists()).toBeTruthy();

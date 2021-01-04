@@ -15,12 +15,14 @@ import {
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   EuiText,
+  EuiBadge,
+  euiSelectableTemplateSitewideRenderOptions,
 } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ApplicationStart } from 'kibana/public';
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import React, { ReactNode, useCallback, useRef, useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -30,10 +32,9 @@ import {
   GlobalSearchResult,
   GlobalSearchFindParams,
 } from '../../../global_search/public';
-import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+import { SavedObjectTaggingPluginStart, Tag } from '../../../saved_objects_tagging/public';
 import { parseSearchParams } from '../search_syntax';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
-
 import './search_bar.scss';
 
 interface Props {
@@ -75,8 +76,64 @@ const sortByTitle = (a: GlobalSearchResult, b: GlobalSearchResult): number => {
   return 0;
 };
 
-const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewideOption => {
-  const { id, title, url, icon, type, meta } = result;
+const TagListWrapper = ({ children }: { children: ReactNode }) => (
+  <ul
+    className="kbnSearchOption__tagsList"
+    aria-label={i18n.translate('xpack.globalSearchBar.searchBar.optionTagListAriaLabel', {
+      defaultMessage: 'Tags',
+    })}
+  >
+    {children}
+  </ul>
+);
+
+const buildListItem = ({ color, name, id }: Tag) => {
+  return (
+    <li className="kbnSearchOption__tagsListItem" key={id}>
+      <EuiBadge color={color}>{name}</EuiBadge>
+    </li>
+  );
+};
+
+const tagList = (tags: Tag[], searchTagIds: string[]) => {
+  const TAGS_TO_SHOW = 3;
+  const showOverflow = tags.length > TAGS_TO_SHOW;
+
+  if (!showOverflow) return <TagListWrapper>{tags.map(buildListItem)}</TagListWrapper>;
+
+  // float searched tags to the start of the list, actual order doesn't matter
+  tags.sort((a) => {
+    if (searchTagIds.find((id) => id === a.id)) return -1;
+    return 1;
+  });
+
+  const overflowList = tags.splice(TAGS_TO_SHOW);
+  const overflowMessage = i18n.translate('xpack.globalSearchBar.searchbar.overflowTagsAriaLabel', {
+    defaultMessage: '{n} more {n, plural, one {tag} other {tags}}: {tags}',
+    values: {
+      n: overflowList.length,
+      // @ts-ignore-line
+      tags: overflowList.map(({ name }) => name),
+    },
+  });
+
+  return (
+    <TagListWrapper>
+      {tags.map(buildListItem)}
+      <li className="kbnSearchOption__tagsListItem" aria-label={overflowMessage}>
+        <EuiBadge title={overflowMessage}>+{overflowList.length}</EuiBadge>
+      </li>
+    </TagListWrapper>
+  );
+};
+
+const resultToOption = (
+  result: GlobalSearchResult,
+  searchTagIds: string[],
+  getTag?: SavedObjectTaggingPluginStart['ui']['getTag']
+): EuiSelectableTemplateSitewideOption => {
+  const { id, title, url, icon, type, meta = {} } = result;
+  const { tagIds = [], categoryLabel = '' } = meta as { tagIds: string[]; categoryLabel: string };
   // only displaying icons for applications
   const useIcon = type === 'application';
   const option: EuiSelectableTemplateSitewideOption = {
@@ -88,10 +145,13 @@ const resultToOption = (result: GlobalSearchResult): EuiSelectableTemplateSitewi
     'data-test-subj': `nav-search-option`,
   };
 
-  if (type === 'application') {
-    option.meta = [{ text: (meta?.categoryLabel as string) ?? '' }];
-  } else {
-    option.meta = [{ text: cleanMeta(type) }];
+  if (type === 'application') option.meta = [{ text: categoryLabel }];
+  else option.meta = [{ text: cleanMeta(type) }];
+
+  if (getTag && tagIds.length) {
+    // TODO #85189 - refactor to use TagList instead of getTag
+    // Casting to Tag[] because we know all our IDs will be valid here, no need to check for undefined
+    option.append = tagList(tagIds.map(getTag) as Tag[], searchTagIds);
   }
 
   return option;
@@ -120,11 +180,13 @@ export function SearchBar({
 }: Props) {
   const isMounted = useMountedState();
   const [searchValue, setSearchValue] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
   const searchSubscription = useRef<Subscription | null>(null);
   const [options, _setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
+  const UNKNOWN_TAG_ID = '__unknown__';
 
   useEffect(() => {
     const fetch = async () => {
@@ -135,9 +197,9 @@ export function SearchBar({
   }, [globalSearch]);
 
   const loadSuggestions = useCallback(
-    (searchTerm: string) => {
+    (term: string) => {
       return getSuggestions({
-        searchTerm,
+        searchTerm: term,
         searchableTypes,
         tagCache: taggingApi?.cache,
       });
@@ -146,13 +208,27 @@ export function SearchBar({
   );
 
   const setOptions = useCallback(
-    (_options: GlobalSearchResult[], suggestions: SearchSuggestion[]) => {
+    (
+      _options: GlobalSearchResult[],
+      suggestions: SearchSuggestion[],
+      searchTagIds: string[] = []
+    ) => {
       if (!isMounted()) {
         return;
       }
-      _setOptions([...suggestions.map(suggestionToOption), ..._options.map(resultToOption)]);
+
+      _setOptions([
+        ...suggestions.map(suggestionToOption),
+        ..._options.map((option) =>
+          resultToOption(
+            option,
+            searchTagIds?.filter((id) => id !== UNKNOWN_TAG_ID) ?? [],
+            taggingApi?.ui.getTag
+          )
+        ),
+      ]);
     },
-    [isMounted, _setOptions]
+    [isMounted, _setOptions, taggingApi]
   );
 
   useDebounce(
@@ -174,7 +250,7 @@ export function SearchBar({
       const tagIds =
         taggingApi && rawParams.filters.tags
           ? rawParams.filters.tags.map(
-              (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? '__unknown__'
+              (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
             )
           : undefined;
       const searchParams: GlobalSearchFindParams = {
@@ -182,12 +258,17 @@ export function SearchBar({
         types: rawParams.filters.types,
         tags: tagIds,
       };
+      // TODO technically a subtle bug here
+      // this term won't be set until the next time the debounce is fired
+      // so the SearchOption won't highlight anything if only one call is fired
+      // in practice, this is hard to spot, unlikely to happen, and is a negligible issue
+      setSearchTerm(rawParams.term ?? '');
 
       searchSubscription.current = globalSearch.find(searchParams, {}).subscribe({
         next: ({ results }) => {
           if (searchValue.length > 0) {
             aggregatedResults = [...results, ...aggregatedResults].sort(sortByScore);
-            setOptions(aggregatedResults, suggestions);
+            setOptions(aggregatedResults, suggestions, searchParams.tags);
             return;
           }
 
@@ -196,7 +277,7 @@ export function SearchBar({
 
           aggregatedResults = [...results, ...aggregatedResults].sort(sortByTitle);
 
-          setOptions(aggregatedResults, suggestions);
+          setOptions(aggregatedResults, suggestions, searchParams.tags);
         },
         error: () => {
           // Not doing anything on error right now because it'll either just show the previous
@@ -304,6 +385,7 @@ export function SearchBar({
       options={options}
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
+      renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchTerm)}
       popoverButton={
         <EuiHeaderSectionItemButton
           aria-label={i18n.translate(

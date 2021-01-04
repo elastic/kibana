@@ -65,6 +65,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
 
         memoryHistory.push({
@@ -111,6 +113,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
         memoryHistory.push({
           search: queryStringWithEventDetailSelected,
@@ -150,6 +154,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
 
         memoryHistory.push({
@@ -207,6 +213,8 @@ describe('Resolver: panel loading and resolution states', () => {
           history: memoryHistory,
           resolverComponentInstanceID,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
 
         memoryHistory.push({

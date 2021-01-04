@@ -57,7 +57,7 @@
   }
 
   .mlFieldDataCard__codeContent {
-    font-family: $euiCodeFontFamily;
+    @include euiCodeFont;
   }
 
   .mlFieldDataCard__stats {

@@ -126,6 +126,7 @@ describe('KibanaVersionMismatchAlert', () => {
           {
             cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
             ccs: undefined,
+            nodeName: 'Kibana instance alert',
             ui: {
               isFiring: true,
               message: {

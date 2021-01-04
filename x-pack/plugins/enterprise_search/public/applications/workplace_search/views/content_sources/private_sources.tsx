@@ -7,9 +7,8 @@
 import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { Link } from 'react-router-dom';
 
-import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 
 import { LicensingLogic } from '../../../../applications/shared/licensing';
 
@@ -18,6 +17,7 @@ import { ADD_SOURCE_PATH } from '../../routes';
 import noSharedSourcesIcon from '../../assets/share_circle.svg';
 
 import { Loading } from '../../../shared/loading';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
@@ -79,11 +79,9 @@ export const PrivateSources: React.FC = () => {
   }
 
   const headerAction = (
-    <Link to={ADD_SOURCE_PATH}>
-      <EuiButton fill color="primary" data-test-subj="AddSourceButton">
-        {PRIVATE_LINK_TITLE}
-      </EuiButton>
-    </Link>
+    <EuiButtonTo to={ADD_SOURCE_PATH} fill color="primary" data-test-subj="AddSourceButton">
+      {PRIVATE_LINK_TITLE}
+    </EuiButtonTo>
   );
 
   const sourcesHeader = (

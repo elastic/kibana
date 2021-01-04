@@ -17,11 +17,11 @@ import type {
   TimelineType,
   TimelineStatus,
   RowRendererId,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
-
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
 /** Uniquely identifies a column */
@@ -43,18 +43,13 @@ export interface ColumnHeaderOptions {
   width: number;
 }
 
-export enum TimelineTabs {
-  query = 'query',
-  graph = 'graph',
-  notes = 'notes',
-  pinned = 'pinned',
-}
-
 export interface TimelineModel {
   /** The selected tab to displayed in the timeline */
   activeTab: TimelineTabs;
   /** The columns displayed in the timeline */
   columns: ColumnHeaderOptions[];
+  /** Timeline saved object owner */
+  createdBy?: string;
   /** The sources of the event data shown in the timeline */
   dataProviders: DataProvider[];
   /** Events to not be rendered **/
@@ -116,6 +111,7 @@ export interface TimelineModel {
     start: string;
     end: string;
   };
+  showSaveModal?: boolean;
   savedQueryId?: string | null;
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
   selectedEventIds: Record<string, TimelineNonEcsData[]>;
@@ -124,7 +120,7 @@ export interface TimelineModel {
   /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
   showCheckboxes: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
-  sort: Sort;
+  sort: Sort[];
   /** status: active | draft */
   status: TimelineStatus;
   /** updated saved object timestamp */

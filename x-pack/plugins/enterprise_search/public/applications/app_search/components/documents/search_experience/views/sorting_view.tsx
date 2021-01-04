@@ -33,8 +33,9 @@ export const SortingView: React.FC<Props> = ({ onChange, options, value }) => {
   const selectedValue = value && !valuesFromOptions.includes(value) ? undefined : value;
 
   return (
-    <div>
+    <>
       <EuiSelect
+        fullWidth
         options={options.map(wrapSortingOptionForEuiSelect)}
         value={selectedValue}
         prepend={i18n.translate('xpack.enterpriseSearch.appSearch.documents.search.sortBy', {
@@ -48,6 +49,6 @@ export const SortingView: React.FC<Props> = ({ onChange, options, value }) => {
           }
         )}
       />
-    </div>
+    </>
   );
 };

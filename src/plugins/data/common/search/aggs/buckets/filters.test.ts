@@ -84,19 +84,24 @@ describe('Filters Agg', () => {
       });
       expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
         Object {
-          "arguments": Object {
-            "enabled": Array [
-              true,
-            ],
-            "filters": Array [
-              "[{\\"label\\":\\"a\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"foo\\"}},{\\"label\\":\\"b\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"status:200\\"}},{\\"label\\":\\"c\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"status:[400 TO 499] AND (foo OR bar)\\"}}]",
-            ],
-            "id": Array [
-              "test",
-            ],
-          },
-          "function": "aggFilters",
-          "type": "function",
+          "chain": Array [
+            Object {
+              "arguments": Object {
+                "enabled": Array [
+                  true,
+                ],
+                "filters": Array [
+                  "[{\\"label\\":\\"a\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"foo\\"}},{\\"label\\":\\"b\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"status:200\\"}},{\\"label\\":\\"c\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"status:[400 TO 499] AND (foo OR bar)\\"}}]",
+                ],
+                "id": Array [
+                  "test",
+                ],
+              },
+              "function": "aggFilters",
+              "type": "function",
+            },
+          ],
+          "type": "expression",
         }
       `);
     });

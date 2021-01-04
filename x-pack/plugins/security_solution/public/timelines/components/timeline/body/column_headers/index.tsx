@@ -4,10 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiCheckbox, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCheckbox,
+  EuiDataGridSorting,
+  EuiToolTip,
+  useDataGridColumnSorting,
+} from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
-import deepEqual from 'fast-deep-equal';
+import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
 
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
@@ -19,7 +27,10 @@ import {
 } from '../../../../../common/components/drag_and_drop/helpers';
 import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
 import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
-import { useFullScreen } from '../../../../../common/containers/use_full_screen';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../../../common/containers/use_full_screen';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { OnSelectAll } from '../../events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../../helpers';
@@ -34,11 +45,26 @@ import {
   EventsThGroupData,
   EventsTrHeader,
 } from '../../styles';
-import { Sort } from '../sort';
+import { Sort, SortDirection } from '../sort';
 import { EventsSelect } from './events_select';
 import { ColumnHeader } from './column_header';
 
 import * as i18n from './translations';
+import { timelineActions } from '../../../../store/timeline';
+
+const SortingColumnsContainer = styled.div`
+  button {
+    color: ${({ theme }) => theme.eui.euiColorPrimary};
+  }
+
+  .euiPopover .euiButtonEmpty .euiButtonContent {
+    padding: 0;
+
+    .euiButtonEmpty__text {
+      display: none;
+    }
+  }
+`;
 
 interface Props {
   actionsColumnWidth: number;
@@ -49,7 +75,7 @@ interface Props {
   onSelectAll: OnSelectAll;
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
-  sort: Sort;
+  sort: Sort[];
   timelineId: string;
 }
 
@@ -98,13 +124,10 @@ export const ColumnHeadersComponent = ({
   sort,
   timelineId,
 }: Props) => {
+  const dispatch = useDispatch();
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-  const {
-    timelineFullScreen,
-    setTimelineFullScreen,
-    globalFullScreen,
-    setGlobalFullScreen,
-  } = useFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
 
   const toggleFullScreen = useCallback(() => {
     if (timelineId === TimelineId.active) {
@@ -189,6 +212,48 @@ export const ColumnHeadersComponent = ({
     [ColumnHeaderList]
   );
 
+  const myColumns = useMemo(
+    () =>
+      columnHeaders.map(({ aggregatable, label, id, type }) => ({
+        id,
+        isSortable: aggregatable,
+        displayAsText: label,
+        schema: type,
+      })),
+    [columnHeaders]
+  );
+
+  const onSortColumns = useCallback(
+    (cols: EuiDataGridSorting['columns']) =>
+      dispatch(
+        timelineActions.updateSort({
+          id: timelineId,
+          sort: cols.map(({ id, direction }) => ({
+            columnId: id,
+            sortDirection: direction as SortDirection,
+          })),
+        })
+      ),
+    [dispatch, timelineId]
+  );
+  const sortedColumns = useMemo(
+    () => ({
+      onSort: onSortColumns,
+      columns: sort.map<{ id: string; direction: 'asc' | 'desc' }>(
+        ({ columnId, sortDirection }) => ({
+          id: columnId,
+          direction: sortDirection as 'asc' | 'desc',
+        })
+      ),
+    }),
+    [onSortColumns, sort]
+  );
+  const displayValues = useMemo(
+    () => columnHeaders.reduce((acc, ch) => ({ ...acc, [ch.id]: ch.label ?? ch.id }), {}),
+    [columnHeaders]
+  );
+  const ColumnSorting = useDataGridColumnSorting(myColumns, sortedColumns, {}, [], displayValues);
+
   return (
     <EventsThead data-test-subj="column-headers">
       <EventsTrHeader>
@@ -198,7 +263,7 @@ export const ColumnHeadersComponent = ({
           isEventViewer={isEventViewer}
         >
           {showSelectAllCheckbox && (
-            <EventsTh>
+            <EventsTh role="checkbox">
               <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EuiCheckbox
                   data-test-subj="select-all-events"
@@ -210,7 +275,7 @@ export const ColumnHeadersComponent = ({
             </EventsTh>
           )}
 
-          <EventsTh>
+          <EventsTh role="button">
             <StatefulFieldsBrowser
               browserFields={browserFields}
               columnHeaders={columnHeaders}
@@ -220,14 +285,15 @@ export const ColumnHeadersComponent = ({
               width={FIELD_BROWSER_WIDTH}
             />
           </EventsTh>
-          <EventsTh>
+
+          <EventsTh role="button">
             <StatefulRowRenderersBrowser
               data-test-subj="row-renderers-browser"
               timelineId={timelineId}
             />
           </EventsTh>
 
-          <EventsTh>
+          <EventsTh role="button">
             <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
               <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : i18n.FULL_SCREEN}>
                 <EuiButtonIcon
@@ -238,16 +304,27 @@ export const ColumnHeadersComponent = ({
                   }
                   className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
                   color={fullScreen ? 'ghost' : 'primary'}
-                  data-test-subj="full-screen"
+                  data-test-subj={
+                    // a full screen button gets created for timeline and for the host page
+                    // this sets the data-test-subj for each case so that tests can differentiate between them
+                    timelineId === TimelineId.active ? 'full-screen-active' : 'full-screen'
+                  }
                   iconType="fullScreen"
                   onClick={toggleFullScreen}
                 />
               </EuiToolTip>
             </EventsThContent>
           </EventsTh>
+          <EventsTh role="button">
+            <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+              <EuiToolTip content={i18n.SORT_FIELDS}>
+                <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
+              </EuiToolTip>
+            </EventsThContent>
+          </EventsTh>
 
           {showEventsSelect && (
-            <EventsTh>
+            <EventsTh role="button">
               <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
                 <EventsSelect checkState="unchecked" timelineId={timelineId} />
               </EventsThContent>
@@ -278,7 +355,7 @@ export const ColumnHeaders = React.memo(
     prevProps.onSelectAll === nextProps.onSelectAll &&
     prevProps.showEventsSelect === nextProps.showEventsSelect &&
     prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
-    prevProps.sort === nextProps.sort &&
+    deepEqual(prevProps.sort, nextProps.sort) &&
     prevProps.timelineId === nextProps.timelineId &&
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
     deepEqual(prevProps.browserFields, nextProps.browserFields)

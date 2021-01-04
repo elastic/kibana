@@ -371,7 +371,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       expect(colorProperty._getMbColor()).toBeNull();
     });
 
-    describe('pre-defined color ramp', () => {
+    describe('interpolate color ramp', () => {
       test('should return null when color ramp is not provided', async () => {
         const dynamicStyleOptions = {
           type: COLOR_MAP_TYPE.ORDINAL,
@@ -457,7 +457,16 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const colorProperty = makeProperty(dynamicStyleOptions);
         expect(colorProperty._getMbColor()).toEqual([
           'step',
-          ['coalesce', ['feature-state', 'foobar'], 9],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['feature-state', 'foobar'], null],
+              9,
+              ['max', ['min', ['to-number', ['feature-state', 'foobar']], 100], 10],
+            ],
+            9,
+          ],
           'rgba(0,0,0,0)',
           10,
           '#f7faff',
@@ -483,7 +492,16 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         const colorProperty = makeProperty(dynamicStyleOptions, undefined, field);
         expect(colorProperty._getMbColor()).toEqual([
           'step',
-          ['coalesce', ['get', 'foobar'], 9],
+          [
+            'coalesce',
+            [
+              'case',
+              ['==', ['get', 'foobar'], null],
+              9,
+              ['max', ['min', ['to-number', ['get', 'foobar']], 100], 10],
+            ],
+            9,
+          ],
           'rgba(0,0,0,0)',
           10,
           '#f7faff',

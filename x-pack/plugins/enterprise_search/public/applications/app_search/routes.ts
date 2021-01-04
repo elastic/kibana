@@ -12,6 +12,7 @@ export const DOCS_PREFIX = `https://www.elastic.co/guide/en/app-search/${CURRENT
 
 export const ROOT_PATH = '/';
 export const SETUP_GUIDE_PATH = '/setup_guide';
+export const LIBRARY_PATH = '/library';
 export const SETTINGS_PATH = '/settings/account';
 export const CREDENTIALS_PATH = '/credentials';
 export const ROLE_MAPPINGS_PATH = '#/role-mappings'; // This page seems to 404 if the # isn't included
@@ -28,6 +29,9 @@ export const ENGINE_ANALYTICS_PATH = '/analytics';
 
 export const ENGINE_DOCUMENTS_PATH = '/documents';
 export const ENGINE_DOCUMENT_DETAIL_PATH = `${ENGINE_DOCUMENTS_PATH}/:documentId`;
+export const getDocumentDetailRoute = (engineName: string, documentId: string) => {
+  return generatePath(ENGINE_PATH + ENGINE_DOCUMENT_DETAIL_PATH, { engineName, documentId });
+};
 
 export const ENGINE_SCHEMA_PATH = '/schema/edit';
 export const ENGINE_REINDEX_JOB_PATH = '/reindex-job/:activeReindexJobId';

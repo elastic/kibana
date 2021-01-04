@@ -413,6 +413,7 @@ export const threat_tactic = t.type({
   name: threat_tactic_name,
   reference: threat_tactic_reference,
 });
+export type ThreatTactic = t.TypeOf<typeof threat_tactic>;
 export const threat_subtechnique_id = t.string;
 export const threat_subtechnique_name = t.string;
 export const threat_subtechnique_reference = t.string;
@@ -421,6 +422,7 @@ export const threat_subtechnique = t.type({
   name: threat_subtechnique_name,
   reference: threat_subtechnique_reference,
 });
+export type ThreatSubtechnique = t.TypeOf<typeof threat_subtechnique>;
 export const threat_subtechniques = t.array(threat_subtechnique);
 export const threat_technique_id = t.string;
 export const threat_technique_name = t.string;
@@ -439,21 +441,22 @@ export const threat_technique = t.intersection([
     })
   ),
 ]);
+export type ThreatTechnique = t.TypeOf<typeof threat_technique>;
 export const threat_techniques = t.array(threat_technique);
-export const threat = t.array(
-  t.exact(
-    t.type({
-      framework: threat_framework,
-      tactic: threat_tactic,
-      technique: threat_techniques,
-    })
-  )
+export const threat = t.exact(
+  t.type({
+    framework: threat_framework,
+    tactic: threat_tactic,
+    technique: threat_techniques,
+  })
 );
-
 export type Threat = t.TypeOf<typeof threat>;
 
-export const threatOrUndefined = t.union([threat, t.undefined]);
-export type ThreatOrUndefined = t.TypeOf<typeof threatOrUndefined>;
+export const threats = t.array(threat);
+export type Threats = t.TypeOf<typeof threats>;
+
+export const threatsOrUndefined = t.union([threats, t.undefined]);
+export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 
 export const threshold = t.exact(
   t.type({

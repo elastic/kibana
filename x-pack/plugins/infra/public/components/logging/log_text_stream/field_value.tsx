@@ -14,7 +14,12 @@ export const FieldValue: React.FC<{
   highlightTerms: string[];
   isActiveHighlight: boolean;
   value: JsonArray;
-}> = React.memo(({ highlightTerms, isActiveHighlight, value }) => {
+  render?: (value: JsonValue) => React.ReactNode;
+}> = React.memo(({ highlightTerms, isActiveHighlight, value, render }) => {
+  if (render) {
+    return <>{render(value.length === 1 ? value[0] : value)}</>;
+  }
+
   if (value.length === 1) {
     return (
       <>
