@@ -9,7 +9,8 @@
     "types": [
       "node",
       "jest"
-    ]
+    ],
+    "incremental": false
   },
   "include": ["index.ts", "jest/**/*", "test-d/**/*"],
   "exclude": [

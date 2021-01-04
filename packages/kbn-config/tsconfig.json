@@ -5,7 +5,8 @@
     "outDir": "./target",
     "stripInternal": false,
     "declarationMap": true,
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "incremental": false
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["target"]

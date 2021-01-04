@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "target",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "incremental": false
   },
   "include": [
     "src/**/*"

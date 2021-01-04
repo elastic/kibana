@@ -3,7 +3,8 @@
   "compilerOptions": {
     "declaration": true,
     "outDir": "target",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "incremental": false
   },
   "include": ["*.ts", "lib/*.ts"]
 }

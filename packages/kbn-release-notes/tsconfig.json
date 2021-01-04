@@ -4,7 +4,8 @@
     "outDir": "./target",
     "declaration": true,
     "sourceMap": true,
-    "target": "ES2019"
+    "target": "ES2019",
+    "incremental": false
   },
   "include": [
     "src/**/*"

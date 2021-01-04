@@ -5,7 +5,8 @@
     "stripInternal": false,
     "declaration": true,
     "declarationMap": true,
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "incremental": false
   },
   "include": ["./src/**/*"]
 }
