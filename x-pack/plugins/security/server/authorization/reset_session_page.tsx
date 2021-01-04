@@ -55,7 +55,7 @@ export function ResetSessionPage({
       </head>
       <body>
         <I18nProvider>
-          <EuiPage style={{ minHeight: '100vh' }}>
+          <EuiPage paddingSize="none" style={{ minHeight: '100vh' }}>
             <EuiPageBody>
               <EuiPageContent verticalPosition="center" horizontalPosition="center">
                 <EuiEmptyPrompt
