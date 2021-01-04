@@ -6964,7 +6964,7 @@
     "xpack.enterpriseSearch.workplaceSearch.groups.sourcesModalTitle": "{groupName}と共有するコンテンツソースを選択",
     "xpack.enterpriseSearch.workplaceSearch.groups.userListCount": "{maxVisibleUsers}/{numUsers}ユーザーを表示しています。",
     "xpack.enterpriseSearch.workplaceSearch.groups.usersModalLabel": "ユーザー",
-    "xpack.enterpriseSearch.workplaceSearch.headerActions.searchApplication": "検索アプリケーションに移動",
+    "xpack.enterpriseSearch.workplaceSearch.nav.searchApplication": "検索アプリケーションに移動",
     "xpack.enterpriseSearch.workplaceSearch.nav.groups": "グループ",
     "xpack.enterpriseSearch.workplaceSearch.nav.groups.groupOverview": "概要",
     "xpack.enterpriseSearch.workplaceSearch.nav.groups.sourcePrioritization": "ソースの優先度",

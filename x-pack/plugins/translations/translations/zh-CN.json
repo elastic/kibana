@@ -6970,7 +6970,7 @@
     "xpack.enterpriseSearch.workplaceSearch.groups.sourcesModalTitle": "选择要与 {groupName} 共享的内容源",
     "xpack.enterpriseSearch.workplaceSearch.groups.userListCount": "正在显示 {numUsers} 个用户中的 {maxVisibleUsers} 个。",
     "xpack.enterpriseSearch.workplaceSearch.groups.usersModalLabel": "用户",
-    "xpack.enterpriseSearch.workplaceSearch.headerActions.searchApplication": "前往搜索应用程序",
+    "xpack.enterpriseSearch.workplaceSearch.nav.searchApplication": "前往搜索应用程序",
     "xpack.enterpriseSearch.workplaceSearch.nav.groups": "组",
     "xpack.enterpriseSearch.workplaceSearch.nav.groups.groupOverview": "概览",
     "xpack.enterpriseSearch.workplaceSearch.nav.groups.sourcePrioritization": "源的优先级排序",
