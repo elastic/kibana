@@ -13,6 +13,5 @@ export {
   IAsyncSearchOptions,
   pollSearch,
   BackgroundSessionSavedObjectAttributes,
-  BackgroundSessionFindOptions,
   BackgroundSessionStatus,
 } from './search';

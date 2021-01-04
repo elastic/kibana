@@ -16,6 +16,7 @@ import {
   SavedObject,
   CoreSetup,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsFindOptions,
 } from '../../../../../../src/core/server';
 import {
   IKibanaSearchRequest,
@@ -34,11 +35,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
-import {
-  BackgroundSessionSavedObjectAttributes,
-  BackgroundSessionFindOptions,
-  BackgroundSessionStatus,
-} from '../../../common';
+import { BackgroundSessionSavedObjectAttributes, BackgroundSessionStatus } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
@@ -301,7 +298,7 @@ export class BackgroundSessionService implements ISessionService {
 
   // TODO: Throw an error if this session doesn't belong to this user
   public find = (
-    options: BackgroundSessionFindOptions,
+    options: SavedObjectsFindOptions,
     { savedObjectsClient }: BackgroundSessionDependencies
   ) => {
     return savedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
@@ -401,7 +398,7 @@ export class BackgroundSessionService implements ISessionService {
         save: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
           this.save(sessionId, attributes, deps),
         get: (sessionId: string) => this.get(sessionId, deps),
-        find: (options: BackgroundSessionFindOptions) => this.find(options, deps),
+        find: (options: SavedObjectsFindOptions) => this.find(options, deps),
         update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
           this.update(sessionId, attributes, deps),
         delete: (sessionId: string) => this.delete(sessionId, deps),

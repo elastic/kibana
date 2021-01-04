@@ -21,11 +21,3 @@ export interface BackgroundSessionSavedObjectAttributes {
   restoreState: Record<string, unknown>;
   idMapping: Record<string, string>;
 }
-
-export interface BackgroundSessionFindOptions {
-  page?: number;
-  perPage?: number;
-  sortField?: string;
-  sortOrder?: string;
-  filter?: string;
-}

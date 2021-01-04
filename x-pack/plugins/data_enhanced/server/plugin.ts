@@ -27,11 +27,13 @@ interface SetupDependencies {
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
 }
-interface StartDependencies {
+export interface StartDependencies {
+  data: DataPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
-export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDependencies> {
+export class EnhancedDataServerPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies> {
   private readonly logger: Logger;
   private sessionService!: BackgroundSessionService;
 
