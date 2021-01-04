@@ -5,10 +5,11 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 
 import { externalUrl, getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
+
+import { NAV } from '../../constants';
 
 export const WorkplaceSearchHeaderActions: React.FC = () => {
   if (!externalUrl.enterpriseSearchUrl) return null;
@@ -20,11 +21,7 @@ export const WorkplaceSearchHeaderActions: React.FC = () => {
       iconType="search"
       style={{ marginRight: 5 }}
     >
-      <EuiText size="s">
-        {i18n.translate('xpack.enterpriseSearch.workplaceSearch.headerActions.searchApplication', {
-          defaultMessage: 'Go to search application',
-        })}
-      </EuiText>
+        <EuiText size="s">{NAV.SEARCH}</EuiText>
     </EuiButtonEmpty>
   );
 };
