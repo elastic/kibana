@@ -204,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
     });
-    describe('missing timestamps', () => {
+    describe.skip('missing timestamps', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
         // to edit these files run the following script
@@ -216,7 +216,7 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllAlerts(supertest);
         await esArchiver.unload('security_solution/timestamp_override');
       });
-      it('should create a single rule which has a timestamp override and generates two signals with a failing status', async () => {
+      it.skip('should create a single rule which has a timestamp override and generates two signals with a failing status', async () => {
         // should be a failing status because one of the indices in the index pattern is missing
         // the timestamp override field.
 
