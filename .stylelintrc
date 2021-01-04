@@ -1,3 +1,5 @@
+plugins:
+  - stylelint-scss
 rules:
   number-leading-zero: never
   color-hex-case: upper
