@@ -125,8 +125,8 @@ export function useFormState<Values extends FormValues, Result>({
   const [submitCount, setSubmitCount] = useState(0);
 
   const [validationState, validateForm] = useAsyncFn(
-    async (values: Values) => {
-      const nextErrors = await validate(values);
+    async (formValues: Values) => {
+      const nextErrors = await validate(formValues);
       setErrors(nextErrors);
       if (Object.keys(nextErrors).length === 0) {
         setSubmitCount(0);
@@ -137,12 +137,12 @@ export function useFormState<Values extends FormValues, Result>({
   );
 
   const [submitState, submitForm] = useAsyncFn(
-    async (values: Values) => {
-      const nextErrors = await validateForm(values);
-      setTouched(mapDeep(values, true));
+    async (formValues: Values) => {
+      const nextErrors = await validateForm(formValues);
+      setTouched(mapDeep(formValues, true));
       setSubmitCount(submitCount + 1);
       if (Object.keys(nextErrors).length === 0) {
-        return onSubmit(values);
+        return onSubmit(formValues);
       }
     },
     [validateForm, onSubmit]
@@ -177,7 +177,7 @@ export function useFormState<Values extends FormValues, Result>({
 type DeepMap<T, TValue> = {
   [K in keyof T]?: T[K] extends any[]
     ? T[K][number] extends object
-      ? DeepMap<T[K][number], TValue>[]
+      ? Array<DeepMap<T[K][number], TValue>>
       : TValue
     : T[K] extends object
     ? DeepMap<T[K], TValue>

@@ -30,12 +30,12 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { getUserDisplayName } from '../../../../common/model';
 import { isUserDeprecated, isUserReserved } from '../user_utils';
-import { UserAPIClient } from '..';
 import { UserForm } from './user_form';
 import { ChangePasswordFlyout } from './change_password_flyout';
 import { ConfirmDisableUsers } from './confirm_disable_users';
 import { ConfirmEnableUsers } from './confirm_enable_users';
 import { ConfirmDeleteUsers } from './confirm_delete_users';
+import { UserAPIClient } from '..';
 
 export interface EditUserPageProps {
   username: string;
@@ -61,13 +61,13 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
 
   useEffect(() => {
     getUser();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (error) {
       backToUsers();
     }
-  }, [error]);
+  }, [error]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) {
     return null;

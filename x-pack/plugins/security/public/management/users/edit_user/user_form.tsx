@@ -68,6 +68,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
     services.http,
   ]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const getUsersThrottled = useCallback(
     throttle(() => new UserAPIClient(services.http!).getUsers(), 10000),
     [services.http]
@@ -75,6 +76,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
 
   const [form, eventHandlers] = useForm({
     onSubmit: async (values) => {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { password, confirm_password, ...rest } = values;
       const user = isNewUser ? { password, ...rest } : rest;
       try {
@@ -98,7 +100,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                 defaultMessage: 'Could not create user ‘{username}’',
                 values: { username: user.username },
               })
-            : i18n.translate('xpack.security.management.users.userForm.createErrorMessage', {
+            : i18n.translate('xpack.security.management.users.userForm.updateErrorMessage', {
                 defaultMessage: 'Could not update user ‘{username}’',
                 values: { username: user.username },
               }),
@@ -140,7 +142,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                 }
               );
             }
-          } catch (error) {}
+          } catch (error) {} // eslint-disable-line no-empty
         }
 
         if (!values.password) {
@@ -190,11 +192,11 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
 
   useEffect(() => {
     getRoles();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const availableRoles = rolesState.value ?? [];
   const selectedRoleNames = form.values.roles ?? [];
-  const deprecatedRoles = selectedRoleNames.reduce<Array<Role>>((roles, name) => {
+  const deprecatedRoles = selectedRoleNames.reduce<Role[]>((roles, name) => {
     const role = availableRoles.find((r) => r.name === name);
     if (role && isRoleDeprecated(role)) {
       roles.push(role);
