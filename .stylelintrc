@@ -9,7 +9,7 @@ rules:
     - ignoreProperties:
       - font-size
       - word-break
-      # Triage needed for:
+      # TODO: triage needed for:
       - background
       - composes
       - text-align
@@ -17,6 +17,21 @@ rules:
       - transition
       - width
       - display
+
   # ($var / 2) rather than ($var/2)
   function-calc-no-unspaced-operator: true
+
+  # something { not something{
   block-opening-brace-space-before: always
+
+  # TODO: # Allows input[type=search]
+  # selector-no-qualifying-type:
+  #   - true
+  #   - ignore:
+  #     - attribute
+
+  # TODO; Put a line-break between sections of CSS, but allow quicky one-liners for legibility
+  # rule-empty-line-before:
+  #   - always-multi-line
+  #   - except:
+  #     - inside-block-and-after-rule
