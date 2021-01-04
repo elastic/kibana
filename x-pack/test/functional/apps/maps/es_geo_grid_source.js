@@ -13,7 +13,6 @@ export default function ({ getPageObjects, getService }) {
   const security = getService('security');
 
   describe('layer geo grid aggregation source', () => {
-    const EXPECTED_NUMBER_FEATURES_ZOOMED_OUT = 4;
     const DATA_CENTER_LON = -98;
     const DATA_CENTER_LAT = 38;
 
@@ -40,7 +39,7 @@ export default function ({ getPageObjects, getService }) {
       return requestTimestamp;
     }
 
-    function makeRequestTestsForGeoPrecision(LAYER_ID) {
+    function makeRequestTestsForGeoPrecision(LAYER_ID, expectedNumFeaturesZoomedOut) {
       describe('geoprecision - requests', () => {
         let beforeTimestamp;
         beforeEach(async () => {
@@ -83,7 +82,7 @@ export default function ({ getPageObjects, getService }) {
         it('should request the data when the map covers the databounds', async () => {
           const mapboxStyle = await PageObjects.maps.getMapboxStyle();
           expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
-            EXPECTED_NUMBER_FEATURES_ZOOMED_OUT
+            expectedNumFeaturesZoomedOut
           );
         });
 
@@ -122,7 +121,7 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
-      makeRequestTestsForGeoPrecision(LAYER_ID);
+      makeRequestTestsForGeoPrecision(LAYER_ID, 4);
 
       describe('query bar', () => {
         before(async () => {
@@ -199,7 +198,7 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
-      makeRequestTestsForGeoPrecision(LAYER_ID);
+      makeRequestTestsForGeoPrecision(LAYER_ID, 8);
 
       describe('query bar', () => {
         before(async () => {
