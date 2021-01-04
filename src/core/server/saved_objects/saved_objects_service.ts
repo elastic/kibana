@@ -50,6 +50,7 @@ import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
 import { SavedObjectExporter, ISavedObjectExporter } from './export';
+import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
@@ -217,6 +218,10 @@ export interface SavedObjectsServiceStart {
    * Creates a {@link ISavedObjectExporter | exporter} bound to given client.
    */
   createExporter: (client: SavedObjectsClientContract) => ISavedObjectExporter;
+  /**
+   * Creates a {@link ISavedObjectsImporter | importer} bound to given client.
+   */
+  createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
   /**
    * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
    * {@link SavedObjectsType | saved object types}
@@ -460,6 +465,12 @@ export class SavedObjectsService
         new SavedObjectExporter({
           savedObjectsClient,
           exportSizeLimit: this.config!.maxImportExportSize,
+        }),
+      createImporter: (savedObjectsClient) =>
+        new SavedObjectsImporter({
+          savedObjectsClient,
+          typeRegistry: this.typeRegistry,
+          importSizeLimit: this.config!.maxImportExportSize,
         }),
       getTypeRegistry: () => this.typeRegistry,
     };

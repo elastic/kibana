@@ -31,6 +31,7 @@ import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 import { typeRegistryMock } from './saved_objects_type_registry.mock';
 import { savedObjectExporterMock } from './export/saved_object_exporter.mock';
+import { savedObjectsImporterMock } from './import/saved_objects_importer.mock';
 import { migrationMocks } from './migrations/mocks';
 import { ServiceStatusLevels } from '../status';
 import { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
@@ -44,6 +45,7 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
     createScopedRepository: jest.fn(),
     createSerializer: jest.fn(),
     createExporter: jest.fn(),
+    createImporter: jest.fn(),
     getTypeRegistry: jest.fn(),
   };
 
@@ -51,6 +53,8 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
   startContrat.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
   startContrat.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
   startContrat.getTypeRegistry.mockReturnValue(typeRegistry ?? typeRegistryMock.create());
+  startContrat.createExporter.mockReturnValue(savedObjectExporterMock.create());
+  startContrat.createImporter.mockReturnValue(savedObjectsImporterMock.create());
 
   return startContrat;
 };
@@ -109,4 +113,5 @@ export const savedObjectsServiceMock = {
   createMigrationContext: migrationMocks.createContext,
   createTypeRegistryMock: typeRegistryMock.create,
   createExporter: savedObjectExporterMock.create,
+  createImporter: savedObjectsImporterMock.create,
 };

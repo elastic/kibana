@@ -22,7 +22,6 @@ import { Readable } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
-import { resolveSavedObjectsImportErrors } from '../import';
 import { SavedObjectConfig } from '../saved_objects_config';
 import { createSavedObjectsStreamFromNdJson } from './utils';
 
@@ -41,7 +40,7 @@ export const registerResolveImportErrorsRoute = (
   router: IRouter,
   { config, coreUsageData }: RouteDependencies
 ) => {
-  const { maxImportExportSize, maxImportPayloadBytes } = config;
+  const { maxImportPayloadBytes } = config;
 
   router.post(
     {
@@ -103,12 +102,10 @@ export const registerResolveImportErrorsRoute = (
         });
       }
 
-      const result = await resolveSavedObjectsImportErrors({
-        typeRegistry: context.core.savedObjects.typeRegistry,
-        savedObjectsClient: context.core.savedObjects.client,
+      const { importer } = context.core.savedObjects;
+      const result = await importer.resolveImportErrors({
         readStream,
         retries: req.body.retries,
-        objectLimit: maxImportExportSize,
         createNewCopies,
       });
 

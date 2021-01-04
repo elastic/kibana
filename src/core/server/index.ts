@@ -59,6 +59,7 @@ import {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
   ISavedObjectExporter,
+  ISavedObjectsImporter,
 } from './saved_objects';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
@@ -404,6 +405,7 @@ export interface RequestHandlerContext {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
       exporter: ISavedObjectExporter;
+      importer: ISavedObjectsImporter;
     };
     elasticsearch: {
       client: IScopedClusterClient;

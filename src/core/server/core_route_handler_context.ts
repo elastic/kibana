@@ -25,6 +25,7 @@ import {
   InternalSavedObjectsServiceStart,
   ISavedObjectTypeRegistry,
   ISavedObjectExporter,
+  ISavedObjectsImporter,
 } from './saved_objects';
 import {
   InternalElasticsearchServiceStart,
@@ -69,6 +70,7 @@ class CoreSavedObjectsRouteHandlerContext {
   #scopedSavedObjectsClient?: SavedObjectsClientContract;
   #typeRegistry?: ISavedObjectTypeRegistry;
   #exporter?: ISavedObjectExporter;
+  #importer?: ISavedObjectsImporter;
 
   public get client() {
     if (this.#scopedSavedObjectsClient == null) {
@@ -89,6 +91,13 @@ class CoreSavedObjectsRouteHandlerContext {
       this.#exporter = this.savedObjectsStart.createExporter(this.client);
     }
     return this.#exporter;
+  }
+
+  public get importer() {
+    if (this.#importer == null) {
+      this.#importer = this.savedObjectsStart.createImporter(this.client);
+    }
+    return this.#importer;
   }
 }
 
