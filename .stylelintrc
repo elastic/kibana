@@ -1,8 +1,19 @@
-{
-  "rules": {
-    "number-leading-zero": "never",
-    "color-hex-case": "upper",
-    "string-quotes": "single",
-    "indentation": 2
-  }
-}
+rules:
+  number-leading-zero: never
+  color-hex-case: upper
+  string-quotes: single
+  indentation: 2
+  declaration-block-no-duplicate-properties: 
+    - true
+    # We use some rare duplicate property values for browser variance
+    - ignoreProperties:
+      - font-size
+      - word-break
+      # Triage needed for:
+      - background
+      - composes
+      - text-align
+      - filter
+      - transition
+      - width
+      - display
