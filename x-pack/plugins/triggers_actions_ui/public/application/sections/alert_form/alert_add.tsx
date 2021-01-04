@@ -7,8 +7,13 @@ import React, { useCallback, useReducer, useMemo, useState, useEffect } from 're
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeRegistryContract, Alert, AlertTypeRegistryContract } from '../../../types';
-import { AlertForm, getAlertErrors, hasObjectErrors, isValidAlert } from './alert_form';
+import {
+  ActionTypeRegistryContract,
+  Alert,
+  AlertTypeRegistryContract,
+  AlertUpdates,
+} from '../../../types';
+import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
@@ -109,38 +114,21 @@ const AlertAdd = ({
     alertType
   );
 
-  const hasAlertErrors = !isValidAlert(alert, alertErrors, alertActionsErrors);
-
-  const hasActionErrors =
-    Object.keys(alertActionsErrors).find((actionErrorsKey) =>
-      hasObjectErrors(alertActionsErrors[actionErrorsKey])
-    ) === undefined;
   // Confirm before saving if user is able to add actions but hasn't added any to this alert
   const shouldConfirmSave = canShowActions && alert.actions?.length === 0;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      if (isValidAlert(alert, alertErrors, alertActionsErrors)) {
-        const newAlert = await createAlert({ http, alert });
-        toasts.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
-            defaultMessage: 'Created alert "{alertName}"',
-            values: {
-              alertName: newAlert.name,
-            },
-          })
-        );
-        return newAlert;
-      } else {
-        setAlert(
-          getAlertWithInvalidatedFields(
-            alert as Alert,
-            alertParamsErrors,
-            alertBaseErrors,
-            alertActionsErrors
-          )
-        );
-      }
+      const newAlert = await createAlert({ http, alert: alert as AlertUpdates });
+      toasts.addSuccess(
+        i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
+          defaultMessage: 'Created alert "{alertName}"',
+          values: {
+            alertName: newAlert.name,
+          },
+        })
+      );
+      return newAlert;
     } catch (errorRes) {
       toasts.addDanger(
         errorRes.body?.message ??
@@ -192,7 +180,19 @@ const AlertAdd = ({
               isSaving={isSaving}
               onSave={async () => {
                 setIsSaving(true);
-                if (shouldConfirmSave && !hasAlertErrors && !hasActionErrors) {
+                if (!isValidAlert(alert, alertErrors, alertActionsErrors)) {
+                  setAlert(
+                    getAlertWithInvalidatedFields(
+                      alert as Alert,
+                      alertParamsErrors,
+                      alertBaseErrors,
+                      alertActionsErrors
+                    )
+                  );
+                  setIsSaving(false);
+                  return;
+                }
+                if (shouldConfirmSave) {
                   setIsConfirmAlertSaveModalOpen(true);
                 } else {
                   await saveAlertAndCloseFlyout();

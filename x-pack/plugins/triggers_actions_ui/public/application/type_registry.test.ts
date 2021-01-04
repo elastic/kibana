@@ -12,6 +12,7 @@ import {
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../types';
+import { actionTypeRegistryMock } from './action_type_registry.mock';
 
 export const ExpressionComponent: React.FunctionComponent = () => {
   return null;
