@@ -47,6 +47,9 @@ declare module 'src/core/server' {
 }
 
 export interface Services {
+  /**
+   * @deprecated Use `scopedClusterClient` instead.
+   */
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
@@ -61,10 +64,10 @@ export interface AlertServices<
 }
 
 export interface AlertExecutorOptions<
-  Params extends AlertTypeParams = AlertTypeParams,
-  State extends AlertTypeState = AlertTypeState,
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never
 > {
   alertId: string;
   startedAt: Date;
@@ -85,26 +88,28 @@ export interface ActionVariable {
   description: string;
 }
 
-// signature of the alert type executor function
 export type ExecutorType<
-  Params,
-  State,
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never
 > = (
   options: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>
 ) => Promise<State | void>;
 
+export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
+  validate: (object: unknown) => Params;
+}
 export interface AlertType<
-  Params extends AlertTypeParams = AlertTypeParams,
-  State extends AlertTypeState = AlertTypeState,
-  InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  Params extends AlertTypeParams = never,
+  State extends AlertTypeState = never,
+  InstanceState extends AlertInstanceState = never,
+  InstanceContext extends AlertInstanceContext = never
 > {
   id: string;
   name: string;
   validate?: {
-    params?: { validate: (object: unknown) => Params };
+    params?: AlertTypeParamsValidator<Params>;
   };
   actionGroups: ActionGroup[];
   defaultActionGroupId: ActionGroup['id'];
@@ -118,6 +123,13 @@ export interface AlertType<
   };
   minimumLicenseRequired: LicenseType;
 }
+
+export type UntypedAlertType = AlertType<
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext
+>;
 
 export interface RawAlertAction extends SavedObjectAttributes {
   group: string;
@@ -142,7 +154,8 @@ export interface RawAlertExecutionStatus extends SavedObjectAttributes {
   };
 }
 
-export type PartialAlert = Pick<Alert, 'id'> & Partial<Omit<Alert, 'id'>>;
+export type PartialAlert<Params extends AlertTypeParams = never> = Pick<Alert<Params>, 'id'> &
+  Partial<Omit<Alert<Params>, 'id'>>;
 
 export interface RawAlert extends SavedObjectAttributes {
   enabled: boolean;

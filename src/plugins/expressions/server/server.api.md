@@ -737,6 +737,8 @@ export interface IInterpreterRenderHandlers {
     // (undocumented)
     hasCompatibleActions?: (event: any) => Promise<boolean>;
     // (undocumented)
+    isSyncColorsEnabled: () => boolean;
+    // (undocumented)
     onDestroy: (fn: () => void) => void;
     // (undocumented)
     reload: () => void;
