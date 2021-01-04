@@ -3,13 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { delay } from 'bluebird';
 import expect from '@kbn/expect';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { panAnimationDuration } from '../../../../plugins/security_solution/public/resolver/store/camera/scaling_constants';
 
 const expectedDifference = 0.09;
+
+const waitForPanAnimationToFinish = () =>
+  new Promise((resolve) => setTimeout(resolve, panAnimationDuration + 1));
 
 export default function ({
   getPageObjects,
@@ -21,7 +24,6 @@ export default function ({
   const screenshot = getService('screenshots');
   const find = getService('find');
   const browser = getService('browser');
-  const panningDuration = 1000;
 
   describe('Resolver test app', function () {
     this.tags('ciGroup7');
@@ -105,7 +107,7 @@ export default function ({
               // select the node
               await button.click();
               // Wait for the pan to center the node
-              await delay(panningDuration);
+              await waitForPanAnimationToFinish();
             });
             it('should render as expected', async () => {
               expect(
@@ -160,7 +162,7 @@ export default function ({
                       await (await firstPill()).click();
 
                       // Wait for the pan to center the node
-                      await delay(panningDuration);
+                      await waitForPanAnimationToFinish();
                     });
                     it('should render as expected', async () => {
                       expect(
