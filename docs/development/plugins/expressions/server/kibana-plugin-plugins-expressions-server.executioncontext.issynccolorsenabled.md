@@ -4,6 +4,8 @@
 
 ## ExecutionContext.isSyncColorsEnabled property
 
+Returns the state (true\|false) of the sync colors across panels switch.
+
 <b>Signature:</b>
 
 ```typescript
