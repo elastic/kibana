@@ -49,7 +49,12 @@ export const buildTimelineEventsAllQuery = ({
   const getSortField = (sortFields: SortField[]) =>
     sortFields.map((item) => {
       const field: string = item.field === 'timestamp' ? '@timestamp' : item.field;
-      return { [field]: item.direction };
+      return {
+        [field]: {
+          order: item.direction,
+          unmapped_type: 'text',
+        },
+      };
     });
 
   const dslQuery = {
