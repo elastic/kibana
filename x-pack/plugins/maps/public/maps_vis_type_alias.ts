@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
+import { MapSavedObject } from '../common/map_saved_object_type';
 import {
   APP_ID,
   APP_ICON,
@@ -39,7 +40,7 @@ export function getMapsVisTypeAlias(
       visualizations: {
         docTypes: [MAP_SAVED_OBJECT_TYPE],
         searchFields: ['title^3'],
-        toListItem(savedObject) {
+        toListItem(savedObject: MapSavedObject) {
           const { id, type, attributes } = savedObject;
           const { title, description } = attributes as { title: string; description?: string };
           return {
