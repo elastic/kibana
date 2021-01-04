@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { NumberInputOption } from '../../../../../../charts/public';
+import { NumberInputOption } from '../../../../../../vis_default_editor/public';
 
 import { LineOptions, LineOptionsParams } from './line_options';
 import { seriesParam, vis } from './mocks';

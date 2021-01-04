@@ -71,6 +71,9 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {

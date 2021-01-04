@@ -38,13 +38,13 @@ export const SplitChartWarning: FC = () => {
     >
       <FormattedMessage
         id="visTypeXy.splitChartWarning.content"
-        defaultMessage="The new charts library does not support split chart aggregation. Please disable the {link} advanced setting to use split chart aggregation."
+        defaultMessage="The new charts library does not support split chart aggregation. Please enable the {link} advanced setting to use split chart aggregation."
         values={{
           link: (
             <EuiLink href={advancedSettingsLink} target="_blank" external>
               <FormattedMessage
                 id="visTypeXy.splitChartWarning.link"
-                defaultMessage="Charts library"
+                defaultMessage="Legacy charts library"
               />
             </EuiLink>
           ),

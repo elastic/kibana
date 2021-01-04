@@ -17,6 +17,7 @@ import { LicensingPluginSetup } from '../../licensing/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
 import { CloudSetup } from '../../cloud/server';
+import { ElasticsearchSource } from '../common/types/es';
 
 export interface MonitoringLicenseService {
   refresh: () => Promise<any>;
@@ -81,30 +82,36 @@ export interface LegacyRequest {
   payload: {
     [key: string]: any;
   };
+  params: {
+    [key: string]: string;
+  };
   getKibanaStatsCollector: () => any;
   getUiSettingsService: () => any;
   getActionTypeRegistry: () => any;
   getAlertsClient: () => any;
   getActionsClient: () => any;
-  server: {
-    config: () => {
-      get: (key: string) => string | undefined;
+  server: LegacyServer;
+}
+
+export interface LegacyServer {
+  route: (params: any) => void;
+  config: () => {
+    get: (key: string) => string | undefined;
+  };
+  newPlatform: {
+    setup: {
+      plugins: PluginsSetup;
     };
-    newPlatform: {
-      setup: {
-        plugins: PluginsSetup;
-      };
+  };
+  plugins: {
+    monitoring: {
+      info: MonitoringLicenseService;
     };
-    plugins: {
-      monitoring: {
-        info: MonitoringLicenseService;
-      };
-      elasticsearch: {
-        getCluster: (
-          name: string
-        ) => {
-          callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
-        };
+    elasticsearch: {
+      getCluster: (
+        name: string
+      ) => {
+        callWithRequest: (req: any, endpoint: string, params: any) => Promise<any>;
       };
     };
   };
@@ -127,60 +134,6 @@ export interface ElasticsearchResponseHit {
         hits: ElasticsearchResponseHit[];
         total: {
           value: number;
-        };
-      };
-    };
-  };
-}
-
-export interface ElasticsearchSource {
-  timestamp: string;
-  beats_stats?: {
-    timestamp?: string;
-    beat?: {
-      uuid?: string;
-      name?: string;
-      type?: string;
-      version?: string;
-      host?: string;
-    };
-    metrics?: {
-      beat?: {
-        memstats?: {
-          memory_alloc?: number;
-        };
-        info?: {
-          uptime?: {
-            ms?: number;
-          };
-        };
-        handles?: {
-          limit?: {
-            hard?: number;
-            soft?: number;
-          };
-        };
-      };
-      libbeat?: {
-        config?: {
-          reloads?: number;
-        };
-        output?: {
-          type?: string;
-          write?: {
-            bytes?: number;
-            errors?: number;
-          };
-          read?: {
-            errors?: number;
-          };
-        };
-        pipeline?: {
-          events?: {
-            total?: number;
-            published?: number;
-            dropped?: number;
-          };
         };
       };
     };

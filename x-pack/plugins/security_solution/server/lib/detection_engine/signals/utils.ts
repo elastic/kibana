@@ -5,6 +5,7 @@
  */
 import { createHash } from 'crypto';
 import moment from 'moment';
+import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
 
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -50,6 +51,20 @@ export const shorthandMap = {
     asFn: (duration: moment.Duration) => duration.asHours(),
   },
 };
+
+export const checkPrivileges = async (services: AlertServices, indices: string[]) =>
+  services.callCluster('transport.request', {
+    path: '/_security/user/_has_privileges',
+    method: 'POST',
+    body: {
+      index: [
+        {
+          names: indices ?? [],
+          privileges: ['read'],
+        },
+      ],
+    },
+  });
 
 export const getGapMaxCatchupRatio = ({
   logger,
@@ -515,6 +530,7 @@ export const getSignalTimeTuples = ({
 export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): string[] => {
   return errors.map((error) => {
     const {
+      index,
       reason: {
         reason,
         type,
@@ -526,6 +542,7 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
     } = error;
 
     return [
+      ...(index != null ? [`index: "${index}"`] : []),
       ...(reason != null ? [`reason: "${reason}"`] : []),
       ...(type != null ? [`type: "${type}"`] : []),
       ...(causedByReason != null ? [`caused by reason: "${causedByReason}"`] : []),
@@ -614,6 +631,25 @@ export const createSearchAfterReturnType = ({
   };
 };
 
+export const createSearchResultReturnType = (): SignalSearchResponse => {
+  return {
+    took: 0,
+    timed_out: false,
+    _shards: {
+      total: 0,
+      successful: 0,
+      failed: 0,
+      skipped: 0,
+      failures: [],
+    },
+    hits: {
+      total: 0,
+      max_score: 0,
+      hits: [],
+    },
+  };
+};
+
 export const mergeReturns = (
   searchAfters: SearchAfterAndBulkCreateReturnType[]
 ): SearchAfterAndBulkCreateReturnType => {
@@ -650,6 +686,52 @@ export const mergeReturns = (
   });
 };
 
+export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
+  return searchResults.reduce((prev, next) => {
+    const {
+      took: existingTook,
+      timed_out: existingTimedOut,
+      // _scroll_id: existingScrollId,
+      _shards: existingShards,
+      // aggregations: existingAggregations,
+      hits: existingHits,
+    } = prev;
+
+    const {
+      took: newTook,
+      timed_out: newTimedOut,
+      _scroll_id: newScrollId,
+      _shards: newShards,
+      aggregations: newAggregations,
+      hits: newHits,
+    } = next;
+
+    return {
+      took: Math.max(newTook, existingTook),
+      timed_out: newTimedOut && existingTimedOut,
+      _scroll_id: newScrollId,
+      _shards: {
+        total: newShards.total + existingShards.total,
+        successful: newShards.successful + existingShards.successful,
+        failed: newShards.failed + existingShards.failed,
+        skipped: newShards.skipped + existingShards.skipped,
+        failures: [
+          ...(existingShards.failures != null ? existingShards.failures : []),
+          ...(newShards.failures != null ? newShards.failures : []),
+        ],
+      },
+      aggregations: newAggregations,
+      hits: {
+        total:
+          createTotalHitsFromSearchResult({ searchResult: prev }) +
+          createTotalHitsFromSearchResult({ searchResult: next }),
+        max_score: Math.max(newHits.max_score, existingHits.max_score),
+        hits: [...existingHits.hits, ...newHits.hits],
+      },
+    };
+  });
+};
+
 export const createTotalHitsFromSearchResult = ({
   searchResult,
 }: {
@@ -660,4 +742,21 @@ export const createTotalHitsFromSearchResult = ({
       ? searchResult.hits.total
       : searchResult.hits.total.value;
   return totalHits;
+};
+
+export const calculateThresholdSignalUuid = (
+  ruleId: string,
+  startedAt: Date,
+  thresholdField: string,
+  key?: string
+): string => {
+  // used to generate constant Threshold Signals ID when run with the same params
+  const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
+
+  let baseString = `${ruleId}${startedAt}${thresholdField}`;
+  if (key != null) {
+    baseString = `${baseString}${key}`;
+  }
+
+  return uuidv5(baseString, NAMESPACE_ID);
 };

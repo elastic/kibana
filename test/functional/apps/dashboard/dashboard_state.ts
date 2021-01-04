@@ -46,16 +46,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard state', function describeIndexTests() {
     // Used to track flag before and after reset
-    let isNewChartUiEnabled = false;
+    let isNewChartsLibraryEnabled = false;
 
     before(async function () {
-      isNewChartUiEnabled = await PageObjects.visChart.isNewChartUiEnabled();
+      isNewChartsLibraryEnabled = await PageObjects.visChart.isNewChartsLibraryEnabled();
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
 
-      if (isNewChartUiEnabled) {
+      if (isNewChartsLibraryEnabled) {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:chartsLibrary': true,
+          'visualization:visualize:legacyChartsLibrary': false,
         });
         await browser.refresh();
       }
@@ -73,12 +73,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const visName = await PageObjects.visChart.getExpectedValue(
         AREA_CHART_VIS_NAME,
-        `${AREA_CHART_VIS_NAME} - chartsLibrary`
+        `${AREA_CHART_VIS_NAME} - new charts library`
       );
       await dashboardAddPanel.addVisualization(visName);
       const dashboarName = await PageObjects.visChart.getExpectedValue(
         'Overridden colors',
-        'Overridden colors - chartsLibrary'
+        'Overridden colors - new charts library'
       );
       await PageObjects.dashboard.saveDashboard(dashboarName);
 
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard(dashboarName);
 
-      if (await PageObjects.visChart.isNewChartUiEnabled()) {
+      if (await PageObjects.visChart.isNewChartsLibraryEnabled()) {
         await elasticChart.setNewChartUiDebugFlag();
         await queryBar.submitQuery();
       }
