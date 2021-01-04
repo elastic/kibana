@@ -10,9 +10,9 @@
   font-style: normal;
 }
 
-@import "font-awesome/scss/variables";
-@import "font-awesome/scss/core";
-@import "font-awesome/scss/icons";
+@import 'font-awesome/scss/variables';
+@import 'font-awesome/scss/core';
+@import 'font-awesome/scss/icons';
 
 // new file icon
 .#{$fa-css-prefix}-file-new-o:before { content: $fa-var-file-o; }

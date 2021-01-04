@@ -40,7 +40,7 @@
     height: $size;
     width: 100%;
   } @else {
-    @warn("Direction unknown for kbnResizer");
+    @warn('Direction unknown for kbnResizer');
   }
 
   &:hover {
@@ -54,7 +54,7 @@
   }
 
   &::after {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;

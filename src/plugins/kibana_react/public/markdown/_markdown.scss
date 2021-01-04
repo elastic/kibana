@@ -171,13 +171,13 @@ $kbnDefaultFontSize: 14px;
 
   hr::before {
     display: table;
-    content: "";
+    content: '';
   }
 
   hr::after {
     display: table;
     clear: both;
-    content: "";
+    content: '';
   }
 
   // 6. Lists
@@ -298,7 +298,7 @@ $kbnDefaultFontSize: 14px;
   code::before,
   code::after {
     letter-spacing: -.2em;
-    content: "\00a0";
+    content: '\00a0';
   }
 
   pre {
