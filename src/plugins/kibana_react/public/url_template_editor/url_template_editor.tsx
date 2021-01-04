@@ -20,19 +20,65 @@
 import * as React from 'react';
 import { monaco } from '@kbn/monaco';
 import { CodeEditor, Props as CodeEditorProps } from '../code_editor/code_editor';
+import { LANG } from './constants';
 
-monaco.languages.setMonarchTokensProvider('handlebars_url', {
+monaco.languages.setMonarchTokensProvider(LANG, {
   tokenizer: {
     root: [[/\{\{[^\}]+\}\}/, 'comment']],
   },
 });
-monaco.languages.register({ id: 'handlebars_url' });
-
+monaco.languages.register({ id: LANG });
 export interface UrlTemplateEditorProps {
   value: string;
+  height?: CodeEditorProps['height'];
   onChange: CodeEditorProps['onChange'];
 }
 
-export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({ value, onChange }) => {
-  return <CodeEditor languageId="handlebars_url" height={250} value={value} onChange={onChange} />;
+export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
+  height = 200,
+  value,
+  onChange,
+}) => {
+  React.useEffect(() => {
+    const { dispose } = monaco.languages.registerCompletionItemProvider(LANG, {
+      provideCompletionItems(model, position) {
+        const word = model.getWordUntilPosition(position);
+        const range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn,
+        };
+        return {
+          suggestions: [
+            {
+              label: 'LABEL',
+              kind: monaco.languages.CompletionItemKind.Text,
+              documentation: 'DOCUMENTATION TEXT',
+              insertText: 'INSERT_TEXT',
+              range,
+            },
+          ],
+        };
+      },
+    });
+
+    return () => {
+      dispose();
+    };
+  }, []);
+
+  return (
+    <CodeEditor
+      languageId={LANG}
+      height={height}
+      value={value}
+      onChange={onChange}
+      options={{
+        minimap: {
+          enabled: false,
+        },
+      }}
+    />
+  );
 };
