@@ -9,6 +9,8 @@ export const userAPIClientMock = {
     getUsers: jest.fn(),
     getUser: jest.fn(),
     deleteUser: jest.fn(),
+    enableUser: jest.fn(),
+    disableUser: jest.fn(),
     saveUser: jest.fn(),
     changePassword: jest.fn(),
   }),
