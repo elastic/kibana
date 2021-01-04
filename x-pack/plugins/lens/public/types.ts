@@ -28,6 +28,8 @@ import {
 import type {
   LensSortActionData,
   LENS_EDIT_SORT_ACTION,
+  LENS_EDIT_RESIZE_ACTION,
+  LensResizeActionData,
 } from './datatable_visualization/expression';
 
 export type ErrorCallback = (e: { message: string }) => void;
@@ -634,6 +636,7 @@ export interface LensBrushEvent {
 // Use same technique as TriggerContext
 interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
+  [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
 }
 type LensEditSupportedActions = keyof LensEditContextMapping;
 

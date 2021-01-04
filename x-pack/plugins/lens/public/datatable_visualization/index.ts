@@ -29,12 +29,14 @@ export class DatatableVisualization {
       const {
         getDatatable,
         datatableColumns,
+        datatableColumnWidth,
         getDatatableRenderer,
         datatableVisualization,
       } = await import('../async_services');
       const resolvedFormatFactory = await formatFactory;
 
       expressions.registerFunction(() => datatableColumns);
+      expressions.registerFunction(() => datatableColumnWidth);
       expressions.registerFunction(() => getDatatable({ formatFactory: resolvedFormatFactory }));
       expressions.registerRenderer(() =>
         getDatatableRenderer({

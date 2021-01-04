@@ -14,6 +14,7 @@ import {
   DatasourcePublicAPI,
 } from '../types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
+import { DatatableColumnWidth } from './expression';
 
 export interface LayerState {
   layerId: string;
@@ -26,6 +27,7 @@ export interface DatatableVisualizationState {
     columnId: string | undefined;
     direction: 'asc' | 'desc' | 'none';
   };
+  columnWidth?: DatatableColumnWidth[];
 }
 
 function newLayerState(layerId: string): LayerState {
@@ -239,6 +241,19 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                       columnIds: operations.map((o) => o.columnId),
                       sortBy: [state.sorting?.columnId || ''],
                       sortDirection: [state.sorting?.direction || 'none'],
+                      columnWidth: (state.columnWidth || []).map((columnWidth) => ({
+                        type: 'expression',
+                        chain: [
+                          {
+                            type: 'function',
+                            function: 'lens_datatable_column_width',
+                            arguments: {
+                              columnId: [columnWidth.columnId],
+                              width: [columnWidth.width],
+                            },
+                          },
+                        ],
+                      })),
                     },
                   },
                 ],
@@ -255,16 +270,26 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
   },
 
   onEditAction(state, event) {
-    if (event.data.action !== 'sort') {
-      return state;
+    switch (event.data.action) {
+      case 'sort':
+        return {
+          ...state,
+          sorting: {
+            columnId: event.data.columnId,
+            direction: event.data.direction,
+          },
+        };
+      case 'resize':
+        return {
+          ...state,
+          columnWidth: [
+            ...(state.columnWidth || []).filter(({ columnId }) => columnId !== event.data.columnId),
+            { columnId: event.data.columnId, width: event.data.width },
+          ],
+        };
+      default:
+        return state;
     }
-    return {
-      ...state,
-      sorting: {
-        columnId: event.data.columnId,
-        direction: event.data.direction,
-      },
-    };
   },
 };
 
