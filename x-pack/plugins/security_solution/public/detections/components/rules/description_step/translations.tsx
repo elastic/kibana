@@ -96,7 +96,7 @@ export const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
     defaultMessage: 'Results aggregated by',
   }
 );
-// TODO: maybe `depricated` instead? Since its tied to mitre currently
+
 export const UNKNOWN_TACTIC = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.unknownTactic',
   {
