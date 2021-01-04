@@ -26,10 +26,15 @@ const StyledEuiFlyout = styled(EuiFlyout)`
 `;
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  height: 100%;
+  .euiFlyoutBody__overflow {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
 
-  & .euiFlyoutBody__overflowContent {
-    height: 100%;
+    .euiFlyoutBody__overflowContent {
+      overflow: hidden;
+      padding-bottom: 64px;
+    }
   }
 `;
 
