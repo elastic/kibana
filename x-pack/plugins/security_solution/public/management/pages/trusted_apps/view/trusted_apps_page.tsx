@@ -76,8 +76,8 @@ export const TrustedAppsPage = memo(() => {
 
   const content = (
     <>
-      <TrustedAppsNotifications />
       <TrustedAppDeletionDialog />
+
       {showCreateFlyout && (
         <CreateTrustedAppFlyout
           onClose={handleAddFlyoutClose}
@@ -124,6 +124,8 @@ export const TrustedAppsPage = memo(() => {
       subtitle={ABOUT_TRUSTED_APPS}
       actions={doEntriesExist ? addButton : <></>}
     >
+      <TrustedAppsNotifications />
+
       {isCheckingIfEntriesExists ? (
         <EuiEmptyPrompt body={<EuiLoadingSpinner className="essentialAnimation" size="xl" />} />
       ) : (
