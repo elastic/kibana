@@ -6,7 +6,7 @@
 
 import './expression.scss';
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -19,6 +19,7 @@ import { EuiDataGridControlColumn } from '@elastic/eui';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
   FormatFactory,
   ILensInterpreterRenderHandlers,
@@ -79,11 +80,9 @@ export interface DatatableProps {
 
 type DatatableRenderProps = DatatableProps & {
   formatFactory: FormatFactory;
-  onClickValue: (data: LensFilterEvent['data']) => void;
-  onEditAction?: (data: LensSortAction['data'] | LensResizeAction['data']) => void;
+  dispatchEvent: ILensInterpreterRenderHandlers['event'];
   getType: (name: string) => IAggType;
   renderMode: RenderMode;
-  onRowContextMenuClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 
   /**
    * A boolean for each table row, which is true if the row active
@@ -251,18 +250,6 @@ export const getDatatableRenderer = (dependencies: {
     handlers: ILensInterpreterRenderHandlers
   ) => {
     const resolvedGetType = await dependencies.getType;
-    const onClickValue = (data: LensFilterEvent['data']) => {
-      handlers.event({ name: 'filter', data });
-    };
-
-    const onEditAction = (data: LensSortAction['data'] | LensResizeAction['data']) => {
-      if (handlers.getRenderMode() === 'edit') {
-        handlers.event({ name: 'edit', data });
-      }
-    };
-    const onRowContextMenuClick = (data: LensTableRowContextMenuEvent['data']) => {
-      handlers.event({ name: 'tableRowContextMenuClick', data });
-    };
     const { hasCompatibleActions } = handlers;
 
     // An entry for each table row, whether it has any actions attached to
@@ -297,10 +284,8 @@ export const getDatatableRenderer = (dependencies: {
         <DatatableComponent
           {...config}
           formatFactory={dependencies.formatFactory}
-          onClickValue={onClickValue}
-          onEditAction={onEditAction}
+          dispatchEvent={handlers.event}
           renderMode={handlers.getRenderMode()}
-          onRowContextMenuClick={onRowContextMenuClick}
           getType={resolvedGetType}
           rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
         />
@@ -321,20 +306,57 @@ function getNextOrderValue(currentValue: LensSortAction['data']['direction']) {
 }
 
 export function DatatableComponent(props: DatatableRenderProps) {
+  const [columnConfig, setColumnConfig] = useState(props.args.columns);
+
+  useDeepCompareEffect(() => {
+    setColumnConfig(props.args.columns);
+  }, [props.args.columns]);
   const [firstTable] = Object.values(props.data.tables);
-  const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  firstTable.columns.forEach((column) => {
-    formatters[column.id] = props.formatFactory(column.meta?.params);
-  });
+  const firstTableRef = useRef(firstTable);
+  firstTableRef.current = firstTable;
 
-  const { onClickValue, onEditAction: onEditAction, onRowContextMenuClick } = props;
+  const formatFactory = props.formatFactory;
+  const formatters: Record<
+    string,
+    ReturnType<FormatFactory>
+  > = firstTableRef.current.columns.reduce(
+    (map, column) => ({
+      ...map,
+      [column.id]: formatFactory(column.meta?.params),
+    }),
+    {}
+  );
+  const { getType, dispatchEvent, renderMode, rowHasRowClickTriggerActions } = props;
+  const onClickValue = useCallback(
+    (data: LensFilterEvent['data']) => {
+      dispatchEvent({ name: 'filter', data });
+    },
+    [dispatchEvent]
+  );
+  const hasAtLeastOneRowClickAction = rowHasRowClickTriggerActions?.find((x) => x);
+
+  const onEditAction = useCallback(
+    (data: LensSortAction['data'] | LensResizeAction['data']) => {
+      if (renderMode === 'edit') {
+        dispatchEvent({ name: 'edit', data });
+      }
+    },
+    [dispatchEvent, renderMode]
+  );
+  const onRowContextMenuClick = useCallback(
+    (data: LensTableRowContextMenuEvent['data']) => {
+      dispatchEvent({ name: 'tableRowContextMenuClick', data });
+    },
+    [dispatchEvent]
+  );
+
   const handleFilterClick = useMemo(
     () => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
-      const col = firstTable.columns[colIndex];
+      const col = firstTableRef.current.columns[colIndex];
       const isDate = col.meta?.type === 'date';
       const timeFieldName = negate && isDate ? undefined : col?.meta?.field;
-      const rowIndex = firstTable.rows.findIndex((row) => row[field] === value);
+      const rowIndex = firstTableRef.current.rows.findIndex((row) => row[field] === value);
 
       const data: LensFilterEvent['data'] = {
         negate,
@@ -343,24 +365,28 @@ export function DatatableComponent(props: DatatableRenderProps) {
             row: rowIndex,
             column: colIndex,
             value,
-            table: firstTable,
+            table: firstTableRef.current,
           },
         ],
         timeFieldName,
       };
       onClickValue(desanitizeFilterContext(data));
     },
-    [firstTable, onClickValue]
+    [firstTableRef, onClickValue]
   );
 
-  const bucketColumns = firstTable.columns
-    .filter((col) => {
-      return (
-        col?.meta?.sourceParams?.type &&
-        props.getType(col.meta.sourceParams.type as string)?.type === 'buckets'
-      );
-    })
-    .map((col) => col.id);
+  const bucketColumns = useMemo(
+    () =>
+      firstTableRef.current.columns
+        .filter((col) => {
+          return (
+            col?.meta?.sourceParams?.type &&
+            getType(col.meta.sourceParams.type as string)?.type === 'buckets'
+          );
+        })
+        .map((col) => col.id),
+    [firstTableRef, getType]
+  );
 
   const isEmpty =
     firstTable.rows.length === 0 ||
@@ -369,145 +395,158 @@ export function DatatableComponent(props: DatatableRenderProps) {
         bucketColumns.every((col) => typeof row[col] === 'undefined')
       ));
 
-  if (isEmpty) {
-    return <EmptyPlaceholder icon={LensIconChartDatatable} />;
-  }
+  const visibleColumns = useMemo(() => columnConfig.columnIds.filter((field) => !!field), [
+    columnConfig,
+  ]);
 
-  const visibleColumns = props.args.columns.columnIds.filter((field) => !!field);
-  const columnsReverseLookup = firstTable.columns.reduce<
-    Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
-  >((memo, { id, name, meta }, i) => {
-    memo[id] = { name, index: i, meta };
-    return memo;
-  }, {});
-
-  const { sortBy, sortDirection } = props.args.columns;
+  const { sortBy, sortDirection } = columnConfig;
 
   const isReadOnlySorted = props.renderMode !== 'edit';
 
   // todo memoize this
-  const columns: EuiDataGridColumn[] = visibleColumns.map((field) => {
-    const filterable = bucketColumns.includes(field);
-    const { name, index: colIndex } = columnsReverseLookup[field];
+  const columns: EuiDataGridColumn[] = useMemo(() => {
+    const columnsReverseLookup = firstTableRef.current.columns.reduce<
+      Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
+    >((memo, { id, name, meta }, i) => {
+      memo[id] = { name, index: i, meta };
+      return memo;
+    }, {});
 
-    const cellActions = filterable
-      ? [
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-            const rowValue = firstTable.rows[rowIndex][columnId];
-            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+    return visibleColumns.map((field) => {
+      const filterable = bucketColumns.includes(field);
+      const { name, index: colIndex } = columnsReverseLookup[field];
 
-            const cellContent = formatters[field]?.convert(rowValue);
+      const cellActions = filterable
+        ? [
+            ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+              const rowValue = firstTableRef.current.rows[rowIndex][columnId];
+              const column = firstTableRef.current.columns.find(({ id }) => id === columnId);
+              const contentsIsDefined = rowValue !== null && rowValue !== undefined;
 
-            const filterForText = i18n.translate(
-              'xpack.lens.table.tableCellFilter.filterForValueText',
-              {
-                defaultMessage: 'Filter for value',
-              }
-            );
-            const filterForAriaLabel = i18n.translate(
-              'spack.lens.table.tableCellFilter.filterForValueAriaLabel',
-              {
-                defaultMessage: 'Filter for value: {cellContent}',
-                values: {
-                  cellContent,
-                },
-              }
-            );
+              const cellContent = formatFactory(column?.meta?.params).convert(rowValue);
 
-            return (
-              contentsIsDefined && (
-                <Component
-                  aria-label={filterForAriaLabel}
-                  data-test-subj="lnsTableCell__filterForCellValue"
-                  onClick={() => {
-                    handleFilterClick(field, rowValue, colIndex);
-                    closePopover();
-                  }}
-                  iconType="plusInCircle"
-                >
-                  {filterForText}
-                </Component>
-              )
-            );
-          },
-          ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-            const rowValue = firstTable.rows[rowIndex][columnId];
-            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
-            const cellContent = formatters[field]?.convert(rowValue);
+              const filterForText = i18n.translate(
+                'xpack.lens.table.tableCellFilter.filterForValueText',
+                {
+                  defaultMessage: 'Filter for value',
+                }
+              );
+              const filterForAriaLabel = i18n.translate(
+                'spack.lens.table.tableCellFilter.filterForValueAriaLabel',
+                {
+                  defaultMessage: 'Filter for value: {cellContent}',
+                  values: {
+                    cellContent,
+                  },
+                }
+              );
 
-            const filterOutText = i18n.translate('xpack.lens.tableCellFilter.filterOutValueText', {
-              defaultMessage: 'Filter out value',
-            });
-            const filterOutAriaLabel = i18n.translate(
-              'xpack.lens.tableCellFilter.filterOutValueAriaLabel',
-              {
-                defaultMessage: 'Filter out value: {cellContent}',
-                values: {
-                  cellContent,
-                },
-              }
-            );
-
-            return (
-              contentsIsDefined && (
-                <Component
-                  aria-label={filterOutAriaLabel}
-                  onClick={() => {
-                    handleFilterClick(field, rowValue, colIndex, true);
-                    closePopover();
-                  }}
-                  iconType="minusInCircle"
-                >
-                  {filterOutText}
-                </Component>
-              )
-            );
-          },
-        ]
-      : undefined;
-
-    const columnDefinition: EuiDataGridColumn = {
-      id: field,
-      cellActions,
-      display: name,
-      displayAsText: name,
-      actions: {
-        showHide: false,
-        showMoveLeft: false,
-        showMoveRight: false,
-        showSortAsc: isReadOnlySorted
-          ? false
-          : {
-              label: i18n.translate('visTypeTable.sort.ascLabel', {
-                defaultMessage: 'Sort asc',
-              }),
+              return (
+                contentsIsDefined && (
+                  <Component
+                    aria-label={filterForAriaLabel}
+                    data-test-subj="lnsTableCell__filterForCellValue"
+                    onClick={() => {
+                      handleFilterClick(field, rowValue, colIndex);
+                      closePopover();
+                    }}
+                    iconType="plusInCircle"
+                  >
+                    {filterForText}
+                  </Component>
+                )
+              );
             },
-        showSortDesc: isReadOnlySorted
-          ? false
-          : {
-              label: i18n.translate('visTypeTable.sort.descLabel', {
-                defaultMessage: 'Sort desc',
-              }),
-            },
-      },
-    };
+            ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
+              const rowValue = firstTableRef.current.rows[rowIndex][columnId];
+              const column = firstTableRef.current.columns.find(({ id }) => id === columnId);
+              const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+              const cellContent = formatFactory(column?.meta?.params).convert(rowValue);
 
-    const initialWidth = props.args.columns.columnWidth?.find(({ columnId }) => columnId === field)
-      ?.width;
-    if (initialWidth) {
-      columnDefinition.initialWidth = initialWidth;
+              const filterOutText = i18n.translate(
+                'xpack.lens.tableCellFilter.filterOutValueText',
+                {
+                  defaultMessage: 'Filter out value',
+                }
+              );
+              const filterOutAriaLabel = i18n.translate(
+                'xpack.lens.tableCellFilter.filterOutValueAriaLabel',
+                {
+                  defaultMessage: 'Filter out value: {cellContent}',
+                  values: {
+                    cellContent,
+                  },
+                }
+              );
+
+              return (
+                contentsIsDefined && (
+                  <Component
+                    aria-label={filterOutAriaLabel}
+                    onClick={() => {
+                      handleFilterClick(field, rowValue, colIndex, true);
+                      closePopover();
+                    }}
+                    iconType="minusInCircle"
+                  >
+                    {filterOutText}
+                  </Component>
+                )
+              );
+            },
+          ]
+        : undefined;
+
+      const columnDefinition: EuiDataGridColumn = {
+        id: field,
+        cellActions,
+        display: name,
+        displayAsText: name,
+        actions: {
+          showHide: false,
+          showMoveLeft: false,
+          showMoveRight: false,
+          showSortAsc: isReadOnlySorted
+            ? false
+            : {
+                label: i18n.translate('visTypeTable.sort.ascLabel', {
+                  defaultMessage: 'Sort asc',
+                }),
+              },
+          showSortDesc: isReadOnlySorted
+            ? false
+            : {
+                label: i18n.translate('visTypeTable.sort.descLabel', {
+                  defaultMessage: 'Sort desc',
+                }),
+              },
+        },
+      };
+
+      const initialWidth = columnConfig.columnWidth?.find(({ columnId }) => columnId === field)
+        ?.width;
+      if (initialWidth) {
+        columnDefinition.initialWidth = initialWidth;
+      }
+
+      return columnDefinition;
+    });
+  }, [
+    bucketColumns,
+    firstTableRef,
+    handleFilterClick,
+    isReadOnlySorted,
+    columnConfig,
+    visibleColumns,
+    formatFactory,
+  ]);
+
+  const trailingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
+    if (!hasAtLeastOneRowClickAction || !onRowContextMenuClick) {
+      return [];
     }
-
-    return columnDefinition;
-  });
-
-  // TODO memoize this
-  const trailingControlColumns: EuiDataGridControlColumn[] = [];
-
-  if (!!props.rowHasRowClickTriggerActions && !!onRowContextMenuClick) {
-    const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions.find((x) => x);
-    if (hasAtLeastOneRowClickAction) {
-      trailingControlColumns.push({
+    return [
+      {
         headerCellRender: () => null,
         width: 40,
         id: 'trailingControlColumn',
@@ -517,40 +556,57 @@ export function DatatableComponent(props: DatatableRenderProps) {
               aria-label={i18n.translate('xpack.lens.datatable.actionsLabel', {
                 defaultMessage: 'Show actions',
               })}
-              iconType="boxesHorizontal"
+              iconType={
+                !!rowHasRowClickTriggerActions && !rowHasRowClickTriggerActions[rowIndex]
+                  ? 'empty'
+                  : 'boxesVertical'
+              }
               color="text"
               onClick={() => {
                 onRowContextMenuClick({
                   rowIndex,
-                  table: firstTable,
-                  columns: props.args.columns.columnIds,
+                  table: firstTableRef.current,
+                  columns: columnConfig.columnIds,
                 });
               }}
             />
           );
         },
-      });
-    }
+      },
+    ];
+  }, [
+    firstTableRef,
+    onRowContextMenuClick,
+    columnConfig,
+    hasAtLeastOneRowClickAction,
+    rowHasRowClickTriggerActions,
+  ]);
+
+  const renderCellValue = useCallback(
+    ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
+      const rowValue = firstTableRef.current.rows[rowIndex][columnId];
+      const content = formatters[columnId].convert(rowValue, 'html');
+
+      const cellContent = (
+        <div
+          /*
+           * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
+           * which is produced in a safe way.
+           */
+          dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
+          data-test-subj="lnsTableCellContent"
+          className="lnsDataTableCellContent"
+        />
+      );
+
+      return cellContent;
+    },
+    [formatters, firstTableRef]
+  );
+
+  if (isEmpty) {
+    return <EmptyPlaceholder icon={LensIconChartDatatable} />;
   }
-
-  const renderCellValue = ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-    const rowValue = firstTable.rows[rowIndex][columnId];
-    const content = formatters[columnId].convert(rowValue, 'html');
-
-    const cellContent = (
-      <div
-        /*
-         * dangerouslySetInnerHTML is necessary because the field formatter might produce HTML markup
-         * which is produced in a safe way.
-         */
-        dangerouslySetInnerHTML={{ __html: content }} // eslint-disable-line react/no-danger
-        data-test-subj="lnsTableCellContent"
-        className="lnsDataTableCellContent"
-      />
-    );
-
-    return cellContent;
-  };
 
   const dataGridAriaLabel =
     props.args.title ||
