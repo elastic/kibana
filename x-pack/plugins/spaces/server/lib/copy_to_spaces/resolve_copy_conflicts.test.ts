@@ -27,8 +27,6 @@ interface SetupOpts {
   ) => Promise<SavedObjectsImportResponse>;
 }
 
-const EXPORT_LIMIT = 1000;
-
 const expectStreamToContainObjects = async (
   stream: Readable,
   expectedObjects: SetupOpts['objects']
@@ -137,7 +135,6 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
     const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
       savedObjects,
-      () => EXPORT_LIMIT,
       request
     );
 
@@ -220,7 +217,6 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
     const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
       savedObjects,
-      () => EXPORT_LIMIT,
       request
     );
 
@@ -285,7 +281,6 @@ describe('resolveCopySavedObjectsToSpacesConflicts', () => {
 
     const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
       savedObjects,
-      () => EXPORT_LIMIT,
       request
     );
 

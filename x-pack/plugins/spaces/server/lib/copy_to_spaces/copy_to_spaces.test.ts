@@ -27,8 +27,6 @@ interface SetupOpts {
   ) => Promise<SavedObjectsImportResponse>;
 }
 
-const EXPORT_LIMIT = 1000;
-
 const expectStreamToContainObjects = async (
   stream: Readable,
   expectedObjects: SetupOpts['objects']
@@ -135,11 +133,7 @@ describe('copySavedObjectsToSpaces', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-      savedObjects,
-      () => EXPORT_LIMIT,
-      request
-    );
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(savedObjects, request);
 
     const namespace = 'sourceSpace';
     const objects = [{ type: 'dashboard', id: 'my-dashboard' }];
@@ -213,11 +207,7 @@ describe('copySavedObjectsToSpaces', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-      savedObjects,
-      () => EXPORT_LIMIT,
-      request
-    );
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(savedObjects, request);
 
     const result = await copySavedObjectsToSpaces(
       'sourceSpace',
@@ -276,11 +266,7 @@ describe('copySavedObjectsToSpaces', () => {
 
     const request = httpServerMock.createKibanaRequest();
 
-    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
-      savedObjects,
-      () => EXPORT_LIMIT,
-      request
-    );
+    const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(savedObjects, request);
 
     await expect(
       copySavedObjectsToSpaces(

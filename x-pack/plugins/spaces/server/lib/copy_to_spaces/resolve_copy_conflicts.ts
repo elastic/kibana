@@ -16,7 +16,6 @@ import { getIneligibleTypes } from './lib/get_ineligible_types';
 
 export function resolveCopySavedObjectsToSpacesConflictsFactory(
   savedObjects: CoreStart['savedObjects'],
-  getImportExportObjectLimit: () => number,
   request: KibanaRequest
 ) {
   const { getTypeRegistry, getScopedClient, createExporter, createImporter } = savedObjects;
