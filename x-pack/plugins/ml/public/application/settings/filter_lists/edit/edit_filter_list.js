@@ -322,7 +322,7 @@ export class EditFilterListUI extends Component {
 
     const totalItemCount = items !== undefined ? items.length : 0;
 
-    const helpLink = getDocLinks().links.ml.guide;
+    const helpLink = getDocLinks().links.ml.customRules;
 
     return (
       <Fragment>

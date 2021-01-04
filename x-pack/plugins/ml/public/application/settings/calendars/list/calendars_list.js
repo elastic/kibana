@@ -106,7 +106,7 @@ export class CalendarsListUI extends Component {
     const { canCreateCalendar, canDeleteCalendar } = this.props;
     let destroyModal = '';
 
-    const helpLink = getDocLinks().links.ml.guide;
+    const helpLink = getDocLinks().links.ml.calendars;
 
     if (this.state.isDestroyModalVisible) {
       destroyModal = (

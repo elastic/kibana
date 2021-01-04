@@ -88,7 +88,7 @@ export class FilterListsUI extends Component {
   render() {
     const { filterLists, selectedFilterLists } = this.state;
     const { canCreateFilter, canDeleteFilter } = this.props;
-    const helpLink = getDocLinks().links.ml.guide;
+    const helpLink = getDocLinks().links.ml.customRules;
 
     return (
       <Fragment>

@@ -20,7 +20,7 @@ jest.mock('../../../components/help_menu', () => ({
 jest.mock('../../../util/dependency_cache', () => ({
   getDocLinks: () => ({
     links: {
-      ml: { guide: jest.fn() },
+      ml: { customRules: jest.fn() },
     },
   }),
 }));

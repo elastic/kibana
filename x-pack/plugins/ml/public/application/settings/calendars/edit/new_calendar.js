@@ -330,7 +330,7 @@ class NewCalendarUI extends Component {
       isGlobalCalendar,
     } = this.state;
 
-    const helpLink = getDocLinks().links.ml.guide;
+    const helpLink = getDocLinks().links.ml.calendars;
 
     let modal = '';
 
