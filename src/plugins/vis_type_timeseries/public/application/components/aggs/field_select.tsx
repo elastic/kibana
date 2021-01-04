@@ -38,6 +38,7 @@ interface FieldSelectProps {
   restrict?: string[];
   placeholder?: string;
   uiRestrictions?: TimeseriesUIRestrictions;
+  'data-test-subj'?: string;
 }
 
 const isFieldTypeEnabled = (fieldRestrictions: string[], fieldType: string) =>
@@ -57,6 +58,7 @@ export function FieldSelect({
   restrict = [],
   placeholder = defaultPlaceholder,
   uiRestrictions,
+  'data-test-subj': dataTestSubj = 'metricsIndexPatternFieldsSelect',
 }: FieldSelectProps) {
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = [];
   let newPlaceholder = placeholder;
@@ -108,7 +110,7 @@ export function FieldSelect({
 
   return (
     <EuiComboBox
-      data-test-subj="metricsIndexPatternFieldsSelect"
+      data-test-subj={dataTestSubj}
       placeholder={newPlaceholder}
       isDisabled={disabled}
       options={options}
