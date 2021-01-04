@@ -65,7 +65,6 @@ import {
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { removeSignalsIndex } from '../tasks/api_calls/rules';
 import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
@@ -91,7 +90,6 @@ describe('Detection rules, Indicator Match', () => {
 
   beforeEach(() => {
     cleanKibana();
-    removeSignalsIndex();
     esArchiverLoad('threat_indicator');
     esArchiverLoad('threat_data');
   });
