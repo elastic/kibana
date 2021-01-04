@@ -20,6 +20,7 @@ const enabledActionTypes = [
   '.email',
   '.index',
   '.pagerduty',
+  '.swimlane',
   '.server-log',
   '.servicenow',
   '.slack',

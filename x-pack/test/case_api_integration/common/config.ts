@@ -25,6 +25,7 @@ const enabledActionTypes = [
   '.index',
   '.jira',
   '.pagerduty',
+  '.swimlane',
   '.resilient',
   '.server-log',
   '.servicenow',

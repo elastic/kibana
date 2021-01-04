@@ -19,6 +19,9 @@
             "__index": {
               "type": "long"
             },
+            "__swimlane": {
+              "type": "long"
+            },
             "__pagerduty": {
               "type": "long"
             },
@@ -51,6 +54,9 @@
               "type": "long"
             },
             "__index": {
+              "type": "long"
+            },
+            "__swimlane": {
               "type": "long"
             },
             "__pagerduty": {
