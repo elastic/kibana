@@ -5,7 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
+import {
+  VisualizationsSetup,
+  VisualizationStage,
+} from '../../../../src/plugins/visualizations/public';
+import { SavedObject } from '../../../../src/core/types/saved_objects';
 import { MapSavedObject } from '../common/map_saved_object_type';
 import {
   APP_ID,
@@ -35,14 +39,14 @@ export function getMapsVisTypeAlias(
     title: APP_NAME,
     description: appDescription,
     icon: APP_ICON,
-    stage: 'production',
+    stage: 'production' as VisualizationStage,
     appExtensions: {
       visualizations: {
         docTypes: [MAP_SAVED_OBJECT_TYPE],
         searchFields: ['title^3'],
-        toListItem(savedObject: MapSavedObject) {
-          const { id, type, attributes } = savedObject;
-          const { title, description } = attributes as { title: string; description?: string };
+        toListItem(savedObject: SavedObject) {
+          const { id, type, attributes } = savedObject as MapSavedObject;
+          const { title, description } = attributes;
           return {
             id,
             title,
@@ -50,7 +54,7 @@ export function getMapsVisTypeAlias(
             editUrl: getEditPath(id),
             editApp: APP_ID,
             icon: APP_ICON,
-            stage: 'production',
+            stage: 'production' as VisualizationStage,
             savedObjectType: type,
             typeTitle: APP_NAME,
           };

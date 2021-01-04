@@ -17,6 +17,9 @@
  * under the License.
  */
 import { TriggerContextMapping } from '../../../ui_actions/public';
+import { SavedObject } from '../../../../core/types/saved_objects';
+
+export type VisualizationStage = 'experimental' | 'beta' | 'production';
 
 export interface VisualizationListItem {
   editUrl: string;
@@ -24,7 +27,7 @@ export interface VisualizationListItem {
   error?: string;
   icon: string;
   id: string;
-  stage: 'experimental' | 'beta' | 'production';
+  stage: VisualizationStage;
   savedObjectType: string;
   title: string;
   description?: string;
@@ -36,11 +39,7 @@ export interface VisualizationListItem {
 export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
-  toListItem: (savedObject: {
-    id: string;
-    type: string;
-    attributes: object;
-  }) => VisualizationListItem;
+  toListItem: (savedObject: SavedObject) => VisualizationListItem;
 }
 
 export interface VisTypeAliasPromoTooltip {
@@ -60,7 +59,7 @@ export interface VisTypeAlias {
   note?: string;
   disabled?: boolean;
   getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
-  stage: 'experimental' | 'beta' | 'production';
+  stage: VisualizationStage;
 
   appExtensions?: {
     visualizations: VisualizationsAppExtension;
