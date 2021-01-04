@@ -4,26 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { getSearchSessionIdByPanelProvider } from './get_search_session_id_by_panel';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
+  const inspector = getService('inspector');
   const PageObjects = getPageObjects([
     'common',
     'header',
-    'dashboard',
+    'discover',
     'visChart',
     'security',
     'timePicker',
   ]);
-  const getSearchSessionIdByPanel = getSearchSessionIdByPanelProvider(getService);
   const browser = getService('browser');
   const sendToBackground = getService('sendToBackground');
 
-  describe('dashboard in space', () => {
+  describe('discover in space', () => {
     describe('Send to background in space', () => {
       before(async () => {
         await esArchiver.load('dashboard/session_in_space');
@@ -35,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           kibana: [
             {
               feature: {
-                dashboard: ['minimal_read', 'store_search_session'],
+                discover: ['all'],
               },
               spaces: ['another-space'],
             },
@@ -64,27 +63,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Saves and restores a session', async () => {
-        await PageObjects.common.navigateToApp('dashboard', { basePath: 's/another-space' });
-        await PageObjects.dashboard.loadSavedDashboard('A Dashboard in another space');
+        await PageObjects.common.navigateToApp('discover', { basePath: 's/another-space' });
+
+        await PageObjects.discover.selectIndexPattern('logstash-*');
 
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 1, 2015 @ 00:00:00.000',
           'Oct 1, 2015 @ 00:00:00.000'
         );
 
-        await PageObjects.dashboard.waitForRenderComplete();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
 
         await sendToBackground.expectState('completed');
         await sendToBackground.save();
         await sendToBackground.expectState('backgroundCompleted');
-        const savedSessionId = await getSearchSessionIdByPanel('A Pie in another space');
+        await inspector.open();
+
+        const savedSessionId = await (
+          await testSubjects.find('inspectorRequestSearchSessionId')
+        ).getAttribute('data-search-session-id');
+        await inspector.close();
 
         // load URL to restore a saved session
         const url = await browser.getCurrentUrl();
         const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`;
         await browser.get(savedSessionURL);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
 
         // Check that session is restored
         await sendToBackground.expectState('restored');
