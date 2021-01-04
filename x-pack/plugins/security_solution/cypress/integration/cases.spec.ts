@@ -51,10 +51,10 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { CASES_URL } from '../urls/navigation';
 
-describe.skip('Cases', () => {
+describe('Cases', () => {
   const mycase = { ...case1 };
 
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     createTimeline(case1.timeline).then((response) => {
       mycase.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;

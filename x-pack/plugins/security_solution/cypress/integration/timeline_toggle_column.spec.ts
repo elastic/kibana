@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timeline } from '../objects/timeline';
 import {
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
   TIMESTAMP_HEADER_FIELD,
   TIMESTAMP_TOGGLE_FIELD,
 } from '../screens/timeline';
-import { createTimeline } from '../tasks/api_calls/timelines';
 import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPage } from '../tasks/login';
@@ -28,13 +26,11 @@ import {
 
 import { HOSTS_URL } from '../urls/navigation';
 
-describe('toggle column in timeline', () => {
+describe.skip('toggle column in timeline', () => {
   before(() => {
     cleanKibana();
     cy.intercept('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
-    createTimeline(timeline).then((response) => {
-      loginAndWaitForPage(HOSTS_URL);
-    });
+    loginAndWaitForPage(HOSTS_URL);
   });
 
   beforeEach(() => {
