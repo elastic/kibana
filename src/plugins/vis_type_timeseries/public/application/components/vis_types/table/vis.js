@@ -28,8 +28,6 @@ import { replaceVars } from '../../lib/replace_vars';
 import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
-
-import { METRIC_TYPES } from '../../../../../common/metric_types';
 import { extractFieldLabel } from '../../../../../common/field_utils';
 
 function getColor(rules, colorKey, value) {
@@ -116,19 +114,8 @@ class TableVis extends Component {
       order: 'asc',
     });
 
-    const calculateHeaderLabel = (metric, item) => {
-      const defaultLabel =
-        item.label || visData.series[0]?.series?.find((s) => item.id === s.id)?.label;
-
-      switch (metric.type) {
-        case METRIC_TYPES.PERCENTILE:
-          return `${defaultLabel} (${last(metric.percentiles).value || 0})`;
-        case METRIC_TYPES.PERCENTILE_RANK:
-          return `${defaultLabel} (${last(metric.values) || 0})`;
-        default:
-          return defaultLabel;
-      }
-    };
+    const calculateHeaderLabel = (metric, item) =>
+      item.label || visData.series[0]?.series?.find((s) => item.id === s.id)?.label;
 
     const columns = this.visibleSeries.map((item) => {
       const metric = last(item.metrics);

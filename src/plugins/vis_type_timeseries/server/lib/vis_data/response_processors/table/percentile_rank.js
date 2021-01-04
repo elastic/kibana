@@ -51,7 +51,7 @@ export function percentileRank(bucket, panel, series, meta, extractFields) {
       results.push({
         data,
         id: split.id,
-        label: `${split.label} (${percentileRank || 0})`,
+        label: `${split.label} (${lastRankValue ?? 0})`,
       });
     });
 

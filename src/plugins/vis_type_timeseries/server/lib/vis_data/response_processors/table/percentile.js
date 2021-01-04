@@ -45,6 +45,7 @@ export function percentile(bucket, panel, series, meta, extractFields) {
 
       results.push({
         id: split.id,
+        label: `${split.label} (${percentile.value ?? 0})`,
         data,
       });
     });
