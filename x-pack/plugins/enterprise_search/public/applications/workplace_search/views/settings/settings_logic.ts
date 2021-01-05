@@ -14,7 +14,6 @@ import { IFlashMessagesProps } from 'shared/types';
 import { clearFlashMessages } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 
-import { SourceLogic } from '../content_sources/source_logic';
 import { Connector } from '../../types';
 
 import { ORG_SETTINGS_CONNECTORS_PATH } from '../../routes';
@@ -51,7 +50,6 @@ interface SettingsActions {
   initializeConnectors(): void;
   updateOauthApplication(): void;
   updateOrgName(): void;
-  saveUpdatedConfig(): void;
   deleteSourceConfig(
     serviceType: string,
     name: string
@@ -85,7 +83,6 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     initializeConnectors: () => true,
     updateOrgName: () => true,
     updateOauthApplication: () => true,
-    saveUpdatedConfig: () => true,
     deleteSourceConfig: (serviceType: string, name: string) => ({
       serviceType,
       name,
@@ -170,11 +167,6 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         .put(route, { oauth_application: { name, confidential, redirect_uri: redirectUri } })
         .then(({ data }) => actions.setUpdatedOauthApplication(data))
         .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
-    },
-    saveUpdatedConfig: () => {
-      SourceLogic.actions.saveSourceConfig(true, () =>
-        actions.setFlashMessages(SourceLogic.values.flashMessages)
-      );
     },
     deleteSourceConfig: ({ serviceType, name }) => {
       const route = routes.fritoPieOrganizationSettingsContentSourceOauthConfigurationPath(

@@ -14,6 +14,7 @@ import { Loading } from '../../../../shared/loading';
 import { SourceDataItem } from '../../../types';
 import { staticSourceData } from '../../content_sources/source_data';
 import { SourceLogic } from '../../content_sources/source_logic';
+import { AddSourceLogic } from '../../content_sources/components/add_source/add_source_logic';
 
 import { AddSourceHeader } from '../../content_sources/components/add_source/add_source_header';
 import { SaveConfig } from '../../content_sources/components/add_source/save_config';
@@ -27,8 +28,9 @@ interface SourceConfigProps {
 export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
   const { configuration, serviceType } = staticSourceData[sourceIndex] as SourceDataItem;
-  const { saveUpdatedConfig, deleteSourceConfig } = useActions(SettingsLogic);
+  const { deleteSourceConfig } = useActions(SettingsLogic);
   const { getSourceConfigData } = useActions(SourceLogic);
+  const { saveSourceConfig } = useActions(AddSourceLogic);
   const {
     sourceConfigData: { name, categories },
     dataLoading: sourceDataLoading,
@@ -41,6 +43,7 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
   if (sourceDataLoading) return <Loading />;
   const hideConfirmModal = () => setConfirmModalVisibility(false);
   const showConfirmModal = () => setConfirmModalVisibility(true);
+  const saveUpdatedConfig = () => saveSourceConfig(true);
 
   const header = <AddSourceHeader name={name} serviceType={serviceType} categories={categories} />;
 
