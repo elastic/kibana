@@ -164,4 +164,12 @@ export class ESTermSource extends AbstractESAggSource {
   getFieldNames(): string[] {
     return this.getMetricFields().map((esAggMetricField) => esAggMetricField.getName());
   }
+
+  getSyncMeta(): VectorSourceSyncMeta | null {
+    return this._descriptor.size !== undefined
+      ? {
+          size: this._descriptor.size,
+        }
+      : null;
+  }
 }
