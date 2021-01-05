@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import type { PluginInitializerContext } from 'kibana/public';
 import { DiscoverEnhancedPlugin } from './plugin';
 
-export {
+export type { ExploreDataContextMenuAction, ExploreDataChartAction } from './actions';
+
+export type {
   DiscoverEnhancedPlugin,
   DiscoverEnhancedSetupDependencies,
   DiscoverEnhancedStartDependencies,
