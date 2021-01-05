@@ -19,19 +19,19 @@
 
 const dateMath = require('./index');
 const moment = require('moment');
-const sinon = require('sinon');
 
 /**
- * Require a new instance of the moment library, bypassing the require cache.
+ * Require a new instance of the moment library, bypassing the require cache
+ * by using jest.resetModules().
  * This is needed, since we are trying to test whether or not this library works
  * when passing in a different configured moment instance. If we would change
  * the locales on the imported moment, it would automatically apply
  * to the source code, even without passing it in to the method, since they share
  * the same global state. This method avoids this, by loading a separate instance
- * of moment, by deleting the require cache and require the library again.
+ * of moment, by resetting the jest require modules cache and require the library again.
  */
 function momentClone() {
-  delete require.cache[require.resolve('moment')];
+  jest.resetModules();
   return require('moment');
 }
 
@@ -42,7 +42,6 @@ describe('dateMath', function () {
   const anchoredDate = new Date(Date.parse(anchor));
   const unix = moment(anchor).valueOf();
   const format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
-  let clock;
 
   describe('errors', function () {
     it('should return undefined if passed something falsy', function () {
@@ -90,16 +89,20 @@ describe('dateMath', function () {
     let string;
     let now;
 
+    beforeAll(function () {
+      global.jest.useFakeTimers('modern');
+    });
+
     beforeEach(function () {
-      clock = sinon.useFakeTimers(unix);
+      jest.setSystemTime(unix);
       now = moment();
       mmnt = moment(anchor);
       date = mmnt.toDate();
       string = mmnt.format(format);
     });
 
-    afterEach(function () {
-      clock.restore();
+    afterAll(function () {
+      jest.useRealTimers();
     });
 
     it('should return the same moment if passed a moment', function () {
@@ -128,13 +131,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      clock = sinon.useFakeTimers(unix);
+      jest.useFakeTimers('modern');
+      jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      clock.restore();
+      jest.useRealTimers();
     });
 
     [5, 12, 247].forEach((len) => {
@@ -165,13 +169,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      clock = sinon.useFakeTimers(unix);
+      jest.useFakeTimers('modern');
+      jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      clock.restore();
+      jest.useRealTimers();
     });
 
     [5, 12, 247].forEach((len) => {
@@ -203,13 +208,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      clock = sinon.useFakeTimers(unix);
+      jest.useFakeTimers('modern');
+      jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      clock.restore();
+      jest.useRealTimers();
     });
 
     spans.forEach((span) => {
@@ -244,13 +250,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      clock = sinon.useFakeTimers(unix);
+      jest.useFakeTimers('modern');
+      jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      clock.restore();
+      jest.useRealTimers();
     });
 
     it('should round to the nearest second with 0 value', function () {
@@ -316,10 +323,10 @@ describe('dateMath', function () {
 
   describe('used momentjs instance', function () {
     it('should use the default moment instance if parameter not specified', function () {
-      const momentSpy = sinon.spy(moment, 'isMoment');
+      const momentSpy = jest.spyOn(moment, 'isMoment');
       dateMath.parse('now');
-      expect(momentSpy.called).toBeTruthy();
-      momentSpy.restore();
+      expect(momentSpy).toHaveBeenCalled();
+      momentSpy.mockRestore();
     });
 
     it('should not use default moment instance if parameter is specified', function () {
@@ -336,34 +343,34 @@ describe('dateMath', function () {
     it('should work with multiple different instances', function () {
       const m1 = momentClone();
       const m2 = momentClone();
-      const m1Spy = sinon.spy(m1, 'isMoment');
-      const m2Spy = sinon.spy(m2, 'isMoment');
+      const m1Spy = jest.spyOn(m1, 'isMoment');
+      const m2Spy = jest.spyOn(m2, 'isMoment');
       dateMath.parse('now', { momentInstance: m1 });
-      expect(m1Spy.called).toBeTruthy();
-      expect(m2Spy.called).toBeFalsy();
-      m1Spy.resetHistory();
-      m2Spy.resetHistory();
+      expect(m1Spy).toHaveBeenCalled();
+      expect(m2Spy).not.toHaveBeenCalled();
+      m1Spy.mockClear();
+      m2Spy.mockClear();
       dateMath.parse('now', { momentInstance: m2 });
-      expect(m1Spy.called).toBeFalsy();
-      expect(m2Spy.called).toBeTruthy();
-      m1Spy.restore();
-      m2Spy.restore();
+      expect(m1Spy).not.toHaveBeenCalled();
+      expect(m2Spy).toHaveBeenCalled();
+      m1Spy.mockRestore();
+      m2Spy.mockRestore();
     });
 
     it('should use global instance after passing an instance', function () {
       const m = momentClone();
-      const momentSpy = sinon.spy(moment, 'isMoment');
-      const cloneSpy = sinon.spy(m, 'isMoment');
+      const momentSpy = jest.spyOn(moment, 'isMoment');
+      const cloneSpy = jest.spyOn(m, 'isMoment');
       dateMath.parse('now', { momentInstance: m });
-      expect(momentSpy.called).toBeFalsy();
-      expect(cloneSpy.called).toBeTruthy();
-      momentSpy.resetHistory();
-      cloneSpy.resetHistory();
+      expect(momentSpy).not.toHaveBeenCalled();
+      expect(cloneSpy).toHaveBeenCalled();
+      momentSpy.mockClear();
+      cloneSpy.mockClear();
       dateMath.parse('now');
-      expect(momentSpy.called).toBeTruthy();
-      expect(cloneSpy.called).toBeFalsy();
-      momentSpy.restore();
-      cloneSpy.restore();
+      expect(momentSpy).toHaveBeenCalled();
+      expect(cloneSpy).not.toHaveBeenCalled();
+      momentSpy.mockRestore();
+      cloneSpy.mockRestore();
     });
   });
 
