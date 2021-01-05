@@ -15,4 +15,5 @@ export {
   BackgroundSessionSavedObjectAttributes,
   BackgroundSessionFindOptions,
   BackgroundSessionStatus,
+  BackgroundSessionSearchInfo,
 } from './search';

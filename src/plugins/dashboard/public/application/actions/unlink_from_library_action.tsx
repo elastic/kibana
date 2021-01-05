@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { ActionByType, IncompatibleActionError } from '../../services/ui_actions';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
   ViewMode,
   PanelState,
@@ -38,7 +38,7 @@ export interface UnlinkFromLibraryActionContext {
   embeddable: IEmbeddable;
 }
 
-export class UnlinkFromLibraryAction implements ActionByType<typeof ACTION_UNLINK_FROM_LIBRARY> {
+export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionContext> {
   public readonly type = ACTION_UNLINK_FROM_LIBRARY;
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;

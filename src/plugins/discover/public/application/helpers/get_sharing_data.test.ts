@@ -51,7 +51,7 @@ describe('getSharingData', () => {
         "searchRequest": Object {
           "body": Object {
             "_source": Object {},
-            "fields": undefined,
+            "fields": Array [],
             "query": Object {
               "bool": Object {
                 "filter": Array [],
@@ -68,7 +68,9 @@ describe('getSharingData', () => {
                 },
               },
             ],
-            "stored_fields": undefined,
+            "stored_fields": Array [
+              "*",
+            ],
           },
           "index": "the-index-pattern-title",
         },
