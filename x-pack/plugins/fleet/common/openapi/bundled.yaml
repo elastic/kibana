@@ -789,6 +789,11 @@ paths:
     put:
       summary: PackagePolicies - Update
       operationId: put-packagePolicies-packagePolicyId
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update_package_policy'
       responses:
         '200':
           description: OK
@@ -1323,5 +1328,13 @@ components:
         - format_version
         - download
         - path
+    update_package_policy:
+      title: UpdatePackagePolicy
+      allOf:
+        - type: object
+          properties:
+            version:
+              type: string
+        - $ref: '#/components/schemas/new_package_policy'
 security:
   - basicAuth: []
