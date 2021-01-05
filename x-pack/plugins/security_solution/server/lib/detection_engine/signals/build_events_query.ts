@@ -49,19 +49,12 @@ export const buildEventsSearchQuery = ({
 
   const rangeFilter: unknown[] = [
     {
-      bool: {
-        should: [
-          {
-            range: {
-              [sortField]: {
-                lte: to,
-                gte: from,
-                format: 'strict_date_optional_time',
-              },
-            },
-          },
-        ],
-        minimum_should_match: 1,
+      range: {
+        [sortField]: {
+          lte: to,
+          gte: from,
+          format: 'strict_date_optional_time',
+        },
       },
     },
   ];
