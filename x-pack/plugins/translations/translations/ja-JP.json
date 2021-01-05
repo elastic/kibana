@@ -4513,7 +4513,6 @@
     "visualize.createVisualization.failedToLoadErrorMessage": "ビジュアライゼーションを読み込めませんでした",
     "visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage": "indexPatternまたはsavedSearchIdが必要です",
     "visualize.createVisualization.noVisTypeErrorMessage": "有効なビジュアライゼーションタイプを指定してください",
-    "visualize.dashboard.prefix.breadcrumb": "ダッシュボード",
     "visualize.discover.visualizeFieldLabel": "Visualizeフィールド",
     "visualize.editor.createBreadcrumb": "作成",
     "visualize.editor.defaultEditBreadcrumbText": "編集",
