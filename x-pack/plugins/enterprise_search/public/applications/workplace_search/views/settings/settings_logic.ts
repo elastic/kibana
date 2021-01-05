@@ -11,6 +11,7 @@ import routes from 'workplace_search/routes';
 import { handleAPIError } from 'app_search/utils/handleAPIError';
 import { IFlashMessagesProps } from 'shared/types';
 
+import { clearFlashMessages } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { AppLogic } from '../../app_logic';
@@ -46,7 +47,6 @@ interface SettingsActions {
     oauthApplication: IOauthApplication;
   }): IOauthApplication;
   setConfigDeleted(name: string): string;
-  resetFlashMessages(): void;
   resetSettingsState(): void;
   initializeSettings(): void;
   initializeConnectors(): void;
@@ -81,7 +81,6 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     setUpdatedOauthApplication: ({ oauthApplication }: { oauthApplication: IOauthApplication }) =>
       oauthApplication,
     setConfigDeleted: (name: string) => name,
-    resetFlashMessages: () => true,
     resetSettingsState: () => true,
     initializeSettings: () => true,
     initializeConnectors: () => true,
@@ -126,7 +125,6 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
           success: [`Successfully removed configuration for ${name}.`],
         }),
         resetSettingsState: () => ({}),
-        resetFlashMessages: () => ({}),
       },
     ],
     dataLoading: [
@@ -168,7 +166,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       const oauthApplication = values.oauthApplication || ({} as IOauthApplication);
       const { name, redirectUri, confidential } = oauthApplication;
 
-      actions.resetFlashMessages();
+      clearFlashMessages();
 
       http
         .put(route, { oauth_application: { name, confidential, redirect_uri: redirectUri } })

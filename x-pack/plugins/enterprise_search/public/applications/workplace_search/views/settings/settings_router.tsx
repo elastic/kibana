@@ -16,7 +16,7 @@ import {
   ORG_SETTINGS_OAUTH_APPLICATION_PATH,
 } from '../../routes';
 
-import { FlashMessages } from '../../../shared/flash_messages';
+import { FlashMessages, clearFlashMessages } from '../../../shared/flash_messages';
 
 import { Connectors } from './components/connectors';
 import { Customize } from './components/customize';
@@ -29,14 +29,14 @@ import { SettingsLogic } from './settings_logic';
 
 export const SettingsRouter: React.FC = () => {
   const { pathname } = useLocation();
-  const { resetFlashMessages, initializeSettings } = useActions(SettingsLogic);
+  const { initializeSettings } = useActions(SettingsLogic);
 
   useEffect(() => {
     initializeSettings();
   }, []);
 
   useEffect(() => {
-    resetFlashMessages();
+    clearFlashMessages();
   }, [pathname]);
 
   return (
