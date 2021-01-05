@@ -586,7 +586,7 @@ describe('Jira service', () => {
 
     test('it should throw an auth error', async () => {
       requestMock.mockImplementation(() => {
-        const error: ResponseError = new Error('An error has occurred');
+        const error = new Error('An error has occurred');
         // @ts-ignore this can happen!
         error.response = { data: 'Unauthorized' };
         throw error;

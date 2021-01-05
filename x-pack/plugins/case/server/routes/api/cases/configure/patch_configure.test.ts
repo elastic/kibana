@@ -158,9 +158,6 @@ describe('PATCH configuration', () => {
         caseMappingsSavedObject: [],
       })
     );
-    const mockGetMappings = jest.fn().mockImplementation(() => {
-      throw new Error();
-    });
     const mockThrowContext = {
       ...context,
       case: {
@@ -168,7 +165,9 @@ describe('PATCH configuration', () => {
         getCaseClient: () =>
           ({
             ...context?.case?.getCaseClient(),
-            getMappings: mockGetMappings,
+            getMappings: () => {
+              throw new Error();
+            },
           } as CaseClient),
       },
     };

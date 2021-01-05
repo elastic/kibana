@@ -173,8 +173,7 @@ describe('useConfigure', () => {
     });
   });
 
-  test('sort of happy save case configuration - getCaseConfigure', async () => {
-    // When there is no version, a configuration is created. Otherwise is updated.
+  test('Displays error when present - getCaseConfigure', async () => {
     const spyOnGetCaseConfigure = jest.spyOn(api, 'getCaseConfigure');
     spyOnGetCaseConfigure.mockImplementation(() =>
       Promise.resolve({
@@ -194,7 +193,7 @@ describe('useConfigure', () => {
     });
   });
 
-  test('sort of happy save case configuration - postCaseConfigure', async () => {
+  test('Displays error when present - postCaseConfigure', async () => {
     // When there is no version, a configuration is created. Otherwise is updated.
     const spyOnGetCaseConfigure = jest.spyOn(api, 'getCaseConfigure');
     spyOnGetCaseConfigure.mockImplementation(() =>
