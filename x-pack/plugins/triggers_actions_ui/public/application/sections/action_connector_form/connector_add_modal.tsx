@@ -22,11 +22,9 @@ import { createConnectorReducer, InitialConnector, ConnectorReducer } from './co
 import { createActionConnector } from '../../lib/action_connector_api';
 import './connector_add_modal.scss';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { ActionType, ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import {
   ActionType,
   ActionConnector,
-  IErrorObject,
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
 } from '../../../types';
