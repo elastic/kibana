@@ -59,7 +59,7 @@ Each action type exposes different properties. For example an email action allow
 [role="screenshot"]
 image::images/alert-flyout-action-details.png[UI for defining an email action]
 
-Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass alert values at the time a condition is detected to an action. Available variables differ by alert type, and a list can be accessed using the "add variable" button.
+Using the https://mustache.github.io/[Mustache] template syntax `{{variable name}}`, you can pass alert values at the time a condition is detected to an action.  Note that using two curly braces will escape any HTML.  Should you need to preserve HTML, use three curly braces (`{{{`). Available variables differ by alert type, and a list can be accessed using the "add variable" button.
 
 [role="screenshot"]
 image::images/alert-flyout-action-variables.png[Passing alert values to an action]
