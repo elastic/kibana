@@ -24,8 +24,12 @@ import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
-import { ActionType, ActionConnector, ActionTypeRegistryContract } from '../../../types';
+import {
+  ActionType,
+  ActionConnector,
+  ActionTypeRegistryContract,
   UserConfiguredActionConnector,
+} from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
