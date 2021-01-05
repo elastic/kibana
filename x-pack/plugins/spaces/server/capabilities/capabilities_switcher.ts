@@ -16,10 +16,10 @@ export function setupCapabilitiesSwitcher(
   logger: Logger
 ): CapabilitiesSwitcher {
   return async (request, capabilities, useDefaultCapabilities) => {
-    const isAnonymousRequest = !request.route.options.authRequired;
-    const shouldToggleCapabilities = !isAnonymousRequest && !useDefaultCapabilities;
+    const isAuthRequiredOrOptional = !request.route.options.authRequired;
+    const shouldNotToggleCapabilities = isAuthRequiredOrOptional || useDefaultCapabilities;
 
-    if (!shouldToggleCapabilities) {
+    if (shouldNotToggleCapabilities) {
       return capabilities;
     }
 
