@@ -4,23 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ThresholdMetActionGroupId } from '../../../common/alert_types';
 import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../typings/elasticsearch';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../alerts/server';
+import { AlertServices } from '../../../../alerts/server';
 
 export function alertingEsClient<TParams extends ESSearchRequest>(
-  services: AlertServices<
-    AlertInstanceState,
-    AlertInstanceContext,
-    ThresholdMetActionGroupId
-  >,
+  services: AlertServices,
   params: TParams
 ): Promise<ESSearchResponse<unknown, TParams>> {
   return services.callCluster('search', {

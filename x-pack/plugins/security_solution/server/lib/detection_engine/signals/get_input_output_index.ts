@@ -5,14 +5,10 @@
  */
 
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../../alerts/server';
+import { AlertServices } from '../../../../../alerts/server';
 
 export const getInputIndex = async (
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
+  services: AlertServices,
   version: string,
   inputIndex: string[] | null | undefined
 ): Promise<string[]> => {

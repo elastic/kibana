@@ -10,7 +10,7 @@ import { addSpaceIdToPath } from '../../../spaces/server';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
-import { createExecutionHandler, ExecutionHandler } from './create_execution_handler';
+import { createExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
 import {
   validateAlertTypeParams,
@@ -44,7 +44,6 @@ import {
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedAlertType } from '../alert_type_registry';
 
@@ -65,32 +64,16 @@ export class TaskRunner<
   Params extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  InstanceContext extends AlertInstanceContext
 > {
   private context: TaskRunnerContext;
   private logger: Logger;
   private taskInstance: AlertTaskInstance;
-  private alertType: NormalizedAlertType<
-    Params,
-    State,
-    InstanceState,
-    InstanceContext,
-    ActionGroupIds,
-    RecoveryActionGroupId
-  >;
+  private alertType: NormalizedAlertType<Params, State, InstanceState, InstanceContext>;
   private readonly alertTypeRegistry: AlertTypeRegistry;
 
   constructor(
-    alertType: NormalizedAlertType<
-      Params,
-      State,
-      InstanceState,
-      InstanceContext,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >,
+    alertType: NormalizedAlertType<Params, State, InstanceState, InstanceContext>,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext
   ) {
@@ -161,14 +144,7 @@ export class TaskRunner<
     actions: Alert<Params>['actions'],
     alertParams: Params
   ) {
-    return createExecutionHandler<
-      Params,
-      State,
-      InstanceState,
-      InstanceContext,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >({
+    return createExecutionHandler({
       alertId,
       alertName,
       tags,
@@ -187,7 +163,7 @@ export class TaskRunner<
   async executeAlertInstance(
     alertInstanceId: string,
     alertInstance: AlertInstance<InstanceState, InstanceContext>,
-    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>
+    executionHandler: ReturnType<typeof createExecutionHandler>
   ) {
     const {
       actionGroup,
@@ -204,7 +180,7 @@ export class TaskRunner<
     services: Services,
     alert: SanitizedAlert<Params>,
     params: Params,
-    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
+    executionHandler: ReturnType<typeof createExecutionHandler>,
     spaceId: string,
     event: Event
   ): Promise<AlertTaskState> {
@@ -242,11 +218,9 @@ export class TaskRunner<
         alertId,
         services: {
           ...services,
-          alertInstanceFactory: createAlertInstanceFactory<
-            InstanceState,
-            InstanceContext,
-            WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-          >(alertInstances),
+          alertInstanceFactory: createAlertInstanceFactory<InstanceState, InstanceContext>(
+            alertInstances
+          ),
         },
         params,
         state: alertTypeState as State,
@@ -304,7 +278,7 @@ export class TaskRunner<
     if (!muteAll) {
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
-      scheduleActionsForRecoveredInstances<InstanceState, InstanceContext, RecoveryActionGroupId>({
+      scheduleActionsForRecoveredInstances({
         recoveryActionGroup: this.alertType.recoveryActionGroup,
         recoveredAlertInstances,
         executionHandler,
@@ -641,30 +615,20 @@ function generateNewAndRecoveredInstanceEvents<
 
 interface ScheduleActionsForRecoveredInstancesParams<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  RecoveryActionGroupId extends string
+  InstanceContext extends AlertInstanceContext
 > {
   logger: Logger;
-  recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
-  recoveredAlertInstances: Dictionary<
-    AlertInstance<InstanceState, InstanceContext, RecoveryActionGroupId>
-  >;
-  executionHandler: ExecutionHandler<RecoveryActionGroupId | RecoveryActionGroupId>;
+  recoveryActionGroup: ActionGroup;
+  recoveredAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  executionHandler: ReturnType<typeof createExecutionHandler>;
   mutedInstanceIdsSet: Set<string>;
   alertLabel: string;
 }
 
 function scheduleActionsForRecoveredInstances<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  RecoveryActionGroupId extends string
->(
-  params: ScheduleActionsForRecoveredInstancesParams<
-    InstanceState,
-    InstanceContext,
-    RecoveryActionGroupId
-  >
-) {
+  InstanceContext extends AlertInstanceContext
+>(params: ScheduleActionsForRecoveredInstancesParams<InstanceState, InstanceContext>) {
   const {
     logger,
     recoveryActionGroup,
@@ -696,31 +660,18 @@ function scheduleActionsForRecoveredInstances<
 
 interface LogActiveAndRecoveredInstancesParams<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  InstanceContext extends AlertInstanceContext
 > {
   logger: Logger;
-  activeAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>;
-  recoveredAlertInstances: Dictionary<
-    AlertInstance<InstanceState, InstanceContext, RecoveryActionGroupId>
-  >;
+  activeAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
+  recoveredAlertInstances: Dictionary<AlertInstance<InstanceState, InstanceContext>>;
   alertLabel: string;
 }
 
 function logActiveAndRecoveredInstances<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
->(
-  params: LogActiveAndRecoveredInstancesParams<
-    InstanceState,
-    InstanceContext,
-    ActionGroupIds,
-    RecoveryActionGroupId
-  >
-) {
+  InstanceContext extends AlertInstanceContext
+>(params: LogActiveAndRecoveredInstancesParams<InstanceState, InstanceContext>) {
   const { logger, activeAlertInstances, recoveredAlertInstances, alertLabel } = params;
   const activeInstanceIds = Object.keys(activeAlertInstances);
   const recoveredInstanceIds = Object.keys(recoveredAlertInstances);

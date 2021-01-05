@@ -102,18 +102,9 @@ export interface PluginSetupContract {
     Params extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
-    ActionGroupIds extends string = never,
-    RecoveryActionGroupId extends string = never
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext
   >(
-    alertType: AlertType<
-      Params,
-      State,
-      InstanceState,
-      InstanceContext,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >
+    alertType: AlertType<Params, State, InstanceState, InstanceContext>
   ): void;
 }
 
@@ -282,19 +273,8 @@ export class AlertingPlugin {
         Params extends AlertTypeParams = AlertTypeParams,
         State extends AlertTypeState = AlertTypeState,
         InstanceState extends AlertInstanceState = AlertInstanceState,
-        InstanceContext extends AlertInstanceContext = AlertInstanceContext,
-        ActionGroupIds extends string = never,
-        RecoveryActionGroupId extends string = never
-      >(
-        alertType: AlertType<
-          Params,
-          State,
-          InstanceState,
-          InstanceContext,
-          ActionGroupIds,
-          RecoveryActionGroupId
-        >
-      ) {
+        InstanceContext extends AlertInstanceContext = AlertInstanceContext
+      >(alertType: AlertType<Params, State, InstanceState, InstanceContext>) {
         if (!(alertType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${alertType.minimumLicenseRequired}" is not a valid license type`);
         }

@@ -13,13 +13,7 @@ import { LicensingPluginStart } from '../../../licensing/server';
 import { ILicense, LicenseType } from '../../../licensing/common/types';
 import { PLUGIN } from '../constants/plugin';
 import { getAlertTypeFeatureUsageName } from './get_alert_type_feature_usage_name';
-import {
-  AlertType,
-  AlertTypeParams,
-  AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-} from '../types';
+import { AlertType } from '../types';
 import { AlertTypeDisabledError } from './errors/alert_type_disabled';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
@@ -136,23 +130,7 @@ export class LicenseState {
     }
   }
 
-  public ensureLicenseForAlertType<
-    Params extends AlertTypeParams,
-    State extends AlertTypeState,
-    InstanceState extends AlertInstanceState,
-    InstanceContext extends AlertInstanceContext,
-    ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
-  >(
-    alertType: AlertType<
-      Params,
-      State,
-      InstanceState,
-      InstanceContext,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >
-  ) {
+  public ensureLicenseForAlertType(alertType: AlertType) {
     this.notifyUsage(alertType.name, alertType.minimumLicenseRequired);
 
     const check = this.getLicenseCheckForAlertType(

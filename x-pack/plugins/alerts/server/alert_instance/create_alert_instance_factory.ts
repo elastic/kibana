@@ -9,12 +9,11 @@ import { AlertInstance } from './alert_instance';
 
 export function createAlertInstanceFactory<
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string
->(alertInstances: Record<string, AlertInstance<InstanceState, InstanceContext, ActionGroupIds>>) {
-  return (id: string): AlertInstance<InstanceState, InstanceContext, ActionGroupIds> => {
+  InstanceContext extends AlertInstanceContext
+>(alertInstances: Record<string, AlertInstance<InstanceState, InstanceContext>>) {
+  return (id: string): AlertInstance<InstanceState, InstanceContext> => {
     if (!alertInstances[id]) {
-      alertInstances[id] = new AlertInstance<InstanceState, InstanceContext, ActionGroupIds>();
+      alertInstances[id] = new AlertInstance<InstanceState, InstanceContext>();
     }
 
     return alertInstances[id];

@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import {
-  PluginSetupContract,
-  AlertTypeParams,
-  AlertTypeState,
-  AlertInstanceContext,
-  AlertInstanceState,
-  ActionGroupIdsOf,
-} from '../../../../../alerts/server';
+import { PluginSetupContract } from '../../../../../alerts/server';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import {
   LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
@@ -86,13 +79,7 @@ export async function registerLogThresholdAlertType(
     );
   }
 
-  alertingPlugin.registerType<
-    AlertTypeParams,
-    AlertTypeState,
-    AlertInstanceState,
-    AlertInstanceContext,
-    ActionGroupIdsOf<typeof FIRED_ACTIONS>
-  >({
+  alertingPlugin.registerType({
     id: LOG_DOCUMENT_COUNT_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.logs.alertName', {
       defaultMessage: 'Log threshold',

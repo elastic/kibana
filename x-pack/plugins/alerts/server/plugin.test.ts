@@ -58,7 +58,7 @@ describe('Alerting Plugin', () => {
 
     describe('registerType()', () => {
       let setup: PluginSetupContract;
-      const sampleAlertType: AlertType<never, never, never, never, 'default'> = {
+      const sampleAlertType: AlertType = {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',

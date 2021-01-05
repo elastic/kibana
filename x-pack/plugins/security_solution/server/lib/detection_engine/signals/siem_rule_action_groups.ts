@@ -5,9 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionGroup } from '../../../../../alerts/common';
 
-export const siemRuleActionGroups: Array<ActionGroup<'default'>> = [
+export const siemRuleActionGroups = [
   {
     id: 'default',
     name: i18n.translate(

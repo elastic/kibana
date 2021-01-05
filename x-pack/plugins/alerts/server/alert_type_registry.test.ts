@@ -6,7 +6,7 @@
 
 import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry, ConstructorOptions } from './alert_type_registry';
-import { ActionGroup, AlertType } from './types';
+import { AlertType } from './types';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
@@ -55,7 +55,7 @@ describe('has()', () => {
 
 describe('register()', () => {
   test('throws if AlertType Id contains invalid characters', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -87,7 +87,7 @@ describe('register()', () => {
   });
 
   test('throws if AlertType Id isnt a string', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType = {
       id: (123 as unknown) as string,
       name: 'Test',
       actionGroups: [
@@ -109,7 +109,7 @@ describe('register()', () => {
   });
 
   test('throws if AlertType action groups contains reserved group id', () => {
-    const alertType: AlertType<never, never, never, never, 'default' | 'NotReserved'> = {
+    const alertType: AlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -117,14 +117,10 @@ describe('register()', () => {
           id: 'default',
           name: 'Default',
         },
-        /**
-         * The type system will ensure you can't use the `recovered` action group
-         * but we also want to ensure this at runtime
-         */
-        ({
+        {
           id: 'recovered',
           name: 'Recovered',
-        } as unknown) as ActionGroup<'NotReserved'>,
+        },
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
@@ -141,7 +137,7 @@ describe('register()', () => {
   });
 
   test('allows an AlertType to specify a custom recovery group', () => {
-    const alertType: AlertType<never, never, never, never, 'default', 'backToAwesome'> = {
+    const alertType: AlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -176,14 +172,7 @@ describe('register()', () => {
   });
 
   test('throws if the custom recovery group is contained in the AlertType action groups', () => {
-    const alertType: AlertType<
-      never,
-      never,
-      never,
-      never,
-      'default' | 'backToAwesome',
-      'backToAwesome'
-    > = {
+    const alertType: AlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -215,7 +204,7 @@ describe('register()', () => {
   });
 
   test('registers the executor with the task manager', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -245,7 +234,7 @@ describe('register()', () => {
   });
 
   test('shallow clones the given alert type', () => {
-    const alertType: AlertType<never, never, never, never, 'default'> = {
+    const alertType: AlertType = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -486,12 +475,8 @@ describe('ensureAlertTypeEnabled', () => {
   });
 });
 
-function alertTypeWithVariables<ActionGroupIds extends string>(
-  id: ActionGroupIds,
-  context: string,
-  state: string
-): AlertType<never, never, never, never, ActionGroupIds> {
-  const baseAlert: AlertType<never, never, never, never, ActionGroupIds> = {
+function alertTypeWithVariables(id: string, context: string, state: string): AlertType {
+  const baseAlert: AlertType = {
     id,
     name: `${id}-name`,
     actionGroups: [],

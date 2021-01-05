@@ -266,8 +266,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         executorServices
           .alertInstanceFactory('1')
@@ -427,8 +426,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
@@ -544,8 +542,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
         executorServices.alertInstanceFactory('2').scheduleActions('default');
@@ -598,8 +595,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
@@ -700,8 +696,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
@@ -748,8 +743,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         executorServices
           .alertInstanceFactory('1')
@@ -804,8 +798,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
@@ -980,8 +973,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
@@ -1088,8 +1080,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
@@ -1187,8 +1178,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         executorServices.alertInstanceFactory('1').scheduleActions('default');
       }
@@ -1457,8 +1447,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         throw new Error('OMG');
       }
@@ -1833,8 +1822,7 @@ describe('Task Runner', () => {
         AlertTypeParams,
         AlertTypeState,
         AlertInstanceState,
-        AlertInstanceContext,
-        string
+        AlertInstanceContext
       >) => {
         throw new Error('OMG');
       }

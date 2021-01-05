@@ -29,7 +29,6 @@ import {
   AlertExecutionStatusErrorReasons,
   AlertsHealth,
   AlertNotifyWhenType,
-  WithoutReservedActionGroups,
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 
@@ -59,25 +58,21 @@ export interface Services {
 
 export interface AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
-  ActionGroupIds extends string = never
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext
 > extends Services {
-  alertInstanceFactory: (
-    id: string
-  ) => PublicAlertInstance<InstanceState, InstanceContext, ActionGroupIds>;
+  alertInstanceFactory: (id: string) => PublicAlertInstance<InstanceState, InstanceContext>;
 }
 
 export interface AlertExecutorOptions<
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
   InstanceState extends AlertInstanceState = never,
-  InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  InstanceContext extends AlertInstanceContext = never
 > {
   alertId: string;
   startedAt: Date;
   previousStartedAt: Date | null;
-  services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
+  services: AlertServices<InstanceState, InstanceContext>;
   params: Params;
   state: State;
   spaceId: string;
@@ -97,10 +92,9 @@ export type ExecutorType<
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
   InstanceState extends AlertInstanceState = never,
-  InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  InstanceContext extends AlertInstanceContext = never
 > = (
-  options: AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds>
+  options: AlertExecutorOptions<Params, State, InstanceState, InstanceContext>
 ) => Promise<State | void>;
 
 export interface AlertTypeParamsValidator<Params extends AlertTypeParams> {
@@ -110,29 +104,17 @@ export interface AlertType<
   Params extends AlertTypeParams = never,
   State extends AlertTypeState = never,
   InstanceState extends AlertInstanceState = never,
-  InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never,
-  RecoveryActionGroupId extends string = never
+  InstanceContext extends AlertInstanceContext = never
 > {
   id: string;
   name: string;
   validate?: {
     params?: AlertTypeParamsValidator<Params>;
   };
-  actionGroups: Array<ActionGroup<ActionGroupIds>>;
-  defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];
-  recoveryActionGroup?: ActionGroup<RecoveryActionGroupId>;
-  executor: ExecutorType<
-    Params,
-    State,
-    InstanceState,
-    InstanceContext,
-    /**
-     * Ensure that the reserved ActionGroups (such as `Recovered`) are not
-     * available for scheduling in the Executor
-     */
-    WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
-  >;
+  actionGroups: ActionGroup[];
+  defaultActionGroupId: ActionGroup['id'];
+  recoveryActionGroup?: ActionGroup;
+  executor: ExecutorType<Params, State, InstanceState, InstanceContext>;
   producer: string;
   actionVariables?: {
     context?: ActionVariable[];
