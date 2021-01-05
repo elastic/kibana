@@ -157,11 +157,7 @@ export class HeadlessChromiumDriverFactory {
   getBrowserLogger(page: puppeteer.Page, logger: LevelLogger): Rx.Observable<void> {
     const consoleMessages$ = Rx.fromEvent<puppeteer.ConsoleMessage>(page, 'console').pipe(
       map((line) => {
-        if (line.type() === 'error') {
-          logger.error(line.text(), ['headless-browser-console']);
-        } else {
-          logger.debug(line.text(), [`headless-browser-console:${line.type()}`]);
-        }
+        logger.trace(line.text(), [`headless-browser-console:${line.type()}`]);
       })
     );
 

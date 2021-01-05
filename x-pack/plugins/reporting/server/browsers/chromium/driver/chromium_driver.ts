@@ -246,7 +246,7 @@ export class HeadlessChromiumDriver {
       }
 
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
-        logger.debug(`Using custom headers for ${interceptedUrl}`);
+        logger.trace(`Using custom headers for ${interceptedUrl}`);
         const headers = map(
           {
             ...interceptedRequest.request.headers,
@@ -273,7 +273,7 @@ export class HeadlessChromiumDriver {
         }
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
-        logger.debug(`No custom headers for ${loggedUrl}`);
+        logger.trace(`No custom headers for ${loggedUrl}`);
         try {
           await client.send('Fetch.continueRequest', { requestId });
         } catch (err) {
