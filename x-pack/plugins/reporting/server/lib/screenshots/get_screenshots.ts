@@ -32,10 +32,9 @@ export const getScreenshots = async (
     // In Puppeteer 5.4+, the viewport size limits what the screenshot can take, even if a clip is specified. The clip area must
     // be visible in the viewport. This workaround resizes the viewport to the actual content height and width.
     // NOTE: this will fire a window resize event
-
-    const { top, left, height, width } = item.position.boundingClientRect;
     {
       // Check current viewport size
+      const { top, left, height, width } = item.position.boundingClientRect;
       const [viewHeight, viewWidth] = await browser.evaluate(
         {
           fn: () => [document.body.clientHeight, document.body.clientWidth],
@@ -59,9 +58,9 @@ export const getScreenshots = async (
           logger
         );
       }
-    }
 
-    logger.debug(`Capturing item: top:${top} left:${left} height:${height} width:${width}`);
+      logger.debug(`Capturing item: top:${top} left:${left} height:${height} width:${width}`);
+    }
 
     const base64EncodedData = await browser.screenshot(item.position);
     screenshots.push({
