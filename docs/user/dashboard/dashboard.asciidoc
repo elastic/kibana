@@ -14,8 +14,6 @@ image:images/Dashboard_example.png[Example dashboard]
 
 [[tsvb]]
 
-[[timelion]]
-
 Dashboards support many types of panels and editors to create panels, including:
 
 [cols="2"]
