@@ -32,8 +32,9 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
     overflow: hidden;
 
     .euiFlyoutBody__overflowContent {
+      flex: 1;
       overflow: hidden;
-      padding-bottom: 64px;
+      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 64px`};
     }
   }
 `;

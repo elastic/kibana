@@ -108,10 +108,12 @@ const EventDetailsComponent: React.FC<Props> = ({
         id: EventsViewType.jsonView,
         name: i18n.JSON_VIEW,
         content: (
-          <TabContentWrapper>
+          <>
             <EuiSpacer size="m" />
-            <JsonView data={data} />
-          </TabContentWrapper>
+            <TabContentWrapper>
+              <JsonView data={data} />
+            </TabContentWrapper>
+          </>
         ),
       },
     ],
