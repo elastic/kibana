@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import * as Api from '../api';
 import { HttpStart } from '../../../../../../src/core/public';
 import { ExceptionListItemSchema, ExceptionListSchema } from '../../../common/schemas';
-import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps } from '../types';
+import { ApiCallFindListsItemsMemoProps, ApiCallMemoProps, ApiListExportProps } from '../types';
 import { getIdsAndNamespaces } from '../utils';
 
 export interface ExceptionsApi {
@@ -22,6 +22,7 @@ export interface ExceptionsApi {
     arg: ApiCallMemoProps & { onSuccess: (arg: ExceptionListSchema) => void }
   ) => Promise<void>;
   getExceptionListsItems: (arg: ApiCallFindListsItemsMemoProps) => Promise<void>;
+  exportExceptionList: (arg: ApiListExportProps) => Promise<void>;
 }
 
 export const useApi = (http: HttpStart): ExceptionsApi => {
@@ -63,6 +64,28 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
             signal: abortCtrl.signal,
           });
           onSuccess();
+        } catch (error) {
+          onError(error);
+        }
+      },
+      async exportExceptionList({
+        id,
+        listId,
+        namespaceType,
+        onError,
+        onSuccess,
+      }: ApiListExportProps): Promise<void> {
+        const abortCtrl = new AbortController();
+
+        try {
+          const blob = await Api.exportExceptionList({
+            http,
+            id,
+            listId,
+            namespaceType,
+            signal: abortCtrl.signal,
+          });
+          onSuccess(blob);
         } catch (error) {
           onError(error);
         }

@@ -21,8 +21,7 @@ import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { RangeOption, SwitchOption } from '../../charts/public';
+import { VisOptionsProps, SwitchOption, RangeOption } from '../../vis_default_editor/public';
 import { MarkdownVisParams } from './types';
 
 function SettingsOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisParams>) {

@@ -45,9 +45,7 @@ describe('useBreadcrumbs', () => {
 
     const urlParams: UptimeUrlParams = getSupportedUrlParams({});
     expect(JSON.stringify(getBreadcrumbs())).toEqual(
-      JSON.stringify(
-        [makeBaseBreadcrumb('/app/uptime', jest.fn(), urlParams)].concat(expectedCrumbs)
-      )
+      JSON.stringify([makeBaseBreadcrumb('/app/uptime', urlParams)].concat(expectedCrumbs))
     );
   });
 });
