@@ -6,7 +6,7 @@
 
 import React, { useEffect } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useActions } from 'kea';
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 
 import { SidebarNavigation, AppView } from 'workplace_search/components';
@@ -32,7 +32,6 @@ import { SettingsLogic } from './settings_logic';
 export const SettingsRouter: React.FC = () => {
   const { pathname } = useLocation();
   const { resetFlashMessages, initializeSettings } = useActions(SettingsLogic);
-  const { flashMessages } = useValues(SettingsLogic);
 
   useEffect(() => {
     initializeSettings();
@@ -70,7 +69,7 @@ export const SettingsRouter: React.FC = () => {
 
   return (
     <AppView sidebar={sidebar}>
-      {flashMessages && <FlashMessages {...flashMessages} />}
+      <FlashMessages />
       <Switch>
         <Redirect exact from={ORG_SETTINGS_PATH} to={ORG_SETTINGS_CUSTOMIZE_PATH} />
         <Route exact path={ORG_SETTINGS_CUSTOMIZE_PATH} component={Customize} />
