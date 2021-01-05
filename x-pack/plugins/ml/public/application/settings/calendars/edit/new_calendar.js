@@ -21,6 +21,8 @@ import { ml } from '../../../services/ml_api_service';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { getDocLinks } from '../../../util/dependency_cache';
+import { HelpMenu } from '../../../components/help_menu';
 
 class NewCalendarUI extends Component {
   static propTypes = {
@@ -328,6 +330,8 @@ class NewCalendarUI extends Component {
       isGlobalCalendar,
     } = this.state;
 
+    const helpLink = getDocLinks().links.ml.calendars;
+
     let modal = '';
 
     if (isNewEventModalVisible) {
@@ -389,6 +393,7 @@ class NewCalendarUI extends Component {
             {modal}
           </EuiPageBody>
         </EuiPage>
+        <HelpMenu docLink={helpLink} />
       </Fragment>
     );
   }
