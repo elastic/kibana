@@ -109,6 +109,7 @@ export function createUptimeESClient({
     },
   };
 }
+
 /* eslint-disable no-console */
 
 function formatObj(obj: Record<string, any>) {
