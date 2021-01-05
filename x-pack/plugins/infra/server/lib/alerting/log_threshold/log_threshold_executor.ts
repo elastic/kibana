@@ -64,7 +64,6 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
     const indexPattern = sourceConfiguration.configuration.logAlias;
     const timestampField = sourceConfiguration.configuration.fields.timestamp;
-    const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
 
     try {
       const validatedParams = decodeOrThrow(alertParamsRT)(params);
@@ -87,10 +86,6 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
         );
       }
     } catch (e) {
-      alertInstance.replaceState({
-        alertState: AlertStates.ERROR,
-      });
-
       throw new Error(e);
     }
   };
@@ -190,11 +185,10 @@ export const processUngroupedResults = (
   alertInstaceUpdater: AlertInstanceUpdater
 ) => {
   const { count, criteria } = params;
-
-  const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
   const documentCount = results.hits.total.value;
 
   if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
+    const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
     alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
@@ -206,8 +200,6 @@ export const processUngroupedResults = (
         },
       },
     ]);
-  } else {
-    alertInstaceUpdater(alertInstance, AlertStates.OK);
   }
 };
 
@@ -220,12 +212,12 @@ export const processUngroupedRatioResults = (
 ) => {
   const { count, criteria } = params;
 
-  const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
   const numeratorCount = numeratorResults.hits.total.value;
   const denominatorCount = denominatorResults.hits.total.value;
   const ratio = getRatio(numeratorCount, denominatorCount);
 
   if (ratio !== undefined && checkValueAgainstComparatorMap[count.comparator](ratio, count.value)) {
+    const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY);
     alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
       {
         actionGroup: FIRED_ACTIONS.id,
@@ -238,8 +230,6 @@ export const processUngroupedRatioResults = (
         },
       },
     ]);
-  } else {
-    alertInstaceUpdater(alertInstance, AlertStates.OK);
   }
 };
 
@@ -278,10 +268,10 @@ export const processGroupByResults = (
   const groupResults = getReducedGroupByResults(results);
 
   groupResults.forEach((group) => {
-    const alertInstance = alertInstanceFactory(group.name);
     const documentCount = group.documentCount;
 
     if (checkValueAgainstComparatorMap[count.comparator](documentCount, count.value)) {
+      const alertInstance = alertInstanceFactory(group.name);
       alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -293,8 +283,6 @@ export const processGroupByResults = (
           },
         },
       ]);
-    } else {
-      alertInstaceUpdater(alertInstance, AlertStates.OK);
     }
   });
 };
@@ -312,7 +300,6 @@ export const processGroupByRatioResults = (
   const denominatorGroupResults = getReducedGroupByResults(denominatorResults);
 
   numeratorGroupResults.forEach((numeratorGroup) => {
-    const alertInstance = alertInstanceFactory(numeratorGroup.name);
     const numeratorDocumentCount = numeratorGroup.documentCount;
     const denominatorGroup = denominatorGroupResults.find(
       (_group) => _group.name === numeratorGroup.name
@@ -325,6 +312,7 @@ export const processGroupByRatioResults = (
       ratio !== undefined &&
       checkValueAgainstComparatorMap[count.comparator](ratio, count.value)
     ) {
+      const alertInstance = alertInstanceFactory(numeratorGroup.name);
       alertInstaceUpdater(alertInstance, AlertStates.ALERT, [
         {
           actionGroup: FIRED_ACTIONS.id,
@@ -337,8 +325,6 @@ export const processGroupByRatioResults = (
           },
         },
       ]);
-    } else {
-      alertInstaceUpdater(alertInstance, AlertStates.OK);
     }
   });
 };
