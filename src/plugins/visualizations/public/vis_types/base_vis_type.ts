@@ -20,7 +20,7 @@
 import { defaultsDeep } from 'lodash';
 
 import { VisParams } from '../types';
-import { VisType, VisTypeOptions, VisGroups, ISchemas } from './types';
+import { VisType, VisTypeOptions, VisGroups } from './types';
 import { Schemas } from './schemas';
 
 interface CommonBaseVisTypeOptions<TVisParams>
