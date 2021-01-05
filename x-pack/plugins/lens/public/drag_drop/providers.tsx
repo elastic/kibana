@@ -223,6 +223,11 @@ export function ReorderProvider({
                 defaultMessage: `Press space bar to start reordering the dimension group. When dragging, use arrow keys to reorder. Press space bar again to finish.`,
               })}
             </p>
+            <p id={`lnsDragDrop-groupMovementInstructions-${id}`}>
+              {i18n.translate('xpack.lens.dragDrop.groupMovementInstructions', {
+                defaultMessage: `Use right arrow key to move dimension to next group.`,
+              })}
+            </p>
           </div>
         </EuiScreenReaderOnly>
       </EuiPortal>

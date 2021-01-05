@@ -767,7 +767,11 @@ describe('workspace_panel', () => {
 
     function initComponent(draggingContext = draggedField) {
       instance = mount(
-        <ChildDragDropProvider dragging={draggingContext} setDragging={() => {}}>
+        <ChildDragDropProvider
+          dragging={draggingContext}
+          setDragging={() => {}}
+          setActiveDropTarget={() => {}}
+        >
           <WorkspacePanel
             activeDatasourceId={'mock'}
             datasourceStates={{

@@ -452,7 +452,11 @@ describe('LayerPanel', () => {
       const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1' };
 
       const component = mountWithIntl(
-        <ChildDragDropProvider dragging={draggingField} setDragging={jest.fn()}>
+        <ChildDragDropProvider
+          dragging={draggingField}
+          setDragging={jest.fn()}
+          setActiveDropTarget={() => {}}
+        >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -495,7 +499,11 @@ describe('LayerPanel', () => {
       const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1' };
 
       const component = mountWithIntl(
-        <ChildDragDropProvider dragging={draggingField} setDragging={jest.fn()}>
+        <ChildDragDropProvider
+          dragging={draggingField}
+          setDragging={jest.fn()}
+          setActiveDropTarget={() => {}}
+        >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -508,7 +516,11 @@ describe('LayerPanel', () => {
         component.find('DragDrop[data-test-subj="lnsGroup"]').first().prop('droppable')
       ).toEqual(false);
 
-      component.find('DragDrop[data-test-subj="lnsGroup"]').first().simulate('drop');
+      component
+        .find('DragDrop[data-test-subj="lnsGroup"]')
+        .first()
+        .find('.lnsLayerPanel__dimension')
+        .simulate('drop');
 
       expect(mockDatasource.onDrop).not.toHaveBeenCalled();
     });
@@ -542,7 +554,11 @@ describe('LayerPanel', () => {
       const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
 
       const component = mountWithIntl(
-        <ChildDragDropProvider dragging={draggingOperation} setDragging={jest.fn()}>
+        <ChildDragDropProvider
+          dragging={draggingOperation}
+          setDragging={jest.fn()}
+          setActiveDropTarget={() => {}}
+        >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -596,7 +612,11 @@ describe('LayerPanel', () => {
       const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
 
       const component = mountWithIntl(
-        <ChildDragDropProvider dragging={draggingOperation} setDragging={jest.fn()}>
+        <ChildDragDropProvider
+          dragging={draggingOperation}
+          setDragging={jest.fn()}
+          setActiveDropTarget={() => {}}
+        >
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
       );
@@ -607,7 +627,47 @@ describe('LayerPanel', () => {
       );
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
-          isReorder: true,
+          groupId: 'a',
+          droppedItem: draggingOperation,
+        })
+      );
+    });
+
+    it('should copy when dropping on empty slot in the same group', () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }, { columnId: 'b' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
+
+      const component = mountWithIntl(
+        <ChildDragDropProvider
+          dragging={draggingOperation}
+          setDragging={jest.fn()}
+          setActiveDropTarget={() => {}}
+        >
+          <LayerPanel {...getDefaultProps()} />
+        </ChildDragDropProvider>
+      );
+
+      expect(mockDatasource.canHandleDrop).not.toHaveBeenCalled();
+      component.find('DragDrop[data-test-subj="lnsGroup"]').at(2).prop('onDrop')!(
+        (draggingOperation as unknown) as DroppableEvent
+      );
+      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          groupId: 'a',
+          droppedItem: draggingOperation,
+          isNew: true,
         })
       );
     });

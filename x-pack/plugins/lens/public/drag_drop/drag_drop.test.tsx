@@ -57,7 +57,11 @@ describe('DragDrop', () => {
     };
 
     const component = mount(
-      <ChildDragDropProvider dragging={value} setDragging={setDragging}>
+      <ChildDragDropProvider
+        dragging={value}
+        setDragging={setDragging}
+        setActiveDropTarget={() => {}}
+      >
         <DragDrop value={value} draggable={true} label="drag label">
           <button>Hello!</button>
         </DragDrop>
@@ -79,7 +83,11 @@ describe('DragDrop', () => {
     const onDrop = jest.fn();
 
     const component = mount(
-      <ChildDragDropProvider dragging={{ id: '2', label: 'hi' }} setDragging={setDragging}>
+      <ChildDragDropProvider
+        dragging={{ id: '2', label: 'hi' }}
+        setDragging={setDragging}
+        setActiveDropTarget={() => {}}
+      >
         <DragDrop onDrop={onDrop} droppable={true} value={value}>
           <button>Hello!</button>
         </DragDrop>
@@ -103,7 +111,11 @@ describe('DragDrop', () => {
     const onDrop = jest.fn();
 
     const component = mount(
-      <ChildDragDropProvider dragging={{ id: 'hi' }} setDragging={setDragging}>
+      <ChildDragDropProvider
+        dragging={{ id: 'hi' }}
+        setDragging={setDragging}
+        setActiveDropTarget={() => {}}
+      >
         <DragDrop onDrop={onDrop} droppable={false} value={value}>
           <button>Hello!</button>
         </DragDrop>
@@ -137,7 +149,7 @@ describe('DragDrop', () => {
 
   test('items that have droppable=false get special styling when another item is dragged', () => {
     const component = mount(
-      <ChildDragDropProvider dragging={value} setDragging={() => {}}>
+      <ChildDragDropProvider dragging={value} setDragging={() => {}} setActiveDropTarget={() => {}}>
         <DragDrop value={value} draggable={true} label="a">
           <button>Hello!</button>
         </DragDrop>
@@ -159,6 +171,7 @@ describe('DragDrop', () => {
         setDragging={() => {
           dragging = { id: '1' };
         }}
+        setActiveDropTarget={() => {}}
       >
         <DragDrop value={{ label: 'ignored', id: '3' }} draggable={true} label="a">
           <button>Hello!</button>
@@ -206,6 +219,7 @@ describe('DragDrop', () => {
           setDragging={() => {
             dragging = { id: '1' };
           }}
+          setActiveDropTarget={() => {}}
         >
           <ReorderProvider id="groupId">
             <DragDrop
@@ -262,6 +276,7 @@ describe('DragDrop', () => {
           setDragging={() => {
             dragging = { id: '1' };
           }}
+          setActiveDropTarget={() => {}}
         >
           <ReorderProvider id="groupId">
             <DragDrop

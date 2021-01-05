@@ -431,15 +431,11 @@ export const ReorderableDragDrop = ({
     >
       <EuiScreenReaderOnly showOnFocus>
         <button
-          aria-label={
-            draggingProps.onNextGroup
-              ? i18n.translate('xpack.lens.dragDrop.arrowRightMovementLabel', {
-                  defaultMessage: '{label} - Use right arrow key to move dimension to other groups',
-                  values: { label },
-                })
-              : label
-          }
-          aria-describedby={`lnsDragDrop-reorderInstructions-${groupId}`}
+          aria-label={label}
+          aria-describedby={classNames({
+            [`lnsDragDrop-reorderInstructions-${groupId}`]: dropProps.itemsInGroup.length > 1,
+            [`lnsDragDrop-groupMovementInstructions-${groupId}`]: draggingProps.onNextGroup,
+          })}
           className="lnsDragDrop__keyboardHandler"
           data-test-subj="lnsDragDrop-keyboardHandler"
           onBlur={() => {
@@ -476,7 +472,9 @@ export const ReorderableDragDrop = ({
               setReorderState((s: ReorderState) => ({
                 ...s,
                 isReorderOn: false,
-                keyboardReorderMessage: '',
+                keyboardReorderMessage: i18n.translate('xpack.lens.dragDrop.abortMessage', {
+                  defaultMessage: 'Movement aborted.',
+                }),
               }));
               if (dragInProgress) {
                 draggingProps.onDragEnd();
