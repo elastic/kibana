@@ -5,18 +5,19 @@
  */
 
 import React from 'react';
-import { ExternalLink } from './external_link';
+import { DocLink } from './doc_link';
+import * as i18n from './links_translations';
 
 export const SecuritySolutionRequirementsLink = () => (
-  <ExternalLink
-    url="https://www.elastic.co/guide/en/security/current/sec-requirements.html"
-    text="Elastic Security system requirements"
+  <DocLink
+    docPath={i18n.SOLUTION_REQUIREMENTS_LINK_PATH}
+    linkText={i18n.SOLUTION_REQUIREMENTS_LINK_TEXT}
   />
 );
 
 export const DetectionsRequirementsLink = () => (
-  <ExternalLink
-    url="https://www.elastic.co/guide/en/security/current/detections-permissions-section.html"
-    text="Detections prerequisites and requirements"
+  <DocLink
+    docPath={i18n.DETECTIONS_REQUIREMENTS_LINK_PATH}
+    linkText={i18n.DETECTIONS_REQUIREMENTS_LINK_TEXT}
   />
 );

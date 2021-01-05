@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   SecuritySolutionRequirementsLink,
   DetectionsRequirementsLink,
-} from '../documentation_links';
+} from '../../../../common/components/links_to_docs';
 
 export const READ_ONLY_ALERTS_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.readOnlyAlertsCallOut.messageTitle',

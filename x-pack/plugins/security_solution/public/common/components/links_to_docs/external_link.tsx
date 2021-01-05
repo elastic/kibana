@@ -10,14 +10,15 @@ import { EuiLink } from '@elastic/eui';
 interface ExternalLinkProps {
   url: string;
   text: string;
+  ariaLabel?: string;
 }
 
 /**
  * A simplistic text link for opening external urls in a new browser tab.
  */
-export const ExternalLink: FC<ExternalLinkProps> = ({ url, text }) => {
+export const ExternalLink: FC<ExternalLinkProps> = ({ url, text, ariaLabel }) => {
   return (
-    <EuiLink href={url} external target="_blank" rel="noopener">
+    <EuiLink href={url} aria-label={ariaLabel} external target="_blank" rel="noopener">
       {text}
     </EuiLink>
   );
