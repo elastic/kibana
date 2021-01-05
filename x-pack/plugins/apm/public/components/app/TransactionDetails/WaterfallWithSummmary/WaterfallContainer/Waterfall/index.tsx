@@ -55,10 +55,7 @@ const toggleFlyout = ({
   });
 };
 
-const WaterfallItemsContainer = styled.div<{
-  paddingTop: number;
-}>`
-  padding-top: ${(props) => px(props.paddingTop)};
+const WaterfallItemsContainer = styled.div`
   border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
