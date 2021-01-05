@@ -14,4 +14,5 @@ export {
   pollSearch,
   BackgroundSessionSavedObjectAttributes,
   BackgroundSessionStatus,
+  BackgroundSessionSearchInfo,
 } from './search';

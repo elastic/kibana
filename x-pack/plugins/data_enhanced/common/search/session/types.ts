@@ -46,5 +46,10 @@ export interface BackgroundSessionSavedObjectAttributes {
   /**
    * Mapping of search request hashes to their corresponsing info (async search id, etc.)
    */
-  idMapping: Record<string, string>;
+  idMapping: Record<string, BackgroundSessionSearchInfo>;
+}
+
+export interface BackgroundSessionSearchInfo {
+  id: string; // ID of the async search request
+  strategy: string; // Search strategy used to submit the search request
 }
