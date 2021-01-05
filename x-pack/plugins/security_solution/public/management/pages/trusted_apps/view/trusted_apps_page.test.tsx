@@ -18,10 +18,19 @@ import {
   TrustedApp,
 } from '../../../../../common/endpoint/types';
 import { HttpFetchOptions } from 'kibana/public';
+import { TRUSTED_APPS_LIST_API } from '../../../../../common/endpoint/constants';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
+
+//
+//
+//
+jest.setTimeout(30000);
+//
+//
+//
 
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
@@ -34,6 +43,45 @@ describe('When on the Trusted Apps Page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   const originalScrollTo = window.scrollTo;
   const act = reactTestingLibrary.act;
+
+  const getFakeTrustedApp = (): TrustedApp => ({
+    id: '1111-2222-3333-4444',
+    name: 'one app',
+    os: OperatingSystem.WINDOWS,
+    created_at: '2021-01-04T13:55:00.561Z',
+    created_by: 'me',
+    description: 'a good one',
+    entries: [
+      {
+        field: ConditionEntryField.PATH,
+        value: 'one/two',
+        operator: 'included',
+        type: 'match',
+      },
+    ],
+  });
+
+  const mockListApis = (http: AppContextTestRender['coreStart']['http']) => {
+    const currentGetHandler = http.get.getMockImplementation();
+
+    http.get.mockImplementation(async (...args) => {
+      const path = (args[0] as unknown) as string;
+      // @ts-ignore
+      const httpOptions = args[1] as HttpFetchOptions;
+
+      if (path === TRUSTED_APPS_LIST_API) {
+        return {
+          data: [getFakeTrustedApp()],
+          total: 50, // << Should be a value large enough to fulfill two pages
+          page: httpOptions?.query?.page ?? 1,
+          per_page: httpOptions?.query?.per_page ?? 20,
+        };
+      }
+      if (currentGetHandler) {
+        return currentGetHandler(...args);
+      }
+    });
+  };
 
   beforeAll(() => {
     window.scrollTo = () => {};
@@ -56,15 +104,27 @@ describe('When on the Trusted Apps Page', () => {
     window.scrollTo = jest.fn();
   });
 
-  it('should display subtitle info about trusted apps', async () => {
-    const { getByTestId } = render();
-    expect(getByTestId('header-panel-subtitle').textContent).toEqual(expectedAboutInfo);
-  });
+  describe('and there is trusted app entries', () => {
+    const renderWithListData = async () => {
+      const renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsListResourceStateChanged');
+      });
+      return renderResult;
+    };
 
-  it('should display a Add Trusted App button', async () => {
-    const { getByTestId } = render();
-    const addButton = await getByTestId('trustedAppsListAddButton');
-    expect(addButton.textContent).toBe('Add Trusted Application');
+    beforeEach(() => mockListApis(coreStart.http));
+
+    it('should display subtitle info about trusted apps', async () => {
+      const { getByTestId } = await renderWithListData();
+      expect(getByTestId('header-panel-subtitle').textContent).toEqual(expectedAboutInfo);
+    });
+
+    it('should display a Add Trusted App button', async () => {
+      const { getByTestId } = await renderWithListData();
+      const addButton = await getByTestId('trustedAppsListAddButton');
+      expect(addButton.textContent).toBe('Add Trusted Application');
+    });
   });
 
   describe('when the Add Trusted App button is clicked', () => {
@@ -72,12 +132,17 @@ describe('When on the Trusted Apps Page', () => {
       ReturnType<AppContextTestRender['render']>
     > => {
       const renderResult = render();
+      await act(async () => {
+        await waitForAction('trustedAppsListResourceStateChanged');
+      });
       const addButton = renderResult.getByTestId('trustedAppsListAddButton');
       reactTestingLibrary.act(() => {
         fireEvent.click(addButton, { button: 1 });
       });
       return renderResult;
     };
+
+    beforeEach(() => mockListApis(coreStart.http));
 
     it('should display the create flyout', async () => {
       const { getByTestId } = await renderAndClickAddButton();
@@ -254,7 +319,7 @@ describe('When on the Trusted Apps Page', () => {
           });
 
           it('should trigger the List to reload', async () => {
-            expect(coreStart.http.get.mock.calls[0][0]).toEqual('/api/endpoint/trusted_apps');
+            expect(coreStart.http.get.mock.calls[0][0]).toEqual(TRUSTED_APPS_LIST_API);
           });
         });
 
@@ -327,27 +392,11 @@ describe('When on the Trusted Apps Page', () => {
         per_page: 20,
       };
     });
-    const getFakeTrustedApp = (): TrustedApp => ({
-      id: '1111-2222-3333-4444',
-      name: 'one app',
-      os: OperatingSystem.WINDOWS,
-      created_at: '2021-01-04T13:55:00.561Z',
-      created_by: 'me',
-      description: 'a good one',
-      entries: [
-        {
-          field: ConditionEntryField.PATH,
-          value: 'one/two',
-          operator: 'included',
-          type: 'match',
-        },
-      ],
-    });
 
     beforeEach(() => {
       // @ts-ignore
       coreStart.http.get.mockImplementation(async (path, options) => {
-        if (path === '/api/endpoint/trusted_apps') {
+        if (path === TRUSTED_APPS_LIST_API) {
           const { page, per_page: perPage } = options.query as { page: number; per_page: number };
 
           if (page === 1 && perPage === 1) {
