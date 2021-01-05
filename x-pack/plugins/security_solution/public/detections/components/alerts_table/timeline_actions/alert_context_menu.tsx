@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   EuiButtonIcon,
@@ -60,9 +60,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const dispatch = useDispatch();
   const [, dispatchToaster] = useStateToaster();
   const [isPopoverOpen, setPopover] = useState(false);
-  const [alertStatus, setAlertStatus] = useState<Status | undefined>(
-    (ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status)) ?? undefined
-  );
   const eventId = ecsRowData._id;
   const ruleId = useMemo(
     (): string | null =>
@@ -90,14 +87,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const { addWarning } = useAppToasts();
 
-  // TODO: This happens after another render where alertStatus should already have the correct value ???
-  useEffect(() => {
-    const status =
-      (ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status)) ?? undefined;
-    if (alertStatus !== status) {
-      setAlertStatus(status);
-    }
-  }, [ecsRowData, alertStatus]);
+  const getAlertStatus = useCallback(() => {
+    return ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status);
+  }, [ecsRowData]);
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -131,9 +123,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const onAddExceptionConfirm = useCallback(
     (didCloseAlert: boolean, didBulkCloseAlert) => {
       closeAddExceptionModal();
-      if (didCloseAlert) {
-        setAlertStatus('closed');
-      }
       if (timelineId !== TimelineId.active || didBulkCloseAlert) {
         refetch();
       }
@@ -163,9 +152,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         }
         displaySuccessToast(title, dispatchToaster);
       }
-      setAlertStatus(newStatus);
     },
-    [dispatchToaster, addWarning, setAlertStatus]
+    [dispatchToaster, addWarning]
   );
 
   const onAlertStatusUpdateFailure = useCallback(
@@ -353,11 +341,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 
   const statusFilters = useMemo(() => {
-    if (!alertStatus) {
+    if (!getAlertStatus()) {
       return [];
     }
 
-    switch (alertStatus) {
+    switch (getAlertStatus()) {
       case 'open':
         return [inProgressAlertActionComponent, closeAlertActionComponent];
       case 'in-progress':
@@ -368,10 +356,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         return [];
     }
   }, [
-    alertStatus,
     closeAlertActionComponent,
     inProgressAlertActionComponent,
     openAlertActionComponent,
+    getAlertStatus,
   ]);
 
   const items = useMemo(
@@ -405,7 +393,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           alertData={ecsRowData}
           onCancel={onAddExceptionCancel}
           onConfirm={onAddExceptionConfirm}
-          alertStatus={alertStatus}
+          alertStatus={getAlertStatus()}
           onRuleChange={onRuleChange}
         />
       )}
