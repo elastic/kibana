@@ -65,7 +65,7 @@ export const reload = () => {
 };
 
 export const cleanKibana = () => {
-  cy.exec(`curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/${DEFAULT_SIGNALS_INDEX}\*" -k`);
+  // cy.exec(`curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/${DEFAULT_SIGNALS_INDEX}\*" -k`);
   esArchiverResetKibana();
 
   // We wait until the kibana indexes are created
@@ -76,5 +76,5 @@ export const cleanKibana = () => {
       .then((response) => JSON.stringify(response.body) !== '{}');
   });
 
-  waitForAlertsIndexToBeCreated();
+  // waitForAlertsIndexToBeCreated();
 };
