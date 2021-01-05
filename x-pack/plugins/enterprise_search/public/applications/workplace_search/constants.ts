@@ -46,7 +46,7 @@ export const NAV = {
   SETTINGS_CUSTOMIZE: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.nav.settingsCustomize',
     {
-      defaultMessage: 'Customize Workplace Search',
+      defaultMessage: 'Customize',
     }
   ),
   SETTINGS_SOURCE_PRIORITIZATION: i18n.translate(
