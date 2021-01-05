@@ -29,6 +29,8 @@ import { AllRulesUtilityBar } from '../utility_bar';
 import { LastUpdatedAt } from '../../../../../../common/components/last_updated';
 import { AllExceptionListsColumns, getAllExceptionListsColumns } from './columns';
 import { useAllExceptionLists } from './use_all_exception_lists';
+import { ReferenceErrorModal } from '../../../../../components/value_lists_management_modal/reference_error_modal';
+import { patchRule } from '../../../../../containers/detection_engine/rules/api';
 
 // Known lost battle with Eui :(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,12 +50,33 @@ interface ExceptionListsTableProps {
   formatUrl: FormatUrl;
 }
 
+interface ReferenceModalState {
+  contentText: string;
+  rulesReferences: string[];
+  isLoading: boolean;
+  listId: string;
+  listNamespaceType: NamespaceType;
+}
+
+const exceptionReferenceModalInitialState: ReferenceModalState = {
+  contentText: '',
+  rulesReferences: [],
+  isLoading: false,
+  listId: '',
+  listNamespaceType: 'single',
+};
+
 export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
   ({ formatUrl, history, hasNoPermissions, loading }) => {
     const {
       services: { http, notifications },
     } = useKibana();
-    const { exportExceptionList } = useApi(http);
+    const { exportExceptionList, deleteExceptionList } = useApi(http);
+
+    const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
+    const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
+      exceptionReferenceModalInitialState
+    );
     const [filters, setFilters] = useState<ExceptionListFilter>({
       name: null,
       list_id: null,
@@ -67,14 +90,35 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       notifications,
       showTrustedApps: false,
     });
-    const [loadingTableInfo, data] = useAllExceptionLists({
-      exceptionLists: exceptions ?? [],
-    });
+    const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists(
+      {
+        exceptionLists: exceptions ?? [],
+      }
+    );
     const [initLoading, setInitLoading] = useState(true);
     const [lastUpdated, setLastUpdated] = useState(Date.now());
     const [deletingListIds, setDeletingListIds] = useState<string[]>([]);
     const [exportingListIds, setExportingListIds] = useState<string[]>([]);
     const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
+
+    const handleDeleteSuccess = useCallback(
+      (listId?: string) => () => {
+        notifications.toasts.addSuccess({
+          title: i18n.exceptionDeleteSuccessMessage(listId ?? referenceModalState.listId),
+        });
+      },
+      [notifications.toasts, referenceModalState.listId]
+    );
+
+    const handleDeleteError = useCallback(
+      (err: Error & { body?: { message: string } }): void => {
+        notifications.toasts.addError(err, {
+          title: i18n.EXCEPTION_DELETE_ERROR,
+          toastMessage: err.body != null ? err.body.message : err.message,
+        });
+      },
+      [notifications.toasts]
+    );
 
     const handleDelete = useCallback(
       ({
@@ -88,14 +132,45 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       }) => async () => {
         try {
           setDeletingListIds((ids) => [...ids, id]);
+          if (refreshExceptions != null) {
+            await refreshExceptions();
+          }
+
+          if (exceptionsListsRef[id] != null && exceptionsListsRef[id].rules.length === 0) {
+            await deleteExceptionList({
+              id,
+              namespaceType,
+              onError: handleDeleteError,
+              onSuccess: handleDeleteSuccess(listId),
+            });
+
+            if (refreshExceptions != null) {
+              refreshExceptions();
+            }
+          } else {
+            setReferenceModalState({
+              contentText: i18n.referenceErrorMessage(exceptionsListsRef[id].rules.length),
+              rulesReferences: exceptionsListsRef[id].rules.map(({ name }) => name),
+              isLoading: true,
+              listId: id,
+              listNamespaceType: namespaceType,
+            });
+            setShowReferenceErrorModal(true);
+          }
           // route to patch rules with associated exception list
         } catch (error) {
-          notifications.toasts.addError(error, { title: i18n.EXCEPTION_DELETE_ERROR });
+          handleDeleteError(error);
         } finally {
           setDeletingListIds((ids) => [...ids.filter((_id) => _id !== id)]);
         }
       },
-      [notifications.toasts]
+      [
+        deleteExceptionList,
+        exceptionsListsRef,
+        handleDeleteError,
+        handleDeleteSuccess,
+        refreshExceptions,
+      ]
     );
 
     const handleExportSuccess = useCallback(
@@ -182,6 +257,67 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       setFilters(formattedFilter);
     }, []);
 
+    const handleCloseReferenceErrorModal = useCallback((): void => {
+      setDeletingListIds([]);
+      setShowReferenceErrorModal(false);
+      setReferenceModalState({
+        contentText: '',
+        rulesReferences: [],
+        isLoading: false,
+        listId: '',
+        listNamespaceType: 'single',
+      });
+    }, []);
+
+    const handleReferenceDelete = useCallback(async (): Promise<void> => {
+      const exceptionListId = referenceModalState.listId;
+      const exceptionListNamespaceType = referenceModalState.listNamespaceType;
+      const relevantRules = exceptionsListsRef[exceptionListId].rules;
+
+      try {
+        await Promise.all(
+          relevantRules.map((rule) => {
+            const abortCtrl = new AbortController();
+            const exceptionLists = (rule.exceptions_list ?? []).filter(
+              ({ id }) => id !== exceptionListId
+            );
+
+            return patchRule({
+              ruleProperties: {
+                rule_id: rule.rule_id,
+                exceptions_list: exceptionLists,
+              },
+              signal: abortCtrl.signal,
+            });
+          })
+        );
+
+        await deleteExceptionList({
+          id: exceptionListId,
+          namespaceType: exceptionListNamespaceType,
+          onError: handleDeleteError,
+          onSuccess: handleDeleteSuccess(),
+        });
+      } catch (err) {
+        handleDeleteError(err);
+      } finally {
+        setReferenceModalState(exceptionReferenceModalInitialState);
+        setDeletingListIds([]);
+        setShowReferenceErrorModal(false);
+        if (refreshExceptions != null) {
+          refreshExceptions();
+        }
+      }
+    }, [
+      referenceModalState.listId,
+      referenceModalState.listNamespaceType,
+      exceptionsListsRef,
+      deleteExceptionList,
+      handleDeleteError,
+      handleDeleteSuccess,
+      refreshExceptions,
+    ]);
+
     const paginationMemo = useMemo(
       () => ({
         pageIndex: pagination.page - 1,
@@ -196,7 +332,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       setExportDownload({});
     }, []);
 
-    const tableItems = (data ?? []).map((item) => ({
+    const tableItems = (exceptionListsWithRuleRefs ?? []).map((item) => ({
       ...item,
       isDeleting: deletingListIds.includes(item.id),
       isExporting: exportingListIds.includes(item.id),
@@ -204,11 +340,6 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
 
     return (
       <>
-        <AutoDownload
-          blob={exportDownload.blob}
-          name={`${exportDownload.name}.ndjson`}
-          onDownload={handleOnDownload}
-        />
         <Panel loading={!initLoading && loadingTableInfo} data-test-subj="allExceptionListsPanel">
           <>
             {loadingTableInfo && (
@@ -235,7 +366,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
               />
             </HeaderSection>
 
-            {loadingTableInfo && !initLoading && (
+            {loadingTableInfo && !initLoading && !showReferenceErrorModal && (
               <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
             )}
             {initLoading ? (
@@ -245,7 +376,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
                 <AllRulesUtilityBar
                   showBulkActions={false}
                   userHasNoPermissions={hasNoPermissions}
-                  paginationTotal={data.length ?? 0}
+                  paginationTotal={exceptionListsWithRuleRefs.length ?? 0}
                   numberSelectedItems={0}
                   onRefresh={handleRefresh}
                 />
@@ -263,9 +394,23 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
             )}
           </>
         </Panel>
+        <AutoDownload
+          blob={exportDownload.blob}
+          name={`${exportDownload.name}.ndjson`}
+          onDownload={handleOnDownload}
+        />
+        <ReferenceErrorModal
+          cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
+          confirmText={i18n.REFERENCE_MODAL_CONFIRM_BUTTON}
+          contentText={referenceModalState.contentText}
+          onCancel={handleCloseReferenceErrorModal}
+          onClose={handleCloseReferenceErrorModal}
+          onConfirm={handleReferenceDelete}
+          references={referenceModalState.rulesReferences}
+          showModal={showReferenceErrorModal}
+          titleText={i18n.REFERENCE_MODAL_TITLE}
+        />
       </>
     );
   }
 );
-
-ExceptionListsTable.displayName = 'ExceptionListsTable';

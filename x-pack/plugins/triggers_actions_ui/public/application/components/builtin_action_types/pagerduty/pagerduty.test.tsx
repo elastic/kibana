@@ -42,16 +42,20 @@ describe('pagerduty connector validation', () => {
     } as PagerDutyActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        routingKey: [],
+      secrets: {
+        errors: {
+          routingKey: [],
+        },
       },
     });
 
     delete actionConnector.config.apiUrl;
     actionConnector.secrets.routingKey = 'test1';
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        routingKey: [],
+      secrets: {
+        errors: {
+          routingKey: [],
+        },
       },
     });
   });
@@ -68,8 +72,10 @@ describe('pagerduty connector validation', () => {
     } as PagerDutyActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        routingKey: ['An integration key / routing key is required.'],
+      secrets: {
+        errors: {
+          routingKey: ['An integration key / routing key is required.'],
+        },
       },
     });
   });
