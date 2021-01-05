@@ -234,7 +234,12 @@ export function ServiceList({ items, noItemsMessage }: Props) {
     : 'transactionsPerMinute';
 
   return (
-    <EuiFlexGroup direction="column" responsive={false} alignItems="flexEnd">
+    <EuiFlexGroup
+      gutterSize="xs"
+      direction="column"
+      responsive={false}
+      alignItems="flexEnd"
+    >
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
