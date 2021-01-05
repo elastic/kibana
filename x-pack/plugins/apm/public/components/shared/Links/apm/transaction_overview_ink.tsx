@@ -5,12 +5,11 @@
  */
 
 import React from 'react';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { APMLink, APMLinkExtendProps } from './APMLink';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
-  latencyAggregationType?: LatencyAggregationType;
+  latencyAggregationType?: string;
 }
 
 export function TransactionOverviewLink({

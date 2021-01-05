@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { APMLink, APMLinkExtendProps } from './APMLink';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
@@ -17,7 +16,7 @@ interface Props extends APMLinkExtendProps {
   transactionId?: string;
   transactionName: string;
   transactionType: string;
-  latencyAggregationType?: LatencyAggregationType;
+  latencyAggregationType?: string;
 }
 
 const persistedFilters: Array<keyof APMQueryParams> = [

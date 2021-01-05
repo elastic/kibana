@@ -8,7 +8,7 @@ import { EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import {
   asMillisecondDuration,
@@ -41,7 +41,9 @@ interface Props {
 }
 
 export function TransactionList({ items, isLoading }: Props) {
-  const latencyAggregationType = useLatencyAggregationType();
+  const {
+    urlParams: { latencyAggregationType },
+  } = useUrlParams();
   const columns: Array<ITableColumn<TransactionGroup>> = useMemo(
     () => [
       {

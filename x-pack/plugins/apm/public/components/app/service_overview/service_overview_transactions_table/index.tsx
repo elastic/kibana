@@ -23,7 +23,6 @@ import {
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
 import {
   APIReturnType,
   callApmApi,
@@ -54,9 +53,7 @@ const DEFAULT_SORT = {
   field: 'impact' as const,
 };
 
-function getLatencyAggregationTypeLabel(
-  latencyAggregationType?: LatencyAggregationType
-) {
+function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
   switch (latencyAggregationType) {
     case 'p95': {
       return i18n.translate(
@@ -88,10 +85,9 @@ function getLatencyAggregationTypeLabel(
 export function ServiceOverviewTransactionsTable(props: Props) {
   const { serviceName } = props;
   const { transactionType } = useApmServiceContext();
-  const latencyAggregationType = useLatencyAggregationType();
   const {
     uiFilters,
-    urlParams: { start, end },
+    urlParams: { start, end, latencyAggregationType },
   } = useUrlParams();
 
   const [tableOptions, setTableOptions] = useState<{
@@ -135,7 +131,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
           transactionType,
-          latencyAggregationType,
+          latencyAggregationType: latencyAggregationType as LatencyAggregationType,
         },
       },
     }).then((response) => {
