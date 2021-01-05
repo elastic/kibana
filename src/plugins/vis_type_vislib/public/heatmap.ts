@@ -23,7 +23,7 @@ import { Position } from '@elastic/charts';
 import { RangeValues } from '../../vis_default_editor/public';
 import { AggGroupNames } from '../../data/public';
 import { ColorSchemas, ColorSchemaParams } from '../../charts/public';
-import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions, Schemas } from '../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../visualizations/public';
 import { ValueAxis, ScaleType, AxisType } from '../../vis_type_xy/public';
 
 import { HeatmapOptions, getHeatmapCollections } from './editor';
@@ -88,7 +88,7 @@ export const heatmapVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   editorConfig: {
     collections: getHeatmapCollections(),
     optionsTemplate: HeatmapOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -136,6 +136,6 @@ export const heatmapVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
-    ]),
+    ],
   },
 };

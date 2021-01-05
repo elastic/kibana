@@ -45,7 +45,6 @@ export type {
   Schema,
   ISchemas,
 } from './vis_types';
-export { Schemas } from './vis_types';
 export { VisParams, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;

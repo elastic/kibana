@@ -16,7 +16,6 @@
   "requiredBundles": [
     "kibanaUtils",
     "charts",
-    "visualizations",
     "visDefaultEditor"
   ]
 }

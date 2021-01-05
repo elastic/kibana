@@ -25,7 +25,7 @@ import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Fit, Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../../data/public';
-import { VIS_EVENT_TO_TRIGGER, Schemas } from '../../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../visualizations/public';
 import { defaultCountLabel, LabelRotation } from '../../../charts/public';
 
 import {
@@ -138,7 +138,7 @@ export const getAreaVisTypeDefinition = (
   editorConfig: {
     collections: getConfigCollections(),
     optionTabs: getOptionTabs(showElasticChartsOptions),
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -195,6 +195,6 @@ export const getAreaVisTypeDefinition = (
           tooltip: <SplitTooltip />,
         }),
       },
-    ]),
+    ],
   },
 });

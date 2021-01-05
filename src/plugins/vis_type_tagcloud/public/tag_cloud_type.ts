@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VIS_EVENT_TO_TRIGGER, Schemas } from '../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 
 import { TagCloudOptions } from './components/tag_cloud_options';
 import { toExpressionAst } from './to_ast';
@@ -87,7 +87,7 @@ export const tagCloudVisTypeDefinition = {
       ],
     },
     optionsTemplate: TagCloudOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: 'metrics',
         name: 'metric',
@@ -116,6 +116,6 @@ export const tagCloudVisTypeDefinition = {
         max: 1,
         aggFilter: ['terms', 'significant_terms'],
       },
-    ]),
+    ],
   },
 };

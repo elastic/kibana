@@ -20,7 +20,7 @@
 import { i18n } from '@kbn/i18n';
 import { MetricVisOptions } from './components/metric_vis_options';
 import { ColorSchemas, colorSchemas, ColorMode } from '../../charts/public';
-import { BaseVisTypeOptions, Schemas } from '../../visualizations/public';
+import { BaseVisTypeOptions } from '../../visualizations/public';
 import { AggGroupNames } from '../../data/public';
 import { toExpressionAst } from './to_ast';
 
@@ -82,7 +82,7 @@ export const createMetricVisTypeDefinition = (): BaseVisTypeOptions => ({
       colorSchemas,
     },
     optionsTemplate: MetricVisOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -119,6 +119,6 @@ export const createMetricVisTypeDefinition = (): BaseVisTypeOptions => ({
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
-    ]),
+    ],
   },
 });

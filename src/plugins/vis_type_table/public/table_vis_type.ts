@@ -21,7 +21,7 @@ import { AggGroupNames } from '../../data/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 
 import { TableOptions } from './components/table_vis_options_lazy';
-import { VIS_EVENT_TO_TRIGGER, Schemas } from '../../../plugins/visualizations/public';
+import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
 import { toExpressionAst } from './to_ast';
 import { TableVisParams } from './types';
 
@@ -50,7 +50,7 @@ export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
   },
   editorConfig: {
     optionsTemplate: TableOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -84,7 +84,7 @@ export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
         max: 1,
         aggFilter: ['!filter'],
       },
-    ]),
+    ],
   },
   toExpressionAst,
   hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,

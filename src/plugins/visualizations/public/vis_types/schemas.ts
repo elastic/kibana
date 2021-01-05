@@ -18,23 +18,16 @@
  */
 
 import _, { defaults } from 'lodash';
-import type { Optional } from '@kbn/utility-types';
 import { AggGroupNames, AggParam } from '../../../data/public';
 import type { ISchemas, Schema } from './types';
 
+/** @private **/
 export class Schemas implements ISchemas {
   all: Schema[] = [];
   [AggGroupNames.Buckets]: Schema[] = [];
   [AggGroupNames.Metrics]: Schema[] = [];
 
-  constructor(
-    schemas: Array<
-      Optional<
-        Schema,
-        'min' | 'max' | 'group' | 'title' | 'aggFilter' | 'editor' | 'params' | 'defaults'
-      >
-    >
-  ) {
+  constructor(schemas: Array<Partial<Schema>>) {
     _(schemas || [])
       .chain()
       .map((schema) => {
