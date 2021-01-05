@@ -77,7 +77,7 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
               <EuiButton
                 data-test-subj="addDynamicAction"
                 onClick={() => {
-                  const dynamicAction = createAction<typeof ACTION_HELLO_WORLD>({
+                  const dynamicAction = createAction({
                     id: `${ACTION_HELLO_WORLD}-${name}`,
                     type: ACTION_HELLO_WORLD,
                     getDisplayName: () => `Say hello to ${name}`,
