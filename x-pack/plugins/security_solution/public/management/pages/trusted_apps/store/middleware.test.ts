@@ -106,6 +106,12 @@ describe('middleware', () => {
 
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        entriesExist: {
+          previousState: {
+            type: 'UninitialisedResourceState',
+          },
+          type: 'LoadingResourceState',
+        },
         listView: createLoadedListViewWithPagination(initialNow, pagination),
         active: true,
         location,
@@ -126,9 +132,15 @@ describe('middleware', () => {
 
       store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
 
-      expect(service.getTrustedAppsList).toBeCalledTimes(1);
+      expect(service.getTrustedAppsList).toBeCalledTimes(2);
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        entriesExist: {
+          previousState: {
+            type: 'UninitialisedResourceState',
+          },
+          type: 'LoadingResourceState',
+        },
         listView: createLoadedListViewWithPagination(initialNow, pagination),
         active: true,
         location,
@@ -154,6 +166,12 @@ describe('middleware', () => {
 
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        entriesExist: {
+          previousState: {
+            type: 'UninitialisedResourceState',
+          },
+          type: 'LoadingResourceState',
+        },
         listView: {
           listResourceState: {
             type: 'LoadingResourceState',
@@ -169,6 +187,10 @@ describe('middleware', () => {
 
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        entriesExist: {
+          data: true,
+          type: 'LoadedResourceState',
+        },
         listView: createLoadedListViewWithPagination(newNow, pagination),
         active: true,
         location,
@@ -189,6 +211,12 @@ describe('middleware', () => {
 
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        entriesExist: {
+          previousState: {
+            type: 'UninitialisedResourceState',
+          },
+          type: 'LoadingResourceState',
+        },
         listView: {
           listResourceState: {
             type: 'FailedResourceState',
@@ -218,7 +246,18 @@ describe('middleware', () => {
     const getTrustedAppsListResponse = createGetTrustedListAppsResponse(pagination);
     const listView = createLoadedListViewWithPagination(initialNow, pagination);
     const listViewNew = createLoadedListViewWithPagination(newNow, pagination);
-    const testStartState = { ...initialState, listView, active: true, location };
+    const testStartState = {
+      ...initialState,
+      entriesExist: {
+        previousState: {
+          type: 'UninitialisedResourceState',
+        },
+        type: 'LoadingResourceState',
+      },
+      listView,
+      active: true,
+      location,
+    };
 
     it('does not submit when entry is undefined', async () => {
       const service = createTrustedAppsServiceMock();
@@ -270,7 +309,14 @@ describe('middleware', () => {
       await spyMiddleware.waitForAction('trustedAppDeletionSubmissionResourceStateChanged');
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
 
-      expect(store.getState()).toStrictEqual({ ...testStartState, listView: listViewNew });
+      expect(store.getState()).toStrictEqual({
+        ...testStartState,
+        entriesExist: {
+          data: true,
+          type: 'LoadedResourceState',
+        },
+        listView: listViewNew,
+      });
       expect(service.deleteTrustedApp).toBeCalledWith({ id: '3' });
       expect(service.deleteTrustedApp).toBeCalledTimes(1);
     });
@@ -307,7 +353,14 @@ describe('middleware', () => {
       await spyMiddleware.waitForAction('trustedAppDeletionSubmissionResourceStateChanged');
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
 
-      expect(store.getState()).toStrictEqual({ ...testStartState, listView: listViewNew });
+      expect(store.getState()).toStrictEqual({
+        ...testStartState,
+        entriesExist: {
+          data: true,
+          type: 'LoadedResourceState',
+        },
+        listView: listViewNew,
+      });
       expect(service.deleteTrustedApp).toBeCalledWith({ id: '3' });
       expect(service.deleteTrustedApp).toBeCalledTimes(1);
     });
@@ -342,6 +395,10 @@ describe('middleware', () => {
 
       expect(store.getState()).toStrictEqual({
         ...testStartState,
+        entriesExist: {
+          data: true,
+          type: 'LoadedResourceState',
+        },
         deletionDialog: {
           entry,
           confirmed: true,
