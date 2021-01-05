@@ -132,8 +132,7 @@ export function screenshotsObservableFactory(
 
                   const elements = data.elementsPositionAndAttributes
                     ? data.elementsPositionAndAttributes
-                    : getDefaultElementPosition(getDefaultViewPort());
-
+                    : getDefaultElementPosition(layout.getViewport(1));
                   const screenshots = await getScreenshots(driver, layout, elements, logger);
                   const { timeRange, error: setupError } = data;
                   return {

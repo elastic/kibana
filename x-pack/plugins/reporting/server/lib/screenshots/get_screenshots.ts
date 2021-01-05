@@ -11,6 +11,51 @@ import { LayoutInstance } from '../layouts';
 import { ElementsPositionAndAttribute, Screenshot } from './';
 import { CONTEXT_GETBROWSERDIMENSIONS } from './constants';
 
+// In Puppeteer 5.4+, the viewport size limits what the screenshot can take, even if a clip is specified. The clip area must
+// be visible in the viewport. This workaround resizes the viewport to the actual content height and width.
+// NOTE: this will fire a window resize event
+const resizeToClipArea = async (
+  item: ElementsPositionAndAttribute,
+  browser: HeadlessChromiumDriver,
+  layout: LayoutInstance,
+  logger: LevelLogger
+) => {
+  // Check current viewport size
+  const { top, left, width, height } = item.position.boundingClientRect;
+  const [viewWidth, viewHeight] = await browser.evaluate(
+    {
+      fn: () => [document.body.clientHeight, document.body.clientWidth],
+      args: [],
+    },
+    { context: CONTEXT_GETBROWSERDIMENSIONS },
+    logger
+  );
+
+  logger.debug(`Browser viewport: width=${viewWidth} height=${viewHeight}`);
+
+  // Resize the viewport if the clip area is not visible
+  if (viewWidth < width + left || viewHeight < height + top) {
+    logger.debug(`Item's position is not within the viewport.`);
+
+    const zoom = layout.getBrowserZoom();
+    const newWidth = width + left;
+    const newHeight = height + top;
+
+    logger.debug(`Resizing browser viewport to: width=${width} height=${height} zoom=${zoom}`);
+
+    await browser.setViewport(
+      {
+        width: newWidth * zoom,
+        height: newHeight * zoom,
+        zoom,
+      },
+      logger
+    );
+  }
+
+  logger.debug(`Capturing item: top:${top} left:${left} height:${height} width:${width}`);
+};
+
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,
   layout: LayoutInstance,
@@ -29,40 +74,9 @@ export const getScreenshots = async (
     const endTrace = startTrace('get_screenshots', 'read');
     const item = elementsPositionAndAttributes[i];
 
-    // In Puppeteer 5.4+, the viewport size limits what the screenshot can take, even if a clip is specified. The clip area must
-    // be visible in the viewport. This workaround resizes the viewport to the actual content height and width.
-    // NOTE: this will fire a window resize event
-    {
-      // Check current viewport size
-      const { top, left, height, width } = item.position.boundingClientRect;
-      const [viewHeight, viewWidth] = await browser.evaluate(
-        {
-          fn: () => [document.body.clientHeight, document.body.clientWidth],
-          args: [],
-        },
-        { context: CONTEXT_GETBROWSERDIMENSIONS },
-        logger
-      );
-
-      logger.debug(`Browser viewport: height=${viewHeight} width=${viewWidth}`);
-
-      // Resize the viewport if the clip area is not visible
-      if (viewHeight < height + top || viewWidth < width + left) {
-        logger.debug(`Resize browser viewport to: height=${height + top} width=${width + left}`);
-        await browser.setViewport(
-          {
-            height: height + top,
-            width: width + left,
-            zoom: layout.getBrowserZoom(),
-          },
-          logger
-        );
-      }
-
-      logger.debug(`Capturing item: top:${top} left:${left} height:${height} width:${width}`);
-    }
-
+    await resizeToClipArea(item, browser, layout, logger);
     const base64EncodedData = await browser.screenshot(item.position);
+
     screenshots.push({
       base64EncodedData,
       title: item.attributes.title,
