@@ -265,9 +265,10 @@ export function createSearchSessionRestorationDataProvider(deps: {
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
+  getSessionName: () => string;
 }): SearchSessionInfoProvider {
   return {
-    getName: async () => 'Discover',
+    getName: async () => deps.getSessionName(),
     getUrlGeneratorData: async () => {
       return {
         urlGeneratorId: DISCOVER_APP_URL_GENERATOR,
