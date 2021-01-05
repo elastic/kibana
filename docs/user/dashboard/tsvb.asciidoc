@@ -1,4 +1,4 @@
-[[add-panels-with-tsvb]]
+[[create-panels-with-tsvb]]
 === Create panels with TSVB
 
 With *TSVB*, you manually configure the <<aggregation-reference,aggregations>> and data fields, then format the fields to best display the data.

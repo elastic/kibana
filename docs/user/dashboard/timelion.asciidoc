@@ -1,4 +1,4 @@
-[[timelion]]
+[[create-panels-with-timelion]]
 === Create panels with Timelion
 
 With *Timelion*, you manually configure the <<aggregation-reference,aggregations>> and data fields, then format the fields to best display the data.

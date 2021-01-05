@@ -12,6 +12,10 @@ then compare the panels side-by-side to identify the patterns and connections in
 [role="screenshot"]
 image:images/Dashboard_example.png[Example dashboard]
 
+[[tsvb]]
+
+[[timelion]]
+
 Dashboards support many types of panels and editors to create panels, including:
 
 [cols="2"]
