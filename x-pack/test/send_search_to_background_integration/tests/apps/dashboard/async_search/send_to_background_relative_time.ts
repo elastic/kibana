@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('send to background with relative time', () => {
     before(async () => {
-      await PageObjects.common.sleep(5000);
+      await PageObjects.common.sleep(5000); // this part was copied from `x-pack/test/functional/apps/dashboard/_async_dashboard.ts` and this was sleep was needed because of flakiness
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
@@ -58,7 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.timePicker.pauseAutoRefresh(); // sample data has auto-refresh on
-      // await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
       await queryBar.submitQuery();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
