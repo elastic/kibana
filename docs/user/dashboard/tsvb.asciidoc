@@ -1,0 +1,89 @@
+[[add-panels-with-tsvb]]
+=== Create panels with TSVB
+
+With *TSVB*, you manually configure the <<aggregation-reference,aggregations>> and data fields, then format the fields to best display the data.
+
+. On the dashboard, click *Create panel*.
+
+. On the *New visualization* window, click *TSVB*.
+
+[float]
+[[configure-the-data]]
+==== Configure and format the data
+
+Add the aggregations and data fields you want to visualize, then format the data.
+
+. Click *Panel options*, then verify that your <<index-patterns, index pattern>> appears in the *Index pattern* field.
+
+. Click *Data*, then select the <<aggregation-reference,aggregations>> you want to visualize.
++
+If you are using *Table*, select the aggregations on the *Columns* tab.
+
+.. From the *Aggregation* drop down, select the aggregation, then select the data field from the *Field* dropdown.
++
+If you don’t see any data, change the <<set-time-filter,time filter>>.
+
+.. In the *Label* field, enter the data label name. 
+
+.. Click the color picker, then select the color for the data.
++
+[role="screenshot"]
+image::images/tsvb_color_picker.png[TSVB color picker]
+
+. To format the data, click *Options*, then configure the options. 
++
+For example, to use a different index pattern, go to *Override Index Pattern*, select *Yes*, then enter the index pattern you want to use.
+
+. To add an aggregation, click *+* in the *Metrics* editor, then configure the options. 
++
+When you have more than one aggregation, the last value is displayed.
+
+. To add another data series, click *+* in the data series editor, then configure the options.
+
+[float]
+[[filter-the-panel]]
+==== Filter the data
+
+To filter the data, use the <<kuery-query,{kib} Query Language>>.
+
+. Click *Panel options*.
+
+. In the *Panel Filter* field, enter the query. 
+
+[float]
+[[change-the-panel-type]]
+==== View the data in different visualizations
+
+To find the best way to display your data, click each panel type.
+
+[role="screenshot"]
+image::images/tsvb_change_display.gif[TSVB change the panel type]
+
+[float]
+[[add-annotations]]
+==== Add annotations
+
+Overlay annotation events on top of *Time Series* charts. The options available depend on the data source.
+
+. Click *Annotations*.
+
+. Click *Add data source*, then configure the options.
++
+[role="screenshot"]
+image::images/tsvb_annotations.png[TSVB annotations]
+
+[float]
+==== Save the panel
+
+Save and add the panel to the dashboard.
+
+. From the toolbar, click *Save*.
+
+. Enter the *Title* and optional *Description*. 
+
+. From the *Tags* drop down, select any applicable tags. 
+
+. Select *Add to Dashboard after saving*.
+
+. Click *Save and return*.
+
