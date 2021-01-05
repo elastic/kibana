@@ -25,15 +25,16 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { ContentSection, LicenseBadge, ViewContentHeader } from 'workplace_search/components';
+import { AppLogic } from '../../../app_logic';
+import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { ENT_SEARCH_LICENSE_MANAGEMENT } from 'workplace_search/utils/routePaths';
+import { ContentSection } from '../../../components/shared/content_section';
+import { LicenseBadge } from '../../../components/shared/license_badge';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
+import { CredentialItem } from '../../../components/shared/credential_item';
+import { SettingsLogic } from '../settings_logic';
 
-import { CredentialItem } from 'workplace_search/components/CredentialItem';
-import { SettingsLogic } from '../SettingsLogic';
-
-export const Oauth: React.FC = () => {
+export const OauthApplication: React.FC = () => {
   const { setOauthApplication, updateOauthApplication } = useActions(SettingsLogic);
   const { oauthApplication } = useValues(SettingsLogic);
   const {

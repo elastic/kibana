@@ -8,15 +8,16 @@ import { kea, MakeLogicType } from 'kea';
 
 import http from 'shared/http';
 import routes from 'workplace_search/routes';
-
 import { handleAPIError } from 'app_search/utils/handleAPIError';
 import { IFlashMessagesProps } from 'shared/types';
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
-import { Connector, IObject } from 'workplace_search/types';
 
-import { ORG_SETTINGS_CONNECTORS_PATH } from 'workplace_search/utils/routePaths';
 import { KibanaLogic } from '../../../shared/kibana';
+
+import { AppLogic } from '../../app_logic';
+import { SourceLogic } from '../content_sources/source_logic';
+import { Connector } from '../../types';
+
+import { ORG_SETTINGS_CONNECTORS_PATH } from '../../routes';
 
 interface IOauthApplication {
   name: string;

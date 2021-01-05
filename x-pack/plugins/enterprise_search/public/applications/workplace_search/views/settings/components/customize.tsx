@@ -11,10 +11,11 @@ import { useActions, useValues } from 'kea';
 import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
 import TelemetryPanel from 'shared/components/TelemetryPanel';
-import { ViewContentHeader, ContentSection } from 'workplace_search/components';
+import { ContentSection } from '../../../components/shared/content_section';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 
-import { AppLogic } from 'workplace_search/App/AppLogic';
-import { SettingsLogic } from '../SettingsLogic';
+import { AppLogic } from '../../../app_logic';
+import { SettingsLogic } from '../settings_logic';
 
 export const Customize: React.FC = () => {
   const { onOrgNameInputChange, updateOrgName, toggleTelemetryOptIn } = useActions(SettingsLogic);

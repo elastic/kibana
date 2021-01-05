@@ -9,25 +9,25 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 
+import { SidebarNavigation, AppView } from 'workplace_search/components';
+
 import {
   ORG_SETTINGS_PATH,
   ORG_SETTINGS_CUSTOMIZE_PATH,
   ORG_SETTINGS_CONNECTORS_PATH,
   ORG_SETTINGS_OAUTH_APPLICATION_PATH,
-} from 'workplace_search/utils/routePaths';
+} from '../../routes';
 
-import { SidebarNavigation, AppView } from 'workplace_search/components';
+import { FlashMessages } from '../../../shared/flash_messages';
 
-import FlashMessages from 'shared/components/FlashMessages';
+import { Connectors } from './components/connectors';
+import { Customize } from './components/customize';
+import { OauthApplication } from './components/oauth_application';
+import { SourceConfig } from './components/source_config';
 
-import Connectors from './components/Connectors';
-import Customize from './components/Customize';
-import OauthApplication from './components/OauthApplication';
-import SourceConfig from './components/SourceConfig';
+import { staticSourceData } from '../content_sources/source_data';
 
-import { staticSourceData } from '../ContentSources/sourceData';
-
-import { SettingsLogic, SettingsServerProps } from './SettingsLogic';
+import { SettingsLogic } from './settings_logic';
 
 export const SettingsRouter: React.FC = () => {
   const { pathname } = useLocation();

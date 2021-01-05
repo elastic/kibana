@@ -19,19 +19,18 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import {
-  Loading,
-  SourceIcon,
-  ViewContentHeader,
-  LicenseCallout,
-} from 'workplace_search/components';
+import { Loading } from '../../../../shared/loading';
+import { SourceIcon } from '../../../components/shared/source_icon';
+import { LicenseCallout } from '../../../components/shared/license_callout';
+import { ViewContentHeader } from '../../../components/shared/view_content_header';
 
-import { CUSTOM_SERVICE_TYPE } from 'workplace_search/constants';
-import { staticSourceData } from 'workplace_search/ContentSources/sourceData';
-import { SourceDataItem } from 'workplace_search/types';
-import { getSourcesPath } from 'workplace_search/utils/routePaths';
+import { CUSTOM_SERVICE_TYPE } from '../../../constants';
+import { getSourcesPath } from '../../../routes';
+import { SourceDataItem } from '../../../types';
 
-import { SettingsLogic } from '../SettingsLogic';
+import { staticSourceData } from '../../content_sources/source_data';
+
+import { SettingsLogic } from '../settings_logic';
 
 export const Connectors: React.FC = () => {
   const { initializeConnectors } = useActions(SettingsLogic);

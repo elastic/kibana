@@ -8,16 +8,17 @@ import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { Loading } from 'workplace_search/components';
-import { staticSourceData } from 'workplace_search/ContentSources/sourceData';
-import { SourceDataItem } from 'workplace_search/types';
-import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
-
 import ConfirmModal from 'shared/components/ConfirmModal';
-import { AddSourceHeader } from 'workplace_search/ContentSources/components/AddSource/AddSourceHeader';
-import { SaveConfig } from 'workplace_search/ContentSources/components/AddSource/SaveConfig';
 
-import { SettingsLogic } from '../SettingsLogic';
+import { Loading } from '../../../../shared/loading';
+import { SourceDataItem } from '../../../types';
+import { staticSourceData } from '../../content_sources/source_data';
+import { SourceLogic } from '../../content_sources/source_logic';
+
+import { AddSourceHeader } from '../../content_sources/components/add_source/add_source_header';
+import { SaveConfig } from '../../content_sources/components/add_source/save_config';
+
+import { SettingsLogic } from '../settings_logic';
 
 interface SourceConfigProps {
   sourceIndex: number;
