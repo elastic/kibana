@@ -19,7 +19,6 @@
 
 const dateMath = require('./index');
 const moment = require('moment');
-const sinon = require('sinon');
 
 /**
  * Require a new instance of the moment library, bypassing the require cache
@@ -43,7 +42,6 @@ describe('dateMath', function () {
   const anchoredDate = new Date(Date.parse(anchor));
   const unix = moment(anchor).valueOf();
   const format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
-  let clock;
 
   describe('errors', function () {
     it('should return undefined if passed something falsy', function () {
@@ -92,10 +90,8 @@ describe('dateMath', function () {
     let now;
 
     beforeEach(function () {
-      // NOTE: In order to stop using sinon for faking the timers we would need to have the need to start using
-      // jest.useFakeTimers('modern'). However when doing it we start getting undefined type errors for the
-      // jest global. Will continue to use sinon until jest v27 where the modern implementation will become the default.
-      clock = sinon.useFakeTimers(unix);
+      jest.useFakeTimers('modern');
+      jest.setSystemTime(unix);
       now = moment();
       mmnt = moment(anchor);
       date = mmnt.toDate();
@@ -103,7 +99,7 @@ describe('dateMath', function () {
     });
 
     afterEach(function () {
-      clock.restore();
+      jest.useRealTimers();
     });
 
     it('should return the same moment if passed a moment', function () {
@@ -132,13 +128,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      clock = sinon.useFakeTimers(unix);
+      jest.useFakeTimers('modern');
+      jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      clock.restore();
+      jest.useRealTimers();
     });
 
     [5, 12, 247].forEach((len) => {
@@ -169,13 +166,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      clock = sinon.useFakeTimers(unix);
+      jest.useFakeTimers('modern');
+      jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      clock.restore();
+      jest.useRealTimers();
     });
 
     [5, 12, 247].forEach((len) => {
@@ -207,13 +205,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      clock = sinon.useFakeTimers(unix);
+      jest.useFakeTimers('modern');
+      jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      clock.restore();
+      jest.useRealTimers();
     });
 
     spans.forEach((span) => {
@@ -248,13 +247,14 @@ describe('dateMath', function () {
     let anchored;
 
     beforeEach(function () {
-      clock = sinon.useFakeTimers(unix);
+      jest.useFakeTimers('modern');
+      jest.setSystemTime(unix);
       now = moment();
       anchored = moment(anchor);
     });
 
     afterEach(function () {
-      clock.restore();
+      jest.useRealTimers();
     });
 
     it('should round to the nearest second with 0 value', function () {
