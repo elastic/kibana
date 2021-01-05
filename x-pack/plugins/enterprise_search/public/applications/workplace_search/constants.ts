@@ -43,6 +43,21 @@ export const NAV = {
   SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.settings', {
     defaultMessage: 'Settings',
   }),
+  SETTINGS_CUSTOMIZE: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.settingsCustomize',
+    {
+      defaultMessage: 'Customize Workplace Search',
+    }
+  ),
+  SETTINGS_SOURCE_PRIORITIZATION: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.settingsSourcePrioritization',
+    {
+      defaultMessage: 'Content source connectors',
+    }
+  ),
+  SETTINGS_OAUTH: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.settingsOauth', {
+    defaultMessage: 'OAuth application',
+  }),
   ADD_SOURCE: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.addSource', {
     defaultMessage: 'Add Source',
   }),
