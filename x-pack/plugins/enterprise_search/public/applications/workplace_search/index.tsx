@@ -98,7 +98,7 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       </Route>
       <Route path={ORG_SETTINGS_PATH}>
         <Layout
-          navigation={<WorkplaceSearchNav groupsSubNav={<SettingsSubNav />} />}
+          navigation={<WorkplaceSearchNav settingsSubNav={<SettingsSubNav />} />}
           restrictWidth
           readOnlyMode={readOnlyMode}
         >
