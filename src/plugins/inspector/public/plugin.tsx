@@ -26,7 +26,7 @@ import { InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { Adapters } from '../common';
 
-import { getRequestsViewDescription, getDataViewDescription } from './views';
+import { getRequestsViewDescription } from './views';
 
 export interface Setup {
   registerView: InspectorViewRegistry['register'];
@@ -70,7 +70,6 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   public async setup(core: CoreSetup) {
     this.views = new InspectorViewRegistry();
 
-    this.views.register(getDataViewDescription());
     this.views.register(getRequestsViewDescription());
 
     return {

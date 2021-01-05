@@ -34,7 +34,7 @@ export const createTileMapFn = () => ({
       default: '"{}"',
     },
   },
-  fn(context, args) {
+  fn(context, args, handlers) {
     const visConfig = JSON.parse(args.visConfig);
     const { geohash, metric, geocentroid } = visConfig.dimensions;
     const convertedData = convertToGeoJson(context, {
@@ -47,6 +47,9 @@ export const createTileMapFn = () => ({
       convertedData.meta.geohash = context.columns[geohash.accessor].meta;
     }
 
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.logDatatable('default', context);
+    }
     return {
       type: 'render',
       as: 'visualization',
