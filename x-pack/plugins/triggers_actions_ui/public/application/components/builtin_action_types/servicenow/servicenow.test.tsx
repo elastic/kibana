@@ -102,8 +102,7 @@ describe('servicenow action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        'subActionParams.incident.short_description': ['Short description is required.'],
+        ['subActionParams.incident.short_description']: ['Short description is required.'],
       },
     });
   });
