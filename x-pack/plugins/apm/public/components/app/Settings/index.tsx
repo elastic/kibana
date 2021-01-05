@@ -34,7 +34,7 @@ export function Settings({ children, location }: SettingsProps) {
   const [isSideNavOpenOnMobile, setisSideNavOpenOnMobile] = useState(false);
 
   const toggleOpenOnMobile = () => {
-    setisSideNavOpenOnMobile(!isSideNavOpenOnMobile);
+    setisSideNavOpenOnMobile((prevState) => !prevState);
   };
 
   function getSettingsHref(path: string) {
