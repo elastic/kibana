@@ -62,6 +62,14 @@ export class CanvasLayout extends Layout implements LayoutInstance {
     return ZOOM;
   }
 
+  public getViewport() {
+    return {
+      height: this.scaledHeight,
+      width: this.scaledWidth,
+      zoom: ZOOM,
+    };
+  }
+
   public getPdfImageSize() {
     return {
       height: this.height,

@@ -200,9 +200,14 @@ export class HeadlessChromiumDriver {
     { width, height, zoom }: ViewZoomWidthHeight,
     logger: LevelLogger
   ): Promise<void> {
-    logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
+    logger.debug(`Setting viewport: width=${width} height=${height} zoom=${zoom}`);
 
-    await this.page.setViewport({ width, height, deviceScaleFactor: zoom, isMobile: false });
+    await this.page.setViewport({
+      width: Math.floor(width),
+      height: Math.floor(height),
+      deviceScaleFactor: zoom,
+      isMobile: false,
+    });
   }
 
   private registerListeners(conditionalHeaders: ConditionalHeaders, logger: LevelLogger) {
