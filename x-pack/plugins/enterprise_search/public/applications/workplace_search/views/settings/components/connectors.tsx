@@ -47,7 +47,7 @@ export const Connectors: React.FC = () => {
     ({ serviceType }) => serviceType === CUSTOM_SERVICE_TYPE
   );
 
-  const getRowActions = (configured, serviceType, supportedByLicense) => {
+  const getRowActions = (configured: boolean, serviceType: string, supportedByLicense: boolean) => {
     const { addPath, editPath } = staticSourceData.find(
       (s) => s.serviceType === serviceType
     ) as SourceDataItem;

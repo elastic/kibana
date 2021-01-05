@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -69,7 +69,7 @@ export const OauthApplication: React.FC = () => {
     ? 'Using an insecure redirect URI (http) is not recommended.'
     : 'Cannot contain duplicate redirect URIs.';
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     updateOauthApplication();
   };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { FormEvent } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -25,7 +25,7 @@ export const Customize: React.FC = () => {
     telemetryStatus: { telemetryOptedIn },
   } = useValues(AppLogic);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     updateOrgName();
   };

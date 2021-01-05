@@ -34,24 +34,34 @@ export interface SettingsServerProps {
 }
 
 interface SettingsActions {
-  onInitializeConnectors(connectors: Connector[]);
-  onOrgNameInputChange(orgNameInputValue: string);
-  setFlashMessages(flashMessages: IFlashMessagesProps);
-  setUpdatedName({ organizationName });
-  setServerProps(props: SettingsServerProps);
-  setOauthApplication(oauthApplication: IOauthApplication);
-  setUpdatedOauthApplication({ oauthApplication }: { oauthApplication: IOauthApplication });
-  setConfigDeleted(name: string);
-  setTelemetryOptedInUpdating(updating: boolean);
-  resetFlashMessages();
-  resetSettingsState();
-  initializeSettings();
-  initializeConnectors();
-  updateOauthApplication();
-  updateOrgName();
-  saveUpdatedConfig();
-  deleteSourceConfig(serviceType: string, name: string);
-  toggleTelemetryOptIn(checked: boolean);
+  onInitializeConnectors(connectors: Connector[]): Connector[];
+  onOrgNameInputChange(orgNameInputValue: string): string;
+  setFlashMessages(flashMessages: IFlashMessagesProps): {};
+  setUpdatedName({ organizationName }: { organizationName: string }): string;
+  setServerProps(props: SettingsServerProps): SettingsServerProps;
+  setOauthApplication(oauthApplication: IOauthApplication): IOauthApplication;
+  setUpdatedOauthApplication({
+    oauthApplication,
+  }: {
+    oauthApplication: IOauthApplication;
+  }): IOauthApplication;
+  setConfigDeleted(name: string): string;
+  setTelemetryOptedInUpdating(updating: boolean): { updating: boolean };
+  resetFlashMessages(): void;
+  resetSettingsState(): void;
+  initializeSettings(): void;
+  initializeConnectors(): void;
+  updateOauthApplication(): void;
+  updateOrgName(): void;
+  saveUpdatedConfig(): void;
+  deleteSourceConfig(
+    serviceType: string,
+    name: string
+  ): {
+    serviceType: string;
+    name: string;
+  };
+  toggleTelemetryOptIn(checked: boolean): { checked: boolean };
 }
 
 interface SettingsValues {
