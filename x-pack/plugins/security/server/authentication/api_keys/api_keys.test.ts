@@ -115,7 +115,7 @@ describe('API Keys', () => {
       expect(result).toEqual(true);
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
-          id: 'kibana-api-key-service-test',
+          ids: ['kibana-api-key-service-test'],
         },
       });
     });
@@ -318,7 +318,7 @@ describe('API Keys', () => {
       });
       expect(mockScopedClusterClient.asCurrentUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
-          id: '123',
+          ids: ['123'],
         },
       });
     });
@@ -345,7 +345,7 @@ describe('API Keys', () => {
       });
       expect(mockScopedClusterClient.asCurrentUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
-          id: '123',
+          ids: ['123'],
         },
       });
     });
@@ -378,7 +378,7 @@ describe('API Keys', () => {
       });
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
-          id: '123',
+          ids: ['123'],
         },
       });
     });
@@ -405,7 +405,7 @@ describe('API Keys', () => {
       });
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
-          id: '123',
+          ids: ['123'],
         },
       });
     });

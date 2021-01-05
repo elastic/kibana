@@ -6,6 +6,7 @@
 
 import { TypeRegistry } from './type_registry';
 import { ValidationResult, AlertTypeModel, ActionTypeModel } from '../types';
+import { actionTypeRegistryMock } from './action_type_registry.mock';
 
 export const ExpressionComponent: React.FunctionComponent = () => {
   return null;
@@ -30,7 +31,7 @@ const getTestActionType = (
   iconClass?: string,
   selectedMessage?: string
 ): ActionTypeModel<any, any> => {
-  return {
+  return actionTypeRegistryMock.createMockActionTypeModel({
     id: id || 'my-action-type',
     iconClass: iconClass || 'test',
     selectMessage: selectedMessage || 'test',
@@ -42,8 +43,7 @@ const getTestActionType = (
       return validationResult;
     },
     actionConnectorFields: null,
-    actionParamsFields: null,
-  };
+  });
 };
 
 beforeEach(() => jest.resetAllMocks());
@@ -74,7 +74,12 @@ describe('get()', () => {
     expect(actionType).toMatchInlineSnapshot(`
       Object {
         "actionConnectorFields": null,
-        "actionParamsFields": null,
+        "actionParamsFields": Object {
+          "$$typeof": Symbol(react.lazy),
+          "_ctor": [Function],
+          "_result": null,
+          "_status": -1,
+        },
         "iconClass": "test",
         "id": "my-action-type-snapshot",
         "selectMessage": "test",
@@ -97,7 +102,8 @@ describe('get()', () => {
 describe('list()', () => {
   test('returns list of action types', () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-    actionTypeRegistry.register(getTestActionType());
+    const actionType = getTestActionType();
+    actionTypeRegistry.register(actionType);
     const actionTypes = actionTypeRegistry.list();
     expect(actionTypes).toEqual([
       {
@@ -105,7 +111,7 @@ describe('list()', () => {
         iconClass: 'test',
         selectMessage: 'test',
         actionConnectorFields: null,
-        actionParamsFields: null,
+        actionParamsFields: actionType.actionParamsFields,
         validateConnector: actionTypes[0].validateConnector,
         validateParams: actionTypes[0].validateParams,
       },
