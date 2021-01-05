@@ -17,11 +17,12 @@ import {
 import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
+import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
 import { createConnectorReducer, InitialConnector, ConnectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
 import './connector_add_modal.scss';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { ActionType, ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import {
   ActionType,
   ActionConnector,
@@ -30,6 +31,7 @@ import {
   UserConfiguredActionConnector,
 } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
+import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
 interface ConnectorAddModalProps {
   actionType: ActionType;
@@ -93,11 +95,13 @@ export const ConnectorAddModal = ({
   }, [initialConnector, onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
-  const errors = {
-    ...actionTypeModel?.validateConnector(connector).errors,
-    ...validateBaseProperties(connector).errors,
-  } as IErrorObject;
-  hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
+  const { configErrors, connectorBaseErrors, connectorErrors, secretsErrors } = getConnectorErrors(
+    connector,
+    actionTypeModel
+  );
+  hasErrors = !!Object.keys(connectorErrors).find(
+    (errorKey) => connectorErrors[errorKey].length >= 1
+  );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
     await createActionConnector({
@@ -159,7 +163,7 @@ export const ConnectorAddModal = ({
             actionTypeName={actionType.name}
             dispatch={dispatch}
             serverError={serverError}
-            errors={errors}
+            errors={connectorErrors}
             actionTypeRegistry={actionTypeRegistry}
             consumer={consumer}
           />
@@ -180,9 +184,19 @@ export const ConnectorAddModal = ({
               data-test-subj="saveActionButtonModal"
               type="submit"
               iconType="check"
-              isDisabled={hasErrors}
               isLoading={isSaving}
               onClick={async () => {
+                if (hasErrors) {
+                  setConnector(
+                    getConnectorWithInvalidatedFields(
+                      connector,
+                      configErrors,
+                      secretsErrors,
+                      connectorBaseErrors
+                    )
+                  );
+                  return;
+                }
                 setIsSaving(true);
                 const savedAction = await onActionConnectorSave();
                 setIsSaving(false);

@@ -80,8 +80,10 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   actionTypeTitle?: string;
   validateConnector: (
     connector: UserConfiguredActionConnector<ActionConfig, ActionSecrets>
-  ) => ValidationResult;
-  validateParams: (actionParams: ActionParams) => ValidationResult;
+  ) => ConnectorValidationResult<Partial<ActionConfig>, Partial<ActionSecrets>>;
+  validateParams: (
+    actionParams: ActionParams
+  ) => GenericValidationResult<Partial<ActionParams> | unknown>;
   actionConnectorFields: React.LazyExoticComponent<
     ComponentType<
       ActionConnectorFieldsProps<UserConfiguredActionConnector<ActionConfig, ActionSecrets>>
@@ -90,8 +92,17 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
 }
 
+export interface GenericValidationResult<T> {
+  errors: Record<Extract<keyof T, string>, string[] | unknown>;
+}
+
 export interface ValidationResult {
   errors: Record<string, any>;
+}
+
+export interface ConnectorValidationResult<Config, Secrets> {
+  config?: GenericValidationResult<Config>;
+  secrets?: GenericValidationResult<Secrets>;
 }
 
 interface ActionConnectorProps<Config, Secrets> {
