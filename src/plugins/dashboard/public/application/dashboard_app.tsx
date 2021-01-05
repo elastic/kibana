@@ -43,7 +43,7 @@ import {
 
 import { removeQueryParam } from '../services/kibana_utils';
 import { IndexPattern } from '../services/data';
-import { EmbeddableRenderer } from '../services/embeddable';
+import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
 import { DashboardContainerInput } from '.';
 import { leaveConfirmStrings } from '../dashboard_strings';
 
@@ -72,6 +72,7 @@ export function DashboardApp({
 
   const [lastReloadTime, setLastReloadTime] = useState(0);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.VIEW);
 
   const savedDashboard = useSavedDashboard(savedDashboardId, history);
   const dashboardStateManager = useDashboardStateManager(savedDashboard, history);
@@ -111,6 +112,10 @@ export function DashboardApp({
         if (getSearchSessionIdFromURL(history)) {
           // going away from a background search results
           removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
+        }
+
+        if (changes.viewMode) {
+          setViewMode(changes.viewMode);
         }
 
         dashboardContainer.updateInput({
@@ -233,6 +238,7 @@ export function DashboardApp({
               dashboardContainer,
               dashboardStateManager,
             }}
+            viewMode={viewMode}
             lastDashboardId={savedDashboardId}
             timefilter={data.query.timefilter.timefilter}
             onQuerySubmit={(_payload, isUpdate) => {
