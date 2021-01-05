@@ -6,8 +6,9 @@
 
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import { ApplyGlobalFilterActionContext } from '../../../../../../src/plugins/data/public';
+import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 
-export type ActionContext = ApplyGlobalFilterActionContext;
+export type ActionContext = ApplyGlobalFilterActionContext & { embeddable: IEmbeddable };
 
 export type Config = {
   /**

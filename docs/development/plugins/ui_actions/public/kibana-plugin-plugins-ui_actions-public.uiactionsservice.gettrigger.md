@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-readonly getTrigger: <T extends "" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER" | "ROW_CLICK_TRIGGER" | "FILTER_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER">(triggerId: T) => TriggerContract<T>;
+readonly getTrigger: (triggerId: string) => TriggerContract;
 ```

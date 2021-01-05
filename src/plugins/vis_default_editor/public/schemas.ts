@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { ReactNode } from 'react';
 import _, { defaults } from 'lodash';
 
 import { Optional } from '@kbn/utility-types';
@@ -42,6 +43,8 @@ export interface Schema {
   hideCustomLabel?: boolean;
   mustBeFirst?: boolean;
   aggSettings?: any;
+  disabled?: boolean;
+  tooltip?: ReactNode;
 }
 
 export class Schemas implements ISchemas {

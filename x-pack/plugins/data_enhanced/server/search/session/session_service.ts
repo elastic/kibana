@@ -15,12 +15,15 @@ import {
   SavedObject,
   SavedObjectsClient,
   SavedObjectsClientContract,
+  SavedObjectsBulkUpdateObject,
 } from '../../../../../../src/core/server';
 import {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchClient,
   ISearchOptions,
+  KueryNode,
+  nodeBuilder,
   tapFirst,
 } from '../../../../../../src/plugins/data/common';
 import {
@@ -30,6 +33,7 @@ import {
 import {
   BackgroundSessionFindOptions,
   BackgroundSessionSavedObjectAttributes,
+  BackgroundSessionSearchInfo,
   BackgroundSessionStatus,
 } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
@@ -50,7 +54,7 @@ export interface BackgroundSessionDependencies extends ISessionServiceDependenci
 export interface SessionInfo {
   insertTime: Moment;
   retryCount: number;
-  ids: Map<string, string>;
+  ids: Map<string, BackgroundSessionSearchInfo>;
 }
 
 export type BackgroundSessionClient = ReturnType<
@@ -95,6 +99,18 @@ export class BackgroundSessionService implements ISessionService<BackgroundSessi
   }
 
   /**
+   * Compiles a KQL Query to fetch sessions by ID.
+   * Done as a performance optimization workaround.
+   */
+  private sessionIdsAsFilters(sessionIds: string[]): KueryNode {
+    return nodeBuilder.or(
+      sessionIds.map((id) => {
+        return nodeBuilder.is(`${BACKGROUND_SESSION_TYPE}.attributes.sessionId`, id);
+      })
+    );
+  }
+
+  /**
    * Gets all {@link SessionSavedObjectAttributes | Background Searches} that
    * currently being tracked by the service.
    *
@@ -103,17 +119,14 @@ export class BackgroundSessionService implements ISessionService<BackgroundSessi
    * context of a user's session.
    */
   private async getAllMappedSavedObjects() {
-    const activeMappingIds = Array.from(this.sessionSearchMap.keys())
-      .map((sessionId) => `"${sessionId}"`)
-      .join(' | ');
+    const filter = this.sessionIdsAsFilters(Array.from(this.sessionSearchMap.keys()));
     const res = await this.internalSavedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
       perPage: INMEM_MAX_SESSIONS, // If there are more sessions in memory, they will be synced when some items are cleared out.
       type: BACKGROUND_SESSION_TYPE,
-      search: activeMappingIds,
-      searchFields: ['sessionId'],
+      filter,
       namespaces: ['*'],
     });
-    this.logger.debug(`getAllMappedSavedObjects | Got ${res.saved_objects.length} items`);
+    this.logger.warn(`getAllMappedSavedObjects | Got ${res.saved_objects.length} items`);
     return res.saved_objects;
   }
 
@@ -148,6 +161,9 @@ export class BackgroundSessionService implements ISessionService<BackgroundSessi
         updatedSessions.forEach((updatedSavedObject) => {
           const sessionInfo = this.sessionSearchMap.get(updatedSavedObject.id)!;
           if (updatedSavedObject.error) {
+            this.logger.warn(
+              `monitorMappedIds | update error ${JSON.stringify(updatedSavedObject.error) || ''}`
+            );
             // Retry next time
             sessionInfo.retryCount++;
           } else if (updatedSavedObject.attributes.idMapping) {
@@ -177,7 +193,9 @@ export class BackgroundSessionService implements ISessionService<BackgroundSessi
     if (!activeMappingObjects.length) return [];
 
     this.logger.debug(`updateAllSavedObjects | Updating ${activeMappingObjects.length} items`);
-    const updatedSessions = activeMappingObjects
+    const updatedSessions: Array<
+      SavedObjectsBulkUpdateObject<BackgroundSessionSavedObjectAttributes>
+    > = activeMappingObjects
       .filter((so) => !so.error)
       .map((sessionSavedObject) => {
         const sessionInfo = this.sessionSearchMap.get(sessionSavedObject.id);
@@ -186,7 +204,10 @@ export class BackgroundSessionService implements ISessionService<BackgroundSessi
           ...sessionSavedObject.attributes.idMapping,
           ...idMapping,
         };
-        return sessionSavedObject;
+        return {
+          ...sessionSavedObject,
+          namespace: sessionSavedObject.namespaces?.[0],
+        };
       });
 
     const updateResults = await this.internalSavedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
@@ -324,24 +345,30 @@ export class BackgroundSessionService implements ISessionService<BackgroundSessi
     deps: BackgroundSessionDependencies,
     searchRequest: IKibanaSearchRequest,
     searchId: string,
-    { sessionId, isStored }: ISearchOptions
+    { sessionId, isStored, strategy }: ISearchOptions
   ) {
     if (!sessionId || !searchId) return;
     this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
     const requestHash = createRequestHash(searchRequest.params);
+    const searchInfo = {
+      id: searchId,
+      strategy: strategy!,
+    };
 
     // If there is already a saved object for this session, update it to include this request/ID.
     // Otherwise, just update the in-memory mapping for this session for when the session is saved.
     if (isStored) {
-      const attributes = { idMapping: { [requestHash]: searchId } };
-      await this.update(deps, sessionId, attributes);
+      const attributes = {
+        idMapping: { [requestHash]: searchInfo },
+      };
+      await this.update(sessionId, attributes, deps);
     } else {
       const map = this.sessionSearchMap.get(sessionId) ?? {
         insertTime: moment(),
         retryCount: 0,
-        ids: new Map<string, string>(),
+        ids: new Map<string, BackgroundSessionSearchInfo>(),
       };
-      map.ids.set(requestHash, searchId);
+      map.ids.set(requestHash, searchInfo);
       this.sessionSearchMap.set(sessionId, map);
     }
   }
@@ -370,7 +397,7 @@ export class BackgroundSessionService implements ISessionService<BackgroundSessi
       throw new Error('No search ID in this session matching the given search request');
     }
 
-    return session.attributes.idMapping[requestHash];
+    return session.attributes.idMapping[requestHash].id;
   };
 
   public asScopedProvider({ savedObjects }: CoreStart) {

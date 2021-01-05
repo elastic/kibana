@@ -9,7 +9,7 @@ import { IEvent } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 
 export interface AlertInstanceSummaryFromEventLogParams {
-  alert: SanitizedAlert;
+  alert: SanitizedAlert<{ bar: boolean }>;
   events: IEvent[];
   dateStart: string;
   dateEnd: string;
