@@ -75,7 +75,7 @@ export class SecurityOssPlugin
         async canAccessSavedObjectType(savedObjectType: string) {
           if (isAnonymousAccessEnabled) {
             return await core.http.get<SavedObjectTypeAnonymousAccess>(
-              `/internal/security/anonymous_access/_can_access_saved_object_type?type=${encodeURIComponent(
+              `/internal/security_oss/anonymous_access/_can_access_saved_object_type?type=${encodeURIComponent(
                 savedObjectType
               )}`
             );

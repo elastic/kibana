@@ -18,3 +18,4 @@
  */
 
 export { setupDisplayInsecureClusterAlertRoute } from './display_insecure_cluster_alert';
+export { setupCanAccessSavedObjectTypeRoute } from './can_access_saved_object_type';

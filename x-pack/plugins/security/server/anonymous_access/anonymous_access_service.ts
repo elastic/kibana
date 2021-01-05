@@ -12,6 +12,7 @@ import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constant
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { AuthorizationServiceSetup } from '../authorization';
 import type { ConfigType } from '../config';
+import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
 export interface AnonymousAccessServiceSetup {
   readonly isAnonymousAccessEnabled: boolean;
@@ -90,22 +91,22 @@ export class AnonymousAccessService {
         }
 
         const checkPrivileges = authz.checkSavedObjectsPrivilegesWithRequest(fakeAnonymousRequest);
-        const { hasAllRequested } = await checkPrivileges(
-          authz.actions.savedObject.get(savedObjectType, 'get'),
-          spaces && spaceId ? spaces.spaceIdToNamespace(spaceId) : undefined
-        );
+        try {
+          const { hasAllRequested } = await checkPrivileges(
+            authz.actions.savedObject.get(savedObjectType, 'get'),
+            spaces && spaceId ? spaces.spaceIdToNamespace(spaceId) : undefined
+          );
+          return hasAllRequested;
+        } catch (err) {
+          if (getErrorStatusCode(err) === 401) {
+            this.logger.warn(
+              `Anonymous access may not be properly configured: ${getDetailedErrorMessage(err)}`
+            );
+            return false;
+          }
 
-        if (hasAllRequested) {
-          this.logger.debug(
-            `Saved Objects with "${savedObjectType}" type can be accessed anonymously.`
-          );
-        } else {
-          this.logger.debug(
-            `Saved Objects with "${savedObjectType}" type cannot be accessed anonymously.`
-          );
+          throw err;
         }
-
-        return hasAllRequested;
       },
     };
   }

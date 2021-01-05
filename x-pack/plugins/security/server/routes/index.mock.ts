@@ -14,7 +14,6 @@ import { authorizationMock } from '../authorization/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { authenticationServiceMock } from '../authentication/authentication_service.mock';
-import { anonymousAccessServiceMock } from '../anonymous_access/anonymous_access_service.mock';
 import { sessionMock } from '../session_management/session.mock';
 import type { RouteDefinitionParams } from '.';
 
@@ -35,8 +34,5 @@ export const routeDefinitionParamsMock = {
       getFeatureUsageService: jest.fn(),
       session: sessionMock.create(),
       getAuthenticationService: jest.fn().mockReturnValue(authenticationServiceMock.createStart()),
-      getAnonymousAccessService: jest
-        .fn()
-        .mockReturnValue(anonymousAccessServiceMock.createStart()),
     } as unknown) as DeeplyMockedKeys<RouteDefinitionParams>),
 };
