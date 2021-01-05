@@ -6,10 +6,10 @@
 
 import React, { FC } from 'react';
 
-import { FieldDataCardProps } from '../field_data_card';
+import { FieldDataRowProps } from '../field_data_card';
 import { ExamplesList } from '../examples_list';
 
-export const GeoPointContent: FC<FieldDataCardProps> = ({ config }) => {
+export const GeoPointContent: FC<FieldDataRowProps> = ({ config }) => {
   // TODO - adjust server-side query to get examples using:
 
   // GET /filebeat-apache-2019.01.30/_search

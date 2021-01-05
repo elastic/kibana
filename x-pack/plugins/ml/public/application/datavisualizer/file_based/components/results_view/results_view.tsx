@@ -27,6 +27,7 @@ import { FileContents } from '../file_contents';
 import { AnalysisSummary } from '../analysis_summary';
 // @ts-ignore
 import { FieldsStats } from '../fields_stats';
+import { FieldsStatsGrid } from '../fields_stats_grid';
 
 interface Props {
   data: string;
@@ -52,6 +53,13 @@ export const ResultsView: FC<Props> = ({
         defaultMessage: 'File stats',
       }),
       content: <FieldsStats results={results} />,
+    },
+    {
+      id: 'file-stats-grid',
+      name: i18n.translate('xpack.ml.fileDatavisualizer.resultsView.fileStatsTabName', {
+        defaultMessage: 'File stats grid',
+      }),
+      content: <FieldsStatsGrid results={results} />,
     },
   ];
 

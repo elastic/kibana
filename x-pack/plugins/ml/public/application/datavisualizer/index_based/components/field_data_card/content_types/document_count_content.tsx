@@ -6,11 +6,11 @@
 
 import React, { FC } from 'react';
 
-import type { FieldDataCardProps } from '../field_data_card';
+import type { FieldDataRowProps } from '../field_data_card';
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../../total_count_header';
 
-export interface Props extends FieldDataCardProps {
+export interface Props extends FieldDataRowProps {
   totalCount: number;
 }
 

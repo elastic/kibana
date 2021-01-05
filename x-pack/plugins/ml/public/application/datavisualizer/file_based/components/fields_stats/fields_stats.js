@@ -28,6 +28,7 @@ export class FieldsStats extends Component {
   }
 
   render() {
+    console.log('this.state.fields', this.state.fields);
     return (
       <div className="fields-stats">
         <EuiFlexGrid gutterSize="m">

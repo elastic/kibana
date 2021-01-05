@@ -29,15 +29,21 @@ export interface FindFileStructureResponse {
       count: number;
       cardinality: number;
       top_hits: Array<{ count: number; value: any }>;
+      mean_value?: number;
+      median_value?: number;
       max_value?: number;
       min_value?: number;
+      earliest?: string;
+      latest?: string;
     };
   };
   sample_start: string;
   num_messages_analyzed: number;
   mappings: {
-    [fieldName: string]: {
-      type: string;
+    properties: {
+      [fieldName: string]: {
+        type: string;
+      };
     };
   };
   quote: string;

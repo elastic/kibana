@@ -7,11 +7,11 @@
 import React, { FC } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldDataCardProps } from '../field_data_card';
+import { FieldDataRowProps } from '../field_data_card';
 import { TopValues } from '../top_values';
 import { ExpandedRowFieldHeader } from '../../../../stats_datagrid/components/expanded_row_field_header';
 
-export const KeywordContent: FC<FieldDataCardProps> = ({ config }) => {
+export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats, fieldFormat } = config;
 
   return (

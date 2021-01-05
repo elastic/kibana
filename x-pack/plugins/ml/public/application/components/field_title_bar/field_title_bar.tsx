@@ -13,9 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { FieldTypeIcon } from '../field_type_icon';
 import { FieldVisConfig } from '../../datavisualizer/index_based/common';
 import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
+import {
+  FileBasedFieldVisConfig,
+  isIndexBasedFieldVisConfig,
+} from '../../datavisualizer/index_based/common/field_vis_config';
 
 interface Props {
-  card: FieldVisConfig;
+  card: FieldVisConfig | FileBasedFieldVisConfig;
 }
 
 export const FieldTitleBar: FC<Props> = ({ card }) => {
@@ -30,13 +34,13 @@ export const FieldTitleBar: FC<Props> = ({ card }) => {
 
   if (card.fieldName === undefined) {
     classNames.push('document_count');
-  } else if (card.isUnsupportedType === true) {
+  } else if (isIndexBasedFieldVisConfig(card) && card.isUnsupportedType === true) {
     classNames.push('type-other');
   } else {
     classNames.push(card.type);
   }
 
-  if (card.isUnsupportedType !== true) {
+  if (isIndexBasedFieldVisConfig(card) && card.isUnsupportedType !== true) {
     // All the supported field types have aria labels.
     cardTitleAriaLabel.unshift(getMLJobTypeAriaLabel(card.type)!);
   }

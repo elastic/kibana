@@ -7,10 +7,10 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
 import React from 'react';
-import { FieldDataCardProps } from '../../../index_based/components/field_data_card';
+import { FieldDataRowProps } from '../../../index_based/components/field_data_card';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 
-export const DocumentStat = ({ config }: FieldDataCardProps) => {
+export const DocumentStat = ({ config }: FieldDataRowProps) => {
   const { stats } = config;
   if (stats === undefined) return null;
 

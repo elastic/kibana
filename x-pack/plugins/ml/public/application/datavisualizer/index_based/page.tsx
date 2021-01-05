@@ -46,7 +46,7 @@ import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { ActionsPanel } from './components/actions_panel';
 import { SearchPanel } from './components/search_panel';
 import { DocumentCountContent } from './components/field_data_card/content_types/document_count_content';
-import { DataVisualizerDataGrid } from '../stats_datagrid';
+import { DataVisualizerDataGrid, ItemIdToExpandedRowMap } from '../stats_datagrid';
 import { FieldCountPanel } from './components/field_count_panel';
 import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 import { DataLoader } from './data_loader';
@@ -56,6 +56,7 @@ import type { OverallStats } from '../../../../common/types/datavisualizer';
 import { MlJobFieldType } from '../../../../common/types/field_types';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
+import { IndexBasedDataVisualizerExpandedRow } from '../stats_datagrid/expanded_row';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -105,6 +106,19 @@ export const getDefaultDataVisualizerListState = (): Required<DataVisualizerInde
   showAllFields: false,
   showEmptyFields: false,
 });
+
+function getItemIdToExpandedRowMap(
+  itemIds: string[],
+  items: FieldVisConfig[]
+): ItemIdToExpandedRowMap {
+  return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
+    const item = items.find((fieldVisConfig) => fieldVisConfig.fieldName === fieldName);
+    if (item !== undefined) {
+      m[fieldName] = <IndexBasedDataVisualizerExpandedRow item={item} />;
+    }
+    return m;
+  }, {} as ItemIdToExpandedRowMap);
+}
 
 export const Page: FC = () => {
   const mlContext = useMlContext();
@@ -740,6 +754,7 @@ export const Page: FC = () => {
                     items={configs}
                     pageState={dataVisualizerListState}
                     updatePageState={setDataVisualizerListState}
+                    getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
                   />
                 </EuiPanel>
               </EuiFlexItem>

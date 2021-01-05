@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { FieldDataCardProps } from '../field_data_card';
+import { FieldDataRowProps } from '../field_data_card';
 import { DisplayValue } from '../../../../../components/display_value';
 import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
 import { numberAsOrdinal } from '../../../../../formatters/number_as_ordinal';
@@ -40,7 +40,7 @@ const METRIC_DISTRIBUTION_CHART_WIDTH = 325;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 210;
 const DEFAULT_TOP_VALUES_THRESHOLD = 100;
 
-export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
+export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats, fieldFormat } = config;
 
   useEffect(() => {

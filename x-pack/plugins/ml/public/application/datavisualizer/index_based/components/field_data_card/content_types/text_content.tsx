@@ -10,10 +10,10 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { FieldDataCardProps } from '../field_data_card';
+import { FieldDataRowProps } from '../field_data_card';
 import { ExamplesList } from '../examples_list';
 
-export const TextContent: FC<FieldDataCardProps> = ({ config }) => {
+export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) return null;
 

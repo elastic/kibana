@@ -10,7 +10,7 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { FieldDataCardProps } from '../../../index_based/components/field_data_card';
+import { FieldDataRowProps } from '../../../index_based/components/field_data_card';
 import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 import { numberAsOrdinal } from '../../../../formatters/number_as_ordinal';
 import {
@@ -30,7 +30,7 @@ interface SummaryTableItem {
   value: number | string | undefined | null;
 }
 
-export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
+export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats, fieldFormat } = config;
 
   useEffect(() => {

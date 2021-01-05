@@ -11,7 +11,7 @@ import { formatDate } from '@elastic/eui/lib/services/format';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
-import { FieldDataCardProps } from '../field_data_card';
+import { FieldDataRowProps } from '../field_data_card';
 import { ExpandedRowFieldHeader } from '../../../../stats_datagrid/components/expanded_row_field_header';
 const TIME_FORMAT = 'MMM D YYYY, HH:mm:ss.SSS';
 interface SummaryTableItem {
@@ -20,7 +20,7 @@ interface SummaryTableItem {
   value: number | string | undefined | null;
 }
 
-export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
+export const DateContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) return null;
 
@@ -33,19 +33,22 @@ export const DateContent: FC<FieldDataCardProps> = ({ config }) => {
     {
       function: 'earliest',
       display: (
-        <FormattedMessage id="xpack.ml.fieldDataCard.cardDate.minLabel" defaultMessage="min" />
+        <FormattedMessage
+          id="xpack.ml.fieldDataCard.cardDate.earliestLabel"
+          defaultMessage="earliest"
+        />
       ),
-      value: formatDate(earliest, TIME_FORMAT),
+      value: typeof earliest === 'string' ? earliest : formatDate(earliest, TIME_FORMAT),
     },
     {
       function: 'latest',
       display: (
         <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardDate.medianLabel"
-          defaultMessage="median"
+          id="xpack.ml.fieldDataCard.cardDate.latestLabel"
+          defaultMessage="latest"
         />
       ),
-      value: formatDate(latest, TIME_FORMAT),
+      value: typeof latest === 'string' ? latest : formatDate(latest, TIME_FORMAT),
     },
   ];
   const summaryTableColumns = [

@@ -23,17 +23,20 @@ import {
   TextContent,
 } from './content_types';
 import { LoadingIndicator } from './loading_indicator';
+import { FileBasedFieldVisConfig, isIndexBasedFieldVisConfig } from '../../common/field_vis_config';
 
-export interface FieldDataCardProps {
-  config: FieldVisConfig;
+export interface FieldDataRowProps {
+  config: FieldVisConfig | FileBasedFieldVisConfig;
 }
 
-export const FieldDataCard: FC<FieldDataCardProps> = ({ config }) => {
-  const { fieldName, loading, type, existsInDocs } = config;
+export const FieldDataCard: FC<FieldDataRowProps> = ({ config }) => {
+  const { fieldName, type } = config;
 
   function getCardContent() {
-    if (existsInDocs === false) {
-      return <NotInDocsContent />;
+    if (isIndexBasedFieldVisConfig(config)) {
+      if (config.existsInDocs === false) {
+        return <NotInDocsContent />;
+      }
     }
 
     switch (type) {
@@ -75,7 +78,11 @@ export const FieldDataCard: FC<FieldDataCardProps> = ({ config }) => {
     >
       <FieldTitleBar card={config} />
       <div className="mlFieldDataCard__content" data-test-subj="mlFieldDataCardContent">
-        {loading === true ? <LoadingIndicator /> : getCardContent()}
+        {isIndexBasedFieldVisConfig(config) && config.loading === true ? (
+          <LoadingIndicator />
+        ) : (
+          getCardContent()
+        )}
       </div>
     </EuiPanel>
   );

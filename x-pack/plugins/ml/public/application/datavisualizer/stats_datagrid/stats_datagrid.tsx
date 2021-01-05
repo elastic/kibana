@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { FieldTypeIcon } from '../../components/field_type_icon';
 import { FieldVisConfig } from '../index_based/common';
-import { DataVisualizerFieldExpandedRow } from './expanded_row';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { DistinctValues } from './components/field_data_row/distinct_values';
 import { NumberContentPreview } from './components/field_data_row/number_content_preview';
@@ -29,38 +28,32 @@ import { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_ur
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { TopValuesPreview } from './components/field_data_row/top_values_preview';
 import type { MlJobFieldType } from '../../../../common/types/field_types';
+import { FileBasedFieldVisConfig } from '../index_based/common/field_vis_config';
 const FIELD_NAME = 'fieldName';
-
-interface DataVisualizerDataGrid {
-  items: FieldVisConfig[];
-  pageState: DataVisualizerIndexBasedAppState;
-  updatePageState: (update: Partial<DataVisualizerIndexBasedAppState>) => void;
-}
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
-function getItemIdToExpandedRowMap(
-  itemIds: string[],
-  items: FieldVisConfig[]
-): ItemIdToExpandedRowMap {
-  return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
-    const item = items.find((fieldVisConfig) => fieldVisConfig[FIELD_NAME] === fieldName);
-    if (item !== undefined) {
-      m[fieldName] = <DataVisualizerFieldExpandedRow item={item} />;
-    }
-    return m;
-  }, {} as ItemIdToExpandedRowMap);
+type DataVisualizerDataGridItem = FieldVisConfig | FileBasedFieldVisConfig;
+interface DataVisualizerDataGridProps {
+  items: DataVisualizerDataGridItem[];
+  pageState: DataVisualizerIndexBasedAppState;
+  updatePageState: (update: Partial<DataVisualizerIndexBasedAppState>) => void;
+  getItemIdToExpandedRowMap: (
+    itemIds: string[],
+    items: DataVisualizerDataGridItem[]
+  ) => ItemIdToExpandedRowMap;
 }
 
 export const DataVisualizerDataGrid = ({
   items,
   pageState,
   updatePageState,
-}: DataVisualizerDataGrid) => {
+  getItemIdToExpandedRowMap,
+}: DataVisualizerDataGridProps) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, toggleExpandAll] = useState<boolean>(false);
 
-  const { onTableChange, pagination, sorting } = useTableSettings<FieldVisConfig>(
+  const { onTableChange, pagination, sorting } = useTableSettings<DataVisualizerDataGridItem>(
     items,
     pageState,
     updatePageState
@@ -73,7 +66,7 @@ export const DataVisualizerDataGrid = ({
     });
   };
 
-  function toggleDetails(item: FieldVisConfig) {
+  function toggleDetails(item: DataVisualizerDataGridItem) {
     if (item.fieldName === undefined) return;
     const index = expandedRowItemIds.indexOf(item.fieldName);
     if (index !== -1) {
@@ -87,7 +80,7 @@ export const DataVisualizerDataGrid = ({
   }
 
   const columns = useMemo(() => {
-    const expanderColumn: EuiTableComputedColumnType<FieldVisConfig> = {
+    const expanderColumn: EuiTableComputedColumnType<DataVisualizerDataGridItem> = {
       name: (
         <EuiButtonIcon
           data-test-subj={`mlToggleDetailsForAllRowsButton ${expandAll ? 'expanded' : 'collapsed'}`}
@@ -107,7 +100,7 @@ export const DataVisualizerDataGrid = ({
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,
-      render: (item: FieldVisConfig) => {
+      render: (item: DataVisualizerDataGridItem) => {
         if (item.fieldName === undefined) return null;
         const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown';
         return (
@@ -167,8 +160,10 @@ export const DataVisualizerDataGrid = ({
         name: i18n.translate('xpack.ml.datavisualizer.dataGrid.documentsCountColumnName', {
           defaultMessage: 'Documents (%)',
         }),
-        render: (value: number | undefined, item: FieldVisConfig) => <DocumentStat config={item} />,
-        sortable: (item: FieldVisConfig) => item?.stats?.count,
+        render: (value: number | undefined, item: DataVisualizerDataGridItem) => (
+          <DocumentStat config={item} />
+        ),
+        sortable: (item: DataVisualizerDataGridItem) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'mlDataVisualizerTableColumnDocumentsCount',
       },
@@ -203,7 +198,7 @@ export const DataVisualizerDataGrid = ({
             />
           </div>
         ),
-        render: (item: FieldVisConfig) => {
+        render: (item: DataVisualizerDataGridItem) => {
           if (item === undefined || showDistributions === false) return null;
           if (item.type === 'keyword' && item.stats?.topValues !== undefined) {
             return <TopValuesPreview config={item} />;
@@ -230,7 +225,7 @@ export const DataVisualizerDataGrid = ({
 
   return (
     <EuiFlexItem data-test-subj="mlDataVisualizerTableContainer">
-      <EuiInMemoryTable<FieldVisConfig>
+      <EuiInMemoryTable<DataVisualizerDataGridItem>
         className={'mlDataVisualizer'}
         items={items}
         itemId={FIELD_NAME}

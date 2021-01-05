@@ -10,7 +10,7 @@ import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FieldDataCardProps } from '../field_data_card';
+import { FieldDataRowProps } from '../field_data_card';
 import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
 import { ExpandedRowFieldHeader } from '../../../../stats_datagrid/components/expanded_row_field_header';
 
@@ -25,7 +25,7 @@ function getPercentLabel(value: number): string {
   }
 }
 
-export const BooleanContent: FC<FieldDataCardProps> = ({ config }) => {
+export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) return null;
   const { count, trueCount, falseCount } = stats;

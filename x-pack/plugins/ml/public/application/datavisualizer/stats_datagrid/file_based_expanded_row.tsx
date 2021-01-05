@@ -5,31 +5,24 @@
  */
 
 import React from 'react';
-
-import { FieldVisConfig } from '../index_based/common';
 import {
   BooleanContent,
   DateContent,
   GeoPointContent,
   IpContent,
   KeywordContent,
-  NotInDocsContent,
   OtherContent,
   TextContent,
 } from '../index_based/components/field_data_card/content_types';
 import { NumberContent } from './components/field_data_expanded_row/number_content';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
-import { LoadingIndicator } from '../index_based/components/field_data_card/loading_indicator';
+import type { FileBasedFieldVisConfig } from '../index_based/common/field_vis_config';
 
-export const IndexBasedDataVisualizerExpandedRow = ({ item }: { item: FieldVisConfig }) => {
+export const FileBasedDataVisualizerExpandedRow = ({ item }: { item: FileBasedFieldVisConfig }) => {
   const config = item;
-  const { loading, type, existsInDocs, fieldName } = config;
+  const { type, fieldName } = config;
 
   function getCardContent() {
-    if (existsInDocs === false) {
-      return <NotInDocsContent />;
-    }
-
     switch (type) {
       case ML_JOB_FIELD_TYPES.NUMBER:
         return <NumberContent config={config} />;
@@ -62,7 +55,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({ item }: { item: FieldVisCo
       className="mlDataVisualizerFieldExpandedRow"
       data-test-subj={`mlDataVisualizerFieldExpandedRow-${fieldName}`}
     >
-      {loading === true ? <LoadingIndicator /> : getCardContent()}
+      {getCardContent()}
     </div>
   );
 };

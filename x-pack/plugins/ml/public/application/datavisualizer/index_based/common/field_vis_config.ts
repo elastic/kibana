@@ -70,3 +70,21 @@ export interface FieldVisConfig {
   fieldFormat?: any;
   isUnsupportedType?: boolean;
 }
+
+export interface FileBasedFieldVisConfig {
+  type: MlJobFieldType;
+  fieldName?: string;
+  stats?: FieldVisStats;
+}
+
+export function isFileBasedFieldVisConfig(
+  field: FieldVisConfig | FileBasedFieldVisConfig
+): field is FileBasedFieldVisConfig {
+  return !field.hasOwnProperty('existsInDocs');
+}
+
+export function isIndexBasedFieldVisConfig(
+  field: FieldVisConfig | FileBasedFieldVisConfig
+): field is FieldVisConfig {
+  return (field as FieldVisConfig).existsInDocs !== undefined;
+}

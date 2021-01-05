@@ -57,6 +57,14 @@ export interface DataVisualizerIndexBasedAppState {
   showAllFields?: boolean;
   showEmptyFields?: boolean;
 }
+
+export interface DataVisualizerFileBasedAppState {
+  pageIndex: number;
+  pageSize: number;
+  sortField: string;
+  sortDirection: string;
+}
+
 export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB

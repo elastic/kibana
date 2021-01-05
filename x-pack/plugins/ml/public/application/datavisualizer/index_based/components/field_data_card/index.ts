@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FieldDataCard, FieldDataCardProps } from './field_data_card';
+export { FieldDataCard, FieldDataRowProps } from './field_data_card';

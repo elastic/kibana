@@ -6,12 +6,12 @@
 
 import React, { FC } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
-import { FieldDataCardProps } from '../../../index_based/components/field_data_card';
+import { FieldDataRowProps } from '../../../index_based/components/field_data_card';
 import { ColumnChart } from '../../../../components/data_grid/column_chart';
 import { ChartData } from '../../../../components/data_grid';
 import { OrdinalDataItem } from '../../../../components/data_grid/use_column_chart';
 
-export const TopValuesPreview: FC<FieldDataCardProps> = ({ config }) => {
+export const TopValuesPreview: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) return null;
   const { topValues, cardinality } = stats;
