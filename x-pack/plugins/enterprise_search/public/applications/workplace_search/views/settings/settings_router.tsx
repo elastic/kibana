@@ -9,8 +9,6 @@ import React, { useEffect } from 'react';
 import { useActions } from 'kea';
 import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 
-import { SidebarNavigation, AppView } from 'workplace_search/components';
-
 import {
   ORG_SETTINGS_PATH,
   ORG_SETTINGS_CUSTOMIZE_PATH,
@@ -41,34 +39,8 @@ export const SettingsRouter: React.FC = () => {
     resetFlashMessages();
   }, [pathname]);
 
-  const customizeLink = {
-    title: 'Customize Workplace Search',
-    path: ORG_SETTINGS_CUSTOMIZE_PATH,
-  };
-
-  const sourcePrioritizationLink = {
-    title: 'Content source connectors',
-    path: ORG_SETTINGS_CONNECTORS_PATH,
-    dataTestSubj: 'ConnectorsLink',
-  };
-  const oauthApplicationLink = {
-    title: 'OAuth application',
-    path: ORG_SETTINGS_OAUTH_APPLICATION_PATH,
-    dataTestSubj: 'OAuthLink',
-  };
-
-  const links = [customizeLink, sourcePrioritizationLink, oauthApplicationLink];
-
-  const sidebar = (
-    <SidebarNavigation
-      title="Organization settings"
-      description="Manage content sources and other settings for your organization."
-      links={links}
-    />
-  );
-
   return (
-    <AppView sidebar={sidebar}>
+    <>
       <FlashMessages />
       <Switch>
         <Redirect exact from={ORG_SETTINGS_PATH} to={ORG_SETTINGS_CUSTOMIZE_PATH} />
@@ -79,6 +51,6 @@ export const SettingsRouter: React.FC = () => {
           <Route key={i} exact path={editPath} render={() => <SourceConfig sourceIndex={i} />} />
         ))}
       </Switch>
-    </AppView>
+    </>
   );
 };
