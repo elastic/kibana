@@ -64,8 +64,8 @@ If your PKCS#12 file is encrypted, add the decryption password to your <<secure-
 bin/kibana-keystore add server.ssl.keystore.password
 --------------------------------------------------------------------------------
 
-TIP: If your PKCS#12 file isn't protected with a password, depending on how it was generated, you may need to set
-`server.ssl.keystore.password` to an empty string.
+NOTE: If you used `elasticsearch-certutil` to generate a PKCS#12 file and you did not specify a password, the file is encrypted, and you
+need to set `server.ssl.keystore.password` to an empty string.
 --
 
 .. Otherwise, if your server certificate and private key are in PEM format:
@@ -166,8 +166,8 @@ If your PKCS#12 file is encrypted, add the decryption password to your <<secure-
 bin/kibana-keystore add elasticsearch.ssl.truststore.password
 --------------------------------------------------------------------------------
 
-TIP: If you used `elasticsearch-certutil` to generate a PKCS#12 file and you did not specify a password, the file is encrypted, and you need
-to set server.ssl.keystore.password to an empty string.
+NOTE: If you used `elasticsearch-certutil` to generate a PKCS#12 file and you did not specify a password, the file is encrypted, and you
+need to set `server.ssl.truststore.password` to an empty string.
 --
 
 +

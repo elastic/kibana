@@ -73,7 +73,7 @@ For more information, see <<xpack-security-session-management, Session managemen
 
 . Restart {kib}.
 
-. Temporarily log into {kib} using the built-in `elastic` superuser so you can create new users and assign roles. If you are running {kib}
+. Temporarily log in to {kib} using the built-in `elastic` superuser so you can create new users and assign roles. If you are running {kib}
 locally, go to `https://localhost:5601` to view the login page.
 +
 NOTE: The password for the built-in `elastic` user is typically set as part of the security configuration process on {es}. For more
@@ -85,7 +85,7 @@ information, see {ref}/built-in-users.html[Built-in users].
 To manage privileges in {kib}, open the main menu, then click *Stack Management > Roles*. The built-in `kibana_admin` role will grant
 access to {kib} with administrator privileges. Alternatively, you can create additional roles that grant limited access to {kib}.
 
-If you're using the default native realm with Basic Authentication, open then main menu, then click *Stack Management > Users* to create
+If you're using the default native realm with Basic Authentication, open the main menu, then click *Stack Management > Users* to create
 users and assign roles, or use the {es} {ref}/security-api.html#security-user-apis[user management APIs]. For example, the following creates
 a user named `jacknich` and assigns it the `kibana_admin` role:
 
