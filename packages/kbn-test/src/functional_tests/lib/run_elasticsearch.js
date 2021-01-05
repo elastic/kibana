@@ -18,7 +18,7 @@
  */
 
 import { resolve } from 'path';
-import { KIBANA_ROOT } from './paths';
+import { tmpdir } from 'os';
 import { createLegacyEsTestCluster } from '../../legacy_es';
 
 import { setupUsers, DEFAULT_SUPERUSER_PASS } from './auth';
@@ -38,7 +38,7 @@ export async function runElasticsearch({ config, options }) {
       : config.get('servers.elasticsearch.password'),
     license,
     log,
-    basePath: resolve(KIBANA_ROOT, '.es'),
+    basePath: resolve(tmpdir(), `es-${Math.random().toString(36).substring(7)}`),
     esFrom: esFrom || config.get('esTestCluster.from'),
     dataArchive: config.get('esTestCluster.dataArchive'),
     esArgs,
