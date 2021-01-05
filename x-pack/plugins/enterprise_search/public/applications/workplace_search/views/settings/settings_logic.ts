@@ -8,10 +8,13 @@ import { kea, MakeLogicType } from 'kea';
 
 import http from 'shared/http';
 import routes from 'workplace_search/routes';
-import { handleAPIError } from 'app_search/utils/handleAPIError';
-import { IFlashMessagesProps } from 'shared/types';
 
-import { clearFlashMessages } from '../../../shared/flash_messages';
+import {
+  clearFlashMessages,
+  setQueuedSuccessMessage,
+  setSuccessMessage,
+  flashAPIErrors,
+} from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { Connector } from '../../types';
@@ -35,7 +38,6 @@ export interface SettingsServerProps {
 interface SettingsActions {
   onInitializeConnectors(connectors: Connector[]): Connector[];
   onOrgNameInputChange(orgNameInputValue: string): string;
-  setFlashMessages(flashMessages: IFlashMessagesProps): {};
   setUpdatedName({ organizationName }: { organizationName: string }): string;
   setServerProps(props: SettingsServerProps): SettingsServerProps;
   setOauthApplication(oauthApplication: IOauthApplication): IOauthApplication;
@@ -44,7 +46,6 @@ interface SettingsActions {
   }: {
     oauthApplication: IOauthApplication;
   }): IOauthApplication;
-  setConfigDeleted(name: string): string;
   resetSettingsState(): void;
   initializeSettings(): void;
   initializeConnectors(): void;
@@ -60,7 +61,6 @@ interface SettingsActions {
 }
 
 interface SettingsValues {
-  flashMessages: IFlashMessagesProps;
   dataLoading: boolean;
   connectors: Connector[];
   orgNameInputValue: string;
@@ -71,13 +71,11 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
   actions: {
     onInitializeConnectors: (connectors: Connector[]) => connectors,
     onOrgNameInputChange: (orgNameInputValue: string) => orgNameInputValue,
-    setFlashMessages: (flashMessages: IFlashMessagesProps) => ({ flashMessages }),
     setUpdatedName: ({ organizationName }) => organizationName,
     setServerProps: (props: SettingsServerProps) => props,
     setOauthApplication: (oauthApplication: IOauthApplication) => oauthApplication,
     setUpdatedOauthApplication: ({ oauthApplication }: { oauthApplication: IOauthApplication }) =>
       oauthApplication,
-    setConfigDeleted: (name: string) => name,
     resetSettingsState: () => true,
     initializeSettings: () => true,
     initializeConnectors: () => true,
@@ -111,18 +109,6 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         setUpdatedOauthApplication: (_, oauthApplication) => oauthApplication,
       },
     ],
-    flashMessages: [
-      {},
-      {
-        setFlashMessages: (_, { flashMessages }) => flashMessages,
-        setUpdatedName: () => ({ success: ['Successfully updated organization.'] }),
-        setUpdatedOauthApplication: () => ({ success: ['Successfully updated application.'] }),
-        setConfigDeleted: (_, name) => ({
-          success: [`Successfully removed configuration for ${name}.`],
-        }),
-        resetSettingsState: () => ({}),
-      },
-    ],
     dataLoading: [
       true,
       {
@@ -136,14 +122,14 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       const route = routes.fritoPieOrganizationSettingsPath();
       http(route)
         .then(({ data }) => actions.setServerProps(data))
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch((e) => flashAPIErrors(e));
     },
     initializeConnectors: () => {
       const route = routes.fritoPieOrganizationSettingsContentSourceOauthConfigurationsPath();
 
       http(route)
         .then(({ data }) => actions.onInitializeConnectors(data))
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch((e) => flashAPIErrors(e));
     },
     updateOrgName: () => {
       const route = routes.customizeFritoPieOrganizationSettingsPath();
@@ -153,8 +139,9 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         .put(route, { name })
         .then(({ data }) => {
           actions.setUpdatedName(data);
+          setSuccessMessage('Successfully updated organization.');
         })
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch((e) => flashAPIErrors(e));
     },
     updateOauthApplication: () => {
       const route = routes.oauthApplicationFritoPieOrganizationSettingsPath();
@@ -165,8 +152,11 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
 
       http
         .put(route, { oauth_application: { name, confidential, redirect_uri: redirectUri } })
-        .then(({ data }) => actions.setUpdatedOauthApplication(data))
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .then(({ data }) => {
+          actions.setUpdatedOauthApplication(data);
+          setSuccessMessage('Successfully updated application.');
+        })
+        .catch((e) => flashAPIErrors(e));
     },
     deleteSourceConfig: ({ serviceType, name }) => {
       const route = routes.fritoPieOrganizationSettingsContentSourceOauthConfigurationPath(
@@ -177,9 +167,12 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         .delete(route)
         .then(() => {
           KibanaLogic.values.navigateToUrl(ORG_SETTINGS_CONNECTORS_PATH);
-          actions.setConfigDeleted(name);
+          setQueuedSuccessMessage(`Successfully removed configuration for ${name}.`);
         })
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
+        .catch((e) => flashAPIErrors(e));
+    },
+    resetSettingsState: () => {
+      clearFlashMessages();
     },
   }),
 });
