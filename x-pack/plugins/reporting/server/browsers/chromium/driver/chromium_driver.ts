@@ -197,16 +197,16 @@ export class HeadlessChromiumDriver {
 
   // NOTE: dimensions must be given in the base pixels sizes, not pre-scaled by the zoom factor.
   public async setViewport(
-    { width: _width, height: _height, zoom }: ViewZoomWidthHeight,
+    { height: _height, width: _width, zoom }: ViewZoomWidthHeight,
     logger: LevelLogger
   ): Promise<void> {
     const height = Math.floor(_height);
     const width = Math.floor(_width);
-    logger.debug(`Setting viewport: width=${width} height=${height} zoom=${zoom}`);
+    logger.debug(`Setting viewport: height=${height} width=${width} zoom=${zoom}`);
 
     await this.page.setViewport({
-      width,
       height,
+      width,
       deviceScaleFactor: zoom,
       isMobile: false,
     });
