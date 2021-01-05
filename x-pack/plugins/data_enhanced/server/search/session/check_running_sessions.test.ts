@@ -60,18 +60,19 @@ describe('getSearchStatus', () => {
 
   test('does nothing if the search is still running', async () => {
     savedObjectsClient.bulkUpdate = jest.fn();
-    savedObjectsClient.find.mockResolvedValue({
-      saved_objects: [
-        {
-          idMapping: {
-            'search-hash': {
-              id: 'search-id',
-              strategy: 'cool',
-              status: SearchStatus.IN_PROGRESS,
-            },
+    const so = {
+      attributes: {
+        idMapping: {
+          'search-hash': {
+            id: 'search-id',
+            strategy: 'cool',
+            status: SearchStatus.IN_PROGRESS,
           },
         },
-      ],
+      },
+    };
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [so],
       total: 1,
     } as any);
 
@@ -83,6 +84,34 @@ describe('getSearchStatus', () => {
     await checkRunningSessions(savedObjectsClient, mockClient, mockLogger);
 
     expect(savedObjectsClient.bulkUpdate).not.toBeCalled();
+  });
+
+  test("doesn't re-check completed or errored searches", async () => {
+    savedObjectsClient.bulkUpdate = jest.fn();
+    const so = {
+      attributes: {
+        idMapping: {
+          'search-hash': {
+            id: 'search-id',
+            strategy: 'cool',
+            status: SearchStatus.COMPLETE,
+          },
+          'another-search-hash': {
+            id: 'search-id',
+            strategy: 'cool',
+            status: SearchStatus.ERROR,
+          },
+        },
+      },
+    };
+    savedObjectsClient.find.mockResolvedValue({
+      saved_objects: [so],
+      total: 1,
+    } as any);
+
+    await checkRunningSessions(savedObjectsClient, mockClient, mockLogger);
+
+    expect(mockClient.asyncSearch.status).not.toBeCalled();
   });
 
   test('updates to complete if the search is done', async () => {

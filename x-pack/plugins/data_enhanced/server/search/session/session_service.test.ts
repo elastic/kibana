@@ -21,6 +21,7 @@ import { coreMock } from 'src/core/server/mocks';
 import { ConfigSchema } from '../../../config';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { INMEM_TRACKING_INTERVAL, MAX_UPDATE_RETRIES } from './constants';
+import { SearchStatus } from './types';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -340,6 +341,7 @@ describe('BackgroundSessionService', () => {
           [requestHash]: {
             id: searchId,
             strategy: MOCK_STRATEGY,
+            status: SearchStatus.IN_PROGRESS,
           },
         },
       });

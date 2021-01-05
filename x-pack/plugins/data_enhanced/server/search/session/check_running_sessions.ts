@@ -43,21 +43,25 @@ export async function checkRunningSessions(
 
     await Promise.all(
       runningBackgroundSearchesResponse.saved_objects.map(async (session) => {
+        // Check statuses of all running searches
         await Promise.all(
           Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
             const searchInfo = session.attributes.idMapping[searchKey];
             if (searchInfo.status === SearchStatus.IN_PROGRESS) {
-              const searchStatus = await getSearchStatus(client, searchInfo.strategy);
+              const currentStatus = await getSearchStatus(client, searchInfo.strategy);
 
-              sessionUpdated = true;
-              session.attributes.idMapping[searchKey] = {
-                ...session.attributes.idMapping[searchKey],
-                ...searchStatus,
-              };
+              if (currentStatus.status !== SearchStatus.IN_PROGRESS) {
+                sessionUpdated = true;
+                session.attributes.idMapping[searchKey] = {
+                  ...session.attributes.idMapping[searchKey],
+                  ...currentStatus,
+                };
+              }
             }
           })
         );
 
+        // And only then derive the session's status
         const sessionStatus = getSessionStatus(session.attributes);
         if (sessionStatus !== BackgroundSessionStatus.IN_PROGRESS) {
           session.attributes.status = sessionStatus;
