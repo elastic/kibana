@@ -269,7 +269,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         const headingText = await pageObjects.alertDetailsUI.getHeadingText();
         expect(headingText).to.be(updatedAlertName);
-        await alerting.alerts.deleteAlert(alert.id);
       });
 
       it('should reset alert when canceling an edit', async () => {
@@ -301,7 +300,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const nameInputAfterCancel = await testSubjects.find('alertNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
         expect(textAfterCancel).to.eql(updatedAlertName);
-        await alerting.alerts.deleteAlert(alert.id);
       });
     });
 
@@ -337,7 +335,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.alertDetailsUI.clickViewInApp();
 
         expect(await pageObjects.alertDetailsUI.getNoOpAppTitle()).to.be(`View Alert ${alert.id}`);
-        await alerting.alerts.deleteAlert(alert.id);
       });
 
       it('renders a disabled alert details view in app button', async () => {
@@ -356,7 +353,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
 
         expect(await pageObjects.alertDetailsUI.isViewInAppDisabled()).to.be(true);
-        await alerting.alerts.deleteAlert(alert.id);
       });
     });
 
@@ -597,8 +593,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first alert
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(alert.name);
       });
-
-      after(async () => await alerting.alerts.deleteAlert(alert.id));
 
       after(async () => {
         await objectRemover.removeAll();
