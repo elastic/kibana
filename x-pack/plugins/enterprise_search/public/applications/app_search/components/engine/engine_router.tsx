@@ -69,29 +69,31 @@ export const EngineRouter: React.FC = () => {
     },
   } = useValues(AppLogic);
 
-  const { dataLoading, engineNotFound } = useValues(EngineLogic);
+  const { engineName, dataLoading, engineNotFound } = useValues(EngineLogic);
   const { setEngineName, initializeEngine, clearEngine } = useActions(EngineLogic);
 
-  const { engineName } = useParams() as { engineName: string };
-  const engineBreadcrumb = [ENGINES_TITLE, engineName];
+  const { engineName: engineNameParam } = useParams() as { engineName: string };
+  const engineBreadcrumb = [ENGINES_TITLE, engineNameParam];
+
+  const isEngineInStateStale = () => engineName !== engineNameParam;
 
   useEffect(() => {
-    setEngineName(engineName);
+    setEngineName(engineNameParam);
     initializeEngine();
     return clearEngine;
-  }, [engineName]);
+  }, [engineNameParam]);
 
   if (engineNotFound) {
     setQueuedErrorMessage(
       i18n.translate('xpack.enterpriseSearch.appSearch.engine.notFound', {
-        defaultMessage: "No engine with name '{engineName}' could be found.",
-        values: { engineName },
+        defaultMessage: "No engine with name '{engineNameParam}' could be found.",
+        values: { engineNameParam },
       })
     );
     return <Redirect to={ENGINES_PATH} />;
   }
 
-  if (dataLoading) return <Loading />;
+  if (isEngineInStateStale() || dataLoading) return <Loading />;
 
   return (
     <Switch>
