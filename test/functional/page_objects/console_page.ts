@@ -20,9 +20,11 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
-export function ConsolePageProvider({ getService }: FtrProviderContext) {
+export function ConsolePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const find = getService('find');
+  const PageObjects = getPageObjects(['common']);
 
   class ConsolePage {
     public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
@@ -78,6 +80,35 @@ export function ConsolePageProvider({ getService }: FtrProviderContext) {
 
     public async getRequestFontSize() {
       return await this.getFontSize(await this.getRequestEditor());
+    }
+
+    public async dismissTutorial() {
+      try {
+        const closeButton = await find.byCssSelector('.euiFlyout__closeButton');
+        await closeButton.click();
+      } catch (e) {
+        // Ignore because it is probably not there.
+      }
+    }
+
+    public async appendTextToEditor(editor: WebElementWrapper, browser: any, text: string) {
+      // This focusses the cursor on the bottom of the text area
+      const content = await editor.findByCssSelector('.ace_content');
+      await content.click();
+      const textArea = await editor.findByCssSelector('#ConAppInputTextarea');
+      for (const key of text.split('')) {
+        await textArea.pressKeys(key);
+        // This is needed so that the browser has time to look up each character for autocomplete
+        await PageObjects.common.sleep(100);
+      }
+    }
+
+    public async hasAutocompleter(): Promise<boolean> {
+      try {
+        return Boolean(await find.byCssSelector('.ace_autocomplete'));
+      } catch (e) {
+        return false;
+      }
     }
   }
 

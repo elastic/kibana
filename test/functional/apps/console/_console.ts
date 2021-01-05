@@ -91,5 +91,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const afterSize = await editor.getSize();
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
     });
+
+    it('should provide basic auto-complete functionality', async () => {
+      // Ensure that the text area can be interacted with
+      await PageObjects.console.dismissTutorial();
+      const editor = await find.byCssSelector('.conApp');
+      expect(await PageObjects.console.hasAutocompleter()).to.be(false);
+      // We should always have autocompletion for the GET _search endpoint
+      await PageObjects.console.appendTextToEditor(editor, browser, '\nGET _sear');
+      expect(await PageObjects.console.hasAutocompleter()).to.be(true);
+    });
   });
 }
