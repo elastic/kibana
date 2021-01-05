@@ -13,7 +13,7 @@ interface WaterfallChartOuterContainerProps {
 }
 
 export const WaterfallChartOuterContainer = euiStyled.div<WaterfallChartOuterContainerProps>`
-  height: ${(props) => (props.height ? `${props.height}px` : 'auto')};
+  height: calc(100vh - 228px);
   overflow-y: ${(props) => (props.height ? 'scroll' : 'visible')};
   overflow-x: hidden;
 `;

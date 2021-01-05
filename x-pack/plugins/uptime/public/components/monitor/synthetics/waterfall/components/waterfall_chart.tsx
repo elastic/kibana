@@ -86,7 +86,6 @@ export const WaterfallChart = ({
   barStyleAccessor,
   renderSidebarItem,
   renderLegendItem,
-  maxHeight = 800,
 }: WaterfallChartProps) => {
   const { data, sidebarItems, legendItems } = useWaterfallContext();
 
@@ -106,7 +105,7 @@ export const WaterfallChart = ({
     legendItems && legendItems.length > 0 && renderLegendItem ? true : false;
 
   return (
-    <WaterfallChartOuterContainer height={maxHeight}>
+    <WaterfallChartOuterContainer>
       <>
         <WaterfallChartFixedTopContainer>
           <EuiFlexGroup gutterSize="none" responsive={false}>
