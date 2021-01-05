@@ -26,6 +26,7 @@
     { "path": "../../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../plugins/global_search/tsconfig.json" },
     { "path": "../plugins/licensing/tsconfig.json" },
-    { "path": "../plugins/telemetry_collection_xpack/tsconfig.json" }
+    { "path": "../plugins/telemetry_collection_xpack/tsconfig.json" },
+    { "path": "../plugins/ui_actions_enhanced/tsconfig.json" },
   ]
 }
