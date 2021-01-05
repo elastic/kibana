@@ -101,7 +101,18 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
   if (!alertObject.alertTypeId) {
     errors.alertTypeId.push(
       i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredAlertTypeIdText', {
-        defaultMessage: 'Alert trigger is required.',
+        defaultMessage: 'Alert type is required.',
+      })
+    );
+  }
+  const emptyConnectorActions = alertObject.actions.find(
+    (actionItem) => /^\d+$/.test(actionItem.id) && Object.keys(actionItem.params).length > 0
+  );
+  if (emptyConnectorActions !== undefined) {
+    errors.actionConnectors.push(
+      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredActionConnector', {
+        defaultMessage: 'Action connector for {actionTypeId} is required.',
+        values: { actionTypeId: emptyConnectorActions.actionTypeId },
       })
     );
   }
@@ -113,9 +124,9 @@ export function getAlertErrors(
   actionTypeRegistry: ActionTypeRegistryContract,
   alertTypeModel: AlertTypeModel | null
 ) {
-  const alertParamsErrors = (alertTypeModel
+  const alertParamsErrors: IErrorObject = alertTypeModel
     ? alertTypeModel.validate(alert.params).errors
-    : []) as IErrorObject;
+    : [];
   const alertBaseErrors = validateBaseProperties(alert).errors as IErrorObject;
   const alertErrors = {
     ...alertParamsErrors,
@@ -595,33 +606,42 @@ export const AlertForm = ({
       alertTypeModel &&
       alert.alertTypeId &&
       selectedAlertType ? (
-        <ActionForm
-          actions={alert.actions}
-          setHasActionsDisabled={setHasActionsDisabled}
-          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          messageVariables={selectedAlertType.actionVariables}
-          defaultActionGroupId={defaultActionGroupId}
-          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
-            isActionGroupDisabledForActionType(selectedAlertType, actionGroupId, actionTypeId)
-          }
-          actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
-            actionGroup.id === selectedAlertType.recoveryActionGroup.id
-              ? {
-                  ...actionGroup,
-                  omitOptionalMessageVariables: true,
-                  defaultActionMessage: recoveredActionGroupMessage,
-                }
-              : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
-          )}
-          getDefaultActionParams={getDefaultActionParams}
-          setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
-          setActionGroupIdByIndex={(group: string, index: number) =>
-            setActionProperty('group', group, index)
-          }
-          setActions={setActions}
-          setActionParamsProperty={setActionParamsProperty}
-          actionTypeRegistry={actionTypeRegistry}
-        />
+        <>
+          {errors.actionConnectors.length >= 1 ? (
+            <Fragment>
+              <EuiSpacer />
+              <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
+              <EuiSpacer />
+            </Fragment>
+          ) : null}
+          <ActionForm
+            actions={alert.actions}
+            setHasActionsDisabled={setHasActionsDisabled}
+            setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
+            messageVariables={selectedAlertType.actionVariables}
+            defaultActionGroupId={defaultActionGroupId}
+            isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
+              isActionGroupDisabledForActionType(selectedAlertType, actionGroupId, actionTypeId)
+            }
+            actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
+              actionGroup.id === selectedAlertType.recoveryActionGroup.id
+                ? {
+                    ...actionGroup,
+                    omitOptionalMessageVariables: true,
+                    defaultActionMessage: recoveredActionGroupMessage,
+                  }
+                : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
+            )}
+            getDefaultActionParams={getDefaultActionParams}
+            setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
+            setActionGroupIdByIndex={(group: string, index: number) =>
+              setActionProperty('group', group, index)
+            }
+            setActions={setActions}
+            setActionParamsProperty={setActionParamsProperty}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        </>
       ) : null}
     </Fragment>
   );

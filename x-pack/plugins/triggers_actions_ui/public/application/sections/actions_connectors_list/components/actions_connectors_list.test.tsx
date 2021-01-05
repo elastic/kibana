@@ -141,6 +141,12 @@ describe('actions_connectors_list component with items', () => {
       },
     ] = await mocks.getStartServices();
 
+    const mockedActionParamsFields = React.lazy(async () => ({
+      default() {
+        return <React.Fragment />;
+      },
+    }));
+
     actionTypeRegistry.get.mockReturnValue({
       id: 'test',
       iconClass: 'test',
@@ -153,7 +159,7 @@ describe('actions_connectors_list component with items', () => {
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
+      actionParamsFields: mockedActionParamsFields,
     });
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
