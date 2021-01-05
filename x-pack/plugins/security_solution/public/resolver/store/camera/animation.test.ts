@@ -12,6 +12,7 @@ import * as selectors from './selectors';
 import { animatePanning } from './methods';
 import { lerp } from '../../lib/math';
 import { ResolverAction } from '../actions';
+import { panAnimationDuration } from './scaling_constants';
 
 type TestAction =
   | ResolverAction
@@ -60,7 +61,7 @@ describe('when the camera is created', () => {
   });
 
   describe('When attempting to pan to current position and scale', () => {
-    const duration = 1000;
+    const duration = panAnimationDuration;
     const startTime = 0;
     beforeEach(() => {
       const action: TestAction = {
@@ -102,7 +103,7 @@ describe('when the camera is created', () => {
   });
 
   describe('when animation begins', () => {
-    const duration = 1000;
+    const duration = panAnimationDuration;
     let targetTranslation: Vector2;
     const startTime = 0;
     beforeEach(() => {

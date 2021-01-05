@@ -152,7 +152,7 @@ function NodeDetailLink({ name, nodeID }: { name?: string; nodeID: string }) {
     (mouseEvent: React.MouseEvent<HTMLAnchorElement>) => {
       linkProps.onClick(mouseEvent);
       dispatch({
-        type: 'userBroughtNodeIntoView',
+        type: 'userSelectedResolverNode',
         payload: {
           nodeID,
           time: timestamp(),

@@ -150,7 +150,7 @@ const NodeSubmenuPill = ({
     (mouseEvent: React.MouseEvent<HTMLButtonElement>) => {
       linkProps.onClick(mouseEvent);
       dispatch({
-        type: 'userBroughtNodeIntoView',
+        type: 'userSelectedResolverNode',
         payload: {
           nodeID,
           time: timestamp(),
