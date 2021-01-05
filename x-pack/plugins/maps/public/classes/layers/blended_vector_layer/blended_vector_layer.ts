@@ -41,6 +41,7 @@ import {
 import { IVectorSource } from '../../sources/vector_source';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 import { ESSearchSource } from '../../sources/es_search_source/es_search_source';
+import { isSearchSourceAbortError } from '../../sources/es_source/es_source';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
@@ -320,7 +321,7 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
         const countData = { isSyncClustered } as CountData;
         syncContext.stopLoading(dataRequestId, requestToken, countData, searchFilters);
       } catch (error) {
-        if (!(error instanceof DataRequestAbortError)) {
+        if (!(error instanceof DataRequestAbortError) || !isSearchSourceAbortError(error)) {
           syncContext.onLoadError(dataRequestId, requestToken, error.message);
         }
         return;
