@@ -58,13 +58,11 @@ exports[`Ping Timestamp component render without errors 1`] = `
         class="stepArrowsFullScreen"
         style="position:absolute;bottom:32px;width:100%"
       />
-      <a
-        class="euiLink euiLink--primary eui-textNoWrap"
-        href="/step/details"
-        rel="noreferrer"
+      <span
+        class="eui-textNoWrap"
       >
         Nov 26, 2020 10:28:56 AM
-      </a>
+      </span>
       <div
         class="euiSpacer euiSpacer--s"
       />
@@ -130,12 +128,11 @@ exports[`Ping Timestamp component shallow render without errors 1`] = `
           }
         }
       />
-      <EuiLink
+      <span
         className="eui-textNoWrap"
-        href="/step/details"
       >
         Nov 26, 2020 10:28:56 AM
-      </EuiLink>
+      </span>
       <EuiSpacer
         size="s"
       />
