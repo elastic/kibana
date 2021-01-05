@@ -6,8 +6,6 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import http from 'shared/http';
-
 import {
   clearFlashMessages,
   setQueuedSuccessMessage,
@@ -15,6 +13,7 @@ import {
   flashAPIErrors,
 } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
+import { HttpLogic } from '../../../shared/http';
 
 import { Connector } from '../../types';
 
@@ -117,56 +116,72 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     ],
   },
   listeners: ({ actions, values }) => ({
-    initializeSettings: () => {
+    initializeSettings: async () => {
+      const { http } = HttpLogic.values;
       const route = '/api/workplace_search/org/settings';
-      http(route)
-        .then(({ data }) => actions.setServerProps(data))
-        .catch((e) => flashAPIErrors(e));
+
+      try {
+        const response = await http.get(route);
+        actions.setServerProps(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    initializeConnectors: () => {
+    initializeConnectors: async () => {
+      const { http } = HttpLogic.values;
       const route = '/api/workplace_search/org/settings/connectors';
 
-      http(route)
-        .then(({ data }) => actions.onInitializeConnectors(data))
-        .catch((e) => flashAPIErrors(e));
+      try {
+        const response = await http.get(route);
+        actions.onInitializeConnectors(response);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    updateOrgName: () => {
+    updateOrgName: async () => {
+      const { http } = HttpLogic.values;
       const route = '/api/workplace_search/org/settings/customize';
       const { orgNameInputValue: name } = values;
+      const body = JSON.stringify({ name });
 
-      http
-        .put(route, { name })
-        .then(({ data }) => {
-          actions.setUpdatedName(data);
-          setSuccessMessage('Successfully updated organization.');
-        })
-        .catch((e) => flashAPIErrors(e));
+      try {
+        const response = await http.put(route, { body });
+        actions.setUpdatedName(response);
+        setSuccessMessage('Successfully updated organization.');
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    updateOauthApplication: () => {
+    updateOauthApplication: async () => {
+      const { http } = HttpLogic.values;
       const route = '/api/workplace_search/org/settings/oauth_application';
       const oauthApplication = values.oauthApplication || ({} as IOauthApplication);
       const { name, redirectUri, confidential } = oauthApplication;
+      const body = JSON.stringify({
+        oauth_application: { name, confidential, redirect_uri: redirectUri },
+      });
 
       clearFlashMessages();
 
-      http
-        .put(route, { oauth_application: { name, confidential, redirect_uri: redirectUri } })
-        .then(({ data }) => {
-          actions.setUpdatedOauthApplication(data);
-          setSuccessMessage('Successfully updated application.');
-        })
-        .catch((e) => flashAPIErrors(e));
+      try {
+        const response = await http.put(route, { body });
+        actions.setUpdatedOauthApplication(response);
+        setSuccessMessage('Successfully updated application.');
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
-    deleteSourceConfig: ({ serviceType, name }) => {
+    deleteSourceConfig: async ({ serviceType, name }) => {
+      const { http } = HttpLogic.values;
       const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
 
-      http
-        .delete(route)
-        .then(() => {
-          KibanaLogic.values.navigateToUrl(ORG_SETTINGS_CONNECTORS_PATH);
-          setQueuedSuccessMessage(`Successfully removed configuration for ${name}.`);
-        })
-        .catch((e) => flashAPIErrors(e));
+      try {
+        await http.delete(route);
+        KibanaLogic.values.navigateToUrl(ORG_SETTINGS_CONNECTORS_PATH);
+        setQueuedSuccessMessage(`Successfully removed configuration for ${name}.`);
+      } catch (e) {
+        flashAPIErrors(e);
+      }
     },
     resetSettingsState: () => {
       clearFlashMessages();
