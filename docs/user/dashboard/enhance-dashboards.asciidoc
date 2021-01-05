@@ -87,6 +87,22 @@ The following image is displayed:
 image::images/markdown_example_4.png[]
 
 [float]
+[[filter-in-dashboard]]
+=== Filter your data
+
+Filters enable you to focus on only the data that's important to you.
+You can filter results to include or exclude specific fields, filter for a value in a range,
+and more. The *Add filter* popup prompts you with the fields you can filter
+and the operators you can use.
+
+Filter the dashboard to display only ios data:
+
+. Click *Add filter*.
+. Set *Field* to *machine.os*, *Operator* to *is*, and *Value* to *ios*.
+. *Save* the filter.
+. To remove the filter, click *x* next to the filter.
+
+[float]
 [[dashboard-customize-filter]]
 === Customize time ranges
 

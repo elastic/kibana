@@ -54,10 +54,10 @@ HJSON supports the following:
 ```yaml
 index: kibana_sample_data_ecommerce
 ```
-+
+
 A flat line appears with zero results.
 
-. To add the data fields from the *kibana_sample_data_ecommerce* index, replace the following, then click *Update*:
+To add the data fields from the *kibana_sample_data_ecommerce* index, replace the following, then click *Update*:
 
 * `%timefield%: @timestamp` with `%timefield%: order_date`
 
@@ -672,7 +672,7 @@ image::visualize/images/vega_tutorial_3.png[]
 
 Show the clickable points on the area chart to filter for a specific date.
 
-In the *Vega* spec, add to the `marks` block, then click *Update*.
+In the *Vega* spec, add to the `marks` block, then click *Update*:
 
 ```yaml
   {

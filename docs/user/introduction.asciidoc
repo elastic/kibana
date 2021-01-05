@@ -78,7 +78,7 @@ questions of your location-based data. Maps supports multiple
 layers and data sources, mapping of individual geo points and shapes,
 and dynamic client-side styling.
 
-* <<tsvb, TSVB>> allows you to combine
+* <<tsvb-advanced-editor, TSVB>> allows you to combine
 an infinite number of aggregations to display complex data.
 With TSVB, you can customize
 every aspect of your visualization. Choose your own date format and color

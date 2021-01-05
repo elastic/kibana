@@ -4,6 +4,24 @@
 To get a closer look at your data, drill down into the data elements, or explore and download the underlying data.
 
 [float]
+[[search-in-dashboard]]
+=== Search your data
+
+Combine free text search with filtering based on structured data.
+To search all fields, enter a simple string in the *Search* field. To search particular fields and
+build more complex queries, use the <<kuery-query,Kibana Query language>>.
+As you type, KQL prompts you with the fields you can search and the operators
+you can use to build a structured query.
+
+In the sample web logs data, display data only for the US:
+
+. Enter `g`, and then select *geo.source*.
+. Select *equals some value* and *US*, and then click *Update*.
+. For a more complex search, try:
++
+`geo.src : "US" and url.keyword : "https://www.elastic.co/downloads/beats/metricbeat"`
+
+[float]
 [[viewing-detailed-information]]
 === View the panel data 
 
