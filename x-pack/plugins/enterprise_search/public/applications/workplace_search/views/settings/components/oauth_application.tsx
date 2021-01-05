@@ -25,9 +25,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { AppLogic } from '../../../app_logic';
 import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
 
+import { LicensingLogic } from '../../../../shared/licensing';
 import { ContentSection } from '../../../components/shared/content_section';
 import { LicenseBadge } from '../../../components/shared/license_badge';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
@@ -37,11 +37,9 @@ import { SettingsLogic } from '../settings_logic';
 export const OauthApplication: React.FC = () => {
   const { setOauthApplication, updateOauthApplication } = useActions(SettingsLogic);
   const { oauthApplication } = useValues(SettingsLogic);
-  const {
-    fpAccount: { minimumPlatinumLicense },
-  } = useValues(AppLogic);
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const [isLicenseModalVisible, setIsLicenseModalVisible] = useState(!minimumPlatinumLicense);
+  const [isLicenseModalVisible, setIsLicenseModalVisible] = useState(!hasPlatinumLicense);
   const closeLicenseModal = () => setIsLicenseModalVisible(false);
 
   if (!oauthApplication) return null;
@@ -114,7 +112,7 @@ export const OauthApplication: React.FC = () => {
                 data-test-subj="OAuthAppName"
                 onChange={(e) => setOauthApplication({ ...oauthApplication, name: e.target.value })}
                 required
-                disabled={!minimumPlatinumLicense}
+                disabled={!hasPlatinumLicense}
               />
             </EuiFormRow>
             <EuiSpacer size="xl" />
@@ -131,7 +129,7 @@ export const OauthApplication: React.FC = () => {
                   setOauthApplication({ ...oauthApplication, redirectUri: e.target.value })
                 }
                 required
-                disabled={!minimumPlatinumLicense}
+                disabled={!hasPlatinumLicense}
               />
             </EuiFormRow>
             <EuiSpacer size="xl" />
@@ -143,7 +141,7 @@ export const OauthApplication: React.FC = () => {
                 onChange={(e) =>
                   setOauthApplication({ ...oauthApplication, confidential: e.target.checked })
                 }
-                disabled={!minimumPlatinumLicense}
+                disabled={!hasPlatinumLicense}
               />
             </EuiFormRow>
             <EuiSpacer size="xl" />
@@ -152,7 +150,7 @@ export const OauthApplication: React.FC = () => {
               color="primary"
               data-test-subj="SaveOAuthApp"
               type="submit"
-              disabled={!minimumPlatinumLicense}
+              disabled={!hasPlatinumLicense}
             >
               Save Changes
             </EuiButton>
