@@ -306,6 +306,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Edit alert with deleted connector', function () {
       const testRunUuid = uuid.v4();
 
+      after(async () => {
+        await objectRemover.removeAll();
+      });
+
       it('should show and update deleted connectors', async () => {
         const action = await createAction({
           name: `slack-${testRunUuid}-${0}`,
