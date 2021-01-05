@@ -11,7 +11,6 @@ import { CONSTANTS } from '../url_state/constants';
 import { SiemNavigationComponent } from './';
 import { setBreadcrumbs } from './breadcrumbs';
 import { navTabs } from '../../../app/home/home_navigations';
-import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { HostsTableType } from '../../../hosts/store/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
@@ -32,9 +31,7 @@ jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
 const mockGetUrlForApp = jest.fn();
-const {
-  http: { basePath: mockBasePath },
-} = createStartServicesMock();
+
 jest.mock('../../lib/kibana', () => {
   return {
     useKibana: () => ({
@@ -43,9 +40,6 @@ jest.mock('../../lib/kibana', () => {
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: mockGetUrlForApp,
-        },
-        http: {
-          basePath: mockBasePath,
         },
       },
     }),
@@ -192,8 +186,7 @@ describe('SIEM Navigation', () => {
         },
       },
       undefined,
-      mockGetUrlForApp,
-      mockBasePath
+      mockGetUrlForApp
     );
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
@@ -293,8 +286,7 @@ describe('SIEM Navigation', () => {
         },
       },
       undefined,
-      mockGetUrlForApp,
-      mockBasePath
+      mockGetUrlForApp
     );
   });
 });

@@ -6,9 +6,8 @@
 
 import { getOr, omit } from 'lodash/fp';
 
-import { IBasePath } from 'kibana/public';
 import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
-import { APP_NAME } from '../../../../../common/constants';
+import { APP_NAME, APP_ID } from '../../../../../common/constants';
 import { StartServices } from '../../../../types';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
@@ -33,22 +32,12 @@ import { GetUrlForApp, SearchNavTab } from '../types';
 export const setBreadcrumbs = (
   spyState: RouteSpyState & TabNavigationProps,
   chrome: StartServices['chrome'],
-  getUrlForApp: GetUrlForApp,
-  basePath: IBasePath
+  getUrlForApp: GetUrlForApp
 ) => {
-  const breadcrumbs = getBreadcrumbsForRoute(spyState, getUrlForApp, basePath);
+  const breadcrumbs = getBreadcrumbsForRoute(spyState, getUrlForApp);
   if (breadcrumbs) {
     chrome.setBreadcrumbs(breadcrumbs);
   }
-};
-
-const fullSiemRootBreadcrumb = (basePath: IBasePath): ChromeBreadcrumb[] => {
-  return [
-    {
-      text: APP_NAME,
-      href: getAppOverviewUrl(basePath.get()),
-    },
-  ];
 };
 
 const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpyState =>
@@ -72,11 +61,14 @@ const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRoute
 // eslint-disable-next-line complexity
 export const getBreadcrumbsForRoute = (
   object: RouteSpyState & TabNavigationProps,
-  getUrlForApp: GetUrlForApp,
-  basePath: IBasePath
+  getUrlForApp: GetUrlForApp
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
-  const siemRootBreadcrumb = fullSiemRootBreadcrumb(basePath);
+  const overviewPath = getUrlForApp(APP_ID, { path: SecurityPageName.overview });
+  const siemRootBreadcrumb: ChromeBreadcrumb = {
+    text: APP_NAME,
+    href: getAppOverviewUrl(overviewPath),
+  };
   if (isHostsRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'host', isDetailPage: false };
     let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
@@ -84,7 +76,7 @@ export const getBreadcrumbsForRoute = (
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
     }
     return [
-      ...siemRootBreadcrumb,
+      siemRootBreadcrumb,
       ...getHostDetailsBreadcrumbs(
         spyState,
         urlStateKeys.reduce(
@@ -102,7 +94,7 @@ export const getBreadcrumbsForRoute = (
       urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
     }
     return [
-      ...siemRootBreadcrumb,
+      siemRootBreadcrumb,
       ...getIPDetailsBreadcrumbs(
         spyState,
         urlStateKeys.reduce(
@@ -121,7 +113,7 @@ export const getBreadcrumbsForRoute = (
     }
 
     return [
-      ...siemRootBreadcrumb,
+      siemRootBreadcrumb,
       ...getDetectionRulesBreadcrumbs(
         spyState,
         urlStateKeys.reduce(
@@ -140,7 +132,7 @@ export const getBreadcrumbsForRoute = (
     }
 
     return [
-      ...siemRootBreadcrumb,
+      siemRootBreadcrumb,
       ...getCaseDetailsBreadcrumbs(
         spyState,
         urlStateKeys.reduce(
@@ -159,7 +151,7 @@ export const getBreadcrumbsForRoute = (
     }
 
     return [
-      ...siemRootBreadcrumb,
+      siemRootBreadcrumb,
       ...getTimelinesBreadcrumbs(
         spyState,
         urlStateKeys.reduce(
@@ -179,7 +171,7 @@ export const getBreadcrumbsForRoute = (
     }
 
     return [
-      ...siemRootBreadcrumb,
+      siemRootBreadcrumb,
       ...getAdminBreadcrumbs(
         spyState,
         urlStateKeys.reduce(
@@ -198,7 +190,7 @@ export const getBreadcrumbsForRoute = (
     object.navTabs[spyState.pageName]
   ) {
     return [
-      ...siemRootBreadcrumb,
+      siemRootBreadcrumb,
       {
         text: object.navTabs[spyState.pageName].name,
         href: '',

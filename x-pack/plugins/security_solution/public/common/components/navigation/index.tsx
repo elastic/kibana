@@ -33,7 +33,6 @@ export const SiemNavigationComponent: React.FC<
   const {
     chrome,
     application: { getUrlForApp },
-    http: { basePath },
   } = useKibana().services;
 
   useEffect(() => {
@@ -56,12 +55,11 @@ export const SiemNavigationComponent: React.FC<
           timerange: urlState.timerange,
         },
         chrome,
-        getUrlForApp,
-        basePath
+        getUrlForApp
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chrome, pageName, pathName, search, navTabs, urlState, state, basePath]);
+  }, [chrome, pageName, pathName, search, navTabs, urlState, state]);
 
   return (
     <TabNavigation

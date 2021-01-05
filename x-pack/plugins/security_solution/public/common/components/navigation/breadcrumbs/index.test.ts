@@ -5,7 +5,6 @@
  */
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
-import { createStartServicesMock } from '../../../lib/kibana/kibana_react.mock';
 import { getBreadcrumbsForRoute, setBreadcrumbs } from '.';
 import { HostsTableType } from '../../../../hosts/store/model';
 import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
@@ -29,9 +28,7 @@ const mockDefaultTab = (pageName: string): SiemRouteType | undefined => {
       return undefined;
   }
 };
-const {
-  http: { basePath },
-} = createStartServicesMock();
+
 const getMockObject = (
   pageName: string,
   pathName: string,
@@ -126,12 +123,11 @@ describe('Navigation Breadcrumbs', () => {
     test('should return Host breadcrumbs when supplied host pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('hosts', '/', undefined),
-        getUrlForAppMock,
-        basePath
+        getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
         {
-          href: '/app/security/overview',
+          href: 'securitySolutionoverview',
           text: 'Security',
         },
         {
@@ -149,11 +145,10 @@ describe('Navigation Breadcrumbs', () => {
     test('should return Network breadcrumbs when supplied network pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('network', '/', undefined),
-        getUrlForAppMock,
-        basePath
+        getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Network',
           href:
@@ -169,11 +164,10 @@ describe('Navigation Breadcrumbs', () => {
     test('should return Timelines breadcrumbs when supplied timelines pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('timelines', '/', undefined),
-        getUrlForAppMock,
-        basePath
+        getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Timelines',
           href:
@@ -185,11 +179,10 @@ describe('Navigation Breadcrumbs', () => {
     test('should return Host Details breadcrumbs when supplied a pathname with hostName', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('hosts', '/', hostName),
-        getUrlForAppMock,
-        basePath
+        getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Hosts',
           href:
@@ -207,11 +200,10 @@ describe('Navigation Breadcrumbs', () => {
     test('should return IP Details breadcrumbs when supplied pathname with ipv4', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('network', '/', ipv4),
-        getUrlForAppMock,
-        basePath
+        getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Network',
           href:
@@ -228,11 +220,10 @@ describe('Navigation Breadcrumbs', () => {
     test('should return IP Details breadcrumbs when supplied pathname with ipv6', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('network', '/', ipv6Encoded),
-        getUrlForAppMock,
-        basePath
+        getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Network',
           href:
@@ -249,11 +240,10 @@ describe('Navigation Breadcrumbs', () => {
     test('should return Alerts breadcrumbs when supplied detection pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('detections', '/', undefined),
-        getUrlForAppMock,
-        basePath
+        getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Detections',
           href:
@@ -264,11 +254,10 @@ describe('Navigation Breadcrumbs', () => {
     test('should return Cases breadcrumbs when supplied case pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('case', '/', undefined),
-        getUrlForAppMock,
-        basePath
+        getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Cases',
           href:
@@ -286,11 +275,10 @@ describe('Navigation Breadcrumbs', () => {
           ...getMockObject('case', `/${sampleCase.id}`, sampleCase.id),
           state: { caseTitle: sampleCase.name },
         },
-        getUrlForAppMock,
-        basePath
+        getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Cases',
           href:
@@ -305,11 +293,10 @@ describe('Navigation Breadcrumbs', () => {
     test('should return Admin breadcrumbs when supplied admin pathname', () => {
       const breadcrumbs = getBreadcrumbsForRoute(
         getMockObject('administration', '/', undefined),
-        getUrlForAppMock,
-        basePath
+        getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Administration',
           href: 'securitySolution:administration',
@@ -320,9 +307,9 @@ describe('Navigation Breadcrumbs', () => {
 
   describe('setBreadcrumbs()', () => {
     test('should call chrome breadcrumb service with correct breadcrumbs', () => {
-      setBreadcrumbs(getMockObject('hosts', '/', hostName), chromeMock, getUrlForAppMock, basePath);
+      setBreadcrumbs(getMockObject('hosts', '/', hostName), chromeMock, getUrlForAppMock);
       expect(setBreadcrumbsMock).toBeCalledWith([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Hosts',
           href:
