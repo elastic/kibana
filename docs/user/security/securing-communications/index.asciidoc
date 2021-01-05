@@ -27,26 +27,15 @@ hostname verification will trust it. You can set one or more SANs to the {kib} s
 address. When choosing the SAN, you should pick whichever attribute you will be using to connect to {kib} in your browser, which is likely
 the FQDN in a production environment.
 
-<<<<<<< HEAD
-You may choose to generate a certificate signing request (CSR) and private key using the {ref}/certutil.html[`elasticsearch-certutil`] tool.
-=======
 You may choose to generate a signed certificate and private key using the {ref}/certutil.html[`elasticsearch-certutil`] tool.
 For example:
->>>>>>> 0c41c2d598d... Update security docs (#87215)
 
-For example:
 [source,sh]
 --------------------------------------------------------------------------------
 bin/elasticsearch-certutil cert -name kibana-server -dns localhost,127.0.0.1
 --------------------------------------------------------------------------------
-<<<<<<< HEAD
-This will produce a ZIP archive named `kibana-server.zip`. Extract that archive to obtain the PEM-formatted CSR (`kibana-server.csr`) and
-unencrypted private key (`kibana-server.key`). In this example, the CSR has a common name (CN) of `kibana-server`, a SAN of
-`some-website.com`, and another SAN of `www.some-website.com`.
-=======
 
 This will produce a PKCS#12 file named `kibana-server.p12`, which contains the server certificate and private key.
->>>>>>> 0c41c2d598d... Update security docs (#87215)
 
 NOTE: In this example, the server certificate is signed by a locally-generated certificate authority (CA). This is not suitable for a
 production environment, and it will result in warnings in your web browser until you configure your browser to trust the certificate. Steps
@@ -60,35 +49,6 @@ production environment, you can instead generate a certificate signing request (
 .. If your server certificate and private key are contained in a PKCS#12 file:
 +
 --
-<<<<<<< HEAD
-Specify your server certificate and private key in `kibana.yml`:
-=======
-Specify your PKCS#12 file in `kibana.yml`:
-
->>>>>>> 0c41c2d598d... Update security docs (#87215)
-[source,yaml]
---------------------------------------------------------------------------------
-server.ssl.keystore.path: "/path/to/kibana-server.p12"
---------------------------------------------------------------------------------
-<<<<<<< HEAD
-If your private key is encrypted, add the decryption password to your <<secure-settings,{kib} keystore>>:
-=======
-
-If your PKCS#12 file is encrypted, add the decryption password to your <<secure-settings,{kib} keystore>>:
-
->>>>>>> 0c41c2d598d... Update security docs (#87215)
-[source,yaml]
---------------------------------------------------------------------------------
-bin/kibana-keystore add server.ssl.keystore.password
---------------------------------------------------------------------------------
-
-NOTE: If you used `elasticsearch-certutil` to generate a PKCS#12 file and you did not specify a password, the file is encrypted, and you
-need to set `server.ssl.keystore.password` to an empty string.
---
-<<<<<<< HEAD
-.. Otherwise, if your server certificate and private key are contained in a PKCS#12 file:
-+
---
 You will need to extract the server certificate and private key in PEM format.
 [source,shell]
 ----------------------------------------------------------
@@ -96,10 +56,10 @@ openssl pkcs12 -in kibana-server.p12 -clcerts -nokeys -out kibana-server.crt
 openssl pkcs12 -in kibana-server.p12 -nocerts -nodes -out kibana-server.key
 ----------------------------------------------------------
 This will produce a PEM-formatted server certificate (`kibana-server.crt`) and unencrypted private key (`kibana-server.key`). Then, specify
-these files in `kibana.yml` as described above.
-=======
+these files in `kibana.yml` as described below.
+--
 
-.. Otherwise, if your server certificate and private key are in PEM format:
+.. If your server certificate and private key are in PEM format:
 +
 --
 Specify your server certificate and private key in `kibana.yml`:
@@ -116,10 +76,11 @@ If your private key is encrypted, add the decryption password to your <<secure-s
 --------------------------------------------------------------------------------
 bin/kibana-keystore add server.ssl.keyPassphrase
 --------------------------------------------------------------------------------
->>>>>>> 0c41c2d598d... Update security docs (#87215)
 --
+
 +
 For more information about settings for certificates and keys, see <<settings,{kib} configuration settings>>.
+
 . Configure {kib} to enable TLS for inbound connections.
 +
 --
@@ -130,12 +91,8 @@ server.ssl.enabled: true
 --------------------------------------------------------------------------------
 --
 . Restart {kib}.
-<<<<<<< HEAD
-After making these changes, you must always access {kib} via HTTPS. For example, `https://<your_kibana_host>.com`.
-=======
 
 After making these changes, you must always access {kib} via HTTPS. For example, `https://localhost:5601`.
->>>>>>> 0c41c2d598d... Update security docs (#87215)
 
 [[configuring-tls-kib-es]]
 ==== Encrypting traffic between {kib} and {es}
@@ -166,36 +123,6 @@ Specify one or more PEM-formatted CA certificates in `kibana.yml`:
 --------------------------------------------------------------------------------
 elasticsearch.ssl.certificateAuthorities: ["/path/to/elasticsearch-ca.pem"]
 --------------------------------------------------------------------------------
-<<<<<<< HEAD
-=======
---
-
-.. Otherwise, if your CA certificate chain is contained in a PKCS#12 file:
-+
---
-WARNING: You should not use a PKCS#12 file that contains a private key. This is an unnecessary security risk. If you only have a PKCS#12
-file that contains a private key, a safer approach is to extract the CA certificate chain in PEM format.
-
-Specify your PKCS#12 file in `kibana.yml`:
-
-[source,yaml]
---------------------------------------------------------------------------------
-elasticsearch.ssl.truststore.path: "/path/to/elasticsearch-ca.p12"
---------------------------------------------------------------------------------
-
-If your PKCS#12 file is encrypted, add the decryption password to your <<secure-settings,{kib} keystore>>:
-
-[source,yaml]
---------------------------------------------------------------------------------
-bin/kibana-keystore add elasticsearch.ssl.truststore.password
---------------------------------------------------------------------------------
-
-NOTE: If you used `elasticsearch-certutil` to generate a PKCS#12 file and you did not specify a password, the file is encrypted, and you
-need to set `server.ssl.truststore.password` to an empty string.
---
-
-+
->>>>>>> 0c41c2d598d... Update security docs (#87215)
 For more information about settings for certificates and keys, see <<settings,{kib} configuration settings>>.
 --
 . Configure {kib} to enable TLS for outbound connections to {es}.
