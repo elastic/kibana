@@ -10,7 +10,11 @@ import {
   SavedObjectsFindResult,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { BackgroundSessionStatus, BackgroundSessionSavedObjectAttributes } from '../../../common';
+import {
+  BackgroundSessionStatus,
+  BackgroundSessionSavedObjectAttributes,
+  BackgroundSessionSearchInfo,
+} from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { getSearchStatus } from './get_search_status';
 import { getSessionStatus } from './get_session_status';
@@ -32,7 +36,7 @@ export async function checkRunningSessions(
 
     if (!runningBackgroundSearchesResponse.total) return;
 
-    logger.debug(`Found ${runningBackgroundSearchesResponse.total} running sessios`);
+    logger.debug(`Found ${runningBackgroundSearchesResponse.total} running sessions`);
 
     const updatedSessions = new Array<
       SavedObjectsFindResult<BackgroundSessionSavedObjectAttributes>
@@ -42,8 +46,8 @@ export async function checkRunningSessions(
       runningBackgroundSearchesResponse.saved_objects.map(async (session) => {
         const searchIds = Object.values(session.attributes.idMapping);
         const searchStatuses = await Promise.all(
-          searchIds.map(async (searchId: string) => {
-            return await getSearchStatus(client, searchId);
+          searchIds.map(async (sessionInfo: BackgroundSessionSearchInfo) => {
+            return await getSearchStatus(client, sessionInfo.strategy);
           })
         );
 

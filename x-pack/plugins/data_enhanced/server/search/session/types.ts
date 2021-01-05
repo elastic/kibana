@@ -4,22 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ShardsResponse } from 'elasticsearch';
+import { AsyncSearchStatusResponse } from '../types';
 
 export enum SearchStatus {
   IN_PROGRESS = 'in_progress',
   ERROR = 'error',
   COMPLETE = 'complete',
-}
-
-export interface AsyncSearchStatusResponse<T = unknown> {
-  id?: string;
-  is_partial: boolean;
-  is_running: boolean;
-  start_time_in_millis: number;
-  expiration_time_in_millis: number;
-  completion_status: number;
-  _shards: ShardsResponse;
 }
 
 export function isAsyncSearchStatusResponse(response: any): response is AsyncSearchStatusResponse {
