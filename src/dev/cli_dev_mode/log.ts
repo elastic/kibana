@@ -25,7 +25,7 @@ export interface Log {
   good(label: string, ...args: any[]): void;
   warn(label: string, ...args: any[]): void;
   bad(label: string, ...args: any[]): void;
-  write(label: string, ...args: any[]): void;
+  write(...args: any[]): void;
 }
 
 export class CliLog implements Log {
@@ -58,9 +58,9 @@ export class CliLog implements Log {
     console.log(Chalk.white.bgRed(` ${label.trim()} `), ...args);
   }
 
-  write(label: string, ...args: any[]) {
+  write(...args: any[]) {
     // eslint-disable-next-line no-console
-    console.log(` ${label.trim()} `, ...args);
+    console.log(...args);
   }
 }
 
@@ -88,10 +88,10 @@ export class TestLog implements Log {
     });
   }
 
-  write(label: string, ...args: any[]) {
+  write(...args: any[]) {
     this.messages.push({
       type: 'write',
-      args: [label, ...args],
+      args,
     });
   }
 }

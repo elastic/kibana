@@ -6,10 +6,23 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import { RequestHandler, Logger } from 'kibana/server';
+import { ResolverPaginatedEvents, SafeResolverEvent } from '../../../../common/endpoint/types';
 import { validateEvents } from '../../../../common/endpoint/schema/resolver';
 import { EventsQuery } from './queries/events';
-import { createEvents } from './utils/node';
 import { PaginationBuilder } from './utils/pagination';
+
+/**
+ * Creates an object that the events handler would return
+ *
+ * @param events array of events
+ * @param nextEvent the cursor to retrieve the next event
+ */
+function createEvents(
+  events: SafeResolverEvent[] = [],
+  nextEvent: string | null = null
+): ResolverPaginatedEvents {
+  return { events, nextEvent };
+}
 
 /**
  * This function handles the `/events` api and returns an array of events and a cursor if more events exist than were

@@ -59,7 +59,7 @@ export const LogColumnsConfigurationPanel: React.FunctionComponent<LogColumnsCon
             <h3>
               <FormattedMessage
                 id="xpack.infra.sourceConfiguration.logColumnsSectionTitle"
-                defaultMessage="Log Columns"
+                defaultMessage="Log columns"
               />
             </h3>
           </EuiTitle>
@@ -182,7 +182,7 @@ const FieldLogColumnConfigurationPanel: React.FunctionComponent<{
   );
   return (
     <EuiPanel data-test-subj={`logColumnPanel fieldLogColumnPanel fieldLogColumnPanel:${field}`}>
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
           <div data-test-subj="moveLogColumnHandle" {...dragHandleProps}>
             <EuiIcon type="grab" />
@@ -212,7 +212,7 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   <EuiPanel
     data-test-subj={`logColumnPanel systemLogColumnPanel systemLogColumnPanel:${fieldName}`}
   >
-    <EuiFlexGroup>
+    <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={false}>
         <div data-test-subj="moveLogColumnHandle" {...dragHandleProps}>
           <EuiIcon type="grab" />
