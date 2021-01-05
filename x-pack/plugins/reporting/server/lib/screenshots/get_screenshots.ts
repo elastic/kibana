@@ -9,6 +9,7 @@ import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { LayoutInstance } from '../layouts';
 import { ElementsPositionAndAttribute, Screenshot } from './';
+import { CONTEXT_GETBROWSERDIMENSIONS } from './constants';
 
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,
@@ -38,7 +39,7 @@ export const getScreenshots = async (
         fn: () => [document.body.clientHeight, document.body.clientWidth],
         args: [],
       },
-      { context: 'resize for screenshot' },
+      { context: CONTEXT_GETBROWSERDIMENSIONS },
       logger
     );
 

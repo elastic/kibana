@@ -339,6 +339,8 @@ describe('Screenshot Observable Pipeline', () => {
 
         if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
           return Promise.resolve(null);
+        } else if (mockCall === contexts.CONTEXT_GETBROWSERDIMENSIONS) {
+          return Promise.resolve([800, 600]);
         } else {
           return Promise.resolve();
         }
