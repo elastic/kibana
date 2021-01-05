@@ -10,7 +10,6 @@ import { useDispatch } from 'react-redux';
 import { useTrackPageview } from '../../../observability/public';
 import { useMonitorId } from '../hooks';
 import { MonitorCharts } from '../components/monitor';
-import { PageHeader } from '../components/common/header/page_header';
 import { MonitorStatusDetails, PingList } from '../components/monitor';
 import { getDynamicSettings } from '../state/actions/dynamic_settings';
 import { setSelectedMonitorId } from '../state/actions';
@@ -38,7 +37,6 @@ export const MonitorPage: React.FC = () => {
 
   return (
     <>
-      <PageHeader showDatePicker showMonitorTitle />
       <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
