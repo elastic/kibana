@@ -3,11 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ComboBoxOption } from './types';
-
-export const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
-
-type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+import { ComboBoxOption, RuntimeType } from './types';
 
 export const RUNTIME_FIELD_OPTIONS: Array<ComboBoxOption<RuntimeType>> = [
   {
