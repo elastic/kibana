@@ -12,7 +12,7 @@ import { LatencyAggregationType } from '../../../../../common/latency_aggregatio
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
+import { useTransactionLatencyChartFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
   getMaxY,
@@ -40,7 +40,7 @@ export function LatencyChart({ height }: Props) {
   const {
     latencyChartsData,
     latencyChartsStatus,
-  } = useTransactionLatencyChartsFetcher();
+  } = useTransactionLatencyChartFetcher();
 
   const { latencyTimeseries, anomalyTimeseries, mlJobId } = latencyChartsData;
 

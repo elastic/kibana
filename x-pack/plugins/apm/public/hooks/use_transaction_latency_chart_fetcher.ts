@@ -6,14 +6,15 @@
 
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { useFetcher } from './use_fetcher';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
+import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
-import { useTheme } from './use_theme';
+import { useEnvironmentsFetcher } from './use_environments_fetcher';
+import { useFetcher } from './use_fetcher';
 import { useLatencyAggregationType } from './use_latency_Aggregation_type';
+import { useTheme } from './use_theme';
 
-export function useTransactionLatencyChartsFetcher() {
+export function useTransactionLatencyChartFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { transactionType } = useApmServiceContext();
   const latencyAggregationType = useLatencyAggregationType();
@@ -22,15 +23,30 @@ export function useTransactionLatencyChartsFetcher() {
     urlParams: { start, end, transactionName },
     uiFilters,
   } = useUrlParams();
+  const { environments } = useEnvironmentsFetcher({ start, end, serviceName });
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
+      // If we have "All" selected in the environment selector, there won't be
+      // any ML jobs for the "All" environment. If we have a single environment
+      // (fetched with the `useEnvironmentsFetcher`) we can safely assume the
+      // user would want to see ML data for that single environment.
+      //
+      // We modify the uiFilters here, which is not advised, but the uiFilters
+      // are what's used to specify the environment when using this endpoint.
+      const environmentCount = environments.length;
+      const modifiedUiFilters =
+        environmentCount === 1
+          ? { ...uiFilters, environment: environments[0] }
+          : uiFilters;
+
       if (
         serviceName &&
         start &&
         end &&
         transactionType &&
-        latencyAggregationType
+        latencyAggregationType &&
+        environmentCount > 0
       ) {
         return callApmApi({
           endpoint:
@@ -42,7 +58,7 @@ export function useTransactionLatencyChartsFetcher() {
               end,
               transactionType,
               transactionName,
-              uiFilters: JSON.stringify(uiFilters),
+              uiFilters: JSON.stringify(modifiedUiFilters),
               latencyAggregationType,
             },
           },
@@ -50,6 +66,7 @@ export function useTransactionLatencyChartsFetcher() {
       }
     },
     [
+      environments,
       serviceName,
       start,
       end,
