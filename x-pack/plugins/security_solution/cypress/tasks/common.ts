@@ -5,6 +5,7 @@
  */
 
 import { DEFAULT_SIGNALS_INDEX } from '../../common/constants';
+import { waitForAlertsIndexToBeCreated } from './alerts';
 import { esArchiverResetKibana } from './es_archiver';
 
 const primaryButton = 0;
@@ -74,4 +75,6 @@ export const cleanKibana = () => {
       .request(`${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`)
       .then((response) => JSON.stringify(response.body) !== '{}');
   });
+
+  waitForAlertsIndexToBeCreated();
 };
