@@ -26,8 +26,7 @@ import {
   SelectOption,
   SwitchOption,
   RequiredNumberInputOption,
-} from '../../../../../../charts/public';
-
+} from '../../../../../../vis_default_editor/public';
 import { ValidationVisOptionsProps } from '../../common';
 import { VisParams } from '../../../../types';
 

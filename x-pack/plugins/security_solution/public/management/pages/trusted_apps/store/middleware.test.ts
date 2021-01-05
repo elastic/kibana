@@ -179,7 +179,9 @@ describe('middleware', () => {
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
 
-      service.getTrustedAppsList.mockRejectedValue(createServerApiError('Internal Server Error'));
+      service.getTrustedAppsList.mockRejectedValue({
+        body: createServerApiError('Internal Server Error'),
+      });
 
       store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
 
@@ -315,7 +317,7 @@ describe('middleware', () => {
       const { store, spyMiddleware } = createStoreSetup(service);
 
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
-      service.deleteTrustedApp.mockRejectedValue(notFoundError);
+      service.deleteTrustedApp.mockRejectedValue({ body: notFoundError });
 
       store.dispatch(createUserChangedUrlAction('/trusted_apps'));
 
