@@ -18,6 +18,7 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TimelineTabs } from '../../../../common/types/timeline';
+import { waitFor } from '@testing-library/dom';
 
 jest.mock('../link_to');
 describe('EventDetails', () => {
