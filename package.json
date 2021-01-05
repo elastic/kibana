@@ -93,7 +93,7 @@
     "**/typescript": "4.1.2"
   },
   "engines": {
-    "node": "14.15.3",
+    "node": "14.15.4",
     "yarn": "^1.21.1"
   },
   "dependencies": {
@@ -116,7 +116,7 @@
     "@hapi/good-squeeze": "6.0.0",
     "@hapi/h2o2": "^9.0.2",
     "@hapi/hapi": "^20.0.3",
-    "@hapi/hoek": "^9.1.0",
+    "@hapi/hoek": "^9.1.1",
     "@hapi/inert": "^6.0.3",
     "@hapi/podium": "^4.1.1",
     "@hapi/statehood": "^7.0.3",
@@ -824,7 +824,7 @@
     "url-loader": "^2.2.0",
     "use-resize-observer": "^6.0.0",
     "val-loader": "^1.1.1",
-    "vega": "^5.17.1",
+    "vega": "^5.17.3",
     "vega-lite": "^4.17.0",
     "vega-schema-url-parser": "^2.1.0",
     "vega-tooltip": "^0.24.2",
