@@ -25,10 +25,10 @@ rules:
   block-opening-brace-space-before: always
 
   # TODO: # Allows input[type=search]
-  # selector-no-qualifying-type:
-  #   - true
-  #   - ignore:
-  #     - attribute
+  selector-no-qualifying-type:
+    - true
+    - ignore:
+      - attribute
 
   # Put a line-break between sections of CSS, but allow quicky one-liners for legibility
   block-closing-brace-newline-after:
