@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiButtonIcon, EuiBasicTableColumn, EuiToolTip } from '@elastic/eui';
 import { History } from 'history';
 
+import { Spacer } from '../../../../../../common/components/page';
 import { NamespaceType } from '../../../../../../../../lists/common';
 import { FormatUrl } from '../../../../../../common/components/link_to';
 import { LinkAnchor } from '../../../../../../common/components/links';
@@ -17,15 +18,10 @@ import { ExceptionListInfo } from './use_all_exception_lists';
 import { getRuleDetailsUrl } from '../../../../../../common/components/link_to/redirect_to_detection_engine';
 
 export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionListInfo>;
-export type Func = (arg: {
-  id: string;
-  listId: string;
-  namespaceType: NamespaceType;
-}) => () => void;
 
 export const getAllExceptionListsColumns = (
-  onExport: Func,
-  onDelete: Func,
+  onExport: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
+  onDelete: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
   history: History,
   formatUrl: FormatUrl
 ): AllExceptionListsColumns[] => [
@@ -64,8 +60,9 @@ export const getAllExceptionListsColumns = (
       return (
         <>
           {value.map(({ id, name }, index) => (
-            <>
+            <Spacer key={id}>
               <LinkAnchor
+                key={id}
                 data-test-subj="ruleName"
                 onClick={(ev: { preventDefault: () => void }) => {
                   ev.preventDefault();
@@ -76,7 +73,7 @@ export const getAllExceptionListsColumns = (
                 {name}
               </LinkAnchor>
               {index !== value.length - 1 ? ', ' : ''}
-            </>
+            </Spacer>
           ))}
         </>
       );
@@ -120,11 +117,7 @@ export const getAllExceptionListsColumns = (
     render: ({ id, list_id: listId, namespace_type: namespaceType }: ExceptionListInfo) => (
       <EuiButtonIcon
         color="danger"
-        onClick={onDelete({
-          id,
-          listId,
-          namespaceType,
-        })}
+        onClick={onDelete({ id, listId, namespaceType })}
         aria-label="Delete exception list"
         iconType="trash"
       />
