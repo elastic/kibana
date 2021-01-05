@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { Trigger } from '../../../ui_actions/public';
 
 export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
-export const applyFilterTrigger: Trigger<'FILTER_TRIGGER'> = {
+export const applyFilterTrigger: Trigger = {
   id: APPLY_FILTER_TRIGGER,
   title: i18n.translate('data.triggers.applyFilterTitle', {
     defaultMessage: 'Apply filter',
