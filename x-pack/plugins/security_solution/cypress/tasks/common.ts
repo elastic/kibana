@@ -5,8 +5,6 @@
  */
 
 import { DEFAULT_SIGNALS_INDEX } from '../../common/constants';
-import { waitForAlertsIndexToBeCreated } from './alerts';
-import { removeSignalsIndex } from './api_calls/rules';
 import { esArchiverResetKibana } from './es_archiver';
 
 const primaryButton = 0;
