@@ -160,6 +160,12 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
     id: GEO_CONTAINMENT_ID,
     name: alertTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
+    recoveryActionGroup: {
+      id: 'notGeoContained',
+      name: i18n.translate('xpack.stackAlerts.geoContainment.notGeoContained', {
+        defaultMessage: 'No longer contained',
+      }),
+    },
     defaultActionGroupId: ActionGroupId,
     executor: getGeoContainmentExecutor(logger),
     producer: STACK_ALERTS_FEATURE_ID,
