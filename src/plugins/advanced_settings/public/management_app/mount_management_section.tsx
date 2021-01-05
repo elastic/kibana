@@ -54,7 +54,7 @@ const redirectUrl = ({
   match,
   location,
 }: RouteChildrenProps<{ [QUERY]: string }>): LocationDescriptor => {
-  const search = url.modifyParams(location.search, QUERY, match?.params[QUERY]);
+  const search = url.addQueryParam(location.search, QUERY, match?.params[QUERY]);
 
   return {
     pathname: '/',

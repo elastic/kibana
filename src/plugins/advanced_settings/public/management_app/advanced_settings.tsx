@@ -185,7 +185,7 @@ export class AdvancedSettings extends Component<AdvancedSettingsProps, AdvancedS
   }
 
   setUrlQuery(q: string = '') {
-    const search = url.modifyParams(window.location.search, QUERY, q);
+    const search = url.addQueryParam(window.location.search, QUERY, q);
 
     this.props.history.push({
       pathname: '', // remove any route query param

@@ -64,10 +64,10 @@ export const encodeQuery = (
  * @param key
  * @param value
  */
-export const modifyParams = (params: string, key: string, value?: string) => {
+export const addQueryParam = (params: string, key: string, value?: string) => {
   const queryParams = parse(params);
 
-  if (value) {
+  if (value !== undefined) {
     queryParams[key] = value;
   } else {
     delete queryParams[key];
