@@ -30,11 +30,12 @@ rules:
   #   - ignore:
   #     - attribute
 
-  # TODO; Put a line-break between sections of CSS, but allow quicky one-liners for legibility
-  # rule-empty-line-before:
-  #   - always-multi-line
-  #   - except:
-  #     - inside-block-and-after-rule
+  # Put a line-break between sections of CSS, but allow quicky one-liners for legibility
+  block-closing-brace-newline-after:
+    - always-multi-line
+    - ignoreAtRules:
+        - if
+        - else
 
   # camelCase mixin, function, and variable names
   scss/at-mixin-pattern: "^[a-z][a-zA-Z0-9]+$"
