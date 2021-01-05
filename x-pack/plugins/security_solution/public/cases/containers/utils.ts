@@ -112,12 +112,12 @@ export const decodeServiceConnectorCaseResponse = (respPushCase?: ServiceConnect
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-const valueToUpdateIsSettings = (
+export const valueToUpdateIsSettings = (
   key: UpdateByKey['updateKey'],
   value: UpdateByKey['updateValue']
 ): value is CasePatchRequest['settings'] => key === 'settings';
 
-const valueToUpdateIsStatus = (
+export const valueToUpdateIsStatus = (
   key: UpdateByKey['updateKey'],
   value: UpdateByKey['updateValue']
 ): value is CasePatchRequest['status'] => key === 'status';
