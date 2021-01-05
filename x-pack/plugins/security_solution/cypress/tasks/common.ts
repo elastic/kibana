@@ -66,12 +66,18 @@ export const reload = () => {
 };
 
 export const cleanKibana = () => {
-  // cy.exec(
-  //   `curl -X DELETE "${Cypress.env('ELASTICSEARCH_URL')}/${DEFAULT_SIGNALS_INDEX}-default-\*" -k`
-  // );
-  cy.request('POST', `${Cypress.env('ELASTICSEARCH_URL')}/_ilm/stop`);
+  cy.request(
+    'POST',
+    `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/${DEFAULT_SIGNALS_INDEX}-default\*/_delete_by_query?conflicts=proceed`,
+    {
+      query: {
+        match_all: {},
+      },
+    }
+  );
   esArchiverResetKibana();
-  removeSignalsIndex();
 
   // We wait until the kibana indexes are created
   cy.waitUntil(() => {
@@ -81,5 +87,5 @@ export const cleanKibana = () => {
       .then((response) => JSON.stringify(response.body) !== '{}');
   });
 
-  waitForAlertsIndexToBeCreated();
+  // waitForAlertsIndexToBeCreated();
 };
