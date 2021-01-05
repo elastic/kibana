@@ -3,69 +3,127 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ActionConnector } from '../../../types';
+import { isEqual } from 'lodash';
+import { Reducer } from 'react';
+import { ActionConnector, UserConfiguredActionConnector } from '../../../types';
 
-export type CommandType<Config, Secrets> =
-  | {
-      type: 'setConnector';
-      connector: ActionConnector<Config, Secrets>;
-    }
-  | {
-      type: 'setProperty';
-      payload: ActionConnector<Config, Secrets>;
-    }
-  | {
-      type: 'setConfigProperty';
-      payload: Config;
-    }
-  | {
-      type: 'setSecretsProperty';
-      payload: Secrets;
-    };
+export type InitialConnector<Config, Secrets> = Partial<
+  UserConfiguredActionConnector<Config, Secrets>
+> &
+  Pick<UserConfiguredActionConnector<Config, Secrets>, 'actionTypeId' | 'config' | 'secrets'>;
 
-export interface ActionState<Config, Secrets> {
-  connector: ActionConnector<Config, Secrets>;
+interface CommandType<
+  T extends 'setConnector' | 'setProperty' | 'setConfigProperty' | 'setSecretsProperty'
+> {
+  type: T;
 }
 
-export const createConnectorReducer = <Config, Secrets>() => (
-  state: ActionState<Config, Secrets>,
-  action: CommandType<Config, Secrets>
+interface Payload<Keys, Value> {
+  key: Keys;
+  value: Value;
+}
+
+interface TPayload<T, Key extends keyof T> {
+  key: Key;
+  value: T[Key] | null;
+}
+
+export type ConnectorReducerAction<Config, Secrets> =
+  | {
+      command: CommandType<'setConnector'>;
+      payload: Payload<'connector', InitialConnector<Config, Secrets>>;
+    }
+  | {
+      command: CommandType<'setProperty'>;
+      payload: TPayload<ActionConnector, keyof ActionConnector>;
+    }
+  | {
+      command: CommandType<'setConfigProperty'>;
+      payload: TPayload<Config, keyof Config>;
+    }
+  | {
+      command: CommandType<'setSecretsProperty'>;
+      payload: TPayload<Secrets, keyof Secrets>;
+    };
+
+export type InitialConnectorReducer<Config, Secrets> = Reducer<
+  { connector: InitialConnector<Config, Secrets> },
+  ConnectorReducerAction<Config, Secrets>
+>;
+export type ConcreteConnectorReducer<Config, Secrets> = Reducer<
+  { connector: UserConfiguredActionConnector<Config, Secrets> },
+  ConnectorReducerAction<Config, Secrets>
+>;
+
+export const createConnectorReducer = <Config, Secrets>() => <
+  ConnectorPhase extends
+    | InitialConnector<Config, Secrets>
+    | UserConfiguredActionConnector<Config, Secrets>
+>(
+  state: { connector: ConnectorPhase },
+  action: ConnectorReducerAction<Config, Secrets>
 ) => {
   const { connector } = state;
 
-  switch (action.type) {
+  switch (action.command.type) {
     case 'setConnector': {
-      return {
-        ...state,
-        connector: action.connector,
-      };
+      const { key, value } = action.payload as Payload<'connector', ConnectorPhase>;
+      if (key === 'connector') {
+        return {
+          ...state,
+          connector: value,
+        };
+      } else {
+        return state;
+      }
     }
     case 'setProperty': {
-      return {
-        ...state,
-        connector: {
-          ...connector,
-          ...action.payload,
-        },
-      };
+      const { key, value } = action.payload as TPayload<ActionConnector, keyof ActionConnector>;
+      if (isEqual(connector[key], value)) {
+        return state;
+      } else {
+        return {
+          ...state,
+          connector: {
+            ...connector,
+            [key]: value,
+          },
+        };
+      }
     }
     case 'setConfigProperty': {
-      return {
-        ...state,
-        connector: {
-          ...connector,
-          config: action.payload,
-        },
-      };
+      const { key, value } = action.payload as TPayload<Config, keyof Config>;
+      if (isEqual(connector.config[key], value)) {
+        return state;
+      } else {
+        return {
+          ...state,
+          connector: {
+            ...connector,
+            config: {
+              ...(connector.config as Config),
+              [key]: value,
+            },
+          },
+        };
+      }
     }
     case 'setSecretsProperty': {
-      return {
-        ...state,
-        connector: {
-          ...connector,
-          secrets: action.payload,
-        },
-      };
+      const { key, value } = action.payload as TPayload<Secrets, keyof Secrets>;
+      if (isEqual(connector.secrets[key], value)) {
+        return state;
+      } else {
+        return {
+          ...state,
+          connector: {
+            ...connector,
+            secrets: {
+              ...(connector.secrets as Secrets),
+              [key]: value,
+            },
+          },
+        };
+      }
     }
   }
 };

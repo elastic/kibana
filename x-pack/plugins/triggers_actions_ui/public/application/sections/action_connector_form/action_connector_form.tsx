@@ -27,6 +27,7 @@ import {
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
+import { ConnectorReducerAction } from './connector_reducer_gen';
 
 export function validateBaseProperties(actionObject: ActionConnector) {
   const validationResult = { errors: {} };
@@ -52,6 +53,7 @@ interface ActionConnectorProps<
   ConnectorSecrets = Record<string, any>
 > {
   connector: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>;
+  dispatch: React.Dispatch<ConnectorReducerAction<ConnectorConfig, ConnectorSecrets>>;
   actionTypeName: string;
   serverError?: {
     body: { message: string; error: string };
@@ -76,15 +78,24 @@ export const ActionConnectorForm = ({
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
 
-  const setActionProperty = (key: string, value: any) => {
+  const setActionProperty = <Key extends keyof ActionConnector>(
+    key: Key,
+    value: ActionConnector[Key] | null
+  ) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
-  const setActionConfigProperty = (key: string, value: any) => {
+  const setActionConfigProperty = <Key extends keyof Record<string, unknown>>(
+    key: Key,
+    value: Record<string, unknown>[Key]
+  ) => {
     dispatch({ command: { type: 'setConfigProperty' }, payload: { key, value } });
   };
 
-  const setActionSecretsProperty = (key: string, value: any) => {
+  const setActionSecretsProperty = <Key extends keyof Record<string, unknown>>(
+    key: Key,
+    value: Record<string, unknown>[Key]
+  ) => {
     dispatch({ command: { type: 'setSecretsProperty' }, payload: { key, value } });
   };
 
