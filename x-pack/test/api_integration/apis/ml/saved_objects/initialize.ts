@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { compareById } from '../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -52,13 +53,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       const body = await runRequest(USER.ML_POWERUSER_ALL_SPACES, 200);
 
-      expect(body).to.eql({
-        jobs: [
-          { id: adJobId, type: 'anomaly-detector' },
-          { id: dfaJobId, type: 'data-frame-analytics' },
-        ],
-        success: true,
-      });
+      expect(body).to.have.property('jobs');
+      expect(body.jobs.sort(compareById)).to.eql([
+        { id: adJobId, type: 'anomaly-detector' },
+        { id: dfaJobId, type: 'data-frame-analytics' },
+      ]);
+      expect(body).to.have.property('success', true);
       await ml.api.assertJobSpaces(adJobId, 'anomaly-detector', ['*']);
       await ml.api.assertJobSpaces(dfaJobId, 'data-frame-analytics', ['*']);
     });

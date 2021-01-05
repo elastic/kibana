@@ -13,6 +13,7 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/cons
 import { Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { compareById } from '../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -699,16 +700,6 @@ export default ({ getService }: FtrProviderContext) => {
       .expect(rspCode);
 
     return body;
-  }
-
-  function compareById(a: { id: string }, b: { id: string }) {
-    if (a.id < b.id) {
-      return -1;
-    }
-    if (a.id > b.id) {
-      return 1;
-    }
-    return 0;
   }
 
   function mapIdsToSuccessObjects(ids: string[]) {

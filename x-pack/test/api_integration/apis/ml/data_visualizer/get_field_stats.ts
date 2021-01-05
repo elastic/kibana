@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { compareByFieldName } from '../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -172,16 +173,6 @@ export default ({ getService }: FtrProviderContext) => {
       .expect(expectedResponsecode);
 
     return body;
-  }
-
-  function compareByFieldName(a: { fieldName: string }, b: { fieldName: string }) {
-    if (a.fieldName < b.fieldName) {
-      return -1;
-    }
-    if (a.fieldName > b.fieldName) {
-      return 1;
-    }
-    return 0;
   }
 
   describe('get_field_stats', function () {

@@ -8,6 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { compareByJobId } from '../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -76,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.have.property('jobs');
 
       expect(body.jobs).to.have.property('anomaly-detector');
-      expect(body.jobs['anomaly-detector']).to.eql([
+      expect(body.jobs['anomaly-detector'].sort(compareByJobId)).to.eql([
         {
           checks: { savedObjectExits: true },
           datafeedId: null,
@@ -90,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
 
       expect(body.jobs).to.have.property('data-frame-analytics');
-      expect(body.jobs['data-frame-analytics']).to.eql([
+      expect(body.jobs['data-frame-analytics'].sort(compareByJobId)).to.eql([
         {
           checks: { savedObjectExits: true },
           datafeedId: null,
@@ -107,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.have.property('savedObjects');
 
       expect(body.savedObjects).to.have.property('anomaly-detector');
-      expect(body.savedObjects['anomaly-detector']).to.eql([
+      expect(body.savedObjects['anomaly-detector'].sort(compareByJobId)).to.eql([
         {
           checks: { datafeedExists: false, jobExists: true },
           datafeedId: null,
@@ -125,7 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
 
       expect(body.savedObjects).to.have.property('data-frame-analytics');
-      expect(body.savedObjects['data-frame-analytics']).to.eql([
+      expect(body.savedObjects['data-frame-analytics'].sort(compareByJobId)).to.eql([
         {
           checks: { jobExists: true },
           jobId: dfaJobIdSpace1,

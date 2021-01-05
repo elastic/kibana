@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG } from './common_jobs';
+import { compareById } from '../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -179,16 +180,6 @@ export default ({ getService }: FtrProviderContext) => {
       .expect(expectedResponsecode);
 
     return body;
-  }
-
-  function compareById(a: { id: string }, b: { id: string }) {
-    if (a.id < b.id) {
-      return -1;
-    }
-    if (a.id > b.id) {
-      return 1;
-    }
-    return 0;
   }
 
   function getGroups(jobs: Array<{ groups: string[] }>) {
