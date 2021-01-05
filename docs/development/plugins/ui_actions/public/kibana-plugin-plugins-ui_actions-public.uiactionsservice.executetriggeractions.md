@@ -12,5 +12,5 @@
 <b>Signature:</b>
 
 ```typescript
-readonly executeTriggerActions: <T extends "" | "ROW_CLICK_TRIGGER" | "VISUALIZE_FIELD_TRIGGER" | "VISUALIZE_GEO_FIELD_TRIGGER" | "FILTER_TRIGGER" | "CONTEXT_MENU_TRIGGER" | "PANEL_BADGE_TRIGGER" | "PANEL_NOTIFICATION_TRIGGER" | "SELECT_RANGE_TRIGGER" | "VALUE_CLICK_TRIGGER">(triggerId: T, context: TriggerContext<T>) => Promise<void>;
+readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>;
 ```
