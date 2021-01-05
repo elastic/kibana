@@ -10,14 +10,11 @@ import {
   SavedObjectsFindResult,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import {
-  BackgroundSessionStatus,
-  BackgroundSessionSavedObjectAttributes,
-  BackgroundSessionSearchInfo,
-} from '../../../common';
+import { BackgroundSessionStatus, BackgroundSessionSavedObjectAttributes } from '../../../common';
 import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 import { getSearchStatus } from './get_search_status';
 import { getSessionStatus } from './get_session_status';
+import { SearchStatus } from './types';
 
 export async function checkRunningSessions(
   savedObjectsClient: SavedObjectsClientContract,
@@ -42,20 +39,32 @@ export async function checkRunningSessions(
       SavedObjectsFindResult<BackgroundSessionSavedObjectAttributes>
     >();
 
+    let sessionUpdated = false;
+
     await Promise.all(
       runningBackgroundSearchesResponse.saved_objects.map(async (session) => {
-        const searchIds = Object.values(session.attributes.idMapping);
-        const searchStatuses = await Promise.all(
-          searchIds.map(async (sessionInfo: BackgroundSessionSearchInfo) => {
-            return await getSearchStatus(client, sessionInfo.strategy);
+        await Promise.all(
+          Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
+            const searchInfo = session.attributes.idMapping[searchKey];
+            if (searchInfo.status === SearchStatus.IN_PROGRESS) {
+              const searchStatus = await getSearchStatus(client, searchInfo.strategy);
+
+              sessionUpdated = true;
+              session.attributes.idMapping[searchKey] = {
+                ...session.attributes.idMapping[searchKey],
+                ...searchStatus,
+              };
+            }
           })
         );
 
-        const sessionStatus = getSessionStatus(searchStatuses);
+        const sessionStatus = getSessionStatus(session.attributes);
         if (sessionStatus !== BackgroundSessionStatus.IN_PROGRESS) {
           session.attributes.status = sessionStatus;
-          const firstError = searchStatuses.filter((searchInfo) => searchInfo.status === undefined);
-          session.attributes.error = firstError.length ? firstError[0].error : undefined;
+          sessionUpdated = true;
+        }
+
+        if (sessionUpdated) {
           updatedSessions.push(session);
         }
       })

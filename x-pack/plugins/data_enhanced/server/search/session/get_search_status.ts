@@ -9,16 +9,12 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
 import { isAsyncSearchStatusResponse, SearchStatus } from './types';
 import { AsyncSearchResponse } from '../types';
-
-export interface SearchStatusInfo {
-  status: SearchStatus;
-  error?: string;
-}
+import { BackgroundSessionSearchInfo } from '../../../common';
 
 export async function getSearchStatus(
   client: ElasticsearchClient,
   asyncId: string
-): Promise<SearchStatusInfo> {
+): Promise<Pick<BackgroundSessionSearchInfo, 'status' | 'error'>> {
   try {
     // TODO: Handle strategies other than KQL
     const response: ApiResponse<AsyncSearchResponse> = await client.asyncSearch.status({

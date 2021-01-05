@@ -11,14 +11,14 @@ describe('getSearchStatus', () => {
   let mockClient: any;
   beforeEach(() => {
     mockClient = {
-      transport: {
-        request: jest.fn(),
+      asyncSearch: {
+        status: jest.fn(),
       },
     };
   });
 
   test('returns an error status if search is partial and not running', () => {
-    mockClient.transport.request.mockResolvedValue({
+    mockClient.asyncSearch.status.mockResolvedValue({
       is_partial: true,
       is_running: false,
       completion_status: 200,
@@ -27,7 +27,7 @@ describe('getSearchStatus', () => {
   });
 
   test('returns an error status if completion_status is an error', () => {
-    mockClient.transport.request.mockResolvedValue({
+    mockClient.asyncSearch.status.mockResolvedValue({
       is_partial: false,
       is_running: false,
       completion_status: 500,
@@ -36,7 +36,7 @@ describe('getSearchStatus', () => {
   });
 
   test('returns an error status if gets an ES error', () => {
-    mockClient.transport.request.mockResolvedValue({
+    mockClient.asyncSearch.status.mockResolvedValue({
       error: {
         root_cause: {
           reason: 'not found',
@@ -47,12 +47,12 @@ describe('getSearchStatus', () => {
   });
 
   test('returns an error status throws', () => {
-    mockClient.transport.request.mockRejectedValue(new Error('O_o'));
+    mockClient.asyncSearch.status.mockRejectedValue(new Error('O_o'));
     expect(getSearchStatus(mockClient, '123')).resolves.toBe(SearchStatus.ERROR);
   });
 
   test('returns a complete status', () => {
-    mockClient.transport.request.mockResolvedValue({
+    mockClient.asyncSearch.status.mockResolvedValue({
       is_partial: false,
       is_running: false,
       completion_status: 200,
@@ -61,7 +61,7 @@ describe('getSearchStatus', () => {
   });
 
   test('returns a running status otherwise', () => {
-    mockClient.transport.request.mockResolvedValue({
+    mockClient.asyncSearch.status.mockResolvedValue({
       is_partial: false,
       is_running: true,
       completion_status: undefined,

@@ -26,10 +26,6 @@ export interface BackgroundSessionSavedObjectAttributes {
    */
   status: string;
   /**
-   * An optional error. Set if status is set to error.
-   */
-  error?: string;
-  /**
    * urlGeneratorId
    */
   urlGeneratorId: string;
@@ -50,6 +46,20 @@ export interface BackgroundSessionSavedObjectAttributes {
 }
 
 export interface BackgroundSessionSearchInfo {
-  id: string; // ID of the async search request
-  strategy: string; // Search strategy used to submit the search request
+  /**
+   * ID of the async search request
+   */
+  id: string;
+  /**
+   * Search strategy used to submit the search request
+   */
+  strategy: string;
+  /**
+   * status
+   */
+  status: string;
+  /**
+   * An optional error. Set if status is set to error.
+   */
+  error?: string;
 }

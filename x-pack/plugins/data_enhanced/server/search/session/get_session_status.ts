@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BackgroundSessionStatus } from '../../../common';
-import { SearchStatusInfo } from './get_search_status';
+import { BackgroundSessionSavedObjectAttributes, BackgroundSessionStatus } from '../../../common';
 import { SearchStatus } from './types';
 
-export function getSessionStatus(searchStatuses: SearchStatusInfo[]): BackgroundSessionStatus {
+export function getSessionStatus(
+  session: BackgroundSessionSavedObjectAttributes
+): BackgroundSessionStatus {
+  const searchStatuses = Object.values(session.idMapping);
   if (searchStatuses.some((item) => item.status === SearchStatus.ERROR)) {
     return BackgroundSessionStatus.ERROR;
   } else if (

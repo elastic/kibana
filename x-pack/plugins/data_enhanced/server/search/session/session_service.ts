@@ -51,6 +51,7 @@ import {
   INMEM_TRACKING_TIMEOUT_SEC,
   MAX_UPDATE_RETRIES,
 } from './constants';
+import { SearchStatus } from './types';
 
 export interface BackgroundSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -347,6 +348,7 @@ export class BackgroundSessionService implements ISessionService {
     const searchInfo = {
       id: searchId,
       strategy: strategy!,
+      status: SearchStatus.IN_PROGRESS,
     };
 
     // If there is already a saved object for this session, update it to include this request/ID.
