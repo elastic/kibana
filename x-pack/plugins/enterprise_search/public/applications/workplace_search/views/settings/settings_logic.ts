@@ -46,7 +46,6 @@ interface SettingsActions {
     oauthApplication: IOauthApplication;
   }): IOauthApplication;
   setConfigDeleted(name: string): string;
-  setTelemetryOptedInUpdating(updating: boolean): { updating: boolean };
   resetFlashMessages(): void;
   resetSettingsState(): void;
   initializeSettings(): void;
@@ -61,7 +60,6 @@ interface SettingsActions {
     serviceType: string;
     name: string;
   };
-  toggleTelemetryOptIn(checked: boolean): { checked: boolean };
 }
 
 interface SettingsValues {
@@ -70,7 +68,6 @@ interface SettingsValues {
   connectors: Connector[];
   orgNameInputValue: string;
   oauthApplication: IOauthApplication | null;
-  telemetryOptedInUpdating: boolean;
 }
 
 export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>({
@@ -84,7 +81,6 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     setUpdatedOauthApplication: ({ oauthApplication }: { oauthApplication: IOauthApplication }) =>
       oauthApplication,
     setConfigDeleted: (name: string) => name,
-    setTelemetryOptedInUpdating: (updating: boolean) => ({ updating }),
     resetFlashMessages: () => true,
     resetSettingsState: () => true,
     initializeSettings: () => true,
@@ -96,7 +92,6 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       serviceType,
       name,
     }),
-    toggleTelemetryOptIn: (checked: boolean) => ({ checked }),
   },
   reducers: {
     connectors: [
@@ -139,13 +134,6 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       {
         onInitializeConnectors: () => false,
         resetSettingsState: () => true,
-      },
-    ],
-    telemetryOptedInUpdating: [
-      false,
-      {
-        setTelemetryOptedInUpdating: (_, { updating }) => updating,
-        setFlashMessages: () => false,
       },
     ],
   },
@@ -202,16 +190,6 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         .then(() => {
           KibanaLogic.values.navigateToUrl(ORG_SETTINGS_CONNECTORS_PATH);
           actions.setConfigDeleted(name);
-        })
-        .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
-    },
-    toggleTelemetryOptIn: ({ checked }) => {
-      actions.setTelemetryOptedInUpdating(true);
-      http
-        .put(routes.fritoPieTelemetryPath(), { opt_in: checked })
-        .then(({ data }) => {
-          AppLogic.actions.setTelemetryStatus(data.telemetryStatus);
-          actions.setTelemetryOptedInUpdating(false);
         })
         .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
     },

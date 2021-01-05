@@ -10,20 +10,14 @@ import { useActions, useValues } from 'kea';
 
 import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
-import TelemetryPanel from 'shared/components/TelemetryPanel';
 import { ContentSection } from '../../../components/shared/content_section';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 
-import { AppLogic } from '../../../app_logic';
 import { SettingsLogic } from '../settings_logic';
 
 export const Customize: React.FC = () => {
-  const { onOrgNameInputChange, updateOrgName, toggleTelemetryOptIn } = useActions(SettingsLogic);
-  const { orgNameInputValue, telemetryOptedInUpdating } = useValues(SettingsLogic);
-
-  const {
-    telemetryStatus: { telemetryOptedIn },
-  } = useValues(AppLogic);
+  const { onOrgNameInputChange, updateOrgName } = useActions(SettingsLogic);
+  const { orgNameInputValue } = useValues(SettingsLogic);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -56,13 +50,6 @@ export const Customize: React.FC = () => {
             Save organization name
           </EuiButton>
         </EuiFormRow>
-      </ContentSection>
-      <ContentSection>
-        <TelemetryPanel
-          telemetryOptedIn={!!telemetryOptedIn}
-          telemetryOptedInUpdating={!!telemetryOptedInUpdating}
-          toggleTelemetryOptIn={toggleTelemetryOptIn}
-        />
       </ContentSection>
     </form>
   );
