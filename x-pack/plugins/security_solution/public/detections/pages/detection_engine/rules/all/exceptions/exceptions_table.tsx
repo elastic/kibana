@@ -102,26 +102,23 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
 
     const handleDeleteSuccess = useCallback(() => {
-      notifications.toasts.addSuccess({ title: i18n.EXCEPTION_DELETE_SUCCESS });
-    }, [notifications.toasts]);
+      notifications.toasts.addSuccess({
+        title: i18n.exceptionDeleteSuccessMessage(referenceModalState.listId),
+      });
+    }, [notifications.toasts, referenceModalState]);
 
     const handleDeleteError = useCallback(
-      (err: Error) => {
-        notifications.toasts.addError(err, { title: i18n.EXCEPTION_DELETE_ERROR });
+      (err: Error & { body?: { message: string } }): void => {
+        notifications.toasts.addError(err, {
+          title: i18n.EXCEPTION_DELETE_ERROR,
+          toastMessage: err.body != null ? err.body.message : err.message,
+        });
       },
       [notifications.toasts]
     );
 
     const handleDelete = useCallback(
-      ({
-        id,
-        listId,
-        namespaceType,
-      }: {
-        id: string;
-        listId: string;
-        namespaceType: NamespaceType;
-      }) => async () => {
+      ({ id, namespaceType }: { id: string; namespaceType: NamespaceType }) => async () => {
         try {
           setDeletingListIds((ids) => [...ids, id]);
           if (refreshExceptions != null) {
@@ -291,7 +288,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
           onSuccess: handleDeleteSuccess,
         });
       } catch (err) {
-        notifications.toasts.addError(err, { title: i18n.EXCEPTION_DELETE_ERROR });
+        handleDeleteError(err);
       } finally {
         setReferenceModalState(exceptionReferenceModalInitialState);
         setDeletingListIds([]);
@@ -307,7 +304,6 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
       deleteExceptionList,
       handleDeleteError,
       handleDeleteSuccess,
-      notifications.toasts,
       refreshExceptions,
     ]);
 

@@ -97,12 +97,11 @@ export const EXCEPTION_DELETE_ERROR = i18n.translate(
   }
 );
 
-export const EXCEPTION_DELETE_SUCCESS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.all.exceptions.deleteSuccess',
-  {
-    defaultMessage: 'Exception list deleted successfully',
-  }
-);
+export const exceptionDeleteSuccessMessage = (listId: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.referenceModalDescription', {
+    defaultMessage: 'Exception list - {listId} - deleted successfully.',
+    values: { listId },
+  });
 
 export const REFERENCE_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.exceptions.referenceModalTitle',
@@ -121,13 +120,13 @@ export const REFERENCE_MODAL_CANCEL_BUTTON = i18n.translate(
 export const REFERENCE_MODAL_CONFIRM_BUTTON = i18n.translate(
   'xpack.securitySolution.exceptions.referenceModalDeleteButton',
   {
-    defaultMessage: 'Remove exceptions list',
+    defaultMessage: 'Remove exception list',
   }
 );
 
 export const referenceErrorMessage = (referenceCount: number) =>
   i18n.translate('xpack.securitySolution.exceptions.referenceModalDescription', {
     defaultMessage:
-      'This exceptions list is associated with ({referenceCount}) {referenceCount, plural, =1 {rule} other {rules}}. Removing this exception list will also remove its reference from the associated rules.',
+      'This exception list is associated with ({referenceCount}) {referenceCount, plural, =1 {rule} other {rules}}. Removing this exception list will also remove its reference from the associated rules.',
     values: { referenceCount },
   });
