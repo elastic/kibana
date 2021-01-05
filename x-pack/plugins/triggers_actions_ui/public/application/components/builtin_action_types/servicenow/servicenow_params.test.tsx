@@ -35,8 +35,7 @@ const editAction = jest.fn();
 const defaultProps = {
   actionConnector: connector,
   actionParams,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  errors: { 'subActionParams.incident.short_description': [] },
+  errors: { ['subActionParams.incident.short_description']: [] },
   editAction,
   index: 0,
   messageVariables: [],
