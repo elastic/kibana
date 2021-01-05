@@ -135,7 +135,7 @@ on specific index patterns. For more information, see
 enter the credentials for a user you've assigned a {kib} user role. For example, you could log in as the user `jacknich`.
 +
 NOTE: This must be a user who has been assigned <<kibana-privileges, Kibana privileges>>. {kib} server credentials (the built-in
-`kibana_system` user) should only be used internally by the {kib} server.
+`kibana` user) should only be used internally by the {kib} server.
 
 include::authentication/index.asciidoc[]
 include::securing-communications/index.asciidoc[]
