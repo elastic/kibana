@@ -14,7 +14,6 @@ import { IFlashMessagesProps } from 'shared/types';
 import { clearFlashMessages } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 
-import { AppLogic } from '../../app_logic';
 import { SourceLogic } from '../content_sources/source_logic';
 import { Connector } from '../../types';
 
@@ -157,7 +156,6 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         .put(route, { name })
         .then(({ data }) => {
           actions.setUpdatedName(data);
-          AppLogic.actions.setUpdatedOrgName(data);
         })
         .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
     },
