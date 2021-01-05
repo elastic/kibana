@@ -18,6 +18,10 @@ describe('alertType', () => {
     expect(alertType.actionGroups).toEqual([
       { id: 'Tracked entity contained', name: 'Tracking containment met' },
     ]);
+    expect(alertType.recoveryActionGroup).toEqual({
+      id: 'notGeoContained',
+      name: 'No longer contained',
+    });
 
     expect(alertType.actionVariables).toMatchSnapshot();
   });
