@@ -48,6 +48,9 @@ function getUrlGeneratorState({
   data: DataPublicPluginStart;
   getAppState: () => DashboardAppState;
   getDashboardId: () => string;
+  /**
+   * Can force time range from time filter to convert from relative to absolute time range
+   */
   forceAbsoluteTime: boolean;
 }): DashboardUrlGeneratorState {
   const appState = getAppState();

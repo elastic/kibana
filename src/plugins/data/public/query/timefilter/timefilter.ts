@@ -114,6 +114,9 @@ export class Timefilter {
     };
   };
 
+  /**
+   * Same as {@link getTime}, but also converts relative time range to absolute time range
+   */
   public getAbsoluteTime() {
     return getAbsoluteTimeRange(this._time, { forceNow: this.nowProvider.get() });
   }
@@ -186,7 +189,7 @@ export class Timefilter {
 
   public createFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, {
-      forceNow: this.getForceNow(),
+      forceNow: this.nowProvider.get(),
     });
   };
 
@@ -195,7 +198,7 @@ export class Timefilter {
   }
 
   public calculateBounds(timeRange: TimeRange): TimeRangeBounds {
-    return calculateBounds(timeRange, { forceNow: this.getForceNow() });
+    return calculateBounds(timeRange, { forceNow: this.nowProvider.get() });
   }
 
   public getActiveBounds(): TimeRangeBounds | undefined {
@@ -243,10 +246,6 @@ export class Timefilter {
   public getRefreshIntervalDefaults(): RefreshInterval {
     return _.cloneDeep(this.refreshIntervalDefaults);
   }
-
-  private getForceNow = () => {
-    return this.nowProvider.get();
-  };
 }
 
 export type TimefilterContract = PublicMethodsOf<Timefilter>;

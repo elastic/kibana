@@ -287,6 +287,9 @@ function createUrlGeneratorState({
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
+  /**
+   * Can force time range from time filter to convert from relative to absolute time range
+   */
   forceAbsoluteTime: boolean;
 }): DiscoverUrlGeneratorState {
   const appState = appStateContainer.get();

@@ -109,7 +109,7 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
   /**
    * Start time of current session
    */
-  sessionStartTime?: Date;
+  startTime?: Date;
 }
 
 const createSessionDefaultState: <
@@ -140,7 +140,7 @@ export const sessionPureTransitions: SessionPureTransitions = {
   start: (state) => () => ({
     ...createSessionDefaultState(),
     sessionId: uuid.v4(),
-    sessionStartTime: new Date(),
+    startTime: new Date(),
   }),
   restore: (state) => (sessionId: string) => ({
     ...createSessionDefaultState(),
@@ -239,7 +239,7 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
   );
 
   const sessionStartTime$: Observable<Date | undefined> = stateContainer.state$.pipe(
-    map(() => stateContainer.get().sessionStartTime),
+    map(() => stateContainer.get().startTime),
     distinctUntilChanged(),
     shareReplay(1)
   );
