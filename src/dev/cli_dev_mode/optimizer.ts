@@ -105,7 +105,7 @@ export class Optimizer {
 
           ToolingLogTextWriter.write(
             options.writeLogTo ?? process.stdout,
-            `${dim}    log   [${time()}] [${level(msg.type)}][${name}] `,
+            ` ${dim}    log   [${time()}] [${level(msg.type)}][${name}] `,
             msg
           );
           return true;
