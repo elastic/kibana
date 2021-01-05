@@ -20,6 +20,7 @@ import {
   EuiButtonEmpty,
   EuiPortal,
 } from '@elastic/eui';
+import { useHtmlId } from './use_html_id';
 
 export interface FormFlyoutProps extends Omit<EuiFlyoutProps, 'onSubmit' | 'onClose'> {
   title: string;
@@ -51,11 +52,13 @@ export const FormFlyout: FunctionComponent<FormFlyoutProps> = ({
     }
   }, [initialFocus]);
 
+  const titleId = useHtmlId('formFlyout', 'title');
+
   const flyout = (
-    <EuiFlyout ownFocus={ownFocus} onClose={onCancel} {...rest}>
+    <EuiFlyout ownFocus={ownFocus} onClose={onCancel} aria-labelledby={titleId} {...rest}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{title}</h2>
+          <h2 id={titleId}>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{children}</EuiFlyoutBody>

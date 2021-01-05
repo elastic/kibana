@@ -226,7 +226,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         })}
       >
         <EuiFormRow
-          id="user_username"
           label={i18n.translate('xpack.security.management.users.userForm.usernameLabel', {
             defaultMessage: 'Username',
           })}
@@ -254,7 +253,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         {!isReservedUser ? (
           <>
             <EuiFormRow
-              id="user_full_name"
               label={i18n.translate('xpack.security.management.users.userForm.fullNameLabel', {
                 defaultMessage: 'Full name',
               })}
@@ -268,7 +266,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               />
             </EuiFormRow>
             <EuiFormRow
-              id="user_email"
               label={i18n.translate('xpack.security.management.users.userForm.emailLabel', {
                 defaultMessage: 'Email address',
               })}
@@ -298,7 +295,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           description="Protect your data with a strong password."
         >
           <EuiFormRow
-            id="user_password"
             label={i18n.translate('xpack.security.management.users.userForm.passwordLabel', {
               defaultMessage: 'Password',
             })}
@@ -317,7 +313,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             />
           </EuiFormRow>
           <EuiFormRow
-            id="user_confirm_password"
             label={i18n.translate('xpack.security.management.users.userForm.confirmPasswordLabel', {
               defaultMessage: 'Confirm password',
             })}
@@ -352,7 +347,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         )}
       >
         <EuiFormRow
-          id="user_roles"
           label={i18n.translate('xpack.security.management.users.userForm.rolesLabel', {
             defaultMessage: 'Roles',
           })}

@@ -19,6 +19,10 @@ import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
 import { EditUserPage } from './edit_user_page';
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
+
 const userMock = {
   username: 'jdoe',
   full_name: '',

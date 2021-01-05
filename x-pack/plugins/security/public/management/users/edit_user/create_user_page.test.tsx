@@ -12,6 +12,10 @@ import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
 import { CreateUserPage } from './create_user_page';
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => () => `id-${Math.random()}`,
+}));
+
 describe('CreateUserPage', () => {
   it('creates user when submitting form and redirects back', async () => {
     const coreStart = coreMock.createStart();

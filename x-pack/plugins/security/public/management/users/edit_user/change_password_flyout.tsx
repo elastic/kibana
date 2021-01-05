@@ -172,7 +172,6 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
 
           {isCurrentUser ? (
             <EuiFormRow
-              id="change_password_current_password"
               label={i18n.translate(
                 'xpack.security.management.users.changePasswordFlyout.currentPasswordLabel',
                 { defaultMessage: 'Current password' }
@@ -191,7 +190,6 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
           ) : null}
 
           <EuiFormRow
-            id="change_password_password"
             label={i18n.translate(
               'xpack.security.management.users.changePasswordFlyout.passwordLabel',
               {
@@ -211,7 +209,6 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
             />
           </EuiFormRow>
           <EuiFormRow
-            id="change_password_confirm_password"
             label={i18n.translate(
               'xpack.security.management.users.changePasswordFlyout.confirmPasswordLabel',
               { defaultMessage: 'Confirm password' }
