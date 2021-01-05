@@ -23,12 +23,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
 
-  async function createAction(overwrites: Record<string, any> = {}) {
+  async function createActionManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdAction } = await supertest
       .post(`/api/actions/action`)
       .set('kbn-xsrf', 'foo')
       .send(getTestActionData(overwrites))
       .expect(200);
+    return createdAction;
+  }
+
+  async function createAction(overwrites: Record<string, any> = {}) {
+    const createdAction = await createActionManualCleanup(overwrites);
     objectRemover.add(createdAction.id, 'action', 'actions');
     return createdAction;
   }
@@ -311,7 +316,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should show and update deleted connectors', async () => {
-        const action = await createAction({
+        const action = await createActionManualCleanup({
           name: `slack-${testRunUuid}-${0}`,
         });
 
