@@ -28,6 +28,9 @@ interface Options {
 type ESResponse = PromiseReturnType<typeof fetcher>;
 
 function transform(response: ESResponse) {
+  if (response.hits.total.value === 0) {
+    return [];
+  }
   const buckets = response.aggregations?.throughput?.buckets ?? [];
   return buckets.map(({ key: x, doc_count: y }) => ({ x, y }));
 }

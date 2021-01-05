@@ -99,12 +99,6 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
     [serviceName, transactionType]
   );
 
-  // TODO: improve urlParams typings.
-  // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
-  if (!serviceName || !transactionType) {
-    return null;
-  }
-
   return (
     <>
       <SearchBar />

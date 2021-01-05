@@ -232,8 +232,7 @@ export function ServiceOverviewInstancesTable({ serviceName }: Props) {
     memoryUsageValue: item.memoryUsage?.value ?? 0,
   }));
 
-  const isLoading =
-    status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
