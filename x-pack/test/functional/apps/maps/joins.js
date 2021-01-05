@@ -81,7 +81,7 @@ export default function ({ getPageObjects, getService }) {
 
     it('should decorate feature properties with join property', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-      expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(4);
+      expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(8);
 
       mapboxStyle.sources.n1t6f.data.features.forEach(({ properties }) => {
         if (properties.name === 'tango') {
