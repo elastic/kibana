@@ -92,6 +92,9 @@ describe('dateMath', function () {
     let now;
 
     beforeEach(function () {
+      // NOTE: In order to stop using sinon for faking the timers we would need to have the need to start using
+      // jest.useFakeTimers('modern'). However when doing it we start getting undefined type errors for the
+      // jest global. Will continue to use sinon until jest v27 where the modern implementation will become the default.
       clock = sinon.useFakeTimers(unix);
       now = moment();
       mmnt = moment(anchor);
