@@ -32,7 +32,8 @@ export class EmbeddedLensExamplePlugin
     developerExamples.register({
       appId: 'embedded_lens_example',
       title: 'Embedded Lens',
-      description: 'Examples of how to use Lens in other apps.',
+      description:
+        'Embed Lens visualizations into other applications and link to a pre-configured Lens editor to allow users to use visualizations in your app as starting points for further explorations.',
       links: [
         {
           label: 'README',

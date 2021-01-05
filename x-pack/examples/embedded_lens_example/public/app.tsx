@@ -7,6 +7,8 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -108,32 +110,51 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
         </EuiPageHeader>
         <EuiPageContent>
           <EuiPageContentBody style={{ maxWidth: 800, margin: '0 auto' }}>
-            <EuiButton
-              onClick={() => {
-                // eslint-disable-next-line no-bitwise
-                const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
-                setColor(newColor);
-              }}
-            >
-              Change color
-            </EuiButton>
-            <EuiButton
-              onClick={() => {
-                props.plugins.lens.navigateToPrefilledEditor({
-                  id: '',
-                  timeRange: {
-                    from: 'now-5d',
-                    to: 'now',
-                  },
-                  attributes: getLensAttributes(props.core.uiSettings.get('defaultIndex'), color),
-                });
-                // eslint-disable-next-line no-bitwise
-                const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
-                setColor(newColor);
-              }}
-            >
-              Edit
-            </EuiButton>
+            <p>
+              This app embeds a Lens visualization by specifying the configuration. Data fetching
+              and rendering is completely managed by Lens itself.
+            </p>
+            <p>
+              The Change color button will update the configuration by picking a new random color of
+              the series which causes Lens to re-render. The Edit button will take the current
+              configuration and navigate to a prefilled editor.
+            </p>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={() => {
+                    // eslint-disable-next-line no-bitwise
+                    const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
+                    setColor(newColor);
+                  }}
+                >
+                  Change color
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  isDisabled={!props.plugins.lens.canUseEditor()}
+                  onClick={() => {
+                    props.plugins.lens.navigateToPrefilledEditor({
+                      id: '',
+                      timeRange: {
+                        from: 'now-5d',
+                        to: 'now',
+                      },
+                      attributes: getLensAttributes(
+                        props.core.uiSettings.get('defaultIndex'),
+                        color
+                      ),
+                    });
+                    // eslint-disable-next-line no-bitwise
+                    const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
+                    setColor(newColor);
+                  }}
+                >
+                  Edit
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             <LensComponent
               id=""
               style={{ height: 500 }}

@@ -93,6 +93,10 @@ export interface LensPublicStart {
    * @experimental
    */
   navigateToPrefilledEditor: (input: LensEmbeddableInput) => void;
+  /**
+   * Method which returns true if the user has permission to use Lens as defined by application capabilities.
+   */
+  canUseEditor: () => boolean;
 }
 
 export class LensPlugin {
@@ -232,6 +236,9 @@ export class LensPlugin {
             valueInput: input,
           },
         });
+      },
+      canUseEditor: () => {
+        return Boolean(core.application.capabilities.visualize?.show);
       },
     };
   }
