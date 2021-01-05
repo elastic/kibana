@@ -26,7 +26,16 @@ export interface ElasticsearchSourceKibanaStats {
 
 export interface ElasticsearchSource {
   timestamp: string;
+  cluster_uuid: string;
   kibana_stats?: ElasticsearchSourceKibanaStats;
+  cluster_state?: {
+    status?: string;
+  };
+  cluster_stats?: {
+    nodes?: {
+      versions?: string[];
+    };
+  };
   beats_stats?: {
     timestamp?: string;
     beat?: {
