@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { TriggerContextMapping } from '../../../ui_actions/public';
 import { SavedObject } from '../../../../core/types/saved_objects';
 
 export type VisualizationStage = 'experimental' | 'beta' | 'production';
@@ -31,7 +30,7 @@ export interface VisualizationListItem {
   savedObjectType: string;
   title: string;
   description?: string;
-  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
+  getSupportedTriggers?: () => string[];
   typeTitle: string;
   image?: string;
 }
@@ -58,7 +57,7 @@ export interface VisTypeAlias {
   description: string;
   note?: string;
   disabled?: boolean;
-  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
+  getSupportedTriggers?: () => string[];
   stage: VisualizationStage;
 
   appExtensions?: {
