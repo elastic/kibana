@@ -45,10 +45,11 @@ export const getScreenshots = async (
         logger
       );
 
-      logger.debug(`Browser viewport: height: ${viewHeight}, width: ${viewWidth}`);
+      logger.debug(`Browser viewport: height=${viewHeight} width=${viewWidth}`);
 
       // Resize the viewport if the clip area is not visible
       if (viewHeight < height + top || viewWidth < width + left) {
+        logger.debug(`Resize browser viewport to: height=${viewHeight} width=${viewWidth}`);
         await browser.setViewport(
           {
             height: height + top,
