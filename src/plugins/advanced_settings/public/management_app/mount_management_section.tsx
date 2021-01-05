@@ -50,7 +50,6 @@ const readOnlyBadge = {
   iconType: 'glasses',
 };
 
-// TODO: remove route `query` param in 7.12
 const redirectUrl = ({
   match,
   location,
@@ -83,6 +82,7 @@ export async function mountManagementSection(
     <I18nProvider>
       <Router history={params.history}>
         <Switch>
+          {/* TODO: remove route param (`query`) in 7.13 */}
           <Route path={`/:${QUERY}`}>{(props) => <Redirect to={redirectUrl(props)} />}</Route>
           <Route path="/">
             <AdvancedSettings
