@@ -7,6 +7,7 @@
 import moment, { Moment } from 'moment';
 import { from, Observable } from 'rxjs';
 import { first, switchMap } from 'rxjs/operators';
+import dateMath from '@elastic/datemath';
 import {
   CoreSetup,
   CoreStart,
@@ -331,9 +332,48 @@ export class BackgroundSessionService implements ISessionService<BackgroundSessi
     );
   }
 
+  /**
+   * Deletes the saved object for the given search session and cancels all the associated search
+   * requests.
+   */
   // TODO: Throw an error if this session doesn't belong to this user
-  public delete({ savedObjectsClient }: BackgroundSessionDependencies, sessionId: string) {
-    return savedObjectsClient.delete(BACKGROUND_SESSION_TYPE, sessionId);
+  public async delete(deps: BackgroundSessionDependencies, sessionId: string) {
+    const session = await this.get(deps, sessionId);
+    const searchRequests = Object.values(session.attributes.idMapping);
+    const promises = searchRequests.map(({ id, strategy }) => {
+      return this.cancel(deps, id, { strategy });
+    });
+    await Promise.all(promises);
+
+    return deps.savedObjectsClient.delete(BACKGROUND_SESSION_TYPE, sessionId);
+  }
+
+  /**
+   * Extend the TTL of a session by updating the saved object and extending the TTL of each search
+   * request in the ID mapping.
+   */
+  public async extend(deps: BackgroundSessionDependencies, sessionId: string, keepAlive: string) {
+    if (!sessionId) {
+      throw new Error('Session ID is required');
+    }
+
+    // Calculate the new `expires` value given the `keepAlive`
+    const expiresMoment = dateMath.parse(`now+${keepAlive}`);
+    if (!expiresMoment || isNaN(expiresMoment.date())) {
+      throw new Error(`"${keepAlive}" is not a valid value for keepAlive`);
+    }
+
+    // Extend the TTL of each search request in the ID mapping
+    const expires = expiresMoment.toISOString();
+    const session = await this.get(deps, sessionId);
+    const searchRequests = Object.values(session.attributes.idMapping);
+    const promises = searchRequests.map(({ id, strategy }) => {
+      return deps.searchClient.extend(id, keepAlive, { strategy });
+    });
+    await Promise.all(promises);
+
+    // Update the `expires` value in the search session saved object
+    return this.update(deps, sessionId, { expires });
   }
 
   /**
@@ -361,7 +401,7 @@ export class BackgroundSessionService implements ISessionService<BackgroundSessi
       const attributes = {
         idMapping: { [requestHash]: searchInfo },
       };
-      await this.update(sessionId, attributes, deps);
+      await this.update(deps, sessionId, attributes);
     } else {
       const map = this.sessionSearchMap.get(sessionId) ?? {
         insertTime: moment(),
@@ -418,6 +458,7 @@ export class BackgroundSessionService implements ISessionService<BackgroundSessi
         find: this.find.bind(this, deps),
         update: this.update.bind(this, deps),
         delete: this.delete.bind(this, deps),
+        extend: this.extend.bind(this, deps),
       };
     };
   }

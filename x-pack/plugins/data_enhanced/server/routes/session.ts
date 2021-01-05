@@ -160,4 +160,39 @@ export function registerSessionRoutes(router: IRouter): void {
       }
     }
   );
+
+  router.post(
+    {
+      path: '/internal/session/{id}/_extend',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          keepAlive: schema.string(),
+        }),
+      },
+    },
+    async (context, request, res) => {
+      const { id } = request.params;
+      const { keepAlive } = request.body;
+      try {
+        const response = await context.search!.session.extend(id, keepAlive);
+
+        return res.ok({
+          body: response,
+        });
+      } catch (err) {
+        return res.customError({
+          statusCode: err.statusCode || 500,
+          body: {
+            message: err.message,
+            attributes: {
+              error: err.body?.error || err.message,
+            },
+          },
+        });
+      }
+    }
+  );
 }
