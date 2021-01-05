@@ -39,7 +39,11 @@ export default function ({ getPageObjects, getService }) {
       return requestTimestamp;
     }
 
-    function makeRequestTestsForGeoPrecision(LAYER_ID, expectedNumFeaturesZoomedOut) {
+    function makeRequestTestsForGeoPrecision(
+      LAYER_ID,
+      expectedNumFeaturesZoomedOut,
+      expectedNumPartialFeatures
+    ) {
       describe('geoprecision - requests', () => {
         let beforeTimestamp;
         beforeEach(async () => {
@@ -90,7 +94,9 @@ export default function ({ getPageObjects, getService }) {
           //todo this verifies the extent-filtering behavior (not really the correct application of geotile_grid-precision), and should ideally be moved to its own section
           await PageObjects.maps.setView(DATA_CENTER_LAT, DATA_CENTER_LON, 6);
           const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(2);
+          expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(
+            expectedNumPartialFeatures
+          );
         });
       });
     }
@@ -121,7 +127,7 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
-      makeRequestTestsForGeoPrecision(LAYER_ID, 4);
+      makeRequestTestsForGeoPrecision(LAYER_ID, 4, 2);
 
       describe('query bar', () => {
         before(async () => {
@@ -198,7 +204,7 @@ export default function ({ getPageObjects, getService }) {
         });
       });
 
-      makeRequestTestsForGeoPrecision(LAYER_ID, 8);
+      makeRequestTestsForGeoPrecision(LAYER_ID, 8, 4);
 
       describe('query bar', () => {
         before(async () => {
