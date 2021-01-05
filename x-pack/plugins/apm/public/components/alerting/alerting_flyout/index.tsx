@@ -6,7 +6,8 @@
 import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../../common/alert_types';
+import { AlertType } from '../../../../common/alert_types';
+import { getInitialAlertValues } from '../get_initial_alert_values';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../../triggers_actions_ui/public';
 interface Props {
   addFlyoutVisible: boolean;
@@ -25,22 +26,7 @@ export function AlertingFlyout(props: Props) {
     services: { triggersActionsUi },
   } = useKibana<KibanaDeps>();
 
-  const alertTypeName = alertType
-    ? ALERT_TYPES_CONFIG[alertType].name
-    : undefined;
-  const alertName = alertTypeName
-    ? serviceName
-      ? `${alertTypeName} | ${serviceName}`
-      : alertTypeName
-    : undefined;
-  const tags = ['apm'];
-  if (serviceName) {
-    tags.push(`service.name:${serviceName}`.toLowerCase());
-  }
-  const initialValues = {
-    tags,
-    ...(alertName ? { name: alertName } : {}),
-  };
+  const initialValues = getInitialAlertValues(alertType, serviceName);
 
   const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
     setAddFlyoutVisibility,
