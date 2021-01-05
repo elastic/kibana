@@ -41,6 +41,7 @@ const ConnectorSpan = styled.span`
     height: 20px;
   }
 `;
+export const ALLOWED_ALERT_ACTIONS = ['.slack'];
 
 export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
   onChange,

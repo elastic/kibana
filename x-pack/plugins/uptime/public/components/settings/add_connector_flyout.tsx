@@ -39,6 +39,7 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
     () =>
       getAddConnectorFlyout({
         consumer: 'uptime',
+        // actionTypes: ['.slack'],
         onClose: () => setAddFlyoutVisibility(false),
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps

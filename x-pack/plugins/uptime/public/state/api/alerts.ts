@@ -99,3 +99,7 @@ export const fetchAlertRecords = async ({
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {
   return await apiService.delete(API_URLS.ALERT + alertId);
 };
+
+export const fetchActionTypes = async (): Promise<AlertsResult> => {
+  return await apiService.get(API_URLS.ACTION_TYPES);
+};
