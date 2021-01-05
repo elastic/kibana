@@ -20,12 +20,17 @@
 import { copy, Task } from '../lib';
 
 export const ReplaceFavicon: Task = {
-  description: 'Replacing favicon.svg with built version',
+  description: 'Replacing favicons with built version',
 
   async run(config, log, build) {
     await copy(
-      config.resolveFromRepo('src/...../favicon.built.svg'),
-      build.resolvePath('src/......./favicon.svg')
+      config.resolveFromRepo('src/core/server/core_app/assets/favicons/favicon.built.png'),
+      build.resolvePath('src/core/server/core_app/assets/favicons/favicon.png')
+    );
+
+    await copy(
+      config.resolveFromRepo('src/core/server/core_app/assets/favicons/favicon.built.svg'),
+      build.resolvePath('src/core/server/core_app/assets/favicons/favicon.svg')
     );
   },
 };
