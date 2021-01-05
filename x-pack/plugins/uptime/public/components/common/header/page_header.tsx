@@ -14,7 +14,7 @@ import { CertRefreshBtn } from '../../certificates/cert_refresh_btn';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
 import { MonitorPageTitle } from '../../monitor/monitor_title';
 
-interface Props {
+export interface Props {
   includeSpacer?: boolean;
   showCertificateRefreshBtn?: boolean;
   showDatePicker?: boolean;

@@ -5,8 +5,9 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { OverviewPage } from './components/overview/overview_container';
+import { Props as PageHeaderProps, PageHeader } from './components/common/header/page_header';
 import {
   CERTIFICATES_ROUTE,
   MONITOR_ROUTE,
@@ -24,6 +25,7 @@ interface RouteProps {
   dataTestSubj: string;
   title: string;
   telemetryId: UptimePage;
+  headerProps?: PageHeaderProps;
 }
 
 const baseTitle = 'Uptime - Kibana';
@@ -35,6 +37,10 @@ const Routes: RouteProps[] = [
     component: MonitorPage,
     dataTestSubj: 'uptimeMonitorPage',
     telemetryId: UptimePage.Monitor,
+    headerProps: {
+      showDatePicker: true,
+      showMonitorTitle: true,
+    },
   },
   {
     title: `Settings | ${baseTitle}`,
@@ -42,6 +48,10 @@ const Routes: RouteProps[] = [
     component: SettingsPage,
     dataTestSubj: 'uptimeSettingsPage',
     telemetryId: UptimePage.Settings,
+    headerProps: {
+      includeSpacer: true,
+      showTabs: true,
+    },
   },
   {
     title: `Certificates | ${baseTitle}`,
@@ -49,6 +59,11 @@ const Routes: RouteProps[] = [
     component: CertificatesPage,
     dataTestSubj: 'uptimeCertificatesPage',
     telemetryId: UptimePage.Certificates,
+    headerProps: {
+      includeSpacer: true,
+      showCertificateRefreshBtn: true,
+      showTabs: true,
+    },
   },
   {
     title: baseTitle,
@@ -63,6 +78,22 @@ const Routes: RouteProps[] = [
     component: OverviewPage,
     dataTestSubj: 'uptimeOverviewPage',
     telemetryId: UptimePage.Overview,
+    headerProps: {
+      showDatePicker: true,
+      showTabs: true,
+    },
+  },
+  {
+    title: baseTitle,
+    path: OVERVIEW_ROUTE,
+    component: OverviewPage,
+    dataTestSubj: 'uptimeOverviewPage',
+    telemetryId: UptimePage.Overview,
+    headerProps: {
+      includeSpacer: true,
+      showDatePicker: true,
+      showTabs: true,
+    },
   },
 ];
 
@@ -80,16 +111,30 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title' | 'telemetryId'>> = 
 
 export const PageRouter: FC = () => {
   return (
-    <Switch>
-      {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
-        <Route path={path} key={telemetryId} exact={true}>
-          <div data-test-subj={dataTestSubj}>
-            <RouteInit title={title} path={path} telemetryId={telemetryId} />
-            <RouteComponent />
-          </div>
-        </Route>
-      ))}
-      <Route component={NotFoundPage} />
-    </Switch>
+    <>
+      {/* Independent page header route that matches all paths and passes appropriate header props */}
+      {/* Prevents the header from being remounted on route changes */}
+      <Route
+        path={[...Routes.map((route) => route.path)]}
+        exact={true}
+        render={({ match }: RouteComponentProps) => {
+          const routeProps: RouteProps | undefined = Routes.find(
+            (route: RouteProps) => route?.path === match?.path
+          );
+          return routeProps?.headerProps && <PageHeader {...routeProps?.headerProps} />;
+        }}
+      />
+      <Switch>
+        {Routes.map(({ title, path, component: RouteComponent, dataTestSubj, telemetryId }) => (
+          <Route path={path} key={telemetryId} exact={true}>
+            <div data-test-subj={dataTestSubj}>
+              <RouteInit title={title} path={path} telemetryId={telemetryId} />
+              <RouteComponent />
+            </div>
+          </Route>
+        ))}
+        <Route component={NotFoundPage} />
+      </Switch>
+    </>
   );
 };
