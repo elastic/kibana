@@ -115,8 +115,8 @@ on specific index patterns. For more information, see
 . Log out of {kib} and verify that you can log in as a normal user. If you are running {kib} locally, go to `https://localhost:5601` and
 enter the credentials for a user you've assigned a {kib} user role. For example, you could log in as the user `jacknich`.
 +
-NOTE: This must be a user who has been assigned <<kibana-privileges, Kibana privileges>>. {kib} server credentials (the built-in
-`kibana` user) should only be used internally by the {kib} server.
+NOTE: This must be a user who has been assigned the `kibana_user` role. {kib} server credentials (the built-in `kibana` user) should only be
+used internally by the {kib} server.
 
 include::authentication/index.asciidoc[]
 include::securing-communications/index.asciidoc[]
