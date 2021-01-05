@@ -6,7 +6,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { pickBy } from 'lodash/fp';
-import React, { forwardRef, useCallback } from 'react';
+import React, { forwardRef, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { OutPortal } from 'react-reverse-portal';
 
@@ -73,7 +73,14 @@ export const HeaderGlobal = React.memo(
       const search = useGetUrlSearch(navTabs.overview);
       const { application, http } = useKibana().services;
       const { navigateToApp, getUrlForApp } = application;
-      const overviewPath = getUrlForApp(APP_ID, { path: SecurityPageName.overview });
+      const overviewPath = useMemo(
+        () => getUrlForApp(APP_ID, { path: SecurityPageName.overview }),
+        [getUrlForApp]
+      );
+      const overviewHref = useMemo(() => getAppOverviewUrl(overviewPath, search), [
+        overviewPath,
+        search,
+      ]);
 
       const basePath = http.basePath.get();
       const goToOverview = useCallback(
@@ -95,10 +102,7 @@ export const HeaderGlobal = React.memo(
               <FlexItem>
                 <EuiFlexGroup alignItems="center" responsive={false}>
                   <FlexItem grow={false}>
-                    <LinkAnchor
-                      onClick={goToOverview}
-                      href={getAppOverviewUrl(overviewPath, search)}
-                    >
+                    <LinkAnchor onClick={goToOverview} href={overviewHref}>
                       <EuiIcon aria-label={i18n.SECURITY_SOLUTION} type="logoSecurity" size="l" />
                     </LinkAnchor>
                   </FlexItem>
