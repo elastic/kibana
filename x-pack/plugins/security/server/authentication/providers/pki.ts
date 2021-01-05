@@ -54,8 +54,13 @@ function stringifyCertificate(peerCertificate: DetailedPeerCertificate) {
     valid_to: validTo,
   } = peerCertificate;
 
-  // The issuerCertificate field can be an Object, null, or (in some edge cases) undefined. This distinction can be useful for
-  // troubleshooting mutual TLS connection problems, so we include it in the stringified certificate that is printed to the debug logs.
+  // The issuerCertificate field can be three different values:
+  //  * Object: In this case, the issuer certificate is an object
+  //  * null: In this case, the issuer certificate is a null value; this should not happen according to the type definition but historically there was code in place to account for this
+  //  * undefined: The issuer certificate chain is broken; this should not happen according to the type definition but we have observed this edge case behavior with certain client/server configurations
+  // This distinction can be useful for troubleshooting mutual TLS connection problems, so we include it in the stringified certificate that is printed to the debug logs.
+  // There are situations where a partial client certificate chain is accepted by Node, but we cannot verify the chain in Kibana because an intermediate issuerCertificate is undefined.
+  // If this happens, Kibana will reject the authentication attempt, and the client and/or server need to ensure that the entire CA chain is installed.
   let issuerCertType: string;
   if (issuerCertificate === undefined) {
     issuerCertType = 'undefined';
