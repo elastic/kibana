@@ -213,7 +213,7 @@ describe('helpers', () => {
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
       expect(result[0].title).toEqual('Mitre Attack');
       expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
-        i18n.UNKNOWN_TACTIC
+        'Collection (TA000999)'
       );
       expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
         'Audio Capture (T1123)'
@@ -237,7 +237,7 @@ describe('helpers', () => {
         'Collection (TA0009)'
       );
       expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
-        i18n.UNKNOWN_TECHNIQUE
+        'Audio Capture (T1123456)'
       );
     });
 
@@ -270,7 +270,7 @@ describe('helpers', () => {
         'Audio Capture (T1123)'
       );
       expect(wrapper.find('[data-test-subj="threatSubtechniqueLink"]').text()).toEqual(
-        i18n.UNKNOWN_SUBTECHNIQUE
+        'Audio Capture Data (T1123.000123)'
       );
     });
 

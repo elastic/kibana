@@ -96,24 +96,3 @@ export const THRESHOLD_RESULTS_AGGREGATED_BY = i18n.translate(
     defaultMessage: 'Results aggregated by',
   }
 );
-
-export const UNKNOWN_TACTIC = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.unknownTactic',
-  {
-    defaultMessage: 'Unknown Tactic',
-  }
-);
-
-export const UNKNOWN_TECHNIQUE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.unknownTechnique',
-  {
-    defaultMessage: 'Unknown Technique',
-  }
-);
-
-export const UNKNOWN_SUBTECHNIQUE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.unknownSubtechnique',
-  {
-    defaultMessage: 'Unknown Subtechnique',
-  }
-);
