@@ -40,7 +40,7 @@ export const Expression: FC<ExpressionProps> = ({ done }) => {
     return <ElementNotSelected done={done} />;
   }
 
-  return <ExpressionContainer done={done} element={element} pageId={pageId} />;
+  return <ExpressionContainer key={element.id} done={done} element={element} pageId={pageId} />;
 };
 
 const ExpressionContainer: FC<ExpressionContainerProps> = ({ done, element, pageId }) => {
