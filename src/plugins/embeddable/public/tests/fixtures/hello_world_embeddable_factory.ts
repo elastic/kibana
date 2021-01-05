@@ -39,7 +39,7 @@ export class HelloWorldEmbeddableFactoryDefinition implements EmbeddableFactoryD
   }
 
   public getDisplayName() {
-    return i18n.translate('embeddableExamples.helloworld.displayName', {
+    return i18n.translate('embeddableApi.helloworld.displayName', {
       defaultMessage: 'hello world',
     });
   }
