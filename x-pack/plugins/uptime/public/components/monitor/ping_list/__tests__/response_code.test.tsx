@@ -17,9 +17,9 @@ describe('ResponseCodeColumn', () => {
     expect(getByText(statusCode)).toBeInTheDocument();
   });
 
-  it('does not when statusCode is unavailable', () => {
+  it('renders error content when statusCode is unavailable', () => {
     const { queryByText } = render(<ResponseCodeColumn statusCode={''} />);
 
-    expect(queryByText(statusCode)).not.toBeInTheDocument();
+    expect(queryByText('--')).toBeInTheDocument();
   });
 });
