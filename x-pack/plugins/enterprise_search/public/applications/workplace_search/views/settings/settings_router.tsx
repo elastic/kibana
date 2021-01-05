@@ -44,11 +44,19 @@ export const SettingsRouter: React.FC = () => {
       <FlashMessages />
       <Switch>
         <Redirect exact from={ORG_SETTINGS_PATH} to={ORG_SETTINGS_CUSTOMIZE_PATH} />
-        <Route exact path={ORG_SETTINGS_CUSTOMIZE_PATH} component={Customize} />
-        <Route exact path={ORG_SETTINGS_CONNECTORS_PATH} component={Connectors} />
-        <Route exact path={ORG_SETTINGS_OAUTH_APPLICATION_PATH} component={OauthApplication} />
+        <Route exact path={ORG_SETTINGS_CUSTOMIZE_PATH}>
+          <Customize />
+        </Route>
+        <Route exact path={ORG_SETTINGS_CONNECTORS_PATH}>
+          <Connectors />
+        </Route>
+        <Route exact path={ORG_SETTINGS_OAUTH_APPLICATION_PATH}>
+          <OauthApplication />
+        </Route>
         {staticSourceData.map(({ editPath }, i) => (
-          <Route key={i} exact path={editPath} render={() => <SourceConfig sourceIndex={i} />} />
+          <Route key={i} exact path={editPath}>
+            <SourceConfig sourceIndex={i} />
+          </Route>
         ))}
       </Switch>
     </>
