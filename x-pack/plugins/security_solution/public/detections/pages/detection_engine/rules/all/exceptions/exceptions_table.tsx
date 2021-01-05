@@ -101,11 +101,14 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     const [exportingListIds, setExportingListIds] = useState<string[]>([]);
     const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
 
-    const handleDeleteSuccess = useCallback(() => {
-      notifications.toasts.addSuccess({
-        title: i18n.exceptionDeleteSuccessMessage(referenceModalState.listId),
-      });
-    }, [notifications.toasts, referenceModalState]);
+    const handleDeleteSuccess = useCallback(
+      (listId?: string) => () => {
+        notifications.toasts.addSuccess({
+          title: i18n.exceptionDeleteSuccessMessage(listId ?? referenceModalState.listId),
+        });
+      },
+      [notifications.toasts, referenceModalState.listId]
+    );
 
     const handleDeleteError = useCallback(
       (err: Error & { body?: { message: string } }): void => {
@@ -118,7 +121,15 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
     );
 
     const handleDelete = useCallback(
-      ({ id, namespaceType }: { id: string; namespaceType: NamespaceType }) => async () => {
+      ({
+        id,
+        listId,
+        namespaceType,
+      }: {
+        id: string;
+        listId: string;
+        namespaceType: NamespaceType;
+      }) => async () => {
         try {
           setDeletingListIds((ids) => [...ids, id]);
           if (refreshExceptions != null) {
@@ -130,7 +141,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
               id,
               namespaceType,
               onError: handleDeleteError,
-              onSuccess: handleDeleteSuccess,
+              onSuccess: handleDeleteSuccess(listId),
             });
 
             if (refreshExceptions != null) {
@@ -285,7 +296,7 @@ export const ExceptionListsTable = React.memo<ExceptionListsTableProps>(
           id: exceptionListId,
           namespaceType: exceptionListNamespaceType,
           onError: handleDeleteError,
-          onSuccess: handleDeleteSuccess,
+          onSuccess: handleDeleteSuccess(),
         });
       } catch (err) {
         handleDeleteError(err);

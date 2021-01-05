@@ -21,7 +21,7 @@ export type AllExceptionListsColumns = EuiBasicTableColumn<ExceptionListInfo>;
 
 export const getAllExceptionListsColumns = (
   onExport: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
-  onDelete: (arg: { id: string; namespaceType: NamespaceType }) => () => void,
+  onDelete: (arg: { id: string; listId: string; namespaceType: NamespaceType }) => () => void,
   history: History,
   formatUrl: FormatUrl
 ): AllExceptionListsColumns[] => [
@@ -114,10 +114,10 @@ export const getAllExceptionListsColumns = (
     align: 'center',
     width: '25px',
     isExpander: false,
-    render: ({ id, namespace_type: namespaceType }: ExceptionListInfo) => (
+    render: ({ id, list_id: listId, namespace_type: namespaceType }: ExceptionListInfo) => (
       <EuiButtonIcon
         color="danger"
-        onClick={onDelete({ id, namespaceType })}
+        onClick={onDelete({ id, listId, namespaceType })}
         aria-label="Delete exception list"
         iconType="trash"
       />

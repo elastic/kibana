@@ -98,7 +98,7 @@ export const EXCEPTION_DELETE_ERROR = i18n.translate(
 );
 
 export const exceptionDeleteSuccessMessage = (listId: string) =>
-  i18n.translate('xpack.securitySolution.exceptions.referenceModalDescription', {
+  i18n.translate('xpack.securitySolution.exceptions.referenceModalSuccessDescription', {
     defaultMessage: 'Exception list - {listId} - deleted successfully.',
     values: { listId },
   });
