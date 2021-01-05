@@ -7,7 +7,6 @@
 import moment from 'moment';
 import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
 import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
 import { savedObjectsAdapter } from '../../saved_objects';
 import { UptimeESClient, createUptimeESClient } from '../../lib';
