@@ -483,6 +483,7 @@ export {
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
 export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
+export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*
  * Plugin setup

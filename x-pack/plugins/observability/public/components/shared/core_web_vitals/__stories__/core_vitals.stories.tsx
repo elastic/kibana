@@ -33,13 +33,26 @@ export default {
   ],
 };
 
-export function Basic() {
+export function NoDataAvailable() {
+  return (
+    <CoreVitalItem
+      thresholds={{ good: '0.1', bad: '0.25' }}
+      title={LCP_LABEL}
+      value={null}
+      loading={false}
+      helpLabel={LCP_HELP_LABEL}
+    />
+  );
+}
+
+export function OneHundredPercentGood() {
   return (
     <CoreVitalItem
       thresholds={{ good: '0.1', bad: '0.25' }}
       title={LCP_LABEL}
       value={'0.00s'}
       loading={false}
+      ranks={[100, 0, 0]}
       helpLabel={LCP_HELP_LABEL}
     />
   );

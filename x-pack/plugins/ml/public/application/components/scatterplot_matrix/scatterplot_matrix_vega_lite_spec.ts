@@ -24,12 +24,12 @@ export const OUTLIER_SCORE_FIELD = 'outlier_score';
 
 const SCATTERPLOT_SIZE = 125;
 
-const DEFAULT_COLOR = euiPaletteColorBlind()[0];
-const COLOR_OUTLIER = euiPaletteNegative(2)[1];
-const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
-const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
+export const DEFAULT_COLOR = euiPaletteColorBlind()[0];
+export const COLOR_OUTLIER = euiPaletteNegative(2)[1];
+export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
+export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
 
-const getColorSpec = (
+export const getColorSpec = (
   euiTheme: typeof euiThemeLight,
   outliers = true,
   color?: string,
@@ -72,10 +72,13 @@ export const getScatterplotMatrixVegaLiteSpec = (
     calculate: `datum['${column}']`,
     as: column,
   }));
-  transform.push({
-    calculate: `datum['${resultsField}.${OUTLIER_SCORE_FIELD}']`,
-    as: OUTLIER_SCORE_FIELD,
-  });
+
+  if (resultsField !== undefined) {
+    transform.push({
+      calculate: `datum['${resultsField}.${OUTLIER_SCORE_FIELD}']`,
+      as: OUTLIER_SCORE_FIELD,
+    });
+  }
 
   return {
     $schema: 'https://vega.github.io/schema/vega-lite/v4.17.0.json',

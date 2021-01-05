@@ -37,6 +37,14 @@ describe('getThrouputChartSelector', () => {
     expect(throughputTimeseries).toEqual({ throughputTimeseries: [] });
   });
 
+  it('returns default values when timeseries is empty', () => {
+    const throughputTimeseries = getThrouputChartSelector({
+      theme,
+      throuputChart: { throughputTimeseries: [] },
+    });
+    expect(throughputTimeseries).toEqual({ throughputTimeseries: [] });
+  });
+
   it('return throughput time series', () => {
     const throughputTimeseries = getThrouputChartSelector({
       theme,

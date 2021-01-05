@@ -24,4 +24,4 @@ image::fleet/images/fleet-start.png[{fleet} app in {kib}]
 == Get started
 
 To get started with {fleet}, refer to the
-{ingest-guide}/index.html[{fleet}] docs.
+{fleet-guide}/index.html[{fleet}] docs.

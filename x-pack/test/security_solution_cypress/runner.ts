@@ -16,7 +16,6 @@ export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrPr
   const config = getService('config');
   const esArchiver = getService('esArchiver');
 
-  await esArchiver.load('empty_kibana');
   await esArchiver.load('auditbeat');
 
   await withProcRunner(log, async (procs) => {

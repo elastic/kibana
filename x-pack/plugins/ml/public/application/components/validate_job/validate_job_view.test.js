@@ -27,6 +27,7 @@ const job = {
 };
 
 const getJobConfig = () => job;
+const getDuration = () => ({ start: 0, end: 1 });
 
 function prepareTest(messages) {
   const p = Promise.resolve(messages);
@@ -40,7 +41,9 @@ function prepareTest(messages) {
     },
   };
 
-  const component = <ValidateJob getJobConfig={getJobConfig} ml={ml} kibana={kibana} />;
+  const component = (
+    <ValidateJob getDuration={getDuration} getJobConfig={getJobConfig} ml={ml} kibana={kibana} />
+  );
 
   const wrapper = shallowWithIntl(component);
 

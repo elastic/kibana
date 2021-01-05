@@ -23,6 +23,7 @@ interface PrivilegesFromEs {
 interface StatsFromEs {
   data_stream: string;
   store_size: string;
+  store_size_bytes: number;
   maximum_timestamp: number;
 }
 
@@ -40,7 +41,7 @@ const enhanceDataStreams = ({
 
     if (dataStreamsStats) {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { store_size, maximum_timestamp } =
+      const { store_size, store_size_bytes, maximum_timestamp } =
         dataStreamsStats.find(
           ({ data_stream: statsName }: { data_stream: string }) => statsName === dataStream.name
         ) || {};
@@ -48,6 +49,7 @@ const enhanceDataStreams = ({
       enhancedDataStream = {
         ...enhancedDataStream,
         store_size,
+        store_size_bytes,
         maximum_timestamp,
       };
     }

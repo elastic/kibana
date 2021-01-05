@@ -37,6 +37,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppLeaveDefaultAction](./kibana-plugin-core-public.appleavedefaultaction.md) | Action to return from a [AppLeaveHandler](./kibana-plugin-core-public.appleavehandler.md) to execute the default behaviour when leaving the application.<!-- -->See  |
 |  [ApplicationSetup](./kibana-plugin-core-public.applicationsetup.md) |  |
 |  [ApplicationStart](./kibana-plugin-core-public.applicationstart.md) |  |
+|  [AppMeta](./kibana-plugin-core-public.appmeta.md) | Input type for meta data for an application.<!-- -->Meta fields include <code>keywords</code> and <code>searchDeepLinks</code> Keywords is an array of string with which to associate the app, must include at least one unique string as an array. <code>searchDeepLinks</code> is an array of links that represent secondary in-app locations for the app. |
 |  [AppMountContext](./kibana-plugin-core-public.appmountcontext.md) | The context object received when applications are mounted to the DOM. Deprecated, use [CoreSetup.getStartServices](./kibana-plugin-core-public.coresetup.getstartservices.md)<!-- -->. |
 |  [AppMountParameters](./kibana-plugin-core-public.appmountparameters.md) |  |
 |  [Capabilities](./kibana-plugin-core-public.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
@@ -164,6 +165,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
 |  [PluginOpaqueId](./kibana-plugin-core-public.pluginopaqueid.md) |  |
 |  [PublicAppInfo](./kibana-plugin-core-public.publicappinfo.md) | Public information about a registered [application](./kibana-plugin-core-public.app.md) |
+|  [PublicAppMetaInfo](./kibana-plugin-core-public.publicappmetainfo.md) | Public information about a registered app's [keywords](./kibana-plugin-core-public.appmeta.md) |
 |  [PublicAppSearchDeepLinkInfo](./kibana-plugin-core-public.publicappsearchdeeplinkinfo.md) | Public information about a registered app's [searchDeepLinks](./kibana-plugin-core-public.appsearchdeeplink.md) |
 |  [PublicUiSettingsParams](./kibana-plugin-core-public.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) exposed to the client-side. |
 |  [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
