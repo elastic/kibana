@@ -111,11 +111,11 @@ tags:(success and info and security)
 [discrete]
 === Range queries
 
-KQL supports `>`, `>=`, `<`, and `<=`. For example:
+KQL supports `>`, `>=`, `<`, and `<=` on numeric and date types. For example:
 
 [source,yaml]
 -------------------
-account_number >= 100 and items_sold <= 200
+account_number >= 100 and items_sold <= 200 and @timestamp >= now-5m
 -------------------
 
 [discrete]
