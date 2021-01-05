@@ -31,7 +31,6 @@ jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
 const mockGetUrlForApp = jest.fn();
-
 jest.mock('../../lib/kibana', () => {
   return {
     useKibana: () => ({

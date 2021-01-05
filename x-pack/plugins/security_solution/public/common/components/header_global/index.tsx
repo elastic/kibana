@@ -72,7 +72,9 @@ export const HeaderGlobal = React.memo(
       const { timelineFullScreen } = useTimelineFullScreen();
       const search = useGetUrlSearch(navTabs.overview);
       const { application, http } = useKibana().services;
-      const { navigateToApp } = application;
+      const { navigateToApp, getUrlForApp } = application;
+      const overviewPath = getUrlForApp(APP_ID, { path: SecurityPageName.overview });
+
       const basePath = http.basePath.get();
       const goToOverview = useCallback(
         (ev) => {
@@ -93,7 +95,10 @@ export const HeaderGlobal = React.memo(
               <FlexItem>
                 <EuiFlexGroup alignItems="center" responsive={false}>
                   <FlexItem grow={false}>
-                    <LinkAnchor onClick={goToOverview} href={getAppOverviewUrl(basePath, search)}>
+                    <LinkAnchor
+                      onClick={goToOverview}
+                      href={getAppOverviewUrl(overviewPath, search)}
+                    >
                       <EuiIcon aria-label={i18n.SECURITY_SOLUTION} type="logoSecurity" size="l" />
                     </LinkAnchor>
                   </FlexItem>
