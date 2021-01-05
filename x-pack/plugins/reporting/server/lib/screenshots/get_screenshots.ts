@@ -33,35 +33,36 @@ export const getScreenshots = async (
     // be visible in the viewport. This workaround resizes the viewport to the actual content height and width.
     // NOTE: this will fire a window resize event
 
-    // Check current viewport size
-    const [height, width] = await browser.evaluate(
-      {
-        fn: () => [document.body.clientHeight, document.body.clientWidth],
-        args: [],
-      },
-      { context: CONTEXT_GETBROWSERDIMENSIONS },
-      logger
-    );
-
-    logger.debug(`Browser viewport: height: ${height}, width: ${width}`);
-
-    // Resize the viewport if the clip area is not visible
-    if (
-      height < item.position.boundingClientRect.height + item.position.boundingClientRect.top ||
-      width < item.position.boundingClientRect.width + item.position.boundingClientRect.left
-    ) {
-      await browser.setViewport(
+    const { top, left, height, width } = item.position.boundingClientRect;
+    {
+      // Check current viewport size
+      const [viewHeight, viewWidth] = await browser.evaluate(
         {
-          height: item.position.boundingClientRect.height + item.position.boundingClientRect.top,
-          width: item.position.boundingClientRect.width + item.position.boundingClientRect.left,
-          zoom: layout.getBrowserZoom(),
+          fn: () => [document.body.clientHeight, document.body.clientWidth],
+          args: [],
         },
+        { context: CONTEXT_GETBROWSERDIMENSIONS },
         logger
       );
+
+      logger.debug(`Browser viewport: height: ${viewHeight}, width: ${viewWidth}`);
+
+      // Resize the viewport if the clip area is not visible
+      if (viewHeight < height + top || viewWidth < width + left) {
+        await browser.setViewport(
+          {
+            height: height + top,
+            width: width + left,
+            zoom: layout.getBrowserZoom(),
+          },
+          logger
+        );
+      }
     }
 
-    const base64EncodedData = await browser.screenshot(item.position);
+    logger.debug(`Capturing item - top:${top} left:${left} height:${height} width:${width}`);
 
+    const base64EncodedData = await browser.screenshot(item.position);
     screenshots.push({
       base64EncodedData,
       title: item.attributes.title,
