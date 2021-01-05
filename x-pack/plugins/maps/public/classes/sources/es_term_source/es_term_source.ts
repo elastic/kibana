@@ -25,6 +25,7 @@ import {
 import {
   ESTermSourceDescriptor,
   VectorJoinSourceRequestMeta,
+  VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
