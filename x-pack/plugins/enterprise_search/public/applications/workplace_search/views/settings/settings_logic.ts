@@ -7,7 +7,6 @@
 import { kea, MakeLogicType } from 'kea';
 
 import http from 'shared/http';
-import routes from 'workplace_search/routes';
 
 import {
   clearFlashMessages,
@@ -119,20 +118,20 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
   },
   listeners: ({ actions, values }) => ({
     initializeSettings: () => {
-      const route = routes.fritoPieOrganizationSettingsPath();
+      const route = '/api/workplace_search/org/settings';
       http(route)
         .then(({ data }) => actions.setServerProps(data))
         .catch((e) => flashAPIErrors(e));
     },
     initializeConnectors: () => {
-      const route = routes.fritoPieOrganizationSettingsContentSourceOauthConfigurationsPath();
+      const route = '/api/workplace_search/org/settings/connectors';
 
       http(route)
         .then(({ data }) => actions.onInitializeConnectors(data))
         .catch((e) => flashAPIErrors(e));
     },
     updateOrgName: () => {
-      const route = routes.customizeFritoPieOrganizationSettingsPath();
+      const route = '/api/workplace_search/org/settings/customize';
       const { orgNameInputValue: name } = values;
 
       http
@@ -144,7 +143,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         .catch((e) => flashAPIErrors(e));
     },
     updateOauthApplication: () => {
-      const route = routes.oauthApplicationFritoPieOrganizationSettingsPath();
+      const route = '/api/workplace_search/org/settings/oauth_application';
       const oauthApplication = values.oauthApplication || ({} as IOauthApplication);
       const { name, redirectUri, confidential } = oauthApplication;
 
@@ -159,9 +158,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         .catch((e) => flashAPIErrors(e));
     },
     deleteSourceConfig: ({ serviceType, name }) => {
-      const route = routes.fritoPieOrganizationSettingsContentSourceOauthConfigurationPath(
-        serviceType
-      );
+      const route = `/api/workplace_search/org/settings/connectors/${serviceType}`;
 
       http
         .delete(route)
