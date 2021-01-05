@@ -119,12 +119,7 @@ export const waitForAlertsIndexToBeCreated = () => {
         method: 'POST',
         url: `/api/detection_engine/index`,
         headers: { 'kbn-xsrf': 'create-signals-index' },
-      }).then(() =>
-        cy.request('/api/detection_engine/index', {
-          failOnStatusCode: false,
-          retryOnStatusCodeFailure: true,
-        })
-      );
+      });
     }
   });
 };
