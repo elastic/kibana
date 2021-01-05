@@ -53,7 +53,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
                 id="dashboard.noMatchRoute.bannerText"
                 defaultMessage="Dashboard application doesn't recognize this route: {route}."
                 values={{
-                  route: <EuiLink href={window.location.href}>{history.location.pathname}</EuiLink>,
+                  route: history.location.pathname,
                 }}
               />
             </p>
