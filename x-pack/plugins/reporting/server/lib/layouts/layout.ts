@@ -33,6 +33,7 @@ export abstract class Layout {
     pageSizeParams: PageSizeParams
   ): CustomPageSize | PredefinedPageSize;
 
+  // return unscaled dimensions, to allow adding top or left margin
   public abstract getViewport(itemsCount: number): ViewZoomWidthHeight | null;
 
   public abstract getBrowserZoom(): number;

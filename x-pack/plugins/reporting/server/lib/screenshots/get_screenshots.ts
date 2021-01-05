@@ -17,11 +17,11 @@ import { CONTEXT_GETBROWSERDIMENSIONS } from './constants';
 const resizeToClipArea = async (
   item: ElementsPositionAndAttribute,
   browser: HeadlessChromiumDriver,
-  layout: LayoutInstance,
+  zoom: number,
   logger: LevelLogger
 ) => {
   // Check current viewport size
-  const { top, left, width, height } = item.position.boundingClientRect;
+  const { top, left, width, height } = item.position.boundingClientRect; // the "unscaled" pixel sizes
   const [viewWidth, viewHeight] = await browser.evaluate(
     {
       fn: () => [document.body.clientHeight, document.body.clientWidth],
@@ -37,7 +37,7 @@ const resizeToClipArea = async (
   if (viewWidth < width + left || viewHeight < height + top) {
     logger.debug(`Item's position is not within the viewport.`);
 
-    const zoom = layout.getBrowserZoom();
+    // add top and left margin to unscaled measurements
     const newWidth = width + left;
     const newHeight = height + top;
 
@@ -45,8 +45,8 @@ const resizeToClipArea = async (
 
     await browser.setViewport(
       {
-        width: newWidth * zoom,
-        height: newHeight * zoom,
+        width: newWidth,
+        height: newHeight,
         zoom,
       },
       logger
@@ -74,7 +74,7 @@ export const getScreenshots = async (
     const endTrace = startTrace('get_screenshots', 'read');
     const item = elementsPositionAndAttributes[i];
 
-    await resizeToClipArea(item, browser, layout, logger);
+    await resizeToClipArea(item, browser, layout.getBrowserZoom(), logger);
     const base64EncodedData = await browser.screenshot(item.position);
 
     screenshots.push({

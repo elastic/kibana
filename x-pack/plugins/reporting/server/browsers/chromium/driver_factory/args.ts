@@ -41,7 +41,7 @@ export const args = ({ userDataDir, viewport, disableSandbox, proxy: proxyConfig
     '--disable-gpu',
     '--headless',
     '--hide-scrollbars',
-    `--window-size=${Math.floor(viewport.width)},${Math.floor(viewport.height)}`,
+    `--window-size=${Math.floor(viewport.width)},${Math.floor(viewport.height)}`, // NOTE: this does NOT set the viewport size. That is what layoutType.getBrowserViewport is for
   ];
 
   if (proxyConfig.enabled) {

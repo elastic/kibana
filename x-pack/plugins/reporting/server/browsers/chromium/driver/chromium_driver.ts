@@ -199,10 +199,10 @@ export class HeadlessChromiumDriver {
     { width: _width, height: _height, zoom }: ViewZoomWidthHeight,
     logger: LevelLogger
   ): Promise<void> {
-    const width = Math.floor(_width / zoom);
-    const height = Math.floor(_height / zoom);
+    const width = Math.floor(_width);
+    const height = Math.floor(_height);
 
-    logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
+    logger.debug(`Setting viewport to: width=${width} height=${height} zoom=${zoom}`);
 
     await this.page.setViewport({
       width,
