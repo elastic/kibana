@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { waitFor } from '@testing-library/dom';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
@@ -38,23 +39,20 @@ describe('EventDetails', () => {
     isAlert: true,
   };
 
-  const wrapper = mount(
-    <TestProviders>
-      <EventDetails {...defaultProps} />
-    </TestProviders>
-  );
-
-  const alertsWrapper = mount(
-    <TestProviders>
-      <EventDetails {...alertsProps} />
-    </TestProviders>
-  );
-
-  describe('rendering', () => {
-    test('should match snapshot', () => {
-      const shallowWrap = shallow(<EventDetails {...defaultProps} />);
-      expect(shallowWrap).toMatchSnapshot();
-    });
+  let wrapper: ReactWrapper;
+  let alertsWrapper: ReactWrapper;
+  beforeAll(async () => {
+    wrapper = mount(
+      <TestProviders>
+        <EventDetails {...defaultProps} />
+      </TestProviders>
+    ) as ReactWrapper;
+    alertsWrapper = mount(
+      <TestProviders>
+        <EventDetails {...alertsProps} />
+      </TestProviders>
+    ) as ReactWrapper;
+    await waitFor(() => wrapper.update());
   });
 
   describe('tabs', () => {
