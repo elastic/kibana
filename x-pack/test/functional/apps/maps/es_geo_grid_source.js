@@ -262,7 +262,7 @@ export default function ({ getPageObjects, getService }) {
       const LAYER_ID = 'g1xkv';
       it('should get expected number of grid cells', async () => {
         const mapboxStyle = await PageObjects.maps.getMapboxStyle();
-        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(13);
+        expect(mapboxStyle.sources[LAYER_ID].data.features.length).to.equal(26);
       });
 
       describe('inspector', () => {
