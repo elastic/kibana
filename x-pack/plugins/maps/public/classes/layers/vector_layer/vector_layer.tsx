@@ -61,6 +61,8 @@ import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_st
 import { IESSource } from '../../sources/es_source';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 
+const ABORT_SYNC_DATA = 'ABORT_SYNC_DATA';
+
 interface SourceResult {
   refreshed: boolean;
   featureCollection?: FeatureCollection;
@@ -384,10 +386,7 @@ export class VectorLayer extends AbstractLayer {
       if (!(e instanceof DataRequestAbortError)) {
         onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       }
-      return {
-        dataHasChanged: true,
-        join,
-      };
+      throw new Error(ABORT_SYNC_DATA);
     }
   }
 
@@ -426,7 +425,7 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
-  async _performInnerJoins(
+  _performInnerJoins(
     sourceResult: SourceResult,
     joinStates: JoinState[],
     updateSourceData: DataRequestContext['updateSourceData']
@@ -527,9 +526,7 @@ export class VectorLayer extends AbstractLayer {
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(dataRequestId, requestToken, error.message);
       }
-      return {
-        refreshed: false,
-      };
+      throw new Error(ABORT_SYNC_DATA);
     }
   }
 
@@ -635,6 +632,7 @@ export class VectorLayer extends AbstractLayer {
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(dataRequestId, requestToken, error.message);
       }
+      throw new Error(ABORT_SYNC_DATA);
     }
   }
 
@@ -725,6 +723,7 @@ export class VectorLayer extends AbstractLayer {
       stopLoading(dataRequestId, requestToken, formatters, nextMeta);
     } catch (error) {
       onLoadError(dataRequestId, requestToken, error.message);
+      throw new Error(ABORT_SYNC_DATA);
     }
   }
 
@@ -746,19 +745,25 @@ export class VectorLayer extends AbstractLayer {
     if (this.isLoadingBounds()) {
       return;
     }
-    await this._syncSourceStyleMeta(syncContext, source, style);
-    await this._syncSourceFormatters(syncContext, source, style);
-    const sourceResult = await this._syncSource(syncContext, source, style);
-    if (
-      !sourceResult.featureCollection ||
-      !sourceResult.featureCollection.features.length ||
-      !this.hasJoins()
-    ) {
-      return;
-    }
 
-    const joinStates = await this._syncJoins(syncContext, style);
-    await this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
+    try {
+      await this._syncSourceStyleMeta(syncContext, source, style);
+      await this._syncSourceFormatters(syncContext, source, style);
+      const sourceResult = await this._syncSource(syncContext, source, style);
+      if (
+        !sourceResult.featureCollection ||
+        !sourceResult.featureCollection.features.length ||
+        !this.hasJoins()
+      ) {
+        return;
+      }
+
+      const joinStates = await this._syncJoins(syncContext, style);
+      this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
+    } catch (error) {
+      // Error captured for failing data request
+      // Exception thrown to abort sync data thread
+    }
   }
 
   _getSourceFeatureCollection() {
