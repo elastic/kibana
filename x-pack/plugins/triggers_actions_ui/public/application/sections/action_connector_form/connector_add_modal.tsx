@@ -18,7 +18,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import { connectorReducer } from './connector_reducer';
+import { createConnectorReducer, InitialConnector, ConnectorReducer } from './connector_reducer';
 import { createActionConnector } from '../../lib/action_connector_api';
 import './connector_add_modal.scss';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -27,6 +27,7 @@ import {
   ActionConnector,
   IErrorObject,
   ActionTypeRegistryContract,
+  UserConfiguredActionConnector,
 } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -51,7 +52,10 @@ export const ConnectorAddModal = ({
     application: { capabilities },
   } = useKibana().services;
   let hasErrors = false;
-  const initialConnector = useMemo(
+  const initialConnector: InitialConnector<
+    Record<string, unknown>,
+    Record<string, unknown>
+  > = useMemo(
     () => ({
       actionTypeId: actionType.id,
       config: {},
@@ -62,7 +66,16 @@ export const ConnectorAddModal = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);
 
-  const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
+  const reducer: ConnectorReducer<
+    Record<string, unknown>,
+    Record<string, unknown>
+  > = createConnectorReducer<Record<string, unknown>, Record<string, unknown>>();
+  const [{ connector }, dispatch] = useReducer(reducer, {
+    connector: initialConnector as UserConfiguredActionConnector<
+      Record<string, unknown>,
+      Record<string, unknown>
+    >,
+  });
   const setConnector = (value: any) => {
     dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
@@ -87,7 +100,10 @@ export const ConnectorAddModal = ({
   hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
-    await createActionConnector({ http, connector })
+    await createActionConnector({
+      http,
+      connector,
+    })
       .then((savedConnector) => {
         if (toasts) {
           toasts.addSuccess(

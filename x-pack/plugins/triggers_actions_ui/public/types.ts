@@ -73,11 +73,7 @@ export interface Pagination {
   size: number;
 }
 
-export interface ActionTypeModel<
-  ActionConfig = unknown,
-  ActionSecrets = unknown,
-  ActionParams = unknown
-> {
+export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, ActionParams = any> {
   id: string;
   iconClass: string;
   selectMessage: string;
@@ -95,7 +91,7 @@ export interface ActionTypeModel<
 }
 
 export interface ValidationResult {
-  errors: Record<string, unknown>;
+  errors: Record<string, any>;
 }
 
 interface ActionConnectorProps<Config, Secrets> {
@@ -203,7 +199,7 @@ export interface AlertTypeModel<Params extends AlertTypeParams = AlertTypeParams
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (alertParams: Params) => ValidationResult;
   alertParamsExpression:
-    | React.FunctionComponent<unknown>
+    | React.FunctionComponent<any>
     | React.LazyExoticComponent<ComponentType<AlertTypeParamsExpressionProps<Params>>>;
   requiresAppContext: boolean;
   defaultActionMessage?: string;

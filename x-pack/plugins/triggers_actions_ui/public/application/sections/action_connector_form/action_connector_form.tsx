@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ReducerAction } from './connector_reducer';
 import {
   ActionConnector,
   IErrorObject,
@@ -27,7 +26,7 @@ import {
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
-import { ConnectorReducerAction } from './connector_reducer_gen';
+import { ConnectorReducerAction } from './connector_reducer';
 
 export function validateBaseProperties(actionObject: ActionConnector) {
   const validationResult = { errors: {} };
@@ -54,13 +53,13 @@ interface ActionConnectorProps<
 > {
   connector: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>;
   dispatch: React.Dispatch<ConnectorReducerAction<ConnectorConfig, ConnectorSecrets>>;
-  actionTypeName: string;
-  serverError?: {
-    body: { message: string; error: string };
-  };
   errors: IErrorObject;
   actionTypeRegistry: ActionTypeRegistryContract;
   consumer?: string;
+  actionTypeName?: string;
+  serverError?: {
+    body: { message: string; error: string };
+  };
 }
 
 export const ActionConnectorForm = ({
@@ -119,7 +118,7 @@ export const ActionConnectorForm = ({
                 id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningDescriptionText"
                 defaultMessage="To create this connector, you must configure at least one {actionType} account. {docLink}"
                 values={{
-                  actionType: actionTypeName,
+                  actionType: actionTypeName ?? connector.actionTypeId,
                   docLink: (
                     <EuiLink
                       href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/action-types.html`}

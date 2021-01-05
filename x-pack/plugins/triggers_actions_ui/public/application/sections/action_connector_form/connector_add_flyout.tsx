@@ -31,16 +31,11 @@ import {
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
 } from '../../../types';
-import { connectorReducer } from './connector_reducer';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import {
-  createConnectorReducer,
-  InitialConnector,
-  InitialConnectorReducer,
-} from './connector_reducer_gen';
+import { createConnectorReducer, InitialConnector, ConnectorReducer } from './connector_reducer';
 
 export interface ConnectorAddFlyoutProps {
   onClose: () => void;
@@ -69,17 +64,22 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
   // hooks
-  const initialConnector = {
+  const initialConnector: InitialConnector<Record<string, unknown>, Record<string, unknown>> = {
     actionTypeId: actionType?.id ?? '',
     config: {},
     secrets: {},
-  } as InitialConnector<Record<string, unknown>, Record<string, unknown>>;
+  };
 
-  const reducer: InitialConnectorReducer<
+  const reducer: ConnectorReducer<
     Record<string, unknown>,
     Record<string, unknown>
   > = createConnectorReducer<Record<string, unknown>, Record<string, unknown>>();
-  const [{ connector }, dispatch] = useReducer(reducer, { connector: initialConnector });
+  const [{ connector }, dispatch] = useReducer(reducer, {
+    connector: initialConnector as UserConfiguredActionConnector<
+      Record<string, unknown>,
+      Record<string, unknown>
+    >,
+  });
 
   const setActionProperty = <Key extends keyof ActionConnector>(
     key: Key,
@@ -120,9 +120,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
     actionTypeModel = actionTypeRegistry.get(actionType.id);
 
     const errors = {
-      ...actionTypeModel?.validateConnector(
-        connector as UserConfiguredActionConnector<unknown, unknown>
-      ).errors,
+      ...actionTypeModel?.validateConnector(connector).errors,
       ...validateBaseProperties(connector as ActionConnector).errors,
     } as IErrorObject;
     hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
@@ -141,7 +139,13 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
     );
   }
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
-    await createActionConnector({ http, connector })
+    await createActionConnector({
+      http,
+      connector: connector as UserConfiguredActionConnector<
+        Record<string, unknown>,
+        Record<string, unknown>
+      >,
+    })
       .then((savedConnector) => {
         if (toasts) {
           toasts.addSuccess(
