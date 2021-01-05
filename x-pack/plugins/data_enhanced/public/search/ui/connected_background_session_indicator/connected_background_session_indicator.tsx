@@ -29,11 +29,34 @@ export const createConnectedBackgroundSessionIndicator = ({
     .getRefreshIntervalUpdate$()
     .pipe(map(isAutoRefreshEnabled), distinctUntilChanged());
 
+  const getCapabilitiesByAppId = (
+    capabilities: ApplicationStart['capabilities'],
+    appId?: string
+  ) => {
+    switch (appId) {
+      case 'dashboards':
+        return capabilities.dashboard;
+      case 'discover':
+        return capabilities.discover;
+      default:
+        return undefined;
+    }
+  };
+
   return () => {
     const state = useObservable(sessionService.state$.pipe(debounceTime(500)));
     const autoRefreshEnabled = useObservable(isAutoRefreshEnabled$, isAutoRefreshEnabled());
+    const appId = useObservable(application.currentAppId$, undefined);
+
     let disabled = false;
     let disabledReasonText: string = '';
+
+    if (getCapabilitiesByAppId(application.capabilities, appId)?.storeSearchSession !== true) {
+      disabled = true;
+      disabledReasonText = i18n.translate('xpack.data.backgroundSessionIndicator.noCapability', {
+        defaultMessage: "You don't have permissions to send to background.",
+      });
+    }
 
     if (autoRefreshEnabled) {
       disabled = true;
