@@ -25,7 +25,6 @@ import {
   AlertEnableAction,
   CommonAlertFilter,
   CommonAlertParams,
-  LegacyAlert,
 } from '../../common/types/alerts';
 import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
@@ -254,10 +253,6 @@ export class BaseAlert {
       params as CommonAlertParams,
       availableCcs
     );
-    // if (this.alertOptions.legacy) {
-    //   const data = await this.fetchLegacyData(callCluster, clusters, availableCcs);
-    //   return await this.processLegacyData(data, clusters, services, state);
-    // }
     const data = await this.fetchData(params, callCluster, clusters, availableCcs);
     return await this.processData(data, clusters, services, state);
   }
@@ -292,38 +287,8 @@ export class BaseAlert {
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<Array<AlertData & unknown>> {
-    return [];
-    // throw new Error('Child classes must implement `fetchData`');
+    throw new Error('Child classes must implement `fetchData`');
   }
-
-  // protected async fetchLegacyData(
-  //   callCluster: CallCluster,
-  //   clusters: AlertCluster[],
-  //   availableCcs: string[]
-  // ): Promise<AlertData[]> {
-  //   let alertIndexPattern = INDEX_ALERTS;
-  //   if (availableCcs) {
-  //     alertIndexPattern = getCcsIndexPattern(alertIndexPattern, availableCcs);
-  //   }
-  //   const legacyAlerts = await fetchLegacyAlerts(
-  //     callCluster,
-  //     clusters,
-  //     alertIndexPattern,
-  //     this.alertOptions.legacy!.watchName,
-  //     Globals.app.config.ui.max_bucket_size
-  //   );
-
-  //   return legacyAlerts.map((legacyAlert) => {
-  //     return {
-  //       clusterUuid: legacyAlert.metadata.cluster_uuid,
-  //       shouldFire: !legacyAlert.resolved_timestamp,
-  //       severity: mapLegacySeverity(legacyAlert.metadata.severity),
-  //       meta: legacyAlert,
-  //       nodeName: this.alertOptions.legacy!.nodeNameLabel,
-  //       ...this.alertOptions.legacy!.changeDataValues,
-  //     };
-  //   });
-  // }
 
   protected async processData(
     data: AlertData[],
@@ -379,34 +344,6 @@ export class BaseAlert {
     return state;
   }
 
-  protected async processLegacyData(
-    data: AlertData[],
-    clusters: AlertCluster[],
-    services: AlertServices,
-    state: ExecutedState
-  ) {
-    const currentUTC = +new Date();
-    for (const item of data) {
-      const instanceId = `${this.alertOptions.id}:${item.clusterUuid}`;
-      const instance = services.alertInstanceFactory(instanceId);
-      if (!item.shouldFire) {
-        instance.replaceState({ alertStates: [] });
-        continue;
-      }
-      const cluster = clusters.find((c: AlertCluster) => c.clusterUuid === item.clusterUuid);
-      const alertState: AlertState = this.getDefaultAlertState(cluster!, item);
-      alertState.nodeName = item.nodeName;
-      alertState.ui.triggeredMS = currentUTC;
-      alertState.ui.isFiring = true;
-      alertState.ui.severity = item.severity;
-      alertState.ui.message = this.getUiMessage(alertState, item);
-      instance.replaceState({ alertStates: [alertState] });
-      this.executeActions(instance, alertState, item, cluster);
-    }
-    state.lastChecked = currentUTC;
-    return state;
-  }
-
   protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
     return {
       cluster,
@@ -419,10 +356,6 @@ export class BaseAlert {
         lastCheckedMS: 0,
       },
     };
-  }
-
-  protected getVersions(legacyAlert: LegacyAlert) {
-    return `[${legacyAlert.message.match(/(?<=Versions: \[).+?(?=\])/)}]`;
   }
 
   protected getUiMessage(
