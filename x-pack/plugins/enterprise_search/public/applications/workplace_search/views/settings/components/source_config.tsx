@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import ConfirmModal from 'shared/components/ConfirmModal';
+import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
 import { SourceDataItem } from '../../../types';
@@ -54,13 +54,15 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
         header={header}
       />
       {confirmModalVisible && (
-        <ConfirmModal
-          onConfirm={() => deleteSourceConfig(serviceType, name)}
-          onCancel={hideConfirmModal}
-          buttonColor="danger"
-        >
-          Are you sure you want to remove the OAuth configuration for {name}?
-        </ConfirmModal>
+        <EuiOverlayMask>
+          <EuiConfirmModal
+            onConfirm={() => deleteSourceConfig(serviceType, name)}
+            onCancel={hideConfirmModal}
+            buttonColor="danger"
+          >
+            Are you sure you want to remove the OAuth configuration for {name}?
+          </EuiConfirmModal>
+        </EuiOverlayMask>
       )}
     </>
   );
