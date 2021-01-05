@@ -46,8 +46,8 @@ You have two options for exporting saved objects.
 * Select the checkboxes of objects that you want to export, and then click *Export*.
 * Click *Export x objects*, and export objects by type.
 
-The export action creates an NDJSON with all your saved objects. By default, the 
-NDJSON includes related objects. Exported dashboards include their associated index patterns.
+This action creates an NDJSON with all your saved objects. By default, the NDJSON includes child objects that are related to the saved
+objects. Exported dashboards include their associated index patterns.
 
 [float]
 [[managing-saved-objects-object-definition]]
