@@ -103,7 +103,7 @@ server.ssl.enabled: true
 
 . Restart {kib}.
 
-After making these changes, you must always access {kib} via HTTPS. For example, https://localhost:5601.
+After making these changes, you must always access {kib} via HTTPS. For example, `https://localhost:5601`.
 
 [[configuring-tls-kib-es]]
 ==== Encrypt traffic between {kib} and {es}
