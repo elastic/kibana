@@ -23,11 +23,11 @@ import { CodeEditor, Props as CodeEditorProps } from '../code_editor/code_editor
 import { LANG } from './constants';
 import { language, conf } from './language';
 
-monaco.languages.setMonarchTokensProvider(LANG, language);
-monaco.languages.setLanguageConfiguration(LANG, conf);
 monaco.languages.register({
   id: LANG,
 });
+monaco.languages.setMonarchTokensProvider(LANG, language);
+monaco.languages.setLanguageConfiguration(LANG, conf);
 export interface UrlTemplateEditorProps {
   value: string;
   height?: CodeEditorProps['height'];
