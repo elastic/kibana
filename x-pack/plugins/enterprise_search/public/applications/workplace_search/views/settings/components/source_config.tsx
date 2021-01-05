@@ -7,7 +7,6 @@
 import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { withRouter } from 'react-router-dom';
 
 import { Loading } from 'workplace_search/components';
 import { staticSourceData } from 'workplace_search/ContentSources/sourceData';
@@ -15,17 +14,16 @@ import { SourceDataItem } from 'workplace_search/types';
 import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
 
 import ConfirmModal from 'shared/components/ConfirmModal';
-import { IRouter } from 'shared/types';
 import { AddSourceHeader } from 'workplace_search/ContentSources/components/AddSource/AddSourceHeader';
 import { SaveConfig } from 'workplace_search/ContentSources/components/AddSource/SaveConfig';
 
 import { SettingsLogic } from '../SettingsLogic';
 
-interface SourceConfigProps extends IRouter {
+interface SourceConfigProps {
   sourceIndex: number;
 }
 
-export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex, history }) => {
+export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
   const [confirmModalVisible, setConfirmModalVisibility] = useState(false);
   const { configuration, serviceType } = staticSourceData[sourceIndex] as SourceDataItem;
   const { saveUpdatedConfig, deleteSourceConfig } = useActions(SettingsLogic);
@@ -56,7 +54,7 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex, history
       />
       {confirmModalVisible && (
         <ConfirmModal
-          onConfirm={() => deleteSourceConfig(serviceType, name, history)}
+          onConfirm={() => deleteSourceConfig(serviceType, name)}
           onCancel={hideConfirmModal}
           buttonColor="danger"
         >

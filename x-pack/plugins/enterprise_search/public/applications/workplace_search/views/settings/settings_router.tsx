@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
-import { Redirect, Route, Switch, withRouter } from 'react-router-dom';
+import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 
 import {
   ORG_SETTINGS_PATH,
@@ -19,7 +19,6 @@ import {
 import { SidebarNavigation, AppView } from 'workplace_search/components';
 
 import FlashMessages from 'shared/components/FlashMessages';
-import { IRouter } from 'shared/types';
 
 import Connectors from './components/Connectors';
 import Customize from './components/Customize';
@@ -30,9 +29,8 @@ import { staticSourceData } from '../ContentSources/sourceData';
 
 import { SettingsLogic, SettingsServerProps } from './SettingsLogic';
 
-export const SettingsRouter: React.FC<IRouter & SettingsServerProps> = ({
-  location: { pathname },
-}) => {
+export const SettingsRouter: React.FC = () => {
+  const { pathname } = useLocation();
   const { resetFlashMessages, initializeSettings } = useActions(SettingsLogic);
   const { flashMessages } = useValues(SettingsLogic);
 

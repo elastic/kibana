@@ -16,6 +16,7 @@ import { SourceLogic } from 'workplace_search/ContentSources/SourceLogic';
 import { Connector, IObject } from 'workplace_search/types';
 
 import { ORG_SETTINGS_CONNECTORS_PATH } from 'workplace_search/utils/routePaths';
+import { KibanaLogic } from '../../../shared/kibana';
 
 interface IOauthApplication {
   name: string;
@@ -48,7 +49,7 @@ interface SettingsActions {
   updateOauthApplication();
   updateOrgName();
   saveUpdatedConfig();
-  deleteSourceConfig(serviceType: string, name: string, history: IObject);
+  deleteSourceConfig(serviceType: string, name: string);
   toggleTelemetryOptIn(checked: boolean);
 }
 
@@ -80,10 +81,9 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
     updateOrgName: () => true,
     updateOauthApplication: () => true,
     saveUpdatedConfig: () => true,
-    deleteSourceConfig: (serviceType: string, name: string, history: IObject) => ({
+    deleteSourceConfig: (serviceType: string, name: string) => ({
       serviceType,
       name,
-      history,
     }),
     toggleTelemetryOptIn: (checked: boolean) => ({ checked }),
   },
@@ -181,7 +181,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
         actions.setFlashMessages(SourceLogic.values.flashMessages)
       );
     },
-    deleteSourceConfig: ({ serviceType, name, history }) => {
+    deleteSourceConfig: ({ serviceType, name }) => {
       const route = routes.fritoPieOrganizationSettingsContentSourceOauthConfigurationPath(
         serviceType
       );
@@ -189,7 +189,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       http
         .delete(route)
         .then(() => {
-          history.push(ORG_SETTINGS_CONNECTORS_PATH);
+          KibanaLogic.values.navigateToUrl(ORG_SETTINGS_CONNECTORS_PATH);
           actions.setConfigDeleted(name);
         })
         .catch(handleAPIError((messages) => actions.setFlashMessages({ error: messages })));
