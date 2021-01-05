@@ -52,6 +52,9 @@ export const NAV = {
       defaultMessage: 'View my personal dashboard',
     }
   ),
+  SEARCH: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.searchApplication', {
+    defaultMessage: 'Go to search application',
+  }),
 };
 
 export const MAX_TABLE_ROW_ICONS = 3;
