@@ -16,6 +16,7 @@ export interface ReturnPrivilegeUser {
   hasEncryptionKey: boolean | null;
   hasIndexManage: boolean | null;
   hasIndexWrite: boolean | null;
+  hasIndexUpdateDelete: boolean | null;
 }
 /**
  * Hook to get user privilege from
@@ -23,16 +24,12 @@ export interface ReturnPrivilegeUser {
  */
 export const usePrivilegeUser = (): ReturnPrivilegeUser => {
   const [loading, setLoading] = useState(true);
-  const [privilegeUser, setPrivilegeUser] = useState<
-    Pick<
-      ReturnPrivilegeUser,
-      'isAuthenticated' | 'hasEncryptionKey' | 'hasIndexManage' | 'hasIndexWrite'
-    >
-  >({
+  const [privilegeUser, setPrivilegeUser] = useState<Omit<ReturnPrivilegeUser, 'loading'>>({
     isAuthenticated: null,
     hasEncryptionKey: null,
     hasIndexManage: null,
     hasIndexWrite: null,
+    hasIndexUpdateDelete: null,
   });
   const [, dispatchToaster] = useStateToaster();
 
@@ -59,6 +56,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
                 privilege.index[indexName].create_doc ||
                 privilege.index[indexName].index ||
                 privilege.index[indexName].write,
+              hasIndexUpdateDelete: privilege.index[indexName].write,
             });
           }
         }
@@ -69,6 +67,7 @@ export const usePrivilegeUser = (): ReturnPrivilegeUser => {
             hasEncryptionKey: false,
             hasIndexManage: false,
             hasIndexWrite: false,
+            hasIndexUpdateDelete: false,
           });
           errorToToaster({ title: i18n.PRIVILEGE_FETCH_FAILURE, error, dispatchToaster });
         }
