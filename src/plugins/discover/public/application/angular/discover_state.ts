@@ -282,7 +282,7 @@ function createUrlGeneratorState({
   appStateContainer,
   data,
   getSavedSearchId,
-  forceAbsoluteTime, // TODO: not implemented
+  forceAbsoluteTime,
 }: {
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
@@ -295,7 +295,9 @@ function createUrlGeneratorState({
     indexPatternId: appState.index,
     query: appState.query,
     savedSearchId: getSavedSearchId(),
-    timeRange: data.query.timefilter.timefilter.getTime(), // TODO: handle relative time range
+    timeRange: forceAbsoluteTime
+      ? data.query.timefilter.timefilter.getAbsoluteTime()
+      : data.query.timefilter.timefilter.getTime(),
     searchSessionId: data.search.session.getSessionId(),
     columns: appState.columns,
     sort: appState.sort,

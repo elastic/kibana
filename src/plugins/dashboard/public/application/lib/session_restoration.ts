@@ -43,7 +43,7 @@ function getUrlGeneratorState({
   data,
   getAppState,
   getDashboardId,
-  forceAbsoluteTime, // TODO: not implemented
+  forceAbsoluteTime,
 }: {
   data: DataPublicPluginStart;
   getAppState: () => DashboardAppState;
@@ -53,7 +53,9 @@ function getUrlGeneratorState({
   const appState = getAppState();
   return {
     dashboardId: getDashboardId(),
-    timeRange: data.query.timefilter.timefilter.getTime(),
+    timeRange: forceAbsoluteTime
+      ? data.query.timefilter.timefilter.getAbsoluteTime()
+      : data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
     query: data.query.queryString.formatQuery(appState.query),
     savedQuery: appState.savedQuery,

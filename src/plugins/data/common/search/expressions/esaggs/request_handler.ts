@@ -51,6 +51,7 @@ export interface RequestHandlerParams {
   searchSourceService: ISearchStartSearchSource;
   timeFields?: string[];
   timeRange?: TimeRange;
+  getNow?: () => Date;
 }
 
 export const handleRequest = async ({

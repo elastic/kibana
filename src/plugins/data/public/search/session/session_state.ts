@@ -105,6 +105,11 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
    * If user has explicitly canceled search requests
    */
   isCanceled: boolean;
+
+  /**
+   * Start time of current session
+   */
+  sessionStartTime?: Date;
 }
 
 const createSessionDefaultState: <
@@ -132,7 +137,11 @@ export interface SessionPureTransitions<
 }
 
 export const sessionPureTransitions: SessionPureTransitions = {
-  start: (state) => () => ({ ...createSessionDefaultState(), sessionId: uuid.v4() }),
+  start: (state) => () => ({
+    ...createSessionDefaultState(),
+    sessionId: uuid.v4(),
+    sessionStartTime: new Date(),
+  }),
   restore: (state) => (sessionId: string) => ({
     ...createSessionDefaultState(),
     sessionId,
@@ -214,6 +223,7 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
 ): {
   stateContainer: SessionStateContainer<SearchDescriptor>;
   sessionState$: Observable<SessionState>;
+  sessionStartTime$: Observable<Date | undefined>;
 } => {
   const stateContainer = createStateContainer(
     createSessionDefaultState(),
@@ -227,8 +237,16 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
     distinctUntilChanged(),
     shareReplay(1)
   );
+
+  const sessionStartTime$: Observable<Date | undefined> = stateContainer.state$.pipe(
+    map(() => stateContainer.get().sessionStartTime),
+    distinctUntilChanged(),
+    shareReplay(1)
+  );
+
   return {
     stateContainer,
     sessionState$,
+    sessionStartTime$,
   };
 };

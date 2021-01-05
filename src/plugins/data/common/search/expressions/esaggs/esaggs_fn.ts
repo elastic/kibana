@@ -28,7 +28,7 @@ import {
 import { FormatFactory } from '../../../field_formats/utils';
 import { IndexPatternExpressionType } from '../../../index_patterns/expressions';
 import { IndexPatternsContract } from '../../../index_patterns/index_patterns';
-import { calculateBounds } from '../../../query';
+import { getAbsoluteTimeRange } from '../../../query';
 
 import { AggsStart, AggExpressionType } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
@@ -62,6 +62,7 @@ export interface EsaggsStartDependencies {
   deserializeFieldFormat: FormatFactory;
   indexPatterns: IndexPatternsContract;
   searchSource: ISearchStartSearchSource;
+  getNow?: () => Date;
 }
 
 /** @internal */
@@ -118,9 +119,13 @@ export async function handleEsaggsRequest(
   args: Arguments,
   params: RequestHandlerParams
 ): Promise<Datatable> {
-  const resolvedTimeRange = input?.timeRange && calculateBounds(input.timeRange);
+  const resolvedTimeRange =
+    params.timeRange && getAbsoluteTimeRange(params.timeRange, { forceNow: params.getNow?.() });
 
-  const response = await handleRequest(params);
+  const response = await handleRequest({
+    ...params,
+    timeRange: resolvedTimeRange,
+  });
 
   const table: Datatable = {
     type: 'datatable',
@@ -139,12 +144,12 @@ export async function handleEsaggsRequest(
             indexPatternId: params.indexPattern?.id,
             appliedTimeRange:
               column.aggConfig.params.field?.name &&
-              input?.timeRange &&
+              resolvedTimeRange &&
               args.timeFields &&
               args.timeFields.includes(column.aggConfig.params.field?.name)
                 ? {
-                    from: resolvedTimeRange?.min?.toISOString(),
-                    to: resolvedTimeRange?.max?.toISOString(),
+                    from: resolvedTimeRange?.from,
+                    to: resolvedTimeRange?.to,
                   }
                 : undefined,
             ...column.aggConfig.serialize(),
