@@ -20,7 +20,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 
 import { RouteComponentProps } from 'react-router-dom';
 import { useKibana, toMountPoint } from '../../services/kibana_react';
