@@ -108,7 +108,7 @@ export function getTemplate(
     };
   };
 
-  const template: Partial<TDocumentDefinitions> = {
+  return {
     // define page size
     pageOrientation: layout.getPdfPageOrientation(),
     pageSize: layout.getPdfPageSize({
@@ -133,6 +133,4 @@ export function getTemplate(
       font: 'Roboto',
     },
   };
-
-  return template;
 }

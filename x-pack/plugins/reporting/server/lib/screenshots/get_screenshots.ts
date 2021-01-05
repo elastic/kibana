@@ -49,7 +49,7 @@ export const getScreenshots = async (
 
       // Resize the viewport if the clip area is not visible
       if (viewHeight < height + top || viewWidth < width + left) {
-        logger.debug(`Resize browser viewport to: height=${viewHeight} width=${viewWidth}`);
+        logger.debug(`Resize browser viewport to: height=${height + top} width=${width + left}`);
         await browser.setViewport(
           {
             height: height + top,
@@ -61,7 +61,7 @@ export const getScreenshots = async (
       }
     }
 
-    logger.debug(`Capturing item - top:${top} left:${left} height:${height} width:${width}`);
+    logger.debug(`Capturing item: top:${top} left:${left} height:${height} width:${width}`);
 
     const base64EncodedData = await browser.screenshot(item.position);
     screenshots.push({

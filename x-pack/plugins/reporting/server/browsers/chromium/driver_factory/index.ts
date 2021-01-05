@@ -158,9 +158,9 @@ export class HeadlessChromiumDriverFactory {
     const consoleMessages$ = Rx.fromEvent<puppeteer.ConsoleMessage>(page, 'console').pipe(
       map((line) => {
         if (line.type() === 'error') {
-          // logger.error(line.text(), ['headless-browser-console']);
+          logger.error(line.text(), ['headless-browser-console']);
         } else {
-          // logger.debug(line.text(), [`headless-browser-console:${line.type()}`]);
+          logger.debug(line.text(), [`headless-browser-console:${line.type()}`]);
         }
       })
     );
