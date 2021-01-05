@@ -553,6 +553,7 @@ export interface DocLinksStart {
             readonly sum: string;
             readonly top_hits: string;
         };
+        readonly runtimeFields: string;
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -567,6 +568,7 @@ export interface DocLinksStart {
         };
         readonly addData: string;
         readonly kibana: string;
+        readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
             readonly gettingStarted: string;
@@ -590,6 +592,8 @@ export interface DocLinksStart {
         readonly maps: Record<string, string>;
         readonly monitoring: Record<string, string>;
         readonly security: Record<string, string>;
+        readonly watcher: Record<string, string>;
+        readonly ccs: Record<string, string>;
     };
 }
 
