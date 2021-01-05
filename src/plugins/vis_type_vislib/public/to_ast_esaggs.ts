@@ -29,6 +29,8 @@ import { BasicVislibParams } from './types';
 
 /**
  * Get esaggs expressions function
+ * TODO: replace this with vis.data.aggs!.toExpressionAst();
+ * https://github.com/elastic/kibana/issues/61768
  * @param vis
  */
 export function getEsaggsFn(vis: Vis<PieVisParams> | Vis<BasicVislibParams>) {

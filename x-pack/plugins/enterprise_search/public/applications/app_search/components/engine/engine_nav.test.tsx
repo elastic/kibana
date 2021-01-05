@@ -102,12 +102,6 @@ describe('EngineNav', () => {
       const wrapper = shallow(<EngineNav />);
       expect(wrapper.find('[data-test-subj="EngineCrawlerLink"]')).toHaveLength(0);
     });
-
-    it('does not render for sample engine', () => {
-      setMockValues({ ...values, myRole, isSampleEngine: true });
-      const wrapper = shallow(<EngineNav />);
-      expect(wrapper.find('[data-test-subj="EngineCrawlerLink"]')).toHaveLength(0);
-    });
   });
 
   describe('meta engine source engines link', () => {

@@ -97,6 +97,7 @@ export async function fetchMissingMonitoringData(
                       {
                         timestamp: {
                           order: 'desc',
+                          unmapped_type: 'long',
                         },
                       },
                     ],

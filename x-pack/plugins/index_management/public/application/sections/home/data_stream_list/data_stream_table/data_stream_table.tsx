@@ -70,6 +70,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     render: (health: DataStream['health']) => {
       return <DataHealth health={health} />;
     },
+    width: '100px',
   });
 
   if (includeStats) {
@@ -231,6 +232,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
             defaultMessage="No data streams found"
           />
         }
+        tableLayout={'auto'}
       />
     </>
   );
