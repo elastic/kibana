@@ -51,7 +51,7 @@ export async function checkRunningSessions(
         if (sessionStatus !== BackgroundSessionStatus.IN_PROGRESS) {
           session.attributes.status = sessionStatus;
           const firstError = searchStatuses.filter((searchInfo) => searchInfo.status === undefined);
-          session.attributes.error = firstError ? firstError[0].error : undefined;
+          session.attributes.error = firstError.length ? firstError[0].error : undefined;
           updatedSessions.push(session);
         }
       })
@@ -62,7 +62,7 @@ export async function checkRunningSessions(
       const updatedResponse = await savedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
         updatedSessions
       );
-      logger.debug(`Updated ${updatedResponse.saved_objects.length} background sessios`);
+      logger.debug(`Updated ${updatedResponse.saved_objects.length} background sessions`);
     }
   } catch (err) {
     logger.error(err);

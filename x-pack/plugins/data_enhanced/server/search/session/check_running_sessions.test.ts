@@ -21,8 +21,8 @@ describe('getSearchStatus', () => {
   beforeEach(() => {
     savedObjectsClient = savedObjectsClientMock.create();
     mockClient = {
-      transport: {
-        request: jest.fn(),
+      asyncSearch: {
+        status: jest.fn(),
       },
     };
   });
@@ -72,7 +72,7 @@ describe('getSearchStatus', () => {
       total: 1,
     } as any);
 
-    mockClient.transport.request.mockResolvedValue({
+    mockClient.asyncSearch.status.mockResolvedValue({
       is_partial: true,
       is_running: true,
     });
@@ -96,7 +96,7 @@ describe('getSearchStatus', () => {
       total: 1,
     } as any);
 
-    mockClient.transport.request.mockResolvedValue({
+    mockClient.asyncSearch.status.mockResolvedValue({
       is_partial: false,
       is_running: false,
       completion_status: 200,
@@ -123,7 +123,7 @@ describe('getSearchStatus', () => {
       total: 1,
     } as any);
 
-    mockClient.transport.request.mockResolvedValue({
+    mockClient.asyncSearch.status.mockResolvedValue({
       is_partial: false,
       is_running: false,
       completion_status: 500,
