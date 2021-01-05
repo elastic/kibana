@@ -15,7 +15,7 @@ import { IFieldFormat } from '../../../../../src/plugins/data/public';
 import { IAggType } from 'src/plugins/data/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiDataGrid } from '@elastic/eui';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';
@@ -78,12 +78,10 @@ function sampleArgs() {
 }
 
 describe('datatable_expression', () => {
-  let onClickValue: jest.Mock;
-  let onEditAction: jest.Mock;
+  let onDispatchEvent: jest.Mock;
 
   beforeEach(() => {
-    onClickValue = jest.fn();
-    onEditAction = jest.fn();
+    onDispatchEvent = jest.fn();
   });
 
   describe('datatable renders', () => {
@@ -113,7 +111,7 @@ describe('datatable_expression', () => {
             data={data}
             args={args}
             formatFactory={(x) => x as IFieldFormat}
-            onClickValue={onClickValue}
+            dispatchEvent={onDispatchEvent}
             getType={jest.fn()}
             renderMode="edit"
           />
@@ -130,9 +128,8 @@ describe('datatable_expression', () => {
             data={data}
             args={args}
             formatFactory={(x) => x as IFieldFormat}
-            onClickValue={onClickValue}
+            dispatchEvent={onDispatchEvent}
             getType={jest.fn()}
-            onRowContextMenuClick={() => undefined}
             rowHasRowClickTriggerActions={[true, true, true]}
             renderMode="edit"
           />
@@ -153,8 +150,8 @@ describe('datatable_expression', () => {
             },
           }}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
-          onClickValue={onClickValue}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          dispatchEvent={onDispatchEvent}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
           renderMode="edit"
         />
@@ -162,17 +159,20 @@ describe('datatable_expression', () => {
 
       wrapper.find('[data-test-subj="lensDatatableFilterOut"]').first().simulate('click');
 
-      expect(onClickValue).toHaveBeenCalledWith({
-        data: [
-          {
-            column: 0,
-            row: 0,
-            table: data.tables.l1,
-            value: 'shoes',
-          },
-        ],
-        negate: true,
-        timeFieldName: 'a',
+      expect(onDispatchEvent).toHaveBeenCalledWith({
+        name: 'filter',
+        data: {
+          data: [
+            {
+              column: 0,
+              row: 0,
+              table: data.tables.l1,
+              value: 'shoes',
+            },
+          ],
+          negate: true,
+          timeFieldName: 'a',
+        },
       });
     });
 
@@ -189,8 +189,8 @@ describe('datatable_expression', () => {
             },
           }}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
-          onClickValue={onClickValue}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          dispatchEvent={onDispatchEvent}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
           renderMode="edit"
         />
@@ -198,17 +198,20 @@ describe('datatable_expression', () => {
 
       wrapper.find('[data-test-subj="lensDatatableFilterFor"]').at(3).simulate('click');
 
-      expect(onClickValue).toHaveBeenCalledWith({
-        data: [
-          {
-            column: 1,
-            row: 0,
-            table: data.tables.l1,
-            value: 1588024800000,
-          },
-        ],
-        negate: false,
-        timeFieldName: 'b',
+      expect(onDispatchEvent).toHaveBeenCalledWith({
+        name: 'filter',
+        data: {
+          data: [
+            {
+              column: 1,
+              row: 0,
+              table: data.tables.l1,
+              value: 1588024800000,
+            },
+          ],
+          negate: false,
+          timeFieldName: 'b',
+        },
       });
     });
 
@@ -264,8 +267,8 @@ describe('datatable_expression', () => {
             },
           }}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
-          onClickValue={onClickValue}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          dispatchEvent={onDispatchEvent}
           getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
           renderMode="edit"
         />
@@ -273,17 +276,20 @@ describe('datatable_expression', () => {
 
       wrapper.find('[data-test-subj="lensDatatableFilterFor"]').at(1).simulate('click');
 
-      expect(onClickValue).toHaveBeenCalledWith({
-        data: [
-          {
-            column: 0,
-            row: 0,
-            table: data.tables.l1,
-            value: 1588024800000,
-          },
-        ],
-        negate: false,
-        timeFieldName: 'a',
+      expect(onDispatchEvent).toHaveBeenCalledWith({
+        name: 'filter',
+        data: {
+          data: [
+            {
+              column: 0,
+              row: 0,
+              table: data.tables.l1,
+              value: 1588024800000,
+            },
+          ],
+          negate: false,
+          timeFieldName: 'a',
+        },
       });
     });
 
@@ -303,8 +309,8 @@ describe('datatable_expression', () => {
         <DatatableComponent
           data={emptyData}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
-          onClickValue={onClickValue}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          dispatchEvent={onDispatchEvent}
           getType={jest.fn((type) =>
             type === 'count' ? ({ type: 'metrics' } as IAggType) : ({ type: 'buckets' } as IAggType)
           )}
@@ -328,41 +334,40 @@ describe('datatable_expression', () => {
               sortDirection: 'desc',
             },
           }}
-          formatFactory={(x) => x as IFieldFormat}
-          onClickValue={onClickValue}
-          onEditAction={onEditAction}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           renderMode="edit"
         />
       );
 
-      // there's currently no way to detect the sorting column via DOM
-      expect(
-        wrapper.exists('[className*="isSorted"][data-test-subj="tableHeaderSortButton"]')
-      ).toBe(true);
-      // check that the sorting is passing the right next state for the same column
-      wrapper
-        .find('[className*="isSorted"][data-test-subj="tableHeaderSortButton"]')
-        .first()
-        .simulate('click');
+      expect(wrapper.find(EuiDataGrid).prop('sorting')!.columns).toEqual([
+        { id: 'b', direction: 'desc' },
+      ]);
 
-      expect(onEditAction).toHaveBeenCalledWith({
-        action: 'sort',
-        columnId: undefined,
-        direction: 'none',
+      wrapper.find(EuiDataGrid).prop('sorting')!.onSort([]);
+
+      expect(onDispatchEvent).toHaveBeenCalledWith({
+        name: 'edit',
+        data: {
+          action: 'sort',
+          columnId: undefined,
+          direction: 'none',
+        },
       });
 
-      // check that the sorting is passing the right next state for another column
       wrapper
-        .find('[data-test-subj="tableHeaderSortButton"]')
-        .not('[className*="isSorted"]')
-        .first()
-        .simulate('click');
+        .find(EuiDataGrid)
+        .prop('sorting')!
+        .onSort([{ id: 'a', direction: 'asc' }]);
 
-      expect(onEditAction).toHaveBeenCalledWith({
-        action: 'sort',
-        columnId: 'a',
-        direction: 'asc',
+      expect(onDispatchEvent).toHaveBeenCalledWith({
+        name: 'edit',
+        data: {
+          action: 'sort',
+          columnId: 'a',
+          direction: 'asc',
+        },
       });
     });
 
@@ -380,18 +385,16 @@ describe('datatable_expression', () => {
               sortDirection: 'desc',
             },
           }}
-          formatFactory={(x) => x as IFieldFormat}
-          onClickValue={onClickValue}
-          onEditAction={onEditAction}
+          formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+          dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           renderMode="display"
         />
       );
 
-      expect(wrapper.find(EuiBasicTable).prop('sorting')).toMatchObject({
-        sort: undefined,
-        allowNeutralSort: true,
-      });
+      expect(wrapper.find(EuiDataGrid).prop('sorting')!.columns).toEqual([
+        { id: 'b', direction: 'desc' },
+      ]);
     });
   });
 });

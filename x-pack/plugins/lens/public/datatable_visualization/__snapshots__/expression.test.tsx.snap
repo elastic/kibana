@@ -4,64 +4,163 @@ exports[`datatable_expression DatatableComponent it renders actions column when 
 <VisualizationContainer
   reportTitle="My fanci metric chart"
 >
-  <EuiBasicTable
-    className="lnsDataTable"
-    columns={
-      Array [
-        Object {
-          "field": "a",
-          "name": "a",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "b",
-          "name": "b",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "c",
-          "name": "c",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "actions": Array [
+  <ContextProvider
+    value={
+      Object {
+        "rowHasRowClickTriggerActions": Array [
+          true,
+          true,
+          true,
+        ],
+        "table": Object {
+          "columns": Array [
             Object {
-              "description": "Table row context menu",
-              "icon": [Function],
-              "name": "More",
-              "onClick": [Function],
-              "type": "icon",
+              "id": "a",
+              "meta": Object {
+                "field": "a",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "terms",
+                },
+                "type": "string",
+              },
+              "name": "a",
+            },
+            Object {
+              "id": "b",
+              "meta": Object {
+                "field": "b",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "date_histogram",
+                },
+                "type": "date",
+              },
+              "name": "b",
+            },
+            Object {
+              "id": "c",
+              "meta": Object {
+                "field": "c",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "count",
+                },
+                "type": "number",
+              },
+              "name": "c",
             },
           ],
-          "name": "Actions",
+          "rows": Array [
+            Object {
+              "a": "shoes",
+              "b": 1588024800000,
+              "c": 3,
+            },
+          ],
+          "type": "datatable",
         },
-      ]
-    }
-    data-test-subj="lnsDataTable"
-    items={
-      Array [
-        Object {
-          "a": "shoes",
-          "b": 1588024800000,
-          "c": 3,
-          "rowIndex": 0,
-        },
-      ]
-    }
-    noItemsMessage="No items found"
-    onChange={[Function]}
-    responsive={true}
-    sorting={
-      Object {
-        "allowNeutralSort": true,
-        "sort": undefined,
       }
     }
-    tableLayout="auto"
-  />
+  >
+    <EuiDataGrid
+      aria-label="My fanci metric chart"
+      columnVisibility={
+        Object {
+          "setVisibleColumns": [Function],
+          "visibleColumns": Array [
+            "a",
+            "b",
+            "c",
+          ],
+        }
+      }
+      columns={
+        Array [
+          Object {
+            "actions": Object {
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort asc",
+              },
+              "showSortDesc": Object {
+                "label": "Sort desc",
+              },
+            },
+            "cellActions": undefined,
+            "display": "a",
+            "displayAsText": "a",
+            "id": "a",
+          },
+          Object {
+            "actions": Object {
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort asc",
+              },
+              "showSortDesc": Object {
+                "label": "Sort desc",
+              },
+            },
+            "cellActions": undefined,
+            "display": "b",
+            "displayAsText": "b",
+            "id": "b",
+          },
+          Object {
+            "actions": Object {
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort asc",
+              },
+              "showSortDesc": Object {
+                "label": "Sort desc",
+              },
+            },
+            "cellActions": undefined,
+            "display": "c",
+            "displayAsText": "c",
+            "id": "c",
+          },
+        ]
+      }
+      gridStyle={
+        Object {
+          "border": "horizontal",
+          "header": "underline",
+        }
+      }
+      onColumnResize={[Function]}
+      renderCellValue={[Function]}
+      rowCount={1}
+      sorting={
+        Object {
+          "columns": Array [],
+          "onSort": [Function],
+        }
+      }
+      toolbarVisibility={false}
+      trailingControlColumns={
+        Array [
+          Object {
+            "headerCellRender": [Function],
+            "id": "trailingControlColumn",
+            "rowCellRender": [Function],
+            "width": 40,
+          },
+        ]
+      }
+    />
+  </ContextProvider>
 </VisualizationContainer>
 `;
 
@@ -69,51 +168,149 @@ exports[`datatable_expression DatatableComponent it renders the title and value 
 <VisualizationContainer
   reportTitle="My fanci metric chart"
 >
-  <EuiBasicTable
-    className="lnsDataTable"
-    columns={
-      Array [
-        Object {
-          "field": "a",
-          "name": "a",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "b",
-          "name": "b",
-          "render": [Function],
-          "sortable": true,
-        },
-        Object {
-          "field": "c",
-          "name": "c",
-          "render": [Function],
-          "sortable": true,
-        },
-      ]
-    }
-    data-test-subj="lnsDataTable"
-    items={
-      Array [
-        Object {
-          "a": "shoes",
-          "b": 1588024800000,
-          "c": 3,
-          "rowIndex": 0,
-        },
-      ]
-    }
-    noItemsMessage="No items found"
-    onChange={[Function]}
-    responsive={true}
-    sorting={
+  <ContextProvider
+    value={
       Object {
-        "allowNeutralSort": true,
-        "sort": undefined,
+        "rowHasRowClickTriggerActions": undefined,
+        "table": Object {
+          "columns": Array [
+            Object {
+              "id": "a",
+              "meta": Object {
+                "field": "a",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "terms",
+                },
+                "type": "string",
+              },
+              "name": "a",
+            },
+            Object {
+              "id": "b",
+              "meta": Object {
+                "field": "b",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "date_histogram",
+                },
+                "type": "date",
+              },
+              "name": "b",
+            },
+            Object {
+              "id": "c",
+              "meta": Object {
+                "field": "c",
+                "source": "esaggs",
+                "sourceParams": Object {
+                  "indexPatternId": "indexPatternId",
+                  "type": "count",
+                },
+                "type": "number",
+              },
+              "name": "c",
+            },
+          ],
+          "rows": Array [
+            Object {
+              "a": "shoes",
+              "b": 1588024800000,
+              "c": 3,
+            },
+          ],
+          "type": "datatable",
+        },
       }
     }
-    tableLayout="auto"
-  />
+  >
+    <EuiDataGrid
+      aria-label="My fanci metric chart"
+      columnVisibility={
+        Object {
+          "setVisibleColumns": [Function],
+          "visibleColumns": Array [
+            "a",
+            "b",
+            "c",
+          ],
+        }
+      }
+      columns={
+        Array [
+          Object {
+            "actions": Object {
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort asc",
+              },
+              "showSortDesc": Object {
+                "label": "Sort desc",
+              },
+            },
+            "cellActions": undefined,
+            "display": "a",
+            "displayAsText": "a",
+            "id": "a",
+          },
+          Object {
+            "actions": Object {
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort asc",
+              },
+              "showSortDesc": Object {
+                "label": "Sort desc",
+              },
+            },
+            "cellActions": undefined,
+            "display": "b",
+            "displayAsText": "b",
+            "id": "b",
+          },
+          Object {
+            "actions": Object {
+              "showHide": false,
+              "showMoveLeft": false,
+              "showMoveRight": false,
+              "showSortAsc": Object {
+                "label": "Sort asc",
+              },
+              "showSortDesc": Object {
+                "label": "Sort desc",
+              },
+            },
+            "cellActions": undefined,
+            "display": "c",
+            "displayAsText": "c",
+            "id": "c",
+          },
+        ]
+      }
+      gridStyle={
+        Object {
+          "border": "horizontal",
+          "header": "underline",
+        }
+      }
+      onColumnResize={[Function]}
+      renderCellValue={[Function]}
+      rowCount={1}
+      sorting={
+        Object {
+          "columns": Array [],
+          "onSort": [Function],
+        }
+      }
+      toolbarVisibility={false}
+      trailingControlColumns={Array []}
+    />
+  </ContextProvider>
 </VisualizationContainer>
 `;

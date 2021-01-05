@@ -6,7 +6,7 @@
 
 import './expression.scss';
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -19,6 +19,8 @@ import { EuiDataGridControlColumn } from '@elastic/eui';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGridStyle } from '@elastic/eui';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
   FormatFactory,
@@ -29,6 +31,7 @@ import {
   LensTableRowContextMenuEvent,
 } from '../types';
 import {
+  Datatable,
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
 } from '../../../../../src/plugins/expressions/public';
@@ -96,6 +99,18 @@ export interface DatatableRender {
   as: 'lens_datatable_renderer';
   value: DatatableProps;
 }
+
+interface DataContextType {
+  table?: Datatable;
+  rowHasRowClickTriggerActions?: boolean[];
+}
+
+const DataContext = React.createContext<DataContextType>({});
+
+const gridStyle: EuiDataGridStyle = {
+  border: 'horizontal',
+  header: 'underline',
+};
 
 export const getDatatable = ({
   formatFactory,
@@ -299,12 +314,6 @@ export const getDatatableRenderer = (dependencies: {
   },
 });
 
-function getNextOrderValue(currentValue: LensSortAction['data']['direction']) {
-  const states: Array<LensSortAction['data']['direction']> = ['asc', 'desc', 'none'];
-  const newStateIndex = (1 + states.findIndex((state) => state === currentValue)) % states.length;
-  return states[newStateIndex];
-}
-
 export function DatatableComponent(props: DatatableRenderProps) {
   const [columnConfig, setColumnConfig] = useState(props.args.columns);
 
@@ -327,14 +336,14 @@ export function DatatableComponent(props: DatatableRenderProps) {
     }),
     {}
   );
-  const { getType, dispatchEvent, renderMode, rowHasRowClickTriggerActions } = props;
+  const { getType, dispatchEvent, renderMode } = props;
   const onClickValue = useCallback(
     (data: LensFilterEvent['data']) => {
       dispatchEvent({ name: 'filter', data });
     },
     [dispatchEvent]
   );
-  const hasAtLeastOneRowClickAction = rowHasRowClickTriggerActions?.find((x) => x);
+  const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions?.find((x) => x);
 
   const onEditAction = useCallback(
     (data: LensSortAction['data'] | LensResizeAction['data']) => {
@@ -377,15 +386,14 @@ export function DatatableComponent(props: DatatableRenderProps) {
 
   const bucketColumns = useMemo(
     () =>
-      firstTableRef.current.columns
-        .filter((col) => {
-          return (
-            col?.meta?.sourceParams?.type &&
-            getType(col.meta.sourceParams.type as string)?.type === 'buckets'
-          );
-        })
-        .map((col) => col.id),
-    [firstTableRef, getType]
+      columnConfig.columnIds.filter((_colId, index) => {
+        const col = firstTableRef.current.columns[index];
+        return (
+          col?.meta?.sourceParams?.type &&
+          getType(col.meta.sourceParams.type as string)?.type === 'buckets'
+        );
+      }),
+    [firstTableRef, columnConfig, getType]
   );
 
   const isEmpty =
@@ -403,7 +411,6 @@ export function DatatableComponent(props: DatatableRenderProps) {
 
   const isReadOnlySorted = props.renderMode !== 'edit';
 
-  // todo memoize this
   const columns: EuiDataGridColumn[] = useMemo(() => {
     const columnsReverseLookup = firstTableRef.current.columns.reduce<
       Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -445,7 +452,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
                 contentsIsDefined && (
                   <Component
                     aria-label={filterForAriaLabel}
-                    data-test-subj="lnsTableCell__filterForCellValue"
+                    data-test-subj="lensDatatableFilterFor"
                     onClick={() => {
                       handleFilterClick(field, rowValue, colIndex);
                       closePopover();
@@ -482,6 +489,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
               return (
                 contentsIsDefined && (
                   <Component
+                    data-test-subj="lensDatatableFilterOut"
                     aria-label={filterOutAriaLabel}
                     onClick={() => {
                       handleFilterClick(field, rowValue, colIndex, true);
@@ -551,6 +559,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
         width: 40,
         id: 'trailingControlColumn',
         rowCellRender: function RowCellRender({ rowIndex }) {
+          const { rowHasRowClickTriggerActions } = useContext(DataContext);
           return (
             <EuiButtonIcon
               aria-label={i18n.translate('xpack.lens.datatable.actionsLabel', {
@@ -574,18 +583,13 @@ export function DatatableComponent(props: DatatableRenderProps) {
         },
       },
     ];
-  }, [
-    firstTableRef,
-    onRowContextMenuClick,
-    columnConfig,
-    hasAtLeastOneRowClickAction,
-    rowHasRowClickTriggerActions,
-  ]);
+  }, [firstTableRef, onRowContextMenuClick, columnConfig, hasAtLeastOneRowClickAction]);
 
   const renderCellValue = useCallback(
-    ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-      const rowValue = firstTableRef.current.rows[rowIndex][columnId];
-      const content = formatters[columnId].convert(rowValue, 'html');
+    function CellRenderer({ rowIndex, columnId }: EuiDataGridCellValueElementProps) {
+      const { table } = useContext(DataContext);
+      const rowValue = table?.rows[rowIndex][columnId];
+      const content = formatters[columnId]?.convert(rowValue, 'html');
 
       const cellContent = (
         <div
@@ -601,7 +605,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
 
       return cellContent;
     },
-    [formatters, firstTableRef]
+    [formatters]
   );
 
   const onColumnResize = useCallback(
@@ -632,6 +636,42 @@ export function DatatableComponent(props: DatatableRenderProps) {
     [onEditAction, setColumnConfig, columnConfig]
   );
 
+  const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns: () => {} }), [
+    visibleColumns,
+  ]);
+
+  const sorting = useMemo<EuiDataGridSorting>(
+    () => ({
+      columns:
+        !sortBy || sortDirection === 'none'
+          ? []
+          : [
+              {
+                id: sortBy,
+                direction: sortDirection as 'asc' | 'desc',
+              },
+            ],
+      onSort: (sortingCols) => {
+        if (onEditAction) {
+          const newSortValue:
+            | {
+                id: string;
+                direction: 'desc' | 'asc';
+              }
+            | undefined = sortingCols.length <= 1 ? sortingCols[0] : sortingCols[1];
+          const isNewColumn = sortBy !== (newSortValue?.id || '');
+          const nextDirection = newSortValue ? newSortValue.direction : 'none';
+          return onEditAction({
+            action: 'sort',
+            columnId: nextDirection !== 'none' || isNewColumn ? newSortValue?.id : undefined,
+            direction: nextDirection,
+          });
+        }
+      },
+    }),
+    [onEditAction, sortBy, sortDirection]
+  );
+
   if (isEmpty) {
     return <EmptyPlaceholder icon={LensIconChartDatatable} />;
   }
@@ -647,51 +687,25 @@ export function DatatableComponent(props: DatatableRenderProps) {
       reportTitle={props.args.title}
       reportDescription={props.args.description}
     >
-      <EuiDataGrid
-        aria-label={dataGridAriaLabel}
-        columns={columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns: () => {} }}
-        trailingControlColumns={trailingControlColumns}
-        rowCount={firstTable.rows.length}
-        renderCellValue={renderCellValue}
-        gridStyle={{
-          border: 'horizontal',
-          header: 'underline',
+      <DataContext.Provider
+        value={{
+          table: firstTable,
+          rowHasRowClickTriggerActions: props.rowHasRowClickTriggerActions,
         }}
-        sorting={{
-          columns:
-            !sortBy || sortDirection === 'none'
-              ? []
-              : [
-                  {
-                    id: sortBy,
-                    direction: sortDirection as 'asc' | 'desc',
-                  },
-                ],
-          onSort: (sortingCols) => {
-            if (onEditAction) {
-              const newSortValue:
-                | {
-                    id: string;
-                    direction: 'desc' | 'asc';
-                  }
-                | undefined = sortingCols.length <= 1 ? sortingCols[0] : sortingCols[1];
-              const isNewColumn = sortBy !== (newSortValue?.id || '');
-              // unfortunately the neutral state is not propagated and we need to manually handle it
-              const nextDirection = getNextOrderValue(
-                (isNewColumn ? 'none' : sortDirection) as LensSortAction['data']['direction']
-              );
-              return onEditAction({
-                action: 'sort',
-                columnId: nextDirection !== 'none' || isNewColumn ? newSortValue?.id : undefined,
-                direction: nextDirection,
-              });
-            }
-          },
-        }}
-        onColumnResize={onColumnResize}
-        toolbarVisibility={false}
-      />
+      >
+        <EuiDataGrid
+          aria-label={dataGridAriaLabel}
+          columns={columns}
+          columnVisibility={columnVisibility}
+          trailingControlColumns={trailingControlColumns}
+          rowCount={firstTable.rows.length}
+          renderCellValue={renderCellValue}
+          gridStyle={gridStyle}
+          sorting={sorting}
+          onColumnResize={onColumnResize}
+          toolbarVisibility={false}
+        />
+      </DataContext.Provider>
     </VisualizationContainer>
   );
 }

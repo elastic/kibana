@@ -408,6 +408,7 @@ describe('Datatable Visualization', () => {
         columnIds: ['c', 'b'],
         sortBy: [''],
         sortDirection: ['none'],
+        columnWidth: [],
       });
     });
 
