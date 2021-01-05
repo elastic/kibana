@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { waitFor } from '@testing-library/dom';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
 
