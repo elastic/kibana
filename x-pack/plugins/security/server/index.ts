@@ -25,6 +25,7 @@ import {
 export type {
   CreateAPIKeyResult,
   InvalidateAPIKeyParams,
+  InvalidateAPIKeysParams,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
 } from './authentication';

@@ -46,6 +46,13 @@ export interface InvalidateAPIKeyParams {
 }
 
 /**
+ * Represents the params for invalidating multiple API keys
+ */
+export interface InvalidateAPIKeysParams {
+  ids: string[];
+}
+
+/**
  * The return value when creating an API key in Elasticsearch. The API key returned by this API
  * can then be used by sending a request with a Authorization header with a value having the
  * prefix ApiKey `{token}` where token is id and api_key joined by a colon `{id}:{api_key}` and
@@ -256,7 +263,7 @@ export class APIKeys {
    * Tries to invalidate an API key by using the internal user.
    * @param params The params to invalidate an API key.
    */
-  async invalidateAsInternalUser(params: InvalidateAPIKeyParams) {
+  async invalidateAsInternalUser(params: InvalidateAPIKeysParams) {
     if (!this.license.isEnabled()) {
       return null;
     }
@@ -268,7 +275,7 @@ export class APIKeys {
       // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
       result = (
         await this.clusterClient.asInternalUser.security.invalidateApiKey<InvalidateAPIKeyResult>({
-          body: { ids: [params.id] },
+          body: { ids: params.ids },
         })
       ).body;
       this.logger.debug('API key was invalidated successfully');
