@@ -44,5 +44,8 @@ exports[`NewCalendar Renders new calendar form 1`] = `
       </EuiPageContent>
     </EuiPageBody>
   </EuiPage>
+  <HelpMenu
+    docLink={[MockFunction]}
+  />
 </Fragment>
 `;
