@@ -12,6 +12,12 @@ export const ADDED_TO_TIMELINE_MESSAGE = (fieldOrValue: string) =>
     defaultMessage: `Added {fieldOrValue} to timeline`,
   });
 
+export const ADDED_TO_TIMELINE_TEMPLATE_MESSAGE = (fieldOrValue: string) =>
+  i18n.translate('xpack.securitySolution.hooks.useAddToTimeline.template.addedFieldMessage', {
+    values: { fieldOrValue },
+    defaultMessage: `Added {fieldOrValue} to timeline template`,
+  });
+
 export const STATUS_CODE = i18n.translate(
   'xpack.securitySolution.components.ml.api.errors.statusCodeFailureTitle',
   {
