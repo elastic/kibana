@@ -20,6 +20,7 @@ import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_CONTAINMENT_ID = '.geo-containment';
 export const ActionGroupId = 'Tracked entity contained';
+export const RecoveryActionGroupId = 'notGeoContained';
 
 const actionVariableContextEntityIdLabel = i18n.translate(
   'xpack.stackAlerts.geoContainment.actionVariableContextEntityIdLabel',
@@ -142,7 +143,8 @@ export type GeoContainmentAlertType = AlertType<
   GeoContainmentState,
   GeoContainmentInstanceState,
   GeoContainmentInstanceContext,
-  typeof ActionGroupId
+  typeof ActionGroupId,
+  typeof RecoveryActionGroupId
 >;
 
 export function getAlertType(logger: Logger): GeoContainmentAlertType {
@@ -162,7 +164,7 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
     name: alertTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     recoveryActionGroup: {
-      id: 'notGeoContained',
+      id: RecoveryActionGroupId,
       name: i18n.translate('xpack.stackAlerts.geoContainment.notGeoContained', {
         defaultMessage: 'No longer contained',
       }),
