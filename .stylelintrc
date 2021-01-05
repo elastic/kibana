@@ -11,13 +11,11 @@ rules:
     - ignoreProperties:
       - font-size
       - word-break
-      # TODO: triage needed for:
-      - background
       - composes
-      - text-align
       - filter
-      - transition
+      - background
       - width
+      - transition
       - display
 
   # ($var / 2) rather than ($var/2)
