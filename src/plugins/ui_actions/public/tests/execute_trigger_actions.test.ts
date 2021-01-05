@@ -49,7 +49,6 @@ const reset = () => {
   uiActions = uiActionsPluginMock.createPlugin();
 
   uiActions.setup.registerTrigger({
-    // @ts-expect-error
     id: CONTACT_USER_TRIGGER,
   });
   // uiActions.setup.attachAction(CONTACT_USER_TRIGGER, 'ACTION_SEND_MESSAGE');
