@@ -13,7 +13,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { HeaderMenuPortal } from '../../../../../observability/public';
 import { ActionMenu } from '../../../application/action_menu';
@@ -30,6 +30,12 @@ export function Settings({ children, location }: SettingsProps) {
   const { basePath } = core.http;
   const canAccessML = !!core.application.capabilities.ml?.canAccessML;
   const { search, pathname } = location;
+
+  const [isSideNavOpenOnMobile, setisSideNavOpenOnMobile] = useState(false);
+
+  const toggleOpenOnMobile = () => {
+    setisSideNavOpenOnMobile(!isSideNavOpenOnMobile);
+  };
 
   function getSettingsHref(path: string) {
     return getAPMHref({ basePath, path: `/settings${path}`, search });
@@ -58,6 +64,8 @@ export function Settings({ children, location }: SettingsProps) {
             <EuiSpacer size="s" />
           </HomeLink>
           <EuiSideNav
+            toggleOpenOnMobile={() => toggleOpenOnMobile()}
+            isOpenOnMobile={isSideNavOpenOnMobile}
             items={[
               {
                 name: i18n.translate('xpack.apm.settings.pageTitle', {
