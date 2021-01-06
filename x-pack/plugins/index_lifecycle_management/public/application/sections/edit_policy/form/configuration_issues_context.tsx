@@ -40,7 +40,9 @@ export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => 
     ],
   });
   const isUsingDefaultRollover = get(formData, isUsingDefaultRolloverPath);
-  const isUsingCustomRollover = get(formData, isUsingCustomRolloverPath);
+  // Provide default value, as path may become undefined if removed from the DOM
+  const isUsingCustomRollover = get(formData, isUsingCustomRolloverPath, true);
+
   return (
     <ConfigurationIssuesContext.Provider
       value={{
