@@ -98,7 +98,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     setPopover(false);
   }, []);
   const [exceptionModalType, setOpenAddExceptionModal] = useState<ExceptionListType | null>(null);
-  const [{ canUserCRUD, hasIndexWrite }] = useUserData();
+  const [{ canUserCRUD, hasIndexWrite, hasIndexUpdateDelete }] = useUserData();
 
   const isEndpointAlert = useMemo((): boolean => {
     if (ecsRowData == null) {
@@ -218,7 +218,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="open-alert-status"
       id={FILTER_OPEN}
       onClick={openAlertActionOnClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
+      disabled={!canUserCRUD || !hasIndexUpdateDelete}
     >
       <EuiText size="m">{i18n.ACTION_OPEN_ALERT}</EuiText>
     </EuiContextMenuItem>
@@ -251,7 +251,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="close-alert-status"
       id={FILTER_CLOSED}
       onClick={closeAlertActionClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
+      disabled={!canUserCRUD || !hasIndexUpdateDelete}
     >
       <EuiText size="m">{i18n.ACTION_CLOSE_ALERT}</EuiText>
     </EuiContextMenuItem>
@@ -284,7 +284,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       data-test-subj="in-progress-alert-status"
       id={FILTER_IN_PROGRESS}
       onClick={inProgressAlertActionClick}
-      disabled={!canUserCRUD || !hasIndexWrite}
+      disabled={!canUserCRUD || !hasIndexUpdateDelete}
     >
       <EuiText size="m">{i18n.ACTION_IN_PROGRESS_ALERT}</EuiText>
     </EuiContextMenuItem>
