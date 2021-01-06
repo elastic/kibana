@@ -2,13 +2,12 @@ package builds
 
 import dependsOn
 import getProjectBranch
-import jetbrains.buildServer.configs.kotlin.v2019_2.AbsoluteId
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.commitStatusPublisher
 import vcs.Kibana
 
 object PullRequestCi : BuildType({
-  id = AbsoluteId("Kibana_PullRequest_CI")
+  id("Pull_Request")
   name = "Pull Request CI"
   type = Type.COMPOSITE
 
