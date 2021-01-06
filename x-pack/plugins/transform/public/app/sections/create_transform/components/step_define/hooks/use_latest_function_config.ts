@@ -46,26 +46,21 @@ function getOptions(
     ? ((param as unknown) as FieldParamType).getAvailableFields(aggConfig)
     : [];
 
-  const termAggregatableFields = new Set(filteredIndexPatternFields.map((v) => v.name));
-
-  const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = [];
-  const sortFieldOptions: Array<EuiComboBoxOptionOption<string>> = [];
-
   const ignoreFieldNames = new Set(['_source', '_type', '_index', '_id', '_version', '_score']);
 
-  for (const field of indexPattern.fields) {
-    if (ignoreFieldNames.has(field.name)) {
-      continue;
-    }
+  const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = filteredIndexPatternFields
+    .filter((v) => !ignoreFieldNames.has(v.name))
+    .map((v) => ({
+      label: v.displayName,
+      value: v.name,
+    }));
 
-    if (termAggregatableFields.has(field.name)) {
-      uniqueKeyOptions.push({ label: field.displayName, value: field.name });
-    }
-
-    if (field.sortable) {
-      sortFieldOptions.push({ label: field.displayName, value: field.name });
-    }
-  }
+  const sortFieldOptions: Array<EuiComboBoxOptionOption<string>> = indexPattern.fields
+    .filter((v) => !ignoreFieldNames.has(v.name) && v.sortable)
+    .map((v) => ({
+      label: v.displayName,
+      value: v.name,
+    }));
 
   return { uniqueKeyOptions, sortFieldOptions };
 }
