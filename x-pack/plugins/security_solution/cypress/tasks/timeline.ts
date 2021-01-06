@@ -58,7 +58,7 @@ export const hostExistsQuery = 'host.name: *';
 
 export const addDescriptionToTimeline = (description: string) => {
   cy.get(TIMELINE_EDIT_MODAL_OPEN_BUTTON).first().click();
-  cy.get(TIMELINE_DESCRIPTION_INPUT).type(`${description}{enter}`);
+  cy.get(TIMELINE_DESCRIPTION_INPUT).type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
   cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
