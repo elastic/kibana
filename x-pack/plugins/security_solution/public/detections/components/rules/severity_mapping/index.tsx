@@ -52,7 +52,7 @@ const EuiFlexItemSeverityColumn = styled(EuiFlexItem)`
 
 interface SeverityFieldProps {
   dataTestSubj: string;
-  field: FieldHook;
+  field: FieldHook<AboutStepSeverity>;
   idAria: string;
   indices: IIndexPattern;
   isDisabled: boolean;
@@ -67,8 +67,8 @@ export const SeverityField = ({
   isDisabled,
   options,
 }: SeverityFieldProps) => {
+  const { value, isMappingChecked, mapping } = field.value;
   const { setValue } = field;
-  const { value, isMappingChecked, mapping } = field.value as AboutStepSeverity;
 
   const handleFieldValueChange = useCallback(
     (newMappingItems: SeverityMapping, index: number): void => {
@@ -97,8 +97,8 @@ export const SeverityField = ({
     [mapping, handleFieldValueChange]
   );
 
-  const handleSecurityLevelChange = useCallback(
-    (newValue: string) => {
+  const handleDefaultSeverityChange = useCallback(
+    (newValue: Severity) => {
       setValue({
         value: newValue,
         isMappingChecked,
@@ -123,14 +123,6 @@ export const SeverityField = ({
     },
     [mapping, handleFieldValueChange]
   );
-
-  const getIFieldTypeFromFieldName = (
-    fieldName: string | undefined,
-    iIndexPattern: IIndexPattern
-  ): IFieldType | undefined => {
-    const [iFieldType] = iIndexPattern.fields.filter(({ name }) => fieldName === name);
-    return iFieldType;
-  };
 
   const handleSeverityMappingChecked = useCallback(() => {
     setValue({
@@ -195,7 +187,7 @@ export const SeverityField = ({
             fullWidth={false}
             disabled={false}
             valueOfSelected={value}
-            onChange={handleSecurityLevelChange}
+            onChange={handleDefaultSeverityChange}
             options={options}
             data-test-subj="select"
           />
@@ -244,10 +236,7 @@ export const SeverityField = ({
                       <EuiFlexItemComboBoxColumn>
                         <FieldComponent
                           placeholder={''}
-                          selectedField={getIFieldTypeFromFieldName(
-                            severityMappingItem.field,
-                            indices
-                          )}
+                          selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
                           isLoading={false}
                           isDisabled={isDisabled}
                           isClearable={false}
@@ -265,10 +254,7 @@ export const SeverityField = ({
                       <EuiFlexItemComboBoxColumn>
                         <AutocompleteFieldMatchComponent
                           placeholder={''}
-                          selectedField={getIFieldTypeFromFieldName(
-                            severityMappingItem.field,
-                            indices
-                          )}
+                          selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
                           selectedValue={severityMappingItem.value}
                           isClearable={false}
                           isDisabled={isDisabled}
@@ -302,4 +288,21 @@ export const SeverityField = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+};
+
+/**
+ * Looks for field metadata (IFieldType) in existing index pattern.
+ * If specified field doesn't exist, returns a stub IFieldType created based on the mapping --
+ * because the field might not have been indexed yet, but we still need to display the mapping.
+ *
+ * @param mapping Mapping of a specified field name + value to a certain severity value.
+ * @param pattern Existing index pattern.
+ */
+const getFieldTypeByMapping = (
+  mapping: SeverityMappingItem,
+  pattern: IIndexPattern
+): IFieldType => {
+  const { field } = mapping;
+  const [knownFieldType] = pattern.fields.filter(({ name }) => field === name);
+  return knownFieldType ?? { name: field, type: 'string' };
 };
