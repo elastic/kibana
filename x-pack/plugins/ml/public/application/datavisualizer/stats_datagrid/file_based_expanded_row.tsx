@@ -25,8 +25,6 @@ export const FileBasedDataVisualizerExpandedRow = ({ item }: { item: FileBasedFi
   function getCardContent() {
     switch (type) {
       case ML_JOB_FIELD_TYPES.NUMBER:
-      case 'long':
-      case 'double':
         return <NumberContent config={config} />;
 
       case ML_JOB_FIELD_TYPES.BOOLEAN:
