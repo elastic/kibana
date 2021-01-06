@@ -37,7 +37,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
             id="xpack.indexLifecycleMgmt.editPolicy.shrinkIndexExplanationText"
             defaultMessage="Shrink the index into a new index with fewer primary shards."
           />{' '}
-          <LearnMoreLink docPath="indices-shrink-index.html#indices-shrink-index" />
+          <LearnMoreLink docPath="ilm-shrink.html" />
         </EuiTextColor>
       }
       titleSize="xs"

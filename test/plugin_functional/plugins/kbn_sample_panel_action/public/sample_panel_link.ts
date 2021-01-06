@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Action, createAction, ActionType } from '../../../../../src/plugins/ui_actions/public';
+import { Action, createAction } from '../../../../../src/plugins/ui_actions/public';
 
-// Casting to ActionType is a hack - in a real situation use
-// declare module and add this id to ActionContextMapping.
-export const SAMPLE_PANEL_LINK = 'samplePanelLink' as ActionType;
+export const SAMPLE_PANEL_LINK = 'samplePanelLink';
 
 export const createSamplePanelLink = (): Action =>
-  createAction<typeof SAMPLE_PANEL_LINK>({
+  createAction({
+    id: SAMPLE_PANEL_LINK,
     type: SAMPLE_PANEL_LINK,
     getDisplayName: () => 'Sample panel Link',
     execute: async () => {

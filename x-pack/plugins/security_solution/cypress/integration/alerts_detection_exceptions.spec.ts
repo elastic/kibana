@@ -16,7 +16,7 @@ import {
   goToOpenedAlerts,
   waitForAlertsIndexToBeCreated,
 } from '../tasks/alerts';
-import { createCustomRule, removeSignalsIndex } from '../tasks/api_calls/rules';
+import { createCustomRule } from '../tasks/api_calls/rules';
 import { goToRuleDetails } from '../tasks/alerts_detection_rules';
 import { waitForAlertsToPopulate } from '../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
@@ -35,11 +35,10 @@ import { refreshPage } from '../tasks/security_header';
 import { DETECTIONS_URL } from '../urls/navigation';
 import { cleanKibana } from '../tasks/common';
 
-describe.skip('Exceptions', () => {
+describe('Exceptions', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1';
   beforeEach(() => {
     cleanKibana();
-    removeSignalsIndex();
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsIndexToBeCreated();
     createCustomRule(newRule);
