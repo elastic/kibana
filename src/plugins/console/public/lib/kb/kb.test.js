@@ -18,11 +18,11 @@
  */
 
 import _ from 'lodash';
-import { populateContext } from '../../autocomplete/engine';
+import { populateContext } from '../autocomplete/engine';
 
-import '../../../application/models/sense_editor/sense_editor.test.mocks';
-import * as kb from '../../kb';
-import * as mappings from '../../mappings/mappings';
+import '../../application/models/sense_editor/sense_editor.test.mocks';
+import * as kb from '../kb';
+import * as mappings from '../mappings/mappings';
 
 describe('Knowledge base', () => {
   beforeEach(() => {

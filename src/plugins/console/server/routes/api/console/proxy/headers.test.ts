@@ -16,21 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-jest.mock('../../../../../../../../core/server/http/router/request', () => ({
+jest.mock('../../../../../../../core/server/http/router/request', () => ({
   ensureRawRequest: jest.fn(),
 }));
 
-import { kibanaResponseFactory } from '../../../../../../../../core/server';
+import { kibanaResponseFactory } from '../../../../../../../core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../../../../../../core/server/http/router/request';
+import { ensureRawRequest } from '../../../../../../../core/server/http/router/request';
 
 import { getProxyRouteHandlerDeps } from './mocks';
 
-import expect from '@kbn/expect';
-import * as requestModule from '../../../../../lib/proxy_request';
+import * as requestModule from '../../../../lib/proxy_request';
 
-import { createHandler } from '../create_handler';
+import { createHandler } from './create_handler';
 
 import { createResponseStub } from './stubs';
 
@@ -74,16 +73,16 @@ describe('Console Proxy Route', () => {
         kibanaResponseFactory
       );
 
-      expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
+      expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
       const [[{ headers }]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-      expect(headers).to.have.property('x-forwarded-for');
-      expect(headers['x-forwarded-for']).to.be('0.0.0.0');
-      expect(headers).to.have.property('x-forwarded-port');
-      expect(headers['x-forwarded-port']).to.be('1234');
-      expect(headers).to.have.property('x-forwarded-proto');
-      expect(headers['x-forwarded-proto']).to.be('http');
-      expect(headers).to.have.property('x-forwarded-host');
-      expect(headers['x-forwarded-host']).to.be('test');
+      expect(headers).toHaveProperty('x-forwarded-for');
+      expect(headers['x-forwarded-for']).toBe('0.0.0.0');
+      expect(headers).toHaveProperty('x-forwarded-port');
+      expect(headers['x-forwarded-port']).toBe('1234');
+      expect(headers).toHaveProperty('x-forwarded-proto');
+      expect(headers['x-forwarded-proto']).toBe('http');
+      expect(headers).toHaveProperty('x-forwarded-host');
+      expect(headers['x-forwarded-host']).toBe('test');
     });
   });
 });
