@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { configBlockSchemas } from '../../../common/config_schemas';
-import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
-import { ConfigBlocksLib } from '../configuration_blocks';
-import { MemoryConfigBlocksAdapter } from './../adapters/configuration_blocks/memory_config_blocks_adapter';
+import { configBlockSchemas } from '../../common/config_schemas';
+import { translateConfigSchema } from '../../common/config_schemas_translations_map';
+import { ConfigBlocksLib } from './configuration_blocks';
+import { MemoryConfigBlocksAdapter } from './adapters/configuration_blocks/memory_config_blocks_adapter';
 
 describe('Tags Client Domain Lib', () => {
   let lib: ConfigBlocksLib;
