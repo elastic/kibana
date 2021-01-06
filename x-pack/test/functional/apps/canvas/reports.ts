@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           "
         `);
 
-        expectSnapshot(res.get('content-length')).toMatchInline(`"20726"`);
+        expect(res.get('content-length')).to.be('20725');
       });
 
       it('downloaded PDF base64 string is correct without borders and logo', async function () {
