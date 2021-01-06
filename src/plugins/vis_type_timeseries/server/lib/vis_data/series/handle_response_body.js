@@ -21,10 +21,9 @@ import { buildProcessorFunction } from '../build_processor_function';
 import { processors } from '../response_processors/series';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { createFieldsFetcher } from './../helpers/fields_fetcher';
 
 export function handleResponseBody(panel, req, searchStrategy, capabilities) {
-  const extractFields = (index) => searchStrategy.getFieldsForWildcard(req, index, capabilities);
-
   return async (resp) => {
     if (resp.error) {
       const err = new Error(resp.error.type);
@@ -50,6 +49,8 @@ export function handleResponseBody(panel, req, searchStrategy, capabilities) {
     const [seriesId] = keys;
     const meta = get(resp, `aggregations.${seriesId}.meta`, {});
     const series = panel.series.find((s) => s.id === (meta.seriesId || seriesId));
+
+    const extractFields = createFieldsFetcher(req, searchStrategy, capabilities);
 
     const processor = buildProcessorFunction(processors, resp, panel, series, meta, extractFields);
 

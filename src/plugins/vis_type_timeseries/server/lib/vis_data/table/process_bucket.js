@@ -23,6 +23,7 @@ import { getLastValue } from '../../../../common/get_last_value';
 import { first, get } from 'lodash';
 import { overwrite } from '../helpers';
 import { getActiveSeries } from '../helpers/get_active_series';
+import { createFieldsFetcher } from '../helpers/fields_fetcher';
 
 function trendSinceLastBucket(data) {
   if (data.length < 2) {
@@ -36,7 +37,7 @@ function trendSinceLastBucket(data) {
 
 export function processBucket(panel, req, searchStrategy, capabilities) {
   return async (bucket) => {
-    const extractFields = (index) => searchStrategy.getFieldsForWildcard(req, index, capabilities);
+    const extractFields = createFieldsFetcher(req, searchStrategy, capabilities);
 
     const series = await Promise.all(
       getActiveSeries(panel).map(async (series) => {
