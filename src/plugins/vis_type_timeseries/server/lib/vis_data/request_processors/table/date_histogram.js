@@ -39,6 +39,7 @@ export function dateHistogram(
     const { timeField, interval } = getIntervalAndTimefield(panel, {}, indexPatternObject);
     const meta = {
       timeField,
+      index: indexPatternObject?.title,
     };
 
     const getDateHistogramForLastBucketMode = () => {
@@ -66,10 +67,9 @@ export function dateHistogram(
         });
 
         overwrite(doc, aggRoot.replace(/\.aggs$/, '.meta'), {
-          timeField,
+          ...meta,
           intervalString,
           bucketSize,
-          index: indexPatternObject?.title,
         });
       });
     };

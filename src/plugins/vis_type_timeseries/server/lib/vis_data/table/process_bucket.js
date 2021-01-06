@@ -36,6 +36,8 @@ function trendSinceLastBucket(data) {
 
 export function processBucket(panel, req, searchStrategy, capabilities) {
   return async (bucket) => {
+    const extractFields = (index) => searchStrategy.getFieldsForWildcard(req, index, capabilities);
+
     const series = await Promise.all(
       getActiveSeries(panel).map(async (series) => {
         const timeseries = get(bucket, `${series.id}.timeseries`);
@@ -49,8 +51,6 @@ export function processBucket(panel, req, searchStrategy, capabilities) {
           };
           overwrite(bucket, series.id, { meta, timeseries });
         }
-        const extractFields = (index) =>
-          searchStrategy.getFieldsForWildcard(req, index, capabilities);
 
         const processor = buildProcessorFunction(
           processors,
@@ -61,6 +61,7 @@ export function processBucket(panel, req, searchStrategy, capabilities) {
           extractFields
         );
         const result = first(await processor([]));
+
         if (!result) return null;
         const data = get(result, 'data', []);
         result.slope = trendSinceLastBucket(data);

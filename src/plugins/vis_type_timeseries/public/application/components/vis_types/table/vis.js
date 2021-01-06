@@ -28,7 +28,6 @@ import { replaceVars } from '../../lib/replace_vars';
 import { fieldFormats } from '../../../../../../../plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getFieldFormats, getCoreStart } from '../../../../services';
-import { extractFieldLabel } from '../../../../../common/field_utils';
 
 function getColor(rules, colorKey, value) {
   let color;
@@ -166,8 +165,7 @@ class TableVis extends Component {
         </th>
       );
     });
-
-    const label = model.pivot_label || extractFieldLabel(model.pivot_id);
+    const label = model.pivot_label || model.pivot_id;
     let sortIcon;
     if (sort.column === '_default_') {
       sortIcon = sort.order === 'asc' ? 'sortUp' : 'sortDown';
