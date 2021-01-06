@@ -64,13 +64,13 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     if (!item.timings) return acc;
 
     const offsetValue = getValueForOffset(item);
+    const mimeTypeColour = getColourForMimeType(item.mimeType);
 
     let currentOffset = offsetValue - zeroOffset;
 
     TIMING_ORDER.forEach((timing) => {
       const value = getValue(item.timings, timing);
-      const colour =
-        timing === Timings.Receive ? getColourForMimeType(item.mimeType) : colourPalette[timing];
+      const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
       if (value && value >= 0) {
         const y = currentOffset + value;
 
@@ -91,6 +91,22 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
         currentOffset = y;
       }
     });
+
+    /* if no specific timing values are found, use the total time */
+    if (!acc.find((entry) => entry.x === index)) {
+      acc.push({
+        x: index,
+        y0: currentOffset,
+        y: currentOffset + item.timings.total,
+        config: {
+          colour: mimeTypeColour,
+          tooltipProps: {
+            value: `${FriendlyTimingLabels.total}: ${formatValueForDisplay(item.timings.total)}ms`,
+            colour: mimeTypeColour,
+          },
+        },
+      });
+    }
     return acc;
   }, []);
 
