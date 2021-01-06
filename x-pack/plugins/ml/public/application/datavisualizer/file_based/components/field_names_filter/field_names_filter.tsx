@@ -33,9 +33,10 @@ export const DataVisualizerFieldNamesFilter: FC<Props> = ({
       }),
     []
   );
-  const options = fields
-    .filter((d) => d.fieldName !== undefined)
-    .map((d) => ({ value: d.fieldName! }));
+  const options = useMemo(
+    () => fields.filter((d) => d.fieldName !== undefined).map((d) => ({ value: d.fieldName! })),
+    [fields]
+  );
 
   return (
     <MultiSelectPicker

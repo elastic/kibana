@@ -16,7 +16,7 @@ import type { MlJobFieldType } from '../../../../common/types/field_types';
 
 interface FieldTypeIconProps {
   tooltipEnabled: boolean;
-  type: MlJobFieldType | 'long' | 'double';
+  type: MlJobFieldType;
   fieldName?: string;
   needsAria: boolean;
 }
@@ -67,8 +67,6 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({
       color = 'euiColorVis0';
       break;
     case ML_JOB_FIELD_TYPES.NUMBER:
-    case 'long':
-    case 'double':
       iconType = 'tokenNumber';
       color = fieldName !== undefined ? 'euiColorVis1' : 'euiColorVis2';
       break;
