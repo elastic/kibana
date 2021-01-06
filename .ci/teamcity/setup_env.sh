@@ -33,7 +33,8 @@ fi
 
 if is_pr; then
   tc_set_env ELASTIC_APM_ACTIVE false
-  tc_set_env CHECKS_REPORTER_ACTIVE true
+  # tc_set_env CHECKS_REPORTER_ACTIVE true
+  tc_set_env CHECKS_REPORTER_ACTIVE false # TODO change this back later
 
   # These can be removed once we're not supporting Jenkins and TeamCity at the same time
   # These are primarily used by github checks reporter and can be configured via /github_checks_api.json
@@ -41,7 +42,7 @@ if is_pr; then
   tc_set_env ghprbActualCommit "$GITHUB_PR_TRIGGERED_SHA"
   tc_set_env BUILD_URL "$TEAMCITY_BUILD_URL"
 else
-  tc_set_env ELASTIC_APM_ACTIVE true
+  tc_set_env ELASTIC_APM_ACTIVE false # TODO change this back to true later
   tc_set_env CHECKS_REPORTER_ACTIVE false
 fi
 
