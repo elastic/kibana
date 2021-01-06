@@ -136,6 +136,18 @@ describe('EngineLogic', () => {
         });
       });
 
+      describe('engineName', () => {
+        it('should be reset to an empty string', () => {
+          mount({ engineName: 'hello-world' });
+          EngineLogic.actions.clearEngine();
+
+          expect(EngineLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            engineName: '',
+          });
+        });
+      });
+
       describe('dataLoading', () => {
         it('should be set to true', () => {
           mount({ dataLoading: false });
@@ -144,6 +156,18 @@ describe('EngineLogic', () => {
           expect(EngineLogic.values).toEqual({
             ...DEFAULT_VALUES,
             dataLoading: true,
+          });
+        });
+      });
+
+      describe('engineNotFound', () => {
+        it('should be set to false', () => {
+          mount({ engineNotFound: true });
+          EngineLogic.actions.clearEngine();
+
+          expect(EngineLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            engineNotFound: false,
           });
         });
       });
