@@ -22,7 +22,11 @@ interface Opts {
 }
 
 export enum TaskPoolRunResult {
+  // This means we're running all the tasks we claimed
   RunningAllClaimedTasks = 'RunningAllClaimedTasks',
+  // This means we're running all the tasks we claimed and we're at capacity
+  RunningAtCapacity = 'RunningAtCapacity',
+  // This means we're prematurely out of capacity and have accidentally claimed more tasks than we had capacity for
   RanOutOfCapacity = 'RanOutOfCapacity',
 }
 
@@ -123,6 +127,8 @@ export class TaskPool {
         return this.attemptToRun(leftOverTasks);
       }
       return TaskPoolRunResult.RanOutOfCapacity;
+    } else if (!this.availableWorkers) {
+      return TaskPoolRunResult.RunningAtCapacity;
     }
     return TaskPoolRunResult.RunningAllClaimedTasks;
   }

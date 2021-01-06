@@ -38,6 +38,7 @@ export * from './transpile_babel_task';
 export * from './uuid_verification_task';
 export * from './verify_env_task';
 export * from './write_sha_sums_task';
+export * from './replace_favicon';
 
 // @ts-expect-error this module can't be TS because it ends up pulling x-pack into Kibana
 export { InstallChromium } from './install_chromium';
