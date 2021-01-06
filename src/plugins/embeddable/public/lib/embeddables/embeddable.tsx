@@ -25,7 +25,6 @@ import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
-import { TriggerContextMapping } from '../ui_actions';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
@@ -248,7 +247,7 @@ export abstract class Embeddable<
     this.onResetInput(newInput);
   }
 
-  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+  public supportedTriggers(): string[] {
     return [];
   }
 }

@@ -53,13 +53,15 @@ export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]'
 
 export const NOTES = '[data-test-subj="note-card-body"]';
 
-const NOTE_BY_NOTE_ID = (noteId: string) => `[data-test-subj="note-preview-${noteId}"]`;
+export const NOTE_BY_NOTE_ID = (noteId: string) => `[data-test-subj="note-preview-${noteId}"]`;
 
 export const NOTE_CONTENT = (noteId: string) => `${NOTE_BY_NOTE_ID(noteId)} p`;
 
 export const NOTES_TEXT_AREA = '[data-test-subj="add-a-note"] textarea';
 
 export const NOTES_TAB_BUTTON = '[data-test-subj="timelineTabs-notes"]';
+
+export const NOTES_TEXT = '.euiMarkdownFormat';
 
 export const NOTES_COUNT = '[data-test-subj="timeline-notes-count"]';
 
@@ -99,7 +101,7 @@ export const TIMELINE_DATA_PROVIDERS_EMPTY =
 
 export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
-export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="timeline-description-textarea"]';
+export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="save-timeline-description"]';
 
 export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
 
@@ -134,7 +136,7 @@ export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-plus-in-circle"
 
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 
-export const TIMELINE_TITLE_INPUT = '[data-test-subj="timeline-title-input"]';
+export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-title"]';
 
 export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]';
 

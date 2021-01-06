@@ -10,15 +10,8 @@ import { nextTick } from '@kbn/test/jest';
 
 describe('SpacesManager', () => {
   describe('#constructor', () => {
-    it('attempts to retrieve the active space', () => {
+    it('does not attempt to retrieve the active space', () => {
       const coreStart = coreMock.createStart();
-      new SpacesManager(coreStart.http);
-      expect(coreStart.http.get).toHaveBeenCalledWith('/internal/spaces/_active_space');
-    });
-
-    it('does not retrieve the active space if on an anonymous path', () => {
-      const coreStart = coreMock.createStart();
-      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
       new SpacesManager(coreStart.http);
       expect(coreStart.http.get).not.toHaveBeenCalled();
     });
@@ -32,6 +25,7 @@ describe('SpacesManager', () => {
         name: 'my space',
       });
       const spacesManager = new SpacesManager(coreStart.http);
+      await spacesManager.getActiveSpace();
       expect(coreStart.http.get).toHaveBeenCalledWith('/internal/spaces/_active_space');
 
       await nextTick();
@@ -50,7 +44,7 @@ describe('SpacesManager', () => {
       const spacesManager = new SpacesManager(coreStart.http);
       expect(coreStart.http.get).not.toHaveBeenCalled();
 
-      expect(() => spacesManager.getActiveSpace()).toThrowErrorMatchingInlineSnapshot(
+      expect(() => spacesManager.getActiveSpace()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Cannot retrieve the active space for anonymous paths"`
       );
     });
@@ -68,9 +62,6 @@ describe('SpacesManager', () => {
         });
 
       const spacesManager = new SpacesManager(coreStart.http);
-      expect(coreStart.http.get).toHaveBeenCalledWith('/internal/spaces/_active_space');
-
-      await nextTick();
 
       const activeSpace = await spacesManager.getActiveSpace();
       expect(activeSpace).toEqual({
@@ -99,7 +90,7 @@ describe('SpacesManager', () => {
 
       expect(() =>
         spacesManager.getActiveSpace({ forceRefresh: true })
-      ).toThrowErrorMatchingInlineSnapshot(
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Cannot retrieve the active space for anonymous paths"`
       );
     });
@@ -111,10 +102,9 @@ describe('SpacesManager', () => {
       const shareToAllSpaces = Symbol();
       coreStart.http.get.mockResolvedValue({ shareToAllSpaces });
       const spacesManager = new SpacesManager(coreStart.http);
-      expect(coreStart.http.get).toHaveBeenCalledTimes(1); // initial call to get active space
 
       const result = await spacesManager.getShareSavedObjectPermissions('foo');
-      expect(coreStart.http.get).toHaveBeenCalledTimes(2);
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
       expect(coreStart.http.get).toHaveBeenLastCalledWith(
         '/internal/security/_share_saved_object_permissions',
         {
@@ -126,17 +116,15 @@ describe('SpacesManager', () => {
 
     it('allows the share if security is disabled', async () => {
       const coreStart = coreMock.createStart();
-      coreStart.http.get.mockResolvedValueOnce({});
       coreStart.http.get.mockRejectedValueOnce({
         body: {
           statusCode: 404,
         },
       });
       const spacesManager = new SpacesManager(coreStart.http);
-      expect(coreStart.http.get).toHaveBeenCalledTimes(1); // initial call to get active space
 
       const result = await spacesManager.getShareSavedObjectPermissions('foo');
-      expect(coreStart.http.get).toHaveBeenCalledTimes(2);
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
       expect(coreStart.http.get).toHaveBeenLastCalledWith(
         '/internal/security/_share_saved_object_permissions',
         {
@@ -148,16 +136,14 @@ describe('SpacesManager', () => {
 
     it('throws all other errors', async () => {
       const coreStart = coreMock.createStart();
-      coreStart.http.get.mockResolvedValueOnce({});
       coreStart.http.get.mockRejectedValueOnce(new Error('Get out of here!'));
       const spacesManager = new SpacesManager(coreStart.http);
-      expect(coreStart.http.get).toHaveBeenCalledTimes(1); // initial call to get active space
 
       await expect(
         spacesManager.getShareSavedObjectPermissions('foo')
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Get out of here!"`);
 
-      expect(coreStart.http.get).toHaveBeenCalledTimes(2);
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
       expect(coreStart.http.get).toHaveBeenLastCalledWith(
         '/internal/security/_share_saved_object_permissions',
         {
