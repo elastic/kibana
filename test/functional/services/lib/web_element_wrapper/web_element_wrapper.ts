@@ -18,7 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
+import { Element as WebElement, Browser } from 'webdriverio';
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
@@ -29,6 +29,9 @@ import { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../../remote/browsers';
 
+const BACK_SPACE_KEY = 'Back space';
+const RELEASE_KEY = 'NULL';
+const SELECTION_KEY = process.platform === 'darwin' ? 'Command' : 'Control';
 interface TypeOptions {
   charByChar: boolean;
 }
@@ -45,14 +48,12 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
 ];
 
 export class WebElementWrapper {
-  private By = By;
-  private Keys = Key;
   public isChromium: boolean = [Browsers.Chrome, Browsers.ChromiumEdge].includes(this.browserType);
 
   public static create(
     webElement: WebElement | WebElementWrapper,
-    locator: By | null,
-    driver: WebDriver,
+    locator: string | null,
+    driver: Browser,
     timeout: number,
     fixedHeaderHeight: number,
     logger: ToolingLog,
@@ -75,8 +76,8 @@ export class WebElementWrapper {
 
   constructor(
     public _webElement: WebElement,
-    private locator: By | null,
-    private driver: WebDriver,
+    private locator: string | null,
+    private driver: Browser,
     private timeout: number,
     private fixedHeaderHeight: number,
     private logger: ToolingLog,
@@ -88,16 +89,16 @@ export class WebElementWrapper {
     timeout?: number
   ) {
     if (timeout && timeout !== this.timeout) {
-      await this.driver.manage().setTimeouts({ implicit: timeout });
+      await this.driver.setTimeout({ implicit: timeout });
     }
     const elements = await findFunction();
     if (timeout && timeout !== this.timeout) {
-      await this.driver.manage().setTimeouts({ implicit: this.timeout });
+      await this.driver.setTimeout({ implicit: this.timeout });
     }
     return elements;
   }
 
-  private _wrap(otherWebElement: WebElement | WebElementWrapper, locator: By | null = null) {
+  private _wrap(otherWebElement: WebElement | WebElementWrapper, locator: string | null = null) {
     return WebElementWrapper.create(
       otherWebElement,
       locator,
@@ -134,13 +135,9 @@ export class WebElementWrapper {
       );
 
       await delay(200);
-      this._webElement = await this.driver.findElement(this.locator);
+      this._webElement = await this.driver.$(this.locator);
       return await this.retryCall(fn, attemptsRemaining - 1);
     }
-  }
-
-  private getActions() {
-    return this.driver.actions();
   }
 
   /**
@@ -153,7 +150,7 @@ export class WebElementWrapper {
    *  - Elements with opacity: 0
    *  - Elements with no offsetWidth or offsetHeight
    *
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#isDisplayed
+   * https://webdriver.io/docs/api/element/isDisplayed.html
    *
    * @return {Promise<boolean>}
    */
@@ -165,7 +162,7 @@ export class WebElementWrapper {
 
   /**
    * Tests whether this element is enabled, as dictated by the disabled attribute.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#isEnabled
+   * https://webdriver.io/docs/api/element/isEnabled.html
    *
    * @return {Promise<boolean>}
    */
@@ -177,7 +174,7 @@ export class WebElementWrapper {
 
   /**
    * Tests whether this element is selected.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#isSelected
+   * https://webdriver.io/docs/api/element/isSelected.html
    *
    * @return {Promise<boolean>}
    */
@@ -189,7 +186,7 @@ export class WebElementWrapper {
 
   /**
    * Clicks on this element.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#click
+   * https://webdriver.io/docs/api/element/click.html
    *
    * @return {Promise<void>}
    */
@@ -208,7 +205,7 @@ export class WebElementWrapper {
   public async focus() {
     await this.retryCall(async function focus(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      await wrapper.driver.executeScript(`arguments[0].focus()`, wrapper._webElement);
+      await wrapper.driver.execute(`arguments[0].focus()`, wrapper._webElement);
     });
   }
 
@@ -226,7 +223,7 @@ export class WebElementWrapper {
   /**
    * Clear the value of this element. This command has no effect if the underlying DOM element
    * is neither a text INPUT element nor a TEXTAREA element.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#clear
+   * https://webdriver.io/docs/api/element/clearValue.html
    *
    * @param {{ withJS: boolean }} options option to clear input with JS: `arguments[0].value=''`
    * @default { withJS: false }
@@ -235,9 +232,9 @@ export class WebElementWrapper {
     await this.retryCall(async function clearValue(wrapper) {
       if (wrapper.isChromium || options.withJS) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
-        await wrapper.driver.executeScript(`arguments[0].value=''`, wrapper._webElement);
+        await wrapper.driver.execute(`arguments[0].value=''`, wrapper._webElement);
       } else {
-        await wrapper._webElement.clear();
+        await wrapper._webElement.clearValue();
       }
     });
   }
@@ -251,21 +248,20 @@ export class WebElementWrapper {
     if (options.charByChar === true) {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
-        await this.pressKeys(this.Keys.BACK_SPACE);
+        await this.pressKeys(BACK_SPACE_KEY);
         await delay(100);
       }
     } else {
       if (this.isChromium) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=30
         await this.retryCall(async function clearValueWithKeyboard(wrapper) {
-          await wrapper.driver.executeScript(`arguments[0].select();`, wrapper._webElement);
+          await wrapper.driver.execute(`arguments[0].select();`, wrapper._webElement);
         });
-        await this.pressKeys(this.Keys.BACK_SPACE);
+        await this.pressKeys(BACK_SPACE_KEY);
       } else {
-        const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-        await this.pressKeys([selectionKey, 'a']);
-        await this.pressKeys(this.Keys.NULL); // Release modifier keys
-        await this.pressKeys(this.Keys.BACK_SPACE); // Delete all content
+        await this.pressKeys([SELECTION_KEY, 'a']);
+        await this.pressKeys(RELEASE_KEY); // Release modifier keys
+        await this.pressKeys(BACK_SPACE_KEY); // Delete all content
       }
     }
   }
@@ -280,7 +276,7 @@ export class WebElementWrapper {
    * The input.Key.NULL key is encountered in the sequence. When this key is encountered, all
    * modifier keys current in the down state are released (with accompanying keyup events). The NULL
    * key can be used to simulate common keyboard shortcuts.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#sendKeys
+   * https://webdriver.io/docs/api/element/setValue.html
    *
    * @param {string|string[]} value
    * @param {charByChar: boolean} options
@@ -290,34 +286,27 @@ export class WebElementWrapper {
     if (options.charByChar) {
       for (const char of value) {
         await this.retryCall(async function type(wrapper) {
-          await wrapper._webElement.sendKeys(char);
+          await wrapper._webElement.addValue(char);
           await delay(100);
         });
       }
     } else {
       await this.retryCall(async function type(wrapper) {
-        await wrapper._webElement.sendKeys(...value);
+        await wrapper._webElement.addValue(value);
       });
     }
   }
 
   /**
    * Sends keyboard event into the element.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#sendKeys
+   * https://webdriver.io/docs/api/browser/keys.html
    *
    * @param  {string|string[]} keys
    * @return {Promise<void>}
    */
-  public async pressKeys<T extends typeof Key>(keys: T | T[]): Promise<void>;
-  public async pressKeys<T extends string>(keys: T | T[]): Promise<void>;
-  public async pressKeys(keys: string): Promise<void> {
+  public async pressKeys(keys: string | string[]): Promise<void> {
     await this.retryCall(async function pressKeys(wrapper) {
-      if (Array.isArray(keys)) {
-        const chord = wrapper.Keys.chord(keys);
-        await wrapper._webElement.sendKeys(chord);
-      } else {
-        await wrapper._webElement.sendKeys(keys);
-      }
+      await wrapper.driver.keys(keys);
     });
   }
 
@@ -328,7 +317,7 @@ export class WebElementWrapper {
    * case the value of the property with the same name is returned. If neither value is set, null
    * is returned (for example, the "value" property of a textarea element). The "style" attribute
    * is converted as best can be to a text representation with a trailing semi-colon.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getAttribute
+   * https://webdriver.io/docs/api/element/getAttribute.html
    *
    * @param {string} name
    */
@@ -342,21 +331,21 @@ export class WebElementWrapper {
    * Retrieves the value of a computed style property for this instance. If the element inherits
    * the named style from its parent, the parent will be queried for its value. Where possible,
    * color values will be converted to their hex representation (e.g. #00ff00 instead of rgb(0, 255, 0)).
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getCssValue
+   * https://webdriver.io/docs/api/element/getCSSProperty.html
    *
    * @param {string} propertyName
    * @return {Promise<string>}
    */
   public async getComputedStyle(propertyName: string) {
     return await this.retryCall(async function getComputedStyle(wrapper) {
-      return await wrapper._webElement.getCssValue(propertyName);
+      return await wrapper._webElement.getCSSProperty(propertyName);
     });
   }
 
   /**
    * Get the visible (i.e. not hidden by CSS) innerText of this element, including sub-elements,
    * without any leading or trailing whitespace.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getText
+   * https://webdriver.io/docs/api/element/getText.html
    *
    * @return {Promise<string>}
    */
@@ -368,7 +357,7 @@ export class WebElementWrapper {
 
   /**
    * Retrieves the element's tag name.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getTagName
+   * https://webdriver.io/docs/api/element/getTagName.html
    *
    * @return {Promise<string>}
    */
@@ -383,98 +372,91 @@ export class WebElementWrapper {
   /**
    * Returns an object describing an element's location, in pixels relative to the document element,
    * and the element's size in pixels.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getRect
+   * https://webdriver.io/docs/api/element/getLocation.html
    *
-   * @return {Promise<{height: number, width: number, x: number, y: number}>}
+   * @return {Promise<{x: number, y: number}>}
    */
-  public async getPosition(): Promise<{ height: number; width: number; x: number; y: number }> {
+  public async getPosition(): Promise<{ x: number; y: number }> {
     return await this.retryCall(async function getPosition(wrapper) {
-      return await wrapper._webElement.getRect();
+      return await wrapper._webElement.getLocation();
     });
   }
 
   /**
    * Returns an object describing an element's location, in pixels relative to the document element,
    * and the element's size in pixels.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getRect
+   * https://webdriver.io/docs/api/element/getSize.html
    *
    * @return {Promise<{height: number, width: number, x: number, y: number}>}
    */
-  public async getSize(): Promise<{ height: number; width: number; x: number; y: number }> {
+  public async getSize(): Promise<{ height: number; width: number }> {
     return await this.retryCall(async function getSize(wrapper) {
-      return await wrapper._webElement.getRect();
+      return await wrapper._webElement.getSize();
     });
   }
 
   /**
    * Moves the remote environment’s mouse cursor to the current element with optional offset
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
+   * https://webdriver.io/docs/api/element/moveTo.html
    * @param { xOffset: 0, yOffset: 0 } options
    * @return {Promise<void>}
    */
   public async moveMouseTo(options = { xOffset: 0, yOffset: 0 }) {
+    const { xOffset, yOffset } = options;
     await this.retryCall(async function moveMouseTo(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      await wrapper.getActions().move({ x: 0, y: 0 }).perform();
-      await wrapper
-        .getActions()
-        .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-        .perform();
+      await wrapper._webElement.moveTo({ xOffset, yOffset });
     });
   }
 
   /**
    * Inserts an action for moving the mouse to element center, unless optional offset is provided.
    * Then adds an action for left-click (down/up) with the mouse.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click
+   * https://webdriver.io/docs/api/element/click.html
    *
    * @param { xOffset: 0, yOffset: 0 } options Optional
    * @return {Promise<void>}
    */
-  public async clickMouseButton(options = { xOffset: 0, yOffset: 0 }) {
+  public async clickMouseButton(options = { button: 1, xOffset: 0, yOffset: 0 }) {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      await wrapper.getActions().move({ x: 0, y: 0 }).perform();
-      await wrapper
-        .getActions()
-        .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
-        .click()
-        .perform();
+      await wrapper._webElement.click({
+        button: options.button,
+        x: options.xOffset,
+        y: options.yOffset,
+      });
     });
   }
 
   /**
    * Inserts action for performing a double left-click with the mouse.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#doubleClick
+   * https://webdriver.io/docs/api/element/doubleClick.html
    * @param {WebElementWrapper} element
    * @return {Promise<void>}
    */
   public async doubleClick() {
     await this.retryCall(async function clickMouseButton(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      await wrapper.getActions().doubleClick(wrapper._webElement).perform();
+      await wrapper._webElement.doubleClick();
     });
   }
 
   /**
    * Gets the first element inside this element matching the given CSS selector.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://webdriver.io/docs/selectors.html#css-query-selector
    *
    * @param {string} selector
    * @return {Promise<WebElementWrapper>}
    */
   public async findByCssSelector(selector: string) {
     return await this.retryCall(async function findByCssSelector(wrapper) {
-      return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.css(selector)),
-        wrapper.By.css(selector)
-      );
+      return wrapper._wrap(await wrapper._webElement.$(selector), selector);
     });
   }
 
   /**
    * Gets all elements inside this element matching the given CSS selector.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://webdriver.io/docs/selectors.html#css-query-selector
    *
    * @param {string} selector
    * @param {number} timeout
@@ -484,7 +466,7 @@ export class WebElementWrapper {
     return await this.retryCall(async function findAllByCssSelector(wrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () => await wrapper._webElement.findElements(wrapper.By.css(selector)),
+          async () => await wrapper._webElement.$$(selector),
           timeout
         )
       );
@@ -499,10 +481,7 @@ export class WebElementWrapper {
    */
   public async findByTestSubject(selector: string) {
     return await this.retryCall(async function find(wrapper) {
-      return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector))),
-        wrapper.By.css(selector)
-      );
+      return wrapper._wrap(await wrapper._webElement.$(testSubjSelector(selector)), selector);
     });
   }
 
@@ -517,8 +496,7 @@ export class WebElementWrapper {
     return await this.retryCall(async function findAll(wrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () =>
-            await wrapper._webElement.findElements(wrapper.By.css(testSubjSelector(selector))),
+          async () => await wrapper._webElement.$$(testSubjSelector(selector)),
           timeout
         )
       );
@@ -527,23 +505,20 @@ export class WebElementWrapper {
 
   /**
    * Gets the first element inside this element matching the given CSS class name.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://webdriver.io/docs/selectors.html#css-query-selector
    *
    * @param {string} className
    * @return {Promise<WebElementWrapper>}
    */
   public async findByClassName(className: string) {
     return await this.retryCall(async function findByClassName(wrapper) {
-      return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.className(className)),
-        wrapper.By.className(className)
-      );
+      return wrapper._wrap(await wrapper._webElement.$(`.${className}`), `.${className}`);
     });
   }
 
   /**
    * Gets all elements inside this element matching the given CSS class name.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://webdriver.io/docs/selectors.html#css-query-selector
    *
    * @param {string} className
    * @param {number} timeout
@@ -553,7 +528,7 @@ export class WebElementWrapper {
     return await this.retryCall(async function findAllByClassName(wrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () => await wrapper._webElement.findElements(wrapper.By.className(className)),
+          async () => await wrapper._webElement.$$(`.${className}`),
           timeout
         )
       );
@@ -562,7 +537,7 @@ export class WebElementWrapper {
 
   /**
    * Gets the first element inside this element matching the given tag name.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://webdriver.io/docs/selectors.html#tag-name
    *
    * @param {string} tagName
    * @return {Promise<WebElementWrapper>}
@@ -573,16 +548,13 @@ export class WebElementWrapper {
   public async findByTagName<T extends string>(tagName: T): Promise<WebElementWrapper>;
   public async findByTagName(tagName: string): Promise<WebElementWrapper> {
     return await this.retryCall(async function findByTagName(wrapper) {
-      return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.tagName(tagName)),
-        wrapper.By.tagName(tagName)
-      );
+      return wrapper._wrap(await wrapper._webElement.$(`<${tagName} />`), `<${tagName} />`);
     });
   }
 
   /**
    * Gets all elements inside this element matching the given tag name.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://webdriver.io/docs/selectors.html#tag-name
    *
    * @param {string} tagName
    * @param {number} timeout
@@ -600,7 +572,7 @@ export class WebElementWrapper {
     return await this.retryCall(async function findAllByTagName(wrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () => await wrapper._webElement.findElements(wrapper.By.tagName(tagName)),
+          async () => await wrapper._webElement.$$(`<${tagName} />`),
           timeout
         )
       );
@@ -609,23 +581,20 @@ export class WebElementWrapper {
 
   /**
    * Gets the first element inside this element matching the given XPath selector.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://webdriver.io/docs/selectors.html#xpath
    *
    * @param {string} selector
    * @return {Promise<WebElementWrapper>}
    */
   async findByXpath(selector: string) {
     return await this.retryCall(async function findByXpath(wrapper) {
-      return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.xpath(selector)),
-        wrapper.By.xpath(selector)
-      );
+      return wrapper._wrap(await wrapper._webElement.$(selector), selector);
     });
   }
 
   /**
    * Gets all elements inside this element matching the given XPath selector.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://webdriver.io/docs/selectors.html#xpath
    *
    * @param {string} selector
    * @param {number} timeout
@@ -635,7 +604,7 @@ export class WebElementWrapper {
     return await this.retryCall(async function findAllByXpath(wrapper) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () => await wrapper._webElement.findElements(wrapper.By.xpath(selector)),
+          async () => await wrapper._webElement.$$(selector),
           timeout
         )
       );
@@ -644,23 +613,20 @@ export class WebElementWrapper {
 
   /**
    * Gets the first element inside this element matching the given partial link text.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://webdriver.io/docs/selectors.html#partial-link-text
    *
    * @param {string} linkText
    * @return {Promise<WebElementWrapper[]>}
    */
   public async findByPartialLinkText(linkText: string) {
     return await this.retryCall(async function findByPartialLinkText(wrapper) {
-      return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.partialLinkText(linkText)),
-        wrapper.By.partialLinkText(linkText)
-      );
+      return wrapper._wrap(await wrapper._webElement.$(`*=${linkText}`), `*=${linkText}`);
     });
   }
 
   /**
    * Gets all elements inside this element matching the given partial link text.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://webdriver.io/docs/selectors.html#partial-link-text
    *
    * @param {string} linkText
    * @param {number} timeout
@@ -672,7 +638,7 @@ export class WebElementWrapper {
     ) {
       return wrapper._wrapAll(
         await wrapper._findWithCustomTimeout(
-          async () => await wrapper._webElement.findElements(wrapper.By.partialLinkText(linkText)),
+          async () => await wrapper._webElement.$$(`*=${linkText}`),
           timeout
         )
       );
@@ -681,21 +647,22 @@ export class WebElementWrapper {
 
   /**
    * Waits for all elements inside this element matching the given CSS selector to be destroyed.
-   *
+   * https://webdriver.io/docs/api/browser/waitUntil.html
    * @param {string} className
    * @return {Promise<void>}
    */
   public async waitForDeletedByCssSelector(selector: string): Promise<void> {
-    await this.driver.manage().setTimeouts({ implicit: 1000 });
-    await this.driver.wait(
+    await this.driver.waitUntil(
       async () => {
-        const found = await this._webElement.findElements(this.By.css(selector));
+        const found = await this._webElement.$$(selector);
         return found.length === 0;
       },
-      this.timeout,
-      `The element with ${selector} selector was still present after ${this.timeout} sec.`
+      {
+        timeout: this.timeout,
+        timeoutMsg: `The element with ${selector} selector was still present after ${this.timeout} sec.`,
+        interval: 200,
+      }
     );
-    await this.driver.manage().setTimeouts({ implicit: this.timeout });
   }
 
   /**
@@ -705,11 +672,7 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   public async scrollIntoViewIfNecessary(): Promise<void> {
-    await this.driver.executeScript(
-      scrollIntoViewIfNecessary,
-      this._webElement,
-      this.fixedHeaderHeight
-    );
+    await this.driver.execute(scrollIntoViewIfNecessary, this._webElement, this.fixedHeaderHeight);
   }
 
   /**
@@ -750,10 +713,12 @@ export class WebElementWrapper {
    * @returns {Promise<void>}
    */
   public async takeScreenshot(): Promise<Buffer> {
-    const screenshot = await this.driver.takeScreenshot();
+    // might not work as expected
+    const screenshot = await this._webElement.takeScreenshot();
     const buffer = Buffer.from(screenshot, 'base64');
-    const { width, height, x, y } = await this.getPosition();
-    const windowWidth: number = await this.driver.executeScript(
+    const { x, y } = await this.getPosition();
+    const { width, height } = await this.getSize();
+    const windowWidth: number = await this.driver.execute(
       'return window.document.body.clientWidth'
     );
     const src = PNG.sync.read(buffer);
