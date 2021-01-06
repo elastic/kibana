@@ -75,7 +75,7 @@ export const config = {
         hostname: true,
         validate(value) {
           if (value === '0') {
-            return 'value 0 is not a valid hostname';
+            return 'value 0 is not a valid hostname (use "0.0.0.0" to bind to all interfaces)';
           }
         },
       }),
