@@ -5,32 +5,24 @@
  */
 
 import React from 'react';
-
-import { FieldVisConfig } from '../stats_datagrid/types';
-import { NotInDocsContent } from '../index_based/components/field_data_row/content_types';
 import {
   BooleanContent,
   DateContent,
   GeoPointContent,
   IpContent,
   KeywordContent,
-  NumberContent,
   OtherContent,
   TextContent,
-} from './components/field_data_expanded_row';
+  NumberContent,
+} from '../../../stats_datagrid/components/field_data_expanded_row';
+import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
+import type { FileBasedFieldVisConfig } from '../../../stats_datagrid/types/field_vis_config';
 
-import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
-import { LoadingIndicator } from '../index_based/components/field_data_row/loading_indicator';
-
-export const IndexBasedDataVisualizerExpandedRow = ({ item }: { item: FieldVisConfig }) => {
+export const FileBasedDataVisualizerExpandedRow = ({ item }: { item: FileBasedFieldVisConfig }) => {
   const config = item;
-  const { loading, type, existsInDocs, fieldName } = config;
+  const { type, fieldName } = config;
 
   function getCardContent() {
-    if (existsInDocs === false) {
-      return <NotInDocsContent />;
-    }
-
     switch (type) {
       case ML_JOB_FIELD_TYPES.NUMBER:
         return <NumberContent config={config} />;
@@ -63,7 +55,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({ item }: { item: FieldVisCo
       className="mlDataVisualizerFieldExpandedRow"
       data-test-subj={`mlDataVisualizerFieldExpandedRow-${fieldName}`}
     >
-      {loading === true ? <LoadingIndicator /> : getCardContent()}
+      {getCardContent()}
     </div>
   );
 };

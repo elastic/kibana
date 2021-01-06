@@ -14,7 +14,7 @@ import { DataVisualizerDataGrid, ItemIdToExpandedRowMap } from '../../../stats_d
 import type { DataVisualizerFileBasedAppState } from '../../../../../../common/types/ml_url_generator';
 import { getFieldNames, getSupportedFieldType } from './get_field_names';
 import type { FileBasedFieldVisConfig } from '../../../stats_datagrid/types/field_vis_config';
-import { FileBasedDataVisualizerExpandedRow } from '../../../stats_datagrid/file_based_expanded_row';
+import { FileBasedDataVisualizerExpandedRow } from '../expanded_row';
 
 import { DataVisualizerFieldNamesFilter } from '../field_names_filter';
 import { DataVisualizerFieldTypesFilter } from '../field_types_filter';

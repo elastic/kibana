@@ -56,7 +56,7 @@ import type { OverallStats } from '../../../../common/types/datavisualizer';
 import { MlJobFieldType } from '../../../../common/types/field_types';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
-import { IndexBasedDataVisualizerExpandedRow } from '../stats_datagrid/expanded_row';
+import { IndexBasedDataVisualizerExpandedRow } from './components/expanded_row';
 import { FieldVisConfig } from '../stats_datagrid/types';
 
 interface DataVisualizerPageState {
