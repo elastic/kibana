@@ -37,7 +37,7 @@ describe('kbnUrlTracker', () => {
   let state2Subject: Subject<{ key2: string }>;
   let navLinkUpdaterSubject: BehaviorSubject<AppUpdater>;
   let toastService: jest.Mocked<ToastsSetup>;
-  let onBeforeNavLinkSaved = jest.fn((url) => url);
+  const onBeforeNavLinkSaved = jest.fn((url) => url);
 
   function createTracker(shouldTrackUrlUpdate?: (pathname: string) => boolean) {
     urlTracker = createKbnUrlTracker({
