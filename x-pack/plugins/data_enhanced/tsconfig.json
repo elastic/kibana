@@ -10,9 +10,10 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "public/autocomplete/providers/kql_query_suggestion/__fixtures__/*.json",
     "server/**/*",
-    "config.ts"
+    "config.ts",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "public/autocomplete/providers/kql_query_suggestion/__fixtures__/*.json"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
