@@ -15287,7 +15287,6 @@
     "xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel": "打印优化",
     "xpack.reporting.serverConfig.autoSet.sandboxDisabled": "Chromium 沙盒提供附加保护层，但不受 {osName} OS 支持。自动设置“{configKey}: true”。",
     "xpack.reporting.serverConfig.autoSet.sandboxEnabled": "Chromium 沙盒提供附加保护层，受 {osName} OS 支持。自动启用 Chromium 沙盒。",
-    "xpack.reporting.serverConfig.invalidServerHostname": "在 Kibana 配置中找到“server.host:\"0\"”。其不与 Reporting 兼容。要使 Reporting 运行，“{configKey}:0.0.0.0”将自动添加到配置中。可以将该设置更改为“server.host:0.0.0.0”或在 kibana.yml 中添加“{configKey}:0.0.0.0”，以阻止此消息。",
     "xpack.reporting.serverConfig.osDetected": "正在以下 OS 上运行：“{osName}”",
     "xpack.reporting.serverConfig.randomEncryptionKey": "正在为 xpack.reporting.encryptionKey 生成随机密钥。要防止会话在重新启动时失效，请在 kibana.yml 中设置 xpack.reporting.encryptionKey",
     "xpack.reporting.shareContextMenu.csvReportsButtonLabel": "CSV 报告",
