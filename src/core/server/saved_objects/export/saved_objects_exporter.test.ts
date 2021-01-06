@@ -781,7 +781,7 @@ describe('getSortedObjectsForExport()', () => {
             },
           ],
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Bad Request"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Error fetching objects to export"`);
     });
 
     test('export selected objects throws error when exceeding exportSizeLimit', async () => {
