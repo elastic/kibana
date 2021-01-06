@@ -86,9 +86,13 @@ export function screenshotsObservableFactory(
                 );
               }),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
-              mergeMap((itemsCount) =>
-                waitForVisualizations(captureConfig, driver, itemsCount, layout, logger)
-              ),
+              mergeMap(async (itemsCount) => {
+                const viewport = layout.getViewport(itemsCount) || getDefaultViewPort();
+                await Promise.all([
+                  driver.setViewport(viewport, logger),
+                  waitForVisualizations(captureConfig, driver, itemsCount, layout, logger),
+                ]);
+              }),
               mergeMap(async () => {
                 // Waiting till _after_ elements have rendered before injecting our CSS
                 // allows for them to be displayed properly in many cases
@@ -153,6 +157,15 @@ export function screenshotsObservableFactory(
   };
 }
 
+/*
+ * If Kibana is showing a non-HTML error message, the viewport might not be
+ * provided by the browser.
+ */
+const getDefaultViewPort = () => ({
+  height: DEFAULT_SCREENSHOT_CLIP_HEIGHT,
+  width: DEFAULT_SCREENSHOT_CLIP_WIDTH,
+  zoom: 1,
+});
 /*
  * If an error happens setting up the page, we don't know if there actually
  * are any visualizations showing. These defaults should help capture the page
