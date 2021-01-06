@@ -5,7 +5,7 @@
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
@@ -28,6 +28,8 @@ import {
   ExecutorSubActionCommonFieldsParams,
   ServiceNowExecutorResultData,
 } from './types';
+
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
 interface GetActionTypeParams {
   logger: Logger;

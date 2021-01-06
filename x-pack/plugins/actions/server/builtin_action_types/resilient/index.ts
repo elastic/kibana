@@ -5,7 +5,7 @@
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
@@ -29,6 +29,8 @@ import {
 } from './types';
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
+
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
 interface GetActionTypeParams {
   logger: Logger;
