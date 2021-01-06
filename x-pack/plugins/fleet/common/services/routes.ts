@@ -36,7 +36,7 @@ export const epmRouteService = {
   },
 
   getSummaryPath: (pkgName: string) => {
-    return EPM_API_ROUTES.SUMMARY_PATTERN.replace('{pkgName}', pkgName);
+    return EPM_API_ROUTES.STATS_PATTERN.replace('{pkgName}', pkgName);
   },
 
   getFilePath: (filePath: string) => {

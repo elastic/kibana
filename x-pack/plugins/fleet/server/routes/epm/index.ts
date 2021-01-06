@@ -61,7 +61,7 @@ export const registerRoutes = (router: IRouter) => {
 
   router.get(
     {
-      path: EPM_API_ROUTES.SUMMARY_PATTERN,
+      path: EPM_API_ROUTES.STATS_PATTERN,
       validate: GetSummaryRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
