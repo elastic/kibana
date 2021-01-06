@@ -9,11 +9,11 @@ import { euiStyled } from '../../../../../../../observability/public';
 import { FIXED_AXIS_HEIGHT } from './constants';
 
 interface WaterfallChartOuterContainerProps {
-  height?: number;
+  height?: string;
 }
 
 export const WaterfallChartOuterContainer = euiStyled.div<WaterfallChartOuterContainerProps>`
-  height: calc(100vh - 228px);
+  height: ${(props) => (props.height ? `${props.height}` : 'auto')};
   overflow-y: ${(props) => (props.height ? 'scroll' : 'visible')};
   overflow-x: hidden;
 `;
