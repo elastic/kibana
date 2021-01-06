@@ -5,7 +5,7 @@
  */
 
 import { waitFor } from '@testing-library/dom';
-import { ReactWrapper, shallow } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
@@ -53,12 +53,6 @@ describe('EventDetails', () => {
       </TestProviders>
     ) as ReactWrapper;
     await waitFor(() => wrapper.update());
-  });
-  describe('rendering', () => {
-    test('should match snapshot', () => {
-      const shallowWrap = shallow(<EventDetails {...defaultProps} />);
-      expect(shallowWrap).toMatchSnapshot();
-    });
   });
 
   describe('tabs', () => {

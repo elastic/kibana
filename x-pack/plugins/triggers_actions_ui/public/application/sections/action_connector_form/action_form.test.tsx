@@ -8,7 +8,13 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, Alert, AlertAction } from '../../../types';
+import {
+  ValidationResult,
+  Alert,
+  AlertAction,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../types';
 import ActionForm from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import {
@@ -44,10 +50,10 @@ describe('action_form', () => {
     id: 'my-action-type',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): GenericValidationResult<unknown> => {
       const validationResult = { errors: {} };
       return validationResult;
     },
@@ -59,10 +65,10 @@ describe('action_form', () => {
     id: 'disabled-by-config',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): GenericValidationResult<unknown> => {
       const validationResult = { errors: {} };
       return validationResult;
     },
@@ -74,8 +80,8 @@ describe('action_form', () => {
     id: '.jira',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
     },
     validateParams: (): ValidationResult => {
       const validationResult = { errors: {} };
@@ -89,10 +95,10 @@ describe('action_form', () => {
     id: 'disabled-by-license',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): GenericValidationResult<unknown> => {
       const validationResult = { errors: {} };
       return validationResult;
     },
@@ -104,10 +110,10 @@ describe('action_form', () => {
     id: 'preconfigured',
     iconClass: 'test',
     selectMessage: 'test',
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return {};
     },
-    validateParams: (): ValidationResult => {
+    validateParams: (): GenericValidationResult<unknown> => {
       const validationResult = { errors: {} };
       return validationResult;
     },
