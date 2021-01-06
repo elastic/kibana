@@ -19,6 +19,24 @@ export interface AnalysisResult {
   overrides?: FormattedOverrides;
 }
 
+type NumericType =
+  | 'long'
+  | 'integer'
+  | 'short'
+  | 'byte'
+  | 'double'
+  | 'float'
+  | 'half_float'
+  | 'scaled_float';
+
+type RangeType =
+  | 'integer_range'
+  | 'float_range'
+  | 'long_range'
+  | 'ip_range'
+  | 'double_range'
+  | 'date_range';
+
 // including all possible Elasticsearch types
 // since find_file_structure API can be enhanced to include new fields in the future
 export type EsMappingType =
@@ -51,8 +69,8 @@ export type EsMappingType =
   | 'constant_keyword'
   | 'version'
   | 'wildcard'
-  | 'long'
-  | 'double'
+  | NumericType
+  | RangeType
   | 'unknown';
 
 export interface FindFileStructureResponse {
