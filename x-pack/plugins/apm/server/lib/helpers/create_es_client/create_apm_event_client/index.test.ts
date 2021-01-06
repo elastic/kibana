@@ -5,11 +5,11 @@
  */
 
 import { contextServiceMock } from 'src/core/server/mocks';
+import { createHttpServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { createApmEventClient } from '.';
-import { createHttpServer } from '../../../../../../../../src/core/server/test_utils';
 
-describe('create_apm_event_client', () => {
+describe('createApmEventClient', () => {
   let server: ReturnType<typeof createHttpServer>;
 
   beforeEach(() => {
