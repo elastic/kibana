@@ -94,6 +94,14 @@ export const FIELD_MAPPING_DESC = (thirdPartyName: string): string => {
       'Map Security Case fields to { thirdPartyName } fields when pushing data to { thirdPartyName }. Field mappings require an established connection to { thirdPartyName }.',
   });
 };
+
+export const FIELD_MAPPING_DESC_ERR = (thirdPartyName: string): string => {
+  return i18n.translate('xpack.securitySolution.case.configureCases.fieldMappingDescErr', {
+    values: { thirdPartyName },
+    defaultMessage:
+      'Field mappings require an established connection to { thirdPartyName }. Please check your connection credentials.',
+  });
+};
 export const EDIT_FIELD_MAPPING_TITLE = (thirdPartyName: string): string => {
   return i18n.translate('xpack.securitySolution.case.configureCases.editFieldMappingTitle', {
     values: { thirdPartyName },
