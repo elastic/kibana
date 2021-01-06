@@ -18,12 +18,12 @@
  */
 import _ from 'lodash';
 // @ts-ignore
-import collapsingTests from './utils_string_collapsing.txt';
+import collapsingTests from './__fixtures__/utils_string_collapsing.txt';
 // @ts-ignore
-import expandingTests from './utils_string_expanding.txt';
+import expandingTests from './__fixtures__/utils_string_expanding.txt';
 
-import * as utils from '../index';
-import { extractJSONStringValues } from '../parser';
+import * as utils from './index';
+import { extractJSONStringValues } from './parser';
 
 describe('JSON to XJSON conversion tools', () => {
   it('will collapse multiline strings', () => {
