@@ -141,8 +141,7 @@ export type GeoContainmentAlertType = AlertType<
   GeoContainmentParams,
   GeoContainmentState,
   GeoContainmentInstanceState,
-  GeoContainmentInstanceContext,
-  typeof ActionGroupId
+  GeoContainmentInstanceContext
 >;
 
 export function getAlertType(logger: Logger): GeoContainmentAlertType {

@@ -61,7 +61,7 @@ describe('alert_conditions', () => {
     const ConditionForm = ({
       actionGroup,
     }: {
-      actionGroup?: ActionGroupWithCondition<{ someProp: string }, string>;
+      actionGroup?: ActionGroupWithCondition<{ someProp: string }>;
     }) => {
       return (
         <EuiDescriptionList>
@@ -113,7 +113,7 @@ describe('alert_conditions', () => {
     const ConditionForm = ({
       actionGroup,
     }: {
-      actionGroup?: ActionGroupWithCondition<{ someProp: string }, string>;
+      actionGroup?: ActionGroupWithCondition<{ someProp: string }>;
     }) => {
       return (
         <EuiDescriptionList>
@@ -165,7 +165,7 @@ describe('alert_conditions', () => {
     const ConditionForm = ({
       actionGroup,
     }: {
-      actionGroup?: ActionGroupWithCondition<{ someProp: string }, string>;
+      actionGroup?: ActionGroupWithCondition<{ someProp: string }>;
     }) => {
       return (
         <EuiDescriptionList>
@@ -218,10 +218,8 @@ describe('alert_conditions', () => {
       actionGroup,
       someCallbackProp,
     }: {
-      actionGroup?: ActionGroupWithCondition<{ someProp: string }, string>;
-      someCallbackProp: (
-        actionGroup: ActionGroupWithCondition<{ someProp: string }, string>
-      ) => void;
+      actionGroup?: ActionGroupWithCondition<{ someProp: string }>;
+      someCallbackProp: (actionGroup: ActionGroupWithCondition<{ someProp: string }>) => void;
     }) => {
       if (!actionGroup) {
         return <div />;

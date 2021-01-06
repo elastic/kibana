@@ -11,10 +11,7 @@ import { ActionGroup, getBuiltinActionGroups } from '../../../../../alerts/commo
 
 const BUILT_IN_ACTION_GROUPS: Set<string> = new Set(getBuiltinActionGroups().map(({ id }) => id));
 
-export type ActionGroupWithCondition<
-  T,
-  ActionGroupIds extends string
-> = ActionGroup<ActionGroupIds> &
+export type ActionGroupWithCondition<T> = ActionGroup &
   (
     | // allow isRequired=false with or without conditions
     {
@@ -28,26 +25,22 @@ export type ActionGroupWithCondition<
       }
   );
 
-export interface AlertConditionsProps<ConditionProps, ActionGroupIds extends string> {
+export interface AlertConditionsProps<ConditionProps> {
   headline?: string;
-  actionGroups: Array<ActionGroupWithCondition<ConditionProps, ActionGroupIds>>;
-  onInitializeConditionsFor?: (
-    actionGroup: ActionGroupWithCondition<ConditionProps, ActionGroupIds>
-  ) => void;
-  onResetConditionsFor?: (
-    actionGroup: ActionGroupWithCondition<ConditionProps, ActionGroupIds>
-  ) => void;
+  actionGroups: Array<ActionGroupWithCondition<ConditionProps>>;
+  onInitializeConditionsFor?: (actionGroup: ActionGroupWithCondition<ConditionProps>) => void;
+  onResetConditionsFor?: (actionGroup: ActionGroupWithCondition<ConditionProps>) => void;
   includeBuiltInActionGroups?: boolean;
 }
 
-export const AlertConditions = <ConditionProps extends any, ActionGroupIds extends string>({
+export const AlertConditions = <ConditionProps extends any>({
   headline,
   actionGroups,
   onInitializeConditionsFor,
   onResetConditionsFor,
   includeBuiltInActionGroups = false,
   children,
-}: PropsWithChildren<AlertConditionsProps<ConditionProps, ActionGroupIds>>) => {
+}: PropsWithChildren<AlertConditionsProps<ConditionProps>>) => {
   const [withConditions, withoutConditions] = partition(
     includeBuiltInActionGroups
       ? actionGroups

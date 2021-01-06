@@ -19,12 +19,7 @@ import {
   AlertInstanceState,
   AlertInstanceContext,
 } from './types';
-import {
-  RecoveredActionGroup,
-  getBuiltinActionGroups,
-  RecoveredActionGroupId,
-  ActionGroup,
-} from '../common';
+import { RecoveredActionGroup, getBuiltinActionGroups } from '../common';
 import { ILicenseState } from './lib/license_state';
 import { getAlertTypeFeatureUsageName } from './lib/get_alert_type_feature_usage_name';
 
@@ -74,36 +69,15 @@ export type NormalizedAlertType<
   Params extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
-> = {
-  actionGroups: Array<ActionGroup<ActionGroupIds | RecoveryActionGroupId>>;
-} & Omit<
-  AlertType<Params, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId>,
-  'recoveryActionGroup' | 'actionGroups'
-> &
-  Pick<
-    Required<
-      AlertType<
-        Params,
-        State,
-        InstanceState,
-        InstanceContext,
-        ActionGroupIds,
-        RecoveryActionGroupId
-      >
-    >,
-    'recoveryActionGroup'
-  >;
+  InstanceContext extends AlertInstanceContext
+> = Omit<AlertType<Params, State, InstanceState, InstanceContext>, 'recoveryActionGroup'> &
+  Pick<Required<AlertType<Params, State, InstanceState, InstanceContext>>, 'recoveryActionGroup'>;
 
 export type UntypedNormalizedAlertType = NormalizedAlertType<
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
-  AlertInstanceContext,
-  string,
-  string
+  AlertInstanceContext
 >;
 
 export class AlertTypeRegistry {
@@ -132,19 +106,8 @@ export class AlertTypeRegistry {
     Params extends AlertTypeParams,
     State extends AlertTypeState,
     InstanceState extends AlertInstanceState,
-    InstanceContext extends AlertInstanceContext,
-    ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
-  >(
-    alertType: AlertType<
-      Params,
-      State,
-      InstanceState,
-      InstanceContext,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >
-  ) {
+    InstanceContext extends AlertInstanceContext
+  >(alertType: AlertType<Params, State, InstanceState, InstanceContext>) {
     if (this.has(alertType.id)) {
       throw new Error(
         i18n.translate('xpack.alerts.alertTypeRegistry.register.duplicateAlertTypeError', {
@@ -161,28 +124,18 @@ export class AlertTypeRegistry {
       Params,
       State,
       InstanceState,
-      InstanceContext,
-      ActionGroupIds,
-      RecoveryActionGroupId
+      InstanceContext
     >(alertType);
 
     this.alertTypes.set(
       alertIdSchema.validate(alertType.id),
-      /** stripping the typing is required in order to store the AlertTypes in a Map */
-      (normalizedAlertType as unknown) as UntypedNormalizedAlertType
+      normalizedAlertType as UntypedNormalizedAlertType
     );
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
         createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create<
-            Params,
-            State,
-            InstanceState,
-            InstanceContext,
-            ActionGroupIds,
-            RecoveryActionGroupId | RecoveredActionGroupId
-          >(normalizedAlertType, context),
+          this.taskRunnerFactory.create(normalizedAlertType as UntypedNormalizedAlertType, context),
       },
     });
     // No need to notify usage on basic alert types
@@ -198,19 +151,8 @@ export class AlertTypeRegistry {
     Params extends AlertTypeParams = AlertTypeParams,
     State extends AlertTypeState = AlertTypeState,
     InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
-    ActionGroupIds extends string = string,
-    RecoveryActionGroupId extends string = string
-  >(
-    id: string
-  ): NormalizedAlertType<
-    Params,
-    State,
-    InstanceState,
-    InstanceContext,
-    ActionGroupIds,
-    RecoveryActionGroupId
-  > {
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  >(id: string): NormalizedAlertType<Params, State, InstanceState, InstanceContext> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.alerts.alertTypeRegistry.get.missingAlertTypeError', {
@@ -221,18 +163,11 @@ export class AlertTypeRegistry {
         })
       );
     }
-    /**
-     * When we store the AlertTypes in the Map we strip the typing.
-     * This means that returning a typed AlertType in `get` is an inherently
-     * unsafe operation. Down casting to `unknown` is the only way to achieve this.
-     */
-    return (this.alertTypes.get(id)! as unknown) as NormalizedAlertType<
+    return this.alertTypes.get(id)! as NormalizedAlertType<
       Params,
       State,
       InstanceState,
-      InstanceContext,
-      ActionGroupIds,
-      RecoveryActionGroupId
+      InstanceContext
     >;
   }
 
@@ -282,31 +217,15 @@ function augmentActionGroupsWithReserved<
   Params extends AlertTypeParams,
   State extends AlertTypeState,
   InstanceState extends AlertInstanceState,
-  InstanceContext extends AlertInstanceContext,
-  ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  InstanceContext extends AlertInstanceContext
 >(
-  alertType: AlertType<
-    Params,
-    State,
-    InstanceState,
-    InstanceContext,
-    ActionGroupIds,
-    RecoveryActionGroupId
-  >
-): NormalizedAlertType<
-  Params,
-  State,
-  InstanceState,
-  InstanceContext,
-  ActionGroupIds,
-  RecoveredActionGroupId | RecoveryActionGroupId
-> {
+  alertType: AlertType<Params, State, InstanceState, InstanceContext>
+): NormalizedAlertType<Params, State, InstanceState, InstanceContext> {
   const reservedActionGroups = getBuiltinActionGroups(alertType.recoveryActionGroup);
   const { id, actionGroups, recoveryActionGroup } = alertType;
 
-  const activeActionGroups = new Set<string>(actionGroups.map((item) => item.id));
-  const intersectingReservedActionGroups = intersection<string>(
+  const activeActionGroups = new Set(actionGroups.map((item) => item.id));
+  const intersectingReservedActionGroups = intersection(
     [...activeActionGroups.values()],
     reservedActionGroups.map((item) => item.id)
   );

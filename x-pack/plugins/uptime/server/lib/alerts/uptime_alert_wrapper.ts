@@ -15,8 +15,8 @@ import { DynamicSettings } from '../../../common/runtime_types';
 import { createUptimeESClient, UptimeESClient } from '../lib';
 import { UptimeAlertTypeFactory, UptimeAlertTypeParam, UptimeAlertTypeState } from './types';
 
-export interface UptimeAlertType<ActionGroupIds extends string>
-  extends Omit<ReturnType<UptimeAlertTypeFactory<ActionGroupIds>>, 'executor' | 'producer'> {
+export interface UptimeAlertType
+  extends Omit<ReturnType<UptimeAlertTypeFactory>, 'executor' | 'producer'> {
   executor: ({
     options,
     uptimeEsClient,
@@ -26,8 +26,7 @@ export interface UptimeAlertType<ActionGroupIds extends string>
       UptimeAlertTypeParam,
       UptimeAlertTypeState,
       AlertInstanceState,
-      AlertInstanceContext,
-      ActionGroupIds
+      AlertInstanceContext
     >;
     uptimeEsClient: UptimeESClient;
     dynamicSettings: DynamicSettings;
@@ -35,9 +34,7 @@ export interface UptimeAlertType<ActionGroupIds extends string>
   }) => Promise<UptimeAlertTypeState | void>;
 }
 
-export const uptimeAlertWrapper = <ActionGroupIds extends string>(
-  uptimeAlert: UptimeAlertType<ActionGroupIds>
-) => ({
+export const uptimeAlertWrapper = (uptimeAlert: UptimeAlertType) => ({
   ...uptimeAlert,
   producer: 'uptime',
   executor: async (
@@ -45,8 +42,7 @@ export const uptimeAlertWrapper = <ActionGroupIds extends string>(
       UptimeAlertTypeParam,
       UptimeAlertTypeState,
       AlertInstanceState,
-      AlertInstanceContext,
-      ActionGroupIds
+      AlertInstanceContext
     >
   ) => {
     const {

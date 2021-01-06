@@ -133,10 +133,8 @@ export const AlwaysFiringExpression: React.FunctionComponent<
 };
 
 interface TShirtSelectorProps {
-  actionGroup?: ActionGroupWithCondition<number, AlwaysFiringActionGroupIds>;
-  setTShirtThreshold: (
-    actionGroup: ActionGroupWithCondition<number, AlwaysFiringActionGroupIds>
-  ) => void;
+  actionGroup?: ActionGroupWithCondition<number>;
+  setTShirtThreshold: (actionGroup: ActionGroupWithCondition<number>) => void;
 }
 const TShirtSelector = ({ actionGroup, setTShirtThreshold }: TShirtSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);

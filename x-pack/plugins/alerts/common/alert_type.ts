@@ -5,29 +5,19 @@
  */
 
 import { LicenseType } from '../../licensing/common/types';
-import { RecoveredActionGroupId, DefaultActionGroupId } from './builtin_action_groups';
 
-export interface AlertType<
-  ActionGroupIds extends Exclude<string, RecoveredActionGroupId> = DefaultActionGroupId,
-  RecoveryActionGroupId extends string = RecoveredActionGroupId
-> {
+export interface AlertType {
   id: string;
   name: string;
-  actionGroups: Array<ActionGroup<ActionGroupIds>>;
-  recoveryActionGroup: ActionGroup<RecoveryActionGroupId>;
+  actionGroups: ActionGroup[];
+  recoveryActionGroup: ActionGroup;
   actionVariables: string[];
-  defaultActionGroupId: ActionGroupIds;
+  defaultActionGroupId: ActionGroup['id'];
   producer: string;
   minimumLicenseRequired: LicenseType;
 }
 
-export interface ActionGroup<ActionGroupIds extends string> {
-  id: ActionGroupIds;
+export interface ActionGroup {
+  id: string;
   name: string;
 }
-
-export type ActionGroupIdsOf<T> = T extends ActionGroup<infer groups>
-  ? groups
-  : T extends Readonly<ActionGroup<infer groups>>
-  ? groups
-  : never;

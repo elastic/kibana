@@ -10,7 +10,6 @@ import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_m
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import { AlertStates, InventoryMetricConditions } from './types';
 import {
-  ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
   RecoveredActionGroup,
@@ -28,7 +27,6 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
-import { InventoryMetricThresholdAllowedActionGroups } from './register_inventory_metric_threshold_alert_type';
 
 interface InventoryMetricThresholdParams {
   criteria: InventoryMetricConditions[];
@@ -48,8 +46,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
   Record<string, any>,
   Record<string, any>,
   AlertInstanceState,
-  AlertInstanceContext,
-  InventoryMetricThresholdAllowedActionGroups
+  AlertInstanceContext
 >) => {
   const {
     criteria,
@@ -118,25 +115,18 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     }
     if (reason) {
       const actionGroupId =
-        nextState === AlertStates.OK ? RecoveredActionGroup.id : FIRED_ACTIONS_ID;
-      alertInstance.scheduleActions(
-        /**
-         * TODO: We're lying to the compiler here as explicitly  calling `scheduleActions` on
-         * the RecoveredActionGroup isn't allowed
-         */
-        (actionGroupId as unknown) as InventoryMetricThresholdAllowedActionGroups,
-        {
-          group: item,
-          alertState: stateToAlertMessage[nextState],
-          reason,
-          timestamp: moment().toISOString(),
-          value: mapToConditionsLookup(results, (result) =>
-            formatMetric(result[item].metric, result[item].currentValue)
-          ),
-          threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
-          metric: mapToConditionsLookup(criteria, (c) => c.metric),
-        }
-      );
+        nextState === AlertStates.OK ? RecoveredActionGroup.id : FIRED_ACTIONS.id;
+      alertInstance.scheduleActions(actionGroupId, {
+        group: item,
+        alertState: stateToAlertMessage[nextState],
+        reason,
+        timestamp: moment().toISOString(),
+        value: mapToConditionsLookup(results, (result) =>
+          formatMetric(result[item].metric, result[item].currentValue)
+        ),
+        threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
+        metric: mapToConditionsLookup(criteria, (c) => c.metric),
+      });
     }
 
     alertInstance.replaceState({
@@ -170,9 +160,8 @@ const mapToConditionsLookup = (
       {}
     );
 
-export const FIRED_ACTIONS_ID = 'metrics.invenotry_threshold.fired';
-export const FIRED_ACTIONS: ActionGroup<typeof FIRED_ACTIONS_ID> = {
-  id: FIRED_ACTIONS_ID,
+export const FIRED_ACTIONS = {
+  id: 'metrics.invenotry_threshold.fired',
   name: i18n.translate('xpack.infra.metrics.alerting.inventory.threshold.fired', {
     defaultMessage: 'Fired',
   }),

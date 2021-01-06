@@ -10,7 +10,7 @@ import { AlertType, AlertInstanceState, AlertInstanceContext } from '../../../..
 
 export type UptimeAlertTypeParam = Record<string, any>;
 export type UptimeAlertTypeState = Record<string, any>;
-export type UptimeAlertTypeFactory<ActionGroupIds extends string> = (
+export type UptimeAlertTypeFactory = (
   server: UptimeCoreSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePlugins
@@ -18,6 +18,5 @@ export type UptimeAlertTypeFactory<ActionGroupIds extends string> = (
   UptimeAlertTypeParam,
   UptimeAlertTypeState,
   AlertInstanceState,
-  AlertInstanceContext,
-  ActionGroupIds
+  AlertInstanceContext
 >;

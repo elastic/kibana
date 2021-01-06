@@ -93,7 +93,7 @@ export class BaseAlert {
     this.scopedLogger = Globals.app.getLogger(alertOptions.id!);
   }
 
-  public getAlertType(): AlertType<never, never, never, never, 'default'> {
+  public getAlertType(): AlertType {
     const { id, name, actionVariables } = this.alertOptions;
     return {
       id,
@@ -108,11 +108,8 @@ export class BaseAlert {
       ],
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
-      executor: (
-        options: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
-          state: ExecutedState;
-        }
-      ): Promise<any> => this.execute(options),
+      executor: (options: AlertExecutorOptions & { state: ExecutedState }): Promise<any> =>
+        this.execute(options),
       producer: 'monitoring',
       actionVariables: {
         context: actionVariables,
@@ -241,9 +238,7 @@ export class BaseAlert {
     services,
     params,
     state,
-  }: AlertExecutorOptions<never, never, AlertInstanceState, never, 'default'> & {
-    state: ExecutedState;
-  }): Promise<any> {
+  }: AlertExecutorOptions & { state: ExecutedState }): Promise<any> {
     this.scopedLogger.debug(
       `Executing alert with params: ${JSON.stringify(params)} and state: ${JSON.stringify(state)}`
     );
@@ -338,7 +333,7 @@ export class BaseAlert {
   protected async processData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices<AlertInstanceState, never, 'default'>,
+    services: AlertServices,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();
@@ -392,7 +387,7 @@ export class BaseAlert {
   protected async processLegacyData(
     data: AlertData[],
     clusters: AlertCluster[],
-    services: AlertServices<AlertInstanceState, never, 'default'>,
+    services: AlertServices,
     state: ExecutedState
   ) {
     const currentUTC = +new Date();

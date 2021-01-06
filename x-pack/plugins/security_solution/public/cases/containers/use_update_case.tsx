@@ -6,36 +6,17 @@
 
 import { useReducer, useCallback } from 'react';
 
-import {
-  displaySuccessToast,
-  errorToToaster,
-  useStateToaster,
-} from '../../common/components/toasters';
-import { CasePatchRequest } from '../../../../case/common/api';
+import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 
 import { patchCase } from './api';
+import { UpdateKey, UpdateByKey } from './types';
 import * as i18n from './translations';
-import { Case } from './types';
-
-export type UpdateKey = keyof Pick<
-  CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings'
->;
+import { createUpdateSuccessToaster } from './utils';
 
 interface NewCaseState {
   isLoading: boolean;
   isError: boolean;
   updateKey: UpdateKey | null;
-}
-
-export interface UpdateByKey {
-  updateKey: UpdateKey;
-  updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string) => void;
-  updateCase?: (newCase: Case) => void;
-  version: string;
-  onSuccess?: () => void;
-  onError?: () => void;
 }
 
 type Action =
@@ -89,7 +70,7 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
       updateKey,
       updateValue,
       updateCase,
-      version,
+      caseData,
       onSuccess,
       onError,
     }: UpdateByKey) => {
@@ -101,7 +82,7 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
         const response = await patchCase(
           caseId,
           { [updateKey]: updateValue },
-          version,
+          caseData.version,
           abortCtrl.signal
         );
         if (!cancel) {
@@ -112,7 +93,11 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
             updateCase(response[0]);
           }
           dispatch({ type: 'FETCH_SUCCESS' });
-          displaySuccessToast(i18n.UPDATED_CASE(response[0].title), dispatchToaster);
+          dispatchToaster({
+            type: 'addToaster',
+            toast: createUpdateSuccessToaster(caseData, response[0], updateKey, updateValue),
+          });
+
           if (onSuccess) {
             onSuccess();
           }

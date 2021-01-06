@@ -15,7 +15,7 @@ import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { UntypedNormalizedAlertType } from '../alert_type_registry';
 import {
   AlertTypeParams,
   AlertTypeState,
@@ -27,14 +27,7 @@ jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
 }));
 
-const alertType: NormalizedAlertType<
-  AlertTypeParams,
-  AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  'default' | 'other-group',
-  'recovered'
-> = {
+const alertType: UntypedNormalizedAlertType = {
   id: 'test',
   name: 'Test',
   actionGroups: [
@@ -60,9 +53,7 @@ const createExecutionHandlerParams: jest.Mocked<
     AlertTypeParams,
     AlertTypeState,
     AlertInstanceState,
-    AlertInstanceContext,
-    'default' | 'other-group',
-    'recovered'
+    AlertInstanceContext
   >
 > = {
   actionsPlugin: mockActionsPlugin,
@@ -357,9 +348,7 @@ test('state attribute gets parameterized', async () => {
 test(`logs an error when action group isn't part of actionGroups available for the alertType`, async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
   const result = await executionHandler({
-    // we have to trick the compiler as this is an invalid type and this test checks whether we
-    // enforce this at runtime as well as compile time
-    actionGroup: 'invalid-group' as 'default' | 'other-group',
+    actionGroup: 'invalid-group',
     context: {},
     state: {},
     alertInstanceId: '2',

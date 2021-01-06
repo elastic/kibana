@@ -15,11 +15,7 @@ import {
   Language,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../../alerts/server';
+import { AlertServices } from '../../../../../alerts/server';
 import { PartialFilter } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
 import { QueryFilter } from './types';
@@ -30,7 +26,7 @@ interface GetFilterArgs {
   language: LanguageOrUndefined;
   query: QueryOrUndefined;
   savedId: SavedIdOrUndefined;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: AlertServices;
   index: IndexOrUndefined;
   lists: ExceptionListItemSchema[];
 }

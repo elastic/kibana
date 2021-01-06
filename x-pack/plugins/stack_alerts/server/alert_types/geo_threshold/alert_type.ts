@@ -209,8 +209,7 @@ export type GeoThresholdAlertType = AlertType<
   GeoThresholdParams,
   GeoThresholdState,
   GeoThresholdInstanceState,
-  GeoThresholdInstanceContext,
-  typeof ActionGroupId
+  GeoThresholdInstanceContext
 >;
 export function getAlertType(logger: Logger): GeoThresholdAlertType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoThreshold.alertTypeTitle', {

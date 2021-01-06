@@ -24,9 +24,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Option, none, some } from 'fp-ts/lib/Option';
-import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
+import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
 import { TestConnectorForm } from './test_connector_form';
-import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import { ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
@@ -36,6 +36,7 @@ import {
 } from '../../../../../actions/common';
 import './connector_edit_flyout.scss';
 import { useKibana } from '../../../common/lib/kibana';
+import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
 export interface ConnectorEditFlyoutProps {
   initialConnector: ActionConnector;
@@ -108,14 +109,22 @@ export const ConnectorEditFlyout = ({
   }, [onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
-  const errorsInConnectorConfig = (!connector.isPreconfigured
-    ? {
-        ...actionTypeModel?.validateConnector(connector).errors,
-        ...validateBaseProperties(connector).errors,
-      }
-    : {}) as IErrorObject;
-  const hasErrorsInConnectorConfig = !!Object.keys(errorsInConnectorConfig).find(
-    (errorKey) => errorsInConnectorConfig[errorKey].length >= 1
+  const {
+    configErrors,
+    connectorBaseErrors,
+    connectorErrors,
+    secretsErrors,
+  } = !connector.isPreconfigured
+    ? getConnectorErrors(connector, actionTypeModel)
+    : {
+        configErrors: {},
+        connectorBaseErrors: {},
+        connectorErrors: {},
+        secretsErrors: {},
+      };
+
+  const hasErrors = !!Object.keys(connectorErrors).find(
+    (errorKey) => connectorErrors[errorKey].length >= 1
   );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
@@ -209,6 +218,18 @@ export const ConnectorEditFlyout = ({
   };
 
   const onSaveClicked = async (closeAfterSave: boolean = true) => {
+    if (hasErrors) {
+      setConnector(
+        'connector',
+        getConnectorWithInvalidatedFields(
+          connector,
+          configErrors,
+          secretsErrors,
+          connectorBaseErrors
+        )
+      );
+      return;
+    }
     setIsSaving(true);
     const savedAction = await onActionConnectorSave();
     setIsSaving(false);
@@ -260,7 +281,7 @@ export const ConnectorEditFlyout = ({
           !connector.isPreconfigured ? (
             <ActionConnectorForm
               connector={connector}
-              errors={errorsInConnectorConfig}
+              errors={connectorErrors}
               actionTypeName={connector.actionType}
               dispatch={(changes) => {
                 setHasChanges(true);
@@ -326,7 +347,6 @@ export const ConnectorEditFlyout = ({
                     <EuiButton
                       color="secondary"
                       data-test-subj="saveEditedActionButton"
-                      isDisabled={hasErrorsInConnectorConfig || !hasChanges}
                       isLoading={isSaving || isExecutingAction}
                       onClick={async () => {
                         await onSaveClicked(false);
@@ -344,7 +364,6 @@ export const ConnectorEditFlyout = ({
                       color="secondary"
                       data-test-subj="saveAndCloseEditedActionButton"
                       type="submit"
-                      isDisabled={hasErrorsInConnectorConfig || !hasChanges}
                       isLoading={isSaving || isExecutingAction}
                       onClick={async () => {
                         await onSaveClicked();

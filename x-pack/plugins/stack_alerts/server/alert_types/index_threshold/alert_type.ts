@@ -42,7 +42,7 @@ export const ComparatorFnNames = new Set(ComparatorFns.keys());
 export function getAlertType(
   logger: Logger,
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>
-): AlertType<Params, {}, {}, ActionContext, typeof ActionGroupId> {
+): AlertType<Params, {}, {}, ActionContext> {
   const alertTypeName = i18n.translate('xpack.stackAlerts.indexThreshold.alertTypeTitle', {
     defaultMessage: 'Index threshold',
   });
@@ -148,9 +148,7 @@ export function getAlertType(
     producer: STACK_ALERTS_FEATURE_ID,
   };
 
-  async function executor(
-    options: AlertExecutorOptions<Params, {}, {}, ActionContext, typeof ActionGroupId>
-  ) {
+  async function executor(options: AlertExecutorOptions<Params, {}, {}, ActionContext>) {
     const { alertId, name, services, params } = options;
 
     const compareFn = ComparatorFns.get(params.thresholdComparator);

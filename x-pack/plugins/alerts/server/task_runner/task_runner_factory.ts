@@ -13,19 +13,11 @@ import {
 import { RunContext } from '../../../task_manager/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
-import {
-  AlertTypeParams,
-  AlertTypeRegistry,
-  GetServicesFunction,
-  SpaceIdToNamespaceFunction,
-  AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-} from '../types';
+import { AlertTypeRegistry, GetServicesFunction, SpaceIdToNamespaceFunction } from '../types';
 import { TaskRunner } from './task_runner';
 import { IEventLogger } from '../../../event_log/server';
 import { AlertsClient } from '../alerts_client';
-import { NormalizedAlertType } from '../alert_type_registry';
+import { UntypedNormalizedAlertType } from '../alert_type_registry';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -52,35 +44,11 @@ export class TaskRunnerFactory {
     this.taskRunnerContext = taskRunnerContext;
   }
 
-  public create<
-    Params extends AlertTypeParams,
-    State extends AlertTypeState,
-    InstanceState extends AlertInstanceState,
-    InstanceContext extends AlertInstanceContext,
-    ActionGroupIds extends string,
-    RecoveryActionGroupId extends string
-  >(
-    alertType: NormalizedAlertType<
-      Params,
-      State,
-      InstanceState,
-      InstanceContext,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >,
-    { taskInstance }: RunContext
-  ) {
+  public create(alertType: UntypedNormalizedAlertType, { taskInstance }: RunContext) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
     }
 
-    return new TaskRunner<
-      Params,
-      State,
-      InstanceState,
-      InstanceContext,
-      ActionGroupIds,
-      RecoveryActionGroupId
-    >(alertType, taskInstance, this.taskRunnerContext!);
+    return new TaskRunner(alertType, taskInstance, this.taskRunnerContext!);
   }
 }
