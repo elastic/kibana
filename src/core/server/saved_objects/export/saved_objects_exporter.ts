@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import Boom from '@hapi/boom';
 import { createListStream } from '@kbn/utils';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObject, SavedObjectsClientContract } from '../types';
@@ -154,7 +153,9 @@ export class SavedObjectsExporter {
       namespaces: namespace ? [namespace] : undefined,
     });
     if (findResponse.total > this.#exportSizeLimit) {
-      throw Boom.badRequest(`Can't export more than ${this.#exportSizeLimit} objects`);
+      throw SavedObjectsExportError.exportSizeExceeded(
+        `Can't export more than ${this.#exportSizeLimit} objects`
+      );
     }
 
     // sorts server-side by _id, since it's only available in fielddata
