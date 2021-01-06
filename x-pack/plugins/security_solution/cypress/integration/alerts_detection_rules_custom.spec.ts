@@ -33,7 +33,7 @@ import {
   DEFINE_CONTINUE_BUTTON,
   DEFINE_EDIT_BUTTON,
   DEFINE_INDEX_INPUT,
-  RISK_INPUT,
+  DEFAULT_RISK_SCORE_INPUT,
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
@@ -318,7 +318,7 @@ describe.skip('Custom detection rules deletion and edition', () => {
       cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
       cy.get(TAGS_FIELD).should('have.text', existingRule.tags.join(''));
       cy.get(SEVERITY_DROPDOWN).should('have.text', existingRule.severity);
-      cy.get(RISK_INPUT).invoke('val').should('eql', existingRule.riskScore);
+      cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', existingRule.riskScore);
 
       goToScheduleStepTab();
 
