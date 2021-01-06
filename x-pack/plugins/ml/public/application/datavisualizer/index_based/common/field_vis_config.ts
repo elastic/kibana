@@ -75,6 +75,7 @@ export interface FileBasedFieldVisConfig {
   type: MlJobFieldType;
   fieldName?: string;
   stats?: FieldVisStats;
+  format?: string;
 }
 
 export function isFileBasedFieldVisConfig(

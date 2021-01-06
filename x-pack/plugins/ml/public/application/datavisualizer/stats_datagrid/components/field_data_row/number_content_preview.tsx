@@ -7,18 +7,22 @@
 import React, { FC, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import classNames from 'classnames';
-import { FieldDataRowProps } from '../../../index_based/components/field_data_card';
 import {
   MetricDistributionChart,
   MetricDistributionChartData,
   buildChartDataFromStats,
 } from '../../../index_based/components/field_data_card/metric_distribution_chart';
 import { formatSingleValue } from '../../../../formatters/format_value';
+import { FieldVisConfig } from '../../../index_based/common';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 150;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 80;
 
-export const NumberContentPreview: FC<FieldDataRowProps> = ({ config }) => {
+export interface NumberContentPreviewProps {
+  config: FieldVisConfig;
+}
+
+export const NumberContentPreview: FC<NumberContentPreviewProps> = ({ config }) => {
   const { stats, fieldFormat, fieldName } = config;
   const defaultChartData: MetricDistributionChartData[] = [];
   const [distributionChartData, setDistributionChartData] = useState(defaultChartData);

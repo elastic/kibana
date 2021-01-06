@@ -30,6 +30,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   if (stats === undefined) return null;
   const { count, trueCount, falseCount } = stats;
   if (count === undefined || trueCount === undefined || falseCount === undefined) return null;
+  const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   return (
     <div className="mlFieldDataCard__stats">
@@ -58,7 +59,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
           }}
         />
         <BarSeries
-          id={config.fieldName || config.fieldFormat}
+          id={config.fieldName || fieldFormat}
           data={[
             { x: 'true', y: roundToDecimalPlace((trueCount / count) * 100) },
             { x: 'false', y: roundToDecimalPlace((falseCount / count) * 100) },

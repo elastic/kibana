@@ -41,7 +41,8 @@ const METRIC_DISTRIBUTION_CHART_HEIGHT = 210;
 const DEFAULT_TOP_VALUES_THRESHOLD = 100;
 
 export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
-  const { stats, fieldFormat } = config;
+  const { stats } = config;
+  const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   useEffect(() => {
     const chartData = buildChartDataFromStats(stats, METRIC_DISTRIBUTION_CHART_WIDTH);

@@ -14,7 +14,7 @@ import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_
 import { ExamplesList } from '../examples_list';
 
 export const OtherContent: FC<FieldDataRowProps> = ({ config }) => {
-  const { stats, type, aggregatable } = config;
+  const { stats, type } = config;
   if (stats === undefined) return null;
 
   const { count, sampleCount, cardinality, examples } = stats;
@@ -41,7 +41,7 @@ export const OtherContent: FC<FieldDataRowProps> = ({ config }) => {
           />
         </EuiText>
       </div>
-      {aggregatable === true && (
+      {'aggregatable' in config && config.aggregatable === true && (
         <Fragment>
           <EuiSpacer size="s" />
           <div>

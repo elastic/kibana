@@ -29,7 +29,10 @@ function createFields(results: FindFileStructureResponse) {
 
     return fieldNames.map((name) => {
       if (fieldStats[name] !== undefined) {
-        const field: Partial<FileBasedFieldVisConfig> = { fieldName: name };
+        const field: FileBasedFieldVisConfig = {
+          fieldName: name,
+          type: ML_JOB_FIELD_TYPES.UNKNOWN,
+        };
         const f = fieldStats[name];
         const m = mappings.properties[name];
 
@@ -41,10 +44,9 @@ function createFields(results: FindFileStructureResponse) {
 
         if (m !== undefined) {
           field.type = getFieldType(m.type);
-          // todo: ???/
-          // if (m.format !== undefined) {
-          //   field.format = m.format;
-          // }
+          if (m.format !== undefined) {
+            field.format = m.format;
+          }
         }
 
         let _stats = {};

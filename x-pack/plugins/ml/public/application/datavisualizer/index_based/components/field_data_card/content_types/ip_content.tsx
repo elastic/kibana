@@ -14,10 +14,11 @@ import { TopValues } from '../top_values';
 import { ExpandedRowFieldHeader } from '../../../../stats_datagrid/components/expanded_row_field_header';
 
 export const IpContent: FC<FieldDataRowProps> = ({ config }) => {
-  const { stats, fieldFormat } = config;
+  const { stats } = config;
   if (stats === undefined) return null;
   const { count, sampleCount, cardinality } = stats;
   if (count === undefined || sampleCount === undefined || cardinality === undefined) return null;
+  const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   return (
     <div className="mlFieldDataCard__stats">

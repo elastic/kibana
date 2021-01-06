@@ -31,7 +31,7 @@ interface SummaryTableItem {
 }
 
 export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
-  const { stats, fieldFormat } = config;
+  const { stats } = config;
 
   useEffect(() => {
     const chartData = buildChartDataFromStats(stats, METRIC_DISTRIBUTION_CHART_WIDTH);
@@ -43,6 +43,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config }) => {
 
   if (stats === undefined) return null;
   const { min, median, max, distribution } = stats;
+  const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   const summaryTableItems = [
     {

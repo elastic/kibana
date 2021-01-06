@@ -28,7 +28,10 @@ import { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_ur
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { TopValuesPreview } from './components/field_data_row/top_values_preview';
 import type { MlJobFieldType } from '../../../../common/types/field_types';
-import { FileBasedFieldVisConfig } from '../index_based/common/field_vis_config';
+import {
+  FileBasedFieldVisConfig,
+  isIndexBasedFieldVisConfig,
+} from '../index_based/common/field_vis_config';
 const FIELD_NAME = 'fieldName';
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
@@ -38,10 +41,7 @@ interface DataVisualizerDataGridProps {
   items: DataVisualizerDataGridItem[];
   pageState: DataVisualizerIndexBasedAppState;
   updatePageState: (update: Partial<DataVisualizerIndexBasedAppState>) => void;
-  getItemIdToExpandedRowMap: (
-    itemIds: string[],
-    items: DataVisualizerDataGridItem[]
-  ) => ItemIdToExpandedRowMap;
+  getItemIdToExpandedRowMap: (itemIds: string[], items: any[]) => ItemIdToExpandedRowMap;
 }
 
 export const DataVisualizerDataGrid = ({
@@ -204,8 +204,10 @@ export const DataVisualizerDataGrid = ({
             return <TopValuesPreview config={item} />;
           }
 
-          if (item.type === 'number' && item.stats?.distribution !== undefined) {
-            return <NumberContentPreview config={item} />;
+          if (isIndexBasedFieldVisConfig(item)) {
+            if (item.type === 'number' && item.stats?.distribution !== undefined) {
+              return <NumberContentPreview config={item} />;
+            }
           }
           return null;
         },

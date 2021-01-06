@@ -25,8 +25,6 @@ import { FindFileStructureResponse } from '../../../../../../common/types/file_d
 
 import { FileContents } from '../file_contents';
 import { AnalysisSummary } from '../analysis_summary';
-// @ts-ignore
-import { FieldsStats } from '../fields_stats';
 import { FieldsStatsGrid } from '../fields_stats_grid';
 
 interface Props {
@@ -48,16 +46,9 @@ export const ResultsView: FC<Props> = ({
 }) => {
   const tabs = [
     {
-      id: 'file-stats',
-      name: i18n.translate('xpack.ml.fileDatavisualizer.resultsView.fileStatsTabName', {
-        defaultMessage: 'File stats',
-      }),
-      content: <FieldsStats results={results} />,
-    },
-    {
       id: 'file-stats-grid',
       name: i18n.translate('xpack.ml.fileDatavisualizer.resultsView.fileStatsTabName', {
-        defaultMessage: 'File stats grid',
+        defaultMessage: 'File stats',
       }),
       content: <FieldsStatsGrid results={results} />,
     },

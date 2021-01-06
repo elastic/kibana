@@ -12,7 +12,8 @@ import { TopValues } from '../top_values';
 import { ExpandedRowFieldHeader } from '../../../../stats_datagrid/components/expanded_row_field_header';
 
 export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
-  const { stats, fieldFormat } = config;
+  const { stats } = config;
+  const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   return (
     <div className="mlFieldDataCard__stats">

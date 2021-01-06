@@ -43,6 +43,7 @@ export interface FindFileStructureResponse {
     properties: {
       [fieldName: string]: {
         type: string;
+        format?: string;
       };
     };
   };
