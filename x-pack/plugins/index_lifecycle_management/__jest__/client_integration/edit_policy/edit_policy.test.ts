@@ -226,6 +226,63 @@ describe('<EditPolicy />', () => {
         expect(actions.hot.searchableSnapshotsExists()).toBeTruthy();
       });
     });
+
+    describe('validation', () => {
+      test('should validate rollover configuration', async () => {
+        // Load a policy with no existing rollover configuration
+        httpRequestsMockHelpers.setLoadPolicies([
+          {
+            version: 1,
+            modified_date: Date.now().toString(),
+            policy: {
+              name: 'my_policy',
+              phases: {
+                hot: {
+                  min_age: '0ms',
+                  actions: {},
+                },
+              },
+            },
+            name: 'my_policy',
+          },
+        ]);
+        httpRequestsMockHelpers.setListNodes({
+          nodesByRoles: {},
+          nodesByAttributes: { test: ['123'] },
+          isUsingDeprecatedDataRoleConfig: false,
+        });
+        httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
+
+        await act(async () => {
+          testBed = await setup();
+        });
+
+        const { component, exists } = testBed;
+        component.update();
+
+        const { actions } = testBed;
+
+        // Enable rollover
+        await actions.hot.toggleRollover();
+        // Open the request flyout to trigger form validation without submitting the form
+        await actions.toggleRequestFlyout();
+
+        // No rollover configuration provided, so validation should fail and error messages should render
+        expect(exists('rolloverSettingsRequired')).toBe(true);
+        expect(exists('invalidPolicyJsonCallout')).toBe(true);
+
+        // Close request flyout
+        await actions.toggleRequestFlyout();
+        // Enable default configuration
+        await actions.hot.toggleDefaultRollover();
+        // Open the request flyout to trigger form validation without submitting the form
+        await actions.toggleRequestFlyout();
+
+        // Validation should pass, so no error messages should render
+        expect(exists('rolloverSettingsRequired')).toBe(false);
+        expect(exists('invalidPolicyJsonCallout')).toBe(false);
+      });
+    });
   });
 
   describe('warm phase', () => {

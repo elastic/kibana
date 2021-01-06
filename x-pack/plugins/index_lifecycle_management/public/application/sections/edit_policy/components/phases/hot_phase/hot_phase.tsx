@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useState, useEffect } from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +22,13 @@ import {
 
 import { Phases } from '../../../../../../../common/types';
 
-import { useFormData, UseField, SelectField, NumericField } from '../../../../../../shared_imports';
+import {
+  useFormData,
+  UseField,
+  SelectField,
+  NumericField,
+  useFormContext,
+} from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
@@ -48,12 +54,22 @@ const hotProperty: keyof Phases = 'hot';
 
 export const HotPhase: FunctionComponent = () => {
   const { license } = useEditPolicyContext();
+  const { getFields } = useFormContext();
   const [formData] = useFormData({
     watch: isUsingDefaultRolloverPath,
   });
   const { isUsingRollover } = useConfigurationIssues();
   const isUsingDefaultRollover = get(formData, isUsingDefaultRolloverPath);
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
+
+  useEffect(() => {
+    if (isUsingDefaultRollover === true) {
+      const fields = getFields();
+      fields[ROLLOVER_FORM_PATHS.maxAge].reset({ resetValue: false });
+      fields[ROLLOVER_FORM_PATHS.maxDocs].reset({ resetValue: false });
+      fields[ROLLOVER_FORM_PATHS.maxSize].reset({ resetValue: false });
+    }
+  }, [getFields, isUsingDefaultRollover]);
 
   return (
     <>
@@ -165,7 +181,7 @@ export const HotPhase: FunctionComponent = () => {
                     content={
                       <FormattedMessage
                         id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.enableRolloverTipContent"
-                        defaultMessage="Roll over to a new index when the 
+                        defaultMessage="Roll over to a new index when the
     current index meets one of the defined conditions."
                       />
                     }

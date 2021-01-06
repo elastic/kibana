@@ -70,6 +70,7 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, c
             'xpack.indexLifecycleMgmt.policyJsonFlyout.validationErrorCallout.title',
             { defaultMessage: 'Invalid policy' }
           )}
+          data-test-subj="invalidPolicyJsonCallout"
         >
           {i18n.translate('xpack.indexLifecycleMgmt.policyJsonFlyout.validationErrorCallout.body', {
             defaultMessage: 'To view the JSON for this policy address all validation errors.',

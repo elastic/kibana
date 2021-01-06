@@ -6,7 +6,7 @@
 
 import { fieldValidators, ValidationFunc, ValidationConfig } from '../../../../shared_imports';
 
-import { ROLLOVER_FORM_PATHS } from '../constants';
+import { ROLLOVER_FORM_PATHS, isUsingDefaultRolloverPath, useRolloverPath } from '../constants';
 
 import { i18nTexts } from '../i18n_texts';
 import { PolicyFromES } from '../../../../../common/types';
@@ -59,6 +59,8 @@ export const ROLLOVER_EMPTY_VALIDATION = 'ROLLOVER_EMPTY_VALIDATION';
 export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
   const fields = form.getFields();
   if (
+    fields[useRolloverPath]?.value === true &&
+    !fields[isUsingDefaultRolloverPath]?.value &&
     !(
       fields[ROLLOVER_FORM_PATHS.maxAge]?.value ||
       fields[ROLLOVER_FORM_PATHS.maxDocs]?.value ||

@@ -111,6 +111,13 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     component.update();
   };
 
+  const toggleRequestFlyout = async () => {
+    await act(async () => {
+      find('requestButton').simulate('click');
+    });
+    component.update();
+  };
+
   const toggleDefaultRollover = createFormToggleAction('useDefaultRolloverSwitch');
 
   const toggleRollover = createFormToggleAction('rolloverSwitch');
@@ -236,6 +243,7 @@ export const setup = async (arg?: { appServicesContext: Partial<AppServicesConte
     actions: {
       setWaitForSnapshotPolicy,
       savePolicy,
+      toggleRequestFlyout,
       hot: {
         setMaxSize,
         setMaxDocs,
