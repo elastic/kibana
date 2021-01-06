@@ -102,7 +102,7 @@ export const WaterfallChart = ({
     return darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
   }, [darkMode]);
 
-  const divRef = useRef<HTMLDivElement | null>(null);
+  const chartWrapperDivRef = useRef<HTMLDivElement | null>(null);
 
   const [height, setHeight] = useState<string>(maxHeight);
 
@@ -112,14 +112,14 @@ export const WaterfallChart = ({
     legendItems && legendItems.length > 0 && renderLegendItem ? true : false;
 
   useEffect(() => {
-    if (fullHeight && divRef.current) {
-      const chartOffset = divRef.current.getBoundingClientRect().top;
+    if (fullHeight && chartWrapperDivRef.current) {
+      const chartOffset = chartWrapperDivRef.current.getBoundingClientRect().top;
       setHeight(`calc(100vh - ${chartOffset}px)`);
     }
-  }, [divRef, fullHeight]);
+  }, [chartWrapperDivRef, fullHeight]);
 
   return (
-    <WaterfallChartOuterContainer height={height} className="waterfallOuterContainer">
+    <WaterfallChartOuterContainer height={height}>
       <>
         <WaterfallChartFixedTopContainer>
           <EuiFlexGroup gutterSize="none" responsive={false}>
@@ -170,7 +170,7 @@ export const WaterfallChart = ({
           gutterSize="none"
           responsive={false}
           style={{ paddingTop: '10px' }}
-          ref={divRef}
+          ref={chartWrapperDivRef}
         >
           {shouldRenderSidebar && (
             <Sidebar items={sidebarItems!} height={generatedHeight} render={renderSidebarItem!} />
