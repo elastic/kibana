@@ -25,7 +25,8 @@ export default function ({
   const find = getService('find');
   const browser = getService('browser');
 
-  describe('Resolver test app', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/87425
+  describe.skip('Resolver test app', function () {
     this.tags('ciGroup7');
 
     // Note: these tests are intended to run on the same page in serial.
