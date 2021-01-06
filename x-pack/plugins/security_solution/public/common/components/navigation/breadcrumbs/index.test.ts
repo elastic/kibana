@@ -5,7 +5,6 @@
  */
 import '../../../mock/match_media';
 import { encodeIpv6 } from '../../../lib/helpers';
-
 import { getBreadcrumbsForRoute, setBreadcrumbs } from '.';
 import { HostsTableType } from '../../../../hosts/store/model';
 import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
@@ -110,6 +109,7 @@ const getMockObject = (
   sourcerer: {},
 });
 
+// The string returned is different from what getUrlForApp returns, but does not matter for the purposes of this test.
 const getUrlForAppMock = (appId: string, options?: { path?: string; absolute?: boolean }) =>
   `${appId}${options?.path ?? ''}`;
 
@@ -128,7 +128,7 @@ describe('Navigation Breadcrumbs', () => {
       );
       expect(breadcrumbs).toEqual([
         {
-          href: '/app/security/overview',
+          href: 'securitySolutionoverview',
           text: 'Security',
         },
         {
@@ -149,7 +149,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Network',
           href:
@@ -168,7 +168,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Timelines',
           href:
@@ -183,7 +183,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Hosts',
           href:
@@ -204,7 +204,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Network',
           href:
@@ -224,7 +224,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Network',
           href:
@@ -244,7 +244,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Detections',
           href:
@@ -258,7 +258,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Cases',
           href:
@@ -279,7 +279,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Cases',
           href:
@@ -297,7 +297,7 @@ describe('Navigation Breadcrumbs', () => {
         getUrlForAppMock
       );
       expect(breadcrumbs).toEqual([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Administration',
           href: 'securitySolution:administration',
@@ -310,7 +310,7 @@ describe('Navigation Breadcrumbs', () => {
     test('should call chrome breadcrumb service with correct breadcrumbs', () => {
       setBreadcrumbs(getMockObject('hosts', '/', hostName), chromeMock, getUrlForAppMock);
       expect(setBreadcrumbsMock).toBeCalledWith([
-        { text: 'Security', href: '/app/security/overview' },
+        { text: 'Security', href: 'securitySolutionoverview' },
         {
           text: 'Hosts',
           href:
