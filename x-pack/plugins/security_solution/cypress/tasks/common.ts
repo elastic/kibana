@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { removeSignalsIndex } from './api_calls/rules';
 import { esArchiverResetKibana } from './es_archiver';
 
 const primaryButton = 0;
