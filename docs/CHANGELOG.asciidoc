@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.10.2>>
 * <<release-notes-7.10.1>>
 * <<release-notes-7.10.0>>
 * <<release-notes-7.9.3>>
@@ -45,6 +46,39 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+[[release-notes-7.10.2]]
+== {kib} 7.10.2
+
+For detailed information about the 7.10.2 release, review the following bug fixes.
+
+For the breaking changes, refer to the <<breaking-changes-7.10,breaking changes in 7.10>>.
+
+[float]
+[[bug-v7.10.2]]
+=== Bug fixes
+Alerting::
+* Don't reset server log level if level is defined {kibana-pull}83651[#83651]
+Dashboard::
+* Fixes Duplicated Create New Modal {kibana-pull}86489[#86489]
+Logs::
+* Fixes value completion in the logs stream query bar {kibana-pull}85772[#85772]
+Machine Learning::
+* Fixes watcher URL to the Anomaly Explorer page {kibana-pull}85123[#85123]
+* Fixes Anomaly Explorer data refresh with relative time bounds  {kibana-pull}86142[#86142]
+* Fixes zoom missing in Anomaly detection URLs {kibana-pull}86182[#86182] and {kibana-pull}86400[#86400]
+* Fixes charts grid on the Anomaly Explorer page {kibana-pull}86904[#86904]
+Management::
+* When number of replicas is set to zero, it is now correctly displayed in Index Lifecycle Management policies {kibana-pull}85251[#85251]
+* The list of data streams in Index Management now sorts numerically by the raw bytes value, which renders them in the correct order {kibana-pull}86204[#86204]
+* Fixes a bug where the enterprise level subscription displayed as platinum {kibana-pull}85849[#85849]
+* From table actions in the Cross-Cluster Replication app, you can now pause/resume index replication, unfollow leader index, or delete an auto-follow pattern {kibana-pull}84433[#84433]
+* Accessibility fix in Rollup Jobs app: when selecting a row in the jobs table, a screen reader pronounces the job's name {kibana-pull}84567[#84567]
+Monitoring::
+* Makes alert status fetching more resilient {kibana-pull}84676[#84676]
+* Adds unmapped_type to additional queries {kibana-pull}85837[#85837]
+Security::
+* Fixes 500 error when using PKI authentication with an incomplete certificate chain {kibana-pull}86700[#86700]
+
 [[release-notes-7.10.1]]
 == {kib} 7.10.1
 
