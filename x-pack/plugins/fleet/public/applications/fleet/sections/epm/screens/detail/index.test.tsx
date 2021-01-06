@@ -17,7 +17,7 @@ describe('when on integration detail', () => {
   const detailPageUrlPath = pagePathGetters.integration_details({ pkgkey });
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  let mockedApi: ReturnType<typeof epmDetailsApiMock>;
+  let mockedHttp: ReturnType<typeof epmDetailsApiMock>;
   const render = () =>
     (renderResult = testRenderer.render(
       <Route path={PAGE_ROUTING_PATHS.integration_details}>
@@ -27,7 +27,7 @@ describe('when on integration detail', () => {
 
   beforeEach(() => {
     testRenderer = createTestRendererMock();
-    mockedApi = epmDetailsApiMock(testRenderer.startServices.http);
+    mockedHttp = epmDetailsApiMock(testRenderer.startServices.http);
     testRenderer.history.push(detailPageUrlPath);
   });
 
@@ -40,31 +40,31 @@ describe('when on integration detail', () => {
     beforeEach(() => render());
 
     it('should display agent policy usage count', async () => {
-      await mockedApi.waitForApi();
+      await mockedHttp.waitForApi();
       expect(renderResult.queryByTestId('agentPolicyCount')).not.toBeNull();
     });
 
     it('should show the Policies tab', async () => {
-      await mockedApi.waitForApi();
+      await mockedHttp.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).not.toBeNull();
     });
   });
 
   describe('and the package is not installed', () => {
     beforeEach(() => {
-      const unInstalledPackage = mockedApi.responseProvider.epmGetInfo();
+      const unInstalledPackage = mockedHttp.responseProvider.epmGetInfo();
       unInstalledPackage.response.status = 'not_installed';
-      mockedApi.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
+      mockedHttp.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
       render();
     });
 
     it('should NOT display agent policy usage count', async () => {
-      await mockedApi.waitForApi();
+      await mockedHttp.waitForApi();
       expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
     });
 
     it('should NOT the Policies tab', async () => {
-      await mockedApi.waitForApi();
+      await mockedHttp.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
   });
@@ -186,7 +186,7 @@ describe('when on integration detail', () => {
     });
 
     it('should link to integration policy detail when an integration policy is clicked', async () => {
-      await mockedApi.waitForApi();
+      await mockedHttp.waitForApi();
       const firstPolicy = renderResult.getAllByTestId(
         'integrationNameLink'
       )[0] as HTMLAnchorElement;
@@ -196,14 +196,14 @@ describe('when on integration detail', () => {
     });
 
     it('should NOT show link for agent count if it is zero', async () => {
-      await mockedApi.waitForApi();
+      await mockedHttp.waitForApi();
       const firstRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[0];
       expect(firstRowAgentCount.textContent).toEqual('0');
       expect(firstRowAgentCount.tagName).not.toEqual('A');
     });
 
     it('should show link for agent count if greater than zero', async () => {
-      await mockedApi.waitForApi();
+      await mockedHttp.waitForApi();
       const secondRowAgentCount = renderResult.getAllByTestId('rowAgentCount')[1];
       expect(secondRowAgentCount.textContent).toEqual('100');
       expect(secondRowAgentCount.tagName).toEqual('A');
