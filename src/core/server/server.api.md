@@ -2373,6 +2373,8 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
 
 // @public (undocumented)
 export class SavedObjectsExporter {
+    // (undocumented)
+    #private;
     constructor({ savedObjectsClient, exportSizeLimit, }: {
         savedObjectsClient: SavedObjectsClientContract;
         exportSizeLimit: number;
@@ -2380,6 +2382,19 @@ export class SavedObjectsExporter {
     exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<import("stream").Readable>;
     exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<import("stream").Readable>;
     }
+
+// @public (undocumented)
+export class SavedObjectsExportError extends Error {
+    constructor(type: string, message: string, attributes?: Record<string, any> | undefined);
+    // (undocumented)
+    readonly attributes?: Record<string, any> | undefined;
+    // (undocumented)
+    static exportSizeExceeded(message: string): SavedObjectsExportError;
+    // (undocumented)
+    static objectFetchError(message: string, objects: SavedObject[]): SavedObjectsExportError;
+    // (undocumented)
+    readonly type: string;
+}
 
 // @public
 export interface SavedObjectsExportResultDetails {
@@ -2470,6 +2485,8 @@ export interface SavedObjectsImportConflictError {
 
 // @public (undocumented)
 export class SavedObjectsImporter {
+    // (undocumented)
+    #private;
     constructor({ savedObjectsClient, typeRegistry, importSizeLimit, }: {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
@@ -2477,7 +2494,7 @@ export class SavedObjectsImporter {
     });
     import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
     resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
-    }
+}
 
 // @public
 export interface SavedObjectsImportError {
@@ -2697,7 +2714,6 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
-    getImportExportObjectLimit: () => number;
     registerType: (type: SavedObjectsType) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }

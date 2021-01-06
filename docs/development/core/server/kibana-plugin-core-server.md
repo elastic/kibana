@@ -27,6 +27,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClient](./kibana-plugin-core-server.savedobjectsclient.md) |  |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-core-server.savedobjectserrorhelpers.md) |  |
 |  [SavedObjectsExporter](./kibana-plugin-core-server.savedobjectsexporter.md) |  |
+|  [SavedObjectsExportError](./kibana-plugin-core-server.savedobjectsexporterror.md) |  |
 |  [SavedObjectsImporter](./kibana-plugin-core-server.savedobjectsimporter.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-core-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-core-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-core-server.savedobjectsanitizeddoc.md) documents to the other kind. |

@@ -24,3 +24,7 @@ exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<import("str
 
 `Promise<import("stream").Readable>`
 
+## Exceptions
+
+SavedObjectsExportError
+

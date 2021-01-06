@@ -4,7 +4,7 @@
 
 ## SavedObjectsExportByTypeOptions.hasReference property
 
-optional array of references to search object for when exporting by types
+optional array of references to search object for.
 
 <b>Signature:</b>
 
