@@ -26,6 +26,27 @@ import {
 } from '@elastic/eui';
 
 import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../routes';
+import {
+  CLIENT_ID_LABEL,
+  CLIENT_SECRET_LABEL,
+  CONFIDENTIAL_HELP_TEXT,
+  CONFIDENTIAL_LABEL,
+  CREDENTIALS_TITLE,
+  CREDENTIALS_DESCRIPTION,
+  NAME_LABEL,
+  NAV,
+  OAUTH_DESCRIPTION,
+  OAUTH_PERSISTED_DESCRIPTION,
+  REDIRECT_HELP_TEXT,
+  REDIRECT_NATIVE_HELP_TEXT,
+  REDIRECT_INSECURE_ERROR_TEXT,
+  REDIRECT_SECURE_ERROR_TEXT,
+  REDIRECT_URIS_LABEL,
+  SAVE_CHANGES_BUTTON,
+  LICENSE_MODAL_TITLE,
+  LICENSE_MODAL_DESCRIPTION,
+  LICENSE_MODAL_LINK,
+} from '../../../constants';
 
 import { LicensingLogic } from '../../../../shared/licensing';
 import { ContentSection } from '../../../components/shared/content_section';
@@ -45,9 +66,7 @@ export const OauthApplication: React.FC = () => {
   if (!oauthApplication) return null;
 
   const persisted = !!(oauthApplication.uid && oauthApplication.secret);
-  const description = persisted
-    ? "Access your organization's OAuth client credentials and manage OAuth settings."
-    : 'Create an OAuth client for your organization.';
+  const description = persisted ? OAUTH_PERSISTED_DESCRIPTION : OAUTH_DESCRIPTION;
   const insecureRedirectUri = /(^|\s)http:/i.test(oauthApplication.redirectUri);
   const redirectUris = oauthApplication.redirectUri.split('\n').map((uri) => uri.trim());
   const uniqRedirectUri = Array.from(new Set(redirectUris));
@@ -55,19 +74,18 @@ export const OauthApplication: React.FC = () => {
 
   const redirectUriHelpText = (
     <span>
-      <strong>Provide one URI per line.</strong>{' '}
+      <strong>{REDIRECT_HELP_TEXT}</strong>{' '}
       {oauthApplication.nativeRedirectUri && (
         <span>
-          For local development URIs, use format{' '}
-          <EuiCode>{oauthApplication.nativeRedirectUri}</EuiCode>
+          {REDIRECT_NATIVE_HELP_TEXT} <EuiCode>{oauthApplication.nativeRedirectUri}</EuiCode>
         </span>
       )}
     </span>
   );
 
   const redirectErrorText = insecureRedirectUri
-    ? 'Using an insecure redirect URI (http) is not recommended.'
-    : 'Cannot contain duplicate redirect URIs.';
+    ? REDIRECT_INSECURE_ERROR_TEXT
+    : REDIRECT_SECURE_ERROR_TEXT;
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -82,17 +100,13 @@ export const OauthApplication: React.FC = () => {
           <LicenseBadge />
           <EuiSpacer />
           <EuiTitle size="l">
-            <h1>Configuring OAuth for Custom Search Applications</h1>
+            <h1>{LICENSE_MODAL_TITLE}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiText color="subdued">
-            Configure an OAuth application for secure use of the Workplace Search Search API.
-            Upgrade to a Platinum license to enable the Search API and create your OAuth
-            application.
-          </EuiText>
+          <EuiText color="subdued">{LICENSE_MODAL_DESCRIPTION}</EuiText>
           <EuiSpacer />
           <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
-            Explore Platinum features
+            {LICENSE_MODAL_LINK}
           </EuiLink>
           <EuiSpacer />
         </EuiModalBody>
@@ -104,9 +118,9 @@ export const OauthApplication: React.FC = () => {
     <>
       <form onSubmit={handleSubmit}>
         <EuiForm>
-          <ViewContentHeader title="OAuth application" description={description} />
+          <ViewContentHeader title={NAV.SETTINGS_OAUTH} description={description} />
           <ContentSection>
-            <EuiFormRow label="Name">
+            <EuiFormRow label={NAME_LABEL}>
               <EuiFieldText
                 value={oauthApplication.name}
                 data-test-subj="OAuthAppName"
@@ -117,7 +131,7 @@ export const OauthApplication: React.FC = () => {
             </EuiFormRow>
             <EuiSpacer size="xl" />
             <EuiFormRow
-              label="Redirect URIs"
+              label={REDIRECT_URIS_LABEL}
               helpText={redirectUriHelpText}
               isInvalid={redirectUriInvalid}
               error={redirectErrorText}
@@ -133,9 +147,9 @@ export const OauthApplication: React.FC = () => {
               />
             </EuiFormRow>
             <EuiSpacer size="xl" />
-            <EuiFormRow helpText="Deselect for environments in which the client secret cannot be kept confidential, such as native mobile apps and single page applications.">
+            <EuiFormRow helpText={CONFIDENTIAL_HELP_TEXT}>
               <EuiSwitch
-                label="Confidential"
+                label={CONFIDENTIAL_LABEL}
                 checked={oauthApplication.confidential}
                 data-test-subj="ConfidentialToggle"
                 onChange={(e) =>
@@ -152,17 +166,14 @@ export const OauthApplication: React.FC = () => {
               type="submit"
               disabled={!hasPlatinumLicense}
             >
-              Save Changes
+              {SAVE_CHANGES_BUTTON}
             </EuiButton>
           </ContentSection>
           {persisted && (
-            <ContentSection
-              title="Credentials"
-              description="Use the following credentials within your client to request access tokens from our authentication server."
-            >
+            <ContentSection title={CREDENTIALS_TITLE} description={CREDENTIALS_DESCRIPTION}>
               <EuiFormRow>
                 <CredentialItem
-                  label="Client id"
+                  label={CLIENT_ID_LABEL}
                   value={oauthApplication.uid}
                   testSubj="ClientID"
                 />
@@ -173,7 +184,7 @@ export const OauthApplication: React.FC = () => {
                   <EuiSpacer size="s" />
                   <EuiFormRow>
                     <CredentialItem
-                      label="Client secret"
+                      label={CLIENT_SECRET_LABEL}
                       value={oauthApplication.secret}
                       testSubj="ClientSecret"
                     />

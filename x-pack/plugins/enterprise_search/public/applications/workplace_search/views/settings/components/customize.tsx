@@ -10,6 +10,13 @@ import { useActions, useValues } from 'kea';
 
 import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 
+import {
+  CUSTOMIZE_HEADER_TITLE,
+  CUSTOMIZE_HEADER_DESCRIPTION,
+  CUSTOMIZE_NAME_LABEL,
+  CUSTOMIZE_NAME_BUTTON,
+} from '../../../constants';
+
 import { ContentSection } from '../../../components/shared/content_section';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 
@@ -27,11 +34,11 @@ export const Customize: React.FC = () => {
   return (
     <form onSubmit={handleSubmit}>
       <ViewContentHeader
-        title="Customize Workplace Search"
-        description="Personalize general organization settings."
+        title={CUSTOMIZE_HEADER_TITLE}
+        description={CUSTOMIZE_HEADER_DESCRIPTION}
       />
       <ContentSection>
-        <EuiFormRow label="Organization name" fullWidth isInvalid={false}>
+        <EuiFormRow label={CUSTOMIZE_NAME_LABEL} fullWidth isInvalid={false}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFieldText
@@ -47,7 +54,7 @@ export const Customize: React.FC = () => {
         </EuiFormRow>
         <EuiFormRow>
           <EuiButton color="primary" data-test-subj="SaveOrgNameButton" type="submit">
-            Save organization name
+            {CUSTOMIZE_NAME_BUTTON}
           </EuiButton>
         </EuiFormRow>
       </ContentSection>

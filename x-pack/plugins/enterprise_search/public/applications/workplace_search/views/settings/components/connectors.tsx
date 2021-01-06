@@ -24,7 +24,15 @@ import { SourceIcon } from '../../../components/shared/source_icon';
 import { LicenseCallout } from '../../../components/shared/license_callout';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 
-import { CUSTOM_SERVICE_TYPE } from '../../../constants';
+import {
+  CONFIGURE_BUTTON,
+  CONNECTORS_HEADER_TITLE,
+  CONNECTORS_HEADER_DESCRIPTION,
+  CUSTOM_SERVICE_TYPE,
+  PRIVATE_PLATINUM_LICENSE_CALLOUT,
+  PRIVATE_SOURCE,
+  UPDATE_BUTTON,
+} from '../../../constants';
 import { getSourcesPath } from '../../../routes';
 import { SourceDataItem } from '../../../types';
 
@@ -57,7 +65,7 @@ export const Connectors: React.FC = () => {
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmptyTo to={editPath} data-test-subj="UpdateButton">
-            Update
+            {UPDATE_BUTTON}
           </EuiButtonEmptyTo>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -65,20 +73,18 @@ export const Connectors: React.FC = () => {
 
     const configureButton = supportedByLicense ? (
       <EuiButtonEmptyTo to={configurePath} data-test-subj="ConfigureButton">
-        Configure
+        {CONFIGURE_BUTTON}
       </EuiButtonEmptyTo>
     ) : (
       <EuiButtonEmpty data-test-subj="ConfigureButton" disabled>
-        Configure
+        {CONFIGURE_BUTTON}
       </EuiButtonEmpty>
     );
 
     return configured ? updateButtons : configureButton;
   };
 
-  const platinumLicenseCallout = (
-    <LicenseCallout message="Private Sources require a Platinum license." />
-  );
+  const platinumLicenseCallout = <LicenseCallout message={PRIVATE_PLATINUM_LICENSE_CALLOUT} />;
 
   const connectorsList = (
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
@@ -100,7 +106,7 @@ export const Connectors: React.FC = () => {
                     <span className="source-row__name">
                       {name}
                       &nbsp;&nbsp;
-                      {accountContextOnly && <EuiBadge color="hollow">Private Source</EuiBadge>}
+                      {accountContextOnly && <EuiBadge color="hollow">{PRIVATE_SOURCE}</EuiBadge>}
                     </span>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -126,8 +132,8 @@ export const Connectors: React.FC = () => {
   return (
     <>
       <ViewContentHeader
-        title="Content source connectors"
-        description="All of your configurable connectors."
+        title={CONNECTORS_HEADER_TITLE}
+        description={CONNECTORS_HEADER_DESCRIPTION}
       />
       {connectorsList}
     </>

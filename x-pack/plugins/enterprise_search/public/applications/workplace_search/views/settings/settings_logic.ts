@@ -5,6 +5,7 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
+import { i18n } from '@kbn/i18n';
 
 import {
   clearFlashMessages,
@@ -16,6 +17,7 @@ import { KibanaLogic } from '../../../shared/kibana';
 import { HttpLogic } from '../../../shared/http';
 
 import { Connector } from '../../types';
+import { ORG_UPDATED_MESSAGE, OAUTH_APP_UPDATED_MESSAGE } from '../../constants';
 
 import { ORG_SETTINGS_CONNECTORS_PATH } from '../../routes';
 
@@ -147,7 +149,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       try {
         const response = await http.put(route, { body });
         actions.setUpdatedName(response);
-        setSuccessMessage('Successfully updated organization.');
+        setSuccessMessage(ORG_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -166,7 +168,7 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       try {
         const response = await http.put(route, { body });
         actions.setUpdatedOauthApplication(response);
-        setSuccessMessage('Successfully updated application.');
+        setSuccessMessage(OAUTH_APP_UPDATED_MESSAGE);
       } catch (e) {
         flashAPIErrors(e);
       }
@@ -178,7 +180,12 @@ export const SettingsLogic = kea<MakeLogicType<SettingsValues, SettingsActions>>
       try {
         await http.delete(route);
         KibanaLogic.values.navigateToUrl(ORG_SETTINGS_CONNECTORS_PATH);
-        setQueuedSuccessMessage(`Successfully removed configuration for ${name}.`);
+        setQueuedSuccessMessage(
+          i18n.translate('xpack.enterpriseSearch.workplaceSearch.settings.configRemoved.message', {
+            defaultMessage: 'Successfully removed configuration for {name}.',
+            values: { name },
+          })
+        );
       } catch (e) {
         flashAPIErrors(e);
       }

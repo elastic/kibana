@@ -7,6 +7,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
+import { i18n } from '@kbn/i18n';
 
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 
@@ -63,7 +64,14 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
             onCancel={hideConfirmModal}
             buttonColor="danger"
           >
-            Are you sure you want to remove the OAuth configuration for {name}?
+            {i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.settings.confirmRemoveConfig.message',
+              {
+                defaultMessage:
+                  'Are you sure you want to remove the OAuth configuration for {name}?',
+                values: { name },
+              }
+            )}
           </EuiConfirmModal>
         </EuiOverlayMask>
       )}
