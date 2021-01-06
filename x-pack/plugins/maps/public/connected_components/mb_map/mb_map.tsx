@@ -18,6 +18,7 @@ import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 // @ts-expect-error
 import { DrawControl } from './draw_control';
+import { ScaleControl } from './scale_control';
 // @ts-expect-error
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
@@ -224,6 +225,7 @@ export class MBMap extends Component<Props, State> {
         emptyImage.crossOrigin = 'anonymous';
         resolve(mbMap);
       });
+      mbMap.addControl(new mapboxgl.ScaleControl());
     });
   }
 
@@ -384,6 +386,7 @@ export class MBMap extends Component<Props, State> {
   render() {
     let drawControl;
     let tooltipControl;
+    let scaleControl;
     if (this.state.mbMap) {
       drawControl = <DrawControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />;
       tooltipControl = !this.props.disableTooltipControl ? (
@@ -397,6 +400,8 @@ export class MBMap extends Component<Props, State> {
           renderTooltipContent={this.props.renderTooltipContent}
         />
       ) : null;
+      const showScaling = true;
+      scaleControl = showScaling ? <ScaleControl mbMap={this.state.mbMap} /> : null;
     }
     return (
       <div
@@ -406,6 +411,7 @@ export class MBMap extends Component<Props, State> {
         data-test-subj="mapContainer"
       >
         {drawControl}
+        {scaleControl}
         {tooltipControl}
       </div>
     );
