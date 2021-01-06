@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
+import { LogicMounter } from '../../../__mocks__/kea.mock';
 
 import { mockHttpValues } from '../../../__mocks__';
 jest.mock('../../../shared/http', () => ({
@@ -46,24 +46,7 @@ describe('EngineLogic', () => {
     engineNotFound: false,
   };
 
-  const mount = (values?: object) => {
-    if (!values) {
-      resetContext({});
-    } else {
-      resetContext({
-        defaults: {
-          enterprise_search: {
-            app_search: {
-              engine_logic: {
-                ...values,
-              },
-            },
-          },
-        },
-      });
-    }
-    EngineLogic.mount();
-  };
+  const { mount } = new LogicMounter(EngineLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -153,6 +136,18 @@ describe('EngineLogic', () => {
         });
       });
 
+      describe('engineName', () => {
+        it('should be reset to an empty string', () => {
+          mount({ engineName: 'hello-world' });
+          EngineLogic.actions.clearEngine();
+
+          expect(EngineLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            engineName: '',
+          });
+        });
+      });
+
       describe('dataLoading', () => {
         it('should be set to true', () => {
           mount({ dataLoading: false });
@@ -161,6 +156,18 @@ describe('EngineLogic', () => {
           expect(EngineLogic.values).toEqual({
             ...DEFAULT_VALUES,
             dataLoading: true,
+          });
+        });
+      });
+
+      describe('engineNotFound', () => {
+        it('should be set to false', () => {
+          mount({ engineNotFound: true });
+          EngineLogic.actions.clearEngine();
+
+          expect(EngineLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            engineNotFound: false,
           });
         });
       });

@@ -18,13 +18,8 @@
  */
 
 import _ from 'lodash';
-import {
-  URL_PATH_END_MARKER,
-  UrlPatternMatcher,
-  ListComponent,
-} from '../../autocomplete/components';
-
-import { populateContext } from '../../autocomplete/engine';
+import { URL_PATH_END_MARKER, UrlPatternMatcher, ListComponent } from './components';
+import { populateContext } from './engine';
 
 describe('Url autocomplete', () => {
   function patternsTest(name, endpoints, tokenPath, expectedContext, globalUrlComponentFactories) {
