@@ -67,6 +67,7 @@ export function createKbnUrlTracker({
   shouldTrackUrlUpdate = () => {
     return true;
   },
+  onBeforeNavLinkSaved = (newNavLink) => newNavLink,
 }: {
   /**
    * Base url of the current app. This will be used as a prefix for the
@@ -123,6 +124,12 @@ export function createKbnUrlTracker({
    * @param {string} pathname A location's pathname which comes to history listener
    */
   shouldTrackUrlUpdate?: (pathname: string) => boolean;
+
+  /**
+   * Called when current subpath is about to be saved to sessionStorage for subsequent use as a nav link.
+   * Use to mutate app's subpath before it is saved by returning a new subpath.
+   */
+  onBeforeNavLinkSaved?: (newNavLink: string) => string;
 }): KbnUrlTracker {
   const storageInstance = storage || sessionStorage;
 
@@ -165,12 +172,19 @@ export function createKbnUrlTracker({
 
     previousActiveUrl = activeUrl;
     activeUrl = getActiveSubUrl(urlWithStates || urlWithHashes);
+    activeUrl = onBeforeNavLinkSaved(activeUrl);
     storageInstance.setItem(storageKey, activeUrl);
   }
 
   function onMountApp() {
     unsubscribe();
     const historyInstance = history || (getHistory && getHistory()) || createHashHistory();
+
+    // set mounted URL as active
+    if (shouldTrackUrlUpdate(historyInstance.location.hash)) {
+      setActiveUrl(historyInstance.location.hash.substr(1));
+    }
+
     // track current hash when within app
     unsubscribeURLHistory = historyInstance.listen((location) => {
       if (shouldTrackUrlUpdate(location.hash)) {
@@ -193,6 +207,9 @@ export function createKbnUrlTracker({
         previousActiveUrl = activeUrl;
         // remove baseUrl prefix (just storing the sub url part)
         activeUrl = getActiveSubUrl(updatedUrl);
+        // allow app to mutate resulting URL before committing
+        activeUrl = onBeforeNavLinkSaved(activeUrl);
+
         storageInstance.setItem(storageKey, activeUrl);
         setNavLink(activeUrl);
       })
