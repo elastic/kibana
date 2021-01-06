@@ -32,7 +32,8 @@ export type UiSettingsType =
   | 'boolean'
   | 'string'
   | 'array'
-  | 'image';
+  | 'image'
+  | 'color';
 
 /**
  * UiSettings deprecation field options.
@@ -70,6 +71,13 @@ export interface UiSettingsParams<T = unknown> {
   type?: UiSettingsType;
   /** optional deprecation information. Used to generate a deprecation warning. */
   deprecation?: DeprecationSettings;
+  /**
+   * index of the settings within its category (ascending order, smallest will be displayed first).
+   * Used for ordering in the UI.
+   *
+   * @remark settings without their order defined will be displayed last.
+   */
+  order?: number;
   /*
    * Allows defining a custom validation applicable to value change on the client.
    * @deprecated

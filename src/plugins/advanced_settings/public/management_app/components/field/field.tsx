@@ -28,6 +28,7 @@ import {
   EuiBadge,
   EuiCode,
   EuiCodeBlock,
+  EuiColorPicker,
   EuiScreenReaderOnly,
   EuiCodeEditor,
   EuiDescribedFormGroup,
@@ -400,6 +401,16 @@ export class Field extends PureComponent<FieldProps> {
             isLoading={loading}
             disabled={loading || isOverridden || !enableSaving}
             fullWidth
+            data-test-subj={`advancedSetting-editField-${name}`}
+          />
+        );
+      case 'color':
+        return (
+          <EuiColorPicker
+            {...a11yProps}
+            color={currentValue}
+            onChange={this.onFieldChange}
+            format="hex"
             data-test-subj={`advancedSetting-editField-${name}`}
           />
         );

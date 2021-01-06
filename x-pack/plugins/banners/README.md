@@ -1,0 +1,3 @@
+# Kibana banners plugin
+
+TODO

@@ -17,9 +17,22 @@
  * under the License.
  */
 
-export { isDefaultValue } from './is_default_value';
-export { toEditableConfig } from './to_editable_config';
-export { getCategoryName } from './get_category_name';
-export { DEFAULT_CATEGORY } from './default_category';
-export { getAriaName } from './get_aria_name';
-export { fieldSorter } from './sort_fields';
+import { Comparators } from '@elastic/eui';
+import { FieldSetting } from '../types';
+
+const cmp = Comparators.default('asc');
+
+// TODO: test
+export const fieldSorter = (a: FieldSetting, b: FieldSetting): number => {
+  const aOrder = a.order !== undefined;
+  const bOrder = b.order !== undefined;
+  if (aOrder && bOrder) {
+    return cmp(a.order, b.order);
+  } else if (aOrder) {
+    return -1;
+  } else if (bOrder) {
+    return 1;
+  } else {
+    return cmp(a.name, b.name);
+  }
+};

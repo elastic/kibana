@@ -23,6 +23,7 @@ import {
   StringValidationRegexString,
   SavedObjectAttribute,
 } from 'src/core/public';
+import { FieldSetting } from '../types';
 import { getValType } from './get_val_type';
 import { getAriaName } from './get_aria_name';
 import { DEFAULT_CATEGORY } from './default_category';
@@ -52,7 +53,7 @@ export function toEditableConfig({
 
   const validationTyped = def.validation as StringValidationRegexString;
 
-  const conf = {
+  const conf: FieldSetting = {
     name,
     displayName: def.name || name,
     ariaName: def.name || getAriaName(name),
@@ -60,7 +61,7 @@ export function toEditableConfig({
     category: def.category && def.category.length ? def.category : [DEFAULT_CATEGORY],
     isCustom,
     isOverridden,
-    readonly: !!def.readonly,
+    readOnly: !!def.readonly,
     defVal: def.value,
     type: getValType(def, value),
     description: def.description,
@@ -74,6 +75,7 @@ export function toEditableConfig({
         : def.validation,
     options: def.options,
     optionLabels: def.optionLabels,
+    order: def.order,
     requiresPageReload: !!def.requiresPageReload,
     metric: def.metric,
   };

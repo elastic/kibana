@@ -19,7 +19,7 @@
 
 import React, { Component } from 'react';
 import { Subscription } from 'rxjs';
-import { Comparators, EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, Query } from '@elastic/eui';
 
 import { useParams } from 'react-router-dom';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -30,7 +30,7 @@ import { AdvancedSettingsVoiceAnnouncement } from './components/advanced_setting
 import { IUiSettingsClient, DocLinksStart, ToastsStart } from '../../../../core/public/';
 import { ComponentRegistry } from '../';
 
-import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
+import { getAriaName, toEditableConfig, fieldSorter, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, SettingsChanges } from './types';
 
@@ -153,17 +153,17 @@ export class AdvancedSettingsComponent extends Component<
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     return Object.entries(all)
-      .map((setting) => {
+      .map(([settingId, settingDef]) => {
         return toEditableConfig({
-          def: setting[1],
-          name: setting[0],
-          value: setting[1].userValue,
-          isCustom: config.isCustom(setting[0]),
-          isOverridden: config.isOverridden(setting[0]),
+          def: settingDef,
+          name: settingId,
+          value: settingDef.userValue,
+          isCustom: config.isCustom(settingId),
+          isOverridden: config.isOverridden(settingId),
         });
       })
-      .filter((c) => !c.readonly)
-      .sort(Comparators.property('name', Comparators.default('asc')));
+      .filter((c) => !c.readOnly)
+      .sort(fieldSorter);
   }
 
   mapSettings(settings: FieldSetting[]) {
