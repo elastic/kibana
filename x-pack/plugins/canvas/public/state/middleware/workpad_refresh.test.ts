@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../lib/app_state');
+jest.mock('../../lib/app_state');
 
-import { workpadRefresh } from '../workpad_refresh';
-import { inFlightComplete } from '../../actions/resolved_args';
-import { setRefreshInterval } from '../../actions/workpad';
-import { setRefreshInterval as setAppStateRefreshInterval } from '../../../lib/app_state';
+import { workpadRefresh } from './workpad_refresh';
+import { inFlightComplete } from '../actions/resolved_args';
+import { setRefreshInterval } from '../actions/workpad';
+import { setRefreshInterval as setAppStateRefreshInterval } from '../../lib/app_state';
 
-import { createTimeInterval } from '../../../lib/time_interval';
+import { createTimeInterval } from '../../lib/time_interval';
 
 const next = jest.fn();
 const dispatch = jest.fn();

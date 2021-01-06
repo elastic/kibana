@@ -6,11 +6,11 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { JestContext } from '../../test/context_jest';
-import { getScrubber as scrubber, getPageControlsCenter as center } from '../../test/selectors';
-import { Canvas } from '../canvas';
+import { JestContext } from '../test/context_jest';
+import { getScrubber as scrubber, getPageControlsCenter as center } from '../test/selectors';
+import { Canvas } from './canvas';
 
-jest.mock('../../supported_renderers');
+jest.mock('../supported_renderers');
 
 describe('<Canvas />', () => {
   test('null workpad renders nothing', () => {

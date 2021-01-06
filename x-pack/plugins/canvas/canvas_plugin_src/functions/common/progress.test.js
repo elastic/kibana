@@ -5,14 +5,15 @@
  */
 
 import expect from '@kbn/expect';
-import { progress } from '../progress';
-import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
-import { getFunctionErrors } from '../../../../i18n';
-import { fontStyle } from './fixtures/test_styles';
+import { functionWrapper } from '../../../helpers/function_wrapper';
+import { getFunctionErrors } from '../../../i18n';
+import { progress } from './progress';
+import { fontStyle } from './__fixtures__/test_styles';
 
 const errors = getFunctionErrors().progress;
 
-describe('progress', () => {
+// TODO: this test was not running and is not up to date
+describe.skip('progress', () => {
   const fn = functionWrapper(progress);
   const value = 0.33;
 
