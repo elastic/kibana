@@ -24,3 +24,4 @@ export {
   SavedObjectsExportResultDetails,
 } from './types';
 export { ISavedObjectsExporter, SavedObjectsExporter } from './saved_objects_exporter';
+export { SavedObjectsExportError } from './errors';

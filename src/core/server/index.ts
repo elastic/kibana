@@ -323,6 +323,7 @@ export {
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
+  SavedObjectsExportError,
   SavedObjectsImporter,
   ISavedObjectsImporter,
 } from './saved_objects';

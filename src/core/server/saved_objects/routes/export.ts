@@ -24,7 +24,11 @@ import { createPromiseFromStreams, createMapStream, createConcatStream } from '@
 import { IRouter } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
-import { SavedObjectsExportByTypeOptions, SavedObjectsExportByObjectOptions } from '../export';
+import {
+  SavedObjectsExportByTypeOptions,
+  SavedObjectsExportByObjectOptions,
+  SavedObjectsExportError,
+} from '../export';
 import { validateTypes, validateObjects } from './utils';
 
 interface RouteDependencies {
@@ -188,25 +192,37 @@ export const registerExportRoute = (
         .incrementSavedObjectsExport({ request: req, types: cleaned.types, supportedTypes })
         .catch(() => {});
 
-      const exportStream = isExportByTypeOptions(options)
-        ? await exporter.exportByTypes(options)
-        : await exporter.exportByObjects(options);
+      try {
+        const exportStream = isExportByTypeOptions(options)
+          ? await exporter.exportByTypes(options)
+          : await exporter.exportByObjects(options);
 
-      const docsToExport: string[] = await createPromiseFromStreams([
-        exportStream,
-        createMapStream((obj: unknown) => {
-          return stringify(obj);
-        }),
-        createConcatStream([]),
-      ]);
+        const docsToExport: string[] = await createPromiseFromStreams([
+          exportStream,
+          createMapStream((obj: unknown) => {
+            return stringify(obj);
+          }),
+          createConcatStream([]),
+        ]);
 
-      return res.ok({
-        body: docsToExport.join('\n'),
-        headers: {
-          'Content-Disposition': `attachment; filename="export.ndjson"`,
-          'Content-Type': 'application/ndjson',
-        },
-      });
+        return res.ok({
+          body: docsToExport.join('\n'),
+          headers: {
+            'Content-Disposition': `attachment; filename="export.ndjson"`,
+            'Content-Type': 'application/ndjson',
+          },
+        });
+      } catch (e) {
+        if (e instanceof SavedObjectsExportError) {
+          return res.badRequest({
+            body: {
+              message: e.message,
+              attributes: e.attributes,
+            },
+          });
+        }
+        throw e;
+      }
     })
   );
 };

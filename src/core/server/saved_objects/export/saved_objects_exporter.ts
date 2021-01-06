@@ -29,6 +29,7 @@ import {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
 } from './types';
+import { SavedObjectsExportError } from './errors';
 
 /**
  * @public
@@ -57,6 +58,8 @@ export class SavedObjectsExporter {
    * Generates an export stream for given types.
    *
    * See the {@link SavedObjectsExportByTypeOptions | options} for more detailed information.
+   *
+   * @throws SavedObjectsExportError
    */
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
     const objects = await this.fetchByTypes(options);
@@ -71,10 +74,14 @@ export class SavedObjectsExporter {
    * Generates an export stream for given object references.
    *
    * See the {@link SavedObjectsExportByObjectOptions | options} for more detailed information.
+   *
+   * @throws SavedObjectsExportError
    */
   public async exportByObjects(options: SavedObjectsExportByObjectOptions) {
     if (options.objects.length > this.#exportSizeLimit) {
-      throw Boom.badRequest(`Can't export more than ${this.#exportSizeLimit} objects`);
+      throw SavedObjectsExportError.exportSizeExceeded(
+        `Can't export more than ${this.#exportSizeLimit} objects`
+      );
     }
     const objects = await this.fetchByObjects(options);
     return this.processObjects(objects, {
@@ -124,11 +131,7 @@ export class SavedObjectsExporter {
     const bulkGetResult = await this.#savedObjectsClient.bulkGet(objects, { namespace });
     const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {
-      const err = Boom.badRequest();
-      err.output.payload.attributes = {
-        objects: erroredObjects,
-      };
-      throw err;
+      throw SavedObjectsExportError.objectFetchError('Error fetching objects', erroredObjects);
     }
     return bulkGetResult.saved_objects;
   }

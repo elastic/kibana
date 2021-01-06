@@ -42,6 +42,7 @@ export {
   SavedObjectsExportByTypeOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportResultDetails,
+  SavedObjectsExportError,
 } from './export';
 
 export {

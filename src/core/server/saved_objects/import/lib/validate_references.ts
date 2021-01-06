@@ -21,10 +21,10 @@ import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsClientContract } from '../../types';
 import { SavedObjectsImportError, SavedObjectsImportRetry } from '../types';
 
-const REF_TYPES_TO_VLIDATE = ['index-pattern', 'search'];
+const REF_TYPES_TO_VALIDATE = ['index-pattern', 'search'];
 
 function filterReferencesToValidate({ type }: { type: string }) {
-  return REF_TYPES_TO_VLIDATE.includes(type);
+  return REF_TYPES_TO_VALIDATE.includes(type);
 }
 const getObjectsToSkip = (retries: SavedObjectsImportRetry[] = []) =>
   retries.reduce(
