@@ -155,7 +155,6 @@ interface DataProvidersGroupItem extends Omit<Props, 'dataProviders'> {
 export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
   ({ browserFields, group, groupIndex, dataProvider, index, timelineId }) => {
     const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
-    const [, setHoverActionsOwnFocus] = useState<boolean>(false);
     const [, setClosePopOverTrigger] = useState(false);
     const dispatch = useDispatch();
 
@@ -240,7 +239,13 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
     }, []);
 
     const openPopover = useCallback(() => {
-      setHoverActionsOwnFocus(true);
+      keyboardHandlerRef.current?.querySelector('.euiBadge__childButton')?.dispatchEvent(
+        new MouseEvent('click', {
+          view: window,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
     }, []);
 
     const { onBlur, onKeyDown } = useDraggableKeyboardWrapper({

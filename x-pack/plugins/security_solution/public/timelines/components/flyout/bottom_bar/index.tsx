@@ -16,6 +16,7 @@ import { DataProviders } from '../../timeline/data_providers';
 import { FlyoutHeaderPanel } from '../header';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 
+export const FLYOUT_BUTTON_BAR_CLASS_NAME = 'timeline-flyout-button-bar';
 export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
 
 export const getBadgeCount = (dataProviders: DataProvider[]): number =>
@@ -76,7 +77,11 @@ interface FlyoutBottomBarProps {
 export const FlyoutBottomBar = React.memo<FlyoutBottomBarProps>(
   ({ activeTab, showDataproviders, timelineId }) => {
     return (
-      <Container $isGlobal={showDataproviders} data-test-subj="flyoutBottomBar">
+      <Container
+        className={FLYOUT_BUTTON_BAR_CLASS_NAME}
+        $isGlobal={showDataproviders}
+        data-test-subj="flyoutBottomBar"
+      >
         {showDataproviders && <FlyoutHeaderPanel timelineId={timelineId} />}
         {(showDataproviders || (!showDataproviders && activeTab !== TimelineTabs.query)) && (
           <DataProvidersPanel paddingSize="none">
