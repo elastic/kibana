@@ -111,6 +111,9 @@ export class AuditService {
         if (features.allowAuditLogging) {
           recordAuditLoggingUsage();
           this.usageIntervalId = setInterval(recordAuditLoggingUsage, RECORD_USAGE_INTERVAL);
+          if (this.usageIntervalId.unref) {
+            this.usageIntervalId.unref();
+          }
         }
       });
     }
