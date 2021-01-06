@@ -21,9 +21,17 @@ type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 export type ResponseProviderCallback<F extends (...args: any) => any = (...args: any) => any> = F;
 
 /**
- * Map of HTTP response provider callbacks that will be exposed when the mock is applied
+ * Generic interface to facilitate defining the map of HTTP response provider callbacks
+ * that will be exposed when the mock is applied
+ *
+ * @example
+ *  type FleetSetupResponseProvidersMock = ResponseProvidersInterface<{
+ *    fleetSetup: () => PostIngestSetupResponse;
+ *  }>;
  */
-export type ResponseProvidersInterface = Record<string, ResponseProviderCallback>;
+export type ResponseProvidersInterface<
+  I extends Record<string, ResponseProviderCallback> = Record<string, ResponseProviderCallback>
+> = I;
 
 type SingleResponseProvider<
   F extends ResponseProviderCallback = ResponseProviderCallback
@@ -108,7 +116,7 @@ export type ApiHandlerMockFactoryProps<
  *
  * @example
  *
- * const mockEpmApi = httpHandlerMockFactory([
+ * const mockEpmApi = httpHandlerMockFactory<{ epmGetInfo: () => GetInfoResponse }>([
  *  {
  *    id: 'epmGetInfo',
  *    method: 'get',

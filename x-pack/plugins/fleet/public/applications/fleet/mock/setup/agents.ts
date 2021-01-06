@@ -14,9 +14,9 @@ export const agentsSetupResponseMock = (): GetFleetStatusResponse => {
   };
 };
 
-export interface AgentsSetupResponseProvidersMock extends ResponseProvidersInterface {
-  getAgentsSetup: (...args: any) => GetFleetStatusResponse;
-}
+export type AgentsSetupResponseProvidersMock = ResponseProvidersInterface<{
+  getAgentsSetup: () => GetFleetStatusResponse;
+}>;
 
 export const agentsSetupApiMock = httpHandlerMockFactory<AgentsSetupResponseProvidersMock>([
   {

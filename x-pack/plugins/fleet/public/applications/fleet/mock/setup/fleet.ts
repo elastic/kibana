@@ -11,9 +11,9 @@ export const setupResponseMock = (): PostIngestSetupResponse => {
   return { isInitialized: true };
 };
 
-export interface FleetSetupResponseProvidersMock extends ResponseProvidersInterface {
+export type FleetSetupResponseProvidersMock = ResponseProvidersInterface<{
   fleetSetup: () => PostIngestSetupResponse;
-}
+}>;
 
 export const fleetSetupApiMock = httpHandlerMockFactory<FleetSetupResponseProvidersMock>([
   {

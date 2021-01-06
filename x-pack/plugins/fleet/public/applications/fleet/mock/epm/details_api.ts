@@ -491,13 +491,13 @@ export const epmGetSummaryResponse = (): GetSummaryResponse => ({
   },
 });
 
-export interface EpmPackageDetailsResponseProvidersMock extends ResponseProvidersInterface {
+export type EpmPackageDetailsResponseProvidersMock = ResponseProvidersInterface<{
   epmGetInfo: () => GetInfoResponse;
   epmGetFile: () => string;
   epmGetSummary: () => GetSummaryResponse;
   packagePolicyList: () => GetPackagePoliciesResponse;
   agentPolicyList: () => GetAgentPoliciesResponse;
-}
+}>;
 
 const epmDetailsApiOnlyMocks = httpHandlerMockFactory<EpmPackageDetailsResponseProvidersMock>([
   {
