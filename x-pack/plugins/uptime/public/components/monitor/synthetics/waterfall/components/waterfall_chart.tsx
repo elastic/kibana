@@ -116,7 +116,7 @@ export const WaterfallChart = ({
       const chartOffset = divRef.current.getBoundingClientRect().top;
       setHeight(`calc(100vh - ${chartOffset}px)`);
     }
-  }, [divRef]);
+  }, [divRef, fullHeight]);
 
   return (
     <WaterfallChartOuterContainer height={height} className="waterfallOuterContainer">

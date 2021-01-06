@@ -40,7 +40,7 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
   const networkEvents = _networkEvents[checkGroup ?? '']?.[stepIndex];
 
   return (
-    <div>
+    <>
       {!networkEvents ||
         (networkEvents.loading && (
           <EuiFlexGroup justifyContent="center">
@@ -61,6 +61,6 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
       {networkEvents && !networkEvents.loading && networkEvents.events.length > 0 && (
         <WaterfallChartWrapper data={extractItems(networkEvents.events)} />
       )}
-    </div>
+    </>
   );
 };
