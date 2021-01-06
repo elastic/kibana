@@ -16,13 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import '../sense_editor.test.mocks';
-import { create } from '../create';
+import './sense_editor.test.mocks';
+import { create } from './create';
 import _ from 'lodash';
 import $ from 'jquery';
 
-import * as kb from '../../../../lib/kb/kb';
-import * as mappings from '../../../../lib/mappings/mappings';
+import * as kb from '../../../lib/kb/kb';
+import * as mappings from '../../../lib/mappings/mappings';
 
 describe('Integration', () => {
   let senseEditor;

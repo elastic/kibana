@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import '../legacy_core_editor.test.mocks';
-import RowParser from '../../../../lib/row_parser';
-import { createTokenIterator } from '../../../factories';
+import './legacy_core_editor.test.mocks';
+import RowParser from '../../../lib/row_parser';
+import { createTokenIterator } from '../../factories';
 import $ from 'jquery';
-import { create } from '../create';
+import { create } from './create';
 
 describe('Input', () => {
   let coreEditor;
