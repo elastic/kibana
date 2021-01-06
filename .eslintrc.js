@@ -35,6 +35,11 @@ module.exports = {
       },
     ],
     'no-console': 'error',
+
+    // prefer typescript specific `no-unused-vars` rule
+    'no-unused-vars': 'off',
+    '@typescript-eslint/no-unused-vars': ['error'],
+
     '@typescript-eslint/no-unnecessary-condition': 'error',
     '@typescript-eslint/prefer-ts-expect-error': 'error',
 

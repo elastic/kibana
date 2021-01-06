@@ -81,7 +81,7 @@ export async function deleteRemote(
   try {
     await exec(`git remote rm ${remoteName}`, { cwd: getRepoPath(options) });
   } catch (e) {
-    const isExecError = e.cmd && e.code === 128;
+    const isExecError = e.cmd && e.code > 0;
     // re-throw if error is not an exec related error
     if (!isExecError) {
       throw e;
