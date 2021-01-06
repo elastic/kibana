@@ -21,10 +21,10 @@ const resizeToClipArea = async (
   logger: LevelLogger
 ) => {
   // Check current viewport size
-  const { top, left, width, height } = item.position.boundingClientRect; // the "unscaled" pixel sizes
+  const { width, height, left, top } = item.position.boundingClientRect; // the "unscaled" pixel sizes
   const [viewWidth, viewHeight] = await browser.evaluate(
     {
-      fn: () => [document.body.clientHeight, document.body.clientWidth],
+      fn: () => [document.body.clientWidth, document.body.clientHeight],
       args: [],
     },
     { context: CONTEXT_GETBROWSERDIMENSIONS },
