@@ -13,6 +13,8 @@ import {
   AlertTypeState,
   AlertInstanceContext,
   AlertInstanceState,
+  ActionGroup,
+  ActionGroupIdsOf,
 } from '../../../../../alerts/server';
 import {
   AlertStates,
@@ -37,12 +39,18 @@ import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 
-type LogThresholdAlertServices = AlertServices<AlertInstanceState, AlertInstanceContext>;
+type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
+type LogThresholdAlertServices = AlertServices<
+  AlertInstanceState,
+  AlertInstanceContext,
+  LogThresholdActionGroups
+>;
 type LogThresholdAlertExecutorOptions = AlertExecutorOptions<
   AlertTypeParams,
   AlertTypeState,
   AlertInstanceState,
-  AlertInstanceContext
+  AlertInstanceContext,
+  LogThresholdActionGroups
 >;
 
 const COMPOSITE_GROUP_SIZE = 40;
@@ -344,9 +352,9 @@ export const processGroupByRatioResults = (
 };
 
 type AlertInstanceUpdater = (
-  alertInstance: AlertInstance,
+  alertInstance: AlertInstance<AlertInstanceState, AlertInstanceContext, LogThresholdActionGroups>,
   state: AlertStates,
-  actions?: Array<{ actionGroup: string; context: AlertInstanceContext }>
+  actions?: Array<{ actionGroup: LogThresholdActionGroups; context: AlertInstanceContext }>
 ) => void;
 
 export const updateAlertInstance: AlertInstanceUpdater = (alertInstance, state, actions) => {
@@ -653,8 +661,9 @@ const createConditionsMessageForCriteria = (criteria: CountCriteria) => {
 
 // When the Alerting plugin implements support for multiple action groups, add additional
 // action groups here to send different messages, e.g. a recovery notification
-export const FIRED_ACTIONS = {
-  id: 'logs.threshold.fired',
+export const LogsThresholdFiredActionGroupId = 'logs.threshold.fired';
+export const FIRED_ACTIONS: ActionGroup<'logs.threshold.fired'> = {
+  id: LogsThresholdFiredActionGroupId,
   name: i18n.translate('xpack.infra.logs.alerting.threshold.fired', {
     defaultMessage: 'Fired',
   }),

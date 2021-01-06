@@ -111,20 +111,23 @@ export async function importSavedObjectsFromStream({
   const createSavedObjectsResult = await createSavedObjects(createSavedObjectsParams);
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];
 
-  const successResults = createSavedObjectsResult.createdObjects.map(
-    ({ type, id, attributes: { title }, destinationId, originId }) => {
-      const meta = { title, icon: typeRegistry.getType(type)?.management?.icon };
-      const attemptedOverwrite = pendingOverwrites.has(`${type}:${id}`);
-      return {
-        type,
-        id,
-        meta,
-        ...(attemptedOverwrite && { overwrite: true }),
-        ...(destinationId && { destinationId }),
-        ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
-      };
-    }
-  );
+  const successResults = createSavedObjectsResult.createdObjects.map((createdObject) => {
+    const { type, id, destinationId, originId } = createdObject;
+    const getTitle = typeRegistry.getType(type)?.management?.getTitle;
+    const meta = {
+      title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
+      icon: typeRegistry.getType(type)?.management?.icon,
+    };
+    const attemptedOverwrite = pendingOverwrites.has(`${type}:${id}`);
+    return {
+      type,
+      id,
+      meta,
+      ...(attemptedOverwrite && { overwrite: true }),
+      ...(destinationId && { destinationId }),
+      ...(destinationId && !originId && !createNewCopies && { createNewCopy: true }),
+    };
+  });
   const errorResults = errorAccumulator.map((error) => {
     const icon = typeRegistry.getType(error.type)?.management?.icon;
     const attemptedOverwrite = pendingOverwrites.has(`${error.type}:${error.id}`);
