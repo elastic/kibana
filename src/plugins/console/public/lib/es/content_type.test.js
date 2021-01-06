@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { getContentType } from '../es';
+import { getContentType } from './es';
 
 const APPLICATION_JSON = 'application/json';
 describe('Content type', () => {

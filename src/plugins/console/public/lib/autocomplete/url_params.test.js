@@ -17,8 +17,8 @@
  * under the License.
  */
 import _ from 'lodash';
-import { UrlParams } from '../../autocomplete/url_params';
-import { populateContext } from '../../autocomplete/engine';
+import { UrlParams } from './url_params';
+import { populateContext } from './engine';
 
 describe('Url params', () => {
   function paramTest(name, description, tokenPath, expectedContext, globalParams) {
