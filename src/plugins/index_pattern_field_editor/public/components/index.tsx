@@ -17,17 +17,69 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { OverlayStart } from 'src/core/public';
-import { IndexPattern, IndexPatternField } from '../../../data/public';
+import { EuiButton, EuiFieldText } from '@elastic/eui';
+import { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../../data/public';
 import { toMountPoint } from '../../../kibana_react/public';
 
 export const indexPatternFieldEditorFlyoutContent = (
   openFlyout: OverlayStart['openFlyout'],
   indexPattern: IndexPattern,
-  indexPatternField: IndexPatternField
+  indexPatternsService: DataPublicPluginStart['indexPatterns'],
+  indexPatternField?: IndexPatternField
 ) => {
-  // const a = toMountPoint(<div>hello</div>);
-  openFlyout(toMountPoint(<div>hello {indexPatternField.name}</div>));
-  console.log('hello from async loaded component', indexPattern, indexPatternField);
+  openFlyout(
+    toMountPoint(
+      <Content
+        indexPattern={indexPattern}
+        indexPatternField={indexPatternField}
+        onSave={() => {
+          console.log('onSave');
+          indexPatternsService.updateSavedObject(indexPattern);
+          console.log(indexPattern);
+        }}
+      />
+    )
+  );
+  console.log(
+    'hello from async loaded component',
+    indexPattern,
+    indexPatternField,
+    indexPatternField?.isMapped
+  );
+};
+
+const Content = ({
+  indexPatternField,
+  indexPattern,
+  onSave,
+}: {
+  indexPatternField?: IndexPatternField;
+  indexPattern: IndexPattern;
+  onSave: () => void;
+}) => {
+  const [fieldName, setFieldName] = useState<string>('');
+
+  return (
+    <>
+      <div>hello {indexPatternField?.name}</div>
+      <EuiFieldText value={fieldName} onChange={(e) => setFieldName(e.target.value)} />
+      <EuiButton
+        onClick={() => {
+          const field = indexPattern.getFieldByName(fieldName);
+          if (!field) {
+            indexPattern.saveRuntimeField(fieldName, {
+              name: fieldName,
+              type: 'keyword',
+              script: { source: `emit('${fieldName}')` },
+            });
+            onSave();
+          }
+        }}
+      >
+        Add new field
+      </EuiButton>
+    </>
+  );
 };

@@ -81,6 +81,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
     docLinks,
     indexPatternFieldEditor,
     overlays,
+    data,
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [indexedFieldTypeFilter, setIndexedFieldTypeFilter] = useState<string>('');
@@ -145,7 +146,17 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={() => console.log('add field')}>
+                <EuiButton
+                  fill
+                  onClick={async () => {
+                    const editor = await indexPatternFieldEditor.loadEditor();
+                    editor.indexPatternFieldEditorFlyoutContent(
+                      overlays.openFlyout,
+                      indexPattern,
+                      data.indexPatterns
+                    );
+                  }}
+                >
                   Add field
                 </EuiButton>
               </EuiFlexItem>
@@ -170,6 +181,10 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       indexedFieldTypes,
       scriptedFieldLanguageFilter,
       scriptedFieldLanguages,
+      indexPattern,
+      indexPatternFieldEditor,
+      overlays.openFlyout,
+      data.indexPatterns,
     ]
   );
 
@@ -200,6 +215,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                   editor.indexPatternFieldEditorFlyoutContent(
                     overlays.openFlyout,
                     ip,
+                    data.indexPatterns,
                     indexPatternField
                   );
                 }}
@@ -259,6 +275,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       saveIndexPattern,
       indexPatternFieldEditor,
       overlays.openFlyout,
+      data.indexPatterns,
     ]
   );
 
