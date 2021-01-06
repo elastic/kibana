@@ -101,7 +101,11 @@ export const REFERENCE_URLS_INPUT =
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
-export const RISK_INPUT = '.euiRangeInput';
+export const DEFAULT_RISK_SCORE_INPUT =
+  '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeInput';
+
+export const DEFAULT_RISK_SCORE_SLIDER =
+  '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeSlider';
 
 export const RISK_MAPPING_OVERRIDE_OPTION = '#risk_score-mapping-override';
 

@@ -28,15 +28,6 @@ import {
   createEditUserAction,
   makePhoneCallAction,
   showcasePluggability,
-  UserContext,
-  CountryContext,
-  PhoneContext,
-  ACTION_EDIT_USER,
-  ACTION_SHOWCASE_PLUGGABILITY,
-  ACTION_CALL_PHONE_NUMBER,
-  ACTION_TRAVEL_GUIDE,
-  ACTION_VIEW_IN_MAPS,
-  ACTION_TRIGGER_PHONE_USER,
   createTriggerPhoneTriggerAction,
 } from './actions/actions';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
@@ -49,23 +40,6 @@ interface StartDeps {
 interface SetupDeps {
   uiActions: UiActionsSetup;
   developerExamples: DeveloperExamplesSetup;
-}
-
-declare module '../../../src/plugins/ui_actions/public' {
-  export interface TriggerContextMapping {
-    [USER_TRIGGER]: UserContext;
-    [COUNTRY_TRIGGER]: CountryContext;
-    [PHONE_TRIGGER]: PhoneContext;
-  }
-
-  export interface ActionContextMapping {
-    [ACTION_EDIT_USER]: UserContext;
-    [ACTION_SHOWCASE_PLUGGABILITY]: {};
-    [ACTION_CALL_PHONE_NUMBER]: PhoneContext;
-    [ACTION_TRAVEL_GUIDE]: CountryContext;
-    [ACTION_VIEW_IN_MAPS]: CountryContext;
-    [ACTION_TRIGGER_PHONE_USER]: UserContext;
-  }
 }
 
 export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps> {
