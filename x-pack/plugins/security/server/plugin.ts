@@ -252,7 +252,7 @@ export class Plugin {
       session,
     });
 
-    const anonymousAccessSetup = this.anonymousAccessService.setup();
+    this.anonymousAccessService.setup();
 
     this.authorizationSetup = this.authorizationService.setup({
       http: core.http,
@@ -304,10 +304,6 @@ export class Plugin {
       },
     });
 
-    core.capabilities.registerProvider(() => ({
-      security: { anonymousAccess: anonymousAccessSetup.isAnonymousAccessEnabled },
-    }));
-
     return Object.freeze<SecurityPluginSetup>({
       audit: {
         asScoped: audit.asScoped,
@@ -350,7 +346,7 @@ export class Plugin {
     this.authorizationService.start({ features, clusterClient, online$: watchOnlineStatus$() });
 
     this.anonymousAccessStart = this.anonymousAccessService.start({
-      authz: this.authorizationSetup!,
+      capabilities: core.capabilities,
       basePath: core.http.basePath,
       spaces: spaces?.spacesService,
     });

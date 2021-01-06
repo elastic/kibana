@@ -17,13 +17,20 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import {
+  Capabilities,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from 'src/core/public';
 import { ConfigType } from './config';
 import {
   InsecureClusterService,
   InsecureClusterServiceSetup,
   InsecureClusterServiceStart,
 } from './insecure_cluster_service';
+import { AppStateService } from './app_state';
 
 export interface SavedObjectTypeAnonymousAccess {
   /**
@@ -44,8 +51,8 @@ export interface SecurityOssPluginSetup {
 export interface SecurityOssPluginStart {
   insecureCluster: InsecureClusterServiceStart;
   anonymousAccess: {
-    isAnonymousAccessEnabled: boolean;
-    canAccessSavedObjectType: (savedObjectType: string) => Promise<SavedObjectTypeAnonymousAccess>;
+    getAccessURLParameters: () => Promise<Record<string, string> | null>;
+    getCapabilities: () => Promise<Capabilities>;
   };
 }
 
@@ -53,7 +60,8 @@ export class SecurityOssPlugin
   implements Plugin<SecurityOssPluginSetup, SecurityOssPluginStart, {}, {}> {
   private readonly config: ConfigType;
 
-  private insecureClusterService: InsecureClusterService;
+  private readonly insecureClusterService: InsecureClusterService;
+  private readonly appStateService = new AppStateService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -67,21 +75,18 @@ export class SecurityOssPlugin
   }
 
   public start(core: CoreStart) {
-    const isAnonymousAccessEnabled = !!core.application.capabilities.security?.anonymousAccess;
+    const appState = this.appStateService.start({ core });
     return {
-      insecureCluster: this.insecureClusterService.start({ core }),
+      insecureCluster: this.insecureClusterService.start({ core, appState }),
       anonymousAccess: {
-        isAnonymousAccessEnabled,
-        async canAccessSavedObjectType(savedObjectType: string) {
-          if (isAnonymousAccessEnabled) {
-            return await core.http.get<SavedObjectTypeAnonymousAccess>(
-              `/internal/security_oss/anonymous_access/_can_access_saved_object_type?type=${encodeURIComponent(
-                savedObjectType
-              )}`
-            );
-          }
-
-          return { canAccess: false, accessURLParameters: null };
+        async getAccessURLParameters() {
+          const { anonymousAccess } = await appState.getState();
+          return anonymousAccess.accessURLParameters;
+        },
+        async getCapabilities() {
+          return await core.http.get<Capabilities>(
+            '/internal/security_oss/anonymous_access/capabilities'
+          );
         },
       },
     };

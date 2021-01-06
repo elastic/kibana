@@ -19,8 +19,10 @@
 
 import { IRouter, Logger } from 'kibana/server';
 import { combineLatest, Observable } from 'rxjs';
+import type { AppState } from '../../common';
 import { createClusterDataCheck } from '../check_cluster_data';
-import { ConfigType } from '../config';
+import type { ConfigType } from '../config';
+import { AnonymousAccessService } from '../plugin';
 
 interface Deps {
   router: IRouter;
@@ -28,14 +30,16 @@ interface Deps {
   config$: Observable<ConfigType>;
   displayModifier$: Observable<boolean>;
   doesClusterHaveUserData: ReturnType<typeof createClusterDataCheck>;
+  getAnonymousAccessService: () => AnonymousAccessService;
 }
 
-export const setupDisplayInsecureClusterAlertRoute = ({
+export const setupAppStateRoute = ({
   router,
   log,
   config$,
   displayModifier$,
   doesClusterHaveUserData,
+  getAnonymousAccessService,
 }: Deps) => {
   let showInsecureClusterWarning = false;
 
@@ -44,20 +48,27 @@ export const setupDisplayInsecureClusterAlertRoute = ({
   });
 
   router.get(
-    {
-      path: '/internal/security_oss/display_insecure_cluster_alert',
-      validate: false,
-    },
+    { path: '/internal/security_oss/app_state', validate: false },
     async (context, request, response) => {
-      if (!showInsecureClusterWarning) {
-        return response.ok({ body: { displayAlert: false } });
+      let displayAlert = false;
+      if (showInsecureClusterWarning) {
+        displayAlert = await doesClusterHaveUserData(
+          context.core.elasticsearch.client.asInternalUser,
+          log
+        );
       }
 
-      const hasData = await doesClusterHaveUserData(
-        context.core.elasticsearch.client.asInternalUser,
-        log
-      );
-      return response.ok({ body: { displayAlert: hasData } });
+      const anonymousAccessService = getAnonymousAccessService();
+      const appState: AppState = {
+        insecureClusterAlert: { displayAlert },
+        anonymousAccess: {
+          isEnabled: anonymousAccessService.isAnonymousAccessEnabled,
+          accessURLParameters: anonymousAccessService.accessURLParameters
+            ? Object.fromEntries(anonymousAccessService.accessURLParameters.entries())
+            : anonymousAccessService.accessURLParameters,
+        },
+      };
+      return response.ok({ body: appState });
     }
   );
 };

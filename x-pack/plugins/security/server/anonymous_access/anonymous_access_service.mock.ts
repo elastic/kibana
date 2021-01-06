@@ -9,6 +9,8 @@ import type {
   AnonymousAccessServiceStart,
 } from './anonymous_access_service';
 
+import { capabilitiesServiceMock } from '../../../../../src/core/server/mocks';
+
 export const anonymousAccessServiceMock = {
   createSetup: (): jest.Mocked<AnonymousAccessServiceSetup> => ({
     isAnonymousAccessEnabled: false,
@@ -16,6 +18,6 @@ export const anonymousAccessServiceMock = {
   createStart: (): jest.Mocked<AnonymousAccessServiceStart> => ({
     isAnonymousAccessEnabled: false,
     accessURLParameters: null,
-    isSavedObjectTypeAccessibleAnonymously: jest.fn(),
+    getCapabilities: jest.fn().mockReturnValue(capabilitiesServiceMock.createCapabilities()),
   }),
 };

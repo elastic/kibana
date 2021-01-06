@@ -17,14 +17,18 @@
  * under the License.
  */
 
-import { CoreSetup, KibanaRequest, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
+import {
+  Capabilities,
+  CoreSetup,
+  KibanaRequest,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from 'kibana/server';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { createClusterDataCheck } from './check_cluster_data';
 import { ConfigType } from './config';
-import {
-  setupDisplayInsecureClusterAlertRoute,
-  setupCanAccessSavedObjectTypeRoute,
-} from './routes';
+import { setupAppStateRoute, setupAnonymousAccessCapabilitiesRoute } from './routes';
 
 export interface SecurityOssPluginSetup {
   /**
@@ -48,25 +52,28 @@ export interface AnonymousAccessService {
 
   /**
    * A map of query string parameters that should be specified in URL so that anonymous user can use
-   * to automatically log in to Kibana and access particular Saved Object type.
+   * to automatically log in to Kibana.
    */
   readonly accessURLParameters: Readonly<Map<string, string>> | null;
 
   /**
-   * Checks if the specified Saved Object type is accessible
+   * Gets capabilities of the anonymous service account.
    * @param request Kibana request instance.
-   * @param savedObjectType Saved Object type to check access for.
    */
-  isSavedObjectTypeAccessibleAnonymously: (
-    request: KibanaRequest,
-    savedObjectType: string
-  ) => Promise<boolean>;
+  getCapabilities: (request: KibanaRequest) => Promise<Capabilities>;
 }
 
 export class SecurityOssPlugin implements Plugin<SecurityOssPluginSetup, void, {}, {}> {
   private readonly config$: Observable<ConfigType>;
   private readonly logger: Logger;
+
   private anonymousAccessServiceProvider?: () => AnonymousAccessService;
+  private readonly getAnonymousAccessService = () => {
+    if (!this.anonymousAccessServiceProvider) {
+      throw new Error('Anonymous Access service provider is not set.');
+    }
+    return this.anonymousAccessServiceProvider();
+  };
 
   constructor(initializerContext: PluginInitializerContext<ConfigType>) {
     this.config$ = initializerContext.config.create();
@@ -77,23 +84,18 @@ export class SecurityOssPlugin implements Plugin<SecurityOssPluginSetup, void, {
     const router = core.http.createRouter();
     const showInsecureClusterWarning$ = new BehaviorSubject<boolean>(true);
 
-    setupDisplayInsecureClusterAlertRoute({
+    setupAppStateRoute({
       router,
       log: this.logger,
       config$: this.config$,
       displayModifier$: showInsecureClusterWarning$,
       doesClusterHaveUserData: createClusterDataCheck(),
+      getAnonymousAccessService: this.getAnonymousAccessService,
     });
 
-    setupCanAccessSavedObjectTypeRoute({
+    setupAnonymousAccessCapabilitiesRoute({
       router,
-      getAnonymousAccessService: () => {
-        if (!this.anonymousAccessServiceProvider) {
-          throw new Error('Anonymous Access service provider is not set.');
-        }
-
-        return this.anonymousAccessServiceProvider();
-      },
+      getAnonymousAccessService: this.getAnonymousAccessService,
     });
 
     return {

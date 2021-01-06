@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { setupAppStateRoute } from './app_state';
-export { setupAnonymousAccessCapabilitiesRoute } from './anonymous_access_capabilities';
+export { AppStateService, AppStateServiceStart } from './app_state_service';

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { AnonymousAccessService } from '../plugin';
 
@@ -27,30 +26,14 @@ interface Deps {
 }
 
 /**
- * Defines route that checks if the specified Saved Object type can be accessed anonymously.
+ * Defines route that returns capabilities of the anonymous service account.
  */
-export function setupCanAccessSavedObjectTypeRoute({ router, getAnonymousAccessService }: Deps) {
+export function setupAnonymousAccessCapabilitiesRoute({ router, getAnonymousAccessService }: Deps) {
   router.get(
-    {
-      path: '/internal/security_oss/anonymous_access/_can_access_saved_object_type',
-      validate: { query: schema.object({ type: schema.string() }) },
-    },
+    { path: '/internal/security_oss/anonymous_access/capabilities', validate: false },
     async (_context, request, response) => {
-      const anonymousAccessService = getAnonymousAccessService();
-      if (!anonymousAccessService.isAnonymousAccessEnabled) {
-        return response.ok({ body: { canAccess: false, accessURLParameters: null } });
-      }
-
       return response.ok({
-        body: {
-          canAccess: await anonymousAccessService.isSavedObjectTypeAccessibleAnonymously(
-            request,
-            request.query.type
-          ),
-          accessURLParameters: anonymousAccessService.accessURLParameters
-            ? Object.fromEntries(anonymousAccessService.accessURLParameters.entries())
-            : anonymousAccessService.accessURLParameters,
-        },
+        body: await getAnonymousAccessService().getCapabilities(request),
       });
     }
   );

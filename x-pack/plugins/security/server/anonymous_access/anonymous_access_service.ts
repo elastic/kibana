@@ -5,50 +5,55 @@
  */
 
 import type { Request } from '@hapi/hapi';
-import { IBasePath, KibanaRequest, Logger } from '../../../../../src/core/server';
+import {
+  CapabilitiesStart,
+  IBasePath,
+  KibanaRequest,
+  Logger,
+  Capabilities,
+} from '../../../../../src/core/server';
 import { addSpaceIdToPath } from '../../../spaces/common';
 import type { SpacesServiceStart } from '../../../spaces/server';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { AnonymousAuthenticationProvider } from '../authentication';
-import type { AuthorizationServiceSetup } from '../authorization';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
-
-export interface AnonymousAccessServiceSetup {
-  readonly isAnonymousAccessEnabled: boolean;
-}
 
 export interface AnonymousAccessServiceStart {
   readonly isAnonymousAccessEnabled: boolean;
   // We cannot use `ReadonlyMap` just yet: https://github.com/microsoft/TypeScript/issues/16840
   readonly accessURLParameters: Readonly<Map<string, string>> | null;
-  isSavedObjectTypeAccessibleAnonymously: (
-    request: KibanaRequest,
-    savedObjectType: string
-  ) => Promise<boolean>;
+  getCapabilities: (request: KibanaRequest) => Promise<Capabilities>;
 }
 
 interface AnonymousAccessServiceStartParams {
-  authz: Pick<AuthorizationServiceSetup, 'actions' | 'checkSavedObjectsPrivilegesWithRequest'>;
   basePath: IBasePath;
+  capabilities: CapabilitiesStart;
   spaces?: SpacesServiceStart;
 }
+
+const DEFAULT_CAPABILITIES: Capabilities = { navLinks: {}, management: {}, catalogue: {} };
 
 /**
  * Service that manages various aspects of the anonymous access.
  */
 export class AnonymousAccessService {
+  /**
+   * Indicates whether anonymous access is enabled.
+   */
+  private isAnonymousAccessEnabled = false;
+
   constructor(private readonly logger: Logger, private readonly getConfig: () => ConfigType) {}
 
-  setup(): AnonymousAccessServiceSetup {
-    return {
-      isAnonymousAccessEnabled: this.isAnonymousAccessEnabled(),
-    };
+  setup() {
+    this.isAnonymousAccessEnabled = this.getConfig().authc.sortedProviders.some(
+      ({ type }) => type === AnonymousAuthenticationProvider.type
+    );
   }
 
   start({
-    authz,
     basePath,
+    capabilities,
     spaces,
   }: AnonymousAccessServiceStartParams): AnonymousAccessServiceStart {
     const config = this.getConfig();
@@ -62,15 +67,20 @@ export class AnonymousAccessService {
       !config.authc.selector.enabled && anonymousProvider === config.authc.sortedProviders[0];
 
     return {
-      isAnonymousAccessEnabled: this.isAnonymousAccessEnabled(),
+      isAnonymousAccessEnabled: this.isAnonymousAccessEnabled,
       accessURLParameters:
         anonymousProvider && !anonymousIsDefault
           ? Object.freeze(
               new Map([[AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER, anonymousProvider.name]])
             )
           : null,
-      isSavedObjectTypeAccessibleAnonymously: async (request, savedObjectType) => {
-        this.logger.debug(`Checking if Saved Object is accessible anonymously.`);
+      getCapabilities: async (request) => {
+        this.logger.debug('Retrieving capabilities of the anonymous service account.');
+
+        if (!this.isAnonymousAccessEnabled) {
+          this.logger.warn('Anonymous access is not enabled');
+          return DEFAULT_CAPABILITIES;
+        }
 
         // We should use credentials of the anonymous service account instead of credentials of the
         // current user to figure out if the specified Saved Object type can be accessed anonymously.
@@ -79,6 +89,9 @@ export class AnonymousAccessService {
           headers: anonymousAuthorizationHeader
             ? { authorization: anonymousAuthorizationHeader.toString() }
             : {},
+          // We should pretend that this request is authenticated to force authorization service to
+          // perform a privileges check and not to automatically disable all capabilities.
+          auth: { isAuthenticated: true },
           path: '/',
           route: { settings: {} },
           url: { href: '/' },
@@ -90,21 +103,18 @@ export class AnonymousAccessService {
           basePath.set(fakeAnonymousRequest, addSpaceIdToPath('/', spaceId));
         }
 
-        const checkPrivileges = authz.checkSavedObjectsPrivilegesWithRequest(fakeAnonymousRequest);
         try {
-          const { hasAllRequested } = await checkPrivileges(
-            authz.actions.savedObject.get(savedObjectType, 'get'),
-            spaces && spaceId ? spaces.spaceIdToNamespace(spaceId) : undefined
-          );
-          return hasAllRequested;
+          return await capabilities.resolveCapabilities(fakeAnonymousRequest);
         } catch (err) {
+          const errorMessage = getDetailedErrorMessage(err);
           if (getErrorStatusCode(err) === 401) {
-            this.logger.warn(
-              `Anonymous access may not be properly configured: ${getDetailedErrorMessage(err)}`
-            );
-            return false;
+            this.logger.warn(`Cannot authenticate anonymous service account: ${errorMessage}`);
+            return DEFAULT_CAPABILITIES;
           }
 
+          this.logger.error(
+            `Failed to retrieve anonymous service account capabilities: ${errorMessage}`
+          );
           throw err;
         }
       },
@@ -112,18 +122,7 @@ export class AnonymousAccessService {
   }
 
   /**
-   * Checks whether anonymous access is enabled.
-   * @private
-   */
-  private isAnonymousAccessEnabled() {
-    return this.getConfig().authc.sortedProviders.some(
-      ({ type }) => type === AnonymousAuthenticationProvider.type
-    );
-  }
-
-  /**
    * Creates authorization header that is used to authentication anonymous users.
-   * @private
    */
   private createAnonymousAuthorizationHeader() {
     const config = this.getConfig();

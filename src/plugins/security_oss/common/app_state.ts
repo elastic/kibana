@@ -17,5 +17,13 @@
  * under the License.
  */
 
-export { setupAppStateRoute } from './app_state';
-export { setupAnonymousAccessCapabilitiesRoute } from './anonymous_access_capabilities';
+/**
+ * Defines Security OSS application state.
+ */
+export interface AppState {
+  insecureClusterAlert: { displayAlert: boolean };
+  anonymousAccess: {
+    isEnabled: boolean;
+    accessURLParameters: Record<string, string> | null;
+  };
+}
