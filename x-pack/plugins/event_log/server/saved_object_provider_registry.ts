@@ -5,7 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import {
+  KibanaRequest,
+  SavedObjectsBulkGetObject,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 
 import { fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -13,7 +17,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 export type SavedObjectGetter = (
   ...params: Parameters<SavedObjectsClientContract['get']>
 ) => Promise<unknown>;
-export type SavedObjectProvider = (request: KibanaRequest) => SavedObjectGetter;
+
+export type SavedObjectBulkGetter = (
+  ...params: Parameters<SavedObjectsClientContract['bulkGet']>
+) => Promise<unknown>;
+
+export type SavedObjectProvider = (request: KibanaRequest) => SavedObjectBulkGetter;
 
 export class SavedObjectProviderRegistry {
   private providers = new Map<string, SavedObjectProvider>();
@@ -34,7 +43,7 @@ export class SavedObjectProviderRegistry {
     this.providers.set(type, provider);
   }
 
-  public getProvidersClient(request: KibanaRequest): SavedObjectGetter {
+  public getProvidersClient(request: KibanaRequest): SavedObjectBulkGetter {
     if (!this.defaultProvider) {
       throw new Error(
         i18n.translate(
@@ -49,20 +58,23 @@ export class SavedObjectProviderRegistry {
     // `scopedProviders` is a cache of providers which are scoped t othe current request.
     // The client will only instantiate a provider on-demand and it will cache each
     // one to enable the request to reuse each provider.
-    const scopedProviders = new Map<string, SavedObjectGetter>();
+
+    // would be nice to have a simple version support in API:
+    // curl -X GET "localhost:9200/my-index-000001/_mget?pretty" -H 'Content-Type: application/json' -d' { "ids" : ["1", "2"] } '
+    const scopedProviders = new Map<string, SavedObjectBulkGetter>();
     const defaultGetter = this.defaultProvider(request);
-    return (type: string, id: string) => {
+    return (objects: SavedObjectsBulkGetObject[] | undefined) => {
       const getter = pipe(
-        fromNullable(scopedProviders.get(type)),
+        fromNullable(scopedProviders.get('objects')),
         getOrElse(() => {
-          const client = this.providers.has(type)
-            ? this.providers.get(type)!(request)
+          const client = this.providers.has(objects![0].type)
+            ? this.providers.get(objects![0].type)!(request)
             : defaultGetter;
-          scopedProviders.set(type, client);
+          scopedProviders.set(objects![0].type, client);
           return client;
         })
       );
-      return getter(type, id);
+      return getter(objects);
     };
   }
 }

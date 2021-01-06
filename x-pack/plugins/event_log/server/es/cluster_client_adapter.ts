@@ -303,6 +303,114 @@ export class ClusterClientAdapter {
     }
   }
 
+  public async queryEventsBySavedObjects(
+    index: string,
+    namespace: string | undefined,
+    type: string,
+    ids: string[],
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    { page, per_page: perPage, start, end, sort_field, sort_order }: FindOptionsType
+  ): Promise<QueryEventsBySavedObjectResult> {
+    const defaultNamespaceQuery = {
+      bool: {
+        must_not: {
+          exists: {
+            field: 'kibana.saved_objects.namespace',
+          },
+        },
+      },
+    };
+    const namedNamespaceQuery = {
+      term: {
+        'kibana.saved_objects.namespace': {
+          value: namespace,
+        },
+      },
+    };
+    const namespaceQuery = namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
+
+    const body = {
+      size: perPage,
+      from: (page - 1) * perPage,
+      sort: { [sort_field]: { order: sort_order } },
+      query: {
+        bool: {
+          must: reject(
+            [
+              {
+                nested: {
+                  path: 'kibana.saved_objects',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'kibana.saved_objects.rel': {
+                              value: SAVED_OBJECT_REL_PRIMARY,
+                            },
+                          },
+                        },
+                        {
+                          term: {
+                            'kibana.saved_objects.type': {
+                              value: type,
+                            },
+                          },
+                        },
+                        {
+                          terms: {
+                            // default maximum of 65,536 terms, configurable by index.max_terms_count
+                            'kibana.saved_objects.id': ids,
+                          },
+                        },
+                        namespaceQuery,
+                      ],
+                    },
+                  },
+                },
+              },
+              start && {
+                range: {
+                  '@timestamp': {
+                    gte: start,
+                  },
+                },
+              },
+              end && {
+                range: {
+                  '@timestamp': {
+                    lte: end,
+                  },
+                },
+              },
+            ],
+            isUndefined
+          ),
+        },
+      },
+    };
+
+    try {
+      const {
+        hits: { hits, total },
+      }: ESSearchResponse<unknown, {}> = await this.callEs('search', {
+        index,
+        track_total_hits: true,
+        body,
+      });
+      return {
+        page,
+        per_page: perPage,
+        total: total.value,
+        data: hits.map((hit) => hit._source) as IValidatedEvent[],
+      };
+    } catch (err) {
+      throw new Error(
+        `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
+      );
+    }
+  }
+
   // We have a common problem typing ES-DSL Queries
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async callEs<ESQueryResult = unknown>(operation: string, body?: any) {
