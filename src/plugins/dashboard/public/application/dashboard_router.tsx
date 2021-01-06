@@ -41,6 +41,7 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from '../services/core';
+import { DashboardNoMatch } from './listing/dashboard_no_match';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -77,6 +78,7 @@ export async function mountApp({
   const {
     navigation,
     savedObjects,
+    urlForwarding,
     data: dataStart,
     share: shareStart,
     embeddable: embeddableStart,
@@ -88,6 +90,7 @@ export async function mountApp({
     navigation,
     onAppLeave,
     savedObjects,
+    urlForwarding,
     usageCollection,
     core: coreStart,
     data: dataStart,
@@ -180,6 +183,10 @@ export async function mountApp({
     );
   };
 
+  const renderNoMatch = (routeProps: RouteComponentProps) => {
+    return <DashboardNoMatch history={routeProps.history} />;
+  };
+
   // make sure the index pattern list is up to date
   await dataStart.indexPatterns.clearCache();
 
@@ -202,9 +209,10 @@ export async function mountApp({
               render={renderDashboard}
             />
             <Route exact path={DashboardConstants.LANDING_PAGE_PATH} render={renderListingPage} />
-            <Route path="/">
+            <Route exact path="/">
               <Redirect to={DashboardConstants.LANDING_PAGE_PATH} />
             </Route>
+            <Route render={renderNoMatch} />
           </Switch>
         </HashRouter>
       </KibanaContextProvider>

@@ -141,7 +141,7 @@ export const getTopNavConfig = (
             stateTransfer.clearEditorState();
           }
           chrome.docTitle.change(savedVis.lastSavedTitle);
-          chrome.setBreadcrumbs(getEditBreadcrumbs(savedVis.lastSavedTitle));
+          chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
 
           if (id !== visualizationIdFromUrl) {
             history.replace({

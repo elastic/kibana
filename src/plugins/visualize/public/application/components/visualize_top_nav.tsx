@@ -80,7 +80,6 @@ const TopNav = ({
     },
     [visInstance.embeddableHandler]
   );
-  const stateTransfer = services.embeddable.getStateTransfer();
   const savedObjectsClient = services.savedObjects.client;
 
   const config = useMemo(() => {
@@ -96,7 +95,7 @@ const TopNav = ({
           visInstance,
           stateContainer,
           visualizationIdFromUrl,
-          stateTransfer,
+          stateTransfer: services.stateTransferService,
           savedObjectsClient,
           embeddableId,
         },
@@ -116,7 +115,6 @@ const TopNav = ({
     visualizationIdFromUrl,
     services,
     embeddableId,
-    stateTransfer,
     savedObjectsClient,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
@@ -147,7 +145,7 @@ const TopNav = ({
       if (
         originatingApp &&
         (hasUnappliedChanges || hasUnsavedChanges) &&
-        !stateTransfer.isTransferInProgress
+        !services.stateTransferService.isTransferInProgress
       ) {
         return actions.confirm(
           i18n.translate('visualize.confirmModal.confirmTextDescription', {
@@ -166,7 +164,7 @@ const TopNav = ({
     hasUnsavedChanges,
     hasUnappliedChanges,
     visualizeCapabilities.save,
-    stateTransfer.isTransferInProgress,
+    services.stateTransferService.isTransferInProgress,
   ]);
 
   useEffect(() => {
