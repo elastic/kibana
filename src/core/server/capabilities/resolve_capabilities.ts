@@ -23,7 +23,8 @@ import { KibanaRequest } from '../http';
 
 export type CapabilitiesResolver = (
   request: KibanaRequest,
-  applications: string[]
+  applications: string[],
+  useDefaultCapabilities: boolean
 ) => Promise<Capabilities>;
 
 export const getCapabilitiesResolver = (
@@ -31,16 +32,24 @@ export const getCapabilitiesResolver = (
   switchers: () => CapabilitiesSwitcher[]
 ): CapabilitiesResolver => async (
   request: KibanaRequest,
-  applications: string[]
+  applications: string[],
+  useDefaultCapabilities: boolean
 ): Promise<Capabilities> => {
-  return resolveCapabilities(capabilities(), switchers(), request, applications);
+  return resolveCapabilities(
+    capabilities(),
+    switchers(),
+    request,
+    applications,
+    useDefaultCapabilities
+  );
 };
 
 export const resolveCapabilities = async (
   capabilities: Capabilities,
   switchers: CapabilitiesSwitcher[],
   request: KibanaRequest,
-  applications: string[]
+  applications: string[],
+  useDefaultCapabilities: boolean
 ): Promise<Capabilities> => {
   const mergedCaps = cloneDeep({
     ...capabilities,
@@ -54,7 +63,7 @@ export const resolveCapabilities = async (
   });
   return switchers.reduce(async (caps, switcher) => {
     const resolvedCaps = await caps;
-    const changes = await switcher(request, resolvedCaps);
+    const changes = await switcher(request, resolvedCaps, useDefaultCapabilities);
     return recursiveApplyChanges(resolvedCaps, changes);
   }, Promise.resolve(mergedCaps));
 };

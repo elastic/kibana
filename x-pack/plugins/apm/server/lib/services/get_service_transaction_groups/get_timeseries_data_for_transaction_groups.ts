@@ -87,11 +87,6 @@ export async function getTimeseriesDataForTransactionGroups({
             size,
           },
           aggs: {
-            transaction_types: {
-              terms: {
-                field: TRANSACTION_TYPE,
-              },
-            },
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
