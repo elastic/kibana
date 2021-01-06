@@ -41,12 +41,19 @@ interface FieldSelectProps {
   'data-test-subj'?: string;
 }
 
-const isFieldTypeEnabled = (fieldRestrictions: string[], fieldType: string) =>
-  fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
-
 const defaultPlaceholder = i18n.translate('visTypeTimeseries.fieldSelect.selectFieldPlaceholder', {
   defaultMessage: 'Select field...',
 });
+
+const isFieldTypeEnabled = (fieldRestrictions: string[], fieldType: string) =>
+  fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
+
+const sortByLabel = (a: EuiComboBoxOptionOption<string>, b: EuiComboBoxOptionOption<string>) => {
+  const getNormalizedString = (option: EuiComboBoxOptionOption<string>) =>
+    (option.label || '').toLowerCase();
+
+  return getNormalizedString(a).localeCompare(getNormalizedString(b));
+};
 
 export function FieldSelect({
   type,
@@ -62,7 +69,7 @@ export function FieldSelect({
 }: FieldSelectProps) {
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = [];
   let newPlaceholder = placeholder;
-  const options: EuiComboBoxProps<string>['options'] = Object.values(
+  const groupedOptions: EuiComboBoxProps<string>['options'] = Object.values(
     (fields[indexPattern] || []).reduce<Record<string, EuiComboBoxOptionOption<string>>>(
       (acc, field) => {
         if (placeholder === field?.name) {
@@ -100,6 +107,16 @@ export function FieldSelect({
     )
   );
 
+  // sort groups
+  groupedOptions.sort(sortByLabel);
+
+  // sort items
+  groupedOptions.forEach((group) => {
+    if (Array.isArray(group.options)) {
+      group.options.sort(sortByLabel);
+    }
+  });
+
   if (type === METRIC_TYPES.COUNT) {
     return null;
   }
@@ -113,7 +130,7 @@ export function FieldSelect({
       data-test-subj={dataTestSubj}
       placeholder={newPlaceholder}
       isDisabled={disabled}
-      options={options}
+      options={groupedOptions}
       selectedOptions={selectedOptions}
       onChange={onChange}
       singleSelection={{ asPlainText: true }}
