@@ -11,6 +11,7 @@ import { pickKeys } from '../../../../../common/utils/pick_keys';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
+  environment?: string;
   traceId?: string;
   transactionId?: string;
   transactionName: string;
@@ -19,6 +20,7 @@ interface Props extends APMLinkExtendProps {
 
 export function TransactionDetailLink({
   serviceName,
+  environment,
   traceId,
   transactionId,
   transactionName,
@@ -41,6 +43,7 @@ export function TransactionDetailLink({
         transactionId,
         transactionName,
         transactionType,
+        environment: environment ?? urlParams.environment,
         ...persistedFilters,
       }}
       {...rest}

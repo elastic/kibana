@@ -6,6 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useUrlParams } from '../../../../../../../context/url_params_context/use_url_params';
+import {
+  ENVIRONMENT_ALL,
+  isEnvironmentEqualToQueryEnvironment,
+} from '../../../../../../../../common/environment_filter_values';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import {
   SPAN_NAME,
@@ -24,6 +29,17 @@ interface Props {
 }
 
 export function StickySpanProperties({ span, transaction }: Props) {
+  const {
+    urlParams: { environment },
+  } = useUrlParams();
+
+  const nextEnvironment = isEnvironmentEqualToQueryEnvironment(
+    transaction?.service.environment,
+    environment
+  )
+    ? environment
+    : ENVIRONMENT_ALL.value;
+
   const spanName = span.span.name;
   const transactionStickyProperties = transaction
     ? [
@@ -35,6 +51,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
           val: (
             <ServiceOrTransactionsOverviewLink
               serviceName={transaction.service.name}
+              environment={nextEnvironment}
             >
               {transaction.service.name}
             </ServiceOrTransactionsOverviewLink>
@@ -56,6 +73,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
               traceId={transaction.trace.id}
               transactionName={transaction.transaction.name}
               transactionType={transaction.transaction.type}
+              environment={nextEnvironment}
             >
               {transaction.transaction.name}
             </TransactionDetailLink>

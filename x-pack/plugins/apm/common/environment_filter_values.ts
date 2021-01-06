@@ -33,3 +33,13 @@ export const ENVIRONMENT_NOT_DEFINED = {
 export function getEnvironmentLabel(environment: string) {
   return environmentLabels[environment] || environment;
 }
+
+export function isEnvironmentEqualToQueryEnvironment(
+  environment?: string,
+  queryEnvironment?: string
+) {
+  const environmentToCheck = environment ?? ENVIRONMENT_NOT_DEFINED.value;
+  const queryEnvironmentToCheck = queryEnvironment ?? ENVIRONMENT_ALL.value;
+
+  return environmentToCheck === queryEnvironmentToCheck;
+}

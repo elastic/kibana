@@ -13,7 +13,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  isEnvironmentEqualToQueryEnvironment,
+} from '../../../../../common/environment_filter_values';
 import {
   asDuration,
   asPercent,
@@ -64,7 +67,17 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   {item.type === 'service' ? (
-                    <ServiceOverviewLink serviceName={item.serviceName}>
+                    <ServiceOverviewLink
+                      serviceName={item.serviceName}
+                      environment={
+                        isEnvironmentEqualToQueryEnvironment(
+                          item.environment,
+                          environment
+                        )
+                          ? environment
+                          : ENVIRONMENT_ALL.value
+                      }
+                    >
                       {item.name}
                     </ServiceOverviewLink>
                   ) : (

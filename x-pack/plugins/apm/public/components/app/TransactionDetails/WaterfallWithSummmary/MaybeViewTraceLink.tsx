@@ -7,6 +7,11 @@
 import React from 'react';
 import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import {
+  ENVIRONMENT_ALL,
+  isEnvironmentEqualToQueryEnvironment,
+} from '../../../../../common/environment_filter_values';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
@@ -18,6 +23,10 @@ export const MaybeViewTraceLink = ({
   transaction: ITransaction;
   waterfall: IWaterfall;
 }) => {
+  const {
+    urlParams: { environment },
+  } = useUrlParams();
+
   const viewFullTraceButtonLabel = i18n.translate(
     'xpack.apm.transactionDetails.viewFullTraceButtonLabel',
     {
@@ -69,6 +78,13 @@ export const MaybeViewTraceLink = ({
 
     // the user is viewing a zoomed in version of the trace. Link to the full trace
   } else {
+    const nextEnvironment = isEnvironmentEqualToQueryEnvironment(
+      rootTransaction?.service.environment,
+      environment
+    )
+      ? environment
+      : ENVIRONMENT_ALL.value;
+
     return (
       <EuiFlexItem grow={false}>
         <TransactionDetailLink
@@ -77,6 +93,7 @@ export const MaybeViewTraceLink = ({
           traceId={rootTransaction.trace.id}
           transactionName={rootTransaction.transaction.name}
           transactionType={rootTransaction.transaction.type}
+          environment={nextEnvironment}
         >
           <EuiButton iconType="apmTrace">{viewFullTraceButtonLabel}</EuiButton>
         </TransactionDetailLink>

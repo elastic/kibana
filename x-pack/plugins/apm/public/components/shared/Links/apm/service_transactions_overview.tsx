@@ -24,10 +24,12 @@ export function useServiceOrTransactionsOverviewHref(serviceName: string) {
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
+  environment?: string;
 }
 
 export function ServiceOrTransactionsOverviewLink({
   serviceName,
+  environment,
   ...rest
 }: Props) {
   const { urlParams } = useUrlParams();
@@ -35,7 +37,10 @@ export function ServiceOrTransactionsOverviewLink({
   return (
     <APMLink
       path={`/services/${serviceName}`}
-      query={pickKeys(urlParams as APMQueryParams, ...persistedFilters)}
+      query={{
+        ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
+        environment: environment ?? urlParams.environment,
+      }}
       {...rest}
     />
   );

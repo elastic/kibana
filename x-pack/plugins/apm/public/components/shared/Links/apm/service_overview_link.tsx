@@ -16,6 +16,7 @@ import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
 
 interface ServiceOverviewLinkProps extends APMLinkExtendProps {
   serviceName: string;
+  environment?: string;
 }
 
 const persistedFilters: Array<keyof APMQueryParams> = [
@@ -28,6 +29,7 @@ export function useServiceOverviewHref(serviceName: string) {
 
 export function ServiceOverviewLink({
   serviceName,
+  environment,
   ...rest
 }: ServiceOverviewLinkProps) {
   const { urlParams } = useUrlParams();
@@ -35,7 +37,10 @@ export function ServiceOverviewLink({
   return (
     <APMLink
       path={`/services/${serviceName}/overview`}
-      query={pickKeys(urlParams as APMQueryParams, ...persistedFilters)}
+      query={{
+        ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
+        environment: environment ?? urlParams.environment,
+      }}
       {...rest}
     />
   );

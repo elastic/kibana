@@ -6,6 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useUrlParams } from '../../../../../../context/url_params_context/use_url_params';
+import {
+  ENVIRONMENT_ALL,
+  isEnvironmentEqualToQueryEnvironment,
+} from '../../../../../../../common/environment_filter_values';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -20,9 +25,20 @@ interface Props {
 }
 
 export function FlyoutTopLevelProperties({ transaction }: Props) {
+  const {
+    urlParams: { environment },
+  } = useUrlParams();
+
   if (!transaction) {
     return null;
   }
+
+  const nextEnvironment = isEnvironmentEqualToQueryEnvironment(
+    transaction?.service.environment,
+    environment
+  )
+    ? environment
+    : ENVIRONMENT_ALL.value;
 
   const stickyProperties = [
     {
@@ -33,6 +49,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       val: (
         <ServiceOrTransactionsOverviewLink
           serviceName={transaction.service.name}
+          environment={nextEnvironment}
         >
           {transaction.service.name}
         </ServiceOrTransactionsOverviewLink>
@@ -51,6 +68,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           traceId={transaction.trace.id}
           transactionName={transaction.transaction.name}
           transactionType={transaction.transaction.type}
+          environment={nextEnvironment}
         >
           {transaction.transaction.name}
         </TransactionDetailLink>
