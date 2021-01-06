@@ -6,11 +6,11 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { sharedWorkpads, tick } from '../../test';
-import { share } from '../shareable';
+import { sharedWorkpads, tick } from '../test';
+import { share } from './shareable';
 
 // Mock the renderers within this test.
-jest.mock('../../supported_renderers');
+jest.mock('../supported_renderers');
 
 describe('Canvas Shareable Workpad API', () => {
   // Mock the AJAX load of the workpad.
