@@ -23,8 +23,8 @@ test('Loading state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Loading results'));
-  await userEvent.click(screen.getByText('Cancel'));
+  await userEvent.click(screen.getByLabelText('Loading'));
+  await userEvent.click(screen.getByText('Cancel session'));
 
   expect(onCancel).toBeCalled();
 });
@@ -37,8 +37,8 @@ test('Completed state', async () => {
     </Container>
   );
 
-  await userEvent.click(screen.getByLabelText('Results loaded'));
-  await userEvent.click(screen.getByText('Save'));
+  await userEvent.click(screen.getByLabelText('Loaded'));
+  await userEvent.click(screen.getByText('Save session'));
 
   expect(onSave).toBeCalled();
 });
@@ -52,7 +52,7 @@ test('Loading in the background state', async () => {
   );
 
   await userEvent.click(screen.getByLabelText('Loading results in the background'));
-  await userEvent.click(screen.getByText('Cancel'));
+  await userEvent.click(screen.getByText('Cancel session'));
 
   expect(onCancel).toBeCalled();
 });

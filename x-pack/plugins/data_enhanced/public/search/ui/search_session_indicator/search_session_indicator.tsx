@@ -157,7 +157,7 @@ const searchSessionIndicatorViewStateToProps: {
     },
     popover: {
       text: i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedText', {
-        defaultMessage: 'Results loaded',
+        defaultMessage: 'Loaded',
       }),
       primaryAction: SaveButton,
       secondaryAction: ViewAllSearchSessionsButton,
@@ -206,7 +206,7 @@ const searchSessionIndicatorViewStateToProps: {
     },
     popover: {
       text: i18n.translate('xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundText', {
-        defaultMessage: 'Results loaded',
+        defaultMessage: 'Loaded',
       }),
       primaryAction: ViewAllSearchSessionsButton,
     },
