@@ -18,6 +18,8 @@ export default function ({ getService }: FtrProviderContext) {
       filePath: path.join(__dirname, 'files_to_import', 'artificial_server_log'),
       indexName: 'user-import_1',
       createIndexPattern: false,
+      fieldTypeFilters: [ML_JOB_FIELD_TYPES.NUMBER, ML_JOB_FIELD_TYPES.DATE],
+      fieldNameFilters: ['clientip'],
       expected: {
         results: {
           title: 'artificial_server_log',
@@ -102,10 +104,12 @@ export default function ({ getService }: FtrProviderContext) {
             docCountFormatted: '19 (100%)',
           },
         ],
-        visibleMetricFieldsCount: 0,
-        totalMetricFieldsCount: 0,
-        populatedFieldsCount: 4,
-        totalFieldsCount: 4,
+        visibleMetricFieldsCount: 3,
+        totalMetricFieldsCount: 3,
+        populatedFieldsCount: 12,
+        totalFieldsCount: 12,
+        fieldTypeFiltersResultCount: 4,
+        fieldNameFiltersResultCount: 1,
       },
     },
   ];
@@ -149,6 +153,24 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
 
           await ml.testExecution.logTestStep(
+            `displays elements in the data visualizer table correctly`
+          );
+          await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
+
+          await ml.dataVisualizerIndexBased.assertVisibleMetricFieldsCount(
+            testData.expected.visibleMetricFieldsCount
+          );
+          await ml.dataVisualizerIndexBased.assertTotalMetricFieldsCount(
+            testData.expected.totalMetricFieldsCount
+          );
+          await ml.dataVisualizerIndexBased.assertVisibleFieldsCount(
+            testData.expected.totalFieldsCount
+          );
+          await ml.dataVisualizerIndexBased.assertTotalFieldsCount(
+            testData.expected.totalFieldsCount
+          );
+
+          await ml.testExecution.logTestStep(
             'displays details for metric fields and non-metric fields correctly'
           );
           await ml.dataVisualizerTable.ensureNumRowsPerPage(25);
@@ -169,6 +191,26 @@ export default function ({ getService }: FtrProviderContext) {
               fieldRow.exampleCount
             );
           }
+
+          await ml.testExecution.logTestStep('sets and resets field type filter correctly');
+          await ml.dataVisualizerTable.setFieldTypeFilter(
+            testData.fieldTypeFilters,
+            testData.expected.fieldTypeFiltersResultCount
+          );
+          await ml.dataVisualizerTable.removeFieldTypeFilter(
+            testData.fieldTypeFilters,
+            testData.expected.totalFieldsCount
+          );
+
+          await ml.testExecution.logTestStep('sets and resets field name filter correctly');
+          await ml.dataVisualizerTable.setFieldNameFilter(
+            testData.fieldNameFilters,
+            testData.expected.fieldNameFiltersResultCount
+          );
+          await ml.dataVisualizerTable.removeFieldNameFilter(
+            testData.fieldNameFilters,
+            testData.expected.totalFieldsCount
+          );
 
           await ml.testExecution.logTestStep('loads the import settings page');
           await ml.dataVisualizerFileBased.navigateToFileImport();
