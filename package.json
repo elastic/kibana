@@ -832,6 +832,7 @@
     "vinyl-fs": "^3.0.3",
     "wait-on": "^5.0.1",
     "watchpack": "^1.6.0",
+    "webdriverio": "^6.11.3",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^4.2.2",
