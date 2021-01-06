@@ -182,14 +182,54 @@ export const signalRulesAlertType = ({
       try {
         const inputIndex = await getInputIndex(services, version, index);
         const privileges = await checkPrivileges(services, inputIndex);
+        const timestampFields: string[] = params.timestampOverride
+          ? ['@timestamp', params.timestampOverride]
+          : ['@timestamp'];
+        const timestampFieldCaps = await services.scopedClusterClient.fieldCaps({
+          index,
+          fields: timestampFields,
+          allow_no_indices: false,
+          include_unmapped: true,
+        });
 
+        if (
+          params.timestampOverride != null &&
+          timestampFieldCaps?.body?.fields[params.timestampOverride]?.unmapped?.indices != null
+        ) {
+          // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
+          // partial failure
+          const errorString = `The following indices are missing the timestamp override field ${
+            params.timestampOverride
+          }: ${JSON.stringify(
+            timestampFieldCaps?.body?.fields[params.timestampOverride]?.unmapped?.indices
+          )}`;
+          logger.debug(buildRuleMessage(errorString));
+          await ruleStatusService.partialFailure(errorString);
+          wroteStatus = true;
+        } else if (
+          params.timestampOverride == null &&
+          timestampFieldCaps?.body?.fields['@timestamp']?.unmapped?.indices != null
+        ) {
+          // if there is no timestamp override and the unmapped array is not empty,
+          // partial failure
+          const errorString = `The following indices are missing the timestamp field "@timestamp": ${JSON.stringify(
+            timestampFieldCaps?.body?.fields['@timestamp']?.unmapped?.indices
+          )}`;
+          logger.debug(buildRuleMessage(errorString));
+          await ruleStatusService.partialFailure(errorString);
+          wroteStatus = true;
+        }
         const indexNames = Object.keys(privileges.index);
         const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
           indexNames,
           (indexName) => privileges.index[indexName].read
         );
 
-        if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
+        if (
+          !wroteStatus &&
+          indexesWithReadPrivileges.length > 0 &&
+          indexesWithNoReadPrivileges.length > 0
+        ) {
           // some indices have read privileges others do not.
           // set a partial failure status
           const errorString = `Missing required read permissions on indexes: ${JSON.stringify(
@@ -199,6 +239,7 @@ export const signalRulesAlertType = ({
           await ruleStatusService.partialFailure(errorString);
           wroteStatus = true;
         } else if (
+          !wroteStatus &&
           indexesWithReadPrivileges.length === 0 &&
           indexesWithNoReadPrivileges.length === indexNames.length
         ) {
