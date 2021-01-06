@@ -1,0 +1,29 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    // add all the folders containg files to be compiled
+  ],
+  "references": [
+    { "path": "../../../src/core/tsconfig.json" },
+    // add references to other TypeScript projects the plugin depends on
+
+    // requiredPlugins from ./kibana.json
+    { "path": "../licensing/tsconfig.json" },
+    // TODO { "path": "../../../src/plugins/data/tsconfig.json" },
+    // TODO { "path": "../encrypted_saved_objects/tsconfig.json" },
+
+    // optionalPlugins from ./kibana.json
+    // TODO { "path": "../security/tsconfig.json" },
+    // TODO { "path": "../features/tsconfig.json" },
+    // TODO { "path": "../cloud/tsconfig.json" },
+    { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    // TODO { "path": "../../../src/plugins/home/tsconfig.json" },
+  ]
+}
