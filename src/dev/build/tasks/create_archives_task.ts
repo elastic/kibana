@@ -99,6 +99,7 @@ export const CreateArchives: Task = {
     }
     log.debug('archive metrics:', metrics);
 
-    await CiStatsReporter.fromEnv(log).metrics(metrics);
+    // FLAKY: https://github.com/elastic/kibana/issues/87529
+    // await CiStatsReporter.fromEnv(log).metrics(metrics);
   },
 };
