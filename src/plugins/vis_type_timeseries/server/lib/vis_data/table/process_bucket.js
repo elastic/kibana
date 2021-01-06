@@ -23,7 +23,6 @@ import { getLastValue } from '../../../../common/get_last_value';
 import { first, get } from 'lodash';
 import { overwrite } from '../helpers';
 import { getActiveSeries } from '../helpers/get_active_series';
-import { createFieldsFetcher } from '../helpers/fields_fetcher';
 
 function trendSinceLastBucket(data) {
   if (data.length < 2) {
@@ -35,10 +34,8 @@ function trendSinceLastBucket(data) {
   return Number.isNaN(trend) ? 0 : trend;
 }
 
-export function processBucket(panel, req, searchStrategy, capabilities) {
+export function processBucket(panel, req, searchStrategy, capabilities, extractFields) {
   return async (bucket) => {
-    const extractFields = createFieldsFetcher(req, searchStrategy, capabilities);
-
     const series = await Promise.all(
       getActiveSeries(panel).map(async (series) => {
         const timeseries = get(bucket, `${series.id}.timeseries`);

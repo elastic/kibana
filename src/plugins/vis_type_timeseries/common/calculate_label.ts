@@ -37,15 +37,15 @@ const paths = [
   'positive_only',
 ];
 
-export function calculateLabel(
+export const extractFieldLabel = (fields: SanitizedFieldType[], name: string) => {
+  return fields.find((f) => f.name === name)?.label ?? name;
+};
+
+export const calculateLabel = (
   metric: MetricsItemsSchema,
   metrics: MetricsItemsSchema[] = [],
   fields: SanitizedFieldType[] = []
-): string {
-  const extractFieldLabel = (name: string) => {
-    return fields.find((f) => f.name === name)?.label ?? name;
-  };
-
+): string => {
   if (!metric) {
     return i18n.translate('visTypeTimeseries.calculateLabel.unknownLabel', {
       defaultMessage: 'Unknown',
@@ -82,7 +82,7 @@ export function calculateLabel(
   if (metric.type === 'positive_rate') {
     return i18n.translate('visTypeTimeseries.calculateLabel.positiveRateLabel', {
       defaultMessage: 'Counter Rate of {field}',
-      values: { field: extractFieldLabel(metric.field!) },
+      values: { field: extractFieldLabel(fields, metric.field!) },
     });
   }
   if (metric.type === 'static') {
@@ -126,7 +126,7 @@ export function calculateLabel(
     defaultMessage: '{lookupMetricType} of {metricField}',
     values: {
       lookupMetricType: lookup[metric.type],
-      metricField: extractFieldLabel(metric.field!),
+      metricField: extractFieldLabel(fields, metric.field!),
     },
   });
-}
+};

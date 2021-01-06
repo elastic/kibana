@@ -165,7 +165,7 @@ class TableVis extends Component {
         </th>
       );
     });
-    const label = model.pivot_label || model.pivot_id;
+    const label = visData.pivot_label || model.pivot_label || model.pivot_id;
     let sortIcon;
     if (sort.column === '_default_') {
       sortIcon = sort.order === 'asc' ? 'sortUp' : 'sortDown';
