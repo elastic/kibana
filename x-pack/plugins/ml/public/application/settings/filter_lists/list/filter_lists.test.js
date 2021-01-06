@@ -12,6 +12,19 @@ import { FilterLists } from './filter_lists';
 jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
+
+jest.mock('../../../components/help_menu', () => ({
+  HelpMenu: () => <div id="mockHelpMenu" />,
+}));
+
+jest.mock('../../../util/dependency_cache', () => ({
+  getDocLinks: () => ({
+    links: {
+      ml: { customRules: jest.fn() },
+    },
+  }),
+}));
+
 jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));

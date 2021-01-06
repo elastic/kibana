@@ -3,7 +3,7 @@
 exports[`should render with error 1`] = `
 <EuiFormRow
   describedByIds={Array []}
-  display="columnCompressed"
+  display="row"
   error={
     Array [
       "Must be between 0 and 20",
@@ -30,7 +30,7 @@ exports[`should render with error 1`] = `
 exports[`should render without error 1`] = `
 <EuiFormRow
   describedByIds={Array []}
-  display="columnCompressed"
+  display="row"
   error={Array []}
   fullWidth={false}
   hasChildLabel={true}

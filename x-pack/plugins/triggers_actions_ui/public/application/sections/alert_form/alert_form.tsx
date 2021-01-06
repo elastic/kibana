@@ -31,6 +31,7 @@ import {
   EuiNotificationBadge,
   EuiErrorBoundary,
   EuiToolTip,
+  EuiCallOut,
 } from '@elastic/eui';
 import { capitalize, isObject } from 'lodash';
 import { KibanaFeature } from '../../../../../features/public';
@@ -100,24 +101,71 @@ export function validateBaseProperties(alertObject: InitialAlert): ValidationRes
   if (!alertObject.alertTypeId) {
     errors.alertTypeId.push(
       i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredAlertTypeIdText', {
-        defaultMessage: 'Alert trigger is required.',
+        defaultMessage: 'Alert type is required.',
+      })
+    );
+  }
+  const emptyConnectorActions = alertObject.actions.find(
+    (actionItem) => /^\d+$/.test(actionItem.id) && Object.keys(actionItem.params).length > 0
+  );
+  if (emptyConnectorActions !== undefined) {
+    errors.actionConnectors.push(
+      i18n.translate('xpack.triggersActionsUI.sections.alertForm.error.requiredActionConnector', {
+        defaultMessage: 'Action connector for {actionTypeId} is required.',
+        values: { actionTypeId: emptyConnectorActions.actionTypeId },
       })
     );
   }
   return validationResult;
 }
 
-const hasErrors: (errors: IErrorObject) => boolean = (errors) =>
+export function getAlertErrors(
+  alert: Alert,
+  actionTypeRegistry: ActionTypeRegistryContract,
+  alertTypeModel: AlertTypeModel | null
+) {
+  const alertParamsErrors: IErrorObject = alertTypeModel
+    ? alertTypeModel.validate(alert.params).errors
+    : [];
+  const alertBaseErrors = validateBaseProperties(alert).errors as IErrorObject;
+  const alertErrors = {
+    ...alertParamsErrors,
+    ...alertBaseErrors,
+  } as IErrorObject;
+
+  const alertActionsErrors = alert.actions.reduce((prev, alertAction: AlertAction) => {
+    return {
+      ...prev,
+      [alertAction.id]: actionTypeRegistry
+        .get(alertAction.actionTypeId)
+        ?.validateParams(alertAction.params).errors,
+    };
+  }, {}) as Record<string, IErrorObject>;
+  return {
+    alertParamsErrors,
+    alertBaseErrors,
+    alertActionsErrors,
+    alertErrors,
+  };
+}
+
+export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
   !!Object.values(errors).find((errorList) => {
-    if (isObject(errorList)) return hasErrors(errorList as IErrorObject);
+    if (isObject(errorList)) return hasObjectErrors(errorList as IErrorObject);
     return errorList.length >= 1;
   });
 
 export function isValidAlert(
   alertObject: InitialAlert | Alert,
-  validationResult: IErrorObject
+  validationResult: IErrorObject,
+  actionsErrors: Record<string, IErrorObject>
 ): alertObject is Alert {
-  return !hasErrors(validationResult);
+  return (
+    !hasObjectErrors(validationResult) &&
+    Object.keys(actionsErrors).find((actionErrorsKey) =>
+      hasObjectErrors(actionsErrors[actionErrorsKey])
+    ) === undefined
+  );
 }
 
 function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
@@ -558,33 +606,42 @@ export const AlertForm = ({
       alertTypeModel &&
       alert.alertTypeId &&
       selectedAlertType ? (
-        <ActionForm
-          actions={alert.actions}
-          setHasActionsDisabled={setHasActionsDisabled}
-          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          messageVariables={selectedAlertType.actionVariables}
-          defaultActionGroupId={defaultActionGroupId}
-          isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
-            isActionGroupDisabledForActionType(selectedAlertType, actionGroupId, actionTypeId)
-          }
-          actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
-            actionGroup.id === selectedAlertType.recoveryActionGroup.id
-              ? {
-                  ...actionGroup,
-                  omitOptionalMessageVariables: true,
-                  defaultActionMessage: recoveredActionGroupMessage,
-                }
-              : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
-          )}
-          getDefaultActionParams={getDefaultActionParams}
-          setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
-          setActionGroupIdByIndex={(group: string, index: number) =>
-            setActionProperty('group', group, index)
-          }
-          setActions={setActions}
-          setActionParamsProperty={setActionParamsProperty}
-          actionTypeRegistry={actionTypeRegistry}
-        />
+        <>
+          {errors.actionConnectors.length >= 1 ? (
+            <Fragment>
+              <EuiSpacer />
+              <EuiCallOut color="danger" size="s" title={errors.actionConnectors} />
+              <EuiSpacer />
+            </Fragment>
+          ) : null}
+          <ActionForm
+            actions={alert.actions}
+            setHasActionsDisabled={setHasActionsDisabled}
+            setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
+            messageVariables={selectedAlertType.actionVariables}
+            defaultActionGroupId={defaultActionGroupId}
+            isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) =>
+              isActionGroupDisabledForActionType(selectedAlertType, actionGroupId, actionTypeId)
+            }
+            actionGroups={selectedAlertType.actionGroups.map((actionGroup) =>
+              actionGroup.id === selectedAlertType.recoveryActionGroup.id
+                ? {
+                    ...actionGroup,
+                    omitOptionalMessageVariables: true,
+                    defaultActionMessage: recoveredActionGroupMessage,
+                  }
+                : { ...actionGroup, defaultActionMessage: alertTypeModel?.defaultActionMessage }
+            )}
+            getDefaultActionParams={getDefaultActionParams}
+            setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
+            setActionGroupIdByIndex={(group: string, index: number) =>
+              setActionProperty('group', group, index)
+            }
+            setActions={setActions}
+            setActionParamsProperty={setActionParamsProperty}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        </>
       ) : null}
     </Fragment>
   );
@@ -801,6 +858,13 @@ export const AlertForm = ({
             </EuiFlexGroup>
           </EuiFormRow>
           <EuiSpacer />
+          {errors.alertTypeId.length >= 1 && alert.alertTypeId !== undefined ? (
+            <Fragment>
+              <EuiSpacer />
+              <EuiCallOut color="danger" size="s" title={errors.alertTypeId} />
+              <EuiSpacer />
+            </Fragment>
+          ) : null}
           {alertTypeNodes}
         </Fragment>
       ) : alertTypesIndex ? (
