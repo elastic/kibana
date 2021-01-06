@@ -417,7 +417,7 @@ export const AlertsList: React.FunctionComponent = () => {
         id="xpack.triggersActionsUI.sections.alertsList.refreshAlertsButtonLabel"
         defaultMessage="Refresh"
       />
-    </EuiButtonEmpty>
+    </EuiButtonEmpty>,
   ];
 
   const authorizedToModifySelectedAlerts = selectedIds.length
