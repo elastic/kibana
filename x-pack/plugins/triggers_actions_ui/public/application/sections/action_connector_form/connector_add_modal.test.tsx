@@ -7,7 +7,7 @@ import * as React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ConnectorAddModal } from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, ActionType } from '../../../types';
+import { ActionType, ConnectorValidationResult, GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
@@ -37,10 +37,10 @@ describe('connector_add_modal', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
