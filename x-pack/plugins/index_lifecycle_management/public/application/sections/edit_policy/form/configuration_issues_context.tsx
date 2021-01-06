@@ -9,7 +9,7 @@ import React, { FunctionComponent, createContext, useContext } from 'react';
 
 import { useFormData } from '../../../../shared_imports';
 
-import { isUsingDefaultRolloverPath, useRolloverPath } from '../constants';
+import { isUsingDefaultRolloverPath, isUsingCustomRolloverPath } from '../constants';
 
 export interface ConfigurationIssues {
   /**
@@ -33,14 +33,18 @@ const pathToHotPhaseSearchableSnapshot =
 
 export const ConfigurationIssuesProvider: FunctionComponent = ({ children }) => {
   const [formData] = useFormData({
-    watch: [pathToHotPhaseSearchableSnapshot, useRolloverPath, isUsingDefaultRolloverPath],
+    watch: [
+      pathToHotPhaseSearchableSnapshot,
+      isUsingCustomRolloverPath,
+      isUsingDefaultRolloverPath,
+    ],
   });
   const isUsingDefaultRollover = get(formData, isUsingDefaultRolloverPath);
-  const rolloverSwitchEnabled = get(formData, useRolloverPath);
+  const isUsingCustomRollover = get(formData, isUsingCustomRolloverPath);
   return (
     <ConfigurationIssuesContext.Provider
       value={{
-        isUsingRollover: isUsingDefaultRollover === false ? rolloverSwitchEnabled : true,
+        isUsingRollover: isUsingDefaultRollover === false ? isUsingCustomRollover : true,
         isUsingSearchableSnapshotInHotPhase:
           get(formData, pathToHotPhaseSearchableSnapshot) != null,
       }}
