@@ -41,7 +41,9 @@ const resizeToClipArea = async (
     const newWidth = width + left;
     const newHeight = height + top;
 
-    logger.debug(`Resizing browser viewport to: width=${width} height=${height} zoom=${zoom}`);
+    logger.debug(
+      `Resizing browser viewport to: width=${newWidth} height=${newHeight} zoom=${zoom}`
+    );
 
     await browser.setViewport(
       {
