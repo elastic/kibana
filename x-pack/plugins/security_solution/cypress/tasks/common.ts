@@ -66,7 +66,7 @@ export const reload = (afterReload: () => void) => {
 
 export const cleanKibana = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query`, {
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
     query: {
       bool: {
         filter: [
@@ -94,7 +94,7 @@ export const cleanKibana = () => {
     'POST',
     `${Cypress.env(
       'ELASTICSEARCH_URL'
-    )}/.lists-*,.items-*,.siem-signals-*/_delete_by_query?scroll_size=10000`,
+    )}/.lists-*,.items-*,.siem-signals-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
     {
       query: {
         match_all: {},
