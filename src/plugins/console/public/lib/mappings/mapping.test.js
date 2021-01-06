@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import '../../../application/models/sense_editor/sense_editor.test.mocks';
-import * as mappings from '../mappings';
+import '../../application/models/sense_editor/sense_editor.test.mocks';
+import * as mappings from './mappings';
 
 describe('Mappings', () => {
   beforeEach(() => {

@@ -17,28 +17,9 @@
  * under the License.
  */
 
-import { getContentType } from '../es';
-
-const APPLICATION_JSON = 'application/json';
-describe('Content type', () => {
-  test('body', () => {
-    const contentType = getContentType(
-      [
-        JSON.stringify({
-          foo: 'baz',
-        }),
-        JSON.stringify({
-          foo: 'bar',
-        }),
-      ].join('\n')
-    );
-
-    expect(contentType).toEqual(APPLICATION_JSON);
-  });
-
-  test('no body', () => {
-    const contentType = getContentType('');
-
-    expect(contentType).toBeUndefined();
-  });
-});
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/elastic-datemath'],
+  testEnvironment: 'jsdom',
+};
