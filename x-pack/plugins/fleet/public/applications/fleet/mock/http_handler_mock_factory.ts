@@ -239,7 +239,7 @@ export const composeHttpHandlerMocks = <
 >(
   handlerMocks: ApiHandlerMock[]
 ): ApiHandlerMock<R> => {
-  return (http: HttpStart) => {
+  return (http) => {
     const waitForApiHandlers: Array<MockedApi['waitForApi']> = [];
     const mockedApiInterfaces: MockedApi<R> = {
       async waitForApi() {
