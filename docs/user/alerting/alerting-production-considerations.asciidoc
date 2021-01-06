@@ -2,7 +2,7 @@
 [[alerting-production-considerations]]
 == Production considerations
 
-{kib} alerting run both alert checks and actions as persistent background tasks managed by the Task Manager. This has two major benefits:
+{kib} alerting run both alert checks and actions as persistent background tasks managed by the Kibana Task Manager. This has two major benefits:
 
 * *Persistence*: all task state and scheduling is stored in {es}, so if {kib} is restarted, alerts and actions will pick up where they left off.  Task definitions for alerts and actions are stored in the index specified by `xpack.task_manager.index` (defaults to `.kibana_task_manager`).  It is important to have at least 1 replica of this index for production deployments, since if you lose this index all scheduled alerts and actions are also lost.
 * *Scaling*: multiple {kib} instances can read from and update the same task queue in {es}, allowing the alerting and action load to be distributed across instances. In cases where a {kib} instance no longer has capacity to run alert checks or actions, capacity can be increased by adding additional {kib} instances.
