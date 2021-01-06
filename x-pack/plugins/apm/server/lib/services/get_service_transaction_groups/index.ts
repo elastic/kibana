@@ -80,6 +80,7 @@ export async function getServiceTransactionGroups({
       start,
       end,
       latencyAggregationType,
+      transactionType,
     }),
     totalTransactionGroups,
     isAggregationAccurate,
