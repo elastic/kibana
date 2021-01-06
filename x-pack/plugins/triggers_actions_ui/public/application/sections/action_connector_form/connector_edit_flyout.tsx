@@ -238,7 +238,7 @@ export const ConnectorEditFlyout = ({
     if (hasErrors) {
       setConnector(
         getConnectorWithInvalidatedFields(
-          connector as any,
+          connector,
           configErrors,
           secretsErrors,
           connectorBaseErrors
