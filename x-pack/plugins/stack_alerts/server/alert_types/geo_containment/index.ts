@@ -12,6 +12,8 @@ import {
   GeoContainmentInstanceState,
   GeoContainmentInstanceContext,
   getAlertType,
+  ActionGroupId,
+  RecoveryActionGroupId,
 } from './alert_type';
 
 interface RegisterParams {
@@ -25,6 +27,8 @@ export function register(params: RegisterParams) {
     GeoContainmentParams,
     GeoContainmentState,
     GeoContainmentInstanceState,
-    GeoContainmentInstanceContext
+    GeoContainmentInstanceContext,
+    typeof ActionGroupId,
+    typeof RecoveryActionGroupId
   >(getAlertType(logger));
 }

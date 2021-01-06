@@ -8,7 +8,12 @@ import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, Alert } from '../../../types';
+import {
+  ValidationResult,
+  Alert,
+  ConnectorValidationResult,
+  GenericValidationResult,
+} from '../../../types';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
 import AlertEdit from './alert_edit';
@@ -61,20 +66,19 @@ describe('alert_edit', () => {
       requiresAppContext: false,
     };
 
-    const actionTypeModel = {
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
 
     const alert: Alert = {
       id: 'ab5661e0-197e-45ee-b477-302d89193b5e',
