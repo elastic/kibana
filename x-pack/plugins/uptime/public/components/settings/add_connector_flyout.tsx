@@ -11,6 +11,8 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
 import { getConnectorsAction } from '../../state/alerts/alerts';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useFetcher } from '../../../../observability/public';
+import { fetchActionTypes } from '../../state/api/alerts';
 
 interface Props {
   focusInput: () => void;
@@ -19,6 +21,15 @@ interface Props {
 interface KibanaDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
+
+export const ALLOWED_ACTION_TYPES = [
+  '.slack',
+  '.pagerduty',
+  '.server-log',
+  '.index',
+  '.teams',
+  '.servicenow',
+];
 
 export const AddConnectorFlyout = ({ focusInput }: Props) => {
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -30,20 +41,26 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
 
   const dispatch = useDispatch();
 
+  const { data: actionTypes } = useFetcher(() => fetchActionTypes(), []);
+
   useEffect(() => {
     dispatch(getConnectorsAction.get());
-    focusInput();
-  }, [addFlyoutVisible, dispatch, focusInput]);
+  }, [addFlyoutVisible, dispatch]);
 
   const ConnectorAddFlyout = useMemo(
     () =>
       getAddConnectorFlyout({
         consumer: 'uptime',
-        // actionTypes: ['.slack'],
-        onClose: () => setAddFlyoutVisibility(false),
+        actionTypes: (actionTypes ?? []).filter((actionType) =>
+          ALLOWED_ACTION_TYPES.includes(actionType.id)
+        ),
+        onClose: () => {
+          setAddFlyoutVisibility(false);
+          focusInput();
+        },
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [actionTypes]
   );
 
   return (
