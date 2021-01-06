@@ -3,6 +3,7 @@ package builds
 import addSlackNotifications
 import dependsOn
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
+import jetbrains.buildServer.configs.kotlin.v2019_2.DslContext
 import jetbrains.buildServer.configs.kotlin.v2019_2.FailureAction
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.schedule
 
@@ -18,7 +19,7 @@ object HourlyCi : BuildType({
         hours = "*"
         minutes = "0"
       }
-      branchFilter = "refs/heads/master_teamcity"
+      branchFilter = "refs/heads/${DslContext.getParameter("projectBranch")}"
       triggerBuild = always()
       withPendingChangesOnly = true
     }

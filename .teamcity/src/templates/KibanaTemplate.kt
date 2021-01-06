@@ -4,6 +4,7 @@ import StandardAgents
 import co.elastic.teamcity.common.requireAgent
 import vcs.Kibana
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildStep
+import jetbrains.buildServer.configs.kotlin.v2019_2.DslContext
 import jetbrains.buildServer.configs.kotlin.v2019_2.ParameterDisplay
 import jetbrains.buildServer.configs.kotlin.v2019_2.Template
 import jetbrains.buildServer.configs.kotlin.v2019_2.buildFeatures.PullRequests
@@ -33,7 +34,7 @@ object KibanaTemplate : Template({
         authType = token {
           token = "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b"
         }
-        filterTargetBranch = "refs/heads/master_teamcity"
+        filterTargetBranch = "refs/heads/${DslContext.getParameter("projectBranch")}"
         filterAuthorRole = PullRequests.GitHubRoleFilter.MEMBER
       }
     }
