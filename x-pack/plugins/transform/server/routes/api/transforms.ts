@@ -544,14 +544,21 @@ const previewTransformHandler: RequestHandler<
         include_unmapped: false,
       });
 
+      const fieldNamesSet = new Set(Object.keys(fieldCapsResponse.body.fields));
+
       const fields = Object.entries(
-        fieldCapsResponse.body.fields as Record<string, Record<string, Record<string, any>>>
-      )
-        .filter(([fieldName]) => !fieldName.startsWith('_'))
-        .reduce((acc, [fieldName, fieldCaps]) => {
-          acc[fieldName] = { type: Object.values(fieldCaps)[0].type };
+        fieldCapsResponse.body.fields as Record<string, Record<string, { type: string }>>
+      ).reduce((acc, [fieldName, fieldCaps]) => {
+        const fieldDefinition = Object.values(fieldCaps)[0];
+        const isMetaField = fieldDefinition.type.startsWith('_');
+        const isKeywordDuplicate =
+          fieldName.endsWith('.keyword') && fieldNamesSet.has(fieldName.split('.keyword')[0]);
+        if (isMetaField || isKeywordDuplicate) {
           return acc;
-        }, {} as Record<string, { type: string }>);
+        }
+        acc[fieldName] = { ...fieldDefinition };
+        return acc;
+      }, {} as Record<string, { type: string }>);
 
       body.generated_dest_index.mappings.properties = fields;
     }
