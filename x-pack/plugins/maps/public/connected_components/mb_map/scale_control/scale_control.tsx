@@ -39,7 +39,6 @@ export class ScaleControl extends React.Component {
 
   componentWillUnmount() {
     this._isMounted = false;
-    this._updateScale.cancel();
     this.props.mbMap.off('move', this._updateScale);
   }
 
