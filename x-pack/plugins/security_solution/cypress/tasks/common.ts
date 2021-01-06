@@ -57,10 +57,9 @@ export const drop = (dropTarget: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
-export const reload = (afterReload: () => void) => {
+export const reload = () => {
   cy.reload();
   cy.contains('a', 'Security');
-  afterReload();
 };
 
 export const cleanKibana = () => {
