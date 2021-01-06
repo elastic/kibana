@@ -172,6 +172,20 @@ describe('deserializer and serializer', () => {
     expect(result.phases.warm!.actions.forcemerge).toBeUndefined();
   });
 
+  it('removes the index_codec option in the forcemerge action if it is disabled in the form', () => {
+    formInternal.phases.warm!.actions.forcemerge = {
+      max_num_segments: 22,
+      index_codec: 'best_compression',
+    };
+    formInternal._meta.hot.bestCompression = false;
+    formInternal._meta.warm.bestCompression = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.forcemerge!.index_codec).toBeUndefined();
+    expect(result.phases.warm!.actions.forcemerge!.index_codec).toBeUndefined();
+  });
+
   it('removes the readonly action if it is disabled in hot', () => {
     formInternal._meta.hot.readonlyEnabled = false;
 

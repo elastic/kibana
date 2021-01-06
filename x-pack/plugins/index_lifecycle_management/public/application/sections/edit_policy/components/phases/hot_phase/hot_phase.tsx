@@ -114,7 +114,7 @@ export const HotPhase: FunctionComponent = () => {
                         defaultMessage="Learn more"
                       />
                     }
-                    docPath="indices-rollover-index.html"
+                    docPath="ilm-rollover.html"
                   />
                 </p>
               </EuiTextColor>
