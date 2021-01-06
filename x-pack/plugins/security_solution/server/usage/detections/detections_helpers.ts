@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
-
 import {
-  LegacyAPICaller,
+  ElasticsearchClient,
   SavedObjectsClientContract,
   KibanaRequest,
+  SearchResponse,
 } from '../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../ml/server';
 import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
@@ -20,6 +19,26 @@ import { isSecurityJob } from '../../../common/machine_learning/is_security_job'
 interface DetectionsMetric {
   isElastic: boolean;
   isEnabled: boolean;
+}
+
+interface RuleSearchBody {
+  query: {
+    bool: {
+      filter: {
+        term: { [key: string]: string };
+      };
+    };
+  };
+}
+interface RuleSearchParams {
+  body: RuleSearchBody;
+  filterPath: string[];
+  ignoreUnavailable: boolean;
+  index: string;
+  size: number;
+}
+interface RuleSearchResult {
+  alert: { enabled: boolean; tags: string[] };
 }
 
 const isElasticRule = (tags: string[]) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
@@ -135,10 +154,10 @@ const updateMlJobsUsage = (jobMetric: DetectionsMetric, usage: MlJobsUsage): MlJ
 
 export const getRulesUsage = async (
   index: string,
-  callCluster: LegacyAPICaller
+  esClient: ElasticsearchClient
 ): Promise<DetectionRulesUsage> => {
   let rulesUsage: DetectionRulesUsage = initialRulesUsage;
-  const ruleSearchOptions: SearchParams = {
+  const ruleSearchOptions: RuleSearchParams = {
     body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
     filterPath: ['hits.hits._source.alert.enabled', 'hits.hits._source.alert.tags'],
     ignoreUnavailable: true,
@@ -147,8 +166,7 @@ export const getRulesUsage = async (
   };
 
   try {
-    const ruleResults = await callCluster<{ alert: { enabled: boolean; tags: string[] } }>(
-      'search',
+    const { body: ruleResults } = await esClient.search<SearchResponse<RuleSearchResult>>(
       ruleSearchOptions
     );
 
