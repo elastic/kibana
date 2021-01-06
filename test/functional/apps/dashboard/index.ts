@@ -127,7 +127,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       before(async () => {
         await loadLogstash();
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:chartsLibrary': true,
+          'visualization:visualize:legacyChartsLibrary': false,
         });
         await browser.refresh();
       });
@@ -135,7 +135,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       after(async () => {
         await unloadLogstash();
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:chartsLibrary': false,
+          'visualization:visualize:legacyChartsLibrary': true,
         });
         await browser.refresh();
       });

@@ -99,7 +99,7 @@ export function VisualizePageProvider({ getService, getPageObjects }: FtrProvide
     }
 
     public async clickRefresh() {
-      if (await visChart.isNewChartUiEnabled()) {
+      if (await visChart.isNewChartsLibraryEnabled()) {
         await elasticChart.setNewChartUiDebugFlag();
       }
       await queryBar.clickQuerySubmitButton();
