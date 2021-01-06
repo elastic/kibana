@@ -550,7 +550,7 @@ const previewTransformHandler: RequestHandler<
         fieldCapsResponse.body.fields as Record<string, Record<string, { type: string }>>
       ).reduce((acc, [fieldName, fieldCaps]) => {
         const fieldDefinition = Object.values(fieldCaps)[0];
-        const isMetaField = fieldDefinition.type.startsWith('_');
+        const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';
         const isKeywordDuplicate =
           fieldName.endsWith('.keyword') && fieldNamesSet.has(fieldName.split('.keyword')[0]);
         if (isMetaField || isKeywordDuplicate) {

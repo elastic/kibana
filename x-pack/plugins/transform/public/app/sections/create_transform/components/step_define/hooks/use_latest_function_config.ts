@@ -37,7 +37,7 @@ function getOptions(indexPattern: StepDefineFormProps['searchItems']['indexPatte
   const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = [];
   const sortFieldOptions: Array<EuiComboBoxOptionOption<string>> = [];
 
-  const ignoreFieldNames = new Set(['_id', '_index', '_type']);
+  const ignoreFieldNames = new Set(['_source', '_type', '_index', '_id', '_version', '_score']);
 
   for (const field of indexPattern.fields) {
     if (ignoreFieldNames.has(field.name)) {
