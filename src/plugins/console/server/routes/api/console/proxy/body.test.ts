@@ -18,12 +18,11 @@
  */
 import { getProxyRouteHandlerDeps } from './mocks';
 
-import expect from '@kbn/expect';
 import { Readable } from 'stream';
 
-import { kibanaResponseFactory } from '../../../../../../../../core/server';
-import { createHandler } from '../create_handler';
-import * as requestModule from '../../../../../lib/proxy_request';
+import { kibanaResponseFactory } from '../../../../../../../core/server';
+import { createHandler } from './create_handler';
+import * as requestModule from '../../../../lib/proxy_request';
 import { createResponseStub } from './stubs';
 
 describe('Console Proxy Route', () => {
@@ -62,38 +61,38 @@ describe('Console Proxy Route', () => {
     describe('GET request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('GET', '/', 'foobar');
-        expect(await readStream(payload)).to.be('foobar');
+        expect(await readStream(payload)).toBe('foobar');
       });
     });
     describe('POST request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('POST', '/', 'foobar');
-        expect(await readStream(payload)).to.be('foobar');
+        expect(await readStream(payload)).toBe('foobar');
       });
     });
     describe('PUT request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('PUT', '/', 'foobar');
-        expect(await readStream(payload)).to.be('foobar');
+        expect(await readStream(payload)).toBe('foobar');
       });
     });
     describe('DELETE request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('DELETE', '/', 'foobar');
-        expect(await readStream(payload)).to.be('foobar');
+        expect(await readStream(payload)).toBe('foobar');
       });
     });
     describe('HEAD request', () => {
       it('returns the status code and text', async () => {
         const { payload } = await request('HEAD', '/');
-        expect(typeof payload).to.be('string');
-        expect(payload).to.be('200 - OK');
+        expect(typeof payload).toBe('string');
+        expect(payload).toBe('200 - OK');
       });
       describe('mixed casing', () => {
         it('returns the status code and text', async () => {
           const { payload } = await request('HeAd', '/');
-          expect(typeof payload).to.be('string');
-          expect(payload).to.be('200 - OK');
+          expect(typeof payload).toBe('string');
+          expect(payload).toBe('200 - OK');
         });
       });
     });
