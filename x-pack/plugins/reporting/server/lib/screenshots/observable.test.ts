@@ -243,10 +243,10 @@ describe('Screenshot Observable Pipeline', () => {
                       "attributes": Object {},
                       "position": Object {
                         "boundingClientRect": Object {
-                          "height": 200,
+                          "height": 100,
                           "left": 0,
                           "top": 0,
-                          "width": 200,
+                          "width": 100,
                         },
                         "scroll": Object {
                           "x": 0,
@@ -271,10 +271,10 @@ describe('Screenshot Observable Pipeline', () => {
                       "attributes": Object {},
                       "position": Object {
                         "boundingClientRect": Object {
-                          "height": 200,
+                          "height": 100,
                           "left": 0,
                           "top": 0,
-                          "width": 200,
+                          "width": 100,
                         },
                         "scroll": Object {
                           "x": 0,
