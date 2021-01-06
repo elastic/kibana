@@ -17,7 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DEFAULT_MAX_BUCKETS_LIMIT } from '../../../../../common/constants';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
+import { ValidatedNumberInput } from '../../../../components/validated_number_input';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { getTermsFields } from '../../../../index_pattern_util';
@@ -155,10 +157,49 @@ export class JoinExpression extends Component {
     );
   }
 
+  _renderRightFieldSizeInput() {
+    if (!this.props.rightValue || !this.props.leftValue) {
+      return null;
+    }
+
+    return (
+      <ValidatedNumberInput
+        initialValue={
+          this.props.rightSize !== undefined ? this.props.rightSize : DEFAULT_MAX_BUCKETS_LIMIT
+        }
+        min={1}
+        max={DEFAULT_MAX_BUCKETS_LIMIT}
+        onChange={this.props.onRightSizeChange}
+        label={i18n.translate('xpack.maps.layerPanel.joinExpression.rightSizeLabel', {
+          defaultMessage: 'Right size',
+        })}
+        helpText={i18n.translate('xpack.maps.layerPanel.joinExpression.rightSizeHelpText', {
+          defaultMessage: 'Right field term limit.',
+        })}
+      />
+    );
+  }
+
   _getExpressionValue() {
-    const { leftSourceName, leftValue, rightSourceName, rightValue } = this.props;
+    const { leftSourceName, leftValue, rightSourceName, rightValue, rightSize } = this.props;
     if (leftSourceName && leftValue && rightSourceName && rightValue) {
-      return `${leftSourceName}:${leftValue} with ${rightSourceName}:${rightValue}`;
+      return i18n.translate('xpack.maps.layerPanel.joinExpression.value', {
+        defaultMessage:
+          '{leftSourceName}:{leftValue} with {sizeFragment} {rightSourceName}:{rightValue}',
+        values: {
+          leftSourceName,
+          leftValue,
+          sizeFragment:
+            rightSize !== undefined
+              ? i18n.translate('xpack.maps.layerPanel.joinExpression.sizeFragment', {
+                  defaultMessage: 'top {rightSize} terms from',
+                  values: { rightSize },
+                })
+              : '',
+          rightSourceName,
+          rightValue,
+        },
+      });
     }
 
     return i18n.translate('xpack.maps.layerPanel.joinExpression.selectPlaceholder', {
@@ -213,6 +254,8 @@ export class JoinExpression extends Component {
           {this._renderRightSourceSelect()}
 
           {this._renderRightFieldSelect()}
+
+          {this._renderRightFieldSizeInput()}
         </div>
       </EuiPopover>
     );
@@ -240,8 +283,10 @@ JoinExpression.propTypes = {
 
   // Right field props
   rightValue: PropTypes.string,
+  rightSize: PropTypes.number,
   rightFields: PropTypes.array,
   onRightFieldChange: PropTypes.func.isRequired,
+  onRightSizeChange: PropTypes.func.isRequired,
 };
 
 function getSelectFieldPlaceholder() {
