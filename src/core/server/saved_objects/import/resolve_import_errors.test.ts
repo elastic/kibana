@@ -89,18 +89,18 @@ describe('#importSavedObjectsFromStream', () => {
 
   const setupOptions = (
     retries: SavedObjectsImportRetry[] = [],
-    createNewCopies: boolean = false
+    createNewCopies: boolean = false,
+    getTypeImpl: (name: string) => any = (type: string) =>
+      ({
+        // other attributes aren't needed for the purposes of injecting metadata
+        management: { icon: `${type}-icon` },
+      } as any)
   ): SavedObjectsResolveImportErrorsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();
-    typeRegistry.getType.mockImplementation(
-      (type: string) =>
-        ({
-          // other attributes aren't needed for the purposes of injecting metadata
-          management: { icon: `${type}-icon` },
-        } as any)
-    );
+    typeRegistry.getType.mockImplementation(getTypeImpl);
+
     return {
       readStream,
       objectLimit,
@@ -122,15 +122,16 @@ describe('#importSavedObjectsFromStream', () => {
     return { type: 'foo-type', id, overwrite, replaceReferences };
   };
   const createObject = (
-    references?: SavedObjectReference[]
+    references?: SavedObjectReference[],
+    { type = 'foo-type', title = 'some-title' }: { type?: string; title?: string } = {}
   ): SavedObject<{
     title: string;
   }> => {
     return {
-      type: 'foo-type',
+      type,
       id: uuidv4(),
       references: references || [],
-      attributes: { title: 'some-title' },
+      attributes: { title },
     };
   };
   const createError = (): SavedObjectsImportError => {
@@ -267,7 +268,7 @@ describe('#importSavedObjectsFromStream', () => {
       expect(getImportIdMapForRetries).toHaveBeenCalledWith(getImportIdMapForRetriesParams);
     });
 
-    test('splits objects to ovewrite from those not to overwrite', async () => {
+    test('splits objects to overwrite from those not to overwrite', async () => {
       const retries = [createRetry()];
       const options = setupOptions(retries);
       const collectedObjects = [createObject()];
@@ -489,6 +490,55 @@ describe('#importSavedObjectsFromStream', () => {
         { ...error2, meta: { ...error2.meta, icon: `${error2.type}-icon` }, overwrite: true },
       ];
       expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
+    });
+
+    test('uses `type.management.getTitle` to resolve the titles', async () => {
+      const obj1 = createObject([], { type: 'foo' });
+      const obj2 = createObject([], { type: 'bar', title: 'bar-title' });
+
+      const options = setupOptions([], false, (type) => {
+        if (type === 'foo') {
+          return {
+            management: { getTitle: () => 'getTitle-foo', icon: `${type}-icon` },
+          };
+        }
+        return {
+          management: { icon: `${type}-icon` },
+        };
+      });
+
+      getMockFn(checkConflicts).mockResolvedValue({
+        errors: [],
+        filteredObjects: [],
+        importIdMap: new Map(),
+        pendingOverwrites: new Set(),
+      });
+      getMockFn(createSavedObjects)
+        .mockResolvedValueOnce({ errors: [], createdObjects: [obj1, obj2] })
+        .mockResolvedValueOnce({ errors: [], createdObjects: [] });
+
+      const result = await resolveSavedObjectsImportErrors(options);
+      // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
+      const successResults = [
+        {
+          type: obj1.type,
+          id: obj1.id,
+          overwrite: true,
+          meta: { title: 'getTitle-foo', icon: `${obj1.type}-icon` },
+        },
+        {
+          type: obj2.type,
+          id: obj2.id,
+          overwrite: true,
+          meta: { title: 'bar-title', icon: `${obj2.type}-icon` },
+        },
+      ];
+
+      expect(result).toEqual({
+        success: true,
+        successCount: 2,
+        successResults,
+      });
     });
 
     test('accumulates multiple errors', async () => {
