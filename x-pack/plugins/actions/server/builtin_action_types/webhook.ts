@@ -176,8 +176,14 @@ export async function executor(
     const { error } = result;
 
     if (error.response) {
-      const { status, statusText, headers: responseHeaders } = error.response;
-      const message = `[${status}] ${statusText}`;
+      const {
+        status,
+        statusText,
+        headers: responseHeaders,
+        data: { message: responseMessage },
+      } = error.response;
+      const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
+      const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
       logger.error(`error on ${actionId} webhook event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
@@ -195,6 +201,10 @@ export async function executor(
         );
       }
       return errorResultInvalid(actionId, message);
+    } else if (error.isAxiosError) {
+      const message = `[${error.code}] ${error.message}`;
+      logger.error(`error on ${actionId} webhook event: ${message}`);
+      return errorResultRequestFailed(actionId, message);
     }
 
     logger.error(`error on ${actionId} webhook action: unexpected error`);
@@ -213,6 +223,21 @@ function errorResultInvalid(
 ): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
     defaultMessage: 'error calling webhook, invalid response',
+  });
+  return {
+    status: 'error',
+    message: errMessage,
+    actionId,
+    serviceMessage,
+  };
+}
+
+function errorResultRequestFailed(
+  actionId: string,
+  serviceMessage: string
+): ActionTypeExecutorResult<unknown> {
+  const errMessage = i18n.translate('xpack.actions.builtin.webhook.requestFailedErrorMessage', {
+    defaultMessage: 'error calling webhook, request failed',
   });
   return {
     status: 'error',
