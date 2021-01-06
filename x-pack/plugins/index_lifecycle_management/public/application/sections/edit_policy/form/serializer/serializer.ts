@@ -56,6 +56,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         if (_meta.hot.isUsingDefaultRollover) {
           hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
         } else {
+          // We are using user-defined, custom rollover settings.
           if (updatedPolicy.phases.hot!.actions.rollover?.max_age) {
             hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot.customRollover.maxAgeUnit}`;
           } else {
