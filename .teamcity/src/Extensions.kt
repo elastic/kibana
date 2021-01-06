@@ -39,7 +39,9 @@ val testArtifactRules = """
 fun BuildType.addTestSettings() {
   artifactRules += "\n" + testArtifactRules
   steps {
-    // failedTestReporter() // TODO add this back later
+    if(isReportingEnabled()) {
+       failedTestReporter()
+    }
   }
   features {
     junit()

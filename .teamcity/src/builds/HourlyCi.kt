@@ -1,6 +1,7 @@
 package builds
 
 import addSlackNotifications
+import areTriggersEnabled
 import dependsOn
 import getProjectBranch
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
@@ -12,6 +13,7 @@ object HourlyCi : BuildType({
   name = "Hourly CI"
   description = "Runs everything in CI, hourly"
   type = Type.COMPOSITE
+  paused = !areTriggersEnabled()
 
   triggers {
     schedule {

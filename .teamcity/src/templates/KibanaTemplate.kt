@@ -3,6 +3,7 @@ package templates
 import StandardAgents
 import co.elastic.teamcity.common.requireAgent
 import getProjectBranch
+import isReportingEnabled
 import vcs.Kibana
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildStep
 import jetbrains.buildServer.configs.kotlin.v2019_2.ParameterDisplay
@@ -73,10 +74,19 @@ object KibanaTemplate : Template({
     // password("env.CI_STATS_HOST", "%vault:kibana-issues:secret/kibana-issues/dev/kibana_ci_stats!/api_host%", display = ParameterDisplay.HIDDEN)
 
     // TODO remove this once we are able to pull it out of vault and put it closer to the things that require it
-//    password("env.GITHUB_TOKEN", "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b", display = ParameterDisplay.HIDDEN)
-//    password("env.KIBANA_CI_REPORTER_KEY", "", display = ParameterDisplay.HIDDEN)
-//    password("env.KIBANA_CI_REPORTER_KEY_BASE64", "credentialsJSON:86878779-4cf7-4434-82af-5164a1b992fb", display = ParameterDisplay.HIDDEN)
-
+    if(isReportingEnabled()) {
+      password(
+        "env.GITHUB_TOKEN",
+        "credentialsJSON:07d22002-12de-4627-91c3-672bdb23b55b",
+        display = ParameterDisplay.HIDDEN
+      )
+      password("env.KIBANA_CI_REPORTER_KEY", "", display = ParameterDisplay.HIDDEN)
+      password(
+        "env.KIBANA_CI_REPORTER_KEY_BASE64",
+        "credentialsJSON:86878779-4cf7-4434-82af-5164a1b992fb",
+        display = ParameterDisplay.HIDDEN
+      )
+    }
   }
 
   steps {

@@ -1,6 +1,7 @@
 package builds
 
 import addSlackNotifications
+import areTriggersEnabled
 import builds.default.DefaultBuild
 import builds.default.DefaultSavedObjectFieldMetrics
 import builds.oss.OssBuild
@@ -16,14 +17,14 @@ object BaselineCi : BuildType({
   name = "Baseline CI"
   description = "Runs builds, saved object field metrics for every commit"
   type = Type.COMPOSITE
-  paused = true
+  paused = !areTriggersEnabled()
 
   templates(KibanaTemplate)
 
   triggers {
     vcs {
       branchFilter = "refs/heads/${getProjectBranch()}"
-//      perCheckinTriggering = true // TODO re-enable this later, it wreaks havoc when I merge upstream
+      perCheckinTriggering = areTriggersEnabled()
     }
   }
 
