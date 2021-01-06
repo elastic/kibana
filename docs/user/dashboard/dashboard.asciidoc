@@ -14,7 +14,7 @@ image:images/Dashboard_example.png[Example dashboard]
 
 [[tsvb]]
 
-Dashboards support many types of panels and editors to create panels, including:
+Dashboards support many types of panels, and several editors that you can use to create panels.
 
 [cols="2"]
 |===
@@ -23,7 +23,7 @@ Dashboards support many types of panels and editors to create panels, including:
 | The drag and drop editor that creates visualizations of your data. *Lens* is recommended for most users.
 
 | <<maps,Maps>>
-| Displays your geographical data.
+| Create beautiful displays of your geographical data.
 
 | <<add-panels-with-advanced-editors,Advanced editors>>
 | Manually create panels of your data with the *TSVB*, *Vega*, and *Timelion* editors.
@@ -46,7 +46,7 @@ Dashboards support many types of panels and editors to create panels, including:
 [[create-the-dashboard]]
 == Create dashboards
 
-Dashboards provide you with the space where you add panels of your data to create a story. You can begin with an empty dashboard, or open an existing dashboard. 
+Dashboards provide you with the space where you add panels of your data.
 
 [float]
 === Minimum requirements
@@ -64,20 +64,17 @@ to create or save dashboards. The options to create and save dashboards are not 
 refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [float]
-=== Start with an empty dashboard
+=== Open the dashboard
+
+Begin with an empty dashboard, or open an existing dashboard. 
 
 . Open the main menu, then click *Dashboard*.
 
-. Click *Create dashboard*.
+. Choose one of the following options:
 
-[float]
-=== Open an existing dashboard
+* To start with an empty dashboard, click *Create dashboard*.
 
-To build and add to a dashboard that's already been started, open an existing dashboard.
-
-. Open the main menu, then click *Dashboard*.
-
-. Click the dashboard *Title* you want to open.
+* To open an existing dashboard, Click the dashboard *Title* you want to open.
 
 [float]
 === Create panels
