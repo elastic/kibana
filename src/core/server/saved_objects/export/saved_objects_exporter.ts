@@ -131,7 +131,10 @@ export class SavedObjectsExporter {
     const bulkGetResult = await this.#savedObjectsClient.bulkGet(objects, { namespace });
     const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {
-      throw SavedObjectsExportError.objectFetchError('Error fetching objects', erroredObjects);
+      throw SavedObjectsExportError.objectFetchError(
+        'Error fetching objects to export',
+        erroredObjects
+      );
     }
     return bulkGetResult.saved_objects;
   }
