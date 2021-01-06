@@ -151,11 +151,6 @@ export interface SavedObjectsServiceSetup {
    * ```
    */
   registerType: (type: SavedObjectsType) => void;
-
-  /**
-   * Returns the maximum number of objects allowed for import or export operations.
-   */
-  getImportExportObjectLimit: () => number;
 }
 
 /**
@@ -350,7 +345,6 @@ export class SavedObjectsService
         }
         this.typeRegistry.registerType(type);
       },
-      getImportExportObjectLimit: () => this.config!.maxImportExportSize,
     };
   }
 
