@@ -5,7 +5,7 @@
  */
 import { isEqual } from 'lodash';
 import { Reducer } from 'react';
-import { ActionConnector, UserConfiguredActionConnector } from '../../../types';
+import { UserConfiguredActionConnector } from '../../../types';
 
 export type InitialConnector<Config, Secrets> = Partial<
   UserConfiguredActionConnector<Config, Secrets>
@@ -35,7 +35,10 @@ export type ConnectorReducerAction<Config, Secrets> =
     }
   | {
       command: CommandType<'setProperty'>;
-      payload: TPayload<ActionConnector, keyof ActionConnector>;
+      payload: TPayload<
+        UserConfiguredActionConnector<Config, Secrets>,
+        keyof UserConfiguredActionConnector<Config, Secrets>
+      >;
     }
   | {
       command: CommandType<'setConfigProperty'>;
@@ -74,7 +77,10 @@ export const createConnectorReducer = <Config, Secrets>() => <
       }
     }
     case 'setProperty': {
-      const { key, value } = action.payload as TPayload<ActionConnector, keyof ActionConnector>;
+      const { key, value } = action.payload as TPayload<
+        UserConfiguredActionConnector<Config, Secrets>,
+        keyof UserConfiguredActionConnector<Config, Secrets>
+      >;
       if (isEqual(connector[key], value)) {
         return state;
       } else {

@@ -18,7 +18,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  ActionConnector,
   IErrorObject,
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
@@ -29,7 +28,9 @@ import { useKibana } from '../../../common/lib/kibana';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorReducerAction } from './connector_reducer';
 
-export function validateBaseProperties(actionObject: ActionConnector) {
+export function validateBaseProperties<ConnectorConfig, ConnectorSecrets>(
+  actionObject: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>
+) {
   const validationResult = { errors: {} };
   const verrors = {
     name: new Array<string>(),
@@ -103,9 +104,16 @@ export const ActionConnectorForm = ({
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
 
-  const setActionProperty = <Key extends keyof ActionConnector>(
+  const setActionProperty = <
+    Key extends keyof UserConfiguredActionConnector<
+      Record<string, unknown>,
+      Record<string, unknown>
+    >
+  >(
     key: Key,
-    value: ActionConnector[Key] | null
+    value:
+      | UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>[Key]
+      | null
   ) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };

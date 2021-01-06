@@ -237,9 +237,8 @@ export const ConnectorEditFlyout = ({
   const onSaveClicked = async (closeAfterSave: boolean = true) => {
     if (hasErrors) {
       setConnector(
-        'connector',
         getConnectorWithInvalidatedFields(
-          connector,
+          connector as any,
           configErrors,
           secretsErrors,
           connectorBaseErrors

@@ -102,10 +102,7 @@ export const ConnectorAddModal = ({
   );
 
   const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
-    await createActionConnector({
-      http,
-      connector,
-    })
+    await createActionConnector({ http, connector })
       .then((savedConnector) => {
         if (toasts) {
           toasts.addSuccess(

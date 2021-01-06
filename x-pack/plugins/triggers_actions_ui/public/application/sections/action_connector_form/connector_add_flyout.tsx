@@ -83,7 +83,9 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
 
   const setActionProperty = <Key extends keyof ActionConnector>(
     key: Key,
-    value: ActionConnector[Key] | null
+    value:
+      | UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>[Key]
+      | null
   ) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
@@ -133,9 +135,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
     currentForm = (
       <ActionConnectorForm
         actionTypeName={actionType.name}
-        connector={
-          connector as UserConfiguredActionConnector<Record<string, any>, Record<string, any>>
-        }
+        connector={connector}
         dispatch={dispatch}
         errors={connectorErrors}
         actionTypeRegistry={actionTypeRegistry}
