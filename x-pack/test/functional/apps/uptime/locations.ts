@@ -38,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await makeChecksWithStatus(es, LessAvailMonitor, 5, 2, 10000, {}, 'down');
   };
 
-  describe('Observer location', () => {
+  describe.only('Observer location', () => {
     const start = '~ 15 minutes ago';
     const end = 'now';
 
