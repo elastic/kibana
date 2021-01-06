@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import * as utils from '../';
+import * as utils from '.';
 
 describe('Utils class', () => {
   test('extract deprecation messages', function () {

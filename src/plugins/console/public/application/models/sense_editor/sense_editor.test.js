@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import '../sense_editor.test.mocks';
+import './sense_editor.test.mocks';
 
 import $ from 'jquery';
 import _ from 'lodash';
 
-import { create } from '../create';
-import { XJson } from '../../../../../../es_ui_shared/public';
-import editorInput1 from './editor_input1.txt';
+import { create } from './create';
+import { XJson } from '../../../../../es_ui_shared/public';
+import editorInput1 from './__fixtures__/editor_input1.txt';
 
 const { collapseLiteralStrings } = XJson;
 
