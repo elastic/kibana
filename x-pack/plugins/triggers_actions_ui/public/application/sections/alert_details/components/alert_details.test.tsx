@@ -11,6 +11,7 @@ import { Alert, ActionType, AlertTypeModel, AlertType } from '../../../../types'
 import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { ViewInApp } from './view_in_app';
 import {
+  ActionGroup,
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerts/common';
@@ -47,7 +48,7 @@ const mockAlertApis = {
 const authorizedConsumers = {
   [ALERTS_FEATURE_ID]: { read: true, all: true },
 };
-const recoveryActionGroup = { id: 'recovered', name: 'Recovered' };
+const recoveryActionGroup: ActionGroup<'recovered'> = { id: 'recovered', name: 'Recovered' };
 
 describe('alert_details', () => {
   // mock Api handlers
