@@ -327,12 +327,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         /Filter /FlateDecode
         /ColorSpace /DeviceRGB
         /SMask 14 0 R
-        /Length 18
+        /Length 17
         >>
         "
         `);
 
-        expectSnapshot(res.get('content-length')).toMatchInline(`"1599"`);
+        expect(res.get('content-length')).to.be('1598');
       });
     });
   });
