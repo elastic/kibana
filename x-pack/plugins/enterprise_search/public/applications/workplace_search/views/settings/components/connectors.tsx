@@ -8,7 +8,6 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 import { reject } from 'lodash';
-import { Link } from 'react-router-dom';
 
 import {
   EuiBadge,
@@ -19,6 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { Loading } from '../../../../shared/loading';
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { LicenseCallout } from '../../../components/shared/license_callout';
@@ -56,17 +56,17 @@ export const Connectors: React.FC = () => {
     const updateButtons = (
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <Link to={editPath}>
-            <EuiButtonEmpty data-test-subj="UpdateButton">Update</EuiButtonEmpty>
-          </Link>
+          <EuiButtonEmptyTo to={editPath} data-test-subj="UpdateButton">
+            Update
+          </EuiButtonEmptyTo>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
 
     const configureButton = supportedByLicense ? (
-      <Link to={configurePath}>
-        <EuiButtonEmpty data-test-subj="ConfigureButton">Configure</EuiButtonEmpty>
-      </Link>
+      <EuiButtonEmptyTo to={configurePath} data-test-subj="ConfigureButton">
+        Configure
+      </EuiButtonEmptyTo>
     ) : (
       <EuiButtonEmpty data-test-subj="ConfigureButton" disabled>
         Configure
