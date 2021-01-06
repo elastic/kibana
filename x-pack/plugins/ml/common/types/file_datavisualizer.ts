@@ -19,6 +19,42 @@ export interface AnalysisResult {
   overrides?: FormattedOverrides;
 }
 
+// including all possible Elasticsearch types
+// since find_file_structure API can be enhanced to include new fields in the future
+export type EsMappingType =
+  | 'text'
+  | 'keyword'
+  | 'numeric'
+  | 'binary'
+  | 'boolean'
+  | 'range'
+  | 'object'
+  | 'nested'
+  | 'alias'
+  | 'completion'
+  | 'dense_vector'
+  | 'flattened'
+  | 'ip'
+  | 'join'
+  | 'percolator'
+  | 'rank_feature'
+  | 'rank_features'
+  | 'shape'
+  | 'search_as_you_type'
+  | 'date'
+  | 'date_nanos'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'token_count'
+  | 'point'
+  | 'histogram'
+  | 'constant_keyword'
+  | 'version'
+  | 'wildcard'
+  | 'long'
+  | 'double'
+  | 'unknown';
+
 export interface FindFileStructureResponse {
   charset: string;
   has_header_row: boolean;
@@ -42,7 +78,7 @@ export interface FindFileStructureResponse {
   mappings: {
     properties: {
       [fieldName: string]: {
-        type: string;
+        type: EsMappingType;
         format?: string;
       };
     };

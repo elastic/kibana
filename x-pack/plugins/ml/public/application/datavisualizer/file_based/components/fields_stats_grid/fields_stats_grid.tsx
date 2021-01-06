@@ -12,7 +12,7 @@ import { DataVisualizerDataGrid, ItemIdToExpandedRowMap } from '../../../stats_d
 import type { DataVisualizerFileBasedAppState } from '../../../../../../common/types/ml_url_generator';
 import { usePageUrlState } from '../../../../util/url_state';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
-import { getFieldNames, getFieldType } from './get_field_names';
+import { getFieldNames } from './get_field_names';
 import type { FileBasedFieldVisConfig } from '../../../stats_datagrid/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../../../stats_datagrid/file_based_expanded_row';
 
@@ -38,12 +38,12 @@ function createFields(results: FindFileStructureResponse) {
 
         // sometimes the timestamp field is not in the mappings, and so our
         // collection of fields will be missing a time field with a type of date
-        if (name === timestampField && field.type === undefined) {
+        if (name === timestampField && field.type === ML_JOB_FIELD_TYPES.UNKNOWN) {
           field.type = ML_JOB_FIELD_TYPES.DATE;
         }
 
         if (m !== undefined) {
-          field.type = getFieldType(m.type);
+          field.type = m.type;
           if (m.format !== undefined) {
             field.format = m.format;
           }

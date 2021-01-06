@@ -72,7 +72,7 @@ export interface FieldVisConfig {
 }
 
 export interface FileBasedFieldVisConfig {
-  type: MlJobFieldType;
+  type: MlJobFieldType | 'long' | 'double';
   fieldName?: string;
   stats?: FieldVisStats;
   format?: string;
