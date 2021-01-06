@@ -20,13 +20,13 @@ describe('getTransactionType', () => {
   });
 
   describe('with no transaction types', () => {
-    it('returns default transaction type', () => {
+    it('returns undefined', () => {
       expect(
         getTransactionType({
           transactionTypes: [],
           urlParams: {},
         })
-      ).toEqual('request');
+      ).toBeUndefined();
     });
   });
 

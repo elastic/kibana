@@ -56,14 +56,14 @@ export function getTransactionType({
     return urlParams.transactionType;
   }
 
+  if (!agentName || transactionTypes.length === 0) {
+    return;
+  }
+
   // The default transaction type is "page-load" for RUM agents and "request" for all others
   const defaultTransactionType = isRumAgentName(agentName)
     ? TRANSACTION_PAGE_LOAD
     : TRANSACTION_REQUEST;
-
-  if (!agentName || transactionTypes.length === 0) {
-    return defaultTransactionType;
-  }
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
   return transactionTypes.includes(defaultTransactionType)

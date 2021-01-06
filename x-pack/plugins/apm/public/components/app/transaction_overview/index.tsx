@@ -83,6 +83,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
     typeof LocalUIFilters
   > = useMemo(
     () => ({
+      shouldFetch: !!transactionType,
       filterNames: [
         'transactionResult',
         'host',
@@ -98,6 +99,12 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
     }),
     [serviceName, transactionType]
   );
+
+  // TODO: improve urlParams typings.
+  // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
+  if (!serviceName) {
+    return null;
+  }
 
   return (
     <>
