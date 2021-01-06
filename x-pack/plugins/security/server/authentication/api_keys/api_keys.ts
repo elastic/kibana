@@ -260,8 +260,8 @@ export class APIKeys {
   }
 
   /**
-   * Tries to invalidate an API key by using the internal user.
-   * @param params The params to invalidate an API key.
+   * Tries to invalidate an API keys by using the internal user.
+   * @param params The params to invalidate an API keys.
    */
   async invalidateAsInternalUser(params: InvalidateAPIKeysParams) {
     if (!this.license.isEnabled()) {
