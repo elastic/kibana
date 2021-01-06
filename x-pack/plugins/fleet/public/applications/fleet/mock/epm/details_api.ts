@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { composeApiHandlerMocks, httpHandlerMockFactory } from '../http_handler_mock_factory';
+import {
+  composeHttpHandlerMocks,
+  httpHandlerMockFactory,
+  ResponseProvidersInterface,
+} from '../http_handler_mock_factory';
 import {
   agentPolicyRouteService,
   epmRouteService,
@@ -487,12 +491,12 @@ export const epmGetSummaryResponse = (): GetSummaryResponse => ({
   },
 });
 
-export interface EpmPackageDetailsResponseProvidersMock {
-  epmGetInfo: jest.MockedFunction<() => GetInfoResponse>;
-  epmGetFile: jest.MockedFunction<() => string>;
-  epmGetSummary: jest.MockedFunction<() => GetSummaryResponse>;
-  packagePolicyList: jest.MockedFunction<() => GetPackagePoliciesResponse>;
-  agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
+export interface EpmPackageDetailsResponseProvidersMock extends ResponseProvidersInterface {
+  epmGetInfo: () => GetInfoResponse;
+  epmGetFile: () => string;
+  epmGetSummary: () => GetSummaryResponse;
+  packagePolicyList: () => GetPackagePoliciesResponse;
+  agentPolicyList: () => GetAgentPoliciesResponse;
 }
 
 const epmDetailsApiOnlyMocks = httpHandlerMockFactory<EpmPackageDetailsResponseProvidersMock>([
@@ -528,7 +532,7 @@ const epmDetailsApiOnlyMocks = httpHandlerMockFactory<EpmPackageDetailsResponseP
   },
 ]);
 
-export const epmDetailsApiMock = composeApiHandlerMocks<
+export const epmDetailsApiMock = composeHttpHandlerMocks<
   FleetSetupResponseProvidersMock &
     AgentsSetupResponseProvidersMock &
     EpmPackageDetailsResponseProvidersMock

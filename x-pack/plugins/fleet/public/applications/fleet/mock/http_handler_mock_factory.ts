@@ -14,12 +14,38 @@ class ApiRouteNotMocked extends Error {
   }
 }
 
-type ResponseProviderMocks = Record<string, jest.MockedFunction<any>>;
+// Source: https://stackoverflow.com/a/43001581
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+
+/** The callback that will be executed to retrieve an HTTP API response */
+export type ResponseProviderCallback<F extends (...args: any) => any = (...args: any) => any> = F;
+
+/**
+ * Map of HTTP response provider callbacks that will be exposed when the mock is applied
+ */
+export type ResponseProvidersInterface = Record<string, ResponseProviderCallback>;
+
+type SingleResponseProvider<
+  F extends ResponseProviderCallback = ResponseProviderCallback
+> = jest.MockedFunction<F> & {
+  /**
+   * Delay responding to the HTTP call until this promise is resolved. Use it to introduce
+   * elongated delays in order to test intermediate UI states.
+   *
+   * @example
+   * apiMocks.responseProvider.someProvider.mockDelay
+   *    // Delay this response by 1/2 second
+   *    .mockImplementation(
+   *      () => new Promise(r => setTimeout(r, 500))
+   *    )
+   */
+  mockDelay: jest.MockedFunction<() => Promise<void>>;
+};
 
 /**
  * The interface for a `core.http` set of mocked API responses.
  */
-interface MockedApi<R extends ResponseProviderMocks = ResponseProviderMocks> {
+interface MockedApi<R extends ResponseProvidersInterface = ResponseProvidersInterface> {
   /**
    * Will return a promise that resolves when triggered APIs are all complete. This method uses
    * React testing `act()` to await for the API calls, thus ensuring that the UI components are
@@ -30,8 +56,15 @@ interface MockedApi<R extends ResponseProviderMocks = ResponseProviderMocks> {
    * A object containing the list of API response provider functions that are used by the mocked API.
    * These API response methods are wrapped in `jest.MockedFunction`, thus their implementation or
    * returned values can be manipulated by each test case using the normal `jest.mock` interface.
+   * In addition to the normal `jest.Mock` properties and functions, an additional method is also
+   * available - `mockDelay()` - which can be used to delay the given response being returned by the
+   * associated HTTP method.
    */
-  responseProvider: Readonly<R>;
+  responseProvider: Readonly<
+    {
+      [K in keyof R]: SingleResponseProvider<R[K]>;
+    }
+  >;
 }
 
 type HttpMethods = keyof Pick<
@@ -41,11 +74,15 @@ type HttpMethods = keyof Pick<
 
 const HTTP_METHODS: HttpMethods[] = ['delete', 'fetch', 'get', 'post', 'put', 'head', 'patch'];
 
-export type ApiHandlerMock<R extends ResponseProviderMocks = ResponseProviderMocks> = (
+export type ApiHandlerMock<R extends ResponseProvidersInterface = ResponseProvidersInterface> = (
   http: jest.Mocked<HttpStart>
 ) => MockedApi<R>;
 
-interface RouteMock<R extends ResponseProviderMocks = ResponseProviderMocks> {
+interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInterface> {
+  /**
+   * A legible identifier for the Mock. Will be used as the name in the `MockedApi`
+   * that is returned when the HTTP mock is applied
+   */
   id: keyof R;
   method: HttpMethods;
   path: string;
@@ -54,10 +91,16 @@ interface RouteMock<R extends ResponseProviderMocks = ResponseProviderMocks> {
    * It should return the "raw" value, __NOT__ a `Promise`
    */
   handler: (...args: Parameters<HttpHandler>) => any;
+  /**
+   * A function that returns a promise. The API response will be delayed until this promise is
+   * resolved. This can be helpful when wanting to test an intermediate UI state while the API
+   * call is inflight.
+   */
+  delay?: () => Promise<void>;
 }
 
 export type ApiHandlerMockFactoryProps<
-  R extends ResponseProviderMocks = ResponseProviderMocks
+  R extends ResponseProvidersInterface = ResponseProvidersInterface
 > = Array<RouteMock<R>>;
 /**
  * Returns a function that can be used to apply mocked responses to calls made via `core.http`
@@ -79,15 +122,23 @@ export type ApiHandlerMockFactoryProps<
  *   mockedApi = mockEpmApi(core.http);
  * });
  */
-export const httpHandlerMockFactory = <R extends ResponseProviderMocks = ResponseProviderMocks>(
+export const httpHandlerMockFactory = <R extends ResponseProvidersInterface = {}>(
   mocks: ApiHandlerMockFactoryProps<R>
 ): ApiHandlerMock<R> => {
   return (http) => {
     let inflightApiCalls = 0;
     const apiDoneListeners: Array<() => void> = [];
-    const markApiCallAsHandled = async () => {
+    const markApiCallAsHandled = async (delay?: RouteMock['delay']) => {
       inflightApiCalls++;
+
+      // If a delay was defined, then await that first
+      if (delay) {
+        await delay();
+      }
+
+      // We always wait at least 1ms
       await new Promise((r) => setTimeout(r, 1));
+
       inflightApiCalls--;
 
       // If no more pending API calls, then notify listeners
@@ -96,13 +147,19 @@ export const httpHandlerMockFactory = <R extends ResponseProviderMocks = Respons
       }
     };
 
-    const responseProvider: MockedApi<R>['responseProvider'] = mocks.reduce<R>(
+    const responseProvider: MockedApi<R>['responseProvider'] = mocks.reduce(
       (providers, routeMock) => {
+        // FIXME: find a way to remove the ignore below. May need to limit the calling signature of `RouteMock['handler']`
         // @ts-ignore
-        providers[routeMock.id] = jest.fn(routeMock.handler);
+        const routeResponseCallbackMock: SingleResponseProvider<R[keyof R]> = jest.fn(
+          routeMock.handler
+        );
+        routeResponseCallbackMock.mockDelay = jest.fn(routeMock.delay || (async () => {}));
+
+        providers[routeMock.id] = routeResponseCallbackMock;
         return providers;
       },
-      {} as R
+      {} as Writeable<MockedApi<R>['responseProvider']>
     );
 
     const mockedApiInterface: MockedApi<R> = {
@@ -129,7 +186,10 @@ export const httpHandlerMockFactory = <R extends ResponseProviderMocks = Respons
         const routeMock = methodMocks.find((handler) => handler.path === path);
 
         if (routeMock) {
-          markApiCallAsHandled();
+          markApiCallAsHandled(responseProvider[routeMock.id].mockDelay);
+
+          await responseProvider[routeMock.id].mockDelay();
+
           // Use the handler defined for the HTTP Mocked interface (not the one passed on input to
           // the factory) for retrieving the response value because that one could have had its
           // response value manipulated by the individual test case.
@@ -174,7 +234,9 @@ const isHttpFetchOptionsWithPath = (
  *  ComposedApiHandlerMocks
  * >([fleetSetupApiMock, agentsSetupApiMock]);
  */
-export const composeApiHandlerMocks = <R extends ResponseProviderMocks = ResponseProviderMocks>(
+export const composeHttpHandlerMocks = <
+  R extends ResponseProvidersInterface = ResponseProvidersInterface
+>(
   handlerMocks: ApiHandlerMock[]
 ): ApiHandlerMock<R> => {
   return (http: HttpStart) => {

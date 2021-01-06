@@ -5,7 +5,7 @@
  */
 
 import { fleetSetupRouteService, GetFleetStatusResponse } from '../../../../../common';
-import { httpHandlerMockFactory } from '../http_handler_mock_factory';
+import { httpHandlerMockFactory, ResponseProvidersInterface } from '../http_handler_mock_factory';
 
 export const agentsSetupResponseMock = (): GetFleetStatusResponse => {
   return {
@@ -14,8 +14,8 @@ export const agentsSetupResponseMock = (): GetFleetStatusResponse => {
   };
 };
 
-export interface AgentsSetupResponseProvidersMock {
-  getAgentsSetup: jest.MockedFunction<() => GetFleetStatusResponse>;
+export interface AgentsSetupResponseProvidersMock extends ResponseProvidersInterface {
+  getAgentsSetup: (...args: any) => GetFleetStatusResponse;
 }
 
 export const agentsSetupApiMock = httpHandlerMockFactory<AgentsSetupResponseProvidersMock>([

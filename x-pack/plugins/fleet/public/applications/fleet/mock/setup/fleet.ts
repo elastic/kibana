@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { httpHandlerMockFactory } from '../http_handler_mock_factory';
+import { httpHandlerMockFactory, ResponseProvidersInterface } from '../http_handler_mock_factory';
 import { PostIngestSetupResponse, setupRouteService } from '../../../../../common';
 
 export const setupResponseMock = (): PostIngestSetupResponse => {
   return { isInitialized: true };
 };
 
-export interface FleetSetupResponseProvidersMock {
-  fleetSetup: jest.MockedFunction<() => PostIngestSetupResponse>;
+export interface FleetSetupResponseProvidersMock extends ResponseProvidersInterface {
+  fleetSetup: () => PostIngestSetupResponse;
 }
 
 export const fleetSetupApiMock = httpHandlerMockFactory<FleetSetupResponseProvidersMock>([
