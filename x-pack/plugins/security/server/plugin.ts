@@ -204,6 +204,7 @@ export class Plugin {
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => session.getSID(request),
       getCurrentUser: (request) => authenticationSetup.getCurrentUser(request),
+      recordAuditLoggingUsage: () => this.featureUsageServiceStart?.recordAuditLoggingUsage(),
     });
     const legacyAuditLogger = new SecurityAuditLogger(audit.getLogger());
 

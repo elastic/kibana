@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { emptyTable, testTable } from './__tests__/fixtures/test_tables';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { emptyTable, testTable } from './__fixtures__/test_tables';
 import { head } from './head';
 
 describe('head', () => {
