@@ -36,7 +36,7 @@ export const SetPriorityInputField: FunctionComponent<Props> = ({ phase }) => {
             defaultMessage="Set the priority for recovering your indices after a node restart.
               Indices with higher priorities are recovered before indices with lower priorities."
           />{' '}
-          <LearnMoreLink docPath="recovery-prioritization.html" />
+          <LearnMoreLink docPath="ilm-set-priority.html" />
         </EuiTextColor>
       }
       titleSize="xs"
