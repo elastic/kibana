@@ -10,15 +10,15 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { FieldDataRowProps } from '../../../index_based/components/field_data_card';
+import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
 import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 import { numberAsOrdinal } from '../../../../formatters/number_as_ordinal';
 import {
   MetricDistributionChart,
   MetricDistributionChartData,
   buildChartDataFromStats,
-} from '../../../index_based/components/field_data_card/metric_distribution_chart';
-import { TopValues } from '../../../index_based/components/field_data_card/top_values';
+} from '../../../index_based/components/field_data_row/metric_distribution_chart';
+import { TopValues } from '../../../index_based/components/field_data_row/top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 325;

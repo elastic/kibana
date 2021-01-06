@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FieldHistogramRequestConfig, FieldRequestConfig } from './request';
+export { DocumentCountContent } from './document_count_content';
+export { NotInDocsContent } from './not_in_docs_content';

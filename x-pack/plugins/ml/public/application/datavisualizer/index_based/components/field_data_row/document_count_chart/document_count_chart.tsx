@@ -25,7 +25,6 @@ export interface DocumentCountChartPoint {
 
 interface Props {
   width?: number;
-  height?: number;
   chartPoints: DocumentCountChartPoint[];
   timeRangeEarliest: number;
   timeRangeLatest: number;
@@ -35,7 +34,6 @@ const SPEC_ID = 'document_count';
 
 export const DocumentCountChart: FC<Props> = ({
   width,
-  height,
   chartPoints,
   timeRangeEarliest,
   timeRangeLatest,

@@ -13,10 +13,10 @@ import {
   KeywordContent,
   OtherContent,
   TextContent,
-} from '../index_based/components/field_data_card/content_types';
-import { NumberContent } from './components/field_data_expanded_row/number_content';
+  NumberContent,
+} from './components/field_data_expanded_row';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
-import type { FileBasedFieldVisConfig } from '../index_based/common/field_vis_config';
+import type { FileBasedFieldVisConfig } from './types/field_vis_config';
 
 export const FileBasedDataVisualizerExpandedRow = ({ item }: { item: FileBasedFieldVisConfig }) => {
   const config = item;

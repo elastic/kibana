@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
-import { FieldDataRowProps } from '../../../index_based/components/field_data_card';
+import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
 import { ColumnChart } from '../../../../components/data_grid/column_chart';
 import { ChartData } from '../../../../components/data_grid';
 import { OrdinalDataItem } from '../../../../components/data_grid/use_column_chart';

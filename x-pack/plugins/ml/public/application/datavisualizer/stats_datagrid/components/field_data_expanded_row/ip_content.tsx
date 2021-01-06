@@ -6,20 +6,25 @@
 
 import React, { FC } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldDataRowProps } from '../field_data_card';
-import { TopValues } from '../top_values';
-import { ExpandedRowFieldHeader } from '../../../../stats_datagrid/components/expanded_row_field_header';
 
-export const KeywordContent: FC<FieldDataRowProps> = ({ config }) => {
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
+import { TopValues } from '../../../index_based/components/field_data_row/top_values';
+import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+
+export const IpContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
+  if (stats === undefined) return null;
+  const { count, sampleCount, cardinality } = stats;
+  if (count === undefined || sampleCount === undefined || cardinality === undefined) return null;
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
 
   return (
     <div className="mlFieldDataCard__stats">
       <ExpandedRowFieldHeader>
         <FormattedMessage
-          id="xpack.ml.fieldDataCard.cardKeyword.topValuesLabel"
+          id="xpack.ml.fieldDataCard.cardIp.topValuesLabel"
           defaultMessage="Top values"
         />
       </ExpandedRowFieldHeader>

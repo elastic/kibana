@@ -6,20 +6,21 @@
 
 import React from 'react';
 
-import { FieldVisConfig } from '../index_based/common';
+import { FieldVisConfig } from '../stats_datagrid/types';
+import { NotInDocsContent } from '../index_based/components/field_data_row/content_types';
 import {
   BooleanContent,
   DateContent,
   GeoPointContent,
   IpContent,
   KeywordContent,
-  NotInDocsContent,
+  NumberContent,
   OtherContent,
   TextContent,
-} from '../index_based/components/field_data_card/content_types';
-import { NumberContent } from './components/field_data_expanded_row/number_content';
+} from './components/field_data_expanded_row';
+
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
-import { LoadingIndicator } from '../index_based/components/field_data_card/loading_indicator';
+import { LoadingIndicator } from '../index_based/components/field_data_row/loading_indicator';
 
 export const IndexBasedDataVisualizerExpandedRow = ({ item }: { item: FieldVisConfig }) => {
   const config = item;

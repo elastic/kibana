@@ -10,9 +10,9 @@ import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { FieldDataRowProps } from '../field_data_card';
-import { roundToDecimalPlace } from '../../../../../formatters/round_to_decimal_place';
-import { ExpandedRowFieldHeader } from '../../../../stats_datagrid/components/expanded_row_field_header';
+import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
+import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
+import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 
 function getPercentLabel(value: number): string {
   if (value === 0) {

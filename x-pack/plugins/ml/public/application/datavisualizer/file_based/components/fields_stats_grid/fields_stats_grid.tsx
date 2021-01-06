@@ -13,7 +13,7 @@ import type { DataVisualizerFileBasedAppState } from '../../../../../../common/t
 import { usePageUrlState } from '../../../../util/url_state';
 import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
 import { getFieldNames, getFieldType } from './get_field_names';
-import type { FileBasedFieldVisConfig } from '../../../index_based/common/field_vis_config';
+import type { FileBasedFieldVisConfig } from '../../../stats_datagrid/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../../../stats_datagrid/file_based_expanded_row';
 
 function createFields(results: FindFileStructureResponse) {

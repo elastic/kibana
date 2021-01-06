@@ -11,8 +11,8 @@ import { formatDate } from '@elastic/eui/lib/services/format';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { i18n } from '@kbn/i18n';
-import { FieldDataRowProps } from '../field_data_card';
-import { ExpandedRowFieldHeader } from '../../../../stats_datagrid/components/expanded_row_field_header';
+import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
+import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 const TIME_FORMAT = 'MMM D YYYY, HH:mm:ss.SSS';
 interface SummaryTableItem {
   function: string;

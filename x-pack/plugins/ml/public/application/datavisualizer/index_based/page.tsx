@@ -45,18 +45,19 @@ import { getToastNotifications } from '../../util/dependency_cache';
 import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { ActionsPanel } from './components/actions_panel';
 import { SearchPanel } from './components/search_panel';
-import { DocumentCountContent } from './components/field_data_card/content_types/document_count_content';
+import { DocumentCountContent } from './components/field_data_row/content_types/document_count_content';
 import { DataVisualizerDataGrid, ItemIdToExpandedRowMap } from '../stats_datagrid';
 import { FieldCountPanel } from './components/field_count_panel';
 import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 import { DataLoader } from './data_loader';
-import type { FieldRequestConfig, FieldVisConfig } from './common';
+import type { FieldRequestConfig } from './common';
 import type { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
 import type { OverallStats } from '../../../../common/types/datavisualizer';
 import { MlJobFieldType } from '../../../../common/types/field_types';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
 import { IndexBasedDataVisualizerExpandedRow } from '../stats_datagrid/expanded_row';
+import { FieldVisConfig } from '../stats_datagrid/types';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;

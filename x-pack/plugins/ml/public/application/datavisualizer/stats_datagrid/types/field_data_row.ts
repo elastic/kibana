@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FieldHistogramRequestConfig, FieldRequestConfig } from './request';
+import type { FieldVisConfig, FileBasedFieldVisConfig } from './field_vis_config';
+
+export interface FieldDataRowProps {
+  config: FieldVisConfig | FileBasedFieldVisConfig;
+}

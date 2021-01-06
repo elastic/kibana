@@ -20,7 +20,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
 import { FieldTypeIcon } from '../../components/field_type_icon';
-import { FieldVisConfig } from '../index_based/common';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { DistinctValues } from './components/field_data_row/distinct_values';
 import { NumberContentPreview } from './components/field_data_row/number_content_preview';
@@ -29,9 +28,10 @@ import { useTableSettings } from '../../data_frame_analytics/pages/analytics_man
 import { TopValuesPreview } from './components/field_data_row/top_values_preview';
 import type { MlJobFieldType } from '../../../../common/types/field_types';
 import {
+  FieldVisConfig,
   FileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
-} from '../index_based/common/field_vis_config';
+} from './types/field_vis_config';
 const FIELD_NAME = 'fieldName';
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;

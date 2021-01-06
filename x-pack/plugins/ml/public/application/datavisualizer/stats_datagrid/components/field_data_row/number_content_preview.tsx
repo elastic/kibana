@@ -11,9 +11,9 @@ import {
   MetricDistributionChart,
   MetricDistributionChartData,
   buildChartDataFromStats,
-} from '../../../index_based/components/field_data_card/metric_distribution_chart';
+} from '../../../index_based/components/field_data_row/metric_distribution_chart';
 import { formatSingleValue } from '../../../../formatters/format_value';
-import { FieldVisConfig } from '../../../index_based/common';
+import { FieldVisConfig } from '../../../stats_datagrid/types';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 150;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 80;

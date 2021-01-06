@@ -4,4 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { FieldDataCard, FieldDataRowProps } from './field_data_card';
+export { FieldDataRowProps } from './field_data_row';
+export {
+  FieldVisConfig,
+  FileBasedFieldVisConfig,
+  FieldVisStats,
+  MetricFieldVisStats,
+  isFileBasedFieldVisConfig,
+  isIndexBasedFieldVisConfig,
+} from './field_vis_config';

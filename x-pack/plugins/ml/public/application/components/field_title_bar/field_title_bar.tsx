@@ -11,12 +11,12 @@ import { EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FieldTypeIcon } from '../field_type_icon';
-import { FieldVisConfig } from '../../datavisualizer/index_based/common';
 import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
 import {
+  FieldVisConfig,
   FileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
-} from '../../datavisualizer/index_based/common/field_vis_config';
+} from '../../datavisualizer/stats_datagrid/types/field_vis_config';
 
 interface Props {
   card: FieldVisConfig | FileBasedFieldVisConfig;

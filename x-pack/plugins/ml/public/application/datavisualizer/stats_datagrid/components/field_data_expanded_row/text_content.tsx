@@ -10,8 +10,8 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { FieldDataRowProps } from '../field_data_card';
-import { ExamplesList } from '../examples_list';
+import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
+import { ExamplesList } from '../../../index_based/components/field_data_row/examples_list';
 
 export const TextContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
