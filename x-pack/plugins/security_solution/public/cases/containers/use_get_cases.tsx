@@ -7,10 +7,9 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import { CaseStatuses } from '../../../../case/common/api';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
-import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case } from './types';
+import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case, UpdateByKey } from './types';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import * as i18n from './translations';
-import { UpdateByKey } from './use_update_case';
 import { getCases, patchCase } from './api';
 
 export interface UseGetCasesState {
@@ -22,7 +21,7 @@ export interface UseGetCasesState {
   selectedCases: Case[];
 }
 
-export interface UpdateCase extends UpdateByKey {
+export interface UpdateCase extends Omit<UpdateByKey, 'caseData'> {
   caseId: string;
   version: string;
   refetchCasesStatus: () => void;
