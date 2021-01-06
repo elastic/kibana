@@ -874,7 +874,13 @@ describe('status check alert', () => {
   });
 
   describe('alert factory', () => {
-    let alert: AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext>;
+    let alert: AlertType<
+      AlertTypeParams,
+      AlertTypeState,
+      AlertInstanceState,
+      AlertInstanceContext,
+      'xpack.uptime.alerts.actionGroups.monitorStatus'
+    >;
 
     beforeEach(() => {
       const { server, libs, plugins } = bootstrapDependencies();
