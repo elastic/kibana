@@ -16,6 +16,7 @@ export {
   ActionVariable,
   AlertType,
   ActionGroup,
+  ActionGroupIdsOf,
   AlertingPlugin,
   AlertExecutorOptions,
   AlertActionParams,
