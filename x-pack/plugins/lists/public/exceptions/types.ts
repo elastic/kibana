@@ -86,7 +86,7 @@ export interface ApiCallByIdProps {
 export interface ApiCallMemoProps {
   id: string;
   namespaceType: NamespaceType;
-  onError: (arg: string[]) => void;
+  onError: (arg: Error) => void;
   onSuccess: () => void;
 }
 

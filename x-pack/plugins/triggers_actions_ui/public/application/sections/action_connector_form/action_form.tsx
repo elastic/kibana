@@ -39,7 +39,7 @@ import { ActionGroup, AlertActionParam } from '../../../../../alerts/common';
 import { useKibana } from '../../../common/lib/kibana';
 import { DefaultActionParamsGetter } from '../../lib/get_defaults_for_action_params';
 
-export interface ActionGroupWithMessageVariables extends ActionGroup {
+export interface ActionGroupWithMessageVariables extends ActionGroup<string> {
   omitOptionalMessageVariables?: boolean;
   defaultActionMessage?: string;
 }
