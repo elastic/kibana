@@ -88,6 +88,20 @@ export const cleanKibana = () => {
     },
   });
 
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'cases',
+            },
+          },
+        ],
+      },
+    },
+  });
+
   cy.request(
     'POST',
     `${Cypress.env(
