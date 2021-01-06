@@ -32,7 +32,8 @@ jest.mock('../../common/components/link_to', () => {
   };
 });
 
-describe('usePostPushToService', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/87541
+describe.skip('usePostPushToService', () => {
   const abortCtrl = new AbortController();
   const updateCase = jest.fn();
   const formatUrl = jest.fn();

@@ -93,7 +93,6 @@ export class MetricsExpression extends Component {
         closePopover={this._closePopover}
         ownFocus
         initialFocus="body" /* avoid initialFocus on Combobox */
-        withTitle
         anchorPosition="leftCenter"
         button={
           <EuiExpression
