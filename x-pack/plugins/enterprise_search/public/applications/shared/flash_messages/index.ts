@@ -12,4 +12,5 @@ export {
   setErrorMessage,
   setQueuedSuccessMessage,
   setQueuedErrorMessage,
+  clearFlashMessages,
 } from './set_message_helpers';
