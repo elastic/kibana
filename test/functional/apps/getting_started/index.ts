@@ -31,17 +31,17 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     // TODO: Remove when vislib is removed
-    describe('chartsLibrary', function () {
+    describe('new charts library', function () {
       before(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:chartsLibrary': true,
+          'visualization:visualize:legacyChartsLibrary': false,
         });
         await browser.refresh();
       });
 
       after(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:chartsLibrary': false,
+          'visualization:visualize:legacyChartsLibrary': true,
         });
         await browser.refresh();
       });

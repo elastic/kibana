@@ -22,21 +22,21 @@ import { schema } from '@kbn/config-schema';
 
 import { CoreSetup, Plugin, UiSettingsParams } from 'kibana/server';
 
-import { CHARTS_LIBRARY } from '../common';
+import { LEGACY_CHARTS_LIBRARY } from '../common';
 
 export const uiSettingsConfig: Record<string, UiSettingsParams<boolean>> = {
   // TODO: Remove this when vis_type_vislib is removed
   // https://github.com/elastic/kibana/issues/56143
-  [CHARTS_LIBRARY]: {
-    name: i18n.translate('visTypeXy.advancedSettings.visualization.chartsLibrary', {
-      defaultMessage: 'Charts library',
+  [LEGACY_CHARTS_LIBRARY]: {
+    name: i18n.translate('visTypeXy.advancedSettings.visualization.legacyChartsLibrary.name', {
+      defaultMessage: 'Legacy charts library',
     }),
-    value: false,
+    value: true,
     description: i18n.translate(
-      'visTypeXy.advancedSettings.visualization.chartsLibrary.description',
+      'visTypeXy.advancedSettings.visualization.legacyChartsLibrary.description',
       {
         defaultMessage:
-          'Enables new charts library for areas, lines and bars in visualize. Currently, does <strong>not</strong> support split chart aggregation.',
+          'Enables legacy charts library for area, line and bar charts in visualize. Currently, only legacy charts library supports split chart aggregation.',
       }
     ),
     category: ['visualization'],
