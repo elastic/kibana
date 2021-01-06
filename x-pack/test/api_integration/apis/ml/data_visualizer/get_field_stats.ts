@@ -5,11 +5,11 @@
  */
 
 import expect from '@kbn/expect';
+import { sortBy } from 'lodash';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
-import { compareByFieldName } from '../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -212,11 +212,8 @@ export default ({ getService }: FtrProviderContext) => {
         nonMetricFieldsTestData.expected.responseCode
       );
 
-      // Sort the fields in the response before validating.
-      const expectedRspFields = nonMetricFieldsTestData.expected.responseBody.sort(
-        compareByFieldName
-      );
-      const actualRspFields = body.sort(compareByFieldName);
+      const expectedRspFields = sortBy(nonMetricFieldsTestData.expected.responseBody, 'fieldName');
+      const actualRspFields = sortBy(body, 'fieldName');
       expect(actualRspFields).to.eql(expectedRspFields);
     });
 

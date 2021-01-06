@@ -5,12 +5,12 @@
  */
 
 import expect from '@kbn/expect';
+import { sortBy } from 'lodash';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG } from './common_jobs';
-import { compareById } from '../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -227,16 +227,18 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.have.length(expectedResponse.length);
 
           // Validate job IDs.
-          const expectedRspJobIds = expectedResponse
-            .map((job: { id: string }) => {
+          const expectedRspJobIds = sortBy(
+            expectedResponse.map((job: { id: string }) => {
               return { id: job.id };
-            })
-            .sort(compareById);
-          const actualRspJobIds = body
-            .map((job: { id: string }) => {
+            }),
+            'id'
+          );
+          const actualRspJobIds = sortBy(
+            body.map((job: { id: string }) => {
               return { id: job.id };
-            })
-            .sort(compareById);
+            }),
+            'id'
+          );
 
           expect(actualRspJobIds).to.eql(expectedRspJobIds);
 
@@ -264,16 +266,18 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.have.length(expectedResponse.length);
 
           // Validate job IDs.
-          const expectedRspJobIds = expectedResponse
-            .map((job: { id: string }) => {
+          const expectedRspJobIds = sortBy(
+            expectedResponse.map((job: { id: string }) => {
               return { id: job.id };
-            })
-            .sort(compareById);
-          const actualRspJobIds = body
-            .map((job: { id: string }) => {
+            }),
+            'id'
+          );
+          const actualRspJobIds = sortBy(
+            body.map((job: { id: string }) => {
               return { id: job.id };
-            })
-            .sort(compareById);
+            }),
+            'id'
+          );
 
           expect(actualRspJobIds).to.eql(expectedRspJobIds);
 

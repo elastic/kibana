@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { isEmpty } from 'lodash';
+import { isEmpty, sortBy } from 'lodash';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -13,7 +13,6 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/cons
 import { Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
-import { compareById } from '../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -703,11 +702,12 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   function mapIdsToSuccessObjects(ids: string[]) {
-    const successObjects = ids
-      .map((id) => {
+    const successObjects = sortBy(
+      ids.map((id) => {
         return { id, success: true };
-      })
-      .sort(compareById);
+      }),
+      'id'
+    );
 
     return successObjects;
   }
@@ -756,7 +756,7 @@ export default ({ getService }: FtrProviderContext) => {
             const expectedJobIds = testData.expected.jobs.map((job) => job.jobId);
             const expectedRspJobs = mapIdsToSuccessObjects(expectedJobIds);
 
-            const actualRspJobs = rspBody.jobs.sort(compareById);
+            const actualRspJobs = sortBy(rspBody.jobs, 'id');
 
             expect(actualRspJobs).to.eql(
               expectedRspJobs,
@@ -768,17 +768,18 @@ export default ({ getService }: FtrProviderContext) => {
             // datafeeds
             expect(rspBody).to.have.property('datafeeds');
 
-            const expectedRspDatafeeds = testData.expected.jobs
-              .map((job) => {
+            const expectedRspDatafeeds = sortBy(
+              testData.expected.jobs.map((job) => {
                 return {
                   id: `datafeed-${job.jobId}`,
                   success: true,
                   started: testData.requestBody.startDatafeed,
                 };
-              })
-              .sort(compareById);
+              }),
+              'id'
+            );
 
-            const actualRspDatafeeds = rspBody.datafeeds.sort(compareById);
+            const actualRspDatafeeds = sortBy(rspBody.datafeeds, 'id');
 
             expect(actualRspDatafeeds).to.eql(
               expectedRspDatafeeds,
@@ -794,9 +795,9 @@ export default ({ getService }: FtrProviderContext) => {
             let actualDashboards = [];
 
             if (isEmpty(rspKibana) === false) {
-              actualSearches = rspBody.kibana.search.sort(compareById);
-              actualVisualizations = rspBody.kibana.visualization.sort(compareById);
-              actualDashboards = rspBody.kibana.dashboard.sort(compareById);
+              actualSearches = sortBy(rspBody.kibana.search, 'id');
+              actualVisualizations = sortBy(rspBody.kibana.visualization, 'id');
+              actualDashboards = sortBy(rspBody.kibana.dashboard, 'id');
             }
 
             const expectedSearches = mapIdsToSuccessObjects(testData.expected.searches);
@@ -838,12 +839,13 @@ export default ({ getService }: FtrProviderContext) => {
           }
 
           // compare model memory limits for created jobs
-          const expectedModelMemoryLimits = testData.expected.jobs
-            .map((j) => ({
+          const expectedModelMemoryLimits = sortBy(
+            testData.expected.jobs.map((j) => ({
               id: j.jobId,
               modelMemoryLimit: j.modelMemoryLimit,
-            }))
-            .sort(compareById);
+            })),
+            'id'
+          );
 
           const {
             body: { jobs },
@@ -855,12 +857,13 @@ export default ({ getService }: FtrProviderContext) => {
             testData.expected.jobs.map((j) => j.jobId).join()
           );
 
-          const actualModelMemoryLimits = jobs
-            .map((j) => ({
+          const actualModelMemoryLimits = sortBy(
+            jobs.map((j) => ({
               id: j.job_id,
               modelMemoryLimit: j.analysis_limits!.model_memory_limit,
-            }))
-            .sort(compareById);
+            })),
+            'id'
+          );
 
           expect(actualModelMemoryLimits).to.eql(
             expectedModelMemoryLimits,
