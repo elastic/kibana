@@ -9,7 +9,21 @@ export type DocumentCreationMode = 'text' | 'file' | 'api';
 export enum DocumentCreationStep {
   ShowCreationModes,
   AddDocuments,
-  ShowErrorSummary,
-  ShowSuccessSummary,
-  ShowError,
+  ShowSummary,
+}
+
+export interface DocumentCreationSummary {
+  errors: string[];
+  validDocuments: {
+    total: number;
+    examples: object[];
+  };
+  invalidDocuments: {
+    total: number;
+    examples: Array<{
+      document: object;
+      errors: string[];
+    }>;
+  };
+  newSchemaFields: string[];
 }
