@@ -13,7 +13,6 @@
     "kibanaUtils",
     "kibanaReact",
     "share",
-    "visualizations",
     "visDefaultEditor"
   ],
   "optionalPlugins": ["usageCollection"]
