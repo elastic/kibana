@@ -38,6 +38,7 @@ describe('useUserInfo', () => {
           hasEncryptionKey: null,
           hasIndexManage: null,
           hasIndexWrite: null,
+          hasIndexUpdateDelete: null,
           isAuthenticated: null,
           isSignalIndexExists: null,
           loading: true,

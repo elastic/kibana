@@ -41,11 +41,36 @@ describe('#start', () => {
     http.post.mockReturnValue(Promise.resolve(mockedCapabilities));
   });
 
-  it('only returns capabilities for given appIds', async () => {
+  it('requests default capabilities on anonymous paths', async () => {
+    http.anonymousPaths.isAnonymous.mockReturnValue(true);
     const service = new CapabilitiesService();
+    const appIds = ['app1', 'app2', 'legacyApp1', 'legacyApp2'];
     const { capabilities } = await service.start({
       http,
-      appIds: ['app1', 'app2', 'legacyApp1', 'legacyApp2'],
+      appIds,
+    });
+
+    expect(http.post).toHaveBeenCalledWith('/api/core/capabilities', {
+      query: {
+        useDefaultCapabilities: true,
+      },
+      body: JSON.stringify({ applications: appIds }),
+    });
+
+    // @ts-expect-error TypeScript knows this shouldn't be possible
+    expect(() => (capabilities.foo = 'foo')).toThrowError();
+  });
+
+  it('only returns capabilities for given appIds', async () => {
+    const service = new CapabilitiesService();
+    const appIds = ['app1', 'app2', 'legacyApp1', 'legacyApp2'];
+    const { capabilities } = await service.start({
+      http,
+      appIds,
+    });
+
+    expect(http.post).toHaveBeenCalledWith('/api/core/capabilities', {
+      body: JSON.stringify({ applications: appIds }),
     });
 
     // @ts-expect-error TypeScript knows this shouldn't be possible
