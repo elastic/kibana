@@ -904,7 +904,7 @@ describe('state_helpers', () => {
     });
 
     describe('switching from non-reference to reference test cases', () => {
-      it('should wrap around the previous operation as a reference if possible (case n1)', () => {
+      it('should wrap around the previous operation as a reference if possible (case new1)', () => {
         const expectedColumn = {
           label: 'Count',
           customLabel: true,
@@ -940,7 +940,7 @@ describe('state_helpers', () => {
         );
       });
 
-      it('should create a new no-input operation to use as reference (case n2)', () => {
+      it('should create a new no-input operation to use as reference (case new2)', () => {
         // @ts-expect-error this function is not valid
         operationDefinitionMap.testReference.requiredReferences = [
           {
@@ -980,7 +980,7 @@ describe('state_helpers', () => {
         });
       });
 
-      it('should use the previous field, but select the best operation, when creating a reference (case n3)', () => {
+      it('should use the previous field, but select the best operation, when creating a reference (case new3)', () => {
         // @ts-expect-error this function is not valid
         operationDefinitionMap.testReference.requiredReferences = [
           {
@@ -1021,7 +1021,7 @@ describe('state_helpers', () => {
         });
       });
 
-      it('should ignore previous field and previous operation, but set incomplete operation if known (case n4)', () => {
+      it('should ignore previous field and previous operation, but set incomplete operation if known (case new4)', () => {
         // @ts-expect-error this function is not valid
         operationDefinitionMap.testReference.requiredReferences = [
           {
@@ -1061,7 +1061,7 @@ describe('state_helpers', () => {
         });
       });
 
-      it('should leave an empty reference if all the other cases fail (case n5)', () => {
+      it('should leave an empty reference if all the other cases fail (case new6)', () => {
         // @ts-expect-error this function is not valid
         operationDefinitionMap.testReference.requiredReferences = [
           {
@@ -1140,7 +1140,7 @@ describe('state_helpers', () => {
         delete operationDefinitionMap.secondTest;
       });
 
-      it('should use existing references, delete invalid, when switching from one reference to another (case r1)', () => {
+      it('should use existing references, delete invalid, when switching from one reference to another (case ref1)', () => {
         const layer: IndexPatternLayer = {
           indexPatternId: '1',
           columnOrder: ['ref1', 'invalid', 'output'],
@@ -1240,7 +1240,7 @@ describe('state_helpers', () => {
         );
       });
 
-      it('should transition by using the field from the previous reference if nothing else works (case r2)', () => {
+      it('should transition by using the field from the previous reference if nothing else works (case new5)', () => {
         const layer: IndexPatternLayer = {
           indexPatternId: '1',
           columnOrder: ['fieldReused', 'output'],

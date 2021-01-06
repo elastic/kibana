@@ -256,7 +256,7 @@ export function replaceColumn({
         const referencedOperation = operationDefinitionMap[referenceColumn.operationType];
 
         if (referencedOperation.type === op) {
-          // Case a1, case a2
+          // Unit tests are labelled as case a1, case a2
           tempLayer = deleteColumn({
             layer: tempLayer,
             columnId: previousReferenceId,
@@ -284,9 +284,9 @@ export function replaceColumn({
           referencedOperation.input === 'field' &&
           operationDefinition.input === 'field'
         ) {
-          // Case a3
+          // Unit test is case a3
           const matchedField = indexPattern.getFieldByName(referenceColumn.sourceField);
-          if (matchedField && operationDefinition.getPossibleOperationForField(matchedField!)) {
+          if (matchedField && operationDefinition.getPossibleOperationForField(matchedField)) {
             field = matchedField;
           }
         }
@@ -411,17 +411,20 @@ export function canTransition({
  * Function to transition to a fullReference from any different operation.
  * It is always possible to transition to a fullReference, but there are multiple
  * passes needed to copy all the previous state. These are the passes in priority
- * order:
+ * order, each of which has a unit test:
  *
- * 1. Case r1: referenced columns are an exact match
- * 2. Case n1: the previous column is an exact match.
+ * 1. Case ref1: referenced columns are an exact match
+ *    Side effect: Modifies the reference list directly
+ * 2. Case new1: the previous column is an exact match.
  *    Side effect: Deletes and then inserts the previous column
- * 3. Case n2: the reference supports `none` inputs, like filters. not visible in the UI.
+ * 3. Case new2: the reference supports `none` inputs, like filters. not visible in the UI.
  *    Side effect: Inserts a new column
- * 4. Case n3, n4: Fuzzy matching on the previous field
+ * 4. Case new3, new4: Fuzzy matching on the previous field
  *    Side effect: Inserts a new column, or an incomplete column
- * 5. Fuzzy matching based on the previous references
+ * 5. Fuzzy matching based on the previous references (case new6)
  *    Side effect: Inserts a new column, or an incomplete column
+ *    Side effect: Modifies the reference list directly
+ * 6. Case new6: Fall back by generating the column with empty references
  */
 function applyReferenceTransition({
   layer,
@@ -453,7 +456,7 @@ function applyReferenceTransition({
   const referenceIds = operationDefinition.requiredReferences.map((validation) => {
     const newId = generateId();
 
-    // First priority is to use any references that can be kept (case r1)
+    // First priority is to use any references that can be kept (case ref1)
     if (unusedReferencesQueue.length) {
       const otherColumn = layer.columns[unusedReferencesQueue[0]];
       if (isColumnValidAsReference({ validation, column: otherColumn })) {
@@ -461,7 +464,7 @@ function applyReferenceTransition({
       }
     }
 
-    // Second priority is to wrap around the previous column (case n1)
+    // Second priority is to wrap around the previous column (case new1)
     if (!hasExactMatch && isColumnValidAsReference({ validation, column: previousColumn })) {
       hasExactMatch = true;
 
@@ -474,7 +477,7 @@ function applyReferenceTransition({
       return newId;
     }
 
-    // Look for any fieldless operations that can be inserted directly (case n2)
+    // Look for any fieldless operations that can be inserted directly (case new2)
     if (validation.input.includes('none')) {
       const validOperations = operationDefinitions.filter((def) => {
         if (def.input !== 'none') return;
@@ -509,7 +512,6 @@ function applyReferenceTransition({
 
       // No exact match found, so let's determine that the current field can be reused
       const defWithField = defIgnoringfield.filter((def) => {
-        if (def.input !== 'field') return;
         const previousField = indexPattern.getFieldByName(previousColumn.sourceField);
         if (!previousField) return;
         return isOperationAllowedAsReference({
@@ -521,7 +523,7 @@ function applyReferenceTransition({
       });
 
       if (defWithField.length > 0) {
-        // Found the best match that keeps the field (case n3)
+        // Found the best match that keeps the field (case new3)
         hasFieldMatch = true;
         layer = insertNewColumn({
           layer,
@@ -532,7 +534,7 @@ function applyReferenceTransition({
         });
         return newId;
       } else if (defIgnoringfield.length === 1) {
-        // Can't use the field, but there is an exact match on the operation (case n4)
+        // Can't use the field, but there is an exact match on the operation (case new4)
         hasFieldMatch = true;
         layer = {
           ...layer,
@@ -545,34 +547,24 @@ function applyReferenceTransition({
       }
     }
 
-    // Look for field-based references that we can use to assign a new field-based operation from (case r2)
+    // Look for field-based references that we can use to assign a new field-based operation from (case new5)
     if (unusedReferencesQueue.length) {
       const otherColumn = layer.columns[unusedReferencesQueue[0]];
       if (otherColumn && 'sourceField' in otherColumn && validation.input.includes('field')) {
         const previousField = indexPattern.getFieldByName(otherColumn.sourceField);
         if (previousField) {
-          const defIgnoringfield = operationDefinitions
+          const defWithField = operationDefinitions
             .filter(
               (def) =>
                 def.input === 'field' &&
                 isOperationAllowedAsReference({
                   validation,
                   operationType: def.type,
+                  field: previousField,
                   indexPattern,
                 })
             )
             .sort(getSortScoreByPriority);
-
-          // No exact match found, so let's determine that the current field can be reused
-          const defWithField = defIgnoringfield.filter((def) => {
-            if (def.input !== 'field') return;
-            return isOperationAllowedAsReference({
-              validation,
-              operationType: def.type,
-              field: previousField,
-              indexPattern,
-            });
-          });
 
           if (defWithField.length > 0) {
             layer = insertNewColumn({
@@ -588,7 +580,7 @@ function applyReferenceTransition({
       }
     }
 
-    // The reference is too ambiguous at this point, but instead of throwing an error (case n5)
+    // The reference is too ambiguous at this point, but instead of throwing an error (case new6)
     return newId;
   });
 
