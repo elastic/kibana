@@ -39,8 +39,8 @@ export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
  * @public
  */
 export class SavedObjectsExporter {
-  private savedObjectsClient: SavedObjectsClientContract;
-  private exportSizeLimit: number;
+  readonly #savedObjectsClient: SavedObjectsClientContract;
+  readonly #exportSizeLimit: number;
 
   constructor({
     savedObjectsClient,
@@ -49,8 +49,8 @@ export class SavedObjectsExporter {
     savedObjectsClient: SavedObjectsClientContract;
     exportSizeLimit: number;
   }) {
-    this.savedObjectsClient = savedObjectsClient;
-    this.exportSizeLimit = exportSizeLimit;
+    this.#savedObjectsClient = savedObjectsClient;
+    this.#exportSizeLimit = exportSizeLimit;
   }
 
   /**
@@ -60,7 +60,11 @@ export class SavedObjectsExporter {
    */
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
     const objects = await this.fetchByTypes(options);
-    return this.processObjects(objects, options);
+    return this.processObjects(objects, {
+      includeReferencesDeep: options.includeReferencesDeep,
+      excludeExportDetails: options.excludeExportDetails,
+      namespace: options.namespace,
+    });
   }
 
   /**
@@ -69,34 +73,38 @@ export class SavedObjectsExporter {
    * See the {@link SavedObjectsExportByObjectOptions | options} for more detailed information.
    */
   public async exportByObjects(options: SavedObjectsExportByObjectOptions) {
-    if (options.objects.length > this.exportSizeLimit) {
-      throw Boom.badRequest(`Can't export more than ${this.exportSizeLimit} objects`);
+    if (options.objects.length > this.#exportSizeLimit) {
+      throw Boom.badRequest(`Can't export more than ${this.#exportSizeLimit} objects`);
     }
     const objects = await this.fetchByObjects(options);
-    return this.processObjects(objects, options);
+    return this.processObjects(objects, {
+      includeReferencesDeep: options.includeReferencesDeep,
+      excludeExportDetails: options.excludeExportDetails,
+      namespace: options.namespace,
+    });
   }
 
   private async processObjects(
-    rootObjects: SavedObject[],
+    savedObjects: SavedObject[],
     {
       excludeExportDetails = false,
       includeReferencesDeep = false,
       namespace,
     }: SavedObjectExportBaseOptions
   ) {
-    let exportedObjects: Array<SavedObject<unknown>> = [];
+    let exportedObjects: Array<SavedObject<unknown>>;
     let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
 
     if (includeReferencesDeep) {
       const fetchResult = await fetchNestedDependencies(
-        rootObjects,
-        this.savedObjectsClient,
+        savedObjects,
+        this.#savedObjectsClient,
         namespace
       );
       exportedObjects = sortObjects(fetchResult.objects);
       missingReferences = fetchResult.missingRefs;
     } else {
-      exportedObjects = sortObjects(rootObjects);
+      exportedObjects = sortObjects(savedObjects);
     }
 
     // redact attributes that should not be exported
@@ -113,7 +121,7 @@ export class SavedObjectsExporter {
   }
 
   private async fetchByObjects({ objects, namespace }: SavedObjectsExportByObjectOptions) {
-    const bulkGetResult = await this.savedObjectsClient.bulkGet(objects, { namespace });
+    const bulkGetResult = await this.#savedObjectsClient.bulkGet(objects, { namespace });
     const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {
       const err = Boom.badRequest();
@@ -131,16 +139,16 @@ export class SavedObjectsExporter {
     hasReference,
     search,
   }: SavedObjectsExportByTypeOptions) {
-    const findResponse = await this.savedObjectsClient.find({
+    const findResponse = await this.#savedObjectsClient.find({
       type: types,
       hasReference,
       hasReferenceOperator: hasReference ? 'OR' : undefined,
       search,
-      perPage: this.exportSizeLimit,
+      perPage: this.#exportSizeLimit,
       namespaces: namespace ? [namespace] : undefined,
     });
-    if (findResponse.total > this.exportSizeLimit) {
-      throw Boom.badRequest(`Can't export more than ${this.exportSizeLimit} objects`);
+    if (findResponse.total > this.#exportSizeLimit) {
+      throw Boom.badRequest(`Can't export more than ${this.#exportSizeLimit} objects`);
     }
 
     // sorts server-side by _id, since it's only available in fielddata

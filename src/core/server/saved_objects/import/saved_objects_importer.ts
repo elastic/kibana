@@ -37,9 +37,9 @@ export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
  * @public
  */
 export class SavedObjectsImporter {
-  private savedObjectsClient: SavedObjectsClientContract;
-  private typeRegistry: ISavedObjectTypeRegistry;
-  private importSizeLimit: number;
+  readonly #savedObjectsClient: SavedObjectsClientContract;
+  readonly #typeRegistry: ISavedObjectTypeRegistry;
+  readonly #importSizeLimit: number;
 
   constructor({
     savedObjectsClient,
@@ -50,9 +50,9 @@ export class SavedObjectsImporter {
     typeRegistry: ISavedObjectTypeRegistry;
     importSizeLimit: number;
   }) {
-    this.savedObjectsClient = savedObjectsClient;
-    this.typeRegistry = typeRegistry;
-    this.importSizeLimit = importSizeLimit;
+    this.#savedObjectsClient = savedObjectsClient;
+    this.#typeRegistry = typeRegistry;
+    this.#importSizeLimit = importSizeLimit;
   }
 
   /**
@@ -61,7 +61,7 @@ export class SavedObjectsImporter {
    *
    * @public
    */
-  async import({
+  import({
     readStream,
     createNewCopies,
     namespace,
@@ -72,9 +72,9 @@ export class SavedObjectsImporter {
       createNewCopies,
       namespace,
       overwrite,
-      objectLimit: this.importSizeLimit,
-      savedObjectsClient: this.savedObjectsClient,
-      typeRegistry: this.typeRegistry,
+      objectLimit: this.#importSizeLimit,
+      savedObjectsClient: this.#savedObjectsClient,
+      typeRegistry: this.#typeRegistry,
     });
   }
 
@@ -84,7 +84,7 @@ export class SavedObjectsImporter {
    *
    * @public
    */
-  async resolveImportErrors({
+  resolveImportErrors({
     readStream,
     createNewCopies,
     namespace,
@@ -95,9 +95,9 @@ export class SavedObjectsImporter {
       createNewCopies,
       namespace,
       retries,
-      objectLimit: this.importSizeLimit,
-      savedObjectsClient: this.savedObjectsClient,
-      typeRegistry: this.typeRegistry,
+      objectLimit: this.#importSizeLimit,
+      savedObjectsClient: this.#savedObjectsClient,
+      typeRegistry: this.#typeRegistry,
     });
   }
 }

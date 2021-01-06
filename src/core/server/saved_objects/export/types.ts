@@ -37,7 +37,7 @@ export interface SavedObjectExportBaseOptions {
 export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOptions {
   /** array of saved object types. */
   types: string[];
-  /** optional array of references to search object for when exporting by types */
+  /** optional array of references to search object for. */
   hasReference?: SavedObjectsFindOptionsReference[];
   /** optional query string to filter exported objects. */
   search?: string;

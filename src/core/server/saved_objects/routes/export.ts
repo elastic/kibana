@@ -89,9 +89,13 @@ const validateOptions = (
 ): EitherExportOptions => {
   const hasTypes = (types?.length ?? 0) > 0;
   const hasObjects = (objects?.length ?? 0) > 0;
+  if (!hasTypes && !hasObjects) {
+    throw new Error('Either `type` or `objects` are required.');
+  }
   if (hasTypes && hasObjects) {
     throw new Error(`Can't specify both "types" and "objects" properties when exporting`);
-  } else if (hasObjects) {
+  }
+  if (hasObjects) {
     if (objects!.length > exportSizeLimit) {
       throw new Error(`Can't export more than ${exportSizeLimit} objects`);
     }
@@ -110,7 +114,7 @@ const validateOptions = (
       excludeExportDetails,
       includeReferencesDeep,
     };
-  } else if (hasTypes) {
+  } else {
     const validationError = validateTypes(types!, supportedTypes);
     if (validationError) {
       throw new Error(validationError);
@@ -122,8 +126,6 @@ const validateOptions = (
       excludeExportDetails,
       includeReferencesDeep,
     };
-  } else {
-    throw new Error('Either `type` or `objects` are required.');
   }
 };
 
