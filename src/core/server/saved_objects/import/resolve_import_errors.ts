@@ -21,7 +21,7 @@ import { Readable } from 'stream';
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportRetry } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import {
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
 } from './types';
@@ -76,7 +76,7 @@ export async function resolveSavedObjectsImportErrors({
   validateRetries(retries);
 
   let successCount = 0;
-  let errorAccumulator: SavedObjectsImportError[] = [];
+  let errorAccumulator: SavedObjectsImportFailure[] = [];
   let importIdMap: Map<string, { id?: string; omitOriginId?: boolean }> = new Map();
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
   const filter = createObjectsFilter(retries);

@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom, { Payload } from '@hapi/boom';
-import { SavedObjectsImportError } from 'src/core/server';
+import { SavedObjectsImportFailure } from 'src/core/server';
 
-export const createEmptyFailureResponse = (errors?: Array<SavedObjectsImportError | Boom.Boom>) => {
-  const errorMessages: Array<SavedObjectsImportError | Payload> = (errors || []).map((error) => {
+export const createEmptyFailureResponse = (
+  errors?: Array<SavedObjectsImportFailure | Boom.Boom>
+) => {
+  const errorMessages: Array<SavedObjectsImportFailure | Payload> = (errors || []).map((error) => {
     if (Boom.isBoom(error as any)) {
       return (error as Boom.Boom).output.payload as Payload;
     }
-    return error as SavedObjectsImportError;
+    return error as SavedObjectsImportFailure;
   });
 
   return {

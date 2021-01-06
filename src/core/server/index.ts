@@ -272,7 +272,7 @@ export {
   SavedObjectsFindResponse,
   SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportOptions,
   SavedObjectsImportResponse,

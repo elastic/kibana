@@ -19,7 +19,7 @@
 
 import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsClientContract } from '../../types';
-import { SavedObjectsImportError, SavedObjectsImportRetry } from '../types';
+import { SavedObjectsImportFailure, SavedObjectsImportRetry } from '../types';
 
 const REF_TYPES_TO_VALIDATE = ['index-pattern', 'search'];
 
@@ -95,7 +95,7 @@ export async function validateReferences(
   retries?: SavedObjectsImportRetry[]
 ) {
   const objectsToSkip = getObjectsToSkip(retries);
-  const errorMap: { [key: string]: SavedObjectsImportError } = {};
+  const errorMap: { [key: string]: SavedObjectsImportFailure } = {};
   const nonExistingReferenceKeys = await getNonExistingReferenceAsKeys(
     savedObjects,
     savedObjectsClient,

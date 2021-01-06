@@ -97,7 +97,7 @@ export interface SavedObjectsImportMissingReferencesError {
  * Represents a failure to import.
  * @public
  */
-export interface SavedObjectsImportError {
+export interface SavedObjectsImportFailure {
   id: string;
   type: string;
   /**
@@ -153,7 +153,7 @@ export interface SavedObjectsImportResponse {
   success: boolean;
   successCount: number;
   successResults?: SavedObjectsImportSuccess[];
-  errors?: SavedObjectsImportError[];
+  errors?: SavedObjectsImportFailure[];
 }
 
 /**

@@ -23,7 +23,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsType,
   SavedObject,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectReference,
 } from '../types';
@@ -139,7 +139,7 @@ describe('#importSavedObjectsFromStream', () => {
       attributes: { title },
     };
   };
-  const createError = (): SavedObjectsImportError => {
+  const createError = (): SavedObjectsImportFailure => {
     const title = 'some-title';
     return {
       type: 'foo-type',

@@ -17,14 +17,14 @@
  * under the License.
  */
 import { SavedObject } from '../../types';
-import { SavedObjectsImportError, CreatedObject } from '../types';
+import { SavedObjectsImportFailure, CreatedObject } from '../types';
 
 export function extractErrors(
   // TODO: define saved object type
   savedObjectResults: Array<CreatedObject<unknown>>,
   savedObjectsToImport: Array<SavedObject<any>>
 ) {
-  const errors: SavedObjectsImportError[] = [];
+  const errors: SavedObjectsImportFailure[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject<{ title: string }>>();
   for (const savedObject of savedObjectsToImport) {
     originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);

@@ -21,7 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   SavedObject,
   SavedObjectsClientContract,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectError,
   SavedObjectsImportRetry,
 } from '../../types';
@@ -47,7 +47,7 @@ export async function checkConflicts({
   createNewCopies,
 }: CheckConflictsParams) {
   const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
-  const errors: SavedObjectsImportError[] = [];
+  const errors: SavedObjectsImportFailure[] = [];
   const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
   const pendingOverwrites = new Set<string>();
 

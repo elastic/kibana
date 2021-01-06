@@ -20,7 +20,7 @@
 import { Readable } from 'stream';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsClientContract } from '../types';
-import { SavedObjectsImportError, SavedObjectsImportResponse } from './types';
+import { SavedObjectsImportFailure, SavedObjectsImportResponse } from './types';
 import {
   validateReferences,
   checkOriginConflicts,
@@ -65,7 +65,7 @@ export async function importSavedObjectsFromStream({
   typeRegistry,
   namespace,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
-  let errorAccumulator: SavedObjectsImportError[] = [];
+  let errorAccumulator: SavedObjectsImportFailure[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
 
   // Get the objects to import

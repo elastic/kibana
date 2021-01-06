@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { SavedObject, SavedObjectsClientContract, SavedObjectsImportError } from '../../types';
+import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from '../types';
 
 interface CreateSavedObjectsParams<T> {
   objects: Array<SavedObject<T>>;
-  accumulatedErrors: SavedObjectsImportError[];
+  accumulatedErrors: SavedObjectsImportFailure[];
   savedObjectsClient: SavedObjectsClientContract;
   importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
   namespace?: string;
@@ -31,7 +31,7 @@ interface CreateSavedObjectsParams<T> {
 }
 interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;
-  errors: SavedObjectsImportError[];
+  errors: SavedObjectsImportFailure[];
 }
 
 /**

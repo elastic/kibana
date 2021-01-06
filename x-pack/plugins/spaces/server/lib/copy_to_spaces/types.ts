@@ -7,7 +7,7 @@
 import { Payload } from '@hapi/boom';
 import {
   SavedObjectsImportSuccess,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from 'src/core/server';
 
@@ -32,6 +32,6 @@ export interface CopyResponse {
     success: boolean;
     successCount: number;
     successResults?: SavedObjectsImportSuccess[];
-    errors?: Array<SavedObjectsImportError | Payload>;
+    errors?: Array<SavedObjectsImportFailure | Payload>;
   };
 }

@@ -23,7 +23,7 @@ import {
   SavedObjectReference,
   SavedObject,
   SavedObjectsImportRetry,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
 } from '../../types';
 import { checkOriginConflicts, getImportIdMapForRetries } from './check_origin_conflicts';
 import { savedObjectsClientMock } from '../../../mocks';
@@ -164,7 +164,7 @@ describe('#checkOriginConflicts', () => {
     const createAmbiguousConflictError = (
       object: SavedObjectType,
       destinations: SavedObjectType[]
-    ): SavedObjectsImportError => ({
+    ): SavedObjectsImportFailure => ({
       type: object.type,
       id: object.id,
       title: object.attributes.title,
@@ -177,7 +177,7 @@ describe('#checkOriginConflicts', () => {
     const createConflictError = (
       object: SavedObjectType,
       destinationId?: string
-    ): SavedObjectsImportError => ({
+    ): SavedObjectsImportFailure => ({
       type: object.type,
       id: object.id,
       title: object.attributes?.title,

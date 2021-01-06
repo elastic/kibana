@@ -27,7 +27,7 @@ import {
 
 import { SavedObject } from '../../types';
 import { createLimitStream } from './create_limit_stream';
-import { SavedObjectsImportError } from '../types';
+import { SavedObjectsImportFailure } from '../types';
 import { getNonUniqueEntries } from './get_non_unique_entries';
 import { SavedObjectsErrorHelpers } from '../../service';
 
@@ -44,7 +44,7 @@ export async function collectSavedObjects({
   filter,
   supportedTypes,
 }: CollectSavedObjectsOptions) {
-  const errors: SavedObjectsImportError[] = [];
+  const errors: SavedObjectsImportFailure[] = [];
   const entries: Array<{ type: string; id: string }> = [];
   const importIdMap = new Map<string, { id?: string; omitOriginId?: boolean }>();
   const collectedObjects: Array<SavedObject<{ title?: string }>> = await createPromiseFromStreams([

@@ -19,7 +19,7 @@
 
 import { savedObjectsClientMock } from '../../../mocks';
 import { createSavedObjects } from './create_saved_objects';
-import { SavedObjectsClientContract, SavedObject, SavedObjectsImportError } from '../../types';
+import { SavedObjectsClientContract, SavedObject, SavedObjectsImportFailure } from '../../types';
 import { SavedObjectsErrorHelpers } from '../../service';
 import { extractErrors } from './extract_errors';
 
@@ -79,7 +79,7 @@ describe('#createSavedObjects', () => {
    */
   const setupParams = (partial: {
     objects: SavedObject[];
-    accumulatedErrors?: SavedObjectsImportError[];
+    accumulatedErrors?: SavedObjectsImportFailure[];
     namespace?: string;
     overwrite?: boolean;
   }): CreateSavedObjectsParams => {
@@ -158,7 +158,7 @@ describe('#createSavedObjects', () => {
   };
 
   test('filters out objects that have errors present', async () => {
-    const error = { type: obj1.type, id: obj1.id } as SavedObjectsImportError;
+    const error = { type: obj1.type, id: obj1.id } as SavedObjectsImportFailure;
     const options = setupParams({ objects: [obj1], accumulatedErrors: [error] });
 
     const createSavedObjectsResult = await createSavedObjects(options);
@@ -197,22 +197,26 @@ describe('#createSavedObjects', () => {
   };
 
   describe('handles accumulated errors as expected', () => {
-    const resolvableErrors: SavedObjectsImportError[] = [
-      { type: 'foo', id: 'foo-id', error: { type: 'conflict' } } as SavedObjectsImportError,
+    const resolvableErrors: SavedObjectsImportFailure[] = [
+      { type: 'foo', id: 'foo-id', error: { type: 'conflict' } } as SavedObjectsImportFailure,
       {
         type: 'bar',
         id: 'bar-id',
         error: { type: 'ambiguous_conflict' },
-      } as SavedObjectsImportError,
+      } as SavedObjectsImportFailure,
       {
         type: 'baz',
         id: 'baz-id',
         error: { type: 'missing_references' },
-      } as SavedObjectsImportError,
+      } as SavedObjectsImportFailure,
     ];
-    const unresolvableErrors: SavedObjectsImportError[] = [
-      { type: 'qux', id: 'qux-id', error: { type: 'unsupported_type' } } as SavedObjectsImportError,
-      { type: 'quux', id: 'quux-id', error: { type: 'unknown' } } as SavedObjectsImportError,
+    const unresolvableErrors: SavedObjectsImportFailure[] = [
+      {
+        type: 'qux',
+        id: 'qux-id',
+        error: { type: 'unsupported_type' },
+      } as SavedObjectsImportFailure,
+      { type: 'quux', id: 'quux-id', error: { type: 'unknown' } } as SavedObjectsImportFailure,
     ];
 
     test('does not call bulkCreate when resolvable errors are present', async () => {

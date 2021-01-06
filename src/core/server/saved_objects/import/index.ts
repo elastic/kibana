@@ -21,7 +21,7 @@ export { ISavedObjectsImporter, SavedObjectsImporter } from './saved_objects_imp
 export {
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportOptions,
   SavedObjectsImportConflictError,
   SavedObjectsImportAmbiguousConflictError,

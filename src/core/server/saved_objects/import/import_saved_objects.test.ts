@@ -23,7 +23,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsType,
   SavedObject,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
 } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
 import { ISavedObjectTypeRegistry } from '..';
@@ -116,7 +116,7 @@ describe('#importSavedObjectsFromStream', () => {
       attributes: { title },
     };
   };
-  const createError = (): SavedObjectsImportError => {
+  const createError = (): SavedObjectsImportFailure => {
     const title = 'some-title';
     return {
       type: 'foo-type',

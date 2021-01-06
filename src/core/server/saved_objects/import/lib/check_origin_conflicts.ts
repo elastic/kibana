@@ -22,7 +22,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   SavedObject,
   SavedObjectsClientContract,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportRetry,
 } from '../../types';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -159,7 +159,7 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
       return acc.set(key, [...value, cur.value.object]);
     }, new Map<string, Array<SavedObject<{ title?: string }>>>());
 
-  const errors: SavedObjectsImportError[] = [];
+  const errors: SavedObjectsImportFailure[] = [];
   const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
   const pendingOverwrites = new Set<string>();
   checkOriginConflictResults.forEach((result) => {

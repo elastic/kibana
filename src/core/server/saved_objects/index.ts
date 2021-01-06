@@ -24,7 +24,7 @@ export {
   SavedObjectsImporter,
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportOptions,
   SavedObjectsImportResponse,
