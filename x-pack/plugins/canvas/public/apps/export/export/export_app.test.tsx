@@ -6,18 +6,18 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { ExportApp } from '../export_app.component';
-import { CanvasWorkpad } from '../../../../../types';
+import { ExportApp } from './export_app.component';
+import { CanvasWorkpad } from '../../../../types';
 
 jest.mock('style-it', () => ({
   it: (css: string, Component: any) => Component,
 }));
 
-jest.mock('../../../../components/workpad_page', () => ({
+jest.mock('../../../components/workpad_page', () => ({
   WorkpadPage: (props: any) => <div>Page</div>,
 }));
 
-jest.mock('../../../../components/link', () => ({
+jest.mock('../../../components/link', () => ({
   Link: (props: any) => <div>Link</div>,
 }));
 

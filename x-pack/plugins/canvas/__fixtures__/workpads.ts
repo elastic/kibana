@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CanvasWorkpad, CanvasElement, CanvasPage, CanvasVariable } from '../../types';
+import { CanvasWorkpad, CanvasElement, CanvasPage, CanvasVariable } from '../types';
 
 const BaseWorkpad: CanvasWorkpad = {
   '@created': '2019-02-08T18:35:23.029Z',

@@ -13,8 +13,8 @@
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 // import { act } from 'react-dom/test-utils';
-import { App } from '../app';
-import { sharedWorkpads, WorkpadNames, tick } from '../../test';
+import { App } from './app';
+import { sharedWorkpads, WorkpadNames, tick } from '../test';
 import {
   getScrubber as scrubber,
   getScrubberSlideContainer as scrubberContainer,
@@ -27,11 +27,11 @@ import {
   getFooter as footer,
   getPageControlsPrevious as previous,
   getPageControlsNext as next,
-} from '../../test/selectors';
-import { openSettings, selectMenuItem } from '../../test/interactions';
+} from '../test/selectors';
+import { openSettings, selectMenuItem } from '../test/interactions';
 
 // Mock the renderers
-jest.mock('../../supported_renderers');
+jest.mock('../supported_renderers');
 
 // Mock the EuiPortal - `insertAdjacentElement is not supported in
 // `jsdom` 12.  We're just going to render a `div` with the children
