@@ -29,6 +29,14 @@
         "id": "TA0008",
         "name": "Lateral Movement",
         "reference": "https://attack.mitre.org/tactics/TA0008/"
+      }
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0002",
+        "name": "Execution",
+        "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
       "technique": [
         {

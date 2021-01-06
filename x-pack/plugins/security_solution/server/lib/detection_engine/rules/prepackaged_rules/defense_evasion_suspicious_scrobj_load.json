@@ -29,16 +29,9 @@
         "id": "TA0005",
         "name": "Defense Evasion",
         "reference": "https://attack.mitre.org/tactics/TA0005/"
-      },
-      "technique": [
-        {
-          "id": "T1064",
-          "name": "Scripting",
-          "reference": "https://attack.mitre.org/techniques/T1064/"
-        }
-      ]
+      }
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }

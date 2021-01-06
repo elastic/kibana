@@ -31,6 +31,14 @@
         "id": "TA0003",
         "name": "Persistence",
         "reference": "https://attack.mitre.org/tactics/TA0003/"
+      }
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
       },
       "technique": [
         {

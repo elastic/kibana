@@ -30,9 +30,9 @@
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
-        "id": "TA0002",
-        "name": "Execution",
-        "reference": "https://attack.mitre.org/tactics/TA0002/"
+        "id": "TA0001",
+        "name": "Initial Access",
+        "reference": "https://attack.mitre.org/tactics/TA0001/"
       },
       "technique": [
         {
