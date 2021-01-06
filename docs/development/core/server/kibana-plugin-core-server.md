@@ -29,6 +29,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsExporter](./kibana-plugin-core-server.savedobjectsexporter.md) |  |
 |  [SavedObjectsExportError](./kibana-plugin-core-server.savedobjectsexporterror.md) |  |
 |  [SavedObjectsImporter](./kibana-plugin-core-server.savedobjectsimporter.md) |  |
+|  [SavedObjectsImportError](./kibana-plugin-core-server.savedobjectsimporterror.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-core-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-core-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-core-server.savedobjectsanitizeddoc.md) documents to the other kind. |
 |  [SavedObjectsUtils](./kibana-plugin-core-server.savedobjectsutils.md) |  |
@@ -168,7 +169,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsFindResult](./kibana-plugin-core-server.savedobjectsfindresult.md) |  |
 |  [SavedObjectsImportAmbiguousConflictError](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.md) | Represents a failure to import due to a conflict, which can be resolved in different ways with an overwrite. |
 |  [SavedObjectsImportConflictError](./kibana-plugin-core-server.savedobjectsimportconflicterror.md) | Represents a failure to import due to a conflict. |
-|  [SavedObjectsImportError](./kibana-plugin-core-server.savedobjectsimporterror.md) | Represents a failure to import. |
+|  [SavedObjectsImportFailure](./kibana-plugin-core-server.savedobjectsimportfailure.md) | Represents a failure to import. |
 |  [SavedObjectsImportMissingReferencesError](./kibana-plugin-core-server.savedobjectsimportmissingreferenceserror.md) | Represents a failure to import due to missing references. |
 |  [SavedObjectsImportOptions](./kibana-plugin-core-server.savedobjectsimportoptions.md) | Options to control the import operation. |
 |  [SavedObjectsImportResponse](./kibana-plugin-core-server.savedobjectsimportresponse.md) | The response describing the result of an import. |

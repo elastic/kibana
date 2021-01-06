@@ -22,3 +22,7 @@ resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedO
 
 `Promise<SavedObjectsImportResponse>`
 
+## Exceptions
+
+SavedObjectsImportError
+

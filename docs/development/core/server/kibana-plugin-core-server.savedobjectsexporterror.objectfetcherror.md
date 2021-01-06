@@ -7,14 +7,13 @@
 <b>Signature:</b>
 
 ```typescript
-static objectFetchError(message: string, objects: SavedObject[]): SavedObjectsExportError;
+static objectFetchError(objects: SavedObject[]): SavedObjectsExportError;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  message | <code>string</code> |  |
 |  objects | <code>SavedObject[]</code> |  |
 
 <b>Returns:</b>

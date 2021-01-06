@@ -2389,9 +2389,9 @@ export class SavedObjectsExportError extends Error {
     // (undocumented)
     readonly attributes?: Record<string, any> | undefined;
     // (undocumented)
-    static exportSizeExceeded(message: string): SavedObjectsExportError;
+    static exportSizeExceeded(limit: number): SavedObjectsExportError;
     // (undocumented)
-    static objectFetchError(message: string, objects: SavedObject[]): SavedObjectsExportError;
+    static objectFetchError(objects: SavedObject[]): SavedObjectsExportError;
     // (undocumented)
     readonly type: string;
 }
@@ -2496,8 +2496,26 @@ export class SavedObjectsImporter {
     resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 }
 
+// @public (undocumented)
+export class SavedObjectsImportError extends Error {
+    // (undocumented)
+    readonly attributes?: Record<string, any> | undefined;
+    // (undocumented)
+    static importSizeExceeded(limit: number): SavedObjectsImportError;
+    // (undocumented)
+    static nonUniqueImportObjects(nonUniqueEntries: string[]): SavedObjectsImportError;
+    // (undocumented)
+    static nonUniqueRetryDestinations(nonUniqueRetryDestinations: string[]): SavedObjectsImportError;
+    // (undocumented)
+    static nonUniqueRetryObjects(nonUniqueRetryObjects: string[]): SavedObjectsImportError;
+    // (undocumented)
+    static referencesFetchError(objects: SavedObject[]): SavedObjectsImportError;
+    // (undocumented)
+    readonly type: string;
+}
+
 // @public
-export interface SavedObjectsImportError {
+export interface SavedObjectsImportFailure {
     // (undocumented)
     error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
@@ -2536,7 +2554,7 @@ export interface SavedObjectsImportOptions {
 // @public
 export interface SavedObjectsImportResponse {
     // (undocumented)
-    errors?: SavedObjectsImportError[];
+    errors?: SavedObjectsImportFailure[];
     // (undocumented)
     success: boolean;
     // (undocumented)

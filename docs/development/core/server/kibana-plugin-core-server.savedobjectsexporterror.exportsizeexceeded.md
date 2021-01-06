@@ -7,14 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-static exportSizeExceeded(message: string): SavedObjectsExportError;
+static exportSizeExceeded(limit: number): SavedObjectsExportError;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  message | <code>string</code> |  |
+|  limit | <code>number</code> |  |
 
 <b>Returns:</b>
 

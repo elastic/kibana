@@ -22,3 +22,7 @@ import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImpor
 
 `Promise<SavedObjectsImportResponse>`
 
+## Exceptions
+
+SavedObjectsImportError
+

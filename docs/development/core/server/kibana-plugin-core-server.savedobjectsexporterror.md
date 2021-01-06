@@ -28,6 +28,6 @@ export declare class SavedObjectsExportError extends Error
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [exportSizeExceeded(message)](./kibana-plugin-core-server.savedobjectsexporterror.exportsizeexceeded.md) | <code>static</code> |  |
-|  [objectFetchError(message, objects)](./kibana-plugin-core-server.savedobjectsexporterror.objectfetcherror.md) | <code>static</code> |  |
+|  [exportSizeExceeded(limit)](./kibana-plugin-core-server.savedobjectsexporterror.exportsizeexceeded.md) | <code>static</code> |  |
+|  [objectFetchError(objects)](./kibana-plugin-core-server.savedobjectsexporterror.objectfetcherror.md) | <code>static</code> |  |
 
