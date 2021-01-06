@@ -24,7 +24,7 @@ import {
   buildErrorAlertReason,
   buildFiredAlertReason,
   buildNoDataAlertReason,
-  buildRecoveredAlertReason,
+  // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
 import { evaluateCondition } from './evaluate_condition';
@@ -99,9 +99,14 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         .map((result) => buildReasonWithVerboseMetricName(result[item], buildFiredAlertReason))
         .join('\n');
     } else if (nextState === AlertStates.OK && prevState?.alertState === AlertStates.ALERT) {
-      reason = results
-        .map((result) => buildReasonWithVerboseMetricName(result[item], buildRecoveredAlertReason))
-        .join('\n');
+      /*
+       * Custom recovery actions aren't yet available in the alerting framework
+       * Uncomment the code below once they've been implemented
+       * Reference: https://github.com/elastic/kibana/issues/87048
+       */
+      // reason = results
+      //   .map((result) => buildReasonWithVerboseMetricName(result[item], buildRecoveredAlertReason))
+      //   .join('\n');
     }
     if (alertOnNoData) {
       if (nextState === AlertStates.NO_DATA) {
