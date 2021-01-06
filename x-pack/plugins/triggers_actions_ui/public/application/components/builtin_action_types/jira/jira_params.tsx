@@ -96,6 +96,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         : { hasLabels: false, hasDescription: false, hasPriority: false, hasParent: false },
     [fields]
   );
+  console.log('INFO', { hasPriority, fields, incident });
 
   const issueTypesSelectOptions: EuiSelectOption[] = useMemo(() => {
     const doesIssueTypeExist =
@@ -133,6 +134,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
   );
 
   useEffect(() => {
+    debugger;
     if (actionConnector != null && actionConnectorRef.current !== actionConnector.id) {
       actionConnectorRef.current = actionConnector.id;
       editAction(
