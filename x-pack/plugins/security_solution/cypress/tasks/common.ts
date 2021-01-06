@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { removeSignalsIndex } from './api_calls/rules';
 import { esArchiverLoadEmptyKibana } from './es_archiver';
 
 const primaryButton = 0;
@@ -64,6 +65,21 @@ export const reload = (afterReload: () => void) => {
 };
 
 export const cleanKibana = () => {
-  cy.exec(`curl -XDELETE "${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*" -k`);
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`;
+
+  // Delete kibana indexes and wait until they are deleted
+  cy.request('DELETE', kibanaIndexUrl);
+  cy.waitUntil(() => {
+    cy.wait(500);
+    return cy.request(kibanaIndexUrl).then((response) => JSON.stringify(response.body) === '{}');
+  });
+
+  // Load kibana indexes and wait until they are created
   esArchiverLoadEmptyKibana();
+  cy.waitUntil(() => {
+    cy.wait(500);
+    return cy.request(kibanaIndexUrl).then((response) => JSON.stringify(response.body) !== '{}');
+  });
+
+  removeSignalsIndex();
 };

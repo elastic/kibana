@@ -5,7 +5,11 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, ValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import { ServerLogActionParams } from '../types';
 
 export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActionParams> {
@@ -24,15 +28,16 @@ export function getActionType(): ActionTypeModel<unknown, unknown, ServerLogActi
         defaultMessage: 'Send to Server log',
       }
     ),
-    validateConnector: (): ValidationResult => {
-      return { errors: {} };
+    validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+      return { config: { errors: {} }, secrets: { errors: {} } };
     },
-    validateParams: (actionParams: ServerLogActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
+    validateParams: (
+      actionParams: ServerLogActionParams
+    ): GenericValidationResult<Pick<ServerLogActionParams, 'message'>> => {
       const errors = {
         message: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = { errors };
       if (!actionParams.message?.length) {
         errors.message.push(
           i18n.translate(

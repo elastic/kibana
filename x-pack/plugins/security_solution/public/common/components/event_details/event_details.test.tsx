@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReactWrapper, shallow } from 'enzyme';
+import { waitFor } from '@testing-library/dom';
+import { ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
@@ -16,7 +17,7 @@ import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { waitFor } from '@testing-library/dom';
+import { TimelineTabs } from '../../../../common/types/timeline';
 
 jest.mock('../link_to');
 describe('EventDetails', () => {
@@ -27,6 +28,7 @@ describe('EventDetails', () => {
     id: mockDetailItemDataId,
     isAlert: false,
     onViewSelected: jest.fn(),
+    timelineTabType: TimelineTabs.query,
     timelineId: 'test',
     view: EventsViewType.summaryView,
   };
@@ -51,12 +53,6 @@ describe('EventDetails', () => {
       </TestProviders>
     ) as ReactWrapper;
     await waitFor(() => wrapper.update());
-  });
-  describe('rendering', () => {
-    test('should match snapshot', () => {
-      const shallowWrap = shallow(<EventDetails {...defaultProps} />);
-      expect(shallowWrap).toMatchSnapshot();
-    });
   });
 
   describe('tabs', () => {
