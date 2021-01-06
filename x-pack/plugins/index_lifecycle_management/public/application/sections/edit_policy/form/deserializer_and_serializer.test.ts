@@ -233,7 +233,10 @@ describe('deserializer and serializer', () => {
   });
 
   it('removes forcemerge, readonly, and rollover config when rollover is disabled in hot phase', () => {
-    formInternal._meta.hot.useRollover = false;
+    // These two toggles jointly control whether rollover is enabled since the default is
+    // for rollover to be enabled.
+    formInternal._meta.hot.isUsingDefaultRollover = false;
+    formInternal._meta.hot.customRollover.enabled = false;
 
     const result = serializer(formInternal);
 
@@ -243,7 +246,7 @@ describe('deserializer and serializer', () => {
   });
 
   it('removes min_age from warm when rollover is enabled', () => {
-    formInternal._meta.hot.useRollover = true;
+    formInternal._meta.hot.customRollover.enabled = true;
     formInternal._meta.warm.warmPhaseOnRollover = true;
 
     const result = serializer(formInternal);
