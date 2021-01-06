@@ -130,7 +130,17 @@ export default function ({ getPageObjects, getService }) {
         return feature.properties.__kbn_isvisibleduetojoin__;
       });
 
-      expect(visibilitiesOfFeatures).to.eql([false, true, true, true, false, true, true, true]);
+      expect(visibilitiesOfFeatures).to.eql([
+        false,
+        true,
+        true,
+        true,
+        // geo centroids for above features
+        false,
+        true,
+        true,
+        true,
+      ]);
     });
 
     describe('query bar', () => {
@@ -201,6 +211,7 @@ export default function ({ getPageObjects, getService }) {
           true,
           false,
           false,
+          // geo centroids for above features
           false,
           true,
           false,
