@@ -109,6 +109,7 @@ const getMockObject = (
   sourcerer: {},
 });
 
+// The string returned is different from what getUrlForApp returns, but does not matter for the purposes of this test.
 const getUrlForAppMock = (appId: string, options?: { path?: string; absolute?: boolean }) =>
   `${appId}${options?.path ?? ''}`;
 
