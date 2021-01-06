@@ -16,6 +16,7 @@ import {
   setErrorMessage,
   setQueuedSuccessMessage,
   setQueuedErrorMessage,
+  clearFlashMessages,
 } from './';
 
 describe('Flash Message Helpers', () => {
@@ -67,5 +68,11 @@ describe('Flash Message Helpers', () => {
         type: 'error',
       },
     ]);
+  });
+
+  it('clearFlashMessages()', () => {
+    clearFlashMessages();
+
+    expect(FlashMessagesLogic.values.messages).toEqual([]);
   });
 });
