@@ -1,0 +1,73 @@
+[[upgrading-nodejs]]
+== Upgrading Node.js
+
+{kib} requires a specific Node.js version to run.
+When running {kib} from source, the developer needs to have this version installed locally.
+
+The required version of Node.js is listed in several different files throughout the {kib} source code.
+All of these needs to be updated when upgrading Node.js:
+
+  - {kib-repo}blob/{branch}/.ci/Dockerfile[`.ci/Dockerfile`] - The version is specified in the `NODE_VERSION` constant.
+  - {kib-repo}blob/{branch}/.node-version[`.node-version`]
+  - {kib-repo}blob/{branch}/.nvmrc[`.nvmrc`]
+  - {kib-repo}blob/{branch}/package.json[`package.json`] - The version is specified in the `engines.node` field.
+
+See PR {kib-repo}pull/86593[#86593] for an example of how the Node.js version has been upgraded previously.
+
+In the `6.8` branch, the `.ci/Dockerfile` file does not exist, so when upgrading Node.js in that branch, just skip that file.
+
+=== Backporting
+
+The following rules are not set in stone.
+Use best judgement when backporting.
+
+Currently `7.11` and newer runs Node.js 14 while `7.10` and older runs Node.js 10.
+Hence, upgrades to either Node.js 14 or Node.js 10 shold be done as separate PRs.
+
+==== Node.js patch upgrades
+
+Normally we want to backport Node.js _patch_ upgrades to all supported release branches that runs the same _major_ Node.js version:
+
+  - If upgrading Node.js 14, and the current release is `7.11.1`, the main PR should target `master` and be backported to `7.x` and `7.11`.
+  - If upgrading Node.js 10, the main PR should just target `6.8`.
+
+==== Node.js minor upgrades
+
+Normally we want to backport Node.js _minor_ upgrades to the next minor {kib} release branch that runs the same _major_ Node.js version:
+
+  - If upgrading Node.js 14, and the current release is `7.11.1`, the main PR should target `master` and be backported to `7.x`, while leaving the `7.11` branch as-is.
+  - If upgrading Node.js 10, the main PR should just target `6.8`.
+
+=== Upgrading installed Node.js version
+
+The following guide expects that https://github.com/nvm-sh/nvm[nvm] is used to manage locally installed Node.js versions.
+
+Run the following to install the new Node.js version (replace `<version>` with the desired Node.js version):
+
+[source,bash]
+----
+nvm install <version>
+----
+
+To get the same global npm modules installed with the new version of Node.js as is currently installed, use the `--reinstall-packages-from` command-line argument (optionally replace `14` with the desired source version):
+
+[source,bash]
+----
+nvm install <version> --reinstall-packages-from=14
+----
+
+If needed, uninstall the old version of Node.js by running the following (replace `<old-version>` with the full version number of the version that should be uninstalled):
+
+[source,bash]
+----
+nvm uninstall <old-version>
+----
+
+Optionally, tell nvm to always use the "highest" installed Node.js 14 version (replace `14` if a different major version is desired):
+
+[source,bash]
+----
+nvm alias default 14
+----
+
+Alternatively, include the full version number at the end to specify a specific default version.
