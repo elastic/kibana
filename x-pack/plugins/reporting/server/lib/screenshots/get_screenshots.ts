@@ -37,7 +37,7 @@ const resizeToClipArea = async (
   if (viewWidth < width + left || viewHeight < height + top) {
     logger.debug(`Item's position is not within the viewport.`);
 
-    // add top and left margin to unscaled measurements
+    // add left and top margin to unscaled measurements
     const newWidth = width + left;
     const newHeight = height + top;
 
@@ -55,7 +55,7 @@ const resizeToClipArea = async (
     );
   }
 
-  logger.debug(`Capturing item: top:${top} left:${left} height:${height} width:${width}`);
+  logger.debug(`Capturing item: width=${width} height=${height} left=${left} top=${top}`);
 };
 
 export const getScreenshots = async (

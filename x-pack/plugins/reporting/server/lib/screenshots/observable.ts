@@ -87,6 +87,7 @@ export function screenshotsObservableFactory(
               }),
               mergeMap(() => getNumberOfItems(captureConfig, driver, layout, logger)),
               mergeMap(async (itemsCount) => {
+                // set the viewport to the dimentions from the job, to allow elements to flow into the expected layout
                 const viewport = layout.getViewport(itemsCount) || getDefaultViewPort();
                 await Promise.all([
                   driver.setViewport(viewport, logger),

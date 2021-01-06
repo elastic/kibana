@@ -43,7 +43,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     tracker.startLayout();
 
     const layout = createLayout(captureConfig, layoutParams);
-    logger.debug(`Layout: height=${layout.height} width=${layout.width}`);
+    logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
     tracker.endLayout();
 
     tracker.startScreenshots();
