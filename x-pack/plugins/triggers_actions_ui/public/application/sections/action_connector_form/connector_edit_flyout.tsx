@@ -29,7 +29,6 @@ import { TestConnectorForm } from './test_connector_form';
 import {
   ActionConnector,
   ActionTypeRegistryContract,
-  IErrorObject,
   UserConfiguredActionConnector,
 } from '../../../types';
 import { ConnectorReducer, createConnectorReducer } from './connector_reducer';
