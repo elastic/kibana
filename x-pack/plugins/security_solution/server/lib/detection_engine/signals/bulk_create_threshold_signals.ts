@@ -12,7 +12,11 @@ import {
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger } from '../../../../../../../src/core/server';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
@@ -24,7 +28,7 @@ interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
   someResult: SignalSearchResponse;
   ruleParams: RuleTypeParams;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;
   id: string;

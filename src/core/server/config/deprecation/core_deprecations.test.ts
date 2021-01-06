@@ -120,6 +120,26 @@ describe('core deprecations', () => {
     });
   });
 
+  describe('server.host', () => {
+    it('logs a warning if server.host is set to "0"', () => {
+      const { messages } = applyCoreDeprecations({
+        server: { host: '0' },
+      });
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "Support for setting server.host to \\"0\\" in kibana.yml is deprecated and will be removed in Kibana version 8.0.0. Instead use \\"0.0.0.0\\" to bind to all interfaces.",
+        ]
+      `);
+    });
+    it('does not log a warning if server.host is not set to "0"', () => {
+      const { migrated, messages } = applyCoreDeprecations({
+        server: { host: '0.0.0.0' },
+      });
+      expect(migrated.server.host).toEqual('0.0.0.0');
+      expect(messages.length).toBe(0);
+    });
+  });
+
   describe('rewriteBasePath', () => {
     it('logs a warning is server.basePath is set and server.rewriteBasePath is not', () => {
       const { messages } = applyCoreDeprecations({
