@@ -444,7 +444,6 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     test('handles a mix of successes and errors and injects metadata', async () => {
-      // TODO
       const error1 = createError();
       const error2 = createError();
       const options = setupOptions([
