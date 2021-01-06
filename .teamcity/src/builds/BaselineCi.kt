@@ -5,8 +5,8 @@ import builds.default.DefaultBuild
 import builds.default.DefaultSavedObjectFieldMetrics
 import builds.oss.OssBuild
 import dependsOn
+import getProjectBranch
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
-import jetbrains.buildServer.configs.kotlin.v2019_2.DslContext
 import jetbrains.buildServer.configs.kotlin.v2019_2.FailureAction
 import jetbrains.buildServer.configs.kotlin.v2019_2.triggers.vcs
 import templates.KibanaTemplate
@@ -22,7 +22,7 @@ object BaselineCi : BuildType({
 
   triggers {
     vcs {
-      branchFilter = "refs/heads/${DslContext.getParameter("projectBranch")}"
+      branchFilter = "refs/heads/${getProjectBranch()}"
 //      perCheckinTriggering = true // TODO re-enable this later, it wreaks havoc when I merge upstream
     }
   }

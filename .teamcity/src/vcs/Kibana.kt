@@ -1,12 +1,12 @@
 package vcs
 
-import jetbrains.buildServer.configs.kotlin.v2019_2.DslContext
+import getProjectBranch
 import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
 
 object Kibana : GitVcsRoot({
-  id("kibana_${DslContext.getParameter("projectBranch")}")
+  id("kibana_${getProjectBranch()}")
 
-  name = "kibana / ${DslContext.getParameter("projectBranch")}"
+  name = "kibana / ${getProjectBranch()}"
   url = "https://github.com/elastic/kibana.git"
-  branch = "refs/heads/${DslContext.getParameter("projectBranch")}"
+  branch = "refs/heads/${getProjectBranch()}"
 })

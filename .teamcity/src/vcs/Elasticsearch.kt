@@ -1,12 +1,12 @@
 package vcs
 
-import jetbrains.buildServer.configs.kotlin.v2019_2.DslContext
+import getProjectBranch
 import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
 
 object Elasticsearch : GitVcsRoot({
-  id("elasticsearch_${DslContext.getParameter("projectBranch")}")
+  id("elasticsearch_${getProjectBranch()}")
 
-  name = "elasticsearch / ${DslContext.getParameter("projectBranch")}"
+  name = "elasticsearch / ${getProjectBranch()}"
   url = "https://github.com/elastic/elasticsearch.git"
-  branch = "refs/heads/${DslContext.getParameter("projectBranch")}"
+  branch = "refs/heads/${getProjectBranch()}"
 })
