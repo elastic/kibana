@@ -18,16 +18,34 @@ import { getActionType as getServiceNowActionType } from './servicenow';
 import { getActionType as getJiraActionType } from './jira';
 import { getActionType as getResilientActionType } from './resilient';
 import { getActionType as getTeamsActionType } from './teams';
-export type { ActionParamsType as EmailActionParams } from './email';
-export type { ActionParamsType as IndexActionParams } from './es_index';
-export type { ActionParamsType as PagerDutyActionParams } from './pagerduty';
-export type { ActionParamsType as ServerLogActionParams } from './server_log';
-export type { ActionParamsType as SlackActionParams } from './slack';
-export type { ActionParamsType as WebhookActionParams } from './webhook';
-export type { ActionParamsType as ServiceNowActionParams } from './servicenow';
-export type { ActionParamsType as JiraActionParams } from './jira';
-export type { ActionParamsType as ResilientActionParams } from './resilient';
-export type { ActionParamsType as TeamsActionParams } from './teams';
+export { ActionParamsType as EmailActionParams, ActionTypeId as EmailActionTypeId } from './email';
+export {
+  ActionParamsType as IndexActionParams,
+  ActionTypeId as IndexActionTypeId,
+} from './es_index';
+export {
+  ActionParamsType as PagerDutyActionParams,
+  ActionTypeId as PagerDutyActionTypeId,
+} from './pagerduty';
+export {
+  ActionParamsType as ServerLogActionParams,
+  ActionTypeId as ServerLogActionTypeId,
+} from './server_log';
+export { ActionParamsType as SlackActionParams, ActionTypeId as SlackActionTypeId } from './slack';
+export {
+  ActionParamsType as WebhookActionParams,
+  ActionTypeId as WebhookActionTypeId,
+} from './webhook';
+export {
+  ActionParamsType as ServiceNowActionParams,
+  ActionTypeId as ServiceNowActionTypeId,
+} from './servicenow';
+export { ActionParamsType as JiraActionParams, ActionTypeId as JiraActionTypeId } from './jira';
+export {
+  ActionParamsType as ResilientActionParams,
+  ActionTypeId as ResilientActionTypeId,
+} from './resilient';
+export { ActionParamsType as TeamsActionParams, ActionTypeId as TeamsActionTypeId } from './teams';
 
 export function registerBuiltInActionTypes({
   actionsConfigUtils: configurationUtilities,

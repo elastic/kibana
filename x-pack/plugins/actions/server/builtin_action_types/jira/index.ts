@@ -48,6 +48,7 @@ const supportedSubActions: string[] = [
   'issue',
 ];
 
+export const ActionTypeId = '.jira';
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -59,7 +60,7 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.jira',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
     validate: {

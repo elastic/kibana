@@ -39,6 +39,7 @@ interface GetActionTypeParams {
 
 const supportedSubActions: string[] = ['getFields', 'pushToService', 'incidentTypes', 'severity'];
 
+export const ActionTypeId = '.resilient';
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -50,7 +51,7 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.resilient',
+    id: ActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.NAME,
     validate: {
