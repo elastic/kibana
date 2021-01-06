@@ -6,8 +6,8 @@
 
 import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import type { BackgroundSessionIndicatorProps } from './background_session_indicator';
-export type { BackgroundSessionIndicatorProps };
+import type { SearchSessionIndicatorProps } from './search_session_indicator';
+export type { SearchSessionIndicatorProps };
 
 const Fallback = () => (
   <EuiDelayRender>
@@ -15,9 +15,9 @@ const Fallback = () => (
   </EuiDelayRender>
 );
 
-const LazyBackgroundSessionIndicator = React.lazy(() => import('./background_session_indicator'));
-export const BackgroundSessionIndicator = (props: BackgroundSessionIndicatorProps) => (
+const LazySearchSessionIndicator = React.lazy(() => import('./search_session_indicator'));
+export const SearchSessionIndicator = (props: SearchSessionIndicatorProps) => (
   <React.Suspense fallback={<Fallback />}>
-    <LazyBackgroundSessionIndicator {...props} />
+    <LazySearchSessionIndicator {...props} />
   </React.Suspense>
 );

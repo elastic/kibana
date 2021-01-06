@@ -27,7 +27,7 @@ import { createStateContainer, StateContainer } from '../../../../kibana_utils/p
  *
  * @public
  */
-export enum SessionState {
+export enum SearchSessionState {
   /**
    * Session is not active, e.g. didn't start
    */
@@ -39,18 +39,18 @@ export enum SessionState {
   Loading = 'loading',
 
   /**
-   * No action was taken and the page completed loading without background session creation.
+   * No action was taken and the page completed loading without search session creation.
    */
   Completed = 'completed',
 
   /**
-   * Search request was sent to the background.
+   * Search session was sent to the background.
    * The page is loading in background.
    */
   BackgroundLoading = 'backgroundLoading',
 
   /**
-   * Page load completed with background session created.
+   * Page load completed with search session created.
    */
   BackgroundCompleted = 'backgroundCompleted',
 
@@ -68,7 +68,7 @@ export enum SessionState {
 
 /**
  * Internal state of SessionService
- * {@link SessionState} is inferred from this state
+ * {@link SearchSessionState} is inferred from this state
  *
  * @private
  */
@@ -179,27 +179,29 @@ export interface SessionPureSelectors<
   SearchDescriptor = unknown,
   S = SessionStateInternal<SearchDescriptor>
 > {
-  getState: (state: S) => () => SessionState;
+  getState: (state: S) => () => SearchSessionState;
 }
 
 export const sessionPureSelectors: SessionPureSelectors = {
   getState: (state) => () => {
-    if (!state.sessionId) return SessionState.None;
-    if (!state.isStarted) return SessionState.None;
-    if (state.isCanceled) return SessionState.Canceled;
+    if (!state.sessionId) return SearchSessionState.None;
+    if (!state.isStarted) return SearchSessionState.None;
+    if (state.isCanceled) return SearchSessionState.Canceled;
     switch (true) {
       case state.isRestore:
         return state.pendingSearches.length > 0
-          ? SessionState.BackgroundLoading
-          : SessionState.Restored;
+          ? SearchSessionState.BackgroundLoading
+          : SearchSessionState.Restored;
       case state.isStored:
         return state.pendingSearches.length > 0
-          ? SessionState.BackgroundLoading
-          : SessionState.BackgroundCompleted;
+          ? SearchSessionState.BackgroundLoading
+          : SearchSessionState.BackgroundCompleted;
       default:
-        return state.pendingSearches.length > 0 ? SessionState.Loading : SessionState.Completed;
+        return state.pendingSearches.length > 0
+          ? SearchSessionState.Loading
+          : SearchSessionState.Completed;
     }
-    return SessionState.None;
+    return SearchSessionState.None;
   },
 };
 
@@ -213,7 +215,7 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
   { freeze = true }: { freeze: boolean } = { freeze: true }
 ): {
   stateContainer: SessionStateContainer<SearchDescriptor>;
-  sessionState$: Observable<SessionState>;
+  sessionState$: Observable<SearchSessionState>;
 } => {
   const stateContainer = createStateContainer(
     createSessionDefaultState(),
@@ -222,7 +224,7 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
     freeze ? undefined : { freeze: (s) => s }
   ) as SessionStateContainer<SearchDescriptor>;
 
-  const sessionState$: Observable<SessionState> = stateContainer.state$.pipe(
+  const sessionState$: Observable<SearchSessionState> = stateContainer.state$.pipe(
     map(() => stateContainer.selectors.getState()),
     distinctUntilChanged(),
     shareReplay(1)

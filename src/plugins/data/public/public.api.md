@@ -2419,7 +2419,7 @@ export class SearchTimeoutError extends KbnError {
     }
 
 // @public
-export enum SessionState {
+export enum SearchSessionState {
     BackgroundCompleted = "backgroundCompleted",
     BackgroundLoading = "backgroundLoading",
     Canceled = "canceled",

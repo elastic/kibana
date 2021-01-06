@@ -18,5 +18,5 @@
  */
 
 export { SessionService, ISessionService, SearchSessionInfoProvider } from './session_service';
-export { SessionState } from './session_state';
+export { SearchSessionState } from './search_session_state';
 export { SessionsClient, ISessionsClient } from './sessions_client';

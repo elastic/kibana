@@ -5,19 +5,19 @@
 - Architecture diagram: https://app.lucidchart.com/documents/edit/cf35b512-616a-4734-bc72-43dde70dbd44/0_0
 - Mockups: https://www.figma.com/proto/FD2M7MUpLScJKOyYjfbmev/ES-%2F-Query-Management-v4?node-id=440%3A1&viewport=984%2C-99%2C0.09413627535104752&scaling=scale-down
 - Old issue: https://github.com/elastic/kibana/issues/53335
-- Background search roadmap: https://github.com/elastic/kibana/issues/61738
+- Search Sessions roadmap: https://github.com/elastic/kibana/issues/61738
 - POC: https://github.com/elastic/kibana/pull/64641   
 
 # Summary
 
-Background Sessions will enable Kibana applications and solutions to start a group of related search requests (such as those coming from a single load of a dashboard or SIEM timeline), navigate away or close the browser, then retrieve the results when they have completed.
+Search Sessions will enable Kibana applications and solutions to start a group of related search requests (such as those coming from a single load of a dashboard or SIEM timeline), navigate away or close the browser, then retrieve the results when they have completed.
 
 # Basic example
 
-At its core, background sessions are enabled via several new APIs, that:
+At its core, search sessions are enabled via several new APIs, that:
 - Start a session, associating multiple search requests with a single entity
 - Store the session (and continue search requests in the background)
-- Restore the background session
+- Restore the saved search session
 
 ```ts
 const searchService = dataPluginStart.search;
@@ -26,7 +26,7 @@ if (appState.sessionId) {
   // If we are restoring a session, set the session ID in the search service
   searchService.session.restore(sessionId);
 } else {
-  // Otherwise, start a new background session to associate our search requests
+  // Otherwise, start a new search session to associate our search requests
   appState.sessionId = searchService.session.start();
 } 
 
@@ -41,7 +41,7 @@ const response$ = await searchService.search(request);
 // Calling `session.store()`, creates a saved object for this session, allowing the user to navigate away.
 // The session object will be saved with all async search IDs that were executed so far. 
 // Any follow up searches executed with this sessionId will be saved into this object as well.  
-const backgroundSession = await searchService.session.store();
+const searchSession = await searchService.session.store();
 ```
 
 # Motivation
@@ -73,20 +73,20 @@ We call this entity a `session`, and when a user decides that they want to conti
 
 This diagram matches any case where `data.search` is called from the front end:
 
-![image](../images/background_sessions_client.png)
+![image](../images/search_sessions_client.png)
 
 ### Server side search
 
 This case happens if the server is the one to invoke the `data.search` endpoint, for example with TSVB.
 
-![image](../images/background_sessions_server.png)
+![image](../images/search_sessions_server.png)
 
 ## Data and Saved Objects
 
-### Background Session Status
+### Search Session Status
 
 ```ts
-export enum BackgroundSessionStatus {
+export enum SearchSessionStatus {
   Running,   // The session has at least one running search ID associated with it.
   Done,      // All search IDs associated with this session have completed.
   Error,     // At least one search ID associated with this session had an error. 
@@ -96,27 +96,27 @@ export enum BackgroundSessionStatus {
 
 ### Saved Object Structure
 
-The saved object created for a background session will be scoped to a single space, and will be a `hidden` saved object
+The saved object created for a search session will be scoped to a single space, and will be a `hidden` saved object
 (so that it doesn't show in the management listings). We will provide a separate interface for users to manage their own
-background sessions (which will use the `list`, `expire`, and `extend` methods described below, which will be restricted
+saved search sessions (which will use the `list`, `expire`, and `extend` methods described below, which will be restricted
 per-user).
 
 ```ts
-interface BackgroundSessionAttributes extends SavedObjectAttributes {
+interface SearchSessionAttributes extends SavedObjectAttributes {
   sessionId: string;
   userId: string; // Something unique to the user who generated this session, like username/realm-name/realm-type
-  status: BackgroundSessionStatus;
+  status: SearchSessionStatus;
   name: string;
   creation: Date;
   expiration: Date;
   idMapping: { [key: string]: string };
-  url: string; // A URL relative to the Kibana root to retrieve the results of a completed background session (and/or to return to an incomplete view)
-  metadata: { [key: string]: any } // Any data the specific application requires to restore a background session view
+  url: string; // A URL relative to the Kibana root to retrieve the results of a completed search session (and/or to return to an incomplete view)
+  metadata: { [key: string]: any } // Any data the specific application requires to restore a search session view
 }
 ```
 
-The URL that is provided will need to be generated by the specific application implementing background sessions. We
-recommend using the URL generator to ensure that URLs are backwards-compatible since background sessions may exist as
+The URL that is provided will need to be generated by the specific application implementing search sessions. We
+recommend using the URL generator to ensure that URLs are backwards-compatible since search sessions may exist as
 long as a user continues to extend the expiration. 
 
 ## Frontend Services
@@ -153,10 +153,10 @@ interface ISessionService {
     * @param sessionId Session ID to store. Probably retrieved from `sessionService.get()`.
     * @param name A display name for the session.
     * @param url TODO: is the URL provided here? How?
-    * @returns The stored `BackgroundSessionAttributes` object
+    * @returns The stored `SearchSessionAttributes` object
     * @throws Throws an error in OSS.
     */
-   store: (sessionId: string, name: string, url: string) => Promise<BackgroundSessionAttributes>
+   store: (sessionId: string, name: string, url: string) => Promise<SearchSessionAttributes>
 
    /**
     * @returns Is the current session stored (i.e. is there a saved object corresponding with this sessionId).
@@ -188,17 +188,17 @@ interface ISessionService {
 
    /**
     * @param sessionId the ID of the session to retrieve the saved object.
-    * @returns a filtered list of BackgroundSessionAttributes objects. 
+    * @returns a filtered list of SearchSessionAttributes objects. 
     * @throws Throws an error in OSS.
     */
-   get: (sessionId: string) => Promise<BackgroundSessionAttributes>
+   get: (sessionId: string) => Promise<SearchSessionAttributes>
 
    /**
-    * @param options The options to query for specific background session saved objects.
-    * @returns a filtered list of BackgroundSessionAttributes objects. 
+    * @param options The options to query for specific search session saved objects.
+    * @returns a filtered list of SearchSessionAttributes objects. 
     * @throws Throws an error in OSS.
     */
-   list: (options: SavedObjectsFindOptions) => Promise<BackgroundSessionAttributes[]>
+   list: (options: SavedObjectsFindOptions) => Promise<SearchSessionAttributes[]>
 
    /**
     * Clears out any session info as well as the current session. Called internally whenever the user navigates
@@ -241,12 +241,12 @@ attempt to find the correct id within the saved object, and use it to retrieve t
 ```ts
 interface ISessionService {
   /** 
-   * Adds a search ID to a Background Session, if it exists.
+   * Adds a search ID to a Search Session, if it exists.
    * Also extends the expiration of the search ID to match the session's expiration.
    * @param request 
    * @param sessionId
    * @param searchId 
-   * @returns true if id was added, false if Background Session doesn't exist or if there was an error while updating.
+   * @returns true if id was added, false if Search Session doesn't exist or if there was an error while updating.
    * @throws an error if `searchId` already exists in the mapping for this `sessionId`
    */
   trackSearchId: (
@@ -256,21 +256,21 @@ interface ISessionService {
   ) => Promise<boolean>
 
   /** 
-   * Get a Background Session object.
+   * Get a Search Session object.
    * @param request 
    * @param sessionId
-   * @returns the Background Session object if exists, or undefined.
+   * @returns the Search Session object if exists, or undefined.
    */
   get: async (
     request: KibanaRequest,
     sessionId: string
-  ) => Promise<BackgroundSessionAttributes?>
+  ) => Promise<SearchSessionAttributes?>
 
   /** 
-   * Get a searchId from a Background Session object.
+   * Get a searchId from a Search Session object.
    * @param request 
    * @param sessionId
-   * @returns the searchID if exists on the Background Session, or undefined.
+   * @returns the searchID if exists on the Search Session, or undefined.
    */
   getSearchId: async (
     request: KibanaRequest,
@@ -283,7 +283,7 @@ interface ISessionService {
     * @param sessionId Session ID to store. Probably retrieved from `sessionService.get()`.
     * @param searchIdMap A mapping of hashed requests mapped to the corresponding searchId.
     * @param url TODO: is the URL provided here? How?
-    * @returns The stored `BackgroundSessionAttributes` object
+    * @returns The stored `SearchSessionAttributes` object
     * @throws Throws an error in OSS.
     * @internal (Consumers should use searchInterceptor.sendToBackground())
     */
@@ -293,7 +293,7 @@ interface ISessionService {
     name: string,
     url: string,
     searchIdMapping?: Record<string, string>
-  ) => Promise<BackgroundSessionAttributes>
+  ) => Promise<SearchSessionAttributes>
 
    /**
     * Mark a session as and all associated searchIds as expired.
@@ -322,7 +322,7 @@ interface ISessionService {
   ) => Promise<boolean>
 
    /**
-    * Get a list of background session objects.
+    * Get a list of Search Session objects.
     * @param request 
     * @param sessionId
     * @returns success status
@@ -330,7 +330,7 @@ interface ISessionService {
     */
   list: async (
     request: KibanaRequest,
-  ) => Promise<BackgroundSessionAttributes[]>
+  ) => Promise<SearchSessionAttributes[]>
 
    /**
     * Update the status of a given session
@@ -343,7 +343,7 @@ interface ISessionService {
   updateStatus: async (
     request: KibanaRequest,
     sessionId: string,
-    status: BackgroundSessionStatus
+    status: SearchSessionStatus
   ) => Promise<boolean>
 }
 
@@ -381,13 +381,13 @@ Each route exposes the corresponding method from the Session Service (used only 
 
 ### Search Strategy Integration 
 
-If the `EnhancedEsSearchStrategy` receives a `restore` option, it will attempt reloading data using the Background Session saved object matching the provided `sessionId`. If there are any errors during that process, the strategy will return an error response and *not attempt to re-run the request.
+If the `EnhancedEsSearchStrategy` receives a `restore` option, it will attempt reloading data using the Search Session saved object matching the provided `sessionId`. If there are any errors during that process, the strategy will return an error response and *not attempt to re-run the request.
 
 The strategy will track the asyncId on the server side, if `trackId` option is provided.
 
 ### Monitoring Service
 
-The `data` plugin will register a task with the task manager, periodically monitoring the status of incomplete background sessions. 
+The `data` plugin will register a task with the task manager, periodically monitoring the status of incomplete search sessions. 
 
 It will query the list of all incomplete sessions, and check the status of each search that is executing. If the search requests are all complete, it will update the corresponding saved object to have a `status` of `complete`. If any of the searches return an error, it will update the saved object to an `error` state. If the search requests have expired, it will update the saved object to an `expired` state. Expired sessions will be purged once they are older than the time definedby the `EXPIRED_SESSION_TTL` advanced setting.  
 
@@ -405,23 +405,23 @@ There are two potential scenarios:
 
 Both scenarios require careful attention during the UI design and implementation. 
 
-The former can be resolved by clearly displaying the creation time of the restored Background Session. We could also attempt translating relative dates to absolute one's, but this might be challenging as relative dates may appear deeply nested within the DSL. 
+The former can be resolved by clearly displaying the creation time of the restored Search Session. We could also attempt translating relative dates to absolute one's, but this might be challenging as relative dates may appear deeply nested within the DSL. 
 
 The latter case happens at the moment for the timepicker only: The relative date is being translated each time into an absolute one, before being sent to Elasticsearch. In order to avoid issues, we'll have to make sure that restore URLs are generated with an absolute date, to make sure they are restored correctly.
 
 #### Changing a restored session
 
-If you have restored a Background Session, making any type of change to it (time range, filters, etc.) will trigger new (potentially long) searches. There should be a clear indication in the UI that the data is no longer stored. A user then may choose to send it to background, resulting in a new Background Session being saved.
+If you have restored a Search Session, making any type of change to it (time range, filters, etc.) will trigger new (potentially long) searches. There should be a clear indication in the UI that the data is no longer stored. A user then may choose to send it to background, resulting in a new Search Session being saved.
 
 #### Loading an errored \ expired \ canceled session
 
-When trying to restore a Background Session, if any of the requests hashes don't match the ones saved, or if any of the saved async search IDs are expired, a meaningful error code will be returned by the server **by those requests**. It is each application's responsibility to handle these errors appropriately.
+When trying to restore a Search Session, if any of the requests hashes don't match the ones saved, or if any of the saved async search IDs are expired, a meaningful error code will be returned by the server **by those requests**. It is each application's responsibility to handle these errors appropriately.
 
 In such a scenario, the session will be partially restored.
 
 #### Extending Expiration
 
-Sessions are given an expiration date defined in an advanced setting (5 days by default). This expiration date is measured from the time the Background Session is saved, and it includes the time it takes to generate the results. 
+Sessions are given an expiration date defined in an advanced setting (5 days by default). This expiration date is measured from the time the Search Session is saved, and it includes the time it takes to generate the results. 
 
 A session's expiration date may be extended indefinitely. However, if a session was canceled or has already expired, it needs to be re-run.
 
@@ -444,7 +444,7 @@ so we feel comfortable moving forward with this approach.
 
 Two potential drawbacks stem from storing things in server memory. If a Kibana server is restarted, in-memory results
 will be lost. (This can be an issue if a search request has started, and the user has sent to background, but the
-background session saved object has not yet been updated with the search request ID.) In such cases, the user interface
+search session saved object has not yet been updated with the search request ID.) In such cases, the user interface
 will need to indicate errors for requests that were not stored in the saved object.
 
 There is also the consideration of the memory footprint of the Kibana server; however, since
@@ -452,7 +452,7 @@ we are only storing a hash of the request and search request ID, and are periodi
 Services and Routes), we do not anticipate the footprint to increase significantly.
 
 The results of search requests that have been sent to the background will be stored in Elasticsearch for several days,
-even if they will only be retrieved once. This will be mitigated by allowing the user manually delete a background
+even if they will only be retrieved once. This will be mitigated by allowing the user manually delete a search
 session object after it has been accessed.
 
 # Alternatives
@@ -463,7 +463,7 @@ What other designs have been considered? What is the impact of not doing this?
 
 (See "Basic example" above.)
 
-Any application or solution that uses the `data` plugin `search` services will be able to facilitate background sessions
+Any application or solution that uses the `data` plugin `search` services will be able to facilitate search sessions
 fairly simply. The public side will need to create/clear sessions when appropriate, and ensure the `sessionId` is sent
 with all search requests. It will also need to ensure that any necessary application data, as well as a `restoreUrl` is
 sent when creating the saved object.
