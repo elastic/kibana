@@ -24,6 +24,7 @@ export const esArchiverResetKibana = () => {
   cy.exec(
     `node ../../../scripts/es_archiver empty-kibana-index --config ../../../test/functional/config.js --es-url ${Cypress.env(
       'ELASTICSEARCH_URL'
-    )} --kibana-url ${Cypress.config().baseUrl}`
+    )} --kibana-url ${Cypress.config().baseUrl}`,
+    { failOnNonZeroExit: false }
   );
 };
