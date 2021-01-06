@@ -16,13 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { kibanaResponseFactory } from '../../../../../../../../core/server';
+import { kibanaResponseFactory } from '../../../../../../../core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 import { createResponseStub } from './stubs';
-import * as requestModule from '../../../../../lib/proxy_request';
-import expect from '@kbn/expect';
+import * as requestModule from '../../../../lib/proxy_request';
 
-import { createHandler } from '../create_handler';
+import { createHandler } from './create_handler';
 
 describe('Console Proxy Route', () => {
   let handler: ReturnType<typeof createHandler>;
@@ -45,7 +44,7 @@ describe('Console Proxy Route', () => {
             kibanaResponseFactory
           );
 
-          expect(status).to.be(403);
+          expect(status).toBe(403);
         });
       });
       describe('one match', () => {
@@ -62,8 +61,8 @@ describe('Console Proxy Route', () => {
             kibanaResponseFactory
           );
 
-          expect(status).to.be(200);
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
+          expect(status).toBe(200);
+          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
         });
       });
       describe('all match', () => {
@@ -80,8 +79,8 @@ describe('Console Proxy Route', () => {
             kibanaResponseFactory
           );
 
-          expect(status).to.be(200);
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
+          expect(status).toBe(200);
+          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
         });
       });
     });

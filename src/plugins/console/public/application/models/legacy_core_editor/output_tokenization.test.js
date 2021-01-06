@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import '../legacy_core_editor.test.mocks';
+import './legacy_core_editor.test.mocks';
 import $ from 'jquery';
-import RowParser from '../../../../lib/row_parser';
+import RowParser from '../../../lib/row_parser';
 import ace from 'brace';
-import { createReadOnlyAceEditor } from '../create_readonly';
+import { createReadOnlyAceEditor } from './create_readonly';
 let output;
 const tokenIterator = ace.acequire('ace/token_iterator');
 
