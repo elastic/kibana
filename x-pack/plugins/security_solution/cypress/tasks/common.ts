@@ -5,7 +5,7 @@
  */
 
 import { removeSignalsIndex } from './api_calls/rules';
-import { esArchiverLoadEmptyKibana } from './es_archiver';
+import { esArchiverResetKibana } from './es_archiver';
 
 const primaryButton = 0;
 
@@ -65,21 +65,42 @@ export const reload = (afterReload: () => void) => {
 };
 
 export const cleanKibana = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`;
-
-  // Delete kibana indexes and wait until they are deleted
-  cy.request('DELETE', kibanaIndexUrl);
-  cy.waitUntil(() => {
-    cy.wait(500);
-    return cy.request(kibanaIndexUrl).then((response) => JSON.stringify(response.body) === '{}');
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'alert',
+            },
+          },
+          {
+            match: {
+              'alert.alertTypeId': 'siem.signals',
+            },
+          },
+          {
+            match: {
+              'alert.consumer': 'siem',
+            },
+          },
+        ],
+      },
+    },
   });
 
-  // Load kibana indexes and wait until they are created
-  esArchiverLoadEmptyKibana();
-  cy.waitUntil(() => {
-    cy.wait(500);
-    return cy.request(kibanaIndexUrl).then((response) => JSON.stringify(response.body) !== '{}');
-  });
+  cy.request(
+    'POST',
+    `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/.lists-*,.items-*,.siem-signals-*/_delete_by_query?scroll_size=10000`,
+    {
+      query: {
+        match_all: {},
+      },
+    }
+  );
 
-  removeSignalsIndex();
+  esArchiverResetKibana();
 };
