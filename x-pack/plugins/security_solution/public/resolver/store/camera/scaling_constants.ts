@@ -28,3 +28,8 @@ export const unitsPerNudge = 50;
  * The duration a nudge animation lasts.
  */
 export const nudgeAnimationDuration = 300;
+
+/**
+ * The duration a panning animation lasts
+ */
+export const panAnimationDuration = 1000;
