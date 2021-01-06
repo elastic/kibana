@@ -22589,7 +22589,7 @@ puppeteer@^2.0.0:
   integrity sha512-I4JbNmQHZkE72TPNdipND8GnsEBnqzuksxPSAT25qvudShuuzdY9TwNBQ65IJwPD/pjlpx7fUIUmFyvTHwlxhQ==
   dependencies:
     debug "^4.1.0"
-    devtools-protocol "0.0.818844"
+    devtools-protocol "0.0.809251"
     extract-zip "^2.0.0"
     https-proxy-agent "^4.0.0"
     node-fetch "^2.6.1"
@@ -28547,10 +28547,10 @@ vega-time@^2.0.3, vega-time@^2.0.4, vega-time@~2.0.4:
     d3-time "^2.0.0"
     vega-util "^1.15.2"
 
-vega-tooltip@^0.24.2:
-  version "0.24.2"
-  resolved "https://registry.yarnpkg.com/vega-tooltip/-/vega-tooltip-0.24.2.tgz#da55a171a96ea48a8ff135a728622e1cbb1152af"
-  integrity sha512-b7IeYQl/piNVsMmTliOgTnwSOhBs67KqoZ9UzP1I3XpH7TKbSuc3YHA7b1CSxkRR0hHKdradby4UI8c9rdH74w==
+vega-tooltip@^0.25.0:
+  version "0.25.0"
+  resolved "https://registry.yarnpkg.com/vega-tooltip/-/vega-tooltip-0.25.0.tgz#c5dcae1b2bd36e1c2e61e69f6ee7a0d0d27a3026"
+  integrity sha512-S48d/eP6WfieLmUvFEjd+raHWKKeK/RfTlwLa3zGcBULDHJY2NU2vRfjC1x33G6Y7eKeAfqGpM6ER5Qt1nf8tA==
   dependencies:
     vega-util "^1.15.2"
 
