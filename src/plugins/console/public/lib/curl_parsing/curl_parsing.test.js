@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
-import { detectCURL, parseCURL } from '../curl';
-import curlTests from './curl_parsing.txt';
+import { detectCURL, parseCURL } from './curl';
+import curlTests from './__fixtures__/curl_parsing.txt';
 
 describe('CURL', () => {
   const notCURLS = ['sldhfsljfhs', 's;kdjfsldkfj curl -XDELETE ""', '{ "hello": 1 }'];

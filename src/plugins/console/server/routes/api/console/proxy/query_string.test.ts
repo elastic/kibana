@@ -16,14 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { kibanaResponseFactory } from '../../../../../../../../core/server';
+import { kibanaResponseFactory } from '../../../../../../../core/server';
 import { getProxyRouteHandlerDeps } from './mocks';
 import { createResponseStub } from './stubs';
-import * as requestModule from '../../../../../lib/proxy_request';
+import * as requestModule from '../../../../lib/proxy_request';
 
-import expect from '@kbn/expect';
-
-import { createHandler } from '../create_handler';
+import { createHandler } from './create_handler';
 
 describe('Console Proxy Route', () => {
   let request: any;
@@ -50,25 +48,25 @@ describe('Console Proxy Route', () => {
       describe('contains full url', () => {
         it('treats the url as a path', async () => {
           await request('GET', 'http://evil.com/test');
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
+          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
           const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-          expect(args.uri.href).to.be('http://localhost:9200/http://evil.com/test?pretty=true');
+          expect(args.uri.href).toBe('http://localhost:9200/http://evil.com/test?pretty=true');
         });
       });
       describe('starts with a slash', () => {
         it('combines well with the base url', async () => {
           await request('GET', '/index/id');
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
+          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
           const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-          expect(args.uri.href).to.be('http://localhost:9200/index/id?pretty=true');
+          expect(args.uri.href).toBe('http://localhost:9200/index/id?pretty=true');
         });
       });
       describe(`doesn't start with a slash`, () => {
         it('combines well with the base url', async () => {
           await request('GET', 'index/id');
-          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).to.be(1);
+          expect((requestModule.proxyRequest as jest.Mock).mock.calls.length).toBe(1);
           const [[args]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
-          expect(args.uri.href).to.be('http://localhost:9200/index/id?pretty=true');
+          expect(args.uri.href).toBe('http://localhost:9200/index/id?pretty=true');
         });
       });
     });
