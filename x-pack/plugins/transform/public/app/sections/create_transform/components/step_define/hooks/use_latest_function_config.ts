@@ -11,6 +11,8 @@ import { LatestFunctionConfigUI } from '../../../../../../../common/types/transf
 import { StepDefineFormProps } from '../step_define_form';
 import { StepDefineExposedState } from '../common';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
+import { AggConfigs, FieldParamType } from '../../../../../../../../../../src/plugins/data/common';
+import { useAppDependencies } from '../../../../../app_dependencies';
 
 /**
  * Latest function config mapper between API and UI
@@ -32,8 +34,20 @@ export const latestConfigMapper = {
 /**
  * Provides available options for unique_key and sort fields
  * @param indexPattern
+ * @param aggConfigs
  */
-function getOptions(indexPattern: StepDefineFormProps['searchItems']['indexPattern']) {
+function getOptions(
+  indexPattern: StepDefineFormProps['searchItems']['indexPattern'],
+  aggConfigs: AggConfigs
+) {
+  const aggConfig = aggConfigs.aggs[0];
+  const param = aggConfig.type.params.find((p) => p.type === 'field');
+  const filteredIndexPatternFields = param
+    ? ((param as unknown) as FieldParamType).getAvailableFields(aggConfig)
+    : [];
+
+  const termAggregatableFields = new Set(filteredIndexPatternFields.map((v) => v.name));
+
   const uniqueKeyOptions: Array<EuiComboBoxOptionOption<string>> = [];
   const sortFieldOptions: Array<EuiComboBoxOptionOption<string>> = [];
 
@@ -44,7 +58,7 @@ function getOptions(indexPattern: StepDefineFormProps['searchItems']['indexPatte
       continue;
     }
 
-    if (field.aggregatable) {
+    if (termAggregatableFields.has(field.name)) {
       uniqueKeyOptions.push({ label: field.displayName, value: field.name });
     }
 
@@ -92,9 +106,12 @@ export function useLatestFunctionConfig(
     sort: defaults.sort,
   });
 
-  const { uniqueKeyOptions, sortFieldOptions } = useMemo(() => getOptions(indexPattern), [
-    indexPattern,
-  ]);
+  const { data } = useAppDependencies();
+
+  const { uniqueKeyOptions, sortFieldOptions } = useMemo(() => {
+    const aggConfigs = data.search.aggs.createAggConfigs(indexPattern, [{ type: 'terms' }]);
+    return getOptions(indexPattern, aggConfigs);
+  }, [indexPattern, data.search.aggs]);
 
   const updateLatestFunctionConfig = useCallback(
     (update) =>
