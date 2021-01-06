@@ -7,6 +7,7 @@
 import path from 'path';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 
 export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
@@ -22,6 +23,89 @@ export default function ({ getService }: FtrProviderContext) {
           title: 'artificial_server_log',
           numberOfFields: 4,
         },
+        metricFields: [
+          {
+            fieldName: 'bytes',
+            type: ML_JOB_FIELD_TYPES.NUMBER,
+            docCountFormatted: '19 (100%)',
+            statsMaxDecimalPlaces: 3,
+            topValuesCount: 8,
+          },
+          {
+            fieldName: 'httpversion',
+            type: ML_JOB_FIELD_TYPES.NUMBER,
+            docCountFormatted: '19 (100%)',
+            statsMaxDecimalPlaces: 3,
+            topValuesCount: 1,
+          },
+          {
+            fieldName: 'response',
+            type: ML_JOB_FIELD_TYPES.NUMBER,
+            docCountFormatted: '19 (100%)',
+            statsMaxDecimalPlaces: 3,
+            topValuesCount: 3,
+          },
+        ],
+        nonMetricFields: [
+          {
+            fieldName: 'timestamp',
+            type: ML_JOB_FIELD_TYPES.DATE,
+            docCountFormatted: '19 (100%)',
+            exampleCount: 10,
+          },
+          {
+            fieldName: 'agent',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            exampleCount: 8,
+            docCountFormatted: '19 (100%)',
+          },
+          {
+            fieldName: 'auth',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            exampleCount: 1,
+            docCountFormatted: '19 (100%)',
+          },
+          {
+            fieldName: 'ident',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            exampleCount: 1,
+            docCountFormatted: '19 (100%)',
+          },
+          {
+            fieldName: 'verb',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            exampleCount: 1,
+            docCountFormatted: '19 (100%)',
+          },
+          {
+            fieldName: 'request',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            exampleCount: 2,
+            docCountFormatted: '19 (100%)',
+          },
+          {
+            fieldName: 'referrer',
+            type: ML_JOB_FIELD_TYPES.KEYWORD,
+            exampleCount: 1,
+            docCountFormatted: '19 (100%)',
+          },
+          {
+            fieldName: 'clientip',
+            type: ML_JOB_FIELD_TYPES.IP,
+            exampleCount: 7,
+            docCountFormatted: '19 (100%)',
+          },
+          {
+            fieldName: 'message',
+            type: ML_JOB_FIELD_TYPES.TEXT,
+            exampleCount: 10,
+            docCountFormatted: '19 (100%)',
+          },
+        ],
+        visibleMetricFieldsCount: 0,
+        totalMetricFieldsCount: 0,
+        populatedFieldsCount: 4,
+        totalFieldsCount: 4,
       },
     },
   ];
@@ -63,9 +147,28 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataVisualizerFileBased.assertFileContentPanelExists();
           await ml.dataVisualizerFileBased.assertSummaryPanelExists();
           await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
-          await ml.dataVisualizerFileBased.assertNumberOfFieldCards(
-            testData.expected.results.numberOfFields
+
+          await ml.testExecution.logTestStep(
+            'displays details for metric fields and non-metric fields correctly'
           );
+          await ml.dataVisualizerTable.ensureNumRowsPerPage(25);
+
+          for (const fieldRow of testData.expected.metricFields) {
+            await ml.dataVisualizerTable.assertNumberFieldContents(
+              fieldRow.fieldName,
+              fieldRow.docCountFormatted,
+              fieldRow.topValuesCount,
+              false
+            );
+          }
+          for (const fieldRow of testData.expected.nonMetricFields!) {
+            await ml.dataVisualizerTable.assertNonMetricFieldContents(
+              fieldRow.type,
+              fieldRow.fieldName!,
+              fieldRow.docCountFormatted,
+              fieldRow.exampleCount
+            );
+          }
 
           await ml.testExecution.logTestStep('loads the import settings page');
           await ml.dataVisualizerFileBased.navigateToFileImport();
