@@ -72,10 +72,12 @@ export function DashboardApp({
 
   const [lastReloadTime, setLastReloadTime] = useState(0);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.VIEW);
 
   const savedDashboard = useSavedDashboard(savedDashboardId, history);
-  const dashboardStateManager = useDashboardStateManager(savedDashboard, history);
+  const { dashboardStateManager, viewMode, setViewMode } = useDashboardStateManager(
+    savedDashboard,
+    history
+  );
   const dashboardContainer = useDashboardContainer(dashboardStateManager, history, false);
 
   const refreshDashboardContainer = useCallback(
@@ -128,6 +130,7 @@ export function DashboardApp({
     [
       history,
       data.query,
+      setViewMode,
       embedSettings,
       dashboardContainer,
       data.search.session,
@@ -227,7 +230,7 @@ export function DashboardApp({
 
   return (
     <div className="app-container dshAppContainer">
-      {savedDashboard && dashboardStateManager && dashboardContainer && (
+      {savedDashboard && dashboardStateManager && dashboardContainer && viewMode && (
         <>
           <DashboardTopNav
             {...{
