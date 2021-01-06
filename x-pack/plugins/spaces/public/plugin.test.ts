@@ -6,6 +6,7 @@
 
 import { coreMock } from 'src/core/public/mocks';
 import { SpacesPlugin } from './plugin';
+import { spacesOssPluginMock } from '../../../../src/plugins/spaces_oss/public/mocks';
 import { homePluginMock } from '../../../../src/plugins/home/public/mocks';
 import {
   managementPluginMock,
@@ -16,11 +17,14 @@ import { featuresPluginMock } from '../../features/public/mocks';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
-    it('should register the space selector app', () => {
+    it('should register the spaces API and the space selector app', () => {
       const coreSetup = coreMock.createSetup();
+      const spacesOss = spacesOssPluginMock.createSetupContract();
 
       const plugin = new SpacesPlugin();
-      plugin.setup(coreSetup, {});
+      plugin.setup(coreSetup, { spacesOss });
+
+      expect(spacesOss.registerSpacesApi).toHaveBeenCalledTimes(1);
 
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -34,6 +38,7 @@ describe('Spaces plugin', () => {
 
     it('should register the management and feature catalogue sections when the management and home plugins are both available', () => {
       const coreSetup = coreMock.createSetup();
+      const spacesOss = spacesOssPluginMock.createSetupContract();
       const home = homePluginMock.createSetupContract();
 
       const management = managementPluginMock.createSetupContract();
@@ -44,6 +49,7 @@ describe('Spaces plugin', () => {
 
       const plugin = new SpacesPlugin();
       plugin.setup(coreSetup, {
+        spacesOss,
         management,
         home,
       });
@@ -64,10 +70,11 @@ describe('Spaces plugin', () => {
 
     it('should register the advanced settings components if the advanced_settings plugin is available', () => {
       const coreSetup = coreMock.createSetup();
+      const spacesOss = spacesOssPluginMock.createSetupContract();
       const advancedSettings = advancedSettingsMock.createSetupContract();
 
       const plugin = new SpacesPlugin();
-      plugin.setup(coreSetup, { advancedSettings });
+      plugin.setup(coreSetup, { spacesOss, advancedSettings });
 
       expect(advancedSettings.component.register.mock.calls).toMatchInlineSnapshot(`
         Array [
@@ -89,10 +96,11 @@ describe('Spaces plugin', () => {
   describe('#start', () => {
     it('should register the spaces nav control', () => {
       const coreSetup = coreMock.createSetup();
+      const spacesOss = spacesOssPluginMock.createSetupContract();
       const coreStart = coreMock.createStart();
 
       const plugin = new SpacesPlugin();
-      plugin.setup(coreSetup, {});
+      plugin.setup(coreSetup, { spacesOss });
 
       plugin.start(coreStart, { features: featuresPluginMock.createStart() });
 

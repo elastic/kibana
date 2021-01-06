@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Space } from './space';
+import type { Space } from '../../../../src/plugins/spaces_oss/common';
+
+export interface GetAllSpacesOptions {
+  purpose?: GetAllSpacesPurpose;
+  includeAuthorizedPurposes?: boolean;
+}
 
 export type GetAllSpacesPurpose =
   | 'any'
