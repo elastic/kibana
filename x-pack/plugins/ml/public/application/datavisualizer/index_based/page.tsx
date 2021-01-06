@@ -751,7 +751,7 @@ export const Page: FC = () => {
                     metricsStats={metricsStats}
                   />
                   <EuiSpacer size={'m'} />
-                  <DataVisualizerDataGrid
+                  <DataVisualizerDataGrid<FieldVisConfig>
                     items={configs}
                     pageState={dataVisualizerListState}
                     updatePageState={setDataVisualizerListState}

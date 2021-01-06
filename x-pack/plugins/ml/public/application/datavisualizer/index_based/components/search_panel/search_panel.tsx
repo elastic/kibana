@@ -157,8 +157,6 @@ export const SearchPanel: FC<Props> = ({
         setVisibleFieldTypes={setVisibleFieldTypes}
         visibleFieldTypes={visibleFieldTypes}
       />
-
-      <EuiFlexItem grow={false} />
     </EuiFlexGroup>
   );
 };

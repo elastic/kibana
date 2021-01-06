@@ -7,6 +7,7 @@
 import { difference } from 'lodash';
 import type { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 import { MlJobFieldType } from '../../../../../../common/types/field_types';
+import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 export function getFieldNames(results: FindFileStructureResponse) {
   const { mappings, field_stats: fieldStats, column_names: columnNames } = results;
 
@@ -31,12 +32,17 @@ export function getFieldNames(results: FindFileStructureResponse) {
   return tempFields;
 }
 
-export function getFieldType(type: string): MlJobFieldType {
+export function getSupportedFieldType(type: string): MlJobFieldType {
   switch (type) {
-    // case 'long':
-    // case 'double':
-    //   return ML_JOB_FIELD_TYPES.NUMBER;
-    //   break;
+    case 'long':
+    case 'integer':
+    case 'short':
+    case 'byte':
+    case 'double':
+    case 'float':
+    case 'half_float':
+    case 'scaled_float':
+      return ML_JOB_FIELD_TYPES.NUMBER;
     default:
       return type as MlJobFieldType;
   }

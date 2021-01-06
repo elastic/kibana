@@ -23,7 +23,10 @@ import { FieldTypeIcon } from '../../components/field_type_icon';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { DistinctValues } from './components/field_data_row/distinct_values';
 import { NumberContentPreview } from './components/field_data_row/number_content_preview';
-import { DataVisualizerIndexBasedAppState } from '../../../../common/types/ml_url_generator';
+import {
+  DataVisualizerFileBasedAppState,
+  DataVisualizerIndexBasedAppState,
+} from '../../../../common/types/ml_url_generator';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { TopValuesPreview } from './components/field_data_row/top_values_preview';
 import type { MlJobFieldType } from '../../../../common/types/field_types';
@@ -37,19 +40,19 @@ const FIELD_NAME = 'fieldName';
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
 type DataVisualizerDataGridItem = FieldVisConfig | FileBasedFieldVisConfig;
-interface DataVisualizerDataGridProps {
-  items: DataVisualizerDataGridItem[];
-  pageState: DataVisualizerIndexBasedAppState;
-  updatePageState: (update: Partial<DataVisualizerIndexBasedAppState>) => void;
-  getItemIdToExpandedRowMap: (itemIds: string[], items: any[]) => ItemIdToExpandedRowMap;
+interface DataVisualizerDataGridProps<T> {
+  items: T[];
+  pageState: DataVisualizerIndexBasedAppState | DataVisualizerFileBasedAppState;
+  updatePageState: (update: any) => void;
+  getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
 }
 
-export const DataVisualizerDataGrid = ({
+export const DataVisualizerDataGrid = <T extends DataVisualizerDataGridItem>({
   items,
   pageState,
   updatePageState,
   getItemIdToExpandedRowMap,
-}: DataVisualizerDataGridProps) => {
+}: DataVisualizerDataGridProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, toggleExpandAll] = useState<boolean>(false);
 
@@ -58,7 +61,8 @@ export const DataVisualizerDataGrid = ({
     pageState,
     updatePageState
   );
-  const showDistributions: boolean = pageState.showDistributions ?? true;
+  const showDistributions: boolean =
+    ('showDistributions' in pageState && pageState.showDistributions) ?? true;
   const toggleShowDistribution = () => {
     updatePageState({
       ...pageState,
