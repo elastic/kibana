@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import Boom from '@hapi/boom';
 import { Transform } from 'stream';
+import { SavedObjectsImportError } from '../errors';
 
 export function createLimitStream(limit: number) {
   let counter = 0;
@@ -26,7 +26,7 @@ export function createLimitStream(limit: number) {
     objectMode: true,
     async transform(obj, enc, done) {
       if (counter >= limit) {
-        return done(Boom.badRequest(`Can't import more than ${limit} objects`));
+        return done(SavedObjectsImportError.importSizeExceeded(limit));
       }
       counter++;
       done(undefined, obj);

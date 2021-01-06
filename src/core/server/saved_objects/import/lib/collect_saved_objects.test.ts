@@ -18,6 +18,7 @@
  */
 
 import { Readable, PassThrough } from 'stream';
+import { SavedObjectsImportError } from '../errors';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createLimitStream } from './create_limit_stream';
 import { getNonUniqueEntries } from './get_non_unique_entries';
@@ -112,16 +113,16 @@ describe('collectSavedObjects()', () => {
   });
 
   describe('results', () => {
-    test('throws Boom error if any import objects are not unique', async () => {
+    test('throws import error if any import objects are not unique', async () => {
       getMockFn(getNonUniqueEntries).mockReturnValue(['type1:id1', 'type2:id2']);
       const readStream = createReadStream();
       expect.assertions(2);
       try {
         await collectSavedObjects({ readStream, supportedTypes: [], objectLimit });
-      } catch ({ isBoom, message }) {
-        expect(isBoom).toBe(true);
-        expect(message).toMatchInlineSnapshot(
-          `"Non-unique import objects detected: [type1:id1,type2:id2]: Bad Request"`
+      } catch (e) {
+        expect(e).toBeInstanceOf(SavedObjectsImportError);
+        expect(e.message).toMatchInlineSnapshot(
+          `"Non-unique import objects detected: [type1:id1,type2:id2]"`
         );
       }
     });

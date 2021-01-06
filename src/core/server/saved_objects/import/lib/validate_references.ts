@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsClientContract } from '../../types';
 import { SavedObjectsImportFailure, SavedObjectsImportRetry } from '../types';
+import { SavedObjectsImportError } from '../errors';
 
 const REF_TYPES_TO_VALIDATE = ['index-pattern', 'search'];
 
@@ -70,11 +70,7 @@ export async function getNonExistingReferenceAsKeys(
     (obj) => obj.error && obj.error.statusCode !== 404
   );
   if (erroredObjects.length) {
-    const err = Boom.badRequest();
-    err.output.payload.attributes = {
-      objects: erroredObjects,
-    };
-    throw err;
+    throw SavedObjectsImportError.referencesFetchError(erroredObjects);
   }
 
   // Cleanup collector

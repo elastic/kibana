@@ -59,7 +59,7 @@ export class SavedObjectsImporter {
    * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
    * detailed information.
    *
-   * @public
+   * @throws SavedObjectsImportError
    */
   import({
     readStream,
@@ -82,7 +82,7 @@ export class SavedObjectsImporter {
    * Resolve and return saved object import errors.
    * See the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed informations.
    *
-   * @public
+   * @throws SavedObjectsImportError
    */
   resolveImportErrors({
     readStream,

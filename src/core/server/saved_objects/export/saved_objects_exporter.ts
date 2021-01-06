@@ -78,9 +78,7 @@ export class SavedObjectsExporter {
    */
   public async exportByObjects(options: SavedObjectsExportByObjectOptions) {
     if (options.objects.length > this.#exportSizeLimit) {
-      throw SavedObjectsExportError.exportSizeExceeded(
-        `Can't export more than ${this.#exportSizeLimit} objects`
-      );
+      throw SavedObjectsExportError.exportSizeExceeded(this.#exportSizeLimit);
     }
     const objects = await this.fetchByObjects(options);
     return this.processObjects(objects, {
@@ -130,10 +128,7 @@ export class SavedObjectsExporter {
     const bulkGetResult = await this.#savedObjectsClient.bulkGet(objects, { namespace });
     const erroredObjects = bulkGetResult.saved_objects.filter((obj) => !!obj.error);
     if (erroredObjects.length) {
-      throw SavedObjectsExportError.objectFetchError(
-        'Error fetching objects to export',
-        erroredObjects
-      );
+      throw SavedObjectsExportError.objectFetchError(erroredObjects);
     }
     return bulkGetResult.saved_objects;
   }
@@ -153,9 +148,7 @@ export class SavedObjectsExporter {
       namespaces: namespace ? [namespace] : undefined,
     });
     if (findResponse.total > this.#exportSizeLimit) {
-      throw SavedObjectsExportError.exportSizeExceeded(
-        `Can't export more than ${this.#exportSizeLimit} objects`
-      );
+      throw SavedObjectsExportError.exportSizeExceeded(this.#exportSizeLimit);
     }
 
     // sorts server-side by _id, since it's only available in fielddata

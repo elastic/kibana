@@ -35,12 +35,15 @@ export class SavedObjectsExportError extends Error {
     Object.setPrototypeOf(this, SavedObjectsExportError.prototype);
   }
 
-  static exportSizeExceeded(message: string) {
-    return new SavedObjectsExportError('export-size-exceeded', message);
+  static exportSizeExceeded(limit: number) {
+    return new SavedObjectsExportError(
+      'export-size-exceeded',
+      `Can't export more than ${limit} objects`
+    );
   }
 
-  static objectFetchError(message: string, objects: SavedObject[]) {
-    return new SavedObjectsExportError('object-fetch-error', message, {
+  static objectFetchError(objects: SavedObject[]) {
+    return new SavedObjectsExportError('object-fetch-error', 'Error fetching objects to export', {
       objects,
     });
   }

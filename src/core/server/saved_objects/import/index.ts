@@ -31,3 +31,4 @@ export {
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportRetry,
 } from './types';
+export { SavedObjectsImportError } from './errors';

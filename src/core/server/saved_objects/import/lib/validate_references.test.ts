@@ -586,6 +586,8 @@ describe('validateReferences()', () => {
     ];
     await expect(
       validateReferences(savedObjects, savedObjectsClient)
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Bad Request"`);
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Error fetching references for imported objects"`
+    );
   });
 });

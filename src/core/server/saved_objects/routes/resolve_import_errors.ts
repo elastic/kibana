@@ -23,6 +23,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
 import { CoreUsageDataSetup } from '../../core_usage_data';
 import { SavedObjectConfig } from '../saved_objects_config';
+import { SavedObjectsImportError } from '../import';
 import { createSavedObjectsStreamFromNdJson } from './utils';
 
 interface RouteDependencies {
@@ -103,13 +104,26 @@ export const registerResolveImportErrorsRoute = (
       }
 
       const { importer } = context.core.savedObjects;
-      const result = await importer.resolveImportErrors({
-        readStream,
-        retries: req.body.retries,
-        createNewCopies,
-      });
 
-      return res.ok({ body: result });
+      try {
+        const result = await importer.resolveImportErrors({
+          readStream,
+          retries: req.body.retries,
+          createNewCopies,
+        });
+
+        return res.ok({ body: result });
+      } catch (e) {
+        if (e instanceof SavedObjectsImportError) {
+          return res.badRequest({
+            body: {
+              message: e.message,
+              attributes: e.attributes,
+            },
+          });
+        }
+        throw e;
+      }
     })
   );
 };

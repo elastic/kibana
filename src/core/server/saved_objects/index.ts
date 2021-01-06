@@ -33,6 +33,7 @@ export {
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsImportError,
 } from './import';
 
 export {

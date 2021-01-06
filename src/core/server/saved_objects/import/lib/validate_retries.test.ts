@@ -19,6 +19,7 @@
 
 import { validateRetries } from './validate_retries';
 import { SavedObjectsImportRetry } from '../types';
+import { SavedObjectsImportError } from '../errors';
 
 import { getNonUniqueEntries } from './get_non_unique_entries';
 jest.mock('./get_non_unique_entries');
@@ -62,29 +63,29 @@ describe('#validateRetries', () => {
   });
 
   describe('results', () => {
-    test('throws Boom error if any retry objects are not unique', () => {
+    test('throws import error if any retry objects are not unique', () => {
       mockGetNonUniqueEntries.mockReturnValue(['type1:id1', 'type2:id2']);
       expect.assertions(2);
       try {
         validateRetries([]);
-      } catch ({ isBoom, message }) {
-        expect(isBoom).toBe(true);
-        expect(message).toMatchInlineSnapshot(
-          `"Non-unique retry objects: [type1:id1,type2:id2]: Bad Request"`
+      } catch (e) {
+        expect(e).toBeInstanceOf(SavedObjectsImportError);
+        expect(e.message).toMatchInlineSnapshot(
+          `"Non-unique retry objects: [type1:id1,type2:id2]"`
         );
       }
     });
 
-    test('throws Boom error if any retry destinations are not unique', () => {
+    test('throws import error if any retry destinations are not unique', () => {
       mockGetNonUniqueEntries.mockReturnValueOnce([]);
       mockGetNonUniqueEntries.mockReturnValue(['type1:id1', 'type2:id2']);
       expect.assertions(2);
       try {
         validateRetries([]);
-      } catch ({ isBoom, message }) {
-        expect(isBoom).toBe(true);
-        expect(message).toMatchInlineSnapshot(
-          `"Non-unique retry destinations: [type1:id1,type2:id2]: Bad Request"`
+      } catch (e) {
+        expect(e).toBeInstanceOf(SavedObjectsImportError);
+        expect(e.message).toMatchInlineSnapshot(
+          `"Non-unique retry destinations: [type1:id1,type2:id2]"`
         );
       }
     });

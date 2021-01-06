@@ -326,6 +326,7 @@ export {
   SavedObjectsExportError,
   SavedObjectsImporter,
   ISavedObjectsImporter,
+  SavedObjectsImportError,
 } from './saved_objects';
 
 export {

@@ -26,10 +26,10 @@ import {
 } from '@kbn/utils';
 
 import { SavedObject } from '../../types';
-import { createLimitStream } from './create_limit_stream';
 import { SavedObjectsImportFailure } from '../types';
+import { SavedObjectsImportError } from '../errors';
 import { getNonUniqueEntries } from './get_non_unique_entries';
-import { SavedObjectsErrorHelpers } from '../../service';
+import { createLimitStream } from './create_limit_stream';
 
 interface CollectSavedObjectsOptions {
   readStream: Readable;
@@ -79,9 +79,7 @@ export async function collectSavedObjects({
   // throw a BadRequest error if we see the same import object type/id more than once
   const nonUniqueEntries = getNonUniqueEntries(entries);
   if (nonUniqueEntries.length > 0) {
-    throw SavedObjectsErrorHelpers.createBadRequestError(
-      `Non-unique import objects detected: [${nonUniqueEntries.join()}]`
-    );
+    throw SavedObjectsImportError.nonUniqueImportObjects(nonUniqueEntries);
   }
 
   return {
