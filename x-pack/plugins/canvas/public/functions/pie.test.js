@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../helpers/function_wrapper';
+import { functionWrapper } from '../../test_helpers/function_wrapper';
 import { testPie } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
 import {
   fontStyle,

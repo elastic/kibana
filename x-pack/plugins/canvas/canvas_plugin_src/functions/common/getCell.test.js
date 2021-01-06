@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../../helpers/function_wrapper';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { getFunctionErrors } from '../../../i18n';
 import { emptyTable, testTable } from './__fixtures__/test_tables';
 import { getCell } from './getCell';

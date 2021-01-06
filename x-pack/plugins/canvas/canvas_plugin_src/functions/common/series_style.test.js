@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../../helpers/function_wrapper';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { seriesStyle } from './seriesStyle';
 
 describe('seriesStyle', () => {

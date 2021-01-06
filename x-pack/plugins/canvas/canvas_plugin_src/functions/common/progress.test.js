@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { functionWrapper } from '../../../helpers/function_wrapper';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { getFunctionErrors } from '../../../i18n';
 import { progress } from './progress';
 import { fontStyle } from './__fixtures__/test_styles';
