@@ -43,7 +43,7 @@ import {
 
 import { removeQueryParam } from '../services/kibana_utils';
 import { IndexPattern } from '../services/data';
-import { EmbeddableRenderer, ViewMode } from '../services/embeddable';
+import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardContainerInput } from '.';
 import { leaveConfirmStrings } from '../dashboard_strings';
 
