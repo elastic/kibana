@@ -32,14 +32,16 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
 
   useEffect(() => {
     dispatch(getConnectorsAction.get());
-    focusInput();
   }, [addFlyoutVisible, dispatch, focusInput]);
 
   const ConnectorAddFlyout = useMemo(
     () =>
       getAddConnectorFlyout({
         consumer: 'uptime',
-        onClose: () => setAddFlyoutVisibility(false),
+        onClose: () => {
+          setAddFlyoutVisibility(false);
+          focusInput();
+        },
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
