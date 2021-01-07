@@ -24,5 +24,6 @@
     { "path": "./src/plugins/ui_actions/tsconfig.json" },
     { "path": "./src/plugins/url_forwarding/tsconfig.json" },
     { "path": "./src/plugins/usage_collection/tsconfig.json" },
+    { "path": "./src/plugins/management/tsconfig.json" },
   ]
 }
