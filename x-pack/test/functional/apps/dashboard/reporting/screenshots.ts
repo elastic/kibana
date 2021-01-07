@@ -143,14 +143,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const reportData = await PageObjects.reporting.getRawPdfReportData(url);
         const reportFileName = 'dashboard_preserve_layout';
         const sessionReportPath = await writeSessionReport(reportFileName, reportData, 'png');
-        const percentSimilar = await checkIfPngsMatch(
+        const percentDiff = await checkIfPngsMatch(
           sessionReportPath,
           getBaselineReportPath(reportFileName, 'png'),
           config.get('screenshots.directory'),
           log
         );
 
-        expect(percentSimilar).to.be.lessThan(0.1);
+        expect(percentDiff).to.be.lessThan(0.01);
       });
     });
 
