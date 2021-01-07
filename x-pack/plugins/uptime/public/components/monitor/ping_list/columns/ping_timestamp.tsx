@@ -17,9 +17,10 @@ import {
 import useIntersection from 'react-use/lib/useIntersection';
 import moment from 'moment';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
-import { useFetcher } from '../../../../../../observability/public';
+import { euiStyled, FETCH_STATUS, useFetcher } from '../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../contexts';
 
@@ -81,7 +82,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
     threshold: 1,
   });
 
-  const { data } = useFetcher(() => {
+  const { data, status } = useFetcher(() => {
     if (intersection && intersection.intersectionRatio === 1 && !stepImages[stepNo - 1])
       return getJourneyScreenshot(imgPath);
   }, [intersection?.intersectionRatio, stepNo]);
@@ -93,6 +94,9 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
   }, [data]);
 
   const imgSrc = stepImages[stepNo] || data?.src;
+
+  const isLoading = status === FETCH_STATUS.LOADING;
+  const isPending = status === FETCH_STATUS.PENDING;
 
   const ImageCaption = (
     <>
@@ -149,7 +153,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
       ) : (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
-            <EuiLoadingSpinner size="xl" />
+            {isLoading || isPending ? <EuiLoadingSpinner size="xl" /> : <NoImageAvailable />}
           </EuiFlexItem>
           <EuiFlexItem>{ImageCaption}</EuiFlexItem>
         </EuiFlexGroup>
@@ -186,5 +190,24 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </StepDiv>
+  );
+};
+
+const BorderedText = euiStyled(EuiText)`
+  width: 120px;
+  text-align: center;
+  border: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
+`;
+
+export const NoImageAvailable = () => {
+  return (
+    <BorderedText>
+      <strong>
+        <FormattedMessage
+          id="xpack.uptime.synthetics.screenshot.noImageMessage"
+          defaultMessage="No image available"
+        />
+      </strong>
+    </BorderedText>
   );
 };
