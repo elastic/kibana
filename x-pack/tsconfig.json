@@ -25,6 +25,7 @@
     { "path": "../src/plugins/dev_tools/tsconfig.json" },
     { "path": "../src/plugins/embeddable/tsconfig.json" },
     { "path": "../src/plugins/expressions/tsconfig.json" },
+    { "path": "../src/plugins/home/tsconfig.json" },
     { "path": "../src/plugins/inspector/tsconfig.json" },
     { "path": "../src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "../src/plugins/kibana_react/tsconfig.json" },
