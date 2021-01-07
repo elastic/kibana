@@ -6,7 +6,7 @@
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { Comparator, AlertStates } from './types';
 import * as mocks from './test_mocks';
-import { RecoveredActionGroup } from '../../../../../alerts/common';
+// import { RecoveredActionGroup } from '../../../../../alerts/common';
 import { AlertExecutorOptions } from '../../../../../alerts/server';
 import {
   alertsMock,
@@ -21,7 +21,7 @@ interface AlertTestInstance {
   state: any;
 }
 
-let persistAlertInstances = false;
+let persistAlertInstances = false; // eslint-disable-line prefer-const
 
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
@@ -344,6 +344,13 @@ describe('The metric threshold alert type', () => {
     });
   });
 
+  /*
+   * Custom recovery actions aren't yet available in the alerting framework
+   * Uncomment the code below once they've been implemented
+   * Reference: https://github.com/elastic/kibana/issues/87048
+   */
+
+  /*
   describe('querying a metric that later recovers', () => {
     const instanceID = '*';
     const execute = (threshold: number[]) =>
@@ -387,6 +394,7 @@ describe('The metric threshold alert type', () => {
       expect(getState(instanceID).alertState).toBe(AlertStates.OK);
     });
   });
+  */
 
   describe('querying a metric with a percentage metric', () => {
     const instanceID = '*';
