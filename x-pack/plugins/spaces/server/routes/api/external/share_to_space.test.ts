@@ -59,7 +59,6 @@ describe('share to space', () => {
     initShareToSpacesApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
-      getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,

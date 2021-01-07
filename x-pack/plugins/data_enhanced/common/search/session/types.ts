@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BackgroundSessionStatus } from './';
+import { SearchSessionStatus } from './';
 
-export interface BackgroundSessionSavedObjectAttributes {
+export interface SearchSessionSavedObjectAttributes {
   /**
    * User-facing session name to be displayed in session management
    */
@@ -17,19 +17,19 @@ export interface BackgroundSessionSavedObjectAttributes {
   appId: string;
   created: string;
   expires: string;
-  status: BackgroundSessionStatus;
+  status: SearchSessionStatus;
   urlGeneratorId: string;
   initialState: Record<string, unknown>;
   restoreState: Record<string, unknown>;
-  idMapping: Record<string, BackgroundSessionSearchInfo>;
+  idMapping: Record<string, SearchSessionRequestInfo>;
 }
 
-export interface BackgroundSessionSearchInfo {
+export interface SearchSessionRequestInfo {
   id: string; // ID of the async search request
   strategy: string; // Search strategy used to submit the search request
 }
 
-export interface BackgroundSessionFindOptions {
+export interface SearchSessionFindOptions {
   page?: number;
   perPage?: number;
   sortField?: string;
