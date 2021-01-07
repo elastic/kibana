@@ -13,9 +13,12 @@ const props = {
   alert: {
     _id: 'alert-id',
     _index: 'alert-index',
+    '@timestamp': '2021-01-07T13:58:31.487Z',
     rule: {
       id: 'rule-id',
       name: 'Awesome Rule',
+      from: '2021-01-07T13:58:31.487Z',
+      to: '2021-01-07T14:58:31.487Z',
     },
   },
 };
