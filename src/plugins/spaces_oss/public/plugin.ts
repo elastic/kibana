@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext, Plugin } from 'src/core/public';
+import { Plugin } from 'src/core/public';
 import { SpacesOssPluginSetup, SpacesOssPluginStart } from './types';
 import { SpacesApi } from './api';
 
@@ -25,9 +25,9 @@ export class SpacesOssPlugin implements Plugin<SpacesOssPluginSetup, SpacesOssPl
   private apiRegistered = false;
   private api?: SpacesApi;
 
-  constructor(context: PluginInitializerContext) {}
+  constructor() {}
 
-  public setup({}: CoreSetup) {
+  public setup() {
     return {
       registerSpacesApi: (provider: Promise<SpacesApi>) => {
         if (this.apiRegistered) {
@@ -52,7 +52,7 @@ export class SpacesOssPlugin implements Plugin<SpacesOssPluginSetup, SpacesOssPl
     };
   }
 
-  public start({}: CoreStart) {
+  public start() {
     return {
       isSpacesAvailable: () => this.apiRegistered,
       getSpacesApi: () => this.api,

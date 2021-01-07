@@ -27,7 +27,7 @@ describe('SpacesOssPlugin', () => {
 
   beforeEach(() => {
     coreSetup = coreMock.createSetup();
-    plugin = new SpacesOssPlugin(coreMock.createPluginInitializerContext());
+    plugin = new SpacesOssPlugin();
   });
 
   describe('#start', () => {
@@ -45,37 +45,37 @@ describe('SpacesOssPlugin', () => {
 
     it('returns the spaces API if registered', async () => {
       const spacesApi = spacesApiMock.create();
-      const { registerSpacesApi } = plugin.setup(coreSetup);
+      const { registerSpacesApi } = plugin.setup();
 
       registerSpacesApi(Promise.resolve(spacesApi));
 
       await nextTick();
 
-      const { getSpacesApi, isSpacesAvailable } = plugin.start(coreStart);
+      const { getSpacesApi, isSpacesAvailable } = plugin.start();
 
       expect(isSpacesAvailable()).toBe(true);
       expect(getSpacesApi()).toStrictEqual(spacesApi);
     });
 
     it('does not return the spaces API if not registered', async () => {
-      plugin.setup(coreSetup);
+      plugin.setup();
 
       await nextTick();
 
-      const { getSpacesApi, isSpacesAvailable } = plugin.start(coreStart);
+      const { getSpacesApi, isSpacesAvailable } = plugin.start();
 
       expect(isSpacesAvailable()).toBe(false);
       expect(getSpacesApi()).toBeUndefined();
     });
 
     it('does not return the spaces API if resolution promise rejects', async () => {
-      const { registerSpacesApi } = plugin.setup(coreSetup);
+      const { registerSpacesApi } = plugin.setup();
 
       registerSpacesApi(Promise.reject(new Error('something went bad')));
 
       await nextTick();
 
-      const { getSpacesApi, isSpacesAvailable } = plugin.start(coreStart);
+      const { getSpacesApi, isSpacesAvailable } = plugin.start();
 
       expect(isSpacesAvailable()).toBe(false);
       expect(getSpacesApi()).toBeUndefined();
