@@ -272,12 +272,12 @@ const VisComponent = (props: VisComponentProps) => {
             {
               name: seriesName,
               rankAtDepth: splitAccessors ? allSeries.findIndex((name) => name === seriesName) : 0,
-              totalSeriesAtDepth: splitAccessors ? allSeries.length : 0,
+              totalSeriesAtDepth: splitAccessors ? allSeries.length : 1,
             },
           ],
           {
             maxDepth: 1,
-            totalSeries: splitAccessors ? allSeries.length : 0,
+            totalSeries: splitAccessors ? allSeries.length : 1,
             behindText: false,
             syncColors,
           }
