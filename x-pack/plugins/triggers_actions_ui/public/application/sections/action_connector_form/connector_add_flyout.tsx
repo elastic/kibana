@@ -23,18 +23,14 @@ import {
 import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeMenu } from './action_type_menu';
-import { ActionConnectorForm, validateBaseProperties } from './action_connector_form';
-import {
-  ActionType,
-  ActionConnector,
-  IErrorObject,
-  ActionTypeRegistryContract,
-} from '../../../types';
+import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
+import { ActionType, ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import { connectorReducer } from './connector_reducer';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
+import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
 export interface ConnectorAddFlyoutProps {
   onClose: () => void;
@@ -91,6 +87,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
 
   let currentForm;
   let actionTypeModel;
+  let saveButton;
   if (!actionType) {
     currentForm = (
       <ActionTypeMenu
@@ -103,64 +100,121 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
 
-    const errors = {
-      ...actionTypeModel?.validateConnector(connector).errors,
-      ...validateBaseProperties(connector).errors,
-    } as IErrorObject;
-    hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
+    const {
+      configErrors,
+      connectorBaseErrors,
+      connectorErrors,
+      secretsErrors,
+    } = getConnectorErrors(connector, actionTypeModel);
+    hasErrors = !!Object.keys(connectorErrors).find(
+      (errorKey) => connectorErrors[errorKey].length >= 1
+    );
 
     currentForm = (
       <ActionConnectorForm
         actionTypeName={actionType.name}
         connector={connector}
         dispatch={dispatch}
-        errors={errors}
+        errors={connectorErrors}
         actionTypeRegistry={actionTypeRegistry}
         consumer={consumer}
       />
     );
-  }
-  const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
-    await createActionConnector({ http, connector })
-      .then((savedConnector) => {
-        if (toasts) {
-          toasts.addSuccess(
-            i18n.translate(
-              'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
-              {
-                defaultMessage: "Created '{connectorName}'",
-                values: {
-                  connectorName: savedConnector.name,
-                },
-              }
-            )
-          );
-        }
-        return savedConnector;
-      })
-      .catch((errorRes) => {
-        toasts.addDanger(
-          errorRes.body?.message ??
-            i18n.translate(
-              'xpack.triggersActionsUI.sections.addConnectorForm.updateErrorNotificationText',
-              { defaultMessage: 'Cannot create a connector.' }
-            )
-        );
-        return undefined;
-      });
 
-  const onSaveClicked = async () => {
-    setIsSaving(true);
-    const savedAction = await onActionConnectorSave();
-    setIsSaving(false);
-    if (savedAction) {
-      closeFlyout();
-      if (reloadConnectors) {
-        await reloadConnectors();
+    const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
+      await createActionConnector({ http, connector })
+        .then((savedConnector) => {
+          if (toasts) {
+            toasts.addSuccess(
+              i18n.translate(
+                'xpack.triggersActionsUI.sections.addConnectorForm.updateSuccessNotificationText',
+                {
+                  defaultMessage: "Created '{connectorName}'",
+                  values: {
+                    connectorName: savedConnector.name,
+                  },
+                }
+              )
+            );
+          }
+          return savedConnector;
+        })
+        .catch((errorRes) => {
+          toasts.addDanger(
+            errorRes.body?.message ??
+              i18n.translate(
+                'xpack.triggersActionsUI.sections.addConnectorForm.updateErrorNotificationText',
+                { defaultMessage: 'Cannot create a connector.' }
+              )
+          );
+          return undefined;
+        });
+
+    const onSaveClicked = async () => {
+      if (hasErrors) {
+        setConnector(
+          getConnectorWithInvalidatedFields(
+            connector,
+            configErrors,
+            secretsErrors,
+            connectorBaseErrors
+          )
+        );
+        return;
       }
-    }
-    return savedAction;
-  };
+      setIsSaving(true);
+      const savedAction = await onActionConnectorSave();
+      setIsSaving(false);
+      if (savedAction) {
+        closeFlyout();
+        if (reloadConnectors) {
+          await reloadConnectors();
+        }
+      }
+      return savedAction;
+    };
+
+    saveButton = (
+      <Fragment>
+        {onTestConnector && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="secondary"
+              data-test-subj="saveAndTestNewActionButton"
+              type="submit"
+              isLoading={isSaving}
+              onClick={async () => {
+                const savedConnector = await onSaveClicked();
+                if (savedConnector) {
+                  onTestConnector(savedConnector);
+                }
+              }}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
+                defaultMessage="Save & Test"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            color="secondary"
+            data-test-subj="saveNewActionButton"
+            type="submit"
+            isLoading={isSaving}
+            onClick={onSaveClicked}
+          >
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
+              defaultMessage="Save"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </Fragment>
+    );
+  }
 
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionAddTitle" size="m">
@@ -245,48 +299,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="spaceBetween">
-              {canSave && actionTypeModel && actionType ? (
-                <Fragment>
-                  {onTestConnector && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        color="secondary"
-                        data-test-subj="saveAndTestNewActionButton"
-                        type="submit"
-                        isDisabled={hasErrors}
-                        isLoading={isSaving}
-                        onClick={async () => {
-                          const savedConnector = await onSaveClicked();
-                          if (savedConnector) {
-                            onTestConnector(savedConnector);
-                          }
-                        }}
-                      >
-                        <FormattedMessage
-                          id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveAndTestButtonLabel"
-                          defaultMessage="Save & Test"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      fill
-                      color="secondary"
-                      data-test-subj="saveNewActionButton"
-                      type="submit"
-                      isDisabled={hasErrors}
-                      isLoading={isSaving}
-                      onClick={onSaveClicked}
-                    >
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.actionConnectorAdd.saveButtonLabel"
-                        defaultMessage="Save"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </Fragment>
-              ) : null}
+              {canSave && actionTypeModel && actionType ? saveButton : null}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
