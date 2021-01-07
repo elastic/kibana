@@ -494,6 +494,7 @@ export interface DocLinksStart {
             readonly urlDrilldownTemplateSyntax: string;
             readonly urlDrilldownVariables: string;
         };
+        readonly discover: Record<string, string>;
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;
@@ -553,6 +554,7 @@ export interface DocLinksStart {
             readonly sum: string;
             readonly top_hits: string;
         };
+        readonly runtimeFields: string;
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -567,6 +569,7 @@ export interface DocLinksStart {
         };
         readonly addData: string;
         readonly kibana: string;
+        readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
             readonly gettingStarted: string;
@@ -590,6 +593,8 @@ export interface DocLinksStart {
         readonly maps: Record<string, string>;
         readonly monitoring: Record<string, string>;
         readonly security: Record<string, string>;
+        readonly watcher: Record<string, string>;
+        readonly ccs: Record<string, string>;
     };
 }
 
@@ -1241,7 +1246,7 @@ export interface SavedObjectsImportConflictError {
 }
 
 // @public
-export interface SavedObjectsImportError {
+export interface SavedObjectsImportFailure {
     // (undocumented)
     error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
@@ -1272,7 +1277,7 @@ export interface SavedObjectsImportMissingReferencesError {
 // @public
 export interface SavedObjectsImportResponse {
     // (undocumented)
-    errors?: SavedObjectsImportError[];
+    errors?: SavedObjectsImportFailure[];
     // (undocumented)
     success: boolean;
     // (undocumented)

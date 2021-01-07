@@ -65,23 +65,20 @@ export const reload = (afterReload: () => void) => {
 };
 
 export const cleanKibana = () => {
-  cy.exec(`curl -XDELETE "${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*" -k`);
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`;
 
-  // We wait until the kibana indexes are deleted
+  // Delete kibana indexes and wait until they are deleted
+  cy.request('DELETE', kibanaIndexUrl);
   cy.waitUntil(() => {
     cy.wait(500);
-    return cy
-      .request(`${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`)
-      .then((response) => JSON.stringify(response.body) === '{}');
+    return cy.request(kibanaIndexUrl).then((response) => JSON.stringify(response.body) === '{}');
   });
-  esArchiverLoadEmptyKibana();
 
-  // We wait until the kibana indexes are created
+  // Load kibana indexes and wait until they are created
+  esArchiverLoadEmptyKibana();
   cy.waitUntil(() => {
     cy.wait(500);
-    return cy
-      .request(`${Cypress.env('ELASTICSEARCH_URL')}/.kibana\*`)
-      .then((response) => JSON.stringify(response.body) !== '{}');
+    return cy.request(kibanaIndexUrl).then((response) => JSON.stringify(response.body) !== '{}');
   });
 
   removeSignalsIndex();

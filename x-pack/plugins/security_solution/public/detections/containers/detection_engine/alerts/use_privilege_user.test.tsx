@@ -21,6 +21,7 @@ describe('usePrivilegeUser', () => {
         hasEncryptionKey: null,
         hasIndexManage: null,
         hasIndexWrite: null,
+        hasIndexUpdateDelete: null,
         isAuthenticated: null,
         loading: true,
       });
@@ -38,6 +39,7 @@ describe('usePrivilegeUser', () => {
         hasEncryptionKey: true,
         hasIndexManage: true,
         hasIndexWrite: true,
+        hasIndexUpdateDelete: true,
         isAuthenticated: true,
         loading: false,
       });
@@ -59,6 +61,7 @@ describe('usePrivilegeUser', () => {
         hasEncryptionKey: false,
         hasIndexManage: false,
         hasIndexWrite: false,
+        hasIndexUpdateDelete: false,
         isAuthenticated: false,
         loading: false,
       });
