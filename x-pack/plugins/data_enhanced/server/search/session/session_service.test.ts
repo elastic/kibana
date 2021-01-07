@@ -30,6 +30,7 @@ describe('BackgroundSessionService', () => {
 
   const MOCK_SESSION_ID = 'session-id-mock';
   const MOCK_ASYNC_ID = '123456';
+  const MOCK_STRATEGY = 'ese';
   const MOCK_KEY_HASH = '608de49a4600dbb5b173492759792e4a';
 
   const createMockInternalSavedObjectClient = (
@@ -47,7 +48,10 @@ describe('BackgroundSessionService', () => {
                   attributes: {
                     sessionId: MOCK_SESSION_ID,
                     idMapping: {
-                      'another-key': 'another-async-id',
+                      'another-key': {
+                        id: 'another-async-id',
+                        strategy: 'another-strategy',
+                      },
                     },
                   },
                   id: MOCK_SESSION_ID,
@@ -283,7 +287,7 @@ describe('BackgroundSessionService', () => {
       await service.trackId(
         searchRequest,
         searchId,
-        { sessionId, isStored },
+        { sessionId, isStored, strategy: MOCK_STRATEGY },
         { savedObjectsClient }
       );
 
@@ -313,7 +317,8 @@ describe('BackgroundSessionService', () => {
       );
 
       const [setSessionId, setParams] = setSpy.mock.calls[0];
-      expect(setParams.ids.get(requestHash)).toBe(searchId);
+      expect(setParams.ids.get(requestHash).id).toBe(searchId);
+      expect(setParams.ids.get(requestHash).strategy).toBe(MOCK_STRATEGY);
       expect(setSessionId).toBe(sessionId);
     });
 
@@ -326,12 +331,17 @@ describe('BackgroundSessionService', () => {
       await service.trackId(
         searchRequest,
         searchId,
-        { sessionId, isStored },
+        { sessionId, isStored, strategy: MOCK_STRATEGY },
         { savedObjectsClient }
       );
 
       expect(savedObjectsClient.update).toHaveBeenCalledWith(BACKGROUND_SESSION_TYPE, sessionId, {
-        idMapping: { [requestHash]: searchId },
+        idMapping: {
+          [requestHash]: {
+            id: searchId,
+            strategy: MOCK_STRATEGY,
+          },
+        },
       });
     });
   });
@@ -380,7 +390,12 @@ describe('BackgroundSessionService', () => {
           name: 'my_name',
           appId: 'my_app_id',
           urlGeneratorId: 'my_url_generator_id',
-          idMapping: { [requestHash]: searchId },
+          idMapping: {
+            [requestHash]: {
+              id: searchId,
+              strategy: MOCK_STRATEGY,
+            },
+          },
         },
         references: [],
       };
@@ -420,7 +435,10 @@ describe('BackgroundSessionService', () => {
       const findSpy = jest.fn().mockResolvedValue({ saved_objects: [] });
       createMockInternalSavedObjectClient(findSpy);
 
-      const mockIdMapping = createMockIdMapping([[MOCK_KEY_HASH, MOCK_ASYNC_ID]], moment());
+      const mockIdMapping = createMockIdMapping(
+        [[MOCK_KEY_HASH, { id: MOCK_ASYNC_ID, strategy: MOCK_STRATEGY }]],
+        moment()
+      );
 
       Object.defineProperty(service, 'sessionSearchMap', {
         get: () => mockIdMapping,
@@ -439,7 +457,7 @@ describe('BackgroundSessionService', () => {
       createMockInternalSavedObjectClient(findSpy);
 
       const mockIdMapping = createMockIdMapping(
-        [[MOCK_KEY_HASH, MOCK_ASYNC_ID]],
+        [[MOCK_KEY_HASH, { id: MOCK_ASYNC_ID, strategy: MOCK_STRATEGY }]],
         moment().subtract(2, 'm')
       );
 
@@ -460,7 +478,7 @@ describe('BackgroundSessionService', () => {
       createMockInternalSavedObjectClient(findSpy);
 
       const mockIdMapping = createMockIdMapping(
-        [[MOCK_KEY_HASH, MOCK_ASYNC_ID]],
+        [[MOCK_KEY_HASH, { id: MOCK_ASYNC_ID, strategy: MOCK_STRATEGY }]],
         moment(),
         MAX_UPDATE_RETRIES
       );
@@ -529,7 +547,10 @@ describe('BackgroundSessionService', () => {
             attributes: {
               idMapping: {
                 b: 'c',
-                [MOCK_KEY_HASH]: MOCK_ASYNC_ID,
+                [MOCK_KEY_HASH]: {
+                  id: MOCK_ASYNC_ID,
+                  strategy: MOCK_STRATEGY,
+                },
               },
             },
           },
@@ -567,7 +588,10 @@ describe('BackgroundSessionService', () => {
             id: MOCK_SESSION_ID,
             attributes: {
               idMapping: {
-                b: 'c',
+                b: {
+                  id: 'c',
+                  strategy: MOCK_STRATEGY,
+                },
               },
             },
           },

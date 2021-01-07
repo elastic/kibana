@@ -22,6 +22,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     testFiles: [
       resolve(__dirname, './tests/apps/dashboard/async_search'),
+      resolve(__dirname, './tests/apps/discover'),
       resolve(__dirname, './tests/apps/management/background_sessions'),
     ],
 

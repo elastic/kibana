@@ -15,6 +15,7 @@ readonly links: {
             readonly urlDrilldownTemplateSyntax: string;
             readonly urlDrilldownVariables: string;
         };
+        readonly discover: Record<string, string>;
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;
@@ -74,6 +75,7 @@ readonly links: {
             readonly sum: string;
             readonly top_hits: string;
         };
+        readonly runtimeFields: string;
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -88,6 +90,7 @@ readonly links: {
         };
         readonly addData: string;
         readonly kibana: string;
+        readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
             readonly gettingStarted: string;
@@ -111,5 +114,7 @@ readonly links: {
         readonly maps: Record<string, string>;
         readonly monitoring: Record<string, string>;
         readonly security: Record<string, string>;
+        readonly watcher: Record<string, string>;
+        readonly ccs: Record<string, string>;
     };
 ```
