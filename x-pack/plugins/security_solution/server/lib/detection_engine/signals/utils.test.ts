@@ -1012,6 +1012,7 @@ describe('utils', () => {
     test('result with error will create success: false within the result set', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 1;
+      searchResult._shards.failures = [{ reason: { reason: 'Not a sort faillure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,
@@ -1022,6 +1023,7 @@ describe('utils', () => {
     test('result with error will create success: false within the result set if failed is 2 or more', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
+      searchResult._shards.failures = [{ reason: { reason: 'Not a sort faillure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
         timestampOverride: undefined,

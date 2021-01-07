@@ -7,7 +7,7 @@
 /* eslint-disable complexity */
 
 import { Logger, KibanaRequest } from 'src/core/server';
-import { partition } from 'lodash';
+import { partition, isEmpty } from 'lodash';
 
 import {
   SIGNALS_ID,
@@ -185,51 +185,14 @@ export const signalRulesAlertType = ({
         const timestampFields: string[] = params.timestampOverride
           ? ['@timestamp', params.timestampOverride]
           : ['@timestamp'];
-        const timestampFieldCaps = await services.scopedClusterClient.fieldCaps({
-          index,
-          fields: timestampFields,
-          allow_no_indices: false,
-          include_unmapped: true,
-        });
 
-        if (
-          params.timestampOverride != null &&
-          timestampFieldCaps?.body?.fields[params.timestampOverride]?.unmapped?.indices != null
-        ) {
-          // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
-          // partial failure
-          const errorString = `The following indices are missing the timestamp override field ${
-            params.timestampOverride
-          }: ${JSON.stringify(
-            timestampFieldCaps?.body?.fields[params.timestampOverride]?.unmapped?.indices
-          )}`;
-          logger.debug(buildRuleMessage(errorString));
-          await ruleStatusService.partialFailure(errorString);
-          wroteStatus = true;
-        } else if (
-          params.timestampOverride == null &&
-          timestampFieldCaps?.body?.fields['@timestamp']?.unmapped?.indices != null
-        ) {
-          // if there is no timestamp override and the unmapped array is not empty,
-          // partial failure
-          const errorString = `The following indices are missing the timestamp field "@timestamp": ${JSON.stringify(
-            timestampFieldCaps?.body?.fields['@timestamp']?.unmapped?.indices
-          )}`;
-          logger.debug(buildRuleMessage(errorString));
-          await ruleStatusService.partialFailure(errorString);
-          wroteStatus = true;
-        }
         const indexNames = Object.keys(privileges.index);
         const [indexesWithReadPrivileges, indexesWithNoReadPrivileges] = partition(
           indexNames,
           (indexName) => privileges.index[indexName].read
         );
 
-        if (
-          !wroteStatus &&
-          indexesWithReadPrivileges.length > 0 &&
-          indexesWithNoReadPrivileges.length > 0
-        ) {
+        if (indexesWithReadPrivileges.length > 0 && indexesWithNoReadPrivileges.length > 0) {
           // some indices have read privileges others do not.
           // set a partial failure status
           const errorString = `Missing required read permissions on indexes: ${JSON.stringify(
@@ -239,7 +202,6 @@ export const signalRulesAlertType = ({
           await ruleStatusService.partialFailure(errorString);
           wroteStatus = true;
         } else if (
-          !wroteStatus &&
           indexesWithReadPrivileges.length === 0 &&
           indexesWithNoReadPrivileges.length === indexNames.length
         ) {
@@ -250,6 +212,49 @@ export const signalRulesAlertType = ({
           )}`;
           logger.debug(buildRuleMessage(errorString));
           await ruleStatusService.error(errorString);
+          wroteStatus = true;
+        }
+        const timestampFieldCaps = await services.scopedClusterClient.fieldCaps({
+          index,
+          fields: timestampFields,
+          allow_no_indices: false,
+          include_unmapped: true,
+        });
+
+        if (
+          !wroteStatus &&
+          params.timestampOverride != null &&
+          (isEmpty(timestampFieldCaps?.body?.fields) ||
+            timestampFieldCaps?.body?.fields[params.timestampOverride] == null ||
+            timestampFieldCaps?.body?.fields[params.timestampOverride]?.unmapped?.indices != null)
+        ) {
+          // if there is a timestamp override and the unmapped array for the timestamp override key is not empty,
+          // partial failure
+          const errorString = `The following indices are missing the timestamp override field "${
+            params.timestampOverride
+          }": ${JSON.stringify(
+            isEmpty(timestampFieldCaps?.body?.fields)
+              ? timestampFieldCaps.body.indices
+              : timestampFieldCaps?.body?.fields[params.timestampOverride]?.unmapped?.indices
+          )}`;
+          logger.debug(buildRuleMessage(errorString));
+          await ruleStatusService.partialFailure(errorString);
+          wroteStatus = true;
+        } else if (
+          !wroteStatus &&
+          params.timestampOverride == null &&
+          (isEmpty(timestampFieldCaps?.body?.fields) ||
+            timestampFieldCaps?.body?.fields['@timestamp'].unmapped?.indices != null)
+        ) {
+          // if there is no timestamp override and the unmapped array is not empty,
+          // partial failure
+          const errorString = `The following indices are missing the timestamp field "@timestamp": ${JSON.stringify(
+            isEmpty(timestampFieldCaps?.body?.fields)
+              ? timestampFieldCaps.body.indices
+              : timestampFieldCaps?.body?.fields['@timestamp']?.unmapped?.indices
+          )}`;
+          logger.debug(buildRuleMessage(errorString));
+          await ruleStatusService.partialFailure(errorString);
           wroteStatus = true;
         }
       } catch (exc) {

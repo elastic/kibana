@@ -606,7 +606,15 @@ export const createSearchAfterReturnTypeFromResponse = ({
   timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
-    success: searchResult._shards.failed === 0,
+    success:
+      searchResult._shards.failed === 0 ||
+      searchResult?._shards?.failures?.every((failure) => {
+        return (
+          failure.reason?.reason === 'No mapping found for [@timestamp] in order to sort on' ||
+          failure.reason?.reason ===
+            `No mapping found for [${timestampOverride}] in order to sort on`
+        );
+      }),
     lastLookBackDate: lastValidDate({ searchResult, timestampOverride }),
   });
 };

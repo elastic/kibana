@@ -147,6 +147,21 @@ describe('rules_notification_alert_type', () => {
         total: { value: 10 },
       },
     });
+    // @ts-expect-error missing HTTP response stuff. This is fine we don't care about meta and path etc..
+    alertServices.scopedClusterClient.fieldCaps.mockResolvedValue({
+      statusCode: 200,
+      body: {
+        fields: {
+          '@timestamp': {
+            date: {
+              indices: ['index1', 'index2', 'index3', 'index4'],
+              searchable: true,
+              aggregatable: false,
+            },
+          },
+        },
+      },
+    });
     const ruleAlert = getResult();
     alertServices.savedObjectsClient.get.mockResolvedValue({
       id: 'id',
