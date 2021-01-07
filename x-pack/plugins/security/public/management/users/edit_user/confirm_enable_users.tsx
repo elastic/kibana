@@ -32,7 +32,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
         await new UserAPIClient(services.http!).enableUser(username);
         services.notifications!.toasts.addSuccess(
           i18n.translate('xpack.security.management.users.confirmEnableUsers.successMessage', {
-            defaultMessage: 'Enabled user ‘{username}’',
+            defaultMessage: "Enabled user '{username}'",
             values: { username },
           })
         );
@@ -40,7 +40,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
       } catch (error) {
         services.notifications!.toasts.addDanger({
           title: i18n.translate('xpack.security.management.users.confirmEnableUsers.errorMessage', {
-            defaultMessage: 'Could not enable user ‘{username}’',
+            defaultMessage: "Could not enable user '{username}'",
             values: { username },
           }),
           text: (error as any).body?.message || error.message,
@@ -52,7 +52,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
   return (
     <ConfirmModal
       title={i18n.translate('xpack.security.management.users.confirmEnableUsers.title', {
-        defaultMessage: 'Enable {count, plural, one{user ‘{username}’} other{{count} users}}?',
+        defaultMessage: "Enable {count, plural, one{user '{username}'} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },
       })}
       onCancel={onCancel}

@@ -90,7 +90,6 @@ export const RoleComboBox = (props: Props) => {
 
   return (
     <EuiComboBox
-      className="rolesDropdown"
       data-test-subj="rolesDropdown"
       id="rolesDropdown"
       placeholder={

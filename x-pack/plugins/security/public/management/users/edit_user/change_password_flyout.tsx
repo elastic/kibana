@@ -58,7 +58,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
         );
         services.notifications!.toasts.addSuccess(
           i18n.translate('xpack.security.management.users.changePasswordFlyout.successMessage', {
-            defaultMessage: 'Changed password for user ‘{username}’',
+            defaultMessage: "Changed password for user '{username}'",
             values: { username },
           })
         );

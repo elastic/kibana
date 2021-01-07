@@ -32,7 +32,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
         await new UserAPIClient(services.http!).disableUser(username);
         services.notifications!.toasts.addSuccess(
           i18n.translate('xpack.security.management.users.confirmDisableUsers.successMessage', {
-            defaultMessage: 'Disabled user ‘{username}’',
+            defaultMessage: "Disabled user '{username}'",
             values: { username },
           })
         );
@@ -42,7 +42,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
           title: i18n.translate(
             'xpack.security.management.users.confirmDisableUsers.errorMessage',
             {
-              defaultMessage: 'Could not disable user ‘{username}’',
+              defaultMessage: "Could not disable user '{username}'",
               values: { username },
             }
           ),
@@ -55,7 +55,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
   return (
     <ConfirmModal
       title={i18n.translate('xpack.security.management.users.confirmDisableUsers.title', {
-        defaultMessage: 'Disable {count, plural, one{user ‘{username}’} other{{count} users}}?',
+        defaultMessage: "Disable {count, plural, one{user '{username}'} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },
       })}
       onCancel={onCancel}

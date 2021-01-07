@@ -126,9 +126,9 @@ export const InnerBreadcrumb: FunctionComponent<InnerBreadcrumbProps> = ({
   );
 };
 
-export function getDocTitle(breadcrumbs: BreadcrumbProps[]) {
+export function getDocTitle(breadcrumbs: BreadcrumbProps[], maxBreadcrumbs = 2) {
   return breadcrumbs
-    .slice()
+    .slice(0, maxBreadcrumbs)
     .reverse()
     .map(({ text }) => text);
 }

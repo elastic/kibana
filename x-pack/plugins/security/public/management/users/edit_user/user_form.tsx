@@ -24,6 +24,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { throttle } from 'lodash';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { User, Role, isRoleDeprecated } from '../../../../common/model';
+import { NAME_REGEX, MAX_NAME_LENGTH } from '../../../../common/constants';
 import { useForm, ValidationErrors } from '../../../components/use_form';
 import { DocLink } from '../../../components/doc_link';
 import { RolesAPIClient } from '../../roles';
@@ -84,11 +85,11 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         services.notifications!.toasts.addSuccess(
           isNewUser
             ? i18n.translate('xpack.security.management.users.userForm.createSuccessMessage', {
-                defaultMessage: 'Created user ‘{username}’',
+                defaultMessage: "Created user '{username}'",
                 values: { username: user.username },
               })
             : i18n.translate('xpack.security.management.users.userForm.updateSuccessMessage', {
-                defaultMessage: 'Updated user ‘{username}’',
+                defaultMessage: "Updated user '{username}'",
                 values: { username: user.username },
               })
         );
@@ -97,11 +98,11 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         services.notifications!.toasts.addDanger({
           title: isNewUser
             ? i18n.translate('xpack.security.management.users.userForm.createErrorMessage', {
-                defaultMessage: 'Could not create user ‘{username}’',
+                defaultMessage: "Could not create user '{username}'",
                 values: { username: user.username },
               })
             : i18n.translate('xpack.security.management.users.userForm.updateErrorMessage', {
-                defaultMessage: 'Could not update user ‘{username}’',
+                defaultMessage: "Could not update user '{username}'",
                 values: { username: user.username },
               }),
           text: (error as any).body?.message || error.message,
@@ -111,8 +112,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
     },
     validate: async (values) => {
       const errors: ValidationErrors<typeof values> = {};
-      const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      const usernameRegex = /^[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*/;
 
       if (isNewUser) {
         if (!values.username) {
@@ -122,12 +121,26 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               defaultMessage: 'Please enter a username.',
             }
           );
-        } else if (!values.username.match(usernameRegex)) {
+        } else if (values.username.length > MAX_NAME_LENGTH) {
+          errors.username = i18n.translate(
+            'xpack.security.management.users.userForm.usernameMaxLengthError',
+            {
+              defaultMessage: `Username must be no more than ${MAX_NAME_LENGTH} characters.`,
+            }
+          );
+        } else if (values.username.trim() !== values.username) {
+          errors.username = i18n.translate(
+            'xpack.security.management.users.userForm.usernameWhitespaceError',
+            {
+              defaultMessage: `Username must not contain leading or trailing spaces.`,
+            }
+          );
+        } else if (!values.username.match(NAME_REGEX)) {
           errors.username = i18n.translate(
             'xpack.security.management.users.userForm.usernameInvalidError',
             {
               defaultMessage:
-                'Username must begin with a letter or underscore and contain only letters, underscores, and numbers.',
+                'Username must contain only letters, numbers, spaces, punctuation and printable symbols.',
             }
           );
         } else {
@@ -137,7 +150,8 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               errors.username = i18n.translate(
                 'xpack.security.management.users.userForm.usernameTakenError',
                 {
-                  defaultMessage: `User ‘{username}’ already exists. Please choose another username.`,
+                  defaultMessage:
+                    "User '{username}' already exists. Please choose another username.",
                   values: { username: values.username },
                 }
               );
@@ -174,15 +188,6 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             }
           );
         }
-      }
-
-      if (values.email && !values.email.match(emailRegex)) {
-        errors.email = i18n.translate(
-          'xpack.security.management.users.userForm.emailInvalidError',
-          {
-            defaultMessage: 'Please enter a valid email address.',
-          }
-        );
       }
 
       return errors;
@@ -357,10 +362,10 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
                   <p key={role.name}>
                     <FormattedMessage
                       id="xpack.security.management.users.userForm.deprecatedRolesAssignedWarning"
-                      defaultMessage="Role ‘{name}’ is deprecated. {reason}."
+                      defaultMessage="Role '{name}' is deprecated. {reason}."
                       values={{
                         name: role.name,
-                        reason: role.metadata?._deprecated_reason?.replace(/\[(.+)\]/, '‘$1’'),
+                        reason: role.metadata?._deprecated_reason?.replace(/\[(.+)\]/, "'$1'"),
                       }}
                     />
                   </p>

@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { useHtmlId } from './use_html_id';
 
-export interface FormFlyoutProps extends Omit<EuiFlyoutProps, 'onSubmit' | 'onClose'> {
+export interface FormFlyoutProps extends Omit<EuiFlyoutProps, 'onClose'> {
   title: string;
   initialFocus?: RefObject<HTMLElement>;
   onCancel(): void;
@@ -43,7 +43,6 @@ export const FormFlyout: FunctionComponent<FormFlyoutProps> = ({
   isDisabled,
   children,
   initialFocus,
-  ownFocus = true,
   ...rest
 }) => {
   useEffect(() => {
@@ -54,39 +53,39 @@ export const FormFlyout: FunctionComponent<FormFlyoutProps> = ({
 
   const titleId = useHtmlId('formFlyout', 'title');
 
-  const flyout = (
-    <EuiFlyout ownFocus={ownFocus} onClose={onCancel} aria-labelledby={titleId} {...rest}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id={titleId}>{title}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="left" isDisabled={isLoading} onClick={onCancel}>
-              <FormattedMessage
-                id="xpack.security.formFlyout.cancelButton"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              isLoading={isLoading}
-              isDisabled={isDisabled}
-              color={submitButtonColor}
-              fill
-              onClick={onSubmit}
-            >
-              {submitButtonText}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+  return (
+    <EuiPortal>
+      <EuiFlyout onClose={onCancel} aria-labelledby={titleId} {...rest}>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2 id={titleId}>{title}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>{children}</EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty flush="left" isDisabled={isLoading} onClick={onCancel}>
+                <FormattedMessage
+                  id="xpack.security.formFlyout.cancelButton"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                isLoading={isLoading}
+                isDisabled={isDisabled}
+                color={submitButtonColor}
+                fill
+                onClick={onSubmit}
+              >
+                {submitButtonText}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </EuiPortal>
   );
-
-  return ownFocus ? <EuiPortal>{flyout}</EuiPortal> : flyout;
 };

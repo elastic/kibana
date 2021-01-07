@@ -127,7 +127,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               iconType="alert"
               color="warning"
             >
-              {user.metadata?._deprecated_reason?.replace(/\[(.+)\]/, '‘$1’')}
+              {user.metadata?._deprecated_reason?.replace(/\[(.+)\]/, "'$1'")}
             </EuiCallOut>
             <EuiSpacer />
           </>

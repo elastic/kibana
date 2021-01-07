@@ -40,10 +40,8 @@ export const usersManagementApp = Object.freeze({
       order: 10,
       title: i18n.translate('xpack.security.management.usersTitle', { defaultMessage: 'Users' }),
       async mount({ element, setBreadcrumbs, history }) {
-        const [coreStart] = await getStartServices();
-
         const [
-          [{ http, notifications }],
+          [coreStart],
           { UsersGridPage },
           { CreateUserPage, EditUserPage },
           { UserAPIClient },
@@ -75,9 +73,9 @@ export const usersManagementApp = Object.freeze({
               <Switch>
                 <Route path={['/', '']} exact>
                   <UsersGridPage
-                    notifications={notifications}
-                    userAPIClient={new UserAPIClient(http)}
-                    rolesAPIClient={new RolesAPIClient(http)}
+                    notifications={coreStart.notifications}
+                    userAPIClient={new UserAPIClient(coreStart.http)}
+                    rolesAPIClient={new RolesAPIClient(coreStart.http)}
                     history={history}
                     navigateToApp={coreStart.application.navigateToApp}
                   />
