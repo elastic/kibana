@@ -17,5 +17,13 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './types';
+import { RUNTIME_FIELD_TYPES } from './constants';
+
+export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export interface RuntimeField {
+  name: string;
+  type: RuntimeType;
+  script: {
+    source: string;
+  };
+}

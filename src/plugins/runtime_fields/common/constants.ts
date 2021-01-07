@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './constants';
-export * from './types';
+export const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
