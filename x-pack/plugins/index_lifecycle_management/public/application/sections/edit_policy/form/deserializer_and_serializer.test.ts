@@ -7,6 +7,7 @@
 import { setAutoFreeze } from 'immer';
 import { cloneDeep } from 'lodash';
 import { SerializedPolicy } from '../../../../../common/types';
+import { defaultRolloverAction } from '../../../constants';
 import { deserializer } from './deserializer';
 import { createSerializer } from './serializer';
 import { FormInternal } from '../types';
@@ -266,6 +267,15 @@ describe('deserializer and serializer', () => {
     const result = serializer(formInternal);
 
     expect(result.phases.warm!.min_age).toBeUndefined();
+  });
+
+  it('adds default rollover configuration when enabled, but previously not configured', () => {
+    delete formInternal.phases.hot!.actions.rollover;
+    formInternal._meta.hot.isUsingDefaultRollover = true;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.hot!.actions.rollover).toEqual(defaultRolloverAction);
   });
 
   it('removes snapshot_repository when it is unset', () => {
