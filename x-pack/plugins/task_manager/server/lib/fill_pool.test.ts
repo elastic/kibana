@@ -8,6 +8,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { fillPool } from './fill_pool';
 import { TaskPoolRunResult } from '../task_pool';
+import { asOk } from './result_type';
 
 describe('fillPool', () => {
   test('stops filling when pool runs all claimed tasks, even if there is more capacity', async () => {
@@ -16,7 +17,7 @@ describe('fillPool', () => {
       [4, 5],
     ];
     let index = 0;
-    const fetchAvailableTasks = async () => tasks[index++] || [];
+    const fetchAvailableTasks = async () => asOk(tasks[index++] || []);
     const run = sinon.spy(async () => TaskPoolRunResult.RunningAllClaimedTasks);
     const converter = _.identity;
 
@@ -31,7 +32,7 @@ describe('fillPool', () => {
       [4, 5],
     ];
     let index = 0;
-    const fetchAvailableTasks = async () => tasks[index++] || [];
+    const fetchAvailableTasks = async () => asOk(tasks[index++] || []);
     const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
     const converter = _.identity;
 
@@ -46,7 +47,7 @@ describe('fillPool', () => {
       [4, 5],
     ];
     let index = 0;
-    const fetchAvailableTasks = async () => tasks[index++] || [];
+    const fetchAvailableTasks = async () => asOk(tasks[index++] || []);
     const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
     const converter = (x: number) => x.toString();
 
@@ -80,7 +81,7 @@ describe('fillPool', () => {
           [4, 5],
         ];
         let index = 0;
-        const fetchAvailableTasks = async () => tasks[index++] || [];
+        const fetchAvailableTasks = async () => asOk(tasks[index++] || []);
 
         await fillPool(fetchAvailableTasks, converter, run);
       } catch (err) {
@@ -95,7 +96,7 @@ describe('fillPool', () => {
           [4, 5],
         ];
         let index = 0;
-        const fetchAvailableTasks = async () => tasks[index++] || [];
+        const fetchAvailableTasks = async () => asOk(tasks[index++] || []);
         const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
         const converter = (x: number) => {
           throw new Error(`can not convert ${x}`);
