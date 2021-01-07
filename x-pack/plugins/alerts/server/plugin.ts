@@ -371,11 +371,10 @@ export class AlertingPlugin {
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
       const client = getAlertsClientWithRequest(request);
-      return async (objects?: SavedObjectsBulkGetObject[]) => {
-        if (objects) {
-          Promise.all(objects.map(async (objectItem) => (await client).get({ id: objectItem.id })));
-        }
-      };
+      return (objects?: SavedObjectsBulkGetObject[]) =>
+        objects
+          ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
+          : new Promise(() => []);
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);

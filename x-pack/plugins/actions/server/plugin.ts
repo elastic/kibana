@@ -334,11 +334,12 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     this.eventLogService!.registerSavedObjectProvider('action', (request) => {
       const client = secureGetActionsClientWithRequest(request);
-      return async (objects?: SavedObjectsBulkGetObject[]) => {
-        if (objects) {
-          Promise.all(objects.map(async (objectItem) => (await client).get({ id: objectItem.id })));
-        }
-      };
+      return (objects?: SavedObjectsBulkGetObject[]) =>
+        objects
+          ? Promise.all(
+              objects.map(async (objectItem) => await (await client).get({ id: objectItem.id }))
+            )
+          : new Promise(() => []);
     });
 
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
