@@ -21,7 +21,7 @@ For information about Elasticsearch bucket aggregations, refer to {ref}/search-a
 ^| X
 ^| X
 ^| X
-| 
+^| X
 | 
 
 | Date histogram
@@ -49,7 +49,7 @@ For information about Elasticsearch bucket aggregations, refer to {ref}/search-a
 ^| X
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | GeoHash grid
@@ -70,7 +70,7 @@ For information about Elasticsearch bucket aggregations, refer to {ref}/search-a
 ^| X
 ^| X
 ^| X
-| 
+^| X
 | 
 
 | Terms
@@ -139,7 +139,7 @@ For information about Elasticsearch metrics aggregations, refer to {ref}/search-
 ^| X
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Percentiles Rank
@@ -153,7 +153,7 @@ For information about Elasticsearch metrics aggregations, refer to {ref}/search-
 ^| X
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Value count 
@@ -187,7 +187,7 @@ For information about Elasticsearch pipeline aggregations, refer to {ref}/search
 ^| X
 ^| X
 ^| X
-| 
+^| X
 ^| X
 
 | Max bucket   
@@ -215,14 +215,14 @@ For information about Elasticsearch pipeline aggregations, refer to {ref}/search
 ^| X
 ^| X
 ^| X
-^| 
+^| X
 ^| X
 
 | Cumulative sum 
 ^| X
 ^| X
 ^| X
-^| 
+^| X
 ^| X
 
 | Bucket script 
