@@ -27,7 +27,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, px, truncate, unit } from '../../../../style/variables';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
-import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview';
+import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview_link';
 import { AgentIcon } from '../../../shared/AgentIcon';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
