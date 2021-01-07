@@ -46,6 +46,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     services,
     eventEmitter,
     isChromeVisible,
+    originatingApp,
     visualizationIdFromUrl
   );
   const { appState, hasUnappliedChanges } = useVisualizeAppState(
@@ -64,8 +65,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   useLinkedSearchUpdates(services, eventEmitter, appState, savedVisInstance);
 
   useEffect(() => {
-    const { originatingApp: value } =
-      services.embeddable.getStateTransfer().getIncomingEditorState() || {};
+    const { originatingApp: value } = services.stateTransferService.getIncomingEditorState() || {};
     setOriginatingApp(value);
   }, [services]);
 

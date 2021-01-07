@@ -192,7 +192,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<
               }
             )}
             disabled={readOnly}
-            checked={hasAuth}
+            checked={hasAuth || false}
             onChange={(e) => {
               editActionConfig('hasAuth', e.target.checked);
               if (!e.target.checked) {
