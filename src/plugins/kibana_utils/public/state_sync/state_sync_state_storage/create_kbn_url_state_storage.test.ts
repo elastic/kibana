@@ -49,11 +49,11 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/"`);
-      expect(urlStateStorage.kbnUrlControls.flush()).toBe(true);
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(true);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/#?_s=(ok:1,test:test)"`);
       expect(urlStateStorage.get(key)).toEqual(state);
 
-      expect(urlStateStorage.kbnUrlControls.flush()).toBe(false); // nothing to flush, not update
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(false); // nothing to flush, not update
     });
 
     it('should cancel url updates', async () => {
@@ -225,11 +225,11 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       urlStateStorage.set(key, state);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/kibana/app/"`);
-      expect(urlStateStorage.kbnUrlControls.flush()).toBe(true);
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(true);
       expect(getCurrentUrl()).toMatchInlineSnapshot(`"/kibana/app/#?_s=(ok:1,test:test)"`);
       expect(urlStateStorage.get(key)).toEqual(state);
 
-      expect(urlStateStorage.kbnUrlControls.flush()).toBe(false); // nothing to flush, not update
+      expect(!!urlStateStorage.kbnUrlControls.flush()).toBe(false); // nothing to flush, not update
     });
 
     it('should cancel url updates', async () => {
