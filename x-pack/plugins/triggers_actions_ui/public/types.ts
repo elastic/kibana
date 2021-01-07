@@ -187,7 +187,7 @@ export interface AlertTableItem extends Alert {
 
 export interface AlertTypeParamsExpressionProps<
   Params extends AlertTypeParams = AlertTypeParams,
-  MetaData = Record<string, unknown>
+  MetaData = Record<string, unknown>,
   ActionGroupIds extends string = string
 > {
   alertParams: Params;
