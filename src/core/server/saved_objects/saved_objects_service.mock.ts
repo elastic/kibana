@@ -30,6 +30,8 @@ import type {
 import { savedObjectsRepositoryMock } from './service/lib/repository.mock';
 import { savedObjectsClientMock } from './service/saved_objects_client.mock';
 import { typeRegistryMock } from './saved_objects_type_registry.mock';
+import { savedObjectsExporterMock } from './export/saved_objects_exporter.mock';
+import { savedObjectsImporterMock } from './import/saved_objects_importer.mock';
 import { migrationMocks } from './migrations/mocks';
 import { ServiceStatusLevels } from '../status';
 import { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
@@ -42,6 +44,8 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
     createInternalRepository: jest.fn(),
     createScopedRepository: jest.fn(),
     createSerializer: jest.fn(),
+    createExporter: jest.fn(),
+    createImporter: jest.fn(),
     getTypeRegistry: jest.fn(),
   };
 
@@ -49,6 +53,8 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
   startContract.createInternalRepository.mockReturnValue(savedObjectsRepositoryMock.create());
   startContract.createScopedRepository.mockReturnValue(savedObjectsRepositoryMock.create());
   startContract.getTypeRegistry.mockReturnValue(typeRegistry ?? typeRegistryMock.create());
+  startContract.createExporter.mockReturnValue(savedObjectsExporterMock.create());
+  startContract.createImporter.mockReturnValue(savedObjectsImporterMock.create());
 
   return startContract;
 };
@@ -66,10 +72,7 @@ const createSetupContractMock = () => {
     setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
     registerType: jest.fn(),
-    getImportExportObjectLimit: jest.fn(),
   };
-
-  setupContract.getImportExportObjectLimit.mockReturnValue(100);
 
   return setupContract;
 };
@@ -106,4 +109,6 @@ export const savedObjectsServiceMock = {
   createStartContract: createStartContractMock,
   createMigrationContext: migrationMocks.createContext,
   createTypeRegistryMock: typeRegistryMock.create,
+  createExporter: savedObjectsExporterMock.create,
+  createImporter: savedObjectsImporterMock.create,
 };

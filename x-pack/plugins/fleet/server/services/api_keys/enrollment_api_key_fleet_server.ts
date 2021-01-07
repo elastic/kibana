@@ -10,7 +10,7 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 import { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
-import { createAPIKey, invalidateAPIKey } from './security';
+import { createAPIKey, invalidateAPIKeys } from './security';
 import { agentPolicyService } from '../agent_policy';
 
 // TODO Move these types to another file
@@ -104,7 +104,7 @@ export async function deleteEnrollmentApiKey(
 ) {
   const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id);
 
-  await invalidateAPIKey(soClient, enrollmentApiKey.api_key_id);
+  await invalidateAPIKeys(soClient, [enrollmentApiKey.api_key_id]);
 
   await esClient.update({
     index: ENROLLMENT_API_KEYS_INDEX,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { EnrollmentAPIKey } from '../../types';
 import { appContextService } from '../app_context';
 import * as enrollmentApiKeyServiceSO from './enrollment_api_key_so';
