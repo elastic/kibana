@@ -156,9 +156,11 @@ export const OPTIONAL_ACTION_VARIABLES = ['context'] as const;
 export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
   Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
 
-export interface AlertType
-  extends Pick<
-    CommonAlertType,
+export interface AlertType<
+  ActionGroupIds extends string = string,
+  RecoveryActionGroupId extends string = string
+> extends Pick<
+    CommonAlertType<ActionGroupIds, RecoveryActionGroupId>,
     | 'id'
     | 'name'
     | 'actionGroups'
@@ -186,6 +188,7 @@ export interface AlertTableItem extends Alert {
 export interface AlertTypeParamsExpressionProps<
   Params extends AlertTypeParams = AlertTypeParams,
   MetaData = Record<string, unknown>
+  ActionGroupIds extends string = string
 > {
   alertParams: Params;
   alertInterval: string;
@@ -197,7 +200,7 @@ export interface AlertTypeParamsExpressionProps<
   ) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
-  actionGroups: ActionGroup[];
+  actionGroups: Array<ActionGroup<ActionGroupIds>>;
   metadata?: MetaData;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;

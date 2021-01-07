@@ -92,7 +92,7 @@ describe('TaskPool', () => {
       ]
     `);
 
-    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+    expect(result).toEqual(TaskPoolRunResult.RunningAtCapacity);
   });
 
   test('should log when running a Task fails', async () => {
@@ -242,7 +242,7 @@ describe('TaskPool', () => {
       },
     ]);
 
-    expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
+    expect(result).toEqual(TaskPoolRunResult.RunningAtCapacity);
     expect(pool.occupiedWorkers).toEqual(2);
     expect(pool.availableWorkers).toEqual(0);
 
