@@ -6,10 +6,10 @@
 
 import { SavedObjectsType } from 'kibana/server';
 
-export const BACKGROUND_SESSION_TYPE = 'background-session';
+export const SEARCH_SESSION_TYPE = 'search-session';
 
-export const backgroundSessionMapping: SavedObjectsType = {
-  name: BACKGROUND_SESSION_TYPE,
+export const searchSessionMapping: SavedObjectsType = {
+  name: SEARCH_SESSION_TYPE,
   namespaceType: 'single',
   hidden: true,
   mappings: {

@@ -20,31 +20,31 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import './background_session_indicator.scss';
-import { SessionState } from '../../../../../../../src/plugins/data/public/';
+import './search_session_indicator.scss';
+import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
 
-export interface BackgroundSessionIndicatorProps {
-  state: SessionState;
+export interface SearchSessionIndicatorProps {
+  state: SearchSessionState;
   onContinueInBackground?: () => void;
   onCancel?: () => void;
-  viewBackgroundSessionsLink?: string;
+  viewSearchSessionsLink?: string;
   onSaveResults?: () => void;
   onRefresh?: () => void;
   disabled?: boolean;
   disabledReasonText?: string;
 }
 
-type ActionButtonProps = BackgroundSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
+type ActionButtonProps = SearchSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
 
 const CancelButton = ({ onCancel = () => {}, buttonProps = {} }: ActionButtonProps) => (
   <EuiButtonEmpty
     onClick={onCancel}
-    data-test-subj={'backgroundSessionIndicatorCancelBtn'}
+    data-test-subj={'searchSessionIndicatorCancelBtn'}
     {...buttonProps}
   >
     <FormattedMessage
-      id="xpack.data.backgroundSessionIndicator.cancelButtonText"
-      defaultMessage="Cancel"
+      id="xpack.data.searchSessionIndicator.cancelButtonText"
+      defaultMessage="Cancel session"
     />
   </EuiButtonEmpty>
 );
@@ -55,28 +55,28 @@ const ContinueInBackgroundButton = ({
 }: ActionButtonProps) => (
   <EuiButtonEmpty
     onClick={onContinueInBackground}
-    data-test-subj={'backgroundSessionIndicatorContinueInBackgroundBtn'}
+    data-test-subj={'searchSessionIndicatorContinueInBackgroundBtn'}
     {...buttonProps}
   >
     <FormattedMessage
-      id="xpack.data.backgroundSessionIndicator.continueInBackgroundButtonText"
+      id="xpack.data.searchSessionIndicator.continueInBackgroundButtonText"
       defaultMessage="Continue in background"
     />
   </EuiButtonEmpty>
 );
 
-const ViewBackgroundSessionsButton = ({
-  viewBackgroundSessionsLink = 'management',
+const ViewAllSearchSessionsButton = ({
+  viewSearchSessionsLink = 'management',
   buttonProps = {},
 }: ActionButtonProps) => (
   <EuiButtonEmpty
-    href={viewBackgroundSessionsLink}
-    data-test-subj={'backgroundSessionIndicatorViewBackgroundSessionsLink'}
+    href={viewSearchSessionsLink}
+    data-test-subj={'searchSessionIndicatorviewSearchSessionsLink'}
     {...buttonProps}
   >
     <FormattedMessage
-      id="xpack.data.backgroundSessionIndicator.viewBackgroundSessionsLinkText"
-      defaultMessage="View background sessions"
+      id="xpack.data.searchSessionIndicator.viewSearchSessionsLinkText"
+      defaultMessage="View all sessions"
     />
   </EuiButtonEmpty>
 );
@@ -84,11 +84,11 @@ const ViewBackgroundSessionsButton = ({
 const RefreshButton = ({ onRefresh = () => {}, buttonProps = {} }: ActionButtonProps) => (
   <EuiButtonEmpty
     onClick={onRefresh}
-    data-test-subj={'backgroundSessionIndicatorRefreshBtn'}
+    data-test-subj={'searchSessionIndicatorRefreshBtn'}
     {...buttonProps}
   >
     <FormattedMessage
-      id="xpack.data.backgroundSessionIndicator.refreshButtonText"
+      id="xpack.data.searchSessionIndicator.refreshButtonText"
       defaultMessage="Refresh"
     />
   </EuiButtonEmpty>
@@ -97,18 +97,18 @@ const RefreshButton = ({ onRefresh = () => {}, buttonProps = {} }: ActionButtonP
 const SaveButton = ({ onSaveResults = () => {}, buttonProps = {} }: ActionButtonProps) => (
   <EuiButtonEmpty
     onClick={onSaveResults}
-    data-test-subj={'backgroundSessionIndicatorSaveBtn'}
+    data-test-subj={'searchSessionIndicatorSaveBtn'}
     {...buttonProps}
   >
     <FormattedMessage
-      id="xpack.data.backgroundSessionIndicator.saveButtonText"
-      defaultMessage="Save"
+      id="xpack.data.searchSessionIndicator.saveButtonText"
+      defaultMessage="Save session"
     />
   </EuiButtonEmpty>
 );
 
-const backgroundSessionIndicatorViewStateToProps: {
-  [state in SessionState]: {
+const searchSessionIndicatorViewStateToProps: {
+  [state in SearchSessionState]: {
     button: Pick<EuiButtonIconProps, 'color' | 'iconType' | 'aria-label'> & {
       tooltipText: string;
     };
@@ -119,162 +119,151 @@ const backgroundSessionIndicatorViewStateToProps: {
     };
   } | null;
 } = {
-  [SessionState.None]: null,
-  [SessionState.Loading]: {
+  [SearchSessionState.None]: null,
+  [SearchSessionState.Loading]: {
     button: {
       color: 'subdued',
       iconType: 'clock',
       'aria-label': i18n.translate(
-        'xpack.data.backgroundSessionIndicator.loadingResultsIconAriaLabel',
-        { defaultMessage: 'Loading results' }
+        'xpack.data.searchSessionIndicator.loadingResultsIconAriaLabel',
+        { defaultMessage: 'Loading' }
       ),
       tooltipText: i18n.translate(
-        'xpack.data.backgroundSessionIndicator.loadingResultsIconTooltipText',
-        { defaultMessage: 'Loading results' }
+        'xpack.data.searchSessionIndicator.loadingResultsIconTooltipText',
+        { defaultMessage: 'Loading' }
       ),
     },
     popover: {
-      text: i18n.translate('xpack.data.backgroundSessionIndicator.loadingResultsText', {
+      text: i18n.translate('xpack.data.searchSessionIndicator.loadingResultsText', {
         defaultMessage: 'Loading',
       }),
       primaryAction: CancelButton,
       secondaryAction: ContinueInBackgroundButton,
     },
   },
-  [SessionState.Completed]: {
+  [SearchSessionState.Completed]: {
     button: {
       color: 'subdued',
       iconType: 'checkInCircleFilled',
-      'aria-label': i18n.translate(
-        'xpack.data.backgroundSessionIndicator.resultsLoadedIconAriaLabel',
-        {
-          defaultMessage: 'Results loaded',
-        }
-      ),
+      'aria-label': i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedIconAriaLabel', {
+        defaultMessage: 'Loaded',
+      }),
       tooltipText: i18n.translate(
-        'xpack.data.backgroundSessionIndicator.resultsLoadedIconTooltipText',
+        'xpack.data.searchSessionIndicator.resultsLoadedIconTooltipText',
         {
           defaultMessage: 'Results loaded',
         }
       ),
     },
     popover: {
-      text: i18n.translate('xpack.data.backgroundSessionIndicator.resultsLoadedText', {
-        defaultMessage: 'Results loaded',
+      text: i18n.translate('xpack.data.searchSessionIndicator.resultsLoadedText', {
+        defaultMessage: 'Loaded',
       }),
       primaryAction: SaveButton,
-      secondaryAction: ViewBackgroundSessionsButton,
+      secondaryAction: ViewAllSearchSessionsButton,
     },
   },
-  [SessionState.BackgroundLoading]: {
+  [SearchSessionState.BackgroundLoading]: {
     button: {
       iconType: EuiLoadingSpinner,
       'aria-label': i18n.translate(
-        'xpack.data.backgroundSessionIndicator.loadingInTheBackgroundIconAriaLabel',
+        'xpack.data.searchSessionIndicator.loadingInTheBackgroundIconAriaLabel',
         {
           defaultMessage: 'Loading results in the background',
         }
       ),
       tooltipText: i18n.translate(
-        'xpack.data.backgroundSessionIndicator.loadingInTheBackgroundIconTooltipText',
+        'xpack.data.searchSessionIndicator.loadingInTheBackgroundIconTooltipText',
         {
           defaultMessage: 'Loading results in the background',
         }
       ),
     },
     popover: {
-      text: i18n.translate('xpack.data.backgroundSessionIndicator.loadingInTheBackgroundText', {
+      text: i18n.translate('xpack.data.searchSessionIndicator.loadingInTheBackgroundText', {
         defaultMessage: 'Loading in the background',
       }),
       primaryAction: CancelButton,
-      secondaryAction: ViewBackgroundSessionsButton,
+      secondaryAction: ViewAllSearchSessionsButton,
     },
   },
-  [SessionState.BackgroundCompleted]: {
+  [SearchSessionState.BackgroundCompleted]: {
     button: {
       color: 'success',
       iconType: 'checkInCircleFilled',
       'aria-label': i18n.translate(
-        'xpack.data.backgroundSessionIndicator.resultLoadedInTheBackgroundIconAraText',
+        'xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundIconAraText',
         {
           defaultMessage: 'Results loaded in the background',
         }
       ),
       tooltipText: i18n.translate(
-        'xpack.data.backgroundSessionIndicator.resultLoadedInTheBackgroundIconTooltipText',
+        'xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundIconTooltipText',
         {
           defaultMessage: 'Results loaded in the background',
         }
       ),
     },
     popover: {
-      text: i18n.translate(
-        'xpack.data.backgroundSessionIndicator.resultLoadedInTheBackgroundText',
-        {
-          defaultMessage: 'Results loaded',
-        }
-      ),
-      primaryAction: ViewBackgroundSessionsButton,
+      text: i18n.translate('xpack.data.searchSessionIndicator.resultLoadedInTheBackgroundText', {
+        defaultMessage: 'Loaded',
+      }),
+      primaryAction: ViewAllSearchSessionsButton,
     },
   },
-  [SessionState.Restored]: {
+  [SearchSessionState.Restored]: {
     button: {
       color: 'warning',
       iconType: 'refresh',
       'aria-label': i18n.translate(
-        'xpack.data.backgroundSessionIndicator.restoredResultsIconAriaLabel',
+        'xpack.data.searchSessionIndicator.restoredResultsIconAriaLabel',
         {
           defaultMessage: 'Results no longer current',
         }
       ),
-      tooltipText: i18n.translate(
-        'xpack.data.backgroundSessionIndicator.restoredResultsTooltipText',
-        {
-          defaultMessage: 'Results no longer current',
-        }
-      ),
+      tooltipText: i18n.translate('xpack.data.searchSessionIndicator.restoredResultsTooltipText', {
+        defaultMessage: 'Results no longer current',
+      }),
     },
     popover: {
-      text: i18n.translate('xpack.data.backgroundSessionIndicator.restoredText', {
+      text: i18n.translate('xpack.data.searchSessionIndicator.restoredText', {
         defaultMessage: 'Results no longer current',
       }),
       primaryAction: RefreshButton,
-      secondaryAction: ViewBackgroundSessionsButton,
+      secondaryAction: ViewAllSearchSessionsButton,
     },
   },
-  [SessionState.Canceled]: {
+  [SearchSessionState.Canceled]: {
     button: {
       color: 'subdued',
       iconType: 'refresh',
-      'aria-label': i18n.translate('xpack.data.backgroundSessionIndicator.canceledIconAriaLabel', {
+      'aria-label': i18n.translate('xpack.data.searchSessionIndicator.canceledIconAriaLabel', {
         defaultMessage: 'Canceled',
       }),
-      tooltipText: i18n.translate('xpack.data.backgroundSessionIndicator.canceledTooltipText', {
+      tooltipText: i18n.translate('xpack.data.searchSessionIndicator.canceledTooltipText', {
         defaultMessage: 'Search was canceled',
       }),
     },
     popover: {
-      text: i18n.translate('xpack.data.backgroundSessionIndicator.canceledText', {
+      text: i18n.translate('xpack.data.searchSessionIndicator.canceledText', {
         defaultMessage: 'Search was canceled',
       }),
       primaryAction: RefreshButton,
-      secondaryAction: ViewBackgroundSessionsButton,
+      secondaryAction: ViewAllSearchSessionsButton,
     },
   },
 };
 
-const VerticalDivider: React.FC = () => (
-  <div className="backgroundSessionIndicator__verticalDivider" />
-);
+const VerticalDivider: React.FC = () => <div className="searchSessionIndicator__verticalDivider" />;
 
-export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProps> = (props) => {
+export const SearchSessionIndicator: React.FC<SearchSessionIndicatorProps> = (props) => {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  if (!backgroundSessionIndicatorViewStateToProps[props.state]) return null;
+  if (!searchSessionIndicatorViewStateToProps[props.state]) return null;
 
-  const { button, popover } = backgroundSessionIndicatorViewStateToProps[props.state]!;
+  const { button, popover } = searchSessionIndicatorViewStateToProps[props.state]!;
 
   return (
     <EuiPopover
@@ -283,8 +272,8 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
       closePopover={closePopover}
       anchorPosition={'rightCenter'}
       panelPaddingSize={'s'}
-      className="backgroundSessionIndicator"
-      data-test-subj={'backgroundSessionIndicator'}
+      className="searchSessionIndicator"
+      data-test-subj={'searchSessionIndicator'}
       data-state={props.state}
       button={
         <EuiToolTip content={props.disabled ? props.disabledReasonText : button.tooltipText}>
@@ -302,8 +291,8 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
         responsive={true}
         alignItems={'center'}
         gutterSize={'s'}
-        className="backgroundSessionIndicator__popoverContainer"
-        data-test-subj={'backgroundSessionIndicatorPopoverContainer'}
+        className="searchSessionIndicator__popoverContainer"
+        data-test-subj={'searchSessionIndicatorPopoverContainer'}
       >
         <EuiFlexItem grow={true}>
           <EuiText size="s" color={'subdued'}>
@@ -332,4 +321,4 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
 
 // React.lazy() needs default:
 // eslint-disable-next-line import/no-default-export
-export default BackgroundSessionIndicator;
+export default SearchSessionIndicator;
