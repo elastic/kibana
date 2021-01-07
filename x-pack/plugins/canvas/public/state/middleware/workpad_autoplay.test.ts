@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../../lib/app_state');
-jest.mock('../../../lib/router_provider');
+jest.mock('../../lib/app_state');
+jest.mock('../../lib/router_provider');
 
-import { workpadAutoplay } from '../workpad_autoplay';
-import { setAutoplayInterval } from '../../../lib/app_state';
-import { createTimeInterval } from '../../../lib/time_interval';
+import { workpadAutoplay } from './workpad_autoplay';
+import { setAutoplayInterval } from '../../lib/app_state';
+import { createTimeInterval } from '../../lib/time_interval';
 // @ts-expect-error untyped local
-import { routerProvider } from '../../../lib/router_provider';
+import { routerProvider } from '../../lib/router_provider';
 
 const next = jest.fn();
 const dispatch = jest.fn();

@@ -6,7 +6,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { Page } from '../page';
+import { Page } from './page';
 
 describe('<Page />', () => {
   test('null workpad renders nothing', () => {

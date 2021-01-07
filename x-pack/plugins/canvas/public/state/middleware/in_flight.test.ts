@@ -4,13 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  inFlightActive,
-  inFlightComplete,
-  setLoading,
-  setValue,
-} from '../../actions/resolved_args';
-import { inFlightMiddlewareFactory } from '../in_flight';
+import { inFlightActive, inFlightComplete, setLoading, setValue } from '../actions/resolved_args';
+import { inFlightMiddlewareFactory } from './in_flight';
 
 const next = jest.fn();
 const dispatch = jest.fn();
