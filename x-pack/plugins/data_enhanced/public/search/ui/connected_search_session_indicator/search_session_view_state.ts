@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum BackgroundSessionViewState {
+export enum SearchSessionViewState {
   /**
    * Pending search request has not been sent to the background yet
    */
   Loading = 'loading',
 
   /**
-   * No action was taken and the page completed loading without background session creation.
+   * No action was taken and the page completed loading without search session creation.
    */
   Completed = 'completed',
 
@@ -22,7 +22,7 @@ export enum BackgroundSessionViewState {
   BackgroundLoading = 'backgroundLoading',
 
   /**
-   * Page load completed with background session created.
+   * Page load completed with search session created.
    */
   BackgroundCompleted = 'backgroundCompleted',
 

@@ -8,22 +8,22 @@ import React from 'react';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { BackgroundSessionIndicator } from '../background_session_indicator';
+import { SearchSessionIndicator } from '../search_session_indicator';
 import { ISessionService, TimefilterContract } from '../../../../../../../src/plugins/data/public/';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { ApplicationStart } from '../../../../../../../src/core/public';
 
-export interface BackgroundSessionIndicatorDeps {
+export interface SearchSessionIndicatorDeps {
   sessionService: ISessionService;
   timeFilter: TimefilterContract;
   application: ApplicationStart;
 }
 
-export const createConnectedBackgroundSessionIndicator = ({
+export const createConnectedSearchSessionIndicator = ({
   sessionService,
   application,
   timeFilter,
-}: BackgroundSessionIndicatorDeps): React.FC => {
+}: SearchSessionIndicatorDeps): React.FC => {
   const isAutoRefreshEnabled = () => !timeFilter.getRefreshInterval().pause;
   const isAutoRefreshEnabled$ = timeFilter
     .getRefreshIntervalUpdate$()
@@ -53,7 +53,7 @@ export const createConnectedBackgroundSessionIndicator = ({
 
     if (getCapabilitiesByAppId(application.capabilities, appId)?.storeSearchSession !== true) {
       disabled = true;
-      disabledReasonText = i18n.translate('xpack.data.backgroundSessionIndicator.noCapability', {
+      disabledReasonText = i18n.translate('xpack.data.searchSessionIndicator.noCapability', {
         defaultMessage: "You don't have permissions to send to background.",
       });
     }
@@ -61,7 +61,7 @@ export const createConnectedBackgroundSessionIndicator = ({
     if (autoRefreshEnabled) {
       disabled = true;
       disabledReasonText = i18n.translate(
-        'xpack.data.backgroundSessionIndicator.disabledDueToAutoRefreshMessage',
+        'xpack.data.searchSessionIndicator.disabledDueToAutoRefreshMessage',
         {
           defaultMessage: 'Send to background is not available when auto refresh is enabled.',
         }
@@ -71,7 +71,7 @@ export const createConnectedBackgroundSessionIndicator = ({
     if (!state) return null;
     return (
       <RedirectAppLinks application={application}>
-        <BackgroundSessionIndicator
+        <SearchSessionIndicator
           state={state}
           onContinueInBackground={() => {
             sessionService.save();
