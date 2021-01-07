@@ -6,10 +6,11 @@
 
 import React from 'react';
 import moment from 'moment';
+import * as reactRouterDom from 'react-router-dom';
 import { Ping } from '../../../common/runtime_types';
 import { MonitorPageTitle } from './monitor_title';
 import { renderWithRouter } from '../../lib';
-import { mockReduxHooks, mockReactRouterDomHooks } from '../../lib/helper/test_helpers';
+import { mockReduxHooks } from '../../lib/helper/test_helpers';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -19,6 +20,10 @@ jest.mock('react-router-dom', () => {
     useParams: jest.fn(),
   };
 });
+
+export function mockReactRouterDomHooks({ useParamsResponse }: { useParamsResponse: any }) {
+  jest.spyOn(reactRouterDom, 'useParams').mockReturnValue(useParamsResponse);
+}
 
 describe('MonitorTitle component', () => {
   const monitorName = 'sample monitor';

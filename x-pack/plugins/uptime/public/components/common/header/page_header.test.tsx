@@ -5,20 +5,11 @@
  */
 
 import React from 'react';
-import * as redux from 'react-redux';
 import moment from 'moment';
 import { PageHeader } from './page_header';
 import { Ping } from '../../../../common/runtime_types';
 import { renderWithRouter } from '../../../lib';
-
-jest.mock('react-redux', () => {
-  const originalModule = jest.requireActual('react-redux');
-
-  return {
-    ...originalModule,
-    useSelector: jest.fn(),
-  };
-});
+import { mockReduxHooks } from '../../../lib/helper/test_helpers';
 
 describe('PageHeader', () => {
   const monitorName = 'sample monitor';
@@ -42,8 +33,7 @@ describe('PageHeader', () => {
   };
 
   beforeEach(() => {
-    jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
-    jest.spyOn(redux, 'useSelector').mockReturnValue(defaultMonitorStatus);
+    mockReduxHooks(defaultMonitorStatus);
   });
 
   it('does not render dynamic elements by default', () => {
