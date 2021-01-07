@@ -96,7 +96,7 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
           })),
           { overwrite: true }
         );
-        await Promise.all(
+        await Promise.allSettled(
           rawApplicationUsageTransactional.map(
             ({ id }) => savedObjectsClient.delete(SAVED_OBJECTS_TRANSACTIONAL_TYPE, id) // There is no bulkDelete :(
           )
