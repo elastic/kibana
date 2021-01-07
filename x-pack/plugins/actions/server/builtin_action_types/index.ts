@@ -18,6 +18,34 @@ import { getActionType as getServiceNowActionType } from './servicenow';
 import { getActionType as getJiraActionType } from './jira';
 import { getActionType as getResilientActionType } from './resilient';
 import { getActionType as getTeamsActionType } from './teams';
+export { ActionParamsType as EmailActionParams, ActionTypeId as EmailActionTypeId } from './email';
+export {
+  ActionParamsType as IndexActionParams,
+  ActionTypeId as IndexActionTypeId,
+} from './es_index';
+export {
+  ActionParamsType as PagerDutyActionParams,
+  ActionTypeId as PagerDutyActionTypeId,
+} from './pagerduty';
+export {
+  ActionParamsType as ServerLogActionParams,
+  ActionTypeId as ServerLogActionTypeId,
+} from './server_log';
+export { ActionParamsType as SlackActionParams, ActionTypeId as SlackActionTypeId } from './slack';
+export {
+  ActionParamsType as WebhookActionParams,
+  ActionTypeId as WebhookActionTypeId,
+} from './webhook';
+export {
+  ActionParamsType as ServiceNowActionParams,
+  ActionTypeId as ServiceNowActionTypeId,
+} from './servicenow';
+export { ActionParamsType as JiraActionParams, ActionTypeId as JiraActionTypeId } from './jira';
+export {
+  ActionParamsType as ResilientActionParams,
+  ActionTypeId as ResilientActionTypeId,
+} from './resilient';
+export { ActionParamsType as TeamsActionParams, ActionTypeId as TeamsActionTypeId } from './teams';
 
 export function registerBuiltInActionTypes({
   actionsConfigUtils: configurationUtilities,

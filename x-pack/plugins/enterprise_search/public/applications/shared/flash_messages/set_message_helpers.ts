@@ -33,3 +33,7 @@ export const setQueuedErrorMessage = (message: string) => {
     message,
   });
 };
+
+export const clearFlashMessages = () => {
+  FlashMessagesLogic.actions.clearFlashMessages();
+};

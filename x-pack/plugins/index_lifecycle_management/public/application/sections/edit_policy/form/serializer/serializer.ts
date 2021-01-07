@@ -65,6 +65,8 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
           delete hotPhaseActions.forcemerge;
         } else if (_meta.hot.bestCompression) {
           hotPhaseActions.forcemerge!.index_codec = 'best_compression';
+        } else {
+          delete hotPhaseActions.forcemerge!.index_codec;
         }
 
         if (_meta.hot.bestCompression && hotPhaseActions.forcemerge) {
@@ -124,6 +126,8 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete warmPhase.actions.forcemerge;
       } else if (_meta.warm.bestCompression) {
         warmPhase.actions.forcemerge!.index_codec = 'best_compression';
+      } else {
+        delete warmPhase.actions.forcemerge!.index_codec;
       }
 
       if (_meta.warm.readonlyEnabled) {
