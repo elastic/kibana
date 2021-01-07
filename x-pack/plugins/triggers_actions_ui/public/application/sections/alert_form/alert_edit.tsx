@@ -29,7 +29,7 @@ import { HealthCheck } from '../../components/health_check';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConfirmAlertClose } from './confirm_alert_close';
-import { alertHasChanged } from './alert_has_changed';
+import { hasAlertChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
 export interface AlertEditProps<MetaData = Record<string, any>> {
@@ -76,7 +76,7 @@ export const AlertEdit = ({
   );
 
   const checkForChangesAndCloseFlyout = () => {
-    if (alertHasChanged(alert, initialAlert, true)) {
+    if (hasAlertChanged(alert, initialAlert, true)) {
       setIsConfirmAlertCloseModalOpen(true);
     } else {
       onClose();

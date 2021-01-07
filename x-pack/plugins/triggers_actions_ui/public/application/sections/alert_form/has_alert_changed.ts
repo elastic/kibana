@@ -20,7 +20,7 @@ function getNonNullCompareFields(alert: InitialAlert) {
   };
 }
 
-export function alertHasChanged(a: InitialAlert, b: InitialAlert, compareParams: boolean) {
+export function hasAlertChanged(a: InitialAlert, b: InitialAlert, compareParams: boolean) {
   // Deep compare these fields
   let objectsAreEqual = deepEqual(pick(a, DEEP_COMPARE_FIELDS), pick(b, DEEP_COMPARE_FIELDS));
   if (compareParams) {
@@ -35,6 +35,6 @@ export function alertHasChanged(a: InitialAlert, b: InitialAlert, compareParams:
   return !objectsAreEqual || !nonNullCompareFieldsAreEqual;
 }
 
-export function alertParamsHaveChanged(a: AlertTypeParams, b: AlertTypeParams) {
+export function haveAlertParamsChanged(a: AlertTypeParams, b: AlertTypeParams) {
   return !deepEqual(a, b);
 }

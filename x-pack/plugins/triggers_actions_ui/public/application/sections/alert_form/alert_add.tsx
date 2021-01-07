@@ -25,7 +25,7 @@ import { hasShowActionsCapability } from '../../lib/capabilities';
 import AlertAddFooter from './alert_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
-import { alertHasChanged, alertParamsHaveChanged } from './alert_has_changed';
+import { hasAlertChanged, haveAlertParamsChanged } from './has_alert_changed';
 import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
@@ -99,8 +99,8 @@ const AlertAdd = ({
 
   useEffect(() => {
     if (isEmpty(alert.params) && !isEmpty(initialAlertParams)) {
-      // alert params are explicitly cleared when the alert type is cleared
-      // clear the "initial" in order to params in order to capture the
+      // alert params are explicitly cleared when the alert type is cleared.
+      // clear the "initial" params in order to capture the
       // default when a new alert type is selected
       setInitialAlertParams({});
     } else if (isEmpty(initialAlertParams)) {
@@ -112,8 +112,8 @@ const AlertAdd = ({
 
   const checkForChangesAndCloseFlyout = () => {
     if (
-      alertHasChanged(alert, initialAlert, false) ||
-      alertParamsHaveChanged(alert.params, initialAlertParams)
+      hasAlertChanged(alert, initialAlert, false) ||
+      haveAlertParamsChanged(alert.params, initialAlertParams)
     ) {
       setIsConfirmAlertCloseModalOpen(true);
     } else {
