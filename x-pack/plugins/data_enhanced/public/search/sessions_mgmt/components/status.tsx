@@ -54,10 +54,18 @@ const getStatusAttributes = ({
   session,
   timezone,
 }: StatusIndicatorProps): StatusAttributes | null => {
+  let expireDate: string;
+  if (session.expires) {
+    expireDate = dateString(session.expires!, timezone);
+  } else {
+    expireDate = i18n.translate('xpack.data.mgmt.searchSessions.status.expireDateUnknown', {
+      defaultMessage: 'unknown',
+    });
+  }
+
   switch (session.status) {
     case STATUS.IN_PROGRESS:
       try {
-        const createdDate = dateString(session.created, timezone);
         return {
           textColor: 'default',
           icon: <EuiLoadingSpinner />,
@@ -65,8 +73,8 @@ const getStatusAttributes = ({
           toolTipContent: i18n.translate(
             'xpack.data.mgmt.searchSessions.status.message.createdOn',
             {
-              defaultMessage: 'Started on {createdDate}',
-              values: { createdDate },
+              defaultMessage: 'Expires on {expireDate}',
+              values: { expireDate },
             }
           ),
         };
@@ -78,12 +86,11 @@ const getStatusAttributes = ({
 
     case STATUS.EXPIRED:
       try {
-        const expiredOnDate = dateString(session.expires!, timezone);
         const toolTipContent = i18n.translate(
           'xpack.data.mgmt.searchSessions.status.message.expiredOn',
           {
-            defaultMessage: 'Expired on {expiredOnDate}',
-            values: { expiredOnDate },
+            defaultMessage: 'Expired on {expireDate}',
+            values: { expireDate },
           }
         );
 
@@ -120,10 +127,9 @@ const getStatusAttributes = ({
 
     case STATUS.COMPLETE:
       try {
-        const expiresOnDate = dateString(session.expires!, timezone);
         const toolTipContent = i18n.translate('xpack.data.mgmt.searchSessions.status.expiresOn', {
-          defaultMessage: 'Expires on {expiresOnDate}',
-          values: { expiresOnDate },
+          defaultMessage: 'Expires on {expireDate}',
+          values: { expireDate },
         });
 
         return {
