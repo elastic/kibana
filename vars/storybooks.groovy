@@ -36,7 +36,7 @@ def upload() {
       <html>
         <body>
           <h1>Storybooks</h1>
-          <p><a href="${getUrlForCommit()/composite}">Composite Storybook</a></p>
+          <p><a href="${getUrlForCommit()}/composite">Composite Storybook</a></p>
           <h2>All</h2>
           <ul>
             ${listHtml}
