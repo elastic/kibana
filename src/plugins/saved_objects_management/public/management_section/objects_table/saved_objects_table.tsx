@@ -21,26 +21,8 @@ import React, { Component } from 'react';
 import { debounce } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import {
-  EuiSpacer,
-  Query,
-  EuiOverlayMask,
-  EuiCheckboxGroup,
-  EuiPageContent,
-  EuiSwitch,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiModalHeaderTitle,
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiSpacer, Query, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
@@ -70,7 +52,14 @@ import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../../services';
-import { Header, Table, Flyout, Relationships, DeleteConfirmModal } from './components';
+import {
+  Header,
+  Table,
+  Flyout,
+  Relationships,
+  DeleteConfirmModal,
+  ExportModal,
+} from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 
 interface ExportAllOption {
@@ -565,16 +554,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     );
   }
 
-  changeIncludeReferencesDeep = () => {
-    this.setState((state) => ({
-      isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
-    }));
-  };
-
-  closeExportAllModal = () => {
-    this.setState({ isShowingExportAllOptionsModal: false });
-  };
-
   renderExportAllOptionsModal() {
     const {
       isShowingExportAllOptionsModal,
@@ -589,85 +568,26 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
 
     return (
-      <EuiOverlayMask>
-        <EuiModal onClose={this.closeExportAllModal}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
-                defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
-                values={{
-                  filteredItemCount,
-                }}
-              />
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalDescription"
-                  defaultMessage="Select which types to export"
-                />
-              }
-              labelType="legend"
-            >
-              <EuiCheckboxGroup
-                options={exportAllOptions}
-                idToSelectedMap={exportAllSelectedOptions}
-                onChange={(optionId) => {
-                  const newExportAllSelectedOptions = {
-                    ...exportAllSelectedOptions,
-                    ...{
-                      [optionId]: !exportAllSelectedOptions[optionId],
-                    },
-                  };
-
-                  this.setState({
-                    exportAllSelectedOptions: newExportAllSelectedOptions,
-                  });
-                }}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-            <EuiSwitch
-              name="includeReferencesDeep"
-              label={
-                <FormattedMessage
-                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  defaultMessage="Include related objects"
-                />
-              }
-              checked={isIncludeReferencesDeepChecked}
-              onChange={this.changeIncludeReferencesDeep}
-            />
-          </EuiModalBody>
-          <EuiModalFooter>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty onClick={this.closeExportAllModal}>
-                      <FormattedMessage
-                        id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
-                        defaultMessage="Cancel"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton fill onClick={this.onExportAll}>
-                      <FormattedMessage
-                        id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
-                        defaultMessage="Export all"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiModalFooter>
-        </EuiModal>
-      </EuiOverlayMask>
+      <ExportModal
+        onExport={this.onExportAll}
+        onCancel={() => {
+          this.setState({ isShowingExportAllOptionsModal: false });
+        }}
+        onSelectedOptionsChange={(newOptions) => {
+          this.setState({
+            exportAllSelectedOptions: newOptions,
+          });
+        }}
+        filteredItemCount={filteredItemCount}
+        options={exportAllOptions}
+        selectedOptions={exportAllSelectedOptions}
+        includeReferences={isIncludeReferencesDeepChecked}
+        onIncludeReferenceChange={(newIncludeReferences) => {
+          this.setState({
+            isIncludeReferencesDeepChecked: newIncludeReferences,
+          });
+        }}
+      />
     );
   }
 
