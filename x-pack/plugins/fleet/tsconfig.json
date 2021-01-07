@@ -9,6 +9,11 @@
   },
   "include": [
     // add all the folders containg files to be compiled
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "scripts/**/*"
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
