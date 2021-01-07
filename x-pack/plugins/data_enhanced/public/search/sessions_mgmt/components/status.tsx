@@ -142,7 +142,7 @@ const getStatusAttributes = ({
         // eslint-disable-next-line no-console
         console.error(err);
         throw new Error(
-          `Could not instantiate a expiration Date object for completed session from: ${session.expires}`
+          `Could not instantiate an expiration Date object for completed session from: ${session.expires}`
         );
       }
 
