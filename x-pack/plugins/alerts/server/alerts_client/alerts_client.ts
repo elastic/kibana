@@ -41,9 +41,8 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../security/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+import { TaskManagerStartContract, deleteTaskIfItExists } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
-import { deleteTaskIfItExists } from '../lib/delete_task_if_it_exists';
 import { RegistryAlertType, UntypedNormalizedAlertType } from '../alert_type_registry';
 import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';

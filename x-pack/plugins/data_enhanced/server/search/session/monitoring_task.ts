@@ -8,6 +8,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   RunContext,
+  deleteTaskIfItExists,
 } from '../../../../task_manager/server';
 import { checkRunningSessions } from './check_running_sessions';
 import { CoreSetup, SavedObjectsClient, Logger } from '../../../../../../src/core/server';
@@ -56,10 +57,7 @@ export async function scheduleSearchSessionsTasks(
   taskManager: TaskManagerStartContract,
   logger: Logger
 ) {
-  try {
-    // delete previous task
-    await taskManager.remove(SEARCH_SESSIONS_TASK_ID);
-  } catch (e) {} // eslint-disable-line no-empty
+  await deleteTaskIfItExists(taskManager, SEARCH_SESSIONS_TASK_ID);
 
   try {
     await taskManager.ensureScheduled({
