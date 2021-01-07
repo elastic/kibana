@@ -55,6 +55,14 @@ const DEFAULT_SORT = {
 
 function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
   switch (latencyAggregationType) {
+    case 'avg': {
+      i18n.translate(
+        'xpack.apm.serviceOverview.transactionsTableColumnLatency.avg',
+        {
+          defaultMessage: 'Latency (avg.)',
+        }
+      );
+    }
     case 'p95': {
       return i18n.translate(
         'xpack.apm.serviceOverview.transactionsTableColumnLatency.p95',
@@ -68,14 +76,6 @@ function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
         'xpack.apm.serviceOverview.transactionsTableColumnLatency.p99',
         {
           defaultMessage: 'Latency (99th)',
-        }
-      );
-    }
-    default: {
-      return i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency.avg',
-        {
-          defaultMessage: 'Latency (avg.)',
         }
       );
     }
