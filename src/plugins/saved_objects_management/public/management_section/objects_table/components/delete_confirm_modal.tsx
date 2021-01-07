@@ -119,7 +119,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={onCancel}>
+                  <EuiButtonEmpty onClick={onCancel} data-test-subj="confirmModalCancelButton">
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
                       defaultMessage="Cancel"
@@ -132,6 +132,7 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
                     fill
                     color="danger"
                     onClick={onConfirm}
+                    data-test-subj="confirmModalConfirmButton"
                   >
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
