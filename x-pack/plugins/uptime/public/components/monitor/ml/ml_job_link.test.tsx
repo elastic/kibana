@@ -13,7 +13,7 @@ describe('ML JobLink', () => {
     const { asFragment } = renderTLWithRouter(
       <MLJobLink dateRange={{ to: '', from: '' }} basePath="" monitorId="testMonitor" />,
       {
-        customCoreOptions: { triggersActionsUi: { getEditAlertFlyout: jest.fn() } },
+        coreOptions: { triggersActionsUi: { getEditAlertFlyout: jest.fn() } },
       }
     );
     expect(asFragment()).toMatchSnapshot();
