@@ -7,7 +7,7 @@
 import React, { useEffect } from 'react';
 
 import { useActions } from 'kea';
-import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 
 import {
   ORG_SETTINGS_PATH,
@@ -16,7 +16,7 @@ import {
   ORG_SETTINGS_OAUTH_APPLICATION_PATH,
 } from '../../routes';
 
-import { FlashMessages, clearFlashMessages } from '../../../shared/flash_messages';
+import { FlashMessages } from '../../../shared/flash_messages';
 
 import { Connectors } from './components/connectors';
 import { Customize } from './components/customize';
@@ -28,16 +28,11 @@ import { staticSourceData } from '../content_sources/source_data';
 import { SettingsLogic } from './settings_logic';
 
 export const SettingsRouter: React.FC = () => {
-  const { pathname } = useLocation();
   const { initializeSettings } = useActions(SettingsLogic);
 
   useEffect(() => {
     initializeSettings();
   }, []);
-
-  useEffect(() => {
-    clearFlashMessages();
-  }, [pathname]);
 
   return (
     <>
