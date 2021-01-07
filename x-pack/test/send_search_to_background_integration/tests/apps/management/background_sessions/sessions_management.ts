@@ -36,7 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('session-mgmt-view-status-label-in_progress');
         await testSubjects.existOrFail('session-mgmt-view-status-tooltip-in_progress');
         await testSubjects.existOrFail('session-mgmt-table-col-created');
-        await testSubjects.existOrFail('session-mgmt-view-action');
 
         // find there is only one item in the table which is the newly saved session
         const names = await testSubjects.findAll('session-mgmt-table-col-name');
