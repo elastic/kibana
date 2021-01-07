@@ -41,6 +41,7 @@ function VegaHelpMenu() {
   const items = [
     <EuiContextMenuItem
       key="vegaHelp"
+      // TODO: Replace this to use the DocLinksService
       href="https://www.elastic.co/guide/en/kibana/master/vega-graph.html"
       target="_blank"
       onClick={closePopover}
