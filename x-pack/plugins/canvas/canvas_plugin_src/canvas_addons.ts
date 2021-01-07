@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-expect-error
+// @ts-expect-error Untyped Local
 export * from './uis/datasources';
 export * from './elements';
-// @ts-expect-error
+// @ts-expect-error Untyped Local
 export * from './uis/models';
 export * from './uis/views';
 export * from './uis/arguments';
 export * from './uis/tags';
-// @ts-expect-error
+// @ts-expect-error Untyped Local
 export * from './uis/transforms';
