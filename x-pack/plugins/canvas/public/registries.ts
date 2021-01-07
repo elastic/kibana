@@ -41,7 +41,7 @@ export function initRegistries() {
 }
 
 export async function populateRegistries(setupRegistries: SetupRegistries) {
-  // Our setup registries could container definitions, or a function that will
+  // Our setup registries could contain definitions or a function that would
   // return a promise of definitions.
   // We need to call all the fns and then wait for all of the promises to be resolved
   const resolvedRegistries: Record<string, any[]> = {};
