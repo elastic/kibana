@@ -101,7 +101,7 @@ export const TIMELINE_DATA_PROVIDERS_EMPTY =
 
 export const TIMELINE_DESCRIPTION = '[data-test-subj="timeline-description"]';
 
-export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="timeline-description-textarea"]';
+export const TIMELINE_DESCRIPTION_INPUT = '[data-test-subj="save-timeline-description"]';
 
 export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContainer"]';
 
@@ -136,7 +136,7 @@ export const TIMELINE_SETTINGS_ICON = '[data-test-subj="settings-plus-in-circle"
 
 export const TIMELINE_TITLE = '[data-test-subj="timeline-title"]';
 
-export const TIMELINE_TITLE_INPUT = '[data-test-subj="timeline-title-input"]';
+export const TIMELINE_TITLE_INPUT = '[data-test-subj="save-timeline-title"]';
 
 export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]';
 
