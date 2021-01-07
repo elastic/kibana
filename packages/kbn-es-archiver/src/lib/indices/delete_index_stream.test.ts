@@ -21,14 +21,14 @@ import sinon from 'sinon';
 
 import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 
-import { createDeleteIndexStream } from '../delete_index_stream';
+import { createDeleteIndexStream } from './delete_index_stream';
 
 import {
   createStubStats,
   createStubClient,
   createStubIndexRecord,
   createStubLogger,
-} from './stubs';
+} from './__mocks__/stubs';
 
 const log = createStubLogger();
 
