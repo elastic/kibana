@@ -222,9 +222,9 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems={'center'}>
+          <EuiFlexGroup alignItems={'center'} responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+              <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiIcon color={colorTransformer(chartMetric.color)} type={'dot'} />
                 </EuiFlexItem>
@@ -240,7 +240,7 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+              <EuiFlexGroup gutterSize={'s'} alignItems={'center'} responsive={false}>
                 <EuiFlexItem
                   grow={false}
                   style={{ backgroundColor: '#D36086', height: 5, width: 10 }}
@@ -317,6 +317,9 @@ const TimelineHeader = euiStyled.div`
   width: 100%;
   padding: ${(props) => props.theme.eui.paddingSizes.s} ${(props) =>
   props.theme.eui.paddingSizes.m};
+  @media only screen and (max-width: 767px) {
+      margin-top: 30px;
+  }
 `;
 
 const TimelineChartContainer = euiStyled.div`

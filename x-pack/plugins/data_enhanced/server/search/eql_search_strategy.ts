@@ -66,5 +66,10 @@ export const eqlSearchStrategyProvider = (
 
       return pollSearch(search, cancel, options).pipe(tap((response) => (id = response.id)));
     },
+
+    extend: async (id, keepAlive, options, { esClient }) => {
+      logger.debug(`_eql/extend ${id} by ${keepAlive}`);
+      await esClient.asCurrentUser.eql.get({ id, keep_alive: keepAlive });
+    },
   };
 };

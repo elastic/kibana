@@ -60,7 +60,7 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
         size="s"
         fill
         aria-label={ariaLabel || DEFAULT_MENU_LABEL}
-        onClick={onOpen}
+        onClick={isOpen ? onClose : onOpen}
         minWidth="auto"
       >
         <EuiIcon type="boxesHorizontal" />
@@ -79,7 +79,13 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   return (
     <LogEntryContextMenuContent>
       <AbsoluteWrapper>
-        <EuiPopover closePopover={onClose} isOpen={isOpen} button={button} ownFocus={true}>
+        <EuiPopover
+          panelPaddingSize="none"
+          closePopover={onClose}
+          isOpen={isOpen}
+          button={button}
+          ownFocus={true}
+        >
           <EuiContextMenuPanel items={wrappedItems} />
         </EuiPopover>
       </AbsoluteWrapper>

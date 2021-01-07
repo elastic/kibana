@@ -34,7 +34,7 @@ import {
   IFieldType,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
-import { TriggerId, UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
 import { uiActionsPluginMock } from '../../../../../../../src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from '../../../../../../../src/plugins/ui_actions/public/triggers';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public/embeddable';
@@ -48,12 +48,12 @@ describe('workspace_panel', () => {
   let expressionRendererMock: jest.Mock<React.ReactElement, [ReactExpressionRendererProps]>;
   let uiActionsMock: jest.Mocked<UiActionsStart>;
   let dataMock: jest.Mocked<DataPublicPluginStart>;
-  let trigger: jest.Mocked<TriggerContract<TriggerId>>;
+  let trigger: jest.Mocked<TriggerContract>;
 
   let instance: ReactWrapper<WorkspacePanelProps>;
 
   beforeEach(() => {
-    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract<TriggerId>>;
+    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract>;
     uiActionsMock = uiActionsPluginMock.createStartContract();
     dataMock = dataPluginMock.createStartContract();
     uiActionsMock.getTrigger.mockReturnValue(trigger);
@@ -290,7 +290,7 @@ describe('workspace_panel', () => {
     const onData = expressionRendererMock.mock.calls[0][0].onData$!;
 
     const tableData = { table1: { columns: [], rows: [] } };
-    onData(undefined, { tables: tableData });
+    onData(undefined, { tables: { tables: tableData } });
 
     expect(dispatch).toHaveBeenCalledWith({ type: 'UPDATE_ACTIVE_DATA', tables: tableData });
   });

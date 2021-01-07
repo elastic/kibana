@@ -41,6 +41,7 @@ interface Props {
 
 export function AgentConfigurationList({ status, data, refetch }: Props) {
   const { core } = useApmPluginContext();
+  const canSave = core.application.capabilities.apm.save;
   const { basePath } = core.http;
   const { search } = useLocation();
   const theme = useTheme();
@@ -180,28 +181,36 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
         <TimestampTooltip time={value} timeUnit="minutes" />
       ),
     },
-    {
-      width: px(units.double),
-      name: '',
-      render: (config: Config) => (
-        <EuiButtonIcon
-          aria-label="Edit"
-          iconType="pencil"
-          href={editAgentConfigurationHref(config.service, search, basePath)}
-        />
-      ),
-    },
-    {
-      width: px(units.double),
-      name: '',
-      render: (config: Config) => (
-        <EuiButtonIcon
-          aria-label="Delete"
-          iconType="trash"
-          onClick={() => setConfigToBeDeleted(config)}
-        />
-      ),
-    },
+    ...(canSave
+      ? [
+          {
+            width: px(units.double),
+            name: '',
+            render: (config: Config) => (
+              <EuiButtonIcon
+                aria-label="Edit"
+                iconType="pencil"
+                href={editAgentConfigurationHref(
+                  config.service,
+                  search,
+                  basePath
+                )}
+              />
+            ),
+          },
+          {
+            width: px(units.double),
+            name: '',
+            render: (config: Config) => (
+              <EuiButtonIcon
+                aria-label="Delete"
+                iconType="trash"
+                onClick={() => setConfigToBeDeleted(config)}
+              />
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (

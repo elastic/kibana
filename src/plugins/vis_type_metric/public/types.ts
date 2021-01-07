@@ -19,7 +19,7 @@
 
 import { Range } from '../../expressions/public';
 import { SchemaConfig } from '../../visualizations/public';
-import { ColorModes, Labels, Style, ColorSchemas } from '../../charts/public';
+import { ColorMode, Labels, Style, ColorSchemas } from '../../charts/public';
 
 export const visType = 'metric';
 
@@ -32,7 +32,7 @@ export interface MetricVisParam {
   percentageMode: boolean;
   useRanges: boolean;
   colorSchema: ColorSchemas;
-  metricColorMode: ColorModes;
+  metricColorMode: ColorMode;
   colorsRange: Range[];
   labels: Labels;
   invertColors: boolean;

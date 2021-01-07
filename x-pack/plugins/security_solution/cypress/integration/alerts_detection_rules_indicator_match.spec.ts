@@ -59,14 +59,13 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
-  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { removeSignalsIndex } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -90,6 +89,7 @@ describe('Detection rules, Indicator Match', () => {
   const expectedNumberOfAlerts = 1;
 
   beforeEach(() => {
+    cleanKibana();
     esArchiverLoad('threat_indicator');
     esArchiverLoad('threat_data');
   });
@@ -97,11 +97,9 @@ describe('Detection rules, Indicator Match', () => {
   afterEach(() => {
     esArchiverUnload('threat_indicator');
     esArchiverUnload('threat_data');
-    deleteRule();
-    removeSignalsIndex();
   });
 
-  it.skip('Creates and activates a new Indicator Match rule', () => {
+  it('Creates and activates a new Indicator Match rule', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();

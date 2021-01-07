@@ -114,7 +114,7 @@ export const HotPhase: FunctionComponent = () => {
                         defaultMessage="Learn more"
                       />
                     }
-                    docPath="indices-rollover-index.html"
+                    docPath="ilm-rollover.html"
                   />
                 </p>
               </EuiTextColor>
@@ -165,7 +165,7 @@ export const HotPhase: FunctionComponent = () => {
                     content={
                       <FormattedMessage
                         id="xpack.indexLifecycleMgmt.editPolicy.hotPhase.enableRolloverTipContent"
-                        defaultMessage="Roll over to a new index when the 
+                        defaultMessage="Roll over to a new index when the
     current index meets one of the defined conditions."
                       />
                     }

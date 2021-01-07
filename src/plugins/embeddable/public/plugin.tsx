@@ -19,7 +19,6 @@
 import React from 'react';
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { Start as InspectorStart } from '../../inspector/public';
@@ -62,12 +61,10 @@ import {
 } from '../common/lib';
 
 export interface EmbeddableSetupDependencies {
-  data: DataPublicPluginSetup;
   uiActions: UiActionsSetup;
 }
 
 export interface EmbeddableStartDependencies {
-  data: DataPublicPluginStart;
   uiActions: UiActionsStart;
   inspector: InspectorStart;
 }
@@ -144,7 +141,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(
     core: CoreStart,
-    { data, uiActions, inspector }: EmbeddableStartDependencies
+    { uiActions, inspector }: EmbeddableStartDependencies
   ): EmbeddableStart {
     this.embeddableFactoryDefinitions.forEach((def) => {
       this.embeddableFactories.set(
@@ -161,6 +158,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     this.stateTransferService = new EmbeddableStateTransfer(
       core.application.navigateToApp,
+      core.application.currentAppId$,
       this.appList
     );
     this.isRegistryReady = true;
@@ -206,7 +204,12 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         ),
       getStateTransfer: (storage?: Storage) =>
         storage
-          ? new EmbeddableStateTransfer(core.application.navigateToApp, this.appList, storage)
+          ? new EmbeddableStateTransfer(
+              core.application.navigateToApp,
+              core.application.currentAppId$,
+              this.appList,
+              storage
+            )
           : this.stateTransferService,
       EmbeddablePanel: getEmbeddablePanelHoc(),
       telemetry: getTelemetryFunction(commonContract),

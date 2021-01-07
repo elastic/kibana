@@ -5,12 +5,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useMemo, useContext, useCallback } from 'react';
 import { FormattedMessage } from 'react-intl';
+import { useDispatch } from 'react-redux';
 import { EuiI18nNumber } from '@elastic/eui';
 import { EventStats } from '../../../common/endpoint/types';
-import { useRelatedEventByCategoryNavigation } from './use_related_event_by_category_navigation';
 import { useColors } from './use_colors';
+import { useLinkProps } from './use_link_props';
+import { ResolverAction } from '../store/actions';
+import { SideEffectContext } from './side_effect_context';
+
+/* eslint-disable react/display-name */
 
 /**
  * Until browser support accomodates the `notation="compact"` feature of Intl.NumberFormat...
@@ -78,11 +83,6 @@ export const NodeSubMenuComponents = React.memo(
     nodeID: string;
     nodeStats: EventStats | undefined;
   }) => {
-    // The last projection matrix that was used to position the popover
-    const relatedEventCallbacks = useRelatedEventByCategoryNavigation({
-      nodeID,
-      categories: nodeStats?.byCategory,
-    });
     const relatedEventOptions = useMemo(() => {
       if (nodeStats === undefined) {
         return [];
@@ -99,20 +99,11 @@ export const NodeSubMenuComponents = React.memo(
           );
           return {
             prefix,
-            optionTitle: category,
-            action: () => relatedEventCallbacks(category),
+            category,
           };
         });
       }
-    }, [nodeStats, relatedEventCallbacks]);
-
-    const { pillStroke: pillBorderStroke, resolverBackground: pillFill } = useColors();
-    const listStylesFromTheme = useMemo(() => {
-      return {
-        border: `1.5px solid ${pillBorderStroke}`,
-        backgroundColor: pillFill,
-      };
-    }, [pillBorderStroke, pillFill]);
+    }, [nodeStats]);
 
     if (relatedEventOptions === undefined) {
       return null;
@@ -122,23 +113,61 @@ export const NodeSubMenuComponents = React.memo(
       <ul className={`${className} options`} aria-describedby={nodeID}>
         {relatedEventOptions
           .sort((opta, optb) => {
-            return opta.optionTitle.localeCompare(optb.optionTitle);
+            return opta.category.localeCompare(optb.category);
           })
-          .map((opt) => {
-            return (
-              <li
-                className="item"
-                data-test-subj="resolver:map:node-submenu-item"
-                style={listStylesFromTheme}
-                key={opt.optionTitle}
-              >
-                <button type="button" className="kbn-resetFocusState" onClick={opt.action}>
-                  {opt.prefix} {opt.optionTitle}
-                </button>
-              </li>
-            );
+          .map((pill) => {
+            return <NodeSubmenuPill pill={pill} nodeID={nodeID} key={pill.category} />;
           })}
       </ul>
     );
   }
 );
+
+const NodeSubmenuPill = ({
+  pill,
+  nodeID,
+}: {
+  pill: { prefix: JSX.Element; category: string };
+  nodeID: string;
+}) => {
+  const linkProps = useLinkProps({
+    panelView: 'nodeEventsInCategory',
+    panelParameters: { nodeID, eventCategory: pill.category },
+  });
+  const { pillStroke: pillBorderStroke, resolverBackground: pillFill } = useColors();
+  const listStylesFromTheme = useMemo(() => {
+    return {
+      border: `1.5px solid ${pillBorderStroke}`,
+      backgroundColor: pillFill,
+    };
+  }, [pillBorderStroke, pillFill]);
+
+  const dispatch: (action: ResolverAction) => void = useDispatch();
+  const { timestamp } = useContext(SideEffectContext);
+
+  const handleOnClick = useCallback(
+    (mouseEvent: React.MouseEvent<HTMLButtonElement>) => {
+      linkProps.onClick(mouseEvent);
+      dispatch({
+        type: 'userSelectedResolverNode',
+        payload: {
+          nodeID,
+          time: timestamp(),
+        },
+      });
+    },
+    [timestamp, linkProps, dispatch, nodeID]
+  );
+  return (
+    <li
+      className="item"
+      data-test-subj="resolver:map:node-submenu-item"
+      style={listStylesFromTheme}
+      key={pill.category}
+    >
+      <button type="button" className="kbn-resetFocusState" onClick={handleOnClick}>
+        {pill.prefix} {pill.category}
+      </button>
+    </li>
+  );
+};

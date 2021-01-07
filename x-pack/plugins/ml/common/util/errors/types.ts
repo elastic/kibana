@@ -45,7 +45,12 @@ export interface MLHttpFetchError<T> extends HttpFetchError {
   body: T;
 }
 
-export type ErrorType = MLHttpFetchError<MLResponseError> | EsErrorBody | Boom | string | undefined;
+export type ErrorType =
+  | MLHttpFetchError<MLResponseError>
+  | EsErrorBody
+  | Boom.Boom
+  | string
+  | undefined;
 
 export function isEsErrorBody(error: any): error is EsErrorBody {
   return error && error.error?.reason !== undefined;
@@ -63,6 +68,6 @@ export function isMLResponseError(error: any): error is MLResponseError {
   return typeof error.body === 'object' && 'message' in error.body;
 }
 
-export function isBoomError(error: any): error is Boom {
+export function isBoomError(error: any): error is Boom.Boom {
   return error.isBoom === true;
 }

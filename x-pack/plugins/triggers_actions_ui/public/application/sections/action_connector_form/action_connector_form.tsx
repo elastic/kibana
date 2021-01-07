@@ -12,9 +12,6 @@ import {
   EuiSpacer,
   EuiFieldText,
   EuiFormRow,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiErrorBoundary,
   EuiTitle,
 } from '@elastic/eui';
@@ -26,9 +23,11 @@ import {
   IErrorObject,
   ActionTypeRegistryContract,
   UserConfiguredActionConnector,
+  ActionTypeModel,
 } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
+import { SectionLoading } from '../../components/section_loading';
 
 export function validateBaseProperties(actionObject: ActionConnector) {
   const validationResult = { errors: {} };
@@ -47,6 +46,31 @@ export function validateBaseProperties(actionObject: ActionConnector) {
     );
   }
   return validationResult;
+}
+
+export function getConnectorErrors<ConnectorConfig, ConnectorSecrets>(
+  connector: UserConfiguredActionConnector<ConnectorConfig, ConnectorSecrets>,
+  actionTypeModel: ActionTypeModel
+) {
+  const connectorValidationResult = actionTypeModel?.validateConnector(connector);
+  const configErrors = (connectorValidationResult.config
+    ? connectorValidationResult.config.errors
+    : {}) as IErrorObject;
+  const secretsErrors = (connectorValidationResult.secrets
+    ? connectorValidationResult.secrets.errors
+    : {}) as IErrorObject;
+  const connectorBaseErrors = validateBaseProperties(connector).errors;
+  const connectorErrors = {
+    ...configErrors,
+    ...secretsErrors,
+    ...connectorBaseErrors,
+  } as IErrorObject;
+  return {
+    configErrors,
+    secretsErrors,
+    connectorBaseErrors,
+    connectorErrors,
+  };
 }
 
 interface ActionConnectorProps<
@@ -181,11 +205,12 @@ export const ActionConnectorForm = ({
           <EuiErrorBoundary>
             <Suspense
               fallback={
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="m" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <SectionLoading>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionConnectorForm.loadingConnectorSettingsDescription"
+                    defaultMessage="Loading connector settings…"
+                  />
+                </SectionLoading>
               }
             >
               <FieldsComponent
