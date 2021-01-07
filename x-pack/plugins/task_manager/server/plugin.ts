@@ -37,7 +37,7 @@ export type TaskManagerStartContract = Pick<
   'schedule' | 'runNow' | 'ensureScheduled'
 > &
   Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
-    deleteTaskIfItExists: (id: string) => void;
+    deleteTaskIfItExists: (id: string) => Promise<void>;
   };
 
 export class TaskManagerPlugin
