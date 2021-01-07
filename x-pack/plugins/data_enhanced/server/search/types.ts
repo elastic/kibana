@@ -14,7 +14,7 @@ export interface AsyncSearchResponse<T = unknown> {
   is_partial: boolean;
   is_running: boolean;
 }
-export interface AsyncSearchStatusResponse extends Omit<AsyncSearchResponse, 'resopnse'> {
+export interface AsyncSearchStatusResponse extends Omit<AsyncSearchResponse, 'response'> {
   completion_status: number;
   _shards: ShardsResponse;
 }

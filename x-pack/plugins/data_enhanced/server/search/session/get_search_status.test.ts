@@ -19,18 +19,22 @@ describe('getSearchStatus', () => {
 
   test('returns an error status if search is partial and not running', () => {
     mockClient.asyncSearch.status.mockResolvedValue({
-      is_partial: true,
-      is_running: false,
-      completion_status: 200,
+      body: {
+        is_partial: true,
+        is_running: false,
+        completion_status: 200,
+      },
     });
     expect(getSearchStatus(mockClient, '123')).resolves.toBe(SearchStatus.ERROR);
   });
 
   test('returns an error status if completion_status is an error', () => {
     mockClient.asyncSearch.status.mockResolvedValue({
-      is_partial: false,
-      is_running: false,
-      completion_status: 500,
+      body: {
+        is_partial: false,
+        is_running: false,
+        completion_status: 500,
+      },
     });
     expect(getSearchStatus(mockClient, '123')).resolves.toBe(SearchStatus.ERROR);
   });
@@ -53,18 +57,22 @@ describe('getSearchStatus', () => {
 
   test('returns a complete status', () => {
     mockClient.asyncSearch.status.mockResolvedValue({
-      is_partial: false,
-      is_running: false,
-      completion_status: 200,
+      body: {
+        is_partial: false,
+        is_running: false,
+        completion_status: 200,
+      },
     });
     expect(getSearchStatus(mockClient, '123')).resolves.toBe(SearchStatus.COMPLETE);
   });
 
   test('returns a running status otherwise', () => {
     mockClient.asyncSearch.status.mockResolvedValue({
-      is_partial: false,
-      is_running: true,
-      completion_status: undefined,
+      body: {
+        is_partial: false,
+        is_running: true,
+        completion_status: undefined,
+      },
     });
     expect(getSearchStatus(mockClient, '123')).resolves.toBe(SearchStatus.IN_PROGRESS);
   });

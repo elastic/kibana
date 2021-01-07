@@ -44,16 +44,29 @@ export async function checkRunningSessions(
         // Check statuses of all running searches
         await Promise.all(
           Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
+            const updateSearchRequest = (currentStatus: any) => {
+              sessionUpdated = true;
+              session.attributes.idMapping[searchKey] = {
+                ...session.attributes.idMapping[searchKey],
+                ...currentStatus,
+                ...(currentStatus.status === SearchStatus.ERROR ? {} : { error: undefined }),
+              };
+            };
+
             const searchInfo = session.attributes.idMapping[searchKey];
             if (searchInfo.status === SearchStatus.IN_PROGRESS) {
-              const currentStatus = await getSearchStatus(client, searchInfo.strategy);
+              try {
+                const currentStatus = await getSearchStatus(client, searchInfo.id);
 
-              if (currentStatus.status !== SearchStatus.IN_PROGRESS) {
-                sessionUpdated = true;
-                session.attributes.idMapping[searchKey] = {
-                  ...session.attributes.idMapping[searchKey],
-                  ...currentStatus,
-                };
+                if (currentStatus.status !== SearchStatus.IN_PROGRESS) {
+                  updateSearchRequest(currentStatus);
+                }
+              } catch (e) {
+                logger.error(e);
+                updateSearchRequest({
+                  status: SearchStatus.ERROR,
+                  error: e.message || e.meta.error?.caused_by?.reason,
+                });
               }
             }
           })

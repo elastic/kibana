@@ -15,7 +15,7 @@ import { SEARCH_SESSION_TYPE } from '../../saved_objects';
 
 export const SEARCH_SESSIONS_TASK_TYPE = 'bg_monitor';
 export const SEARCH_SESSIONS_TASK_ID = `data_enhanced_${SEARCH_SESSIONS_TASK_TYPE}`;
-export const MONITOR_INTERVAL = `15s`;
+export const MONITOR_INTERVAL = 15; // in seconds
 
 function searchSessionRunner(core: CoreSetup, logger: Logger) {
   return ({ taskInstance }: RunContext) => {
@@ -31,7 +31,7 @@ function searchSessionRunner(core: CoreSetup, logger: Logger) {
         );
 
         return {
-          runAt: new Date(Date.now() + 10 * 1000),
+          runAt: new Date(Date.now() + MONITOR_INTERVAL * 1000),
           state: {},
         };
       },
@@ -46,7 +46,7 @@ export function registerSearchSessionsTask(
 ) {
   taskManager.registerTaskDefinitions({
     [SEARCH_SESSIONS_TASK_TYPE]: {
-      title: 'Background Session Monitor',
+      title: 'Search Sessions Monitor',
       createTaskRunner: searchSessionRunner(core, logger),
     },
   });
@@ -66,7 +66,7 @@ export async function scheduleSearchSessionsTasks(
       id: SEARCH_SESSIONS_TASK_ID,
       taskType: SEARCH_SESSIONS_TASK_TYPE,
       schedule: {
-        interval: MONITOR_INTERVAL,
+        interval: `${MONITOR_INTERVAL}s`,
       },
       state: {},
       params: {},

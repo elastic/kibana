@@ -77,8 +77,10 @@ describe('getSearchStatus', () => {
     } as any);
 
     mockClient.asyncSearch.status.mockResolvedValue({
-      is_partial: true,
-      is_running: true,
+      body: {
+        is_partial: true,
+        is_running: true,
+      },
     });
 
     await checkRunningSessions(savedObjectsClient, mockClient, mockLogger);
@@ -133,12 +135,16 @@ describe('getSearchStatus', () => {
     } as any);
 
     mockClient.asyncSearch.status.mockResolvedValue({
-      is_partial: false,
-      is_running: false,
-      completion_status: 200,
+      body: {
+        is_partial: false,
+        is_running: false,
+        completion_status: 200,
+      },
     });
 
     await checkRunningSessions(savedObjectsClient, mockClient, mockLogger);
+
+    expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' });
     const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
     const updatedAttributes = updateInput[0].attributes as SearchSessionSavedObjectAttributes;
     expect(updatedAttributes.status).toBe(SearchSessionStatus.COMPLETE);
@@ -165,9 +171,11 @@ describe('getSearchStatus', () => {
     } as any);
 
     mockClient.asyncSearch.status.mockResolvedValue({
-      is_partial: false,
-      is_running: false,
-      completion_status: 500,
+      body: {
+        is_partial: false,
+        is_running: false,
+        completion_status: 500,
+      },
     });
 
     await checkRunningSessions(savedObjectsClient, mockClient, mockLogger);
