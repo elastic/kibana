@@ -43,7 +43,7 @@ export function initRegistries() {
 export async function populateRegistries(setupRegistries: SetupRegistries) {
   // Our setup registries could container definitions, or a function that will
   // return a promise of definitions.
-  // We need to call all the fns and then wait for all of the promises to resolved
+  // We need to call all the fns and then wait for all of the promises to be resolved
   const resolvedRegistries: Record<string, any[]> = {};
   const promises = Object.entries(setupRegistries).map(async ([key, specs]) => {
     const resolved = await (
