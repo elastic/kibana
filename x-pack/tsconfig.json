@@ -8,6 +8,7 @@
     "plugins/global_search/**/*",
     "plugins/features/**/*",
     "plugins/embeddable_enhanced/**/*",
+    "plugins/enterprise_search/**/*",
     "plugins/licensing/**/*",
     "plugins/security_solution/cypress/**/*",
     "plugins/telemetry_collection_xpack/**/*",
