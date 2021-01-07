@@ -104,7 +104,7 @@ export function getServiceColumns({
             id="service-name-tooltip"
             anchorClassName="apmServiceList__serviceNameTooltip"
           >
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               {agentName && (
                 <EuiFlexItem grow={false}>
                   <AgentIcon agentName={agentName} />
