@@ -14,6 +14,8 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../../observability/public';
 import { fetchActionTypes } from '../../state/api/alerts';
 
+import { ActionTypeId } from './types';
+
 interface Props {
   focusInput: () => void;
 }
@@ -22,13 +24,15 @@ interface KibanaDeps {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
-export const ALLOWED_ACTION_TYPES = [
+export const ALLOWED_ACTION_TYPES: ActionTypeId[] = [
   '.slack',
   '.pagerduty',
   '.server-log',
   '.index',
   '.teams',
   '.servicenow',
+  '.jira',
+  '.webhook',
 ];
 
 export const AddConnectorFlyout = ({ focusInput }: Props) => {
@@ -52,7 +56,7 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
       getAddConnectorFlyout({
         consumer: 'uptime',
         actionTypes: (actionTypes ?? []).filter((actionType) =>
-          ALLOWED_ACTION_TYPES.includes(actionType.id)
+          ALLOWED_ACTION_TYPES.includes(actionType.id as ActionTypeId)
         ),
         onClose: () => {
           setAddFlyoutVisibility(false);

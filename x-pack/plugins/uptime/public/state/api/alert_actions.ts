@@ -8,6 +8,25 @@ import { NewAlertParams } from './alerts';
 import { AlertAction } from '../../../../triggers_actions_ui/public';
 import { ACTION_GROUP_DEFINITIONS } from '../../../common/constants/alerts';
 import { MonitorStatusTranslations } from '../../../common/translations';
+import {
+  IndexActionParams,
+  PagerDutyActionParams,
+  ServerLogActionParams,
+  ServiceNowActionParams,
+  JiraActionParams,
+  WebhookActionParams,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '../../../../actions/server';
+import { ActionTypeId } from '../../components/settings/types';
+
+export const SLACK_ACTION_ID: ActionTypeId = '.slack';
+export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';
+export const SERVER_LOG_ACTION_ID: ActionTypeId = '.server-log';
+export const INDEX_ACTION_ID: ActionTypeId = '.index';
+export const TEAMS_ACTION_ID: ActionTypeId = '.teams';
+export const SERVICE_NOW_ACTION_ID: ActionTypeId = '.servicenow';
+export const JIRA_ACTION_ID: ActionTypeId = '.jira';
+export const WEBHOOK_ACTION_ID: ActionTypeId = '.webhook';
 
 const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 
@@ -21,59 +40,26 @@ export function populateAlertActions({ defaultActions, monitorId, monitorName }:
       params: {},
     };
     switch (aId.actionTypeId) {
-      case '.pagerduty':
+      case PAGER_DUTY_ACTION_ID:
         action.params = getPagerDutyActionParams(monitorId);
         break;
-      case '.server-log':
-        action.params = {
-          level: 'warn',
-          message: MonitorStatusTranslations.defaultActionMessage,
-        };
+      case SERVER_LOG_ACTION_ID:
+        action.params = getServerLogActionParams();
         break;
-      case '.index':
-        action.params = {
-          documents: [
-            {
-              monitorName: '{{state.monitorName}}',
-              monitorUrl: '{{{state.monitorUrl}}}',
-              statusMessage: '{{state.statusMessage}}',
-              latestErrorMessage: '{{{state.latestErrorMessage}}}',
-              observerLocation: '{{state.observerLocation}}',
-            },
-          ],
-        };
+      case INDEX_ACTION_ID:
+        action.params = getIndexActionParams();
         break;
-      case '.servicenow':
-        action.params = {
-          subAction: 'pushToService',
-          subActionParams: {
-            incident: {
-              short_description: MonitorStatusTranslations.defaultActionMessage,
-              description: MonitorStatusTranslations.defaultActionMessage,
-              impact: '2',
-              severity: '2',
-              urgency: '2',
-            },
-            comments: [],
-          },
-        };
+      case SERVICE_NOW_ACTION_ID:
+        action.params = getServiceNowActionParams();
         break;
-      case '.jira':
-        action.params = {
-          subAction: 'pushToService',
-          subActionParams: {
-            incident: { summary: MonitorStatusTranslations.defaultActionMessage },
-            comments: [],
-          },
-        };
+      case JIRA_ACTION_ID:
+        action.params = getJiraActionParams();
         break;
-      case '.webhook':
-        action.params = {
-          body: MonitorStatusTranslations.defaultActionMessage,
-        };
+      case WEBHOOK_ACTION_ID:
+        action.params = getWebhookActionParams();
         break;
-      case '.slack':
-      case '.teams':
+      case SLACK_ACTION_ID:
+      case TEAMS_ACTION_ID:
       default:
         action.params = {
           message: MonitorStatusTranslations.defaultActionMessage,
@@ -86,11 +72,73 @@ export function populateAlertActions({ defaultActions, monitorId, monitorName }:
   return actions;
 }
 
-function getPagerDutyActionParams(monitorId: string) {
+function getIndexActionParams(): IndexActionParams {
+  return {
+    documents: [
+      {
+        monitorName: '{{state.monitorName}}',
+        monitorUrl: '{{{state.monitorUrl}}}',
+        statusMessage: '{{state.statusMessage}}',
+        latestErrorMessage: '{{{state.latestErrorMessage}}}',
+        observerLocation: '{{state.observerLocation}}',
+      },
+    ],
+  };
+}
+
+function getServerLogActionParams(): ServerLogActionParams {
+  return {
+    level: 'warn',
+    message: MonitorStatusTranslations.defaultActionMessage,
+  };
+}
+
+function getWebhookActionParams(): WebhookActionParams {
+  return {
+    body: MonitorStatusTranslations.defaultActionMessage,
+  };
+}
+
+function getPagerDutyActionParams(monitorId: string): PagerDutyActionParams {
   return {
     dedupKey: monitorId + MONITOR_STATUS.id,
     eventAction: 'trigger',
     severity: 'error',
     summary: MonitorStatusTranslations.defaultActionMessage,
+  };
+}
+
+function getServiceNowActionParams(): ServiceNowActionParams {
+  return {
+    subAction: 'pushToService',
+    subActionParams: {
+      incident: {
+        short_description: MonitorStatusTranslations.defaultActionMessage,
+        description: MonitorStatusTranslations.defaultActionMessage,
+        impact: '2',
+        severity: '2',
+        urgency: '2',
+        externalId: null,
+      },
+      comments: [],
+    },
+  };
+}
+
+function getJiraActionParams(): JiraActionParams {
+  return {
+    subAction: 'pushToService',
+    subActionParams: {
+      incident: {
+        summary: MonitorStatusTranslations.defaultActionMessage,
+        externalId: null,
+        description: MonitorStatusTranslations.defaultActionMessage,
+        issueType: null,
+        priority: '2',
+        labels: null,
+        parent: null,
+      },
+      comments: [],
+    },
   };
 }
