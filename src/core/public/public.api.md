@@ -494,6 +494,7 @@ export interface DocLinksStart {
             readonly urlDrilldownTemplateSyntax: string;
             readonly urlDrilldownVariables: string;
         };
+        readonly discover: Record<string, string>;
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;

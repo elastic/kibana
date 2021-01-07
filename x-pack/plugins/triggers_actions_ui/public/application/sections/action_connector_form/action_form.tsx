@@ -64,7 +64,7 @@ export interface ActionAccordionFormProps {
 
 interface ActiveActionConnectorState {
   actionTypeId: string;
-  index: number;
+  indices: number[];
 }
 
 export const ActionForm = ({
@@ -307,7 +307,6 @@ export const ActionForm = ({
                 index={index}
                 key={`action-form-action-at-${index}`}
                 actionTypeRegistry={actionTypeRegistry}
-                defaultActionGroupId={defaultActionGroupId}
                 emptyActionsIds={emptyActionsIds}
                 onDeleteConnector={() => {
                   const updatedActions = actions.filter(
@@ -321,7 +320,14 @@ export const ActionForm = ({
                   setActiveActionItem(undefined);
                 }}
                 onAddConnector={() => {
-                  setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                  setActiveActionItem({
+                    actionTypeId: actionItem.actionTypeId,
+                    indices: actions
+                      .map((item: AlertAction, idx: number) =>
+                        item.id === actionItem.id ? idx : -1
+                      )
+                      .filter((idx: number) => idx >= 0),
+                  });
                   setAddModalVisibility(true);
                 }}
               />
@@ -350,7 +356,7 @@ export const ActionForm = ({
               isActionGroupDisabledForActionType={isActionGroupDisabledForActionType}
               setActionGroupIdByIndex={setActionGroupIdByIndex}
               onAddConnector={() => {
-                setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                setActiveActionItem({ actionTypeId: actionItem.actionTypeId, indices: [index] });
                 setAddModalVisibility(true);
               }}
               onConnectorSelected={(id: string) => {
@@ -437,12 +443,12 @@ export const ActionForm = ({
       )}
       {actionTypesIndex && activeActionItem && addModalVisible ? (
         <ConnectorAddModal
-          key={activeActionItem.index}
           actionType={actionTypesIndex[activeActionItem.actionTypeId]}
           onClose={closeAddConnectorModal}
           postSaveEventHandler={(savedAction: ActionConnector) => {
             connectors.push(savedAction);
-            setActionIdByIndex(savedAction.id, activeActionItem.index);
+            const indicesToUpdate = activeActionItem.indices || [];
+            indicesToUpdate.forEach((index: number) => setActionIdByIndex(savedAction.id, index));
           }}
           actionTypeRegistry={actionTypeRegistry}
         />

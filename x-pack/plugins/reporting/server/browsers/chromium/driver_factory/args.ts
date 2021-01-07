@@ -41,6 +41,9 @@ export const args = ({ userDataDir, viewport, disableSandbox, proxy: proxyConfig
     '--disable-gpu',
     '--headless',
     '--hide-scrollbars',
+    // NOTE: setting the window size does NOT set the viewport size: viewport and window size are different.
+    // The viewport may later need to be resized depending on the position of the clip area.
+    // These numbers come from the job parameters, so this is a close guess.
     `--window-size=${Math.floor(viewport.width)},${Math.floor(viewport.height)}`,
   ];
 
