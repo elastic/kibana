@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface BackgroundSessionSavedObjectAttributes {
+export interface SearchSessionSavedObjectAttributes {
   /**
    * User-facing session name to be displayed in session management
    */
@@ -42,10 +42,10 @@ export interface BackgroundSessionSavedObjectAttributes {
   /**
    * Mapping of search request hashes to their corresponsing info (async search id, etc.)
    */
-  idMapping: Record<string, BackgroundSessionSearchInfo>;
+  idMapping: Record<string, SearchSessionRequestInfo>;
 }
 
-export interface BackgroundSessionSearchInfo {
+export interface SearchSessionRequestInfo {
   /**
    * ID of the async search request
    */

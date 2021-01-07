@@ -36,11 +36,11 @@ import {
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
 import {
-  BackgroundSessionSavedObjectAttributes,
-  BackgroundSessionSearchInfo,
-  BackgroundSessionStatus,
+  SearchSessionSavedObjectAttributes,
+  SearchSessionRequestInfo,
+  SearchSessionStatus,
 } from '../../../common';
-import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
+import { SEARCH_SESSION_TYPE } from '../../saved_objects';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
 import { registerBackgroundSessionsTask, scheduleBackgroundSessionsTasks } from './monitoring_task';
@@ -53,14 +53,14 @@ import {
 } from './constants';
 import { SearchStatus } from './types';
 
-export interface BackgroundSessionDependencies {
+export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
 export interface SessionInfo {
   insertTime: Moment;
   retryCount: number;
-  ids: Map<string, BackgroundSessionSearchInfo>;
+  ids: Map<string, SearchSessionRequestInfo>;
 }
 
 interface SetupDependencies {
@@ -71,8 +71,7 @@ interface StartDependencies {
   taskManager: TaskManagerStartContract;
   config$: Observable<ConfigSchema>;
 }
-
-export class BackgroundSessionService implements ISessionService {
+export class SearchSessionService implements ISessionService {
   /**
    * Map of sessionId to { [requestHash]: searchId }
    * @private
@@ -101,7 +100,7 @@ export class BackgroundSessionService implements ISessionService {
     if (config.search.sendToBackground.enabled) {
       scheduleBackgroundSessionsTasks(deps.taskManager, this.logger);
       this.logger.debug(`setupMonitoring | Enabling monitoring`);
-      const internalRepo = core.savedObjects.createInternalRepository([BACKGROUND_SESSION_TYPE]);
+      const internalRepo = core.savedObjects.createInternalRepository([SEARCH_SESSION_TYPE]);
       this.internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
       this.monitorMappedIds();
     }
@@ -114,7 +113,7 @@ export class BackgroundSessionService implements ISessionService {
   private sessionIdsAsFilters(sessionIds: string[]): KueryNode {
     return nodeBuilder.or(
       sessionIds.map((id) => {
-        return nodeBuilder.is(`${BACKGROUND_SESSION_TYPE}.attributes.sessionId`, id);
+        return nodeBuilder.is(`${SEARCH_SESSION_TYPE}.attributes.sessionId`, id);
       })
     );
   }
@@ -129,9 +128,9 @@ export class BackgroundSessionService implements ISessionService {
    */
   private async getAllMappedSavedObjects() {
     const filter = this.sessionIdsAsFilters(Array.from(this.sessionSearchMap.keys()));
-    const res = await this.internalSavedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
+    const res = await this.internalSavedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       perPage: INMEM_MAX_SESSIONS, // If there are more sessions in memory, they will be synced when some items are cleared out.
-      type: BACKGROUND_SESSION_TYPE,
+      type: SEARCH_SESSION_TYPE,
       filter,
       namespaces: ['*'],
     });
@@ -197,13 +196,13 @@ export class BackgroundSessionService implements ISessionService {
   }
 
   private async updateAllSavedObjects(
-    activeMappingObjects: Array<SavedObject<BackgroundSessionSavedObjectAttributes>>
+    activeMappingObjects: Array<SavedObject<SearchSessionSavedObjectAttributes>>
   ) {
     if (!activeMappingObjects.length) return [];
 
     this.logger.debug(`updateAllSavedObjects | Updating ${activeMappingObjects.length} items`);
     const updatedSessions: Array<
-      SavedObjectsBulkUpdateObject<BackgroundSessionSavedObjectAttributes>
+      SavedObjectsBulkUpdateObject<SearchSessionSavedObjectAttributes>
     > = activeMappingObjects
       .filter((so) => !so.error)
       .map((sessionSavedObject) => {
@@ -219,7 +218,7 @@ export class BackgroundSessionService implements ISessionService {
         };
       });
 
-    const updateResults = await this.internalSavedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
+    const updateResults = await this.internalSavedObjectsClient.bulkUpdate<SearchSessionSavedObjectAttributes>(
       updatedSessions
     );
     return updateResults.saved_objects;
@@ -230,7 +229,7 @@ export class BackgroundSessionService implements ISessionService {
     searchRequest: Request,
     options: ISearchOptions,
     searchDeps: SearchStrategyDependencies,
-    deps: BackgroundSessionDependencies
+    deps: SearchSessionDependencies
   ): Observable<Response> {
     // If this is a restored background search session, look up the ID using the provided sessionId
     const getSearchRequest = async () =>
@@ -258,12 +257,12 @@ export class BackgroundSessionService implements ISessionService {
       appId,
       created = new Date().toISOString(),
       expires = new Date(Date.now() + DEFAULT_EXPIRATION).toISOString(),
-      status = BackgroundSessionStatus.IN_PROGRESS,
+      status = SearchSessionStatus.IN_PROGRESS,
       urlGeneratorId,
       initialState = {},
       restoreState = {},
-    }: Partial<BackgroundSessionSavedObjectAttributes>,
-    { savedObjectsClient }: BackgroundSessionDependencies
+    }: Partial<SearchSessionSavedObjectAttributes>,
+    { savedObjectsClient }: SearchSessionDependencies
   ) => {
     if (!name) throw new Error('Name is required');
     if (!appId) throw new Error('AppId is required');
@@ -283,8 +282,8 @@ export class BackgroundSessionService implements ISessionService {
       appId,
       sessionId,
     };
-    const session = await savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
-      BACKGROUND_SESSION_TYPE,
+    const session = await savedObjectsClient.create<SearchSessionSavedObjectAttributes>(
+      SEARCH_SESSION_TYPE,
       attributes,
       { id: sessionId }
     );
@@ -293,10 +292,10 @@ export class BackgroundSessionService implements ISessionService {
   };
 
   // TODO: Throw an error if this session doesn't belong to this user
-  public get = (sessionId: string, { savedObjectsClient }: BackgroundSessionDependencies) => {
+  public get = (sessionId: string, { savedObjectsClient }: SearchSessionDependencies) => {
     this.logger.debug(`get | ${sessionId}`);
-    return savedObjectsClient.get<BackgroundSessionSavedObjectAttributes>(
-      BACKGROUND_SESSION_TYPE,
+    return savedObjectsClient.get<SearchSessionSavedObjectAttributes>(
+      SEARCH_SESSION_TYPE,
       sessionId
     );
   };
@@ -304,31 +303,31 @@ export class BackgroundSessionService implements ISessionService {
   // TODO: Throw an error if this session doesn't belong to this user
   public find = (
     options: Omit<SavedObjectsFindOptions, 'type'>,
-    { savedObjectsClient }: BackgroundSessionDependencies
+    { savedObjectsClient }: SearchSessionDependencies
   ) => {
-    return savedObjectsClient.find<BackgroundSessionSavedObjectAttributes>({
+    return savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
       ...options,
-      type: BACKGROUND_SESSION_TYPE,
+      type: SEARCH_SESSION_TYPE,
     });
   };
 
   // TODO: Throw an error if this session doesn't belong to this user
   public update = (
     sessionId: string,
-    attributes: Partial<BackgroundSessionSavedObjectAttributes>,
-    { savedObjectsClient }: BackgroundSessionDependencies
+    attributes: Partial<SearchSessionSavedObjectAttributes>,
+    { savedObjectsClient }: SearchSessionDependencies
   ) => {
     this.logger.debug(`update | ${sessionId}`);
-    return savedObjectsClient.update<BackgroundSessionSavedObjectAttributes>(
-      BACKGROUND_SESSION_TYPE,
+    return savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
+      SEARCH_SESSION_TYPE,
       sessionId,
       attributes
     );
   };
 
   // TODO: Throw an error if this session doesn't belong to this user
-  public delete = (sessionId: string, { savedObjectsClient }: BackgroundSessionDependencies) => {
-    return savedObjectsClient.delete(BACKGROUND_SESSION_TYPE, sessionId);
+  public delete = (sessionId: string, { savedObjectsClient }: SearchSessionDependencies) => {
+    return savedObjectsClient.delete(SEARCH_SESSION_TYPE, sessionId);
   };
 
   /**
@@ -340,7 +339,7 @@ export class BackgroundSessionService implements ISessionService {
     searchRequest: IKibanaSearchRequest,
     searchId: string,
     { sessionId, isStored, strategy }: ISearchOptions,
-    deps: BackgroundSessionDependencies
+    deps: SearchSessionDependencies
   ) => {
     if (!sessionId || !searchId) return;
     this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
@@ -362,7 +361,7 @@ export class BackgroundSessionService implements ISessionService {
       const map = this.sessionSearchMap.get(sessionId) ?? {
         insertTime: moment(),
         retryCount: 0,
-        ids: new Map<string, BackgroundSessionSearchInfo>(),
+        ids: new Map<string, SearchSessionRequestInfo>(),
       };
       map.ids.set(requestHash, searchInfo);
       this.sessionSearchMap.set(sessionId, map);
@@ -377,7 +376,7 @@ export class BackgroundSessionService implements ISessionService {
   public getId = async (
     searchRequest: IKibanaSearchRequest,
     { sessionId, isStored, isRestore }: ISearchOptions,
-    deps: BackgroundSessionDependencies
+    deps: SearchSessionDependencies
   ) => {
     if (!sessionId) {
       throw new Error('Session ID is required');
@@ -399,7 +398,7 @@ export class BackgroundSessionService implements ISessionService {
   public asScopedProvider = ({ savedObjects }: CoreStart) => {
     return (request: KibanaRequest) => {
       const savedObjectsClient = savedObjects.getScopedClient(request, {
-        includedHiddenTypes: [BACKGROUND_SESSION_TYPE],
+        includedHiddenTypes: [SEARCH_SESSION_TYPE],
       });
       const deps = { savedObjectsClient };
       return {
@@ -407,11 +406,11 @@ export class BackgroundSessionService implements ISessionService {
           strategy: ISearchStrategy<Request, Response>,
           ...args: Parameters<ISearchStrategy<Request, Response>['search']>
         ) => this.search(strategy, ...args, deps),
-        save: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
+        save: (sessionId: string, attributes: Partial<SearchSessionSavedObjectAttributes>) =>
           this.save(sessionId, attributes, deps),
         get: (sessionId: string) => this.get(sessionId, deps),
         find: (options: SavedObjectsFindOptions) => this.find(options, deps),
-        update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
+        update: (sessionId: string, attributes: Partial<SearchSessionSavedObjectAttributes>) =>
           this.update(sessionId, attributes, deps),
         delete: (sessionId: string) => this.delete(sessionId, deps),
       };

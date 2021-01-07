@@ -7,12 +7,12 @@
 import React from 'react';
 import { render, waitFor, screen, act } from '@testing-library/react';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import { createConnectedBackgroundSessionIndicator } from './connected_background_session_indicator';
+import { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';
 import { BehaviorSubject } from 'rxjs';
 import {
   ISessionService,
   RefreshInterval,
-  SessionState,
+  SearchSessionState,
   TimefilterContract,
 } from '../../../../../../../src/plugins/data/public';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
@@ -31,78 +31,76 @@ beforeEach(() => {
 });
 
 test("shouldn't show indicator in case no active search session", async () => {
-  const BackgroundSessionIndicator = createConnectedBackgroundSessionIndicator({
+  const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService,
     application: coreStart.application,
     timeFilter,
   });
-  const { getByTestId, container } = render(<BackgroundSessionIndicator />);
+  const { getByTestId, container } = render(<SearchSessionIndicator />);
 
-  // make sure `backgroundSessionIndicator` isn't appearing after some time (lazy-loading)
+  // make sure `searchSessionIndicator` isn't appearing after some time (lazy-loading)
   await expect(
-    waitFor(() => getByTestId('backgroundSessionIndicator'), { timeout: 100 })
+    waitFor(() => getByTestId('searchSessionIndicator'), { timeout: 100 })
   ).rejects.toThrow();
   expect(container).toMatchInlineSnapshot(`<div />`);
 });
 
 test('should show indicator in case there is an active search session', async () => {
-  const state$ = new BehaviorSubject(SessionState.Loading);
-  const BackgroundSessionIndicator = createConnectedBackgroundSessionIndicator({
+  const state$ = new BehaviorSubject(SearchSessionState.Loading);
+  const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
     application: coreStart.application,
     timeFilter,
   });
-  const { getByTestId } = render(<BackgroundSessionIndicator />);
+  const { getByTestId } = render(<SearchSessionIndicator />);
 
-  await waitFor(() => getByTestId('backgroundSessionIndicator'));
+  await waitFor(() => getByTestId('searchSessionIndicator'));
 });
 
 test('should be disabled when permissions are off', async () => {
-  const state$ = new BehaviorSubject(SessionState.Loading);
+  const state$ = new BehaviorSubject(SearchSessionState.Loading);
   coreStart.application.currentAppId$ = new BehaviorSubject('discover');
   (coreStart.application.capabilities as any) = {
     discover: {
       storeSearchSession: false,
     },
   };
-  const BackgroundSessionIndicator = createConnectedBackgroundSessionIndicator({
+  const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
     application: coreStart.application,
     timeFilter,
   });
 
-  render(<BackgroundSessionIndicator />);
+  render(<SearchSessionIndicator />);
 
-  await waitFor(() => screen.getByTestId('backgroundSessionIndicator'));
+  await waitFor(() => screen.getByTestId('searchSessionIndicator'));
 
-  expect(screen.getByTestId('backgroundSessionIndicator').querySelector('button')).toBeDisabled();
+  expect(screen.getByTestId('searchSessionIndicator').querySelector('button')).toBeDisabled();
 });
 
 test('should be disabled during auto-refresh', async () => {
-  const state$ = new BehaviorSubject(SessionState.Loading);
+  const state$ = new BehaviorSubject(SearchSessionState.Loading);
   coreStart.application.currentAppId$ = new BehaviorSubject('discover');
   (coreStart.application.capabilities as any) = {
     discover: {
       storeSearchSession: true,
     },
   };
-  const BackgroundSessionIndicator = createConnectedBackgroundSessionIndicator({
+  const SearchSessionIndicator = createConnectedSearchSessionIndicator({
     sessionService: { ...sessionService, state$ },
     application: coreStart.application,
     timeFilter,
   });
 
-  render(<BackgroundSessionIndicator />);
+  render(<SearchSessionIndicator />);
 
-  await waitFor(() => screen.getByTestId('backgroundSessionIndicator'));
+  await waitFor(() => screen.getByTestId('searchSessionIndicator'));
 
-  expect(
-    screen.getByTestId('backgroundSessionIndicator').querySelector('button')
-  ).not.toBeDisabled();
+  expect(screen.getByTestId('searchSessionIndicator').querySelector('button')).not.toBeDisabled();
 
   act(() => {
     refreshInterval$.next({ value: 0, pause: false });
   });
 
-  expect(screen.getByTestId('backgroundSessionIndicator').querySelector('button')).toBeDisabled();
+  expect(screen.getByTestId('searchSessionIndicator').querySelector('button')).toBeDisabled();
 });

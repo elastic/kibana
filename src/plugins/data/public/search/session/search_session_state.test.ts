@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createSessionStateContainer, SessionState } from './session_state';
+import { createSessionStateContainer, SearchSessionState } from './search_session_state';
 
 describe('Session state container', () => {
   const { stateContainer: state } = createSessionStateContainer();
@@ -29,7 +29,7 @@ describe('Session state container', () => {
   describe('transitions', () => {
     test('start', () => {
       state.transitions.start();
-      expect(state.selectors.getState()).toBe(SessionState.None);
+      expect(state.selectors.getState()).toBe(SearchSessionState.None);
       expect(state.get().sessionId).not.toBeUndefined();
     });
 
@@ -39,22 +39,22 @@ describe('Session state container', () => {
       state.transitions.start();
       state.transitions.trackSearch({});
 
-      expect(state.selectors.getState()).toBe(SessionState.Loading);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
     });
 
     test('untrack', () => {
       state.transitions.start();
       const search = {};
       state.transitions.trackSearch(search);
-      expect(state.selectors.getState()).toBe(SessionState.Loading);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
       state.transitions.unTrackSearch(search);
-      expect(state.selectors.getState()).toBe(SessionState.Completed);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Completed);
     });
 
     test('clear', () => {
       state.transitions.start();
       state.transitions.clear();
-      expect(state.selectors.getState()).toBe(SessionState.None);
+      expect(state.selectors.getState()).toBe(SearchSessionState.None);
       expect(state.get().sessionId).toBeUndefined();
     });
 
@@ -64,11 +64,11 @@ describe('Session state container', () => {
       state.transitions.start();
       const search = {};
       state.transitions.trackSearch(search);
-      expect(state.selectors.getState()).toBe(SessionState.Loading);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
       state.transitions.cancel();
-      expect(state.selectors.getState()).toBe(SessionState.Canceled);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Canceled);
       state.transitions.clear();
-      expect(state.selectors.getState()).toBe(SessionState.None);
+      expect(state.selectors.getState()).toBe(SearchSessionState.None);
     });
 
     test('store -> completed', () => {
@@ -77,48 +77,48 @@ describe('Session state container', () => {
       state.transitions.start();
       const search = {};
       state.transitions.trackSearch(search);
-      expect(state.selectors.getState()).toBe(SessionState.Loading);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
       state.transitions.store();
-      expect(state.selectors.getState()).toBe(SessionState.BackgroundLoading);
+      expect(state.selectors.getState()).toBe(SearchSessionState.BackgroundLoading);
       state.transitions.unTrackSearch(search);
-      expect(state.selectors.getState()).toBe(SessionState.BackgroundCompleted);
+      expect(state.selectors.getState()).toBe(SearchSessionState.BackgroundCompleted);
       state.transitions.clear();
-      expect(state.selectors.getState()).toBe(SessionState.None);
+      expect(state.selectors.getState()).toBe(SearchSessionState.None);
     });
     test('store -> cancel', () => {
       state.transitions.start();
       const search = {};
       state.transitions.trackSearch(search);
-      expect(state.selectors.getState()).toBe(SessionState.Loading);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Loading);
       state.transitions.store();
-      expect(state.selectors.getState()).toBe(SessionState.BackgroundLoading);
+      expect(state.selectors.getState()).toBe(SearchSessionState.BackgroundLoading);
       state.transitions.cancel();
-      expect(state.selectors.getState()).toBe(SessionState.Canceled);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Canceled);
 
       state.transitions.trackSearch(search);
-      expect(state.selectors.getState()).toBe(SessionState.Canceled);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Canceled);
 
       state.transitions.start();
-      expect(state.selectors.getState()).toBe(SessionState.None);
+      expect(state.selectors.getState()).toBe(SearchSessionState.None);
     });
 
     test('restore', () => {
       const id = 'id';
       state.transitions.restore(id);
-      expect(state.selectors.getState()).toBe(SessionState.None);
+      expect(state.selectors.getState()).toBe(SearchSessionState.None);
       const search = {};
       state.transitions.trackSearch(search);
-      expect(state.selectors.getState()).toBe(SessionState.BackgroundLoading);
+      expect(state.selectors.getState()).toBe(SearchSessionState.BackgroundLoading);
       state.transitions.unTrackSearch(search);
 
-      expect(state.selectors.getState()).toBe(SessionState.Restored);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Restored);
       expect(() => state.transitions.store()).toThrowError();
-      expect(state.selectors.getState()).toBe(SessionState.Restored);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Restored);
       expect(() => state.transitions.cancel()).toThrowError();
-      expect(state.selectors.getState()).toBe(SessionState.Restored);
+      expect(state.selectors.getState()).toBe(SearchSessionState.Restored);
 
       state.transitions.start();
-      expect(state.selectors.getState()).toBe(SessionState.None);
+      expect(state.selectors.getState()).toBe(SearchSessionState.None);
     });
   });
 });
