@@ -24,14 +24,8 @@ import { saveAs } from '@elastic/filesaver';
 import {
   EuiSpacer,
   Query,
-  EuiInMemoryTable,
-  EuiIcon,
-  EuiConfirmModal,
-  EuiLoadingElastic,
   EuiOverlayMask,
-  EUI_MODAL_CONFIRM_BUTTON,
   EuiCheckboxGroup,
-  EuiToolTip,
   EuiPageContent,
   EuiSwitch,
   EuiModal,
@@ -62,7 +56,6 @@ import {
   parseQuery,
   getSavedObjectCounts,
   getRelationships,
-  getSavedObjectLabel,
   fetchExportObjects,
   fetchExportByTypeAndSearch,
   findObjects,
@@ -77,7 +70,7 @@ import {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../../services';
-import { Header, Table, Flyout, Relationships } from './components';
+import { Header, Table, Flyout, Relationships, DeleteConfirmModal } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 
 interface ExportAllOption {
@@ -554,102 +547,22 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   renderDeleteConfirmModal() {
     const { isShowingDeleteConfirmModal, isDeleting, selectedSavedObjects } = this.state;
-
     if (!isShowingDeleteConfirmModal) {
       return null;
     }
 
-    let modal;
-
-    if (isDeleting) {
-      // Block the user from interacting with the table while its contents are being deleted.
-      modal = <EuiLoadingElastic size="xl" />;
-    } else {
-      const onCancel = () => {
-        this.setState({ isShowingDeleteConfirmModal: false });
-      };
-
-      const onConfirm = () => {
-        this.delete();
-      };
-
-      modal = (
-        <EuiConfirmModal
-          title={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
-              defaultMessage="Delete saved objects"
-            />
-          }
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-          buttonColor="danger"
-          cancelButtonText={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            isDeleting ? (
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel"
-                defaultMessage="Deleting…"
-              />
-            ) : (
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
-                defaultMessage="Delete"
-              />
-            )
-          }
-          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-        >
-          <p>
-            <FormattedMessage
-              id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-              defaultMessage="This action will delete the following saved objects:"
-            />
-          </p>
-          <EuiInMemoryTable
-            items={selectedSavedObjects}
-            columns={[
-              {
-                field: 'type',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName',
-                  { defaultMessage: 'Type' }
-                ),
-                width: '50px',
-                render: (type, object) => (
-                  <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
-                    <EuiIcon type={object.meta.icon || 'apps'} />
-                  </EuiToolTip>
-                ),
-              },
-              {
-                field: 'id',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.idColumnName',
-                  { defaultMessage: 'Id' }
-                ),
-              },
-              {
-                field: 'meta.title',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName',
-                  { defaultMessage: 'Title' }
-                ),
-              },
-            ]}
-            pagination={true}
-            sorting={false}
-          />
-        </EuiConfirmModal>
-      );
-    }
-
-    return <EuiOverlayMask>{modal}</EuiOverlayMask>;
+    return (
+      <DeleteConfirmModal
+        isDeleting={isDeleting}
+        onConfirm={() => {
+          this.delete();
+        }}
+        onCancel={() => {
+          this.setState({ isShowingDeleteConfirmModal: false });
+        }}
+        selectedObjects={selectedSavedObjects}
+      />
+    );
   }
 
   changeIncludeReferencesDeep = () => {
