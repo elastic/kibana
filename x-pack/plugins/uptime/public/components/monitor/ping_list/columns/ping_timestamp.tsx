@@ -12,14 +12,14 @@ import {
   EuiImage,
   EuiSpacer,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import useIntersection from 'react-use/lib/useIntersection';
 import moment from 'moment';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
-import { euiStyled, useFetcher } from '../../../../../../observability/public';
+import { useFetcher } from '../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../state/api/journey';
 import { UptimeSettingsContext } from '../../../../contexts';
 
@@ -96,10 +96,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
 
   const ImageCaption = (
     <>
-      <div
-        className="stepArrowsFullScreen"
-        style={{ position: 'absolute', bottom: 32, width: '100%' }}
-      >
+      <div className="stepArrowsFullScreen">
         {imgSrc && (
           <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
             <EuiFlexItem grow={false}>
@@ -152,9 +149,9 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
       ) : (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
-            <NoImageAvailable />
+            <EuiLoadingSpinner size="xl" />
           </EuiFlexItem>
-          <EuiFlexItem> {ImageCaption}</EuiFlexItem>
+          <EuiFlexItem>{ImageCaption}</EuiFlexItem>
         </EuiFlexGroup>
       )}
       <EuiFlexGroup
@@ -189,24 +186,5 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
     </StepDiv>
-  );
-};
-
-const BorderedText = euiStyled(EuiText)`
-  width: 120px;
-  text-align: center;
-  border: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
-`;
-
-export const NoImageAvailable = () => {
-  return (
-    <BorderedText>
-      <strong>
-        <FormattedMessage
-          id="xpack.uptime.synthetics.screenshot.noImageMessage"
-          defaultMessage="No image available"
-        />
-      </strong>
-    </BorderedText>
   );
 };

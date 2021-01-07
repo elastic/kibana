@@ -27,12 +27,6 @@ exports[`Ping Timestamp component render without errors 1`] = `
   display: flex;
 }
 
-.c1 {
-  width: 120px;
-  text-align: center;
-  border: 1px solid #d3dae6;
-}
-
 <div
   class="c0"
 >
@@ -42,21 +36,15 @@ exports[`Ping Timestamp component render without errors 1`] = `
     <div
       class="euiFlexItem"
     >
-      <div
-        class="euiText euiText--medium c1"
-      >
-        <strong>
-          No image available
-        </strong>
-      </div>
+      <span
+        class="euiLoadingSpinner euiLoadingSpinner--xLarge"
+      />
     </div>
     <div
       class="euiFlexItem"
     >
-       
       <div
         class="stepArrowsFullScreen"
-        style="position:absolute;bottom:32px;width:100%"
       />
       <span
         class="eui-textNoWrap"
@@ -114,19 +102,13 @@ exports[`Ping Timestamp component shallow render without errors 1`] = `
     gutterSize="s"
   >
     <EuiFlexItem>
-      <NoImageAvailable />
+      <EuiLoadingSpinner
+        size="xl"
+      />
     </EuiFlexItem>
     <EuiFlexItem>
-       
       <div
         className="stepArrowsFullScreen"
-        style={
-          Object {
-            "bottom": 32,
-            "position": "absolute",
-            "width": "100%",
-          }
-        }
       />
       <span
         className="eui-textNoWrap"
