@@ -5,12 +5,48 @@
  */
 
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { render } from '@testing-library/react';
-
 import { I18nProvider } from '@kbn/i18n/react';
-
 import { TimeSeriesExplorerUrlStateManager } from './timeseriesexplorer';
+import { TimeSeriesExplorer } from '../../timeseriesexplorer';
+import { TimeSeriesExplorerPage } from '../../timeseriesexplorer/timeseriesexplorer_page';
+import { TimeseriesexplorerNoJobsFound } from '../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found';
+
+jest.mock('../../services/toast_notification_service');
+
+jest.mock('../../timeseriesexplorer', () => ({
+  TimeSeriesExplorer: jest.fn(() => {
+    return null;
+  }),
+}));
+
+jest.mock('../../timeseriesexplorer/timeseriesexplorer_page', () => ({
+  TimeSeriesExplorerPage: jest.fn(({ children }) => {
+    return <>{children}</>;
+  }),
+}));
+
+jest.mock('../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found', () => ({
+  TimeseriesexplorerNoJobsFound: jest.fn(() => {
+    return null;
+  }),
+}));
+
+const MockedTimeSeriesExplorer = TimeSeriesExplorer as jest.MockedClass<typeof TimeSeriesExplorer>;
+const MockedTimeSeriesExplorerPage = TimeSeriesExplorerPage as jest.MockedFunction<
+  typeof TimeSeriesExplorerPage
+>;
+const MockedTimeseriesexplorerNoJobsFound = TimeseriesexplorerNoJobsFound as jest.MockedFunction<
+  typeof TimeseriesexplorerNoJobsFound
+>;
+
+jest.mock('../../util/url_state');
+
+jest.mock('../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
+
+jest.mock('../../components/help_menu', () => ({
+  HelpMenu: () => <div id="mockHelpMenu" />,
+}));
 
 jest.mock('../../contexts/kibana/kibana_context', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -53,33 +89,33 @@ jest.mock('../../contexts/kibana/kibana_context', () => {
               addDanger: () => {},
             },
           },
+          docLinks: {
+            links: {
+              ml: { anomalyDetection: jest.fn() },
+            },
+          },
         },
       };
     },
   };
 });
 
-jest.mock('../../util/dependency_cache', () => ({
-  getToastNotifications: () => ({ addSuccess: jest.fn(), addDanger: jest.fn() }),
-}));
-
-jest.mock('../../../../shared_imports');
-
 describe('TimeSeriesExplorerUrlStateManager', () => {
-  test('Initial render shows "No single metric jobs found"', () => {
+  test('should render TimeseriesexplorerNoJobsFound when no jobs provided', () => {
     const props = {
       config: { get: () => 'Browser' },
       jobsWithTimeRange: [],
     };
 
-    const { container } = render(
+    render(
       <I18nProvider>
-        <MemoryRouter>
-          <TimeSeriesExplorerUrlStateManager {...props} />
-        </MemoryRouter>
+        <TimeSeriesExplorerUrlStateManager {...props} />
       </I18nProvider>
     );
 
-    expect(container.textContent).toContain('No single metric jobs found');
+    // assert
+    expect(MockedTimeSeriesExplorer).not.toHaveBeenCalled();
+    expect(MockedTimeSeriesExplorerPage).toHaveBeenCalled();
+    expect(MockedTimeseriesexplorerNoJobsFound).toHaveBeenCalled();
   });
 });
