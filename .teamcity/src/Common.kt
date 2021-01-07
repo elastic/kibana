@@ -8,13 +8,11 @@ const val ENABLE_REPORTING = false
 const val ENABLE_TRIGGERS = false
 
 fun getProjectBranch(): String {
-  // There's no good way to retrieve this information, except to have the convention that the root project name is based on the branch
-  // There are DSL Context Parameters which would work, except that they can only be managed via the UI.
   return DslContext.projectName
 }
 
 fun getCorrespondingESBranch(): String {
-  return getOrgProjectIdKebab().replace("_teamcity", "")
+  return getProjectBranch().replace("_teamcity", "")
 }
 
 fun areTriggersEnabled(): Boolean {
