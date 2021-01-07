@@ -188,7 +188,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
-      getImportExportObjectLimit: deps.savedObjects.getImportExportObjectLimit,
     },
     status: {
       core$: deps.status.core$,
@@ -241,6 +240,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       createInternalRepository: deps.savedObjects.createInternalRepository,
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,
+      createExporter: deps.savedObjects.createExporter,
+      createImporter: deps.savedObjects.createImporter,
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
     },
     metrics: {

@@ -109,7 +109,7 @@ export const ConnectorAddModal = ({
 
   return (
     <EuiOverlayMask className="actConnectorModal">
-      <EuiModal onClose={closeModal}>
+      <EuiModal data-test-subj="connectorAddModal" onClose={closeModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <EuiFlexGroup gutterSize="m" alignItems="center">
