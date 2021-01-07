@@ -68,7 +68,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickCreateNewLink();
       await dashboardAddPanel.clickVisType('lens');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -87,7 +86,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.save('vis2', true, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await elasticChart.setNewChartUiDebugFlag(true);
-      await PageObjects.lens.goToTimeRange();
       const colorMapping1 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(0));
       const colorMapping2 = getColorMapping(await PageObjects.dashboard.getPanelChartDebugState(1));
       expect(Object.keys(colorMapping1)).to.have.length(6);
