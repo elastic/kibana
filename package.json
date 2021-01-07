@@ -264,7 +264,7 @@
     "proper-lockfile": "^3.2.0",
     "proxy-from-env": "1.0.0",
     "puid": "1.0.7",
-    "puppeteer": "^5.5.0",
+    "puppeteer": "npm:@elastic/puppeteer@5.4.1-patch.1",
     "query-string": "^6.13.2",
     "raw-loader": "^3.1.0",
     "re2": "^1.15.4",
