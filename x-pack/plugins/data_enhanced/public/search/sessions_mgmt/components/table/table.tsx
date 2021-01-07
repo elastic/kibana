@@ -93,9 +93,6 @@ export function SearchSessionsMgmtTable({ api, timezone, initialTable, config, .
     ),
   };
 
-  // table config: sorting
-  const sorting = { sort: { field: 'startedDate', direction: 'desc' as 'desc' } };
-
   return (
     <EuiInMemoryTable<UISession>
       {...props}
@@ -105,7 +102,7 @@ export function SearchSessionsMgmtTable({ api, timezone, initialTable, config, .
       items={tableData}
       pagination={pagination}
       search={search}
-      sorting={sorting}
+      sorting={{ sort: { field: 'created', direction: 'desc' } }}
       onTableChange={({ page: { index } }) => {
         setPagination({ pageIndex: index });
       }}
