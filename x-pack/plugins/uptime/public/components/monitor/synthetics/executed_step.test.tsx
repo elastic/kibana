@@ -10,7 +10,7 @@ import { Ping } from '../../../../common/runtime_types';
 import { mountWithRouter, renderTLWithRouter } from '../../../lib';
 
 // FLAKY: https://github.com/elastic/kibana/issues/85899
-describe('ExecutedStep', () => {
+describe.skip('ExecutedStep', () => {
   let step: Ping;
 
   beforeEach(() => {
