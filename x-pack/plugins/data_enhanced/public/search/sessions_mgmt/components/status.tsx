@@ -102,7 +102,7 @@ const getStatusAttributes = ({
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
-        throw new Error(`Could not instantiate a expiration Date object from: ${session.expires}`);
+        throw new Error(`Could not instantiate an expiration Date object from: ${session.expires}`);
       }
 
     case STATUS.CANCELLED:
