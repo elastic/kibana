@@ -72,7 +72,13 @@ export default ({ getService }: FtrProviderContext) => {
           supertest,
           getCreateThreatMatchRulesSchemaMock('rule-1', true)
         );
-        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
+
+        // expecting a 'partial failure' status because the threat match rule mock
+        // does not have any indices listed in the rule definition so the rule will
+        // technically be querying ".kibana_1", ".kibana_task_manager_1", and ".security"
+        // as those are the only indices defined.
+        // This mocked rule should be updated to query against an index like auditbeat-*
+        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id, 'partial failure');
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -82,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock(true));
-        expect(statusBody[ruleResponse.id].current_status.status).to.eql('succeeded');
+        expect(statusBody[ruleResponse.id].current_status.status).to.eql('partial failure');
       });
     });
 
@@ -104,6 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
+          index: ['auditbeat-*'],
           type: 'threat_match',
           risk_score: 55,
           language: 'kuery',
@@ -139,6 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
+          index: ['auditbeat-*'],
           type: 'threat_match',
           risk_score: 55,
           language: 'kuery',
@@ -173,6 +181,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
+          index: ['auditbeat-*'],
           type: 'threat_match',
           risk_score: 55,
           language: 'kuery',
@@ -212,6 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
           name: 'Query with a rule id',
           severity: 'high',
           type: 'threat_match',
+          index: ['auditbeat-*'],
           risk_score: 55,
           language: 'kuery',
           rule_id: 'rule-1',
