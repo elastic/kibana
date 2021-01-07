@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
 
-  describe('Screenshots', () => {
+  describe('Dashboard Reporting Screenshots', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.loadIfNeeded('reporting/ecommerce');
@@ -35,11 +35,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after('clean up archives', async () => {
       await esArchiver.unload('reporting/ecommerce');
       await esArchiver.unload('reporting/ecommerce_kibana');
-      // await es.deleteByQuery({
-      //   index: '.reporting-*',
-      //   refresh: true,
-      //   body: { query: { match_all: {} } },
-      // });
+      await es.deleteByQuery({
+        index: '.reporting-*',
+        refresh: true,
+        body: { query: { match_all: {} } },
+      });
     });
 
     describe('Print PDF button', () => {
