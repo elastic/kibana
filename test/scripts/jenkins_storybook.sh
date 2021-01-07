@@ -5,9 +5,9 @@ source src/dev/ci_setup/setup_env.sh
 # TODO un-comment these after iterating
 
 # yarn storybook --site apm
-# yarn storybook --site canvas
+yarn storybook --site canvas
 yarn storybook --site ci_composite
-# yarn storybook --site codeeditor
+yarn storybook --site codeeditor
 yarn storybook --site dashboard
 # yarn storybook --site dashboard_enhanced
 # yarn storybook --site data_enhanced
