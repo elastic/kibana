@@ -22,6 +22,7 @@ import { SearchBoxView, SortingView } from './views';
 import { SearchExperienceContent } from './search_experience_content';
 import { buildSearchUIConfig } from './build_search_ui_config';
 import { CustomizationCallout } from './customization_callout';
+import { CustomizationModal } from './customization_modal';
 
 const DEFAULT_SORT_OPTIONS = [
   {
@@ -96,6 +97,17 @@ export const SearchExperience: React.FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </SearchProvider>
+      {showCustomizationModal && (
+        <CustomizationModal
+          filterFields={/* fields.filterFields*/ []}
+          sortFields={/* fields.sortFields*/ []}
+          onClose={() => setShowCustomizationModal(false)}
+          onSave={({ filterFields, sortFields }) => {
+            // setFields({ filterFields, sortFields });
+            setShowCustomizationModal(false);
+          }}
+        />
+      )}
     </div>
   );
 };

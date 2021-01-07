@@ -12,6 +12,9 @@ import React from 'react';
 import { SearchProvider } from '@elastic/react-search-ui';
 import { shallow } from 'enzyme';
 
+import { CustomizationCallout } from './customization_callout';
+import { CustomizationModal } from './customization_modal';
+
 import { SearchExperience } from './search_experience';
 
 describe('SearchExperience', () => {
@@ -30,5 +33,18 @@ describe('SearchExperience', () => {
   it('renders', () => {
     const wrapper = shallow(<SearchExperience />);
     expect(wrapper.find(SearchProvider).length).toBe(1);
+  });
+
+  it('has a customization modal which can be opened and closed', () => {
+    const wrapper = shallow(<SearchExperience />);
+    expect(wrapper.find(CustomizationModal).exists()).toBe(false);
+
+    wrapper.find(CustomizationCallout).simulate('click');
+
+    expect(wrapper.find(CustomizationModal).exists()).toBe(true);
+
+    wrapper.find(CustomizationModal).prop('onClose')();
+
+    expect(wrapper.find(CustomizationModal).exists()).toBe(false);
   });
 });
