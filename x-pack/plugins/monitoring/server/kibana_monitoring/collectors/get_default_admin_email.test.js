@@ -8,27 +8,37 @@ import { getDefaultAdminEmail } from './get_settings_collector';
 
 describe('getSettingsCollector / getDefaultAdminEmail', () => {
   function setup({ enabled = true, adminEmail = null } = {}) {
-    const config = {
+    return {
       cluster_alerts: {
         email_notifications: {
-          enabled,
           email_address: adminEmail,
+          enabled: enabled,
         },
       },
+      kibana: {
+        index: '.kibana',
+      },
+      pkg: {
+        version: '1.1.1',
+      },
     };
-
-    return config;
   }
 
   describe('monitoring.cluster_alerts.email_notifications.enabled = false', () => {
     it('returns null when email is defined', async () => {
       const config = setup({ enabled: false });
-      expect(await getDefaultAdminEmail(config)).toBe(null);
+      expect(async () => {
+        const result = await getDefaultAdminEmail(config);
+        expect(result).toBe(null);
+      });
     });
 
     it('returns null when email is undefined', async () => {
       const config = setup({ enabled: false });
-      expect(await getDefaultAdminEmail(config)).toBe(null);
+      expect(async () => {
+        const result = await getDefaultAdminEmail(config);
+        expect(result).toBe(null);
+      });
     });
   });
 
@@ -39,7 +49,10 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
     });
     it('returns null when email is undefined', async () => {
       const config = setup();
-      expect(await getDefaultAdminEmail(config)).toBe(null);
+      expect(async () => {
+        const result = await getDefaultAdminEmail(config);
+        expect(result).toBe(null);
+      });
     });
   });
 });
