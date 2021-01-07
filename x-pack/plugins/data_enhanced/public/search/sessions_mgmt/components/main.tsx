@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import type { HttpStart } from 'kibana/public';
+import type { CoreStart, HttpStart } from 'kibana/public';
 import React from 'react';
 import type { SessionsMgmtConfigSchema } from '../';
 import type { UISession } from '../../../../common/search/sessions_mgmt';
@@ -26,6 +26,7 @@ import { SearchSessionsMgmtTable } from './table';
 
 interface Props {
   documentation: AsyncSearchIntroDocumentation;
+  core: CoreStart;
   api: SearchSessionsMgmtAPI;
   http: HttpStart;
   initialTable: UISession[] | null;

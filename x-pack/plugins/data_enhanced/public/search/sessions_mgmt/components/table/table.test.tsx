@@ -7,7 +7,7 @@
 import { MockedKeys } from '@kbn/utility-types/jest';
 import { waitFor } from '@testing-library/react';
 import { mount, ReactWrapper } from 'enzyme';
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup, CoreStart } from 'kibana/public';
 import moment from 'moment';
 import React from 'react';
 import sinon from 'sinon';
@@ -22,13 +22,14 @@ import { LocaleWrapper, mockUrls } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
+let mockCoreStart: CoreStart;
 let mockConfig: SessionsMgmtConfigSchema;
 let sessionsClient: SessionsClient;
 let initialTable: UISession[];
 let api: SearchSessionsMgmtAPI;
 
 describe('Background Search Session Management Table', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     mockCoreSetup = coreMock.createSetup();
     mockConfig = {
       expiresSoonWarning: moment.duration(1, 'days'),
@@ -57,6 +58,8 @@ describe('Background Search Session Management Table', () => {
       mockCoreSetup.notifications,
       mockConfig
     );
+
+    [mockCoreStart] = await mockCoreSetup.getStartServices();
   });
 
   describe('renders', () => {
@@ -66,6 +69,7 @@ describe('Background Search Session Management Table', () => {
       table = mount(
         <LocaleWrapper>
           <SearchSessionsMgmtTable
+            core={mockCoreStart}
             api={api}
             timezone="UTC"
             initialTable={initialTable}
@@ -116,7 +120,13 @@ describe('Background Search Session Management Table', () => {
 
       const table = mount(
         <LocaleWrapper>
-          <SearchSessionsMgmtTable api={api} timezone="UTC" initialTable={[]} config={mockConfig} />
+          <SearchSessionsMgmtTable
+            core={mockCoreStart}
+            api={api}
+            timezone="UTC"
+            initialTable={[]}
+            config={mockConfig}
+          />
         </LocaleWrapper>
       );
 

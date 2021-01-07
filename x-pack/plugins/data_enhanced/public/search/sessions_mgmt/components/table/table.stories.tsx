@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IntlProvider } from 'react-intl';
 import { storiesOf } from '@storybook/react';
-import type { HttpSetup, NotificationsStart } from 'kibana/public';
+import type { CoreStart, HttpSetup, NotificationsStart } from 'kibana/public';
 import moment from 'moment';
 import * as React from 'react';
+import * as Rx from 'rxjs';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { UrlGeneratorsStart } from 'src/plugins/share/public/url_generators';
 import { SessionsMgmtConfigSchema } from '../..';
@@ -21,6 +23,16 @@ export default {
   title: 'SearchSessionsMgmt/Table',
   component: SearchSessionsMgmtTable,
 };
+
+const mockCoreStart = ({
+  application: {
+    currentAppId$: Rx.of('foo'),
+    navigateToUrl: async (url: string) => {
+      // eslint-disable-next-line no-console
+      console.log(`navigate to URL: ${url}`);
+    },
+  },
+} as unknown) as CoreStart;
 
 storiesOf('components/SearchSessionsMgmt/Table', module)
   .add('no items', () => {
@@ -44,13 +56,18 @@ storiesOf('components/SearchSessionsMgmt/Table', module)
     };
 
     const props = {
+      core: mockCoreStart,
       initialTable: [],
       api: new SearchSessionsMgmtAPI(sessionsClient, urls, notifications, config),
       timezone: 'UTC',
       config,
     };
 
-    return <SearchSessionsMgmtTable {...props} />;
+    return (
+      <IntlProvider locale="en">
+        <SearchSessionsMgmtTable {...props} />
+      </IntlProvider>
+    );
   })
   .add('multiple pages', () => {
     const sessionsClient = new SessionsClient({ http: ({} as unknown) as HttpSetup });
@@ -134,11 +151,16 @@ storiesOf('components/SearchSessionsMgmt/Table', module)
     });
 
     const props = {
+      core: mockCoreStart,
       api: new SearchSessionsMgmtAPI(sessionsClient, urls, notifications, config),
       timezone: 'UTC',
       initialTable: mockTable,
       config,
     };
 
-    return <SearchSessionsMgmtTable {...props} />;
+    return (
+      <IntlProvider locale="en">
+        <SearchSessionsMgmtTable {...props} />
+      </IntlProvider>
+    );
   });

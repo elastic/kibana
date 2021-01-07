@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HttpStart, I18nStart, IUiSettingsClient } from 'kibana/public';
+import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from 'kibana/public';
 import { CoreSetup } from 'kibana/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { ManagementSetup } from 'src/plugins/management/public';
@@ -29,6 +29,7 @@ export interface AppDependencies {
   share: SharePluginStart;
   uiSettings: IUiSettingsClient;
   documentation: AsyncSearchIntroDocumentation;
+  core: CoreStart; // for RedirectAppLinks
   api: SearchSessionsMgmtAPI;
   http: HttpStart;
   i18n: I18nStart;

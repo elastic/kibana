@@ -7,7 +7,7 @@
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { MockedKeys } from '@kbn/utility-types/jest';
 import { mount } from 'enzyme';
-import { CoreSetup } from 'kibana/public';
+import { CoreSetup, CoreStart } from 'kibana/public';
 import moment from 'moment';
 import { ReactElement } from 'react';
 import { coreMock } from 'src/core/public/mocks';
@@ -19,6 +19,7 @@ import { SearchSessionsMgmtAPI } from './api';
 import { getColumns } from './get_columns';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
+let mockCoreStart: CoreStart;
 let mockConfig: SessionsMgmtConfigSchema;
 let api: SearchSessionsMgmtAPI;
 let sessionsClient: SessionsClient;
@@ -28,7 +29,7 @@ let mockSession: UISession;
 let tz = 'UTC';
 
 describe('Search Sessions Management table column factory', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     mockCoreSetup = coreMock.createSetup();
     mockConfig = {
       expiresSoonWarning: moment.duration(1, 'days'),
@@ -61,10 +62,12 @@ describe('Search Sessions Management table column factory', () => {
       expires: '2020-12-07T00:19:32Z',
       isViewable: true,
     };
+
+    [mockCoreStart] = await mockCoreSetup.getStartServices();
   });
 
   test('returns columns', () => {
-    const columns = getColumns(api, mockConfig, tz, handleAction);
+    const columns = getColumns(mockCoreStart, api, mockConfig, tz, handleAction);
     expect(columns).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -116,7 +119,7 @@ describe('Search Sessions Management table column factory', () => {
 
   describe('name', () => {
     test('rendering', () => {
-      const [, nameColumn] = getColumns(api, mockConfig, tz, handleAction) as Array<
+      const [, nameColumn] = getColumns(mockCoreStart, api, mockConfig, tz, handleAction) as Array<
         EuiTableFieldDataColumnType<UISession>
       >;
 
@@ -129,7 +132,7 @@ describe('Search Sessions Management table column factory', () => {
   // Status column
   describe('status', () => {
     test('render in_progress', () => {
-      const [, , status] = getColumns(api, mockConfig, tz, handleAction) as Array<
+      const [, , status] = getColumns(mockCoreStart, api, mockConfig, tz, handleAction) as Array<
         EuiTableFieldDataColumnType<UISession>
       >;
 
@@ -142,7 +145,7 @@ describe('Search Sessions Management table column factory', () => {
     });
 
     test('error handling', () => {
-      const [, , status] = getColumns(api, mockConfig, tz, handleAction) as Array<
+      const [, , status] = getColumns(mockCoreStart, api, mockConfig, tz, handleAction) as Array<
         EuiTableFieldDataColumnType<UISession>
       >;
 
@@ -160,9 +163,13 @@ describe('Search Sessions Management table column factory', () => {
     test('render using Browser timezone', () => {
       tz = 'Browser';
 
-      const [, , , createdDateCol] = getColumns(api, mockConfig, tz, handleAction) as Array<
-        EuiTableFieldDataColumnType<UISession>
-      >;
+      const [, , , createdDateCol] = getColumns(
+        mockCoreStart,
+        api,
+        mockConfig,
+        tz,
+        handleAction
+      ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const date = mount(createdDateCol.render!(mockSession.created, mockSession) as ReactElement);
 
@@ -172,9 +179,13 @@ describe('Search Sessions Management table column factory', () => {
     test('render using AK timezone', () => {
       tz = 'US/Alaska';
 
-      const [, , , createdDateCol] = getColumns(api, mockConfig, tz, handleAction) as Array<
-        EuiTableFieldDataColumnType<UISession>
-      >;
+      const [, , , createdDateCol] = getColumns(
+        mockCoreStart,
+        api,
+        mockConfig,
+        tz,
+        handleAction
+      ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       const date = mount(createdDateCol.render!(mockSession.created, mockSession) as ReactElement);
 
@@ -182,9 +193,13 @@ describe('Search Sessions Management table column factory', () => {
     });
 
     test('error handling', () => {
-      const [, , , createdDateCol] = getColumns(api, mockConfig, tz, handleAction) as Array<
-        EuiTableFieldDataColumnType<UISession>
-      >;
+      const [, , , createdDateCol] = getColumns(
+        mockCoreStart,
+        api,
+        mockConfig,
+        tz,
+        handleAction
+      ) as Array<EuiTableFieldDataColumnType<UISession>>;
 
       mockSession.created = 'INVALID';
       const date = mount(createdDateCol.render!(mockSession.created, mockSession) as ReactElement);

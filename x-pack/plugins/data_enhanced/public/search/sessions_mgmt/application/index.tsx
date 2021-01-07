@@ -57,6 +57,7 @@ export class SearchSessionsMgmtApp {
       plugins: pluginsSetup,
       config: this.config,
       documentation,
+      core: coreStart,
       api,
       http,
       i18n,

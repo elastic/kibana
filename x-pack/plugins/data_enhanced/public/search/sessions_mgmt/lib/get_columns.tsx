@@ -14,8 +14,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { CoreStart } from 'kibana/public';
 import { capitalize } from 'lodash';
 import React from 'react';
+import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { SessionsMgmtConfigSchema } from '../';
 import { ActionComplete, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 import { TableText } from '../components';
@@ -34,6 +36,7 @@ const appToIcon = (app: string) => {
 };
 
 export const getColumns = (
+  core: CoreStart,
   api: SearchSessionsMgmtAPI,
   config: SessionsMgmtConfigSchema,
   timezone: string,
@@ -73,9 +76,11 @@ export const getColumns = (
       render: (name: UISession['name'], { isViewable, url }) => {
         if (isViewable) {
           return (
-            <EuiLink href={url} data-test-subj="session-mgmt-table-col-name-viewable">
-              <TableText>{name}</TableText>
-            </EuiLink>
+            <RedirectAppLinks application={core.application}>
+              <EuiLink href={url} data-test-subj="session-mgmt-table-col-name-viewable">
+                <TableText>{name}</TableText>
+              </EuiLink>
+            </RedirectAppLinks>
           );
         }
 
