@@ -5,13 +5,42 @@
  */
 
 import React from 'react';
-import { PingHistogramComponent, PingHistogramComponentProps } from './ping_histogram';
-import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../lib';
-import moment from 'moment';
+import DateMath from '@elastic/datemath';
+import { PingHistogramComponent, PingHistogramComponentProps } from '../ping_histogram';
+import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../../lib';
+
+jest.mock('moment-timezone', () => {
+  return function () {
+    return { tz: { guess: () => 'America/New_York' } };
+  };
+});
+
+jest.mock('moment', () => {
+  return function () {
+    return { fromNow: () => 'a year ago' };
+  };
+});
+
+jest.mock('../../../../../../../../src/plugins/data/public', () => {
+  return function () {
+    return {
+      esKuery: {
+        fromKueryExpression: () => 'an ast',
+        toElasticsearchQuery: () => 'an es query',
+      },
+    };
+  };
+});
 
 describe('PingHistogram component', () => {
+  let dateMathSpy: any;
   beforeAll(() => {
-    moment.prototype.fromNow = jest.fn(() => 'a year ago');
+    dateMathSpy = jest.spyOn(DateMath, 'parse');
+    dateMathSpy.mockReturnValue(20);
+  });
+
+  afterAll(() => {
+    jest.clearAllMocks();
   });
 
   const props: PingHistogramComponentProps = {
@@ -44,7 +73,7 @@ describe('PingHistogram component', () => {
         { x: 1581068989000, downCount: 3, upCount: 36, y: 1 },
         { x: 1581069019000, downCount: 1, upCount: 11, y: 1 },
       ],
-      minInterval: 60,
+      interval: '1s',
     },
   };
 
