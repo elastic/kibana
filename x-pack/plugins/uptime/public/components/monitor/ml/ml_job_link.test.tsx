@@ -5,28 +5,17 @@
  */
 
 import React from 'react';
-import { coreMock } from 'src/core/public/mocks';
-import { renderWithRouter, shallowWithRouter } from '../../../lib';
+import { renderTLWithRouter } from '../../../lib';
 import { MLJobLink } from './ml_job_link';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 
-const core = coreMock.createStart();
 describe('ML JobLink', () => {
-  it('shallow renders without errors', () => {
-    const wrapper = shallowWithRouter(
-      <MLJobLink dateRange={{ to: '', from: '' }} basePath="" monitorId="testMonitor" />
-    );
-    expect(wrapper).toMatchSnapshot();
-  });
-
   it('renders without errors', () => {
-    const wrapper = renderWithRouter(
-      <KibanaContextProvider
-        services={{ ...core, triggersActionsUi: { getEditAlertFlyout: jest.fn() } }}
-      >
-        <MLJobLink dateRange={{ to: '', from: '' }} basePath="" monitorId="testMonitor" />
-      </KibanaContextProvider>
+    const { asFragment } = renderTLWithRouter(
+      <MLJobLink dateRange={{ to: '', from: '' }} basePath="" monitorId="testMonitor" />,
+      {
+        customCoreOptions: { triggersActionsUi: { getEditAlertFlyout: jest.fn() } },
+      }
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(asFragment()).toMatchSnapshot();
   });
 });

@@ -8,7 +8,7 @@ import { ChromeBreadcrumb } from 'kibana/public';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { of } from 'rxjs';
-import { MountWithReduxProvider, mountWithRouter } from '../../../../lib';
+import { MountWithReduxProvider, mountWithRouter, renderTLWithRouter } from '../../../../lib';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
 import { OVERVIEW_ROUTE } from '../../../../../common/constants';
@@ -27,14 +27,13 @@ describe('useMonitorBreadcrumbs', () => {
       return <>Step Water Fall</>;
     };
 
-    mountWithRouter(
+    renderTLWithRouter(
       <MountWithReduxProvider>
-        <KibanaContextProvider services={{ ...core }}>
-          <Route path={OVERVIEW_ROUTE}>
-            <Component />
-          </Route>
-        </KibanaContextProvider>
-      </MountWithReduxProvider>
+        <Route path={OVERVIEW_ROUTE}>
+          <Component />
+        </Route>
+      </MountWithReduxProvider>,
+      { kibanaProps: { services: { ...core } } }
     );
 
     expect(getBreadcrumbs()).toMatchInlineSnapshot(`

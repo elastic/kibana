@@ -7,10 +7,10 @@
 import React from 'react';
 import { ExecutedStep } from './executed_step';
 import { Ping } from '../../../../common/runtime_types';
-import { mountWithRouter } from '../../../lib';
+import { mountWithRouter, renderTLWithRouter } from '../../../lib';
 
 // FLAKY: https://github.com/elastic/kibana/issues/85899
-describe.skip('ExecutedStep', () => {
+describe('ExecutedStep', () => {
   let step: Ping;
 
   beforeEach(() => {
@@ -35,32 +35,11 @@ describe.skip('ExecutedStep', () => {
   });
 
   it('renders correct step heading', () => {
-    expect(
-      mountWithRouter(<ExecutedStep index={3} step={step} checkGroup={'fake-group'} />).find(
-        'EuiText'
-      )
-    ).toMatchInlineSnapshot(`
-      <EuiText>
-        <div
-          className="euiText euiText--medium"
-        >
-          <strong>
-            <FormattedMessage
-              defaultMessage="{stepNumber}. {stepName}"
-              id="xpack.uptime.synthetics.executedStep.stepName"
-              values={
-                Object {
-                  "stepName": "STEP_NAME",
-                  "stepNumber": 4,
-                }
-              }
-            >
-              4. STEP_NAME
-            </FormattedMessage>
-          </strong>
-        </div>
-      </EuiText>
-    `);
+    const { getByText } = renderTLWithRouter(
+      <ExecutedStep index={3} step={step} checkGroup={'fake-group'} />
+    );
+
+    expect(getByText(`${step?.synthetics?.step?.index}. ${step?.synthetics?.step?.name}`));
   });
 
   it('renders a link to the step detail view', () => {
