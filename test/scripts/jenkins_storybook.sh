@@ -1,15 +1,18 @@
 #!/usr/bin/env bash
 
-# source src/dev/ci_setup/setup_env.sh
+source src/dev/ci_setup/setup_env.sh
 
-yarn storybook --site apm
-yarn storybook --site canvas
-yarn storybook --site codeeditor
+# TODO un-comment these after iterating
+
+# yarn storybook --site apm
+# yarn storybook --site canvas
+yarn storybook --site ci_composite
+# yarn storybook --site codeeditor
 yarn storybook --site dashboard
-yarn storybook --site dashboard_enhanced
-yarn storybook --site data_enhanced
-yarn storybook --site embeddable
-yarn storybook --site infra
-yarn storybook --site security_solution
-yarn storybook --site ui_actions_enhanced
-yarn storybook --site observability
+# yarn storybook --site dashboard_enhanced
+# yarn storybook --site data_enhanced
+# yarn storybook --site embeddable
+# yarn storybook --site infra
+# yarn storybook --site security_solution
+# yarn storybook --site ui_actions_enhanced
+# yarn storybook --site observability

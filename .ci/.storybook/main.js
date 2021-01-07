@@ -10,6 +10,7 @@ const aliases = require('../../src/dev/storybook/aliases.ts').storybookAliases;
 config.refs = {};
 
 for(const alias of Object.keys(aliases).filter(a => a !== 'ci_composite')) {
+  // snake_case -> Title Case
   const title = alias
     .replace(/_/g, ' ')
     .split(' ')
@@ -18,10 +19,8 @@ for(const alias of Object.keys(aliases).filter(a => a !== 'ci_composite')) {
 
   config.refs[alias] = {
     title: title,
-    url: 'TODO',
+    url: `${process.env.STORYBOOK_BASE_URL}/${alias}`,
   }
 }
-
-console.log(config);
 
 module.exports = config;

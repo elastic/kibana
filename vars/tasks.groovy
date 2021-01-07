@@ -128,4 +128,11 @@ def functionalXpack(Map params = [:]) {
   }
 }
 
+def storybooksCi() {
+  task {
+    storybooks.build()
+    storybooks.upload()
+  }
+}
+
 return this

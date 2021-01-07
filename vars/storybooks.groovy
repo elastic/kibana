@@ -1,0 +1,74 @@
+def STORYBOOKS_BUCKET = "ci-artifacts.kibana.dev/storybooks"
+
+def getDestinationDir() {
+  return env.ghprbPullId ? "pr-${env.ghprbPullId}" : buildState.get('checkoutInfo').branch.replace("/", "__")
+}
+
+def getUrl() {
+  return "https://${STORYBOOKS_BUCKET}/${getDestinationDir()}"
+}
+
+def getUrlLatest() {
+  return "${getUrl()}/latest"
+}
+
+def getUrlForCommit() {
+  return "${getUrl()}/${buildState.get('checkoutInfo').commit}"
+}
+
+def upload() {
+  dir("built_assets/storybook") {
+    sh "mv ci_composite composite"
+
+    def storybooks = sh(
+      script: 'ls -1d */',
+      returnStdout: true
+    ).trim()
+      .split('\n')
+      .collect { it.replace('/', '') }
+      .findAll { it != 'composite' }
+
+    def listHtml = storybooks.collect { """<li><a href="${getUrlForCommit()}/${it}">${it}</a></li>""" }
+
+    def html = """
+      <html>
+        <body>
+          <h1>Storybooks</h1>
+          <p><a href="${getUrlForCommit()/composite}">Composite Storybook</a></p>
+          <h2>All</h2>
+          <ul>
+            ${listHtml}
+          </ul>
+        </body>
+      </html>
+    """
+
+    writeFile(file: 'index.html', text: html)
+
+    googleStorageUpload(
+      credentialsId: 'kibana-ci-gcs-plugin',
+      bucket: "gs://${STORYBOOKS_BUCKET}/${getDestinationDir()}/${buildState.get('checkoutInfo').commit}",
+      pattern: "**/*",
+      sharedPublicly: true,
+      // showInline: false,
+    )
+
+    buildState.set('storybooksUrl', getUrlForCommit())
+
+    googleStorageUpload(
+      credentialsId: 'kibana-ci-gcs-plugin',
+      bucket: "gs://${STORYBOOKS_BUCKET}/${getDestinationDir()}/latest",
+      pattern: "index.html",
+      sharedPublicly: true,
+      // showInline: false,
+    )
+  }
+}
+
+def build() {
+  withEnv(["STORYBOOK_BASE_URL=${getUrlForCommit()}"]) {
+    kibanaPipeline.bash('test/scripts/jenkins_storybook.sh', 'Build Storybooks')
+  }
+}
+
+return this
