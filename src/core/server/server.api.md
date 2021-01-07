@@ -123,6 +123,7 @@ import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
 import { Readable } from 'stream';
@@ -908,9 +909,6 @@ export interface Explanation {
 }
 
 // @public
-export function exportSavedObjectsToStream({ types, hasReference, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
-
-// @public
 export interface FakeRequest {
     headers: Headers;
 }
@@ -1123,9 +1121,6 @@ export interface ImageValidation {
     };
 }
 
-// @public
-export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, createNewCopies, savedObjectsClient, typeRegistry, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
-
 // @public @deprecated (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
@@ -1156,6 +1151,12 @@ export interface IRouter {
 
 // @public
 export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+
+// @public (undocumented)
+export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
+
+// @public (undocumented)
+export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
 
 // @public
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
@@ -1894,6 +1895,8 @@ export interface RequestHandlerContext {
         savedObjects: {
             client: SavedObjectsClientContract;
             typeRegistry: ISavedObjectTypeRegistry;
+            exporter: ISavedObjectsExporter;
+            importer: ISavedObjectsImporter;
         };
         elasticsearch: {
             client: IScopedClusterClient;
@@ -1915,9 +1918,6 @@ export type RequestHandlerContextProvider<TContextName extends keyof RequestHand
 
 // @public
 export type RequestHandlerWrapper = <P, Q, B, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Method, ResponseFactory>) => RequestHandler<P, Q, B, Method, ResponseFactory>;
-
-// @public
-export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, createNewCopies, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 
 // @public
 export type ResponseError = string | Error | {
@@ -2048,6 +2048,13 @@ export interface SavedObjectAttributes {
 
 // @public
 export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
+
+// @public (undocumented)
+export interface SavedObjectExportBaseOptions {
+    excludeExportDetails?: boolean;
+    includeReferencesDeep?: boolean;
+    namespace?: string;
+}
 
 // @public
 export interface SavedObjectMigrationContext {
@@ -2350,19 +2357,43 @@ export class SavedObjectsErrorHelpers {
 }
 
 // @public
-export interface SavedObjectsExportOptions {
-    excludeExportDetails?: boolean;
-    exportSizeLimit: number;
-    hasReference?: SavedObjectsFindOptionsReference[];
-    includeReferencesDeep?: boolean;
-    namespace?: string;
-    objects?: Array<{
+export interface SavedObjectsExportByObjectOptions extends SavedObjectExportBaseOptions {
+    objects: Array<{
         id: string;
         type: string;
     }>;
-    savedObjectsClient: SavedObjectsClientContract;
+}
+
+// @public
+export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOptions {
+    hasReference?: SavedObjectsFindOptionsReference[];
     search?: string;
-    types?: string[];
+    types: string[];
+}
+
+// @public (undocumented)
+export class SavedObjectsExporter {
+    // (undocumented)
+    #private;
+    constructor({ savedObjectsClient, exportSizeLimit, }: {
+        savedObjectsClient: SavedObjectsClientContract;
+        exportSizeLimit: number;
+    });
+    exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<import("stream").Readable>;
+    exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<import("stream").Readable>;
+    }
+
+// @public (undocumented)
+export class SavedObjectsExportError extends Error {
+    constructor(type: string, message: string, attributes?: Record<string, any> | undefined);
+    // (undocumented)
+    readonly attributes?: Record<string, any> | undefined;
+    // (undocumented)
+    static exportSizeExceeded(limit: number): SavedObjectsExportError;
+    // (undocumented)
+    static objectFetchError(objects: SavedObject[]): SavedObjectsExportError;
+    // (undocumented)
+    readonly type: string;
 }
 
 // @public
@@ -2452,8 +2483,39 @@ export interface SavedObjectsImportConflictError {
     type: 'conflict';
 }
 
+// @public (undocumented)
+export class SavedObjectsImporter {
+    // (undocumented)
+    #private;
+    constructor({ savedObjectsClient, typeRegistry, importSizeLimit, }: {
+        savedObjectsClient: SavedObjectsClientContract;
+        typeRegistry: ISavedObjectTypeRegistry;
+        importSizeLimit: number;
+    });
+    import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+}
+
+// @public (undocumented)
+export class SavedObjectsImportError extends Error {
+    // (undocumented)
+    readonly attributes?: Record<string, any> | undefined;
+    // (undocumented)
+    static importSizeExceeded(limit: number): SavedObjectsImportError;
+    // (undocumented)
+    static nonUniqueImportObjects(nonUniqueEntries: string[]): SavedObjectsImportError;
+    // (undocumented)
+    static nonUniqueRetryDestinations(nonUniqueRetryDestinations: string[]): SavedObjectsImportError;
+    // (undocumented)
+    static nonUniqueRetryObjects(nonUniqueRetryObjects: string[]): SavedObjectsImportError;
+    // (undocumented)
+    static referencesFetchError(objects: SavedObject[]): SavedObjectsImportError;
+    // (undocumented)
+    readonly type: string;
+}
+
 // @public
-export interface SavedObjectsImportError {
+export interface SavedObjectsImportFailure {
     // (undocumented)
     error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
@@ -2485,17 +2547,14 @@ export interface SavedObjectsImportMissingReferencesError {
 export interface SavedObjectsImportOptions {
     createNewCopies: boolean;
     namespace?: string;
-    objectLimit: number;
     overwrite: boolean;
     readStream: Readable;
-    savedObjectsClient: SavedObjectsClientContract;
-    typeRegistry: ISavedObjectTypeRegistry;
 }
 
 // @public
 export interface SavedObjectsImportResponse {
     // (undocumented)
-    errors?: SavedObjectsImportError[];
+    errors?: SavedObjectsImportFailure[];
     // (undocumented)
     success: boolean;
     // (undocumented)
@@ -2656,11 +2715,8 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsResolveImportErrorsOptions {
     createNewCopies: boolean;
     namespace?: string;
-    objectLimit: number;
     readStream: Readable;
     retries: SavedObjectsImportRetry[];
-    savedObjectsClient: SavedObjectsClientContract;
-    typeRegistry: ISavedObjectTypeRegistry;
 }
 
 // @public
@@ -2676,13 +2732,14 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
-    getImportExportObjectLimit: () => number;
     registerType: (type: SavedObjectsType) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
 // @public
 export interface SavedObjectsServiceStart {
+    createExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+    createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
     createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
     createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;
     createSerializer: () => SavedObjectsSerializer;
