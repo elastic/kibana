@@ -100,6 +100,42 @@ describe('getSeriesAndDomain', () => {
     },
   ];
 
+  const networkItemsWithoutAnyTimings: NetworkItems = [
+    {
+      timestamp: '2021-01-05T19:22:28.928Z',
+      method: 'GET',
+      url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
+      status: 0,
+      mimeType: 'text/javascript',
+      requestSentTime: 18098834.097,
+      loadEndTime: 18098836.889999997,
+      timings: {
+        total: -1,
+        blocked: -1,
+        ssl: -1,
+        wait: -1,
+        connect: -1,
+        dns: -1,
+        queueing: -1,
+        send: -1,
+        proxy: -1,
+        receive: -1,
+      },
+    },
+  ];
+
+  const networkItemsWithoutTimingsObject: NetworkItems = [
+    {
+      timestamp: '2021-01-05T19:22:28.928Z',
+      method: 'GET',
+      url: 'file:///Users/dominiqueclarke/dev/synthetics/examples/todos/app/app.js',
+      status: 0,
+      mimeType: 'text/javascript',
+      requestSentTime: 18098834.097,
+      loadEndTime: 18098836.889999997,
+    },
+  ];
+
   it('formats timings', () => {
     const actual = getSeriesAndDomain(networkItems);
     expect(actual).toMatchInlineSnapshot(`
@@ -246,7 +282,7 @@ describe('getSeriesAndDomain', () => {
     `);
   });
 
-  it('handles formatting when individual timing values are unavaiable', () => {
+  it('handles formatting when only total timing values are available', () => {
     const actual = getSeriesAndDomain(networkItemsWithoutFullTimings);
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -350,6 +386,46 @@ describe('getSeriesAndDomain', () => {
             "x": 1,
             "y": 3.714999998046551,
             "y0": 0.9219999983906746,
+          },
+        ],
+      }
+    `);
+  });
+
+  it('handles formatting when there is no timing information available', () => {
+    const actual = getSeriesAndDomain(networkItemsWithoutAnyTimings);
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "domain": Object {
+          "max": 0,
+          "min": 0,
+        },
+        "series": Array [
+          Object {
+            "config": null,
+            "x": 0,
+            "y": 0,
+            "y0": 0,
+          },
+        ],
+      }
+    `);
+  });
+
+  it('handles formatting when the timings object is undefined', () => {
+    const actual = getSeriesAndDomain(networkItemsWithoutTimingsObject);
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "domain": Object {
+          "max": 0,
+          "min": 0,
+        },
+        "series": Array [
+          Object {
+            "config": null,
+            "x": 0,
+            "y": 0,
+            "y0": 0,
           },
         ],
       }

@@ -15,7 +15,7 @@ export interface WaterfallDataSeriesConfigProperties {
 }
 
 export type WaterfallDataEntry = PlotProperties & {
-  config: WaterfallDataSeriesConfigProperties & Record<string, unknown>;
+  config: (WaterfallDataSeriesConfigProperties & Record<string, unknown>) | null;
 };
 
 export type WaterfallData = WaterfallDataEntry[];

@@ -61,7 +61,15 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
   };
 
   const series = items.reduce<WaterfallData>((acc, item, index) => {
-    if (!item.timings) return acc;
+    if (!item.timings) {
+      acc.push({
+        x: index,
+        y0: 0,
+        y: 0,
+        config: null,
+      });
+      return acc;
+    }
 
     const offsetValue = getValueForOffset(item);
     const mimeTypeColour = getColourForMimeType(item.mimeType);
@@ -92,19 +100,24 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
       }
     });
 
-    /* if no specific timing values are found, use the total time */
+    /* if no specific timing values are found, use the total time
+     * if total titme is not available use 0 */
     if (!acc.find((entry) => entry.x === index)) {
+      const total = item.timings.total;
+      const hasTotal = total !== -1;
       acc.push({
         x: index,
-        y0: currentOffset,
-        y: currentOffset + item.timings.total,
-        config: {
-          colour: mimeTypeColour,
-          tooltipProps: {
-            value: `${FriendlyTimingLabels.total}: ${formatValueForDisplay(item.timings.total)}ms`,
-            colour: mimeTypeColour,
-          },
-        },
+        y0: hasTotal ? currentOffset : 0,
+        y: hasTotal ? currentOffset + item.timings.total : 0,
+        config: hasTotal
+          ? {
+              colour: mimeTypeColour,
+              tooltipProps: {
+                value: `${FriendlyTimingLabels.total}: ${formatValueForDisplay(total)}ms`,
+                colour: mimeTypeColour,
+              },
+            }
+          : null,
       });
     }
     return acc;
