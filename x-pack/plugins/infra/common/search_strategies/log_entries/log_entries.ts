@@ -13,6 +13,7 @@ import {
   logEntryCursorRT,
   logEntryRT,
 } from '../../log_entry';
+import { jsonObjectRT } from '../../typed_json';
 import { searchStrategyErrorRT } from '../common/errors';
 
 export const LOG_ENTRIES_SEARCH_STRATEGY = 'infra-log-entries';
@@ -22,11 +23,12 @@ const logEntriesBaseSearchRequestParamsRT = rt.intersection([
     sourceId: rt.string,
     startTimestamp: rt.number,
     endTimestamp: rt.number,
+    size: rt.number,
   }),
   rt.partial({
-    query: rt.union([rt.string, rt.null]),
-    size: rt.number,
+    query: jsonObjectRT,
     columns: rt.array(logSourceColumnConfigurationRT),
+    highlightTerms: rt.array(rt.string),
   }),
 ]);
 

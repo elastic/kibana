@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { pick } from '@kbn/std';
 import * as rt from 'io-ts';
 import { concat, defer, of } from 'rxjs';
 import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
@@ -68,7 +69,18 @@ export const logEntriesSearchStrategyProvider = ({
             sourceConfiguration$.pipe(
               map(
                 ({ configuration }): IEsSearchRequest => ({
-                  params: createGetLogEntriesQuery(configuration.logAlias),
+                  params: createGetLogEntriesQuery(
+                    configuration.logAlias,
+                    params.startTimestamp,
+                    params.endTimestamp,
+                    undefined, // TODO: determine cursor
+                    params.size,
+                    configuration.fields.timestamp,
+                    configuration.fields.tiebreaker,
+                    [], // TODO: determine fields list
+                    params.query,
+                    undefined // TODO: map over highlight terms OR reduce to one term in request
+                  ),
                 })
               )
             )

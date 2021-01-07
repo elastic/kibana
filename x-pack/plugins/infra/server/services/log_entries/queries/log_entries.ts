@@ -8,14 +8,16 @@ import type { RequestParams } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
 import {
   LogEntryAfterCursor,
+  logEntryAfterCursorRT,
   LogEntryBeforeCursor,
-  LogEntryCursor,
+  logEntryBeforeCursorRT,
 } from '../../../../common/log_entry';
 import { jsonArrayRT, JsonObject } from '../../../../common/typed_json';
 import {
   commonHitFieldsRT,
   commonSearchSuccessResponseFieldsRT,
 } from '../../../utils/elasticsearch_runtime_types';
+import { createSortClause, createTimeRangeFilterClauses } from './common';
 
 export const createGetLogEntriesQuery = (
   logEntriesIndex: string,
@@ -28,50 +30,98 @@ export const createGetLogEntriesQuery = (
   fields: string[],
   query?: JsonObject,
   highlightTerm?: string
-): RequestParams.AsyncSearchSubmit<Record<string, any>> => ({
-  index: logEntriesIndex,
-  terminate_after: 1,
-  track_scores: false,
-  track_total_hits: false,
-  body: {
-    size: 1,
-    query: {},
-    fields: ['*'],
-    // sort: [{ [timestampField]: 'desc' }, { [tiebreakerField]: 'desc' }],
-    _source: false,
-  },
-});
+): RequestParams.AsyncSearchSubmit<Record<string, any>> => {
+  const sortDirection = getSortDirection(cursor);
+  const highlightQuery = createHighlightQuery(highlightTerm, fields);
 
-function createSortAndSearchAfterClause(
+  return {
+    index: logEntriesIndex,
+    allow_no_indices: true,
+    terminate_after: 1,
+    track_scores: false,
+    track_total_hits: false,
+    body: {
+      size,
+      query: {
+        bool: {
+          filter: [
+            ...(query ? [query] : []),
+            ...(highlightQuery ? [highlightQuery] : []),
+            ...createTimeRangeFilterClauses(startTimestamp, endTimestamp, timestampField),
+          ],
+        },
+      },
+      fields,
+      _source: false,
+      ...createSortClause(sortDirection, timestampField, tiebreakerField),
+      ...createSearchAfterClause(cursor),
+      ...createHighlightClause(highlightQuery, fields),
+    },
+  };
+};
+
+const getSortDirection = (
   cursor: LogEntryBeforeCursor | LogEntryAfterCursor | null | undefined
-): {
-  sortDirection: 'asc' | 'desc';
-  searchAfterClause: { search_after?: readonly [number, number] };
-} {
-  if (cursor) {
-    if ('before' in cursor) {
-      return {
-        sortDirection: 'desc',
-        searchAfterClause:
-          cursor.before !== 'last'
-            ? { search_after: [cursor.before.time, cursor.before.tiebreaker] as const }
-            : {},
-      };
-    } else if (cursor.after !== 'first') {
-      return {
-        sortDirection: 'asc',
-        searchAfterClause: { search_after: [cursor.after.time, cursor.after.tiebreaker] as const },
-      };
-    }
+): 'asc' | 'desc' => (logEntryBeforeCursorRT.is(cursor) ? 'desc' : 'asc');
+
+const createSearchAfterClause = (
+  cursor: LogEntryBeforeCursor | LogEntryAfterCursor | null | undefined
+): { search_after?: [number, number] } => {
+  if (logEntryBeforeCursorRT.is(cursor) && cursor.before !== 'last') {
+    return {
+      search_after: [cursor.before.time, cursor.before.tiebreaker],
+    };
+  } else if (logEntryAfterCursorRT.is(cursor) && cursor.after !== 'first') {
+    return {
+      search_after: [cursor.after.time, cursor.after.tiebreaker],
+    };
   }
 
-  return { sortDirection: 'asc', searchAfterClause: {} };
-}
+  return {};
+};
+
+const createHighlightClause = (highlightQuery: JsonObject | undefined, fields: string[]) =>
+  highlightQuery
+    ? {
+        highlight: {
+          boundary_scanner: 'word',
+          fields: fields.reduce(
+            (highlightFieldConfigs, fieldName) => ({
+              ...highlightFieldConfigs,
+              [fieldName]: {},
+            }),
+            {}
+          ),
+          fragment_size: 1,
+          number_of_fragments: 100,
+          post_tags: [''],
+          pre_tags: [''],
+          highlight_query: highlightQuery,
+        },
+      }
+    : {};
+
+const createHighlightQuery = (
+  highlightTerm: string | undefined,
+  fields: string[]
+): JsonObject | undefined => {
+  if (highlightTerm) {
+    return {
+      multi_match: {
+        fields,
+        lenient: true,
+        query: highlightTerm,
+        type: 'phrase',
+      },
+    };
+  }
+};
 
 export const logEntryHitRT = rt.intersection([
   commonHitFieldsRT,
   rt.type({
     fields: rt.record(rt.string, jsonArrayRT),
+    highlight: rt.record(rt.string, rt.array(rt.string)),
     sort: rt.tuple([rt.number, rt.number]),
   }),
 ]);
