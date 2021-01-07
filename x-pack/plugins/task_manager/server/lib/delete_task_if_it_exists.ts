@@ -6,9 +6,12 @@
 import { TaskManagerStartContract } from '../';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
-export async function deleteTaskIfItExists(taskManager: TaskManagerStartContract, taskId: string) {
+export async function deleteTaskIfItExists(
+  removeFn: TaskManagerStartContract['remove'],
+  taskId: string
+) {
   try {
-    await taskManager.remove(taskId);
+    await removeFn(taskId);
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       throw err;

@@ -20,7 +20,6 @@ export {
 } from './task';
 
 export { isUnrecoverableError, throwUnrecoverableError } from './task_running';
-export { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
 
 export {
   TaskManagerPlugin as TaskManager,

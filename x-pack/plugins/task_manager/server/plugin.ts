@@ -18,6 +18,7 @@ import { TaskDefinition } from './task';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
+import { deleteTaskIfItExists } from './lib/delete_task_if_it_exists';
 import { setupSavedObjects } from './saved_objects';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { FetchResult, SearchOpts, TaskStore } from './task_store';
@@ -35,7 +36,9 @@ export type TaskManagerStartContract = Pick<
   TaskScheduling,
   'schedule' | 'runNow' | 'ensureScheduled'
 > &
-  Pick<TaskStore, 'fetch' | 'get' | 'remove'>;
+  Pick<TaskStore, 'fetch' | 'get' | 'remove'> & {
+    deleteTaskIfItExists: (id: string) => void;
+  };
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract> {
@@ -156,6 +159,7 @@ export class TaskManagerPlugin
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       get: (id: string) => taskStore.get(id),
       remove: (id: string) => taskStore.remove(id),
+      deleteTaskIfItExists: (id: string) => deleteTaskIfItExists(taskStore.remove, id),
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),

@@ -14,7 +14,7 @@ describe('deleteTaskIfItExists', () => {
     const tm = taskManagerMock.createStart();
     const id = uuid.v4();
 
-    expect(await deleteTaskIfItExists(tm, id)).toBe(undefined);
+    expect(await deleteTaskIfItExists(tm.remove, id)).toBe(undefined);
 
     expect(tm.remove).toHaveBeenCalledWith(id);
   });
@@ -25,7 +25,7 @@ describe('deleteTaskIfItExists', () => {
 
     tm.remove.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError('task', id));
 
-    expect(await deleteTaskIfItExists(tm, id)).toBe(undefined);
+    expect(await deleteTaskIfItExists(tm.remove, id)).toBe(undefined);
 
     expect(tm.remove).toHaveBeenCalledWith(id);
   });
@@ -37,7 +37,7 @@ describe('deleteTaskIfItExists', () => {
     const error = SavedObjectsErrorHelpers.createInvalidVersionError(uuid.v4());
     tm.remove.mockRejectedValue(error);
 
-    expect(deleteTaskIfItExists(tm, id)).rejects.toBe(error);
+    expect(deleteTaskIfItExists(tm.remove, id)).rejects.toBe(error);
 
     expect(tm.remove).toHaveBeenCalledWith(id);
   });

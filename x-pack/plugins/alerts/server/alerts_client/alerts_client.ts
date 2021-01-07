@@ -41,7 +41,7 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../security/server';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { TaskManagerStartContract, deleteTaskIfItExists } from '../../../task_manager/server';
+import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryAlertType, UntypedNormalizedAlertType } from '../alert_type_registry';
 import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
@@ -601,7 +601,7 @@ export class AlertsClient {
     const removeResult = await this.unsecuredSavedObjectsClient.delete('alert', id);
 
     await Promise.all([
-      taskIdToRemove ? deleteTaskIfItExists(this.taskManager, taskIdToRemove) : null,
+      taskIdToRemove ? this.taskManager.deleteTaskIfItExists(taskIdToRemove) : null,
       apiKeyToInvalidate
         ? markApiKeyForInvalidation(
             { apiKey: apiKeyToInvalidate },
@@ -1059,7 +1059,7 @@ export class AlertsClient {
 
       await Promise.all([
         attributes.scheduledTaskId
-          ? deleteTaskIfItExists(this.taskManager, attributes.scheduledTaskId)
+          ? this.taskManager.deleteTaskIfItExists(attributes.scheduledTaskId)
           : null,
         apiKeyToInvalidate
           ? await markApiKeyForInvalidation(
