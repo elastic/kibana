@@ -221,6 +221,14 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
               },
               properties: {},
             },
+            {
+              geometry: {
+                type: 'Point',
+              },
+              properties: {
+                __kbn_is_centroid_feature__: true,
+              },
+            },
           ],
         },
       });

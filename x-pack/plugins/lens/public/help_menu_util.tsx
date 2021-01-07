@@ -12,7 +12,7 @@ export function addHelpMenuToAppChrome(chrome: ChromeStart, docLinks: DocLinksSt
     links: [
       {
         linkType: 'documentation',
-        href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/lens.html`,
+        href: docLinks.links.visualize.lensPanels,
       },
       {
         linkType: 'github',
