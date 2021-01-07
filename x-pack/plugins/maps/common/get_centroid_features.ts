@@ -11,7 +11,6 @@ import {
   LineString,
   MultiLineString,
   MultiPolygon,
-  Position,
 } from 'geojson';
 import turfAlong from '@turf/along';
 import turfArea from '@turf/area';
@@ -50,7 +49,7 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
           longestLength = nextLength;
         }
       }
-      centroidGeometry = getLineCentroid(lineString(longestLine));
+      centroidGeometry = getLineCentroid(lineString(longestLine) as Feature);
     } else if (feature.geometry.type === GEO_JSON_TYPE.POLYGON) {
       centroidGeometry = turfCenterOfMass(feature).geometry;
     } else if (feature.geometry.type === GEO_JSON_TYPE.MULTI_POLYGON) {
@@ -77,13 +76,13 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
           [KBN_IS_CENTROID_FEATURE]: true,
         },
         geometry: centroidGeometry,
-      });
+      } as Feature);
     }
   }
   return centroidFeatures;
 }
 
-function getLineCentroid(lineStringFeature: LineString): Geometry {
-  const length = turfLength(lineStringFeature);
-  return turfAlong(lineStringFeature, length / 2).geometry;
+function getLineCentroid(feature: Feature): Geometry {
+  const length = turfLength(feature);
+  return turfAlong((feature as unknown) as LineString, length / 2).geometry!;
 }
