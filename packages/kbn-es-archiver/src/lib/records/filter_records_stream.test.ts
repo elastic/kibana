@@ -18,11 +18,10 @@
  */
 
 import Chance from 'chance';
-import expect from '@kbn/expect';
 
 import { createListStream, createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
-import { createFilterRecordsStream } from '../filter_records_stream';
+import { createFilterRecordsStream } from './filter_records_stream';
 
 const chance = new Chance();
 
@@ -42,7 +41,7 @@ describe('esArchiver: createFilterRecordsStream()', () => {
       createConcatStream([]),
     ]);
 
-    expect(output).to.eql([]);
+    expect(output).toEqual([]);
   });
 
   it('produces record values that have a matching type', async () => {
@@ -61,7 +60,7 @@ describe('esArchiver: createFilterRecordsStream()', () => {
       createConcatStream([]),
     ]);
 
-    expect(output).to.have.length(3);
-    expect(output.map((o) => o.type)).to.eql([type1, type1, type1]);
+    expect(output).toHaveLength(3);
+    expect(output.map((o) => o.type)).toEqual([type1, type1, type1]);
   });
 });

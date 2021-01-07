@@ -17,12 +17,11 @@
  * under the License.
  */
 
-import expect from '@kbn/expect';
 import sinon from 'sinon';
 import Chance from 'chance';
 import { createPromiseFromStreams, createConcatStream, createListStream } from '@kbn/utils';
 
-import { createCreateIndexStream } from '../create_index_stream';
+import { createCreateIndexStream } from './create_index_stream';
 
 import {
   createStubStats,
@@ -30,7 +29,7 @@ import {
   createStubDocRecord,
   createStubClient,
   createStubLogger,
-} from './stubs';
+} from './__mocks__/stubs';
 
 const chance = new Chance();
 
@@ -49,7 +48,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createCreateIndexStream({ client, stats, log }),
       ]);
 
-      expect(stats.getTestSummary()).to.eql({
+      expect(stats.getTestSummary()).toEqual({
         deletedIndex: 1,
         createdIndex: 2,
       });
@@ -68,13 +67,13 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createCreateIndexStream({ client, stats, log }),
       ]);
 
-      expect((client.indices.getAlias as sinon.SinonSpy).calledOnce).to.be.ok();
-      expect((client.indices.getAlias as sinon.SinonSpy).args[0][0]).to.eql({
+      expect((client.indices.getAlias as sinon.SinonSpy).calledOnce).toBe(true);
+      expect((client.indices.getAlias as sinon.SinonSpy).args[0][0]).toEqual({
         name: 'existing-index',
         ignore: [404],
       });
-      expect((client.indices.delete as sinon.SinonSpy).calledOnce).to.be.ok();
-      expect((client.indices.delete as sinon.SinonSpy).args[0][0]).to.eql({
+      expect((client.indices.delete as sinon.SinonSpy).calledOnce).toBe(true);
+      expect((client.indices.delete as sinon.SinonSpy).args[0][0]).toEqual({
         index: ['actual-index'],
       });
       sinon.assert.callCount(client.indices.create as sinon.SinonSpy, 3); // one failed create because of existing
@@ -93,7 +92,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createConcatStream([]),
       ]);
 
-      expect(output).to.eql([createStubDocRecord('index', 1), createStubDocRecord('index', 2)]);
+      expect(output).toEqual([createStubDocRecord('index', 1), createStubDocRecord('index', 2)]);
     });
 
     it('creates aliases', async () => {
@@ -134,7 +133,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createConcatStream([]),
       ]);
 
-      expect(output).to.eql(randoms);
+      expect(output).toEqual(randoms);
     });
 
     it('passes through non-record values', async () => {
@@ -148,7 +147,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createConcatStream([]),
       ]);
 
-      expect(output).to.eql(nonRecordValues);
+      expect(output).toEqual(nonRecordValues);
     });
   });
 
@@ -170,13 +169,13 @@ describe('esArchiver: createCreateIndexStream()', () => {
         }),
       ]);
 
-      expect(stats.getTestSummary()).to.eql({
+      expect(stats.getTestSummary()).toEqual({
         skippedIndex: 1,
         createdIndex: 1,
       });
       sinon.assert.callCount(client.indices.delete as sinon.SinonSpy, 0);
       sinon.assert.callCount(client.indices.create as sinon.SinonSpy, 2); // one failed create because of existing
-      expect((client.indices.create as sinon.SinonSpy).args[0][0]).to.have.property(
+      expect((client.indices.create as sinon.SinonSpy).args[0][0]).toHaveProperty(
         'index',
         'new-index'
       );
@@ -204,15 +203,15 @@ describe('esArchiver: createCreateIndexStream()', () => {
         createConcatStream([]),
       ]);
 
-      expect(stats.getTestSummary()).to.eql({
+      expect(stats.getTestSummary()).toEqual({
         skippedIndex: 1,
         createdIndex: 1,
       });
       sinon.assert.callCount(client.indices.delete as sinon.SinonSpy, 0);
       sinon.assert.callCount(client.indices.create as sinon.SinonSpy, 2); // one failed create because of existing
 
-      expect(output).to.have.length(2);
-      expect(output).to.eql([
+      expect(output).toHaveLength(2);
+      expect(output).toEqual([
         createStubDocRecord('new-index', 1),
         createStubDocRecord('new-index', 2),
       ]);
