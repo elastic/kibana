@@ -30,7 +30,7 @@ interface Deps {
   config$: Observable<ConfigType>;
   displayModifier$: Observable<boolean>;
   doesClusterHaveUserData: ReturnType<typeof createClusterDataCheck>;
-  getAnonymousAccessService: () => AnonymousAccessService;
+  getAnonymousAccessService: () => AnonymousAccessService | null;
 }
 
 export const setupAppStateRoute = ({
@@ -62,10 +62,10 @@ export const setupAppStateRoute = ({
       const appState: AppState = {
         insecureClusterAlert: { displayAlert },
         anonymousAccess: {
-          isEnabled: anonymousAccessService.isAnonymousAccessEnabled,
-          accessURLParameters: anonymousAccessService.accessURLParameters
+          isEnabled: !!anonymousAccessService?.isAnonymousAccessEnabled,
+          accessURLParameters: anonymousAccessService?.accessURLParameters
             ? Object.fromEntries(anonymousAccessService.accessURLParameters.entries())
-            : anonymousAccessService.accessURLParameters,
+            : null,
         },
       };
       return response.ok({ body: appState });

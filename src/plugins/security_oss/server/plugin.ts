@@ -66,14 +66,7 @@ export interface AnonymousAccessService {
 export class SecurityOssPlugin implements Plugin<SecurityOssPluginSetup, void, {}, {}> {
   private readonly config$: Observable<ConfigType>;
   private readonly logger: Logger;
-
   private anonymousAccessServiceProvider?: () => AnonymousAccessService;
-  private readonly getAnonymousAccessService = () => {
-    if (!this.anonymousAccessServiceProvider) {
-      throw new Error('Anonymous Access service provider is not set.');
-    }
-    return this.anonymousAccessServiceProvider();
-  };
 
   constructor(initializerContext: PluginInitializerContext<ConfigType>) {
     this.config$ = initializerContext.config.create();
@@ -90,12 +83,12 @@ export class SecurityOssPlugin implements Plugin<SecurityOssPluginSetup, void, {
       config$: this.config$,
       displayModifier$: showInsecureClusterWarning$,
       doesClusterHaveUserData: createClusterDataCheck(),
-      getAnonymousAccessService: this.getAnonymousAccessService,
+      getAnonymousAccessService: () => this.anonymousAccessServiceProvider?.() ?? null,
     });
 
     setupAnonymousAccessCapabilitiesRoute({
       router,
-      getAnonymousAccessService: this.getAnonymousAccessService,
+      getAnonymousAccessService: () => this.anonymousAccessServiceProvider?.() ?? null,
     });
 
     return {

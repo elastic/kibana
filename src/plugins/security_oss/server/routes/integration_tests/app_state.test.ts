@@ -19,6 +19,7 @@
 
 import { loggingSystemMock } from '../../../../../core/server/mocks';
 import { setupServer } from '../../../../../core/server/test_utils';
+import { AnonymousAccessService } from '../../plugin';
 import { setupAppStateRoute } from '../app_state';
 import { ConfigType } from '../../config';
 import { BehaviorSubject, of } from 'rxjs';
@@ -33,9 +34,10 @@ interface SetupOpts {
   config?: ConfigType;
   displayModifier$?: BehaviorSubject<boolean>;
   doesClusterHaveUserData?: ReturnType<typeof createClusterDataCheck>;
+  getAnonymousAccessService?: () => AnonymousAccessService | null;
 }
 
-describe('GET /internal/security_oss/display_insecure_cluster_alert', () => {
+describe('GET /internal/security_oss/app_state', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
 
@@ -43,18 +45,20 @@ describe('GET /internal/security_oss/display_insecure_cluster_alert', () => {
     config = { showInsecureClusterWarning: true },
     displayModifier$ = new BehaviorSubject<boolean>(true),
     doesClusterHaveUserData = jest.fn().mockResolvedValue(true),
+    getAnonymousAccessService = () => null,
   }: SetupOpts) => {
     ({ server, httpSetup } = await setupServer(pluginId));
 
     const router = httpSetup.createRouter('/');
     const log = loggingSystemMock.createLogger();
 
-    setupDisplayInsecureClusterAlertRoute({
+    setupAppStateRoute({
       router,
       log,
       config$: of(config),
       displayModifier$,
       doesClusterHaveUserData,
+      getAnonymousAccessService,
     });
 
     await server.start();
@@ -68,28 +72,34 @@ describe('GET /internal/security_oss/display_insecure_cluster_alert', () => {
     await server.stop();
   });
 
-  it('responds `false` if plugin is not configured to display alerts', async () => {
+  it('responds `insecureClusterAlert.displayAlert == false` if plugin is not configured to display alerts', async () => {
     await setupTestServer({
       config: { showInsecureClusterWarning: false },
     });
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/security_oss/display_insecure_cluster_alert')
-      .expect(200, { displayAlert: false });
+      .get('/internal/security_oss/app_state')
+      .expect(200, {
+        insecureClusterAlert: { displayAlert: false },
+        anonymousAccess: { isEnabled: false, accessURLParameters: null },
+      });
   });
 
-  it('responds `false` if cluster does not contain user data', async () => {
+  it('responds `insecureClusterAlert.displayAlert == false` if cluster does not contain user data', async () => {
     await setupTestServer({
       config: { showInsecureClusterWarning: true },
       doesClusterHaveUserData: jest.fn().mockResolvedValue(false),
     });
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/security_oss/display_insecure_cluster_alert')
-      .expect(200, { displayAlert: false });
+      .get('/internal/security_oss/app_state')
+      .expect(200, {
+        insecureClusterAlert: { displayAlert: false },
+        anonymousAccess: { isEnabled: false, accessURLParameters: null },
+      });
   });
 
-  it('responds `false` if displayModifier$ is set to false', async () => {
+  it('responds `insecureClusterAlert.displayAlert == false` if displayModifier$ is set to false', async () => {
     await setupTestServer({
       config: { showInsecureClusterWarning: true },
       doesClusterHaveUserData: jest.fn().mockResolvedValue(true),
@@ -97,19 +107,25 @@ describe('GET /internal/security_oss/display_insecure_cluster_alert', () => {
     });
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/security_oss/display_insecure_cluster_alert')
-      .expect(200, { displayAlert: false });
+      .get('/internal/security_oss/app_state')
+      .expect(200, {
+        insecureClusterAlert: { displayAlert: false },
+        anonymousAccess: { isEnabled: false, accessURLParameters: null },
+      });
   });
 
-  it('responds `true` if cluster contains user data', async () => {
+  it('responds `insecureClusterAlert.displayAlert == true` if cluster contains user data', async () => {
     await setupTestServer({
       config: { showInsecureClusterWarning: true },
       doesClusterHaveUserData: jest.fn().mockResolvedValue(true),
     });
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/security_oss/display_insecure_cluster_alert')
-      .expect(200, { displayAlert: true });
+      .get('/internal/security_oss/app_state')
+      .expect(200, {
+        insecureClusterAlert: { displayAlert: true },
+        anonymousAccess: { isEnabled: false, accessURLParameters: null },
+      });
   });
 
   it('responds to changing displayModifier$ values', async () => {
@@ -122,13 +138,56 @@ describe('GET /internal/security_oss/display_insecure_cluster_alert', () => {
     });
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/security_oss/display_insecure_cluster_alert')
-      .expect(200, { displayAlert: true });
+      .get('/internal/security_oss/app_state')
+      .expect(200, {
+        insecureClusterAlert: { displayAlert: true },
+        anonymousAccess: { isEnabled: false, accessURLParameters: null },
+      });
 
     displayModifier$.next(false);
 
     await supertest(httpSetup.server.listener)
-      .get('/internal/security_oss/display_insecure_cluster_alert')
-      .expect(200, { displayAlert: false });
+      .get('/internal/security_oss/app_state')
+      .expect(200, {
+        insecureClusterAlert: { displayAlert: false },
+        anonymousAccess: { isEnabled: false, accessURLParameters: null },
+      });
+  });
+
+  it('returns anonymous access state if anonymous access service is provided', async () => {
+    const displayModifier$ = new BehaviorSubject<boolean>(true);
+
+    await setupTestServer({
+      config: { showInsecureClusterWarning: true },
+      doesClusterHaveUserData: jest.fn().mockResolvedValue(true),
+      displayModifier$,
+      getAnonymousAccessService: () => ({
+        isAnonymousAccessEnabled: true,
+        accessURLParameters: new Map([['auth_provider_hint', 'anonymous1']]),
+        getCapabilities: jest.fn(),
+      }),
+    });
+
+    await supertest(httpSetup.server.listener)
+      .get('/internal/security_oss/app_state')
+      .expect(200, {
+        insecureClusterAlert: { displayAlert: true },
+        anonymousAccess: {
+          isEnabled: true,
+          accessURLParameters: { auth_provider_hint: 'anonymous1' },
+        },
+      });
+
+    displayModifier$.next(false);
+
+    await supertest(httpSetup.server.listener)
+      .get('/internal/security_oss/app_state')
+      .expect(200, {
+        insecureClusterAlert: { displayAlert: false },
+        anonymousAccess: {
+          isEnabled: true,
+          accessURLParameters: { auth_provider_hint: 'anonymous1' },
+        },
+      });
   });
 });

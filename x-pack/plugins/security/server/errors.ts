@@ -5,7 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { ResponseError as ESResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import type { CustomHttpResponseOptions, ResponseError } from '../../../../src/core/server';
 
 export function wrapError(error: any) {
@@ -30,7 +30,7 @@ export function wrapIntoCustomErrorResponse(error: any) {
  * @param error Error instance to extract status code from.
  */
 export function getErrorStatusCode(error: any): number {
-  if (error instanceof ESResponseError) {
+  if (error instanceof errors.ResponseError) {
     return error.statusCode;
   }
 
@@ -44,7 +44,7 @@ export function getErrorStatusCode(error: any): number {
  * @param error Error instance to extract message from.
  */
 export function getDetailedErrorMessage(error: any): string {
-  if (error instanceof ESResponseError) {
+  if (error instanceof errors.ResponseError) {
     return JSON.stringify(error.body);
   }
 

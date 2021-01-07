@@ -32,18 +32,6 @@ import {
 } from './insecure_cluster_service';
 import { AppStateService } from './app_state';
 
-export interface SavedObjectTypeAnonymousAccess {
-  /**
-   * Indicates whether anonymous user can access particular Saved Object type (e.g. dashboard, map etc.).
-   */
-  canAccess: boolean;
-  /**
-   * A map of query string parameters that should be specified in URL so that anonymous user can use
-   * to automatically log in to Kibana and access particular Saved Object type.
-   */
-  accessURLParameters: Record<string, string> | null;
-}
-
 export interface SecurityOssPluginSetup {
   insecureCluster: InsecureClusterServiceSetup;
 }
@@ -58,15 +46,11 @@ export interface SecurityOssPluginStart {
 
 export class SecurityOssPlugin
   implements Plugin<SecurityOssPluginSetup, SecurityOssPluginStart, {}, {}> {
-  private readonly config: ConfigType;
-
-  private readonly insecureClusterService: InsecureClusterService;
+  private readonly config = this.initializerContext.config.get<ConfigType>();
+  private readonly insecureClusterService = new InsecureClusterService(this.config, localStorage);
   private readonly appStateService = new AppStateService();
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = this.initializerContext.config.get<ConfigType>();
-    this.insecureClusterService = new InsecureClusterService(this.config, localStorage);
-  }
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
     return {

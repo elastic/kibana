@@ -11,11 +11,12 @@ import {
   KibanaRequest,
   Logger,
   Capabilities,
+  IClusterClient,
 } from '../../../../../src/core/server';
 import { addSpaceIdToPath } from '../../../spaces/common';
 import type { SpacesServiceStart } from '../../../spaces/server';
 import { AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER } from '../../common/constants';
-import { AnonymousAuthenticationProvider } from '../authentication';
+import { AnonymousAuthenticationProvider, HTTPAuthorizationHeader } from '../authentication';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 
@@ -29,10 +30,9 @@ export interface AnonymousAccessServiceStart {
 interface AnonymousAccessServiceStartParams {
   basePath: IBasePath;
   capabilities: CapabilitiesStart;
+  clusterClient: IClusterClient;
   spaces?: SpacesServiceStart;
 }
-
-const DEFAULT_CAPABILITIES: Capabilities = { navLinks: {}, management: {}, catalogue: {} };
 
 /**
  * Service that manages various aspects of the anonymous access.
@@ -43,17 +43,32 @@ export class AnonymousAccessService {
    */
   private isAnonymousAccessEnabled = false;
 
+  /**
+   * Defines HTTP authorization header that should be used to authenticate request.
+   */
+  private httpAuthorizationHeader: HTTPAuthorizationHeader | null = null;
+
   constructor(private readonly logger: Logger, private readonly getConfig: () => ConfigType) {}
 
   setup() {
-    this.isAnonymousAccessEnabled = this.getConfig().authc.sortedProviders.some(
+    const config = this.getConfig();
+    const anonymousProvider = config.authc.sortedProviders.find(
       ({ type }) => type === AnonymousAuthenticationProvider.type
     );
+
+    this.isAnonymousAccessEnabled = !!anonymousProvider;
+    this.httpAuthorizationHeader = anonymousProvider
+      ? AnonymousAuthenticationProvider.createHTTPAuthorizationHeader(
+          (config.authc.providers.anonymous![anonymousProvider.name] as Record<string, any>)
+            .credentials
+        )
+      : null;
   }
 
   start({
     basePath,
     capabilities,
+    clusterClient,
     spaces,
   }: AnonymousAccessServiceStartParams): AnonymousAccessServiceStart {
     const config = this.getConfig();
@@ -77,43 +92,38 @@ export class AnonymousAccessService {
       getCapabilities: async (request) => {
         this.logger.debug('Retrieving capabilities of the anonymous service account.');
 
+        let useDefaultCapabilities = false;
         if (!this.isAnonymousAccessEnabled) {
-          this.logger.warn('Anonymous access is not enabled');
-          return DEFAULT_CAPABILITIES;
+          this.logger.warn(
+            'Default capabilities will be returned since anonymous access is not enabled.'
+          );
+          useDefaultCapabilities = true;
+        } else if (!(await this.canAuthenticateAnonymousServiceAccount(clusterClient))) {
+          this.logger.warn(
+            `Default capabilities will be returned since anonymous service account cannot authenticate.`
+          );
+          useDefaultCapabilities = true;
         }
 
         // We should use credentials of the anonymous service account instead of credentials of the
         // current user to figure out if the specified Saved Object type can be accessed anonymously.
-        const anonymousAuthorizationHeader = this.createAnonymousAuthorizationHeader();
-        const fakeAnonymousRequest = KibanaRequest.from(({
-          headers: anonymousAuthorizationHeader
-            ? { authorization: anonymousAuthorizationHeader.toString() }
-            : {},
-          // We should pretend that this request is authenticated to force authorization service to
-          // perform a privileges check and not to automatically disable all capabilities.
-          auth: { isAuthenticated: true },
-          path: '/',
-          route: { settings: {} },
-          url: { href: '/' },
-          raw: { req: { url: '/' } },
-        } as unknown) as Request);
-
+        const fakeAnonymousRequest = this.createFakeAnonymousRequest({
+          authenticateRequest: !useDefaultCapabilities,
+        });
         const spaceId = spaces?.getSpaceId(request);
         if (spaceId) {
           basePath.set(fakeAnonymousRequest, addSpaceIdToPath('/', spaceId));
         }
 
         try {
-          return await capabilities.resolveCapabilities(fakeAnonymousRequest);
+          return await capabilities.resolveCapabilities(fakeAnonymousRequest, {
+            useDefaultCapabilities,
+          });
         } catch (err) {
-          const errorMessage = getDetailedErrorMessage(err);
-          if (getErrorStatusCode(err) === 401) {
-            this.logger.warn(`Cannot authenticate anonymous service account: ${errorMessage}`);
-            return DEFAULT_CAPABILITIES;
-          }
-
           this.logger.error(
-            `Failed to retrieve anonymous service account capabilities: ${errorMessage}`
+            `Failed to retrieve anonymous service account capabilities: ${getDetailedErrorMessage(
+              err
+            )}`
           );
           throw err;
         }
@@ -122,19 +132,47 @@ export class AnonymousAccessService {
   }
 
   /**
-   * Creates authorization header that is used to authentication anonymous users.
+   * Checks if anonymous service account can authenticate to Elasticsearch using configured credentials.
+   * @param clusterClient
    */
-  private createAnonymousAuthorizationHeader() {
-    const config = this.getConfig();
-    const anonymousProvider = config.authc.sortedProviders.find(
-      ({ type }) => type === AnonymousAuthenticationProvider.type
-    );
+  private async canAuthenticateAnonymousServiceAccount(clusterClient: IClusterClient) {
+    try {
+      await clusterClient
+        .asScoped(this.createFakeAnonymousRequest({ authenticateRequest: true }))
+        .asCurrentUser.security.authenticate();
+    } catch (err) {
+      this.logger.warn(
+        `Failed to authenticate anonymous service account: ${getDetailedErrorMessage(err)}`
+      );
 
-    return anonymousProvider
-      ? AnonymousAuthenticationProvider.createHTTPAuthorizationHeader(
-          (config.authc.providers.anonymous![anonymousProvider.name] as Record<string, any>)
-            .credentials
-        )
-      : null;
+      if (getErrorStatusCode(err) === 401) {
+        return false;
+      }
+      throw err;
+    }
+
+    return true;
+  }
+
+  /**
+   * Creates a fake Kibana request optionally attributed with the anonymous service account
+   * credentials to get the list of capabilities.
+   * @param authenticateRequest Indicates whether or not we should include authorization header with
+   * anonymous service account credentials.
+   */
+  private createFakeAnonymousRequest({ authenticateRequest }: { authenticateRequest: boolean }) {
+    return KibanaRequest.from(({
+      headers:
+        authenticateRequest && this.httpAuthorizationHeader
+          ? { authorization: this.httpAuthorizationHeader.toString() }
+          : {},
+      // This flag is essential for the security capability switcher that relies on it to decide if
+      // it should perform a privileges check or automatically disable all capabilities.
+      auth: { isAuthenticated: authenticateRequest },
+      path: '/',
+      route: { settings: {} },
+      url: { href: '/' },
+      raw: { req: { url: '/' } },
+    } as unknown) as Request);
   }
 }

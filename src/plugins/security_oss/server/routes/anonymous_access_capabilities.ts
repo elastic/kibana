@@ -22,7 +22,7 @@ import { AnonymousAccessService } from '../plugin';
 
 interface Deps {
   router: IRouter;
-  getAnonymousAccessService: () => AnonymousAccessService;
+  getAnonymousAccessService: () => AnonymousAccessService | null;
 }
 
 /**
@@ -32,9 +32,12 @@ export function setupAnonymousAccessCapabilitiesRoute({ router, getAnonymousAcce
   router.get(
     { path: '/internal/security_oss/anonymous_access/capabilities', validate: false },
     async (_context, request, response) => {
-      return response.ok({
-        body: await getAnonymousAccessService().getCapabilities(request),
-      });
+      const anonymousAccessService = getAnonymousAccessService();
+      if (!anonymousAccessService) {
+        return response.custom({ statusCode: 501, body: 'Not Implemented' });
+      }
+
+      return response.ok({ body: await anonymousAccessService.getCapabilities(request) });
     }
   );
 }

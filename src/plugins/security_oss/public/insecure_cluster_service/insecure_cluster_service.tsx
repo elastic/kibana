@@ -30,7 +30,7 @@ interface SetupDeps {
 }
 
 interface StartDeps {
-  core: Pick<CoreStart, 'notifications' | 'http' | 'application'>;
+  core: Pick<CoreStart, 'notifications' | 'application'>;
   appState: AppStateServiceStart;
 }
 

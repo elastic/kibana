@@ -348,6 +348,7 @@ export class Plugin {
 
     this.anonymousAccessStart = this.anonymousAccessService.start({
       capabilities: core.capabilities,
+      clusterClient,
       basePath: core.http.basePath,
       spaces: spaces?.spacesService,
     });
