@@ -10,6 +10,10 @@ import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 import { fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 
+export type SavedObjectGetter = (
+  ...params: Parameters<SavedObjectsClientContract['get']>
+) => Promise<unknown>;
+
 export type SavedObjectBulkGetter = (
   ...params: Parameters<SavedObjectsClientContract['bulkGet']>
 ) => Promise<unknown>;
@@ -58,7 +62,10 @@ export class SavedObjectProviderRegistry {
     const scopedProviders = new Map<string, SavedObjectBulkGetter>();
     const defaultGetter = this.defaultProvider(request);
     return (type: string, ids: string[]) => {
-      const objects = [{ type, id: ids[0] }];
+      const objects = ids.reduce(
+        (prev: Array<{ type: string; id: string }>, id) => [...prev, { type, id }],
+        []
+      );
       const getter = pipe(
         fromNullable(scopedProviders.get(type)),
         getOrElse(() => {
