@@ -1,14 +1,14 @@
-.backgroundSessionIndicator {
+.searchSessionIndicator {
   padding: 0 $euiSizeXS;
 }
 
 @include euiBreakpoint('xs', 's') {
-  .backgroundSessionIndicator__popoverContainer.euiFlexGroup--responsive .euiFlexItem {
+  .searchSessionIndicator__popoverContainer.euiFlexGroup--responsive .euiFlexItem {
     margin-bottom: $euiSizeXS !important;
   }
 }
 
-.backgroundSessionIndicator__verticalDivider {
+.searchSessionIndicator__verticalDivider {
   @include euiBreakpoint('xs', 's') {
     margin-left: $euiSizeXS;
     padding-left: $euiSizeXS;
