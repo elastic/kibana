@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -47,21 +47,18 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
 
   const { data: actionTypes } = useFetcher(() => fetchActionTypes(), []);
 
-  useEffect(() => {
-    dispatch(getConnectorsAction.get());
-  }, [addFlyoutVisible, dispatch]);
-
   const ConnectorAddFlyout = useMemo(
     () =>
       getAddConnectorFlyout({
         consumer: 'uptime',
-        actionTypes: (actionTypes ?? []).filter((actionType) =>
-          ALLOWED_ACTION_TYPES.includes(actionType.id as ActionTypeId)
-        ),
         onClose: () => {
+          dispatch(getConnectorsAction.get());
           setAddFlyoutVisibility(false);
           focusInput();
         },
+        actionTypes: (actionTypes ?? []).filter((actionType) =>
+          ALLOWED_ACTION_TYPES.includes(actionType.id as ActionTypeId)
+        ),
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [actionTypes]
