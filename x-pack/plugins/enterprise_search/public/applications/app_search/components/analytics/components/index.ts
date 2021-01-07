@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ANALYTICS_TITLE } from './constants';
-export { AnalyticsChart } from './components';
-export { convertToChartsData } from './utils';
+export { AnalyticsChart } from './analytics_chart';
