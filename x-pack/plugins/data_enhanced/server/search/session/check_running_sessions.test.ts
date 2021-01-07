@@ -5,7 +5,7 @@
  */
 
 import { checkRunningSessions } from './check_running_sessions';
-import { BackgroundSessionSavedObjectAttributes, BackgroundSessionStatus } from '../../../common';
+import { SearchSessionStatus, SearchSessionSavedObjectAttributes } from '../../../common';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import type { SavedObjectsClientContract } from 'kibana/server';
 import { SearchStatus } from './types';
@@ -140,8 +140,8 @@ describe('getSearchStatus', () => {
 
     await checkRunningSessions(savedObjectsClient, mockClient, mockLogger);
     const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
-    const updatedAttributes = updateInput[0].attributes as BackgroundSessionSavedObjectAttributes;
-    expect(updatedAttributes.status).toBe(BackgroundSessionStatus.COMPLETE);
+    const updatedAttributes = updateInput[0].attributes as SearchSessionSavedObjectAttributes;
+    expect(updatedAttributes.status).toBe(SearchSessionStatus.COMPLETE);
     expect(updatedAttributes.idMapping['search-hash'].status).toBe(SearchStatus.COMPLETE);
     expect(updatedAttributes.idMapping['search-hash'].error).toBeUndefined();
   });
@@ -173,8 +173,8 @@ describe('getSearchStatus', () => {
     await checkRunningSessions(savedObjectsClient, mockClient, mockLogger);
     const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
 
-    const updatedAttributes = updateInput[0].attributes as BackgroundSessionSavedObjectAttributes;
-    expect(updatedAttributes.status).toBe(BackgroundSessionStatus.ERROR);
+    const updatedAttributes = updateInput[0].attributes as SearchSessionSavedObjectAttributes;
+    expect(updatedAttributes.status).toBe(SearchSessionStatus.ERROR);
     expect(updatedAttributes.idMapping['search-hash'].status).toBe(SearchStatus.ERROR);
     expect(updatedAttributes.idMapping['search-hash'].error).toBe(
       'Search completed with a 500 status'

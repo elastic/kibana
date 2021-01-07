@@ -6,14 +6,14 @@
 
 import { SearchStatus } from './types';
 import { getSessionStatus } from './get_session_status';
-import { BackgroundSessionStatus } from '../../../common';
+import { SearchSessionStatus } from '../../../common';
 
 describe('getSessionStatus', () => {
   test("returns an in_progress status if there's nothing inside the session", () => {
     const session: any = {
       idMapping: {},
     };
-    expect(getSessionStatus(session)).toBe(BackgroundSessionStatus.IN_PROGRESS);
+    expect(getSessionStatus(session)).toBe(SearchSessionStatus.IN_PROGRESS);
   });
 
   test("returns an error status if there's at least one error", () => {
@@ -24,7 +24,7 @@ describe('getSessionStatus', () => {
         c: { status: SearchStatus.COMPLETE },
       },
     };
-    expect(getSessionStatus(session)).toBe(BackgroundSessionStatus.ERROR);
+    expect(getSessionStatus(session)).toBe(SearchSessionStatus.ERROR);
   });
 
   test('returns a complete status if all are complete', () => {
@@ -35,7 +35,7 @@ describe('getSessionStatus', () => {
         c: { status: SearchStatus.COMPLETE },
       },
     };
-    expect(getSessionStatus(session)).toBe(BackgroundSessionStatus.COMPLETE);
+    expect(getSessionStatus(session)).toBe(SearchSessionStatus.COMPLETE);
   });
 
   test('returns a running status if some are still running', () => {
@@ -46,6 +46,6 @@ describe('getSessionStatus', () => {
         c: { status: SearchStatus.IN_PROGRESS },
       },
     };
-    expect(getSessionStatus(session)).toBe(BackgroundSessionStatus.IN_PROGRESS);
+    expect(getSessionStatus(session)).toBe(SearchSessionStatus.IN_PROGRESS);
   });
 });

@@ -10,8 +10,8 @@ import {
   SavedObjectsFindResult,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { BackgroundSessionStatus, BackgroundSessionSavedObjectAttributes } from '../../../common';
-import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
+import { SearchSessionStatus, SearchSessionSavedObjectAttributes } from '../../../common';
+import { SEARCH_SESSION_TYPE } from '../../saved_objects';
 import { getSearchStatus } from './get_search_status';
 import { getSessionStatus } from './get_session_status';
 import { SearchStatus } from './types';
@@ -22,27 +22,25 @@ export async function checkRunningSessions(
   logger: Logger
 ): Promise<void> {
   try {
-    const runningBackgroundSearchesResponse = await savedObjectsClient.find<BackgroundSessionSavedObjectAttributes>(
+    const runningSearchSessionsResponse = await savedObjectsClient.find<SearchSessionSavedObjectAttributes>(
       {
-        type: BACKGROUND_SESSION_TYPE,
-        search: BackgroundSessionStatus.IN_PROGRESS.toString(),
+        type: SEARCH_SESSION_TYPE,
+        search: SearchSessionStatus.IN_PROGRESS.toString(),
         searchFields: ['status'],
         namespaces: ['*'],
       }
     );
 
-    if (!runningBackgroundSearchesResponse.total) return;
+    if (!runningSearchSessionsResponse.total) return;
 
-    logger.debug(`Found ${runningBackgroundSearchesResponse.total} running sessions`);
+    logger.debug(`Found ${runningSearchSessionsResponse.total} running sessions`);
 
-    const updatedSessions = new Array<
-      SavedObjectsFindResult<BackgroundSessionSavedObjectAttributes>
-    >();
+    const updatedSessions = new Array<SavedObjectsFindResult<SearchSessionSavedObjectAttributes>>();
 
     let sessionUpdated = false;
 
     await Promise.all(
-      runningBackgroundSearchesResponse.saved_objects.map(async (session) => {
+      runningSearchSessionsResponse.saved_objects.map(async (session) => {
         // Check statuses of all running searches
         await Promise.all(
           Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
@@ -63,7 +61,7 @@ export async function checkRunningSessions(
 
         // And only then derive the session's status
         const sessionStatus = getSessionStatus(session.attributes);
-        if (sessionStatus !== BackgroundSessionStatus.IN_PROGRESS) {
+        if (sessionStatus !== SearchSessionStatus.IN_PROGRESS) {
           session.attributes.status = sessionStatus;
           sessionUpdated = true;
         }
@@ -76,7 +74,7 @@ export async function checkRunningSessions(
 
     if (updatedSessions.length) {
       // If there's an error, we'll try again in the next iteration, so there's no need to check the output.
-      const updatedResponse = await savedObjectsClient.bulkUpdate<BackgroundSessionSavedObjectAttributes>(
+      const updatedResponse = await savedObjectsClient.bulkUpdate<SearchSessionSavedObjectAttributes>(
         updatedSessions
       );
       logger.debug(`Updated ${updatedResponse.saved_objects.length} background sessions`);

@@ -5,4 +5,4 @@
  */
 
 export * from './session_service';
-export { registerBackgroundSessionsTask, scheduleBackgroundSessionsTasks } from './monitoring_task';
+export { registerSearchSessionsTask, scheduleSearchSessionsTasks } from './monitoring_task';

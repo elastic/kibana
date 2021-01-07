@@ -4,21 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BackgroundSessionSavedObjectAttributes, BackgroundSessionStatus } from '../../../common';
+import { SearchSessionSavedObjectAttributes, SearchSessionStatus } from '../../../common';
 import { SearchStatus } from './types';
 
-export function getSessionStatus(
-  session: BackgroundSessionSavedObjectAttributes
-): BackgroundSessionStatus {
+export function getSessionStatus(session: SearchSessionSavedObjectAttributes): SearchSessionStatus {
   const searchStatuses = Object.values(session.idMapping);
   if (searchStatuses.some((item) => item.status === SearchStatus.ERROR)) {
-    return BackgroundSessionStatus.ERROR;
+    return SearchSessionStatus.ERROR;
   } else if (
     searchStatuses.length > 0 &&
     searchStatuses.every((item) => item.status === SearchStatus.COMPLETE)
   ) {
-    return BackgroundSessionStatus.COMPLETE;
+    return SearchSessionStatus.COMPLETE;
   } else {
-    return BackgroundSessionStatus.IN_PROGRESS;
+    return SearchSessionStatus.IN_PROGRESS;
   }
 }

@@ -43,7 +43,7 @@ import {
 import { SEARCH_SESSION_TYPE } from '../../saved_objects';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
-import { registerBackgroundSessionsTask, scheduleBackgroundSessionsTasks } from './monitoring_task';
+import { registerSearchSessionsTask, scheduleSearchSessionsTasks } from './monitoring_task';
 import {
   DEFAULT_EXPIRATION,
   INMEM_MAX_SESSIONS,
@@ -83,7 +83,7 @@ export class SearchSessionService implements ISessionService {
   constructor(private readonly logger: Logger) {}
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
-    registerBackgroundSessionsTask(core, deps.taskManager, this.logger);
+    registerSearchSessionsTask(core, deps.taskManager, this.logger);
   }
 
   public async start(core: CoreStart, deps: StartDependencies) {
@@ -98,7 +98,7 @@ export class SearchSessionService implements ISessionService {
   private setupMonitoring = async (core: CoreStart, deps: StartDependencies) => {
     const config = await deps.config$.pipe(first()).toPromise();
     if (config.search.sendToBackground.enabled) {
-      scheduleBackgroundSessionsTasks(deps.taskManager, this.logger);
+      scheduleSearchSessionsTasks(deps.taskManager, this.logger);
       this.logger.debug(`setupMonitoring | Enabling monitoring`);
       const internalRepo = core.savedObjects.createInternalRepository([SEARCH_SESSION_TYPE]);
       this.internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
