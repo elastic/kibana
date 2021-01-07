@@ -41,11 +41,11 @@ export const getColumns = (
 ): Array<EuiBasicTableColumn<UISession>> => {
   // Use a literal array of table column definitions to detail a UISession object
   return [
-    // Type (appIcon)
+    // App
     {
       field: 'appId',
       name: i18n.translate('xpack.data.mgmt.searchSessions.table.headerType', {
-        defaultMessage: 'Type',
+        defaultMessage: 'App',
       }),
       sortable: true,
       render: (appId: UISession['appId'], { id }) => {

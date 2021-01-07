@@ -69,7 +69,7 @@ describe('Background Sessions Management table column factory', () => {
       Array [
         Object {
           "field": "appId",
-          "name": "Type",
+          "name": "App",
           "render": [Function],
           "sortable": true,
         },

@@ -90,7 +90,7 @@ describe('Background Search Session Management Table', () => {
     test('table body cells', () => {
       expect(table.find('tbody td').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
-          "Type",
+          "App",
           "Namevery background search",
           "StatusIn progress",
           "Created2 Dec, 2020, 00:19:32",
