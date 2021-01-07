@@ -64,7 +64,7 @@ export async function authenticate(callCluster: CallESAsCurrentUser) {
   }
 }
 
-export async function invalidateAPIKey(soClient: SavedObjectsClientContract, ids: string[]) {
+export async function invalidateAPIKeys(soClient: SavedObjectsClientContract, ids: string[]) {
   const adminUser = await outputService.getAdminUser(soClient);
   if (!adminUser) {
     throw new Error('No admin user configured');

@@ -323,7 +323,7 @@ describe('API Keys', () => {
       });
     });
 
-    it(`Only passes id as a parameter`, async () => {
+    it(`Only passes ids as a parameter`, async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       mockScopedClusterClient.asCurrentUser.security.invalidateApiKey.mockResolvedValueOnce(
         securityMock.createApiResponse({
@@ -335,7 +335,7 @@ describe('API Keys', () => {
         })
       );
       const result = await apiKeys.invalidate(httpServerMock.createKibanaRequest(), {
-        id: '123',
+        ids: ['123'],
         name: 'abc',
       } as any);
       expect(result).toEqual({

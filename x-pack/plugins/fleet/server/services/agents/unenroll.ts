@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { chunk } from 'lodash';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentSOAttributes } from '../../types';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
@@ -76,10 +75,10 @@ export async function forceUnenrollAgent(soClient: SavedObjectsClientContract, a
 
   await Promise.all([
     agent.access_api_key_id
-      ? APIKeyService.invalidateAPIKey(soClient, [agent.access_api_key_id])
+      ? APIKeyService.invalidateAPIKeys(soClient, [agent.access_api_key_id])
       : undefined,
     agent.default_api_key_id
-      ? APIKeyService.invalidateAPIKey(soClient, [agent.default_api_key_id])
+      ? APIKeyService.invalidateAPIKeys(soClient, [agent.default_api_key_id])
       : undefined,
   ]);
 
@@ -125,7 +124,7 @@ export async function forceUnenrollAgents(
 
   // Invalidate all API keys
   if (apiKeys.length) {
-    APIKeyService.invalidateAPIKey(soClient, apiKeys);
+    APIKeyService.invalidateAPIKeys(soClient, apiKeys);
   }
 
   // Update the necessary agents
