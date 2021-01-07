@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { testTable, emptyTable } from './__tests__/fixtures/test_tables';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { testTable, emptyTable } from './__fixtures__/test_tables';
 import { staticColumn } from './staticColumn';
 
 describe('staticColumn', () => {

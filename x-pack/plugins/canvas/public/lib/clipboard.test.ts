@@ -8,7 +8,7 @@ jest.mock('../../../../../src/plugins/kibana_utils/public');
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { setClipboardData, getClipboardData } from './clipboard';
 import { LOCALSTORAGE_CLIPBOARD } from '../../common/lib/constants';
-import { elements } from '../../__tests__/fixtures/workpads';
+import { elements } from '../../__fixtures__/workpads';
 
 const set = jest.fn();
 const get = jest.fn();
