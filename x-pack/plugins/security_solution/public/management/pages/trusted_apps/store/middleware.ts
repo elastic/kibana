@@ -223,7 +223,7 @@ const submitDeletionIfNeeded = async (
   }
 };
 
-const checkIfTrustedAppsExistIfNeeded = async (
+const checkTrustedAppsExistIfNeeded = async (
   store: ImmutableMiddlewareAPI<TrustedAppsListPageState, AppAction>,
   trustedAppsService: TrustedAppsService
 ) => {
@@ -276,7 +276,7 @@ export const createTrustedAppsPageMiddleware = (
     // TODO: need to think if failed state is a good condition to consider need for refresh
     if (action.type === 'userChangedUrl' || action.type === 'trustedAppsListDataOutdated') {
       await refreshListIfNeeded(store, trustedAppsService);
-      await checkIfTrustedAppsExistIfNeeded(store, trustedAppsService);
+      await checkTrustedAppsExistIfNeeded(store, trustedAppsService);
     }
 
     if (action.type === 'userChangedUrl') {
