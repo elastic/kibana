@@ -60,7 +60,9 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
       // only go to monitor page if not already there
       if (!(await testSubjects.exists('uptimeMonitorPage', { timeout: 0 }))) {
         await testSubjects.exists(`monitor-page-link-${monitorId}`);
-        await testSubjects.click(`monitor-page-link-${monitorId}`);
+        await retry.try(async () => {
+          await testSubjects.click(`monitor-page-link-${monitorId}`);
+        });
         await testSubjects.existOrFail('uptimeMonitorPage', {
           timeout: 30000,
         });
