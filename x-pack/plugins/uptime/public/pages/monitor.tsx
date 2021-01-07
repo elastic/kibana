@@ -37,7 +37,6 @@ export const MonitorPage: React.FC = () => {
 
   return (
     <>
-      <EuiSpacer size="s" />
       <MonitorStatusDetails monitorId={monitorId} />
       <EuiSpacer size="s" />
       <MonitorCharts monitorId={monitorId} />

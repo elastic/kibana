@@ -15,7 +15,6 @@ import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers
 import { MonitorPageTitle } from '../../monitor/monitor_title';
 
 export interface Props {
-  includeSpacer?: boolean;
   showCertificateRefreshBtn?: boolean;
   showDatePicker?: boolean;
   showMonitorTitle?: boolean;
@@ -39,7 +38,6 @@ const StyledPicker = styled(EuiFlexItem)`
 `;
 
 export const PageHeader = ({
-  includeSpacer = false,
   showCertificateRefreshBtn = false,
   showDatePicker = false,
   showMonitorTitle = false,
@@ -63,7 +61,7 @@ export const PageHeader = ({
           </StyledPicker>
         )}
       </EuiFlexGroup>
-      {includeSpacer && <EuiSpacer size="m" />}
+      <EuiSpacer size="m" />
     </>
   );
 };

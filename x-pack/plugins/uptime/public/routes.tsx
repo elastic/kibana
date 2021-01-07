@@ -49,7 +49,6 @@ const Routes: RouteProps[] = [
     dataTestSubj: 'uptimeSettingsPage',
     telemetryId: UptimePage.Settings,
     headerProps: {
-      includeSpacer: true,
       showTabs: true,
     },
   },
@@ -60,7 +59,6 @@ const Routes: RouteProps[] = [
     dataTestSubj: 'uptimeCertificatesPage',
     telemetryId: UptimePage.Certificates,
     headerProps: {
-      includeSpacer: true,
       showCertificateRefreshBtn: true,
       showTabs: true,
     },
@@ -79,18 +77,6 @@ const Routes: RouteProps[] = [
     dataTestSubj: 'uptimeOverviewPage',
     telemetryId: UptimePage.Overview,
     headerProps: {
-      showDatePicker: true,
-      showTabs: true,
-    },
-  },
-  {
-    title: baseTitle,
-    path: OVERVIEW_ROUTE,
-    component: OverviewPage,
-    dataTestSubj: 'uptimeOverviewPage',
-    telemetryId: UptimePage.Overview,
-    headerProps: {
-      includeSpacer: true,
       showDatePicker: true,
       showTabs: true,
     },
