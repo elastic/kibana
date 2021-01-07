@@ -2,6 +2,11 @@
 
 source src/dev/ci_setup/setup_env.sh
 
+cd "$XPACK_DIR/plugins/canvas"
+node scripts/storybook --dll
+
+cd "$KIBANA_DIR"
+
 # TODO un-comment these after iterating
 
 # yarn storybook --site apm
