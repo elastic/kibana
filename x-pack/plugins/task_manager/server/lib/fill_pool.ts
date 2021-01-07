@@ -6,15 +6,19 @@
 
 import { performance } from 'perf_hooks';
 import { TaskPoolRunResult } from '../task_pool';
+import { Result, map } from './result_type';
 
 export enum FillPoolResult {
+  Failed = 'Failed',
+  NoAvailableWorkers = 'NoAvailableWorkers',
   NoTasksClaimed = 'NoTasksClaimed',
+  RunningAtCapacity = 'RunningAtCapacity',
   RanOutOfCapacity = 'RanOutOfCapacity',
   PoolFilled = 'PoolFilled',
 }
 
 type BatchRun<T> = (tasks: T[]) => Promise<TaskPoolRunResult>;
-type Fetcher<T> = () => Promise<T[]>;
+type Fetcher<T, E> = () => Promise<Result<T[], E>>;
 type Converter<T1, T2> = (t: T1) => T2;
 
 /**
@@ -30,33 +34,43 @@ type Converter<T1, T2> = (t: T1) => T2;
  * @param converter - a function that converts task records to the appropriate task runner
  */
 export async function fillPool<TRecord, TRunner>(
-  fetchAvailableTasks: Fetcher<TRecord>,
+  fetchAvailableTasks: Fetcher<TRecord, FillPoolResult>,
   converter: Converter<TRecord, TRunner>,
   run: BatchRun<TRunner>
 ): Promise<FillPoolResult> {
   performance.mark('fillPool.start');
-  const instances = await fetchAvailableTasks();
+  return map<TRecord[], FillPoolResult, Promise<FillPoolResult>>(
+    await fetchAvailableTasks(),
+    async (instances) => {
+      if (!instances.length) {
+        performance.mark('fillPool.bailNoTasks');
+        performance.measure(
+          'fillPool.activityDurationUntilNoTasks',
+          'fillPool.start',
+          'fillPool.bailNoTasks'
+        );
+        return FillPoolResult.NoTasksClaimed;
+      }
 
-  if (!instances.length) {
-    performance.mark('fillPool.bailNoTasks');
-    performance.measure(
-      'fillPool.activityDurationUntilNoTasks',
-      'fillPool.start',
-      'fillPool.bailNoTasks'
-    );
-    return FillPoolResult.NoTasksClaimed;
-  }
-  const tasks = instances.map(converter);
+      const tasks = instances.map(converter);
 
-  if ((await run(tasks)) === TaskPoolRunResult.RanOutOfCapacity) {
-    performance.mark('fillPool.bailExhaustedCapacity');
-    performance.measure(
-      'fillPool.activityDurationUntilExhaustedCapacity',
-      'fillPool.start',
-      'fillPool.bailExhaustedCapacity'
-    );
-    return FillPoolResult.RanOutOfCapacity;
-  }
-  performance.mark('fillPool.cycle');
-  return FillPoolResult.PoolFilled;
+      switch (await run(tasks)) {
+        case TaskPoolRunResult.RanOutOfCapacity:
+          performance.mark('fillPool.bailExhaustedCapacity');
+          performance.measure(
+            'fillPool.activityDurationUntilExhaustedCapacity',
+            'fillPool.start',
+            'fillPool.bailExhaustedCapacity'
+          );
+          return FillPoolResult.RanOutOfCapacity;
+        case TaskPoolRunResult.RunningAtCapacity:
+          performance.mark('fillPool.cycle');
+          return FillPoolResult.RunningAtCapacity;
+        default:
+          performance.mark('fillPool.cycle');
+          return FillPoolResult.PoolFilled;
+      }
+    },
+    async (result) => result
+  );
 }

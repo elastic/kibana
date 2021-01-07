@@ -17,12 +17,14 @@ interface StartDeps {
 export interface SecurityFeatureUsageServiceStart {
   recordPreAccessAgreementUsage: () => void;
   recordSubFeaturePrivilegeUsage: () => void;
+  recordAuditLoggingUsage: () => void;
 }
 
 export class SecurityFeatureUsageService {
   public setup({ featureUsage }: SetupDeps) {
     featureUsage.register('Subfeature privileges', 'gold');
     featureUsage.register('Pre-access agreement', 'gold');
+    featureUsage.register('Audit logging', 'gold');
   }
 
   public start({ featureUsage }: StartDeps): SecurityFeatureUsageServiceStart {
@@ -32,6 +34,9 @@ export class SecurityFeatureUsageService {
       },
       recordSubFeaturePrivilegeUsage() {
         featureUsage.notifyUsage('Subfeature privileges');
+      },
+      recordAuditLoggingUsage() {
+        featureUsage.notifyUsage('Audit logging');
       },
     };
   }
