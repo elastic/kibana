@@ -10,7 +10,7 @@ import {
   Installable,
   RegistrySearchResult,
   PackageInfo,
-  PackageUsageSummary,
+  PackageUsageStats,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -55,14 +55,14 @@ export interface GetInfoResponse {
   response: PackageInfo;
 }
 
-export interface GetSummaryRequest {
+export interface GetStatsRequest {
   params: {
     pkgname: string;
   };
 }
 
-export interface GetSummaryResponse {
-  response: PackageUsageSummary;
+export interface GetStatsResponse {
+  response: PackageUsageStats;
 }
 
 export interface InstallPackageRequest {

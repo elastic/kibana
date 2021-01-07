@@ -14,7 +14,7 @@ import {
   GetFleetStatusResponse,
   GetInfoResponse,
   GetPackagePoliciesResponse,
-  GetSummaryResponse,
+  GetStatsResponse,
 } from '../../../../../../../common/types/rest_spec';
 import { DetailViewPanelName, KibanaAssetType } from '../../../../../../../common/types/models';
 import {
@@ -236,7 +236,7 @@ interface MockedApi<
 interface EpmPackageDetailsResponseProvidersMock {
   epmGetInfo: jest.MockedFunction<() => GetInfoResponse>;
   epmGetFile: jest.MockedFunction<() => string>;
-  epmGetSummary: jest.MockedFunction<() => GetSummaryResponse>;
+  epmGetSummary: jest.MockedFunction<() => GetStatsResponse>;
   fleetSetup: jest.MockedFunction<() => GetFleetStatusResponse>;
   packagePolicyList: jest.MockedFunction<() => GetPackagePoliciesResponse>;
   agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
@@ -712,7 +712,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     perPage: 100,
   };
 
-  const epmGetSummaryResponse: GetSummaryResponse = {
+  const epmGetSummaryResponse: GetStatsResponse = {
     response: {
       agent_policy_count: 2,
     },
@@ -765,7 +765,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         return mockedApiInterface.responseProvider.agentPolicyList();
       }
 
-      if (path === epmRouteService.getSummaryPath('nginx')) {
+      if (path === epmRouteService.getStatsPath('nginx')) {
         markApiCallAsHandled();
         return mockedApiInterface.responseProvider.epmGetSummary();
       }

@@ -15,7 +15,7 @@ import {
   installPackageByUploadHandler,
   deletePackageHandler,
   bulkInstallPackagesFromRegistryHandler,
-  getSummaryHandler,
+  getStatsHandler,
 } from './handlers';
 import {
   GetCategoriesRequestSchema,
@@ -26,7 +26,7 @@ import {
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
   BulkUpgradePackagesFromRegistryRequestSchema,
-  GetSummaryRequestSchema,
+  GetStatsRequestSchema,
 } from '../../types';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -62,10 +62,10 @@ export const registerRoutes = (router: IRouter) => {
   router.get(
     {
       path: EPM_API_ROUTES.STATS_PATTERN,
-      validate: GetSummaryRequestSchema,
+      validate: GetStatsRequestSchema,
       options: { tags: [`access:${PLUGIN_ID}`] },
     },
-    getSummaryHandler
+    getStatsHandler
   );
 
   router.get(

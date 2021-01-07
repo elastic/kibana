@@ -35,7 +35,7 @@ export const epmRouteService = {
     return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgkey}', pkgkey);
   },
 
-  getSummaryPath: (pkgName: string) => {
+  getStatsPath: (pkgName: string) => {
     return EPM_API_ROUTES.STATS_PATTERN.replace('{pkgName}', pkgName);
   },
 

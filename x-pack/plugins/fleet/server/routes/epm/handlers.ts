@@ -17,7 +17,7 @@ import {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
-  GetSummaryResponse,
+  GetStatsResponse,
 } from '../../../common';
 import {
   GetCategoriesRequestSchema,
@@ -28,7 +28,7 @@ import {
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
   BulkUpgradePackagesFromRegistryRequestSchema,
-  GetSummaryRequestSchema,
+  GetStatsRequestSchema,
 } from '../../types';
 import {
   BulkInstallResponse,
@@ -50,7 +50,7 @@ import { splitPkgKey } from '../../services/epm/registry';
 import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
-import { getPackageUsageSummary } from '../../services/epm/packages/get';
+import { getPackageUsageStats } from '../../services/epm/packages/get';
 
 export const getCategoriesHandler: RequestHandler<
   undefined,
@@ -199,14 +199,16 @@ export const getInfoHandler: RequestHandler<TypeOf<typeof GetInfoRequestSchema.p
   }
 };
 
-export const getSummaryHandler: RequestHandler<
-  TypeOf<typeof GetSummaryRequestSchema.params>
-> = async (context, request, response) => {
+export const getStatsHandler: RequestHandler<TypeOf<typeof GetStatsRequestSchema.params>> = async (
+  context,
+  request,
+  response
+) => {
   try {
     const { pkgName } = request.params;
     const savedObjectsClient = context.core.savedObjects.client;
-    const body: GetSummaryResponse = {
-      response: await getPackageUsageSummary({ savedObjectsClient, pkgName }),
+    const body: GetStatsResponse = {
+      response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
     };
     return response.ok({ body });
   } catch (error) {

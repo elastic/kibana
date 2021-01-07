@@ -279,7 +279,7 @@ export interface Installation extends SavedObjectAttributes {
   install_source: InstallSource;
 }
 
-export interface PackageUsageSummary {
+export interface PackageUsageStats {
   agent_policy_count: number;
 }
 

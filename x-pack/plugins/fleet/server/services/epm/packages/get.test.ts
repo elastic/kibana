@@ -7,7 +7,7 @@
 import { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicySOAttributes } from '../../../../common';
-import { getPackageUsageSummary } from './get';
+import { getPackageUsageStats } from './get';
 
 describe('When using EPM `get` services', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
@@ -133,13 +133,13 @@ describe('When using EPM `get` services', () => {
           page,
           per_page: perPage,
           total: 1500,
-          saved_objects: page === 3 ? [] : savedObjectsResponse,
+          saved_objects: savedObjectsResponse,
         };
       });
     });
 
     it('should query and paginate SO using package name as filter', async () => {
-      await getPackageUsageSummary({ savedObjectsClient: soClient, pkgName: 'system' });
+      await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' });
       expect(soClient.find).toHaveBeenNthCalledWith(1, {
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         perPage: 1000,
@@ -162,7 +162,7 @@ describe('When using EPM `get` services', () => {
 
     it('should return count of unique agent policies', async () => {
       expect(
-        await getPackageUsageSummary({ savedObjectsClient: soClient, pkgName: 'system' })
+        await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' })
       ).toEqual({
         agent_policy_count: 3,
       });

@@ -8,7 +8,7 @@ import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/se
 import {
   isPackageLimited,
   installationStatuses,
-  PackageUsageSummary,
+  PackageUsageStats,
   PackagePolicySOAttributes,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../common';
@@ -130,13 +130,13 @@ export async function getPackageInfo(options: {
   return createInstallableFrom(updated, savedObject);
 }
 
-export const getPackageUsageSummary = async ({
+export const getPackageUsageStats = async ({
   savedObjectsClient,
   pkgName,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-}): Promise<PackageUsageSummary> => {
+}): Promise<PackageUsageStats> => {
   const filter = normalizeKuery(
     PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${pkgName}`

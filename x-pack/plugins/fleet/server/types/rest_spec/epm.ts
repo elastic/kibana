@@ -32,7 +32,7 @@ export const GetInfoRequestSchema = {
   }),
 };
 
-export const GetSummaryRequestSchema = {
+export const GetStatsRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
   }),

@@ -5,13 +5,13 @@
  */
 
 import React, { memo } from 'react';
-import { useGetPackageSummary } from '../../../../hooks';
+import { useGetPackageStats } from '../../../../hooks';
 
 /**
  * Displays a count of Agent Policies that are using the given integration
  */
 export const IntegrationAgentPolicyCount = memo<{ packageName: string }>(({ packageName }) => {
-  const { data } = useGetPackageSummary(packageName);
+  const { data } = useGetPackageStats(packageName);
 
   return <>{data?.response.agent_policy_count ?? 0}</>;
 });
