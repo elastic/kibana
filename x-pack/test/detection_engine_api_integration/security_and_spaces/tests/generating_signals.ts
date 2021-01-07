@@ -201,8 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      // ES PROMOTION FAILURE: http://github.com/elastic/kibana/issues/86709
-      describe.skip('EQL Rules', () => {
+      describe('EQL Rules', () => {
         it('generates signals from EQL sequences in the expected form', async () => {
           const rule: EqlCreateSchema = {
             ...getRuleForSignalTesting(['auditbeat-*']),
@@ -226,28 +225,26 @@ export default ({ getService }: FtrProviderContext) => {
             ancestors: [
               {
                 depth: 0,
-                id: 'UBXOBmkBR346wHgnLP8T',
+                id: 'gCF0B2kBR346wHgnb7m0',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
             ],
             original_event: {
-              action: 'boot',
-              dataset: 'login',
-              kind: 'event',
-              module: 'system',
-              origin: '/var/log/wtmp',
+              action: 'error',
+              category: 'user-login',
+              module: 'auditd',
             },
             parent: {
               depth: 0,
-              id: 'UBXOBmkBR346wHgnLP8T',
+              id: 'gCF0B2kBR346wHgnb7m0',
               index: 'auditbeat-8.0.0-2019.02.19-000001',
               type: 'event',
             },
             parents: [
               {
                 depth: 0,
-                id: 'UBXOBmkBR346wHgnLP8T',
+                id: 'gCF0B2kBR346wHgnb7m0',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
@@ -284,7 +281,7 @@ export default ({ getService }: FtrProviderContext) => {
             ancestors: [
               {
                 depth: 0,
-                id: 'UBXOBmkBR346wHgnLP8T',
+                id: 'gCF0B2kBR346wHgnb7m0',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },
@@ -297,7 +294,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
               {
                 depth: 0,
-                id: 'URXOBmkBR346wHgnLP8T',
+                id: 'CCF0B2kBR346wHgngLtX',
                 index: 'auditbeat-8.0.0-2019.02.19-000001',
                 type: 'event',
               },

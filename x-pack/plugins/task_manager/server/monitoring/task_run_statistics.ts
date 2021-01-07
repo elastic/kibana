@@ -52,8 +52,11 @@ export interface TaskRunStat extends JsonObject {
 interface FillPoolRawStat extends JsonObject {
   last_successful_poll: string;
   result_frequency_percent_as_number: {
+    [FillPoolResult.Failed]: number;
+    [FillPoolResult.NoAvailableWorkers]: number;
     [FillPoolResult.NoTasksClaimed]: number;
     [FillPoolResult.RanOutOfCapacity]: number;
+    [FillPoolResult.RunningAtCapacity]: number;
     [FillPoolResult.PoolFilled]: number;
   };
 }
@@ -163,8 +166,11 @@ const DEFAULT_TASK_RUN_FREQUENCIES = {
   [TaskRunResult.Failed]: 0,
 };
 const DEFAULT_POLLING_FREQUENCIES = {
+  [FillPoolResult.Failed]: 0,
+  [FillPoolResult.NoAvailableWorkers]: 0,
   [FillPoolResult.NoTasksClaimed]: 0,
   [FillPoolResult.RanOutOfCapacity]: 0,
+  [FillPoolResult.RunningAtCapacity]: 0,
   [FillPoolResult.PoolFilled]: 0,
 };
 
