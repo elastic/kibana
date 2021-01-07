@@ -21,7 +21,7 @@ interface LatencyChart {
   latencyTimeseries: Array<TimeSeries<Coordinate>>;
   mlJobId?: string;
   anomalyTimeseries?: {
-    bounderies: TimeSeries;
+    boundaries: TimeSeries;
     scores: TimeSeries;
   };
 }
@@ -49,7 +49,7 @@ export function getLatencyChartSelector({
       latencyAggregationType,
     }),
     mlJobId: latencyChart.anomalyTimeseries?.jobId,
-    anomalyTimeseries: getAnnomalyTimeseries({
+    anomalyTimeseries: getAnomalyTimeseries({
       anomalyTimeseries: latencyChart.anomalyTimeseries,
       theme,
     }),
@@ -115,7 +115,7 @@ function getLatencyTimeseries({
   return [];
 }
 
-function getAnnomalyTimeseries({
+function getAnomalyTimeseries({
   anomalyTimeseries,
   theme,
 }: {
@@ -124,7 +124,7 @@ function getAnnomalyTimeseries({
 }) {
   if (anomalyTimeseries) {
     return {
-      bounderies: getAnomalyBoundariesSeries(
+      boundaries: getAnomalyBoundariesSeries(
         anomalyTimeseries.anomalyBoundaries,
         theme
       ),

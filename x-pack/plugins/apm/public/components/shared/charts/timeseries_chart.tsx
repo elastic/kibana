@@ -174,17 +174,17 @@ export function TimeseriesChart({
           );
         })}
 
-        {anomalySeries?.bounderies && (
+        {anomalySeries?.boundaries && (
           <AreaSeries
-            key={anomalySeries.bounderies.title}
-            id={anomalySeries.bounderies.title}
+            key={anomalySeries.boundaries.title}
+            id={anomalySeries.boundaries.title}
             xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="x"
             yAccessors={['y']}
             y0Accessors={['y0']}
-            data={anomalySeries.bounderies.data}
-            color={anomalySeries.bounderies.color}
+            data={anomalySeries.boundaries.data}
+            color={anomalySeries.boundaries.color}
             curve={CurveType.CURVE_MONOTONE_X}
             hideInLegend
             filterSeriesInTooltip={() => false}

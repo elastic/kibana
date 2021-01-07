@@ -121,7 +121,7 @@ describe('getLatencyChartSelector', () => {
         ],
         mlJobId: '1',
         anomalyTimeseries: {
-          bounderies: {
+          boundaries: {
             title: 'Anomaly Boundaries',
             data: [{ x: 1, y: 2 }],
             type: 'area',
