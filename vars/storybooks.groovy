@@ -52,7 +52,7 @@ def upload() {
       bucket: "gs://${getStorybooksBucket()}/${getDestinationDir()}/${buildState.get('checkoutInfo').commit}",
       pattern: "**/*",
       sharedPublicly: false,
-      // showInline: false,
+      showInline: true,
     )
 
     buildState.set('storybooksUrl', getUrlForCommit())
@@ -62,7 +62,7 @@ def upload() {
       bucket: "gs://${getStorybooksBucket()}/${getDestinationDir()}/latest",
       pattern: "index.html",
       sharedPublicly: false,
-      // showInline: false,
+      showInline: true,
     )
   }
 }
