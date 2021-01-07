@@ -34,9 +34,9 @@ describe('StatusFilter', () => {
   it('should call onStatusChanged when changing status to open', async () => {
     const wrapper = mount(<StatusFilter {...defaultProps} />);
 
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+    wrapper.find('button[data-test-subj="case-status-filter-open"]').simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-      wrapper.find('button[data-test-subj="case-status-filter-open"]').simulate('click');
       expect(onStatusChanged).toBeCalledWith('open');
     });
   });
@@ -44,9 +44,9 @@ describe('StatusFilter', () => {
   it('should call onStatusChanged when changing status to in-progress', async () => {
     const wrapper = mount(<StatusFilter {...defaultProps} />);
 
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+    wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-      wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').simulate('click');
       expect(onStatusChanged).toBeCalledWith('in-progress');
     });
   });
@@ -54,9 +54,9 @@ describe('StatusFilter', () => {
   it('should call onStatusChanged when changing status to closed', async () => {
     const wrapper = mount(<StatusFilter {...defaultProps} />);
 
+    wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
+    wrapper.find('button[data-test-subj="case-status-filter-closed"]').simulate('click');
     await waitFor(() => {
-      wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
-      wrapper.find('button[data-test-subj="case-status-filter-closed"]').simulate('click');
       expect(onStatusChanged).toBeCalledWith('closed');
     });
   });

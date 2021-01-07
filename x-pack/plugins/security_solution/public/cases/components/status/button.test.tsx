@@ -26,7 +26,7 @@ describe('StatusActionButton', () => {
   });
 
   describe('Button icons', () => {
-    it('it renders the correct button icon: status open', async () => {
+    it('it renders the correct button icon: status open', () => {
       const wrapper = mount(<StatusActionButton {...defaultProps} />);
 
       expect(
@@ -34,7 +34,7 @@ describe('StatusActionButton', () => {
       ).toBe('folderExclamation');
     });
 
-    it('it renders the correct button icon: status in-progress', async () => {
+    it('it renders the correct button icon: status in-progress', () => {
       const wrapper = mount(
         <StatusActionButton {...defaultProps} status={CaseStatuses['in-progress']} />
       );
@@ -44,7 +44,7 @@ describe('StatusActionButton', () => {
       ).toBe('folderCheck');
     });
 
-    it('it renders the correct button icon: status closed', async () => {
+    it('it renders the correct button icon: status closed', () => {
       const wrapper = mount(<StatusActionButton {...defaultProps} status={CaseStatuses.closed} />);
 
       expect(
@@ -54,7 +54,7 @@ describe('StatusActionButton', () => {
   });
 
   describe('Status rotation', () => {
-    it('rotates correctly to in-progress when status is open', async () => {
+    it('rotates correctly to in-progress when status is open', () => {
       const wrapper = mount(<StatusActionButton {...defaultProps} />);
 
       wrapper
@@ -64,7 +64,7 @@ describe('StatusActionButton', () => {
       expect(onStatusChanged).toHaveBeenCalledWith('in-progress');
     });
 
-    it('rotates correctly to closed when status is in-progress', async () => {
+    it('rotates correctly to closed when status is in-progress', () => {
       const wrapper = mount(
         <StatusActionButton {...defaultProps} status={CaseStatuses['in-progress']} />
       );
@@ -76,7 +76,7 @@ describe('StatusActionButton', () => {
       expect(onStatusChanged).toHaveBeenCalledWith('closed');
     });
 
-    it('rotates correctly to open when status is closed', async () => {
+    it('rotates correctly to open when status is closed', () => {
       const wrapper = mount(<StatusActionButton {...defaultProps} status={CaseStatuses.closed} />);
 
       wrapper

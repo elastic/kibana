@@ -63,11 +63,9 @@ describe('SyncAlertsToggle', () => {
       </MockHookWrapperComponent>
     );
 
-    await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="caseSyncAlerts"] .euiSwitch__label`).first().text()
-      ).toBe('On');
-    });
+    expect(wrapper.find(`[data-test-subj="caseSyncAlerts"] .euiSwitch__label`).first().text()).toBe(
+      'On'
+    );
 
     wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
 
