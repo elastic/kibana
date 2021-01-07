@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { DATE_STRING_FORMAT } from './constants';
+import { DATE_STRING_FORMAT } from '../../../../common/search/sessions_mgmt';
 
 export const dateString = (inputString: string, tz: string): string => {
   if (inputString == null) {

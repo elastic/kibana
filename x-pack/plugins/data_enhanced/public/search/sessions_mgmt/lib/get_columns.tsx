@@ -18,10 +18,10 @@ import { capitalize } from 'lodash';
 import React from 'react';
 import { SessionsMgmtConfigSchema } from '../';
 import { ActionComplete, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
-import { dateString } from '../../../../common/search/sessions_mgmt/date_string';
 import { TableText } from '../components';
 import { PopoverActionsMenu } from '../components/actions';
 import { StatusIndicator } from '../components/status';
+import { dateString } from '../lib/date_string';
 import { SearchSessionsMgmtAPI } from './api';
 import { getExpirationStatus } from './get_expiration_status';
 
