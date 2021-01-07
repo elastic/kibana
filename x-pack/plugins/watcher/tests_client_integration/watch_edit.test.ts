@@ -9,7 +9,7 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
 import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
 import { WatchEditTestBed } from './helpers/watch_edit.helpers';
-import { WATCH } from './helpers/constants';
+import { WATCH } from './helpers/jest_constants';
 import defaultWatchJson from '../public/application/models/watch/default_watch.json';
 import { getWatch } from '../__fixtures__';
 import { getRandomString } from '@kbn/test/jest';

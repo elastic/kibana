@@ -7,7 +7,7 @@
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { WatchStatusTestBed } from './helpers/watch_status.helpers';
-import { WATCH } from './helpers/constants';
+import { WATCH } from './helpers/jest_constants';
 import { getWatchHistory } from '../__fixtures__';
 import moment from 'moment';
 import { ROUTES } from '../common/constants';

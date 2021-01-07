@@ -7,7 +7,7 @@ import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { WatchEdit } from '../../public/application/sections/watch_edit/components/watch_edit';
 import { registerRouter } from '../../public/application/lib/navigation';
 import { ROUTES } from '../../common/constants';
-import { WATCH_ID } from './constants';
+import { WATCH_ID } from './jest_constants';
 import { withAppContext } from './app_context.mock';
 
 const testBedConfig: TestBedConfig = {
