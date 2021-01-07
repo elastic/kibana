@@ -97,6 +97,7 @@ export const exceptionListItemToTrustedApp = (
       id: exceptionListItem.id,
       name: exceptionListItem.name,
       description: exceptionListItem.description,
+      effectScope: { type: 'global' },
       created_at: exceptionListItem.created_at,
       created_by: exceptionListItem.created_by,
       ...(os === OperatingSystem.LINUX || os === OperatingSystem.MAC
