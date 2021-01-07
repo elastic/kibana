@@ -24,6 +24,8 @@ import { ENGINE_ANALYTICS_PATH, ENGINE_API_LOGS_PATH, getEngineRoute } from '../
 import { TOTAL_QUERIES, TOTAL_API_OPERATIONS } from '../../analytics/constants';
 import { VIEW_ANALYTICS, VIEW_API_LOGS, LAST_7_DAYS } from '../constants';
 
+import { AnalyticsChart, convertToChartsData } from '../../analytics';
+
 import { EngineLogic } from '../../engine';
 import { EngineOverviewLogic } from '../';
 
@@ -31,12 +33,7 @@ export const TotalCharts: React.FC = () => {
   const { engineName } = useValues(EngineLogic);
   const engineRoute = getEngineRoute(engineName);
 
-  const {
-    // startDate,
-    // endDate,
-    // queriesPerDay,
-    // operationsPerDay,
-  } = useValues(EngineOverviewLogic);
+  const { startDate, queriesPerDay, operationsPerDay } = useValues(EngineOverviewLogic);
 
   return (
     <EuiFlexGroup>
@@ -58,12 +55,14 @@ export const TotalCharts: React.FC = () => {
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
-            TODO: Analytics chart
-            {/* <EngineAnalytics
-              data={[queriesPerDay]}
-              startDate={new Date(startDate)}
-              endDate={new Date(endDate)}
-            /> */}
+            <AnalyticsChart
+              lines={[
+                {
+                  id: TOTAL_QUERIES,
+                  data: convertToChartsData({ startDate, data: queriesPerDay }),
+                },
+              ]}
+            />
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiFlexItem>
@@ -85,12 +84,14 @@ export const TotalCharts: React.FC = () => {
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
-            TODO: API Logs chart
-            {/* <EngineAnalytics
-              data={[operationsPerDay]}
-              startDate={new Date(startDate)}
-              endDate={new Date(endDate)}
-            /> */}
+            <AnalyticsChart
+              lines={[
+                {
+                  id: TOTAL_API_OPERATIONS,
+                  data: convertToChartsData({ startDate, data: operationsPerDay }),
+                },
+              ]}
+            />
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiFlexItem>
