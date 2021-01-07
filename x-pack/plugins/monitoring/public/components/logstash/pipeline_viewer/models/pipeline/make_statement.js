@@ -12,7 +12,7 @@ export function makeStatement(pipelineGraphVertex, pipelineStage) {
   switch (pipelineGraphVertex.typeString) {
     case 'plugin':
       return PluginStatement.fromPipelineGraphVertex(pipelineGraphVertex, pipelineStage);
-    case 'vertex':
+    case 'if':
       return IfStatement.fromPipelineGraphVertex(pipelineGraphVertex, pipelineStage);
     case 'queue':
       return Queue.fromPipelineGraphVertex(pipelineGraphVertex, pipelineStage);
