@@ -1,4 +1,3 @@
-import co.elastic.teamcity.common.getOrgProjectIdKebab
 import jetbrains.buildServer.configs.kotlin.v2019_2.DslContext
 
 // If set to true, github check/commit status will be reported, failed-test-reporter will run, etc.
