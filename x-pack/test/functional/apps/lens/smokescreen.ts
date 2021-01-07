@@ -74,7 +74,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
         operation: 'filters',
-        isPreviousIncompatible: true,
         keepOpen: true,
       });
       await PageObjects.lens.addFilterToAgg(`geo.src : CN`);
@@ -475,6 +474,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsDatatable_metrics')).to.eql(
         'Cumulative sum of (incomplete)'
+      );
+    });
+
+    it('should keep the field selection while transitioning to every reference-based operation', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+        operation: 'counter_rate',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+        operation: 'cumulative_sum',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+        operation: 'derivative',
+      });
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
+        operation: 'moving_average',
+      });
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        'Moving average of Sum of bytes'
       );
     });
 

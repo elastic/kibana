@@ -864,7 +864,7 @@ describe('state_helpers', () => {
           columns: {
             col1: termsColumn,
             willBeReference: {
-              label: 'Count',
+              label: 'Count of records',
               dataType: 'number',
               isBucketed: false,
               sourceField: 'Records',
@@ -878,14 +878,18 @@ describe('state_helpers', () => {
       });
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
-        {
-          indexPatternId: '1',
-          columnOrder: ['col1', 'willBeReference'],
+        expect.objectContaining({
           columns: {
             col1: {
               ...termsColumn,
               params: { orderBy: { type: 'alphabetical' }, orderDirection: 'asc', size: 5 },
             },
+            id1: expect.objectContaining({
+              dataType: 'number',
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count',
+            }),
             willBeReference: expect.objectContaining({
               dataType: 'number',
               isBucketed: false,
@@ -893,225 +897,531 @@ describe('state_helpers', () => {
             }),
           },
           incompleteColumns: {},
-        },
+        }),
         'col1',
         'willBeReference'
       );
     });
 
-    it('should not wrap the previous operation when switching to reference', () => {
-      const layer: IndexPatternLayer = {
-        indexPatternId: '1',
-        columnOrder: ['col1'],
-        columns: {
-          col1: {
-            label: 'Count',
-            customLabel: true,
-            dataType: 'number' as const,
-            isBucketed: false,
-            sourceField: 'Records',
-            operationType: 'count' as const,
-          },
-        },
-      };
-      const result = replaceColumn({
-        layer,
-        indexPattern,
-        columnId: 'col1',
-        op: 'testReference' as OperationType,
+    describe('switching from non-reference to reference test cases', () => {
+      it('should wrap around the previous operation as a reference if possible (case new1)', () => {
+        const expectedColumn = {
+          label: 'Count',
+          customLabel: true,
+          dataType: 'number' as const,
+          isBucketed: false,
+          sourceField: 'Records',
+          operationType: 'count' as const,
+        };
+
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: { col1: expectedColumn },
+        };
+        const result = replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'col1',
+          op: 'testReference' as OperationType,
+        });
+
+        expect(operationDefinitionMap.testReference.buildColumn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            referenceIds: ['id1'],
+          })
+        );
+        expect(result.columnOrder).toEqual(['id1', 'col1']);
+        expect(result.columns).toEqual(
+          expect.objectContaining({
+            id1: expectedColumn,
+            col1: expect.any(Object),
+          })
+        );
       });
 
-      expect(operationDefinitionMap.testReference.buildColumn).toHaveBeenCalledWith(
-        expect.objectContaining({
-          referenceIds: ['id1'],
-        })
-      );
-      expect(result.columns).toEqual(
-        expect.objectContaining({
-          col1: expect.objectContaining({ operationType: 'testReference' }),
-        })
-      );
-    });
-
-    it('should delete the previous references and reset to default values when going from reference to no-input', () => {
-      // @ts-expect-error this function is not valid
-      operationDefinitionMap.testReference.requiredReferences = [
-        {
-          input: ['none'],
-          validateMetadata: () => true,
-        },
-      ];
-      const expectedCol = {
-        dataType: 'string' as const,
-        isBucketed: true,
-
-        operationType: 'filters' as const,
-        params: {
-          // These filters are reset
-          filters: [{ input: { query: 'field: true', language: 'kuery' }, label: 'Custom label' }],
-        },
-      };
-      const layer: IndexPatternLayer = {
-        indexPatternId: '1',
-        columnOrder: ['col1', 'col2'],
-        columns: {
-          col1: {
-            ...expectedCol,
-            label: 'Custom label',
-            customLabel: true,
+      it('should create a new no-input operation to use as reference (case new2)', () => {
+        // @ts-expect-error this function is not valid
+        operationDefinitionMap.testReference.requiredReferences = [
+          {
+            input: ['none'],
+            validateMetadata: () => true,
           },
-          col2: {
-            label: 'Test reference',
-            dataType: 'number',
-            isBucketed: false,
-
-            // @ts-expect-error not a valid type
-            operationType: 'testReference',
-            references: ['col1'],
-          },
-        },
-      };
-      expect(
-        replaceColumn({
-          layer,
-          indexPattern,
-          columnId: 'col2',
-          op: 'filters',
-        })
-      ).toEqual(
-        expect.objectContaining({
-          columnOrder: ['col2'],
+        ];
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
           columns: {
-            col2: {
-              ...expectedCol,
-              label: 'Filters',
-              scale: 'ordinal', // added in buildColumn
-              params: {
-                filters: [{ input: { query: '', language: 'kuery' }, label: '' }],
-              },
+            col1: {
+              label: 'Avg',
+              dataType: 'number' as const,
+              isBucketed: false,
+              sourceField: 'bytes',
+              operationType: 'avg' as const,
             },
           },
-        })
-      );
-    });
-
-    it('should delete the inner references when switching away from reference to field-based operation', () => {
-      const expectedCol = {
-        label: 'Count of records',
-        dataType: 'number' as const,
-        isBucketed: false,
-
-        operationType: 'count' as const,
-        sourceField: 'Records',
-      };
-      const layer: IndexPatternLayer = {
-        indexPatternId: '1',
-        columnOrder: ['col1', 'col2'],
-        columns: {
-          col1: expectedCol,
-          col2: {
-            label: 'Test reference',
-            dataType: 'number',
-            isBucketed: false,
-
-            // @ts-expect-error not a valid type
-            operationType: 'testReference',
-            references: ['col1'],
-          },
-        },
-      };
-      expect(
-        replaceColumn({
+        };
+        const result = replaceColumn({
           layer,
           indexPattern,
-          columnId: 'col2',
-          op: 'count',
-          field: documentField,
-        })
-      ).toEqual(
-        expect.objectContaining({
-          columnOrder: ['col2'],
-          columns: {
-            col2: expect.objectContaining(expectedCol),
-          },
-        })
-      );
-    });
+          columnId: 'col1',
+          // @ts-expect-error
+          op: 'testReference',
+        });
 
-    it('should reset when switching from one reference to another', () => {
-      operationDefinitionMap.secondTest = {
-        input: 'fullReference',
-        displayName: 'Reference test 2',
-        // @ts-expect-error this type is not statically available
-        type: 'secondTest',
-        requiredReferences: [
+        expect(result.columnOrder).toEqual(['id1', 'col1']);
+        expect(result.columns).toEqual({
+          id1: expect.objectContaining({
+            operationType: 'filters',
+          }),
+          col1: expect.objectContaining({
+            operationType: 'testReference',
+          }),
+        });
+      });
+
+      it('should use the previous field, but select the best operation, when creating a reference (case new3)', () => {
+        // @ts-expect-error this function is not valid
+        operationDefinitionMap.testReference.requiredReferences = [
           {
-            // Any numeric metric that isn't also a reference
-            input: ['none', 'field'],
-            validateMetadata: (meta: OperationMetadata) =>
-              meta.dataType === 'number' && !meta.isBucketed,
+            input: ['field'],
+            validateMetadata: () => true,
+            specificOperations: ['cardinality', 'sum', 'avg'], // this order is ignored
           },
-        ],
-        // @ts-expect-error don't want to define valid arguments
-        buildColumn: jest.fn((args) => {
-          return {
-            label: 'Test reference',
-            isBucketed: false,
-            dataType: 'number',
-
-            operationType: 'secondTest',
-            references: args.referenceIds,
-          };
-        }),
-        isTransferable: jest.fn(),
-        toExpression: jest.fn().mockReturnValue([]),
-        getPossibleOperation: jest.fn().mockReturnValue({ dataType: 'number', isBucketed: false }),
-        getDefaultLabel: jest.fn().mockReturnValue('Test reference'),
-      };
-
-      const layer: IndexPatternLayer = {
-        indexPatternId: '1',
-        columnOrder: ['col1', 'col2'],
-        columns: {
-          col1: {
-            label: 'Count',
-            customLabel: true,
-            dataType: 'number' as const,
-            isBucketed: false,
-
-            operationType: 'count' as const,
-            sourceField: 'Records',
+        ];
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Max',
+              dataType: 'number' as const,
+              isBucketed: false,
+              sourceField: 'bytes',
+              operationType: 'max' as const,
+            },
           },
-          col2: {
-            label: 'Test reference',
-            dataType: 'number',
-            isBucketed: false,
+        };
+        const result = replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'col1',
+          // @ts-expect-error test only
+          op: 'testReference',
+        });
 
-            // @ts-expect-error not a valid type
+        expect(result.columnOrder).toEqual(['id1', 'col1']);
+        expect(result.columns).toEqual({
+          id1: expect.objectContaining({
+            operationType: 'avg',
+          }),
+          col1: expect.objectContaining({
             operationType: 'testReference',
-            references: ['col1'],
+          }),
+        });
+      });
+
+      it('should ignore previous field and previous operation, but set incomplete operation if known (case new4)', () => {
+        // @ts-expect-error this function is not valid
+        operationDefinitionMap.testReference.requiredReferences = [
+          {
+            input: ['field'],
+            validateMetadata: () => true,
+            specificOperations: ['cardinality'],
           },
-        },
-      };
-      expect(
+        ];
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Count',
+              dataType: 'number' as const,
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count' as const,
+            },
+          },
+        };
+        const result = replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'col1',
+          // @ts-expect-error
+          op: 'testReference',
+        });
+
+        expect(result.incompleteColumns).toEqual({
+          id1: { operationType: 'cardinality' },
+        });
+        expect(result.columns).toEqual({
+          col1: expect.objectContaining({
+            operationType: 'testReference',
+          }),
+        });
+      });
+
+      it('should leave an empty reference if all the other cases fail (case new6)', () => {
+        // @ts-expect-error this function is not valid
+        operationDefinitionMap.testReference.requiredReferences = [
+          {
+            input: ['field'],
+            validateMetadata: () => false,
+            specificOperations: [],
+          },
+        ];
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: {
+              label: 'Count',
+              dataType: 'number' as const,
+              isBucketed: false,
+              sourceField: 'Records',
+              operationType: 'count' as const,
+            },
+          },
+        };
+        const result = replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'col1',
+          // @ts-expect-error
+          op: 'testReference',
+        });
+
+        expect(result.incompleteColumns).toEqual({});
+        expect(result.columns).toEqual({
+          col1: expect.objectContaining({
+            operationType: 'testReference',
+            references: ['id1'],
+          }),
+        });
+      });
+    });
+
+    describe('switching from reference to reference test cases', () => {
+      beforeEach(() => {
+        operationDefinitionMap.secondTest = {
+          input: 'fullReference',
+          displayName: 'Reference test 2',
+          // @ts-expect-error this type is not statically available
+          type: 'secondTest',
+          requiredReferences: [
+            {
+              // Any numeric metric that isn't also a reference
+              input: ['none', 'field'],
+              validateMetadata: (meta: OperationMetadata) =>
+                meta.dataType === 'number' && !meta.isBucketed,
+            },
+          ],
+          // @ts-expect-error don't want to define valid arguments
+          buildColumn: jest.fn((args) => {
+            return {
+              label: 'Test reference',
+              isBucketed: false,
+              dataType: 'number',
+
+              operationType: 'secondTest',
+              references: args.referenceIds,
+            };
+          }),
+          isTransferable: jest.fn(),
+          toExpression: jest.fn().mockReturnValue([]),
+          getPossibleOperation: jest
+            .fn()
+            .mockReturnValue({ dataType: 'number', isBucketed: false }),
+          getDefaultLabel: jest.fn().mockReturnValue('Test reference'),
+        };
+      });
+
+      afterEach(() => {
+        delete operationDefinitionMap.secondTest;
+      });
+
+      it('should use existing references, delete invalid, when switching from one reference to another (case ref1)', () => {
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['ref1', 'invalid', 'output'],
+          columns: {
+            ref1: {
+              label: 'Count',
+              customLabel: true,
+              dataType: 'number' as const,
+              isBucketed: false,
+
+              operationType: 'count' as const,
+              sourceField: 'Records',
+            },
+            invalid: {
+              label: 'Test reference',
+              dataType: 'number',
+              isBucketed: false,
+
+              // @ts-expect-error not a valid type
+              operationType: 'testReference',
+              references: [],
+            },
+            output: {
+              label: 'Test reference',
+              dataType: 'number',
+              isBucketed: false,
+
+              // @ts-expect-error not a valid type
+              operationType: 'testReference',
+              references: ['ref1', 'invalid'],
+            },
+          },
+        };
+        expect(
+          replaceColumn({
+            layer,
+            indexPattern,
+            columnId: 'output',
+            // @ts-expect-error not statically available
+            op: 'secondTest',
+          })
+        ).toEqual(
+          expect.objectContaining({
+            columnOrder: ['ref1', 'output'],
+            columns: {
+              ref1: layer.columns.ref1,
+              output: expect.objectContaining({ references: ['ref1'] }),
+            },
+            incompleteColumns: {},
+          })
+        );
+      });
+
+      it('should modify a copied object, not the original layer', () => {
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['ref1', 'invalid', 'output'],
+          columns: {
+            ref1: {
+              label: 'Count',
+              customLabel: true,
+              dataType: 'number' as const,
+              isBucketed: false,
+
+              operationType: 'count' as const,
+              sourceField: 'Records',
+            },
+            invalid: {
+              label: 'Test reference',
+              dataType: 'number',
+              isBucketed: false,
+
+              // @ts-expect-error not a valid type
+              operationType: 'testReference',
+              references: [],
+            },
+            output: {
+              label: 'Test reference',
+              dataType: 'number',
+              isBucketed: false,
+
+              // @ts-expect-error not a valid type
+              operationType: 'testReference',
+              references: ['ref1', 'invalid'],
+            },
+          },
+        };
         replaceColumn({
           layer,
           indexPattern,
-          columnId: 'col2',
+          columnId: 'output',
           // @ts-expect-error not statically available
           op: 'secondTest',
-        })
-      ).toEqual(
-        expect.objectContaining({
-          columnOrder: ['col2'],
-          columns: {
-            col2: expect.objectContaining({ references: ['id1'] }),
-          },
-          incompleteColumns: {},
-        })
-      );
+        });
+        expect(layer.columns.output).toEqual(
+          expect.objectContaining({ references: ['ref1', 'invalid'] })
+        );
+      });
 
-      delete operationDefinitionMap.secondTest;
+      it('should transition by using the field from the previous reference if nothing else works (case new5)', () => {
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['fieldReused', 'output'],
+          columns: {
+            fieldReused: {
+              label: 'Date histogram',
+              dataType: 'date' as const,
+              isBucketed: true,
+              operationType: 'date_histogram' as const,
+              sourceField: 'timestamp',
+              params: { interval: 'auto' },
+            },
+            output: {
+              label: 'Test reference',
+              dataType: 'number',
+              isBucketed: false,
+              // @ts-expect-error not a valid type
+              operationType: 'testReference',
+              references: ['fieldReused'],
+            },
+          },
+        };
+        expect(
+          replaceColumn({
+            layer,
+            indexPattern,
+            columnId: 'output',
+            // @ts-expect-error not statically available
+            op: 'secondTest',
+          })
+        ).toEqual(
+          expect.objectContaining({
+            columnOrder: ['id1', 'output'],
+            columns: {
+              id1: expect.objectContaining({
+                sourceField: 'timestamp',
+                operationType: 'cardinality',
+              }),
+              output: expect.objectContaining({ references: ['id1'] }),
+            },
+            incompleteColumns: {},
+          })
+        );
+      });
+    });
+
+    describe('switching from reference to non-reference', () => {
+      it('should promote the inner references when switching away from reference to no-input (case a1)', () => {
+        // @ts-expect-error this function is not valid
+        operationDefinitionMap.testReference.requiredReferences = [
+          {
+            input: ['none'],
+            validateMetadata: () => true,
+          },
+        ];
+        const expectedCol = {
+          label: 'Custom label',
+          customLabel: true,
+          dataType: 'string' as const,
+          isBucketed: true,
+
+          operationType: 'filters' as const,
+          params: {
+            // These filters are reset
+            filters: [
+              { input: { query: 'field: true', language: 'kuery' }, label: 'Custom label' },
+            ],
+          },
+        };
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: expectedCol,
+            col2: {
+              label: 'Test reference',
+              dataType: 'number',
+              isBucketed: false,
+
+              // @ts-expect-error not a valid type
+              operationType: 'testReference',
+              references: ['col1'],
+            },
+          },
+        };
+        expect(
+          replaceColumn({
+            layer,
+            indexPattern,
+            columnId: 'col2',
+            op: 'filters',
+          })
+        ).toEqual(
+          expect.objectContaining({
+            columnOrder: ['col2'],
+            columns: {
+              col2: expectedCol,
+            },
+          })
+        );
+      });
+
+      it('should promote the inner references when switching away from reference to field-based operation (case a2)', () => {
+        const expectedCol = {
+          label: 'Count of records',
+          dataType: 'number' as const,
+          isBucketed: false,
+
+          operationType: 'count' as const,
+          sourceField: 'Records',
+        };
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: expectedCol,
+            col2: {
+              label: 'Default label',
+              dataType: 'number',
+              isBucketed: false,
+
+              // @ts-expect-error not a valid type
+              operationType: 'testReference',
+              references: ['col1'],
+            },
+          },
+        };
+        expect(
+          replaceColumn({
+            layer,
+            indexPattern,
+            columnId: 'col2',
+            op: 'count',
+            field: documentField,
+          })
+        ).toEqual(
+          expect.objectContaining({
+            columnOrder: ['col2'],
+            columns: {
+              col2: expect.objectContaining(expectedCol),
+            },
+          })
+        );
+      });
+
+      it('should promote only the field when going from reference to field-based operation (case a3)', () => {
+        const expectedColumn = {
+          dataType: 'number' as const,
+          isBucketed: false,
+          sourceField: 'bytes',
+          operationType: 'avg' as const,
+        };
+
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['metric', 'ref'],
+          columns: {
+            metric: { ...expectedColumn, label: 'Avg', customLabel: true },
+            ref: {
+              label: 'Reference',
+              dataType: 'number',
+              isBucketed: false,
+              operationType: 'derivative',
+              references: ['metric'],
+            },
+          },
+        };
+        const result = replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'ref',
+          op: 'sum',
+        });
+
+        expect(result.columnOrder).toEqual(['ref']);
+        expect(result.columns).toEqual(
+          expect.objectContaining({
+            ref: expect.objectContaining({ ...expectedColumn, operationType: 'sum' }),
+          })
+        );
+      });
     });
 
     it('should allow making a replacement on an operation that is being referenced, even if it ends up invalid', () => {
