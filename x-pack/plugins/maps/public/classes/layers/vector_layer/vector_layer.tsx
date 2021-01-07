@@ -349,6 +349,7 @@ export class VectorLayer extends AbstractLayer {
       sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: joinSource.getApplyGlobalQuery(),
       applyGlobalTime: joinSource.getApplyGlobalTime(),
+      sourceMeta: joinSource.getSyncMeta(),
     };
     const prevDataRequest = this.getDataRequest(sourceDataId);
 
