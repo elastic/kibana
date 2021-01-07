@@ -178,6 +178,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof polling.result_frequency_percent_as_number.NoTasksClaimed).to.eql('number');
       expect(typeof polling.result_frequency_percent_as_number.RanOutOfCapacity).to.eql('number');
       expect(typeof polling.result_frequency_percent_as_number.PoolFilled).to.eql('number');
+      expect(typeof polling.result_frequency_percent_as_number.NoAvailableWorkers).to.eql('number');
+      expect(typeof polling.result_frequency_percent_as_number.RunningAtCapacity).to.eql('number');
+      expect(typeof polling.result_frequency_percent_as_number.Failed).to.eql('number');
 
       expect(typeof drift.p50).to.eql('number');
       expect(typeof drift.p90).to.eql('number');
