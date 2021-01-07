@@ -102,4 +102,18 @@ describe('pollSearch', () => {
     expect(searchFn).toBeCalledTimes(1);
     expect(cancelFn).toBeCalledTimes(0);
   });
+
+  test('Calls cancel even when consumer unsubscribes', async () => {
+    const searchFn = getMockedSearch$(20);
+    const cancelFn = jest.fn();
+    const abortController = new AbortController();
+    const subscription = pollSearch(searchFn, cancelFn, {
+      abortSignal: abortController.signal,
+    }).subscribe(() => {});
+    subscription.unsubscribe();
+    abortController.abort();
+
+    expect(searchFn).toBeCalledTimes(1);
+    expect(cancelFn).toBeCalledTimes(1);
+  });
 });

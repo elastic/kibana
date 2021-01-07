@@ -4,26 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { from, Observable, timer, defer } from 'rxjs';
-import { expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { from, Observable, timer, defer, fromEvent, EMPTY } from 'rxjs';
+import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import type { IKibanaSearchResponse } from '../../../../../src/plugins/data/common';
 import { isErrorResponse, isPartialResponse } from '../../../../../src/plugins/data/common';
-import { AbortError, abortSignalToPromise } from '../../../../../src/plugins/kibana_utils/common';
+import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 import type { IAsyncSearchOptions } from './types';
 
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
   cancel?: () => void,
-  { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
+  { pollInterval = 1000, abortSignal }: IAsyncSearchOptions = {}
 ): Observable<Response> => {
   return defer(() => {
-    const aborted = options?.abortSignal
-      ? abortSignalToPromise(options?.abortSignal)
-      : { promise: new Promise(() => {}), cleanup: () => {} };
+    if (abortSignal?.aborted) {
+      return EMPTY;
+    }
 
-    aborted.promise.catch(() => {
-      if (cancel) cancel();
-    });
+    if (cancel) {
+      abortSignal?.addEventListener('abort', cancel, { once: true });
+    }
+
+    const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
+      map(() => {
+        throw new AbortError();
+      })
+    );
 
     return from(search()).pipe(
       expand(() => timer(pollInterval).pipe(switchMap(search))),
@@ -33,8 +39,7 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
         }
       }),
       takeWhile<Response>(isPartialResponse, true),
-      takeUntil<Response>(from(aborted.promise)),
-      finalize(aborted.cleanup)
+      takeUntil<Response>(aborted$)
     );
   });
 };
