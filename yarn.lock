@@ -22476,12 +22476,12 @@ vega-event-selector@2, vega-event-selector@^2.0.0:
   resolved "https://registry.yarnpkg.com/vega-event-selector/-/vega-event-selector-2.0.0.tgz#6af8dc7345217017ceed74e9155b8d33bad05d42"
   integrity sha512-EZeStM/7LNfJiRuop0lvhOR52Q1l9i/EIYUnm/XddhjR+UqhPkeCmZcffMTr41z3aGm/zciVLlKanUWNT+jQ1A==
 
-vega-expression@2, vega-expression@^2.3:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/vega-expression/-/vega-expression-2.3.1.tgz#d802a329190bdeb999ce6d8083af56b51f686e83"
-  integrity sha512-BOf+7XuzsubcbiLJkgyvnywse1+NY72HhzFPQqwUIfloaH9U6m2sNfMhc353ODWF9UFpKXSQ9r4tWohTj64kNQ==
+"vega-expression@npm:@elastic/vega-expression@2.4.0-kibana":
+  version "2.4.0-kibana"
+  resolved "https://registry.yarnpkg.com/@elastic/vega-expression/-/vega-expression-2.4.0-kibana.tgz#55de8cb6df5820260cd5beec33ebcfd9ded1cb26"
+  integrity sha512-yK1YZGp7V+RBzMS1v4niqh46m09sr8bn5iGp1TiHp7+bu8eACoBz6KD8q64HI8Kv9qLx+jaJIX5534/YsMlbRg==
   dependencies:
-    vega-util "1"
+    vega-util "^1.7.0"
 
 vega-force@2:
   version "2.0.0"
@@ -22514,20 +22514,20 @@ vega-hierarchy@^2.1:
     vega-dataflow "^3.1"
     vega-util "1"
 
-vega-lib@^3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/vega-lib/-/vega-lib-3.3.1.tgz#b5f09974f414ade0c5ac6c5ee250f34d61f5ff2b"
-  integrity sha512-J5VqaKPscx3NnEuiMniPb80NL6Lmh98qIty58HtBn7Sk6KvyuggFmWfzWr8bxx6huB5FPMekuwwOXuxSsgZPXA==
+"vega-lib@npm:@elastic/vega-lib@3.3.1-kibana":
+  version "3.3.1-kibana"
+  resolved "https://registry.yarnpkg.com/@elastic/vega-lib/-/vega-lib-3.3.1-kibana.tgz#8c281c2e89767252962559d4c2bd063c5bc9a4d4"
+  integrity sha512-ECktlATVkTpz8Kmg8y/1kGWsXv09Si5/fSkIkdB5SRVEpMKyMmdoDfo3oVcOsbZL/3YG81jB/xnOitD99WHcEA==
   dependencies:
     vega-crossfilter "2"
     vega-dataflow "3"
     vega-encode "2"
-    vega-expression "^2.3"
+    vega-expression "npm:@elastic/vega-expression@2.4.0-kibana"
     vega-force "2"
     vega-geo "^2.2"
     vega-hierarchy "^2.1"
     vega-loader "2"
-    vega-parser "^2.5"
+    vega-parser "npm:@elastic/vega-parser@2.7.0-kibana"
     vega-projection "1"
     vega-runtime "2"
     vega-scale "^2.1"
@@ -22536,7 +22536,7 @@ vega-lib@^3.3.1:
     vega-transforms "^1.2"
     vega-typings "*"
     vega-util "^1.7"
-    vega-view "^2.2"
+    vega-view "npm:@elastic/vega-view@2.3.2-kibana"
     vega-view-transforms "^1.2"
     vega-voronoi "2"
     vega-wordcloud "^2.1"
@@ -22565,10 +22565,10 @@ vega-loader@2:
     topojson-client "3"
     vega-util "1"
 
-vega-parser@2, vega-parser@^2.5:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/vega-parser/-/vega-parser-2.7.0.tgz#974a7c4cd877eafd07b425f842b1ce83cc18e3cf"
-  integrity sha512-i8J4F1CyADFz533FH1y6rfSp8BBszhvYjy4Cbse/fCbXJ3QyCwxil1OdA5AOl7/K7m+sSSEd985p0o/Cd3Kd5w==
+"vega-parser@npm:@elastic/vega-parser@2.7.0-kibana":
+  version "2.7.0-kibana"
+  resolved "https://registry.yarnpkg.com/@elastic/vega-parser/-/vega-parser-2.7.0-kibana.tgz#69584ea30602a2107b577f0b4cb69e8538cfc399"
+  integrity sha512-+fFDT3mQJ1NSU8vvAKrUTRj3Dd2tEyKos+tNx1iJa+y8sngi1j+MunyskREbjNPvpgfHaSF3QZGla35qm6VSBA==
   dependencies:
     d3-array "1"
     d3-color "1"
@@ -22577,7 +22577,7 @@ vega-parser@2, vega-parser@^2.5:
     d3-time-format "2"
     vega-dataflow "3"
     vega-event-selector "2"
-    vega-expression "2"
+    vega-expression "npm:@elastic/vega-expression@2.4.0-kibana"
     vega-scale "2"
     vega-scenegraph "2"
     vega-statistics "^1.2"
@@ -22675,14 +22675,14 @@ vega-view-transforms@^1.2:
     vega-scenegraph "2"
     vega-util "1"
 
-vega-view@^2.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/vega-view/-/vega-view-2.3.2.tgz#037040b8e64d9dbf7900e86bbc8e952f0b99a119"
-  integrity sha512-Q781vmfQxHlUneOtCd2wnQirIG0ABpd+Jku5n1PQDnnqE2y4KiVSDR2IINMJ1KHpsFkiIoRITD6T7XLGAo95hQ==
+"vega-view@npm:@elastic/vega-view@2.3.2-kibana":
+  version "2.3.2-kibana"
+  resolved "https://registry.yarnpkg.com/@elastic/vega-view/-/vega-view-2.3.2-kibana.tgz#5720e757d4a9b23c42319d434deee04b18690352"
+  integrity sha512-BBpiS8fd7iH5Fl2aput406Czx+keMqv3DmBWOSYgQeXqaIFCFEHJVaOtXTw0T0TSbaMZPJ+4PEHR6osnzUHhDA==
   dependencies:
     d3-array "1"
     vega-dataflow "3"
-    vega-parser "2"
+    vega-parser "npm:@elastic/vega-parser@2.7.0-kibana"
     vega-runtime "2"
     vega-scenegraph "2"
     vega-util "1"
