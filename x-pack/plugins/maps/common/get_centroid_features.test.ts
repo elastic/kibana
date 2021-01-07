@@ -75,6 +75,7 @@ test('should not create centroid for too many features polygon', () => {
 test('should create centroid feature for line (even number of points)', () => {
   const lineFeature: Feature = {
     type: 'Feature',
+    id: 'myfeature',
     geometry: {
       type: 'LineString',
       coordinates: [
@@ -97,9 +98,10 @@ test('should create centroid feature for line (even number of points)', () => {
   expect(centroidFeatures.length).toBe(1);
   expect(centroidFeatures[0]).toEqual({
     type: 'Feature',
+    id: 'myfeature',
     geometry: {
       type: 'Point',
-      coordinates: [103.0, 1.0],
+      coordinates: [103.50003808007737, 0.5000190382261022],
     },
     properties: {
       __kbn_is_centroid_feature__: true,
@@ -179,7 +181,7 @@ test('should create centroid feature for multi line', () => {
     type: 'Feature',
     geometry: {
       type: 'Point',
-      coordinates: [30, 30],
+      coordinates: [35.56701982106548, 24.717594944805672],
     },
     properties: {
       __kbn_is_centroid_feature__: true,

@@ -140,6 +140,7 @@
     "@loaders.gl/json": "^2.3.1",
     "@slack/webhook": "^5.0.0",
     "@storybook/addons": "^6.0.16",
+    "@turf/along": "6.0.1",
     "@turf/area": "6.0.1",
     "@turf/bbox": "6.0.1",
     "@turf/bbox-polygon": "6.0.1",

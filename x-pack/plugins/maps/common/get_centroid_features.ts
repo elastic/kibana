@@ -13,6 +13,7 @@ import {
   MultiPolygon,
   Position,
 } from 'geojson';
+import turfAlong from '@turf/along';
 import turfArea from '@turf/area';
 // @ts-expect-error
 import turfCenterOfMass from '@turf/center-of-mass';
@@ -36,7 +37,7 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
 
     let centroidGeometry: Geometry | null = null;
     if (feature.geometry.type === GEO_JSON_TYPE.LINE_STRING) {
-      centroidGeometry = getLineCentroid((feature.geometry as LineString).coordinates);
+      centroidGeometry = getLineCentroid(feature);
     } else if (feature.geometry.type === GEO_JSON_TYPE.MULTI_LINE_STRING) {
       const coordinates = (feature.geometry as MultiLineString).coordinates;
       let longestLine = coordinates[0];
@@ -49,7 +50,7 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
           longestLength = nextLength;
         }
       }
-      centroidGeometry = getLineCentroid(longestLine);
+      centroidGeometry = getLineCentroid(lineString(longestLine));
     } else if (feature.geometry.type === GEO_JSON_TYPE.POLYGON) {
       centroidGeometry = turfCenterOfMass(feature).geometry;
     } else if (feature.geometry.type === GEO_JSON_TYPE.MULTI_POLYGON) {
@@ -69,7 +70,8 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
 
     if (centroidGeometry) {
       centroidFeatures.push({
-        ...feature,
+        type: 'Feature',
+        id: feature.id,
         properties: {
           ...feature.properties,
           [KBN_IS_CENTROID_FEATURE]: true,
@@ -81,11 +83,7 @@ export function getCentroidFeatures(featureCollection: FeatureCollection): Featu
   return centroidFeatures;
 }
 
-// To ensure centroid is placed on line and fast calculations, centroid is middle point
-function getLineCentroid(lineCoordinates: Position[]): Geometry {
-  const centerPointIndex = Math.ceil(lineCoordinates.length / 2) - 1;
-  return {
-    type: GEO_JSON_TYPE.POINT as 'Point',
-    coordinates: lineCoordinates[centerPointIndex],
-  };
+function getLineCentroid(lineStringFeature: LineString): Geometry {
+  const length = turfLength(lineStringFeature);
+  return turfAlong(lineStringFeature, length / 2).geometry;
 }
