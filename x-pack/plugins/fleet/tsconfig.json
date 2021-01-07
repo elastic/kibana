@@ -9,7 +9,6 @@
   },
   "include": [
     // add all the folders containg files to be compiled
-    "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
@@ -21,7 +20,7 @@
 
     // requiredPlugins from ./kibana.json
     { "path": "../licensing/tsconfig.json" },
-    // TODO { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json" },
     // TODO { "path": "../encrypted_saved_objects/tsconfig.json" },
 
     // optionalPlugins from ./kibana.json
