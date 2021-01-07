@@ -43,15 +43,16 @@ export { ActionType };
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Map<string, AlertType>;
-export type ActionTypeRegistryContract<ActionConnector = any, ActionParams = any> = PublicMethodsOf<
-  TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>
->;
+export type ActionTypeRegistryContract<
+  ActionConnector = unknown,
+  ActionParams = unknown
+> = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type AlertTypeRegistryContract = PublicMethodsOf<TypeRegistry<AlertTypeModel>>;
 
 export interface ActionConnectorFieldsProps<TActionConnector> {
   action: TActionConnector;
-  editActionConfig: (property: string, value: any) => void;
-  editActionSecrets: (property: string, value: any) => void;
+  editActionConfig: (property: string, value: unknown) => void;
+  editActionSecrets: (property: string, value: unknown) => void;
   errors: IErrorObject;
   readOnly: boolean;
   consumer?: string;
@@ -128,13 +129,13 @@ export type UserConfiguredActionConnector<Config, Secrets> = ActionConnectorProp
   isPreconfigured: false;
 };
 
-export type ActionConnector<Config = Record<string, any>, Secrets = Record<string, any>> =
+export type ActionConnector<Config = Record<string, unknown>, Secrets = Record<string, unknown>> =
   | PreConfiguredActionConnector
   | UserConfiguredActionConnector<Config, Secrets>;
 
 export type ActionConnectorWithoutId<
-  Config = Record<string, any>,
-  Secrets = Record<string, any>
+  Config = Record<string, unknown>,
+  Secrets = Record<string, unknown>
 > = Omit<UserConfiguredActionConnector<Config, Secrets>, 'id'>;
 
 export type ActionConnectorTableItem = ActionConnector & {
@@ -155,9 +156,11 @@ export const OPTIONAL_ACTION_VARIABLES = ['context'] as const;
 export type ActionVariables = AsActionVariables<typeof REQUIRED_ACTION_VARIABLES[number]> &
   Partial<AsActionVariables<typeof OPTIONAL_ACTION_VARIABLES[number]>>;
 
-export interface AlertType
-  extends Pick<
-    CommonAlertType,
+export interface AlertType<
+  ActionGroupIds extends string = string,
+  RecoveryActionGroupId extends string = string
+> extends Pick<
+    CommonAlertType<ActionGroupIds, RecoveryActionGroupId>,
     | 'id'
     | 'name'
     | 'actionGroups'
@@ -184,7 +187,8 @@ export interface AlertTableItem extends Alert {
 
 export interface AlertTypeParamsExpressionProps<
   Params extends AlertTypeParams = AlertTypeParams,
-  MetaData = Record<string, any>
+  MetaData = Record<string, unknown>,
+  ActionGroupIds extends string = string
 > {
   alertParams: Params;
   alertInterval: string;
@@ -196,7 +200,7 @@ export interface AlertTypeParamsExpressionProps<
   ) => void;
   errors: IErrorObject;
   defaultActionGroupId: string;
-  actionGroups: ActionGroup[];
+  actionGroups: Array<ActionGroup<ActionGroupIds>>;
   metadata?: MetaData;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;
