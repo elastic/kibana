@@ -26,7 +26,7 @@ import {
   TimelineEventsAllRequestOptions,
   TimelineEdges,
   TimelineItem,
-  SortField,
+  TimelineRequestSortField,
 } from '../../../common/search_strategy';
 import { InspectResponse } from '../../types';
 import * as i18n from './translations';
@@ -56,7 +56,7 @@ export interface UseTimelineEventsProps {
   fields: string[];
   indexNames: string[];
   limit: number;
-  sort: SortField[];
+  sort: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
 }
@@ -69,6 +69,7 @@ export const initSortDefault = [
   {
     field: '@timestamp',
     direction: Direction.asc,
+    type: 'number',
   },
 ];
 
