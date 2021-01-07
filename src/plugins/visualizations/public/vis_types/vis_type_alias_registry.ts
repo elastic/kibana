@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { TriggerContextMapping } from '../../../ui_actions/public';
+import { SavedObject } from '../../../../core/types/saved_objects';
+
+export type VisualizationStage = 'experimental' | 'beta' | 'production';
 
 export interface VisualizationListItem {
   editUrl: string;
@@ -24,11 +26,11 @@ export interface VisualizationListItem {
   error?: string;
   icon: string;
   id: string;
-  stage: 'experimental' | 'beta' | 'production';
+  stage: VisualizationStage;
   savedObjectType: string;
   title: string;
   description?: string;
-  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
+  getSupportedTriggers?: () => string[];
   typeTitle: string;
   image?: string;
 }
@@ -36,11 +38,7 @@ export interface VisualizationListItem {
 export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
-  toListItem: (savedObject: {
-    id: string;
-    type: string;
-    attributes: object;
-  }) => VisualizationListItem;
+  toListItem: (savedObject: SavedObject) => VisualizationListItem;
 }
 
 export interface VisTypeAliasPromoTooltip {
@@ -59,8 +57,8 @@ export interface VisTypeAlias {
   description: string;
   note?: string;
   disabled?: boolean;
-  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
-  stage: 'experimental' | 'beta' | 'production';
+  getSupportedTriggers?: () => string[];
+  stage: VisualizationStage;
 
   appExtensions?: {
     visualizations: VisualizationsAppExtension;

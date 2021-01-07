@@ -5,7 +5,7 @@
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
@@ -29,11 +29,14 @@ import {
   ServiceNowExecutorResultData,
 } from './types';
 
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
+
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
+export const ActionTypeId = '.servicenow';
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -45,7 +48,7 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.servicenow',
+    id: ActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.NAME,
     validate: {
