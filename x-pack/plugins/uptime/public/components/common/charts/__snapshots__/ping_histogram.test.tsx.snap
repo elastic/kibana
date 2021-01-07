@@ -11,7 +11,7 @@ Array [
     class="euiSpacer euiSpacer--m"
   />,
   <div
-    aria-label="Bar Chart showing uptime status over time from a year ago to a year ago."
+    aria-label="Bar Chart showing uptime status over time from 15 minutes ago to 15 minutes ago."
     style="height:100%;opacity:1;transition:opacity 0.2s"
   >
     <div

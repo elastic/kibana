@@ -6,19 +6,15 @@
 
 import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
-import moment from 'moment';
 import { MonitorStatusList } from './monitor_status_list';
 import { Ping } from '../../../../../common/runtime_types';
+import { mockMoment } from '../../../../lib/helper/test_helpers';
 
 describe('MonitorStatusList component', () => {
   let pings: Ping[];
 
   beforeAll(() => {
-    const toLocaleStringSpy = jest.spyOn(moment.prototype, 'toLocaleString');
-    toLocaleStringSpy.mockReturnValue('2019-06-21 15:29:26');
-
-    const fromSpy = jest.spyOn(moment.prototype, 'from');
-    fromSpy.mockReturnValue('a few moments ago');
+    mockMoment();
   });
 
   beforeEach(() => {

@@ -5,23 +5,17 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { getLocationStatus, MonitorListStatusColumn } from './monitor_status_column';
 import { Ping } from '../../../../../common/runtime_types';
 import { STATUS } from '../../../../../common/constants';
 import { EuiThemeProvider } from '../../../../../../observability/public';
+import { mockDate, mockMoment } from '../../../../lib/helper/test_helpers';
 
 describe('MonitorListStatusColumn', () => {
   beforeAll(() => {
-    const toLocaleStringSpy = jest.spyOn(moment.prototype, 'toLocaleString');
-    toLocaleStringSpy.mockReturnValue('Thu May 09 2019 10:15:11 GMT-0400');
-
-    const fromNowSpy = jest.spyOn(moment.prototype, 'fromNow');
-    fromNowSpy.mockReturnValue('a few seconds ago');
-
-    const toStringSpy = jest.spyOn(Date.prototype, 'toString');
-    toStringSpy.mockReturnValue('Tue, 01 Jan 2019 00:00:00 GMT');
+    mockDate();
+    mockMoment();
   });
 
   let upChecks: Ping[];

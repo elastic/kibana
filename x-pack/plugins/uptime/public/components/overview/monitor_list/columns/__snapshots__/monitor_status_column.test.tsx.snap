@@ -69,7 +69,7 @@ exports[`MonitorListStatusColumn can handle a non-numeric timestamp value 1`] = 
         size="xs"
       >
         Checked 
-        Dec 31, 2018 7:00:00 PM
+        Sept 4, 2020  9:31:38 AM
       </EuiText>
     </EuiToolTip>
   </EuiText>
@@ -145,7 +145,7 @@ exports[`MonitorListStatusColumn provides expected tooltip and display times 1`]
         size="xs"
       >
         Checked 
-        Dec 31, 1969 7:38:34 PM
+        Sept 4, 2020  9:31:38 AM
       </EuiText>
     </EuiToolTip>
   </EuiText>
@@ -221,7 +221,7 @@ exports[`MonitorListStatusColumn will display location status 1`] = `
         size="xs"
       >
         Checked 
-        Dec 31, 2018 7:00:00 PM
+        Sept 4, 2020  9:31:38 AM
       </EuiText>
     </EuiToolTip>
   </EuiText>
@@ -291,7 +291,7 @@ exports[`MonitorListStatusColumn will render display location status 1`] = `
         <div
           class="euiTextColor euiTextColor--subdued"
         >
-          Checked Dec 31, 2018 7:00:00 PM
+          Checked Sept 4, 2020  9:31:38 AM
         </div>
       </div>
     </span>
