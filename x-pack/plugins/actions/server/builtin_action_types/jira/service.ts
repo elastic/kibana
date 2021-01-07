@@ -102,9 +102,13 @@ export const createExternalService = (
     return fields;
   };
 
-  const createErrorMessage = (errorResponse: ResponseError | null | undefined): string => {
+  const createErrorMessage = (errorResponse: ResponseError | string | null | undefined): string => {
     if (errorResponse == null) {
       return '';
+    }
+    if (typeof errorResponse === 'string') {
+      // Jira error.response.data can be string!!
+      return errorResponse;
     }
 
     const { errorMessages, errors } = errorResponse;
