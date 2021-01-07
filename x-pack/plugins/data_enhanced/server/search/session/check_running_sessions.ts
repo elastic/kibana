@@ -10,7 +10,11 @@ import {
   SavedObjectsFindResult,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { SearchSessionStatus, SearchSessionSavedObjectAttributes } from '../../../common';
+import {
+  SearchSessionStatus,
+  SearchSessionSavedObjectAttributes,
+  SearchSessionRequestInfo,
+} from '../../../common';
 import { SEARCH_SESSION_TYPE } from '../../saved_objects';
 import { getSearchStatus } from './get_search_status';
 import { getSessionStatus } from './get_session_status';
@@ -44,7 +48,9 @@ export async function checkRunningSessions(
         // Check statuses of all running searches
         await Promise.all(
           Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
-            const updateSearchRequest = (currentStatus: any) => {
+            const updateSearchRequest = (
+              currentStatus: Pick<SearchSessionRequestInfo, 'status' | 'error'>
+            ) => {
               sessionUpdated = true;
               session.attributes.idMapping[searchKey] = {
                 ...session.attributes.idMapping[searchKey],
