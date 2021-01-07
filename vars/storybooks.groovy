@@ -51,7 +51,7 @@ def upload() {
       credentialsId: 'kibana-ci-gcs-plugin',
       bucket: "gs://${getStorybooksBucket()}/${getDestinationDir()}/${buildState.get('checkoutInfo').commit}",
       pattern: "**/*",
-      sharedPublicly: true,
+      sharedPublicly: false,
       // showInline: false,
     )
 
@@ -61,7 +61,7 @@ def upload() {
       credentialsId: 'kibana-ci-gcs-plugin',
       bucket: "gs://${getStorybooksBucket()}/${getDestinationDir()}/latest",
       pattern: "index.html",
-      sharedPublicly: true,
+      sharedPublicly: false,
       // showInline: false,
     )
   }
