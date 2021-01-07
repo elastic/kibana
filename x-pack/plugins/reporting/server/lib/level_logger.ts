@@ -49,6 +49,10 @@ export class LevelLogger implements GenericLevelLogger {
     this.getLogger(tags).debug(msg);
   }
 
+  public trace(msg: string, tags: string[] = []) {
+    this.getLogger(tags).trace(msg);
+  }
+
   public info(msg: string, tags: string[] = []) {
     this.getLogger(tags).info(trimStr(msg));
   }
