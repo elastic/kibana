@@ -74,3 +74,16 @@ export const ERROR_GET_FIELDS = i18n.translate(
     defaultMessage: 'Error getting fields from service',
   }
 );
+
+export const SYNC_CASE = (caseTitle: string) =>
+  i18n.translate('xpack.securitySolution.containers.case.syncCase', {
+    values: { caseTitle },
+    defaultMessage: 'Alerts in "{caseTitle}" have been synced',
+  });
+
+export const STATUS_CHANGED_TOASTER_TEXT = i18n.translate(
+  'xpack.securitySolution.case.containers.statusChangeToasterText',
+  {
+    defaultMessage: 'Alerts in this case have been also had their status updated',
+  }
+);
