@@ -1,11 +1,11 @@
 package vcs
 
 import getCorrespondingESBranch
-import getProjectBranch
 import jetbrains.buildServer.configs.kotlin.v2019_2.vcs.GitVcsRoot
+import makeSafeId
 
 object Elasticsearch : GitVcsRoot({
-  id("elasticsearch_${getCorrespondingESBranch().replace("/", "_")}")
+  id("elasticsearch_${makeSafeId(getCorrespondingESBranch())}")
 
   name = "elasticsearch / ${getCorrespondingESBranch()}"
   url = "https://github.com/elastic/elasticsearch.git"

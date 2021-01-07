@@ -24,3 +24,7 @@ fun areTriggersEnabled(): Boolean {
 fun isReportingEnabled(): Boolean {
   return ENABLE_REPORTING;
 }
+
+fun makeSafeId(id: String): String {
+  return id.replace(Regex("[^a-zA-Z0-9_]"), "_")
+}
