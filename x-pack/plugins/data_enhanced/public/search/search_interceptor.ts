@@ -12,7 +12,7 @@ import {
   SearchInterceptorDeps,
   UI_SETTINGS,
   IKibanaSearchRequest,
-  SessionState,
+  SearchSessionState,
 } from '../../../../../src/plugins/data/public';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
@@ -77,7 +77,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       this.deps.session.state$
         .pipe(
           skip(1), // ignore any state, we are only interested in transition x -> BackgroundLoading
-          filter((state) => isCurrentSession() && state === SessionState.BackgroundLoading),
+          filter((state) => isCurrentSession() && state === SearchSessionState.BackgroundLoading),
           take(1)
         )
         .subscribe(() => {
