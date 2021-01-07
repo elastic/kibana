@@ -45,7 +45,10 @@ describe('swimlane connector validation', () => {
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
+        username: [],
         apiToken: [],
+        apiUrl: [],
+        appId: [],
       },
     });
 
@@ -53,7 +56,10 @@ describe('swimlane connector validation', () => {
     actionConnector.secrets.apiToken = 'test1';
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
+        username: [],
         apiToken: [],
+        apiUrl: [],
+        appId: [],
       },
     });
   });
@@ -75,6 +81,9 @@ describe('swimlane connector validation', () => {
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         username: ['Username is required.'],
+        apiToken: [],
+        apiUrl: [],
+        appId: [],
       },
     });
   });

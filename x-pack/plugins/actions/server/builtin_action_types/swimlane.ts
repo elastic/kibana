@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { curry, isUndefined, pick, omitBy } from 'lodash';
+import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { postSwimlane } from './lib/post_swimlane';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { CommentSchema } from './case/schema';
-
 
 export type SwimlaneActionType = ActionType<
   ActionTypeConfigType,
@@ -48,7 +46,6 @@ const SecretsSchema = schema.object({
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-
 const PayloadSeveritySchema = schema.oneOf([
   schema.literal('critical'),
   schema.literal('error'),
@@ -56,15 +53,12 @@ const PayloadSeveritySchema = schema.oneOf([
   schema.literal('info'),
 ]);
 
-const ParamsSchema = schema.object(
-  {
-    alertName: schema.nullable(schema.string()),
-    severity: schema.maybe(PayloadSeveritySchema),
-    tags: schema.nullable(schema.arrayOf(schema.string())),
-    comments: schema.nullable(schema.arrayOf(CommentSchema)),
-  },
-);
-
+const ParamsSchema = schema.object({
+  alertName: schema.string(),
+  severity: schema.maybe(PayloadSeveritySchema),
+  tags: schema.nullable(schema.string()),
+  comments: schema.nullable(schema.string()),
+});
 
 // action type definition
 export function getActionType({
@@ -108,7 +102,7 @@ function valdiateActionTypeConfig(
 }
 
 function getSwimlaneApiUrl(config: ActionTypeConfigType): string {
-  return config.apiUrl + '/app/' + config.applicationId + '/record';
+  return config.apiUrl + '/app/' + config.appId + '/record';
 }
 
 // action executor
@@ -129,7 +123,7 @@ async function executor(
     'Content-Type': 'application/json',
     'Private-Token': secrets.apiToken,
   };
-  const data = getBodyForEventAction(actionId, params);
+  const data = getBodyForEventAction(actionId, config, params);
 
   let response;
   try {
@@ -190,38 +184,44 @@ async function executor(
 // utilities
 
 interface SwimlanePayload {
-  '$type': string;
-  'isNew': boolean;
-  'applicationId': string;
+  $type: string;
+  isNew: boolean;
+  applicationId: string;
   comments?: {
-    '$type': string;
-    comments?: string;
+    $type: string;
+    comments?: string | null;
   };
   fieldValues?: {
-    '$type': string;
+    $type: string;
     alertName: string;
     severity: string;
-    tags?: string;
+    tags?: string | null;
   };
 }
 
-function getBodyForEventAction(actionId: string, params: ActionParamsType): SwimlanePayload {
+function getBodyForEventAction(
+  actionId: string,
+  config: ActionTypeConfigType,
+  params: ActionParamsType
+): SwimlanePayload {
   const data: SwimlanePayload = {
-    '$type': 'Core.Models.Record.Record, Core',
-    'isNew': true,
-    'applicationId': ConfigSchema.appId
+    $type: 'Core.Models.Record.Record, Core',
+    isNew: true,
+    applicationId: config.appId,
   };
 
   data.fieldValues = {
-    '$type': 'System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Object, mscorlib]], mscorlib',
+    $type:
+      'System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Object, mscorlib]], mscorlib',
     alertName: params.alertName,
     severity: params.severity || 'info',
-    tags: params.tags
+    tags: params.tags,
   };
   data.comments = {
-    '$type': 'System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Collections.Generic.List`1[[Core.Models.Record.Comments, Core]], mscorlib]], mscorlib',
-    comments: params.comments
-  }
+    $type:
+      'System.Collections.Generic.Dictionary`2[[System.String, mscorlib],[System.Collections.Generic.List`1[[Core.Models.Record.Comments, Core]], mscorlib]], mscorlib',
+    comments: params.comments,
+  };
 
   return data;
 }

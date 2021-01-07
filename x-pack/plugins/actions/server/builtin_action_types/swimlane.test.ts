@@ -4,31 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SeverityActionOptions } from '../../../triggers_actions_ui/public/application/components/builtin_action_types/types';
+
 jest.mock('./lib/post_swimlane', () => ({
   postSwimlane: jest.fn(),
 }));
 
-import { Services } from '../types';
-import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { postSwimlane } from './lib/post_swimlane';
+import { validateConfig, validateParams, validateSecrets } from '../lib';
 import { createActionTypeRegistry } from './index.test';
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/logging';
 import { actionsConfigMock } from '../actions_config.mock';
-import { actionsMock } from '../mocks';
 import {
   ActionParamsType,
   ActionTypeConfigType,
   ActionTypeSecretsType,
   getActionType,
   SwimlaneActionType,
-  SwimlaneActionTypeExecutorOptions,
 } from './swimlane';
 
-const postSwimlaneMock = postSwimlane as jest.Mock;
-
 const ACTION_TYPE_ID = '.swimlane';
-
-const services: Services = actionsMock.createServices();
 
 let actionType: SwimlaneActionType;
 let mockedLogger: jest.Mocked<Logger>;
@@ -52,13 +47,23 @@ describe('get()', () => {
 
 describe('validateConfig()', () => {
   test('should validate and pass when config is valid', () => {
-    expect(validateConfig(actionType, {})).toEqual({ apiUrl: null });
-    expect(validateConfig(actionType, { apiUrl: 'bar' })).toEqual({ apiUrl: 'bar' });
+    expect(
+      validateConfig(actionType, { apiUrl: 'bar', appId: '345', username: 'testuser' })
+    ).toEqual({
+      apiUrl: 'bar',
+      appId: '345',
+      username: 'testuser',
+    });
   });
 
   test('should validate and throw error when config is invalid', () => {
     expect(() => {
-      validateConfig(actionType, { shouldNotBeHere: true });
+      validateConfig(actionType, {
+        apiUrl: 'bar',
+        appId: '345',
+        username: 'testuser',
+        shouldNotBeHere: true,
+      });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type config: [shouldNotBeHere]: definition for this key is missing"`
     );
@@ -70,14 +75,22 @@ describe('validateConfig()', () => {
       configurationUtilities: {
         ...actionsConfigMock.create(),
         ensureUriAllowed: (url) => {
-          expect(url).toBe();
+          expect(url).toContain('https://test.swimlane.com');
         },
       },
     });
 
     expect(
-      validateConfig(actionType, { apiUrl: 'https://test.swimlane.com' })
-    ).toEqual({ apiUrl: 'https://test.swimlane.com' });
+      validateConfig(actionType, {
+        apiUrl: 'https://test.swimlane.com',
+        appId: '345',
+        username: 'testuser',
+      })
+    ).toEqual({
+      apiUrl: 'https://test.swimlane.com',
+      appId: '345',
+      username: 'testuser',
+    });
   });
 
   test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
@@ -92,10 +105,27 @@ describe('validateConfig()', () => {
     });
 
     expect(() => {
-      validateConfig(actionType, { apiUrl: 'https://test.swimlane.com' });
+      validateConfig(actionType, {
+        apiUrl: 'https://test.swimlane.com',
+        appId: '345',
+        username: 'testuser',
+      });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring SWIMLANE action: target url is not added to allowedHosts"`
+      `"error validating action type config: error configuring swimlane action: target url is not added to allowedHosts"`
     );
+  });
+});
+
+describe('validateParams()', () => {
+  test('should validate and pass when params is valid', () => {
+    const params = {
+      alertName: 'alert name',
+      tags: 'tags',
+      comments: 'my comments',
+      severity: SeverityActionOptions.CRITICAL,
+    };
+
+    expect(validateParams(actionType, params)).toEqual(params);
   });
 });
 

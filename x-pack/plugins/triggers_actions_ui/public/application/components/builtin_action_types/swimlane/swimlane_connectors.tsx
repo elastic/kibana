@@ -8,15 +8,17 @@ import { EuiCallOut, EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiText } fro
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { SwimlaneActionConnector } from '.././types';
+import { SwimlaneActionConnector } from "../types";
+import { useKibana } from '../../../../common/lib/kibana';
 
-const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
-  SwimlaneActionConnector
->> = ({ errors, action, editActionConfig, editActionSecrets, docLinks, readOnly }) => {
+const SwimlaneActionConnectorFields: React.FunctionComponent<
+  ActionConnectorFieldsProps<SwimlaneActionConnector>
+> = ({ errors, action, editActionConfig, editActionSecrets, readOnly }) => {
   const { apiUrl } = action.config;
   const { appId } = action.config;
   const { username } = action.config;
-  const { apiToken } = action.config;
+  const { apiToken } = action.secrets;
+  const { docLinks } = useKibana().services;
   return (
     <Fragment>
       <EuiFormRow
@@ -40,7 +42,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
           }}
           onBlur={() => {
             if (!apiUrl) {
-              editActionConfig('apiUrl');
+              editActionConfig('apiUrl', '');
             }
           }}
         />
@@ -58,7 +60,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         <EuiFieldText
           fullWidth
           name="appId"
-          value={appId}
+          value={appId || ''}
           readOnly={readOnly}
           data-test-subj="swimlaneAppIdInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +68,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
           }}
           onBlur={() => {
             if (!apiUrl) {
-              editActionConfig('appId');
+              editActionConfig('appId', '');
             }
           }}
         />
@@ -84,15 +86,15 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         <EuiFieldText
           fullWidth
           name="username"
-          value={username}
+          value={username || ''}
           readOnly={readOnly}
           data-test-subj="swimlaneUsernameInput"
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             editActionConfig('username', e.target.value);
           }}
           onBlur={() => {
-            if (!apiUrl) {
-              editActionConfig('username');
+            if (!username) {
+              editActionConfig('username', '');
             }
           }}
         />
@@ -111,8 +113,8 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
             />
           </EuiLink>
         }
-        error={errors.routingKey}
-        isInvalid={errors.routingKey.length > 0 && routingKey !== undefined}
+        error={errors.apiToken}
+        isInvalid={errors.apiToken.length > 0 && apiToken !== undefined}
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.apiTokenTextFieldLabel',
           {
@@ -145,6 +147,20 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
 };
 
 function getEncryptedFieldNotifyLabel(isCreate: boolean) {
+  if (isCreate) {
+    return (
+      <Fragment>
+        <EuiSpacer size="s" />
+        <EuiText size="s" data-test-subj="rememberValuesMessage">
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.rememberValueLabel"
+            defaultMessage="Remember this value. You must reenter it each time you edit the connector."
+          />
+        </EuiText>
+        <EuiSpacer size="s" />
+      </Fragment>
+    );
+  }
   return (
     <Fragment>
       <EuiSpacer size="s" />

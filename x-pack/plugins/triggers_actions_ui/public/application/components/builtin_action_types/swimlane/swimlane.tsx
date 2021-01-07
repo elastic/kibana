@@ -5,16 +5,14 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
 import {
   SwimlaneActionConnector,
   SwimlaneConfig,
   SwimlaneSecrets,
   SwimlaneActionParams,
-} from '.././types';
+} from '../types';
 import swimlaneSvg from './swimlane.svg';
-import { hasMustacheTokens } from '../../../lib/has_mustache_tokens';
 
 export function getActionType(): ActionTypeModel<
   SwimlaneConfig,
@@ -55,17 +53,37 @@ export function getActionType(): ActionTypeModel<
           )
         );
       }
+      if (!action.config.appId) {
+        errors.appId.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAppIdText',
+            {
+              defaultMessage: 'An AppId is required.',
+            }
+          )
+        );
+      }
+      if (!action.config.username) {
+        errors.username.push(
+          i18n.translate(
+            'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredUsernameText',
+            {
+              defaultMessage: 'Username is required.',
+            }
+          )
+        );
+      }
       return validationResult;
     },
     validateParams: (actionParams: SwimlaneActionParams): ValidationResult => {
       const validationResult = { errors: {} };
       const errors = {
-        alertName: new Array<string>()
+        alertName: new Array<string>(),
+        tags: new Array<string>(),
+        comments: new Array<string>(),
       };
       validationResult.errors = errors;
-      if (
-        !actionParams.alertName?.length
-      ) {
+      if (!actionParams.alertName?.length) {
         errors.alertName.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.swimlaneAction.error.requiredAlertName',
@@ -79,5 +97,5 @@ export function getActionType(): ActionTypeModel<
     },
     actionConnectorFields: lazy(() => import('./swimlane_connectors')),
     actionParamsFields: lazy(() => import('./swimlane_params')),
-  }
+  };
 }

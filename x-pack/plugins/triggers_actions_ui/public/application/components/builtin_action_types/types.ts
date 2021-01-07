@@ -111,7 +111,6 @@ export type PagerDutyActionConnector = UserConfiguredActionConnector<
   PagerDutySecrets
 >;
 
-
 export interface SwimlaneConfig {
   apiUrl: string;
   appId: string;

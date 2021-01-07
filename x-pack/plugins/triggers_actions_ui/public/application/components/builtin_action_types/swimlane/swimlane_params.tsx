@@ -17,12 +17,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
   messageVariables,
   errors,
 }) => {
-  const {
-    alertName,
-    severity,
-    tags,
-    comments,
-  } = actionParams;
+  const { alertName, severity, tags, comments } = actionParams;
   const severityOptions = [
     {
       value: 'critical',
@@ -137,7 +132,7 @@ const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneAc
           messageVariables={messageVariables}
           paramsProperty={'tags'}
           inputTargetValue={tags}
-          errors={errors.tags as string[]}
+          // errors={errors.tags as string[]}
         />
       </EuiFormRow>
       <EuiSpacer size="m" />

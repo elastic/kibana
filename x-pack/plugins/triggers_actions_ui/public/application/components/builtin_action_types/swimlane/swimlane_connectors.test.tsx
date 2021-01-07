@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
-import { SwimlaneActionConnector } from '.././types';
+import { SwimlaneActionConnector } from '../types';
 import SwimlaneActionConnectorFields from './swimlane_connectors';
-import { DocLinksStart } from 'kibana/public';
 
 describe('SwimlaneActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
@@ -25,9 +24,6 @@ describe('SwimlaneActionConnectorFields renders', () => {
         username: 'username',
       },
     } as SwimlaneActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
 
     const wrapper = mountWithIntl(
       <SwimlaneActionConnectorFields
@@ -35,7 +31,6 @@ describe('SwimlaneActionConnectorFields renders', () => {
         errors={{ index: [], apiToken: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -52,7 +47,6 @@ describe('SwimlaneActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="swimlaneAppIdInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="swimlaneUsernameInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="swimlaneApiTokenInput"]').length > 0).toBeTruthy();
-    expect(wrap)
   });
 
   test('should display a message on create to remember credentials', () => {
@@ -61,16 +55,13 @@ describe('SwimlaneActionConnectorFields renders', () => {
       secrets: {},
       config: {},
     } as SwimlaneActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
+
     const wrapper = mountWithIntl(
       <SwimlaneActionConnectorFields
         action={actionConnector}
         errors={{ index: [], apiToken: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
@@ -92,16 +83,13 @@ describe('SwimlaneActionConnectorFields renders', () => {
         username: 'username',
       },
     } as SwimlaneActionConnector;
-    const deps = {
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
-    };
+
     const wrapper = mountWithIntl(
       <SwimlaneActionConnectorFields
         action={actionConnector}
         errors={{ index: [], apiToken: [] }}
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
-        docLinks={deps!.docLinks}
         readOnly={false}
       />
     );
