@@ -41,11 +41,11 @@ import {
   useSavedDashboard,
 } from './hooks';
 
-import { removeQueryParam } from '../services/kibana_utils';
 import { IndexPattern } from '../services/data';
 import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardContainerInput } from '.';
 import { leaveConfirmStrings } from '../dashboard_strings';
+import { replaceUrlHashQuery } from '../../../kibana_utils/public';
 
 export interface DashboardAppProps {
   history: History;
@@ -108,15 +108,39 @@ export function DashboardApp({
         const shouldRefetch = Object.keys(changes).some(
           (changeKey) => !noRefetchKeys.includes(changeKey as keyof DashboardContainerInput)
         );
-        if (getSearchSessionIdFromURL(history)) {
-          // going away from a background search results
-          removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
-        }
+
+        const newSearchSessionId: string | undefined = (() => {
+          // do not update session id if this is irrelevant state change to prevent excessive searches
+          if (!shouldRefetch) return;
+
+          let searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+          if (searchSessionIdFromURL) {
+            if (
+              data.search.session.isRestore() &&
+              data.search.session.getSessionId() === searchSessionIdFromURL
+            ) {
+              // navigating away from a restored session
+              dashboardStateManager.kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
+                if (nextUrl.includes(DashboardConstants.SEARCH_SESSION_ID)) {
+                  return replaceUrlHashQuery(nextUrl, (query) => {
+                    delete query[DashboardConstants.SEARCH_SESSION_ID];
+                    return query;
+                  });
+                }
+                return nextUrl;
+              });
+              searchSessionIdFromURL = undefined;
+            } else {
+              data.search.session.restore(searchSessionIdFromURL);
+            }
+          }
+
+          return searchSessionIdFromURL ?? data.search.session.start();
+        })();
 
         dashboardContainer.updateInput({
           ...changes,
-          // do not start a new session if this is irrelevant state change to prevent excessive searches
-          ...(shouldRefetch && { searchSessionId: data.search.session.start() }),
+          ...(newSearchSessionId && { searchSessionId: newSearchSessionId }),
         });
       }
     },

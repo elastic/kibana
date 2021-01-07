@@ -204,8 +204,6 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   const history = getHistory();
-  // used for restoring background session
-  let isInitialSearch = true;
 
   // search session requested a data refresh
   subscriptions.add(
@@ -577,18 +575,21 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     abortController = new AbortController();
 
     const searchSessionId = (() => {
-      const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+      let searchSessionIdFromURL = getSearchSessionIdFromURL(history);
       if (searchSessionIdFromURL) {
-        if (isInitialSearch) {
-          data.search.session.restore(searchSessionIdFromURL);
-          isInitialSearch = false;
-          return searchSessionIdFromURL;
-        } else {
-          // navigating away from background search
+        if (
+          data.search.session.isRestore() &&
+          data.search.session.getSessionId() === searchSessionIdFromURL
+        ) {
+          // navigating away from a restored session
           removeQueryParam(history, SEARCH_SESSION_ID_QUERY_PARAM);
+          searchSessionIdFromURL = undefined;
         }
+      } else {
+        data.search.session.restore(searchSessionIdFromURL);
       }
-      return data.search.session.start();
+
+      return searchSessionIdFromURL ?? data.search.session.start();
     })();
 
     $scope

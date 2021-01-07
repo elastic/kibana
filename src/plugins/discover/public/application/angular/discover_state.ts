@@ -208,7 +208,7 @@ export function getState({
       setState(appStateContainerModified, defaultState);
     },
     getPreviousAppState: () => previousAppState,
-    flushToUrl: () => stateStorage.flush(),
+    flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
   };
 }

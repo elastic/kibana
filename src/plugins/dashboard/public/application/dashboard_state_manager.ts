@@ -83,7 +83,7 @@ export class DashboardStateManager {
   >;
   private readonly stateContainerChangeSub: Subscription;
   private readonly STATE_STORAGE_KEY = '_a';
-  private readonly kbnUrlStateStorage: IKbnUrlStateStorage;
+  public readonly kbnUrlStateStorage: IKbnUrlStateStorage;
   private readonly stateSyncRef: ISyncStateRef;
   private readonly history: History;
   private readonly usageCollection: UsageCollectionSetup | undefined;
@@ -599,7 +599,7 @@ export class DashboardStateManager {
       this.toUrlState(this.stateContainer.get())
     );
     // immediately forces scheduled updates and changes location
-    return this.kbnUrlStateStorage.flush({ replace });
+    return !!this.kbnUrlStateStorage.kbnUrlControls.flush(replace);
   }
 
   // TODO: find nicer solution for this
