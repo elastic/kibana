@@ -14,7 +14,7 @@ const isEnabledOrDefault = (property) => {
   return property === undefined || (Boolean(property) && property !== 'false');
 };
 
-export function findReason(settingsSource, context, isCloudEnabled) {
+export function findReason(settingsSource, { context, isCloudEnabled }) {
   const iterateReasons = () => {
     // PluginEnabled: check for `monitoring.enabled: false`
     const monitoringEnabled = get(settingsSource, 'enabled');
