@@ -8,6 +8,7 @@ import { difference } from 'lodash';
 import type { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 import { MlJobFieldType } from '../../../../../../common/types/field_types';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
+import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
 export function getFieldNames(results: FindFileStructureResponse) {
   const { mappings, field_stats: fieldStats, column_names: columnNames } = results;
 
@@ -34,15 +35,20 @@ export function getFieldNames(results: FindFileStructureResponse) {
 
 export function getSupportedFieldType(type: string): MlJobFieldType {
   switch (type) {
-    case 'long':
-    case 'integer':
-    case 'short':
-    case 'byte':
-    case 'double':
-    case 'float':
-    case 'half_float':
-    case 'scaled_float':
+    case ES_FIELD_TYPES.FLOAT:
+    case ES_FIELD_TYPES.HALF_FLOAT:
+    case ES_FIELD_TYPES.SCALED_FLOAT:
+    case ES_FIELD_TYPES.DOUBLE:
+    case ES_FIELD_TYPES.INTEGER:
+    case ES_FIELD_TYPES.LONG:
+    case ES_FIELD_TYPES.SHORT:
+    case ES_FIELD_TYPES.UNSIGNED_LONG:
       return ML_JOB_FIELD_TYPES.NUMBER;
+
+    case ES_FIELD_TYPES.DATE:
+    case ES_FIELD_TYPES.DATE_NANOS:
+      return ML_JOB_FIELD_TYPES.DATE;
+
     default:
       return type as MlJobFieldType;
   }

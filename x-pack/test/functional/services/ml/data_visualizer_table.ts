@@ -325,14 +325,16 @@ export function MachineLearningDataVisualizerTableProvider(
     }
 
     public async ensureNumRowsPerPage(n: 10 | 25 | 100) {
+      const paginationButton = 'mlDataVisualizerTable > tablePaginationPopoverButton';
       await retry.tryForTime(10000, async () => {
-        await testSubjects.existOrFail('tablePaginationPopoverButton');
-        await testSubjects.click('tablePaginationPopoverButton');
+        await testSubjects.existOrFail(paginationButton);
+        await testSubjects.click(paginationButton);
         await testSubjects.click(`tablePagination-${n}-rows`);
 
-        expect(await testSubjects.getVisibleText('tablePaginationPopoverButton')).to.contain(
-          n.toString()
-        );
+        const visibleTexts = await testSubjects.getVisibleText(paginationButton);
+
+        const [, pagination] = visibleTexts.split(': ');
+        expect(pagination).to.eql(n.toString());
       });
     }
   })();

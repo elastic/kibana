@@ -41,7 +41,11 @@ export const DataVisualizerFieldTypesFilter: FC<Props> = ({
     const fieldTypesTracker = new Set();
     const fieldTypes: Option[] = [];
     fields.forEach(({ type }) => {
-      if (type !== undefined && !fieldTypesTracker.has(type)) {
+      if (
+        type !== undefined &&
+        !fieldTypesTracker.has(type) &&
+        ML_JOB_FIELD_TYPES_OPTIONS[type] !== undefined
+      ) {
         const item = ML_JOB_FIELD_TYPES_OPTIONS[type];
 
         fieldTypesTracker.add(type);
