@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from '@hapi/boom';
+import { sortBy, uniqBy } from 'lodash';
 import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { MlPluginSetup } from '../../../../ml/server';
 import { PromiseReturnType } from '../../../../observability/typings/common';
@@ -95,6 +96,8 @@ export async function getServiceAnomalies({
   };
 
   const [anomalyResponse, jobIds] = await Promise.all([
+    // pass an empty array of job ids to anomaly search
+    // so any validation is skipped
     ml.mlSystem.mlAnomalySearch(params, []),
     getMLJobIds(ml.anomalyDetectors, environment),
   ]);
@@ -103,32 +106,42 @@ export async function getServiceAnomalies({
     unknown,
     typeof params
   > = anomalyResponse as any;
+  const relevantBuckets = uniqBy(
+    sortBy(
+      // make sure we only return data for jobs that are available in this space
+      typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
+        jobIds.includes(bucket.key.jobId as string)
+      ) ?? [],
+      // sort by job ID in case there are multiple jobs for one service to
+      // ensure consistent results
+      (bucket) => bucket.key.jobId
+    ),
+    // return one bucket per service
+    (bucket) => bucket.key.serviceName
+  );
 
   return {
     mlJobIds: jobIds,
-    serviceAnomalies:
-      typedAnomalyResponse.aggregations?.services.buckets
-        .filter((bucket) => jobIds.includes(bucket.key.jobId as string))
-        .map((bucket) => {
-          const metrics = bucket.metrics.top[0].metrics;
+    serviceAnomalies: relevantBuckets.map((bucket) => {
+      const metrics = bucket.metrics.top[0].metrics;
 
-          const anomalyScore =
-            (metrics.result_type === 'record' &&
-              (metrics.record_score as number)) ||
-            0;
+      const anomalyScore =
+        metrics.result_type === 'record' && metrics.record_score
+          ? (metrics.record_score as number)
+          : 0;
 
-          const severity = getSeverity(anomalyScore);
-          const healthStatus = getServiceHealthStatus({ severity });
+      const severity = getSeverity(anomalyScore);
+      const healthStatus = getServiceHealthStatus({ severity });
 
-          return {
-            serviceName: bucket.key.serviceName as string,
-            jobId: bucket.key.jobId as string,
-            transactionType: metrics.by_field_value as string,
-            actualValue: metrics.actual as number | null,
-            anomalyScore,
-            healthStatus,
-          };
-        }) ?? [],
+      return {
+        serviceName: bucket.key.serviceName as string,
+        jobId: bucket.key.jobId as string,
+        transactionType: metrics.by_field_value as string,
+        actualValue: metrics.actual as number | null,
+        anomalyScore,
+        healthStatus,
+      };
+    }),
   };
 }
 
