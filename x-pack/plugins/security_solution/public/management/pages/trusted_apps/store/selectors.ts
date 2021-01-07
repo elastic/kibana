@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createSelector } from 'reselect';
 import { ServerApiError } from '../../../../common/types';
 import { Immutable, NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
 import { MANAGEMENT_PAGE_SIZE_OPTIONS } from '../../../common/constants';
@@ -162,3 +163,24 @@ export const getCreationError = (
 
   return isFailedResourceState(submissionResourceState) ? submissionResourceState.error : undefined;
 };
+
+export const entriesExistState: (
+  state: Immutable<TrustedAppsListPageState>
+) => Immutable<TrustedAppsListPageState['entriesExist']> = (state) => state.entriesExist;
+
+export const checkingIfEntriesExist: (
+  state: Immutable<TrustedAppsListPageState>
+) => boolean = createSelector(entriesExistState, (doEntriesExists) => {
+  return !isLoadedResourceState(doEntriesExists);
+});
+
+export const entriesExist: (state: Immutable<TrustedAppsListPageState>) => boolean = createSelector(
+  entriesExistState,
+  (doEntriesExists) => {
+    return isLoadedResourceState(doEntriesExists) && doEntriesExists.data;
+  }
+);
+
+export const trustedAppsListPageActive: (state: Immutable<TrustedAppsListPageState>) => boolean = (
+  state
+) => state.active;
