@@ -14,7 +14,7 @@ import { SharePluginStart } from '../../../../src/plugins/share/public';
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
-import { registerBackgroundSessionsMgmt } from './search/sessions_mgmt';
+import { registerSearchSessionsMgmt } from './search/sessions_mgmt';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
 import { createConnectedSearchSessionIndicator } from './search';
 import { ConfigSchema } from '../config';
@@ -66,7 +66,7 @@ export class DataEnhancedPlugin
     const { search: searchConfig } = this.initializerContext.config.get();
     if (searchConfig.sendToBackground.enabled) {
       const { sessionsManagement: sessionsMgmtConfig } = searchConfig.sendToBackground;
-      registerBackgroundSessionsMgmt(core, sessionsMgmtConfig, { management });
+      registerSearchSessionsMgmt(core, sessionsMgmtConfig, { management });
     }
   }
 

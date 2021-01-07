@@ -43,7 +43,7 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
               <h1>
                 <FormattedMessage
                   id="xpack.data.mgmt.searchSessions.main.sectionTitle"
-                  defaultMessage="Background Sessions"
+                  defaultMessage="Search Sessions"
                 />
               </h1>
             </EuiTitle>

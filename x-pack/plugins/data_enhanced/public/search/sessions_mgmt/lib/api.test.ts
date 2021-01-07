@@ -24,7 +24,7 @@ let mockConfig: SessionsMgmtConfigSchema;
 let sessionsClient: SessionsClient;
 let findSessions: sinon.SinonStub;
 
-describe('Background Sessions Management API', () => {
+describe('Search Sessions Management API', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockConfig = {
@@ -186,7 +186,7 @@ describe('Background Sessions Management API', () => {
       await api.fetchTableData();
 
       expect(mockCoreSetup.notifications.toasts.addDanger).toHaveBeenCalledWith(
-        'Fetching the Background Session info timed out after 1 seconds'
+        'Fetching the Search Session info timed out after 1 seconds'
       );
     });
   });

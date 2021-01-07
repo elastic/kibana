@@ -66,7 +66,7 @@ const ContinueInBackgroundButton = ({
 );
 
 const ViewAllSearchSessionsButton = ({
-  viewSearchSessionsLink = 'management/kibana/background_sessions',
+  viewSearchSessionsLink = 'management/kibana/search_sessions',
   buttonProps = {},
 }: ActionButtonProps) => (
   <EuiButtonEmpty

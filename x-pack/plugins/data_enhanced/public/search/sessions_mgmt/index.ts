@@ -36,16 +36,16 @@ export interface AppDependencies {
 }
 
 export const APP = {
-  id: 'background_sessions',
+  id: 'search_sessions',
   getI18nName: (): string =>
     i18n.translate('xpack.data.mgmt.searchSessions.appTitle', {
-      defaultMessage: 'Background Sessions',
+      defaultMessage: 'Search Sessions',
     }),
 };
 
 export type SessionsMgmtConfigSchema = ConfigSchema['search']['sendToBackground']['sessionsManagement'];
 
-export function registerBackgroundSessionsMgmt(
+export function registerSearchSessionsMgmt(
   coreSetup: CoreSetup<DataEnhancedStartDependencies>,
   config: SessionsMgmtConfigSchema,
   services: IManagementSectionsPluginsSetup

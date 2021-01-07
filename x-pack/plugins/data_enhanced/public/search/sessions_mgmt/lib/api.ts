@@ -12,21 +12,21 @@ import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import { SessionsMgmtConfigSchema } from '../';
 import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
-import type { BackgroundSessionSavedObjectAttributes } from '../../../../common';
+import type { SearchSessionSavedObjectAttributes } from '../../../../common';
 import { ACTION, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
 
-interface BackgroundSessionSavedObject {
+interface SearchSessionSavedObject {
   id: string;
-  attributes: BackgroundSessionSavedObjectAttributes;
+  attributes: SearchSessionSavedObjectAttributes;
 }
 
 // Helper: factory for a function to map server objects to UI objects
 const mapToUISession = (
   urls: UrlGeneratorsStart,
   { expiresSoonWarning }: SessionsMgmtConfigSchema
-) => async (savedObject: BackgroundSessionSavedObject): Promise<UISession> => {
+) => async (savedObject: SearchSessionSavedObject): Promise<UISession> => {
   // Actions: always allow delete
   const actions = [ACTION.DELETE];
 
@@ -95,8 +95,7 @@ export class SearchSessionsMgmtAPI {
       tap(() => {
         this.notifications.toasts.addDanger(
           i18n.translate('xpack.data.mgmt.searchSessions.api.fetchTimeout', {
-            defaultMessage:
-              'Fetching the Background Session info timed out after {timeout} seconds',
+            defaultMessage: 'Fetching the Search Session info timed out after {timeout} seconds',
             values: { timeout: refreshTimeout.asSeconds() },
           })
         );
@@ -108,7 +107,7 @@ export class SearchSessionsMgmtAPI {
     try {
       const result = await Rx.race<FetchResult | null>(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
-        const savedObjects = result.saved_objects as BackgroundSessionSavedObject[];
+        const savedObjects = result.saved_objects as SearchSessionSavedObject[];
         return await Promise.all(savedObjects.map(mapToUISession(this.urls, this.config)));
       }
     } catch (err) {

@@ -18,11 +18,11 @@ import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { SearchSessionsMgmtTable } from './table';
 
 export default {
-  title: 'BackgroundSessionsMgmt/Table',
+  title: 'SearchSessionsMgmt/Table',
   component: SearchSessionsMgmtTable,
 };
 
-storiesOf('components/BackgroundSessionsMgmt/Table', module)
+storiesOf('components/SearchSessionsMgmt/Table', module)
   .add('no items', () => {
     const sessionsClient = new SessionsClient({ http: ({} as unknown) as HttpSetup });
     const urls = ({

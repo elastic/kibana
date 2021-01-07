@@ -27,7 +27,7 @@ let mockSession: UISession;
 
 let tz = 'UTC';
 
-describe('Background Sessions Management table column factory', () => {
+describe('Search Sessions Management table column factory', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockConfig = {

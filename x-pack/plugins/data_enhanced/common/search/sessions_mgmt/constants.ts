@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BackgroundSessionStatus } from '../';
+import { SearchSessionStatus } from '../';
 
 export enum ACTION {
   EXTEND = 'extend',
@@ -14,4 +14,4 @@ export enum ACTION {
 
 export const DATE_STRING_FORMAT = 'D MMM, YYYY, HH:mm:ss';
 
-export { BackgroundSessionStatus as STATUS };
+export { SearchSessionStatus as STATUS };

@@ -95,9 +95,9 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
     /*
      * This cleanup function should be used by tests that create new background sesions.
      * Tests should not end with new background sessions remaining in storage since that interferes with functional tests that check the _find API.
-     * Alternatively, a test can navigate to `Managment > Background Sessions` and use the UI to delete any created tests.
+     * Alternatively, a test can navigate to `Managment > Search Sessions` and use the UI to delete any created tests.
      */
-    public async deleteAllBackgroundSessions() {
+    public async deleteAllSearchSessions() {
       log.debug('Deleting created background sessions');
       // ignores 409 errs and keeps retrying
       await retry.tryForTime(5000, async () => {

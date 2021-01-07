@@ -86,7 +86,7 @@ describe('Background Search Session Management Main', () => {
     });
 
     test('page title', () => {
-      expect(main.find('h1').text()).toBe('Background Sessions');
+      expect(main.find('h1').text()).toBe('Search Sessions');
     });
 
     test('documentation link', () => {

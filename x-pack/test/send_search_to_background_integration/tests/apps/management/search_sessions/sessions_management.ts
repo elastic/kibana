@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await sendToBackground.deleteAllBackgroundSessions();
+        await sendToBackground.deleteAllSearchSessions();
       });
 
       it('Saves a session and verifies it in the Management app', async () => {
@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await sendToBackground.expectState('backgroundCompleted');
 
         await sendToBackground.openPopover();
-        await sendToBackground.viewBackgroundSessions();
+        await sendToBackground.viewSearchSessions();
 
         await testSubjects.existOrFail('session-mgmt-view-status-label-in_progress');
         await testSubjects.existOrFail('session-mgmt-view-status-tooltip-in_progress');
@@ -56,11 +56,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Archived sessions', () => {
       before(async () => {
-        await PageObjects.common.navigateToApp('management/kibana/background_sessions');
+        await PageObjects.common.navigateToApp('management/kibana/search_sessions');
       });
 
       after(async () => {
-        await sendToBackground.deleteAllBackgroundSessions();
+        await sendToBackground.deleteAllSearchSessions();
       });
 
       it('shows no items found', async () => {
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('autorefreshes and shows items on the server', async () => {
-        await esArchiver.load('data/bckgnd_sessions');
+        await esArchiver.load('data/search_sessions');
 
         const nameColumnText = await testSubjects
           .findAll('session-mgmt-table-col-name')
@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ]
         `);
 
-        await esArchiver.unload('data/bckgnd_sessions');
+        await esArchiver.unload('data/search_sessions');
       });
     });
   });
