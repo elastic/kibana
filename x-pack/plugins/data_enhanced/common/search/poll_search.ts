@@ -18,7 +18,7 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
 ): Observable<Response> => {
   return defer(() => {
     if (abortSignal?.aborted) {
-      return EMPTY;
+      throw new AbortError();
     }
 
     if (cancel) {
