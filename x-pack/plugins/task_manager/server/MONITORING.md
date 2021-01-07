@@ -179,9 +179,21 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
                         /* What is the frequency of polling cycle result?
                             Here we see 94% of "NoTasksClaimed" and 6%  "PoolFilled" */
                     "result_frequency_percent_as_number": {
+                        /* This tells us that the polling cycle didnt claim any new tasks */
                         "NoTasksClaimed": 94,
-                        "RanOutOfCapacity": 0, /* This is a legacy result, we might want to rename - it tells us when a polling cycle resulted in claiming more tasks than we had workers for, butt he name doesn't make much sense outside of the context of the code */
-                        "PoolFilled": 6
+                        /* This is a legacy result we are renaming in 8.0.0 -
+                            it tells us when a polling cycle resulted in claiming more tasks
+                            than we had workers for, butt he name doesn't make much sense outside of the context of the code */
+                        "RanOutOfCapacity": 0, 
+                        /* This is a legacy result we are renaming in 8.0.0 -
+                            it tells us when a polling cycle resulted in tasks being claimed but less the the available workers */
+                        "PoolFilled": 6,
+                        /* This tells us when a polling cycle resulted in no tasks being claimed due to there being no available workers */
+                        "NoAvailableWorkers": 0,
+                        /* This tells us when a polling cycle resulted in tasks being claimed at 100% capacity of the available workers */
+                        "RunningAtCapacity": 0,
+                        /* This tells us when the poller failed to claim */
+                        "Failed": 0
                     }
                 },
                 /* on average, the tasks in this deployment run 1.7s after their scheduled time */

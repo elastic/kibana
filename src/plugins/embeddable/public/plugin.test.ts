@@ -20,7 +20,7 @@ import { coreMock } from '../../../core/public/mocks';
 import { testPlugin } from './tests/test_plugin';
 import { EmbeddableFactoryProvider } from './types';
 import { defaultEmbeddableFactoryProvider } from './lib';
-import { HelloWorldEmbeddable } from '../../../../examples/embeddable_examples/public';
+import { HelloWorldEmbeddable } from './tests/fixtures';
 
 test('can set custom embeddable factory provider', async () => {
   const coreSetup = coreMock.createSetup();
