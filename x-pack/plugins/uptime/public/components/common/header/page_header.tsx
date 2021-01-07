@@ -44,13 +44,17 @@ export const PageHeader = () => {
   const DatePickerComponent = () =>
     isCertRoute ? (
       <CertRefreshBtn />
-    ) : isStepDetailRoute ? null : (
+    ) : (
       <StyledPicker grow={false} style={{ flexBasis: 485 }}>
         <UptimeDatePicker />
       </StyledPicker>
     );
 
   const isMonRoute = useRouteMatch(MONITOR_ROUTE);
+
+  if (isStepDetailRoute) {
+    return null;
+  }
 
   return (
     <>
