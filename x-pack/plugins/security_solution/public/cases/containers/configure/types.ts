@@ -28,6 +28,7 @@ export interface CaseConfigure {
   connector: CasesConfigure['connector'];
   createdAt: string;
   createdBy: ElasticUser;
+  error: string | null;
   mappings: CaseConnectorMapping[];
   updatedAt: string;
   updatedBy: ElasticUser;

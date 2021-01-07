@@ -175,12 +175,6 @@ export const updateDataProviderType = actionCreator<{
   providerId: string;
 }>('UPDATE_PROVIDER_TYPE');
 
-export const updateDescription = actionCreator<{
-  id: string;
-  description: string;
-  disableAutoSave?: boolean;
-}>('UPDATE_DESCRIPTION');
-
 export const updateKqlMode = actionCreator<{ id: string; kqlMode: KqlMode }>('UPDATE_KQL_MODE');
 
 export const applyKqlFilterQuery = actionCreator<{
@@ -203,9 +197,11 @@ export const updateItemsPerPageOptions = actionCreator<{
   itemsPerPageOptions: number[];
 }>('UPDATE_ITEMS_PER_PAGE_OPTIONS');
 
-export const updateTitle = actionCreator<{ id: string; title: string; disableAutoSave?: boolean }>(
-  'UPDATE_TITLE'
-);
+export const updateTitleAndDescription = actionCreator<{
+  description: string;
+  id: string;
+  title: string;
+}>('UPDATE_TITLE_AND_DESCRIPTION');
 
 export const updatePageIndex = actionCreator<{ id: string; activePage: number }>(
   'UPDATE_PAGE_INDEX'
