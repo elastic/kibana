@@ -25,6 +25,7 @@ import { alertFormI18n } from './translations';
 import { useInitApp } from '../../hooks/use_init_app';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public/';
+import { ActionTypeId } from './types';
 
 type ConnectorOption = EuiComboBoxOptionOption<string>;
 
@@ -89,7 +90,7 @@ export const AlertDefaultsForm: React.FC<SettingsFormProps> = ({
   };
 
   const options = (data ?? [])
-    .filter((action) => ALLOWED_ACTION_TYPES.includes(action.actionTypeId))
+    .filter((action) => ALLOWED_ACTION_TYPES.includes(action.actionTypeId as ActionTypeId))
     .map((connectorAction) => ({
       value: connectorAction.id,
       label: connectorAction.name,
