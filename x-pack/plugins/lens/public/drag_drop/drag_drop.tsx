@@ -165,16 +165,16 @@ export const DragDrop = (props: Props) => {
     setActiveDropTarget,
     registerDropTarget,
   } = useContext(DragContext);
-  const { value, draggable, droppable, isValueEqual, dropTargetIdentifier, order, canDrop } = props;
+  const { value, draggable, droppable, isValueEqual, dropTargetIdentifier, order } = props;
 
   useShallowCompareEffect(() => {
-    if (order && dropTargetIdentifier) {
-      registerDropTarget(order, dropTargetIdentifier, canDrop);
+    if (order && droppable && dropTargetIdentifier) {
+      registerDropTarget(order, dropTargetIdentifier);
       return () => {
         registerDropTarget(order, undefined);
       };
     }
-  }, [order, dropTargetIdentifier, registerDropTarget, canDrop]);
+  }, [order, dropTargetIdentifier, registerDropTarget, droppable]);
 
   return (
     <DragDropInner
@@ -318,20 +318,7 @@ const DragDropInner = React.memo(function DragDropInner(
 
   const isReorderDragging = !!(dragging && itemsInGroup?.includes(dragging.id));
 
-  const hasNextTarget = Boolean(
-    activeDropTarget &&
-      value &&
-      nextValidDropTarget(activeDropTarget.dropTargetsByOrder, value, props.order)
-  );
-
-  if (
-    draggable &&
-    itemsInGroup?.length &&
-    (itemsInGroup.length > 1 || (props.draggable && hasNextTarget)) &&
-    value?.id &&
-    dropTo &&
-    (!dragging || isReorderDragging)
-  ) {
+  if (draggable && dropTo) {
     const { label } = props as DraggableProps;
     return (
       <>
@@ -353,8 +340,8 @@ const DragDropInner = React.memo(function DragDropInner(
             onDragLeave: dragLeave,
             dragging,
             droppable,
-            itemsInGroup,
-            id: value.id,
+            itemsInGroup: itemsInGroup || [],
+            id: value?.id || '',
             isActive: state.isActive,
             order: props.order,
           }}
@@ -481,23 +468,28 @@ export const ReorderableDragDrop = ({
           }}
           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
             if (e.key === keys.ENTER || e.key === keys.SPACE) {
-              setReorderState((s: ReorderState) => ({
-                ...s,
-                isReorderOn: !isReorderOn,
-                keyboardReorderMessage: isReorderOn
-                  ? ''
-                  : getKeyboardReorderMessageLifted(label, currentIndex + 1),
-              }));
-              if (dragInProgress && e.key === keys.ENTER && activeDropTarget) {
-                dropTo(activeDropTarget);
+              if (itemsInGroup.length > 1) {
                 setReorderState((s: ReorderState) => ({
                   ...s,
-                  keyboardReorderMessage: s.pendingActionSuccessMessage || '',
-                  pendingActionSuccessMessage: undefined,
+                  isReorderOn: !isReorderOn,
+                  keyboardReorderMessage: isReorderOn
+                    ? ''
+                    : getKeyboardReorderMessageLifted(label, currentIndex + 1),
                 }));
+              }
+              if (dragInProgress && e.key === keys.ENTER && activeDropTarget?.activeDropTarget) {
+                dropTo(activeDropTarget.activeDropTarget);
+                // TODO re-enable announcements
+                // setReorderState((s: ReorderState) => ({
+                //   ...s,
+                //   keyboardReorderMessage: s.pendingActionSuccessMessage || '',
+                //   pendingActionSuccessMessage: undefined,
+                // }));
               }
               if (dragInProgress) {
                 draggingProps.onDragEnd();
+              } else {
+                draggingProps.onDragStart();
               }
             } else if (e.key === keys.ESCAPE) {
               setReorderState((s: ReorderState) => ({
@@ -511,7 +503,6 @@ export const ReorderableDragDrop = ({
                 draggingProps.onDragEnd();
               }
             } else if (keys.ARROW_RIGHT === e.key && activeDropTarget) {
-              draggingProps.onDragStart();
               const nextTarget = nextValidDropTarget(
                 activeDropTarget.dropTargetsByOrder,
                 dragging,

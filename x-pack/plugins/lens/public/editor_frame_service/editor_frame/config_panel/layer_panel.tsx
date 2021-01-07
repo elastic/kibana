@@ -441,19 +441,6 @@ export function LayerPanel(
                           (isDraggedOperation(dragDropContext.dragging) &&
                             dragDropContext.dragging.groupId === group.groupId)
                         }
-                        canDrop={(dragging) =>
-                          (Boolean(dragging) &&
-                            // Verify that the dragged item is not coming from the same group
-                            // since this would be a duplicate
-                            (!isDraggedOperation(dragging) || dragging.groupId !== group.groupId) &&
-                            layerDatasource.canHandleDrop({
-                              ...layerDatasourceDropProps,
-                              columnId: newId,
-                              filterOperations: group.filterOperations,
-                            })) ||
-                          // isFromTheSameGroup
-                          (isDraggedOperation(dragging) && dragging.groupId === group.groupId)
-                        }
                         dropTargetIdentifier={{
                           groupId: group.groupId,
                           layerId,

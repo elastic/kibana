@@ -33,19 +33,12 @@ export interface DragContextState {
 
   activeDropTarget?: {
     activeDropTarget?: DropTargetIdentifier;
-    dropTargetsByOrder: Record<
-      string,
-      { dropTarget: DropTargetIdentifier; canDrop?: (dragging: unknown) => boolean } | undefined
-    >;
+    dropTargetsByOrder: Record<string, { dropTarget: DropTargetIdentifier } | undefined>;
   };
 
   setActiveDropTarget: (newTarget?: DropTargetIdentifier) => void;
 
-  registerDropTarget: (
-    order: number[],
-    dropTarget?: DropTargetIdentifier,
-    canDrop?: (dragging: unknown) => boolean
-  ) => void;
+  registerDropTarget: (order: number[], dropTarget?: DropTargetIdentifier) => void;
 }
 
 /**
@@ -159,15 +152,12 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
 }
 
 export function nextValidDropTarget(
-  dropTargetsByOrder: Record<
-    string,
-    { dropTarget: DropTargetIdentifier; canDrop?: (dragging: unknown) => boolean } | undefined
-  >,
+  dropTargetsByOrder: Record<string, { dropTarget: DropTargetIdentifier } | undefined>,
   dragging: unknown,
   currentlyActiveDropTargetOrder?: number[]
 ) {
   const nextDropTarget = Object.entries(dropTargetsByOrder)
-    .filter(([, target]) => target?.canDrop && target.canDrop(dragging))
+    .filter(([, target]) => !!target)
     .sort(([orderA], [orderB]) => {
       const parsedOrderA = orderA.split(',').map((v) => Number(v));
       const parsedOrderB = orderB.split(',').map((v) => Number(v));
