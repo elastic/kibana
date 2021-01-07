@@ -159,7 +159,7 @@ export class TaskManagerPlugin
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       get: (id: string) => taskStore.get(id),
       remove: (id: string) => taskStore.remove(id),
-      deleteTaskIfItExists: (id: string) => deleteTaskIfItExists(taskStore.remove, id),
+      deleteTaskIfItExists: (id: string) => deleteTaskIfItExists(taskStore, id),
       schedule: (...args) => taskScheduling.schedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runNow: (...args) => taskScheduling.runNow(...args),
