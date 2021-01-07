@@ -43,6 +43,9 @@ export class DocLinksService {
           urlDrilldownTemplateSyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url_templating-language.html`,
           urlDrilldownVariables: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url_templating-language.html#url-template-variables`,
         },
+        discover: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/discover.html`,
+        },
         filebeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
           installation: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation-configuration.html`,
@@ -244,6 +247,7 @@ export interface DocLinksStart {
       readonly urlDrilldownTemplateSyntax: string;
       readonly urlDrilldownVariables: string;
     };
+    readonly discover: Record<string, string>;
     readonly filebeat: {
       readonly base: string;
       readonly installation: string;
