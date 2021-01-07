@@ -32,5 +32,8 @@
     // TODO { "path": "../cloud/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
+
+    // requiredBundles from ./kibana.json
+    // TODO { "path": "../infra/tsconfig.json" },
   ]
 }
