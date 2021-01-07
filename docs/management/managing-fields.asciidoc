@@ -72,13 +72,8 @@ WARNING: Computing data on the fly with scripted fields can be very resource int
 Kibana's performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-When you define a scripted field in Kibana, you have a choice of scripting languages. Starting with 5.0, the default
-options are {ref}/modules-scripting-expression.html[Lucene expressions] and {ref}/modules-scripting-painless.html[Painless].
-While you can use other scripting languages if you enable dynamic scripting for them in Elasticsearch, this is not recommended
-because they cannot be sufficiently {ref}/modules-scripting-security.html[sandboxed].
-
-WARNING: Use of Groovy, JavaScript, and Python scripting is deprecated starting in Elasticsearch 5.0, and support for those
-scripting languages will be removed in the future.
+When you define a scripted field in {kib}, you have a choice of the {ref}/modules-scripting-expression.html[Lucene expressions] or the 
+{ref}/modules-scripting-painless.html[Painless] scripting language.
 
 You can reference any single value numeric field in your expressions, for example:
 
