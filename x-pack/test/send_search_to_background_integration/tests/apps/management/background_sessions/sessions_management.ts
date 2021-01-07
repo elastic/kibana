@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(
           await testSubjects.find('backgroundSessionsMgmtTable').then((n) => n.getVisibleText())
         ).toMatchInline(`
-          "Type
+          "App
           Name
           Status
           Created

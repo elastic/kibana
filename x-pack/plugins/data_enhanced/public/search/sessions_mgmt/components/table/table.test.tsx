@@ -78,10 +78,10 @@ describe('Background Search Session Management Table', () => {
     test('table header cells', () => {
       expect(table.find('thead th').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
-          "TypeClick to sort in ascending order",
+          "AppClick to sort in ascending order",
           "NameClick to sort in ascending order",
           "StatusClick to sort in ascending order",
-          "CreatedClick to sort in ascending order",
+          "CreatedClick to unsort",
           "ExpirationClick to sort in ascending order",
         ]
       `);
@@ -96,7 +96,7 @@ describe('Background Search Session Management Table', () => {
           "Created2 Dec, 2020, 00:19:32",
           "Expiration--",
           "",
-          "View",
+          "",
         ]
       `);
     });

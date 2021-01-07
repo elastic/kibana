@@ -122,10 +122,10 @@ describe('Background Search Session management status labels', () => {
       );
 
       // no unhandled errors
-      const label = statusIndicator
-        .find(`[data-test-subj="session-mgmt-view-status-label-complete"]`)
-        .first();
-      expect(label.exists()).toBe(false);
+      const tooltip = statusIndicator.find('EuiToolTip');
+      expect((tooltip.first().props() as EuiToolTipProps).content).toMatchInlineSnapshot(
+        `"Expires on unknown"`
+      );
     });
   });
 });
