@@ -584,9 +584,9 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
           // navigating away from a restored session
           removeQueryParam(history, SEARCH_SESSION_ID_QUERY_PARAM);
           searchSessionIdFromURL = undefined;
+        } else {
+          data.search.session.restore(searchSessionIdFromURL);
         }
-      } else {
-        data.search.session.restore(searchSessionIdFromURL);
       }
 
       return searchSessionIdFromURL ?? data.search.session.start();
