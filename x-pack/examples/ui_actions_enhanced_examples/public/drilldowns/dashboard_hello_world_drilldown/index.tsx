@@ -23,8 +23,7 @@ export type Config = {
 
 const SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN = 'SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN';
 
-export class DashboardHelloWorldDrilldown
-  implements Drilldown<Config, typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER> {
+export class DashboardHelloWorldDrilldown implements Drilldown<Config, ActionContext> {
   public readonly id = SAMPLE_DASHBOARD_HELLO_WORLD_DRILLDOWN;
 
   public readonly order = 6;
@@ -33,7 +32,7 @@ export class DashboardHelloWorldDrilldown
 
   public readonly euiIcon = 'cheer';
 
-  supportedTriggers(): Array<typeof VALUE_CLICK_TRIGGER | typeof SELECT_RANGE_TRIGGER> {
+  supportedTriggers(): string[] {
     return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER];
   }
 

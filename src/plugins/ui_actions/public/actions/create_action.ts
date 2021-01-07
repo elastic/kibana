@@ -17,25 +17,16 @@
  * under the License.
  */
 
-import { ActionContextMapping } from '../types';
-import { ActionByType } from './action';
-import { ActionType } from '../types';
-import { ActionDefinition } from './action';
+import { ActionDefinition, Action } from './action';
 
-interface ActionDefinitionByType<T extends ActionType>
-  extends Omit<ActionDefinition<ActionContextMapping[T]>, 'id'> {
-  id?: string;
-}
-
-export function createAction<T extends ActionType>(
-  action: ActionDefinitionByType<T>
-): ActionByType<T> {
+export function createAction<Context extends object = object>(
+  action: ActionDefinition<Context>
+): Action<Context> {
   return {
     getIconType: () => undefined,
     order: 0,
-    id: action.type,
     isCompatible: () => Promise.resolve(true),
     getDisplayName: () => '',
     ...action,
-  } as ActionByType<T>;
+  } as Action<Context>;
 }

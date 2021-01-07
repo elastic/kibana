@@ -5,15 +5,13 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../common/mock';
 import { Mapping, MappingProps } from './mapping';
 import { mappings } from './__mock__';
 
 describe('Mapping', () => {
-  let wrapper: ReactWrapper;
-  const setEditFlyoutVisibility = jest.fn();
   const props: MappingProps = {
     connectorActionTypeId: '.servicenow',
     isLoading: false,
@@ -22,39 +20,27 @@ describe('Mapping', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
+  });
+  test('it shows mapping form group', () => {
+    const wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
+    expect(wrapper.find('[data-test-subj="static-mappings"]').first().exists()).toBe(true);
   });
 
-  afterEach(() => {
-    wrapper.unmount();
+  test('correctly maps fields', () => {
+    const wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
+    expect(wrapper.find('[data-test-subj="field-mapping-source"] code').first().text()).toBe(
+      'title'
+    );
+    expect(wrapper.find('[data-test-subj="field-mapping-target"] code').first().text()).toBe(
+      'short_description'
+    );
   });
-  describe('Common', () => {
-    test('it shows mapping form group', () => {
-      expect(wrapper.find('[data-test-subj="static-mappings"]').first().exists()).toBe(true);
+  test('displays connection warning when isLoading: false and mappings: []', () => {
+    const wrapper = mount(<Mapping {...{ ...props, mappings: [] }} />, {
+      wrappingComponent: TestProviders,
     });
-
-    test('correctly maps fields', () => {
-      expect(wrapper.find('[data-test-subj="field-mapping-source"] code').first().text()).toBe(
-        'title'
-      );
-      expect(wrapper.find('[data-test-subj="field-mapping-target"] code').first().text()).toBe(
-        'short_description'
-      );
-    });
-    // skipping until next PR
-    test.skip('it shows the update button', () => {
-      expect(
-        wrapper.find('[data-test-subj="case-mappings-update-connector-button"]').first().exists()
-      ).toBe(true);
-    });
-
-    test.skip('it triggers update flyout', () => {
-      expect(setEditFlyoutVisibility).not.toHaveBeenCalled();
-      wrapper
-        .find('button[data-test-subj="case-mappings-update-connector-button"]')
-        .first()
-        .simulate('click');
-      expect(setEditFlyoutVisibility).toHaveBeenCalled();
-    });
+    expect(wrapper.find('[data-test-subj="field-mapping-desc"]').first().text()).toBe(
+      'Field mappings require an established connection to ServiceNow. Please check your connection credentials.'
+    );
   });
 });
