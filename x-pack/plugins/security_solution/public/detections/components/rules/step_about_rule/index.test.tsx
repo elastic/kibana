@@ -206,7 +206,7 @@ describe('StepAboutRuleComponent', () => {
       .simulate('change', { target: { value: 'Test description text' } });
 
     wrapper
-      .find('[data-test-subj="detectionEngineStepAboutRuleRiskScore"] input')
+      .find('[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRisk"] input')
       .first()
       .simulate('change', { target: { value: '80' } });
 

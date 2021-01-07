@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
+import { LogicMounter } from '../../../__mocks__/kea.mock';
 
 import { mockHttpValues } from '../../../__mocks__';
 jest.mock('../../../shared/http', () => ({
@@ -36,24 +36,7 @@ describe('DocumentDetailLogic', () => {
     fields: [],
   };
 
-  const mount = (defaults?: object) => {
-    if (!defaults) {
-      resetContext({});
-    } else {
-      resetContext({
-        defaults: {
-          enterprise_search: {
-            app_search: {
-              document_detail_logic: {
-                ...defaults,
-              },
-            },
-          },
-        },
-      });
-    }
-    DocumentDetailLogic.mount();
-  };
+  const { mount } = new LogicMounter(DocumentDetailLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();

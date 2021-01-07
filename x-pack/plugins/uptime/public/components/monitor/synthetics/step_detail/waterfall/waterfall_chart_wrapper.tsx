@@ -15,7 +15,7 @@ import {
   RenderItem,
 } from '../../waterfall';
 
-const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
+export const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   const { status } = item;
 
   const isErrorStatusCode = (statusCode: number) => {
@@ -43,7 +43,7 @@ const renderSidebarItem: RenderItem<SidebarItem> = (item, index) => {
   );
 };
 
-const renderLegendItem: RenderItem<LegendItem> = (item) => {
+export const renderLegendItem: RenderItem<LegendItem> = (item) => {
   return <EuiHealth color={item.colour}>{item.name}</EuiHealth>;
 };
 
@@ -81,6 +81,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
         }}
         renderSidebarItem={renderSidebarItem}
         renderLegendItem={renderLegendItem}
+        fullHeight={true}
       />
     </WaterfallProvider>
   );

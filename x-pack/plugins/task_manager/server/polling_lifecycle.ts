@@ -12,7 +12,7 @@ import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
-import { Result, asErr, mapErr } from './lib/result_type';
+import { Result, asErr, mapErr, asOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 
@@ -232,7 +232,7 @@ export async function claimAvailableTasks(
   claim: (opts: OwnershipClaimingOpts) => Promise<ClaimOwnershipResult>,
   availableWorkers: number,
   logger: Logger
-) {
+): Promise<Result<ClaimOwnershipResult['docs'], FillPoolResult>> {
   if (availableWorkers > 0) {
     performance.mark('claimAvailableTasks_start');
 
@@ -260,12 +260,13 @@ export async function claimAvailableTasks(
           } task(s) were fetched (${docs.map((doc) => doc.id).join(', ')})`
         );
       }
-      return docs;
+      return asOk(docs);
     } catch (ex) {
       if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
         logger.warn(
           `Task Manager cannot operate when inline scripts are disabled in Elasticsearch`
         );
+        return asErr(FillPoolResult.Failed);
       } else {
         throw ex;
       }
@@ -275,6 +276,6 @@ export async function claimAvailableTasks(
     logger.debug(
       `[Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.`
     );
+    return asErr(FillPoolResult.NoAvailableWorkers);
   }
-  return [];
 }
