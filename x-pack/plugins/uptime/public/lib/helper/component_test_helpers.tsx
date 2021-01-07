@@ -5,21 +5,27 @@
  */
 
 import React, { ReactElement } from 'react';
-import { render } from '@testing-library/react';
+import { render as reactRender } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { MemoryHistory } from 'history/createMemoryHistory';
 import { createMemoryHistory, History } from 'history';
 import { I18nProvider } from '@kbn/i18n/react';
 import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { coreMock } from 'src/core/public/mocks';
-import { ChromeBreadcrumb } from 'kibana/public';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaServices,
+} from '../../../../../../src/plugins/kibana_react/public';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
 
+interface KibanaProps {
+  services?: KibanaServices;
+}
+
 interface KibanaProviderOptions {
   coreOptions?: any;
-  kibanaProps?: { services: any };
+  kibanaProps?: KibanaProps;
 }
 
 interface MockKibanaProviderProps extends KibanaProviderOptions {
@@ -30,12 +36,10 @@ interface MockRouterProps extends MockKibanaProviderProps {
   history?: History;
 }
 
-interface RenderKibanaOptions extends KibanaProviderOptions {
-  renderOptions?: any;
-}
-
-interface RenderRouterOptions extends RenderKibanaOptions {
+interface RenderRouterOptions extends KibanaProviderOptions {
   history?: History;
+  renderOptions?: any;
+  state?: any;
 }
 
 /* default mock core */
@@ -112,27 +116,16 @@ export function MockRouter({
   );
 }
 
-/* React testing library custom render functions */
-export const renderTLWithKibana = (
+export const render = (
   ui: ReactElement,
-  { coreOptions, kibanaProps, renderOptions }: RenderKibanaOptions = {}
+  { history, coreOptions, kibanaProps, renderOptions, state }: RenderRouterOptions = {}
 ) => {
-  return render(
-    <MockKibanaProvider coreOptions={coreOptions} kibanaProps={kibanaProps}>
-      {ui}
-    </MockKibanaProvider>,
-    renderOptions
-  );
-};
-
-export const renderTLWithRouter = (
-  ui: ReactElement,
-  { history, coreOptions, kibanaProps, renderOptions }: RenderRouterOptions = {}
-) => {
-  return render(
-    <MockRouter history={history} kibanaProps={kibanaProps} coreOptions={coreOptions}>
-      {ui}
-    </MockRouter>,
+  return reactRender(
+    <MountWithReduxProvider store={state}>
+      <MockRouter history={history} kibanaProps={kibanaProps} coreOptions={coreOptions}>
+        {ui}
+      </MockRouter>
+    </MountWithReduxProvider>,
     renderOptions
   );
 };

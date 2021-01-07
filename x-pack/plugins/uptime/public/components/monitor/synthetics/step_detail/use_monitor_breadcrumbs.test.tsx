@@ -8,7 +8,7 @@ import { ChromeBreadcrumb } from 'kibana/public';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { of } from 'rxjs';
-import { MountWithReduxProvider, renderTLWithRouter } from '../../../../lib';
+import { render } from '../../../../lib';
 import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
 import { OVERVIEW_ROUTE } from '../../../../../common/constants';
 import { Ping } from '../../../../../common/runtime_types/ping';
@@ -26,12 +26,10 @@ describe('useMonitorBreadcrumbs', () => {
       return <>Step Water Fall</>;
     };
 
-    renderTLWithRouter(
-      <MountWithReduxProvider>
-        <Route path={OVERVIEW_ROUTE}>
-          <Component />
-        </Route>
-      </MountWithReduxProvider>,
+    render(
+      <Route path={OVERVIEW_ROUTE}>
+        <Component />
+      </Route>,
       { kibanaProps: { services: { ...core } } }
     );
 

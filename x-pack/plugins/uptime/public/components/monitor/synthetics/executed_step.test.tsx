@@ -7,7 +7,7 @@
 import React from 'react';
 import { ExecutedStep } from './executed_step';
 import { Ping } from '../../../../common/runtime_types';
-import { mountWithRouter, renderTLWithRouter } from '../../../lib';
+import { mountWithRouter, render } from '../../../lib';
 
 // FLAKY: https://github.com/elastic/kibana/issues/85899
 describe.skip('ExecutedStep', () => {
@@ -35,9 +35,7 @@ describe.skip('ExecutedStep', () => {
   });
 
   it('renders correct step heading', () => {
-    const { getByText } = renderTLWithRouter(
-      <ExecutedStep index={3} step={step} checkGroup={'fake-group'} />
-    );
+    const { getByText } = render(<ExecutedStep index={3} step={step} checkGroup={'fake-group'} />);
 
     expect(getByText(`${step?.synthetics?.step?.index}. ${step?.synthetics?.step?.name}`));
   });

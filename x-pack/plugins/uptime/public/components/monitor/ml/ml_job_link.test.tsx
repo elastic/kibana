@@ -5,12 +5,12 @@
  */
 
 import React from 'react';
-import { renderTLWithRouter } from '../../../lib';
+import { render } from '../../../lib';
 import { MLJobLink } from './ml_job_link';
 
 describe('ML JobLink', () => {
   it('renders without errors', () => {
-    const { asFragment } = renderTLWithRouter(
+    const { asFragment } = render(
       <MLJobLink dateRange={{ to: '', from: '' }} basePath="" monitorId="testMonitor" />,
       {
         coreOptions: { triggersActionsUi: { getEditAlertFlyout: jest.fn() } },
