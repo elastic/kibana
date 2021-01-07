@@ -10,10 +10,12 @@ import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
+import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import {
   DragContext,
   DragContextState,
   DropTargetIdentifier,
+  nextValidDropTarget,
   ReorderContext,
   ReorderState,
 } from './providers';
@@ -80,6 +82,11 @@ interface BaseProps {
   droppable?: boolean;
 
   /**
+   * Should return true if the first parameter is something that can be dropped here
+   */
+  canDrop?: (dragging: unknown) => boolean;
+
+  /**
    * Additional class names to apply when another element is over the drop target
    */
   getAdditionalClassesOnEnter?: () => string;
@@ -110,6 +117,10 @@ interface BaseProps {
    * it will behave as drop is active right now
    */
   dropTargetIdentifier?: DropTargetIdentifier;
+  /**
+   * Order for keyboard dragging. This takes an array of numbers which will be used to order hierarchically
+   */
+  order?: number[];
 }
 
 /**
@@ -125,11 +136,6 @@ interface DraggableProps extends BaseProps {
    * be used if the element will be dropped into a text field.
    */
   label: string;
-  /**
-   * The event handler that fires when the user navigates to the next group
-   * with the current draggable picked up
-   */
-  onNextGroup?: () => GroupMoveResult;
 }
 
 /**
@@ -152,8 +158,23 @@ type Props = DraggableProps | NonDraggableProps;
  */
 
 export const DragDrop = (props: Props) => {
-  const { dragging, setDragging, activeDropTarget, setActiveDropTarget } = useContext(DragContext);
-  const { value, draggable, droppable, isValueEqual } = props;
+  const {
+    dragging,
+    setDragging,
+    activeDropTarget,
+    setActiveDropTarget,
+    registerDropTarget,
+  } = useContext(DragContext);
+  const { value, draggable, droppable, isValueEqual, dropTargetIdentifier, order, canDrop } = props;
+
+  useShallowCompareEffect(() => {
+    if (order && dropTargetIdentifier) {
+      registerDropTarget(order, dropTargetIdentifier, canDrop);
+      return () => {
+        registerDropTarget(order, undefined);
+      };
+    }
+  }, [order, dropTargetIdentifier, registerDropTarget, canDrop]);
 
   return (
     <DragDropInner
@@ -161,6 +182,7 @@ export const DragDrop = (props: Props) => {
       dragging={droppable ? dragging : undefined}
       activeDropTarget={activeDropTarget}
       setActiveDropTarget={setActiveDropTarget}
+      registerDropTarget={registerDropTarget}
       setDragging={setDragging}
       isDragging={
         !!(draggable && ((isValueEqual && isValueEqual(value, dragging)) || value === dragging))
@@ -207,7 +229,9 @@ const DragDropInner = React.memo(function DragDropInner(
   } = props;
 
   const activeDropTargetMatches =
-    activeDropTarget && isEqual(dropTargetIdentifier, activeDropTarget);
+    activeDropTarget &&
+    activeDropTarget.activeDropTarget &&
+    isEqual(dropTargetIdentifier, activeDropTarget.activeDropTarget);
 
   const isMoveDragging = isDragging && dragType === 'move';
 
@@ -216,12 +240,14 @@ const DragDropInner = React.memo(function DragDropInner(
     {
       'lnsDragDrop-isDraggable': draggable,
       'lnsDragDrop-isDragging': isDragging,
-      'lnsDragDrop-isHidden': isMoveDragging && !activeDropTarget,
+      'lnsDragDrop-isHidden': isMoveDragging && !activeDropTarget?.activeDropTarget,
       'lnsDragDrop-isDroppable': !draggable,
       'lnsDragDrop-isDropTarget':
         // (!activeDropTarget || activeDropTargetMatches) makes sure only the currently active drop target is highlighted, not all of them
         // because this part is not implemented yet
-        droppable && (!activeDropTarget || activeDropTargetMatches) && dragType !== 'reorder',
+        droppable &&
+        (!activeDropTarget?.activeDropTarget || activeDropTargetMatches) &&
+        dragType !== 'reorder',
       'lnsDragDrop-isActiveDropTarget':
         droppable && (state.isActive || activeDropTargetMatches) && dragType !== 'reorder',
       'lnsDragDrop-isNotDroppable': !isMoveDragging && isNotDroppable,
@@ -292,10 +318,16 @@ const DragDropInner = React.memo(function DragDropInner(
 
   const isReorderDragging = !!(dragging && itemsInGroup?.includes(dragging.id));
 
+  const hasNextTarget = Boolean(
+    activeDropTarget &&
+      value &&
+      nextValidDropTarget(activeDropTarget.dropTargetsByOrder, value, props.order)
+  );
+
   if (
     draggable &&
     itemsInGroup?.length &&
-    (itemsInGroup.length > 1 || (props.draggable && props.onNextGroup)) &&
+    (itemsInGroup.length > 1 || (props.draggable && hasNextTarget)) &&
     value?.id &&
     dropTo &&
     (!dragging || isReorderDragging)
@@ -313,7 +345,6 @@ const DragDropInner = React.memo(function DragDropInner(
             draggable,
             onDragEnd: dragEnd,
             onDragStart: dragStart,
-            onNextGroup: props.draggable ? props.onNextGroup : undefined,
             isReorderDragging,
           }}
           dropProps={{
@@ -325,6 +356,7 @@ const DragDropInner = React.memo(function DragDropInner(
             itemsInGroup,
             id: value.id,
             isActive: state.isActive,
+            order: props.order,
           }}
         >
           {children}
@@ -387,7 +419,6 @@ export const ReorderableDragDrop = ({
     draggable: Props['draggable'];
     onDragEnd: (e?: DroppableEvent) => void;
     onDragStart: (e?: DroppableEvent) => void;
-    onNextGroup?: () => GroupMoveResult;
     isReorderDragging: boolean;
   };
   dropProps: {
@@ -399,6 +430,7 @@ export const ReorderableDragDrop = ({
     itemsInGroup: string[];
     id: string;
     isActive: boolean;
+    order?: number[];
   };
   children: React.ReactElement;
   label: string;
@@ -409,7 +441,7 @@ export const ReorderableDragDrop = ({
   const { itemsInGroup, dragging, id, droppable } = dropProps;
   const { reorderState, setReorderState } = useContext(ReorderContext);
 
-  const { activeDropTarget } = useContext(DragContext);
+  const { activeDropTarget, setActiveDropTarget } = useContext(DragContext);
   const dragInProgress = Boolean(useContext(DragContext).dragging);
 
   const { isReorderOn, reorderedItems, draggingHeight, direction, groupId } = reorderState;
@@ -434,7 +466,6 @@ export const ReorderableDragDrop = ({
           aria-label={label}
           aria-describedby={classNames({
             [`lnsDragDrop-reorderInstructions-${groupId}`]: dropProps.itemsInGroup.length > 1,
-            [`lnsDragDrop-groupMovementInstructions-${groupId}`]: draggingProps.onNextGroup,
           })}
           className="lnsDragDrop__keyboardHandler"
           data-test-subj="lnsDragDrop-keyboardHandler"
@@ -479,17 +510,27 @@ export const ReorderableDragDrop = ({
               if (dragInProgress) {
                 draggingProps.onDragEnd();
               }
-            } else if (keys.ARROW_RIGHT === e.key && draggingProps.onNextGroup) {
+            } else if (keys.ARROW_RIGHT === e.key && activeDropTarget) {
               draggingProps.onDragStart();
-              const { targetDescription, actionSuccessMessage } = draggingProps.onNextGroup();
-              setReorderState((s: ReorderState) => ({
-                ...s,
-                keyboardReorderMessage: i18n.translate('xpack.lens.dragDrop.commitOrAbortLabel', {
-                  defaultMessage: '{targetDescription} Press enter to commit or escape to abort.',
-                  values: { targetDescription },
-                }),
-                pendingActionSuccessMessage: actionSuccessMessage,
-              }));
+              const nextTarget = nextValidDropTarget(
+                activeDropTarget.dropTargetsByOrder,
+                dragging,
+                dropProps.order
+              );
+              if (nextTarget) {
+                setActiveDropTarget(nextTarget);
+              }
+              // const { targetDescription, actionSuccessMessage } = draggingProps.onNextGroup();
+
+              // TODO re-enable announcements
+              // setReorderState((s: ReorderState) => ({
+              //   ...s,
+              //   keyboardReorderMessage: i18n.translate('xpack.lens.dragDrop.commitOrAbortLabel', {
+              //     defaultMessage: '{targetDescription} Press enter to commit or escape to abort.',
+              //     values: { targetDescription },
+              //   }),
+              //   pendingActionSuccessMessage: actionSuccessMessage,
+              // }));
             }
             if (isReorderOn) {
               e.stopPropagation();

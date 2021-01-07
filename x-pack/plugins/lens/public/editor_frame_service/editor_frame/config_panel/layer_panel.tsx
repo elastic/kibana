@@ -136,6 +136,10 @@ export function LayerPanel(
     activeData: props.framePublicAPI.activeData,
   };
 
+  const layerIndex = Object.keys(props.framePublicAPI.datasourceLayers).findIndex(
+    (id) => id === layerId
+  );
+
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
   const isEmptyLayer = !groups.some((d) => d.accessors.length > 0);
   const { activeId, activeGroup } = activeDimension;
@@ -327,41 +331,6 @@ export function LayerPanel(
                               );
                             }
                           }}
-                          onNextGroup={
-                            group.supportsMoreColumns
-                              ? () => {
-                                  dragDropContext.setActiveDropTarget({
-                                    layerId,
-                                    groupId: group.groupId,
-                                    isNew: true,
-                                  });
-
-                                  return {
-                                    targetDescription: i18n.translate(
-                                      'xpack.lens.dragDrop.copyDropLabel',
-                                      {
-                                        defaultMessage:
-                                          'Copy as new dimension in {groupName} group.',
-                                        values: {
-                                          groupName: group.groupLabel,
-                                        },
-                                      }
-                                    ),
-                                    actionSuccessMessage: i18n.translate(
-                                      'xpack.lens.dragDrop.copyDropSuccessLabel',
-                                      {
-                                        defaultMessage:
-                                          'Copied {label} to new dimension in {groupName} group.',
-                                        values: {
-                                          label: columnLabelMap[accessor],
-                                          groupName: group.groupLabel,
-                                        },
-                                      }
-                                    ),
-                                  };
-                                }
-                              : undefined
-                          }
                           onDrop={(droppedItem) => {
                             const dropResult = layerDatasource.onDrop({
                               ...layerDatasourceDropProps,
@@ -472,11 +441,26 @@ export function LayerPanel(
                           (isDraggedOperation(dragDropContext.dragging) &&
                             dragDropContext.dragging.groupId === group.groupId)
                         }
+                        canDrop={(dragging) =>
+                          (Boolean(dragging) &&
+                            // Verify that the dragged item is not coming from the same group
+                            // since this would be a duplicate
+                            (!isDraggedOperation(dragging) || dragging.groupId !== group.groupId) &&
+                            layerDatasource.canHandleDrop({
+                              ...layerDatasourceDropProps,
+                              columnId: newId,
+                              filterOperations: group.filterOperations,
+                            })) ||
+                          // isFromTheSameGroup
+                          (isDraggedOperation(dragging) && dragging.groupId === group.groupId)
+                        }
                         dropTargetIdentifier={{
                           groupId: group.groupId,
                           layerId,
                           isNew: true,
                         }}
+                        /* 2 to leave room for data panel and workspace, then go by layer index, then by group index */
+                        order={[2, layerIndex, groupIndex]}
                         onDrop={(droppedItem) => {
                           const dropResult = layerDatasource.onDrop({
                             ...layerDatasourceDropProps,

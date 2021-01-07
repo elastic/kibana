@@ -15,7 +15,7 @@ export type Dragging =
     })
   | undefined;
 
-export type DropTargetIdentifier = Record<string, unknown>;
+export type DropTargetIdentifier = Record<string, unknown> & { name?: string };
 
 /**
  * The shape of the drag / drop context.
@@ -31,9 +31,21 @@ export interface DragContextState {
    */
   setDragging: (dragging: Dragging) => void;
 
-  activeDropTarget?: DropTargetIdentifier;
+  activeDropTarget?: {
+    activeDropTarget?: DropTargetIdentifier;
+    dropTargetsByOrder: Record<
+      string,
+      { dropTarget: DropTargetIdentifier; canDrop?: (dragging: unknown) => boolean } | undefined
+    >;
+  };
 
   setActiveDropTarget: (newTarget?: DropTargetIdentifier) => void;
+
+  registerDropTarget: (
+    order: number[],
+    dropTarget?: DropTargetIdentifier,
+    canDrop?: (dragging: unknown) => boolean
+  ) => void;
 }
 
 /**
@@ -46,6 +58,7 @@ export const DragContext = React.createContext<DragContextState>({
   setDragging: () => {},
   activeDropTarget: undefined,
   setActiveDropTarget: () => {},
+  registerDropTarget: () => {},
 });
 
 /**
@@ -64,9 +77,21 @@ export interface ProviderProps {
    */
   setDragging: (dragging: Dragging) => void;
 
-  activeDropTarget?: DropTargetIdentifier;
+  activeDropTarget?: {
+    activeDropTarget?: DropTargetIdentifier;
+    dropTargetsByOrder: Record<
+      string,
+      { dropTarget: DropTargetIdentifier; canDrop?: (dragging: unknown) => boolean } | undefined
+    >;
+  };
 
   setActiveDropTarget: (newTarget?: DropTargetIdentifier) => void;
+
+  registerDropTarget: (
+    order: number[],
+    dropTarget?: DropTargetIdentifier,
+    canDrop?: (dragging: unknown) => boolean
+  ) => void;
 
   /**
    * The React children.
@@ -87,15 +112,36 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
   });
   const [activeDropTargetState, setActiveDropTargetState] = useState<{
     activeDropTarget?: DropTargetIdentifier;
+    dropTargetsByOrder: Record<
+      string,
+      { dropTarget: DropTargetIdentifier; canDrop?: (dragging: unknown) => boolean } | undefined
+    >;
   }>({
     activeDropTarget: undefined,
+    dropTargetsByOrder: {},
   });
   const setDragging = useMemo(() => (dragging: Dragging) => setDraggingState({ dragging }), [
     setDraggingState,
   ]);
   const setActiveDropTarget = useMemo(
     () => (activeDropTarget?: DropTargetIdentifier) =>
-      setActiveDropTargetState({ activeDropTarget }),
+      setActiveDropTargetState((s) => ({ ...s, activeDropTarget })),
+    [setActiveDropTargetState]
+  );
+
+  const registerDropTarget = useMemo(
+    () => (
+      order: number[],
+      dropTarget?: DropTargetIdentifier,
+      canDrop?: (dragging: unknown) => boolean
+    ) =>
+      setActiveDropTargetState((s) => ({
+        ...s,
+        dropTargetsByOrder: {
+          ...s.dropTargetsByOrder,
+          [order.join(',')]: dropTarget ? { dropTarget, canDrop } : undefined,
+        },
+      })),
     [setActiveDropTargetState]
   );
 
@@ -103,12 +149,49 @@ export function RootDragDropProvider({ children }: { children: React.ReactNode }
     <ChildDragDropProvider
       dragging={draggingState.dragging}
       setDragging={setDragging}
-      activeDropTarget={activeDropTargetState.activeDropTarget}
+      activeDropTarget={activeDropTargetState}
       setActiveDropTarget={setActiveDropTarget}
+      registerDropTarget={registerDropTarget}
     >
       {children}
     </ChildDragDropProvider>
   );
+}
+
+export function nextValidDropTarget(
+  dropTargetsByOrder: Record<
+    string,
+    { dropTarget: DropTargetIdentifier; canDrop?: (dragging: unknown) => boolean } | undefined
+  >,
+  dragging: unknown,
+  currentlyActiveDropTargetOrder?: number[]
+) {
+  const nextDropTarget = Object.entries(dropTargetsByOrder)
+    .filter(([, target]) => target?.canDrop && target.canDrop(dragging))
+    .sort(([orderA], [orderB]) => {
+      const parsedOrderA = orderA.split(',').map((v) => Number(v));
+      const parsedOrderB = orderB.split(',').map((v) => Number(v));
+
+      const relevantLevel = parsedOrderA.findIndex((v, i) => parsedOrderA[i] !== parsedOrderB[i]);
+      return parsedOrderA[relevantLevel] - parsedOrderB[relevantLevel];
+    })
+    .find(([targetOrder, target]) => {
+      const parsedOrder = targetOrder.split(',').map((v) => Number(v));
+
+      const relevantLevel = parsedOrder.findIndex(
+        (v, i) =>
+          parsedOrder[i] !==
+          (currentlyActiveDropTargetOrder ? currentlyActiveDropTargetOrder[i] : 0)
+      );
+      return (
+        parsedOrder[relevantLevel] -
+        (currentlyActiveDropTargetOrder ? currentlyActiveDropTargetOrder[relevantLevel] : 0)
+      );
+    });
+
+  if (nextDropTarget) {
+    return nextDropTarget[1]?.dropTarget;
+  }
 }
 
 /**
@@ -123,14 +206,13 @@ export function ChildDragDropProvider({
   setDragging,
   activeDropTarget,
   setActiveDropTarget,
+  registerDropTarget,
   children,
 }: ProviderProps) {
-  const value = useMemo(() => ({ dragging, setDragging, activeDropTarget, setActiveDropTarget }), [
-    setDragging,
-    dragging,
-    activeDropTarget,
-    setActiveDropTarget,
-  ]);
+  const value = useMemo(
+    () => ({ dragging, setDragging, activeDropTarget, setActiveDropTarget, registerDropTarget }),
+    [setDragging, dragging, activeDropTarget, setActiveDropTarget, registerDropTarget]
+  );
   return <DragContext.Provider value={value}>{children}</DragContext.Provider>;
 }
 
