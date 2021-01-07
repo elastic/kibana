@@ -12,6 +12,7 @@ export class AsyncSearchIntroDocumentation {
   constructor(docs: DocLinksStart) {
     const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docs;
     const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
+    // TODO: There should be Kibana documentation link about Search Sessions in Kibana
     this.docsBasePath = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
   }
 
