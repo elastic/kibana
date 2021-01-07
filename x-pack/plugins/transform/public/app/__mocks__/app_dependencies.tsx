@@ -31,7 +31,7 @@ const appDependencies = {
 
 export const useAppDependencies = () => {
   const ml = useContext(MlSharedContext);
-  return { ...appDependencies, ml, savedObjects: jest.fn(), data: jest.fn() };
+  return { ...appDependencies, ml, savedObjects: jest.fn() };
 };
 
 export const useToastNotifications = () => {

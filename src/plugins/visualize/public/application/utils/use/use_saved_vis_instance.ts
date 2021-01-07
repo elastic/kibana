@@ -38,23 +38,27 @@ export const useSavedVisInstance = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
+  originatingApp: string | undefined,
   visualizationIdFromUrl: string | undefined
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
     visEditorController?: IEditorController;
   }>({});
+
   const visEditorRef = useRef<HTMLDivElement | null>(null);
   const visId = useRef('');
 
   useEffect(() => {
     const {
-      application: { navigateToApp },
       chrome,
       history,
-      http: { basePath },
+      dashboard,
       setActiveUrl,
       toastNotifications,
+      http: { basePath },
+      stateTransferService,
+      application: { navigateToApp },
     } = services;
     const getSavedVisInstance = async () => {
       try {
@@ -93,11 +97,25 @@ export const useSavedVisInstance = (
 
         const { embeddableHandler, savedVis, vis } = savedVisInstance;
 
+        const originatingAppName = originatingApp
+          ? stateTransferService.getAppNameFromId(originatingApp)
+          : undefined;
+        const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
+        const byValueCreateMode = dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
+
         if (savedVis.id) {
-          chrome.setBreadcrumbs(getEditBreadcrumbs(savedVis.title));
+          chrome.setBreadcrumbs(
+            getEditBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
+          );
           chrome.docTitle.change(savedVis.title);
         } else {
-          chrome.setBreadcrumbs(getCreateBreadcrumbs());
+          chrome.setBreadcrumbs(
+            getCreateBreadcrumbs({
+              byValue: byValueCreateMode,
+              originatingAppName,
+              redirectToOrigin,
+            })
+          );
         }
 
         let visEditorController;
@@ -115,7 +133,6 @@ export const useSavedVisInstance = (
             embeddableHandler.render(visEditorRef.current);
           }
         }
-
         setState({
           savedVisInstance,
           visEditorController,
@@ -172,12 +189,13 @@ export const useSavedVisInstance = (
       getSavedVisInstance();
     }
   }, [
-    eventEmitter,
-    isChromeVisible,
     services,
+    eventEmitter,
+    originatingApp,
+    isChromeVisible,
+    visualizationIdFromUrl,
     state.savedVisInstance,
     state.visEditorController,
-    visualizationIdFromUrl,
   ]);
 
   useEffect(() => {
