@@ -38,6 +38,9 @@ interface TimelineFullScreen {
   setTimelineFullScreen: (fullScreen: boolean) => void;
 }
 
+/**
+ * This sets full screen when viewing timeline, but not actively in the flyout
+ */
 export const useGlobalFullScreen = (): GlobalFullScreen => {
   const dispatch = useDispatch();
   const globalFullScreen =
@@ -66,6 +69,9 @@ export const useGlobalFullScreen = (): GlobalFullScreen => {
   return memoizedReturn;
 };
 
+/**
+ * This sets full screen while actively in the timeline flyout
+ */
 export const useTimelineFullScreen = (): TimelineFullScreen => {
   const dispatch = useDispatch();
   const timelineFullScreen =

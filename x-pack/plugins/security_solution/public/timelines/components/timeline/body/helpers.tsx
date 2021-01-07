@@ -21,6 +21,10 @@ import {
 import { OnPinEvent, OnUnPinEvent } from '../events';
 import { ActionIconItem } from './actions/action_icon_item';
 import * as i18n from './translations';
+import {
+  useGlobalFullScreen,
+  useTimelineFullScreen,
+} from '../../../../common/containers/use_full_screen';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
@@ -135,12 +139,31 @@ const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverAction
 }) => {
   const dispatch = useDispatch();
   const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
+
+  // The analyze tool will always be opened in full screen
+  const openInFullScreen = useCallback(() => {
+    if (!timelineFullScreen && timelineId === TimelineId.active) {
+      setTimelineFullScreen(true);
+    } else if (!globalFullScreen) {
+      setGlobalFullScreen(true);
+    }
+  }, [
+    timelineId,
+    setTimelineFullScreen,
+    timelineFullScreen,
+    setGlobalFullScreen,
+    globalFullScreen,
+  ]);
+
   const handleClick = useCallback(() => {
+    openInFullScreen();
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
     if (TimelineId.active) {
       dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
     }
-  }, [dispatch, ecsData._id, timelineId]);
+  }, [dispatch, ecsData._id, timelineId, openInFullScreen]);
 
   return (
     <ActionIconItem

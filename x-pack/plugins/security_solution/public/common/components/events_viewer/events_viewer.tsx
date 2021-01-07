@@ -174,18 +174,25 @@ const EventsViewerComponent: React.FC<Props> = ({
     id,
   ]);
 
-  const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
+  const showExitFullScreen = useMemo(() => globalFullScreen && !graphEventId, [
+    globalFullScreen,
+    graphEventId,
+  ]);
 
-  const titleWithExitFullScreen = useMemo(
+  const EventTitle = useMemo(
     () => (
       <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
-        <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ExitFullScreen />
+          <TitleText data-test-subj="title">{title}</TitleText>
         </EuiFlexItem>
+        {showExitFullScreen && (
+          <EuiFlexItem grow={false}>
+            <ExitFullScreen />
+          </EuiFlexItem>
+        )}
       </TitleFlexGroup>
     ),
-    [justTitle]
+    [title, showExitFullScreen]
   );
 
   const combinedQueries = combineQueries({
@@ -284,7 +291,7 @@ const EventsViewerComponent: React.FC<Props> = ({
               id={!resolverIsShowing(graphEventId) ? id : undefined}
               height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
               subtitle={utilityBar ? undefined : subtitle}
-              title={globalFullScreen ? titleWithExitFullScreen : justTitle}
+              title={EventTitle}
             >
               {HeaderSectionContent}
             </HeaderSection>

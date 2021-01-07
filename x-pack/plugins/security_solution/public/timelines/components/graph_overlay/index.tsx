@@ -54,56 +54,22 @@ const StyledResolver = styled(Resolver)`
   height: 100%;
 `;
 
-const FullScreenButtonIcon = styled(EuiButtonIcon)`
-  margin: 4px 0 4px 0;
-`;
-
 interface OwnProps {
   isEventViewer: boolean;
   timelineId: string;
 }
 
 interface NavigationProps {
-  fullScreen: boolean;
-  globalFullScreen: boolean;
   onCloseOverlay: () => void;
-  timelineId: string;
-  timelineFullScreen: boolean;
-  toggleFullScreen: () => void;
 }
 
-const NavigationComponent: React.FC<NavigationProps> = ({
-  fullScreen,
-  globalFullScreen,
-  onCloseOverlay,
-  timelineId,
-  timelineFullScreen,
-  toggleFullScreen,
-}) => (
+const NavigationComponent: React.FC<NavigationProps> = ({ onCloseOverlay }) => (
   <EuiFlexGroup alignItems="center" gutterSize="none">
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty iconType="cross" onClick={onCloseOverlay} size="xs">
         {i18n.CLOSE_ANALYZER}
       </EuiButtonEmpty>
     </EuiFlexItem>
-    {timelineId !== TimelineId.active && (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={fullScreen ? EXIT_FULL_SCREEN : FULL_SCREEN}>
-          <FullScreenButtonIcon
-            aria-label={
-              isFullScreen({ globalFullScreen, timelineId, timelineFullScreen })
-                ? EXIT_FULL_SCREEN
-                : FULL_SCREEN
-            }
-            className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-            color={fullScreen ? 'ghost' : 'primary'}
-            data-test-subj="full-screen"
-            iconType="fullScreen"
-            onClick={toggleFullScreen}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    )}
   </EuiFlexGroup>
 );
 
@@ -113,16 +79,28 @@ const Navigation = React.memo(NavigationComponent);
 
 const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }) => {
   const dispatch = useDispatch();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
+  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
+
+  // This graph component will always open in full screen, so only necessary to close it
+  const closeFullScreen = useCallback(() => {
+    if (timelineId === TimelineId.active) {
+      setTimelineFullScreen(false);
+    } else {
+      setGlobalFullScreen(false);
+    }
+  }, [timelineId, setTimelineFullScreen, setGlobalFullScreen]);
+
   const onCloseOverlay = useCallback(() => {
+    closeFullScreen();
     dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: '' }));
-  }, [dispatch, timelineId]);
+  }, [dispatch, timelineId, closeFullScreen]);
+
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).graphEventId
   );
 
-  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
-  const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
   const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
@@ -154,20 +132,6 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
     [globalFullScreen, timelineId, timelineFullScreen]
   );
 
-  const toggleFullScreen = useCallback(() => {
-    if (timelineId === TimelineId.active) {
-      setTimelineFullScreen(!timelineFullScreen);
-    } else {
-      setGlobalFullScreen(!globalFullScreen);
-    }
-  }, [
-    timelineId,
-    setTimelineFullScreen,
-    timelineFullScreen,
-    setGlobalFullScreen,
-    globalFullScreen,
-  ]);
-
   const { signalIndexName } = useSignalIndex();
   const [siemDefaultIndices] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const indices: string[] | null = useMemo(() => {
@@ -186,14 +150,7 @@ const GraphOverlayComponent: React.FC<OwnProps> = ({ isEventViewer, timelineId }
       <EuiHorizontalRule margin="none" />
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <Navigation
-            fullScreen={fullScreen}
-            globalFullScreen={globalFullScreen}
-            onCloseOverlay={onCloseOverlay}
-            timelineId={timelineId}
-            timelineFullScreen={timelineFullScreen}
-            toggleFullScreen={toggleFullScreen}
-          />
+          <Navigation onCloseOverlay={onCloseOverlay} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="none" />

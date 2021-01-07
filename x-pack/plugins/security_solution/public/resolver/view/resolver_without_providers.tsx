@@ -150,7 +150,6 @@ export const ResolverWithoutProviders = React.memo(
                 );
               })}
             </GraphContainer>
-            {/* TODO: Remove the below component in favor of the Timeline EventDetails Panel */}
             <PanelRouter />
           </>
         )}
