@@ -1,11 +1,13 @@
-def STORYBOOKS_BUCKET = "ci-artifacts.kibana.dev/storybooks"
+def getStorybooksBucket() {
+  return "ci-artifacts.kibana.dev/storybooks"
+}
 
 def getDestinationDir() {
   return env.ghprbPullId ? "pr-${env.ghprbPullId}" : buildState.get('checkoutInfo').branch.replace("/", "__")
 }
 
 def getUrl() {
-  return "https://${STORYBOOKS_BUCKET}/${getDestinationDir()}"
+  return "https://${getStorybooksBucket()}/${getDestinationDir()}"
 }
 
 def getUrlLatest() {
@@ -47,7 +49,7 @@ def upload() {
 
     googleStorageUpload(
       credentialsId: 'kibana-ci-gcs-plugin',
-      bucket: "gs://${STORYBOOKS_BUCKET}/${getDestinationDir()}/${buildState.get('checkoutInfo').commit}",
+      bucket: "gs://${getStorybooksBucket()}/${getDestinationDir()}/${buildState.get('checkoutInfo').commit}",
       pattern: "**/*",
       sharedPublicly: true,
       // showInline: false,
@@ -57,7 +59,7 @@ def upload() {
 
     googleStorageUpload(
       credentialsId: 'kibana-ci-gcs-plugin',
-      bucket: "gs://${STORYBOOKS_BUCKET}/${getDestinationDir()}/latest",
+      bucket: "gs://${getStorybooksBucket()}/${getDestinationDir()}/latest",
       pattern: "index.html",
       sharedPublicly: true,
       // showInline: false,

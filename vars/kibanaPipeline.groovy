@@ -420,7 +420,8 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
     def config = [name: 'ci-worker', size: 'xxl', ramDisk: true] + (params.worker ?: [:])
 
     workers.ci(config) {
-      withCiTaskQueue(parallel: 24) {
+      withCiTaskQueue(parallel: 1) { // TODO change back
+      // withCiTaskQueue(parallel: 24) {
         // TODO re-enable
         // parallel([
         //   docker: {
