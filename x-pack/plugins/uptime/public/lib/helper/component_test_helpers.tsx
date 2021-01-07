@@ -41,17 +41,11 @@ interface RenderRouterOptions extends RenderKibanaOptions {
 /* default mock core */
 const defaultCore = coreMock.createStart();
 const mockCore: () => any = () => {
-  let breadcrumbObj: ChromeBreadcrumb[] = [];
   const core = {
     ...defaultCore,
     application: {
       getUrlForApp: () => '/app/uptime',
       navigateToUrl: jest.fn(),
-    },
-    chrome: {
-      setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
-        breadcrumbObj = newBreadcrumbs;
-      },
     },
   };
 
