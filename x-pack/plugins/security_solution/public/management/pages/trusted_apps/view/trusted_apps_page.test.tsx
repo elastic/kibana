@@ -24,14 +24,6 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
 
-//
-//
-//
-jest.setTimeout(30000);
-//
-//
-//
-
 describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
     'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.';
