@@ -51,13 +51,7 @@ export interface IEventLogClientService {
 }
 
 export interface IEventLogClient {
-  findEventsBySavedObject(
-    type: string,
-    id: string,
-    options?: Partial<FindOptionsType>
-  ): Promise<QueryEventsBySavedObjectResult>;
-
-  findEventsBySavedObjects(
+  findEventsBySavedObjectIds(
     type: string,
     ids: string[],
     options?: Partial<FindOptionsType>

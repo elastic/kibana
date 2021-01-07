@@ -31,6 +31,7 @@ import { EventLogService } from './event_log_service';
 import { createEsContext, EsContext } from './es';
 import { EventLogClientService } from './event_log_start_service';
 import { SavedObjectProviderRegistry } from './saved_object_provider_registry';
+import { findByIdsRoute } from './routes/find_by_ids';
 
 export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 
@@ -99,6 +100,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     const router = core.http.createRouter();
     // Register routes
     findRoute(router, this.systemLogger);
+    findByIdsRoute(router, this.systemLogger);
 
     return this.eventLogService;
   }

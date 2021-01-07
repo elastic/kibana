@@ -12,7 +12,7 @@ import { SpacesServiceStart } from '../../spaces/server';
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-import { SavedObjectBulkGetter, SavedObjectGetter } from './saved_object_provider_registry';
+import { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
@@ -59,7 +59,7 @@ export type FindOptionsType = Pick<
 
 interface EventLogServiceCtorParams {
   esContext: EsContext;
-  savedObjectGetter: SavedObjectBulkGetter;
+  savedObjectGetter: SavedObjectBulkGetterResult;
   spacesService?: SpacesServiceStart;
   request: KibanaRequest;
 }
@@ -67,7 +67,7 @@ interface EventLogServiceCtorParams {
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClient implements IEventLogClient {
   private esContext: EsContext;
-  private savedObjectGetter: SavedObjectBulkGetter;
+  private savedObjectGetter: SavedObjectBulkGetterResult;
   private spacesService?: SpacesServiceStart;
   private request: KibanaRequest;
 
@@ -78,29 +78,7 @@ export class EventLogClient implements IEventLogClient {
     this.request = request;
   }
 
-  async findEventsBySavedObject(
-    type: string,
-    id: string,
-    options?: Partial<FindOptionsType>
-  ): Promise<QueryEventsBySavedObjectResult> {
-    const findOptions = findOptionsSchema.validate(options ?? {});
-
-    const space = await this.spacesService?.getActiveSpace(this.request);
-    const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
-
-    // verify the user has the required permissions to view this saved object
-    await this.savedObjectGetter([{ type, id }]);
-
-    return await this.esContext.esAdapter.queryEventsBySavedObject(
-      this.esContext.esNames.indexPattern,
-      namespace,
-      type,
-      id,
-      findOptions
-    );
-  }
-
-  async findEventsBySavedObjects(
+  async findEventsBySavedObjectIds(
     type: string,
     ids: string[],
     options?: Partial<FindOptionsType>
@@ -110,9 +88,8 @@ export class EventLogClient implements IEventLogClient {
     const space = await this.spacesService?.getActiveSpace(this.request);
     const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
 
-    // verify the user has the required permissions to view this saved object
-    // await this.savedObjectGetter(type, id);
-    // TODO:
+    // verify the user has the required permissions to view this saved objects
+    await this.savedObjectGetter(type, ids);
 
     return await this.esContext.esAdapter.queryEventsBySavedObjects(
       this.esContext.esNames.indexPattern,

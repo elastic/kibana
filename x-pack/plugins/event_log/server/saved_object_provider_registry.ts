@@ -5,22 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  KibanaRequest,
-  SavedObjectsBulkGetObject,
-  SavedObjectsClientContract,
-} from 'src/core/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 
 import { fromNullable, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-export type SavedObjectGetter = (
-  ...params: Parameters<SavedObjectsClientContract['get']>
-) => Promise<unknown>;
-
 export type SavedObjectBulkGetter = (
   ...params: Parameters<SavedObjectsClientContract['bulkGet']>
 ) => Promise<unknown>;
+
+export type SavedObjectBulkGetterResult = (type: string, ids: string[]) => Promise<unknown>;
 
 export type SavedObjectProvider = (request: KibanaRequest) => SavedObjectBulkGetter;
 
@@ -43,7 +37,7 @@ export class SavedObjectProviderRegistry {
     this.providers.set(type, provider);
   }
 
-  public getProvidersClient(request: KibanaRequest): SavedObjectBulkGetter {
+  public getProvidersClient(request: KibanaRequest): SavedObjectBulkGetterResult {
     if (!this.defaultProvider) {
       throw new Error(
         i18n.translate(
@@ -63,14 +57,15 @@ export class SavedObjectProviderRegistry {
     // curl -X GET "localhost:9200/my-index-000001/_mget?pretty" -H 'Content-Type: application/json' -d' { "ids" : ["1", "2"] } '
     const scopedProviders = new Map<string, SavedObjectBulkGetter>();
     const defaultGetter = this.defaultProvider(request);
-    return (objects: SavedObjectsBulkGetObject[] | undefined) => {
+    return (type: string, ids: string[]) => {
+      const objects = [{ type, id: ids[0] }];
       const getter = pipe(
-        fromNullable(scopedProviders.get('objects')),
+        fromNullable(scopedProviders.get(type)),
         getOrElse(() => {
-          const client = this.providers.has(objects![0].type)
-            ? this.providers.get(objects![0].type)!(request)
+          const client = this.providers.has(type)
+            ? this.providers.get(type)!(request)
             : defaultGetter;
-          scopedProviders.set(objects![0].type, client);
+          scopedProviders.set(type, client);
           return client;
         })
       );

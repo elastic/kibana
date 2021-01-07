@@ -45,7 +45,7 @@ describe('SavedObjectProviderRegistry', () => {
 
       getter.mockResolvedValue(alert);
 
-      expect(await registry.getProvidersClient(request)('alert', alert.id)).toMatchObject(alert);
+      expect(await registry.getProvidersClient(request)('alert', [alert.id])).toMatchObject(alert);
 
       expect(provider).toHaveBeenCalledWith(request);
       expect(getter).toHaveBeenCalledWith('alert', alert.id);
@@ -70,7 +70,9 @@ describe('SavedObjectProviderRegistry', () => {
       defaultProvider.mockReturnValue(getter);
       getter.mockResolvedValue(action);
 
-      expect(await registry.getProvidersClient(request)('action', action.id)).toMatchObject(action);
+      expect(await registry.getProvidersClient(request)('action', [action.id])).toMatchObject(
+        action
+      );
 
       expect(getter).toHaveBeenCalledWith('action', action.id);
       expect(defaultProvider).toHaveBeenCalledWith(request);
