@@ -30,7 +30,7 @@ def upload() {
       .collect { it.replace('/', '') }
       .findAll { it != 'composite' }
 
-    def listHtml = storybooks.collect { """<li><a href="${getUrlForCommit()}/${it}">${it}</a></li>""" }
+    def listHtml = storybooks.collect { """<li><a href="${getUrlForCommit()}/${it}">${it}</a></li>""" }.join("\n")
 
     def html = """
       <html>
