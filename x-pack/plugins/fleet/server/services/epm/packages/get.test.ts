@@ -120,7 +120,7 @@ describe('When using EPM `get` services', () => {
 
         switch (page) {
           case 1:
-            savedObjectsResponse = [savedObjects[1]];
+            savedObjectsResponse = [savedObjects[0]];
             break;
           case 2:
             savedObjectsResponse = savedObjects.slice(1);
