@@ -5,6 +5,6 @@
  */
 
 export {
-  BackgroundSessionIndicatorDeps,
-  createConnectedBackgroundSessionIndicator,
-} from './connected_background_session_indicator';
+  SearchSessionIndicatorDeps,
+  createConnectedSearchSessionIndicator,
+} from './connected_search_session_indicator';
