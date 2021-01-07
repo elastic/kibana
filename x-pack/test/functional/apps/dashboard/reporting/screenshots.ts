@@ -74,27 +74,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
-
-        // verify some UTF8 content from the PDF
-        const pdfStrings = (res.body as Buffer).toString('utf8', 14); // start on byte 14 to skip non-utf8 data
-        const [header] = pdfStrings.split('stream'); // ignore everthing from `stream` to `endstream` - the non-utf8 blocks
-        expectSnapshot(header).toMatchInline(`
-          "
-          13 0 obj
-          <<
-          /Predictor 15
-          /Colors 1
-          /BitsPerComponent 8
-          /Columns 577
-          >>
-          endobj
-          14 0 obj
-          <<
-          /Length 149
-          /Filter /FlateDecode
-          >>
-          "
-        `);
       });
     });
 
@@ -169,26 +148,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
-
-        const pdfStrings = (res.body as Buffer).toString('utf8', 14); // start on byte 14 to skip non-utf8 data
-        const [header] = pdfStrings.split('stream'); // ignore everthing from `stream` to `endstream` - the non-utf8 blocks
-        expectSnapshot(header).toMatchInline(`
-          "
-          7 0 obj
-          <<
-          /Predictor 15
-          /Colors 1
-          /BitsPerComponent 8
-          /Columns 577
-          >>
-          endobj
-          8 0 obj
-          <<
-          /Length 149
-          /Filter /FlateDecode
-          >>
-          "
-        `);
       });
     });
   });
