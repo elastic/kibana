@@ -4,18 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import moment from 'moment';
-import { MonitorStatusList } from './monitor_status_list';
-import { Ping } from '../../../../../common/runtime_types';
+import { MonitorStatusList } from '../monitor_status_list';
+import { Ping } from '../../../../../../common/runtime_types';
 
 describe('MonitorStatusList component', () => {
   let pings: Ping[];
 
   beforeAll(() => {
-    moment.prototype.toLocaleString = jest.fn(() => '2019-06-21 15:29:26');
-    moment.prototype.from = jest.fn(() => 'a few moments ago');
+    const toLocaleStringSpy = jest.spyOn(moment.prototype, 'toLocaleString');
+    toLocaleStringSpy.mockReturnValue('2019-06-21 15:29:26');
+
+    const fromSpy = jest.spyOn(moment.prototype, 'from');
+    fromSpy.mockReturnValue('a few moments ago');
   });
 
   beforeEach(() => {

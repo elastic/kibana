@@ -6,19 +6,21 @@
 
 import React from 'react';
 import moment from 'moment';
-import { renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { getLocationStatus, MonitorListStatusColumn } from '../monitor_list_status_column';
 import { Ping } from '../../../../../common/runtime_types';
 import { STATUS } from '../../../../../common/constants';
-import { getLocationStatus, MonitorListStatusColumn } from './monitor_status_column';
-import { EuiThemeProvider } from '../../../../../../observability/public';
 
 describe('MonitorListStatusColumn', () => {
   beforeAll(() => {
-    moment.prototype.toLocaleString = jest.fn(() => 'Thu May 09 2019 10:15:11 GMT-0400');
-    moment.prototype.fromNow = jest.fn(() => 'a few seconds ago');
-    // Only for testing purposes we allow extending Date here
-    // eslint-disable-next-line no-extend-native
-    Date.prototype.toString = jest.fn(() => 'Tue, 01 Jan 2019 00:00:00 GMT');
+    const toLocaleStringSpy = jest.spyOn(moment.prototype, 'toLocaleString');
+    toLocaleStringSpy.mockReturnValue('Thu May 09 2019 10:15:11 GMT-0400');
+
+    const fromNowSpy = jest.spyOn(moment.prototype, 'fromNow');
+    fromNowSpy.mockReturnValue('a few seconds ago');
+
+    const toStringSpy = jest.spyOn(Date.prototype, 'toString');
+    toStringSpy.mockReturnValue('Tue, 01 Jan 2019 00:00:00 GMT');
   });
 
   let upChecks: Ping[];
@@ -254,32 +256,30 @@ describe('MonitorListStatusColumn', () => {
 
   it('will render display location status', () => {
     const component = renderWithIntl(
-      <EuiThemeProvider darkMode={false}>
-        <MonitorListStatusColumn
-          status="up"
-          timestamp={new Date().toString()}
-          summaryPings={summaryPings}
-        />
-      </EuiThemeProvider>
+      <MonitorListStatusColumn
+        status="up"
+        timestamp={new Date().toString()}
+        summaryPings={summaryPings}
+      />
     );
     expect(component).toMatchSnapshot();
   });
 
   it(' will test getLocationStatus location', () => {
-    let { statusMessage } = getLocationStatus(summaryPings, STATUS.UP);
+    let statusMessage = getLocationStatus(summaryPings, STATUS.UP);
 
-    expect(statusMessage).toBe('in 1/3 locations');
+    expect(statusMessage).toBe('in 1/3 Locations');
 
-    statusMessage = getLocationStatus(summaryPings, STATUS.DOWN).statusMessage;
+    statusMessage = getLocationStatus(summaryPings, STATUS.DOWN);
 
-    expect(statusMessage).toBe('in 2/3 locations');
+    expect(statusMessage).toBe('in 2/3 Locations');
 
-    statusMessage = getLocationStatus(upChecks, STATUS.UP).statusMessage;
+    statusMessage = getLocationStatus(upChecks, STATUS.UP);
 
-    expect(statusMessage).toBe('in 3/3 locations');
+    expect(statusMessage).toBe('in 3/3 Locations');
 
-    statusMessage = getLocationStatus(downChecks, STATUS.UP).statusMessage;
+    statusMessage = getLocationStatus(downChecks, STATUS.UP);
 
-    expect(statusMessage).toBe('in 0/3 locations');
+    expect(statusMessage).toBe('in 0/3 Locations');
   });
 });
