@@ -147,7 +147,7 @@ describe('CaseView ', () => {
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, isLoading: false }));
     useQueryAlertsMock.mockImplementation(() => ({
       loading: false,
-      data: { hits: { hits: [...alertsHit] } },
+      data: { hits: { hits: alertsHit } },
     }));
   });
 

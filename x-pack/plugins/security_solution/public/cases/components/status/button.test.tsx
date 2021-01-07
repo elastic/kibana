@@ -12,30 +12,22 @@ import { StatusActionButton } from './button';
 
 describe('StatusActionButton', () => {
   const onStatusChanged = jest.fn();
+  const defaultProps = {
+    status: CaseStatuses.open,
+    disabled: false,
+    isLoading: false,
+    onStatusChanged,
+  };
 
   it('it renders', async () => {
-    const wrapper = mount(
-      <StatusActionButton
-        status={CaseStatuses.open}
-        disabled={false}
-        isLoading={false}
-        onStatusChanged={onStatusChanged}
-      />
-    );
+    const wrapper = mount(<StatusActionButton {...defaultProps} />);
 
     expect(wrapper.find(`[data-test-subj="case-view-status-action-button"]`).exists()).toBeTruthy();
   });
 
   describe('Button icons', () => {
     it('it renders the correct button icon: status open', async () => {
-      const wrapper = mount(
-        <StatusActionButton
-          status={CaseStatuses.open}
-          disabled={false}
-          isLoading={false}
-          onStatusChanged={onStatusChanged}
-        />
-      );
+      const wrapper = mount(<StatusActionButton {...defaultProps} />);
 
       expect(
         wrapper.find(`[data-test-subj="case-view-status-action-button"]`).first().prop('iconType')
@@ -44,12 +36,7 @@ describe('StatusActionButton', () => {
 
     it('it renders the correct button icon: status in-progress', async () => {
       const wrapper = mount(
-        <StatusActionButton
-          status={CaseStatuses['in-progress']}
-          disabled={false}
-          isLoading={false}
-          onStatusChanged={onStatusChanged}
-        />
+        <StatusActionButton {...defaultProps} status={CaseStatuses['in-progress']} />
       );
 
       expect(
@@ -58,14 +45,7 @@ describe('StatusActionButton', () => {
     });
 
     it('it renders the correct button icon: status closed', async () => {
-      const wrapper = mount(
-        <StatusActionButton
-          status={CaseStatuses.closed}
-          disabled={false}
-          isLoading={false}
-          onStatusChanged={onStatusChanged}
-        />
-      );
+      const wrapper = mount(<StatusActionButton {...defaultProps} status={CaseStatuses.closed} />);
 
       expect(
         wrapper.find(`[data-test-subj="case-view-status-action-button"]`).first().prop('iconType')
@@ -75,14 +55,7 @@ describe('StatusActionButton', () => {
 
   describe('Status rotation', () => {
     it('rotates correctly to in-progress when status is open', async () => {
-      const wrapper = mount(
-        <StatusActionButton
-          status={CaseStatuses.open}
-          disabled={false}
-          isLoading={false}
-          onStatusChanged={onStatusChanged}
-        />
-      );
+      const wrapper = mount(<StatusActionButton {...defaultProps} />);
 
       wrapper
         .find(`button[data-test-subj="case-view-status-action-button"]`)
@@ -93,12 +66,7 @@ describe('StatusActionButton', () => {
 
     it('rotates correctly to closed when status is in-progress', async () => {
       const wrapper = mount(
-        <StatusActionButton
-          status={CaseStatuses['in-progress']}
-          disabled={false}
-          isLoading={false}
-          onStatusChanged={onStatusChanged}
-        />
+        <StatusActionButton {...defaultProps} status={CaseStatuses['in-progress']} />
       );
 
       wrapper
@@ -109,14 +77,7 @@ describe('StatusActionButton', () => {
     });
 
     it('rotates correctly to open when status is closed', async () => {
-      const wrapper = mount(
-        <StatusActionButton
-          status={CaseStatuses.closed}
-          disabled={false}
-          isLoading={false}
-          onStatusChanged={onStatusChanged}
-        />
-      );
+      const wrapper = mount(<StatusActionButton {...defaultProps} status={CaseStatuses.closed} />);
 
       wrapper
         .find(`button[data-test-subj="case-view-status-action-button"]`)

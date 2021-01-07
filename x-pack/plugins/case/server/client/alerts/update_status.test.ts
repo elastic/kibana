@@ -9,10 +9,6 @@ import { createMockSavedObjectsRepository } from '../../routes/api/__fixtures__'
 import { createCaseClientWithMockSavedObjectsClient } from '../mocks';
 
 describe('updateAlertsStatus', () => {
-  beforeEach(async () => {
-    jest.restoreAllMocks();
-  });
-
   describe('happy path', () => {
     test('it update the status of the alert correctly', async () => {
       const savedObjectsClient = createMockSavedObjectsRepository();

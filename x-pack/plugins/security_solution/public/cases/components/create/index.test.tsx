@@ -54,22 +54,18 @@ const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const useInsertTimelineMock = useInsertTimeline as jest.Mock;
 const fetchTags = jest.fn();
 
-const fillForm = async (wrapper: ReactWrapper) => {
-  await act(async () => {
-    wrapper
-      .find(`[data-test-subj="caseTitle"] input`)
-      .first()
-      .simulate('change', { target: { value: sampleData.title } });
-  });
+const fillForm = (wrapper: ReactWrapper) => {
+  wrapper
+    .find(`[data-test-subj="caseTitle"] input`)
+    .first()
+    .simulate('change', { target: { value: sampleData.title } });
 
-  await act(async () => {
-    wrapper
-      .find(`[data-test-subj="caseDescription"] textarea`)
-      .first()
-      .simulate('change', { target: { value: sampleData.description } });
-  });
+  wrapper
+    .find(`[data-test-subj="caseDescription"] textarea`)
+    .first()
+    .simulate('change', { target: { value: sampleData.description } });
 
-  await waitFor(() => {
+  act(() => {
     ((wrapper.find(EuiComboBox).props() as unknown) as {
       onChange: (a: EuiComboBoxOptionOption[]) => void;
     }).onChange(sampleTags.map((tag) => ({ label: tag })));
@@ -127,12 +123,8 @@ describe('Create case', () => {
       </TestProviders>
     );
 
-    await fillForm(wrapper);
-    wrapper.update();
-
-    await act(async () => {
-      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-    });
+    fillForm(wrapper);
+    wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
     await waitFor(() => expect(mockHistory.push).toHaveBeenNthCalledWith(1, '/basic-case-id'));
   });
@@ -152,12 +144,10 @@ describe('Create case', () => {
     );
 
     act(() => {
-      wrapper.update();
       attachTimeline('[title](url)');
     });
 
     await waitFor(() => {
-      wrapper.update();
       expect(wrapper.find(`[data-test-subj="caseDescription"] textarea`).text()).toBe(
         '[title](url)'
       );

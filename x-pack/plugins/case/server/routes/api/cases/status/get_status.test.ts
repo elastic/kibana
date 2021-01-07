@@ -17,6 +17,13 @@ import { CASE_STATUS_URL } from '../../../../../common/constants';
 
 describe('GET status', () => {
   let routeHandler: RequestHandler<any, any, any>;
+  const findArgs = {
+    fields: [],
+    page: 1,
+    perPage: 1,
+    type: 'cases',
+  };
+
   beforeAll(async () => {
     routeHandler = await createRoute(initGetCasesStatusApi, 'get');
   });
@@ -35,27 +42,18 @@ describe('GET status', () => {
 
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(1, {
-      fields: [],
+      ...findArgs,
       filter: 'cases.attributes.status: open',
-      page: 1,
-      perPage: 1,
-      type: 'cases',
     });
 
     expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(2, {
-      fields: [],
+      ...findArgs,
       filter: 'cases.attributes.status: in-progress',
-      page: 1,
-      perPage: 1,
-      type: 'cases',
     });
 
     expect(theContext.core.savedObjects.client.find).toHaveBeenNthCalledWith(3, {
-      fields: [],
+      ...findArgs,
       filter: 'cases.attributes.status: closed',
-      page: 1,
-      perPage: 1,
-      type: 'cases',
     });
 
     expect(response.payload).toEqual({

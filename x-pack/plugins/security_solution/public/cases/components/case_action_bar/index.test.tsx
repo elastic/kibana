@@ -14,6 +14,13 @@ import { TestProviders } from '../../../common/mock';
 describe('CaseActionBar', () => {
   const onRefresh = jest.fn();
   const onUpdateField = jest.fn();
+  const defaultProps = {
+    caseData: basicCase,
+    isLoading: false,
+    onRefresh,
+    onUpdateField,
+    currentExternalIncident: null,
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -22,13 +29,7 @@ describe('CaseActionBar', () => {
   it('it renders', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseActionBar
-          caseData={basicCase}
-          isLoading={false}
-          onRefresh={onRefresh}
-          onUpdateField={onUpdateField}
-          currentExternalIncident={null}
-        />
+        <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
@@ -43,13 +44,7 @@ describe('CaseActionBar', () => {
   it('it should show correct status', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseActionBar
-          caseData={basicCase}
-          isLoading={false}
-          onRefresh={onRefresh}
-          onUpdateField={onUpdateField}
-          currentExternalIncident={null}
-        />
+        <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
@@ -61,13 +56,7 @@ describe('CaseActionBar', () => {
   it('it should show the correct date', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseActionBar
-          caseData={basicCase}
-          isLoading={false}
-          onRefresh={onRefresh}
-          onUpdateField={onUpdateField}
-          currentExternalIncident={null}
-        />
+        <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
@@ -79,13 +68,7 @@ describe('CaseActionBar', () => {
   it('it call onRefresh', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseActionBar
-          caseData={basicCase}
-          isLoading={false}
-          onRefresh={onRefresh}
-          onUpdateField={onUpdateField}
-          currentExternalIncident={null}
-        />
+        <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
@@ -96,13 +79,7 @@ describe('CaseActionBar', () => {
   it('it should call onUpdateField when changing status', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseActionBar
-          caseData={basicCase}
-          isLoading={false}
-          onRefresh={onRefresh}
-          onUpdateField={onUpdateField}
-          currentExternalIncident={null}
-        />
+        <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 
@@ -117,13 +94,7 @@ describe('CaseActionBar', () => {
   it('it should call onUpdateField when changing syncAlerts setting', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseActionBar
-          caseData={basicCase}
-          isLoading={false}
-          onRefresh={onRefresh}
-          onUpdateField={onUpdateField}
-          currentExternalIncident={null}
-        />
+        <CaseActionBar {...defaultProps} />
       </TestProviders>
     );
 

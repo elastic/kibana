@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { SyncAlertsSwitch } from './sync_alerts_switch';
 
@@ -20,14 +20,13 @@ describe('SyncAlertsSwitch', () => {
   it('it toggles the switch', async () => {
     const wrapper = mount(<SyncAlertsSwitch disabled={false} />);
 
-    act(() => {
-      wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
-    });
+    wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
 
-    wrapper.update();
-    expect(wrapper.find('[data-test-subj="sync-alerts-switch"]').first().prop('checked')).toBe(
-      false
-    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="sync-alerts-switch"]').first().prop('checked')).toBe(
+        false
+      );
+    });
   });
 
   it('it disables the switch', async () => {
@@ -48,13 +47,10 @@ describe('SyncAlertsSwitch', () => {
     const wrapper = mount(<SyncAlertsSwitch disabled={false} showLabel={true} />);
 
     expect(wrapper.find('[data-test-subj="sync-alerts-switch"]').first().text()).toBe('On');
+    wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
 
-    act(() => {
-      wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).first().text()).toBe('Off');
     });
-
-    wrapper.update();
-
-    expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).first().text()).toBe('Off');
   });
 });

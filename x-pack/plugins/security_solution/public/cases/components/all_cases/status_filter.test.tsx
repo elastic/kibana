@@ -19,27 +19,20 @@ const stats = {
 
 describe('StatusFilter', () => {
   const onStatusChanged = jest.fn();
+  const defaultProps = {
+    selectedStatus: CaseStatuses.open,
+    onStatusChanged,
+    stats,
+  };
 
   it('should render', () => {
-    const wrapper = mount(
-      <StatusFilter
-        onStatusChanged={onStatusChanged}
-        selectedStatus={CaseStatuses.open}
-        stats={stats}
-      />
-    );
+    const wrapper = mount(<StatusFilter {...defaultProps} />);
 
     expect(wrapper.find('[data-test-subj="case-status-filter"]').exists()).toBeTruthy();
   });
 
   it('should call onStatusChanged when changing status to open', async () => {
-    const wrapper = mount(
-      <StatusFilter
-        onStatusChanged={onStatusChanged}
-        selectedStatus={CaseStatuses.open}
-        stats={stats}
-      />
-    );
+    const wrapper = mount(<StatusFilter {...defaultProps} />);
 
     await waitFor(() => {
       wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -49,13 +42,7 @@ describe('StatusFilter', () => {
   });
 
   it('should call onStatusChanged when changing status to in-progress', async () => {
-    const wrapper = mount(
-      <StatusFilter
-        onStatusChanged={onStatusChanged}
-        selectedStatus={CaseStatuses.open}
-        stats={stats}
-      />
-    );
+    const wrapper = mount(<StatusFilter {...defaultProps} />);
 
     await waitFor(() => {
       wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
@@ -65,13 +52,7 @@ describe('StatusFilter', () => {
   });
 
   it('should call onStatusChanged when changing status to closed', async () => {
-    const wrapper = mount(
-      <StatusFilter
-        onStatusChanged={onStatusChanged}
-        selectedStatus={CaseStatuses.open}
-        stats={stats}
-      />
-    );
+    const wrapper = mount(<StatusFilter {...defaultProps} />);
 
     await waitFor(() => {
       wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');

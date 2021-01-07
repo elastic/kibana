@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../../shared_imports';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
@@ -49,10 +49,7 @@ describe('SyncAlertsToggle', () => {
       </MockHookWrapperComponent>
     );
 
-    act(() => {
-      wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
-      wrapper.update();
-    });
+    wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ syncAlerts: false });
@@ -72,10 +69,7 @@ describe('SyncAlertsToggle', () => {
       ).toBe('On');
     });
 
-    act(() => {
-      wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
-      wrapper.update();
-    });
+    wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
 
     await waitFor(() => {
       expect(

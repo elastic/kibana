@@ -61,22 +61,18 @@ const defaultPostCase = {
   postCase,
 };
 
-const fillForm = async (wrapper: ReactWrapper) => {
-  await act(async () => {
-    wrapper
-      .find(`[data-test-subj="caseTitle"] input`)
-      .first()
-      .simulate('change', { target: { value: sampleData.title } });
-  });
+const fillForm = (wrapper: ReactWrapper) => {
+  wrapper
+    .find(`[data-test-subj="caseTitle"] input`)
+    .first()
+    .simulate('change', { target: { value: sampleData.title } });
 
-  await act(async () => {
-    wrapper
-      .find(`[data-test-subj="caseDescription"] textarea`)
-      .first()
-      .simulate('change', { target: { value: sampleData.description } });
-  });
+  wrapper
+    .find(`[data-test-subj="caseDescription"] textarea`)
+    .first()
+    .simulate('change', { target: { value: sampleData.description } });
 
-  await waitFor(() => {
+  act(() => {
     ((wrapper.find(EuiComboBox).props() as unknown) as {
       onChange: (a: EuiComboBoxOptionOption[]) => void;
     }).onChange(sampleTags.map((tag) => ({ label: tag })));
@@ -138,12 +134,8 @@ describe('Create case', () => {
         </TestProviders>
       );
 
-      await fillForm(wrapper);
-      wrapper.update();
-
-      await act(async () => {
-        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-      });
+      fillForm(wrapper);
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
       await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
     });
 
@@ -162,16 +154,10 @@ describe('Create case', () => {
         </TestProviders>
       );
 
-      await fillForm(wrapper);
+      fillForm(wrapper);
+      wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
-      act(() => {
-        wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
-        wrapper.update();
-      });
-
-      await act(async () => {
-        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-      });
       await waitFor(() =>
         expect(postCase).toBeCalledWith({ ...sampleData, settings: { syncAlerts: false } })
       );
@@ -222,9 +208,7 @@ describe('Create case', () => {
         </TestProviders>
       );
 
-      await fillForm(wrapper);
-      wrapper.update();
-
+      fillForm(wrapper);
       await act(async () => {
         wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
       });
@@ -272,13 +256,8 @@ describe('Create case', () => {
         </TestProviders>
       );
 
-      await fillForm(wrapper);
-      wrapper.update();
-
-      await act(async () => {
-        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-      });
-
+      fillForm(wrapper);
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
       await waitFor(() => expect(postCase).toBeCalledWith(sampleData));
     });
   });
@@ -299,40 +278,31 @@ describe('Create case', () => {
         </TestProviders>
       );
 
-      await fillForm(wrapper);
-      await waitFor(() => {
-        expect(wrapper.find(`[data-test-subj="connector-settings-jira"]`).exists()).toBeFalsy();
-        wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-        wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
-        wrapper.update();
-      });
+      fillForm(wrapper);
+      expect(wrapper.find(`[data-test-subj="connector-settings-jira"]`).exists()).toBeFalsy();
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find(`button[data-test-subj="dropdown-connector-jira-1"]`).simulate('click');
 
       await waitFor(() => {
         wrapper.update();
         expect(wrapper.find(`[data-test-subj="connector-settings-jira"]`).exists()).toBeTruthy();
       });
 
-      act(() => {
-        wrapper
-          .find('select[data-test-subj="issueTypeSelect"]')
-          .first()
-          .simulate('change', {
-            target: { value: '10007' },
-          });
-      });
+      wrapper
+        .find('select[data-test-subj="issueTypeSelect"]')
+        .first()
+        .simulate('change', {
+          target: { value: '10007' },
+        });
 
-      act(() => {
-        wrapper
-          .find('select[data-test-subj="prioritySelect"]')
-          .first()
-          .simulate('change', {
-            target: { value: '2' },
-          });
-      });
+      wrapper
+        .find('select[data-test-subj="prioritySelect"]')
+        .first()
+        .simulate('change', {
+          target: { value: '2' },
+        });
 
-      await act(async () => {
-        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-      });
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
       await waitFor(() =>
         expect(postCase).toBeCalledWith({
@@ -362,15 +332,10 @@ describe('Create case', () => {
         </TestProviders>
       );
 
-      await fillForm(wrapper);
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="connector-settings-resilient"]`).exists()
-        ).toBeFalsy();
-        wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-        wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
-        wrapper.update();
-      });
+      fillForm(wrapper);
+      expect(wrapper.find(`[data-test-subj="connector-settings-resilient"]`).exists()).toBeFalsy();
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find(`button[data-test-subj="dropdown-connector-resilient-2"]`).simulate('click');
 
       await waitFor(() => {
         wrapper.update();
@@ -385,18 +350,14 @@ describe('Create case', () => {
         }).onChange([{ value: '19', label: 'Denial of Service' }]);
       });
 
-      act(() => {
-        wrapper
-          .find('select[data-test-subj="severitySelect"]')
-          .first()
-          .simulate('change', {
-            target: { value: '4' },
-          });
-      });
+      wrapper
+        .find('select[data-test-subj="severitySelect"]')
+        .first()
+        .simulate('change', {
+          target: { value: '4' },
+        });
 
-      await act(async () => {
-        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-      });
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
       await waitFor(() =>
         expect(postCase).toBeCalledWith({
@@ -426,33 +387,22 @@ describe('Create case', () => {
         </TestProviders>
       );
 
-      await fillForm(wrapper);
-      await waitFor(() => {
-        expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeFalsy();
-        wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
-        wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-1"]`).simulate('click');
-        wrapper.update();
-      });
-
-      await waitFor(() => {
-        wrapper.update();
-        expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeTruthy();
-      });
+      fillForm(wrapper);
+      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeFalsy();
+      wrapper.find('button[data-test-subj="dropdown-connectors"]').simulate('click');
+      wrapper.find(`button[data-test-subj="dropdown-connector-servicenow-1"]`).simulate('click');
+      expect(wrapper.find(`[data-test-subj="connector-settings-sn"]`).exists()).toBeTruthy();
 
       ['severitySelect', 'urgencySelect', 'impactSelect'].forEach((subj) => {
-        act(() => {
-          wrapper
-            .find(`select[data-test-subj="${subj}"]`)
-            .first()
-            .simulate('change', {
-              target: { value: '2' },
-            });
-        });
+        wrapper
+          .find(`select[data-test-subj="${subj}"]`)
+          .first()
+          .simulate('change', {
+            target: { value: '2' },
+          });
       });
 
-      await act(async () => {
-        wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
-      });
+      wrapper.find(`[data-test-subj="create-case-submit"]`).first().simulate('click');
 
       await waitFor(() =>
         expect(postCase).toBeCalledWith({

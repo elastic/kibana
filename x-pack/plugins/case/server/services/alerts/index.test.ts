@@ -14,6 +14,12 @@ describe('updateAlertsStatus', () => {
 
   describe('happy path', () => {
     let alertService: AlertServiceContract;
+    const args = {
+      ids: ['alert-id-1'],
+      index: '.siem-signals',
+      request: {} as KibanaRequest,
+      status: CaseStatuses.closed,
+    };
 
     beforeEach(async () => {
       alertService = new AlertService();
@@ -22,21 +28,16 @@ describe('updateAlertsStatus', () => {
 
     test('it update the status of the alert correctly', async () => {
       alertService.initialize(esClientMock);
-      await alertService.updateAlertsStatus({
-        ids: ['alert-id-1'],
-        index: '.siem-signals',
-        request: {} as KibanaRequest,
-        status: CaseStatuses.closed,
-      });
+      await alertService.updateAlertsStatus(args);
 
       expect(esClientMock.asScoped().asCurrentUser.updateByQuery).toHaveBeenCalledWith({
         body: {
-          query: { ids: { values: ['alert-id-1'] } },
-          script: { lang: 'painless', source: "ctx._source.signal.status = 'closed'" },
+          query: { ids: { values: args.ids } },
+          script: { lang: 'painless', source: `ctx._source.signal.status = '${args.status}'` },
         },
         conflicts: 'abort',
         ignore_unavailable: true,
-        index: '.siem-signals',
+        index: args.index,
       });
     });
 
@@ -49,14 +50,7 @@ describe('updateAlertsStatus', () => {
       });
 
       test('it throws when service is not initialized and try to update the status', async () => {
-        await expect(
-          alertService.updateAlertsStatus({
-            ids: ['alert-id-1'],
-            index: '.siem-signals',
-            request: {} as KibanaRequest,
-            status: CaseStatuses.closed,
-          })
-        ).rejects.toThrow();
+        await expect(alertService.updateAlertsStatus(args)).rejects.toThrow();
       });
     });
   });
