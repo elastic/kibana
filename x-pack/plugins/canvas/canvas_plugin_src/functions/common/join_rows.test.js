@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
 import { getFunctionErrors } from '../../../i18n';
-import { testTable } from './__tests__/fixtures/test_tables';
+import { testTable } from './__fixtures__/test_tables';
 import { joinRows } from './join_rows';
 
 const errors = getFunctionErrors().joinRows;

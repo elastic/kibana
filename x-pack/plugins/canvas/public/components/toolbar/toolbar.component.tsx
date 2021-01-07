@@ -21,7 +21,6 @@ import {
 import { WorkpadManager } from '../workpad_manager';
 import { RouterContext } from '../router';
 import { PageManager } from '../page_manager';
-// @ts-expect-error untyped local
 import { Expression } from '../expression';
 import { Tray } from './tray';
 

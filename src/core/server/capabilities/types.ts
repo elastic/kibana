@@ -34,5 +34,6 @@ export type CapabilitiesProvider = () => Partial<Capabilities>;
  */
 export type CapabilitiesSwitcher = (
   request: KibanaRequest,
-  uiCapabilities: Capabilities
+  uiCapabilities: Capabilities,
+  useDefaultCapabilities: boolean
 ) => Partial<Capabilities> | Promise<Partial<Capabilities>>;

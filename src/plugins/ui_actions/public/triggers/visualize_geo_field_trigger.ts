@@ -20,7 +20,7 @@
 import { Trigger } from '.';
 
 export const VISUALIZE_GEO_FIELD_TRIGGER = 'VISUALIZE_GEO_FIELD_TRIGGER';
-export const visualizeGeoFieldTrigger: Trigger<'VISUALIZE_GEO_FIELD_TRIGGER'> = {
+export const visualizeGeoFieldTrigger: Trigger = {
   id: VISUALIZE_GEO_FIELD_TRIGGER,
   title: 'Visualize Geo field',
   description: 'Triggered when user wants to visualize a geo field.',
