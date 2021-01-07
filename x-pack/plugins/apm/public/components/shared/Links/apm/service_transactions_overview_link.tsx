@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { APMQueryParams } from '../url_helpers';
+import { APMLinkExtendProps, useAPMHref } from './APMLink';
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'transactionResult',
@@ -19,7 +18,7 @@ const persistedFilters: Array<keyof APMQueryParams> = [
 ];
 
 export function useServiceOrTransactionsOverviewHref(serviceName: string) {
-  return useAPMHref(`/services/${serviceName}/transactions`, persistedFilters);
+  return useAPMHref(`/services/${serviceName}`, persistedFilters);
 }
 
 interface Props extends APMLinkExtendProps {
@@ -30,13 +29,6 @@ export function ServiceOrTransactionsOverviewLink({
   serviceName,
   ...rest
 }: Props) {
-  const { urlParams } = useUrlParams();
-
-  return (
-    <APMLink
-      path={`/services/${serviceName}`}
-      query={pickKeys(urlParams as APMQueryParams, ...persistedFilters)}
-      {...rest}
-    />
-  );
+  const href = useServiceOrTransactionsOverviewHref(serviceName);
+  return <EuiLink href={href} {...rest} />;
 }
