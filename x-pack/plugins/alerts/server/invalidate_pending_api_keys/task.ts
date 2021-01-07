@@ -203,23 +203,25 @@ async function invalidateApiKeys(
       return decryptedApiKey.attributes.apiKeyId;
     })
   );
-  const response = await invalidateAPIKeys({ ids: apiKeyIds }, securityPluginStart);
-  if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-    logger.error(`Failed to invalidate API Keys [ids="${apiKeyIds.join(', ')}"]`);
-  } else {
-    await Promise.all(
-      apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
-        try {
-          await savedObjectsClient.delete('api_key_pending_invalidation', apiKeyObj.id);
-          totalInvalidated++;
-        } catch (err) {
-          logger.error(
-            `Failed to cleanup api key "${apiKeyObj.attributes.apiKeyId}". Error: ${err.message}`
-          );
-        }
-      })
-    );
+  if (apiKeyIds.length > 0) {
+    const response = await invalidateAPIKeys({ ids: apiKeyIds }, securityPluginStart);
+    if (response.apiKeysEnabled === true && response.result.error_count > 0) {
+      logger.error(`Failed to invalidate API Keys [ids="${apiKeyIds.join(', ')}"]`);
+    } else {
+      await Promise.all(
+        apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
+          try {
+            await savedObjectsClient.delete('api_key_pending_invalidation', apiKeyObj.id);
+            totalInvalidated++;
+          } catch (err) {
+            logger.error(
+              `Failed to delete invalidated API key "${apiKeyObj.attributes.apiKeyId}". Error: ${err.message}`
+            );
+          }
+        })
+      );
+    }
   }
-  logger.debug(`Total invalidated api keys "${totalInvalidated}"`);
+  logger.debug(`Total invalidated API keys "${totalInvalidated}"`);
   return totalInvalidated;
 }

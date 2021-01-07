@@ -289,7 +289,7 @@ describe('API Keys', () => {
     it('returns null when security feature is disabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);
       const result = await apiKeys.invalidate(httpServerMock.createKibanaRequest(), {
-        id: '123',
+        ids: ['123'],
       });
       expect(result).toBeNull();
       expect(
@@ -309,7 +309,7 @@ describe('API Keys', () => {
         })
       );
       const result = await apiKeys.invalidate(httpServerMock.createKibanaRequest(), {
-        id: '123',
+        ids: ['123'],
       });
       expect(result).toEqual({
         invalidated_api_keys: ['api-key-id-1'],

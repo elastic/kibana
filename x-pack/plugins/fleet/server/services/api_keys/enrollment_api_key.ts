@@ -66,7 +66,7 @@ export async function getEnrollmentAPIKey(soClient: SavedObjectsClientContract, 
 export async function deleteEnrollmentApiKey(soClient: SavedObjectsClientContract, id: string) {
   const enrollmentApiKey = await getEnrollmentAPIKey(soClient, id);
 
-  await invalidateAPIKey(soClient, enrollmentApiKey.api_key_id);
+  await invalidateAPIKey(soClient, [enrollmentApiKey.api_key_id]);
 
   await soClient.update(ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE, id, {
     active: false,

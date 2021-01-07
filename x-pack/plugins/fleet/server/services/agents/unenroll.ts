@@ -76,10 +76,10 @@ export async function forceUnenrollAgent(soClient: SavedObjectsClientContract, a
 
   await Promise.all([
     agent.access_api_key_id
-      ? APIKeyService.invalidateAPIKey(soClient, agent.access_api_key_id)
+      ? APIKeyService.invalidateAPIKey(soClient, [agent.access_api_key_id])
       : undefined,
     agent.default_api_key_id
-      ? APIKeyService.invalidateAPIKey(soClient, agent.default_api_key_id)
+      ? APIKeyService.invalidateAPIKey(soClient, [agent.default_api_key_id])
       : undefined,
   ]);
 
@@ -124,16 +124,8 @@ export async function forceUnenrollAgents(
   });
 
   // Invalidate all API keys
-  // ES doesn't provide a bulk invalidate API, so this could take a long time depending on
-  // number of keys to invalidate. We run these in batches to avoid overloading ES.
   if (apiKeys.length) {
-    const BATCH_SIZE = 500;
-    const batches = chunk(apiKeys, BATCH_SIZE);
-    for (const apiKeysBatch of batches) {
-      await Promise.all(
-        apiKeysBatch.map((apiKey) => APIKeyService.invalidateAPIKey(soClient, apiKey))
-      );
-    }
+    APIKeyService.invalidateAPIKey(soClient, apiKeys);
   }
 
   // Update the necessary agents
