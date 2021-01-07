@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { InlineActions } from './inline_actions';
 export { PopoverActionsMenu } from './popover_actions';

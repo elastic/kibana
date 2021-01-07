@@ -20,7 +20,7 @@ import { SessionsMgmtConfigSchema } from '../';
 import { ActionComplete, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 import { dateString } from '../../../../common/search/sessions_mgmt/date_string';
 import { TableText } from '../components';
-import { InlineActions, PopoverActionsMenu } from '../components/actions';
+import { PopoverActionsMenu } from '../components/actions';
 import { StatusIndicator } from '../components/status';
 import { SearchSessionsMgmtAPI } from './api';
 import { getExpirationStatus } from './get_expiration_status';
@@ -181,10 +181,7 @@ export const getColumns = (
       render: (actions: UISession['actions'], session) => {
         if (session.isViewable || (actions && actions.length)) {
           return (
-            <EuiFlexGroup gutterSize="l" justifyContent="flexEnd">
-              <EuiFlexItem grow={true}>
-                <InlineActions url={session.url} session={session} />
-              </EuiFlexItem>
+            <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" alignItems="flexEnd">
               <EuiFlexItem grow={false}>
                 <PopoverActionsMenu
                   api={api}
