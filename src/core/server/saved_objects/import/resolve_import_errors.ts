@@ -153,8 +153,13 @@ export async function resolveSavedObjectsImportErrors({
     successCount += createdObjects.length;
     successResults = [
       ...successResults,
-      ...createdObjects.map(({ type, id, attributes: { title }, destinationId, originId }) => {
-        const meta = { title, icon: typeRegistry.getType(type)?.management?.icon };
+      ...createdObjects.map((createdObject) => {
+        const { type, id, destinationId, originId } = createdObject;
+        const getTitle = typeRegistry.getType(type)?.management?.getTitle;
+        const meta = {
+          title: getTitle ? getTitle(createdObject) : createdObject.attributes.title,
+          icon: typeRegistry.getType(type)?.management?.icon,
+        };
         return {
           type,
           id,
