@@ -7,12 +7,11 @@ import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import { APMLinkExtendProps, useAPMHref } from './APMLink';
 
-function pathFor(serviceName?: string) {
-  return serviceName ? `/services/${serviceName}/service-map` : '/service-map';
-}
-
 export function useServiceMapHref(serviceName?: string) {
-  return useAPMHref(pathFor(serviceName));
+  const pathFor = serviceName
+    ? `/services/${serviceName}/service-map`
+    : '/service-map';
+  return useAPMHref(pathFor);
 }
 
 interface ServiceMapLinkProps extends APMLinkExtendProps {
