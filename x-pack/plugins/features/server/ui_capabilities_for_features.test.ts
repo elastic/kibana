@@ -5,10 +5,10 @@
  */
 
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
-import { Feature } from '.';
-import { SubFeaturePrivilegeGroupConfig } from '../common';
+import { KibanaFeature } from '.';
+import { SubFeaturePrivilegeGroupConfig, ElasticsearchFeature } from '../common';
 
-function createFeaturePrivilege(capabilities: string[] = []) {
+function createKibanaFeaturePrivilege(capabilities: string[] = []) {
   return {
     savedObject: {
       all: [],
@@ -19,7 +19,7 @@ function createFeaturePrivilege(capabilities: string[] = []) {
   };
 }
 
-function createSubFeaturePrivilege(privilegeId: string, capabilities: string[] = []) {
+function createKibanaSubFeaturePrivilege(privilegeId: string, capabilities: string[] = []) {
   return {
     id: privilegeId,
     name: `sub-feature privilege ${privilegeId}`,
@@ -35,44 +35,76 @@ function createSubFeaturePrivilege(privilegeId: string, capabilities: string[] =
 
 describe('populateUICapabilities', () => {
   it('handles no original uiCapabilities and no registered features gracefully', () => {
-    expect(uiCapabilitiesForFeatures([])).toEqual({});
+    expect(uiCapabilitiesForFeatures([], [])).toEqual({});
   });
 
-  it('handles features with no registered capabilities', () => {
+  it('handles kibana features with no registered capabilities', () => {
     expect(
-      uiCapabilitiesForFeatures([
-        new Feature({
-          id: 'newFeature',
-          name: 'my new feature',
-          app: ['bar-app'],
-          privileges: {
-            all: createFeaturePrivilege(),
-            read: createFeaturePrivilege(),
-          },
-        }),
-      ])
+      uiCapabilitiesForFeatures(
+        [
+          new KibanaFeature({
+            id: 'newFeature',
+            name: 'my new feature',
+            app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
+            privileges: {
+              all: createKibanaFeaturePrivilege(),
+              read: createKibanaFeaturePrivilege(),
+            },
+          }),
+        ],
+        []
+      )
     ).toEqual({
       catalogue: {},
+      management: {},
       newFeature: {},
     });
   });
 
-  it('augments the original uiCapabilities with registered feature capabilities', () => {
+  it('handles elasticsearch features with no registered capabilities', () => {
     expect(
-      uiCapabilitiesForFeatures([
-        new Feature({
-          id: 'newFeature',
-          name: 'my new feature',
-          navLinkId: 'newFeatureNavLink',
-          app: ['bar-app'],
-          privileges: {
-            all: createFeaturePrivilege(['capability1', 'capability2']),
-            read: createFeaturePrivilege(),
-          },
-        }),
-      ])
+      uiCapabilitiesForFeatures(
+        [],
+        [
+          new ElasticsearchFeature({
+            id: 'newFeature',
+            privileges: [
+              {
+                requiredClusterPrivileges: [],
+                ui: [],
+              },
+            ],
+          }),
+        ]
+      )
     ).toEqual({
       catalogue: {},
+      management: {},
+      newFeature: {},
+    });
+  });
+
+  it('augments the original uiCapabilities with registered kibana feature capabilities', () => {
+    expect(
+      uiCapabilitiesForFeatures(
+        [
+          new KibanaFeature({
+            id: 'newFeature',
+            name: 'my new feature',
+            app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
+            privileges: {
+              all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
+              read: createKibanaFeaturePrivilege(),
+            },
+          }),
+        ],
+        []
+      )
+    ).toEqual({
+      catalogue: {},
+      management: {},
       newFeature: {
         capability1: true,
         capability2: true,
@@ -80,26 +112,92 @@ describe('populateUICapabilities', () => {
     });
   });
 
-  it('combines catalogue entries from multiple features', () => {
+  it('augments the original uiCapabilities with registered elasticsearch feature capabilities', () => {
     expect(
-      uiCapabilitiesForFeatures([
-        new Feature({
-          id: 'newFeature',
-          name: 'my new feature',
-          navLinkId: 'newFeatureNavLink',
-          app: ['bar-app'],
-          catalogue: ['anotherFooEntry', 'anotherBarEntry'],
-          privileges: {
-            all: createFeaturePrivilege(['capability1', 'capability2']),
-            read: createFeaturePrivilege(['capability3', 'capability4']),
-          },
-        }),
-      ])
+      uiCapabilitiesForFeatures(
+        [],
+        [
+          new ElasticsearchFeature({
+            id: 'newFeature',
+            privileges: [
+              {
+                requiredClusterPrivileges: [],
+                ui: ['capability1', 'capability2'],
+              },
+            ],
+          }),
+        ]
+      )
+    ).toEqual({
+      catalogue: {},
+      management: {},
+      newFeature: {
+        capability1: true,
+        capability2: true,
+      },
+    });
+  });
+
+  it('combines catalogue entries from multiple kibana features', () => {
+    expect(
+      uiCapabilitiesForFeatures(
+        [
+          new KibanaFeature({
+            id: 'newFeature',
+            name: 'my new feature',
+            app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
+            catalogue: ['anotherFooEntry', 'anotherBarEntry'],
+            privileges: {
+              all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
+              read: createKibanaFeaturePrivilege(['capability3', 'capability4']),
+            },
+          }),
+        ],
+        []
+      )
     ).toEqual({
       catalogue: {
         anotherFooEntry: true,
         anotherBarEntry: true,
       },
+      management: {},
+      newFeature: {
+        capability1: true,
+        capability2: true,
+        capability3: true,
+        capability4: true,
+      },
+    });
+  });
+
+  it('combines catalogue entries from multiple elasticsearch privileges', () => {
+    expect(
+      uiCapabilitiesForFeatures(
+        [],
+        [
+          new ElasticsearchFeature({
+            id: 'newFeature',
+            catalogue: ['anotherFooEntry', 'anotherBarEntry'],
+            privileges: [
+              {
+                requiredClusterPrivileges: [],
+                ui: ['capability1', 'capability2'],
+              },
+              {
+                requiredClusterPrivileges: [],
+                ui: ['capability3', 'capability4'],
+              },
+            ],
+          }),
+        ]
+      )
+    ).toEqual({
+      catalogue: {
+        anotherFooEntry: true,
+        anotherBarEntry: true,
+      },
+      management: {},
       newFeature: {
         capability1: true,
         capability2: true,
@@ -111,20 +209,24 @@ describe('populateUICapabilities', () => {
 
   it(`merges capabilities from all feature privileges`, () => {
     expect(
-      uiCapabilitiesForFeatures([
-        new Feature({
-          id: 'newFeature',
-          name: 'my new feature',
-          navLinkId: 'newFeatureNavLink',
-          app: ['bar-app'],
-          privileges: {
-            all: createFeaturePrivilege(['capability1', 'capability2']),
-            read: createFeaturePrivilege(['capability3', 'capability4', 'capability5']),
-          },
-        }),
-      ])
+      uiCapabilitiesForFeatures(
+        [
+          new KibanaFeature({
+            id: 'newFeature',
+            name: 'my new feature',
+            app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
+            privileges: {
+              all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
+              read: createKibanaFeaturePrivilege(['capability3', 'capability4', 'capability5']),
+            },
+          }),
+        ],
+        []
+      )
     ).toEqual({
       catalogue: {},
+      management: {},
       newFeature: {
         capability1: true,
         capability2: true,
@@ -137,30 +239,38 @@ describe('populateUICapabilities', () => {
 
   it(`supports capabilities from reserved privileges`, () => {
     expect(
-      uiCapabilitiesForFeatures([
-        new Feature({
-          id: 'newFeature',
-          name: 'my new feature',
-          navLinkId: 'newFeatureNavLink',
-          app: ['bar-app'],
-          privileges: null,
-          reserved: {
-            description: '',
-            privileges: [
-              {
-                id: 'rp_1',
-                privilege: createFeaturePrivilege(['capability1', 'capability2']),
-              },
-              {
-                id: 'rp_2',
-                privilege: createFeaturePrivilege(['capability3', 'capability4', 'capability5']),
-              },
-            ],
-          },
-        }),
-      ])
+      uiCapabilitiesForFeatures(
+        [
+          new KibanaFeature({
+            id: 'newFeature',
+            name: 'my new feature',
+            app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
+            privileges: null,
+            reserved: {
+              description: '',
+              privileges: [
+                {
+                  id: 'rp_1',
+                  privilege: createKibanaFeaturePrivilege(['capability1', 'capability2']),
+                },
+                {
+                  id: 'rp_2',
+                  privilege: createKibanaFeaturePrivilege([
+                    'capability3',
+                    'capability4',
+                    'capability5',
+                  ]),
+                },
+              ],
+            },
+          }),
+        ],
+        []
+      )
     ).toEqual({
       catalogue: {},
+      management: {},
       newFeature: {
         capability1: true,
         capability2: true,
@@ -173,53 +283,60 @@ describe('populateUICapabilities', () => {
 
   it(`supports merging features with sub privileges`, () => {
     expect(
-      uiCapabilitiesForFeatures([
-        new Feature({
-          id: 'newFeature',
-          name: 'my new feature',
-          navLinkId: 'newFeatureNavLink',
-          app: ['bar-app'],
-          privileges: {
-            all: createFeaturePrivilege(['capability1', 'capability2']),
-            read: createFeaturePrivilege(['capability3', 'capability4']),
-          },
-          subFeatures: [
-            {
-              name: 'sub-feature-1',
-              privilegeGroups: [
-                {
-                  groupType: 'independent',
-                  privileges: [
-                    createSubFeaturePrivilege('privilege-1', ['capability5']),
-                    createSubFeaturePrivilege('privilege-2', ['capability6']),
-                  ],
-                } as SubFeaturePrivilegeGroupConfig,
-                {
-                  groupType: 'mutually_exclusive',
-                  privileges: [
-                    createSubFeaturePrivilege('privilege-3', ['capability7']),
-                    createSubFeaturePrivilege('privilege-4', ['capability8']),
-                  ],
-                } as SubFeaturePrivilegeGroupConfig,
-              ],
+      uiCapabilitiesForFeatures(
+        [
+          new KibanaFeature({
+            id: 'newFeature',
+            name: 'my new feature',
+            app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
+            privileges: {
+              all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
+              read: createKibanaFeaturePrivilege(['capability3', 'capability4']),
             },
-            {
-              name: 'sub-feature-2',
-              privilegeGroups: [
-                {
-                  name: 'Group Name',
-                  groupType: 'independent',
-                  privileges: [
-                    createSubFeaturePrivilege('privilege-5', ['capability9', 'capability10']),
-                  ],
-                } as SubFeaturePrivilegeGroupConfig,
-              ],
-            },
-          ],
-        }),
-      ])
+            subFeatures: [
+              {
+                name: 'sub-feature-1',
+                privilegeGroups: [
+                  {
+                    groupType: 'independent',
+                    privileges: [
+                      createKibanaSubFeaturePrivilege('privilege-1', ['capability5']),
+                      createKibanaSubFeaturePrivilege('privilege-2', ['capability6']),
+                    ],
+                  } as SubFeaturePrivilegeGroupConfig,
+                  {
+                    groupType: 'mutually_exclusive',
+                    privileges: [
+                      createKibanaSubFeaturePrivilege('privilege-3', ['capability7']),
+                      createKibanaSubFeaturePrivilege('privilege-4', ['capability8']),
+                    ],
+                  } as SubFeaturePrivilegeGroupConfig,
+                ],
+              },
+              {
+                name: 'sub-feature-2',
+                privilegeGroups: [
+                  {
+                    name: 'Group Name',
+                    groupType: 'independent',
+                    privileges: [
+                      createKibanaSubFeaturePrivilege('privilege-5', [
+                        'capability9',
+                        'capability10',
+                      ]),
+                    ],
+                  } as SubFeaturePrivilegeGroupConfig,
+                ],
+              },
+            ],
+          }),
+        ],
+        []
+      )
     ).toEqual({
       catalogue: {},
+      management: {},
       newFeature: {
         capability1: true,
         capability2: true,
@@ -235,53 +352,57 @@ describe('populateUICapabilities', () => {
     });
   });
 
-  it('supports merging multiple features with multiple privileges each', () => {
+  it('supports merging multiple kibana features with multiple privileges each', () => {
     expect(
-      uiCapabilitiesForFeatures([
-        new Feature({
-          id: 'newFeature',
-          name: 'my new feature',
-          navLinkId: 'newFeatureNavLink',
-          app: ['bar-app'],
-          privileges: {
-            all: createFeaturePrivilege(['capability1', 'capability2']),
-            read: createFeaturePrivilege(['capability3', 'capability4']),
-          },
-        }),
-        new Feature({
-          id: 'anotherNewFeature',
-          name: 'another new feature',
-          app: ['bar-app'],
-          privileges: {
-            all: createFeaturePrivilege(['capability1', 'capability2']),
-            read: createFeaturePrivilege(['capability3', 'capability4']),
-          },
-        }),
-        new Feature({
-          id: 'yetAnotherNewFeature',
-          name: 'yet another new feature',
-          navLinkId: 'yetAnotherNavLink',
-          app: ['bar-app'],
-          privileges: {
-            all: createFeaturePrivilege(['capability1', 'capability2']),
-            read: createFeaturePrivilege(['something1', 'something2', 'something3']),
-          },
-          subFeatures: [
-            {
-              name: 'sub-feature-1',
-              privilegeGroups: [
-                {
-                  groupType: 'independent',
-                  privileges: [
-                    createSubFeaturePrivilege('privilege-1', ['capability3']),
-                    createSubFeaturePrivilege('privilege-2', ['capability4']),
-                  ],
-                } as SubFeaturePrivilegeGroupConfig,
-              ],
+      uiCapabilitiesForFeatures(
+        [
+          new KibanaFeature({
+            id: 'newFeature',
+            name: 'my new feature',
+            app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
+            privileges: {
+              all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
+              read: createKibanaFeaturePrivilege(['capability3', 'capability4']),
             },
-          ],
-        }),
-      ])
+          }),
+          new KibanaFeature({
+            id: 'anotherNewFeature',
+            name: 'another new feature',
+            app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
+            privileges: {
+              all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
+              read: createKibanaFeaturePrivilege(['capability3', 'capability4']),
+            },
+          }),
+          new KibanaFeature({
+            id: 'yetAnotherNewFeature',
+            name: 'yet another new feature',
+            app: ['bar-app'],
+            category: { id: 'foo', label: 'foo' },
+            privileges: {
+              all: createKibanaFeaturePrivilege(['capability1', 'capability2']),
+              read: createKibanaFeaturePrivilege(['something1', 'something2', 'something3']),
+            },
+            subFeatures: [
+              {
+                name: 'sub-feature-1',
+                privilegeGroups: [
+                  {
+                    groupType: 'independent',
+                    privileges: [
+                      createKibanaSubFeaturePrivilege('privilege-1', ['capability3']),
+                      createKibanaSubFeaturePrivilege('privilege-2', ['capability4']),
+                    ],
+                  } as SubFeaturePrivilegeGroupConfig,
+                ],
+              },
+            ],
+          }),
+        ],
+        []
+      )
     ).toEqual({
       anotherNewFeature: {
         capability1: true,
@@ -290,6 +411,83 @@ describe('populateUICapabilities', () => {
         capability4: true,
       },
       catalogue: {},
+      management: {},
+      newFeature: {
+        capability1: true,
+        capability2: true,
+        capability3: true,
+        capability4: true,
+      },
+      yetAnotherNewFeature: {
+        capability1: true,
+        capability2: true,
+        capability3: true,
+        capability4: true,
+        something1: true,
+        something2: true,
+        something3: true,
+      },
+    });
+  });
+
+  it('supports merging multiple elasticsearch features with multiple privileges each', () => {
+    expect(
+      uiCapabilitiesForFeatures(
+        [],
+        [
+          new ElasticsearchFeature({
+            id: 'newFeature',
+
+            privileges: [
+              {
+                requiredClusterPrivileges: [],
+                ui: ['capability1', 'capability2'],
+              },
+              {
+                requiredClusterPrivileges: [],
+                ui: ['capability3', 'capability4'],
+              },
+            ],
+          }),
+          new ElasticsearchFeature({
+            id: 'anotherNewFeature',
+
+            privileges: [
+              {
+                requiredClusterPrivileges: [],
+                ui: ['capability1', 'capability2'],
+              },
+              {
+                requiredClusterPrivileges: [],
+                ui: ['capability3', 'capability4'],
+              },
+            ],
+          }),
+          new ElasticsearchFeature({
+            id: 'yetAnotherNewFeature',
+
+            privileges: [
+              {
+                requiredClusterPrivileges: [],
+                ui: ['capability1', 'capability2', 'capability3', 'capability4'],
+              },
+              {
+                requiredClusterPrivileges: [],
+                ui: ['something1', 'something2', 'something3'],
+              },
+            ],
+          }),
+        ]
+      )
+    ).toEqual({
+      anotherNewFeature: {
+        capability1: true,
+        capability2: true,
+        capability3: true,
+        capability4: true,
+      },
+      catalogue: {},
+      management: {},
       newFeature: {
         capability1: true,
         capability2: true,

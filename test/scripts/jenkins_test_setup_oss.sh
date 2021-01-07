@@ -2,10 +2,13 @@
 
 source test/scripts/jenkins_test_setup.sh
 
-if [[ -z "$CODE_COVERAGE" ]] ; then
-  installDir="$(realpath $PARENT_DIR/kibana/build/oss/kibana-*-SNAPSHOT-linux-x86_64)"
-  destDir=${installDir}-${CI_PARALLEL_PROCESS_NUMBER}
-  cp -R "$installDir" "$destDir"
+if [[ -z "$CODE_COVERAGE" ]]; then
+  destDir="$WORKSPACE/kibana-build-oss-${TASK_QUEUE_PROCESS_ID:-$CI_PARALLEL_PROCESS_NUMBER}"
+
+  if [[ ! -d $destDir ]]; then
+    mkdir -p $destDir
+    cp -pR "$WORKSPACE/kibana-build-oss/." $destDir/
+  fi
 
   export KIBANA_INSTALL_DIR="$destDir"
 fi

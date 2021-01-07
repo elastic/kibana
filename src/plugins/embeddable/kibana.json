@@ -1,10 +1,9 @@
 {
   "id": "embeddable",
   "version": "kibana",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": [
-    "data",
     "inspector",
     "uiActions"
   ],
@@ -13,6 +12,7 @@
   ],
   "requiredBundles": [
     "savedObjects",
-    "kibanaReact"
+    "kibanaReact",
+    "kibanaUtils"
   ]
 }

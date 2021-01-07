@@ -11,37 +11,66 @@ export default function apmApiIntegrationTests({ loadTestFile }: FtrProviderCont
 
     loadTestFile(require.resolve('./feature_controls'));
 
+    describe('Alerts', function () {
+      loadTestFile(require.resolve('./alerts/chart_preview'));
+    });
+
     describe('Service Maps', function () {
       loadTestFile(require.resolve('./service_maps/service_maps'));
     });
 
     describe('Services', function () {
-      loadTestFile(require.resolve('./services/annotations'));
-      loadTestFile(require.resolve('./services/top_services'));
       loadTestFile(require.resolve('./services/agent_name'));
+      loadTestFile(require.resolve('./services/annotations'));
+      loadTestFile(require.resolve('./services/throughput'));
+      loadTestFile(require.resolve('./services/top_services'));
       loadTestFile(require.resolve('./services/transaction_types'));
+      loadTestFile(require.resolve('./services/service_details'));
+      loadTestFile(require.resolve('./services/service_icons'));
+    });
+
+    describe('Service overview', function () {
+      loadTestFile(require.resolve('./service_overview/error_groups'));
+      loadTestFile(require.resolve('./service_overview/dependencies'));
+      loadTestFile(require.resolve('./service_overview/instances'));
     });
 
     describe('Settings', function () {
       loadTestFile(require.resolve('./settings/custom_link'));
       loadTestFile(require.resolve('./settings/agent_configuration'));
+
+      describe('Anomaly detection', function () {
+        loadTestFile(require.resolve('./settings/anomaly_detection/no_access_user'));
+        loadTestFile(require.resolve('./settings/anomaly_detection/read_user'));
+        loadTestFile(require.resolve('./settings/anomaly_detection/write_user'));
+      });
     });
 
     describe('Traces', function () {
       loadTestFile(require.resolve('./traces/top_traces'));
     });
 
-    describe('Transaction Group', function () {
-      loadTestFile(require.resolve('./transaction_groups/top_transaction_groups'));
-      loadTestFile(require.resolve('./transaction_groups/transaction_charts'));
-      loadTestFile(require.resolve('./transaction_groups/error_rate'));
-      loadTestFile(require.resolve('./transaction_groups/breakdown'));
-      loadTestFile(require.resolve('./transaction_groups/avg_duration_by_browser'));
+    describe('Transactions', function () {
+      loadTestFile(require.resolve('./transactions/top_transaction_groups'));
+      loadTestFile(require.resolve('./transactions/latency'));
+      loadTestFile(require.resolve('./transactions/throughput'));
+      loadTestFile(require.resolve('./transactions/error_rate'));
+      loadTestFile(require.resolve('./transactions/breakdown'));
+      loadTestFile(require.resolve('./transactions/distribution'));
+      loadTestFile(require.resolve('./transactions/transactions_groups_overview'));
     });
 
     describe('Observability overview', function () {
       loadTestFile(require.resolve('./observability_overview/has_data'));
       loadTestFile(require.resolve('./observability_overview/observability_overview'));
+    });
+
+    describe('Metrics', function () {
+      loadTestFile(require.resolve('./metrics_charts/metrics_charts'));
+    });
+
+    describe('Correlations', function () {
+      loadTestFile(require.resolve('./correlations/slow_transactions'));
     });
   });
 }

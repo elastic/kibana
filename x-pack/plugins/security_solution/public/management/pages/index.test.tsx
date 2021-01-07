@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { ManagementContainer } from './index';
+import '../../common/mock/match_media.ts';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../common/mock/endpoint';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 
@@ -14,23 +15,32 @@ jest.mock('../../common/hooks/endpoint/ingest_enabled');
 
 describe('when in the Admistration tab', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
+  let coreStart: AppContextTestRender['coreStart'];
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
+    coreStart = mockedContext.coreStart;
     render = () => mockedContext.render(<ManagementContainer />);
+    coreStart.http.get.mockImplementation(() =>
+      Promise.resolve({
+        response: [
+          {
+            name: 'endpoint',
+          },
+        ],
+      })
+    );
   });
 
   it('should display the No Permissions view when Ingest is OFF', async () => {
     (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: false });
-    const renderResult = render();
-    const noIngestPermissions = await renderResult.findByTestId('noIngestPermissions');
-    expect(noIngestPermissions).not.toBeNull();
+
+    expect(await render().findByTestId('noIngestPermissions')).not.toBeNull();
   });
 
   it('should display the Management view when Ingest is ON', async () => {
     (useIngestEnabledCheck as jest.Mock).mockReturnValue({ allEnabled: true });
-    const renderResult = render();
-    const hostPage = await renderResult.findByTestId('hostPage');
-    expect(hostPage).not.toBeNull();
+
+    expect(await render().findByTestId('endpointPage')).not.toBeNull();
   });
 });

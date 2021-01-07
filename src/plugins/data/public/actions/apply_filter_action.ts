@@ -19,10 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../kibana_react/public';
-import { ActionByType, createAction, IncompatibleActionError } from '../../../ui_actions/public';
+import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
 import { getOverlays, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
-import type { IEmbeddable } from '../../../embeddable/public';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
 export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
@@ -30,7 +29,9 @@ export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
   timeFieldName?: string;
-  embeddable?: IEmbeddable;
+  // Need to make this unknown to prevent circular dependencies.
+  // Apps using this property will need to cast to `IEmbeddable`.
+  embeddable?: unknown;
 }
 
 async function isCompatible(context: ApplyGlobalFilterActionContext) {
@@ -40,10 +41,11 @@ async function isCompatible(context: ApplyGlobalFilterActionContext) {
 export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract
-): ActionByType<typeof ACTION_GLOBAL_APPLY_FILTER> {
-  return createAction<typeof ACTION_GLOBAL_APPLY_FILTER>({
+): Action {
+  return createAction({
     type: ACTION_GLOBAL_APPLY_FILTER,
     id: ACTION_GLOBAL_APPLY_FILTER,
+    order: 100,
     getIconType: () => 'filter',
     getDisplayName: () => {
       return i18n.translate('data.filter.applyFilterActionTitle', {

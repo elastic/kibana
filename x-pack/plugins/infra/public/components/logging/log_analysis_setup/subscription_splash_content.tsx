@@ -20,6 +20,7 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { HttpStart } from 'src/core/public';
 import { LoadingPage } from '../../loading_page';
 
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -27,7 +28,7 @@ import { euiStyled } from '../../../../../observability/public';
 import { useTrialStatus } from '../../../hooks/use_trial_status';
 
 export const SubscriptionSplashContent: React.FC = () => {
-  const { services } = useKibana();
+  const { services } = useKibana<{ http: HttpStart }>();
   const { loadState, isTrialAvailable, checkTrialAvailability } = useTrialStatus();
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export const SubscriptionSplashContent: React.FC = () => {
     description = (
       <FormattedMessage
         id="xpack.infra.logs.logAnalysis.splash.startTrialDescription"
-        defaultMessage="Our free, 14-day trial includes machine learning features, which enable you to detect anomalies in your logs."
+        defaultMessage="Our free trial includes machine learning features, which enable you to detect anomalies in your logs."
       />
     );
 

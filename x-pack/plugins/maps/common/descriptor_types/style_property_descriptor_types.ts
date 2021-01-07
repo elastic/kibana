@@ -11,8 +11,8 @@ import {
   LABEL_BORDER_SIZES,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
+  DATA_MAPPING_FUNCTION,
   STYLE_TYPE,
-  LAYER_STYLE_TYPE,
 } from '../constants';
 
 // Non-static/dynamic options
@@ -37,6 +37,7 @@ export type LabelBorderSizeStylePropertyDescriptor = {
 export type FieldMetaOptions = {
   isEnabled: boolean;
   sigma?: number;
+  percentiles?: number[];
 };
 
 export type StylePropertyField = {
@@ -64,6 +65,7 @@ export type ColorDynamicOptions = {
   color?: string; // TODO move color category ramps to constants and make ENUM type
   customColorRamp?: OrdinalColorStop[];
   useCustomColorRamp?: boolean;
+  dataMappingFunction?: DATA_MAPPING_FUNCTION;
 
   // category color properties
   colorCategory?: string; // TODO move color category palettes to constants and make ENUM type
@@ -175,27 +177,70 @@ export type SizeStylePropertyDescriptor =
     };
 
 export type VectorStylePropertiesDescriptor = {
-  [VECTOR_STYLES.SYMBOLIZE_AS]?: SymbolizeAsStylePropertyDescriptor;
-  [VECTOR_STYLES.FILL_COLOR]?: ColorStylePropertyDescriptor;
-  [VECTOR_STYLES.LINE_COLOR]?: ColorStylePropertyDescriptor;
-  [VECTOR_STYLES.LINE_WIDTH]?: SizeStylePropertyDescriptor;
-  [VECTOR_STYLES.ICON]?: IconStylePropertyDescriptor;
-  [VECTOR_STYLES.ICON_SIZE]?: SizeStylePropertyDescriptor;
-  [VECTOR_STYLES.ICON_ORIENTATION]?: OrientationStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_TEXT]?: LabelStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_COLOR]?: ColorStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_SIZE]?: SizeStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_BORDER_COLOR]?: ColorStylePropertyDescriptor;
-  [VECTOR_STYLES.LABEL_BORDER_SIZE]?: LabelBorderSizeStylePropertyDescriptor;
+  [VECTOR_STYLES.SYMBOLIZE_AS]: SymbolizeAsStylePropertyDescriptor;
+  [VECTOR_STYLES.FILL_COLOR]: ColorStylePropertyDescriptor;
+  [VECTOR_STYLES.LINE_COLOR]: ColorStylePropertyDescriptor;
+  [VECTOR_STYLES.LINE_WIDTH]: SizeStylePropertyDescriptor;
+  [VECTOR_STYLES.ICON]: IconStylePropertyDescriptor;
+  [VECTOR_STYLES.ICON_SIZE]: SizeStylePropertyDescriptor;
+  [VECTOR_STYLES.ICON_ORIENTATION]: OrientationStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_TEXT]: LabelStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_COLOR]: ColorStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_SIZE]: SizeStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_BORDER_COLOR]: ColorStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_BORDER_SIZE]: LabelBorderSizeStylePropertyDescriptor;
 };
 
 export type StyleDescriptor = {
   type: string;
 };
 
+export type RangeFieldMeta = {
+  min: number;
+  max: number;
+  delta: number;
+  isMinOutsideStdRange?: boolean;
+  isMaxOutsideStdRange?: boolean;
+};
+
+export type PercentilesFieldMeta = Array<{
+  percentile: string;
+  value: number;
+}>;
+
+export type Category = {
+  key: string;
+  count: number;
+};
+
+export type CategoryFieldMeta = {
+  categories: Category[];
+};
+
+export type GeometryTypes = {
+  isPointsOnly: boolean;
+  isLinesOnly: boolean;
+  isPolygonsOnly: boolean;
+};
+
+export type StyleMetaDescriptor = {
+  geometryTypes?: GeometryTypes;
+  fieldMeta: {
+    [key: string]: {
+      range?: RangeFieldMeta;
+      categories?: CategoryFieldMeta;
+    };
+  };
+};
+
 export type VectorStyleDescriptor = StyleDescriptor & {
-  type: LAYER_STYLE_TYPE.VECTOR;
   properties: VectorStylePropertiesDescriptor;
+  isTimeAware: boolean;
+  __styleMeta?: StyleMetaDescriptor;
+};
+
+export type HeatmapStyleDescriptor = StyleDescriptor & {
+  colorRampName: string;
 };
 
 export type StylePropertyOptions =
@@ -217,3 +262,8 @@ export type DynamicStylePropertyOptions =
   | LabelDynamicOptions
   | OrientationDynamicOptions
   | SizeDynamicOptions;
+
+export type DynamicStyleProperties = {
+  type: STYLE_TYPE.DYNAMIC;
+  options: DynamicStylePropertyOptions;
+};

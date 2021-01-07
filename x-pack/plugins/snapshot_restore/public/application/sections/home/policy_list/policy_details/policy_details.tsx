@@ -24,6 +24,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+
 import { SlmPolicy } from '../../../../../../common/types';
 import { useServices } from '../../../../app_context';
 import { SectionError, Error } from '../../../../../shared_imports';
@@ -40,8 +42,6 @@ import {
   PolicyDeleteProvider,
 } from '../../../../components';
 import { TabSummary, TabHistory } from './tabs';
-
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   policyName: SlmPolicy['name'];
@@ -65,7 +65,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
   onPolicyExecuted,
 }) => {
   const { i18n, uiMetricService, history } = useServices();
-  const { error, data: policyDetails, sendRequest: reload } = useLoadPolicy(policyName);
+  const { error, data: policyDetails, resendRequest: reload } = useLoadPolicy(policyName);
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -214,7 +214,6 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
                           isOpen={isPopoverOpen}
                           closePopover={() => setIsPopoverOpen(false)}
                           panelPaddingSize="none"
-                          withTitle
                           anchorPosition="rightUp"
                           repositionOnScroll
                         >

@@ -7,10 +7,8 @@
 import { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane_embeddable_factory';
 import { coreMock } from '../../../../../../src/core/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import {
-  AnomalySwimlaneEmbeddable,
-  AnomalySwimlaneEmbeddableInput,
-} from './anomaly_swimlane_embeddable';
+import { AnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
+import { AnomalySwimlaneEmbeddableInput } from '..';
 
 jest.mock('./anomaly_swimlane_embeddable', () => ({
   AnomalySwimlaneEmbeddable: jest.fn(),
@@ -35,9 +33,8 @@ describe('AnomalySwimlaneEmbeddableFactory', () => {
     } as AnomalySwimlaneEmbeddableInput);
 
     // assert
-    const mockCalls = ((AnomalySwimlaneEmbeddable as unknown) as jest.Mock<
-      AnomalySwimlaneEmbeddable
-    >).mock.calls[0];
+    const mockCalls = ((AnomalySwimlaneEmbeddable as unknown) as jest.Mock<AnomalySwimlaneEmbeddable>)
+      .mock.calls[0];
     const input = mockCalls[0];
     const createServices = mockCalls[1];
 

@@ -4,44 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
+import React, { useContext, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { AppState } from '../../../../state';
-import { monitorDetailsSelector } from '../../../../state/selectors';
-import { MonitorDetailsActionPayload } from '../../../../state/actions/types';
+import { monitorDetailsLoadingSelector, monitorDetailsSelector } from '../../../../state/selectors';
 import { getMonitorDetailsAction } from '../../../../state/actions/monitor';
 import { MonitorListDrawerComponent } from './monitor_list_drawer';
 import { useGetUrlParams } from '../../../../hooks';
-import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
+import { MonitorSummary } from '../../../../../common/runtime_types';
+import { alertsSelector } from '../../../../state/alerts/alerts';
+import { UptimeRefreshContext } from '../../../../contexts';
 
 interface ContainerProps {
   summary: MonitorSummary;
-  monitorDetails: MonitorDetails;
-  loadMonitorDetails: typeof getMonitorDetailsAction;
 }
 
-const Container: React.FC<ContainerProps> = ({ summary, loadMonitorDetails, monitorDetails }) => {
+export const MonitorListDrawer: React.FC<ContainerProps> = ({ summary }) => {
+  const { lastRefresh } = useContext(UptimeRefreshContext);
+
   const monitorId = summary?.monitor_id;
 
   const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = useGetUrlParams();
 
+  const monitorDetails = useSelector((state: AppState) => monitorDetailsSelector(state, summary));
+
+  const isLoading = useSelector(monitorDetailsLoadingSelector);
+
+  const dispatch = useDispatch();
+
+  const { data: alerts, loading: alertsLoading } = useSelector(alertsSelector);
+
+  const hasAlert = (alerts?.data ?? []).find((alert) => alert.params.search.includes(monitorId));
+
   useEffect(() => {
-    loadMonitorDetails({
-      dateStart,
-      dateEnd,
-      monitorId,
-    });
-  }, [dateStart, dateEnd, monitorId, loadMonitorDetails]);
-  return <MonitorListDrawerComponent monitorDetails={monitorDetails} summary={summary} />;
+    dispatch(
+      getMonitorDetailsAction.get({
+        dateStart,
+        dateEnd,
+        monitorId,
+      })
+    );
+  }, [dateStart, dateEnd, monitorId, dispatch, hasAlert, lastRefresh]);
+  return (
+    <MonitorListDrawerComponent
+      monitorDetails={monitorDetails}
+      summary={summary}
+      loading={isLoading || alertsLoading}
+    />
+  );
 };
-
-const mapStateToProps = (state: AppState, { summary }: any) => ({
-  monitorDetails: monitorDetailsSelector(state, summary),
-});
-
-const mapDispatchToProps = (dispatch: any) => ({
-  loadMonitorDetails: (actionPayload: MonitorDetailsActionPayload) =>
-    dispatch(getMonitorDetailsAction(actionPayload)),
-});
-
-export const MonitorListDrawer = connect(mapStateToProps, mapDispatchToProps)(Container);

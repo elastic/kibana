@@ -3,8 +3,10 @@
     "Elastic"
   ],
   "description": "Identifies when a terminal (tty) is spawned via Python. Attackers may upgrade a simple reverse shell to a fully interactive tty after obtaining initial access to a host.",
+  "from": "now-9m",
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -15,7 +17,10 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -28,12 +33,12 @@
       "technique": [
         {
           "id": "T1059",
-          "name": "Command-Line Interface",
+          "name": "Command and Scripting Interpreter",
           "reference": "https://attack.mitre.org/techniques/T1059/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 4
 }

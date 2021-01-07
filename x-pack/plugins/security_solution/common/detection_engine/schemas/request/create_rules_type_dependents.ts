@@ -4,67 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CreateRulesSchema } from './create_rules_schema';
-
-export const validateAnomalyThreshold = (rule: CreateRulesSchema): string[] => {
-  if (rule.type === 'machine_learning') {
-    if (rule.anomaly_threshold == null) {
-      return ['when "type" is "machine_learning" anomaly_threshold is required'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
-
-export const validateQuery = (rule: CreateRulesSchema): string[] => {
-  if (rule.type === 'machine_learning') {
-    if (rule.query != null) {
-      return ['when "type" is "machine_learning", "query" cannot be set'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
-
-export const validateLanguage = (rule: CreateRulesSchema): string[] => {
-  if (rule.type === 'machine_learning') {
-    if (rule.language != null) {
-      return ['when "type" is "machine_learning", "language" cannot be set'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
-
-export const validateSavedId = (rule: CreateRulesSchema): string[] => {
-  if (rule.type === 'saved_query') {
-    if (rule.saved_id == null) {
-      return ['when "type" is "saved_query", "saved_id" is required'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
-
-export const validateMachineLearningJobId = (rule: CreateRulesSchema): string[] => {
-  if (rule.type === 'machine_learning') {
-    if (rule.machine_learning_job_id == null) {
-      return ['when "type" is "machine_learning", "machine_learning_job_id" is required'];
-    } else {
-      return [];
-    }
-  } else {
-    return [];
-  }
-};
+import { CreateRulesSchema } from './rule_schemas';
 
 export const validateTimelineId = (rule: CreateRulesSchema): string[] => {
   if (rule.timeline_id != null) {
@@ -92,28 +32,23 @@ export const validateTimelineTitle = (rule: CreateRulesSchema): string[] => {
   return [];
 };
 
-export const validateThreshold = (rule: CreateRulesSchema): string[] => {
-  if (rule.type === 'threshold') {
-    if (!rule.threshold) {
-      return ['when "type" is "threshold", "threshold" is required'];
-    } else if (rule.threshold.value <= 0) {
-      return ['"threshold.value" has to be bigger than 0'];
-    } else {
-      return [];
+export const validateThreatMapping = (rule: CreateRulesSchema): string[] => {
+  let errors: string[] = [];
+  if (rule.type === 'threat_match') {
+    if (rule.concurrent_searches == null && rule.items_per_search != null) {
+      errors = ['when "items_per_search" exists, "concurrent_searches" must also exist', ...errors];
+    }
+    if (rule.concurrent_searches != null && rule.items_per_search == null) {
+      errors = ['when "concurrent_searches" exists, "items_per_search" must also exist', ...errors];
     }
   }
-  return [];
+  return errors;
 };
 
 export const createRuleValidateTypeDependents = (schema: CreateRulesSchema): string[] => {
   return [
-    ...validateAnomalyThreshold(schema),
-    ...validateQuery(schema),
-    ...validateLanguage(schema),
-    ...validateSavedId(schema),
-    ...validateMachineLearningJobId(schema),
     ...validateTimelineId(schema),
     ...validateTimelineTitle(schema),
-    ...validateThreshold(schema),
+    ...validateThreatMapping(schema),
   ];
 };

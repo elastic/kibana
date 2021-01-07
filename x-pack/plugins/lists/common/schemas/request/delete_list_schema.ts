@@ -4,18 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import { id } from '../common/schemas';
 import { RequiredKeepUndefined } from '../../types';
+import { DefaultStringBooleanFalse } from '../types/default_string_boolean_false';
 
-export const deleteListSchema = t.exact(
-  t.type({
-    id,
-  })
-);
+export const deleteListSchema = t.intersection([
+  t.exact(
+    t.type({
+      id,
+    })
+  ),
+  t.exact(
+    t.partial({
+      deleteReferences: DefaultStringBooleanFalse,
+      ignoreReferences: DefaultStringBooleanFalse,
+    })
+  ),
+]);
 
 export type DeleteListSchema = RequiredKeepUndefined<t.TypeOf<typeof deleteListSchema>>;
 export type DeleteListSchemaEncoded = t.OutputOf<typeof deleteListSchema>;

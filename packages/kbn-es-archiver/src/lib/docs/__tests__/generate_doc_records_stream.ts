@@ -20,8 +20,7 @@
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import { delay } from 'bluebird';
-
-import { createListStream, createPromiseFromStreams, createConcatStream } from '../../streams';
+import { createListStream, createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
 import { createGenerateDocRecordsStream } from '../generate_doc_records_stream';
 import { Progress } from '../../progress';
@@ -47,7 +46,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
     const progress = new Progress();
     await createPromiseFromStreams([
       createListStream(['logstash-*']),
-      createGenerateDocRecordsStream(client, stats, progress),
+      createGenerateDocRecordsStream({ client, stats, progress }),
     ]);
 
     expect(progress.getTotal()).to.be(0);
@@ -74,7 +73,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
     const progress = new Progress();
     await createPromiseFromStreams([
       createListStream(['logstash-*']),
-      createGenerateDocRecordsStream(client, stats, progress),
+      createGenerateDocRecordsStream({ client, stats, progress }),
     ]);
 
     expect(progress.getTotal()).to.be(0);
@@ -115,7 +114,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
     const progress = new Progress();
     const docRecords = await createPromiseFromStreams([
       createListStream(['index1', 'index2']),
-      createGenerateDocRecordsStream(client, stats, progress),
+      createGenerateDocRecordsStream({ client, stats, progress }),
       createConcatStream([]),
     ]);
 

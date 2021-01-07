@@ -38,13 +38,13 @@ export function logstashLogsSpecProvider(context: TutorialContext): TutorialSche
       defaultMessage: 'Logstash logs',
     }),
     moduleName,
-    category: TutorialsCategory.LOGGING,
+    category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.logstashLogs.shortDescription', {
-      defaultMessage: 'Collect and parse debug and slow logs created by Logstash itself.',
+      defaultMessage: 'Collect Logstash main and slow logs.',
     }),
     longDescription: i18n.translate('home.tutorials.logstashLogs.longDescription', {
       defaultMessage:
-        'The `logstash` Filebeat module parses debug and slow logs created by Logstash itself. \
+        'The modules parse Logstash regular logs and the slow log, it will support the plain text format and the JSON format. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-logstash.html',
@@ -56,7 +56,7 @@ export function logstashLogsSpecProvider(context: TutorialContext): TutorialSche
         {
           id: 'Filebeat-Logstash-Log-Dashboard-ecs',
           linkLabel: i18n.translate('home.tutorials.logstashLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Logstash logs dashboard',
+            defaultMessage: 'Logstash Logs',
           }),
           isOverview: true,
         },
@@ -66,7 +66,6 @@ export function logstashLogsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/logstash_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

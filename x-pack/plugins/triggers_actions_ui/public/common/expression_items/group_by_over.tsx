@@ -113,7 +113,6 @@ export const GroupByExpression = ({
         setGroupByPopoverOpen(false);
       }}
       ownFocus
-      withTitle
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downRight'}
     >

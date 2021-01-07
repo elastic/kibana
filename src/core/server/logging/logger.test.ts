@@ -17,9 +17,8 @@
  * under the License.
  */
 
+import { LogLevel, Appender } from '@kbn/logging';
 import { LoggingConfig } from './logging_config';
-import { Appender } from './appenders/appenders';
-import { LogLevel } from './log_level';
 import { BaseLogger } from './logger';
 
 const context = LoggingConfig.getLoggerContext(['context', 'parent', 'child']);

@@ -25,11 +25,12 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
       ...xPackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        '--map.proxyElasticMapsServiceInMaps=true',
         '--xpack.security.session.idleTimeout=3600000', // 1 hour
-        '--optimize.enabled=false',
         '--telemetry.optIn=true',
-        '--xpack.ingestManager.enabled=true',
-        '--xpack.ingestManager.fleet.pollingRequestTimeout=5000', // 5 seconds
+        '--xpack.fleet.enabled=true',
+        '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds
+        '--xpack.data_enhanced.search.sendToBackground.enabled=true', // enable WIP send to background UI
       ],
     },
     esTestCluster: {

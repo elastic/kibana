@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 // The color picker is not yet accessible.
 
 import React, { useState } from 'react';

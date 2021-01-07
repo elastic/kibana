@@ -21,9 +21,8 @@ import {
   deleteMLJob,
   getMLCapabilities,
 } from '../api/ml_anomaly';
-import { deleteAlertAction } from '../actions/alerts';
-import { alertSelector } from '../selectors';
 import { MonitorIdParam } from '../actions/types';
+import { anomalyAlertSelector, deleteAlertAction } from '../alerts/alerts';
 
 export function* fetchMLJobEffect() {
   yield takeLatest(
@@ -49,7 +48,7 @@ export function* fetchMLJobEffect() {
       yield put(deleteMLJobAction.success(response));
 
       // let's delete alert as well if it's there
-      const { data: anomalyAlert } = yield select(alertSelector);
+      const { data: anomalyAlert } = yield select(anomalyAlertSelector);
       if (anomalyAlert) {
         yield put(deleteAlertAction.get({ alertId: anomalyAlert.id as string }));
       }

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import { ml } from '../../../services/ml_api_service';
 
 import { CalendarsList } from './calendars_list';
@@ -13,6 +13,19 @@ import { CalendarsList } from './calendars_list';
 jest.mock('../../../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
+
+jest.mock('../../../components/help_menu', () => ({
+  HelpMenu: () => <div id="mockHelpMenu" />,
+}));
+
+jest.mock('../../../util/dependency_cache', () => ({
+  getDocLinks: () => ({
+    links: {
+      ml: { calendars: jest.fn() },
+    },
+  }),
+}));
+
 jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));

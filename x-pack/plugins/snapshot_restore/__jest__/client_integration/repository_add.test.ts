@@ -8,18 +8,11 @@ import { act } from 'react-dom/test-utils';
 import { INVALID_NAME_CHARS } from '../../public/application/services/validation/validate_repository';
 import { getRepository } from '../../test/fixtures';
 import { RepositoryType } from '../../common/types';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, delay } from './helpers';
 import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
-
-jest.mock('ui/new_platform');
 
 const { setup } = pageHelpers.repositoryAdd;
 const repositoryTypes = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];
-
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
 
 describe('<RepositoryAdd />', () => {
   let testBed: RepositoryAddTestBed;
@@ -183,7 +176,7 @@ describe('<RepositoryAdd />', () => {
 
           await act(async () => {
             actions.clickBackButton();
-            await nextTick(100);
+            await delay(100);
             component.update();
           });
         };

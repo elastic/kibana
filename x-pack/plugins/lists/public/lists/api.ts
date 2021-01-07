@@ -29,7 +29,7 @@ import {
   listSchema,
 } from '../../common/schemas';
 import { LIST_INDEX, LIST_ITEM_URL, LIST_PRIVILEGES_URL, LIST_URL } from '../../common/constants';
-import { validateEither } from '../../common/siem_common_deps';
+import { validateEither } from '../../common/shared_imports';
 import { toError, toPromise } from '../common/fp_utils';
 
 import {
@@ -44,6 +44,7 @@ const findLists = async ({
   http,
   cursor,
   page,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   per_page,
   signal,
 }: ApiParams & FindListSchemaEncoded): Promise<FoundListSchema> => {
@@ -82,12 +83,13 @@ export { findListsWithValidation as findLists };
 const importList = async ({
   file,
   http,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   list_id,
   type,
   signal,
-}: ApiParams & ImportListItemSchemaEncoded & ImportListItemQuerySchemaEncoded): Promise<
-  ListSchema
-> => {
+}: ApiParams &
+  ImportListItemSchemaEncoded &
+  ImportListItemQuerySchemaEncoded): Promise<ListSchema> => {
   const formData = new FormData();
   formData.append('file', file as Blob);
 
@@ -121,29 +123,33 @@ const importListWithValidation = async ({
     ),
     chain((payload) => tryCatch(() => importList({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(listSchema, response))),
-    flow(toPromise)
+    toPromise
   );
 
 export { importListWithValidation as importList };
 
 const deleteList = async ({
+  deleteReferences = false,
   http,
   id,
+  ignoreReferences = false,
   signal,
 }: ApiParams & DeleteListSchemaEncoded): Promise<ListSchema> =>
   http.fetch<ListSchema>(LIST_URL, {
     method: 'DELETE',
-    query: { id },
+    query: { deleteReferences, id, ignoreReferences },
     signal,
   });
 
 const deleteListWithValidation = async ({
+  deleteReferences,
   http,
   id,
+  ignoreReferences,
   signal,
 }: DeleteListParams): Promise<ListSchema> =>
   pipe(
-    { id },
+    { deleteReferences, id, ignoreReferences },
     (payload) => fromEither(validateEither(deleteListSchema, payload)),
     chain((payload) => tryCatch(() => deleteList({ http, signal, ...payload }), toError)),
     chain((response) => fromEither(validateEither(listSchema, response))),
@@ -154,6 +160,7 @@ export { deleteListWithValidation as deleteList };
 
 const exportList = async ({
   http,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   list_id,
   signal,
 }: ApiParams & ExportListItemQuerySchemaEncoded): Promise<Blob> =>

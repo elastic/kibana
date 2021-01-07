@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { from } from 'rxjs';
+import { from, of } from 'rxjs';
 import { take, map, takeUntil, mergeMap, shareReplay } from 'rxjs/operators';
 import { ApplicationStart } from 'src/core/public';
 import { GlobalSearchResultProvider } from '../../../global_search/public';
 import { getAppResults } from './get_app_results';
+
+const applicationType = 'application';
 
 export const createApplicationResultProvider = (
   applicationPromise: Promise<ApplicationStart>
@@ -17,7 +19,8 @@ export const createApplicationResultProvider = (
     mergeMap((application) => application.applications$),
     map((apps) =>
       [...apps.values()].filter(
-        (app) => app.status === 0 && (app.legacy === true || app.chromeless !== true)
+        // only include non-chromeless enabled apps with visible navLinks
+        (app) => app.status === 0 && app.navLinkStatus === 1 && app.chromeless !== true
       )
     ),
     shareReplay(1)
@@ -25,15 +28,19 @@ export const createApplicationResultProvider = (
 
   return {
     id: 'application',
-    find: (term, { aborted$, maxResults }) => {
+    find: ({ term, types, tags }, { aborted$, maxResults }) => {
+      if (tags || (types && !types.includes(applicationType))) {
+        return of([]);
+      }
       return searchableApps$.pipe(
         takeUntil(aborted$),
         take(1),
         map((apps) => {
-          const results = getAppResults(term, [...apps.values()]);
+          const results = getAppResults(term ?? '', [...apps.values()]);
           return results.sort((a, b) => b.score - a.score).slice(0, maxResults);
         })
       );
     },
+    getSearchableTypes: () => [applicationType],
   };
 };

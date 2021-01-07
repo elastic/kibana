@@ -19,23 +19,32 @@
 
 import { last } from 'lodash';
 import moment from 'moment';
+import { Datatable } from 'src/plugins/expressions';
 import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
-import { getIndexPatterns } from '../../../public/services';
-import { deserializeAggConfig } from '../../search/expressions/utils';
-import type { RangeSelectContext } from '../../../../embeddable/public';
+import { getIndexPatterns, getSearchService } from '../../../public/services';
+import { AggConfigSerialized } from '../../../common/search/aggs';
 
-export async function createFiltersFromRangeSelectAction(event: RangeSelectContext['data']) {
+/** @internal */
+export interface RangeSelectDataContext {
+  table: Datatable;
+  column: number;
+  range: number[];
+  timeFieldName?: string;
+}
+
+export async function createFiltersFromRangeSelectAction(event: RangeSelectDataContext) {
   const column: Record<string, any> = event.table.columns[event.column];
 
   if (!column || !column.meta) {
     return [];
   }
 
-  const indexPattern = await getIndexPatterns().get(column.meta.indexPatternId);
-  const aggConfig = deserializeAggConfig({
-    ...column.meta,
-    indexPattern,
-  });
+  const { indexPatternId, ...aggConfigs } = column.meta.sourceParams;
+  const indexPattern = await getIndexPatterns().get(indexPatternId);
+  const aggConfigsInstance = getSearchService().aggs.createAggConfigs(indexPattern, [
+    aggConfigs as AggConfigSerialized,
+  ]);
+  const aggConfig = aggConfigsInstance.aggs[0];
   const field: IFieldType = aggConfig.params.field;
 
   if (!field || event.range.length <= 1) {

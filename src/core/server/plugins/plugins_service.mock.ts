@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { PluginsService, PluginsServiceSetup } from './plugins_service';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PluginsService, PluginsServiceSetup } from './plugins_service';
 
 type PluginsServiceMock = jest.Mocked<PublicMethodsOf<PluginsService>>;
 

@@ -6,7 +6,12 @@
 import React from 'react';
 
 import { StateProvider } from './mappings_state_context';
+import { ConfigProvider } from './config_context';
 
 export const MappingsEditorProvider: React.FC = ({ children }) => {
-  return <StateProvider>{children}</StateProvider>;
+  return (
+    <StateProvider>
+      <ConfigProvider>{children}</ConfigProvider>
+    </StateProvider>
+  );
 };

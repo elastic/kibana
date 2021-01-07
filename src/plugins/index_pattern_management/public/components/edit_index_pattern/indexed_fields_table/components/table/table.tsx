@@ -19,7 +19,14 @@
 
 import React, { PureComponent } from 'react';
 
-import { EuiIcon, EuiInMemoryTable, EuiIconTip, EuiBasicTableColumn } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiInMemoryTable,
+  EuiIconTip,
+  EuiBasicTableColumn,
+  EuiBadge,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -144,6 +151,11 @@ const editDescription = i18n.translate(
   { defaultMessage: 'Edit' }
 );
 
+const labelDescription = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.customLabelTooltip',
+  { defaultMessage: 'A custom label for the field.' }
+);
+
 interface IndexedFieldProps {
   indexPattern: IIndexPattern;
   items: IndexedFieldItem[];
@@ -160,7 +172,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
 
     return (
       <span>
-        {name}
+        {field.name}
         {field.info && field.info.length ? (
           <span>
             &nbsp;
@@ -184,6 +196,15 @@ export class Table extends PureComponent<IndexedFieldProps> {
               content={primaryTimeTooltip}
             />
           </span>
+        ) : null}
+        {field.customLabel && field.customLabel !== field.name ? (
+          <div>
+            <EuiToolTip content={labelDescription}>
+              <EuiBadge iconType="flag" iconSide="left">
+                {field.customLabel}
+              </EuiBadge>
+            </EuiToolTip>
+          </div>
         ) : null}
       </span>
     );

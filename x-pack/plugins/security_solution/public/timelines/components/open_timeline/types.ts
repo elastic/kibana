@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SetStateAction, Dispatch } from 'react';
+import type React from 'react';
 import { AllTimelinesVariables } from '../../containers/all';
 import { TimelineModel } from '../../store/timeline/model';
 import { NoteResult } from '../../../graphql/types';
@@ -14,6 +14,7 @@ import {
   TimelineStatus,
   TemplateTimelineTypeLiteral,
   RowRendererId,
+  TimelineStatusLiteralWithNull,
 } from '../../../../common/types/timeline';
 
 /** The users who added a timeline to favorites */
@@ -24,9 +25,11 @@ export interface FavoriteTimelineResult {
 }
 
 export interface TimelineResultNote {
+  eventId?: string | null;
   savedObjectId?: string | null;
   note?: string | null;
   noteId?: string | null;
+  timelineId?: string | null;
   updated?: number | null;
   updatedBy?: string | null;
 }
@@ -92,7 +95,9 @@ export type OnOpenTimeline = ({
 }) => void;
 
 export type OnOpenDeleteTimelineModal = (selectedItem: OpenTimelineResult) => void;
-export type SetActionTimeline = Dispatch<SetStateAction<OpenTimelineResult | undefined>>;
+export type SetActionTimeline = React.Dispatch<
+  React.SetStateAction<OpenTimelineResult | undefined>
+>;
 export type EnableExportTimelineDownloader = (selectedItem: OpenTimelineResult) => void;
 /** Invoked when the user presses enters to submit the text in the search input */
 export type OnQueryChange = (query: EuiSearchBarQuery) => void;
@@ -174,6 +179,8 @@ export interface OpenTimelineProps {
   sortField: string;
   /** this affects timeline's behaviour like editable / duplicatible */
   timelineType: TimelineTypeLiteralWithNull;
+  /* active or immutable */
+  timelineStatus: TimelineStatusLiteralWithNull;
   /** when timelineType === template, templatetimelineFilter is a JSX.Element */
   templateTimelineFilter: JSX.Element[] | null;
   /** timeline / timeline template */
@@ -189,6 +196,7 @@ export interface OpenTimelineProps {
 export interface UpdateTimeline {
   duplicate: boolean;
   id: string;
+  forceNotes?: boolean;
   from: string;
   notes: NoteResult[] | null | undefined;
   timeline: TimelineModel;

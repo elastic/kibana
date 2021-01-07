@@ -23,7 +23,7 @@ import 'angular-sanitize';
 import 'angular-route';
 import _ from 'lodash';
 import sinon from 'sinon';
-import { getFakeRow, getFakeRowVals } from 'fixtures/fake_row';
+import { getFakeRow } from 'fixtures/fake_row';
 import $ from 'jquery';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { setScopedHistory, setServices, setDocViewsRegistry } from '../../../../kibana_services';
@@ -32,6 +32,13 @@ import { dataPluginMock } from '../../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../../navigation/public/mocks';
 import { getInnerAngularModule } from '../../../../get_inner_angular';
 import { createBrowserHistory } from 'history';
+
+const fakeRowVals = {
+  time: 'time_formatted',
+  bytes: 'bytes_formatted',
+  '@timestamp': '@timestamp_formatted',
+  request_body: 'request_body_formatted',
+};
 
 describe('Doc Table', () => {
   const core = coreMock.createStart();
@@ -45,8 +52,6 @@ describe('Doc Table', () => {
   // Stub out a minimal mapping of 4 fields
   let mapping;
 
-  let fakeRowVals;
-  let stubFieldFormatConverter;
   beforeAll(() => setScopedHistory(createBrowserHistory()));
   beforeEach(() => {
     angular.element.prototype.slice = jest.fn(function (index) {
@@ -97,21 +102,15 @@ describe('Doc Table', () => {
       mapping = $parentScope.indexPattern.fields;
 
       // Stub `getConverterFor` for a field in the indexPattern to return mock data.
-      // Returns `val` if provided, otherwise generates fake data for the field.
-      fakeRowVals = getFakeRowVals('formatted', 0, mapping);
-      stubFieldFormatConverter = function ($root, field, val) {
-        const convertFn = (value, type, options) => {
-          if (val) {
-            return val;
-          }
-          const fieldName = _.get(options, 'field.name', null);
 
-          return fakeRowVals[fieldName] || '';
-        };
-
-        $root.indexPattern.fields.getByName(field).format.convert = convertFn;
-        $root.indexPattern.fields.getByName(field).format.getConverterFor = () => convertFn;
+      const convertFn = (value, type, options) => {
+        const fieldName = _.get(options, 'field.name', null);
+        return fakeRowVals[fieldName] || '';
       };
+      $parentScope.indexPattern.getFormatterForField = () => ({
+        convert: convertFn,
+        getConverterFor: () => convertFn,
+      });
     })
   );
 
@@ -147,9 +146,6 @@ describe('Doc Table', () => {
 
     test('should be able to add and remove columns', () => {
       let childElems;
-
-      stubFieldFormatConverter($parentScope, 'bytes');
-      stubFieldFormatConverter($parentScope, 'request_body');
 
       // Should include a column for toggling and the time column by default
       $parentScope.columns = ['bytes'];
@@ -302,9 +298,6 @@ describe('Doc Table', () => {
         $root.mapping = mapping;
         $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-        // Stub field format converters for every field in the indexPattern
-        $root.indexPattern.fields.forEach((f) => stubFieldFormatConverter($root, f.name));
-
         $row = $('<tr>').attr({
           'kbn-table-row': 'row',
           columns: 'columns',
@@ -417,7 +410,8 @@ describe('Doc Table', () => {
     });
 
     test('handles two columns with the same content', () => {
-      stubFieldFormatConverter($root, 'request_body', fakeRowVals.bytes);
+      const tempVal = fakeRowVals.request_body;
+      fakeRowVals.request_body = 'bytes_formatted';
 
       $root.columns.length = 0;
       $root.columns.push('bytes');
@@ -428,6 +422,7 @@ describe('Doc Table', () => {
       expect($after).toHaveLength(4);
       expect($after.eq(2).text().trim()).toMatch(/^bytes_formatted/);
       expect($after.eq(3).text().trim()).toMatch(/^bytes_formatted/);
+      fakeRowVals.request_body = tempVal;
     });
 
     test('handles two columns swapping position', () => {

@@ -12,11 +12,11 @@ import {
   EuiHorizontalRule,
   EuiListGroupItem,
   EuiPopoverProps,
+  EuiListGroupItemProps,
 } from '@elastic/eui';
-
 import React, { HTMLAttributes, ReactNode } from 'react';
-import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/list_group_item';
 import styled from 'styled-components';
+import { EuiListGroupProps } from '@elastic/eui';
 
 type Props = EuiPopoverProps & HTMLAttributes<HTMLDivElement>;
 
@@ -42,9 +42,9 @@ export function SectionSubtitle({ children }: { children?: ReactNode }) {
   );
 }
 
-export function SectionLinks({ children }: { children?: ReactNode }) {
+export function SectionLinks({ children, ...props }: { children?: ReactNode } & EuiListGroupProps) {
   return (
-    <EuiListGroup flush={true} bordered={false}>
+    <EuiListGroup {...props} flush={true} bordered={false}>
       {children}
     </EuiListGroup>
   );

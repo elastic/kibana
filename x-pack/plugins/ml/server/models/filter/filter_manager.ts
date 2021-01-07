@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import Boom from '@hapi/boom';
+import type { MlClient } from '../../lib/ml_client';
 
 import { DetectorRule, DetectorRuleScope } from '../../../common/types/detector_rules';
 
@@ -58,26 +58,23 @@ interface PartialJob {
 }
 
 export class FilterManager {
-  private _callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
-  constructor({ callAsInternalUser }: ILegacyScopedClusterClient) {
-    this._callAsInternalUser = callAsInternalUser;
-  }
+  constructor(private _mlClient: MlClient) {}
 
   async getFilter(filterId: string) {
     try {
       const [JOBS, FILTERS] = [0, 1];
       const results = await Promise.all([
-        this._callAsInternalUser('ml.jobs'),
-        this._callAsInternalUser('ml.filters', { filterId }),
+        this._mlClient.getJobs(),
+        this._mlClient.getFilters({ filter_id: filterId }),
       ]);
 
-      if (results[FILTERS] && results[FILTERS].filters.length) {
+      if (results[FILTERS] && results[FILTERS].body.filters.length) {
         let filtersInUse: FiltersInUse = {};
-        if (results[JOBS] && results[JOBS].jobs) {
-          filtersInUse = this.buildFiltersInUse(results[JOBS].jobs);
+        if (results[JOBS] && results[JOBS].body.jobs) {
+          filtersInUse = this.buildFiltersInUse(results[JOBS].body.jobs);
         }
 
-        const filter = results[FILTERS].filters[0];
+        const filter = results[FILTERS].body.filters[0];
         filter.used_by = filtersInUse[filter.filter_id];
         return filter;
       } else {
@@ -90,8 +87,8 @@ export class FilterManager {
 
   async getAllFilters() {
     try {
-      const filtersResp = await this._callAsInternalUser('ml.filters');
-      return filtersResp.filters;
+      const { body } = await this._mlClient.getFilters({ size: 1000 });
+      return body.filters;
     } catch (error) {
       throw Boom.badRequest(error);
     }
@@ -101,14 +98,14 @@ export class FilterManager {
     try {
       const [JOBS, FILTERS] = [0, 1];
       const results = await Promise.all([
-        this._callAsInternalUser('ml.jobs'),
-        this._callAsInternalUser('ml.filters'),
+        this._mlClient.getJobs(),
+        this._mlClient.getFilters({ size: 1000 }),
       ]);
 
       // Build a map of filter_ids against jobs and detectors using that filter.
       let filtersInUse: FiltersInUse = {};
-      if (results[JOBS] && results[JOBS].jobs) {
-        filtersInUse = this.buildFiltersInUse(results[JOBS].jobs);
+      if (results[JOBS] && results[JOBS].body.jobs) {
+        filtersInUse = this.buildFiltersInUse(results[JOBS].body.jobs);
       }
 
       // For each filter, return just
@@ -117,8 +114,8 @@ export class FilterManager {
       //  item_count
       //  jobs using the filter
       const filterStats: FilterStats[] = [];
-      if (results[FILTERS] && results[FILTERS].filters) {
-        results[FILTERS].filters.forEach((filter: Filter) => {
+      if (results[FILTERS] && results[FILTERS].body.filters) {
+        results[FILTERS].body.filters.forEach((filter: Filter) => {
           const stats: FilterStats = {
             filter_id: filter.filter_id,
             description: filter.description,
@@ -136,11 +133,11 @@ export class FilterManager {
   }
 
   async newFilter(filter: FormFilter) {
-    const filterId = filter.filterId;
-    delete filter.filterId;
+    const { filterId, ...body } = filter;
     try {
       // Returns the newly created filter.
-      return await this._callAsInternalUser('ml.addFilter', { filterId, body: filter });
+      const { body: resp } = await this._mlClient.putFilter({ filter_id: filterId, body });
+      return resp;
     } catch (error) {
       throw Boom.badRequest(error);
     }
@@ -160,17 +157,19 @@ export class FilterManager {
       }
 
       // Returns the newly updated filter.
-      return await this._callAsInternalUser('ml.updateFilter', {
-        filterId,
+      const { body: resp } = await this._mlClient.updateFilter({
+        filter_id: filterId,
         body,
       });
+      return resp;
     } catch (error) {
       throw Boom.badRequest(error);
     }
   }
 
   async deleteFilter(filterId: string) {
-    return this._callAsInternalUser('ml.deleteFilter', { filterId });
+    const { body } = await this._mlClient.deleteFilter({ filter_id: filterId });
+    return body;
   }
 
   buildFiltersInUse(jobsList: PartialJob[]) {

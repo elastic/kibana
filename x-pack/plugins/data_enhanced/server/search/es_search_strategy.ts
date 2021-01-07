@@ -4,119 +4,116 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first } from 'rxjs/operators';
-import { mapKeys, snakeCase } from 'lodash';
+import type { Observable } from 'rxjs';
+import type { Logger, SharedGlobalConfig } from 'kibana/server';
+import { first, tap } from 'rxjs/operators';
 import { SearchResponse } from 'elasticsearch';
-import { Observable } from 'rxjs';
-import {
-  LegacyAPICaller,
-  SharedGlobalConfig,
-  RequestHandlerContext,
-  Logger,
-} from '../../../../../src/core/server';
-import {
+import { from } from 'rxjs';
+import type {
+  IEsSearchRequest,
+  IEsSearchResponse,
   ISearchOptions,
-  getDefaultSearchParams,
-  getTotalLoaded,
   ISearchStrategy,
+  SearchStrategyDependencies,
+  SearchUsage,
 } from '../../../../../src/plugins/data/server';
-import { IEnhancedEsSearchRequest } from '../../common';
-import { shimHitsTotal } from './shim_hits_total';
-
-export interface AsyncSearchResponse<T> {
-  id: string;
-  is_partial: boolean;
-  is_running: boolean;
-  response: SearchResponse<T>;
-}
+import {
+  getDefaultSearchParams,
+  getShardTimeout,
+  getTotalLoaded,
+  searchUsageObserver,
+  shimAbortSignal,
+} from '../../../../../src/plugins/data/server';
+import type { IAsyncSearchOptions } from '../../common';
+import { pollSearch } from '../../common';
+import {
+  getDefaultAsyncGetParams,
+  getDefaultAsyncSubmitParams,
+  getIgnoreThrottled,
+} from './request_utils';
+import { toAsyncKibanaSearchResponse } from './response_utils';
+import { AsyncSearchResponse } from './types';
+import { KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
-  logger: Logger
-): ISearchStrategy => {
-  const search = async (
-    context: RequestHandlerContext,
-    request: IEnhancedEsSearchRequest,
-    options?: ISearchOptions
-  ) => {
-    logger.info(`search ${JSON.stringify(request.params) || request.id}`);
+  logger: Logger,
+  usage?: SearchUsage
+): ISearchStrategy<IEsSearchRequest> => {
+  function asyncSearch(
+    { id, ...request }: IEsSearchRequest,
+    options: IAsyncSearchOptions,
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
+  ) {
+    const client = esClient.asCurrentUser.asyncSearch;
+
+    const search = async () => {
+      const params = id
+        ? getDefaultAsyncGetParams()
+        : { ...(await getDefaultAsyncSubmitParams(uiSettingsClient, options)), ...request.params };
+      const promise = id
+        ? client.get<AsyncSearchResponse>({ ...params, id })
+        : client.submit<AsyncSearchResponse>(params);
+      const { body } = await shimAbortSignal(promise, options.abortSignal);
+      return toAsyncKibanaSearchResponse(body);
+    };
+
+    return pollSearch(search, options).pipe(
+      tap((response) => (id = response.id)),
+      tap(searchUsageObserver(logger, usage))
+    );
+  }
+
+  async function rollupSearch(
+    request: IEsSearchRequest,
+    options: ISearchOptions,
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
+  ): Promise<IEsSearchResponse> {
     const config = await config$.pipe(first()).toPromise();
-    const caller = context.core.elasticsearch.legacy.client.callAsCurrentUser;
-    const defaultParams = getDefaultSearchParams(config);
-    const params = { ...defaultParams, ...request.params };
+    const { body, index, ...params } = request.params!;
+    const method = 'POST';
+    const path = encodeURI(`/${index}/_rollup_search`);
+    const querystring = {
+      ...getShardTimeout(config),
+      ...(await getIgnoreThrottled(uiSettingsClient)),
+      ...(await getDefaultSearchParams(uiSettingsClient)),
+      ...params,
+    };
 
-    return request.indexType === 'rollup'
-      ? rollupSearch(caller, { ...request, params }, options)
-      : asyncSearch(caller, { ...request, params }, options);
-  };
-
-  const cancel = async (context: RequestHandlerContext, id: string) => {
-    logger.info(`cancel ${id}`);
-    const method = 'DELETE';
-    const path = encodeURI(`/_async_search/${id}`);
-    await context.core.elasticsearch.legacy.client.callAsCurrentUser('transport.request', {
+    const promise = esClient.asCurrentUser.transport.request({
       method,
       path,
+      body,
+      querystring,
     });
-  };
 
-  return { search, cancel };
-};
-
-async function asyncSearch(
-  caller: LegacyAPICaller,
-  request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions
-) {
-  const { timeout = undefined, restTotalHitsAsInt = undefined, ...params } = {
-    ...request.params,
-  };
-
-  params.trackTotalHits = true; // Get the exact count of hits
-
-  // If we have an ID, then just poll for that ID, otherwise send the entire request body
-  const { body = undefined, index = undefined, ...queryParams } = request.id ? {} : params;
-
-  const method = request.id ? 'GET' : 'POST';
-  const path = encodeURI(request.id ? `/_async_search/${request.id}` : `/${index}/_async_search`);
-
-  // Wait up to 1s for the response to return
-  const query = toSnakeCase({ waitForCompletionTimeout: '100ms', ...queryParams });
-
-  const { id, response, is_partial, is_running } = (await caller(
-    'transport.request',
-    { method, path, body, query },
-    options
-  )) as AsyncSearchResponse<any>;
+    const esResponse = await shimAbortSignal(promise, options?.abortSignal);
+    const response = esResponse.body as SearchResponse<any>;
+    return {
+      rawResponse: response,
+      ...getTotalLoaded(response),
+    };
+  }
 
   return {
-    id,
-    is_partial,
-    is_running,
-    rawResponse: shimHitsTotal(response),
-    ...getTotalLoaded(response._shards),
+    search: (request, options: IAsyncSearchOptions, deps) => {
+      logger.debug(`search ${JSON.stringify(request.params) || request.id}`);
+
+      if (request.indexType === undefined) {
+        return asyncSearch(request, options, deps);
+      } else if (request.indexType === 'rollup') {
+        return from(rollupSearch(request, options, deps));
+      } else {
+        throw new KbnServerError('Unknown indexType', 400);
+      }
+    },
+    cancel: async (id, options, { esClient }) => {
+      logger.debug(`cancel ${id}`);
+      await esClient.asCurrentUser.asyncSearch.delete({ id });
+    },
+    extend: async (id, keepAlive, options, { esClient }) => {
+      logger.debug(`extend ${id} by ${keepAlive}`);
+      await esClient.asCurrentUser.asyncSearch.get({ id, keep_alive: keepAlive });
+    },
   };
-}
-
-async function rollupSearch(
-  caller: LegacyAPICaller,
-  request: IEnhancedEsSearchRequest,
-  options?: ISearchOptions
-) {
-  const { body, index, ...params } = request.params!;
-  const method = 'POST';
-  const path = encodeURI(`/${index}/_rollup_search`);
-  const query = toSnakeCase(params);
-
-  const rawResponse = await ((caller(
-    'transport.request',
-    { method, path, body, query },
-    options
-  ) as unknown) as SearchResponse<any>);
-
-  return { rawResponse, ...getTotalLoaded(rawResponse._shards) };
-}
-
-function toSnakeCase(obj: Record<string, any>) {
-  return mapKeys(obj, (value, key) => snakeCase(key));
-}
+};

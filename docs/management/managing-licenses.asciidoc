@@ -7,7 +7,7 @@ with no expiration date. For the full list of features, refer to
 
 If you want to try out the full set of features, you can activate a free 30-day
 trial. To view the status of your license, start a trial, or install a new
-license, open the menu, then go to *Stack Management > Stack > License Management*.
+license, open the main menu, then click *Stack Management > License Management*.
 
 NOTE: You can start a trial only if your cluster has not already activated a
 trial license for the current major product version. For example, if you have
@@ -28,6 +28,13 @@ you must configure Transport Layer Security (TLS) in {es}.
 See {ref}/encrypting-communications.html[Encrypting communications].
 {kib} and the {ref}/start-basic.html[start basic API] provide a list of all of
 the features that will no longer be supported if you revert to a basic license.
+
+[float]
+=== Required permissions
+
+The `manage` cluster privilege is required to access *License Management*.
+
+To add the privilege, open the main menu, then click *Stack Management > Roles*.
 
 [discrete]
 [[update-license]]

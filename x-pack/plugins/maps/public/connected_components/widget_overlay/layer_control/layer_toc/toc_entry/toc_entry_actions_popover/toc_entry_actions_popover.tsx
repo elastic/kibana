@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 
-import { EuiButtonEmpty, EuiPopover, EuiContextMenu, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiPopover, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
+import { TOCEntryButton } from '../toc_entry_button';
 
 interface Props {
   cloneLayer: (layerId: string) => void;
@@ -18,11 +19,9 @@ interface Props {
   fitToBounds: (layerId: string) => void;
   isEditButtonDisabled: boolean;
   isReadOnly: boolean;
-  isUsingSearch: boolean;
   layer: ILayer;
   removeLayer: (layerId: string) => void;
   toggleVisible: (layerId: string) => void;
-  zoom: number;
 }
 
 interface State {
@@ -82,55 +81,6 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     this.props.toggleVisible(this.props.layer.getId());
   }
 
-  _renderPopoverToggleButton() {
-    const { icon, tooltipContent, footnotes } = this.props.layer.getIconAndTooltipContent(
-      this.props.zoom,
-      this.props.isUsingSearch
-    );
-
-    const footnoteIcons = footnotes.map((footnote, index) => {
-      return (
-        <Fragment key={index}>
-          {''}
-          {footnote.icon}
-        </Fragment>
-      );
-    });
-    const footnoteTooltipContent = footnotes.map((footnote, index) => {
-      return (
-        <div key={index}>
-          {footnote.icon} {footnote.message}
-        </div>
-      );
-    });
-
-    return (
-      <EuiToolTip
-        anchorClassName="mapLayTocActions__tooltipAnchor"
-        position="top"
-        title={this.props.displayName}
-        content={
-          <Fragment>
-            {tooltipContent}
-            {footnoteTooltipContent}
-          </Fragment>
-        }
-      >
-        <EuiButtonEmpty
-          className="mapTocEntry__layerName eui-textLeft"
-          size="xs"
-          flush="left"
-          color="text"
-          onClick={this._togglePopover}
-          data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
-        >
-          <span className="mapTocEntry__layerNameIcon">{icon}</span>
-          {this.props.displayName} {footnoteIcons}
-        </EuiButtonEmpty>
-      </EuiToolTip>
-    );
-  }
-
   _getActionsPanel() {
     const actionItems = [
       {
@@ -158,7 +108,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           : i18n.translate('xpack.maps.layerTocActions.showLayerTitle', {
               defaultMessage: 'Show layer',
             }),
-        icon: <EuiIcon type={this.props.layer.isVisible() ? 'eye' : 'eyeClosed'} size="m" />,
+        icon: <EuiIcon type={this.props.layer.isVisible() ? 'eyeClosed' : 'eye'} size="m" />,
         'data-test-subj': 'layerVisibilityToggleButton',
         toolTipContent: null,
         onClick: () => {
@@ -220,13 +170,19 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   render() {
     return (
       <EuiPopover
-        id="contextMenu"
+        id={this.props.layer.getId()}
         className="mapLayTocActions"
-        button={this._renderPopoverToggleButton()}
+        button={
+          <TOCEntryButton
+            layer={this.props.layer}
+            displayName={this.props.displayName}
+            escapedDisplayName={this.props.escapedDisplayName}
+            onClick={this._togglePopover}
+          />
+        }
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         panelPaddingSize="none"
-        withTitle
         anchorPosition="leftUp"
         anchorClassName="mapLayTocActions__popoverAnchor"
       >

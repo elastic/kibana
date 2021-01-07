@@ -8,14 +8,8 @@ import React, { memo, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 
-import { euiStyled } from '../../../../../observability/public';
+import { euiStyled, useUiTracker } from '../../../../../observability/public';
 import { isTimestampColumn } from '../../../utils/log_entry';
-import {
-  LogColumnConfiguration,
-  isTimestampLogColumnConfiguration,
-  isMessageLogColumnConfiguration,
-  isFieldLogColumnConfiguration,
-} from '../../../utils/source_configuration';
 import { TextScale } from '../../../../common/log_text_scale';
 import { LogEntryColumn, LogEntryColumnWidths, iconColumnId } from './log_entry_column';
 import { LogEntryFieldColumn } from './log_entry_field_column';
@@ -24,6 +18,12 @@ import { LogEntryTimestampColumn } from './log_entry_timestamp_column';
 import { monospaceTextStyle, hoveredContentStyle, highlightedContentStyle } from './text_styles';
 import { LogEntry, LogColumn } from '../../../../common/http_api';
 import { LogEntryContextMenu } from './log_entry_context_menu';
+import {
+  LogColumnRenderConfiguration,
+  isTimestampColumnRenderConfiguration,
+  isMessageColumnRenderConfiguration,
+  isFieldColumnRenderConfiguration,
+} from '../../../utils/log_column_render_configuration';
 
 const MENU_LABEL = i18n.translate('xpack.infra.logEntryItemView.logEntryActionsMenuToolTip', {
   defaultMessage: 'View actions for line',
@@ -42,7 +42,7 @@ const LOG_VIEW_IN_CONTEXT_LABEL = i18n.translate(
 
 interface LogEntryRowProps {
   boundingBoxRef?: React.Ref<Element>;
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   columnWidths: LogEntryColumnWidths;
   highlights: LogEntry[];
   isActiveHighlight: boolean;
@@ -68,6 +68,8 @@ export const LogEntryRow = memo(
     scale,
     wrap,
   }: LogEntryRowProps) => {
+    const trackMetric = useUiTracker({ app: 'infra_logs' });
+
     const [isHovered, setIsHovered] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -82,10 +84,10 @@ export const LogEntryRow = memo(
       logEntry.id,
     ]);
 
-    const handleOpenViewLogInContext = useCallback(() => openViewLogInContext?.(logEntry), [
-      openViewLogInContext,
-      logEntry,
-    ]);
+    const handleOpenViewLogInContext = useCallback(() => {
+      openViewLogInContext?.(logEntry);
+      trackMetric({ metric: 'view_in_context__stream' });
+    }, [openViewLogInContext, logEntry, trackMetric]);
 
     const hasContext = useMemo(() => !isEmpty(logEntry.context), [logEntry]);
     const hasActionFlyoutWithItem = openFlyoutWithItem !== undefined;
@@ -160,7 +162,7 @@ export const LogEntryRow = memo(
         scale={scale}
       >
         {columnConfigurations.map((columnConfiguration) => {
-          if (isTimestampLogColumnConfiguration(columnConfiguration)) {
+          if (isTimestampColumnRenderConfiguration(columnConfiguration)) {
             const column = logEntryColumnsById[columnConfiguration.timestampColumn.id];
             const columnWidth = columnWidths[columnConfiguration.timestampColumn.id];
 
@@ -171,11 +173,14 @@ export const LogEntryRow = memo(
                 {...columnWidth}
               >
                 {isTimestampColumn(column) ? (
-                  <LogEntryTimestampColumn time={column.timestamp} />
+                  <LogEntryTimestampColumn
+                    time={column.timestamp}
+                    render={columnConfiguration.timestampColumn.render}
+                  />
                 ) : null}
               </LogEntryColumn>
             );
-          } else if (isMessageLogColumnConfiguration(columnConfiguration)) {
+          } else if (isMessageColumnRenderConfiguration(columnConfiguration)) {
             const column = logEntryColumnsById[columnConfiguration.messageColumn.id];
             const columnWidth = columnWidths[columnConfiguration.messageColumn.id];
 
@@ -191,11 +196,12 @@ export const LogEntryRow = memo(
                     highlights={highlightsByColumnId[column.columnId] || []}
                     isActiveHighlight={isActiveHighlight}
                     wrapMode={wrap ? 'long' : 'pre-wrapped'}
+                    render={columnConfiguration.messageColumn.render}
                   />
                 ) : null}
               </LogEntryColumn>
             );
-          } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
+          } else if (isFieldColumnRenderConfiguration(columnConfiguration)) {
             const column = logEntryColumnsById[columnConfiguration.fieldColumn.id];
             const columnWidth = columnWidths[columnConfiguration.fieldColumn.id];
 
@@ -211,6 +217,7 @@ export const LogEntryRow = memo(
                     highlights={highlightsByColumnId[column.columnId] || []}
                     isActiveHighlight={isActiveHighlight}
                     wrapMode={wrap ? 'long' : 'pre-wrapped'}
+                    render={columnConfiguration.fieldColumn.render}
                   />
                 ) : null}
               </LogEntryColumn>

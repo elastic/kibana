@@ -18,17 +18,18 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
-// @ts-expect-error
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { keys } from '@elastic/eui';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
+import { columnServiceMock } from '../../../services/column_service.mock';
 import { Table, TableProps } from './table';
 
 const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
   actionRegistry: actionServiceMock.createStart(),
+  columnRegistry: columnServiceMock.createStart(),
   selectedSavedObjects: [
     {
       id: '1',
@@ -51,6 +52,7 @@ const defaultProps: TableProps = {
   },
   filterOptions: [{ value: 2 }],
   onDelete: () => {},
+  onActionRefresh: () => {},
   onExport: () => {},
   goInspectObject: () => {},
   canGoInApp: () => true,
@@ -79,7 +81,7 @@ const defaultProps: TableProps = {
   onTableChange: () => {},
   isSearching: false,
   onShowRelationships: () => {},
-  canDelete: true,
+  capabilities: { savedObjectsManagement: { delete: true } } as any,
 };
 
 describe('Table', () => {
@@ -118,9 +120,42 @@ describe('Table', () => {
       { type: 'search' },
       { type: 'index-pattern' },
     ] as any;
-    const customizedProps = { ...defaultProps, selectedSavedObjects, canDelete: false };
+    const customizedProps = {
+      ...defaultProps,
+      selectedSavedObjects,
+      capabilities: { savedObjectsManagement: { delete: false } } as any,
+    };
     const component = shallowWithI18nProvider(<Table {...customizedProps} />);
 
     expect(component).toMatchSnapshot();
+  });
+
+  it(`allows for automatic refreshing after an action`, () => {
+    const actionRegistry = actionServiceMock.createStart();
+    actionRegistry.getAll.mockReturnValue([
+      {
+        // minimal action mock to exercise this test case
+        id: 'someAction',
+        render: () => <div>action!</div>,
+        refreshOnFinish: () => true,
+        euiAction: { name: 'foo', description: 'bar', icon: 'beaker', type: 'icon' },
+        registerOnFinishCallback: (callback: Function) => callback(), // call the callback immediately for this test
+        setActionContext: () => null,
+      } as any,
+    ]);
+    const onActionRefresh = jest.fn();
+    const customizedProps = { ...defaultProps, actionRegistry, onActionRefresh };
+    const component = shallowWithI18nProvider(<Table {...customizedProps} />);
+
+    const table = component.find('EuiBasicTable');
+    const columns = table.prop('columns') as any[];
+    const actionColumn = columns.find((x) => x.hasOwnProperty('actions')) as { actions: any[] };
+    const someAction = actionColumn.actions.find(
+      (x) => x['data-test-subj'] === 'savedObjectsTableAction-someAction'
+    );
+
+    expect(onActionRefresh).not.toHaveBeenCalled();
+    someAction.onClick();
+    expect(onActionRefresh).toHaveBeenCalled();
   });
 });

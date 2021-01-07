@@ -17,23 +17,29 @@
  * under the License.
  */
 
-import {
-  ActionByType,
-  APPLY_FILTER_TRIGGER,
-  createAction,
-  UiActionsStart,
-} from '../../../../plugins/ui_actions/public';
+import { Datatable } from 'src/plugins/expressions/public';
+import { Action, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
-import type { RangeSelectContext } from '../../../embeddable/public';
 
-export type SelectRangeActionContext = RangeSelectContext;
+export interface SelectRangeActionContext {
+  // Need to make this unknown to prevent circular dependencies.
+  // Apps using this property will need to cast to `IEmbeddable`.
+  embeddable?: unknown;
+  data: {
+    table: Datatable;
+    column: number;
+    range: number[];
+    timeFieldName?: string;
+  };
+}
 
 export const ACTION_SELECT_RANGE = 'ACTION_SELECT_RANGE';
 
 export function createSelectRangeAction(
   getStartServices: () => { uiActions: UiActionsStart }
-): ActionByType<typeof ACTION_SELECT_RANGE> {
-  return createAction<typeof ACTION_SELECT_RANGE>({
+): Action {
+  return createAction({
     type: ACTION_SELECT_RANGE,
     id: ACTION_SELECT_RANGE,
     shouldAutoExecute: async () => true,

@@ -17,8 +17,7 @@
  * under the License.
  */
 import { IncomingHttpHeaders } from 'http';
-
-import { pick } from '../../../utils';
+import { pick } from '@kbn/std';
 
 /**
  * Creates a Union type of all known keys of a given interface.

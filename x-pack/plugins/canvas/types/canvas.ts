@@ -76,3 +76,7 @@ export interface CanvasWorkpadBoundingBox {
   top: number;
   bottom: number;
 }
+
+export type LayoutState = any;
+
+export type CommitFn = (type: string, payload: any) => LayoutState;

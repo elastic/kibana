@@ -22,12 +22,9 @@ import { KibanaLegacyPlugin } from './plugin';
 export type Setup = jest.Mocked<ReturnType<KibanaLegacyPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<KibanaLegacyPlugin['start']>>;
 
-const createSetupContract = (): Setup => ({
-  forwardApp: jest.fn(),
-});
+const createSetupContract = (): Setup => ({});
 
 const createStartContract = (): Start => ({
-  getForwards: jest.fn(),
   config: {
     defaultAppId: 'home',
   },
@@ -35,8 +32,6 @@ const createStartContract = (): Start => ({
     turnHideWriteControlsOn: jest.fn(),
     getHideWriteControls: jest.fn(),
   },
-  navigateToDefaultApp: jest.fn(),
-  navigateToLegacyKibanaUrl: jest.fn(),
   loadFontAwesome: jest.fn(),
 });
 

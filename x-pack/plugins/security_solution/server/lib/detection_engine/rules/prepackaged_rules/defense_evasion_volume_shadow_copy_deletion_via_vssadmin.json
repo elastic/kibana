@@ -3,8 +3,10 @@
     "Elastic"
   ],
   "description": "Identifies use of vssadmin.exe for shadow copy deletion on endpoints. This commonly occurs in tandem with ransomware or other destructive attacks.",
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -15,7 +17,10 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -35,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 5
 }

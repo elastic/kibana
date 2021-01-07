@@ -21,6 +21,10 @@ import { i18n } from '@kbn/i18n';
 
 import { VisualizeConstants } from '../visualize_constants';
 
+const defaultEditText = i18n.translate('visualize.editor.defaultEditBreadcrumbText', {
+  defaultMessage: 'Edit visualization',
+});
+
 export function getLandingBreadcrumbs() {
   return [
     {
@@ -32,9 +36,18 @@ export function getLandingBreadcrumbs() {
   ];
 }
 
-export function getCreateBreadcrumbs() {
+export function getCreateBreadcrumbs({
+  byValue,
+  originatingAppName,
+  redirectToOrigin,
+}: {
+  byValue?: boolean;
+  originatingAppName?: string;
+  redirectToOrigin?: () => void;
+}) {
   return [
-    ...getLandingBreadcrumbs(),
+    ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
+    ...(!byValue ? getLandingBreadcrumbs() : []),
     {
       text: i18n.translate('visualize.editor.createBreadcrumb', {
         defaultMessage: 'Create',
@@ -43,11 +56,23 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
-export function getEditBreadcrumbs(text: string) {
+export function getEditBreadcrumbs(
+  {
+    byValue,
+    originatingAppName,
+    redirectToOrigin,
+  }: {
+    byValue?: boolean;
+    originatingAppName?: string;
+    redirectToOrigin?: () => void;
+  },
+  title: string = defaultEditText
+) {
   return [
-    ...getLandingBreadcrumbs(),
+    ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
+    ...(!byValue ? getLandingBreadcrumbs() : []),
     {
-      text,
+      text: title,
     },
   ];
 }

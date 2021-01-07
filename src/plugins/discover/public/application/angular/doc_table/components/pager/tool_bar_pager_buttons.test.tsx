@@ -18,9 +18,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { ToolBarPagerButtons } from './tool_bar_pager_buttons';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 test('it renders ToolBarPagerButtons', () => {

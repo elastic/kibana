@@ -8,14 +8,11 @@ const path = require('path');
 const fs = require('fs');
 const del = require('del');
 const { run } = require('@kbn/dev-utils');
+// This is included in the main Kibana package.json
+// eslint-disable-next-line import/no-extraneous-dependencies
 const storybook = require('@storybook/react/standalone');
 const execa = require('execa');
 const { DLL_OUTPUT } = require('./../storybook/constants');
-
-const options = {
-  stdio: ['ignore', 'inherit', 'inherit'],
-  buffer: false,
-};
 
 const storybookOptions = {
   configDir: path.resolve(__dirname, './../storybook'),
@@ -24,7 +21,7 @@ const storybookOptions = {
 
 run(
   ({ log, flags }) => {
-    const { dll, clean, stats, site } = flags;
+    const { addon, dll, clean, stats, site } = flags;
 
     // Delete the existing DLL if we're cleaning or building.
     if (clean || dll) {
@@ -34,12 +31,6 @@ run(
         return;
       }
     }
-
-    // Ensure SASS dependencies have been built before doing anything.
-    execa.sync(process.execPath, ['scripts/build_sass'], {
-      cwd: path.resolve(__dirname, '../../../..'),
-      ...options,
-    });
 
     // Build the DLL if necessary.
     if (fs.existsSync(DLL_OUTPUT)) {
@@ -81,24 +72,33 @@ run(
       return;
     }
 
+    // Build the addon
+    execa.sync('node', ['scripts/build'], {
+      cwd: path.resolve(__dirname, '../storybook/addon'),
+      stdio: ['ignore', 'inherit', 'inherit'],
+      buffer: false,
+    });
+
     // Build site and exit
     if (site) {
       log.success('storybook: Generating Storybook site');
       storybook({
         ...storybookOptions,
         mode: 'static',
-        outputDir: path.resolve(__dirname, './../storybook'),
+        outputDir: path.resolve(__dirname, './../storybook/build'),
       });
       return;
     }
 
     log.info('storybook: Starting Storybook');
 
-    // Watch the SASS sheets for changes
-    execa(process.execPath, ['scripts/build_sass', '--watch'], {
-      cwd: path.resolve(__dirname, '../../../..'),
-      ...options,
-    });
+    if (addon) {
+      execa('node', ['scripts/build', '--watch'], {
+        cwd: path.resolve(__dirname, '../storybook/addon'),
+        stdio: ['ignore', 'inherit', 'inherit'],
+        buffer: false,
+      });
+    }
 
     storybook({
       ...storybookOptions,
@@ -110,8 +110,9 @@ run(
       Storybook runner for Canvas.
     `,
     flags: {
-      boolean: ['dll', 'clean', 'stats', 'site'],
+      boolean: ['addon', 'dll', 'clean', 'stats', 'site'],
       help: `
+        --addon            Watch the addon source code for changes.
         --clean            Forces a clean of the Storybook DLL and exits.
         --dll              Cleans and builds the Storybook dependency DLL and exits.
         --stats            Produces a Webpack stats file.

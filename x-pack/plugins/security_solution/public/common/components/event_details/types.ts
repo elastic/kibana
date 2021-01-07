@@ -5,6 +5,6 @@
  */
 
 import { BrowserField } from '../../containers/source';
-import { DetailItem } from '../../../graphql/types';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
-export type EventFieldsData = BrowserField & DetailItem;
+export type EventFieldsData = BrowserField & TimelineEventsDetailsItem;

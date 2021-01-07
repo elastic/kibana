@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CloneButton } from './clone_button';
+export { useCloneAction } from './use_clone_action';

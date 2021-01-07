@@ -7,16 +7,9 @@
 import React from 'react';
 
 import { HeaderPage, HeaderPageProps } from '../../../common/components/header_page';
-import * as i18n from './translations';
 
-const CaseHeaderPageComponent: React.FC<HeaderPageProps> = (props) => <HeaderPage {...props} />;
-
-CaseHeaderPageComponent.defaultProps = {
-  badgeOptions: {
-    beta: true,
-    text: i18n.PAGE_BADGE_LABEL,
-    tooltip: i18n.PAGE_BADGE_TOOLTIP,
-  },
-};
+const CaseHeaderPageComponent: React.FC<HeaderPageProps> = (props) => (
+  <HeaderPage hideSourcerer={true} {...props} />
+);
 
 export const CaseHeaderPage = React.memo(CaseHeaderPageComponent);

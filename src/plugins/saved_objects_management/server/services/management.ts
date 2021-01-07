@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ISavedObjectTypeRegistry, SavedObject } from 'src/core/server';
 
 export type ISavedObjectsManagement = PublicMethodsOf<SavedObjectsManagement>;
@@ -49,5 +49,9 @@ export class SavedObjectsManagement {
   public getInAppUrl(savedObject: SavedObject) {
     const getInAppUrl = this.registry.getType(savedObject.type)?.management?.getInAppUrl;
     return getInAppUrl ? getInAppUrl(savedObject) : undefined;
+  }
+
+  public getNamespaceType(savedObject: SavedObject) {
+    return this.registry.getType(savedObject.type)?.namespaceType;
   }
 }

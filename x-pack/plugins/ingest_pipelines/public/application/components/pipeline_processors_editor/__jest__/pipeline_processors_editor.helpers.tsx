@@ -5,13 +5,10 @@
  */
 import { act } from 'react-dom/test-utils';
 import React from 'react';
-import { registerTestBed, TestBed } from '../../../../../../../test_utils';
-import {
-  PipelineProcessorsContextProvider,
-  Props,
-  ProcessorsEditor,
-  GlobalOnFailureProcessorsEditor,
-} from '../';
+
+import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { Props } from '../';
+import { ProcessorsEditorWithDeps } from './processors_editor';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -61,11 +58,7 @@ jest.mock('react-virtualized', () => {
 });
 
 const testBedSetup = registerTestBed<TestSubject>(
-  (props: Props) => (
-    <PipelineProcessorsContextProvider {...props}>
-      <ProcessorsEditor /> <GlobalOnFailureProcessorsEditor />
-    </PipelineProcessorsContextProvider>
-  ),
+  (props: Props) => <ProcessorsEditorWithDeps {...props} />,
   {
     doMountAsync: false,
   }
@@ -89,7 +82,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
     async addProcessor(processorsSelector: string, type: string, options: Record<string, any>) {
       find(`${processorsSelector}.addProcessorButton`).simulate('click');
       await act(async () => {
-        find('processorTypeSelector').simulate('change', [{ value: type, label: type }]);
+        find('processorTypeSelector.input').simulate('change', [{ value: type, label: type }]);
       });
       component.update();
       await act(async () => {
@@ -98,7 +91,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
         });
       });
       await act(async () => {
-        find('processorSettingsForm.submitButton').simulate('click');
+        find('addProcessorForm.submitButton').simulate('click');
       });
     },
 
@@ -112,7 +105,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 
     moveProcessor(processorSelector: string, dropZoneSelector: string) {
       act(() => {
-        find(`${processorSelector}.moveItemButton`).simulate('change');
+        find(`${processorSelector}.moveItemButton`).simulate('click');
       });
       component.update();
       act(() => {
@@ -129,7 +122,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
       find(`${processorSelector}.moreMenu.button`).simulate('click');
       find(`${processorSelector}.moreMenu.addOnFailureButton`).simulate('click');
       await act(async () => {
-        find('processorTypeSelector').simulate('change', [{ value: type, label: type }]);
+        find('processorTypeSelector.input').simulate('change', [{ value: type, label: type }]);
       });
       component.update();
       await act(async () => {
@@ -138,17 +131,17 @@ const createActions = (testBed: TestBed<TestSubject>) => {
         });
       });
       await act(async () => {
-        find('processorSettingsForm.submitButton').simulate('click');
+        find('addProcessorForm.submitButton').simulate('click');
       });
     },
 
     startAndCancelMove(processorSelector: string) {
       act(() => {
-        find(`${processorSelector}.moveItemButton`).simulate('change');
+        find(`${processorSelector}.moveItemButton`).simulate('click');
       });
       component.update();
       act(() => {
-        find(`${processorSelector}.cancelMoveItemButton`).simulate('change');
+        find(`${processorSelector}.cancelMoveItemButton`).simulate('click');
       });
       component.update();
     },
@@ -174,10 +167,13 @@ type TestSubject =
   | 'pipelineEditorDoneButton'
   | 'pipelineEditorOnFailureToggle'
   | 'addProcessorsButtonLevel1'
-  | 'processorSettingsForm'
-  | 'processorSettingsForm.submitButton'
+  | 'editProcessorForm'
+  | 'editProcessorForm.submitButton'
+  | 'addProcessorForm.submitButton'
+  | 'addProcessorForm'
   | 'processorOptionsEditor'
   | 'processorSettingsFormFlyout'
   | 'processorTypeSelector'
   | 'pipelineEditorOnFailureTree'
+  | 'processorsEmptyPrompt'
   | string;

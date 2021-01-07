@@ -7,21 +7,22 @@
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
-import { SendRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
-import { encodePathForReactRouter } from '../../../../services/routing';
+import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
 import { useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
 import { TemplateTypeIndicator } from '../components';
+import { getTemplateDetailsLink } from '../../../../services/routing';
 
 interface Props {
   templates: TemplateListItem[];
-  reload: () => Promise<SendRequestResponse>;
+  reload: UseRequestResponse['resendRequest'];
   editTemplate: (name: string) => void;
   cloneTemplate: (name: string) => void;
   history: ScopedHistory;
@@ -52,12 +53,8 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         return (
           <>
             <EuiLink
-              {...reactRouterNavigate(
-                history,
-                {
-                  pathname: `/templates/${encodePathForReactRouter(name)}`,
-                },
-                () => uiMetricService.trackMetric('click', UIM_TEMPLATE_SHOW_DETAILS_CLICK)
+              {...reactRouterNavigate(history, getTemplateDetailsLink(name), () =>
+                uiMetricService.trackMetric(METRIC_TYPE.CLICK, UIM_TEMPLATE_SHOW_DETAILS_CLICK)
               )}
               data-test-subj="templateDetailsLink"
             >

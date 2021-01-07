@@ -17,19 +17,14 @@
  * under the License.
  */
 
-import { PublicAppInfo, AppNavLinkStatus, AppStatus, PublicLegacyAppInfo } from '../../application';
+import { PublicAppInfo, AppNavLinkStatus, AppStatus } from '../../application';
 import { IBasePath } from '../../http';
 import { NavLinkWrapper } from './nav_link';
 import { appendAppPath } from '../../application/utils';
 
-export function toNavLink(
-  app: PublicAppInfo | PublicLegacyAppInfo,
-  basePath: IBasePath
-): NavLinkWrapper {
+export function toNavLink(app: PublicAppInfo, basePath: IBasePath): NavLinkWrapper {
   const useAppStatus = app.navLinkStatus === AppNavLinkStatus.default;
-  const relativeBaseUrl = isLegacyApp(app)
-    ? basePath.prepend(app.appUrl)
-    : basePath.prepend(app.appRoute!);
+  const relativeBaseUrl = basePath.prepend(app.appRoute!);
   const url = relativeToAbsolute(appendAppPath(relativeBaseUrl, app.defaultPath));
   const baseUrl = relativeToAbsolute(relativeBaseUrl);
 
@@ -39,14 +34,9 @@ export function toNavLink(
       ? app.status === AppStatus.inaccessible
       : app.navLinkStatus === AppNavLinkStatus.hidden,
     disabled: useAppStatus ? false : app.navLinkStatus === AppNavLinkStatus.disabled,
-    legacy: isLegacyApp(app),
     baseUrl,
-    ...(isLegacyApp(app)
-      ? {}
-      : {
-          href: url,
-          url,
-        }),
+    href: url,
+    url,
   });
 }
 
@@ -62,8 +52,4 @@ export function relativeToAbsolute(url: string) {
   const a = document.createElement('a');
   a.setAttribute('href', url);
   return a.href;
-}
-
-function isLegacyApp(app: PublicAppInfo | PublicLegacyAppInfo): app is PublicLegacyAppInfo {
-  return app.legacy === true;
 }

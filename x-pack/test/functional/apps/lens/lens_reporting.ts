@@ -7,19 +7,30 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'reporting']);
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
+  const security = getService('security');
 
   describe('lens reporting', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('lens/reporting');
+      await security.testUser.setRoles(
+        ['test_logstash_reader', 'global_dashboard_read', 'reporting_user'],
+        false
+      );
     });
 
     after(async () => {
       await esArchiver.unload('lens/reporting');
+      await es.deleteByQuery({
+        index: '.reporting-*',
+        refresh: true,
+        body: { query: { match_all: {} } },
+      });
+      await security.testUser.restoreDefaults();
     });
 
     it('should not cause PDF reports to fail', async () => {
@@ -28,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.reporting.openPdfReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
       const url = await PageObjects.reporting.getReportURL(60000);
-
       expect(url).to.be.ok();
     });
   });

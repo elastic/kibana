@@ -27,6 +27,9 @@ export const injectCustomCss = async (
   );
 
   const filePath = layout.getCssOverridesPath();
+  if (!filePath) {
+    return;
+  }
   const buffer = await fsp.readFile(filePath);
   try {
     await browser.evaluate(
@@ -43,6 +46,7 @@ export const injectCustomCss = async (
       logger
     );
   } catch (err) {
+    logger.error(err);
     throw new Error(
       i18n.translate('xpack.reporting.screencapture.injectCss', {
         defaultMessage: `An error occurred when trying to update Kibana CSS for reporting. {error}`,

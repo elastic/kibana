@@ -21,7 +21,7 @@
 
 import './commands';
 
-// @ts-ignore
+// @ts-expect-error
 import { register } from '@cypress/snapshot';
 
 register();

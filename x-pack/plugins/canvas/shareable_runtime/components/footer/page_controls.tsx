@@ -14,19 +14,19 @@ import {
   setAutoplayAction,
 } from '../../context';
 
-type onSetPageNumberFn = (page: number) => void;
-type onToggleScrubberFn = () => void;
+type OnSetPageNumberFn = (page: number) => void;
+type OnToggleScrubberFn = () => void;
 
 interface Props {
   /**
    * The handler to invoke when the current page number is set.
    */
-  onSetPageNumber: onSetPageNumberFn;
+  onSetPageNumber: OnSetPageNumberFn;
 
   /**
    * The handler to invoke when the scrubber visibility is toggled.
    */
-  onToggleScrubber: onToggleScrubberFn;
+  onToggleScrubber: OnToggleScrubberFn;
 
   /**
    * The current page number.

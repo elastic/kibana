@@ -34,10 +34,6 @@ export class DocumentationService {
   public getPutPipelineApiUrl() {
     return `${this.esDocBasePath}/put-pipeline-api.html`;
   }
-
-  public getSimulatePipelineApiUrl() {
-    return `${this.esDocBasePath}/simulate-pipeline-api.html`;
-  }
 }
 
 export const documentationService = new DocumentationService();

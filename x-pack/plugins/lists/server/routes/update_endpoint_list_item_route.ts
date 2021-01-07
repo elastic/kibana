@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import {
   UpdateEndpointListItemSchemaDecoded,
   exceptionListItemSchema,
@@ -38,9 +38,9 @@ export const updateEndpointListItemRoute = (router: IRouter): void => {
           description,
           id,
           name,
+          os_types: osTypes,
           meta,
           type,
-          _tags,
           _version,
           comments,
           entries,
@@ -49,7 +49,6 @@ export const updateEndpointListItemRoute = (router: IRouter): void => {
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
         const exceptionListItem = await exceptionLists.updateEndpointListItem({
-          _tags,
           _version,
           comments,
           description,
@@ -58,6 +57,7 @@ export const updateEndpointListItemRoute = (router: IRouter): void => {
           itemId,
           meta,
           name,
+          osTypes,
           tags,
           type,
         });

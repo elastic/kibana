@@ -46,6 +46,7 @@ interface Props {
   suggestion: QuerySuggestion;
   innerRef: (node: HTMLDivElement) => void;
   ariaId: string;
+  shouldDisplayDescription: boolean;
 }
 
 export function SuggestionComponent(props: Props) {
@@ -53,6 +54,7 @@ export function SuggestionComponent(props: Props) {
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
       className={classNames({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         kbnTypeahead__item: true,
         active: props.selected,
       })}
@@ -70,8 +72,12 @@ export function SuggestionComponent(props: Props) {
         <div className="kbnSuggestionItem__type">
           <EuiIcon type={getEuiIconType(props.suggestion.type)} />
         </div>
-        <div className="kbnSuggestionItem__text">{props.suggestion.text}</div>
-        <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
+        <div className="kbnSuggestionItem__text" data-test-subj="autoCompleteSuggestionText">
+          {props.suggestion.text}
+        </div>
+        {props.shouldDisplayDescription && (
+          <div className="kbnSuggestionItem__description">{props.suggestion.description}</div>
+        )}
       </div>
     </div>
   );

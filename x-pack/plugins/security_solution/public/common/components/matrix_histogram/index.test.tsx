@@ -10,42 +10,32 @@ import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
 
 import { MatrixHistogram } from '.';
-import { useQuery } from '../../containers/matrix_histogram';
-import { HistogramType } from '../../../graphql/types';
+import { useMatrixHistogram } from '../../containers/matrix_histogram';
+import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import { TestProviders } from '../../mock';
+
 jest.mock('../../lib/kibana');
 
-jest.mock('./matrix_loader', () => {
-  return {
-    MatrixLoader: () => {
-      return <div className="matrixLoader" />;
-    },
-  };
-});
+jest.mock('./matrix_loader', () => ({
+  MatrixLoader: () => <div className="matrixLoader" />,
+}));
 
-jest.mock('../header_section', () => {
-  return {
-    HeaderSection: () => <div className="headerSection" />,
-  };
-});
+jest.mock('../header_section', () => ({
+  HeaderSection: () => <div className="headerSection" />,
+}));
 
-jest.mock('../charts/barchart', () => {
-  return {
-    BarChart: () => <div className="barchart" />,
-  };
-});
+jest.mock('../charts/barchart', () => ({
+  BarChart: () => <div className="barchart" />,
+}));
 
-jest.mock('../../containers/matrix_histogram', () => {
-  return {
-    useQuery: jest.fn(),
-  };
-});
+jest.mock('../../containers/matrix_histogram', () => ({
+  useMatrixHistogram: jest.fn(),
+}));
 
-jest.mock('../../components/matrix_histogram/utils', () => {
-  return {
-    getBarchartConfigs: jest.fn(),
-    getCustomChartData: jest.fn().mockReturnValue(true),
-  };
-});
+jest.mock('../../components/matrix_histogram/utils', () => ({
+  getBarchartConfigs: jest.fn(),
+  getCustomChartData: jest.fn().mockReturnValue(true),
+}));
 
 describe('Matrix Histogram Component', () => {
   let wrapper: ReactWrapper;
@@ -55,8 +45,9 @@ describe('Matrix Histogram Component', () => {
     defaultStackByOption: { text: 'text', value: 'value' },
     endDate: '2019-07-18T20:00:00.000Z',
     errorMessage: 'error',
-    histogramType: HistogramType.alerts,
+    histogramType: MatrixHistogramType.alerts,
     id: 'mockId',
+    indexNames: [],
     isInspected: false,
     isPtrIncluded: false,
     setQuery: jest.fn(),
@@ -68,17 +59,20 @@ describe('Matrix Histogram Component', () => {
     subtitle: 'mockSubtitle',
     totalCount: -1,
     title: 'mockTitle',
-    dispatchSetAbsoluteRangeDatePicker: jest.fn(),
   };
 
   beforeAll(() => {
-    (useQuery as jest.Mock).mockReturnValue({
-      data: null,
-      loading: false,
-      inspect: false,
-      totalCount: null,
+    (useMatrixHistogram as jest.Mock).mockReturnValue([
+      false,
+      {
+        data: null,
+        inspect: false,
+        totalCount: null,
+      },
+    ]);
+    wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />, {
+      wrappingComponent: TestProviders,
     });
-    wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />);
   });
   describe('on initial load', () => {
     test('it renders MatrixLoader', () => {
@@ -92,26 +86,33 @@ describe('Matrix Histogram Component', () => {
     });
 
     test('it does NOT render a spacer when showSpacer is false', () => {
-      wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} showSpacer={false} />);
+      wrapper = mount(
+        <MatrixHistogram {...mockMatrixOverTimeHistogramProps} showSpacer={false} />,
+        {
+          wrappingComponent: TestProviders,
+        }
+      );
       expect(wrapper.find('[data-test-subj="spacer"]').exists()).toBe(false);
     });
   });
 
   describe('not initial load', () => {
     beforeAll(() => {
-      (useQuery as jest.Mock).mockReturnValue({
-        data: [
-          { x: 1, y: 2, g: 'g1' },
-          { x: 2, y: 4, g: 'g1' },
-          { x: 3, y: 6, g: 'g1' },
-          { x: 1, y: 1, g: 'g2' },
-          { x: 2, y: 3, g: 'g2' },
-          { x: 3, y: 5, g: 'g2' },
-        ],
-        loading: false,
-        inspect: false,
-        totalCount: 1,
-      });
+      (useMatrixHistogram as jest.Mock).mockReturnValue([
+        false,
+        {
+          data: [
+            { x: 1, y: 2, g: 'g1' },
+            { x: 2, y: 4, g: 'g1' },
+            { x: 3, y: 6, g: 'g1' },
+            { x: 1, y: 1, g: 'g2' },
+            { x: 2, y: 3, g: 'g2' },
+            { x: 3, y: 5, g: 'g2' },
+          ],
+          inspect: false,
+          totalCount: 1,
+        },
+      ]);
       wrapper.setProps({ endDate: 100 });
       wrapper.update();
     });

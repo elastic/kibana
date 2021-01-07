@@ -23,10 +23,11 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { isFullLicense } from '../license';
-import { useTimefilter, useMlKibana } from '../contexts/kibana';
+import { useTimefilter, useMlKibana, useNavigateToPath } from '../contexts/kibana';
 
 import { NavigationMenu } from '../components/navigation_menu';
 import { getMaxBytesFormatted } from './file_based/components/utils';
+import { HelpMenu } from '../components/help_menu';
 
 function startTrialDescription() {
   return (
@@ -52,8 +53,14 @@ function startTrialDescription() {
 export const DatavisualizerSelector: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { licenseManagement },
+    services: {
+      licenseManagement,
+      http: { basePath },
+      docLinks,
+    },
   } = useMlKibana();
+  const helpLink = docLinks.links.ml.guide;
+  const navigateToPath = useNavigateToPath();
 
   const startTrialVisible =
     licenseManagement !== undefined &&
@@ -124,7 +131,7 @@ export const DatavisualizerSelector: FC = () => {
                 footer={
                   <EuiButton
                     target="_self"
-                    href="#/filedatavisualizer"
+                    onClick={() => navigateToPath('/filedatavisualizer')}
                     data-test-subj="mlDataVisualizerUploadFileButton"
                   >
                     <FormattedMessage
@@ -154,7 +161,7 @@ export const DatavisualizerSelector: FC = () => {
                 footer={
                   <EuiButton
                     target="_self"
-                    href="#/datavisualizer_index_select"
+                    onClick={() => navigateToPath('/datavisualizer_index_select')}
                     data-test-subj="mlDataVisualizerSelectIndexButton"
                   >
                     <FormattedMessage
@@ -182,13 +189,18 @@ export const DatavisualizerSelector: FC = () => {
                     }
                     description={startTrialDescription()}
                     footer={
-                      <EuiButton target="_blank" href="management/stack/license_management/home">
+                      <EuiButton
+                        target="_blank"
+                        href={`${basePath.get()}/app/management/stack/license_management/home`}
+                        data-test-subj="mlDataVisualizerStartTrialButton"
+                      >
                         <FormattedMessage
                           id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
                           defaultMessage="Start trial"
                         />
                       </EuiButton>
                     }
+                    data-test-subj="mlDataVisualizerCardStartTrial"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -196,6 +208,7 @@ export const DatavisualizerSelector: FC = () => {
           )}
         </EuiPageBody>
       </EuiPage>
+      <HelpMenu docLink={helpLink} />
     </Fragment>
   );
 };

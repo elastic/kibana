@@ -66,9 +66,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   });
 
   const migrator = mockKibanaMigrator.create({ types: typeRegistry.getAllTypes() });
-  const RepositoryConstructor = (SavedObjectsRepository as unknown) as jest.Mock<
-    SavedObjectsRepository
-  >;
+  const RepositoryConstructor = (SavedObjectsRepository as unknown) as jest.Mock<SavedObjectsRepository>;
 
   beforeEach(() => {
     RepositoryConstructor.mockClear();

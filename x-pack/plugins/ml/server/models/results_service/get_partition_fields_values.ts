@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import Boom from '@hapi/boom';
 import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import { PartitionFieldsType } from '../../../common/types/anomalies';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { CriteriaField } from './results_service';
+import { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
+import { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { MlClient } from '../../lib/ml_client';
 
 type SearchTerm =
   | {
@@ -20,14 +21,24 @@ type SearchTerm =
 /**
  * Gets an object for aggregation query to retrieve field name and values.
  * @param fieldType - Field type
+ * @param isModelPlotSearch
  * @param query - Optional query string for partition value
+ * @param fieldConfig - Optional config for filtering and sorting
  * @returns {Object}
  */
-function getFieldAgg(fieldType: PartitionFieldsType, query?: string) {
+function getFieldAgg(
+  fieldType: PartitionFieldsType,
+  isModelPlotSearch: boolean,
+  query?: string,
+  fieldConfig?: FieldConfig
+) {
   const AGG_SIZE = 100;
 
   const fieldNameKey = `${fieldType}_name`;
   const fieldValueKey = `${fieldType}_value`;
+
+  const sortByField =
+    fieldConfig?.sort?.by === 'name' || isModelPlotSearch ? '_key' : 'maxRecordScore';
 
   return {
     [fieldNameKey]: {
@@ -37,10 +48,31 @@ function getFieldAgg(fieldType: PartitionFieldsType, query?: string) {
     },
     [fieldValueKey]: {
       filter: {
-        wildcard: {
-          [fieldValueKey]: {
-            value: query ? `*${query}*` : '*',
-          },
+        bool: {
+          must: [
+            ...(query
+              ? [
+                  {
+                    wildcard: {
+                      [fieldValueKey]: {
+                        value: `*${query}*`,
+                      },
+                    },
+                  },
+                ]
+              : []),
+            ...(fieldConfig?.anomalousOnly
+              ? [
+                  {
+                    range: {
+                      record_score: {
+                        gt: 0,
+                      },
+                    },
+                  },
+                ]
+              : []),
+          ],
         },
       },
       aggs: {
@@ -48,7 +80,25 @@ function getFieldAgg(fieldType: PartitionFieldsType, query?: string) {
           terms: {
             size: AGG_SIZE,
             field: fieldValueKey,
+            ...(fieldConfig?.sort
+              ? {
+                  order: {
+                    [sortByField]: fieldConfig.sort.order ?? 'desc',
+                  },
+                }
+              : {}),
           },
+          ...(isModelPlotSearch
+            ? {}
+            : {
+                aggs: {
+                  maxRecordScore: {
+                    max: {
+                      field: 'record_score',
+                    },
+                  },
+                },
+              }),
         },
       },
     },
@@ -68,15 +118,16 @@ function getFieldObject(fieldType: PartitionFieldsType, aggs: any) {
     ? {
         [fieldType]: {
           name: aggs[fieldNameKey].buckets[0].key,
-          values: aggs[fieldValueKey].values.buckets.map(({ key }: any) => key),
+          values: aggs[fieldValueKey].values.buckets.map(({ key, maxRecordScore }: any) => ({
+            value: key,
+            ...(maxRecordScore ? { maxRecordScore: maxRecordScore.value } : {}),
+          })),
         },
       }
     : {};
 }
 
-export const getPartitionFieldsValuesFactory = ({
-  callAsInternalUser,
-}: ILegacyScopedClusterClient) =>
+export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
   /**
    * Gets the record of partition fields with possible values that fit the provided queries.
    * @param jobId - Job ID
@@ -84,74 +135,102 @@ export const getPartitionFieldsValuesFactory = ({
    * @param criteriaFields - key - value pairs of the term field, e.g. { detector_index: 0 }
    * @param earliestMs
    * @param latestMs
+   * @param fieldsConfig
    */
   async function getPartitionFieldsValues(
     jobId: string,
     searchTerm: SearchTerm = {},
     criteriaFields: CriteriaField[],
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    fieldsConfig: FieldsConfig = {}
   ) {
-    const jobsResponse = await callAsInternalUser('ml.jobs', { jobId: [jobId] });
+    const { body: jobsResponse } = await mlClient.getJobs({ job_id: jobId });
     if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
       throw Boom.notFound(`Job with the id "${jobId}" not found`);
     }
 
-    const job = jobsResponse.jobs[0];
+    const job: Job = jobsResponse.jobs[0];
 
     const isModelPlotEnabled = job?.model_plot_config?.enabled;
+    const isAnomalousOnly = (Object.entries(fieldsConfig) as Array<[string, FieldConfig]>).some(
+      ([k, v]) => {
+        return !!v?.anomalousOnly;
+      }
+    );
 
-    const resp = await callAsInternalUser('search', {
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              ...criteriaFields.map(({ fieldName, fieldValue }) => {
-                return {
-                  term: {
-                    [fieldName]: fieldValue,
-                  },
-                };
-              }),
-              {
+    const applyTimeRange = (Object.entries(fieldsConfig) as Array<[string, FieldConfig]>).some(
+      ([k, v]) => {
+        return !!v?.applyTimeRange;
+      }
+    );
+
+    const isModelPlotSearch = !!isModelPlotEnabled && !isAnomalousOnly;
+
+    // Remove the time filter in case model plot is not enabled
+    // and time range is not applied, so
+    // it includes the records that occurred as anomalies historically
+    const searchAllTime = !isModelPlotEnabled && !applyTimeRange;
+
+    const requestBody = {
+      query: {
+        bool: {
+          filter: [
+            ...criteriaFields.map(({ fieldName, fieldValue }) => {
+              return {
                 term: {
-                  job_id: jobId,
+                  [fieldName]: fieldValue,
                 },
+              };
+            }),
+            {
+              term: {
+                job_id: jobId,
               },
-              {
-                range: {
-                  timestamp: {
-                    gte: earliestMs,
-                    lte: latestMs,
-                    format: 'epoch_millis',
+            },
+            ...(searchAllTime
+              ? []
+              : [
+                  {
+                    range: {
+                      timestamp: {
+                        gte: earliestMs,
+                        lte: latestMs,
+                        format: 'epoch_millis',
+                      },
+                    },
                   },
-                },
+                ]),
+            {
+              term: {
+                result_type: isModelPlotSearch ? 'model_plot' : 'record',
               },
-              {
-                term: {
-                  result_type: isModelPlotEnabled ? 'model_plot' : 'record',
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          ...PARTITION_FIELDS.reduce((acc, key) => {
-            return {
-              ...acc,
-              ...getFieldAgg(key, searchTerm[key]),
-            };
-          }, {}),
+            },
+          ],
         },
       },
-    });
+      aggs: {
+        ...PARTITION_FIELDS.reduce((acc, key) => {
+          return {
+            ...acc,
+            ...getFieldAgg(key, isModelPlotSearch, searchTerm[key], fieldsConfig[key]),
+          };
+        }, {}),
+      },
+    };
+
+    const { body } = await mlClient.anomalySearch(
+      {
+        size: 0,
+        body: requestBody,
+      },
+      [jobId]
+    );
 
     return PARTITION_FIELDS.reduce((acc, key) => {
       return {
         ...acc,
-        ...getFieldObject(key, resp.aggregations),
+        ...getFieldObject(key, body.aggregations),
       };
     }, {});
   };

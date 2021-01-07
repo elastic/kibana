@@ -6,10 +6,11 @@
 
 import { getAlertRoute } from './get';
 import { httpServiceMock } from 'src/core/server/mocks';
-import { mockLicenseState } from '../lib/license_state.mock';
+import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { alertsClientMock } from '../alerts_client.mock';
+import { Alert } from '../../common';
 
 const alertsClient = alertsClientMock.create();
 jest.mock('../lib/license_api_access.ts', () => ({
@@ -21,7 +22,9 @@ beforeEach(() => {
 });
 
 describe('getAlertRoute', () => {
-  const mockedAlert = {
+  const mockedAlert: Alert<{
+    bar: true;
+  }> = {
     id: '1',
     alertTypeId: '1',
     schedule: { interval: '10s' },
@@ -45,16 +48,21 @@ describe('getAlertRoute', () => {
     tags: ['foo'],
     enabled: true,
     muteAll: false,
+    notifyWhen: 'onActionGroupChange',
     createdBy: '',
     updatedBy: '',
     apiKey: '',
     apiKeyOwner: '',
     throttle: '30s',
     mutedInstanceIds: [],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
   };
 
   it('gets an alert with proper parameters', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     getAlertRoute(router, licenseState);
@@ -82,7 +90,7 @@ describe('getAlertRoute', () => {
   });
 
   it('ensures the license allows getting alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     getAlertRoute(router, licenseState);
@@ -105,7 +113,7 @@ describe('getAlertRoute', () => {
   });
 
   it('ensures the license check prevents getting alerts', async () => {
-    const licenseState = mockLicenseState();
+    const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {

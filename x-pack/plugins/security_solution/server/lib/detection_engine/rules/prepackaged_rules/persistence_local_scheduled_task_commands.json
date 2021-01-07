@@ -6,8 +6,10 @@
   "false_positives": [
     "Legitimate scheduled tasks may be created during installation of new software."
   ],
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -18,7 +20,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
   ],
   "threat": [
     {
@@ -31,12 +36,12 @@
       "technique": [
         {
           "id": "T1053",
-          "name": "Scheduled Task",
+          "name": "Scheduled Task/Job",
           "reference": "https://attack.mitre.org/techniques/T1053/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 5
 }

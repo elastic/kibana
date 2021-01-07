@@ -11,7 +11,7 @@ import '../../../../common/mock/match_media';
 import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyStringTag } from '../../../../common/components/empty_value';
-import { HostDetailsLink, IPDetailsLink } from '../../../../common/components/links';
+import { HostDetailsLink, NetworkDetailsLink } from '../../../../common/components/links';
 import { FlowTarget } from '../../../../graphql/types';
 import {
   TooltipProperty,
@@ -24,15 +24,9 @@ describe('PointToolTipContent', () => {
   ];
 
   test('renders correctly against snapshot', () => {
-    const closeTooltip = jest.fn();
-
     const wrapper = shallow(
       <TestProviders>
-        <PointToolTipContentComponent
-          contextId={'contextId'}
-          featureProps={mockFeatureProps}
-          closeTooltip={closeTooltip}
-        />
+        <PointToolTipContentComponent contextId={'contextId'} featureProps={mockFeatureProps} />
       </TestProviders>
     );
     expect(wrapper.find('PointToolTipContentComponent')).toMatchSnapshot();
@@ -50,17 +44,17 @@ describe('PointToolTipContent', () => {
       );
     });
 
-    test('it returns IPDetailsLink if field is source.ip', () => {
+    test('it returns NetworkDetailsLink if field is source.ip', () => {
       const value = '127.0.0.1';
       expect(getRenderedFieldValue('source.ip', value)).toStrictEqual(
-        <IPDetailsLink ip={value} flowTarget={FlowTarget.source} />
+        <NetworkDetailsLink ip={value} flowTarget={FlowTarget.source} />
       );
     });
 
-    test('it returns IPDetailsLink if field is destination.ip', () => {
+    test('it returns NetworkDetailsLink if field is destination.ip', () => {
       const value = '127.0.0.1';
       expect(getRenderedFieldValue('destination.ip', value)).toStrictEqual(
-        <IPDetailsLink ip={value} flowTarget={FlowTarget.destination} />
+        <NetworkDetailsLink ip={value} flowTarget={FlowTarget.destination} />
       );
     });
 

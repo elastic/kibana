@@ -9,19 +9,19 @@ import {
   DESCRIPTION,
   ENTRIES,
   ID,
+  ITEM_ID,
   ITEM_TYPE,
   LIST_ITEM_ID,
   META,
   NAME,
   NAMESPACE_TYPE,
+  OS_TYPES,
   TAGS,
-  _TAGS,
 } from '../../constants.mock';
 
 import { UpdateExceptionListItemSchema } from './update_exception_list_item_schema';
 
 export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
-  _tags: _TAGS,
   _version: undefined,
   comments: COMMENTS,
   description: DESCRIPTION,
@@ -31,6 +31,20 @@ export const getUpdateExceptionListItemSchemaMock = (): UpdateExceptionListItemS
   meta: META,
   name: NAME,
   namespace_type: NAMESPACE_TYPE,
+  os_types: ['linux'],
   tags: TAGS,
+  type: ITEM_TYPE,
+});
+
+/**
+ * Useful for end to end tests and other mechanisms which want to fill in the values
+ * after doing a get of the structure.
+ */
+export const getUpdateMinimalExceptionListItemSchemaMock = (): UpdateExceptionListItemSchema => ({
+  description: DESCRIPTION,
+  entries: ENTRIES,
+  item_id: ITEM_ID,
+  name: NAME,
+  os_types: OS_TYPES,
   type: ITEM_TYPE,
 });

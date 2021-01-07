@@ -15,6 +15,7 @@ import {
   esKuery,
   IIndexPattern,
   QuerySuggestion,
+  DataPublicPluginStart,
 } from '../../../../../../../src/plugins/data/public';
 import { useIndexPattern } from './use_index_pattern';
 
@@ -55,7 +56,7 @@ export function KueryBar({
     services: {
       data: { autocomplete },
     },
-  } = useKibana();
+  } = useKibana<{ data: DataPublicPluginStart }>();
 
   const [state, setState] = useState<State>({
     suggestions: [],
@@ -66,7 +67,7 @@ export function KueryBar({
   let currentRequestCheck: string;
 
   const [getUrlParams, updateUrlParams] = useUrlParams();
-  const { search: kuery, dateRangeStart, dateRangeEnd } = getUrlParams();
+  const { search: kuery } = getUrlParams();
 
   useEffect(() => {
     updateSearchText(kuery);
@@ -102,18 +103,9 @@ export function KueryBar({
           language: 'kuery',
           indexPatterns: [indexPattern],
           query: inputValue,
-          selectionStart,
-          selectionEnd: selectionStart,
-          boolFilter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: dateRangeStart,
-                  lte: dateRangeEnd,
-                },
-              },
-            },
-          ],
+          selectionStart: selectionStart || 0,
+          selectionEnd: selectionStart || 0,
+          useTimeRange: true,
         })) || []
       ).filter((suggestion: QuerySuggestion) => !suggestion.text.startsWith('span.'));
       if (currentRequest !== currentRequestCheck) {

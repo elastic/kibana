@@ -4,28 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import classNames from 'classnames';
-import React, { FunctionComponent, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { EuiFieldText, EuiText, keys } from '@elastic/eui';
 
 export interface Props {
   placeholder: string;
   ariaLabel: string;
   onChange: (value: string) => void;
-  disabled: boolean;
+  /**
+   * Whether the containing element of the text input can be focused.
+   *
+   * If it cannot be focused, this component cannot switch to showing
+   * the text input field.
+   *
+   * Defaults to false.
+   */
+  disabled?: boolean;
   text?: string;
 }
 
-export const InlineTextInput: FunctionComponent<Props> = ({
-  disabled,
+function _InlineTextInput({
   placeholder,
   text,
   ariaLabel,
+  disabled = false,
   onChange,
-}) => {
+}: Props): React.ReactElement<any, any> | null {
   const [isShowingTextInput, setIsShowingTextInput] = useState<boolean>(false);
-  const [textValue, setTextValue] = useState<string>(text ?? '');
+  const [textValue, setTextValue] = useState<string>(() => text ?? '');
 
   const containerClasses = classNames('pipelineProcessorsEditor__item__textContainer', {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'pipelineProcessorsEditor__item__textContainer--notEditing': !isShowingTextInput && !disabled,
   });
 
@@ -37,6 +46,10 @@ export const InlineTextInput: FunctionComponent<Props> = ({
       onChange(textValue);
     });
   }, [setIsShowingTextInput, onChange, textValue]);
+
+  useEffect(() => {
+    setTextValue(text ?? '');
+  }, [text]);
 
   useEffect(() => {
     const keyboardListener = (event: KeyboardEvent) => {
@@ -70,7 +83,11 @@ export const InlineTextInput: FunctionComponent<Props> = ({
       />
     </div>
   ) : (
-    <div className={containerClasses} tabIndex={0} onFocus={() => setIsShowingTextInput(true)}>
+    <div
+      className={containerClasses}
+      tabIndex={disabled ? -1 : 0}
+      onFocus={() => setIsShowingTextInput(true)}
+    >
       <EuiText size="s" color="subdued">
         <div className="pipelineProcessorsEditor__item__description">
           {text || <em>{placeholder}</em>}
@@ -78,4 +95,6 @@ export const InlineTextInput: FunctionComponent<Props> = ({
       </EuiText>
     </div>
   );
-};
+}
+
+export const InlineTextInput = memo(_InlineTextInput);

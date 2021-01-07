@@ -10,10 +10,10 @@
  * Bucket spans: 5m, 10m, 30m, 1h, 3h
  */
 
-import { mlLog } from '../../client/log';
+import { mlLog } from '../../lib/log';
 import { INTERVALS, LONG_INTERVALS } from './intervals';
 
-export function singleSeriesCheckerFactory({ callAsCurrentUser }) {
+export function singleSeriesCheckerFactory({ asCurrentUser }) {
   const REF_DATA_INTERVAL = { name: '1h', ms: 3600000 };
 
   class SingleSeriesChecker {
@@ -166,7 +166,7 @@ export function singleSeriesCheckerFactory({ callAsCurrentUser }) {
           non_empty_buckets: {
             date_histogram: {
               field: this.timeField,
-              interval: `${intervalMs}ms`,
+              fixed_interval: `${intervalMs}ms`,
             },
           },
         },
@@ -184,14 +184,15 @@ export function singleSeriesCheckerFactory({ callAsCurrentUser }) {
       return search;
     }
 
-    performSearch(intervalMs) {
-      const body = this.createSearch(intervalMs);
+    async performSearch(intervalMs) {
+      const searchBody = this.createSearch(intervalMs);
 
-      return callAsCurrentUser('search', {
+      const { body } = await asCurrentUser.search({
         index: this.index,
         size: 0,
-        body,
+        body: searchBody,
       });
+      return body;
     }
 
     getFullBuckets(buckets) {

@@ -11,36 +11,37 @@ import {
 } from '../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../common/types';
 import { GetPolicyListResponse } from '../../policy/types';
-import { GetPackagesResponse } from '../../../../../../ingest_manager/common';
-import { HostState } from '../types';
+import { GetPackagesResponse } from '../../../../../../fleet/common';
+import { EndpointState } from '../types';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
-interface ServerReturnedHostList {
-  type: 'serverReturnedHostList';
+interface ServerReturnedEndpointList {
+  type: 'serverReturnedEndpointList';
   payload: HostResultList;
 }
 
-interface ServerFailedToReturnHostList {
-  type: 'serverFailedToReturnHostList';
+interface ServerFailedToReturnEndpointList {
+  type: 'serverFailedToReturnEndpointList';
   payload: ServerApiError;
 }
 
-interface ServerReturnedHostDetails {
-  type: 'serverReturnedHostDetails';
+interface ServerReturnedEndpointDetails {
+  type: 'serverReturnedEndpointDetails';
   payload: HostInfo;
 }
 
-interface ServerFailedToReturnHostDetails {
-  type: 'serverFailedToReturnHostDetails';
+interface ServerFailedToReturnEndpointDetails {
+  type: 'serverFailedToReturnEndpointDetails';
   payload: ServerApiError;
 }
 
-interface ServerReturnedHostPolicyResponse {
-  type: 'serverReturnedHostPolicyResponse';
+interface ServerReturnedEndpointPolicyResponse {
+  type: 'serverReturnedEndpointPolicyResponse';
   payload: GetHostPolicyResponse;
 }
 
-interface ServerFailedToReturnHostPolicyResponse {
-  type: 'serverFailedToReturnHostPolicyResponse';
+interface ServerFailedToReturnEndpointPolicyResponse {
+  type: 'serverFailedToReturnEndpointPolicyResponse';
   payload: ServerApiError;
 }
 
@@ -63,8 +64,8 @@ interface UserSelectedEndpointPolicy {
   };
 }
 
-interface ServerCancelledHostListLoading {
-  type: 'serverCancelledHostListLoading';
+interface ServerCancelledEndpointListLoading {
+  type: 'serverCancelledEndpointListLoading';
 }
 
 interface ServerCancelledPolicyItemsLoading {
@@ -76,22 +77,83 @@ interface ServerReturnedEndpointPackageInfo {
   payload: GetPackagesResponse['response'][0];
 }
 
-interface ServerReturnedHostNonExistingPolicies {
-  type: 'serverReturnedHostNonExistingPolicies';
-  payload: HostState['nonExistingPolicies'];
+interface ServerReturnedEndpointNonExistingPolicies {
+  type: 'serverReturnedEndpointNonExistingPolicies';
+  payload: EndpointState['nonExistingPolicies'];
 }
 
-export type HostAction =
-  | ServerReturnedHostList
-  | ServerFailedToReturnHostList
-  | ServerReturnedHostDetails
-  | ServerFailedToReturnHostDetails
-  | ServerReturnedHostPolicyResponse
-  | ServerFailedToReturnHostPolicyResponse
+interface ServerReturnedEndpointAgentPolicies {
+  type: 'serverReturnedEndpointAgentPolicies';
+  payload: EndpointState['agentPolicies'];
+}
+
+interface ServerReturnedEndpointExistValue {
+  type: 'serverReturnedEndpointExistValue';
+  payload: boolean;
+}
+
+interface ServerReturnedMetadataPatterns {
+  type: 'serverReturnedMetadataPatterns';
+  payload: IIndexPattern[];
+}
+
+interface ServerFailedToReturnMetadataPatterns {
+  type: 'serverFailedToReturnMetadataPatterns';
+  payload: ServerApiError;
+}
+interface UserUpdatedEndpointListRefreshOptions {
+  type: 'userUpdatedEndpointListRefreshOptions';
+  payload: {
+    isAutoRefreshEnabled?: boolean;
+    autoRefreshInterval?: number;
+  };
+}
+
+interface AppRequestedEndpointList {
+  type: 'appRequestedEndpointList';
+}
+
+interface ServerReturnedAgenstWithEndpointsTotal {
+  type: 'serverReturnedAgenstWithEndpointsTotal';
+  payload: number;
+}
+
+interface ServerFailedToReturnAgenstWithEndpointsTotal {
+  type: 'serverFailedToReturnAgenstWithEndpointsTotal';
+  payload: ServerApiError;
+}
+
+interface ServerReturnedEndpointsTotal {
+  type: 'serverReturnedEndpointsTotal';
+  payload: number;
+}
+
+interface ServerFailedToReturnEndpointsTotal {
+  type: 'serverFailedToReturnEndpointsTotal';
+  payload: ServerApiError;
+}
+
+export type EndpointAction =
+  | ServerReturnedEndpointList
+  | ServerFailedToReturnEndpointList
+  | ServerReturnedEndpointDetails
+  | ServerFailedToReturnEndpointDetails
+  | ServerReturnedEndpointPolicyResponse
+  | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
   | ServerFailedToReturnPoliciesForOnboarding
   | UserSelectedEndpointPolicy
-  | ServerCancelledHostListLoading
+  | ServerCancelledEndpointListLoading
+  | ServerReturnedEndpointExistValue
   | ServerCancelledPolicyItemsLoading
   | ServerReturnedEndpointPackageInfo
-  | ServerReturnedHostNonExistingPolicies;
+  | ServerReturnedMetadataPatterns
+  | ServerFailedToReturnMetadataPatterns
+  | AppRequestedEndpointList
+  | ServerReturnedEndpointNonExistingPolicies
+  | ServerReturnedAgenstWithEndpointsTotal
+  | ServerReturnedEndpointAgentPolicies
+  | UserUpdatedEndpointListRefreshOptions
+  | ServerReturnedEndpointsTotal
+  | ServerFailedToReturnAgenstWithEndpointsTotal
+  | ServerFailedToReturnEndpointsTotal;

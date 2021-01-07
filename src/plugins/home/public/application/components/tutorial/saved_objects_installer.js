@@ -62,9 +62,12 @@ class SavedObjectsInstallerUi extends React.Component {
 
     let resp;
     try {
-      resp = await this.props.bulkCreate(this.props.savedObjects, {
-        overwrite: this.state.overwrite,
-      });
+      // Filter out the saved object version field, if present, to avoid inadvertently triggering optimistic concurrency control.
+      const objectsToCreate = this.props.savedObjects.map(
+        // eslint-disable-next-line no-unused-vars
+        ({ version, ...savedObject }) => savedObject
+      );
+      resp = await this.props.bulkCreate(objectsToCreate, { overwrite: this.state.overwrite });
     } catch (error) {
       if (!this._isMounted) {
         return;

@@ -9,6 +9,7 @@ export default function upgradeCheckup({ loadTestFile }: FtrProviderContext) {
   describe('Upgrade checkup ', function upgradeAssistantTestSuite() {
     this.tags('ciGroup4');
 
+    loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./upgrade_assistant'));
   });
 }

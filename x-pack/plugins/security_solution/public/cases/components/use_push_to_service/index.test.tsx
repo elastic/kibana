@@ -10,10 +10,13 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import '../../../common/mock/match_media';
 import { usePushToService, ReturnUsePushToService, UsePushToService } from '.';
 import { TestProviders } from '../../../common/mock';
+
+import { CaseStatuses } from '../../../../../case/common/api';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { basicPush, actionLicenses } from '../../containers/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock } from '../../containers/configure/mock';
+import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -39,6 +42,7 @@ describe('usePushToService', () => {
     isLoading: false,
     postPushToService,
   };
+
   const mockConnector = connectorsMock[0];
   const actionLicense = actionLicenses[0];
   const caseServices = {
@@ -50,16 +54,34 @@ describe('usePushToService', () => {
       hasDataToPush: true,
     },
   };
+
   const defaultArgs = {
-    caseConnectorId: mockConnector.id,
-    caseConnectorName: mockConnector.name,
+    connector: {
+      id: mockConnector.id,
+      name: mockConnector.name,
+      type: ConnectorTypes.servicenow,
+      fields: null,
+    },
     caseId,
     caseServices,
-    caseStatus: 'open',
+    caseStatus: CaseStatuses.open,
     connectors: connectorsMock,
     updateCase,
     userCanCrud: true,
     isValidConnector: true,
+    alerts: {
+      'alert-id-1': {
+        _id: 'alert-id-1',
+        _index: 'alert-index-1',
+        '@timestamp': '2020-11-20T15:35:28.373Z',
+        rule: {
+          id: 'rule-id-1',
+          name: 'Awesome rule',
+          from: 'now-360s',
+          to: 'now',
+        },
+      },
+    },
   };
 
   beforeEach(() => {
@@ -84,9 +106,26 @@ describe('usePushToService', () => {
       expect(postPushToService).toBeCalledWith({
         caseId,
         caseServices,
-        connectorId: mockConnector.id,
-        connectorName: mockConnector.name,
+        connector: {
+          fields: null,
+          id: 'servicenow-1',
+          name: 'My Connector',
+          type: ConnectorTypes.servicenow,
+        },
         updateCase,
+        alerts: {
+          'alert-id-1': {
+            _id: 'alert-id-1',
+            _index: 'alert-index-1',
+            '@timestamp': '2020-11-20T15:35:28.373Z',
+            rule: {
+              id: 'rule-id-1',
+              name: 'Awesome rule',
+              from: 'now-360s',
+              to: 'now',
+            },
+          },
+        },
       });
       expect(result.current.pushCallouts).toBeNull();
     });
@@ -143,7 +182,12 @@ describe('usePushToService', () => {
           usePushToService({
             ...defaultArgs,
             connectors: [],
-            caseConnectorId: 'none',
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -162,7 +206,12 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseConnectorId: 'none',
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
@@ -181,7 +230,12 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseConnectorId: 'not-exist',
+            connector: {
+              id: 'not-exist',
+              name: 'not-exist',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
             isValidConnector: false,
           }),
         {
@@ -202,7 +256,12 @@ describe('usePushToService', () => {
           usePushToService({
             ...defaultArgs,
             connectors: [],
-            caseConnectorId: 'not-exist',
+            connector: {
+              id: 'not-exist',
+              name: 'not-exist',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
             isValidConnector: false,
           }),
         {
@@ -222,7 +281,7 @@ describe('usePushToService', () => {
         () =>
           usePushToService({
             ...defaultArgs,
-            caseStatus: 'closed',
+            caseStatus: CaseStatuses.closed,
           }),
         {
           wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,

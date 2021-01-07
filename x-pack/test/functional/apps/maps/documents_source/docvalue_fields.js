@@ -10,17 +10,23 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
 
   describe('docvalue_fields', () => {
     before(async () => {
+      await security.testUser.setRoles(['global_maps_read', 'test_logstash_reader'], false);
       await PageObjects.maps.loadSavedMap('document example');
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     async function getResponse() {
       await inspector.open();
       await inspector.openInspectorRequestsView();
       await testSubjects.click('inspectorRequestDetailResponse');
-      const responseBody = await testSubjects.getVisibleText('inspectorResponseBody');
+      const responseBody = await inspector.getCodeEditorValue();
       await inspector.close();
       return JSON.parse(responseBody);
     }

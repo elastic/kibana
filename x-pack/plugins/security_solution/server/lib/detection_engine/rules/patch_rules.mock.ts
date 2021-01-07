@@ -9,8 +9,9 @@ import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import { INTERNAL_RULE_ID_KEY, INTERNAL_IMMUTABLE_KEY } from '../../../../common/constants';
 import { SanitizedAlert } from '../../../../../alerts/common';
+import { RuleTypeParams } from '../types';
 
-const rule: SanitizedAlert = {
+const rule: SanitizedAlert<RuleTypeParams> = {
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`, `${INTERNAL_IMMUTABLE_KEY}:false`],
@@ -58,6 +59,7 @@ const rule: SanitizedAlert = {
             id: 'T1499',
             name: 'endpoint denial of service',
             reference: 'https://attack.mitre.org/techniques/T1499/',
+            subtechnique: [],
           },
         ],
       },
@@ -66,6 +68,8 @@ const rule: SanitizedAlert = {
     note: '# Investigative notes',
     version: 1,
     exceptionsList: [
+      /**
+      TODO: fix this mock. Which the typing has revealed is wrong
       {
         field: 'source.ip',
         values_operator: 'included',
@@ -95,8 +99,31 @@ const rule: SanitizedAlert = {
             ],
           },
         ],
-      },
+      },*/
     ],
+    /**
+     * The fields below were missing as the type was partial and hence not technically correct
+     */
+    author: [],
+    buildingBlockType: undefined,
+    eventCategoryOverride: undefined,
+    license: undefined,
+    savedId: undefined,
+    interval: undefined,
+    riskScoreMapping: undefined,
+    ruleNameOverride: undefined,
+    name: undefined,
+    severityMapping: undefined,
+    tags: undefined,
+    threshold: undefined,
+    threatFilters: undefined,
+    threatIndex: undefined,
+    threatQuery: undefined,
+    threatMapping: undefined,
+    threatLanguage: undefined,
+    concurrentSearches: undefined,
+    itemsPerSearch: undefined,
+    timestampOverride: undefined,
   },
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
   updatedAt: new Date('2019-12-13T16:40:33.400Z'),
@@ -104,12 +131,17 @@ const rule: SanitizedAlert = {
   enabled: true,
   actions: [],
   throttle: null,
+  notifyWhen: null,
   createdBy: 'elastic',
   updatedBy: 'elastic',
   apiKeyOwner: 'elastic',
   muteAll: false,
   mutedInstanceIds: [],
   scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
+  executionStatus: {
+    status: 'unknown',
+    lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+  },
 };
 
 export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
@@ -120,6 +152,7 @@ export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
   anomalyThreshold: undefined,
   description: 'some description',
   enabled: true,
+  eventCategoryOverride: undefined,
   falsePositives: ['false positive 1', 'false positive 2'],
   from: 'now-6m',
   query: 'user.name: root or user.name: admin',
@@ -144,6 +177,13 @@ export const getPatchRulesOptionsMock = (): PatchRulesOptions => ({
   tags: [],
   threat: [],
   threshold: undefined,
+  threatFilters: undefined,
+  threatIndex: undefined,
+  threatQuery: undefined,
+  threatMapping: undefined,
+  threatLanguage: undefined,
+  concurrentSearches: undefined,
+  itemsPerSearch: undefined,
   timestampOverride: undefined,
   to: 'now',
   type: 'query',
@@ -163,6 +203,7 @@ export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({
   anomalyThreshold: 55,
   description: 'some description',
   enabled: true,
+  eventCategoryOverride: undefined,
   falsePositives: ['false positive 1', 'false positive 2'],
   from: 'now-6m',
   query: undefined,
@@ -187,6 +228,13 @@ export const getPatchMlRulesOptionsMock = (): PatchRulesOptions => ({
   tags: [],
   threat: [],
   threshold: undefined,
+  threatFilters: undefined,
+  threatIndex: undefined,
+  threatQuery: undefined,
+  threatMapping: undefined,
+  threatLanguage: undefined,
+  concurrentSearches: undefined,
+  itemsPerSearch: undefined,
   timestampOverride: undefined,
   to: 'now',
   type: 'machine_learning',

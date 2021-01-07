@@ -19,38 +19,11 @@
 import { UiActionsSetup } from '../../ui_actions/public';
 import {
   contextMenuTrigger,
-  createFilterAction,
   panelBadgeTrigger,
-  EmbeddableContext,
-  CONTEXT_MENU_TRIGGER,
-  PANEL_BADGE_TRIGGER,
-  ACTION_ADD_PANEL,
-  ACTION_CUSTOMIZE_PANEL,
-  ACTION_INSPECT_PANEL,
-  REMOVE_PANEL_ACTION,
-  ACTION_EDIT_PANEL,
-  FilterActionContext,
-  ACTION_APPLY_FILTER,
   panelNotificationTrigger,
-  PANEL_NOTIFICATION_TRIGGER,
+  selectRangeTrigger,
+  valueClickTrigger,
 } from './lib';
-
-declare module '../../ui_actions/public' {
-  export interface TriggerContextMapping {
-    [CONTEXT_MENU_TRIGGER]: EmbeddableContext;
-    [PANEL_BADGE_TRIGGER]: EmbeddableContext;
-    [PANEL_NOTIFICATION_TRIGGER]: EmbeddableContext;
-  }
-
-  export interface ActionContextMapping {
-    [ACTION_CUSTOMIZE_PANEL]: EmbeddableContext;
-    [ACTION_ADD_PANEL]: EmbeddableContext;
-    [ACTION_INSPECT_PANEL]: EmbeddableContext;
-    [REMOVE_PANEL_ACTION]: EmbeddableContext;
-    [ACTION_EDIT_PANEL]: EmbeddableContext;
-    [ACTION_APPLY_FILTER]: FilterActionContext;
-  }
-}
 
 /**
  * This method initializes Embeddable plugin with initial set of
@@ -60,8 +33,6 @@ export const bootstrap = (uiActions: UiActionsSetup) => {
   uiActions.registerTrigger(contextMenuTrigger);
   uiActions.registerTrigger(panelBadgeTrigger);
   uiActions.registerTrigger(panelNotificationTrigger);
-
-  const actionApplyFilter = createFilterAction();
-
-  uiActions.registerAction(actionApplyFilter);
+  uiActions.registerTrigger(selectRangeTrigger);
+  uiActions.registerTrigger(valueClickTrigger);
 };

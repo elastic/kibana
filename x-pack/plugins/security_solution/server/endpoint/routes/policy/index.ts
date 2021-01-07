@@ -6,10 +6,17 @@
 
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../../types';
-import { GetPolicyResponseSchema } from '../../../../common/endpoint/schema/policy';
-import { getHostPolicyResponseHandler } from './handlers';
+import {
+  GetPolicyResponseSchema,
+  GetAgentPolicySummaryRequestSchema,
+} from '../../../../common/endpoint/schema/policy';
+import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
+import {
+  AGENT_POLICY_SUMMARY_ROUTE,
+  BASE_POLICY_RESPONSE_ROUTE,
+} from '../../../../common/endpoint/constants';
 
-export const BASE_POLICY_RESPONSE_ROUTE = `/api/endpoint/policy_response`;
+export const INITIAL_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 
 export function registerPolicyRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
   router.get(
@@ -19,5 +26,14 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
       options: { authRequired: true },
     },
     getHostPolicyResponseHandler(endpointAppContext)
+  );
+
+  router.get(
+    {
+      path: AGENT_POLICY_SUMMARY_ROUTE,
+      validate: GetAgentPolicySummaryRequestSchema,
+      options: { authRequired: true },
+    },
+    getAgentPolicySummaryHandler(endpointAppContext)
   );
 }

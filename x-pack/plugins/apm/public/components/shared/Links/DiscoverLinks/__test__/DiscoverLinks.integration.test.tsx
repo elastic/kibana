@@ -33,8 +33,8 @@ describe('DiscoverLinks', () => {
       } as Location
     );
 
-    expect(href).toEqual(
-      `/basepath/app/discover#/?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'processor.event:"transaction" AND transaction.id:"8b60bd32ecc6e150" AND trace.id:"8b60bd32ecc6e1506735a8b6cfcf175c"'))`
+    expect(href).toMatchInlineSnapshot(
+      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'processor.event:\\"transaction\\" AND transaction.id:\\"8b60bd32ecc6e150\\" AND trace.id:\\"8b60bd32ecc6e1506735a8b6cfcf175c\\"'))"`
     );
   });
 
@@ -50,8 +50,8 @@ describe('DiscoverLinks', () => {
         '?rangeFrom=now/w&rangeTo=now&refreshPaused=true&refreshInterval=0',
     } as Location);
 
-    expect(href).toEqual(
-      `/basepath/app/discover#/?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'span.id:"test-span-id"'))`
+    expect(href).toMatchInlineSnapshot(
+      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'span.id:\\"test-span-id\\"'))"`
     );
   });
 
@@ -72,8 +72,8 @@ describe('DiscoverLinks', () => {
       } as Location
     );
 
-    expect(href).toEqual(
-      `/basepath/app/discover#/?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'service.name:"service-name" AND error.grouping_key:"grouping-key"'),sort:('@timestamp':desc))`
+    expect(href).toMatchInlineSnapshot(
+      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'service.name:\\"service-name\\" AND error.grouping_key:\\"grouping-key\\"'),sort:('@timestamp':desc))"`
     );
   });
 
@@ -95,8 +95,8 @@ describe('DiscoverLinks', () => {
       } as Location
     );
 
-    expect(href).toEqual(
-      `/basepath/app/discover#/?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'service.name:"service-name" AND error.grouping_key:"grouping-key" AND some:kuery-string'),sort:('@timestamp':desc))`
+    expect(href).toMatchInlineSnapshot(
+      `"/basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now/w,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:'service.name:\\"service-name\\" AND error.grouping_key:\\"grouping-key\\" AND some:kuery-string'),sort:('@timestamp':desc))"`
     );
   });
 });

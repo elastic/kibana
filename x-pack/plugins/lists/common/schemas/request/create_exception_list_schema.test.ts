@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import {
   CreateExceptionListSchema,
@@ -42,19 +42,6 @@ describe('create_exception_list_schema', () => {
     const outputPayload = getCreateExceptionListSchemaMock();
     delete inputPayload.tags;
     outputPayload.tags = [];
-    const decoded = createExceptionListSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    delete (message.schema as CreateExceptionListSchema).list_id;
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
-  });
-
-  test('it should accept an undefined for "_tags" but return an array and generate a correct body not counting the uuid', () => {
-    const inputPayload = getCreateExceptionListSchemaMock();
-    const outputPayload = getCreateExceptionListSchemaMock();
-    delete inputPayload._tags;
-    outputPayload._tags = [];
     const decoded = createExceptionListSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);

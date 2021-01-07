@@ -17,7 +17,10 @@ export interface SavedObjectsBulkCreateObject<T = unknown>
 |  --- | --- | --- |
 |  [attributes](./kibana-plugin-core-server.savedobjectsbulkcreateobject.attributes.md) | <code>T</code> |  |
 |  [id](./kibana-plugin-core-server.savedobjectsbulkcreateobject.id.md) | <code>string</code> |  |
+|  [initialNamespaces](./kibana-plugin-core-server.savedobjectsbulkcreateobject.initialnamespaces.md) | <code>string[]</code> | Optional initial namespaces for the object to be created in. If this is defined, it will supersede the namespace ID that is in [SavedObjectsCreateOptions](./kibana-plugin-core-server.savedobjectscreateoptions.md)<!-- -->.<!-- -->Note: this can only be used for multi-namespace object types. |
 |  [migrationVersion](./kibana-plugin-core-server.savedobjectsbulkcreateobject.migrationversion.md) | <code>SavedObjectsMigrationVersion</code> | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
+|  [originId](./kibana-plugin-core-server.savedobjectsbulkcreateobject.originid.md) | <code>string</code> | Optional ID of the original saved object, if this object's <code>id</code> was regenerated |
 |  [references](./kibana-plugin-core-server.savedobjectsbulkcreateobject.references.md) | <code>SavedObjectReference[]</code> |  |
 |  [type](./kibana-plugin-core-server.savedobjectsbulkcreateobject.type.md) | <code>string</code> |  |
+|  [version](./kibana-plugin-core-server.savedobjectsbulkcreateobject.version.md) | <code>string</code> |  |
 

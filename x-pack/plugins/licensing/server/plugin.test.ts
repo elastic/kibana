@@ -37,7 +37,11 @@ function createCoreSetupWith(esClient: ILegacyClusterClient) {
       ...coreStart,
       elasticsearch: {
         ...coreStart.elasticsearch,
-        legacy: { client: esClient, createClient: jest.fn() },
+        legacy: {
+          ...coreStart.elasticsearch.legacy,
+          client: esClient,
+          createClient: jest.fn(),
+        },
       },
     },
     {},
@@ -75,6 +79,25 @@ describe('licensing plugin', () => {
         const { license$ } = await plugin.start();
         const license = await license$.pipe(take(1)).toPromise();
         expect(license.isAvailable).toBe(true);
+      });
+
+      it('calls `callAsInternalUser` with the correct parameters', async () => {
+        const esClient = elasticsearchServiceMock.createLegacyClusterClient();
+        esClient.callAsInternalUser.mockResolvedValue({
+          license: buildRawLicense(),
+          features: {},
+        });
+
+        const coreSetup = createCoreSetupWith(esClient);
+        await plugin.setup(coreSetup);
+        const { license$ } = await plugin.start();
+        await license$.pipe(take(1)).toPromise();
+
+        expect(esClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+        expect(esClient.callAsInternalUser).toHaveBeenCalledWith('transport.request', {
+          method: 'GET',
+          path: '/_xpack?accept_enterprise=true',
+        });
       });
 
       it('observable receives updated licenses', async () => {

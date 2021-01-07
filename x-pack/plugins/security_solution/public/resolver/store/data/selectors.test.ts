@@ -5,22 +5,84 @@
  */
 
 import * as selectors from './selectors';
-import { DataState } from '../../types';
+import { DataState, TimeRange } from '../../types';
+import { ResolverAction } from '../actions';
 import { dataReducer } from './reducer';
-import { DataAction } from './action';
 import { createStore } from 'redux';
 import {
   mockTreeWithNoAncestorsAnd2Children,
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWith1AncestorAnd2ChildrenAndAllNodesHave2GraphableEvents,
-  mockTreeWithAllProcessesTerminated,
   mockTreeWithNoProcessEvents,
-} from '../mocks/resolver_tree';
-import { uniquePidForProcess } from '../../models/process_event';
-import { EndpointEvent } from '../../../../common/endpoint/types';
+} from '../../mocks/resolver_tree';
+import { endpointSourceSchema } from './../../mocks/tree_schema';
+import * as nodeModel from '../../../../common/endpoint/models/node';
+import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
+import { SafeResolverEvent } from '../../../../common/endpoint/types';
+import { mockEndpointEvent } from '../../mocks/endpoint_event';
+import { maxDate } from '../../models/time_range';
+
+function mockNodeDataWithAllProcessesTerminated({
+  originID,
+  firstAncestorID,
+  secondAncestorID,
+}: {
+  secondAncestorID: string;
+  firstAncestorID: string;
+  originID: string;
+}): SafeResolverEvent[] {
+  const secondAncestor: SafeResolverEvent = mockEndpointEvent({
+    entityID: secondAncestorID,
+    processName: 'a',
+    parentEntityID: 'none',
+    timestamp: 1600863932316,
+  });
+  const firstAncestor: SafeResolverEvent = mockEndpointEvent({
+    entityID: firstAncestorID,
+    processName: 'b',
+    parentEntityID: secondAncestorID,
+    timestamp: 1600863932317,
+  });
+  const originEvent: SafeResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    processName: 'c',
+    parentEntityID: firstAncestorID,
+    timestamp: 1600863932318,
+  });
+  const secondAncestorTermination: SafeResolverEvent = mockEndpointEvent({
+    entityID: secondAncestorID,
+    processName: 'a',
+    parentEntityID: 'none',
+    timestamp: 1600863932316,
+    eventType: 'end',
+  });
+  const firstAncestorTermination: SafeResolverEvent = mockEndpointEvent({
+    entityID: firstAncestorID,
+    processName: 'b',
+    parentEntityID: secondAncestorID,
+    timestamp: 1600863932317,
+    eventType: 'end',
+  });
+  const originEventTermination: SafeResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    processName: 'c',
+    parentEntityID: firstAncestorID,
+    timestamp: 1600863932318,
+    eventType: 'end',
+  });
+
+  return [
+    originEvent,
+    originEventTermination,
+    firstAncestor,
+    firstAncestorTermination,
+    secondAncestor,
+    secondAncestorTermination,
+  ];
+}
 
 describe('data state', () => {
-  let actions: DataAction[] = [];
+  let actions: ResolverAction[];
 
   /**
    * Get state, given an ordered collection of actions.
@@ -39,41 +101,57 @@ describe('data state', () => {
    */
   const viewAsAString = (dataState: DataState) => {
     return [
-      ['is loading', selectors.isLoading(dataState)],
-      ['has an error', selectors.hasError(dataState)],
+      ['is loading', selectors.isTreeLoading(dataState)],
+      ['has an error', selectors.hadErrorLoadingTree(dataState)],
       ['has more children', selectors.hasMoreChildren(dataState)],
       ['has more ancestors', selectors.hasMoreAncestors(dataState)],
-      ['document to fetch', selectors.databaseDocumentIDToFetch(dataState)],
-      ['requires a pending request to be aborted', selectors.databaseDocumentIDToAbort(dataState)],
+      ['parameters to fetch', selectors.treeParametersToFetch(dataState)],
+      [
+        'requires a pending request to be aborted',
+        selectors.treeRequestParametersToAbort(dataState),
+      ],
     ]
       .map(([message, value]) => `${message}: ${JSON.stringify(value)}`)
       .join('\n');
   };
 
-  it(`shouldn't initially be loading, or have an error, or have more children or ancestors, or have a document to fetch, or have a pending request that needs to be aborted.`, () => {
+  beforeEach(() => {
+    actions = [];
+  });
+
+  it(`shouldn't initially be loading, or have an error, or have more children or ancestors, or have a request to make, or have a pending request that needs to be aborted.`, () => {
     expect(viewAsAString(state())).toMatchInlineSnapshot(`
       "is loading: false
       has an error: false
       has more children: false
       has more ancestors: false
-      document to fetch: null
+      parameters to fetch: null
       requires a pending request to be aborted: null"
     `);
   });
 
-  describe('when there is a databaseDocumentID but no pending request', () => {
+  describe('when there are parameters to fetch but no pending request', () => {
     const databaseDocumentID = 'databaseDocumentID';
     const resolverComponentInstanceID = 'resolverComponentInstanceID';
     beforeEach(() => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID, resolverComponentInstanceID },
+          payload: {
+            databaseDocumentID,
+            resolverComponentInstanceID,
+
+            // `locationSearch` doesn't matter for this test
+            locationSearch: '',
+            indices: [],
+            shouldUpdate: false,
+            filters: {},
+          },
         },
       ];
     });
-    it('should need to fetch the databaseDocumentID', () => {
-      expect(selectors.databaseDocumentIDToFetch(state())).toBe(databaseDocumentID);
+    it('should need to request the tree', () => {
+      expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(databaseDocumentID);
     });
     it('should not be loading, have an error, have more children or ancestors, or have a pending request that needs to be aborted.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -81,66 +159,77 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        document to fetch: \\"databaseDocumentID\\"
+        parameters to fetch: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
         requires a pending request to be aborted: null"
       `);
     });
   });
-  describe('when there is a pending request but no databaseDocumentID', () => {
+  describe('when there is a pending request but no current tree fetching parameters', () => {
     const databaseDocumentID = 'databaseDocumentID';
     beforeEach(() => {
       actions = [
         {
           type: 'appRequestedResolverData',
-          payload: databaseDocumentID,
+          payload: { databaseDocumentID, indices: [], filters: {} },
         },
       ];
     });
     it('should be loading', () => {
-      expect(selectors.isLoading(state())).toBe(true);
+      expect(selectors.isTreeLoading(state())).toBe(true);
     });
     it('should have a request to abort', () => {
-      expect(selectors.databaseDocumentIDToAbort(state())).toBe(databaseDocumentID);
+      expect(selectors.treeRequestParametersToAbort(state())?.databaseDocumentID).toBe(
+        databaseDocumentID
+      );
     });
-    it('should not have an error, more children, more ancestors, or a document to fetch.', () => {
+    it('should not have an error, more children, more ancestors, or request to make.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`
         "is loading: true
         has an error: false
         has more children: false
         has more ancestors: false
-        document to fetch: null
-        requires a pending request to be aborted: \\"databaseDocumentID\\""
+        parameters to fetch: null
+        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
       `);
     });
   });
-  describe('when there is a pending request for the current databaseDocumentID', () => {
+  describe('when there is a pending request that was made using the current parameters', () => {
     const databaseDocumentID = 'databaseDocumentID';
     const resolverComponentInstanceID = 'resolverComponentInstanceID';
     beforeEach(() => {
       actions = [
         {
           type: 'appReceivedNewExternalProperties',
-          payload: { databaseDocumentID, resolverComponentInstanceID },
+          payload: {
+            databaseDocumentID,
+            resolverComponentInstanceID,
+
+            // `locationSearch` doesn't matter for this test
+            locationSearch: '',
+            indices: [],
+            shouldUpdate: false,
+            filters: {},
+          },
         },
         {
           type: 'appRequestedResolverData',
-          payload: databaseDocumentID,
+          payload: { databaseDocumentID, indices: [], filters: {} },
         },
       ];
     });
     it('should be loading', () => {
-      expect(selectors.isLoading(state())).toBe(true);
+      expect(selectors.isTreeLoading(state())).toBe(true);
     });
     it('should not have a request to abort', () => {
-      expect(selectors.databaseDocumentIDToAbort(state())).toBe(null);
+      expect(selectors.treeRequestParametersToAbort(state())).toBe(null);
     });
-    it('should not have an error, more children, more ancestors, a document to begin fetching, or a pending request that should be aborted.', () => {
+    it('should not have an error, more children, more ancestors, a request to make, or a pending request that should be aborted.', () => {
       expect(viewAsAString(state())).toMatchInlineSnapshot(`
         "is loading: true
         has an error: false
         has more children: false
         has more ancestors: false
-        document to fetch: null
+        parameters to fetch: null
         requires a pending request to be aborted: null"
       `);
     });
@@ -148,28 +237,28 @@ describe('data state', () => {
       beforeEach(() => {
         actions.push({
           type: 'serverFailedToReturnResolverData',
-          payload: databaseDocumentID,
+          payload: { databaseDocumentID, indices: [], filters: {} },
         });
       });
       it('should not be loading', () => {
-        expect(selectors.isLoading(state())).toBe(false);
+        expect(selectors.isTreeLoading(state())).toBe(false);
       });
       it('should have an error', () => {
-        expect(selectors.hasError(state())).toBe(true);
+        expect(selectors.hadErrorLoadingTree(state())).toBe(true);
       });
-      it('should not be loading, have more children, have more ancestors, have a document to fetch, or have a pending request that needs to be aborted.', () => {
+      it('should not be loading, have more children, have more ancestors, have a request to make, or have a pending request that needs to be aborted.', () => {
         expect(viewAsAString(state())).toMatchInlineSnapshot(`
           "is loading: false
           has an error: true
           has more children: false
           has more ancestors: false
-          document to fetch: null
+          parameters to fetch: null
           requires a pending request to be aborted: null"
         `);
       });
     });
   });
-  describe('when there is a pending request for a different databaseDocumentID than the current one', () => {
+  describe('when there is a pending request that was made with parameters that are different than the current tree fetching parameters', () => {
     const firstDatabaseDocumentID = 'first databaseDocumentID';
     const secondDatabaseDocumentID = 'second databaseDocumentID';
     const resolverComponentInstanceID1 = 'resolverComponentInstanceID1';
@@ -182,12 +271,17 @@ describe('data state', () => {
           payload: {
             databaseDocumentID: firstDatabaseDocumentID,
             resolverComponentInstanceID: resolverComponentInstanceID1,
+            // `locationSearch` doesn't matter for this test
+            locationSearch: '',
+            indices: [],
+            shouldUpdate: false,
+            filters: {},
           },
         },
         // this happens when the middleware starts the request
         {
           type: 'appRequestedResolverData',
-          payload: firstDatabaseDocumentID,
+          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [], filters: {} },
         },
         // receive a different databaseDocumentID. this should cause the middleware to abort the existing request and start a new one
         {
@@ -195,18 +289,27 @@ describe('data state', () => {
           payload: {
             databaseDocumentID: secondDatabaseDocumentID,
             resolverComponentInstanceID: resolverComponentInstanceID2,
+            // `locationSearch` doesn't matter for this test
+            locationSearch: '',
+            indices: [],
+            shouldUpdate: false,
+            filters: {},
           },
         },
       ];
     });
     it('should be loading', () => {
-      expect(selectors.isLoading(state())).toBe(true);
+      expect(selectors.isTreeLoading(state())).toBe(true);
     });
-    it('should need to fetch the second databaseDocumentID', () => {
-      expect(selectors.databaseDocumentIDToFetch(state())).toBe(secondDatabaseDocumentID);
+    it('should need to request the tree using the second set of parameters', () => {
+      expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
+        secondDatabaseDocumentID
+      );
     });
     it('should need to abort the request for the databaseDocumentID', () => {
-      expect(selectors.databaseDocumentIDToFetch(state())).toBe(secondDatabaseDocumentID);
+      expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
+        secondDatabaseDocumentID
+      );
     });
     it('should use the correct location for the second resolver', () => {
       expect(selectors.resolverComponentInstanceID(state())).toBe(resolverComponentInstanceID2);
@@ -217,25 +320,27 @@ describe('data state', () => {
         has an error: false
         has more children: false
         has more ancestors: false
-        document to fetch: \\"second databaseDocumentID\\"
-        requires a pending request to be aborted: \\"first databaseDocumentID\\""
+        parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
+        requires a pending request to be aborted: {\\"databaseDocumentID\\":\\"first databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}"
       `);
     });
     describe('and when the old request was aborted', () => {
       beforeEach(() => {
         actions.push({
           type: 'appAbortedResolverDataRequest',
-          payload: firstDatabaseDocumentID,
+          payload: { databaseDocumentID: firstDatabaseDocumentID, indices: [], filters: {} },
         });
       });
       it('should not require a pending request to be aborted', () => {
-        expect(selectors.databaseDocumentIDToAbort(state())).toBe(null);
+        expect(selectors.treeRequestParametersToAbort(state())).toBe(null);
       });
       it('should have a document to fetch', () => {
-        expect(selectors.databaseDocumentIDToFetch(state())).toBe(secondDatabaseDocumentID);
+        expect(selectors.treeParametersToFetch(state())?.databaseDocumentID).toBe(
+          secondDatabaseDocumentID
+        );
       });
       it('should not be loading', () => {
-        expect(selectors.isLoading(state())).toBe(false);
+        expect(selectors.isTreeLoading(state())).toBe(false);
       });
       it('should not have an error, more children, or more ancestors.', () => {
         expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -243,7 +348,7 @@ describe('data state', () => {
           has an error: false
           has more children: false
           has more ancestors: false
-          document to fetch: \\"second databaseDocumentID\\"
+          parameters to fetch: {\\"databaseDocumentID\\":\\"second databaseDocumentID\\",\\"indices\\":[],\\"filters\\":{}}
           requires a pending request to be aborted: null"
         `);
       });
@@ -251,14 +356,14 @@ describe('data state', () => {
         beforeEach(() => {
           actions.push({
             type: 'appRequestedResolverData',
-            payload: secondDatabaseDocumentID,
+            payload: { databaseDocumentID: secondDatabaseDocumentID, indices: [], filters: {} },
           });
         });
         it('should not have a document ID to fetch', () => {
-          expect(selectors.databaseDocumentIDToFetch(state())).toBe(null);
+          expect(selectors.treeParametersToFetch(state())).toBe(null);
         });
         it('should be loading', () => {
-          expect(selectors.isLoading(state())).toBe(true);
+          expect(selectors.isTreeLoading(state())).toBe(true);
         });
         it('should not have an error, more children, more ancestors, or a pending request that needs to be aborted.', () => {
           expect(viewAsAString(state())).toMatchInlineSnapshot(`
@@ -266,9 +371,103 @@ describe('data state', () => {
             has an error: false
             has more children: false
             has more ancestors: false
-            document to fetch: null
+            parameters to fetch: null
             requires a pending request to be aborted: null"
           `);
+        });
+      });
+    });
+  });
+  describe('with a mock tree of no ancestors and two children', () => {
+    const databaseDocumentID = 'doc id';
+    const resolverComponentInstanceID = 'instance';
+    const originID = 'origin';
+    const firstChildID = 'first';
+    const secondChildID = 'second';
+    const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+      originID,
+      firstChildID,
+      secondChildID,
+    });
+    const { schema, dataSource } = endpointSourceSchema();
+    describe('when resolver receives external properties without time range filters', () => {
+      beforeEach(() => {
+        actions = [
+          {
+            type: 'appReceivedNewExternalProperties',
+            payload: {
+              databaseDocumentID,
+              resolverComponentInstanceID,
+              locationSearch: '',
+              indices: [],
+              shouldUpdate: false,
+              filters: {},
+            },
+          },
+          {
+            type: 'appRequestedResolverData',
+            payload: { databaseDocumentID, indices: [], filters: {} },
+          },
+          {
+            type: 'serverReturnedResolverData',
+            payload: {
+              result: resolverTree,
+              dataSource,
+              schema,
+              parameters: { databaseDocumentID, indices: [], filters: {} },
+            },
+          },
+        ];
+      });
+      it('uses the default time range filters', () => {
+        expect(selectors.timeRangeFilters(state())?.from).toBe(new Date(0).toISOString());
+        expect(selectors.timeRangeFilters(state())?.to).toBe(new Date(maxDate).toISOString());
+      });
+      describe('when resolver receives time range filters', () => {
+        const timeRangeFilters: TimeRange = {
+          to: 'to',
+          from: 'from',
+        };
+        beforeEach(() => {
+          actions = [
+            ...actions,
+            {
+              type: 'appReceivedNewExternalProperties',
+              payload: {
+                databaseDocumentID,
+                resolverComponentInstanceID,
+                locationSearch: '',
+                indices: [],
+                shouldUpdate: false,
+                filters: timeRangeFilters,
+              },
+            },
+            {
+              type: 'appRequestedResolverData',
+              payload: {
+                databaseDocumentID,
+                indices: [],
+                filters: timeRangeFilters,
+              },
+            },
+            {
+              type: 'serverReturnedResolverData',
+              payload: {
+                result: resolverTree,
+                dataSource,
+                schema,
+                parameters: {
+                  databaseDocumentID,
+                  indices: [],
+                  filters: timeRangeFilters,
+                },
+              },
+            },
+          ];
+        });
+        it('uses the received time range filters', () => {
+          expect(selectors.timeRangeFilters(state())?.from).toBe('from');
+          expect(selectors.timeRangeFilters(state())?.to).toBe('to');
         });
       });
     });
@@ -278,18 +477,23 @@ describe('data state', () => {
     const firstAncestorID = 'b';
     const secondAncestorID = 'a';
     beforeEach(() => {
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: mockTreeWith2AncestorsAndNoChildren({
-            originID,
-            firstAncestorID,
-            secondAncestorID,
-          }),
-          // this value doesn't matter
-          databaseDocumentID: '',
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: mockTreeWith2AncestorsAndNoChildren({
+              originID,
+              firstAncestorID,
+              secondAncestorID,
+            }),
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
         },
-      });
+      ];
     });
     it('should have no flowto candidate for the origin', () => {
       expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
@@ -305,28 +509,33 @@ describe('data state', () => {
     const originID = 'c';
     const firstAncestorID = 'b';
     const secondAncestorID = 'a';
+    const nodeData = mockNodeDataWithAllProcessesTerminated({
+      originID,
+      firstAncestorID,
+      secondAncestorID,
+    });
     beforeEach(() => {
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: mockTreeWithAllProcessesTerminated({
-            originID,
-            firstAncestorID,
-            secondAncestorID,
-          }),
-          // this value doesn't matter
-          databaseDocumentID: '',
+      actions = [
+        {
+          type: 'serverReturnedNodeData',
+          payload: {
+            nodeData,
+            requestedIDs: new Set([originID, firstAncestorID, secondAncestorID]),
+            // mock the requested size being larger than the returned number of events so we
+            // avoid the case where the limit was reached
+            numberOfRequestedEvents: nodeData.length + 1,
+          },
         },
-      });
+      ];
     });
     it('should have origin as terminated', () => {
-      expect(selectors.isProcessTerminated(state())(originID)).toBe(true);
+      expect(selectors.nodeDataStatus(state())(originID)).toBe('terminated');
     });
     it('should have first ancestor as termianted', () => {
-      expect(selectors.isProcessTerminated(state())(firstAncestorID)).toBe(true);
+      expect(selectors.nodeDataStatus(state())(firstAncestorID)).toBe('terminated');
     });
     it('should have second ancestor as terminated', () => {
-      expect(selectors.isProcessTerminated(state())(secondAncestorID)).toBe(true);
+      expect(selectors.nodeDataStatus(state())(secondAncestorID)).toBe('terminated');
     });
   });
   describe('with a tree with 2 children and no ancestors', () => {
@@ -334,14 +543,24 @@ describe('data state', () => {
     const firstChildID = 'd';
     const secondChildID = 'e';
     beforeEach(() => {
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID }),
-          // this value doesn't matter
-          databaseDocumentID: '',
-        },
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID,
+        firstChildID,
+        secondChildID,
       });
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
+        },
+      ];
     });
     it('should have no flowto candidate for the origin', () => {
       expect(selectors.ariaFlowtoCandidate(state())(originID)).toBe(null);
@@ -358,28 +577,31 @@ describe('data state', () => {
     const firstChildID = 'd';
     const secondChildID = 'e';
     beforeEach(() => {
-      const tree = mockTreeWithNoAncestorsAnd2Children({ originID, firstChildID, secondChildID });
-      for (const event of tree.lifecycle) {
-        // delete the process.parent key, if present
-        // cast as `EndpointEvent` because `ResolverEvent` can also be `LegacyEndpointEvent` which has no `process` field
-        delete (event as EndpointEvent).process?.parent;
-      }
-
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: tree,
-          // this value doesn't matter
-          databaseDocumentID: '',
-        },
+      const { resolverTree } = mockTreeWithNoAncestorsAnd2Children({
+        originID,
+        firstChildID,
+        secondChildID,
       });
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: resolverTree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
+        },
+      ];
     });
     it('should be able to calculate the aria flowto candidates for all processes nodes', () => {
-      const graphables = selectors.graphableProcesses(state());
+      const graphables = selectors.graphableNodes(state());
       expect(graphables.length).toBe(3);
-      for (const event of graphables) {
+      for (const node of graphables) {
         expect(() => {
-          selectors.ariaFlowtoCandidate(state())(uniquePidForProcess(event));
+          selectors.ariaFlowtoCandidate(state())(nodeModel.nodeID(node)!);
         }).not.toThrow();
       }
     });
@@ -396,30 +618,40 @@ describe('data state', () => {
         firstChildID,
         secondChildID,
       });
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: tree,
-          // this value doesn't matter
-          databaseDocumentID: '',
+      const { schema, dataSource } = endpointSourceSchema();
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: tree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
         },
-      });
+      ];
     });
     it('should have 4 graphable processes', () => {
-      expect(selectors.graphableProcesses(state()).length).toBe(4);
+      expect(selectors.graphableNodes(state()).length).toBe(4);
     });
   });
   describe('with a tree with no process events', () => {
     beforeEach(() => {
+      const { schema, dataSource } = endpointSourceSchema();
       const tree = mockTreeWithNoProcessEvents();
-      actions.push({
-        type: 'serverReturnedResolverData',
-        payload: {
-          result: tree,
-          // this value doesn't matter
-          databaseDocumentID: '',
+      actions = [
+        {
+          type: 'serverReturnedResolverData',
+          payload: {
+            result: tree,
+            dataSource,
+            schema,
+            // this value doesn't matter
+            parameters: mockTreeFetcherParameters(),
+          },
         },
-      });
+      ];
     });
     it('should return an empty layout', () => {
       expect(selectors.layout(state())).toMatchInlineSnapshot(`

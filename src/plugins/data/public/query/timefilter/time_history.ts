@@ -18,6 +18,7 @@
  */
 
 import moment from 'moment';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { PersistedLog } from '../persisted_log';
 import { TimeRange } from '../../../common';

@@ -5,10 +5,10 @@
  */
 
 import { uniq } from 'lodash';
-import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
+import { KibanaFeature, FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
-const readOperations: string[] = ['get', 'getAlertState', 'find'];
+const readOperations: string[] = ['get', 'getAlertState', 'getAlertInstanceSummary', 'find'];
 const writeOperations: string[] = [
   'create',
   'delete',
@@ -24,7 +24,10 @@ const writeOperations: string[] = [
 const allOperations: string[] = [...readOperations, ...writeOperations];
 
 export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder {
-  public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
+  public getActions(
+    privilegeDefinition: FeatureKibanaPrivileges,
+    feature: KibanaFeature
+  ): string[] {
     const getAlertingPrivilege = (
       operations: string[],
       privilegedTypes: readonly string[],

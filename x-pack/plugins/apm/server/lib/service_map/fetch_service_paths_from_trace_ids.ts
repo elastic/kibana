@@ -3,28 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  PROCESSOR_EVENT,
-  TRACE_ID,
-} from '../../../common/elasticsearch_fieldnames';
+import { rangeFilter } from '../../../common/utils/range_filter';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import {
   ConnectionNode,
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from '../../../common/service_map';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function fetchServicePathsFromTraceIds(
-  setup: Setup,
+  setup: Setup & SetupTimeRange,
   traceIds: string[]
 ) {
-  const { indices, client } = setup;
+  const { apmEventClient } = setup;
+
+  // make sure there's a range so ES can skip shards
+  const dayInMs = 24 * 60 * 60 * 1000;
+  const start = setup.start - dayInMs;
+  const end = setup.end + dayInMs;
 
   const serviceMapParams = {
-    index: [
-      indices['apm_oss.spanIndices'],
-      indices['apm_oss.transactionIndices'],
-    ],
+    apm: {
+      events: [ProcessorEvent.span, ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
       query: {
@@ -32,14 +35,10 @@ export async function fetchServicePathsFromTraceIds(
           filter: [
             {
               terms: {
-                [PROCESSOR_EVENT]: ['span', 'transaction'],
-              },
-            },
-            {
-              terms: {
                 [TRACE_ID]: traceIds,
               },
             },
+            { range: rangeFilter(start, end) },
           ],
         },
       },
@@ -212,7 +211,7 @@ export async function fetchServicePathsFromTraceIds(
     },
   };
 
-  const serviceMapFromTraceIdsScriptResponse = await client.search(
+  const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
     serviceMapParams
   );
 

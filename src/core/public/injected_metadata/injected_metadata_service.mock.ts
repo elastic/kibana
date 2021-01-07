@@ -16,16 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { InjectedMetadataService, InjectedMetadataSetup } from './injected_metadata_service';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<InjectedMetadataSetup> = {
     getBasePath: jest.fn(),
     getServerBasePath: jest.fn(),
+    getPublicBaseUrl: jest.fn(),
     getKibanaVersion: jest.fn(),
     getKibanaBranch: jest.fn(),
     getCspConfig: jest.fn(),
-    getLegacyMode: jest.fn(),
+    getExternalUrlConfig: jest.fn(),
     getAnonymousStatusPage: jest.fn(),
     getLegacyMetadata: jest.fn(),
     getPlugins: jest.fn(),
@@ -34,8 +36,8 @@ const createSetupContractMock = () => {
     getKibanaBuildNumber: jest.fn(),
   };
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
+  setupContract.getExternalUrlConfig.mockReturnValue({ policy: [] });
   setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
-  setupContract.getLegacyMode.mockReturnValue(true);
   setupContract.getAnonymousStatusPage.mockReturnValue(false);
   setupContract.getLegacyMetadata.mockReturnValue({
     app: {

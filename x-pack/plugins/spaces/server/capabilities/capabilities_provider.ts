@@ -8,6 +8,9 @@ export const capabilitiesProvider = () => ({
   spaces: {
     manage: true,
   },
+  catalogue: {
+    spaces: true,
+  },
   management: {
     kibana: {
       spaces: true,

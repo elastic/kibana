@@ -29,19 +29,13 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
           class="euiTitle euiTitle--xxxsmall euiStat__title"
         >
           Status: 
-        </p>
-        <div
-          alt="Status: yellow"
-          color="warning"
-          data-euiicon-type="dot"
-          data-test-subj="statusIcon"
-        />
-         Yellow
-        <p />
-        <p
-          class="euiScreenReaderOnly"
-        >
-          Status [object Object]
+          <span
+            alt="Status: yellow"
+            color="warning"
+            data-euiicon-type="dot"
+            data-test-subj="statusIcon"
+          />
+           Yellow
         </p>
       </div>
     </div>
@@ -208,19 +202,13 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
           class="euiTitle euiTitle--xxxsmall euiStat__title"
         >
           Status: 
-        </p>
-        <div
-          alt="Status: green"
-          color="success"
-          data-euiicon-type="dot"
-          data-test-subj="statusIcon"
-        />
-         Green
-        <p />
-        <p
-          class="euiScreenReaderOnly"
-        >
-          Status [object Object]
+          <span
+            alt="Status: green"
+            color="success"
+            data-euiicon-type="dot"
+            data-test-subj="statusIcon"
+          />
+           Green
         </p>
       </div>
     </div>

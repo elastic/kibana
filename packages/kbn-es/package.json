@@ -1,23 +1,20 @@
 {
   "name": "@kbn/es",
-  "main": "./src/index.js",
+  "main": "./target/index.js",
   "version": "1.0.0",
   "license": "Apache-2.0",
   "private": true,
+  "kibana": {
+    "devOnly": true
+  },
+  "scripts": {
+    "kbn:bootstrap": "node scripts/build",
+    "kbn:watch": "node scripts/build --watch"
+  },
   "dependencies": {
-    "@elastic/elasticsearch": "7.9.0-rc.1",
-    "@kbn/dev-utils": "1.0.0",
-    "abort-controller": "^2.0.3",
-    "chalk": "^2.4.2",
-    "dedent": "^0.7.0",
-    "del": "^5.1.0",
-    "execa": "^4.0.2",
-    "getopts": "^2.2.4",
-    "glob": "^7.1.2",
-    "node-fetch": "^2.6.0",
-    "simple-git": "^1.91.0",
-    "tar-fs": "^1.16.3",
-    "tree-kill": "^1.2.2",
-    "yauzl": "^2.10.0"
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
+  },
+  "devDependencies": {
+    "@kbn/babel-preset": "link:../kbn-babel-preset"
   }
 }

@@ -33,14 +33,12 @@ describe('TSVB theme', () => {
   });
   it('should return a highcontrast color theme for a different background', () => {
     // red use a near full-black color
-    expect(getBaseTheme(LIGHT_THEME, 'red').axes.axisTitleStyle.fill).toEqual('rgb(23,23,23)');
+    expect(getBaseTheme(LIGHT_THEME, 'red').axes.axisTitle.fill).toEqual('rgb(23,23,23)');
 
     // violet increased the text color to full white for higer contrast
-    expect(getBaseTheme(LIGHT_THEME, '#ba26ff').axes.axisTitleStyle.fill).toEqual(
-      'rgb(255,255,255)'
-    );
+    expect(getBaseTheme(LIGHT_THEME, '#ba26ff').axes.axisTitle.fill).toEqual('rgb(255,255,255)');
 
     // light yellow, prefer the LIGHT_THEME fill color because already with a good contrast
-    expect(getBaseTheme(LIGHT_THEME, '#fff49f').axes.axisTitleStyle.fill).toEqual('#333');
+    expect(getBaseTheme(LIGHT_THEME, '#fff49f').axes.axisTitle.fill).toEqual('#333');
   });
 });

@@ -20,7 +20,7 @@ import { CoreSetup, CoreStart } from 'kibana/public';
 
 declare global {
   interface Window {
-    __coreProvider: {
+    _coreProvider: {
       setup: {
         core: CoreSetup;
         plugins: Record<string, any>;

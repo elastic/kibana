@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, Server } from 'hapi';
+import { Request, Server } from '@hapi/hapi';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PLUGIN } from '../common/constants/plugin';
 import { compose } from './lib/compose/kibana';
 import { initUptimeServer } from './uptime_server';
@@ -27,12 +28,11 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
   const { features } = plugins;
   const libs = compose(server);
 
-  features.registerFeature({
+  features.registerKibanaFeature({
     id: PLUGIN.ID,
     name: PLUGIN.NAME,
     order: 1000,
-    navLinkId: PLUGIN.ID,
-    icon: 'uptimeApp',
+    category: DEFAULT_APP_CATEGORIES.observability,
     app: ['uptime', 'kibana'],
     catalogue: ['uptime'],
     management: {
@@ -43,7 +43,7 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
       all: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: ['uptime-read', 'uptime-write'],
+        api: ['uptime-read', 'uptime-write', 'lists-all'],
         savedObject: {
           all: [umDynamicSettings.name, 'alert'],
           read: [],
@@ -54,23 +54,23 @@ export const initServerWithKibana = (server: UptimeCoreSetup, plugins: UptimeCor
         management: {
           insightsAndAlerting: ['triggersActions'],
         },
-        ui: ['save', 'configureSettings', 'show'],
+        ui: ['save', 'configureSettings', 'show', 'alerting:save'],
       },
       read: {
         app: ['uptime', 'kibana'],
         catalogue: ['uptime'],
-        api: ['uptime-read'],
+        api: ['uptime-read', 'lists-read'],
         savedObject: {
           all: ['alert'],
           read: [umDynamicSettings.name],
         },
         alerting: {
-          all: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
+          read: ['xpack.uptime.alerts.tls', 'xpack.uptime.alerts.monitorStatus'],
         },
         management: {
           insightsAndAlerting: ['triggersActions'],
         },
-        ui: ['show'],
+        ui: ['show', 'alerting:save'],
       },
     },
   });

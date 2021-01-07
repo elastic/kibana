@@ -6,7 +6,6 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -16,18 +15,17 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiStepStatus,
-  EuiText,
+  EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useMlContext } from '../../../contexts/ml';
-import { newJobCapsService } from '../../../services/new_job_capabilities_service';
 import { ml } from '../../../services/ml_api_service';
-import { DataFrameAnalyticsId } from '../../common/analytics';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
 import { AdvancedStep, ConfigurationStep, CreateStep, DetailsStep } from './components';
+import { DataFrameAnalyticsId } from '../../../../../common/types/data_frame_analytics';
 
 export enum ANALYTICS_STEPS {
   CONFIGURATION,
@@ -48,17 +46,21 @@ export const Page: FC<Props> = ({ jobId }) => {
   const { currentIndexPattern } = mlContext;
 
   const createAnalyticsForm = useCreateAnalyticsForm();
-  const { isAdvancedEditorEnabled } = createAnalyticsForm.state;
-  const { jobType } = createAnalyticsForm.state.form;
-  const { initiateWizard, setJobClone, switchToAdvancedEditor } = createAnalyticsForm.actions;
+  const { state } = createAnalyticsForm;
+  const { isAdvancedEditorEnabled, disableSwitchToForm } = state;
+  const { jobType } = state.form;
+  const {
+    initiateWizard,
+    setJobClone,
+    switchToAdvancedEditor,
+    switchToForm,
+  } = createAnalyticsForm.actions;
 
   useEffect(() => {
     initiateWizard();
 
     if (currentIndexPattern) {
       (async function () {
-        await newJobCapsService.initializeFromIndexPattern(currentIndexPattern, false, false);
-
         if (jobId !== undefined) {
           const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
           if (
@@ -170,34 +172,40 @@ export const Page: FC<Props> = ({ jobId }) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            {isAdvancedEditorEnabled === false && (
-              <EuiFlexItem grow={false}>
-                <EuiFormRow
-                  helpText={i18n.translate(
-                    'xpack.ml.dataframe.analytics.create.enableJsonEditorHelpText',
+
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                helpText={
+                  disableSwitchToForm &&
+                  i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.jsonEditorDisabledSwitchText',
                     {
-                      defaultMessage: 'You cannot switch back to this form from the json editor.',
+                      defaultMessage:
+                        'Configuration contains advanced fields not supported by the form. You cannot switch back to the form.',
+                    }
+                  )
+                }
+              >
+                <EuiSwitch
+                  disabled={jobType === undefined || disableSwitchToForm}
+                  label={i18n.translate(
+                    'xpack.ml.dataframe.analytics.create.switchToJsonEditorSwitch',
+                    {
+                      defaultMessage: 'Switch to json editor',
                     }
                   )}
-                >
-                  <EuiButtonEmpty
-                    isDisabled={jobType === undefined}
-                    iconType="link"
-                    onClick={switchToAdvancedEditor}
-                    data-test-subj="mlAnalyticsCreateJobWizardAdvancedEditorSwitch"
-                  >
-                    <EuiText size="s" grow={false}>
-                      {i18n.translate(
-                        'xpack.ml.dataframe.analytics.create.switchToJsonEditorSwitch',
-                        {
-                          defaultMessage: 'Switch to json editor',
-                        }
-                      )}
-                    </EuiText>
-                  </EuiButtonEmpty>
-                </EuiFormRow>
-              </EuiFlexItem>
-            )}
+                  checked={isAdvancedEditorEnabled}
+                  onChange={(e) => {
+                    if (e.target.checked === true) {
+                      switchToAdvancedEditor();
+                    } else {
+                      switchToForm();
+                    }
+                  }}
+                  data-test-subj="mlAnalyticsCreateJobWizardAdvancedEditorSwitch"
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
           {isAdvancedEditorEnabled === true && (

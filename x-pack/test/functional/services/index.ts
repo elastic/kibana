@@ -6,6 +6,7 @@
 
 import { services as kibanaFunctionalServices } from '../../../../test/functional/services';
 import { services as kibanaApiIntegrationServices } from '../../../../test/api_integration/services';
+import { services as kibanaXPackApiIntegrationServices } from '../../api_integration/services';
 import { services as commonServices } from '../../common/services';
 
 import {
@@ -30,6 +31,7 @@ import {
   MonitoringKibanaInstancesProvider,
   MonitoringKibanaInstanceProvider,
   MonitoringKibanaSummaryStatusProvider,
+  MonitoringSetupModeProvider,
   // @ts-ignore not ts yet
 } from './monitoring';
 // @ts-ignore not ts yet
@@ -63,6 +65,7 @@ export const services = {
   ...commonServices,
 
   supertest: kibanaApiIntegrationServices.supertest,
+  supertestWithoutAuth: kibanaXPackApiIntegrationServices.supertestWithoutAuth,
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   monitoringNoData: MonitoringNoDataProvider,
   monitoringClusterList: MonitoringClusterListProvider,
@@ -85,6 +88,7 @@ export const services = {
   monitoringKibanaInstances: MonitoringKibanaInstancesProvider,
   monitoringKibanaInstance: MonitoringKibanaInstanceProvider,
   monitoringKibanaSummaryStatus: MonitoringKibanaSummaryStatusProvider,
+  monitoringSetupMode: MonitoringSetupModeProvider,
   pipelineList: PipelineListProvider,
   pipelineEditor: PipelineEditorProvider,
   random: RandomProvider,

@@ -5,7 +5,8 @@
  */
 
 import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { NewRule } from '../../../../containers/detection_engine/rules';
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import {
   getListMock,
   getEndpointListMock,
@@ -28,6 +29,7 @@ import {
   formatActionsStepData,
   formatRule,
   filterRuleFieldsForType,
+  filterEmptyThreats,
 } from './helpers';
 import {
   mockDefineStepRule,
@@ -36,6 +38,8 @@ import {
   mockAboutStepRule,
   mockActionsStepRule,
 } from '../all/__mocks__/mock';
+import { getThreatMock } from '../../../../../../common/detection_engine/schemas/types/threat.mock';
+import { Threat, Threats } from '../../../../../../common/detection_engine/schemas/common/schemas';
 
 describe('helpers', () => {
   describe('getTimeTypeValue', () => {
@@ -79,6 +83,24 @@ describe('helpers', () => {
       const result = getTimeTypeValue('random');
 
       expect(result).toEqual({ unit: '', value: 0 });
+    });
+  });
+
+  describe('filterEmptyThreats', () => {
+    let mockThreat: Threat;
+
+    beforeEach(() => {
+      mockThreat = mockAboutStepRule().threat[0];
+    });
+
+    test('filters out fields with empty tactics', () => {
+      const threat: Threats = [
+        mockThreat,
+        { ...mockThreat, tactic: { ...mockThreat.tactic, name: 'none' } },
+      ];
+      const result = filterEmptyThreats(threat);
+      const expected = [mockThreat];
+      expect(result).toEqual(expected);
     });
   });
 
@@ -132,6 +154,7 @@ describe('helpers', () => {
       const mockStepData = {
         ...mockData,
       };
+      // @ts-expect-error
       delete mockStepData.timeline.id;
 
       const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
@@ -180,6 +203,7 @@ describe('helpers', () => {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
         },
       };
+      // @ts-expect-error
       delete mockStepData.timeline.title;
       const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
 
@@ -237,6 +261,32 @@ describe('helpers', () => {
       };
 
       expect(result).toEqual(expected);
+    });
+
+    test('returns query fields if type is eql', () => {
+      const mockStepData: DefineStepRule = {
+        ...mockData,
+        ruleType: 'eql',
+        queryBar: {
+          ...mockData.queryBar,
+          query: {
+            ...mockData.queryBar.query,
+            language: 'eql',
+            query: 'process where process_name == "explorer.exe"',
+          },
+        },
+      };
+      const result: DefineStepRuleJson = formatDefineStepData(mockStepData);
+
+      const expected = {
+        filters: mockStepData.queryBar.filters,
+        index: mockStepData.index,
+        language: 'eql',
+        query: 'process where process_name == "explorer.exe"',
+        type: 'eql',
+      };
+
+      expect(result).toEqual(expect.objectContaining(expected));
     });
   });
 
@@ -356,23 +406,7 @@ describe('helpers', () => {
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
-        ],
+        threat: getThreatMock(),
       };
 
       expect(result).toEqual(expected);
@@ -443,23 +477,7 @@ describe('helpers', () => {
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
-        ],
+        threat: getThreatMock(),
       };
 
       expect(result).toEqual(expected);
@@ -483,23 +501,7 @@ describe('helpers', () => {
         severity: 'low',
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
-        ],
+        threat: getThreatMock(),
       };
 
       expect(result).toEqual(expected);
@@ -509,21 +511,7 @@ describe('helpers', () => {
       const mockStepData = {
         ...mockData,
         threat: [
-          {
-            framework: 'mockFramework',
-            tactic: {
-              id: '1234',
-              name: 'tactic1',
-              reference: 'reference1',
-            },
-            technique: [
-              {
-                id: '456',
-                name: 'technique1',
-                reference: 'technique reference',
-              },
-            ],
-          },
+          ...getThreatMock(),
           {
             framework: 'mockFramework',
             tactic: {
@@ -536,6 +524,50 @@ describe('helpers', () => {
                 id: '456',
                 name: 'technique1',
                 reference: 'technique reference',
+                subtechnique: [],
+              },
+            ],
+          },
+        ],
+      };
+      const result: AboutStepRuleJson = formatAboutStepData(mockStepData);
+      const expected = {
+        author: ['Elastic'],
+        license: 'Elastic License',
+        description: '24/7',
+        false_positives: ['test'],
+        name: 'Query with rule-id',
+        note: '# this is some markdown documentation',
+        references: ['www.test.co'],
+        risk_score: 21,
+        risk_score_mapping: [],
+        severity: 'low',
+        severity_mapping: [],
+        tags: ['tag1', 'tag2'],
+        threat: getThreatMock(),
+      };
+
+      expect(result).toEqual(expected);
+    });
+
+    test('returns formatted object with threats that contains no subtechniques', () => {
+      const mockStepData = {
+        ...mockData,
+        threat: [
+          ...getThreatMock(),
+          {
+            framework: 'mockFramework',
+            tactic: {
+              id: '1234',
+              name: 'tactic1',
+              reference: 'reference1',
+            },
+            technique: [
+              {
+                id: '456',
+                name: 'technique1',
+                reference: 'technique reference',
+                subtechnique: [],
               },
             ],
           },
@@ -556,10 +588,13 @@ describe('helpers', () => {
         severity_mapping: [],
         tags: ['tag1', 'tag2'],
         threat: [
+          ...getThreatMock(),
           {
             framework: 'MITRE ATT&CK',
             tactic: { id: '1234', name: 'tactic1', reference: 'reference1' },
-            technique: [{ id: '456', name: 'technique1', reference: 'technique reference' }],
+            technique: [
+              { id: '456', name: 'technique1', reference: 'technique reference', subtechnique: [] },
+            ],
           },
         ],
       };
@@ -719,13 +754,13 @@ describe('helpers', () => {
       mockActions = mockActionsStepRule();
     });
 
-    test('returns NewRule with type of saved_query when saved_id exists', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
+    test('returns rule with type of saved_query when saved_id exists', () => {
+      const result: Rule = formatRule<Rule>(mockDefine, mockAbout, mockSchedule, mockActions);
 
       expect(result.type).toEqual('saved_query');
     });
 
-    test('returns NewRule with type of query when saved_id does not exist', () => {
+    test('returns rule with type of query when saved_id does not exist', () => {
       const mockDefineStepRuleWithoutSavedId = {
         ...mockDefine,
         queryBar: {
@@ -733,7 +768,7 @@ describe('helpers', () => {
           saved_id: '',
         },
       };
-      const result: NewRule = formatRule(
+      const result: CreateRulesSchema = formatRule<CreateRulesSchema>(
         mockDefineStepRuleWithoutSavedId,
         mockAbout,
         mockSchedule,
@@ -743,10 +778,15 @@ describe('helpers', () => {
       expect(result.type).toEqual('query');
     });
 
-    test('returns NewRule without id if ruleId does not exist', () => {
-      const result: NewRule = formatRule(mockDefine, mockAbout, mockSchedule, mockActions);
+    test('returns rule without id if ruleId does not exist', () => {
+      const result: CreateRulesSchema = formatRule<CreateRulesSchema>(
+        mockDefine,
+        mockAbout,
+        mockSchedule,
+        mockActions
+      );
 
-      expect(result.id).toBeUndefined();
+      expect(result).not.toHaveProperty<CreateRulesSchema>('id');
     });
   });
 

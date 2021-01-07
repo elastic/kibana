@@ -6,16 +6,21 @@
 
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import {
-  ValueClickContext,
-  RangeSelectContext,
-} from '../../../../../../src/plugins/embeddable/public';
-import { DiscoverUrlGeneratorState } from '../../../../../../src/plugins/discover/public';
-import { isTimeRange, isQuery, isFilters } from '../../../../../../src/plugins/data/public';
-import { KibanaURL } from './kibana_url';
+  DiscoverUrlGeneratorState,
+  SearchInput,
+} from '../../../../../../src/plugins/discover/public';
+import {
+  ApplyGlobalFilterActionContext,
+  esFilters,
+} from '../../../../../../src/plugins/data/public';
+import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
+import { KibanaURL } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
 
-export type ExploreDataChartActionContext = ValueClickContext | RangeSelectContext;
+export interface ExploreDataChartActionContext extends ApplyGlobalFilterActionContext {
+  embeddable?: IEmbeddable;
+}
 
 export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
 
@@ -23,13 +28,19 @@ export const ACTION_EXPLORE_DATA_CHART = 'ACTION_EXPLORE_DATA_CHART';
  * This is "Explore underlying data" action which appears in popup context
  * menu when user clicks a value in visualization or brushes a time range.
  */
-export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDataChartActionContext>
+export class ExploreDataChartAction
+  extends AbstractExploreDataAction<ExploreDataChartActionContext>
   implements Action<ExploreDataChartActionContext> {
   public readonly id = ACTION_EXPLORE_DATA_CHART;
 
   public readonly type = ACTION_EXPLORE_DATA_CHART;
 
   public readonly order = 200;
+
+  public async isCompatible(context: ExploreDataChartActionContext): Promise<boolean> {
+    if (context.embeddable?.type === 'map') return false; // TODO: https://github.com/elastic/kibana/issues/73043
+    return super.isCompatible(context);
+  }
 
   protected readonly getUrl = async (
     context: ExploreDataChartActionContext
@@ -42,7 +53,11 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
     }
 
     const { embeddable } = context;
-    const { filters, timeRange } = await plugins.embeddable.filtersAndTimeRangeFromContext(context);
+    const { restOfFilters: filters, timeRange } = esFilters.extractTimeRange(
+      context.filters,
+      context.timeFieldName
+    );
+
     const state: DiscoverUrlGeneratorState = {
       filters,
       timeRange,
@@ -51,11 +66,11 @@ export class ExploreDataChartAction extends AbstractExploreDataAction<ExploreDat
     if (embeddable) {
       state.indexPatternId = shared.getIndexPatterns(embeddable)[0] || undefined;
 
-      const input = embeddable.getInput();
+      const input = embeddable.getInput() as Readonly<SearchInput>;
 
-      if (isTimeRange(input.timeRange) && !state.timeRange) state.timeRange = input.timeRange;
-      if (isQuery(input.query)) state.query = input.query;
-      if (isFilters(input.filters)) state.filters = [...input.filters, ...(state.filters || [])];
+      if (input.timeRange && !state.timeRange) state.timeRange = input.timeRange;
+      if (input.query) state.query = input.query;
+      if (input.filters) state.filters = [...input.filters, ...(state.filters || [])];
     }
 
     const path = await urlGenerator.createUrl(state);

@@ -6,6 +6,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { getJobId } from '../../../../common/log_analysis';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { JobSummary } from './api/ml_get_jobs_summary_api';
 import { GetMlModuleResponsePayload, JobDefinition } from './api/ml_get_module';
@@ -18,6 +19,7 @@ export const useLogAnalysisModuleDefinition = <JobType extends string>({
   sourceConfiguration: ModuleSourceConfiguration;
   moduleDescriptor: ModuleDescriptor<JobType>;
 }) => {
+  const { services } = useKibanaContextForPlugin();
   const [moduleDefinition, setModuleDefinition] = useState<
     GetMlModuleResponsePayload | undefined
   >();
@@ -40,7 +42,7 @@ export const useLogAnalysisModuleDefinition = <JobType extends string>({
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await moduleDescriptor.getModuleDefinition();
+        return await moduleDescriptor.getModuleDefinition(services.http.fetch);
       },
       onResolve: (response) => {
         setModuleDefinition(response);

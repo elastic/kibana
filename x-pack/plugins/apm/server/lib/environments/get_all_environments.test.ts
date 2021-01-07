@@ -8,7 +8,7 @@ import { getAllEnvironments } from './get_all_environments';
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../public/utils/testHelpers';
+} from '../../utils/test_helpers';
 
 describe('getAllEnvironments', () => {
   let mock: SearchParamsMock;
@@ -21,6 +21,7 @@ describe('getAllEnvironments', () => {
     mock = await inspectSearchParams((setup) =>
       getAllEnvironments({
         serviceName: 'test',
+        searchAggregatedTransactions: false,
         setup,
       })
     );
@@ -33,6 +34,7 @@ describe('getAllEnvironments', () => {
       getAllEnvironments({
         serviceName: 'test',
         setup,
+        searchAggregatedTransactions: false,
         includeMissing: true,
       })
     );

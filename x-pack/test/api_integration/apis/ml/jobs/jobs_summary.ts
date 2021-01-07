@@ -5,13 +5,13 @@
  */
 
 import expect from '@kbn/expect';
+import { sortBy } from 'lodash';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG } from './common_jobs';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
@@ -161,8 +161,8 @@ export default ({ getService }: FtrProviderContext) => {
       requestBody: {},
       // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
       },
     },
   ];
@@ -180,16 +180,6 @@ export default ({ getService }: FtrProviderContext) => {
       .expect(expectedResponsecode);
 
     return body;
-  }
-
-  function compareById(a: { id: string }, b: { id: string }) {
-    if (a.id < b.id) {
-      return -1;
-    }
-    if (a.id > b.id) {
-      return 1;
-    }
-    return 0;
   }
 
   function getGroups(jobs: Array<{ groups: string[] }>) {
@@ -237,16 +227,18 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.have.length(expectedResponse.length);
 
           // Validate job IDs.
-          const expectedRspJobIds = expectedResponse
-            .map((job: { id: string }) => {
+          const expectedRspJobIds = sortBy(
+            expectedResponse.map((job: { id: string }) => {
               return { id: job.id };
-            })
-            .sort(compareById);
-          const actualRspJobIds = body
-            .map((job: { id: string }) => {
+            }),
+            'id'
+          );
+          const actualRspJobIds = sortBy(
+            body.map((job: { id: string }) => {
               return { id: job.id };
-            })
-            .sort(compareById);
+            }),
+            'id'
+          );
 
           expect(actualRspJobIds).to.eql(expectedRspJobIds);
 
@@ -274,16 +266,18 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body).to.have.length(expectedResponse.length);
 
           // Validate job IDs.
-          const expectedRspJobIds = expectedResponse
-            .map((job: { id: string }) => {
+          const expectedRspJobIds = sortBy(
+            expectedResponse.map((job: { id: string }) => {
               return { id: job.id };
-            })
-            .sort(compareById);
-          const actualRspJobIds = body
-            .map((job: { id: string }) => {
+            }),
+            'id'
+          );
+          const actualRspJobIds = sortBy(
+            body.map((job: { id: string }) => {
               return { id: job.id };
-            })
-            .sort(compareById);
+            }),
+            'id'
+          );
 
           expect(actualRspJobIds).to.eql(expectedRspJobIds);
 

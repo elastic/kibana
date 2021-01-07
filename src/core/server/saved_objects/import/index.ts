@@ -17,16 +17,18 @@
  * under the License.
  */
 
-export { importSavedObjectsFromStream } from './import_saved_objects';
-export { resolveSavedObjectsImportErrors } from './resolve_import_errors';
+export { ISavedObjectsImporter, SavedObjectsImporter } from './saved_objects_importer';
 export {
   SavedObjectsImportResponse,
-  SavedObjectsImportError,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportFailure,
   SavedObjectsImportOptions,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportRetry,
 } from './types';
+export { SavedObjectsImportError } from './errors';

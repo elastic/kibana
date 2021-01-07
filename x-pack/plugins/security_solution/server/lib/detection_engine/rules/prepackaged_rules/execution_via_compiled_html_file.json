@@ -7,18 +7,22 @@
     "The HTML Help executable program (hh.exe) runs whenever a user clicks a compiled help (.chm) file or menu item that opens the help file inside the Help Viewer. This is not always malicious, but adversaries may abuse this technology to conceal malicious code."
   ],
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Process Activity via Compiled HTML File",
-  "query": "event.code:1 and process.name:hh.exe",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:hh.exe",
   "risk_score": 21,
   "rule_id": "e3343ab9-4245-4715-b344-e11c56b0a47f",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -53,5 +57,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

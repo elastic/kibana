@@ -11,11 +11,11 @@ const actionCreator = actionCreatorFactory('x-pack/security_solution/local/netwo
 
 export const updateNetworkTable = actionCreator<{
   networkType: networkModel.NetworkType;
-  tableType: networkModel.NetworkTableType | networkModel.IpDetailsTableType;
+  tableType: networkModel.NetworkTableType | networkModel.NetworkDetailsTableType;
   updates: networkModel.TableUpdates;
 }>('UPDATE_NETWORK_TABLE');
 
-export const setIpDetailsTablesActivePageToZero = actionCreator(
+export const setNetworkDetailsTablesActivePageToZero = actionCreator(
   'SET_IP_DETAILS_TABLES_ACTIVE_PAGE_TO_ZERO'
 );
 

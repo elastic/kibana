@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Visualize', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Visualize']);
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
@@ -210,7 +210,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Visualize', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Visualize']);
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
@@ -325,7 +325,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows visualize navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Visualize', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Visualize']);
       });
 
       it(`landing page shows "Create new Visualization" button`, async () => {
@@ -428,20 +428,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_visualize_privileges_user');
       });
 
-      it(`landing page shows 404`, async () => {
+      it(`landing page shows 403`, async () => {
         await PageObjects.common.navigateToActualUrl('visualize', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`edit page shows 404`, async () => {
+      it(`edit page shows 403`, async () => {
         await PageObjects.common.navigateToActualUrl('visualize', '/edit/i-exist', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

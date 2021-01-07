@@ -7,7 +7,7 @@
 import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
+
 import '../../../common/mock/match_media';
 import {
   apolloClientObservable,
@@ -17,13 +17,9 @@ import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
 } from '../../../common/mock';
-
 import { OverviewNetwork } from '.';
 import { createStore, State } from '../../../common/store';
-import { overviewNetworkQuery } from '../../containers/overview_network/index.gql_query';
-import { GetOverviewHostQuery } from '../../../graphql/types';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { useNetworkOverview } from '../../containers/overview_network';
 
 jest.mock('../../../common/components/link_to');
 const mockNavigateToApp = jest.fn();
@@ -47,61 +43,30 @@ jest.mock('../../../common/lib/kibana', () => {
 
 const startDate = '2020-01-20T20:49:57.080Z';
 const endDate = '2020-01-21T20:49:57.080Z';
+const defaultProps = {
+  endDate,
+  startDate,
+  setQuery: jest.fn(),
+  indexNames: [],
+};
 
-interface MockedProvidedQuery {
-  request: {
-    query: GetOverviewHostQuery.Query;
-    fetchPolicy: string;
-    variables: GetOverviewHostQuery.Variables;
-  };
-  result: {
-    data: {
-      source: unknown;
-    };
-  };
-}
-
-const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
-  {
-    request: {
-      query: overviewNetworkQuery,
-      fetchPolicy: 'cache-and-network',
-      variables: {
-        sourceId: 'default',
-        timerange: { interval: '12h', from: startDate, to: endDate },
-        filterQuery: undefined,
-        defaultIndex: [
-          'apm-*-transaction*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'logs-*',
-          'packetbeat-*',
-          'winlogbeat-*',
-        ],
-        inspect: false,
-      },
-    },
-    result: {
-      data: {
-        source: {
-          id: 'default',
-          OverviewNetwork: {
-            auditbeatSocket: 1,
-            filebeatCisco: 1,
-            filebeatNetflow: 1,
-            filebeatPanw: 1,
-            filebeatSuricata: 1,
-            filebeatZeek: 1,
-            packetbeatDNS: 1,
-            packetbeatFlow: 1,
-            packetbeatTLS: 1,
-          },
-        },
-      },
-    },
+const MOCKED_RESPONSE = {
+  overviewNetwork: {
+    auditbeatSocket: 1,
+    filebeatCisco: 1,
+    filebeatNetflow: 1,
+    filebeatPanw: 1,
+    filebeatSuricata: 1,
+    filebeatZeek: 1,
+    packetbeatDNS: 1,
+    packetbeatFlow: 1,
+    packetbeatTLS: 1,
   },
-];
+};
+
+jest.mock('../../containers/overview_network');
+const useNetworkOverviewMock = useNetworkOverview as jest.Mock;
+useNetworkOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
 
 describe('OverviewNetwork', () => {
   const state: State = mockGlobalState;
@@ -129,7 +94,7 @@ describe('OverviewNetwork', () => {
   test('it renders the expected widget title', () => {
     const wrapper = mount(
       <TestProviders store={store}>
-        <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+        <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
@@ -139,9 +104,10 @@ describe('OverviewNetwork', () => {
   });
 
   test('it renders an empty subtitle while loading', () => {
+    useNetworkOverviewMock.mockReturnValueOnce([true, { overviewNetwork: {} }]);
     const wrapper = mount(
-      <TestProviders>
-        <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
+      <TestProviders store={store}>
+        <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
@@ -150,27 +116,20 @@ describe('OverviewNetwork', () => {
 
   test('it renders the expected event count in the subtitle after loading events', async () => {
     const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
-        </MockedProvider>
+      <TestProviders store={store}>
+        <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
-    await waitFor(() => {
-      wrapper.update();
 
-      expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
-        'Showing: 9 events'
-      );
-    });
+    expect(wrapper.find('[data-test-subj="header-panel-subtitle"]').first().text()).toEqual(
+      'Showing: 9 events'
+    );
   });
 
   it('it renders View Network', () => {
     const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
-        </MockedProvider>
+      <TestProviders store={store}>
+        <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 
@@ -179,10 +138,8 @@ describe('OverviewNetwork', () => {
 
   it('when click on View Network we call navigateToApp to make sure to navigate to right page', () => {
     const wrapper = mount(
-      <TestProviders>
-        <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-          <OverviewNetwork endDate={endDate} setQuery={jest.fn()} startDate={startDate} />
-        </MockedProvider>
+      <TestProviders store={store}>
+        <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
 

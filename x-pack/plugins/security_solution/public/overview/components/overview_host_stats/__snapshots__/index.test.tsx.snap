@@ -40,6 +40,8 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupauditbeat"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     paddingSize="none"
   >
     <styled.div>
@@ -252,7 +254,7 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
         >
           <EuiText>
             <FormattedMessage
-              defaultMessage="Elastic Endpoint Security"
+              defaultMessage="Endpoint Security"
               id="xpack.securitySolution.overview.hostStatGroupElasticEndpointSecurity"
               values={Object {}}
             />
@@ -273,6 +275,8 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupendgame"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     paddingSize="none"
   >
     <styled.div>
@@ -538,6 +542,8 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupfilebeat"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     paddingSize="none"
   >
     <styled.div>
@@ -611,6 +617,8 @@ exports[`Overview Host Stat Data rendering it renders the default OverviewHostSt
     buttonContentClassName="accordion-button"
     id="host-stat-accordion-groupwinlogbeat"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     paddingSize="none"
   >
     <styled.div>

@@ -6,6 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Route } from 'react-router-dom';
 import qs from 'query-string';
@@ -13,7 +14,6 @@ import qs from 'query-string';
 import {
   EuiButton,
   EuiCallOut,
-  EuiHealth,
   EuiLink,
   EuiCheckbox,
   EuiFlexGroup,
@@ -36,14 +36,13 @@ import {
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
-import { reactRouterNavigate } from '../../../../../shared_imports';
+import { reactRouterNavigate, attemptToURIDecode } from '../../../../../shared_imports';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
-import { healthToColor } from '../../../../services';
-import { encodePathForReactRouter } from '../../../../services/routing';
+import { getDataStreamDetailsLink } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
-import { NoMatch, PageErrorForbidden } from '../../../../components';
+import { NoMatch, PageErrorForbidden, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
 const HEADERS = {
@@ -109,7 +108,7 @@ export class IndexTable extends Component {
     const { location, filterChanged } = this.props;
     const { filter } = qs.parse((location && location.search) || '');
     if (filter) {
-      const decodedFilter = decodeURIComponent(filter);
+      const decodedFilter = attemptToURIDecode(filter);
 
       try {
         const filter = EuiSearchBar.Query.parse(decodedFilter);
@@ -260,14 +259,14 @@ export class IndexTable extends Component {
     const { openDetailPanel, filterChanged, history } = this.props;
 
     if (fieldName === 'health') {
-      return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
+      return <DataHealth health={value} />;
     } else if (fieldName === 'name') {
       return (
         <Fragment>
           <EuiLink
             data-test-subj="indexTableIndexNameLink"
             onClick={() => {
-              appServices.uiMetricService.trackMetric('click', UIM_SHOW_DETAILS_CLICK);
+              appServices.uiMetricService.trackMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(value);
             }}
           >
@@ -281,7 +280,7 @@ export class IndexTable extends Component {
         <EuiLink
           data-test-subj="dataStreamLink"
           {...reactRouterNavigate(history, {
-            pathname: `/data_streams/${encodePathForReactRouter(value)}`,
+            pathname: getDataStreamDetailsLink(value),
             search: '?isDeepLink=true',
           })}
         >

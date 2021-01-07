@@ -33,10 +33,12 @@ export function checkGetManagementMlJobsResolver() {
   });
 }
 
-export function checkGetJobsCapabilitiesResolver(): Promise<MlCapabilities> {
+export function checkGetJobsCapabilitiesResolver(
+  redirectToMlAccessDeniedPage: () => Promise<void>
+): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
     getCapabilities()
-      .then(({ capabilities, isPlatinumOrTrialLicense }) => {
+      .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
         _capabilities = capabilities;
         // the minimum privilege for using ML with a platinum or trial license is being able to get the transforms list.
         // all other functionality is controlled by the return capabilities object.
@@ -46,21 +48,23 @@ export function checkGetJobsCapabilitiesResolver(): Promise<MlCapabilities> {
         if (_capabilities.canGetJobs || isPlatinumOrTrialLicense === false) {
           return resolve(_capabilities);
         } else {
-          window.location.href = '#/access-denied';
+          await redirectToMlAccessDeniedPage();
           return reject();
         }
       })
-      .catch((e) => {
-        window.location.href = '#/access-denied';
+      .catch(async (e) => {
+        await redirectToMlAccessDeniedPage();
         return reject();
       });
   });
 }
 
-export function checkCreateJobsCapabilitiesResolver(): Promise<MlCapabilities> {
+export function checkCreateJobsCapabilitiesResolver(
+  redirectToJobsManagementPage: () => Promise<void>
+): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
     getCapabilities()
-      .then(({ capabilities, isPlatinumOrTrialLicense }) => {
+      .then(async ({ capabilities, isPlatinumOrTrialLicense }) => {
         _capabilities = capabilities;
         // if the license is basic (isPlatinumOrTrialLicense === false) then do not redirect,
         // allow the promise to resolve as the separate license check will redirect then user to
@@ -69,34 +73,36 @@ export function checkCreateJobsCapabilitiesResolver(): Promise<MlCapabilities> {
           return resolve(_capabilities);
         } else {
           // if the user has no permission to create a job,
-          // redirect them back to the Transforms Management page
-          window.location.href = '#/jobs';
+          // redirect them back to the Anomaly Detection Management page
+          await redirectToJobsManagementPage();
           return reject();
         }
       })
-      .catch((e) => {
-        window.location.href = '#/jobs';
+      .catch(async (e) => {
+        await redirectToJobsManagementPage();
         return reject();
       });
   });
 }
 
-export function checkFindFileStructurePrivilegeResolver(): Promise<MlCapabilities> {
+export function checkFindFileStructurePrivilegeResolver(
+  redirectToMlAccessDeniedPage: () => Promise<void>
+): Promise<MlCapabilities> {
   return new Promise((resolve, reject) => {
     getCapabilities()
-      .then(({ capabilities }) => {
+      .then(async ({ capabilities }) => {
         _capabilities = capabilities;
         // the minimum privilege for using ML with a basic license is being able to use the datavisualizer.
         // all other functionality is controlled by the return _capabilities object
         if (_capabilities.canFindFileStructure) {
           return resolve(_capabilities);
         } else {
-          window.location.href = '#/access-denied';
+          await redirectToMlAccessDeniedPage();
           return reject();
         }
       })
-      .catch((e) => {
-        window.location.href = '#/access-denied';
+      .catch(async (e) => {
+        await redirectToMlAccessDeniedPage();
         return reject();
       });
   });

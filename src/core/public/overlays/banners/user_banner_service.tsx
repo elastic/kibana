@@ -19,12 +19,11 @@
 
 import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
-import ReactMarkdown from 'react-markdown';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut, EuiButton } from '@elastic/eui';
+import { EuiCallOut, EuiButton, EuiLoadingSpinner } from '@elastic/eui';
 
 import { I18nStart } from '../../i18n';
 import { IUiSettingsClient } from '../../ui_settings';
@@ -35,6 +34,8 @@ interface StartDeps {
   i18n: I18nStart;
   uiSettings: IUiSettingsClient;
 }
+
+const ReactMarkdownLazy = React.lazy(() => import('react-markdown'));
 
 /**
  * Sets up the custom banner that can be specified in advanced settings.
@@ -75,7 +76,15 @@ export class UserBannerService {
                 }
                 iconType="help"
               >
-                <ReactMarkdown renderers={{ root: Fragment }}>{content.trim()}</ReactMarkdown>
+                <React.Suspense
+                  fallback={
+                    <div>
+                      <EuiLoadingSpinner />
+                    </div>
+                  }
+                >
+                  <ReactMarkdownLazy renderers={{ root: Fragment }} source={content.trim()} />
+                </React.Suspense>
 
                 <EuiButton type="primary" size="s" onClick={() => banners.remove(id!)}>
                   <FormattedMessage

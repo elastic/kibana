@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { GetConfigFn } from '../types';
 import { FieldFormat } from './field_format';
 import { FieldFormatsRegistry } from './field_formats_registry';
 
@@ -25,6 +26,7 @@ export type FieldFormatsContentType = 'html' | 'text';
 /** @internal **/
 export interface HtmlContextTypeOptions {
   field?: any;
+  indexPattern?: any;
   hit?: Record<string, any>;
 }
 
@@ -72,9 +74,9 @@ export interface FieldFormatConfig {
   es?: boolean;
 }
 
-export type FieldFormatsGetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+export type FieldFormatsGetConfigFn = GetConfigFn;
 
-export type IFieldFormat = PublicMethodsOf<FieldFormat>;
+export type IFieldFormat = FieldFormat;
 
 /**
  * @string id type is needed for creating custom converters.

@@ -18,19 +18,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
-import { PieOptions } from './components/options';
-import { getPositions, Positions } from './utils/collections';
-import { createVislibVisController } from './vis_controller';
+import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { getPositions } from '../../vis_type_xy/public';
+
 import { CommonVislibParams } from './types';
-import { VisTypeVislibDependencies } from './plugin';
-import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { PieOptions } from './editor';
+import { toExpressionAst } from './to_ast_pie';
 
 export interface PieVisParams extends CommonVislibParams {
   type: 'pie';
-  addLegend: boolean;
   isDonut: boolean;
   labels: {
     show: boolean;
@@ -40,23 +40,21 @@ export interface PieVisParams extends CommonVislibParams {
   };
 }
 
-export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
   name: 'pie',
   title: i18n.translate('visTypeVislib.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
   description: i18n.translate('visTypeVislib.pie.pieDescription', {
-    defaultMessage: 'Compare parts of a whole',
+    defaultMessage: 'Compare data in proportion to a whole.',
   }),
-  visualization: createVislibVisController(deps),
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.filter];
-  },
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
+  toExpressionAst,
   visConfig: {
     defaults: {
       type: 'pie',
       addTooltip: true,
       addLegend: true,
-      legendPosition: Positions.RIGHT,
+      legendPosition: Position.Right,
       isDonut: true,
       labels: {
         show: false,
@@ -108,4 +106,4 @@ export const createPieVisTypeDefinition = (deps: VisTypeVislibDependencies) => (
   },
   hierarchicalData: true,
   responseHandler: 'vislib_slices',
-});
+};

@@ -19,8 +19,15 @@
 
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { isErrorEmbeddable, EmbeddableOutput, ContainerInput, ViewMode } from '../lib';
 import {
+  isErrorEmbeddable,
+  EmbeddableOutput,
+  ContainerInput,
+  ViewMode,
+  SavedObjectEmbeddableInput,
+} from '../lib';
+import {
+  MockFilter,
   FilterableEmbeddableInput,
   FilterableEmbeddable,
   FILTERABLE_EMBEDDABLE,
@@ -29,10 +36,7 @@ import { ERROR_EMBEDDABLE_TYPE } from '../lib/embeddables/error_embeddable';
 import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
 import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
-import {
-  HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactoryDefinition,
-} from '../../../../../examples/embeddable_examples/public';
+import { HELLO_WORLD_EMBEDDABLE, HelloWorldEmbeddableFactoryDefinition } from './fixtures';
 import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import {
   ContactCardEmbeddableInput,
@@ -43,11 +47,9 @@ import {
   FilterableContainer,
   FilterableContainerInput,
 } from '../lib/test_samples/embeddables/filterable_container';
-// eslint-disable-next-line
 import { coreMock } from '../../../../core/public/mocks';
 import { testPlugin } from './test_plugin';
 import { of } from './helpers';
-import { esFilters, Filter } from '../../../../plugins/data/public';
 import { createEmbeddablePanelMock } from '../mocks';
 
 async function creatHelloWorldContainerAndEmbeddable(
@@ -444,8 +446,8 @@ test('Test nested reactions', async (done) => {
 
 test('Explicit embeddable input mapped to undefined will default to inherited', async () => {
   const { start } = await creatHelloWorldContainerAndEmbeddable();
-  const derivedFilter: Filter = {
-    $state: { store: esFilters.FilterStateStore.APP_STATE },
+  const derivedFilter: MockFilter = {
+    $state: { store: 'appState' },
     meta: { disabled: false, alias: 'name', negate: false },
     query: { match: {} },
   };
@@ -649,7 +651,7 @@ test('container stores ErrorEmbeddables when a saved object cannot be found', as
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123', savedObjectId: '456' },
+        explicitInput: { id: '123', savedObjectId: '456' } as SavedObjectEmbeddableInput,
       },
     },
     viewMode: ViewMode.EDIT,
@@ -670,7 +672,7 @@ test('ErrorEmbeddables get updated when parent does', async (done) => {
     panels: {
       '123': {
         type: 'vis',
-        explicitInput: { id: '123', savedObjectId: '456' },
+        explicitInput: { id: '123', savedObjectId: '456' } as SavedObjectEmbeddableInput,
       },
     },
     viewMode: ViewMode.EDIT,

@@ -6,9 +6,7 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import { rule_id, id } from '../common/schemas';
-/* eslint-enable @typescript-eslint/camelcase */
 
 export const queryRulesSchema = t.exact(
   t.partial({

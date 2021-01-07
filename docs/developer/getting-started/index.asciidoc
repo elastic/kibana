@@ -30,7 +30,7 @@ you can switch to the correct version when using nvm by running:
 nvm use
 ----
 
-Install the latest version of https://yarnpkg.com[yarn].
+Install the latest version of https://classic.yarnpkg.com/en/docs/install[yarn v1].
 
 Bootstrap {kib} and install all the dependencies:
 
@@ -49,7 +49,7 @@ ____
 
 (You can also run `yarn kbn` to see the other available commands. For
 more info about this tool, see
-{kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}packages/kbn-pm].)
+{kib-repo}tree/{branch}/packages/kbn-pm[{kib-repo}tree/{branch}/packages/kbn-pm].)
 
 When switching branches which use different versions of npm packages you
 may need to run:
@@ -99,7 +99,7 @@ preserving data inbetween runs, running remote cluster, etc.
 [discrete]
 === Run {kib}
 
-In another terminal window, start up {kib}. Include developer examples by adding an optional `--run-examples` flag.
+In another terminal window, start up {kib}. Include {kib-repo}tree/{branch}/examples[developer examples] by adding an optional `--run-examples` flag.
 
 [source,bash]
 ----
@@ -109,6 +109,20 @@ yarn start --run-examples
 View all available options by running `yarn start --help`
 
 Read about more advanced options for <<running-kibana-advanced>>.
+
+[discrete]
+=== Install pre-commit hook (optional)
+
+In case you want to run a couple of checks like linting or check the file casing of the files to commit, we provide 
+a way to install a pre-commit hook. To configure it you just need to run the following:
+
+[source,bash]
+----
+node scripts/register_git_hook
+----
+
+After the script completes the pre-commit hook will be created within the file `.git/hooks/pre-commit`.
+If you choose to not install it, don't worry, we still run a quick ci check to provide feedback earliest as we can about the same checks. 
 
 [discrete]
 === Code away!

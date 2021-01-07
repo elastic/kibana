@@ -8,9 +8,9 @@ import React, { useState, useEffect } from 'react';
 
 import { MlCapabilitiesResponse } from '../../../../../../ml/public';
 import { emptyMlCapabilities } from '../../../../../common/machine_learning/empty_ml_capabilities';
-import { getMlCapabilities } from '../api/get_ml_capabilities';
-import { errorToToaster, useStateToaster } from '../../toasters';
-
+import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { useHttp } from '../../../lib/kibana';
+import { useGetMlCapabilities } from '../hooks/use_get_ml_capabilities';
 import * as i18n from './translations';
 
 interface MlCapabilitiesProvider extends MlCapabilitiesResponse {
@@ -32,36 +32,27 @@ export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ c
   const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
     emptyMlCapabilitiesProvider
   );
-  const [, dispatchToaster] = useStateToaster();
+  const http = useHttp();
+  const { addError } = useAppToasts();
+  const { start, result, error } = useGetMlCapabilities();
 
   useEffect(() => {
-    let isSubscribed = true;
-    const abortCtrl = new AbortController();
+    start({ http });
+  }, [http, start]);
 
-    async function fetchMlCapabilities() {
-      try {
-        const mlCapabilities = await getMlCapabilities(abortCtrl.signal);
-        if (isSubscribed) {
-          setCapabilities({ ...mlCapabilities, capabilitiesFetched: true });
-        }
-      } catch (error) {
-        if (isSubscribed) {
-          errorToToaster({
-            title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
-            error,
-            dispatchToaster,
-          });
-        }
-      }
+  useEffect(() => {
+    if (result) {
+      setCapabilities({ ...result, capabilitiesFetched: true });
     }
+  }, [result]);
 
-    fetchMlCapabilities();
-    return () => {
-      isSubscribed = false;
-      abortCtrl.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  useEffect(() => {
+    if (error) {
+      addError(error, {
+        title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
+      });
+    }
+  }, [addError, error]);
 
   return (
     <MlCapabilitiesContext.Provider value={capabilities}>{children}</MlCapabilitiesContext.Provider>

@@ -14,6 +14,7 @@ import {
   EuiButtonEmpty,
   EuiFieldNumber,
   EuiSelect,
+  EuiCode,
 } from '@elastic/eui';
 
 import { SlmPolicyPayload } from '../../../../../common/types';
@@ -35,11 +36,17 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
 }) => {
   const { retention = {} } = policy;
 
-  const updatePolicyRetention = (updatedFields: Partial<SlmPolicyPayload['retention']>): void => {
+  const updatePolicyRetention = (
+    updatedFields: Partial<SlmPolicyPayload['retention']>,
+    validationHelperData = {}
+  ): void => {
     const newRetention = { ...retention, ...updatedFields };
-    updatePolicy({
-      retention: newRetention,
-    });
+    updatePolicy(
+      {
+        retention: newRetention,
+      },
+      validationHelperData
+    );
   };
 
   // State for touched inputs
@@ -129,7 +136,10 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepRetention.countDescription"
-          defaultMessage="The minimum and maximum number of snapshots to store in your cluster."
+          defaultMessage="The minimum and maximum number of snapshots to store in your cluster. It should not exceed {maxNumber}."
+          values={{
+            maxNumber: <EuiCode>200</EuiCode>,
+          }}
         />
       }
       fullWidth

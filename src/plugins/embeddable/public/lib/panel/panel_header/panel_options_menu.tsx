@@ -28,14 +28,14 @@ import {
 } from '@elastic/eui';
 
 export interface PanelOptionsMenuProps {
-  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor>;
+  getActionContextMenuPanel: () => Promise<EuiContextMenuPanelDescriptor[]>;
   isViewMode: boolean;
   closeContextMenu: boolean;
   title?: string;
 }
 
 interface State {
-  actionContextMenuPanel?: EuiContextMenuPanelDescriptor;
+  actionContextMenuPanel?: EuiContextMenuPanelDescriptor[];
   isPopoverOpen: boolean;
 }
 
@@ -113,11 +113,10 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
             ? 'embeddablePanelContextMenuOpen'
             : 'embeddablePanelContextMenuClosed'
         }
-        withTitle
       >
         <EuiContextMenu
           initialPanelId="mainMenu"
-          panels={this.state.actionContextMenuPanel ? [this.state.actionContextMenuPanel] : []}
+          panels={this.state.actionContextMenuPanel || []}
         />
       </EuiPopover>
     );

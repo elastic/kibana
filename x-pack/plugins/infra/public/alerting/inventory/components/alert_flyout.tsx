@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
-import { AlertsContextProvider, AlertAdd } from '../../../../../triggers_actions_ui/public';
+import React, { useCallback, useContext, useMemo } from 'react';
+
 import { TriggerActionsContext } from '../../../utils/triggers_actions_context';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import { InfraWaffleMapOptions } from '../../../lib/lib';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { useAlertPrefillContext } from '../../../alerting/use_alert_prefill';
 
 interface Props {
   visible?: boolean;
@@ -21,33 +21,30 @@ interface Props {
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const AlertFlyout = (props: Props) => {
+export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {
   const { triggersActionsUI } = useContext(TriggerActionsContext);
-  const { services } = useKibana();
 
-  return (
-    <>
-      {triggersActionsUI && (
-        <AlertsContextProvider
-          value={{
-            metadata: { options: props.options, nodeType: props.nodeType, filter: props.filter },
-            toastNotifications: services.notifications?.toasts,
-            http: services.http,
-            docLinks: services.docLinks,
-            capabilities: services.application.capabilities,
-            actionTypeRegistry: triggersActionsUI.actionTypeRegistry,
-            alertTypeRegistry: triggersActionsUI.alertTypeRegistry,
-          }}
-        >
-          <AlertAdd
-            addFlyoutVisible={props.visible!}
-            setAddFlyoutVisibility={props.setVisible}
-            alertTypeId={METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID}
-            canChangeTrigger={false}
-            consumer={'infrastructure'}
-          />
-        </AlertsContextProvider>
-      )}
-    </>
+  const { inventoryPrefill } = useAlertPrefillContext();
+  const { customMetrics } = inventoryPrefill;
+  const onCloseFlyout = useCallback(() => setVisible(false), [setVisible]);
+  const AddAlertFlyout = useMemo(
+    () =>
+      triggersActionsUI &&
+      triggersActionsUI.getAddAlertFlyout({
+        consumer: 'infrastructure',
+        onClose: onCloseFlyout,
+        canChangeTrigger: false,
+        alertTypeId: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+        metadata: {
+          options,
+          nodeType,
+          filter,
+          customMetrics,
+        },
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [triggersActionsUI, visible]
   );
+
+  return <>{visible && AddAlertFlyout}</>;
 };

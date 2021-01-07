@@ -4,30 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import {
-  EuiPanel,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  MLErrorMessages,
-  ErrorCode,
-} from '../../../../../common/anomaly_detection';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
-import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
-import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
-import { MLLink } from '../../../shared/Links/MachineLearningLinks/MLLink';
+import React from 'react';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
-import { LegacyJobsCallout } from './legacy_jobs_callout';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { MLExplorerLink } from '../../../shared/Links/MachineLearningLinks/MLExplorerLink';
+import { MLManageJobsLink } from '../../../shared/Links/MachineLearningLinks/MLManageJobsLink';
+import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { AnomalyDetectionApiResponse } from './index';
+import { LegacyJobsCallout } from './legacy_jobs_callout';
 
 type Jobs = AnomalyDetectionApiResponse['jobs'];
 
@@ -48,14 +44,14 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
       { defaultMessage: 'Action' }
     ),
     render: (jobId: string) => (
-      <MLJobLink jobId={jobId}>
+      <MLExplorerLink jobId={jobId}>
         {i18n.translate(
           'xpack.apm.settings.anomalyDetection.jobList.mlJobLinkText',
           {
             defaultMessage: 'View job in ML',
           }
         )}
-      </MLJobLink>
+      </MLExplorerLink>
     ),
   },
 ];
@@ -66,7 +62,7 @@ interface Props {
   onAddEnvironments: () => void;
 }
 export function JobsList({ data, status, onAddEnvironments }: Props) {
-  const { jobs, hasLegacyJobs, errorCode } = data;
+  const { jobs, hasLegacyJobs } = data;
 
   return (
     <EuiPanel>
@@ -84,7 +80,7 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={onAddEnvironments}>
+          <EuiButton fill iconType="plusInCircle" onClick={onAddEnvironments}>
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
               {
@@ -101,24 +97,21 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
           defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
           values={{
             mlJobsLink: (
-              <MLLink path="jobs">
+              <MLManageJobsLink>
                 {i18n.translate(
                   'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
                   {
                     defaultMessage: 'Machine Learning',
                   }
                 )}
-              </MLLink>
+              </MLManageJobsLink>
             ),
           }}
         />
       </EuiText>
       <EuiSpacer size="l" />
       <ManagedTable
-        noItemsMessage={getNoItemsMessage({
-          status,
-          errorCode,
-        })}
+        noItemsMessage={getNoItemsMessage({ status })}
         columns={columns}
         items={jobs}
       />
@@ -129,23 +122,12 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
   );
 }
 
-function getNoItemsMessage({
-  status,
-  errorCode,
-}: {
-  status: FETCH_STATUS;
-  errorCode?: ErrorCode;
-}) {
+function getNoItemsMessage({ status }: { status: FETCH_STATUS }) {
   // loading state
   const isLoading =
     status === FETCH_STATUS.PENDING || status === FETCH_STATUS.LOADING;
   if (isLoading) {
     return <LoadingStatePrompt />;
-  }
-
-  // A known error occured. Show specific error message
-  if (errorCode) {
-    return MLErrorMessages[errorCode];
   }
 
   // An unexpected error occurred. Show default error message

@@ -27,7 +27,10 @@ import { VisualizeApp } from './app';
 import { VisualizeServices } from './types';
 import { addHelpMenuToAppChrome, addBadgeToAppChrome } from './utils';
 
-export const renderApp = ({ element }: AppMountParameters, services: VisualizeServices) => {
+export const renderApp = (
+  { element, onAppLeave }: AppMountParameters,
+  services: VisualizeServices
+) => {
   // add help link to visualize docs into app chrome menu
   addHelpMenuToAppChrome(services.chrome, services.docLinks);
   // add readonly badge if saving restricted
@@ -39,7 +42,7 @@ export const renderApp = ({ element }: AppMountParameters, services: VisualizeSe
     <Router history={services.history}>
       <KibanaContextProvider services={services}>
         <services.i18n.Context>
-          <VisualizeApp />
+          <VisualizeApp onAppLeave={onAppLeave} />
         </services.i18n.Context>
       </KibanaContextProvider>
     </Router>

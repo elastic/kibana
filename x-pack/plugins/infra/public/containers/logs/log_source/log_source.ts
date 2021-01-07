@@ -5,13 +5,15 @@
  */
 
 import createContainer from 'constate';
-import { useState, useMemo, useCallback } from 'react';
-import { HttpSetup } from 'src/core/public';
+import { useCallback, useMemo, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+import type { HttpHandler } from 'src/core/public';
 import {
+  LogIndexField,
   LogSourceConfiguration,
-  LogSourceStatus,
-  LogSourceConfigurationPropertiesPatch,
   LogSourceConfigurationProperties,
+  LogSourceConfigurationPropertiesPatch,
+  LogSourceStatus,
 } from '../../../../common/http_api/log_sources';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callFetchLogSourceConfigurationAPI } from './api/fetch_log_source_configuration';
@@ -19,19 +21,15 @@ import { callFetchLogSourceStatusAPI } from './api/fetch_log_source_status';
 import { callPatchLogSourceConfigurationAPI } from './api/patch_log_source_configuration';
 
 export {
+  LogIndexField,
   LogSourceConfiguration,
   LogSourceConfigurationProperties,
   LogSourceConfigurationPropertiesPatch,
   LogSourceStatus,
 };
 
-export const useLogSource = ({
-  sourceId,
-  fetch,
-}: {
-  sourceId: string;
-  fetch: HttpSetup['fetch'];
-}) => {
+export const useLogSource = ({ sourceId, fetch }: { sourceId: string; fetch: HttpHandler }) => {
+  const getIsMounted = useMountedState();
   const [sourceConfiguration, setSourceConfiguration] = useState<
     LogSourceConfiguration | undefined
   >(undefined);
@@ -45,6 +43,10 @@ export const useLogSource = ({
         return await callFetchLogSourceConfigurationAPI(sourceId, fetch);
       },
       onResolve: ({ data }) => {
+        if (!getIsMounted()) {
+          return;
+        }
+
         setSourceConfiguration(data);
       },
     },
@@ -58,6 +60,10 @@ export const useLogSource = ({
         return await callPatchLogSourceConfigurationAPI(sourceId, patchedProperties, fetch);
       },
       onResolve: ({ data }) => {
+        if (!getIsMounted()) {
+          return;
+        }
+
         setSourceConfiguration(data);
         loadSourceStatus();
       },
@@ -72,6 +78,10 @@ export const useLogSource = ({
         return await callFetchLogSourceStatusAPI(sourceId, fetch);
       },
       onResolve: ({ data }) => {
+        if (!getIsMounted()) {
+          return;
+        }
+
         setSourceStatus(data);
       },
     },
@@ -81,9 +91,8 @@ export const useLogSource = ({
   const derivedIndexPattern = useMemo(
     () => ({
       fields: sourceStatus?.logIndexFields ?? [],
-      title: sourceConfiguration?.configuration.name ?? 'unknown',
+      title: sourceConfiguration?.configuration.logAlias ?? 'unknown',
     }),
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [sourceConfiguration, sourceStatus]
   );
 

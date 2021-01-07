@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!-- This is a copy of the
+     [Storybook IFrame template](https://github.com/storybookjs/storybook/blob/7874ca357c6cb54f3f258dc61f6becae6783fba6/lib/core/src/server/templates/index.ejs).
+     We use this one instead because we want to add the @kbn/ui-shared-deps tags here.
+  -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title><%= options.title || 'Storybook'%></title>
+
+    <% if (files.favicon) { %>
+    <link rel="shortcut icon" href="<%= files.favicon%>" />
+    <% } %>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Added for Kibana shared dependencies -->
+    <script>
+      window.__kbnPublicPath__ = { 'kbn-ui-shared-deps': '/' };
+    </script>
+    <script src="/kbn-ui-shared-deps.@elastic.js"></script>
+    <script src="/kbn-ui-shared-deps.js"></script>
+    <link href="/kbn-ui-shared-deps.css" rel="stylesheet" />
+    <link href="/kbn-ui-shared-deps.v7.light.css" rel="stylesheet" />
+    <!--                                      -->
+
+    <% if (typeof headHtmlSnippet !== 'undefined') { %> <%= headHtmlSnippet %> <% } %> <%
+    files.css.forEach(file => { %>
+    <link href="<%= file %>" rel="stylesheet" />
+    <% }); %>
+
+    <style>
+      #root[hidden],
+      #docs-root[hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <% if (typeof bodyHtmlSnippet !== 'undefined') { %> <%= bodyHtmlSnippet %> <% } %>
+
+    <div id="root"></div>
+    <div id="docs-root"></div>
+
+    <% if (typeof globals !== 'undefined' && Object.keys(globals).length) { %>
+    <script>
+      <% for (var varName in globals) { %>
+          <% if (globals[varName] != undefined) { %>
+            window['<%=varName%>'] = <%= JSON.stringify(globals[varName]) %>;
+          <% } %>
+      <% } %>
+    </script>
+    <% } %> <% dlls.forEach(file => { %>
+    <script src="<%= file %>"></script>
+    <% }); %> <% files.js.forEach(file => { %>
+    <script src="<%= file %>"></script>
+    <% }); %>
+  </body>
+</html>

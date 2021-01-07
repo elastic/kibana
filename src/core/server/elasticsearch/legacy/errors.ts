@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { get } from 'lodash';
 
 const code = Symbol('ElasticsearchError');
@@ -26,8 +26,11 @@ enum ErrorCode {
   NOT_AUTHORIZED = 'Elasticsearch/notAuthorized',
 }
 
-/** @public */
-export interface LegacyElasticsearchError extends Boom {
+/**
+ * @deprecated. The new elasticsearch client doesn't wrap errors anymore.
+ * @public
+ * */
+export interface LegacyElasticsearchError extends Boom.Boom {
   [code]?: string;
 }
 
@@ -83,7 +86,7 @@ export class LegacyElasticsearchErrorHelpers {
     const decoratedError = decorate(error, ErrorCode.NOT_AUTHORIZED, 401, reason);
     const wwwAuthHeader = get(error, 'body.error.header[WWW-Authenticate]') as string;
 
-    decoratedError.output.headers['WWW-Authenticate'] =
+    (decoratedError.output.headers as { [key: string]: string })['WWW-Authenticate'] =
       wwwAuthHeader || 'Basic realm="Authorization Required"';
 
     return decoratedError;

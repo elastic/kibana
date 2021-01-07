@@ -4,17 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, KibanaRequest } from 'kibana/server';
+import { SavedObjectsClientContract, KibanaRequest, IScopedClusterClient } from 'kibana/server';
 import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
+import type { MlClient } from '../../lib/ml_client';
+import { JobSavedObjectService } from '../../saved_objects';
+
+const callAs = () => Promise.resolve({ body: {} });
+
+const mlClusterClient = ({
+  asCurrentUser: callAs,
+  asInternalUser: callAs,
+} as unknown) as IScopedClusterClient;
+
+const mlClient = (callAs as unknown) as MlClient;
 
 describe('ML - data recognizer', () => {
   const dr = new DataRecognizer(
-    { callAsCurrentUser: jest.fn(), callAsInternalUser: jest.fn() },
+    mlClusterClient,
+    mlClient,
     ({
       find: jest.fn(),
       bulkCreate: jest.fn(),
     } as unknown) as SavedObjectsClientContract,
+    {} as JobSavedObjectService,
     { headers: { authorization: '' } } as KibanaRequest
   );
 

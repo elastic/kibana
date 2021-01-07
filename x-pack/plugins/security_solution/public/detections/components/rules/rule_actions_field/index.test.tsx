@@ -8,6 +8,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { RuleActionsField } from './index';
+import { useForm, Form } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useFormFieldMock } from '../../../../common/mock';
 jest.mock('../../../../common/lib/kibana');
@@ -16,7 +17,7 @@ describe('RuleActionsField', () => {
   it('should not render ActionForm if no actions are supported', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
-        triggers_actions_ui: {
+        triggersActionsUi: {
           actionTypeRegistry: {},
         },
         application: {
@@ -30,10 +31,22 @@ describe('RuleActionsField', () => {
         },
       },
     });
+
+    const messageVariables = {
+      context: [],
+      state: [],
+      params: [],
+    };
+
     const Component = () => {
       const field = useFormFieldMock();
+      const { form } = useForm();
 
-      return <RuleActionsField euiFieldProps={{ options: [] }} field={field} />;
+      return (
+        <Form form={form}>
+          <RuleActionsField field={field} messageVariables={messageVariables} />
+        </Form>
+      );
     };
     const wrapper = shallow(<Component />);
 

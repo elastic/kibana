@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from './actions_client';
 
 type ActionsClientContract = PublicMethodsOf<ActionsClient>;
@@ -20,6 +20,7 @@ const createActionsClientMock = () => {
     execute: jest.fn(),
     enqueueExecution: jest.fn(),
     listTypes: jest.fn(),
+    isActionTypeEnabled: jest.fn(),
   };
   return mocked;
 };

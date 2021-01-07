@@ -31,4 +31,4 @@ export { generateTicksProvider } from './helpers/tick_generator';
 
 export { DEFAULT_TIME_FORMAT, calculateInterval } from '../common/lib';
 
-export { VisTypeTimelionPluginStart } from './plugin';
+export { VisTypeTimelionPluginStart, VisTypeTimelionPluginSetup } from './plugin';

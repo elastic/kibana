@@ -8,6 +8,6 @@
 
 ```typescript
 fields: IIndexPatternFieldList & {
-        toSpec: () => FieldSpec[];
+        toSpec: () => IndexPatternFieldMap;
     };
 ```

@@ -19,43 +19,30 @@
 
 // This file contains a lot of single setup logic for registering a language globally
 
-import { monaco } from '../monaco';
+import { monaco } from '../monaco_imports';
 import { WorkerProxyService } from './worker_proxy_service';
-import { registerLexerRules } from './lexer_rules';
 import { ID } from './constants';
-// @ts-ignore
-import workerSrc from '!!raw-loader!../../target/public/xjson.editor.worker.js';
 
 const wps = new WorkerProxyService();
-
-// Register rules against shared monaco instance.
-registerLexerRules(monaco);
-
-// In future we will need to make this map languages to workers using "id" and/or "label" values
-// that get passed in.
-// @ts-ignore
-window.MonacoEnvironment = {
-  getWorker: (id: any, label: any) => {
-    // In kibana we will probably build this once and then load with raw-loader
-    const blob = new Blob([workerSrc], { type: 'application/javascript' });
-    return new Worker(URL.createObjectURL(blob));
-  },
-};
 
 monaco.languages.onLanguage(ID, async () => {
   return wps.setup();
 });
 
 const OWNER = 'XJSON_GRAMMAR_CHECKER';
-export const registerGrammarChecker = (editor: monaco.editor.IEditor) => {
+
+export const registerGrammarChecker = () => {
   const allDisposables: monaco.IDisposable[] = [];
 
-  const updateAnnos = async () => {
-    const { annotations } = await wps.getAnnos();
-    const model = editor.getModel() as monaco.editor.ITextModel | null;
-    if (!model) {
+  const updateAnnotations = async (model: monaco.editor.IModel): Promise<void> => {
+    if (model.isDisposed()) {
       return;
     }
+    const parseResult = await wps.getAnnos(model.uri);
+    if (!parseResult) {
+      return;
+    }
+    const { annotations } = parseResult;
     monaco.editor.setModelMarkers(
       model,
       OWNER,
@@ -74,19 +61,21 @@ export const registerGrammarChecker = (editor: monaco.editor.IEditor) => {
   };
 
   const onModelAdd = (model: monaco.editor.IModel) => {
-    allDisposables.push(
-      model.onDidChangeContent(async () => {
-        updateAnnos();
-      })
-    );
+    if (model.getModeId() === ID) {
+      allDisposables.push(
+        model.onDidChangeContent(async () => {
+          updateAnnotations(model);
+        })
+      );
 
-    updateAnnos();
+      updateAnnotations(model);
+    }
   };
-
   allDisposables.push(monaco.editor.onDidCreateModel(onModelAdd));
-  monaco.editor.getModels().forEach(onModelAdd);
   return () => {
     wps.stop();
     allDisposables.forEach((d) => d.dispose());
   };
 };
+
+registerGrammarChecker();

@@ -9,13 +9,17 @@ import moment from 'moment';
 import deepmerge from 'deepmerge';
 
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
+import { assertUnreachable } from '../../../../../../common/utility_types';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
-import { RuleType } from '../../../../../../common/detection_engine/types';
-import { isMlRule } from '../../../../../../common/machine_learning/helpers';
-import { isThresholdRule } from '../../../../../../common/detection_engine/utils';
 import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { ENDPOINT_LIST_ID } from '../../../../../shared_imports';
-import { NewRule, Rule } from '../../../../containers/detection_engine/rules';
+import { ENDPOINT_LIST_ID, ExceptionListType, NamespaceType } from '../../../../../shared_imports';
+import { Rule } from '../../../../containers/detection_engine/rules';
+import {
+  Threats,
+  ThreatSubtechnique,
+  ThreatTechnique,
+  Type,
+} from '../../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
   AboutStepRule,
@@ -26,6 +30,8 @@ import {
   ScheduleStepRuleJson,
   AboutStepRuleJson,
   ActionsStepRuleJson,
+  RuleStepsFormData,
+  RuleStep,
 } from '../types';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
@@ -33,8 +39,8 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
     unit: '',
     value: 0,
   };
-  const filterTimeVal = (time as string).match(/\d+/g);
-  const filterTimeType = (time as string).match(/[a-zA-Z]+/g);
+  const filterTimeVal = time.match(/\d+/g);
+  const filterTimeType = time.match(/[a-zA-Z]+/g);
   if (!isEmpty(filterTimeVal) && filterTimeVal != null && !isNaN(Number(filterTimeVal[0]))) {
     timeObj.value = Number(filterTimeVal[0]);
   }
@@ -48,6 +54,23 @@ export const getTimeTypeValue = (time: string): { unit: string; value: number } 
   return timeObj;
 };
 
+export const stepIsValid = <T extends RuleStepsFormData[keyof RuleStepsFormData]>(
+  formData?: T
+): formData is { [K in keyof T]: Exclude<T[K], undefined> } =>
+  !!formData?.isValid && !!formData.data;
+
+export const isDefineStep = (input: unknown): input is RuleStepsFormData[RuleStep.defineRule] =>
+  has('data.ruleType', input);
+
+export const isAboutStep = (input: unknown): input is RuleStepsFormData[RuleStep.aboutRule] =>
+  has('data.name', input);
+
+export const isScheduleStep = (input: unknown): input is RuleStepsFormData[RuleStep.scheduleRule] =>
+  has('data.interval', input);
+
+export const isActionsStep = (input: unknown): input is RuleStepsFormData[RuleStep.ruleActions] =>
+  has('data.actions', input);
+
 export interface RuleFields {
   anomalyThreshold: unknown;
   machineLearningJobId: unknown;
@@ -55,30 +78,118 @@ export interface RuleFields {
   index: unknown;
   ruleType: unknown;
   threshold?: unknown;
+  threatIndex?: unknown;
+  threatQueryBar?: unknown;
+  threatMapping?: unknown;
+  threatLanguage?: unknown;
 }
-type QueryRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId' | 'threshold'>;
-type ThresholdRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId'>;
-type MlRuleFields<T> = Omit<T, 'queryBar' | 'index' | 'threshold'>;
+
+type QueryRuleFields<T> = Omit<
+  T,
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+>;
+type ThresholdRuleFields<T> = Omit<
+  T,
+  'anomalyThreshold' | 'machineLearningJobId' | 'threatIndex' | 'threatQueryBar' | 'threatMapping'
+>;
+type MlRuleFields<T> = Omit<
+  T,
+  'queryBar' | 'index' | 'threshold' | 'threatIndex' | 'threatQueryBar' | 'threatMapping'
+>;
+type ThreatMatchRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId' | 'threshold'>;
 
 const isMlFields = <T>(
-  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
 ): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
 
 const isThresholdFields = <T>(
-  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T>
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
-export const filterRuleFieldsForType = <T extends RuleFields>(fields: T, type: RuleType) => {
-  if (isMlRule(type)) {
-    const { index, queryBar, threshold, ...mlRuleFields } = fields;
-    return mlRuleFields;
-  } else if (isThresholdRule(type)) {
-    const { anomalyThreshold, machineLearningJobId, ...thresholdRuleFields } = fields;
-    return thresholdRuleFields;
-  } else {
-    const { anomalyThreshold, machineLearningJobId, threshold, ...queryRuleFields } = fields;
-    return queryRuleFields;
+const isThreatMatchFields = <T>(
+  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
+): fields is ThreatMatchRuleFields<T> => has('threatIndex', fields);
+
+export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
+  fields: T,
+  type: Type
+): QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T> => {
+  switch (type) {
+    case 'machine_learning':
+      const {
+        index,
+        queryBar,
+        threshold,
+        threatIndex,
+        threatQueryBar,
+        threatMapping,
+        ...mlRuleFields
+      } = fields;
+      return mlRuleFields;
+    case 'threshold':
+      const {
+        anomalyThreshold,
+        machineLearningJobId,
+        threatIndex: _removedThreatIndex,
+        threatQueryBar: _removedThreatQueryBar,
+        threatMapping: _removedThreatMapping,
+        ...thresholdRuleFields
+      } = fields;
+      return thresholdRuleFields;
+    case 'threat_match':
+      const {
+        anomalyThreshold: _removedAnomalyThreshold,
+        machineLearningJobId: _removedMachineLearningJobId,
+        threshold: _removedThreshold,
+        ...threatMatchRuleFields
+      } = fields;
+      return threatMatchRuleFields;
+    case 'query':
+    case 'saved_query':
+    case 'eql':
+      const {
+        anomalyThreshold: _a,
+        machineLearningJobId: _m,
+        threshold: _t,
+        threatIndex: __removedThreatIndex,
+        threatQueryBar: __removedThreatQueryBar,
+        threatMapping: __removedThreatMapping,
+        ...queryRuleFields
+      } = fields;
+      return queryRuleFields;
   }
+  assertUnreachable(type);
+};
+
+function trimThreatsWithNoName<T extends ThreatSubtechnique | ThreatTechnique>(
+  filterable: T[]
+): T[] {
+  return filterable.filter((item) => item.name !== 'none');
+}
+
+/**
+ * Filter out unfilled/empty threat, technique, and subtechnique fields based on if their name is `none`
+ */
+export const filterEmptyThreats = (threats: Threats): Threats => {
+  return threats
+    .filter((singleThreat) => singleThreat.tactic.name !== 'none')
+    .map((threat) => {
+      return {
+        ...threat,
+        technique: trimThreatsWithNoName(threat.technique).map((technique) => {
+          return {
+            ...technique,
+            subtechnique:
+              technique.subtechnique != null ? trimThreatsWithNoName(technique.subtechnique) : [],
+          };
+        }),
+      };
+    });
 };
 
 export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStepRuleJson => {
@@ -112,6 +223,18 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
           },
         }),
       }
+    : isThreatMatchFields(ruleFields)
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: ruleFields.queryBar?.saved_id,
+        threat_index: ruleFields.threatIndex,
+        threat_query: ruleFields.threatQueryBar?.query?.query as string,
+        threat_mapping: ruleFields.threatMapping,
+        threat_language: ruleFields.threatQueryBar?.query?.language,
+      }
     : {
         index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,
@@ -119,7 +242,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id,
         ...(ruleType === 'query' &&
-          ruleFields.queryBar?.saved_id && { type: 'saved_query' as RuleType }),
+          ruleFields.queryBar?.saved_id && { type: 'saved_query' as Type }),
       };
 
   return {
@@ -129,7 +252,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
 };
 
 export const formatScheduleStepData = (scheduleData: ScheduleStepRule): ScheduleStepRuleJson => {
-  const { isNew, ...formatScheduleData } = scheduleData;
+  const { ...formatScheduleData } = scheduleData;
   if (!isEmpty(formatScheduleData.interval) && !isEmpty(formatScheduleData.from)) {
     const { unit: intervalUnit, value: intervalValue } = getTimeTypeValue(
       formatScheduleData.interval
@@ -161,7 +284,6 @@ export const formatAboutStepData = (
     threat,
     isAssociatedToEndpointList,
     isBuildingBlock,
-    isNew,
     note,
     ruleNameOverride,
     timestampOverride,
@@ -180,11 +302,11 @@ export const formatAboutStepData = (
             {
               id: ENDPOINT_LIST_ID,
               list_id: ENDPOINT_LIST_ID,
-              namespace_type: 'agnostic',
-              type: 'endpoint',
+              namespace_type: 'agnostic' as NamespaceType,
+              type: 'endpoint' as ExceptionListType,
             },
             ...detectionExceptionLists,
-          ] as AboutStepRuleJson['exceptions_list'],
+          ],
         }
       : exceptionsList != null
       ? {
@@ -202,16 +324,10 @@ export const formatAboutStepData = (
     severity_mapping: severity.isMappingChecked
       ? severity.mapping.filter((m) => m.field != null && m.field !== '' && m.value != null)
       : [],
-    threat: threat
-      .filter((singleThreat) => singleThreat.tactic.name !== 'none')
-      .map((singleThreat) => ({
-        ...singleThreat,
-        framework: 'MITRE ATT&CK',
-        technique: singleThreat.technique.map((technique) => {
-          const { id, name, reference } = technique;
-          return { id, name, reference };
-        }),
-      })),
+    threat: filterEmptyThreats(threat).map((singleThreat) => ({
+      ...singleThreat,
+      framework: 'MITRE ATT&CK',
+    })),
     timestamp_override: timestampOverride !== '' ? timestampOverride : undefined,
     ...(!isEmpty(note) ? { note } : {}),
     ...rest,
@@ -237,16 +353,19 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
   };
 };
 
-export const formatRule = (
+// Used to format form data in rule edit and
+// create flows so "T" here would likely
+// either be CreateRulesSchema or Rule
+export const formatRule = <T>(
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
   actionsData: ActionsStepRule,
   rule?: Rule | null
-): NewRule =>
-  deepmerge.all([
+): T =>
+  (deepmerge.all([
     formatDefineStepData(defineStepData),
     formatAboutStepData(aboutStepData, rule?.exceptions_list),
     formatScheduleStepData(scheduleData),
     formatActionsStepData(actionsData),
-  ]) as NewRule;
+  ]) as unknown) as T;

@@ -167,7 +167,7 @@
       "fleet-agents": {
         "access_api_key_id": "8ZnT7HIBwLFvkUEPQaT3",
         "active": true,
-        "config_id": "2dd2a110-b6f6-11ea-a66d-63cf082a3b58",
+        "policy_id": "2dd2a110-b6f6-11ea-a66d-63cf082a3b58",
         "enrolled_at": "2020-06-25T18:52:47.290Z",
         "local_metadata": {
           "os": "macos"
@@ -180,7 +180,10 @@
       "references": [
       ],
       "type": "fleet-agents",
-      "updated_at": "2020-06-25T18:52:48.464Z"
+      "updated_at": "2020-06-25T18:52:48.464Z",
+      "migrationVersion": {
+        "fleet-agents": "7.10.0"
+      }
     }
   }
 }
@@ -195,14 +198,17 @@
         "active": true,
         "api_key": "8ZnT7HIBwLFvkUEPQaT3",
         "api_key_id": "8ZnT7HIBwLFvkUEPQaT3",
-        "config_id": "2dd2a110-b6f6-11ea-a66d-63cf082a3b58",
+        "policy_id": "2dd2a110-b6f6-11ea-a66d-63cf082a3b58",
         "created_at": "2020-06-25T17:25:30.065Z",
         "name": "Default (93aa98c8-d650-422e-aa7b-663dae3dff83)"
       },
       "references": [
       ],
       "type": "fleet-enrollment-api-keys",
-      "updated_at": "2020-06-25T17:25:30.114Z"
+      "updated_at": "2020-06-25T17:25:30.114Z",
+      "migrationVersion": {
+        "fleet-enrollment-api-keys": "7.10.0"
+      }
     }
   }
 }

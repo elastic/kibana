@@ -151,7 +151,7 @@ that you are interested in.
 A navigation path that retains context (time range and filters)
 from the source to the destination, so you can view the data from a new perspective.
 A dashboard that shows the overall status of multiple data centers
-might have a drilldown to a dashboard for a single data center. See {kibana-ref}/drilldowns.html[Drilldowns].
+might have a drilldown to a dashboard for a single data center. See {kibana-ref}/dashboard.html[Drilldowns].
 // end::drilldown-def[]
 
 
@@ -214,6 +214,13 @@ syslog, Apache, and other webserver logs. See
 [[k_glos]]
 == K
 
+[[glossary-kibana-privileges]] {kib} privileges ::
+// tag::kibana-privileges-def[]
+Enable administrators to grant users read-only, read-write, or no access to 
+individual features within <<glossary-space,spaces>> in {kib}. See
+{kibana-ref}/kibana-privileges.html[{kib} privileges].
+// end::kibana-privileges-def[]
+
 [[glossary-kql]] {kib} Query Language (KQL) ::
 // tag::kql-def[]
 The default language for querying in {kib}. KQL provides
@@ -231,7 +238,7 @@ support for scripted fields. See
 Enables you to build visualizations by dragging and dropping data fields.
 Lens makes makes smart visualization suggestions for your data,
 allowing you to switch between visualization types.
-See {kibana-ref}/lens.html[Lens].
+See {kibana-ref}/dashboard.html[Lens].
 // end::lens-def[]
 
 
@@ -323,6 +330,11 @@ See
 {kibana-ref}/xpack-spaces.html[Spaces].
 // end::space-def[]
 
+[[glossary-stack-alerts]] stack alerts ::
+// tag::stack-alert-def[]
+The general purpose alert types {kib} provides out of the box.  Index threshold and geo alerts are currently the two stack alert types.
+// end::stack-alert-def[]
+
 
 [float]
 [[t_glos]]
@@ -343,7 +355,7 @@ A {kib} control that constrains the search results to a particular time period.
 [[glossary-timelion]] Timelion ::
 // tag::timelion-def[]
 A tool for building a time series visualization that analyzes data in time order.
-See {kibana-ref}/timelion.html[Timelion].
+See {kibana-ref}/dashboard.html[Timelion].
 // end::timelion-def[]
 
 
@@ -357,7 +369,7 @@ Timestamped data such as logs, metrics, and events that is indexed on an ongoing
 // tag::tsvb-def[]
 A time series data visualizer that allows you to combine an
 infinite number of aggregations to display complex data.
-See {kibana-ref}/TSVB.html[TSVB].
+See {kibana-ref}/dashboard.html[TSVB].
 // end::tsvb-def[]
 
 
@@ -381,7 +393,7 @@ indices and guides you through resolving issues, including reindexing. See
 [[glossary-vega]] Vega ::
 // tag::vega-def[]
 A declarative language used to create interactive visualizations.
-See {kibana-ref}/vega-graph.html[Vega].
+See {kibana-ref}/dashboard.html[Vega].
 // end::vega-def[]
 
 [[glossary-vector]] vector data::
@@ -409,5 +421,5 @@ See
 // tag::workpad-def[]
 A workspace where you build presentations of your live data in <<glossary-canvas,Canvas>>.
 See
-{kibana-ref}/create-canvas-workpad.html[Create a workpad].
+{kibana-ref}/canvas.html[Create a workpad].
 // end::workpad-def[]

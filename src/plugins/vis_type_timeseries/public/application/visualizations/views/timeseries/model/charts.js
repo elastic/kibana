@@ -30,13 +30,12 @@ const Chart = {
   data: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
   hideInLegend: PropTypes.bool.isRequired,
   color: PropTypes.string.isRequired,
-  stackAsPercentage: PropTypes.bool.isRequired,
+  stackMode: PropTypes.oneOf(['percentage', 'wiggle', 'silhouette']),
   stackAccessors: PropTypes.arrayOf(PropTypes.number),
   xScaleType: PropTypes.string,
   yScaleType: PropTypes.string,
   timeZone: PropTypes.string.isRequired,
   enableHistogramMode: PropTypes.bool.isRequired,
-  useDefaultGroupDomain: PropTypes.bool,
   sortIndex: PropTypes.number,
 };
 

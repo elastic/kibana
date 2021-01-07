@@ -22,6 +22,14 @@ import { map, pick, zipObject } from 'lodash';
 import { ExpressionTypeDefinition } from '../types';
 import { PointSeries, PointSeriesColumn } from './pointseries';
 import { ExpressionValueRender } from './render';
+import { SerializedFieldFormat } from '../../types';
+
+type State = string | number | boolean | null | undefined | SerializableState;
+
+/** @internal **/
+export interface SerializableState {
+  [key: string]: State | State[];
+}
 
 const name = 'datatable';
 
@@ -34,8 +42,25 @@ export const isDatatable = (datatable: unknown): datatable is Datatable =>
 
 /**
  * This type represents the `type` of any `DatatableColumn` in a `Datatable`.
+ * its duplicated from KBN_FIELD_TYPES
  */
-export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
+export type DatatableColumnType =
+  | '_source'
+  | 'attachment'
+  | 'boolean'
+  | 'date'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'ip'
+  | 'murmur3'
+  | 'number'
+  | 'string'
+  | 'unknown'
+  | 'conflict'
+  | 'object'
+  | 'nested'
+  | 'histogram'
+  | 'null';
 
 /**
  * This type represents a row in a `Datatable`.
@@ -43,11 +68,39 @@ export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'nu
 export type DatatableRow = Record<string, any>;
 
 /**
+ * Datatable column meta information
+ */
+export interface DatatableColumnMeta {
+  type: DatatableColumnType;
+  /**
+   * field this column is based on
+   */
+  field?: string;
+  /**
+   * index/table this column is based on
+   */
+  index?: string;
+  /**
+   * serialized field format
+   */
+  params?: SerializedFieldFormat;
+  /**
+   * source function that produced this column
+   */
+  source?: string;
+  /**
+   * any extra parameters for the source that produced this column
+   */
+  sourceParams?: SerializableState;
+}
+
+/**
  * This type represents the shape of a column in a `Datatable`.
  */
 export interface DatatableColumn {
+  id: string;
   name: string;
-  type: DatatableColumnType;
+  meta: DatatableColumnMeta;
 }
 
 /**
@@ -103,14 +156,16 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
   from: {
     null: () => ({
       type: name,
+      meta: {},
       rows: [],
       columns: [],
     }),
     pointseries: (value: PointSeries) => ({
       type: name,
+      meta: {},
       rows: value.rows,
       columns: map(value.columns, (val: PointSeriesColumn, colName) => {
-        return { name: colName, type: val.type };
+        return { id: colName, name: colName, meta: { type: val.type } };
       }),
     }),
   },
@@ -127,13 +182,13 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
     }),
     pointseries: (table: Datatable): PointSeries => {
       const validFields = ['x', 'y', 'color', 'size', 'text'];
-      const columns = table.columns.filter((column) => validFields.includes(column.name));
+      const columns = table.columns.filter((column) => validFields.includes(column.id));
       const rows = table.rows.map((row) => pick(row, validFields));
       return {
         type: 'pointseries',
         columns: columns.reduce<Record<string, PointSeries['columns']>>((acc, column) => {
           acc[column.name] = {
-            type: column.type,
+            type: column.meta.type,
             expression: column.name,
             role: 'dimension',
           };

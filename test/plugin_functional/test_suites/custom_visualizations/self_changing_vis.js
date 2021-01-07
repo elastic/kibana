@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('self changing vis', function describeIndexTests() {
     before(async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickVisType('self_changing_vis');
     });
 

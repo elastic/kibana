@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { canInheritTimeRange } from './can_inherit_time_range';
-/** eslint-disable */
 import { HelloWorldContainer } from '../../../../src/plugins/embeddable/public/lib/test_samples';
-import { HelloWorldEmbeddable } from '../../../../examples/embeddable_examples/public';
-/** eslint-enable */
+import { HelloWorldEmbeddable } from '../../../../src/plugins/embeddable/public/tests/fixtures';
 import { TimeRangeEmbeddable, TimeRangeContainer } from './test_helpers';
-
-jest.mock('ui/new_platform');
 
 test('canInheritTimeRange returns false if embeddable is inside container without a time range', () => {
   const embeddable = new TimeRangeEmbeddable(

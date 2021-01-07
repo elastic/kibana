@@ -183,7 +183,9 @@ exports[`it renders without crashing 1`] = `
           "_subscribe": [Function],
         },
         "getFeatures": [MockFunction],
+        "getType": [MockFunction],
         "isEnabled": [MockFunction],
+        "isLicenseAvailable": [MockFunction],
       }
     }
     onChange={[MockFunction]}

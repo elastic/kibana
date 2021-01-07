@@ -5,5 +5,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["visualizations", "data", "expressions"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "visDefaultEditor"]
 }

@@ -3,30 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPage,
   EuiPanel,
   EuiToolTip,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../common/i18n';
+import { Projection } from '../../../../common/projections';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { PROJECTION } from '../../../../common/projections/typings';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { ManagedTable, ITableColumn } from '../../shared/ManagedTable';
-import { useFetcher } from '../../../hooks/useFetcher';
 import {
   asDynamicBytes,
   asInteger,
   asPercent,
-} from '../../../utils/formatters';
+} from '../../../../common/utils/formatters';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { px, truncate, unit } from '../../../style/variables';
 import { ServiceNodeMetricOverviewLink } from '../../shared/Links/apm/ServiceNodeMetricOverviewLink';
-import { truncate, px, unit } from '../../../style/variables';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
+import { SearchBar } from '../../shared/search_bar';
 
 const INITIAL_PAGE_SIZE = 25;
 const INITIAL_SORT_FIELD = 'cpu';
@@ -36,28 +37,34 @@ const ServiceNodeName = styled.div`
   ${truncate(px(8 * unit))}
 `;
 
-function ServiceNodeOverview() {
-  const { uiFilters, urlParams } = useUrlParams();
-  const { serviceName, start, end } = urlParams;
+interface ServiceNodeOverviewProps {
+  serviceName: string;
+}
 
-  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
+function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
+  const { uiFilters, urlParams } = useUrlParams();
+  const { start, end } = urlParams;
+
+  const localFiltersConfig: React.ComponentProps<
+    typeof LocalUIFilters
+  > = useMemo(
     () => ({
       filterNames: ['host', 'containerId', 'podName'],
       params: {
         serviceName,
       },
-      projection: PROJECTION.SERVICE_NODES,
+      projection: Projection.serviceNodes,
     }),
     [serviceName]
   );
 
   const { data: items = [] } = useFetcher(
     (callApmApi) => {
-      if (!serviceName || !start || !end) {
+      if (!start || !end) {
         return undefined;
       }
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/serviceNodes',
+        endpoint: 'GET /api/apm/services/{serviceName}/serviceNodes',
         params: {
           path: {
             serviceName,
@@ -72,10 +79,6 @@ function ServiceNodeOverview() {
     },
     [serviceName, start, end, uiFilters]
   );
-
-  if (!serviceName) {
-    return null;
-  }
 
   const columns: Array<ITableColumn<typeof items[0]>> = [
     {
@@ -127,7 +130,7 @@ function ServiceNodeOverview() {
       }),
       field: 'cpu',
       sortable: true,
-      render: (value: number | null) => asPercent(value || 0, 1),
+      render: (value: number | null) => asPercent(value, 1),
     },
     {
       name: i18n.translate('xpack.apm.jvmsTable.heapMemoryColumnLabel', {
@@ -157,29 +160,31 @@ function ServiceNodeOverview() {
 
   return (
     <>
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localFiltersConfig} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <EuiPanel>
-            <ManagedTable
-              noItemsMessage={i18n.translate(
-                'xpack.apm.jvmsTable.noJvmsLabel',
-                {
-                  defaultMessage: 'No JVMs were found',
-                }
-              )}
-              items={items}
-              columns={columns}
-              initialPageSize={INITIAL_PAGE_SIZE}
-              initialSortField={INITIAL_SORT_FIELD}
-              initialSortDirection={INITIAL_SORT_DIRECTION}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <SearchBar />
+      <EuiPage>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <LocalUIFilters {...localFiltersConfig} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            <EuiPanel>
+              <ManagedTable
+                noItemsMessage={i18n.translate(
+                  'xpack.apm.jvmsTable.noJvmsLabel',
+                  {
+                    defaultMessage: 'No JVMs were found',
+                  }
+                )}
+                items={items}
+                columns={columns}
+                initialPageSize={INITIAL_PAGE_SIZE}
+                initialSortField={INITIAL_SORT_FIELD}
+                initialSortDirection={INITIAL_SORT_DIRECTION}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
     </>
   );
 }

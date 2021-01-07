@@ -69,4 +69,16 @@ describe('toExpression', () => {
     expect(aColor?.chain[0].arguments.color[0]).toBe(colorMap.a);
     expect(bColor?.chain[0].arguments.color[0]).toBe(colorMap.b);
   });
+
+  it('includes empty panel title', () => {
+    const input = {
+      ...baseInput,
+      title: '',
+    };
+
+    const expression = toExpression(input);
+    const ast = fromExpression(expression);
+
+    expect(ast.chain[0].arguments).toHaveProperty('title', [input.title]);
+  });
 });

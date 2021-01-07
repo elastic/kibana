@@ -52,3 +52,4 @@ export { TopSizeParamEditor } from './top_size';
 export { TopSortFieldParamEditor } from './top_sort_field';
 export { OrderParamEditor } from './order';
 export { UseGeocentroidParamEditor } from './use_geocentroid';
+export { MaxBarsParamEditor } from './max_bars';

@@ -22,6 +22,7 @@ import { get } from 'lodash';
 import { processBucket } from './table/process_bucket';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
+import { UI_SETTINGS } from '../../../../data/common';
 
 export async function getTableData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
@@ -30,7 +31,6 @@ export async function getTableData(req, panel) {
     searchStrategy,
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
-  const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
 
@@ -40,14 +40,24 @@ export async function getTableData(req, panel) {
   };
 
   try {
-    const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
-    const [resp] = await searchRequest.search([
+    const uiSettings = req.getUiSettingsService();
+    const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities, {
+      maxBarsUiSettings: await uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+      barTargetUiSettings: await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+    });
+
+    const [resp] = await searchStrategy.search(req, [
       {
         body,
         index: panelIndexPattern,
       },
     ]);
-    const buckets = get(resp, 'aggregations.pivot.buckets', []);
+
+    const buckets = get(
+      resp.rawResponse ? resp.rawResponse : resp,
+      'aggregations.pivot.buckets',
+      []
+    );
 
     return {
       ...meta,

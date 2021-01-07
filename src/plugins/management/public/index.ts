@@ -32,3 +32,5 @@ export {
   ManagementStart,
   DefinedSections,
 } from './types';
+
+export { MANAGEMENT_APP_ID } from '../common/contants';

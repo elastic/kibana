@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const listingTable = getService('listingTable');
   const esArchiver = getService('esArchiver');
+  const security = getService('security');
 
   let kibanaLegacyBaseUrl: string;
   let kibanaVisualizeBaseUrl: string;
@@ -42,6 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('legacy urls', function describeIndexTests() {
     before(async function () {
+      await security.testUser.setRoles(['kibana_admin', 'animals']);
       await esArchiver.load('dashboard/current/kibana');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
@@ -61,6 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await listingTable.deleteItem('legacyTest', testDashboardId);
+      await security.testUser.restoreDefaults();
     });
 
     describe('kibana link redirect', () => {
@@ -89,6 +92,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickMarkdownWidget();
         await PageObjects.visEditor.setMarkdownTxt(`[abc](#/dashboard/${testDashboardId})`);
         await PageObjects.visEditor.clickGo();
+
+        await PageObjects.visualize.saveVisualizationExpectSuccess('legacy url markdown');
+
         (await find.byLinkText('abc')).click();
 
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -105,6 +111,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.goBack();
         await PageObjects.visEditor.expectMarkdownTextArea();
         await browser.goForward();
+      });
+
+      it('resolves markdown link from dashboard', async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.clickNewDashboard();
+        await dashboardAddPanel.addVisualization('legacy url markdown');
+        (await find.byLinkText('abc')).click();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.timePicker.setDefaultDataRange();
+
+        await PageObjects.dashboard.waitForRenderComplete();
+        await pieChart.expectPieSliceCount(5);
       });
     });
   });

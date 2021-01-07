@@ -5,15 +5,19 @@
  */
 
 import { addDecorator } from '@storybook/react';
-import { withKnobs } from '@storybook/addon-knobs';
-// @ts-expect-error
-import { withInfo } from '@storybook/addon-info';
-
 import { routerContextDecorator } from './router_decorator';
 import { kibanaContextDecorator } from './kibana_decorator';
+import { servicesContextDecorator } from './services_decorator';
+
+export { reduxDecorator } from './redux_decorator';
 
 export const addDecorators = () => {
-  addDecorator(withKnobs);
+  if (process.env.NODE_ENV === 'test') {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('babel-plugin-require-context-hook/register')();
+  }
+
   addDecorator(kibanaContextDecorator);
   addDecorator(routerContextDecorator);
+  addDecorator(servicesContextDecorator);
 };

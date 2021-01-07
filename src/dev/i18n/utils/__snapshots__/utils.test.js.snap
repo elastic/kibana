@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`i18n utils should create verbose parser error message 1`] = `
+"Unexpected token, expected \\",\\" (4:19):
+  const object = {
+    object: 'with',
+    semicolon: '->'[37m[41m;[49m[39m
+  };
+"
+`;
+
+exports[`i18n utils should normalizePath 1`] = `"src/dev/i18n/utils"`;
+
+exports[`i18n utils should not escape linebreaks 1`] = `
+"Text
+ with
+   line-breaks
+"
+`;
+
+exports[`i18n utils should parse string concatenation 1`] = `"Very long concatenated string"`;
+
+exports[`i18n utils should throw if "values" has a value that is unused in the message 1`] = `"\\"values\\" object contains unused properties (\\"namespace.message.id\\"): [url]."`;
+
+exports[`i18n utils should throw if "values" property is not provided and defaultMessage requires it 1`] = `"some properties are missing in \\"values\\" object (\\"namespace.message.id\\"): [username,password,url]."`;
+
+exports[`i18n utils should throw if "values" property is provided and defaultMessage doesn't include any references 1`] = `"\\"values\\" object contains unused properties (\\"namespace.message.id\\"): [url,username]."`;
+
+exports[`i18n utils should throw if some key is missing in "values" 1`] = `"some properties are missing in \\"values\\" object (\\"namespace.message.id\\"): [password]."`;
+
+exports[`i18n utils should throw on wrong nested ICU message 1`] = `"\\"values\\" object contains unused properties (\\"namespace.message.id\\"): [third]."`;

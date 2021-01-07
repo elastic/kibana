@@ -267,14 +267,13 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
     },
     [UI_SETTINGS.COURIER_BATCH_SEARCHES]: {
       name: i18n.translate('data.advancedSettings.courier.batchSearchesTitle', {
-        defaultMessage: 'Batch concurrent searches',
+        defaultMessage: 'Use legacy search',
       }),
       value: false,
       type: 'boolean',
       description: i18n.translate('data.advancedSettings.courier.batchSearchesText', {
-        defaultMessage: `When disabled, dashboard panels will load individually, and search requests will terminate when users navigate
-           away or update the query. When enabled, dashboard panels will load together when all of the data is loaded, and
-           searches will not terminate.`,
+        defaultMessage: `Kibana uses a new search and batching infrastructure.
+           Enable this option if you prefer to fallback to the legacy synchronous behavior`,
       }),
       deprecation: {
         message: i18n.translate('data.advancedSettings.courier.batchSearchesTextDeprecation', {
@@ -526,6 +525,24 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         value: schema.number(),
       }),
     },
+    [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
+      name: i18n.translate('data.advancedSettings.timepicker.timeDefaultsTitle', {
+        defaultMessage: 'Time filter defaults',
+      }),
+      value: `{
+  "from": "now-15m",
+  "to": "now"
+}`,
+      type: 'json',
+      description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsText', {
+        defaultMessage: 'The timefilter selection to use when Kibana is started without one',
+      }),
+      requiresPageReload: true,
+      schema: schema.object({
+        from: schema.string(),
+        to: schema.string(),
+      }),
+    },
     [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: {
       name: i18n.translate('data.advancedSettings.timepicker.quickRangesTitle', {
         defaultMessage: 'Time filter quick ranges',
@@ -663,6 +680,18 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       description: i18n.translate('data.advancedSettings.suggestFilterValuesText', {
         defaultMessage:
           'Set this property to false to prevent the filter editor from suggesting values for fields.',
+      }),
+      schema: schema.boolean(),
+    },
+    [UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE]: {
+      name: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerange', {
+        defaultMessage: 'Use time range',
+        description: 'Restrict autocomplete results to the current time range',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerangeText', {
+        defaultMessage:
+          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range.',
       }),
       schema: schema.boolean(),
     },

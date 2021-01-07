@@ -19,7 +19,7 @@
 
 import { buildPhrasesFilter, getPhrasesFilterField } from './phrases_filter';
 import { IIndexPattern } from '../../index_patterns';
-import { fields } from '../../index_patterns/fields/fields.mocks.ts';
+import { fields } from '../../index_patterns/fields/fields.mocks';
 
 describe('phrases filter', function () {
   const indexPattern: IIndexPattern = ({

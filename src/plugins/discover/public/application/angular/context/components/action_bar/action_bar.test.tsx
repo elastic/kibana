@@ -18,9 +18,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ActionBar, ActionBarProps } from './action_bar';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from '../../query_parameters/constants';
 

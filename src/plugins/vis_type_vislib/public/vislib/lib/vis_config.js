@@ -41,7 +41,7 @@ export class VisConfig {
 
     const visType = visTypes[visConfigArgs.type];
     const typeDefaults = visType(visConfigArgs, this.data);
-    this._values = _.defaultsDeep({}, typeDefaults, DEFAULT_VIS_CONFIG);
+    this._values = _.defaultsDeep({ ...typeDefaults }, DEFAULT_VIS_CONFIG);
     this._values.el = el;
   }
 
@@ -50,7 +50,6 @@ export class VisConfig {
       return _.get(this._values, property, defaults);
     } else {
       throw new Error(`Accessing invalid config property: ${property}`);
-      return defaults;
     }
   }
 

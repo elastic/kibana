@@ -344,7 +344,7 @@ export default function ({ getService }: FtrProviderContext) {
               actionTypeId: '.email',
               config: {
                 from: 'email-from-1@example.com',
-                // this host is specifically whitelisted in:
+                // this host is specifically added to allowedHosts in:
                 //    x-pack/test/alerting_api_integration/common/config.ts
                 host: 'some.non.existent.com',
                 port: 666,
@@ -518,11 +518,9 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'action',
         id: actionId,
         provider: 'actions',
-        actions: ['execute'],
+        actions: new Map([['execute', { equal: 1 }]]),
       });
     });
-
-    expect(events.length).to.equal(1);
 
     const event = events[0];
 

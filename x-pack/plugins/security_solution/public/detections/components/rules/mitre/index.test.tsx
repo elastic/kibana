@@ -7,16 +7,16 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { AddMitreThreat } from './index';
+import { AddMitreAttackThreat } from './index';
 import { useFormFieldMock } from '../../../../common/mock';
 
 describe('AddMitreThreat', () => {
   it('renders correctly', () => {
     const Component = () => {
-      const field = useFormFieldMock();
+      const field = useFormFieldMock<unknown>({ value: [] });
 
       return (
-        <AddMitreThreat
+        <AddMitreAttackThreat
           dataTestSubj="dataTestSubj"
           idAria="idAria"
           isDisabled={false}
@@ -26,6 +26,6 @@ describe('AddMitreThreat', () => {
     };
     const wrapper = shallow(<Component />);
 
-    expect(wrapper.dive().find('[data-test-subj="addMitre"]')).toHaveLength(1);
+    expect(wrapper.dive().find('[data-test-subj="addMitreAttackTactic"]')).toHaveLength(1);
   });
 });

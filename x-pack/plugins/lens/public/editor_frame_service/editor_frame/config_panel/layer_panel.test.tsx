@@ -12,9 +12,9 @@ import {
   createMockDatasource,
   DatasourceMock,
 } from '../../mocks';
-import { EuiFormRow, EuiPopover } from '@elastic/eui';
-import { mount } from 'enzyme';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { ChildDragDropProvider, DroppableEvent } from '../../../drag_drop';
+import { EuiFormRow } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test/jest';
 import { Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { coreMock } from 'src/core/public/mocks';
@@ -24,6 +24,7 @@ jest.mock('../../../id_generator');
 
 describe('LayerPanel', () => {
   let mockVisualization: jest.Mocked<Visualization>;
+  let mockVisualization2: jest.Mocked<Visualization>;
   let mockDatasource: DatasourceMock;
 
   function getDefaultProps() {
@@ -36,6 +37,7 @@ describe('LayerPanel', () => {
       activeVisualizationId: 'vis1',
       visualizationMap: {
         vis1: mockVisualization,
+        vis2: mockVisualization2,
       },
       activeDatasourceId: 'ds1',
       datasourceMap: {
@@ -56,6 +58,8 @@ describe('LayerPanel', () => {
       onRemoveLayer: jest.fn(),
       dispatch: jest.fn(),
       core: coreMock.createStart(),
+      index: 0,
+      setLayerRef: jest.fn(),
     };
   }
 
@@ -68,6 +72,18 @@ describe('LayerPanel', () => {
           icon: 'empty',
           id: 'testVis',
           label: 'TEST1',
+        },
+      ],
+    };
+
+    mockVisualization2 = {
+      ...createMockVisualization(),
+      id: 'testVis2',
+      visualizationTypes: [
+        {
+          icon: 'empty',
+          id: 'testVis2',
+          label: 'TEST2',
         },
       ],
     };
@@ -122,7 +138,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['x'],
+            accessors: [{ columnId: 'x' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -162,7 +178,7 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['x'],
+            accessors: [{ columnId: 'x' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -183,19 +199,20 @@ describe('LayerPanel', () => {
 
       const group = component
         .find(EuiFormRow)
-        .findWhere((e) => e.prop('error') === 'Required dimension');
+        .findWhere((e) => e.prop('error')?.props?.children === 'Required dimension');
+
       expect(group).toHaveLength(1);
     });
 
-    it('should render the datasource and visualization panels inside the dimension popover', () => {
+    it('should render the datasource and visualization panels inside the dimension container', () => {
       mockVisualization.getConfiguration.mockReturnValueOnce({
         groups: [
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['newid'],
+            accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
-            supportsMoreColumns: false,
+            supportsMoreColumns: true,
             dataTestSubj: 'lnsGroup',
             enableDimensionEditor: true,
           },
@@ -204,27 +221,20 @@ describe('LayerPanel', () => {
       mockVisualization.renderDimensionEditor = jest.fn();
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
-
-      const group = component.find('DimensionPopover');
-      const panel = mount(group.prop('panel'));
-
-      expect(panel.find('EuiTabbedContent').prop('tabs')).toHaveLength(2);
       act(() => {
-        panel.find('EuiTab#visualization').simulate('click');
+        component.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
       });
-      expect(mockVisualization.renderDimensionEditor).toHaveBeenCalledWith(
-        expect.any(Element),
-        expect.objectContaining({
-          groupId: 'a',
-          accessor: 'newid',
-        })
-      );
+      component.update();
+
+      const group = component.find('DimensionContainer').first();
+      const panel: React.ReactElement = group.prop('panel');
+      expect(panel.props.children).toHaveLength(2);
     });
 
-    it('should keep the popover open when configuring a new dimension', () => {
+    it('should keep the DimensionContainer open when configuring a new dimension', () => {
       /**
        * The ID generation system for new dimensions has been messy before, so
-       * this tests that the ID used in the first render is used to keep the popover
+       * this tests that the ID used in the first render is used to keep the container
        * open in future renders
        */
       (generateId as jest.Mock).mockReturnValueOnce(`newid`);
@@ -248,7 +258,115 @@ describe('LayerPanel', () => {
           {
             groupLabel: 'A',
             groupId: 'a',
-            accessors: ['newid'],
+            accessors: [{ columnId: 'newid' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
+      act(() => {
+        component.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
+      });
+      component.update();
+
+      expect(component.find('EuiFlyoutHeader').exists()).toBe(true);
+    });
+
+    it('should not update the visualization if the datasource is incomplete', () => {
+      (generateId as jest.Mock).mockReturnValueOnce(`newid`);
+      const updateAll = jest.fn();
+      const updateDatasource = jest.fn();
+
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const component = mountWithIntl(
+        <LayerPanel
+          {...getDefaultProps()}
+          updateDatasource={updateDatasource}
+          updateAll={updateAll}
+        />
+      );
+
+      act(() => {
+        component.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
+      });
+      component.update();
+
+      expect(mockDatasource.renderDimensionEditor).toHaveBeenCalledWith(
+        expect.any(Element),
+        expect.objectContaining({ columnId: 'newid' })
+      );
+      const stateFn =
+        mockDatasource.renderDimensionEditor.mock.calls[
+          mockDatasource.renderDimensionEditor.mock.calls.length - 1
+        ][1].setState;
+
+      act(() => {
+        stateFn({
+          indexPatternId: '1',
+          columns: {},
+          columnOrder: [],
+          incompleteColumns: { newId: { operationType: 'count' } },
+        });
+      });
+      expect(updateAll).not.toHaveBeenCalled();
+
+      act(() => {
+        stateFn(
+          {
+            indexPatternId: '1',
+            columns: {},
+            columnOrder: [],
+          },
+          true
+        );
+      });
+      expect(updateAll).toHaveBeenCalled();
+    });
+
+    it('should close the DimensionContainer when the active visualization changes', () => {
+      /**
+       * The ID generation system for new dimensions has been messy before, so
+       * this tests that the ID used in the first render is used to keep the container
+       * open in future renders
+       */
+
+      (generateId as jest.Mock).mockReturnValueOnce(`newid`);
+      (generateId as jest.Mock).mockReturnValueOnce(`bad`);
+      mockVisualization.getConfiguration.mockReturnValueOnce({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+      // Normally the configuration would change in response to a state update,
+      // but this test is updating it directly
+      mockVisualization.getConfiguration.mockReturnValueOnce({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'newid' }],
             filterOperations: () => true,
             supportsMoreColumns: false,
             dataTestSubj: 'lnsGroup',
@@ -258,14 +376,240 @@ describe('LayerPanel', () => {
 
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
 
-      const group = component.find('DimensionPopover');
-      const triggerButton = mountWithIntl(group.prop('trigger'));
       act(() => {
-        triggerButton.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
+        component.find('[data-test-subj="lns-empty-dimension"]').first().simulate('click');
       });
       component.update();
+      expect(component.find('EuiFlyoutHeader').exists()).toBe(true);
+      act(() => {
+        component.setProps({ activeVisualizationId: 'vis2' });
+      });
+      component.update();
+      expect(component.find('EuiFlyoutHeader').exists()).toBe(false);
+    });
 
-      expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
+    it('should only update the state on close when needed', () => {
+      const updateDatasource = jest.fn();
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const component = mountWithIntl(
+        <LayerPanel {...getDefaultProps()} updateDatasource={updateDatasource} />
+      );
+
+      // Close without a state update
+      mockDatasource.updateStateOnCloseDimension = jest.fn();
+      component.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+      act(() => {
+        (component.find('DimensionContainer').first().prop('handleClose') as () => void)();
+      });
+      component.update();
+      expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
+      expect(updateDatasource).not.toHaveBeenCalled();
+
+      // Close with a state update
+      mockDatasource.updateStateOnCloseDimension = jest.fn().mockReturnValue({ newState: true });
+
+      component.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+      act(() => {
+        (component.find('DimensionContainer').first().prop('handleClose') as () => void)();
+      });
+      component.update();
+      expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
+      expect(updateDatasource).toHaveBeenCalledWith('ds1', { newState: true });
+    });
+  });
+
+  // This test is more like an integration test, since the layer panel owns all
+  // the coordination between drag and drop
+  describe('drag and drop behavior', () => {
+    it('should determine if the datasource supports dropping of a field onto empty dimension', () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      mockDatasource.canHandleDrop.mockReturnValue(true);
+
+      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1' };
+
+      const component = mountWithIntl(
+        <ChildDragDropProvider dragging={draggingField} setDragging={jest.fn()}>
+          <LayerPanel {...getDefaultProps()} />
+        </ChildDragDropProvider>
+      );
+
+      expect(mockDatasource.canHandleDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dragDropContext: expect.objectContaining({
+            dragging: draggingField,
+          }),
+        })
+      );
+
+      component.find('DragDrop[data-test-subj="lnsGroup"]').first().simulate('drop');
+
+      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dragDropContext: expect.objectContaining({
+            dragging: draggingField,
+          }),
+        })
+      );
+    });
+
+    it('should determine if the datasource supports dropping of a field onto a pre-filled dimension', () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      mockDatasource.canHandleDrop.mockImplementation(({ columnId }) => columnId !== 'a');
+
+      const draggingField = { field: { name: 'dragged' }, indexPatternId: 'a', id: '1' };
+
+      const component = mountWithIntl(
+        <ChildDragDropProvider dragging={draggingField} setDragging={jest.fn()}>
+          <LayerPanel {...getDefaultProps()} />
+        </ChildDragDropProvider>
+      );
+
+      expect(mockDatasource.canHandleDrop).toHaveBeenCalledWith(
+        expect.objectContaining({ columnId: 'a' })
+      );
+
+      expect(
+        component.find('DragDrop[data-test-subj="lnsGroup"]').first().prop('droppable')
+      ).toEqual(false);
+
+      component.find('DragDrop[data-test-subj="lnsGroup"]').first().simulate('drop');
+
+      expect(mockDatasource.onDrop).not.toHaveBeenCalled();
+    });
+
+    it('should allow drag to move between groups', () => {
+      (generateId as jest.Mock).mockReturnValue(`newid`);
+
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }],
+            filterOperations: () => true,
+            supportsMoreColumns: false,
+            dataTestSubj: 'lnsGroupA',
+          },
+          {
+            groupLabel: 'B',
+            groupId: 'b',
+            accessors: [{ columnId: 'b' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroupB',
+          },
+        ],
+      });
+
+      mockDatasource.canHandleDrop.mockReturnValue(true);
+
+      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
+
+      const component = mountWithIntl(
+        <ChildDragDropProvider dragging={draggingOperation} setDragging={jest.fn()}>
+          <LayerPanel {...getDefaultProps()} />
+        </ChildDragDropProvider>
+      );
+
+      expect(mockDatasource.canHandleDrop).toHaveBeenCalledTimes(2);
+      expect(mockDatasource.canHandleDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dragDropContext: expect.objectContaining({
+            dragging: draggingOperation,
+          }),
+        })
+      );
+
+      // Simulate drop on the pre-populated dimension
+      component.find('DragDrop[data-test-subj="lnsGroupB"]').at(0).simulate('drop');
+      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columnId: 'b',
+          dragDropContext: expect.objectContaining({
+            dragging: draggingOperation,
+          }),
+        })
+      );
+
+      // Simulate drop on the empty dimension
+      component.find('DragDrop[data-test-subj="lnsGroupB"]').at(1).simulate('drop');
+      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          columnId: 'newid',
+          dragDropContext: expect.objectContaining({
+            dragging: draggingOperation,
+          }),
+        })
+      );
+    });
+
+    it('should reorder when dropping in the same group', () => {
+      mockVisualization.getConfiguration.mockReturnValue({
+        groups: [
+          {
+            groupLabel: 'A',
+            groupId: 'a',
+            accessors: [{ columnId: 'a' }, { columnId: 'b' }],
+            filterOperations: () => true,
+            supportsMoreColumns: true,
+            dataTestSubj: 'lnsGroup',
+          },
+        ],
+      });
+
+      const draggingOperation = { layerId: 'first', columnId: 'a', groupId: 'a', id: 'a' };
+
+      const component = mountWithIntl(
+        <ChildDragDropProvider dragging={draggingOperation} setDragging={jest.fn()}>
+          <LayerPanel {...getDefaultProps()} />
+        </ChildDragDropProvider>
+      );
+
+      expect(mockDatasource.canHandleDrop).not.toHaveBeenCalled();
+      component.find('DragDrop[data-test-subj="lnsGroup"]').at(1).prop('onDrop')!(
+        (draggingOperation as unknown) as DroppableEvent
+      );
+      expect(mockDatasource.onDrop).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isReorder: true,
+        })
+      );
     });
   });
 });

@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { EmbeddableInput, PanelState } from '../../../../src/plugins/embeddable/common/types';
+import { SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/common/lib/saved_object_embeddable';
 import {
   RawSavedDashboardPanelTo60,
   RawSavedDashboardPanel610,
@@ -25,6 +27,21 @@ import {
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanel730ToLatest,
 } from './bwc/types';
+
+import { GridData } from './embeddable/types';
+export type PanelId = string;
+export type SavedObjectId = string;
+
+export interface DashboardPanelState<
+  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+> extends PanelState<TEmbeddableInput> {
+  readonly gridData: GridData;
+}
+
+/**
+ * This should always represent the latest dashboard panel shape, after all possible migrations.
+ */
+export type SavedDashboardPanel = SavedDashboardPanel730ToLatest;
 
 export type SavedDashboardPanel640To720 = Pick<
   RawSavedDashboardPanel640To720,

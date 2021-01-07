@@ -18,78 +18,18 @@
  */
 
 import { PluginInitializerContext, CoreStart, CoreSetup } from 'kibana/public';
-import { Subscription } from 'rxjs';
 import { ConfigSchema } from '../config';
 import { getDashboardConfig } from './dashboard_config';
-import { navigateToDefaultApp } from './navigate_to_default_app';
-import { createLegacyUrlForwardApp } from './forward_app';
 import { injectHeaderStyle } from './utils/inject_header_style';
-import { navigateToLegacyKibanaUrl } from './forward_app/navigate_to_legacy_kibana_url';
-
-export interface ForwardDefinition {
-  legacyAppId: string;
-  newAppId: string;
-  rewritePath: (legacyPath: string) => string;
-}
 
 export class KibanaLegacyPlugin {
-  private forwardDefinitions: ForwardDefinition[] = [];
-  private currentAppId: string | undefined;
-  private currentAppIdSubscription: Subscription | undefined;
-
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(core: CoreSetup<{}, KibanaLegacyStart>) {
-    core.application.register(createLegacyUrlForwardApp(core, this.forwardDefinitions));
-    return {
-      /**
-       * Forwards URLs within the legacy `kibana` app to a new platform application.
-       *
-       * @param legacyAppId The name of the old app to forward URLs from
-       * @param newAppId The name of the new app that handles the URLs now
-       * @param rewritePath Function to rewrite the legacy sub path of the app to the new path in the core app.
-       *        If none is provided, it will just strip the prefix of the legacyAppId away
-       *
-       * path into the new path
-       *
-       * Example usage:
-       * ```
-       * kibanaLegacy.forwardApp(
-       *   'old',
-       *   'new',
-       *   path => {
-       *     const [, id] = /old/item\/(.*)$/.exec(path) || [];
-       *     if (!id) {
-       *       return '#/home';
-       *     }
-       *     return '#/items/${id}';
-       *  }
-       * );
-       * ```
-       * This will cause the following redirects:
-       *
-       * * app/kibana#/old/ -> app/new#/home
-       * * app/kibana#/old/item/123 -> app/new#/items/123
-       *
-       */
-      forwardApp: (
-        legacyAppId: string,
-        newAppId: string,
-        rewritePath?: (legacyPath: string) => string
-      ) => {
-        this.forwardDefinitions.push({
-          legacyAppId,
-          newAppId,
-          rewritePath: rewritePath || ((path) => `#${path.replace(`/${legacyAppId}`, '') || '/'}`),
-        });
-      },
-    };
+    return {};
   }
 
   public start({ application, http: { basePath }, uiSettings }: CoreStart) {
-    this.currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
-      this.currentAppId = currentAppId;
-    });
     injectHeaderStyle(uiSettings);
     return {
       /**
@@ -97,31 +37,6 @@ export class KibanaLegacyPlugin {
        * @deprecated
        */
       dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
-      /**
-       * Navigates to the app defined as kibana.defaultAppId.
-       * This takes redirects into account and uses the right mechanism to navigate.
-       */
-      navigateToDefaultApp: (
-        { overwriteHash }: { overwriteHash: boolean } = { overwriteHash: true }
-      ) => {
-        navigateToDefaultApp(
-          this.initializerContext.config.get().defaultAppId,
-          this.forwardDefinitions,
-          application,
-          basePath,
-          this.currentAppId,
-          overwriteHash
-        );
-      },
-      /**
-       * Resolves the provided hash using the registered forwards and navigates to the target app.
-       * If a navigation happened, `{ navigated: true }` will be returned.
-       * If no matching forward is found, `{ navigated: false }` will be returned.
-       * @param hash
-       */
-      navigateToLegacyKibanaUrl: (hash: string) => {
-        return navigateToLegacyKibanaUrl(hash, this.forwardDefinitions, basePath, application);
-      },
       /**
        * Loads the font-awesome icon font. Should be removed once the last consumer has migrated to EUI
        * @deprecated
@@ -131,21 +46,10 @@ export class KibanaLegacyPlugin {
       },
       /**
        * @deprecated
-       * Just exported for wiring up with legacy platform, should not be used.
-       */
-      getForwards: () => this.forwardDefinitions,
-      /**
-       * @deprecated
        * Just exported for wiring up with dashboard mode, should not be used.
        */
       config: this.initializerContext.config.get(),
     };
-  }
-
-  public stop() {
-    if (this.currentAppIdSubscription) {
-      this.currentAppIdSubscription.unsubscribe();
-    }
   }
 }
 

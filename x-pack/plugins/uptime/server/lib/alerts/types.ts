@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AlertType } from '../../../../alerts/server';
 import { UptimeCorePlugins, UptimeCoreSetup } from '../adapters';
 import { UMServerLibs } from '../lib';
+import { AlertType, AlertInstanceState, AlertInstanceContext } from '../../../../alerts/server';
 
-export type UptimeAlertTypeFactory = (
+export type UptimeAlertTypeParam = Record<string, any>;
+export type UptimeAlertTypeState = Record<string, any>;
+export type UptimeAlertTypeFactory<ActionGroupIds extends string> = (
   server: UptimeCoreSetup,
   libs: UMServerLibs,
   plugins: UptimeCorePlugins
-) => AlertType;
+) => AlertType<
+  UptimeAlertTypeParam,
+  UptimeAlertTypeState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  ActionGroupIds
+>;

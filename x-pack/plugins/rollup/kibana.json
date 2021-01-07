@@ -7,7 +7,8 @@
   "requiredPlugins": [
     "indexPatternManagement",
     "management",
-    "licensing"
+    "licensing",
+    "features"
   ],
   "optionalPlugins": [
     "home",

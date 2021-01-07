@@ -4,7 +4,7 @@
 
 The Upgrade Assistant helps you prepare for your upgrade to the next major {es} version.
 For example, if you are using 6.8, the Upgrade Assistant helps you to upgrade to 7.0.
-To access the assistant, open the menu, then go to *Stack Management > Stack > Upgrade Assistant*.
+To access the assistant, open the main menu, then click *Stack Management > Upgrade Assistant*.
 
 The assistant identifies the deprecated settings in your cluster and indices
 and guides you through the process of resolving issues, including reindexing.
@@ -12,6 +12,14 @@ and guides you through the process of resolving issues, including reindexing.
 Before you upgrade, make sure that you are using the latest released minor
 version of {es} to see the most up-to-date deprecation issues.
 For example, if you want to upgrade to to 7.0, make sure that you are using 6.8.
+
+[float]
+=== Required permissions
+
+The `manage` cluster privilege is required to access the *Upgrade assistant*.
+Additional privileges may be needed to perform certain actions.
+
+To add the privilege, open the main menu, then click *Stack Management > Roles*.
 
 [float]
 === Reindexing

@@ -6,14 +6,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import {
-  registerTestBed,
-  findTestSubject,
-  TestBed,
-  TestBedConfig,
-  nextTick,
-} from '../../../../../test_utils';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { registerTestBed, findTestSubject, TestBed, TestBedConfig, delay } from '@kbn/test/jest';
 import { WatchStatus } from '../../../public/application/sections/watch_status/components/watch_status';
 import { ROUTES } from '../../../common/constants';
 import { WATCH_ID } from './constants';
@@ -95,7 +88,7 @@ export const setup = async (): Promise<WatchStatusTestBed> => {
 
     await act(async () => {
       button.simulate('click');
-      await nextTick(100);
+      await delay(100);
       component.update();
     });
   };

@@ -47,6 +47,7 @@ export function checkCompatibleTypeDescriptor(
       const typeDescriptorKinds = reduce(
         typeDescriptorTypes,
         (acc: any, type: number, key: string) => {
+          key = key.replace(/'/g, '');
           try {
             acc[key] = kindToDescriptorName(type);
           } catch (err) {
@@ -61,6 +62,7 @@ export function checkCompatibleTypeDescriptor(
       const transformedMappingKinds = reduce(
         schemaTypes,
         (acc: any, type: string, key: string) => {
+          key = key.replace(/'/g, '');
           try {
             acc[key.replace(/.type$/, '.kind')] = compatibleSchemaTypes(type as any);
           } catch (err) {

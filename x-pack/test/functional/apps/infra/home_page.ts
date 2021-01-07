@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
@@ -21,7 +20,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'infraHome']);
   const supertest = getService('supertest');
 
-  describe('Home page', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/75724
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('empty_kibana');
@@ -63,10 +63,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           .set(COMMON_REQUEST_HEADERS)
           .set('Accept', 'application/json')
           .send({
-            timeRange: {
-              min: moment().subtract(1, 'hour').toISOString(),
-              max: moment().toISOString(),
-            },
             unencrypted: true,
           })
           .expect(200)
@@ -87,10 +83,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           .set(COMMON_REQUEST_HEADERS)
           .set('Accept', 'application/json')
           .send({
-            timeRange: {
-              min: moment().subtract(1, 'hour').toISOString(),
-              max: moment().toISOString(),
-            },
             unencrypted: true,
           })
           .expect(200)

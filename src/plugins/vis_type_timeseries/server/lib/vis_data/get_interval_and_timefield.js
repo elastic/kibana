@@ -17,21 +17,29 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { AUTO_INTERVAL } from '../../../common/constants';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 
 export function getIntervalAndTimefield(panel, series = {}, indexPatternObject) {
-  const getDefaultTimeField = () => get(indexPatternObject, 'timeFieldName', DEFAULT_TIME_FIELD);
+  const getDefaultTimeField = () => indexPatternObject?.timeFieldName ?? DEFAULT_TIME_FIELD;
 
   const timeField =
     (series.override_index_pattern && series.series_time_field) ||
     panel.time_field ||
     getDefaultTimeField();
-  const interval = (series.override_index_pattern && series.series_interval) || panel.interval;
+
+  let interval = panel.interval;
+  let maxBars = panel.max_bars;
+
+  if (series.override_index_pattern) {
+    interval = series.series_interval;
+    maxBars = series.series_max_bars;
+  }
 
   return {
     timeField,
-    interval,
+    interval: interval || AUTO_INTERVAL,
+    maxBars,
   };
 }

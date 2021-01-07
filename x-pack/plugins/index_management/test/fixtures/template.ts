@@ -4,11 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRandomString, getRandomNumber } from '../../../../test_utils';
+import { getRandomString, getRandomNumber } from '@kbn/test/jest';
 import { TemplateDeserialized, TemplateType, TemplateListItem } from '../../common';
 
 const objHasProperties = (obj?: Record<string, any>): boolean => {
   return obj === undefined || Object.keys(obj).length === 0 ? false : true;
+};
+
+export const getComposableTemplate = ({
+  name = getRandomString(),
+  version = getRandomNumber(),
+  priority = getRandomNumber(),
+  indexPatterns = [],
+  template: { settings, aliases, mappings } = {},
+  hasDatastream = false,
+  isLegacy = false,
+  type = 'default',
+}: Partial<
+  TemplateDeserialized & {
+    isLegacy?: boolean;
+    type?: TemplateType;
+    hasDatastream: boolean;
+  }
+> = {}): TemplateDeserialized => {
+  const indexTemplate = {
+    name,
+    version,
+    priority,
+    indexPatterns,
+    template: {
+      aliases,
+      mappings,
+      settings,
+    },
+    _kbnMeta: {
+      type,
+      hasDatastream,
+      isLegacy,
+    },
+  };
+
+  return indexTemplate;
 };
 
 export const getTemplate = ({

@@ -16,13 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { throwError, of } from 'rxjs';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { Doc, DocProps } from './doc';
+
+const mockSearchApi = jest.fn();
 
 jest.mock('../../../kibana_services', () => {
   let registry: any[] = [];
@@ -31,6 +33,11 @@ jest.mock('../../../kibana_services', () => {
     getServices: () => ({
       metadata: {
         branch: 'test',
+      },
+      data: {
+        search: {
+          search: mockSearchApi,
+        },
       },
     }),
     getDocViewsRegistry: () => ({
@@ -60,7 +67,7 @@ const waitForPromises = async () =>
  * this works but logs ugly error messages until we're using React 16.9
  * should be adapted when we upgrade
  */
-async function mountDoc(search: () => void, update = false, indexPatternGetter: any = null) {
+async function mountDoc(update = false, indexPatternGetter: any = null) {
   const indexPattern = {
     getComputedFields: () => [],
   };
@@ -71,7 +78,6 @@ async function mountDoc(search: () => void, update = false, indexPatternGetter: 
   const props = {
     id: '1',
     index: 'index1',
-    esClient: { search } as any,
     indexPatternId: 'xyz',
     indexPatternService,
   } as DocProps;
@@ -89,32 +95,33 @@ async function mountDoc(search: () => void, update = false, indexPatternGetter: 
 
 describe('Test of <Doc /> of Discover', () => {
   test('renders loading msg', async () => {
-    const comp = await mountDoc(jest.fn());
+    const comp = await mountDoc();
     expect(findTestSubject(comp, 'doc-msg-loading').length).toBe(1);
   });
 
   test('renders IndexPattern notFound msg', async () => {
     const indexPatternGetter = jest.fn(() => Promise.reject({ savedObjectId: '007' }));
-    const comp = await mountDoc(jest.fn(), true, indexPatternGetter);
+    const comp = await mountDoc(true, indexPatternGetter);
     expect(findTestSubject(comp, 'doc-msg-notFoundIndexPattern').length).toBe(1);
   });
 
   test('renders notFound msg', async () => {
-    const search = jest.fn(() => Promise.reject({ status: 404 }));
-    const comp = await mountDoc(search, true);
+    mockSearchApi.mockImplementation(() => throwError({ status: 404 }));
+    const comp = await mountDoc(true);
     expect(findTestSubject(comp, 'doc-msg-notFound').length).toBe(1);
   });
 
   test('renders error msg', async () => {
-    const search = jest.fn(() => Promise.reject('whatever'));
-    const comp = await mountDoc(search, true);
+    mockSearchApi.mockImplementation(() => throwError({ error: 'something else' }));
+    const comp = await mountDoc(true);
     expect(findTestSubject(comp, 'doc-msg-error').length).toBe(1);
   });
 
   test('renders elasticsearch hit ', async () => {
-    const hit = { hits: { total: 1, hits: [{ _id: 1, _source: { test: 1 } }] } };
-    const search = jest.fn(() => Promise.resolve(hit));
-    const comp = await mountDoc(search, true);
+    mockSearchApi.mockImplementation(() =>
+      of({ rawResponse: { hits: { total: 1, hits: [{ _id: 1, _source: { test: 1 } }] } } })
+    );
+    const comp = await mountDoc(true);
     expect(findTestSubject(comp, 'doc-hit').length).toBe(1);
   });
 });

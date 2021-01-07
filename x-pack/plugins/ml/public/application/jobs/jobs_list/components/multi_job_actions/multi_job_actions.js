@@ -24,7 +24,10 @@ export class MultiJobActions extends Component {
   render() {
     const jobsSelected = this.props.selectedJobs.length > 0;
     return (
-      <div className={`multi-select-actions${jobsSelected ? '' : '-no-display'}`}>
+      <div
+        className={`multi-select-actions${jobsSelected ? '' : '-no-display'}`}
+        data-test-subj={`mlADJobListMultiSelectActionsArea ${jobsSelected ? 'active' : 'inactive'}`}
+      >
         {jobsSelected && (
           <Fragment>
             <EuiTitle size="s" style={{ display: 'inline' }}>

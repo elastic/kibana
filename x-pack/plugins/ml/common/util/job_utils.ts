@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
-import semver from 'semver';
+import { isEmpty, isEqual, each, pick } from 'lodash';
+import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 
+import { i18n } from '@kbn/i18n';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
@@ -19,6 +20,13 @@ import { EntityField } from './anomaly_utils';
 import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
+import { MLCATEGORY } from '../constants/field_types';
+import {
+  getAggregationBucketsName,
+  getAggregations,
+  getDatafeedAggregations,
+} from './datafeed_utils';
+import { findAggField } from './validation_utils';
 
 export interface ValidationResults {
   valid: boolean;
@@ -41,20 +49,24 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: numb
   return freq;
 }
 
-// Returns a flag to indicate whether the job is suitable for viewing
-// in the Time Series dashboard.
-export function isTimeSeriesViewJob(job: CombinedJob): boolean {
-  // only allow jobs with at least one detector whose function corresponds to
-  // an ES aggregation which can be viewed in the single metric view and which
-  // doesn't use a scripted field which can be very difficult or impossible to
-  // invert to a reverse search, or when model plot has been enabled.
-  for (let i = 0; i < job.analysis_config.detectors.length; i++) {
-    if (isTimeSeriesViewDetector(job, i)) {
+export function hasRuntimeMappings(job: CombinedJob): boolean {
+  const hasDatafeed =
+    typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+  if (hasDatafeed) {
+    const runtimeMappings =
+      typeof job.datafeed_config.runtime_mappings === 'object'
+        ? Object.keys(job.datafeed_config.runtime_mappings)
+        : undefined;
+
+    if (Array.isArray(runtimeMappings) && runtimeMappings.length > 0) {
       return true;
     }
   }
-
   return false;
+}
+
+export function isTimeSeriesViewJob(job: CombinedJob): boolean {
+  return getSingleMetricViewerJobErrorMessage(job) === undefined;
 }
 
 // Returns a flag to indicate whether the detector at the index in the specified job
@@ -82,9 +94,9 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
     // whereas the 'function_description' field holds an ML-built display hint for function e.g. 'count'.
     isSourceDataChartable =
       mlFunctionToESAggregation(functionName) !== null &&
-      dtr.by_field_name !== 'mlcategory' &&
-      dtr.partition_field_name !== 'mlcategory' &&
-      dtr.over_field_name !== 'mlcategory';
+      dtr.by_field_name !== MLCATEGORY &&
+      dtr.partition_field_name !== MLCATEGORY &&
+      dtr.over_field_name !== MLCATEGORY;
 
     // If the datafeed uses script fields, we can only plot the time series if
     // model plot is enabled. Without model plot it will be very difficult or impossible
@@ -93,10 +105,32 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       // Perform extra check to see if the detector is using a scripted field.
       const scriptFields = Object.keys(job.datafeed_config.script_fields);
       isSourceDataChartable =
-        scriptFields.indexOf(dtr.field_name!) === -1 &&
         scriptFields.indexOf(dtr.partition_field_name!) === -1 &&
         scriptFields.indexOf(dtr.by_field_name!) === -1 &&
         scriptFields.indexOf(dtr.over_field_name!) === -1;
+    }
+
+    const hasDatafeed =
+      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+    if (hasDatafeed) {
+      // We cannot plot the source data for some specific aggregation configurations
+      const aggs = getDatafeedAggregations(job.datafeed_config);
+      if (aggs !== undefined) {
+        const aggBucketsName = getAggregationBucketsName(aggs);
+        if (aggBucketsName !== undefined) {
+          // if fieldName is a aggregated field under nested terms using bucket_script
+          const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
+          const foundField = findAggField(aggregations, dtr.field_name, false);
+          if (foundField?.bucket_script !== undefined) {
+            return false;
+          }
+        }
+      }
+
+      // We also cannot plot the source data if they datafeed uses any field defined by runtime_mappings
+      if (hasRuntimeMappings(job)) {
+        return false;
+      }
     }
   }
 
@@ -131,6 +165,30 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
   }
 
   return isModelPlotChartable;
+}
+
+// Returns a reason to indicate why the job configuration is not supported
+// if the result is undefined, that means the single metric job should be viewable
+export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
+  // if job has runtime mappings with no model plot
+  if (hasRuntimeMappings(job) && !job.model_plot_config?.enabled) {
+    return i18n.translate('xpack.ml.timeSeriesJob.jobWithRunTimeMessage', {
+      defaultMessage: 'the datafeed contains runtime fields and model plot is disabled',
+    });
+  }
+  // only allow jobs with at least one detector whose function corresponds to
+  // an ES aggregation which can be viewed in the single metric view and which
+  // doesn't use a scripted field which can be very difficult or impossible to
+  // invert to a reverse search, or when model plot has been enabled.
+  const isChartableTimeSeriesViewJob = job.analysis_config.detectors.some((detector, idx) =>
+    isTimeSeriesViewDetector(job, idx)
+  );
+
+  if (isChartableTimeSeriesViewJob === false) {
+    return i18n.translate('xpack.ml.timeSeriesJob.notViewableTimeSeriesJobMessage', {
+      defaultMessage: 'not a viewable time series job',
+    });
+  }
 }
 
 // Returns the names of the partition, by, and over fields for the detector with the
@@ -203,7 +261,7 @@ export function isModelPlotEnabled(
 // created with) is greater than or equal to the supplied version (e.g. '6.1.0').
 export function isJobVersionGte(job: CombinedJob, version: string): boolean {
   const jobVersion = job.job_version ?? '0.0.0';
-  return semver.gte(jobVersion, version);
+  return semverGte(jobVersion, version);
 }
 
 // Takes an ML detector 'function' and returns the corresponding ES aggregation name
@@ -307,7 +365,7 @@ export function getSafeAggregationName(fieldName: string, index: number): string
 
 export function uniqWithIsEqual<T extends any[]>(arr: T): T {
   return arr.reduce((dedupedArray, value) => {
-    if (dedupedArray.filter((compareValue: any) => _.isEqual(compareValue, value)).length === 0) {
+    if (dedupedArray.filter((compareValue: any) => isEqual(compareValue, value)).length === 0) {
       dedupedArray.push(value);
     }
     return dedupedArray;
@@ -328,7 +386,7 @@ export function basicJobValidation(
 
   if (job) {
     // Job details
-    if (_.isEmpty(job.job_id)) {
+    if (isEmpty(job.job_id)) {
       messages.push({ id: 'job_id_empty' });
       valid = false;
     } else if (isJobIdValid(job.job_id) === false) {
@@ -350,7 +408,7 @@ export function basicJobValidation(
     // Analysis Configuration
     if (job.analysis_config.categorization_filters) {
       let v = true;
-      _.each(job.analysis_config.categorization_filters, (d) => {
+      each(job.analysis_config.categorization_filters, (d) => {
         try {
           new RegExp(d);
         } catch (e) {
@@ -376,15 +434,24 @@ export function basicJobValidation(
         valid = false;
       }
     }
-
+    let categorizerDetectorMissingPartitionField = false;
     if (job.analysis_config.detectors.length === 0) {
       messages.push({ id: 'detectors_empty' });
       valid = false;
     } else {
       let v = true;
-      _.each(job.analysis_config.detectors, (d) => {
-        if (_.isEmpty(d.function)) {
+
+      each(job.analysis_config.detectors, (d) => {
+        if (isEmpty(d.function)) {
           v = false;
+        }
+        // if detector has an ml category, check if the partition_field is missing
+        const needToHavePartitionFieldName =
+          job.analysis_config.per_partition_categorization?.enabled === true &&
+          (d.by_field_name === MLCATEGORY || d.over_field_name === MLCATEGORY);
+
+        if (needToHavePartitionFieldName && d.partition_field_name === undefined) {
+          categorizerDetectorMissingPartitionField = true;
         }
       });
       if (v) {
@@ -393,14 +460,50 @@ export function basicJobValidation(
         messages.push({ id: 'detectors_function_empty' });
         valid = false;
       }
+      if (categorizerDetectorMissingPartitionField) {
+        messages.push({ id: 'categorizer_detector_missing_per_partition_field' });
+        valid = false;
+      }
     }
 
-    // check for duplicate detectors
     if (job.analysis_config.detectors.length >= 2) {
+      // check if the detectors with mlcategory might have different per_partition_field values
+      // if per_partition_categorization is enabled
+      if (job.analysis_config.per_partition_categorization !== undefined) {
+        if (
+          job.analysis_config.per_partition_categorization.enabled ||
+          (job.analysis_config.per_partition_categorization.stop_on_warn &&
+            Array.isArray(job.analysis_config.detectors) &&
+            job.analysis_config.detectors.length >= 2)
+        ) {
+          const categorizationDetectors = job.analysis_config.detectors.filter(
+            (d) =>
+              d.by_field_name === MLCATEGORY ||
+              d.over_field_name === MLCATEGORY ||
+              d.partition_field_name === MLCATEGORY
+          );
+          const uniqPartitions = [
+            ...new Set(
+              categorizationDetectors
+                .map((d) => d.partition_field_name)
+                .filter((name) => name !== undefined)
+            ),
+          ];
+          if (uniqPartitions.length > 1) {
+            valid = false;
+            messages.push({
+              id: 'categorizer_varying_per_partition_fields',
+              fields: uniqPartitions.join(', '),
+            });
+          }
+        }
+      }
+
+      // check for duplicate detectors
       // create an array of objects with a subset of the attributes
       // where we want to make sure they are not be the same across detectors
       const compareSubSet = job.analysis_config.detectors.map((d) =>
-        _.pick(d, [
+        pick(d, [
           'function',
           'field_name',
           'by_field_name',
@@ -503,6 +606,27 @@ export function basicDatafeedValidation(datafeed: Datafeed): ValidationResults {
       valid = false;
     }
     messages.push(frequencyMessage);
+  }
+
+  return {
+    messages,
+    valid,
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
+  };
+}
+
+export function basicJobAndDatafeedValidation(job: Job, datafeed: Datafeed): ValidationResults {
+  const messages: ValidationResults['messages'] = [];
+  let valid = true;
+
+  if (datafeed && job) {
+    const datafeedAggregations = getDatafeedAggregations(datafeed);
+
+    if (datafeedAggregations !== undefined && !job.analysis_config?.summary_count_field_name) {
+      valid = false;
+      messages.push({ id: 'missing_summary_count_field_name' });
+    }
   }
 
   return {

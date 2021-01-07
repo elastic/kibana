@@ -12,7 +12,7 @@ import { ISO8601, ELASTICSEARCH, DATEMATH } from '../../constants';
 
 export const help: FunctionHelp<FunctionFactory<typeof timefilter>> = {
   help: i18n.translate('xpack.canvas.functions.timefilterHelpText', {
-    defaultMessage: 'Create a time filter for querying a source.',
+    defaultMessage: 'Creates a time filter for querying a source.',
   }),
   args: {
     column: i18n.translate('xpack.canvas.functions.timefilter.args.columnHelpText', {

@@ -22,10 +22,9 @@ import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
 
 import apm from 'elastic-apm-node';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Server, Request, ResponseToolkit } from 'hapi';
-import HapiProxy from 'h2o2';
+import { Server, Request } from '@hapi/hapi';
+import HapiProxy from '@hapi/h2o2';
 import { sampleSize } from 'lodash';
-import BrowserslistUserAgent from 'browserslist-useragent';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
 
@@ -41,34 +40,6 @@ export interface BasePathProxyServerOptions {
   delayUntil: () => Rx.Observable<void>;
 }
 
-// Before we proxy request to a target port we may want to wait until some
-// condition is met (e.g. until target listener is ready).
-const checkForBrowserCompat = (log: Logger) => async (request: Request, h: ResponseToolkit) => {
-  if (!request.headers['user-agent'] || process.env.BROWSERSLIST_ENV === 'production') {
-    return h.continue;
-  }
-
-  const matches = BrowserslistUserAgent.matchesUA(request.headers['user-agent'], {
-    env: 'dev',
-    allowHigherVersions: true,
-    ignoreMinor: true,
-    ignorePath: true,
-  });
-
-  if (!matches) {
-    log.warn(`
-      Request with user-agent [${request.headers['user-agent']}]
-      seems like it is coming from a browser that is not supported by the dev browserlist.
-
-      Please run Kibana with the environment variable BROWSERSLIST_ENV=production to enable
-      support for all production browsers (like IE).
-
-    `);
-  }
-
-  return h.continue;
-};
-
 export class BasePathProxyServer {
   private server?: Server;
   private httpsAgent?: HttpsAgent;
@@ -79,6 +50,14 @@ export class BasePathProxyServer {
 
   public get targetPort() {
     return this.devConfig.basePathProxyTargetPort;
+  }
+
+  public get host() {
+    return this.httpConfig.host;
+  }
+
+  public get port() {
+    return this.httpConfig.port;
   }
 
   constructor(
@@ -121,7 +100,10 @@ export class BasePathProxyServer {
     await this.server.start();
 
     this.log.info(
-      `basepath proxy server running at ${this.server.info.uri}${this.httpConfig.basePath}`
+      `basepath proxy server running at ${Url.format({
+        host: this.server.info.uri,
+        pathname: this.httpConfig.basePath,
+      })}`
     );
   }
 
@@ -155,9 +137,6 @@ export class BasePathProxyServer {
       },
       method: 'GET',
       path: '/',
-      options: {
-        pre: [checkForBrowserCompat(this.log)],
-      },
     });
 
     this.server.route({
@@ -175,7 +154,6 @@ export class BasePathProxyServer {
       method: '*',
       options: {
         pre: [
-          checkForBrowserCompat(this.log),
           // Before we proxy request to a target port we may want to wait until some
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
@@ -210,7 +188,6 @@ export class BasePathProxyServer {
       method: '*',
       options: {
         pre: [
-          checkForBrowserCompat(this.log),
           // Before we proxy request to a target port we may want to wait until some
           // condition is met (e.g. until target listener is ready).
           async (request, responseToolkit) => {
@@ -233,8 +210,13 @@ export class BasePathProxyServer {
         const isGet = request.method === 'get';
         const isBasepathLike = oldBasePath.length === 3;
 
+        const newUrl = Url.format({
+          pathname: `${this.httpConfig.basePath}/${kbnPath}`,
+          query: request.query,
+        });
+
         return isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)
-          ? responseToolkit.redirect(`${this.httpConfig.basePath}/${kbnPath}`)
+          ? responseToolkit.redirect(newUrl)
           : responseToolkit.response('Not Found').code(404);
       },
       method: '*',

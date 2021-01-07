@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { StickyContainer } from 'react-sticky';
 import {
+  disableConsoleWarning,
   mountWithTheme,
   mockMoment,
   toJson,
@@ -14,8 +14,15 @@ import {
 import { Timeline } from '.';
 
 describe('Timeline', () => {
+  let consoleMock: jest.SpyInstance;
+
   beforeAll(() => {
     mockMoment();
+    consoleMock = disableConsoleWarning('Warning: componentWill');
+  });
+
+  afterAll(() => {
+    consoleMock.mockRestore();
   });
 
   it('should render with data', () => {
@@ -53,11 +60,7 @@ describe('Timeline', () => {
       ],
     };
 
-    const wrapper = mountWithTheme(
-      <StickyContainer>
-        <Timeline {...props} />
-      </StickyContainer>
-    );
+    const wrapper = mountWithTheme(<Timeline {...props} />);
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });
@@ -76,12 +79,7 @@ describe('Timeline', () => {
       },
     };
 
-    const mountTimeline = () =>
-      mountWithTheme(
-        <StickyContainer>
-          <Timeline {...props} />
-        </StickyContainer>
-      );
+    const mountTimeline = () => mountWithTheme(<Timeline {...props} />);
 
     expect(mountTimeline).not.toThrow();
   });

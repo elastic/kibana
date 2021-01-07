@@ -18,10 +18,9 @@
  */
 
 import chalk from 'chalk';
+import { LogRecord, LogLevel } from '@kbn/logging';
 
 import { Conversion } from './type';
-import { LogLevel } from '../../log_level';
-import { LogRecord } from '../../log_record';
 
 const LEVEL_COLORS = new Map([
   [LogLevel.Fatal, chalk.red],

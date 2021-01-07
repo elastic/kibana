@@ -32,6 +32,14 @@ describe('HeaderExtension', () => {
     expect(divNode).toBeInstanceOf(HTMLElement);
   });
 
+  it('calls navControl.render with div node as inlineBlock', () => {
+    const renderSpy = jest.fn();
+    mount(<HeaderExtension extension={renderSpy} display={'inlineBlock'} />);
+
+    const [divNode] = renderSpy.mock.calls[0];
+    expect(divNode).toHaveAttribute('style', 'display: inline-block;');
+  });
+
   it('calls unrender callback when unmounted', () => {
     const unrenderSpy = jest.fn();
     const render = () => unrenderSpy;

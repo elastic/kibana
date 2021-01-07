@@ -48,6 +48,9 @@ beforeEach(() => {
       enabled: true,
       redirectHttpFromPort: chance.integer({ min: 20000, max: 30000 }),
     },
+    cors: {
+      enabled: false,
+    },
   } as HttpConfig;
 
   server = new HttpsRedirectServer(loggingSystemMock.create().get());

@@ -6,8 +6,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import { Client, SearchParams } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { Client } from '@elastic/elasticsearch';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -18,13 +17,9 @@ const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es: Client = getService('legacyEs');
-  const callCluster: LegacyAPICaller = (((path: 'search', searchParams: SearchParams) => {
-    return es[path].call(es, searchParams);
-  }) as unknown) as LegacyAPICaller;
+  const es: Client = getService('es');
 
   async function assertExpectedSavedObjects(num: number) {
     // Make sure that new/deleted docs are available to search
@@ -32,7 +27,9 @@ export default ({ getService }: FtrProviderContext) => {
       index: '.kibana',
     });
 
-    const { count } = await es.count({
+    const {
+      body: { count },
+    } = await es.count({
       index: '.kibana',
       q: 'type:lens-ui-telemetry',
     });
@@ -45,8 +42,9 @@ export default ({ getService }: FtrProviderContext) => {
       await es.deleteByQuery({
         index: '.kibana',
         q: 'type:lens-ui-telemetry',
-        waitForCompletion: true,
-        refresh: 'wait_for',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
       });
     });
 
@@ -54,14 +52,15 @@ export default ({ getService }: FtrProviderContext) => {
       await es.deleteByQuery({
         index: '.kibana',
         q: 'type:lens-ui-telemetry',
-        waitForCompletion: true,
-        refresh: 'wait_for',
+        wait_for_completion: true,
+        refresh: true,
+        body: {},
       });
     });
 
     it('should do nothing on empty post', async () => {
       await supertest
-        .post('/api/lens/telemetry')
+        .post('/api/lens/stats')
         .set(COMMON_HEADERS)
         .send({
           events: {},
@@ -74,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should write a document per results', async () => {
       await supertest
-        .post('/api/lens/telemetry')
+        .post('/api/lens/stats')
         .set(COMMON_HEADERS)
         .send({
           events: {
@@ -108,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
         refresh: 'wait_for',
       });
 
-      const result = await getDailyEvents('.kibana', callCluster);
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
 
       expect(result).to.eql({
         byDate: {},
@@ -151,7 +150,7 @@ export default ({ getService }: FtrProviderContext) => {
         ],
       });
 
-      const result = await getDailyEvents('.kibana', callCluster);
+      const result = await getDailyEvents('.kibana', () => Promise.resolve(es));
 
       expect(result).to.eql({
         byDate: {
@@ -178,7 +177,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       await esArchiver.loadIfNeeded('lens/basic');
 
-      const results = await getVisualizationCounts(callCluster, '.kibana');
+      const results = await getVisualizationCounts(() => Promise.resolve(es), '.kibana');
 
       expect(results).to.have.keys([
         'saved_overall',
@@ -192,8 +191,9 @@ export default ({ getService }: FtrProviderContext) => {
       expect(results.saved_overall).to.eql({
         lnsMetric: 1,
         bar_stacked: 1,
+        lnsPie: 1,
       });
-      expect(results.saved_overall_total).to.eql(2);
+      expect(results.saved_overall_total).to.eql(3);
 
       await esArchiver.unload('lens/basic');
     });

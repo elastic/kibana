@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
@@ -14,12 +14,31 @@ jest.mock('../components/navigation_menu', () => ({
   NavigationMenu: () => <div id="mockNavigationMenu" />,
 }));
 
+jest.mock('../components/help_menu', () => ({
+  HelpMenu: () => <div id="mockHelpMenu" />,
+}));
+
 jest.mock('../contexts/kibana', () => ({
   useNotifications: () => {
     return {
       toasts: { addDanger: jest.fn() },
     };
   },
+  useMlKibana: () => {
+    return {
+      services: {
+        docLinks: {
+          links: {
+            ml: { guide: jest.fn() },
+          },
+        },
+      },
+    };
+  },
+}));
+
+jest.mock('../contexts/kibana/use_create_url', () => ({
+  useCreateAndNavigateToMlLink: jest.fn(),
 }));
 
 describe('Settings', () => {

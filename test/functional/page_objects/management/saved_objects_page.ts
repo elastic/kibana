@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { keyBy } from 'lodash';
 import { map as mapAsync } from 'bluebird';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -34,6 +35,13 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await searchBox.clearValue();
       await searchBox.type(objectName);
       await searchBox.pressKeys(browser.keys.ENTER);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await this.waitTableIsLoaded();
+    }
+
+    async getCurrentSearchValue() {
+      const searchBox = await testSubjects.find('savedObjectSearchBar');
+      return await searchBox.getAttribute('value');
     }
 
     async importFile(path: string, overwriteAll = true) {
@@ -45,7 +53,13 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
-        await testSubjects.click('importSavedObjectsOverwriteToggle');
+        const radio = await testSubjects.find(
+          'savedObjectsManagement-importModeControl-overwriteRadioGroup'
+        );
+        // a radio button consists of a div tag that contains an input, a div, and a label
+        // we can't click the input directly, need to go up one level and click the parent div
+        const div = await radio.findByXpath("//div[input[@id='overwriteDisabled']]");
+        await div.click();
       } else {
         log.debug(`Leaving overwriteAll alone`);
       }
@@ -76,6 +90,14 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await testSubjects.existOrFail('importSavedObjectsFailedWarning', { timeout: 20000 });
     }
 
+    async checkImportError() {
+      await testSubjects.existOrFail('importSavedObjectsErrorText', { timeout: 20000 });
+    }
+
+    async getImportErrorText() {
+      return await testSubjects.getVisibleText('importSavedObjectsErrorText');
+    }
+
     async clickImportDone() {
       await testSubjects.click('importSavedObjectsDoneBtn');
       await this.waitTableIsLoaded();
@@ -99,6 +121,76 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       });
     }
 
+    async clickRelationshipsByTitle(title: string) {
+      const table = keyBy(await this.getElementsInTable(), 'title');
+      // should we check if table size > 0 and log error if not?
+      if (table[title].menuElement) {
+        log.debug(`we found a context menu element for (${title}) so click it`);
+        await table[title].menuElement?.click();
+        // Wait for context menu to render
+        const menuPanel = await find.byCssSelector('.euiContextMenuPanel');
+        await (await menuPanel.findByTestSubject('savedObjectsTableAction-relationships')).click();
+      } else {
+        log.debug(
+          `we didn't find a menu element so should be a relastionships element for (${title}) to click`
+        );
+        // or the action elements are on the row without the menu
+        await table[title].relationshipsElement?.click();
+      }
+    }
+
+    async setOverriddenIndexPatternValue(oldName: string, newName: string) {
+      const select = await testSubjects.find(`managementChangeIndexSelection-${oldName}`);
+      const option = await testSubjects.findDescendant(`indexPatternOption-${newName}`, select);
+      await option.click();
+    }
+
+    async clickCopyToSpaceByTitle(title: string) {
+      const table = keyBy(await this.getElementsInTable(), 'title');
+      // should we check if table size > 0 and log error if not?
+      if (table[title].menuElement) {
+        log.debug(`we found a context menu element for (${title}) so click it`);
+        await table[title].menuElement?.click();
+        // Wait for context menu to render
+        const menuPanel = await find.byCssSelector('.euiContextMenuPanel');
+        await (
+          await menuPanel.findByTestSubject('savedObjectsTableAction-copy_saved_objects_to_space')
+        ).click();
+      } else {
+        log.debug(
+          `we didn't find a menu element so should be a "copy to space" element for (${title}) to click`
+        );
+        // or the action elements are on the row without the menu
+        await table[title].copySaveObjectsElement?.click();
+      }
+    }
+
+    async clickInspectByTitle(title: string) {
+      const table = keyBy(await this.getElementsInTable(), 'title');
+      if (table[title].menuElement) {
+        await table[title].menuElement?.click();
+        // Wait for context menu to render
+        const menuPanel = await find.byCssSelector('.euiContextMenuPanel');
+        const panelButton = await menuPanel.findByTestSubject('savedObjectsTableAction-inspect');
+        await panelButton.click();
+      } else {
+        // or the action elements are on the row without the menu
+        await table[title].copySaveObjectsElement?.click();
+      }
+    }
+
+    async clickCheckboxByTitle(title: string) {
+      const table = keyBy(await this.getElementsInTable(), 'title');
+      // should we check if table size > 0 and log error if not?
+      await table[title].checkbox.click();
+    }
+
+    async getObjectTypeByTitle(title: string) {
+      const table = keyBy(await this.getElementsInTable(), 'title');
+      // should we check if table size > 0 and log error if not?
+      return table[title].objectType;
+    }
+
     async getElementsInTable() {
       const rows = await testSubjects.findAll('~savedObjectsTableRow');
       return mapAsync(rows, async (row) => {
@@ -107,23 +199,45 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
         const objectType = await row.findByTestSubject('objectType');
         const titleElement = await row.findByTestSubject('savedObjectsTableRowTitle');
         // not all rows have inspect button - Advanced Settings objects don't
-        let inspectElement;
-        const innerHtml = await row.getAttribute('innerHTML');
-        if (innerHtml.includes('Inspect')) {
-          inspectElement = await row.findByTestSubject('savedObjectsTableAction-inspect');
-        } else {
-          inspectElement = null;
+        // Advanced Settings has 2 actions,
+        //   data-test-subj="savedObjectsTableAction-relationships"
+        //   data-test-subj="savedObjectsTableAction-copy_saved_objects_to_space"
+        // Some other objects have the ...
+        //   data-test-subj="euiCollapsedItemActionsButton"
+        // Maybe some objects still have the inspect element visible?
+        // !!! Also note that since we don't have spaces on OSS, the actions for the same object can be different depending on OSS or not
+        let menuElement = null;
+        let inspectElement = null;
+        let relationshipsElement = null;
+        let copySaveObjectsElement = null;
+        const actions = await row.findByClassName('euiTableRowCell--hasActions');
+        // getting the innerHTML and checking if it 'includes' a string is faster than a timeout looking for each element
+        const actionsHTML = await actions.getAttribute('innerHTML');
+        if (actionsHTML.includes('euiCollapsedItemActionsButton')) {
+          menuElement = await row.findByTestSubject('euiCollapsedItemActionsButton');
         }
-        const relationshipsElement = await row.findByTestSubject(
-          'savedObjectsTableAction-relationships'
-        );
+        if (actionsHTML.includes('savedObjectsTableAction-inspect')) {
+          inspectElement = await row.findByTestSubject('savedObjectsTableAction-inspect');
+        }
+        if (actionsHTML.includes('savedObjectsTableAction-relationships')) {
+          relationshipsElement = await row.findByTestSubject(
+            'savedObjectsTableAction-relationships'
+          );
+        }
+        if (actionsHTML.includes('savedObjectsTableAction-copy_saved_objects_to_space')) {
+          copySaveObjectsElement = await row.findByTestSubject(
+            'savedObjectsTableAction-copy_saved_objects_to_space'
+          );
+        }
         return {
           checkbox,
           objectType: await objectType.getAttribute('aria-label'),
           titleElement,
           title: await titleElement.getVisibleText(),
+          menuElement,
           inspectElement,
           relationshipsElement,
+          copySaveObjectsElement,
         };
       });
     }

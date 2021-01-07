@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useRef, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
+  EuiPanel,
   EuiRange,
   EuiSpacer,
   EuiText,
@@ -29,6 +30,7 @@ import {
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../shared';
 import {
+  AnalyticsJobType,
   DEFAULT_MODEL_MEMORY_LIMIT,
   State,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
@@ -45,6 +47,22 @@ import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
 import { useSavedSearch } from './use_saved_search';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
+import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
+import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
+
+import { LEGEND_TYPES, ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
+
+const getScatterplotMatrixLegendType = (jobType: AnalyticsJobType) => {
+  switch (jobType) {
+    case ANALYSIS_CONFIG_TYPE.CLASSIFICATION:
+      return LEGEND_TYPES.NOMINAL;
+    case ANALYSIS_CONFIG_TYPE.REGRESSION:
+      return LEGEND_TYPES.QUANTITATIVE;
+    default:
+      return undefined;
+  }
+};
 
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
@@ -91,12 +109,28 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     requiredFieldsError,
     sourceIndex,
     trainingPercent,
+    useEstimatedMml,
   } = form;
+  const [query, setQuery] = useState<Query>({
+    query: jobConfigQueryString ?? '',
+    language: SEARCH_QUERY_LANGUAGE.KUERY,
+  });
+
+  const scatterplotFieldOptions = useMemo(
+    () =>
+      includesTableItems
+        .filter((d) => d.feature_type === 'numerical' && d.is_included)
+        .map((d) => d.name),
+    [includesTableItems]
+  );
 
   const toastNotifications = getToastNotifications();
 
-  const setJobConfigQuery = ({ query, queryString }: { query: any; queryString: string }) => {
-    setFormState({ jobConfigQuery: query, jobConfigQueryString: queryString });
+  const setJobConfigQuery: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
+    if (update.query) {
+      setFormState({ jobConfigQuery: update.query, jobConfigQueryString: update.queryString });
+    }
+    setQuery({ query: update.queryString, language: update.language });
   };
 
   const indexData = useIndexData(
@@ -164,7 +198,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const debouncedGetExplainData = debounce(async () => {
     const jobTypeChanged = previousJobType !== jobType;
-    const shouldUpdateModelMemoryLimit = !firstUpdate.current || !modelMemoryLimit;
+    const shouldUpdateModelMemoryLimit =
+      (!firstUpdate.current || !modelMemoryLimit) && useEstimatedMml === true;
     const shouldUpdateEstimatedMml =
       !firstUpdate.current || !modelMemoryLimit || estimatedModelMemoryLimit === '';
 
@@ -209,17 +244,15 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       let unsupportedFieldsErrorMessage;
       if (
         jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-        errorMessage.includes('status_exception') &&
         (errorMessage.includes('must have at most') || errorMessage.includes('must have at least'))
       ) {
         maxDistinctValuesErrorMessage = errorMessage;
-      }
-
-      if (errorMessage.includes('status_exception') && errorMessage.includes('unsupported type')) {
+      } else if (
+        errorMessage.includes('status_exception') &&
+        errorMessage.includes('unsupported type')
+      ) {
         unsupportedFieldsErrorMessage = errorMessage;
-      }
-
-      if (
+      } else if (
         errorMessage.includes('status_exception') &&
         errorMessage.includes('Unable to estimate memory usage as no documents')
       ) {
@@ -231,6 +264,16 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
             },
           })
         );
+      } else {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.ml.dataframe.analytics.create.unableToFetchExplainDataMessage',
+            {
+              defaultMessage: 'An error occurred fetching analysis fields data.',
+            }
+          ),
+          text: errorMessage,
+        });
       }
 
       const fallbackModelMemoryLimit =
@@ -295,10 +338,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         >
           <ExplorationQueryBar
             indexPattern={currentIndexPattern}
-            // @ts-ignore
             setSearchQuery={setJobConfigQuery}
-            includeQueryString
-            defaultQueryString={jobConfigQueryString}
+            query={query}
           />
         </EuiFormRow>
       )}
@@ -397,7 +438,9 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               }
               isClearable={false}
               isInvalid={dependentVariable === ''}
-              data-test-subj="mlAnalyticsCreateJobWizardDependentVariableSelect"
+              data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
+                loadingDepVarOptions ? ' loading' : ' loaded'
+              }`}
             />
           </EuiFormRow>
         </Fragment>
@@ -423,6 +466,43 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         loadingItems={loadingFieldOptions}
         setFormState={setFormState}
       />
+      {scatterplotFieldOptions.length > 1 && (
+        <>
+          <EuiFormRow
+            data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixFormRow"
+            label={i18n.translate('xpack.ml.dataframe.analytics.create.scatterplotMatrixLabel', {
+              defaultMessage: 'Scatterplot matrix',
+            })}
+            helpText={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.scatterplotMatrixLabelHelpText',
+              {
+                defaultMessage:
+                  'Visualizes the relationships between pairs of selected included fields',
+              }
+            )}
+            fullWidth
+          >
+            <Fragment />
+          </EuiFormRow>
+          <EuiPanel
+            paddingSize="m"
+            data-test-subj="mlAnalyticsCreateJobWizardScatterplotMatrixPanel"
+          >
+            <ScatterplotMatrix
+              fields={scatterplotFieldOptions}
+              index={currentIndexPattern.title}
+              color={
+                jobType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+                jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+                  ? dependentVariable
+                  : undefined
+              }
+              legendType={getScatterplotMatrixLegendType(jobType)}
+            />
+          </EuiPanel>
+          <EuiSpacer />
+        </>
+      )}
       {isJobTypeWithDepVar && (
         <EuiFormRow
           fullWidth

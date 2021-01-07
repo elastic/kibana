@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  EnhancedSearchParams,
-  IEnhancedEsSearchRequest,
-  IAsyncSearchRequest,
-  IAsyncSearchResponse,
-} from './types';
+export * from './types';
+export * from './poll_search';
+export * from './session';

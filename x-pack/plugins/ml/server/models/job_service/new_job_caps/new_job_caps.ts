@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+import { _DOC_COUNT } from '../../../../common/constants/field_types';
 import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
 
@@ -12,25 +13,22 @@ interface NewJobCapsResponse {
   [indexPattern: string]: NewJobCaps;
 }
 
-export function newJobCapsProvider(mlClusterClient: ILegacyScopedClusterClient) {
+export function newJobCapsProvider(client: IScopedClusterClient) {
   async function newJobCaps(
     indexPattern: string,
     isRollup: boolean = false,
     savedObjectsClient: SavedObjectsClientContract
   ): Promise<NewJobCapsResponse> {
-    const fieldService = fieldServiceProvider(
-      indexPattern,
-      isRollup,
-      mlClusterClient,
-      savedObjectsClient
-    );
+    const fieldService = fieldServiceProvider(indexPattern, isRollup, client, savedObjectsClient);
     const { aggs, fields } = await fieldService.getData();
     convertForStringify(aggs, fields);
 
+    // Remove the _doc_count field as we don't want to display this in the fields lists in the UI
+    const fieldsWithoutDocCount = fields.filter(({ id }) => id !== _DOC_COUNT);
     return {
       [indexPattern]: {
         aggs,
-        fields,
+        fields: fieldsWithoutDocCount,
       },
     };
   }

@@ -13,7 +13,7 @@ You do not need to configure any settings to use the {graph-features}.
 
 [cols="2*<"]
 |===
-| `xpack.graph.enabled`
+| `xpack.graph.enabled` {ess-icon}
   | Set to `false` to disable the {graph-features}.
 
 |===

@@ -23,29 +23,33 @@ import { renderOptInBanner } from './render_opt_in_banner';
 import { TelemetryService } from '../telemetry_service';
 
 interface TelemetryNotificationsConstructor {
+  http: CoreStart['http'];
   overlays: CoreStart['overlays'];
   telemetryService: TelemetryService;
 }
 
 export class TelemetryNotifications {
+  private readonly http: CoreStart['http'];
   private readonly overlays: CoreStart['overlays'];
   private readonly telemetryService: TelemetryService;
   private optedInNoticeBannerId?: string;
   private optInBannerId?: string;
 
-  constructor({ overlays, telemetryService }: TelemetryNotificationsConstructor) {
+  constructor({ http, overlays, telemetryService }: TelemetryNotificationsConstructor) {
     this.telemetryService = telemetryService;
+    this.http = http;
     this.overlays = overlays;
   }
 
   public shouldShowOptedInNoticeBanner = (): boolean => {
-    const userHasSeenOptedInNotice = this.telemetryService.getUserHasSeenOptedInNotice();
+    const userShouldSeeOptInNotice = this.telemetryService.getUserShouldSeeOptInNotice();
     const bannerOnScreen = typeof this.optedInNoticeBannerId !== 'undefined';
-    return !bannerOnScreen && userHasSeenOptedInNotice;
+    return !bannerOnScreen && userShouldSeeOptInNotice;
   };
 
   public renderOptedInNoticeBanner = (): void => {
     const bannerId = renderOptedInNoticeBanner({
+      http: this.http,
       onSeen: this.setOptedInNoticeSeen,
       overlays: this.overlays,
     });

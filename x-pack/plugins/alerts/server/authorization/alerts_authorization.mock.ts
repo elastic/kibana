@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertsAuthorization } from './alerts_authorization';
 
 type Schema = PublicMethodsOf<AlertsAuthorization>;
@@ -14,6 +14,7 @@ const createAlertsAuthorizationMock = () => {
     ensureAuthorized: jest.fn(),
     filterByAlertTypeAuthorization: jest.fn(),
     getFindAuthorizationFilter: jest.fn(),
+    shouldUseLegacyAuthorization: jest.fn(),
   };
   return mocked;
 };

@@ -25,11 +25,12 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       executeScript={[Function]}
       indexPattern={
         Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-          ],
+          "fields": Object {
+            "getAll": [Function],
+            "getByName": [Function],
+          },
+          "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -47,6 +48,22 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         isInvalid={true}
         onChange={[Function]}
         placeholder="New scripted field"
+        value=""
+      />
+    </eui-form-row>
+    <eui-form-row
+      helpText={
+        <FormattedMessage
+          defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          id="indexPatternManagement.labelHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom label"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldCustomLabel"
+        onChange={[Function]}
         value=""
       />
     </eui-form-row>
@@ -155,7 +172,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       isInvalid={true}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -260,19 +277,12 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       executeScript={[Function]}
       indexPattern={
         Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-            Object {
-              "format": Format {},
-              "lang": "painless",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
+          "fields": Object {
+            "getAll": [Function],
+            "getByName": [Function],
+          },
+          "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -281,6 +291,23 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       onClose={[Function]}
       script="doc.test.value"
     />
+    <eui-form-row
+      helpText={
+        <FormattedMessage
+          defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          id="indexPatternManagement.labelHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom label"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldCustomLabel"
+        onChange={[Function]}
+        placeholder="test"
+        value=""
+      />
+    </eui-form-row>
     <eui-form-row
       helpText={null}
       label="Language"
@@ -380,7 +407,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       isInvalid={false}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -502,27 +529,12 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       executeScript={[Function]}
       indexPattern={
         Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-            Object {
-              "format": Format {},
-              "lang": "painless",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-            Object {
-              "format": Format {},
-              "lang": "testlang",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
+          "fields": Object {
+            "getAll": [Function],
+            "getByName": [Function],
+          },
+          "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -569,6 +581,23 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         onChange={[Function]}
         placeholder="New scripted field"
         value="foobar"
+      />
+    </eui-form-row>
+    <eui-form-row
+      helpText={
+        <FormattedMessage
+          defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          id="indexPatternManagement.labelHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom label"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldCustomLabel"
+        onChange={[Function]}
+        placeholder="foobar"
+        value=""
       />
     </eui-form-row>
     <eui-form-row
@@ -676,7 +705,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       isInvalid={true}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -781,27 +810,12 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       executeScript={[Function]}
       indexPattern={
         Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-            Object {
-              "format": Format {},
-              "lang": "painless",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-            Object {
-              "format": Format {},
-              "lang": "testlang",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
+          "fields": Object {
+            "getAll": [Function],
+            "getByName": [Function],
+          },
+          "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -810,6 +824,23 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       onClose={[Function]}
       script="doc.test.value"
     />
+    <eui-form-row
+      helpText={
+        <FormattedMessage
+          defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          id="indexPatternManagement.labelHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom label"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldCustomLabel"
+        onChange={[Function]}
+        placeholder="test"
+        value=""
+      />
+    </eui-form-row>
     <eui-form-row
       helpText={
         <span>
@@ -990,7 +1021,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       isInvalid={false}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"
@@ -1112,27 +1143,12 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       executeScript={[Function]}
       indexPattern={
         Object {
-          "fields": Array [
-            Object {
-              "name": "foobar",
-            },
-            Object {
-              "format": Format {},
-              "lang": "painless",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-            Object {
-              "format": Format {},
-              "lang": "testlang",
-              "name": "test",
-              "script": "doc.test.value",
-              "scripted": true,
-              "type": "number",
-            },
-          ],
+          "fields": Object {
+            "getAll": [Function],
+            "getByName": [Function],
+          },
+          "getFormatterForField": [Function],
+          "getFormatterForFieldNoDefault": [Function],
         }
       }
       isVisible={false}
@@ -1179,6 +1195,23 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         onChange={[Function]}
         placeholder="New scripted field"
         value="foobar"
+      />
+    </eui-form-row>
+    <eui-form-row
+      helpText={
+        <FormattedMessage
+          defaultMessage="Set a custom label to use when this field is displayed in Discover, Maps, and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          id="indexPatternManagement.labelHelpText"
+          values={Object {}}
+        />
+      }
+      label="Custom label"
+    >
+      <eui-field-text
+        data-test-subj="editorFieldCustomLabel"
+        onChange={[Function]}
+        placeholder="foobar"
+        value=""
       />
     </eui-form-row>
     <eui-form-row
@@ -1342,7 +1375,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       isInvalid={true}
       label="Script"
     >
-      <Component
+      <eui-code-editor
         data-test-subj="editorFieldScript"
         height="300px"
         mode="groovy"

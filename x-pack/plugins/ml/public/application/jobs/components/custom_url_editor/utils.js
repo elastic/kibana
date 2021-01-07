@@ -18,6 +18,7 @@ import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 import { getSavedObjectsClient, getGetUrlGenerator } from '../../../util/dependency_cache';
+import { getProcessedFields } from '../../../components/data_grid';
 
 export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
   // Returns the settings object in the format used by the custom URL editor
@@ -295,12 +296,14 @@ export function getTestUrl(job, customUrl) {
 
   return new Promise((resolve, reject) => {
     ml.results
-      .anomalySearch({
-        rest_total_hits_as_int: true,
-        body,
-      })
+      .anomalySearch(
+        {
+          body,
+        },
+        [job.job_id]
+      )
       .then((resp) => {
-        if (resp.hits.total > 0) {
+        if (resp.hits.total.value > 0) {
           const record = resp.hits.hits[0]._source;
           testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, record, 'timestamp');
           resolve(testUrl);
@@ -330,7 +333,7 @@ export function getTestUrl(job, customUrl) {
               });
             } else {
               if (response.hits.total.value > 0) {
-                testDoc = response.hits.hits[0]._source;
+                testDoc = getProcessedFields(response.hits.hits[0].fields);
               }
             }
 

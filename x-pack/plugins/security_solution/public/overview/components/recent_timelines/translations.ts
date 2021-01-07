@@ -81,3 +81,10 @@ export const VIEW_ALL_TIMELINES = i18n.translate(
     defaultMessage: 'View all timelines',
   }
 );
+
+export const TIMELINES_FILTER_CONTROL = i18n.translate(
+  'xpack.securitySolution.recentTimelines.filterControlLegend',
+  {
+    defaultMessage: 'Timelines filter',
+  }
+);

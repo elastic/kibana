@@ -6,12 +6,8 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { PluginInitializerContext } from 'kibana/public';
-import {
-  UiActionsSetup,
-  UiActionsStart,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '../../../../src/plugins/ui_actions/public';
+import { UiActionsSetup, UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../../../../src/plugins/data/public';
 import { createStartServicesGetter } from '../../../../src/plugins/kibana_utils/public';
 import { DiscoverSetup, DiscoverStart } from '../../../../src/plugins/discover/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
@@ -19,23 +15,10 @@ import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../src/plugins/ki
 import {
   EmbeddableSetup,
   EmbeddableStart,
-  EmbeddableContext,
   CONTEXT_MENU_TRIGGER,
 } from '../../../../src/plugins/embeddable/public';
-import {
-  ExploreDataContextMenuAction,
-  ExploreDataChartAction,
-  ACTION_EXPLORE_DATA,
-  ACTION_EXPLORE_DATA_CHART,
-  ExploreDataChartActionContext,
-} from './actions';
-
-declare module '../../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_EXPLORE_DATA]: EmbeddableContext;
-    [ACTION_EXPLORE_DATA_CHART]: ExploreDataChartActionContext;
-  }
-}
+import { ExploreDataContextMenuAction, ExploreDataChartAction } from './actions';
+import { Config } from '../common';
 
 export interface DiscoverEnhancedSetupDependencies {
   discover: DiscoverSetup;
@@ -56,10 +39,10 @@ export interface DiscoverEnhancedStartDependencies {
 export class DiscoverEnhancedPlugin
   implements
     Plugin<void, void, DiscoverEnhancedSetupDependencies, DiscoverEnhancedStartDependencies> {
-  public readonly config: { actions: { exploreDataInChart: { enabled: boolean } } };
+  public readonly config: Config;
 
   constructor(protected readonly context: PluginInitializerContext) {
-    this.config = context.config.get();
+    this.config = context.config.get<Config>();
   }
 
   setup(
@@ -77,8 +60,7 @@ export class DiscoverEnhancedPlugin
 
       if (this.config.actions.exploreDataInChart.enabled) {
         const exploreDataChartAction = new ExploreDataChartAction(params);
-        uiActions.addTriggerAction(SELECT_RANGE_TRIGGER, exploreDataChartAction);
-        uiActions.addTriggerAction(VALUE_CLICK_TRIGGER, exploreDataChartAction);
+        uiActions.addTriggerAction(APPLY_FILTER_TRIGGER, exploreDataChartAction);
       }
     }
   }

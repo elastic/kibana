@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { testTable, emptyTable } from './__tests__/fixtures/test_tables';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { testTable, emptyTable } from './__fixtures__/test_tables';
 import { staticColumn } from './staticColumn';
 
 describe('staticColumn', () => {
@@ -15,7 +15,10 @@ describe('staticColumn', () => {
     const result = fn(testTable, { name: 'foo', value: 'bar' });
 
     expect(result.type).toBe('datatable');
-    expect(result.columns).toEqual([...testTable.columns, { name: 'foo', type: 'string' }]);
+    expect(result.columns).toEqual([
+      ...testTable.columns,
+      { id: 'foo', name: 'foo', meta: { type: 'string' } },
+    ]);
     expect(result.rows.every((row) => typeof row.foo === 'string')).toBe(true);
     expect(result.rows.every((row) => row.foo === 'bar')).toBe(true);
   });
@@ -33,7 +36,10 @@ describe('staticColumn', () => {
     const result = fn(testTable, { name: 'empty' });
 
     expect(result.type).toBe('datatable');
-    expect(result.columns).toEqual([...testTable.columns, { name: 'empty', type: 'null' }]);
+    expect(result.columns).toEqual([
+      ...testTable.columns,
+      { id: 'empty', name: 'empty', meta: { type: 'null' } },
+    ]);
     expect(result.rows.every((row) => row.empty === null)).toBe(true);
   });
 
@@ -41,7 +47,7 @@ describe('staticColumn', () => {
     const result = fn(emptyTable, { name: 'empty', value: 1 });
 
     expect(result.type).toBe('datatable');
-    expect(result.columns).toEqual([{ name: 'empty', type: 'number' }]);
+    expect(result.columns).toEqual([{ id: 'empty', name: 'empty', meta: { type: 'number' } }]);
     expect(result.rows.length).toBe(0);
   });
 });

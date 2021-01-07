@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
+import { getBreakpoint } from '@elastic/eui';
 
 import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { euiStyled } from '../../../../../../observability/public';
@@ -34,6 +35,9 @@ interface Props {
   boundsOverride: InfraWaffleMapBounds;
   autoBounds: boolean;
   formatter: InfraFormatter;
+  bottomMargin: number;
+  topMargin: number;
+  showLoading: boolean;
 }
 
 export const NodesOverview = ({
@@ -48,6 +52,9 @@ export const NodesOverview = ({
   options,
   formatter,
   onDrilldown,
+  bottomMargin,
+  topMargin,
+  showLoading,
 }: Props) => {
   const handleDrilldown = useCallback(
     (filter: string) => {
@@ -61,7 +68,8 @@ export const NodesOverview = ({
   );
 
   const noData = !loading && nodes && nodes.length === 0;
-  if (loading) {
+  if (loading && showLoading) {
+    // Don't show loading screen when we're auto-reloading
     return (
       <InfraLoadingPanel
         height="100%"
@@ -92,6 +100,7 @@ export const NodesOverview = ({
   }
   const dataBounds = calculateBoundsFromNodes(nodes);
   const bounds = autoBounds ? dataBounds : boundsOverride;
+  const isStatic = ['xs', 's'].includes(getBreakpoint(window.innerWidth)!);
 
   if (view === 'table') {
     return (
@@ -108,7 +117,7 @@ export const NodesOverview = ({
     );
   }
   return (
-    <MapContainer>
+    <MapContainer top={topMargin} positionStatic={isStatic}>
       <Map
         nodeType={nodeType}
         nodes={nodes}
@@ -118,6 +127,8 @@ export const NodesOverview = ({
         onFilter={handleDrilldown}
         bounds={bounds}
         dataBounds={dataBounds}
+        bottomMargin={bottomMargin}
+        staticHeight={isStatic}
       />
     </MapContainer>
   );
@@ -127,10 +138,10 @@ const TableContainer = euiStyled.div`
   padding: ${(props) => props.theme.eui.paddingSizes.l};
 `;
 
-const MapContainer = euiStyled.div`
-  position: absolute;
+const MapContainer = euiStyled.div<{ top: number; positionStatic: boolean }>`
+  position: ${(props) => (props.positionStatic ? 'static' : 'absolute')};
   display: flex;
-  top: 70px;
+  top: ${(props) => props.top}px;
   right: 0;
   bottom: 0;
   left: 0;

@@ -4,16 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
-import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
+import { IFieldType } from 'src/plugins/data/common';
+import { ESSearchResponse } from '../../../../typings/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
+import { PluginStartContract } from '../plugin';
 
 const SHARD_SIZE = 5000;
 
-export async function initFieldsRoute(setup: CoreSetup) {
+export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
   const router = setup.http.createRouter();
   router.post(
     {
@@ -33,6 +36,9 @@ export async function initFieldsRoute(setup: CoreSetup) {
                 name: schema.string(),
                 type: schema.string(),
                 esTypes: schema.maybe(schema.arrayOf(schema.string())),
+                scripted: schema.maybe(schema.boolean()),
+                lang: schema.maybe(schema.string()),
+                script: schema.maybe(schema.string()),
               },
               { unknowns: 'allow' }
             ),
@@ -42,7 +48,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
       },
     },
     async (context, req, res) => {
-      const requestClient = context.core.elasticsearch.legacy.client;
+      const requestClient = context.core.elasticsearch.client.asCurrentUser;
       const { fromDate, toDate, timeFieldName, field, dslQuery } = req.body;
 
       try {
@@ -66,40 +72,34 @@ export async function initFieldsRoute(setup: CoreSetup) {
           },
         };
 
-        const search = (aggs: unknown) =>
-          requestClient.callAsCurrentUser('search', {
+        const search = async (aggs: unknown) => {
+          const { body: result } = await requestClient.search({
             index: req.params.indexPatternTitle,
+            track_total_hits: true,
             body: {
               query,
               aggs,
             },
-            // The hits total changed in 7.0 from number to object, unless this flag is set
-            // this is a workaround for elasticsearch response types that are from 6.x
-            restTotalHitsAsInt: true,
             size: 0,
           });
+          return result;
+        };
 
         if (field.type === 'number') {
           return res.ok({
             body: await getNumberHistogram(search, field),
           });
-        } else if (field.type === 'string') {
-          return res.ok({
-            body: await getStringSamples(search, field),
-          });
         } else if (field.type === 'date') {
           return res.ok({
             body: await getDateHistogram(search, field, { fromDate, toDate }),
           });
-        } else if (field.type === 'boolean') {
-          return res.ok({
-            body: await getStringSamples(search, field),
-          });
         }
 
-        return res.ok({});
+        return res.ok({
+          body: await getStringSamples(search, field),
+        });
       } catch (e) {
-        if (e.status === 404) {
+        if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound();
         }
         if (e.isBoom) {
@@ -119,8 +119,10 @@ export async function initFieldsRoute(setup: CoreSetup) {
 
 export async function getNumberHistogram(
   aggSearchWithBody: (body: unknown) => Promise<unknown>,
-  field: { name: string; type: string; esTypes?: string[] }
+  field: IFieldType
 ): Promise<FieldStatsResponse> {
+  const fieldRef = getFieldRef(field);
+
   const searchBody = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
@@ -131,9 +133,9 @@ export async function getNumberHistogram(
         max_value: {
           max: { field: field.name },
         },
-        sample_count: { value_count: { field: field.name } },
+        sample_count: { value_count: { ...fieldRef } },
         top_values: {
-          terms: { field: field.name, size: 10 },
+          terms: { ...fieldRef, size: 10 },
         },
       },
     },
@@ -141,8 +143,7 @@ export async function getNumberHistogram(
 
   const minMaxResult = (await aggSearchWithBody(searchBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof searchBody } },
-    { restTotalHitsAsInt: true }
+    { body: { aggs: typeof searchBody } }
   >;
 
   const minValue = minMaxResult.aggregations!.sample.min_value.value;
@@ -163,7 +164,7 @@ export async function getNumberHistogram(
 
   if (histogramInterval === 0) {
     return {
-      totalDocuments: minMaxResult.hits.total,
+      totalDocuments: minMaxResult.hits.total.value,
       sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
       sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
       topValues: topValuesBuckets,
@@ -186,12 +187,11 @@ export async function getNumberHistogram(
   };
   const histogramResult = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof histogramBody } },
-    { restTotalHitsAsInt: true }
+    { body: { aggs: typeof histogramBody } }
   >;
 
   return {
-    totalDocuments: minMaxResult.hits.total,
+    totalDocuments: minMaxResult.hits.total.value,
     sampledDocuments: minMaxResult.aggregations!.sample.doc_count,
     sampledValues: minMaxResult.aggregations!.sample.sample_count.value!,
     histogram: {
@@ -206,27 +206,31 @@ export async function getNumberHistogram(
 
 export async function getStringSamples(
   aggSearchWithBody: (body: unknown) => unknown,
-  field: { name: string; type: string }
+  field: IFieldType
 ): Promise<FieldStatsResponse> {
+  const fieldRef = getFieldRef(field);
+
   const topValuesBody = {
     sample: {
       sampler: { shard_size: SHARD_SIZE },
       aggs: {
-        sample_count: { value_count: { field: field.name } },
+        sample_count: { value_count: { ...fieldRef } },
         top_values: {
-          terms: { field: field.name, size: 10 },
+          terms: {
+            ...fieldRef,
+            size: 10,
+          },
         },
       },
     },
   };
   const topValuesResult = (await aggSearchWithBody(topValuesBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof topValuesBody } },
-    { restTotalHitsAsInt: true }
+    { body: { aggs: typeof topValuesBody } }
   >;
 
   return {
-    totalDocuments: topValuesResult.hits.total,
+    totalDocuments: topValuesResult.hits.total.value,
     sampledDocuments: topValuesResult.aggregations!.sample.doc_count,
     sampledValues: topValuesResult.aggregations!.sample.sample_count.value!,
     topValues: {
@@ -241,7 +245,7 @@ export async function getStringSamples(
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
   aggSearchWithBody: (body: unknown) => unknown,
-  field: { name: string; type: string },
+  field: IFieldType,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse> {
   const fromDate = DateMath.parse(range.fromDate);
@@ -265,16 +269,15 @@ export async function getDateHistogram(
   const fixedInterval = `${interval}ms`;
 
   const histogramBody = {
-    histo: { date_histogram: { field: field.name, fixed_interval: fixedInterval } },
+    histo: { date_histogram: { ...getFieldRef(field), fixed_interval: fixedInterval } },
   };
   const results = (await aggSearchWithBody(histogramBody)) as ESSearchResponse<
     unknown,
-    { body: { aggs: typeof histogramBody } },
-    { restTotalHitsAsInt: true }
+    { body: { aggs: typeof histogramBody } }
   >;
 
   return {
-    totalDocuments: results.hits.total,
+    totalDocuments: results.hits.total.value,
     histogram: {
       buckets: results.aggregations!.histo.buckets.map((bucket) => ({
         count: bucket.doc_count,
@@ -282,4 +285,15 @@ export async function getDateHistogram(
       })),
     },
   };
+}
+
+function getFieldRef(field: IFieldType) {
+  return field.scripted
+    ? {
+        script: {
+          lang: field.lang as string,
+          source: field.script as string,
+        },
+      }
+    : { field: field.name };
 }

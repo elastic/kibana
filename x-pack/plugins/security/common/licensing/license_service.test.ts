@@ -13,6 +13,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(undefined as any),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(false);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: false,
@@ -25,6 +26,7 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     });
   });
 
@@ -34,6 +36,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(rawLicenseMock),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(false);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: false,
@@ -46,6 +49,7 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     });
   });
 
@@ -60,12 +64,14 @@ describe('license features', function () {
     const subscriptionHandler = jest.fn();
     const subscription = serviceSetup.license.features$.subscribe(subscriptionHandler);
     try {
+      expect(serviceSetup.license.isLicenseAvailable()).toEqual(false);
       expect(subscriptionHandler).toHaveBeenCalledTimes(1);
       expect(subscriptionHandler.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
             "allowAccessAgreement": false,
             "allowAuditLogging": false,
+            "allowLegacyAuditLogging": false,
             "allowLogin": false,
             "allowRbac": false,
             "allowRoleDocumentLevelSecurity": false,
@@ -80,12 +86,14 @@ describe('license features', function () {
       `);
 
       rawLicense$.next(licenseMock.createLicenseMock());
+      expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
       expect(subscriptionHandler).toHaveBeenCalledTimes(2);
       expect(subscriptionHandler.mock.calls[1]).toMatchInlineSnapshot(`
         Array [
           Object {
             "allowAccessAgreement": true,
             "allowAuditLogging": true,
+            "allowLegacyAuditLogging": true,
             "allowLogin": true,
             "allowRbac": true,
             "allowRoleDocumentLevelSecurity": true,
@@ -112,6 +120,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: true,
@@ -123,6 +132,7 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     });
     expect(getFeatureSpy).toHaveBeenCalledTimes(1);
     expect(getFeatureSpy).toHaveBeenCalledWith('security');
@@ -136,6 +146,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: false,
       allowLogin: false,
@@ -147,10 +158,36 @@ describe('license features', function () {
       allowRbac: false,
       allowSubFeaturePrivileges: false,
       allowAuditLogging: false,
+      allowLegacyAuditLogging: false,
     });
   });
 
-  it('should allow role mappings, access agreement and sub-feature privileges, but not DLS/FLS if license = gold', () => {
+  it('should allow all basic features for standard license', () => {
+    const mockRawLicense = licenseMock.createLicense({
+      license: { mode: 'standard', type: 'standard' },
+      features: { security: { isEnabled: true, isAvailable: true } },
+    });
+
+    const serviceSetup = new SecurityLicenseService().setup({
+      license$: of(mockRawLicense),
+    });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
+    expect(serviceSetup.license.getFeatures()).toEqual({
+      showLogin: true,
+      allowLogin: true,
+      showLinks: true,
+      showRoleMappingsManagement: false,
+      allowAccessAgreement: false,
+      allowRoleDocumentLevelSecurity: false,
+      allowRoleFieldLevelSecurity: false,
+      allowRbac: true,
+      allowSubFeaturePrivileges: false,
+      allowAuditLogging: false,
+      allowLegacyAuditLogging: true,
+    });
+  });
+
+  it('should allow role mappings, access agreement, sub-feature privileges and audit logging, but not DLS/FLS if license = gold', () => {
     const mockRawLicense = licenseMock.createLicense({
       license: { mode: 'gold', type: 'gold' },
       features: { security: { isEnabled: true, isAvailable: true } },
@@ -159,6 +196,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: true,
@@ -170,6 +208,7 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     });
   });
 
@@ -182,6 +221,7 @@ describe('license features', function () {
     const serviceSetup = new SecurityLicenseService().setup({
       license$: of(mockRawLicense),
     });
+    expect(serviceSetup.license.isLicenseAvailable()).toEqual(true);
     expect(serviceSetup.license.getFeatures()).toEqual({
       showLogin: true,
       allowLogin: true,
@@ -193,29 +233,7 @@ describe('license features', function () {
       allowRbac: true,
       allowSubFeaturePrivileges: true,
       allowAuditLogging: true,
-    });
-  });
-
-  it('should allow all basic features + audit logging for standard license', () => {
-    const mockRawLicense = licenseMock.createLicense({
-      license: { mode: 'standard', type: 'standard' },
-      features: { security: { isEnabled: true, isAvailable: true } },
-    });
-
-    const serviceSetup = new SecurityLicenseService().setup({
-      license$: of(mockRawLicense),
-    });
-    expect(serviceSetup.license.getFeatures()).toEqual({
-      showLogin: true,
-      allowLogin: true,
-      showLinks: true,
-      showRoleMappingsManagement: false,
-      allowAccessAgreement: false,
-      allowRoleDocumentLevelSecurity: false,
-      allowRoleFieldLevelSecurity: false,
-      allowRbac: true,
-      allowSubFeaturePrivileges: false,
-      allowAuditLogging: true,
+      allowLegacyAuditLogging: true,
     });
   });
 });

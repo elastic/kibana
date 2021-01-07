@@ -9,7 +9,7 @@ import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
-import { RuleType } from '../../../../../common/detection_engine/types';
+import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types';
 import {
   IIndexPattern,
   Filter,
@@ -18,11 +18,7 @@ import {
 } from '../../../../../../../../src/plugins/data/public';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  AboutStepRiskScore,
-  AboutStepSeverity,
-  IMitreEnterpriseAttack,
-} from '../../../pages/detection_engine/rules/types';
+import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
 import { FieldValueTimeline } from '../pick_timeline';
 import { FormSchema } from '../../../../shared_imports';
 import { ListItems } from './types';
@@ -37,11 +33,14 @@ import {
   buildRiskScoreDescription,
   buildRuleTypeDescription,
   buildThresholdDescription,
+  buildThreatMappingDescription,
 } from './helpers';
-import { useSiemJobs } from '../../../../common/components/ml_popover/hooks/use_siem_jobs';
 import { buildMlJobDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
+import { Threats, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { THREAT_QUERY_LABEL } from './translations';
+import { filterEmptyThreats } from '../../../pages/detection_engine/rules/create/helpers';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -52,22 +51,21 @@ const DescriptionListContainer = styled(EuiDescriptionList)`
   }
 `;
 
-interface StepRuleDescriptionProps {
+interface StepRuleDescriptionProps<T> {
   columns?: 'multi' | 'single' | 'singleSplit';
   data: unknown;
   indexPatterns?: IIndexPattern;
-  schema: FormSchema;
+  schema: FormSchema<T>;
 }
 
-export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = ({
+export const StepRuleDescriptionComponent = <T,>({
   data,
   columns = 'multi',
   indexPatterns,
   schema,
-}) => {
+}: StepRuleDescriptionProps<T>) => {
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
-  const [, siemJobs] = useSiemJobs(true);
 
   const keys = Object.keys(schema);
   const listItems = keys.reduce((acc: ListItems[], key: string) => {
@@ -76,8 +74,7 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
         ...acc,
         buildMlJobDescription(
           get(key, data) as string,
-          (get(key, schema) as { label: string }).label,
-          siemJobs
+          (get(key, schema) as { label: string }).label
         ),
       ];
     }
@@ -127,9 +124,9 @@ export const StepRuleDescriptionComponent: React.FC<StepRuleDescriptionProps> = 
 
 export const StepRuleDescription = memo(StepRuleDescriptionComponent);
 
-export const buildListItems = (
+export const buildListItems = <T,>(
   data: unknown,
-  schema: FormSchema,
+  schema: FormSchema<T>,
   filterManager: FilterManager,
   indexPatterns?: IIndexPattern
 ): ListItems[] =>
@@ -157,6 +154,7 @@ export const addFilterStateIfNotThere = (filters: Filter[]): Filter[] => {
   });
 };
 
+/* eslint complexity: ["error", 21]*/
 export const getDescriptionItem = (
   field: string,
   label: string,
@@ -177,10 +175,8 @@ export const getDescriptionItem = (
       indexPatterns,
     });
   } else if (field === 'threat') {
-    const threat: IMitreEnterpriseAttack[] = get(field, data).filter(
-      (singleThreat: IMitreEnterpriseAttack) => singleThreat.tactic.name !== 'none'
-    );
-    return buildThreatDescription({ label, threat });
+    const threats: Threats = get(field, data);
+    return buildThreatDescription({ label, threat: filterEmptyThreats(threats) });
   } else if (field === 'threshold') {
     const threshold = get(field, data);
     return buildThresholdDescription(label, threshold);
@@ -190,7 +186,7 @@ export const getDescriptionItem = (
   } else if (field === 'falsePositives') {
     const values: string[] = get(field, data);
     return buildUnorderedListArrayDescription(label, field, values);
-  } else if (Array.isArray(get(field, data))) {
+  } else if (Array.isArray(get(field, data)) && field !== 'threatMapping') {
     const values: string[] = get(field, data);
     return buildStringArrayDescription(label, field, values);
   } else if (field === 'riskScore') {
@@ -211,8 +207,26 @@ export const getDescriptionItem = (
     const val: string = get(field, data);
     return buildNoteDescription(label, val);
   } else if (field === 'ruleType') {
-    const ruleType: RuleType = get(field, data);
+    const ruleType: Type = get(field, data);
     return buildRuleTypeDescription(label, ruleType);
+  } else if (field === 'kibanaSiemAppUrl') {
+    return [];
+  } else if (field === 'threatQueryBar') {
+    const filters = addFilterStateIfNotThere(get('threatQueryBar.filters', data) ?? []);
+    const query = get('threatQueryBar.query.query', data);
+    const savedId = get('threatQueryBar.saved_id', data);
+    return buildQueryBarDescription({
+      field,
+      filters,
+      filterManager,
+      query,
+      savedId,
+      indexPatterns,
+      queryLabel: THREAT_QUERY_LABEL,
+    });
+  } else if (field === 'threatMapping') {
+    const threatMap: ThreatMapping = get(field, data);
+    return buildThreatMappingDescription(label, threatMap);
   }
 
   const description: string = get(field, data);

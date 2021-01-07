@@ -8,10 +8,11 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export function CanvasPageProvider({ getService }: FtrProviderContext) {
+export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const browser = getService('browser');
+  const PageObjects = getPageObjects(['common']);
 
   return {
     async enterFullscreen() {
@@ -29,6 +30,19 @@ export function CanvasPageProvider({ getService }: FtrProviderContext) {
 
     async waitForWorkpadElements() {
       await testSubjects.findAll('canvasWorkpadPage > canvasWorkpadPageElementContent');
+    },
+
+    /*
+     * Finds the first workpad in the loader (uses find, not findAll) and
+     * ensures the expected name is the actual name. Then it clicks the element
+     * to load the workpad. Resolves once the workpad is in the DOM
+     */
+    async loadFirstWorkpad(workpadName: string) {
+      const elem = await testSubjects.find('canvasWorkpadLoaderWorkpad');
+      const text = await elem.getVisibleText();
+      expect(text).to.be(workpadName);
+      await elem.click();
+      await testSubjects.existOrFail('canvasWorkpadPage');
     },
 
     async fillOutCustomElementForm(name: string, description: string) {
@@ -58,6 +72,8 @@ export function CanvasPageProvider({ getService }: FtrProviderContext) {
     async openSavedElementsModal() {
       await testSubjects.click('add-element-button');
       await testSubjects.click('saved-elements-menu-option');
+
+      await PageObjects.common.sleep(1000); // give time for modal animation to complete
     },
     async closeSavedElementsModal() {
       await testSubjects.click('saved-elements-modal-close-button');
@@ -75,6 +91,28 @@ export function CanvasPageProvider({ getService }: FtrProviderContext) {
       expect(refreshPopoverExists).to.be(true);
 
       await testSubjects.missingOrFail('add-element-button');
+    },
+
+    async getTimeFiltersFromDebug() {
+      await testSubjects.existOrFail('canvasDebug__content');
+
+      const contentElem = await testSubjects.find('canvasDebug__content');
+      const content = await contentElem.getVisibleText();
+
+      const filters = JSON.parse(content);
+
+      return filters.and.filter((f: any) => f.filterType === 'time');
+    },
+
+    async getMatchFiltersFromDebug() {
+      await testSubjects.existOrFail('canvasDebug__content');
+
+      const contentElem = await testSubjects.find('canvasDebug__content');
+      const content = await contentElem.getVisibleText();
+
+      const filters = JSON.parse(content);
+
+      return filters.and.filter((f: any) => f.filterType === 'exactly');
     },
   };
 }

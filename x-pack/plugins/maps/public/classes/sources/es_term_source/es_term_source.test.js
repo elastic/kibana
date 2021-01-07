@@ -6,7 +6,6 @@
 
 import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
-jest.mock('ui/new_platform');
 jest.mock('../../layers/vector_layer/vector_layer', () => {});
 
 const indexPatternTitle = 'myIndex';
@@ -35,6 +34,7 @@ describe('getMetricFields', () => {
       id: '1234',
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
+      indexPatternId: 'foobar',
     });
     const metrics = source.getMetricFields();
     expect(metrics[0].getName()).toEqual('__kbnjoin__count__1234');
@@ -47,6 +47,7 @@ describe('getMetricFields', () => {
       indexPatternTitle: indexPatternTitle,
       term: termFieldName,
       metrics: metricExamples,
+      indexPatternId: 'foobar',
     });
     const metrics = source.getMetricFields();
     expect(metrics[0].getName()).toEqual('__kbnjoin__sum_of_myFieldGettingSummed__1234');

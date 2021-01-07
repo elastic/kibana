@@ -4,41 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { storiesOf } from '@storybook/react';
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { SyncBadge } from './SyncBadge';
 
-storiesOf('app/TransactionDetails/SyncBadge', module)
-  .add(
-    'sync=true',
-    () => {
-      return <SyncBadge sync={true} />;
+export default {
+  title: 'app/TransactionDetails/SyncBadge',
+  component: SyncBadge,
+  argTypes: {
+    sync: {
+      control: { type: 'inline-radio', options: [true, false, undefined] },
     },
-    {
-      info: {
-        source: false,
-      },
-    }
-  )
-  .add(
-    'sync=false',
-    () => {
-      return <SyncBadge sync={false} />;
-    },
-    {
-      info: {
-        source: false,
-      },
-    }
-  )
-  .add(
-    'sync=undefined',
-    () => {
-      return <SyncBadge />;
-    },
-    {
-      info: {
-        source: false,
-      },
-    }
-  );
+  },
+};
+
+export function Example({ sync }: ComponentProps<typeof SyncBadge>) {
+  return <SyncBadge sync={sync} />;
+}
+Example.args = { sync: true } as ComponentProps<typeof SyncBadge>;

@@ -5,36 +5,17 @@
  */
 
 import { ElasticsearchServiceSetup } from 'src/core/server';
-import { LevelLogger } from '../';
+import { LevelLogger, statuses } from '../';
 import { ReportingCore } from '../../';
 import { indexTimestamp } from './index_timestamp';
-import { LayoutInstance } from '../layouts';
 import { mapping } from './mapping';
 import { Report } from './report';
 
-export const statuses = {
-  JOB_STATUS_PENDING: 'pending',
-  JOB_STATUS_PROCESSING: 'processing',
-  JOB_STATUS_COMPLETED: 'completed',
-  JOB_STATUS_WARNINGS: 'completed_with_warnings',
-  JOB_STATUS_FAILED: 'failed',
-  JOB_STATUS_CANCELLED: 'cancelled',
+const checkReportIsEditable = (report: Report) => {
+  if (!report._id || !report._index) {
+    throw new Error(`Report object is not synced with ES!`);
+  }
 };
-
-interface AddReportOpts {
-  timeout: number;
-  created_by: string | boolean;
-  browser_type: string;
-  max_attempts: number;
-}
-
-interface UpdateQuery {
-  index: string;
-  id: string;
-  if_seq_no: unknown;
-  if_primary_term: unknown;
-  body: { doc: Partial<Report> };
-}
 
 /*
  * A class to give an interface to historical reports in the reporting.index
@@ -43,9 +24,8 @@ interface UpdateQuery {
  * - interface for downloading the report
  */
 export class ReportingStore {
-  public readonly indexPrefix: string;
-  public readonly indexInterval: string;
-
+  private readonly indexPrefix: string;
+  private readonly indexInterval: string;
   private client: ElasticsearchServiceSetup['legacy']['client'];
   private logger: LevelLogger;
 
@@ -56,12 +36,11 @@ export class ReportingStore {
     this.client = elasticsearch.legacy.client;
     this.indexPrefix = config.get('index');
     this.indexInterval = config.get('queue', 'indexInterval');
-
     this.logger = logger;
   }
 
   private async createIndex(indexName: string) {
-    return this.client
+    return await this.client
       .callAsInternalUser('indices.exists', {
         index: indexName,
       })
@@ -95,75 +74,130 @@ export class ReportingStore {
               return;
             }
 
+            this.logger.error(err);
             throw err;
           });
       });
   }
 
-  private async saveReport(report: Report) {
-    const payload = report.payload as { objectType: string; layout: LayoutInstance };
-
-    const indexParams = {
+  /*
+   * Called from addReport, which handles any errors
+   */
+  private async indexReport(report: Report) {
+    const doc = {
       index: report._index,
-      id: report.id,
+      id: report._id,
       body: {
-        jobtype: report.jobtype,
-        meta: {
-          // We are copying these values out of payload because these fields are indexed and can be aggregated on
-          // for tracking stats, while payload contents are not.
-          objectType: payload.objectType,
-          layout: payload.layout ? payload.layout.id : 'none',
-        },
-        payload: report.payload,
-        created_by: report.created_by,
-        timeout: report.timeout,
+        ...report.toEsDocsJSON()._source,
         process_expiration: new Date(0), // use epoch so the job query works
-        created_at: new Date(),
         attempts: 0,
-        max_attempts: report.max_attempts,
         status: statuses.JOB_STATUS_PENDING,
-        browser_type: report.browser_type,
       },
     };
-    return this.client.callAsInternalUser('index', indexParams);
+    return await this.client.callAsInternalUser('index', doc);
   }
 
+  /*
+   * Called from addReport, which handles any errors
+   */
   private async refreshIndex(index: string) {
-    return this.client.callAsInternalUser('indices.refresh', { index });
+    return await this.client.callAsInternalUser('indices.refresh', { index });
   }
 
-  public async addReport(type: string, payload: unknown, options: AddReportOpts): Promise<Report> {
-    const timestamp = indexTimestamp(this.indexInterval);
-    const index = `${this.indexPrefix}-${timestamp}`;
+  public async addReport(report: Report): Promise<Report> {
+    let index = report._index;
+    if (!index) {
+      const timestamp = indexTimestamp(this.indexInterval);
+      index = `${this.indexPrefix}-${timestamp}`;
+      report._index = index;
+    }
     await this.createIndex(index);
 
-    const report = new Report({
-      index,
-      payload,
-      jobtype: type,
-      created_by: options.created_by,
-      browser_type: options.browser_type,
-      max_attempts: options.max_attempts,
-      timeout: options.timeout,
-      priority: 10, // unused
-    });
+    try {
+      const doc = await this.indexReport(report);
+      report.updateWithEsDoc(doc);
 
-    const doc = await this.saveReport(report);
-    report.updateWithDoc(doc);
+      await this.refreshIndex(index);
+      this.logger.debug(`Successfully stored pending job: ${report._index}/${report._id}`);
 
-    await this.refreshIndex(index);
-    this.logger.info(`Successfully queued pending job: ${report._index}/${report.id}`);
-
-    return report;
+      return report;
+    } catch (err) {
+      this.logger.error(`Error in adding a report!`);
+      this.logger.error(err);
+      throw err;
+    }
   }
 
-  public async updateReport(query: UpdateQuery): Promise<Report> {
-    return this.client.callAsInternalUser('update', {
-      index: query.index,
-      id: query.id,
-      if_seq_no: query.if_seq_no,
-      if_primary_term: query.if_primary_term,
-      body: { doc: query.body.doc },
-    });
+  public async setReportClaimed(report: Report, stats: Partial<Report>): Promise<Report> {
+    const doc = {
+      ...stats,
+      status: statuses.JOB_STATUS_PROCESSING,
+    };
+
+    try {
+      checkReportIsEditable(report);
+
+      return await this.client.callAsInternalUser('update', {
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        body: { doc },
+      });
+    } catch (err) {
+      this.logger.error('Error in setting report processing status!');
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  public async setReportFailed(report: Report, stats: Partial<Report>): Promise<Report> {
+    const doc = {
+      ...stats,
+      status: statuses.JOB_STATUS_FAILED,
+    };
+
+    try {
+      checkReportIsEditable(report);
+
+      return await this.client.callAsInternalUser('update', {
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        body: { doc },
+      });
+    } catch (err) {
+      this.logger.error('Error in setting report failed status!');
+      this.logger.error(err);
+      throw err;
+    }
+  }
+
+  public async setReportCompleted(report: Report, stats: Partial<Report>): Promise<Report> {
+    try {
+      const { output } = stats;
+      const status =
+        output && output.warnings && output.warnings.length > 0
+          ? statuses.JOB_STATUS_WARNINGS
+          : statuses.JOB_STATUS_COMPLETED;
+      const doc = {
+        ...stats,
+        status,
+      };
+      checkReportIsEditable(report);
+
+      return await this.client.callAsInternalUser('update', {
+        id: report._id,
+        index: report._index,
+        if_seq_no: report._seq_no,
+        if_primary_term: report._primary_term,
+        body: { doc },
+      });
+    } catch (err) {
+      this.logger.error('Error in setting report complete status!');
+      this.logger.error(err);
+      throw err;
+    }
   }
 }

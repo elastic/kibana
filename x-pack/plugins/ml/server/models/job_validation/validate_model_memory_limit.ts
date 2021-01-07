@@ -5,22 +5,23 @@
  */
 
 import numeral from '@elastic/numeral';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';
 import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_limit';
 import { ALLOWED_DATA_UNITS } from '../../../common/constants/validation';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlClient } from '../../lib/ml_client';
 
 // The minimum value the backend expects is 1MByte
 const MODEL_MEMORY_LIMIT_MINIMUM_BYTES = 1048576;
 
 export async function validateModelMemoryLimit(
-  mlClusterClient: ILegacyScopedClusterClient,
+  client: IScopedClusterClient,
+  mlClient: MlClient,
   job: CombinedJob,
   duration?: { start?: number; end?: number }
 ) {
-  const { callAsInternalUser } = mlClusterClient;
   validateJobObject(job);
 
   // retrieve the model memory limit specified by the user in the job config.
@@ -52,19 +53,20 @@ export async function validateModelMemoryLimit(
 
   // retrieve the max_model_memory_limit value from the server
   // this will be unset unless the user has set this on their cluster
-  const info = (await callAsInternalUser('ml.info')) as MlInfoResponse;
-  const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
-  const effectiveMaxModelMemoryLimit = info.limits.effective_max_model_memory_limit?.toUpperCase();
+  const { body } = await mlClient.info<MlInfoResponse>();
+  const maxModelMemoryLimit = body.limits.max_model_memory_limit?.toUpperCase();
+  const effectiveMaxModelMemoryLimit = body.limits.effective_max_model_memory_limit?.toUpperCase();
 
   if (runCalcModelMemoryTest) {
-    const { modelMemoryLimit } = await calculateModelMemoryLimitProvider(mlClusterClient)(
+    const { modelMemoryLimit } = await calculateModelMemoryLimitProvider(client, mlClient)(
       job.analysis_config,
       job.datafeed_config.indices.join(','),
       job.datafeed_config.query,
       job.data_description.time_field,
       duration!.start as number,
       duration!.end as number,
-      true
+      true,
+      job.datafeed_config
     );
     // @ts-expect-error
     const mmlEstimateBytes: number = numeral(modelMemoryLimit).value();

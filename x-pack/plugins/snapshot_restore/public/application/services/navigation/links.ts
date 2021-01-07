@@ -13,33 +13,37 @@ export function linkToRepositories() {
 }
 
 export function linkToRepository(repositoryName: string) {
-  return `/repositories/${encodeURIComponent(repositoryName)}`;
+  return encodeURI(`/repositories/${encodeURIComponent(repositoryName)}`);
 }
 
 export function linkToEditRepository(repositoryName: string) {
-  return `/edit_repository/${encodeURIComponent(repositoryName)}`;
+  return encodeURI(`/edit_repository/${encodeURIComponent(repositoryName)}`);
 }
 
 export function linkToAddRepository(redirect?: string) {
-  return `/add_repository${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`;
+  return encodeURI(`/add_repository${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ''}`);
 }
 
 export function linkToSnapshots(repositoryName?: string, policyName?: string) {
   if (repositoryName) {
-    return `/snapshots?repository=${encodeURIComponent(repositoryName)}`;
+    return encodeURI(`/snapshots?repository=${encodeURIComponent(repositoryName)}`);
   }
   if (policyName) {
-    return `/snapshots?policy=${encodeURIComponent(policyName)}`;
+    return encodeURI(`/snapshots?policy=${encodeURIComponent(policyName)}`);
   }
   return `/snapshots`;
 }
 
 export function linkToSnapshot(repositoryName: string, snapshotName: string) {
-  return `/snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(snapshotName)}`;
+  return encodeURI(
+    `/snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(snapshotName)}`
+  );
 }
 
 export function linkToRestoreSnapshot(repositoryName: string, snapshotName: string) {
-  return `/restore/${encodeURIComponent(repositoryName)}/${encodeURIComponent(snapshotName)}`;
+  return encodeURI(
+    `/restore/${encodeURIComponent(repositoryName)}/${encodeURIComponent(snapshotName)}`
+  );
 }
 
 export function linkToPolicies() {
@@ -47,11 +51,11 @@ export function linkToPolicies() {
 }
 
 export function linkToPolicy(policyName: string) {
-  return `/policies/${encodeURIComponent(policyName)}`;
+  return encodeURI(`/policies/${encodeURIComponent(policyName)}`);
 }
 
 export function linkToEditPolicy(policyName: string) {
-  return `/edit_policy/${encodeURIComponent(policyName)}`;
+  return encodeURI(`/edit_policy/${encodeURIComponent(policyName)}`);
 }
 
 export function linkToAddPolicy() {

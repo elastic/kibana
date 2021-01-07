@@ -126,6 +126,10 @@ export class ResultsLoader {
     this._results$.next(this._results);
   }
 
+  public get results$() {
+    return this._results$;
+  }
+
   public subscribeToResults(func: ResultsSubscriber) {
     return this._results$.subscribe(func);
   }
@@ -157,7 +161,7 @@ export class ResultsLoader {
         [],
         this._lastModelTimeStamp,
         this._jobCreator.end,
-        `${this._chartInterval.getInterval().asMilliseconds()}ms`,
+        this._chartInterval.getInterval().asMilliseconds(),
         agg.mlModelPlotAgg
       )
       .toPromise();
@@ -207,7 +211,7 @@ export class ResultsLoader {
       [this._jobCreator.jobId],
       this._jobCreator.start,
       this._jobCreator.end,
-      `${this._chartInterval.getInterval().asMilliseconds()}ms`,
+      this._chartInterval.getInterval().asMilliseconds(),
       1
     );
 
@@ -229,7 +233,7 @@ export class ResultsLoader {
       this._jobCreator.jobId,
       this._jobCreator.start,
       this._jobCreator.end,
-      `${this._chartInterval.getInterval().asMilliseconds()}ms`,
+      this._chartInterval.getInterval().asMilliseconds(),
       this._detectorSplitFieldFilters
     );
 

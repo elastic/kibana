@@ -14,8 +14,6 @@ import {
   HOST_GEO_CITY_NAME_HEADER,
   HOST_GEO_COUNTRY_NAME_HEADER,
   INSPECT_MODAL,
-  LOAD_MORE,
-  LOCAL_EVENTS_COUNT,
 } from '../screens/hosts/events';
 import { HEADERS_GROUP } from '../screens/timeline';
 
@@ -25,7 +23,6 @@ import { openEvents } from '../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
   addsHostGeoCountryNameToHeader,
-  closeModal,
   dragAndDropColumn,
   openEventsViewerFieldsBrowser,
   opensInspectQueryModal,
@@ -35,6 +32,7 @@ import { clearSearchBar, kqlSearch } from '../tasks/security_header';
 
 import { HOSTS_URL } from '../urls/navigation';
 import { resetFields } from '../tasks/timeline';
+import { cleanKibana } from '../tasks/common';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -46,9 +44,10 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe('Events Viewer', () => {
+describe.skip('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
@@ -63,7 +62,7 @@ describe('Events Viewer', () => {
     });
 
     it('displays the `default ECS` category (by default)', () => {
-      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).invoke('text').should('eq', 'default ECS');
+      cy.get(FIELDS_BROWSER_SELECTED_CATEGORY_TITLE).should('have.text', 'default ECS');
     });
 
     it('displays a checked checkbox for all of the default events viewer columns that are also in the default ECS category', () => {
@@ -75,13 +74,9 @@ describe('Events Viewer', () => {
 
   context('Events viewer query modal', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
-    });
-
-    after(() => {
-      closeModal();
-      cy.get(INSPECT_MODAL).should('not.exist');
     });
 
     it('launches the inspect query modal when the inspect button is clicked', () => {
@@ -93,6 +88,7 @@ describe('Events Viewer', () => {
 
   context('Events viewer fields behaviour', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
     });
@@ -124,6 +120,7 @@ describe('Events Viewer', () => {
 
   context('Events behaviour', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();
@@ -139,24 +136,17 @@ describe('Events Viewer', () => {
         .invoke('text')
         .then((initialNumberOfEvents) => {
           kqlSearch(`${filterInput}{enter}`);
-          cy.get(HEADER_SUBTITLE).invoke('text').should('not.equal', initialNumberOfEvents);
+          cy.get(HEADER_SUBTITLE).should('not.have.text', initialNumberOfEvents);
         });
-    });
-
-    it('loads more events when the load more button is clicked', () => {
-      const defaultNumberOfLoadedEvents = '25';
-      cy.get(LOCAL_EVENTS_COUNT).invoke('text').should('equal', defaultNumberOfLoadedEvents);
-
-      cy.get(LOAD_MORE).click({ force: true });
-
-      cy.get(LOCAL_EVENTS_COUNT).invoke('text').should('not.equal', defaultNumberOfLoadedEvents);
     });
   });
 
-  context.skip('Events columns', () => {
+  context('Events columns', () => {
     before(() => {
+      cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
+      cy.scrollTo('bottom');
       waitsForEventsToBeLoaded();
     });
 
@@ -167,13 +157,13 @@ describe('Events Viewer', () => {
 
     it('re-orders columns via drag and drop', () => {
       const originalColumnOrder =
-        '@timestampmessagehost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
+        '@timestamp1messagehost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
       const expectedOrderAfterDragAndDrop =
-        'message@timestamphost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
+        'message@timestamp1host.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
 
-      cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
-      dragAndDropColumn({ column: 0, newPosition: 1 });
-      cy.get(HEADERS_GROUP).invoke('text').should('equal', expectedOrderAfterDragAndDrop);
+      cy.get(HEADERS_GROUP).should('have.text', originalColumnOrder);
+      dragAndDropColumn({ column: 0, newPosition: 0 });
+      cy.get(HEADERS_GROUP).should('have.text', expectedOrderAfterDragAndDrop);
     });
   });
 });

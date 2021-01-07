@@ -7,14 +7,13 @@
 import React, { FC } from 'react';
 
 import { EuiSpacer, EuiInMemoryTable, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-// @ts-ignore
-import { formatDate } from '@elastic/eui/lib/services/format';
+
 import { i18n } from '@kbn/i18n';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 
 import { JobMessage } from '../../../../common/types/audit_message';
-import { TIME_FORMAT } from '../../../../common/constants/time_format';
 import { JobIcon } from '../job_message_icon';
+import { timeFormatter } from '../../../../common/util/date_utils';
 
 interface JobMessagesProps {
   messages: JobMessage[];
@@ -55,7 +54,7 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error, re
       name: i18n.translate('xpack.ml.jobMessages.timeLabel', {
         defaultMessage: 'Time',
       }),
-      render: (timestamp: number) => formatDate(timestamp, TIME_FORMAT),
+      render: timeFormatter,
       width: '120px',
       sortable: true,
     },

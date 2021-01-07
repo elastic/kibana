@@ -17,6 +17,7 @@
  * under the License.
  */
 
+export * from '@kbn/utils';
 export { withProcRunner, ProcRunner } from './proc_runner';
 export * from './tooling_log';
 export * from './serializers';
@@ -33,11 +34,12 @@ export {
   KBN_P12_PATH,
   KBN_P12_PASSWORD,
 } from './certs';
-export { REPO_ROOT } from './repo_root';
-export { KbnClient } from './kbn_client';
+export * from './kbn_client';
 export * from './run';
 export * from './axios';
 export * from './stdio';
 export * from './ci_stats_reporter';
 export * from './plugin_list';
-export * from './simple_kibana_platform_plugin_discovery';
+export * from './plugins';
+export * from './streams';
+export * from './babel';

@@ -8,7 +8,6 @@ import { mapValues, keys } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { API_ROUTE } from '../../../common/lib';
 import { catchErrorHandler } from '../catch_error_handler';
-// @ts-expect-error unconverted lib
 import { normalizeType } from '../../lib/normalize_type';
 import { RouteInitializerDeps } from '..';
 

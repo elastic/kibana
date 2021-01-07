@@ -19,7 +19,7 @@
 
 import { ToolingLog } from '@kbn/dev-utils';
 
-import { PullRequest } from './pull_request';
+import { PullRequest } from './pr_api';
 import { Version } from './version';
 
 export class IrrelevantPrSummary {

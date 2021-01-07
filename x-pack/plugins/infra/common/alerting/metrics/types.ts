@@ -52,6 +52,8 @@ const baseAlertRequestParamsRT = rt.intersection([
     ]),
     criteria: rt.array(rt.any),
     alertInterval: rt.string,
+    alertThrottle: rt.string,
+    alertOnNoData: rt.boolean,
   }),
 ]);
 
@@ -91,6 +93,7 @@ export const alertPreviewSuccessResponsePayloadRT = rt.type({
     fired: rt.number,
     noData: rt.number,
     error: rt.number,
+    notifications: rt.number,
   }),
 });
 export type AlertPreviewSuccessResponsePayload = rt.TypeOf<

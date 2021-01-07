@@ -23,9 +23,9 @@ export {
   EntryList,
   EntriesArray,
   NamespaceType,
+  NestedEntriesArray,
   Operator,
   OperatorEnum,
-  OperatorType,
   OperatorTypeEnum,
   ExceptionListTypeEnum,
   comment,
@@ -42,6 +42,8 @@ export {
   namespaceType,
   ExceptionListType,
   Type,
+  osTypeArray,
+  OsTypeArray,
 } from './schemas';
 
 export { ENDPOINT_LIST_ID } from './constants';

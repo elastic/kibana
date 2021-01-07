@@ -9,9 +9,11 @@ import { map, truncate } from 'lodash';
 import open from 'opn';
 import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
+import { getDisallowedOutgoingUrlError } from '../';
+import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
-import { ConditionalHeaders, ElementPosition } from '../../../types';
+import { ElementPosition } from '../../../lib/screenshots';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 
 export interface ChromiumDriverOptions {
@@ -31,8 +33,6 @@ interface EvaluateOpts {
 interface EvaluateMetaOpts {
   context: string;
 }
-
-type ConditionalHeadersConditions = ConditionalHeaders['conditions'];
 
 interface InterceptedRequest {
   requestId: string;
@@ -76,6 +76,9 @@ export class HeadlessChromiumDriver {
     });
   }
 
+  /*
+   * Call Page.goto and wait to see the Kibana DOM content
+   */
   public async open(
     url: string,
     {
@@ -113,6 +116,16 @@ export class HeadlessChromiumDriver {
     logger.info(`handled ${this.interceptedCount} page requests`);
   }
 
+  /*
+   * Let modules poll if Chrome is still running so they can short circuit if needed
+   */
+  public isPageOpen() {
+    return !this.page.isClosed();
+  }
+
+  /*
+   * Call Page.screenshot and return a base64-encoded string of the image
+   */
   public async screenshot(elementPosition: ElementPosition): Promise<string> {
     const { boundingClientRect, scroll } = elementPosition;
     const screenshot = await this.page.screenshot({
@@ -145,7 +158,7 @@ export class HeadlessChromiumDriver {
   ): Promise<ElementHandle<Element>> {
     const { timeout } = opts;
     logger.debug(`waitForSelector ${selector}`);
-    const resp = await this.page.waitFor(selector, { timeout }); // override default 30000ms
+    const resp = await this.page.waitForSelector(selector, { timeout }); // override default 30000ms
     logger.debug(`waitForSelector ${selector} resolved`);
     return resp;
   }
@@ -183,14 +196,17 @@ export class HeadlessChromiumDriver {
   }
 
   public async setViewport(
-    { width, height, zoom }: ViewZoomWidthHeight,
+    { width: _width, height: _height, zoom }: ViewZoomWidthHeight,
     logger: LevelLogger
   ): Promise<void> {
-    logger.debug(`Setting viewport to width: ${width}, height: ${height}, zoom: ${zoom}`);
+    const width = Math.floor(_width);
+    const height = Math.floor(_height);
+
+    logger.debug(`Setting viewport to: width=${width} height=${height} zoom=${zoom}`);
 
     await this.page.setViewport({
-      width: Math.floor(width / zoom),
-      height: Math.floor(height / zoom),
+      width,
+      height,
       deviceScaleFactor: zoom,
       isMobile: false,
     });
@@ -220,22 +236,17 @@ export class HeadlessChromiumDriver {
 
       // We should never ever let file protocol requests go through
       if (!allowed || !this.allowRequest(interceptedUrl)) {
-        logger.error(`Got bad URL: "${interceptedUrl}", closing browser.`);
         await client.send('Fetch.failRequest', {
           errorReason: 'Aborted',
           requestId,
         });
         this.page.browser().close();
-        throw new Error(
-          i18n.translate('xpack.reporting.chromiumDriver.disallowedOutgoingUrl', {
-            defaultMessage: `Received disallowed outgoing URL: "{interceptedUrl}", exiting`,
-            values: { interceptedUrl },
-          })
-        );
+        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        return;
       }
 
       if (this._shouldUseCustomHeaders(conditionalHeaders.conditions, interceptedUrl)) {
-        logger.debug(`Using custom headers for ${interceptedUrl}`);
+        logger.trace(`Using custom headers for ${interceptedUrl}`);
         const headers = map(
           {
             ...interceptedRequest.request.headers,
@@ -262,7 +273,7 @@ export class HeadlessChromiumDriver {
         }
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
-        logger.debug(`No custom headers for ${loggedUrl}`);
+        logger.trace(`No custom headers for ${loggedUrl}`);
         try {
           await client.send('Fetch.continueRequest', { requestId });
         } catch (err) {
@@ -292,9 +303,9 @@ export class HeadlessChromiumDriver {
       }
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
-        logger.error(`Got disallowed URL "${interceptedUrl}", closing browser.`);
         this.page.browser().close();
-        throw new Error(`Received disallowed URL in response: ${interceptedUrl}`);
+        logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
+        return;
       }
     });
 
@@ -325,17 +336,32 @@ export class HeadlessChromiumDriver {
   private _shouldUseCustomHeaders(conditions: ConditionalHeadersConditions, url: string) {
     const { hostname, protocol, port, pathname } = parseUrl(url);
 
-    if (pathname === undefined) {
-      // There's a discrepancy between the NodeJS docs and the typescript types. NodeJS docs
-      // just say 'string' and the typescript types say 'string | undefined'. We haven't hit a
-      // situation where it's undefined but here's an explicit Error if we do.
-      throw new Error(`pathname is undefined, don't know how to proceed`);
-    }
+    // `port` is null in URLs that don't explicitly state it,
+    // however we can derive the port from the protocol (http/https)
+    // IE: https://feeds-staging.elastic.co/kibana/v8.0.0.json
+    const derivedPort = (() => {
+      if (port) {
+        return port;
+      }
+
+      if (protocol === 'http:') {
+        return '80';
+      }
+
+      if (protocol === 'https:') {
+        return '443';
+      }
+
+      return null;
+    })();
+
+    if (derivedPort === null) throw new Error(`URL missing port: ${url}`);
+    if (pathname === null) throw new Error(`URL missing pathname: ${url}`);
 
     return (
       hostname === conditions.hostname &&
       protocol === `${conditions.protocol}:` &&
-      this._shouldUseCustomHeadersForPort(conditions, port) &&
+      this._shouldUseCustomHeadersForPort(conditions, derivedPort) &&
       pathname.startsWith(`${conditions.basePath}/`)
     );
   }

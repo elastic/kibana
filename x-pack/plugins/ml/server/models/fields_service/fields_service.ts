@@ -4,17 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import Boom from '@hapi/boom';
+import { IScopedClusterClient } from 'kibana/server';
 import { duration } from 'moment';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
+import { AggCardinality } from '../../../common/types/fields';
+import { isValidAggregationField } from '../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 
 /**
  * Service for carrying out queries to obtain data
  * specific to fields in Elasticsearch indices.
  */
-export function fieldsServiceProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
+export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   const fieldsAggsCache = initCardinalityFieldsCache();
 
   /**
@@ -35,15 +39,36 @@ export function fieldsServiceProvider({ callAsCurrentUser }: ILegacyScopedCluste
    */
   async function getAggregatableFields(
     index: string | string[],
-    fieldNames: string[]
+    fieldNames: string[],
+    datafeedConfig?: Datafeed
   ): Promise<string[]> {
-    const fieldCapsResp = await callAsCurrentUser('fieldCaps', {
+    const { body } = await asCurrentUser.fieldCaps({
       index,
       fields: fieldNames,
     });
     const aggregatableFields: string[] = [];
+    const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
+
     fieldNames.forEach((fieldName) => {
-      const fieldInfo = fieldCapsResp.fields[fieldName];
+      if (
+        typeof datafeedConfig?.script_fields === 'object' &&
+        datafeedConfig.script_fields.hasOwnProperty(fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      if (
+        typeof datafeedConfig?.runtime_mappings === 'object' &&
+        datafeedConfig.runtime_mappings.hasOwnProperty(fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      if (
+        datafeedAggregations !== undefined &&
+        isValidAggregationField(datafeedAggregations, fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      const fieldInfo = body.fields[fieldName];
       const typeKeys = fieldInfo !== undefined ? Object.keys(fieldInfo) : [];
       if (typeKeys.length > 0) {
         const fieldType = typeKeys[0];
@@ -67,10 +92,12 @@ export function fieldsServiceProvider({ callAsCurrentUser }: ILegacyScopedCluste
     query: any,
     timeFieldName: string,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    datafeedConfig?: Datafeed
   ): Promise<{ [key: string]: number }> {
-    const aggregatableFields = await getAggregatableFields(index, fieldNames);
+    const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);
 
+    // getAggregatableFields doesn't account for scripted or aggregated fields
     if (aggregatableFields.length === 0) {
       return {};
     }
@@ -112,10 +139,29 @@ export function fieldsServiceProvider({ callAsCurrentUser }: ILegacyScopedCluste
       mustCriteria.push(query);
     }
 
-    const aggs = fieldsToAgg.reduce((obj, field) => {
-      obj[field] = { cardinality: { field } };
-      return obj;
-    }, {} as { [field: string]: { cardinality: { field: string } } });
+    const runtimeMappings: any = {};
+    const aggs = fieldsToAgg.reduce(
+      (obj, field) => {
+        if (
+          typeof datafeedConfig?.script_fields === 'object' &&
+          datafeedConfig.script_fields.hasOwnProperty(field)
+        ) {
+          obj[field] = { cardinality: { script: datafeedConfig.script_fields[field].script } };
+        } else if (
+          typeof datafeedConfig?.runtime_mappings === 'object' &&
+          datafeedConfig.runtime_mappings.hasOwnProperty(field)
+        ) {
+          obj[field] = { cardinality: { field } };
+          runtimeMappings.runtime_mappings = datafeedConfig.runtime_mappings;
+        } else {
+          obj[field] = { cardinality: { field } };
+        }
+        return obj;
+      },
+      {} as {
+        [field: string]: AggCardinality;
+      }
+    );
 
     const body = {
       query: {
@@ -128,14 +174,15 @@ export function fieldsServiceProvider({ callAsCurrentUser }: ILegacyScopedCluste
         excludes: [],
       },
       aggs,
+      ...runtimeMappings,
     };
 
-    const aggregations = (
-      await callAsCurrentUser('search', {
-        index,
-        body,
-      })
-    )?.aggregations;
+    const {
+      body: { aggregations },
+    } = await asCurrentUser.search({
+      index,
+      body,
+    });
 
     if (!aggregations) {
       return {};
@@ -170,7 +217,9 @@ export function fieldsServiceProvider({ callAsCurrentUser }: ILegacyScopedCluste
   }> {
     const obj = { success: true, start: { epoch: 0, string: '' }, end: { epoch: 0, string: '' } };
 
-    const resp = await callAsCurrentUser('search', {
+    const {
+      body: { aggregations },
+    } = await asCurrentUser.search({
       index,
       size: 0,
       body: {
@@ -190,12 +239,12 @@ export function fieldsServiceProvider({ callAsCurrentUser }: ILegacyScopedCluste
       },
     });
 
-    if (resp.aggregations && resp.aggregations.earliest && resp.aggregations.latest) {
-      obj.start.epoch = resp.aggregations.earliest.value;
-      obj.start.string = resp.aggregations.earliest.value_as_string;
+    if (aggregations && aggregations.earliest && aggregations.latest) {
+      obj.start.epoch = aggregations.earliest.value;
+      obj.start.string = aggregations.earliest.value_as_string;
 
-      obj.end.epoch = resp.aggregations.latest.value;
-      obj.end.string = resp.aggregations.latest.value_as_string;
+      obj.end.epoch = aggregations.latest.value;
+      obj.end.string = aggregations.latest.value_as_string;
     }
     return obj;
   }
@@ -338,12 +387,12 @@ export function fieldsServiceProvider({ callAsCurrentUser }: ILegacyScopedCluste
       },
     };
 
-    const aggregations = (
-      await callAsCurrentUser('search', {
-        index,
-        body,
-      })
-    )?.aggregations;
+    const {
+      body: { aggregations },
+    } = await asCurrentUser.search({
+      index,
+      body,
+    });
 
     if (!aggregations) {
       return cachedValues;

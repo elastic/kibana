@@ -5,6 +5,7 @@
  */
 import React, { useCallback } from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenu } from '@elastic/eui';
+import { getCustomMetricLabel } from '../../../../../../../common/formatters/get_custom_metric_label';
 import {
   SnapshotMetricInput,
   SnapshotCustomMetricInput,
@@ -14,7 +15,6 @@ import {
   SnapshotMetricTypeRT,
   SnapshotMetricType,
 } from '../../../../../../../common/inventory_models/types';
-import { getCustomMetricLabel } from './get_custom_metric_label';
 
 interface Props {
   options: Array<{ text: string; value: string }>;

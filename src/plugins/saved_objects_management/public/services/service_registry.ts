@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectLoader } from '../../../saved_objects/public';
 
 export interface SavedObjectsManagementServiceRegistryEntry {
@@ -25,9 +25,7 @@ export interface SavedObjectsManagementServiceRegistryEntry {
   title: string;
 }
 
-export type ISavedObjectsManagementServiceRegistry = PublicMethodsOf<
-  SavedObjectsManagementServiceRegistry
->;
+export type ISavedObjectsManagementServiceRegistry = PublicMethodsOf<SavedObjectsManagementServiceRegistry>;
 
 export class SavedObjectsManagementServiceRegistry {
   private readonly registry = new Map<string, SavedObjectsManagementServiceRegistryEntry>();

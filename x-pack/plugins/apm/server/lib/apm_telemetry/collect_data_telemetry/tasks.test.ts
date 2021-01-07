@@ -4,115 +4,153 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AGENT_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ApmIndicesConfig } from '../../settings/apm_indices/get_apm_indices';
 import { tasks } from './tasks';
+import {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+} from '../../../../common/elasticsearch_fieldnames';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
+    /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.errorIndices': 'apm-8.0.0-error',
     'apm_oss.metricsIndices': 'apm-8.0.0-metric',
     'apm_oss.spanIndices': 'apm-8.0.0-span',
     'apm_oss.transactionIndices': 'apm-8.0.0-transaction',
+    /* eslint-enable @typescript-eslint/naming-convention */
   } as ApmIndicesConfig;
+
+  describe('environments', () => {
+    const task = tasks.find((t) => t.name === 'environments');
+
+    it('returns environment information', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        aggregations: {
+          environments: {
+            buckets: [
+              {
+                key: 'production',
+              },
+              {
+                key: 'testing',
+              },
+            ],
+          },
+          service_environments: {
+            buckets: [
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-node',
+                  [SERVICE_ENVIRONMENT]: 'production',
+                },
+              },
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-node',
+                  [SERVICE_ENVIRONMENT]: null,
+                },
+              },
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-java',
+                  [SERVICE_ENVIRONMENT]: 'production',
+                },
+              },
+              {
+                key: {
+                  [SERVICE_NAME]: 'opbeans-rum',
+                  [SERVICE_ENVIRONMENT]: null,
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      expect(await task?.executor({ search, indices } as any)).toEqual({
+        environments: {
+          services_with_multiple_environments: 1,
+          services_without_environment: 2,
+          top_environments: ['production', 'testing'],
+        },
+      });
+    });
+  });
 
   describe('aggregated_transactions', () => {
     const task = tasks.find((t) => t.name === 'aggregated_transactions');
 
-    it('returns aggregated transaction counts', async () => {
-      // This mock implementation returns different values based on the parameters,
-      // which should simulate all the queries that are done. For most of them we'll
-      // simulate the number of buckets by using the length of the key, but for a
-      // couple we'll simulate being paginated by returning an after_key.
-      const search = jest.fn().mockImplementation((params) => {
-        const isRumResult =
-          params.body.query.bool.filter &&
-          params.body.query.bool.filter.some(
-            (filter: any) =>
-              filter.terms && filter.terms[AGENT_NAME]?.includes('rum-js')
-          );
-        const isNonRumResult =
-          params.body.query.bool.filter &&
-          params.body.query.bool.filter.some(
-            (filter: any) =>
-              filter.terms && !filter.terms[AGENT_NAME]?.includes('rum-js')
-          );
-        const isPagedResult =
-          !!params.body.aggs?.current_implementation?.composite.after ||
-          !!params.body.aggs?.no_observer_name?.composite.after;
-        const isTotalResult = 'track_total_hits' in params.body;
-        const key = Object.keys(params.body.aggs ?? [])[0];
-
-        if (isRumResult) {
-          if (isTotalResult) {
-            return Promise.resolve({ hits: { total: { value: 3000 } } });
-          }
-        }
-
-        if (isNonRumResult) {
-          if (isTotalResult) {
-            return Promise.resolve({ hits: { total: { value: 2000 } } });
-          }
-        }
-
-        if (isPagedResult && key) {
-          return Promise.resolve({
-            hits: { total: { value: key.length } },
-            aggregations: { [key]: { buckets: [{}] } },
-          });
-        }
-
-        if (isTotalResult) {
-          return Promise.resolve({ hits: { total: { value: 1000 } } });
-        }
-
-        if (
-          key === 'current_implementation' ||
-          (key === 'no_observer_name' && !isPagedResult)
-        ) {
-          return Promise.resolve({
-            hits: { total: { value: key.length } },
-            aggregations: {
-              [key]: { after_key: {}, buckets: key.split('').map((_) => ({})) },
+    describe('without transactions', () => {
+      it('returns an empty result', async () => {
+        const search = jest.fn().mockReturnValueOnce({
+          hits: {
+            hits: [],
+            total: {
+              value: 0,
             },
-          });
-        }
+          },
+        });
 
-        if (key) {
-          return Promise.resolve({
-            hits: { total: { value: key.length } },
-            aggregations: {
-              [key]: { buckets: key.split('').map((_) => ({})) },
-            },
-          });
-        }
+        expect(await task?.executor({ indices, search } as any)).toEqual({});
       });
+    });
+
+    it('returns aggregated transaction counts', async () => {
+      const search = jest
+        .fn()
+        // The first call to `search` asks for a transaction to get
+        // a fixed date range.
+        .mockReturnValueOnce({
+          hits: {
+            hits: [{ _source: { '@timestamp': new Date().toISOString() } }],
+          },
+          total: {
+            value: 1,
+          },
+        })
+        // Later calls are all composite aggregations. We return 2 pages of
+        // results to test if scrolling works.
+        .mockImplementation((params) => {
+          let arrayLength = 1000;
+          let nextAfter: Record<string, any> = { after_key: {} };
+
+          if (params.body.aggs.transaction_metric_groups.composite.after) {
+            arrayLength = 250;
+            nextAfter = {};
+          }
+
+          return Promise.resolve({
+            hits: {
+              total: {
+                value: 5000,
+              },
+            },
+            aggregations: {
+              transaction_metric_groups: {
+                buckets: new Array(arrayLength),
+                ...nextAfter,
+              },
+            },
+          });
+        });
 
       expect(await task?.executor({ indices, search } as any)).toEqual({
         aggregated_transactions: {
           current_implementation: {
-            expected_metric_document_count: 23,
-            transaction_count: 1000,
+            expected_metric_document_count: 1250,
+            transaction_count: 5000,
+            ratio: 0.25,
           },
           no_observer_name: {
-            expected_metric_document_count: 17,
-            transaction_count: 1000,
+            expected_metric_document_count: 1250,
+            transaction_count: 5000,
+            ratio: 0.25,
           },
-          no_rum: {
-            expected_metric_document_count: 6,
-            transaction_count: 2000,
-          },
-          no_rum_no_observer_name: {
-            expected_metric_document_count: 23,
-            transaction_count: 2000,
-          },
-          only_rum: {
-            expected_metric_document_count: 8,
-            transaction_count: 3000,
-          },
-          only_rum_no_observer_name: {
-            expected_metric_document_count: 25,
-            transaction_count: 3000,
+          with_country: {
+            expected_metric_document_count: 1250,
+            transaction_count: 5000,
+            ratio: 0.25,
           },
         },
       });

@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import { getCoreStart } from '../../../../services';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import { TopN } from '../../../visualizations/views/top_n';
-import { getLastValue } from '../../../../../../../plugins/vis_type_timeseries/common/get_last_value';
+import { getLastValue } from '../../../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../lib/set_is_reversed';
 import { replaceVars } from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
@@ -47,7 +48,7 @@ function sortSeries(visData, model) {
   }, []);
 }
 
-export function TopNVisualization(props) {
+function TopNVisualization(props) {
   const { backgroundColor, model, visData } = props;
 
   const series = sortSeries(visData, model).map((item) => {
@@ -89,7 +90,8 @@ export function TopNVisualization(props) {
 
   if (model.drilldown_url) {
     params.onClick = (item) => {
-      window.location = replaceVars(model.drilldown_url, {}, { key: item.label });
+      const url = replaceVars(model.drilldown_url, {}, { key: item.label });
+      getCoreStart().application.navigateToUrl(url);
     };
   }
 
@@ -109,3 +111,7 @@ TopNVisualization.propTypes = {
   visData: PropTypes.object,
   getConfig: PropTypes.func,
 };
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { TopNVisualization as default };

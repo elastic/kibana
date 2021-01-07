@@ -6,7 +6,7 @@
 import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { useForm, Form, SerializerFunc } from '../../shared_imports';
+import { useForm, Form } from '../../shared_imports';
 import { GenericObject, MappingsConfiguration } from '../../types';
 import { useDispatch } from '../../mappings_state_context';
 import { DynamicMappingSection } from './dynamic_mapping_section';
@@ -19,14 +19,16 @@ interface Props {
   value?: MappingsConfiguration;
 }
 
-const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
+const formSerializer = (formData: GenericObject) => {
   const {
     dynamicMapping: {
       enabled: dynamicMappingsEnabled,
       throwErrorsForUnmappedFields,
+      /* eslint-disable @typescript-eslint/naming-convention */
       numeric_detection,
       date_detection,
       dynamic_date_formats,
+      /* eslint-enable @typescript-eslint/naming-convention */
     },
     sourceField,
     metaField,
@@ -51,9 +53,11 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
 const formDeserializer = (formData: GenericObject) => {
   const {
     dynamic,
+    /* eslint-disable @typescript-eslint/naming-convention */
     numeric_detection,
     date_detection,
     dynamic_date_formats,
+    /* eslint-enable @typescript-eslint/naming-convention */
     _source: { enabled, includes, excludes } = {} as {
       enabled?: boolean;
       includes?: string[];
@@ -82,9 +86,9 @@ const formDeserializer = (formData: GenericObject) => {
 };
 
 export const ConfigurationForm = React.memo(({ value }: Props) => {
-  const isMounted = useRef<boolean | undefined>(undefined);
+  const isMounted = useRef(false);
 
-  const { form } = useForm<MappingsConfiguration>({
+  const { form } = useForm({
     schema: configurationFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,
@@ -104,36 +108,29 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
           validate,
           submitForm: submit,
         },
-      });
+      } as any);
     });
 
     return subscription.unsubscribe;
   }, [dispatch, subscribe, submit]);
 
   useEffect(() => {
-    if (isMounted.current === undefined) {
-      // On mount: don't reset the form
-      isMounted.current = true;
-      return;
-    } else if (isMounted.current === false) {
-      // When we save the snapshot on unMount we update the "defaultValue" in our state
-      // wich updates the "value" prop here on the component.
-      // To avoid resetting the form at this stage, we exit early.
-      return;
+    if (isMounted.current) {
+      // If the value has changed (it probably means that we have loaded a new JSON)
+      // we need to reset the form to update the fields values.
+      reset({ resetValues: true, defaultValue: value });
     }
-
-    // If the value has changed (it probably means that we have loaded a new JSON)
-    // we need to reset the form to update the fields values.
-    reset({ resetValues: true });
   }, [value, reset]);
 
   useEffect(() => {
+    isMounted.current = true;
+
     return () => {
       isMounted.current = false;
 
       // Save a snapshot of the form state so we can get back to it when navigating back to the tab
       const configurationData = getFormData();
-      dispatch({ type: 'configuration.save', value: configurationData });
+      dispatch({ type: 'configuration.save', value: configurationData as any });
     };
   }, [getFormData, dispatch]);
 

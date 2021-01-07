@@ -34,9 +34,13 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
   <EuiSpacer
     size="xxl"
   />
-  <EuiBottomBar>
+  <EuiBottomBar
+    affordForDisplacement={true}
+    paddingSize="m"
+  >
     <EuiFlexGroup
       alignItems="center"
+      data-test-subj="monitoringSetupModeBottomBar"
       justifyContent="spaceBetween"
     >
       <EuiFlexItem
@@ -99,7 +103,9 @@ exports[`SetupModeRenderer should render with setup mode disabled 1`] = `
     setupMode={
       Object {
         "closeFlyout": [Function],
-        "data": null,
+        "data": Object {
+          "byUuid": Object {},
+        },
         "enabled": false,
         "meta": null,
         "openFlyout": [Function],
@@ -131,9 +137,13 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
   <EuiSpacer
     size="xxl"
   />
-  <EuiBottomBar>
+  <EuiBottomBar
+    affordForDisplacement={true}
+    paddingSize="m"
+  >
     <EuiFlexGroup
       alignItems="center"
+      data-test-subj="monitoringSetupModeBottomBar"
       justifyContent="spaceBetween"
     >
       <EuiFlexItem

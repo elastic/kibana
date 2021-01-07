@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { map, share } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, map, share } from 'rxjs/operators';
 import { History } from 'history';
 import { IStateStorage } from './types';
 import {
@@ -68,7 +68,19 @@ export interface IKbnUrlStateStorage extends IStateStorage {
  * @public
  */
 export const createKbnUrlStateStorage = (
-  { useHash = false, history }: { useHash: boolean; history?: History } = { useHash: false }
+  {
+    useHash = false,
+    history,
+    onGetError,
+    onSetError,
+  }: {
+    useHash: boolean;
+    history?: History;
+    onGetError?: (error: Error) => void;
+    onSetError?: (error: Error) => void;
+  } = {
+    useHash: false,
+  }
 ): IKbnUrlStateStorage => {
   const url = createKbnUrlControls(history);
   return {
@@ -78,15 +90,23 @@ export const createKbnUrlStateStorage = (
       { replace = false }: { replace: boolean } = { replace: false }
     ) => {
       // syncState() utils doesn't wait for this promise
-      return url.updateAsync(
-        (currentUrl) => setStateToKbnUrl(key, state, { useHash }, currentUrl),
-        replace
-      );
+      return url.updateAsync((currentUrl) => {
+        try {
+          return setStateToKbnUrl(key, state, { useHash }, currentUrl);
+        } catch (error) {
+          if (onSetError) onSetError(error);
+        }
+      }, replace);
     },
     get: (key) => {
       // if there is a pending url update, then state will be extracted from that pending url,
       // otherwise current url will be used to retrieve state from
-      return getStateFromKbnUrl(key, url.getPendingUrl());
+      try {
+        return getStateFromKbnUrl(key, url.getPendingUrl());
+      } catch (e) {
+        if (onGetError) onGetError(e);
+        return null;
+      }
     },
     change$: <State>(key: string) =>
       new Observable((observer) => {
@@ -99,6 +119,10 @@ export const createKbnUrlStateStorage = (
         };
       }).pipe(
         map(() => getStateFromKbnUrl<State>(key)),
+        catchError((error) => {
+          if (onGetError) onGetError(error);
+          return of(null);
+        }),
         share()
       ),
     flush: ({ replace = false }: { replace?: boolean } = {}) => {

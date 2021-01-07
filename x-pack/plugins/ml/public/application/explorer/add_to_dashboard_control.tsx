@@ -24,20 +24,18 @@ import { EuiModalBody } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../contexts/kibana';
-import { SavedObjectDashboard } from '../../../../../../src/plugins/dashboard/public';
-import {
-  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
-  getDefaultPanelTitle,
-} from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+import { DashboardSavedObject } from '../../../../../../src/plugins/dashboard/public';
+import { getDefaultPanelTitle } from '../../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
 import { useDashboardService } from '../services/dashboard_service';
 import { SWIMLANE_TYPE, SwimlaneType } from './explorer_constants';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../../embeddables';
 
 export interface DashboardItem {
   id: string;
   title: string;
   description: string | undefined;
-  attributes: SavedObjectDashboard;
+  attributes: DashboardSavedObject;
 }
 
 export type EuiTableProps = EuiInMemoryTableProps<DashboardItem>;

@@ -7,14 +7,14 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getEntryMatchMock } from './entry_match.mock';
 import { EntryMatch, entriesMatch } from './entry_match';
 
 describe('entriesMatch', () => {
   test('it should validate an entry', () => {
-    const payload = { ...getEntryMatchMock() };
+    const payload = getEntryMatchMock();
     const decoded = entriesMatch.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -23,7 +23,7 @@ describe('entriesMatch', () => {
   });
 
   test('it should validate when operator is "included"', () => {
-    const payload = { ...getEntryMatchMock() };
+    const payload = getEntryMatchMock();
     const decoded = entriesMatch.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
@@ -32,7 +32,7 @@ describe('entriesMatch', () => {
   });
 
   test('it should validate when "operator" is "excluded"', () => {
-    const payload = { ...getEntryMatchMock() };
+    const payload = getEntryMatchMock();
     payload.operator = 'excluded';
     const decoded = entriesMatch.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -41,7 +41,7 @@ describe('entriesMatch', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should not validate when "field" is empty string', () => {
+  test('it should FAIL validation when "field" is empty string', () => {
     const payload: Omit<EntryMatch, 'field'> & { field: string } = {
       ...getEntryMatchMock(),
       field: '',
@@ -53,7 +53,7 @@ describe('entriesMatch', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should not validate when "value" is not string', () => {
+  test('it should FAIL validation when "value" is not string', () => {
     const payload: Omit<EntryMatch, 'value'> & { value: string[] } = {
       ...getEntryMatchMock(),
       value: ['some value'],
@@ -67,7 +67,7 @@ describe('entriesMatch', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should not validate when "value" is empty string', () => {
+  test('it should FAIL validation when "value" is empty string', () => {
     const payload: Omit<EntryMatch, 'value'> & { value: string } = {
       ...getEntryMatchMock(),
       value: '',
@@ -79,7 +79,7 @@ describe('entriesMatch', () => {
     expect(message.schema).toEqual({});
   });
 
-  test('it should not validate when "type" is not "match"', () => {
+  test('it should FAIL validation when "type" is not "match"', () => {
     const payload: Omit<EntryMatch, 'type'> & { type: string } = {
       ...getEntryMatchMock(),
       type: 'match_any',
@@ -96,12 +96,12 @@ describe('entriesMatch', () => {
   test('it should strip out extra keys', () => {
     const payload: EntryMatch & {
       extraKey?: string;
-    } = { ...getEntryMatchMock() };
+    } = getEntryMatchMock();
     payload.extraKey = 'some value';
     const decoded = entriesMatch.decode(payload);
     const message = pipe(decoded, foldLeftRight);
 
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual({ ...getEntryMatchMock() });
+    expect(message.schema).toEqual(getEntryMatchMock());
   });
 });

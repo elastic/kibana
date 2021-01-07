@@ -4,15 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { memo } from 'react';
 import { EuiAvatar } from '@elastic/eui';
-import React from 'react';
+
+import * as i18n from './translations';
 
 interface UserActionAvatarProps {
-  name: string;
+  username?: string | null;
+  fullName?: string | null;
 }
 
-export const UserActionAvatar = ({ name }: UserActionAvatarProps) => {
-  return (
-    <EuiAvatar data-test-subj={`user-action-avatar`} className="userAction__circle" name={name} />
-  );
+const UserActionAvatarComponent = ({ username, fullName }: UserActionAvatarProps) => {
+  const avatarName = fullName && fullName.length > 0 ? fullName : username ?? i18n.UNKNOWN;
+
+  return <EuiAvatar name={avatarName} data-test-subj={`user-action-avatar`} />;
 };
+
+export const UserActionAvatar = memo(UserActionAvatarComponent);

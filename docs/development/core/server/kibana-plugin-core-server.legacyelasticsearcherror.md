@@ -4,11 +4,12 @@
 
 ## LegacyElasticsearchError interface
 
+@<!-- -->deprecated. The new elasticsearch client doesn't wrap errors anymore.
 
 <b>Signature:</b>
 
 ```typescript
-export interface LegacyElasticsearchError extends Boom 
+export interface LegacyElasticsearchError extends Boom.Boom 
 ```
 
 ## Properties

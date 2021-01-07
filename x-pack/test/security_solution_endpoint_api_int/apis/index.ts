@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FtrProviderContext } from '../ftr_provider_context';
-import { isRegistryEnabled, getRegistryUrl } from '../registry';
-import { DEFAULT_REGISTRY_URL } from '../../../plugins/ingest_manager/common';
+import { isRegistryEnabled, getRegistryUrlFromTestEnv } from '../registry';
+import { getRegistryUrl as getRegistryUrlFromIngest } from '../../../plugins/fleet/server';
 
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
@@ -20,16 +20,17 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
       log.warning('These tests are being run with an external package registry');
     }
 
-    const registryUrl = getRegistryUrl() ?? DEFAULT_REGISTRY_URL;
+    const registryUrl = getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
     before(async () => {
       await ingestManager.setup();
     });
-    loadTestFile(require.resolve('./resolver/entity_id'));
-    loadTestFile(require.resolve('./resolver/tree'));
+    loadTestFile(require.resolve('./resolver/index'));
     loadTestFile(require.resolve('./metadata'));
+    loadTestFile(require.resolve('./metadata_v1'));
     loadTestFile(require.resolve('./policy'));
     loadTestFile(require.resolve('./artifacts'));
+    loadTestFile(require.resolve('./package'));
   });
 }

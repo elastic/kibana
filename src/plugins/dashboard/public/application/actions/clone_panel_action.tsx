@@ -17,18 +17,26 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'src/core/public';
-import uuid from 'uuid';
 import _ from 'lodash';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { ViewMode, PanelState, IEmbeddable } from '../../embeddable_plugin';
-import { SavedObject } from '../../../../saved_objects/public';
-import { PanelNotFoundError, EmbeddableInput } from '../../../../embeddable/public';
+import uuid from 'uuid';
+
+import { CoreStart } from 'src/core/public';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
+import { SavedObject } from '../../services/saved_objects';
+import {
+  ViewMode,
+  PanelState,
+  IEmbeddable,
+  PanelNotFoundError,
+  EmbeddableInput,
+  SavedObjectEmbeddableInput,
+  isErrorEmbeddable,
+} from '../../services/embeddable';
 import {
   placePanelBeside,
   IPanelPlacementBesideArgs,
 } from '../embeddable/panel/dashboard_panel_placement';
+import { dashboardClonePanelAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
@@ -37,7 +45,7 @@ export interface ClonePanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL> {
+export class ClonePanelAction implements Action<ClonePanelActionContext> {
   public readonly type = ACTION_CLONE_PANEL;
   public readonly id = ACTION_CLONE_PANEL;
   public order = 45;
@@ -48,9 +56,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
-    return i18n.translate('dashboard.panel.clonePanel', {
-      defaultMessage: 'Clone panel',
-    });
+    return dashboardClonePanelAction.getDisplayName();
   }
 
   public getIconType({ embeddable }: ClonePanelActionContext) {
@@ -62,7 +68,8 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
 
   public async isCompatible({ embeddable }: ClonePanelActionContext) {
     return Boolean(
-      embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
+      !isErrorEmbeddable(embeddable) &&
+        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&
         embeddable.getRoot().isContainer &&
         embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE
@@ -93,9 +100,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
   }
 
   private async getUniqueTitle(rawTitle: string, embeddableType: string): Promise<string> {
-    const clonedTag = i18n.translate('dashboard.panel.title.clonedTag', {
-      defaultMessage: 'copy',
-    });
+    const clonedTag = dashboardClonePanelAction.getClonedTag();
     const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
     const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
     const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
@@ -143,12 +148,10 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
         },
         { references: _.cloneDeep(savedObjectToClone.references) }
       );
-      panelState.explicitInput.savedObjectId = clonedSavedObject.id;
+      (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId = clonedSavedObject.id;
     }
     this.core.notifications.toasts.addSuccess({
-      title: i18n.translate('dashboard.panel.clonedToast', {
-        defaultMessage: 'Cloned panel',
-      }),
+      title: dashboardClonePanelAction.getSuccessMessage(),
       'data-test-subj': 'addObjectToContainerSuccess',
     });
     return panelState;

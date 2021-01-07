@@ -62,6 +62,9 @@
       "createdAt": {
         "type": "date"
       },
+      "updatedAt": {
+        "type": "date"
+      },
       "apiKey": {
         "type": "binary"
       },
@@ -71,11 +74,41 @@
       "throttle": {
         "type": "keyword"
       },
+      "notifyWhen": {
+        "type": "keyword"
+      },
       "muteAll": {
         "type": "boolean"
       },
       "mutedInstanceIds": {
         "type": "keyword"
+      },
+      "meta": {
+        "properties": {
+          "versionApiKeyLastmodified": {
+            "type": "keyword"
+          }
+        }
+      },
+      "executionStatus": {
+        "properties": {
+          "status": {
+            "type": "keyword"
+          },
+          "lastExecutionDate": {
+            "type": "date"
+          },
+          "error": {
+            "properties": {
+              "reason": {
+                "type": "keyword"
+              },
+              "message": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
       }
     }
   }

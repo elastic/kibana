@@ -139,6 +139,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
                 })}
               >
                 <EuiFieldText
+                  data-test-subj="deleteSpaceInput"
                   name="confirmDeleteSpaceInput"
                   value={this.state.confirmSpaceName}
                   onChange={this.onSpaceNameChange}

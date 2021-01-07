@@ -3,7 +3,7 @@
 === Trace sample timeline
 
 The trace sample timeline visualization is a bird's-eye view of what your application was doing while it was trying to respond to a request.
-This makes it useful for visualizing where the selected transaction spent most of its time.
+This makes it useful for visualizing where a selected transaction spent most of its time.
 
 [role="screenshot"]
 image::apm/images/apm-transaction-sample.png[Example of distributed trace colors in the APM app in Kibana]
@@ -43,9 +43,12 @@ this makes finding possible bottlenecks throughout your application much easier 
 image::apm/images/apm-distributed-tracing.png[Example view of the distributed tracing in APM app in Kibana]
 
 Don't forget; by definition, a distributed trace includes more than one transaction.
-When viewing these distributed traces in the timeline waterfall, you'll see this image:apm/images/transaction-icon.png[APM icon] icon,
+When viewing distributed traces in the timeline waterfall,
+you'll see this icon: image:apm/images/transaction-icon.png[APM icon],
 which indicates the next transaction in the trace.
-These transactions can be expanded and viewed in detail by clicking on them.
+For easier problem isolation, transactions can be collapsed in the waterfall by clicking
+the icon to the left of the transactions.
+Transactions can also be expanded and viewed in detail by clicking on them.
 
 After exploring these traces,
 you can return to the full trace by clicking *View full trace*.

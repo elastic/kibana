@@ -7,15 +7,15 @@
 import { Role } from '../../../../../../../common/model';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { PrivilegeSpaceForm } from './privilege_space_form';
 import React from 'react';
 import { Space } from '../../../../../../../../spaces/public';
-import { EuiSuperSelect } from '@elastic/eui';
 import { FeatureTable } from '../feature_table';
 import { getDisplayedFeaturePrivileges } from '../feature_table/__fixtures__';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { findTestSubject } from '@kbn/test/jest';
 import { SpaceSelector } from './space_selector';
+import { EuiButtonGroup } from '@elastic/eui';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {
@@ -59,7 +59,9 @@ describe('PrivilegeSpaceForm', () => {
       />
     );
 
-    expect(wrapper.find(EuiSuperSelect).props().valueOfSelected).toEqual(`basePrivilege_custom`);
+    expect(
+      wrapper.find(EuiButtonGroup).filter('[name="basePrivilegeButtonGroup"]').props().idSelected
+    ).toEqual(`basePrivilege_custom`);
     expect(wrapper.find(FeatureTable).props().disabled).toEqual(true);
     expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
       Object {
@@ -69,6 +71,7 @@ describe('PrivilegeSpaceForm', () => {
         },
         "no_sub_features": Object {
           "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
         },
         "with_excluded_sub_features": Object {
           "primaryFeaturePrivilege": "none",
@@ -106,7 +109,9 @@ describe('PrivilegeSpaceForm', () => {
       />
     );
 
-    expect(wrapper.find(EuiSuperSelect).props().valueOfSelected).toEqual(`basePrivilege_all`);
+    expect(
+      wrapper.find(EuiButtonGroup).filter('[name="basePrivilegeButtonGroup"]').props().idSelected
+    ).toEqual(`basePrivilege_all`);
     expect(wrapper.find(FeatureTable).props().disabled).toEqual(true);
     expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
       Object {
@@ -116,6 +121,7 @@ describe('PrivilegeSpaceForm', () => {
         },
         "no_sub_features": Object {
           "primaryFeaturePrivilege": "all",
+          "subFeaturePrivileges": Array [],
         },
         "with_excluded_sub_features": Object {
           "primaryFeaturePrivilege": "all",
@@ -159,7 +165,9 @@ describe('PrivilegeSpaceForm', () => {
       />
     );
 
-    expect(wrapper.find(EuiSuperSelect).props().valueOfSelected).toEqual(`basePrivilege_custom`);
+    expect(
+      wrapper.find(EuiButtonGroup).filter('[name="basePrivilegeButtonGroup"]').props().idSelected
+    ).toEqual(`basePrivilege_custom`);
     expect(wrapper.find(FeatureTable).props().disabled).toEqual(false);
     expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
       Object {
@@ -169,6 +177,7 @@ describe('PrivilegeSpaceForm', () => {
         },
         "no_sub_features": Object {
           "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
         },
         "with_excluded_sub_features": Object {
           "primaryFeaturePrivilege": "none",
@@ -256,7 +265,10 @@ describe('PrivilegeSpaceForm', () => {
       />
     );
 
-    expect(wrapper.find(EuiSuperSelect).props().valueOfSelected).toEqual(`basePrivilege_custom`);
+    expect(
+      wrapper.find(EuiButtonGroup).filter('[name="basePrivilegeButtonGroup"]').props().idSelected
+    ).toEqual(`basePrivilege_custom`);
+
     expect(wrapper.find(FeatureTable).props().disabled).toEqual(false);
     expect(getDisplayedFeaturePrivileges(wrapper)).toMatchInlineSnapshot(`
       Object {
@@ -266,6 +278,7 @@ describe('PrivilegeSpaceForm', () => {
         },
         "no_sub_features": Object {
           "primaryFeaturePrivilege": "none",
+          "subFeaturePrivileges": Array [],
         },
         "with_excluded_sub_features": Object {
           "primaryFeaturePrivilege": "none",

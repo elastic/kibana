@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { some } from 'lodash';
 
 export function hasPrimaryChildren(item) {
-  return _.some(item.children, { primary: true });
+  return some(item.children, { primary: true });
 }

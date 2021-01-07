@@ -4,31 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuidv5 from 'uuid/v5';
-import { reduce, get, isEmpty } from 'lodash/fp';
+import { get, isEmpty } from 'lodash/fp';
 import set from 'set-value';
 
-import { Threshold } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  Threshold,
+  TimestampOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger } from '../../../../../../../src/core/server';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
-import { SignalSearchResponse } from './types';
-
-// used to generate constant Threshold Signals ID when run with the same params
-const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
+import { SignalSearchResponse, ThresholdAggregationBucket } from './types';
+import { calculateThresholdSignalUuid } from './utils';
+import { BuildRuleMessage } from './rule_messages';
 
 interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
   someResult: SignalSearchResponse;
   ruleParams: RuleTypeParams;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;
   id: string;
   filter: unknown;
   signalsIndex: string;
+  timestampOverride: TimestampOverrideOrUndefined;
   name: string;
   createdAt: string;
   createdBy: string;
@@ -40,71 +46,18 @@ interface BulkCreateThresholdSignalsParams {
   tags: string[];
   throttle: string;
   startedAt: Date;
+  buildRuleMessage: BuildRuleMessage;
 }
-
-interface FilterObject {
-  bool?: {
-    filter?: FilterObject | FilterObject[];
-    should?: Array<Record<string, Record<string, string>>>;
-  };
-}
-
-const getNestedQueryFilters = (filtersObj: FilterObject): Record<string, string> => {
-  if (Array.isArray(filtersObj.bool?.filter)) {
-    return reduce(
-      (acc, filterItem) => {
-        const nestedFilter = getNestedQueryFilters(filterItem);
-
-        if (nestedFilter) {
-          return { ...acc, ...nestedFilter };
-        }
-
-        return acc;
-      },
-      {},
-      filtersObj.bool?.filter
-    );
-  } else {
-    return (
-      (filtersObj.bool?.should &&
-        filtersObj.bool?.should[0] &&
-        (filtersObj.bool.should[0].match || filtersObj.bool.should[0].match_phrase)) ??
-      {}
-    );
-  }
-};
-
-export const getThresholdSignalQueryFields = (filter: unknown) => {
-  const filters = get('bool.filter', filter);
-
-  return reduce(
-    (acc, item) => {
-      if (item.match_phrase) {
-        return { ...acc, ...item.match_phrase };
-      }
-
-      if (item.bool?.should && (item.bool.should[0].match || item.bool.should[0].match_phrase)) {
-        return { ...acc, ...(item.bool.should[0].match || item.bool.should[0].match_phrase) };
-      }
-
-      if (item.bool?.filter) {
-        return { ...acc, ...getNestedQueryFilters(item) };
-      }
-
-      return acc;
-    },
-    {},
-    filters
-  );
-};
 
 const getTransformedHits = (
   results: SignalSearchResponse,
   inputIndex: string,
   startedAt: Date,
+  logger: Logger,
   threshold: Threshold,
   ruleId: string,
-  signalQueryFields: Record<string, string>
+  filter: unknown,
+  timestampOverride: TimestampOverrideOrUndefined
 ) => {
   if (isEmpty(threshold.field)) {
     const totalResults =
@@ -114,16 +67,24 @@ const getTransformedHits = (
       return [];
     }
 
+    const hit = results.hits.hits[0];
+    if (hit == null) {
+      logger.warn(`No hits returned, but totalResults >= threshold.value (${threshold.value})`);
+      return [];
+    }
+
     const source = {
-      '@timestamp': new Date().toISOString(),
-      threshold_count: totalResults,
-      ...signalQueryFields,
+      '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
+      threshold_result: {
+        count: totalResults,
+        value: ruleId,
+      },
     };
 
     return [
       {
         _index: inputIndex,
-        _id: uuidv5(`${ruleId}${startedAt}${threshold.field}`, NAMESPACE_ID),
+        _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field),
         _source: source,
       },
     ];
@@ -133,23 +94,30 @@ const getTransformedHits = (
     return [];
   }
 
-  return results.aggregations.threshold.buckets.map(
-    ({ key, doc_count }: { key: string; doc_count: number }) => {
-      const source = {
-        '@timestamp': new Date().toISOString(),
-        threshold_count: doc_count,
-        ...signalQueryFields,
-      };
+  return results.aggregations.threshold.buckets
+    .map(
+      ({ key, doc_count: docCount, top_threshold_hits: topHits }: ThresholdAggregationBucket) => {
+        const hit = topHits.hits.hits[0];
+        if (hit == null) {
+          return null;
+        }
 
-      set(source, threshold.field, key);
+        const source = {
+          '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
+          threshold_result: {
+            count: docCount,
+            value: get(threshold.field, hit._source),
+          },
+        };
 
-      return {
-        _index: inputIndex,
-        _id: uuidv5(`${ruleId}${startedAt}${threshold.field}${key}`, NAMESPACE_ID),
-        _source: source,
-      };
-    }
-  );
+        return {
+          _index: inputIndex,
+          _id: calculateThresholdSignalUuid(ruleId, startedAt, threshold.field, key),
+          _source: source,
+        };
+      }
+    )
+    .filter((bucket: ThresholdAggregationBucket) => bucket != null);
 };
 
 export const transformThresholdResultsToEcs = (
@@ -157,17 +125,20 @@ export const transformThresholdResultsToEcs = (
   inputIndex: string,
   startedAt: Date,
   filter: unknown,
+  logger: Logger,
   threshold: Threshold,
-  ruleId: string
+  ruleId: string,
+  timestampOverride: TimestampOverrideOrUndefined
 ): SignalSearchResponse => {
-  const signalQueryFields = getThresholdSignalQueryFields(filter);
   const transformedHits = getTransformedHits(
     results,
     inputIndex,
     startedAt,
+    logger,
     threshold,
     ruleId,
-    signalQueryFields
+    filter,
+    timestampOverride
   );
   const thresholdResults = {
     ...results,
@@ -176,6 +147,8 @@ export const transformThresholdResultsToEcs = (
       hits: transformedHits,
     },
   };
+
+  delete thresholdResults.aggregations; // no longer needed
 
   set(thresholdResults, 'results.hits.total', transformedHits.length);
 
@@ -191,9 +164,12 @@ export const bulkCreateThresholdSignals = async (
     params.inputIndexPattern.join(','),
     params.startedAt,
     params.filter,
+    params.logger,
     params.ruleParams.threshold!,
-    params.ruleParams.ruleId
+    params.ruleParams.ruleId,
+    params.timestampOverride
   );
+  const buildRuleMessage = params.buildRuleMessage;
 
-  return singleBulkCreate({ ...params, filteredEvents: ecsResults });
+  return singleBulkCreate({ ...params, filteredEvents: ecsResults, buildRuleMessage });
 };

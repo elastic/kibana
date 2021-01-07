@@ -48,6 +48,14 @@
     {
       "id": "windows_rare_user_runas_event",
       "file": "windows_rare_user_runas_event.json"
+    },
+    {
+      "id": "windows_rare_metadata_process",
+      "file": "windows_rare_metadata_process.json"
+    },
+    {
+      "id": "windows_rare_metadata_user",
+      "file": "windows_rare_metadata_user.json"
     }
   ],
   "datafeeds": [
@@ -95,6 +103,16 @@
       "id": "datafeed-windows_rare_user_runas_event",
       "file": "datafeed_windows_rare_user_runas_event.json",
       "job_id": "windows_rare_user_runas_event"
+    },
+    {
+      "id": "datafeed-windows_rare_metadata_process",
+      "file": "datafeed_windows_rare_metadata_process.json",
+      "job_id": "windows_rare_metadata_process"
+    },
+    {
+      "id": "datafeed-windows_rare_metadata_user",
+      "file": "datafeed_windows_rare_metadata_user.json",
+      "job_id": "windows_rare_metadata_user"
     }
   ]
 }

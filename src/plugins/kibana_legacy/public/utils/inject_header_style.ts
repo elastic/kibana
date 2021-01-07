@@ -36,6 +36,7 @@ export function injectHeaderStyle(uiSettings: IUiSettingsClient) {
   document.getElementsByTagName('head')[0].appendChild(style);
 
   uiSettings.get$('truncate:maxHeight').subscribe((value: number) => {
+    // eslint-disable-next-line no-unsanitized/property
     style.innerHTML = buildCSS(value);
   });
 }

@@ -9,6 +9,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Route, Switch, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { StartServicesAccessor } from 'src/core/public';
+import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
 import { SecurityLicense } from '../../../security/public';
 import { RegisterManagementAppArgs } from '../../../../../src/plugins/management/public';
 import { PluginsStart } from '../plugin';
@@ -32,6 +33,7 @@ export const spacesManagementApp = Object.freeze({
       title: i18n.translate('xpack.spaces.displayName', {
         defaultMessage: 'Spaces',
       }),
+
       async mount({ element, setBreadcrumbs, history }) {
         const [
           { notifications, i18n: i18nStart, application },
@@ -114,19 +116,21 @@ export const spacesManagementApp = Object.freeze({
 
         render(
           <i18nStart.Context>
-            <Router history={history}>
-              <Switch>
-                <Route path={['', '/']} exact>
-                  <SpacesGridPageWithBreadcrumbs />
-                </Route>
-                <Route path="/create">
-                  <CreateSpacePageWithBreadcrumbs />
-                </Route>
-                <Route path="/edit/:spaceId">
-                  <EditSpacePageWithBreadcrumbs />
-                </Route>
-              </Switch>
-            </Router>
+            <RedirectAppLinks application={application}>
+              <Router history={history}>
+                <Switch>
+                  <Route path={['', '/']} exact>
+                    <SpacesGridPageWithBreadcrumbs />
+                  </Route>
+                  <Route path="/create">
+                    <CreateSpacePageWithBreadcrumbs />
+                  </Route>
+                  <Route path="/edit/:spaceId">
+                    <EditSpacePageWithBreadcrumbs />
+                  </Route>
+                </Switch>
+              </Router>
+            </RedirectAppLinks>
           </i18nStart.Context>,
           element
         );

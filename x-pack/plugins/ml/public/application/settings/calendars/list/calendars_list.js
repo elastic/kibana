@@ -25,6 +25,8 @@ import { deleteCalendars } from './delete_calendars';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { getDocLinks } from '../../../util/dependency_cache';
+import { HelpMenu } from '../../../components/help_menu';
 
 export class CalendarsListUI extends Component {
   static propTypes = {
@@ -104,14 +106,21 @@ export class CalendarsListUI extends Component {
     const { canCreateCalendar, canDeleteCalendar } = this.props;
     let destroyModal = '';
 
+    const helpLink = getDocLinks().links.ml.calendars;
+
     if (this.state.isDestroyModalVisible) {
       destroyModal = (
         <EuiOverlayMask>
           <EuiConfirmModal
+            data-test-subj={'mlCalendarDeleteConfirmation'}
             title={
               <FormattedMessage
-                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarTitle"
-                defaultMessage="Delete calendar"
+                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle"
+                defaultMessage="Delete {calendarsCount, plural, one {{calendarsList}} other {# calendars}}?"
+                values={{
+                  calendarsCount: selectedForDeletion.length,
+                  calendarsList: selectedForDeletion.map((c) => c.calendar_id).join(', '),
+                }}
               />
             }
             onCancel={this.closeDestroyModal}
@@ -130,18 +139,7 @@ export class CalendarsListUI extends Component {
             }
             buttonColor="danger"
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteCalendarsDescription"
-                defaultMessage="Delete {calendarsCount, plural, one {this calendar} other {these calendars}}? {calendarsList}"
-                values={{
-                  calendarsCount: selectedForDeletion.length,
-                  calendarsList: selectedForDeletion.map((c) => c.calendar_id).join(', '),
-                }}
-              />
-            </p>
-          </EuiConfirmModal>
+          />
         </EuiOverlayMask>
       );
     }
@@ -149,7 +147,7 @@ export class CalendarsListUI extends Component {
     return (
       <Fragment>
         <NavigationMenu tabId="settings" />
-        <EuiPage className="mlCalendarList">
+        <EuiPage className="mlCalendarList" data-test-subj="mlPageCalendarManagement">
           <EuiPageBody>
             <EuiPageContent
               className="mlCalendarList__content"
@@ -174,6 +172,7 @@ export class CalendarsListUI extends Component {
             {destroyModal}
           </EuiPageBody>
         </EuiPage>
+        <HelpMenu docLink={helpLink} />
       </Fragment>
     );
   }

@@ -4,49 +4,50 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import AlertAdd from './alert_add';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult } from '../../../types';
-import { AlertsContextProvider, useAlertsContext } from '../../context/alerts_context';
+import {
+  Alert,
+  ConnectorValidationResult,
+  GenericValidationResult,
+  ValidationResult,
+} from '../../../types';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
-import { chartPluginMock } from '../../../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { ReactWrapper } from 'enzyme';
-import { AppContextProvider } from '../../app_context';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { useKibana } from '../../../common/lib/kibana';
+jest.mock('../../../common/lib/kibana');
+
 jest.mock('../../lib/alert_api', () => ({
   loadAlertTypes: jest.fn(),
-  health: jest.fn((async) => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
+  health: jest.fn(() => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
 }));
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 export const TestExpression: React.FunctionComponent<any> = () => {
-  const alertsContext = useAlertsContext();
-  const { metadata } = alertsContext;
-
   return (
     <EuiFormLabel>
       <FormattedMessage
         defaultMessage="Metadata: {val}. Fields: {fields}."
         id="xpack.triggersActionsUI.sections.alertAdd.metadataTest"
-        values={{ val: metadata!.test, fields: metadata!.fields.join(' ') }}
+        values={{ val: 'test', fields: '' }}
       />
     </EuiFormLabel>
   );
 };
 
 describe('alert_add', () => {
-  let deps: any;
   let wrapper: ReactWrapper<any>;
 
-  async function setup() {
+  async function setup(initialValues?: Partial<Alert>) {
     const mocks = coreMock.createSetup();
     const { loadAlertTypes } = jest.requireMock('../../lib/alert_api');
     const alertTypes = [
@@ -60,6 +61,8 @@ describe('alert_add', () => {
           },
         ],
         defaultActionGroupId: 'testActionGroup',
+        minimumLicenseRequired: 'basic',
+        recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
         producer: ALERTS_FEATURE_ID,
         authorizedConsumers: {
           [ALERTS_FEATURE_ID]: { read: true, all: true },
@@ -78,15 +81,14 @@ describe('alert_add', () => {
         application: { capabilities },
       },
     ] = await mocks.getStartServices();
-    deps = {
-      toastNotifications: mocks.notifications.toasts,
-      http: mocks.http,
-      uiSettings: mocks.uiSettings,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
-      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      alerts: {
+        show: true,
+        save: true,
+        delete: true,
+      },
     };
 
     mocks.http.get.mockResolvedValue({
@@ -97,7 +99,8 @@ describe('alert_add', () => {
     const alertType = {
       id: 'my-alert-type',
       iconClass: 'test',
-      name: 'test-alert',
+      description: 'test',
+      documentationUrl: null,
       validate: (): ValidationResult => {
         return { errors: {} };
       },
@@ -105,20 +108,19 @@ describe('alert_add', () => {
       requiresAppContext: false,
     };
 
-    const actionTypeModel = {
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
     alertTypeRegistry.list.mockReturnValue([alertType]);
@@ -128,36 +130,17 @@ describe('alert_add', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <AlertsContextProvider
-          value={{
-            reloadAlerts: () => {
-              return new Promise<void>(() => {});
-            },
-            http: deps.http,
-            actionTypeRegistry: deps.actionTypeRegistry,
-            alertTypeRegistry: deps.alertTypeRegistry,
-            toastNotifications: deps.toastNotifications,
-            uiSettings: deps.uiSettings,
-            docLinks: deps.docLinks,
-            metadata: { test: 'some value', fields: ['test'] },
-            capabilities: {
-              ...capabilities,
-              actions: {
-                delete: true,
-                save: true,
-                show: true,
-              },
-            },
-          }}
-        >
-          <AlertAdd
-            consumer={ALERTS_FEATURE_ID}
-            addFlyoutVisible={true}
-            setAddFlyoutVisibility={() => {}}
-          />
-        </AlertsContextProvider>
-      </AppContextProvider>
+      <AlertAdd
+        consumer={ALERTS_FEATURE_ID}
+        onClose={() => {}}
+        initialValues={initialValues}
+        reloadAlerts={() => {
+          return new Promise<void>(() => {});
+        }}
+        actionTypeRegistry={actionTypeRegistry}
+        alertTypeRegistry={alertTypeRegistry}
+        metadata={{ test: 'some value', fields: ['test'] }}
+      />
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -179,6 +162,30 @@ describe('alert_add', () => {
 
     wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
 
-    expect(wrapper.contains('Metadata: some value. Fields: test.')).toBeTruthy();
+    expect(wrapper.find('input#alertName').props().value).toBe('');
+
+    expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('');
+
+    expect(wrapper.find('.euiSelect').first().props().value).toBe('m');
+  });
+
+  it('renders alert add flyout with initial values', async () => {
+    await setup({
+      name: 'Simple status alert',
+      tags: ['uptime', 'logs'],
+      schedule: {
+        interval: '1h',
+      },
+    });
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+
+    expect(wrapper.find('input#alertName').props().value).toBe('Simple status alert');
+
+    expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('uptimelogs');
+
+    expect(wrapper.find('.euiSelect').first().props().value).toBe('h');
   });
 });

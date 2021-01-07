@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { FieldFormatsRegistry } from './field_formats_registry';
 type IFieldFormatsRegistry = PublicMethodsOf<FieldFormatsRegistry>;
 
@@ -55,3 +55,5 @@ export {
   IFieldFormat,
   FieldFormatsStartCommon,
 } from './types';
+
+export * from './errors';

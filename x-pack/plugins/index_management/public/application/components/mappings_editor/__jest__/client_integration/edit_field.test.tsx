@@ -8,10 +8,14 @@ import { act } from 'react-dom/test-utils';
 import { componentHelpers, MappingsEditorTestBed } from './helpers';
 import { defaultTextParameters, defaultShapeParameters } from './datatypes';
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
-const onChangeHandler = jest.fn();
-const getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
 describe('Mappings editor: edit field', () => {
+  /**
+   * Variable to store the mappings data forwarded to the consumer component
+   */
+  let data: any;
+  let onChangeHandler: jest.Mock = jest.fn();
+  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   let testBed: MappingsEditorTestBed;
 
   beforeAll(() => {
@@ -22,8 +26,9 @@ describe('Mappings editor: edit field', () => {
     jest.useRealTimers();
   });
 
-  afterEach(() => {
-    onChangeHandler.mockReset();
+  beforeEach(() => {
+    onChangeHandler = jest.fn();
+    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   });
 
   test('should open a flyout with the correct field to edit', async () => {
@@ -43,7 +48,11 @@ describe('Mappings editor: edit field', () => {
       },
     };
 
-    testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    await act(async () => {
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    });
+    testBed.component.update();
+
     await testBed.actions.expandAllFieldsAndReturnMetadata();
 
     const {
@@ -51,7 +60,7 @@ describe('Mappings editor: edit field', () => {
       actions: { startEditField },
     } = testBed;
     // Open the flyout to edit the field
-    startEditField('user.address.street');
+    await startEditField('user.address.street');
 
     // It should have the correct title
     expect(find('mappingsEditorFieldEdit.flyoutTitle').text()).toEqual(`Edit field 'street'`);
@@ -72,7 +81,10 @@ describe('Mappings editor: edit field', () => {
       },
     };
 
-    testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    await act(async () => {
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    });
+    testBed.component.update();
 
     const {
       find,
@@ -83,19 +95,18 @@ describe('Mappings editor: edit field', () => {
 
     expect(exists('userNameField' as any)).toBe(true);
     // Open the flyout, change the field type and save it
-    startEditField('userName');
+    await startEditField('userName');
 
     // Change the field type
-    find('mappingsEditorFieldEdit.fieldType').simulate('change', [
-      { label: 'Shape', value: defaultShapeParameters.type },
-    ]);
-    act(() => {
-      jest.advanceTimersByTime(1000);
+    await act(async () => {
+      find('mappingsEditorFieldEdit.fieldType').simulate('change', [
+        { label: 'Shape', value: defaultShapeParameters.type },
+      ]);
     });
 
     await updateFieldAndCloseFlyout();
 
-    const { data } = await getMappingsEditorData(component);
+    ({ data } = await getMappingsEditorData(component));
 
     const updatedMappings = {
       ...defaultMappings,
@@ -107,5 +118,5 @@ describe('Mappings editor: edit field', () => {
     };
 
     expect(data).toEqual(updatedMappings);
-  }, 50000);
+  });
 });

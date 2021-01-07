@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FieldSpec, IFieldSubType } from '../types';
+import { FieldSpec, IFieldSubType, IndexPattern } from '../..';
 
 export interface IFieldType {
   name: string;
@@ -37,6 +37,7 @@ export interface IFieldType {
   scripted?: boolean;
   subType?: IFieldSubType;
   displayName?: string;
+  customLabel?: string;
   format?: any;
-  toSpec?: () => FieldSpec;
+  toSpec?: (options?: { getFormatterForField?: IndexPattern['getFormatterForField'] }) => FieldSpec;
 }

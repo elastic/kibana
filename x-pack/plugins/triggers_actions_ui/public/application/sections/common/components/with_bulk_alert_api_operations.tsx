@@ -6,8 +6,13 @@
 
 import React from 'react';
 
-import { Alert, AlertType, AlertTaskState, AlertingFrameworkHealth } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
+import {
+  Alert,
+  AlertType,
+  AlertTaskState,
+  AlertInstanceSummary,
+  AlertingFrameworkHealth,
+} from '../../../../types';
 import {
   deleteAlerts,
   disableAlerts,
@@ -22,9 +27,11 @@ import {
   unmuteAlertInstance,
   loadAlert,
   loadAlertState,
+  loadAlertInstanceSummary,
   loadAlertTypes,
   health,
 } from '../../../lib/alert_api';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ComponentOpts {
   muteAlerts: (alerts: Alert[]) => Promise<void>;
@@ -51,6 +58,7 @@ export interface ComponentOpts {
   }>;
   loadAlert: (id: Alert['id']) => Promise<Alert>;
   loadAlertState: (id: Alert['id']) => Promise<AlertTaskState>;
+  loadAlertInstanceSummary: (id: Alert['id']) => Promise<AlertInstanceSummary>;
   loadAlertTypes: () => Promise<AlertType[]>;
   getHealth: () => Promise<AlertingFrameworkHealth>;
 }
@@ -61,7 +69,7 @@ export function withBulkAlertOperations<T>(
   WrappedComponent: React.ComponentType<T & ComponentOpts>
 ): React.FunctionComponent<PropsWithOptionalApiHandlers<T>> {
   return (props: PropsWithOptionalApiHandlers<T>) => {
-    const { http } = useAppDependencies();
+    const { http } = useKibana().services;
     return (
       <WrappedComponent
         {...(props as T)}
@@ -119,6 +127,9 @@ export function withBulkAlertOperations<T>(
         deleteAlert={async (alert: Alert) => deleteAlerts({ http, ids: [alert.id] })}
         loadAlert={async (alertId: Alert['id']) => loadAlert({ http, alertId })}
         loadAlertState={async (alertId: Alert['id']) => loadAlertState({ http, alertId })}
+        loadAlertInstanceSummary={async (alertId: Alert['id']) =>
+          loadAlertInstanceSummary({ http, alertId })
+        }
         loadAlertTypes={async () => loadAlertTypes({ http })}
         getHealth={async () => health({ http })}
       />

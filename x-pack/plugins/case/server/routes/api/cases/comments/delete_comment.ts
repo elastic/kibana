@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 
 import { CASE_SAVED_OBJECT } from '../../../../saved_object_types';
@@ -27,6 +27,7 @@ export function initDeleteCommentApi({ caseService, router, userActionService }:
     async (context, request, response) => {
       try {
         const client = context.core.savedObjects.client;
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request, response });
         const deleteDate = new Date().toISOString();
 

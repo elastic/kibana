@@ -7,15 +7,23 @@ import * as t from 'io-ts';
 import { DateFromString } from './date_from_string';
 
 const metaSchema = t.partial({
-  lastScheduledActions: t.type({
-    group: t.string,
-    date: DateFromString,
-  }),
+  lastScheduledActions: t.intersection([
+    t.partial({
+      subgroup: t.string,
+    }),
+    t.type({
+      group: t.string,
+      date: DateFromString,
+    }),
+  ]),
 });
 export type AlertInstanceMeta = t.TypeOf<typeof metaSchema>;
 
 const stateSchema = t.record(t.string, t.unknown);
 export type AlertInstanceState = t.TypeOf<typeof stateSchema>;
+
+const contextSchema = t.record(t.string, t.unknown);
+export type AlertInstanceContext = t.TypeOf<typeof contextSchema>;
 
 export const rawAlertInstance = t.partial({
   state: stateSchema,

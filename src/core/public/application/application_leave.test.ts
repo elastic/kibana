@@ -35,7 +35,18 @@ describe('getLeaveAction', () => {
       type: AppLeaveActionType.default,
     });
   });
+
+  it('returns the default action provided by the handle and nextAppId', () => {
+    expect(getLeaveAction((actions) => actions.default(), 'futureAppId')).toEqual({
+      type: AppLeaveActionType.default,
+    });
+  });
+
   it('returns the confirm action provided by the handler', () => {
+    expect(getLeaveAction((actions) => actions.confirm('some message'), 'futureAppId')).toEqual({
+      type: AppLeaveActionType.confirm,
+      text: 'some message',
+    });
     expect(getLeaveAction((actions) => actions.confirm('some message'))).toEqual({
       type: AppLeaveActionType.confirm,
       text: 'some message',
@@ -44,6 +55,15 @@ describe('getLeaveAction', () => {
       type: AppLeaveActionType.confirm,
       text: 'another message',
       title: 'a title',
+    });
+    const callback = jest.fn();
+    expect(
+      getLeaveAction((actions) => actions.confirm('another message', 'a title', callback))
+    ).toEqual({
+      type: AppLeaveActionType.confirm,
+      text: 'another message',
+      title: 'a title',
+      callback,
     });
   });
 });

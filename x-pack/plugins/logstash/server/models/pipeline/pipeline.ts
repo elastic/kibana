@@ -5,20 +5,20 @@
  */
 
 import moment from 'moment';
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 interface PipelineOptions {
   id: string;
-  description: string;
+  description?: string;
   pipeline: string;
   username?: string;
   settings?: Record<string, any>;
 }
 
 interface DownstreamPipeline {
-  description: string;
+  description?: string;
   pipeline: string;
   settings?: Record<string, any>;
 }
@@ -27,7 +27,7 @@ interface DownstreamPipeline {
  */
 export class Pipeline {
   public readonly id: string;
-  public readonly description: string;
+  public readonly description?: string;
   public readonly username?: string;
   public readonly pipeline: string;
   private readonly settings: Record<string, any>;
@@ -93,21 +93,21 @@ export class Pipeline {
 
   // generate Pipeline object from elasticsearch response
   static fromUpstreamJSON(upstreamPipeline: Record<string, any>) {
-    if (!upstreamPipeline._id) {
+    if (Object.keys(upstreamPipeline).length !== 1) {
       throw badRequest(
         i18n.translate(
           'xpack.logstash.upstreamPipelineArgumentMustContainAnIdPropertyErrorMessage',
           {
-            defaultMessage: 'upstreamPipeline argument must contain an id property',
+            defaultMessage: 'upstreamPipeline argument must contain pipeline id as a key',
           }
         )
       );
     }
-    const id = get(upstreamPipeline, '_id') as string;
-    const description = get(upstreamPipeline, '_source.description') as string;
-    const username = get(upstreamPipeline, '_source.username') as string;
-    const pipeline = get(upstreamPipeline, '_source.pipeline') as string;
-    const settings = get(upstreamPipeline, '_source.pipeline_settings') as Record<string, any>;
+    const id = Object.keys(upstreamPipeline).pop() as string;
+    const description = get(upstreamPipeline, id + '.description') as string;
+    const username = get(upstreamPipeline, id + '.username') as string;
+    const pipeline = get(upstreamPipeline, id + '.pipeline') as string;
+    const settings = get(upstreamPipeline, id + '.pipeline_settings') as Record<string, any>;
 
     const opts: PipelineOptions = { id, description, username, pipeline, settings };
 

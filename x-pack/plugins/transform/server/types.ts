@@ -6,10 +6,12 @@
 
 import { IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { License } from './services';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface RouteDependencies {

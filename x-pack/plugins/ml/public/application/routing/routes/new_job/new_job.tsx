@@ -5,28 +5,16 @@
  */
 
 import React, { FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 
 import { MlRoute } from '../../router';
-import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
 
-const breadcrumbs = [
-  ML_BREADCRUMB,
-  ANOMALY_DETECTION_BREADCRUMB,
-  {
-    text: i18n.translate('xpack.ml.jobsBreadcrumbs.jobWizardLabel', {
-      defaultMessage: 'Create job',
-    }),
-    href: '#/jobs/new_job',
-  },
-];
-
-export const newJobRoute: MlRoute = {
+export const newJobRouteFactory = (): MlRoute => ({
   path: '/jobs/new_job',
   render: () => <Page />,
-  breadcrumbs,
-};
+  // no breadcrumbs since it's just a redirect
+  breadcrumbs: [],
+});
 
 const Page: FC = () => {
   return <Redirect to="/jobs/new_job/step/index_or_search" />;

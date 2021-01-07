@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
-function DeleteButton({ onClick, canDeleteCalendar }) {
+function DeleteButton({ onClick, canDeleteCalendar, testSubj }) {
   return (
     <Fragment>
       <EuiButtonEmpty
@@ -22,6 +22,7 @@ function DeleteButton({ onClick, canDeleteCalendar }) {
         color="danger"
         onClick={onClick}
         isDisabled={canDeleteCalendar === false}
+        data-test-subj={testSubj}
       >
         <FormattedMessage
           id="xpack.ml.calendarsEdit.eventsTable.deleteButtonLabel"
@@ -90,7 +91,7 @@ export const EventsTable = ({
       name: '',
       render: (event) => (
         <DeleteButton
-          data-test-subj="mlEventDelete"
+          testSubj="mlCalendarEventDeleteButton"
           canDeleteCalendar={canDeleteCalendar}
           onClick={() => {
             onDeleteClick(event.event_id);
@@ -105,7 +106,7 @@ export const EventsTable = ({
       <EuiButton
         isDisabled={canCreateCalendar === false}
         key="ml_new_event"
-        data-test-subj="mlNewEvent"
+        data-test-subj="mlCalendarNewEventButton"
         size="s"
         iconType="plusInCircle"
         onClick={showNewEventModal}
@@ -118,7 +119,7 @@ export const EventsTable = ({
       <EuiButton
         isDisabled={canCreateCalendar === false}
         key="ml_import_event"
-        data-test-subj="mlImportEvents"
+        data-test-subj="mlCalendarImportEventsButton"
         size="s"
         iconType="importAction"
         onClick={showImportModal}
@@ -145,6 +146,10 @@ export const EventsTable = ({
         pagination={pagination}
         sorting={sorting}
         search={showSearchBar ? search : undefined}
+        data-test-subj="mlCalendarEventsTable"
+        rowProps={(item) => ({
+          'data-test-subj': `mlCalendarEventListRow row-${item.description}`,
+        })}
       />
     </Fragment>
   );

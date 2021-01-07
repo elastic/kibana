@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
@@ -15,6 +15,7 @@ import {
 import { createValidationFunction } from '../../../../common/runtime_types';
 import { getLogEntryRateBuckets } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
+import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -54,6 +55,15 @@ export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
       } catch (error) {
         if (Boom.isBoom(error)) {
           throw error;
+        }
+
+        if (isMlPrivilegesError(error)) {
+          return response.customError({
+            statusCode: 403,
+            body: {
+              message: error.message,
+            },
+          });
         }
 
         return response.customError({

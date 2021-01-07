@@ -6,12 +6,7 @@
 import moment from 'moment';
 
 import { entriesNested, ExceptionListItemSchema } from '../../../../lists_plugin_deps';
-import {
-  getEntryValue,
-  getExceptionOperatorSelect,
-  formatOperatingSystems,
-  getOperatingSystems,
-} from '../helpers';
+import { getEntryValue, getExceptionOperatorSelect, formatOperatingSystems } from '../helpers';
 import { FormattedEntry, BuilderEntry, DescriptionListItem } from '../types';
 import * as i18n from '../translations';
 
@@ -20,18 +15,16 @@ import * as i18n from '../translations';
  */
 export const formatEntry = ({
   isNested,
-  parent,
   item,
 }: {
   isNested: boolean;
-  parent?: string;
   item: BuilderEntry;
 }): FormattedEntry => {
   const operator = getExceptionOperatorSelect(item);
   const value = getEntryValue(item);
 
   return {
-    fieldName: isNested ? `${parent}.${item.field}` : item.field ?? '',
+    fieldName: item.field ?? '',
     operator: operator.message,
     value,
     isNested,
@@ -57,7 +50,6 @@ export const getFormattedEntries = (entries: BuilderEntry[]): FormattedEntry[] =
         (acc, nestedEntry) => {
           const formattedEntry = formatEntry({
             isNested: true,
-            parent: item.field,
             item: nestedEntry,
           });
           return [...acc, { ...formattedEntry }];
@@ -83,7 +75,7 @@ export const getDescriptionListContent = (
   const details = [
     {
       title: i18n.OPERATING_SYSTEM,
-      value: formatOperatingSystems(getOperatingSystems(exceptionItem._tags ?? [])),
+      value: formatOperatingSystems(exceptionItem.os_types),
     },
     {
       title: i18n.DATE_CREATED,

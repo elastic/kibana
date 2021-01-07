@@ -24,12 +24,12 @@ import mockItSearchResponse from './__mocks__/mock_it_search_response.json';
 const mlClusterClientFactory = (mockSearchResponse: any) => {
   const callAs = () => {
     return new Promise((resolve) => {
-      resolve(mockSearchResponse);
+      resolve({ body: mockSearchResponse });
     });
   };
   return {
-    callAsCurrentUser: callAs,
-    callAsInternalUser: callAs,
+    asCurrentUser: callAs,
+    asInternalUser: callAs,
   };
 };
 

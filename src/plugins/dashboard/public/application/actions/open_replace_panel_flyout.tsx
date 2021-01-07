@@ -18,15 +18,15 @@
  */
 import React from 'react';
 import { CoreStart } from 'src/core/public';
-import { toMountPoint } from '../../../../../plugins/kibana_react/public';
+import { toMountPoint } from '../../services/kibana_react';
 import { ReplacePanelFlyout } from './replace_panel_flyout';
 import {
+  IContainer,
   IEmbeddable,
+  EmbeddableStart,
   EmbeddableInput,
   EmbeddableOutput,
-  EmbeddableStart,
-  IContainer,
-} from '../../embeddable_plugin';
+} from '../../services/embeddable';
 
 export async function openReplacePanelFlyout(options: {
   embeddable: IContainer;
@@ -60,7 +60,8 @@ export async function openReplacePanelFlyout(options: {
       />
     ),
     {
-      'data-test-subj': 'replacePanelFlyout',
+      'data-test-subj': 'dashboardReplacePanel',
+      ownFocus: true,
     }
   );
 }

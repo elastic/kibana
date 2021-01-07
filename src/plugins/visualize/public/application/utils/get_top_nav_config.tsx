@@ -21,19 +21,26 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
-import uuid from 'uuid';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../../visualizations/public';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
   SavedObjectSaveOpts,
   OnSaveProps,
 } from '../../../../saved_objects/public';
+import { SavedObjectSaveModalDashboard } from '../../../../presentation_util/public';
 import { unhashUrl } from '../../../../kibana_utils/public';
+import { SavedObjectsClientContract } from '../../../../../core/public';
 
-import { SavedVisInstance, VisualizeServices, VisualizeAppStateContainer } from '../types';
+import {
+  VisualizeServices,
+  VisualizeAppStateContainer,
+  VisualizeEditorVisInstance,
+} from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
+import { EmbeddableStateTransfer } from '../../../../embeddable/public';
+
 interface TopNavConfigParams {
   hasUnsavedChanges: boolean;
   setHasUnsavedChanges: (value: boolean) => void;
@@ -41,9 +48,12 @@ interface TopNavConfigParams {
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   hasUnappliedChanges: boolean;
-  savedVisInstance: SavedVisInstance;
+  visInstance: VisualizeEditorVisInstance;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
+  stateTransfer: EmbeddableStateTransfer;
+  savedObjectsClient: SavedObjectsClientContract;
+  embeddableId?: string;
 }
 
 export const getTopNavConfig = (
@@ -54,23 +64,28 @@ export const getTopNavConfig = (
     originatingApp,
     setOriginatingApp,
     hasUnappliedChanges,
-    savedVisInstance: { embeddableHandler, savedVis, vis },
+    visInstance,
     stateContainer,
+    savedObjectsClient,
     visualizationIdFromUrl,
+    stateTransfer,
+    embeddableId,
   }: TopNavConfigParams,
   {
     application,
     chrome,
-    embeddable,
     history,
     share,
     setActiveUrl,
     toastNotifications,
     visualizeCapabilities,
     i18n: { Context: I18nContext },
-    featureFlagConfig,
+    dashboard,
+    savedObjectsTagging,
   }: VisualizeServices
 ) => {
+  const { vis, embeddableHandler } = visInstance;
+  const savedVis = visInstance.savedVis;
   /**
    * Called when the user clicks "Save" button.
    */
@@ -100,25 +115,33 @@ export const getTopNavConfig = (
         });
 
         if (originatingApp && saveOptions.returnToOrigin) {
-          const appPath = `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(id)}`;
+          if (!embeddableId) {
+            const appPath = `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(id)}`;
 
-          // Manually insert a new url so the back button will open the saved visualization.
-          history.replace(appPath);
-          setActiveUrl(appPath);
+            // Manually insert a new url so the back button will open the saved visualization.
+            history.replace(appPath);
+            setActiveUrl(appPath);
+          }
 
-          if (newlyCreated && embeddable) {
-            embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
-              state: { id, type: VISUALIZE_EMBEDDABLE_TYPE },
+          if (newlyCreated && stateTransfer) {
+            stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+              state: {
+                type: VISUALIZE_EMBEDDABLE_TYPE,
+                input: { savedObjectId: id },
+                embeddableId,
+              },
             });
           } else {
             application.navigateToApp(originatingApp);
           }
         } else {
-          if (setOriginatingApp && originatingApp && savedVis.copyOnSave) {
+          if (setOriginatingApp && originatingApp && newlyCreated) {
             setOriginatingApp(undefined);
+            // remove editor state so the connection is still broken after reload
+            stateTransfer.clearEditorState();
           }
           chrome.docTitle.change(savedVis.lastSavedTitle);
-          chrome.setBreadcrumbs(getEditBreadcrumbs(savedVis.lastSavedTitle));
+          chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
 
           if (id !== visualizationIdFromUrl) {
             history.replace({
@@ -147,40 +170,117 @@ export const getTopNavConfig = (
     }
   }
 
+  const createVisReference = () => {
+    if (!originatingApp) {
+      return;
+    }
+
+    const state = {
+      input: {
+        savedVis: vis.serialize(),
+      } as VisualizeInput,
+      embeddableId,
+      type: VISUALIZE_EMBEDDABLE_TYPE,
+    };
+    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
+  };
+
+  const navigateToOriginatingApp = () => {
+    if (originatingApp) {
+      application.navigateToApp(originatingApp);
+    }
+  };
+
+  const saveButtonLabel =
+    embeddableId ||
+    (!savedVis.id && dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && originatingApp)
+      ? i18n.translate('visualize.topNavMenu.saveVisualizationToLibraryButtonLabel', {
+          defaultMessage: 'Save to library',
+        })
+      : originatingApp && (embeddableId || savedVis.id)
+      ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
+          defaultMessage: 'Save as',
+        })
+      : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
+          defaultMessage: 'Save',
+        });
+
+  const showSaveAndReturn =
+    originatingApp &&
+    (savedVis?.id || dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables);
+
   const topNavMenu: TopNavMenuData[] = [
-    ...(originatingApp && savedVis.id
+    {
+      id: 'inspector',
+      label: i18n.translate('visualize.topNavMenu.openInspectorButtonLabel', {
+        defaultMessage: 'inspect',
+      }),
+      description: i18n.translate('visualize.topNavMenu.openInspectorButtonAriaLabel', {
+        defaultMessage: 'Open Inspector for visualization',
+      }),
+      testId: 'openInspectorButton',
+      disableButton() {
+        return !embeddableHandler.hasInspector || !embeddableHandler.hasInspector();
+      },
+      run: openInspector,
+      tooltip() {
+        if (!embeddableHandler.hasInspector || !embeddableHandler.hasInspector()) {
+          return i18n.translate('visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
+            defaultMessage: `This visualization doesn't support any inspectors.`,
+          });
+        }
+      },
+    },
+    {
+      id: 'share',
+      label: i18n.translate('visualize.topNavMenu.shareVisualizationButtonLabel', {
+        defaultMessage: 'share',
+      }),
+      description: i18n.translate('visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
+        defaultMessage: 'Share Visualization',
+      }),
+      testId: 'shareTopNavButton',
+      run: (anchorElement) => {
+        if (share && !embeddableId) {
+          // TODO: support sharing in by-value mode
+          share.toggleShareContextMenu({
+            anchorElement,
+            allowEmbed: true,
+            allowShortUrl: visualizeCapabilities.createShortUrl,
+            shareableUrl: unhashUrl(window.location.href),
+            objectId: savedVis?.id,
+            objectType: 'visualization',
+            sharingData: {
+              title: savedVis?.title,
+            },
+            isDirty: hasUnappliedChanges || hasUnsavedChanges,
+          });
+        }
+      },
+      // disable the Share button if no action specified
+      disableButton: !share || !!embeddableId,
+    },
+    ...(originatingApp
       ? [
           {
-            id: 'saveAndReturn',
-            label: i18n.translate('visualize.topNavMenu.saveAndReturnVisualizationButtonLabel', {
-              defaultMessage: 'Save and return',
+            id: 'cancel',
+            label: i18n.translate('visualize.topNavMenu.cancelButtonLabel', {
+              defaultMessage: 'Cancel',
             }),
-            emphasize: true,
-            iconType: 'check',
-            description: i18n.translate(
-              'visualize.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
-              {
-                defaultMessage: 'Finish editing visualization and return to the last app',
-              }
-            ),
-            testId: 'visualizesaveAndReturnButton',
-            disableButton: hasUnappliedChanges,
+            emphasize: false,
+            description: i18n.translate('visualize.topNavMenu.cancelButtonAriaLabel', {
+              defaultMessage: 'Return to the last app without saving changes',
+            }),
+            testId: 'visualizeCancelAndReturnButton',
             tooltip() {
-              if (hasUnappliedChanges) {
-                return i18n.translate(
-                  'visualize.topNavMenu.saveAndReturnVisualizationDisabledButtonTooltip',
-                  {
-                    defaultMessage: 'Apply or Discard your changes before finishing',
-                  }
-                );
+              if (hasUnappliedChanges || hasUnsavedChanges) {
+                return i18n.translate('visualize.topNavMenu.cancelAndReturnButtonTooltip', {
+                  defaultMessage: 'Discard your changes before finishing',
+                });
               }
             },
             run: async () => {
-              const saveOptions = {
-                confirmOverwrite: false,
-                returnToOrigin: true,
-              };
-              return doSave(saveOptions);
+              return navigateToOriginatingApp();
             },
           },
         ]
@@ -189,15 +289,9 @@ export const getTopNavConfig = (
       ? [
           {
             id: 'save',
-            label:
-              savedVis.id && originatingApp
-                ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
-                    defaultMessage: 'save as',
-                  })
-                : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
-                    defaultMessage: 'save',
-                  }),
-            emphasize: !savedVis.id || !originatingApp,
+            iconType: showSaveAndReturn ? undefined : 'save',
+            label: saveButtonLabel,
+            emphasize: !showSaveAndReturn,
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
               defaultMessage: 'Save Visualization',
             }),
@@ -221,105 +315,158 @@ export const getTopNavConfig = (
                 onTitleDuplicate,
                 newDescription,
                 returnToOrigin,
-              }: OnSaveProps & { returnToOrigin: boolean }) => {
+                dashboardId,
+              }: OnSaveProps & { returnToOrigin?: boolean } & { dashboardId?: string | null }) => {
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
+                embeddableHandler.updateInput({ title: newTitle });
                 savedVis.copyOnSave = newCopyOnSave;
                 savedVis.description = newDescription;
+
+                if (savedObjectsTagging && savedObjectsTagging.ui.hasTagDecoration(savedVis)) {
+                  savedVis.setTags(selectedTags);
+                }
+
                 const saveOptions = {
                   confirmOverwrite: false,
                   isTitleDuplicateConfirmed,
                   onTitleDuplicate,
                   returnToOrigin,
                 };
+
+                if (dashboardId) {
+                  const appPath = `${VisualizeConstants.LANDING_PAGE_PATH}`;
+
+                  // Manually insert a new url so the back button will open the saved visualization.
+                  history.replace(appPath);
+                  setActiveUrl(appPath);
+
+                  const state = {
+                    input: {
+                      savedVis: {
+                        ...vis.serialize(),
+                        title: newTitle,
+                        description: newDescription,
+                      },
+                    } as VisualizeInput,
+                    embeddableId,
+                    type: VISUALIZE_EMBEDDABLE_TYPE,
+                  };
+
+                  const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+
+                  stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+                    state,
+                    path,
+                  });
+
+                  // TODO: Saved Object Modal requires `id` to be defined so this is a workaround
+                  return { id: true };
+                }
+
                 const response = await doSave(saveOptions);
                 // If the save wasn't successful, put the original values back.
                 if (!response.id || response.error) {
                   savedVis.title = currentTitle;
                 }
+
                 return response;
               };
 
-              const createVisReference = () => {
-                if (!originatingApp) {
-                  return;
-                }
-                const input = {
-                  ...vis.serialize(),
-                  id: uuid.v4(),
-                };
-                embeddable.getStateTransfer().navigateToWithEmbeddablePackage(originatingApp, {
-                  state: { input, type: VISUALIZE_EMBEDDABLE_TYPE },
-                });
-              };
+              let selectedTags: string[] = [];
+              let tagOptions: React.ReactNode | undefined;
 
-              const saveModal = (
-                <SavedObjectSaveModalOrigin
-                  documentInfo={savedVis}
-                  onSave={onSave}
-                  objectType={'visualization'}
-                  onClose={() => {}}
-                  originatingApp={originatingApp}
-                />
-              );
-              if (originatingApp === 'dashboards' && featureFlagConfig.showNewVisualizeFlow) {
-                createVisReference();
-              } else {
-                showSaveModal(saveModal, I18nContext);
+              if (savedObjectsTagging) {
+                if (savedVis && savedObjectsTagging.ui.hasTagDecoration(savedVis)) {
+                  selectedTags = savedVis.getTags();
+                }
+                tagOptions = (
+                  <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+                    initialSelection={selectedTags}
+                    onTagsSelected={(newSelection) => {
+                      selectedTags = newSelection;
+                    }}
+                  />
+                );
               }
+
+              const saveModal =
+                !!originatingApp ||
+                !dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables ? (
+                  <SavedObjectSaveModalOrigin
+                    documentInfo={savedVis || { title: '' }}
+                    onSave={onSave}
+                    options={tagOptions}
+                    getAppNameFromId={stateTransfer.getAppNameFromId}
+                    objectType={'visualization'}
+                    onClose={() => {}}
+                    originatingApp={originatingApp}
+                    returnToOriginSwitchLabel={
+                      originatingApp && embeddableId
+                        ? i18n.translate('visualize.topNavMenu.updatePanel', {
+                            defaultMessage: 'Update panel on {originatingAppName}',
+                            values: {
+                              originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
+                            },
+                          })
+                        : undefined
+                    }
+                  />
+                ) : (
+                  <SavedObjectSaveModalDashboard
+                    documentInfo={savedVis || { title: '' }}
+                    onSave={onSave}
+                    tagOptions={tagOptions}
+                    objectType={'visualization'}
+                    onClose={() => {}}
+                    savedObjectsClient={savedObjectsClient}
+                  />
+                );
+              showSaveModal(saveModal, I18nContext);
             },
           },
         ]
       : []),
-    {
-      id: 'share',
-      label: i18n.translate('visualize.topNavMenu.shareVisualizationButtonLabel', {
-        defaultMessage: 'share',
-      }),
-      description: i18n.translate('visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
-        defaultMessage: 'Share Visualization',
-      }),
-      testId: 'shareTopNavButton',
-      run: (anchorElement) => {
-        if (share) {
-          share.toggleShareContextMenu({
-            anchorElement,
-            allowEmbed: true,
-            allowShortUrl: visualizeCapabilities.createShortUrl,
-            shareableUrl: unhashUrl(window.location.href),
-            objectId: savedVis.id,
-            objectType: 'visualization',
-            sharingData: {
-              title: savedVis.title,
+    ...(visualizeCapabilities.save && showSaveAndReturn
+      ? [
+          {
+            id: 'saveAndReturn',
+            label: i18n.translate('visualize.topNavMenu.saveAndReturnVisualizationButtonLabel', {
+              defaultMessage: 'Save and return',
+            }),
+            emphasize: true,
+            iconType: 'checkInCircleFilled',
+            description: i18n.translate(
+              'visualize.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Finish editing visualization and return to the last app',
+              }
+            ),
+            testId: 'visualizesaveAndReturnButton',
+            disableButton: hasUnappliedChanges,
+            tooltip() {
+              if (hasUnappliedChanges) {
+                return i18n.translate(
+                  'visualize.topNavMenu.saveAndReturnVisualizationDisabledButtonTooltip',
+                  {
+                    defaultMessage: 'Apply or Discard your changes before finishing',
+                  }
+                );
+              }
             },
-            isDirty: hasUnappliedChanges || hasUnsavedChanges,
-          });
-        }
-      },
-      // disable the Share button if no action specified
-      disableButton: !share,
-    },
-    {
-      id: 'inspector',
-      label: i18n.translate('visualize.topNavMenu.openInspectorButtonLabel', {
-        defaultMessage: 'inspect',
-      }),
-      description: i18n.translate('visualize.topNavMenu.openInspectorButtonAriaLabel', {
-        defaultMessage: 'Open Inspector for visualization',
-      }),
-      testId: 'openInspectorButton',
-      disableButton() {
-        return !embeddableHandler.hasInspector || !embeddableHandler.hasInspector();
-      },
-      run: openInspector,
-      tooltip() {
-        if (!embeddableHandler.hasInspector || !embeddableHandler.hasInspector()) {
-          return i18n.translate('visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
-            defaultMessage: `This visualization doesn't support any inspectors.`,
-          });
-        }
-      },
-    },
+            run: async () => {
+              if (!savedVis?.id) {
+                return createVisReference();
+              }
+              const saveOptions = {
+                confirmOverwrite: false,
+                returnToOrigin: true,
+              };
+              return doSave(saveOptions);
+            },
+          },
+        ]
+      : []),
   ];
 
   return topNavMenu;

@@ -18,18 +18,23 @@
  */
 
 import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
+import { first } from 'rxjs/operators';
 import { registerRoutes } from './routes';
 
 export class LegacyExportPlugin implements Plugin<{}, {}> {
-  private readonly kibanaVersion: string;
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
-  constructor(context: PluginInitializerContext) {
-    this.kibanaVersion = context.env.packageInfo.version;
-  }
+  public async setup({ http }: CoreSetup) {
+    const globalConfig = await this.initContext.config.legacy.globalConfig$
+      .pipe(first())
+      .toPromise();
 
-  public setup({ http }: CoreSetup) {
     const router = http.createRouter();
-    registerRoutes(router, this.kibanaVersion);
+    registerRoutes(
+      router,
+      this.initContext.env.packageInfo.version,
+      globalConfig.savedObjects.maxImportPayloadBytes.getValueInBytes()
+    );
 
     return {};
   }

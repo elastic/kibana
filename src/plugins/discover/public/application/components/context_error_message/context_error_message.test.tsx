@@ -17,12 +17,11 @@
  * under the License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { ContextErrorMessage } from './context_error_message';
 // @ts-ignore
 import { FAILURE_REASONS, LOADING_STATUS } from '../../angular/context/query';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('loading spinner', function () {

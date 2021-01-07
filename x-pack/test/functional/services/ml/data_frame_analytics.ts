@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlApi } from './api';
 
-import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/data_frame_task_state';
+import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/common/constants/data_frame_analytics';
 
 export function MachineLearningDataFrameAnalyticsProvider(
   { getService }: FtrProviderContext,
@@ -32,29 +34,14 @@ export function MachineLearningDataFrameAnalyticsProvider(
       await testSubjects.existOrFail('mlAnalyticsButtonCreate');
     },
 
-    async assertRegressionEvaluatePanelElementsExists() {
-      await testSubjects.existOrFail('mlDFAnalyticsRegressionExplorationEvaluatePanel');
-      await testSubjects.existOrFail('mlDFAnalyticsRegressionGenMSEstat');
-      await testSubjects.existOrFail('mlDFAnalyticsRegressionGenRSquaredStat');
-      await testSubjects.existOrFail('mlDFAnalyticsRegressionTrainingMSEstat');
-      await testSubjects.existOrFail('mlDFAnalyticsRegressionTrainingRSquaredStat');
-    },
-
-    async assertRegressionTablePanelExists() {
-      await testSubjects.existOrFail('mlDFAnalyticsExplorationTablePanel');
-    },
-
-    async assertClassificationEvaluatePanelElementsExists() {
-      await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationEvaluatePanel');
-      await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationConfusionMatrix');
-    },
-
-    async assertClassificationTablePanelExists() {
-      await testSubjects.existOrFail('mlDFAnalyticsExplorationTablePanel');
-    },
-
-    async assertOutlierTablePanelExists() {
-      await testSubjects.existOrFail('mlDFAnalyticsOutlierExplorationTablePanel');
+    async assertCreateNewAnalyticsButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlAnalyticsButtonCreate');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected data frame analytics "create" button to be '${
+          expectedValue ? 'enabled' : 'disabled'
+        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
+      );
     },
 
     async assertAnalyticsStatsBarExists() {

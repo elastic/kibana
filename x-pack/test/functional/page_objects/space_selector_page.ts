@@ -13,7 +13,7 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'header', 'security']);
+  const PageObjects = getPageObjects(['common']);
 
   class SpaceSelectorPage {
     async initTests() {
@@ -48,6 +48,142 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
     async openSpacesNav() {
       log.debug('openSpacesNav()');
       return await testSubjects.click('spacesNavSelector');
+    }
+
+    async clickManageSpaces() {
+      await testSubjects.click('manageSpaces');
+    }
+
+    async clickCreateSpace() {
+      await testSubjects.click('createSpace');
+    }
+
+    async clickEnterSpaceName() {
+      await testSubjects.click('addSpaceName');
+    }
+
+    async addSpaceName(spaceName: string) {
+      await testSubjects.setValue('addSpaceName', spaceName);
+    }
+
+    async clickCustomizeSpaceAvatar(spaceId: string) {
+      await testSubjects.click(`space-avatar-${spaceId}`);
+    }
+
+    async clickSpaceInitials() {
+      await testSubjects.click('spaceLetterInitial');
+    }
+
+    async addSpaceInitials(spaceInitials: string) {
+      await testSubjects.setValue('spaceLetterInitial', spaceInitials);
+    }
+
+    async clickColorPicker() {
+      await testSubjects.click('colorPickerAnchor');
+    }
+
+    async setColorinPicker(hexValue: string) {
+      await testSubjects.setValue('colorPickerAnchor', hexValue);
+    }
+
+    async clickShowFeatures() {
+      await testSubjects.click('show-hide-section-link');
+    }
+
+    async clickChangeAllPriv() {
+      await testSubjects.click('changeAllPrivilegesButton');
+    }
+
+    async clickSaveSpaceCreation() {
+      await testSubjects.click('save-space-button');
+    }
+
+    async clickSpaceEditButton(spaceName: string) {
+      await testSubjects.click(`${spaceName}-editSpace`);
+    }
+
+    async clickGoToRolesPage() {
+      await testSubjects.click('rolesManagementPage');
+    }
+
+    async clickCancelSpaceCreation() {
+      await testSubjects.click('cancel-space-button');
+    }
+
+    async clickOnCustomizeURL() {
+      await testSubjects.click('CustomizeOrReset');
+    }
+
+    async clickOnSpaceURLDisplay() {
+      await testSubjects.click('spaceURLDisplay');
+    }
+
+    async setSpaceURL(spaceURL: string) {
+      await testSubjects.setValue('spaceURLDisplay', spaceURL);
+    }
+
+    async clickHideAllFeatures() {
+      await testSubjects.click('spc-toggle-all-features-hide');
+    }
+
+    async clickShowAllFeatures() {
+      await testSubjects.click('spc-toggle-all-features-show');
+    }
+
+    async openFeatureCategory(categoryName: string) {
+      const category = await find.byCssSelector(
+        `button[aria-controls=featureCategory_${categoryName}]`
+      );
+      const isCategoryExpanded = (await category.getAttribute('aria-expanded')) === 'true';
+      if (!isCategoryExpanded) {
+        await category.click();
+      }
+    }
+
+    async closeFeatureCategory(categoryName: string) {
+      const category = await find.byCssSelector(
+        `button[aria-controls=featureCategory_${categoryName}]`
+      );
+      const isCategoryExpanded = (await category.getAttribute('aria-expanded')) === 'true';
+      if (isCategoryExpanded) {
+        await category.click();
+      }
+    }
+
+    async toggleFeatureCategoryVisibility(categoryName: string) {
+      await testSubjects.click(`featureCategoryButton_${categoryName}`);
+    }
+
+    async clickOnDescriptionOfSpace() {
+      await testSubjects.click('descriptionSpaceText');
+    }
+
+    async setOnDescriptionOfSpace(descriptionSpace: string) {
+      await testSubjects.setValue('descriptionSpaceText', descriptionSpace);
+    }
+
+    async clickOnDeleteSpaceButton(spaceName: string) {
+      await testSubjects.click(`${spaceName}-deleteSpace`);
+    }
+
+    async setSpaceNameTobeDeleted(spaceName: string) {
+      await testSubjects.setValue('deleteSpaceInput', spaceName);
+    }
+
+    async cancelDeletingSpace() {
+      await testSubjects.click('confirmModalCancelButton');
+    }
+
+    async confirmDeletingSpace() {
+      await testSubjects.click('confirmModalConfirmButton');
+    }
+
+    async clickOnSpaceb() {
+      await testSubjects.click('space-avatar-space_b');
+    }
+
+    async goToSpecificSpace(spaceName: string) {
+      await testSubjects.click(`${spaceName}-gotoSpace`);
     }
 
     async clickSpaceAvatar(spaceId: string) {

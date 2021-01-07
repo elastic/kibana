@@ -19,14 +19,31 @@
 
 export * from './service';
 
-export { SavedObjectsSchema } from './schema';
-
-export * from './import';
+export {
+  ISavedObjectsImporter,
+  SavedObjectsImporter,
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportFailure,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportOptions,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsImportError,
+} from './import';
 
 export {
-  exportSavedObjectsToStream,
-  SavedObjectsExportOptions,
+  SavedObjectsExporter,
+  ISavedObjectsExporter,
+  SavedObjectExportBaseOptions,
+  SavedObjectsExportByTypeOptions,
+  SavedObjectsExportByObjectOptions,
   SavedObjectsExportResultDetails,
+  SavedObjectsExportError,
 } from './export';
 
 export {
@@ -50,6 +67,7 @@ export {
 export {
   ISavedObjectsRepository,
   SavedObjectsIncrementCounterOptions,
+  SavedObjectsIncrementCounterField,
   SavedObjectsDeleteByNamespaceOptions,
 } from './service/lib/repository';
 

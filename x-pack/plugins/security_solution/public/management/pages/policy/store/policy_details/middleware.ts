@@ -5,6 +5,7 @@
  */
 
 import { IHttpFetchError } from 'kibana/public';
+import { DefaultMalwareMessage } from '../../../../../../common/endpoint/models/policy_config';
 import { PolicyDetailsState, UpdatePolicyResponse } from '../../types';
 import {
   policyIdFromParams,
@@ -14,10 +15,10 @@ import {
   getPolicyDataForUpdate,
 } from './selectors';
 import {
-  sendGetPackageConfig,
-  sendGetFleetAgentStatusForConfig,
-  sendPutPackageConfig,
-} from '../policy_list/services/ingest';
+  sendGetPackagePolicy,
+  sendGetFleetAgentStatusForPolicy,
+  sendPutPackagePolicy,
+} from '../services/ingest';
 import { NewPolicyData, PolicyData } from '../../../../../../common/endpoint/types';
 import { ImmutableMiddlewareFactory } from '../../../../../common/store';
 
@@ -25,7 +26,6 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
   coreStart
 ) => {
   const http = coreStart.http;
-
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
     const state = getState();
@@ -35,7 +35,12 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
       let policyItem: PolicyData;
 
       try {
-        policyItem = (await sendGetPackageConfig(http, id)).item;
+        policyItem = (await sendGetPackagePolicy(http, id)).item;
+        // sets default user notification message if policy config message is empty
+        if (policyItem.inputs[0].config.policy.value.windows.popup.malware.message === '') {
+          policyItem.inputs[0].config.policy.value.windows.popup.malware.message = DefaultMalwareMessage;
+          policyItem.inputs[0].config.policy.value.mac.popup.malware.message = DefaultMalwareMessage;
+        }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnPolicyDetailsData',
@@ -53,8 +58,8 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       // Agent summary is secondary data, so its ok for it to come after the details
       // page is populated with the main content
-      if (policyItem.config_id) {
-        const { results } = await sendGetFleetAgentStatusForConfig(http, policyItem.config_id);
+      if (policyItem.policy_id) {
+        const { results } = await sendGetFleetAgentStatusForPolicy(http, policyItem.policy_id);
         dispatch({
           type: 'serverReturnedPolicyDetailsAgentSummaryData',
           payload: {
@@ -68,20 +73,20 @@ export const policyDetailsMiddlewareFactory: ImmutableMiddlewareFactory<PolicyDe
 
       let apiResponse: UpdatePolicyResponse;
       try {
-        apiResponse = await sendPutPackageConfig(http, id, updatedPolicyItem).catch(
+        apiResponse = await sendPutPackagePolicy(http, id, updatedPolicyItem).catch(
           (error: IHttpFetchError) => {
             if (!error.response || error.response.status !== 409) {
               return Promise.reject(error);
             }
             // Handle 409 error (version conflict) here, by using the latest document
-            // for the package config and adding the updated policy to it, ensuring that
+            // for the package policy and adding the updated policy to it, ensuring that
             // any recent updates to `manifest_artifacts` are retained.
-            return sendGetPackageConfig(http, id).then((packageConfig) => {
-              const latestUpdatedPolicyItem = packageConfig.item;
+            return sendGetPackagePolicy(http, id).then((packagePolicy) => {
+              const latestUpdatedPolicyItem = packagePolicy.item;
               latestUpdatedPolicyItem.inputs[0].config.policy =
                 updatedPolicyItem.inputs[0].config.policy;
 
-              return sendPutPackageConfig(
+              return sendPutPackagePolicy(
                 http,
                 id,
                 getPolicyDataForUpdate(latestUpdatedPolicyItem) as NewPolicyData

@@ -6,13 +6,14 @@
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { Comparator, AlertStates } from './types';
 import * as mocks from './test_mocks';
-import { AlertExecutorOptions } from '../../../../../alerts/server';
+// import { RecoveredActionGroup } from '../../../../../alerts/common';
 import {
   alertsMock,
   AlertServicesMock,
   AlertInstanceMock,
 } from '../../../../../alerts/server/mocks';
 import { InfraSources } from '../../sources';
+import { MetricThresholdAlertExecutorOptions } from './register_metric_threshold_alert_type';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -20,13 +21,25 @@ interface AlertTestInstance {
   state: any;
 }
 
-let persistAlertInstances = false; // eslint-disable-line
+let persistAlertInstances = false; // eslint-disable-line prefer-const
+
+const mockOptions = {
+  alertId: '',
+  startedAt: new Date(),
+  previousStartedAt: null,
+  state: {},
+  spaceId: '',
+  name: '',
+  tags: [],
+  createdBy: null,
+  updatedBy: null,
+};
 
 describe('The metric threshold alert type', () => {
   describe('querying the entire infrastructure', () => {
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
-      executor({
+      executor(({
         services,
         params: {
           sourceId,
@@ -38,7 +51,10 @@ describe('The metric threshold alert type', () => {
             },
           ],
         },
-      });
+        /**
+         * TODO: Remove this use of `as` by utilizing a proper type
+         */
+      } as unknown) as MetricThresholdAlertExecutorOptions);
     test('alerts as expected with the > comparator', async () => {
       await execute(Comparator.GT, [0.75]);
       expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
@@ -108,6 +124,7 @@ describe('The metric threshold alert type', () => {
   describe('querying with a groupBy parameter', () => {
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           groupBy: 'something',
@@ -158,6 +175,7 @@ describe('The metric threshold alert type', () => {
       groupBy: string = ''
     ) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           groupBy,
@@ -215,6 +233,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           criteria: [
@@ -241,6 +260,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           criteria: [
@@ -267,6 +287,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = (comparator: Comparator, threshold: number[]) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           criteria: [
@@ -293,6 +314,7 @@ describe('The metric threshold alert type', () => {
     const instanceID = '*';
     const execute = (alertOnNoData: boolean) =>
       executor({
+        ...mockOptions,
         services,
         params: {
           criteria: [
@@ -318,50 +340,115 @@ describe('The metric threshold alert type', () => {
     });
   });
 
-  // describe('querying a metric that later recovers', () => {
-  //   const instanceID = '*';
-  //   const execute = (threshold: number[]) =>
-  //     executor({
-  //
-  //       services,
-  //       params: {
-  //         criteria: [
-  //           {
-  //             ...baseCriterion,
-  //             comparator: Comparator.GT,
-  //             threshold,
-  //           },
-  //         ],
-  //       },
-  //     });
-  //   beforeAll(() => (persistAlertInstances = true));
-  //   afterAll(() => (persistAlertInstances = false));
+  describe("querying a rate-aggregated metric that hasn't reported data", () => {
+    const instanceID = '*';
+    const execute = () =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseCriterion,
+              comparator: Comparator.GT,
+              threshold: 1,
+              metric: 'test.metric.3',
+              aggType: 'rate',
+            },
+          ],
+          alertOnNoData: true,
+        },
+      });
+    test('sends a No Data alert', async () => {
+      await execute();
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.NO_DATA);
+    });
+  });
 
-  //   test('sends a recovery alert as soon as the metric recovers', async () => {
-  //     await execute([0.5]);
-  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
-  //     await execute([2]);
-  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
-  //   });
-  //   test('does not continue to send a recovery alert if the metric is still OK', async () => {
-  //     await execute([2]);
-  //     expect(mostRecentAction(instanceID)).toBe(undefined);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
-  //     await execute([2]);
-  //     expect(mostRecentAction(instanceID)).toBe(undefined);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
-  //   });
-  //   test('sends a recovery alert again once the metric alerts and recovers again', async () => {
-  //     await execute([0.5]);
-  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
-  //     await execute([2]);
-  //     expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
-  //     expect(getState(instanceID).alertState).toBe(AlertStates.OK);
-  //   });
-  // });
+  /*
+   * Custom recovery actions aren't yet available in the alerting framework
+   * Uncomment the code below once they've been implemented
+   * Reference: https://github.com/elastic/kibana/issues/87048
+   */
+
+  /*
+  describe('querying a metric that later recovers', () => {
+    const instanceID = '*';
+    const execute = (threshold: number[]) =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          criteria: [
+            {
+              ...baseCriterion,
+              comparator: Comparator.GT,
+              threshold,
+            },
+          ],
+        },
+      });
+    beforeAll(() => (persistAlertInstances = true));
+    afterAll(() => (persistAlertInstances = false));
+
+    test('sends a recovery alert as soon as the metric recovers', async () => {
+      await execute([0.5]);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+      await execute([2]);
+      expect(mostRecentAction(instanceID).id).toBe(RecoveredActionGroup.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+    test('does not continue to send a recovery alert if the metric is still OK', async () => {
+      await execute([2]);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+      await execute([2]);
+      expect(mostRecentAction(instanceID)).toBe(undefined);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+    test('sends a recovery alert again once the metric alerts and recovers again', async () => {
+      await execute([0.5]);
+      expect(mostRecentAction(instanceID).id).toBe(FIRED_ACTIONS.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.ALERT);
+      await execute([2]);
+      expect(mostRecentAction(instanceID).id).toBe(RecoveredActionGroup.id);
+      expect(getState(instanceID).alertState).toBe(AlertStates.OK);
+    });
+  });
+  */
+
+  describe('querying a metric with a percentage metric', () => {
+    const instanceID = '*';
+    const execute = () =>
+      executor({
+        ...mockOptions,
+        services,
+        params: {
+          sourceId: 'default',
+          criteria: [
+            {
+              ...baseCriterion,
+              metric: 'test.metric.pct',
+              comparator: Comparator.GT,
+              threshold: [0.75],
+            },
+          ],
+        },
+      });
+    test('reports values converted from decimals to percentages to the action context', async () => {
+      const now = 1577858400000;
+      await execute();
+      const { action } = mostRecentAction(instanceID);
+      expect(action.group).toBe('*');
+      expect(action.reason).toContain('current value is 100%');
+      expect(action.reason).toContain('threshold of 75%');
+      expect(action.threshold.condition0[0]).toBe('75%');
+      expect(action.value.condition0).toBe('100%');
+      expect(action.timestamp).toBe(new Date(now).toISOString());
+    });
+  });
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
@@ -380,10 +467,7 @@ const mockLibs: any = {
   configuration: createMockStaticConfiguration({}),
 };
 
-const executor = createMetricThresholdExecutor(mockLibs) as (opts: {
-  params: AlertExecutorOptions['params'];
-  services: { callCluster: AlertExecutorOptions['params']['callCluster'] };
-}) => Promise<void>;
+const executor = createMetricThresholdExecutor(mockLibs);
 
 const services: AlertServicesMock = alertsMock.createAlertServices();
 services.callCluster.mockImplementation(async (_: string, { body, index }: any) => {
@@ -401,7 +485,9 @@ services.callCluster.mockImplementation(async (_: string, { body, index }: any) 
   if (metric === 'test.metric.2') {
     return mocks.alternateMetricResponse;
   } else if (metric === 'test.metric.3') {
-    return mocks.emptyMetricResponse;
+    return body.aggs.aggregatedIntervals.aggregations.aggregatedValue_max
+      ? mocks.emptyRateResponse
+      : mocks.emptyMetricResponse;
   }
   return mocks.basicMetricResponse;
 });

@@ -29,6 +29,9 @@ export const stateToAlertMessage = {
   }),
 };
 
+const toNumber = (value: number | string) =>
+  typeof value === 'string' ? parseFloat(value) : value;
+
 const comparatorToI18n = (comparator: Comparator, threshold: number[], currentValue: number) => {
   const gtText = i18n.translate('xpack.infra.metrics.alerting.threshold.gtComparator', {
     defaultMessage: 'greater than',
@@ -54,10 +57,11 @@ const comparatorToI18n = (comparator: Comparator, threshold: number[], currentVa
     case Comparator.LT:
       return ltText;
     case Comparator.GT_OR_EQ:
-    case Comparator.LT_OR_EQ:
+    case Comparator.LT_OR_EQ: {
       if (threshold[0] === currentValue) return eqText;
       else if (threshold[0] < currentValue) return ltText;
       return gtText;
+    }
   }
 };
 
@@ -88,7 +92,7 @@ const recoveredComparatorToI18n = (
   }
 };
 
-const thresholdToI18n = ([a, b]: number[]) => {
+const thresholdToI18n = ([a, b]: Array<number | string>) => {
   if (typeof b === 'undefined') return a;
   return i18n.translate('xpack.infra.metrics.alerting.threshold.thresholdRange', {
     defaultMessage: '{a} and {b}',
@@ -99,15 +103,15 @@ const thresholdToI18n = ([a, b]: number[]) => {
 export const buildFiredAlertReason: (alertResult: {
   metric: string;
   comparator: Comparator;
-  threshold: number[];
-  currentValue: number;
+  threshold: Array<number | string>;
+  currentValue: number | string;
 }) => string = ({ metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.firedAlertReason', {
     defaultMessage:
       '{metric} is {comparator} a threshold of {threshold} (current value is {currentValue})',
     values: {
       metric,
-      comparator: comparatorToI18n(comparator, threshold, currentValue),
+      comparator: comparatorToI18n(comparator, threshold.map(toNumber), toNumber(currentValue)),
       threshold: thresholdToI18n(threshold),
       currentValue,
     },
@@ -116,15 +120,19 @@ export const buildFiredAlertReason: (alertResult: {
 export const buildRecoveredAlertReason: (alertResult: {
   metric: string;
   comparator: Comparator;
-  threshold: number[];
-  currentValue: number;
+  threshold: Array<number | string>;
+  currentValue: number | string;
 }) => string = ({ metric, comparator, threshold, currentValue }) =>
   i18n.translate('xpack.infra.metrics.alerting.threshold.recoveredAlertReason', {
     defaultMessage:
       '{metric} is now {comparator} a threshold of {threshold} (current value is {currentValue})',
     values: {
       metric,
-      comparator: recoveredComparatorToI18n(comparator, threshold, currentValue),
+      comparator: recoveredComparatorToI18n(
+        comparator,
+        threshold.map(toNumber),
+        toNumber(currentValue)
+      ),
       threshold: thresholdToI18n(threshold),
       currentValue,
     },
@@ -150,3 +158,56 @@ export const buildErrorAlertReason = (metric: string) =>
       metric,
     },
   });
+
+export const groupActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.groupActionVariableDescription',
+  {
+    defaultMessage: 'Name of the group reporting data',
+  }
+);
+
+export const alertStateActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.alertStateActionVariableDescription',
+  {
+    defaultMessage: 'Current state of the alert',
+  }
+);
+
+export const reasonActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.reasonActionVariableDescription',
+  {
+    defaultMessage:
+      'A description of why the alert is in this state, including which metrics have crossed which thresholds',
+  }
+);
+
+export const timestampActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.timestampDescription',
+  {
+    defaultMessage: 'A timestamp of when the alert was detected.',
+  }
+);
+
+export const valueActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.valueActionVariableDescription',
+  {
+    defaultMessage:
+      'The value of the metric in the specified condition. Usage: (ctx.value.condition0, ctx.value.condition1, etc...).',
+  }
+);
+
+export const metricActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.metricActionVariableDescription',
+  {
+    defaultMessage:
+      'The metric name in the specified condition. Usage: (ctx.metric.condition0, ctx.metric.condition1, etc...).',
+  }
+);
+
+export const thresholdActionVariableDescription = i18n.translate(
+  'xpack.infra.metrics.alerting.thresholdActionVariableDescription',
+  {
+    defaultMessage:
+      'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
+  }
+);

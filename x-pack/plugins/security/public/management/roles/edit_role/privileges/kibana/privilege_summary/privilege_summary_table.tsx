@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiButtonIcon,
   EuiIcon,
   EuiIconTip,
+  EuiSpacer,
+  EuiAccordion,
+  EuiTitle,
 } from '@elastic/eui';
 import { Space } from '../../../../../../../../spaces/common/model/space';
 import { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';
@@ -38,6 +43,22 @@ function getColumnKey(entry: RoleKibanaPrivilege) {
 
 export const PrivilegeSummaryTable = (props: Props) => {
   const [expandedFeatures, setExpandedFeatures] = useState<string[]>([]);
+
+  const featureCategories = useMemo(() => {
+    const featureCategoryMap = new Map<string, SecuredFeature[]>();
+
+    props.kibanaPrivileges
+      .getSecuredFeatures()
+      .filter((feature) => feature.privileges != null || feature.reserved != null)
+      .forEach((feature) => {
+        if (!featureCategoryMap.has(feature.category.id)) {
+          featureCategoryMap.set(feature.category.id, []);
+        }
+        featureCategoryMap.get(feature.category.id)!.push(feature);
+      });
+
+    return featureCategoryMap;
+  }, [props.kibanaPrivileges]);
 
   const calculator = new PrivilegeSummaryCalculator(props.kibanaPrivileges, props.role);
 
@@ -140,35 +161,80 @@ export const PrivilegeSummaryTable = (props: Props) => {
     };
   }, {} as Record<string, EffectiveFeaturePrivileges>);
 
-  const items = props.kibanaPrivileges.getSecuredFeatures().map((feature) => {
-    return {
-      feature,
-      featureId: feature.id,
-      ...privileges,
-    };
+  const accordions: any[] = [];
+
+  featureCategories.forEach((featuresInCategory) => {
+    const { category } = featuresInCategory[0];
+
+    const buttonContent = (
+      <EuiFlexGroup
+        data-test-subj={`featureCategoryButton_${category.id}`}
+        alignItems={'center'}
+        responsive={false}
+        gutterSize="m"
+      >
+        {category.euiIconType ? (
+          <EuiFlexItem grow={false}>
+            <EuiIcon size="m" type={category.euiIconType} />
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={1}>
+          <EuiTitle size="xs">
+            <h4 className="eui-displayInlineBlock">{category.label}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+
+    const categoryItems = featuresInCategory.map((feature) => {
+      return {
+        feature,
+        featureId: feature.id,
+        ...privileges,
+      };
+    });
+
+    accordions.push(
+      <EuiAccordion
+        id={`privilegeSummaryFeatureCategory_${category.id}`}
+        data-test-subj={`privilegeSummaryFeatureCategory_${category.id}`}
+        key={category.id}
+        buttonContent={buttonContent}
+        initialIsOpen={true}
+      >
+        <EuiInMemoryTable
+          columns={columns}
+          items={categoryItems}
+          itemId="featureId"
+          rowProps={(record) => {
+            return {
+              'data-test-subj': `summaryTableRow-${record.featureId}`,
+            };
+          }}
+          itemIdToExpandedRowMap={expandedFeatures.reduce((acc, featureId) => {
+            return {
+              ...acc,
+              [featureId]: (
+                <PrivilegeSummaryExpandedRow
+                  feature={props.kibanaPrivileges.getSecuredFeature(featureId)}
+                  effectiveFeaturePrivileges={Object.values(privileges).map((p) => p[featureId])}
+                />
+              ),
+            };
+          }, {})}
+        />
+      </EuiAccordion>
+    );
   });
 
   return (
-    <EuiInMemoryTable
-      columns={columns}
-      items={items}
-      itemId="featureId"
-      rowProps={(record) => {
-        return {
-          'data-test-subj': `summaryTableRow-${record.featureId}`,
-        };
-      }}
-      itemIdToExpandedRowMap={expandedFeatures.reduce((acc, featureId) => {
-        return {
-          ...acc,
-          [featureId]: (
-            <PrivilegeSummaryExpandedRow
-              feature={props.kibanaPrivileges.getSecuredFeature(featureId)}
-              effectiveFeaturePrivileges={Object.values(privileges).map((p) => p[featureId])}
-            />
-          ),
-        };
-      }, {})}
-    />
+    <>
+      {accordions.map((a, idx) => (
+        <Fragment key={idx}>
+          {a}
+          <EuiSpacer />
+        </Fragment>
+      ))}
+    </>
   );
 };

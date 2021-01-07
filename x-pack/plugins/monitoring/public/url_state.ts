@@ -23,6 +23,7 @@ import {
   IKbnUrlStateStorage,
   ISyncStateRef,
   syncState,
+  withNotifyOnErrors,
 } from '../../../../src/plugins/kibana_utils/public';
 
 interface Route {
@@ -71,6 +72,7 @@ export class GlobalState {
 
   constructor(
     queryService: MonitoringStartPluginDependencies['data']['query'],
+    toasts: MonitoringStartPluginDependencies['core']['notifications']['toasts'],
     rootScope: ng.IRootScopeService,
     ngLocation: ng.ILocationService,
     externalState: RawObject
@@ -78,7 +80,11 @@ export class GlobalState {
     this.timefilterRef = queryService.timefilter.timefilter;
 
     const history: History = createHashHistory();
-    this.stateStorage = createKbnUrlStateStorage({ useHash: false, history });
+    this.stateStorage = createKbnUrlStateStorage({
+      useHash: false,
+      history,
+      ...withNotifyOnErrors(toasts),
+    });
 
     const initialStateFromUrl = this.stateStorage.get(GLOBAL_STATE_KEY) as MonitoringAppState;
 

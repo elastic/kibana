@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import { SuggestionRequest, Visualization, VisualizationSuggestion, Operation } from '../types';
-import chartTableSVG from '../assets/chart_datatable.svg';
+import {
+  SuggestionRequest,
+  Visualization,
+  VisualizationSuggestion,
+  Operation,
+  DatasourcePublicAPI,
+} from '../types';
+import { LensIconChartDatatable } from '../assets/chart_datatable';
 
 export interface LayerState {
   layerId: string;
@@ -15,6 +22,10 @@ export interface LayerState {
 
 export interface DatatableVisualizationState {
   layers: LayerState[];
+  sorting?: {
+    columnId: string | undefined;
+    direction: 'asc' | 'desc' | 'none';
+  };
 }
 
 function newLayerState(layerId: string): LayerState {
@@ -24,17 +35,13 @@ function newLayerState(layerId: string): LayerState {
   };
 }
 
-export const datatableVisualization: Visualization<
-  DatatableVisualizationState,
-  DatatableVisualizationState
-> = {
+export const datatableVisualization: Visualization<DatatableVisualizationState> = {
   id: 'lnsDatatable',
 
   visualizationTypes: [
     {
       id: 'lnsDatatable',
-      icon: 'visTable',
-      largeIcon: chartTableSVG,
+      icon: LensIconChartDatatable,
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Data table',
       }),
@@ -57,7 +64,7 @@ export const datatableVisualization: Visualization<
 
   getDescription() {
     return {
-      icon: chartTableSVG,
+      icon: LensIconChartDatatable,
       label: i18n.translate('xpack.lens.datatable.label', {
         defaultMessage: 'Data table',
       }),
@@ -73,8 +80,6 @@ export const datatableVisualization: Visualization<
       }
     );
   },
-
-  getPersistableState: (state) => state,
 
   getSuggestions({
     table,
@@ -125,7 +130,7 @@ export const datatableVisualization: Visualization<
             },
           ],
         },
-        previewIcon: chartTableSVG,
+        previewIcon: LensIconChartDatatable,
         // tables are hidden from suggestion bar, but used for drag & drop and chart switching
         hide: true,
       },
@@ -133,28 +138,41 @@ export const datatableVisualization: Visualization<
   },
 
   getConfiguration({ state, frame, layerId }) {
-    const layer = state.layers.find((l) => l.layerId === layerId);
-    if (!layer) {
+    const { sortedColumns, datasource } =
+      getDataSourceAndSortedColumns(state, frame.datasourceLayers, layerId) || {};
+
+    if (!sortedColumns) {
       return { groups: [] };
     }
-
-    const datasource = frame.datasourceLayers[layer.layerId];
-    const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
-    // When we add a column it could be empty, and therefore have no order
-    const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
 
     return {
       groups: [
         {
           groupId: 'columns',
-          groupLabel: i18n.translate('xpack.lens.datatable.columns', {
-            defaultMessage: 'Columns',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdown', {
+            defaultMessage: 'Break down by',
           }),
           layerId: state.layers[0].layerId,
-          accessors: sortedColumns,
+          accessors: sortedColumns
+            .filter((c) => datasource!.getOperationForColumnId(c)?.isBucketed)
+            .map((accessor) => ({ columnId: accessor })),
           supportsMoreColumns: true,
-          filterOperations: () => true,
+          filterOperations: (op) => op.isBucketed,
           dataTestSubj: 'lnsDatatable_column',
+        },
+        {
+          groupId: 'metrics',
+          groupLabel: i18n.translate('xpack.lens.datatable.metrics', {
+            defaultMessage: 'Metrics',
+          }),
+          layerId: state.layers[0].layerId,
+          accessors: sortedColumns
+            .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
+            .map((accessor) => ({ columnId: accessor })),
+          supportsMoreColumns: true,
+          filterOperations: (op) => !op.isBucketed,
+          required: true,
+          dataTestSubj: 'lnsDatatable_metrics',
         },
       ],
     };
@@ -182,14 +200,23 @@ export const datatableVisualization: Visualization<
             }
           : l
       ),
+      sorting: prevState.sorting?.columnId === columnId ? undefined : prevState.sorting,
     };
   },
 
-  toExpression(state, frame) {
-    const layer = state.layers[0];
-    const datasource = frame.datasourceLayers[layer.layerId];
-    const operations = layer.columns
-      .map((columnId) => ({ columnId, operation: datasource.getOperationForColumnId(columnId) }))
+  toExpression(state, datasourceLayers, { title, description } = {}): Ast | null {
+    const { sortedColumns, datasource } =
+      getDataSourceAndSortedColumns(state, datasourceLayers, state.layers[0].layerId) || {};
+
+    if (
+      sortedColumns?.length &&
+      sortedColumns.filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed).length === 0
+    ) {
+      return null;
+    }
+
+    const operations = sortedColumns!
+      .map((columnId) => ({ columnId, operation: datasource!.getOperationForColumnId(columnId) }))
       .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
     return {
@@ -199,6 +226,8 @@ export const datatableVisualization: Visualization<
           type: 'function',
           function: 'lens_datatable',
           arguments: {
+            title: [title || ''],
+            description: [description || ''],
             columns: [
               {
                 type: 'expression',
@@ -208,6 +237,8 @@ export const datatableVisualization: Visualization<
                     function: 'lens_datatable_columns',
                     arguments: {
                       columnIds: operations.map((o) => o.columnId),
+                      sortBy: [state.sorting?.columnId || ''],
+                      sortDirection: [state.sorting?.direction || 'none'],
                     },
                   },
                 ],
@@ -218,4 +249,37 @@ export const datatableVisualization: Visualization<
       ],
     };
   },
+
+  getErrorMessages(state, frame) {
+    return undefined;
+  },
+
+  onEditAction(state, event) {
+    if (event.data.action !== 'sort') {
+      return state;
+    }
+    return {
+      ...state,
+      sorting: {
+        columnId: event.data.columnId,
+        direction: event.data.direction,
+      },
+    };
+  },
 };
+
+function getDataSourceAndSortedColumns(
+  state: DatatableVisualizationState,
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  layerId: string
+) {
+  const layer = state.layers.find((l: LayerState) => l.layerId === layerId);
+  if (!layer) {
+    return undefined;
+  }
+  const datasource = datasourceLayers[layer.layerId];
+  const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+  // When we add a column it could be empty, and therefore have no order
+  const sortedColumns = Array.from(new Set(originalOrder.concat(layer.columns)));
+  return { datasource, sortedColumns };
+}

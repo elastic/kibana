@@ -31,6 +31,7 @@ export interface EsHitRecord {
   fields: Record<string, any>;
   sort: number[];
   _source: Record<string, any>;
+  _id: string;
 }
 export type EsHitRecordList = EsHitRecord[];
 
@@ -100,7 +101,8 @@ function fetchContextProvider(indexPatterns: IndexPatternsContract) {
         interval,
         searchAfter,
         remainingSize,
-        nanos
+        nanos,
+        anchor._id
       );
 
       documents =

@@ -18,23 +18,23 @@
  */
 
 import { first } from 'rxjs/operators';
-import { CoreSetup } from '../../../../../core/public';
+import { StartServicesAccessor } from '../../../../../core/public';
 import { METRIC_TYPE, UsageCollectionSetup } from '../../../../usage_collection/public';
 import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
 
 export const createUsageCollector = (
-  core: CoreSetup,
+  getStartServices: StartServicesAccessor,
   usageCollection?: UsageCollectionSetup
 ): SearchUsageCollector => {
   const getCurrentApp = async () => {
-    const [{ application }] = await core.getStartServices();
+    const [{ application }] = await getStartServices();
     return application.currentAppId$.pipe(first()).toPromise();
   };
 
   return {
     trackQueryTimedOut: async () => {
       const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiStats(
+      return usageCollection?.reportUiCounter(
         currentApp!,
         METRIC_TYPE.LOADED,
         SEARCH_EVENT_TYPE.QUERY_TIMED_OUT
@@ -42,51 +42,11 @@ export const createUsageCollector = (
     },
     trackQueriesCancelled: async () => {
       const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiStats(
+      return usageCollection?.reportUiCounter(
         currentApp!,
         METRIC_TYPE.LOADED,
         SEARCH_EVENT_TYPE.QUERIES_CANCELLED
       );
-    },
-    trackLongQueryPopupShown: async () => {
-      const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiStats(
-        currentApp!,
-        METRIC_TYPE.LOADED,
-        SEARCH_EVENT_TYPE.LONG_QUERY_POPUP_SHOWN
-      );
-    },
-    trackLongQueryDialogDismissed: async () => {
-      const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiStats(
-        currentApp!,
-        METRIC_TYPE.CLICK,
-        SEARCH_EVENT_TYPE.LONG_QUERY_DIALOG_DISMISSED
-      );
-    },
-    trackLongQueryRunBeyondTimeout: async () => {
-      const currentApp = await getCurrentApp();
-      return usageCollection?.reportUiStats(
-        currentApp!,
-        METRIC_TYPE.CLICK,
-        SEARCH_EVENT_TYPE.LONG_QUERY_RUN_BEYOND_TIMEOUT
-      );
-    },
-    trackError: async (duration: number) => {
-      return core.http.post('/api/search/usage', {
-        body: JSON.stringify({
-          eventType: 'error',
-          duration,
-        }),
-      });
-    },
-    trackSuccess: async (duration: number) => {
-      return core.http.post('/api/search/usage', {
-        body: JSON.stringify({
-          eventType: 'success',
-          duration,
-        }),
-      });
     },
   };
 };

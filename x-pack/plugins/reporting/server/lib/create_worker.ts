@@ -6,12 +6,15 @@
 
 import { CancellationToken } from '../../common';
 import { PLUGIN_ID } from '../../common/constants';
+import { durationToNumber } from '../../common/schema_utils';
 import { ReportingCore } from '../../server';
 import { LevelLogger } from '../../server/lib';
-import { ESQueueWorkerExecuteFn, ExportTypeDefinition, JobSource } from '../../server/types';
+import { RunTaskFn } from '../../server/types';
 import { ESQueueInstance } from './create_queue';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
+import { ReportDocument } from './store';
+import { ReportTaskParams } from './tasks';
 
 export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, logger: LevelLogger) {
   const config = reporting.getConfig();
@@ -22,18 +25,16 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
   // Once more document types are added, this will need to be passed in
   return async function createWorker(queue: ESQueueInstance) {
     // export type / execute job map
-    const jobExecutors: Map<string, ESQueueWorkerExecuteFn<unknown>> = new Map();
+    const jobExecutors: Map<string, RunTaskFn> = new Map();
 
-    for (const exportType of reporting.getExportTypesRegistry().getAll() as Array<
-      ExportTypeDefinition<JobParamsType, unknown, unknown, ESQueueWorkerExecuteFn<unknown>>
-    >) {
+    for (const exportType of reporting.getExportTypesRegistry().getAll()) {
       const jobExecutor = exportType.runTaskFnFactory(reporting, logger);
       jobExecutors.set(exportType.jobType, jobExecutor);
     }
 
-    const workerFn = <ScheduledTaskParamsType>(
-      jobSource: JobSource<ScheduledTaskParamsType>,
-      jobParams: ScheduledTaskParamsType,
+    const workerFn = (
+      jobSource: ReportDocument,
+      payload: ReportTaskParams['payload'],
       cancellationToken: CancellationToken
     ) => {
       const {
@@ -51,13 +52,13 @@ export function createWorkerFactory<JobParamsType>(reporting: ReportingCore, log
       }
 
       // pass the work to the jobExecutor
-      return jobTypeExecutor(jobId, jobParams, cancellationToken);
+      return jobTypeExecutor(jobId, payload, cancellationToken);
     };
 
     const workerOptions = {
       kibanaName,
       kibanaId,
-      interval: queueConfig.pollInterval,
+      interval: durationToNumber(queueConfig.pollInterval),
       intervalErrorMultiplier: queueConfig.pollIntervalErrorMultiplier,
     };
     const worker = queue.registerWorker(PLUGIN_ID, workerFn, workerOptions);

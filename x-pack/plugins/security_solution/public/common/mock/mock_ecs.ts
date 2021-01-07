@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Ecs } from '../../graphql/types';
+import { Ecs } from '../../../common/ecs';
 
 export const mockEcsData: Ecs[] = [
   {
@@ -438,11 +438,7 @@ export const mockEcsData: Ecs[] = [
     _id: '14',
     timestamp: '2019-03-07T05:06:51.000Z',
     event: {
-      action: null,
-      severity: null,
       module: ['zeek'],
-      category: null,
-      id: null,
       dataset: ['zeek.connection'],
     },
     host: {
@@ -462,12 +458,9 @@ export const mockEcsData: Ecs[] = [
       region_name: ['New York'],
       country_iso_code: ['US'],
     },
-    suricata: null,
     network: {
       transport: ['tcp'],
     },
-    http: null,
-    url: null,
     zeek: {
       session_id: ['C8DRTq362Fios6hw16'],
       connection: {
@@ -477,22 +470,13 @@ export const mockEcsData: Ecs[] = [
         state: ['REJ'],
         history: ['Sr'],
       },
-      notice: null,
-      dns: null,
-      http: null,
-      files: null,
-      ssl: null,
     },
   },
   {
     _id: '15',
     timestamp: '2019-03-07T00:51:28.000Z',
     event: {
-      action: null,
-      severity: null,
       module: ['zeek'],
-      category: null,
-      id: null,
       dataset: ['zeek.dns'],
     },
     host: {
@@ -512,43 +496,25 @@ export const mockEcsData: Ecs[] = [
       region_name: ['New York'],
       country_iso_code: ['US'],
     },
-    suricata: null,
     network: {
       transport: ['udp'],
     },
-    http: null,
-    url: null,
     zeek: {
       session_id: ['CyIrMA1L1JtLqdIuol'],
-      connection: null,
-      notice: null,
       dns: {
         AA: [false],
-        qclass_name: null,
         RD: [false],
-        qtype_name: null,
-        rejected: null,
-        qtype: null,
-        query: null,
         trans_id: [65252],
-        qclass: null,
         RA: [false],
         TC: [false],
       },
-      http: null,
-      files: null,
-      ssl: null,
     },
   },
   {
     _id: '16',
     timestamp: '2019-03-05T07:00:20.000Z',
     event: {
-      action: null,
-      severity: null,
       module: ['zeek'],
-      category: null,
-      id: null,
       dataset: ['zeek.http'],
     },
     host: {
@@ -568,32 +534,22 @@ export const mockEcsData: Ecs[] = [
       region_name: ['New York'],
       country_iso_code: ['US'],
     },
-    suricata: null,
-    network: null,
     http: {
       version: ['1.1'],
       request: {
-        method: null,
         body: {
           bytes: [0],
-          content: null,
         },
-        referrer: null,
       },
       response: {
         status_code: [302],
         body: {
           bytes: [154],
-          content: null,
         },
       },
     },
-    url: null,
     zeek: {
       session_id: ['CZLkpC22NquQJOpkwe'],
-      connection: null,
-      notice: null,
-      dns: null,
       http: {
         resp_mime_types: ['text/html'],
         trans_depth: ['3'],
@@ -601,19 +557,13 @@ export const mockEcsData: Ecs[] = [
         resp_fuids: ['FzeujEPP7GTHmYPsc'],
         tags: [],
       },
-      files: null,
-      ssl: null,
     },
   },
   {
     _id: '17',
     timestamp: '2019-02-28T22:36:28.000Z',
     event: {
-      action: null,
-      severity: null,
       module: ['zeek'],
-      category: null,
-      id: null,
       dataset: ['zeek.notice'],
     },
     host: {
@@ -623,17 +573,8 @@ export const mockEcsData: Ecs[] = [
     },
     source: {
       ip: ['8.42.77.171'],
-      port: null,
     },
-    destination: null,
-    geo: null,
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
     zeek: {
-      session_id: null,
-      connection: null,
       notice: {
         suppress_for: [3600],
         msg: ['8.42.77.171 scanned at least 15 unique ports of host 207.154.238.205 in 0m0s'],
@@ -643,27 +584,18 @@ export const mockEcsData: Ecs[] = [
         dropped: [false],
         peer_descr: ['bro'],
       },
-      dns: null,
-      http: null,
-      files: null,
-      ssl: null,
     },
   },
   {
     _id: '18',
     timestamp: '2019-02-22T21:12:13.000Z',
     event: {
-      action: null,
-      severity: null,
       module: ['zeek'],
-      category: null,
-      id: null,
       dataset: ['zeek.ssl'],
     },
     host: {
       id: ['2ce8b1e7d69e4a1d9c6bcddc473da9d9'],
       name: ['zeek-sensor-amsterdam'],
-      ip: null,
     },
     source: {
       ip: ['188.166.66.184'],
@@ -677,17 +609,8 @@ export const mockEcsData: Ecs[] = [
       region_name: ['England'],
       country_iso_code: ['GB'],
     },
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
     zeek: {
       session_id: ['CmTxzt2OVXZLkGDaRe'],
-      connection: null,
-      notice: null,
-      dns: null,
-      http: null,
-      files: null,
       ssl: {
         cipher: ['TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256'],
         established: [false],
@@ -700,11 +623,7 @@ export const mockEcsData: Ecs[] = [
     _id: '19',
     timestamp: '2019-03-03T04:26:38.000Z',
     event: {
-      action: null,
-      severity: null,
       module: ['zeek'],
-      category: null,
-      id: null,
       dataset: ['zeek.files'],
     },
     host: {
@@ -712,19 +631,8 @@ export const mockEcsData: Ecs[] = [
       name: ['suricata-zeek-singapore'],
       ip: ['206.189.35.240', '10.15.0.5', 'fe80::98c7:eff:fe29:4455'],
     },
-    source: null,
-    destination: null,
-    geo: null,
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
     zeek: {
       session_id: ['Cu0n232QMyvNtzb75j'],
-      connection: null,
-      notice: null,
-      dns: null,
-      http: null,
       files: {
         session_ids: ['Cu0n232QMyvNtzb75j'],
         timedout: [false],
@@ -745,7 +653,6 @@ export const mockEcsData: Ecs[] = [
         missing_bytes: [0],
         md5: ['f7653f1951693021daa9e6be61226e32'],
       },
-      ssl: null,
     },
   },
   {
@@ -753,24 +660,14 @@ export const mockEcsData: Ecs[] = [
     timestamp: '2019-03-13T05:42:11.815Z',
     event: {
       action: ['executed'],
-      severity: null,
       module: ['auditd'],
       category: ['audit-rule'],
-      id: null,
-      dataset: null,
     },
     host: {
       id: ['f896741c3b3b44bdb8e351a4ab6d2d7c'],
       name: ['zeek-sanfran'],
       ip: ['134.209.63.134', '10.46.0.5', 'fe80::a0d9:16ff:fecf:e70b'],
     },
-    source: null,
-    destination: null,
-    geo: null,
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
     user: {
       name: ['alice'],
     },
@@ -783,24 +680,19 @@ export const mockEcsData: Ecs[] = [
       title: ['gpgconf --list-dirs agent-socket'],
       working_directory: ['/'],
     },
-    zeek: null,
   },
   {
     _id: '21',
     timestamp: '2019-03-14T22:30:25.527Z',
     event: {
       action: ['logged-in'],
-      severity: null,
       module: ['auditd'],
       category: ['user-login'],
-      id: null,
-      dataset: null,
     },
     auditd: {
       result: ['success'],
       session: ['14'],
       data: {
-        acct: null,
         terminal: ['/dev/pts/0'],
         op: ['login'],
       },
@@ -815,8 +707,6 @@ export const mockEcsData: Ecs[] = [
           type: ['user-session'],
         },
         how: ['/usr/sbin/sshd'],
-        message_type: null,
-        sequence: null,
       },
     },
     host: {
@@ -826,38 +716,22 @@ export const mockEcsData: Ecs[] = [
     },
     source: {
       ip: ['8.42.77.171'],
-      port: null,
     },
-    destination: null,
-    geo: null,
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
     user: {
       name: ['root'],
     },
     process: {
       pid: [17471],
-      name: null,
-      ppid: null,
-      args: null,
       executable: ['/usr/sbin/sshd'],
-      title: null,
-      working_directory: null,
     },
-    zeek: null,
   },
   {
     _id: '22',
     timestamp: '2019-03-13T03:35:21.614Z',
     event: {
       action: ['disposed-credentials'],
-      severity: null,
       module: ['auditd'],
       category: ['user-login'],
-      id: null,
-      dataset: null,
     },
     auditd: {
       result: ['success'],
@@ -878,8 +752,6 @@ export const mockEcsData: Ecs[] = [
           type: ['user-session'],
         },
         how: ['/usr/sbin/sshd'],
-        message_type: null,
-        sequence: null,
       },
     },
     host: {
@@ -887,37 +759,21 @@ export const mockEcsData: Ecs[] = [
       name: ['suricata-bangalore'],
       ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
     },
-    source: null,
-    destination: null,
-    geo: null,
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
     user: {
       name: ['root'],
     },
     process: {
       pid: [21202],
-      name: null,
-      ppid: null,
-      args: null,
       executable: ['/usr/sbin/sshd'],
-      title: null,
-      working_directory: null,
     },
-    zeek: null,
   },
   {
     _id: '23',
     timestamp: '2019-03-13T03:35:21.614Z',
     event: {
       action: ['ended-session'],
-      severity: null,
       module: ['auditd'],
       category: ['user-login'],
-      id: null,
-      dataset: null,
     },
     auditd: {
       result: ['success'],
@@ -938,8 +794,6 @@ export const mockEcsData: Ecs[] = [
           type: ['user-session'],
         },
         how: ['/usr/sbin/sshd'],
-        message_type: null,
-        sequence: null,
       },
     },
     host: {
@@ -947,37 +801,21 @@ export const mockEcsData: Ecs[] = [
       name: ['suricata-bangalore'],
       ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
     },
-    source: null,
-    destination: null,
-    geo: null,
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
     user: {
       name: ['root'],
     },
     process: {
       pid: [21202],
-      name: null,
-      ppid: null,
-      args: null,
       executable: ['/usr/sbin/sshd'],
-      title: null,
-      working_directory: null,
     },
-    zeek: null,
   },
   {
     _id: '24',
     timestamp: '2019-03-18T23:17:01.645Z',
     event: {
       action: ['acquired-credentials'],
-      severity: null,
       module: ['auditd'],
       category: ['user-login'],
-      id: null,
-      dataset: null,
     },
     auditd: {
       result: ['success'],
@@ -994,12 +832,9 @@ export const mockEcsData: Ecs[] = [
         },
         object: {
           primary: ['cron'],
-          secondary: null,
           type: ['user-session'],
         },
         how: ['/usr/sbin/cron'],
-        message_type: null,
-        sequence: null,
       },
     },
     host: {
@@ -1007,37 +842,21 @@ export const mockEcsData: Ecs[] = [
       name: ['zeek-london'],
       ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
     },
-    source: null,
-    destination: null,
-    geo: null,
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
     user: {
       name: ['root'],
     },
     process: {
       pid: [9592],
-      name: null,
-      ppid: null,
-      args: null,
       executable: ['/usr/sbin/cron'],
-      title: null,
-      working_directory: null,
     },
-    zeek: null,
   },
   {
     _id: '25',
     timestamp: '2019-03-19T01:17:01.336Z',
     event: {
       action: ['started-session'],
-      severity: null,
       module: ['auditd'],
       category: ['user-login'],
-      id: null,
-      dataset: null,
     },
     auditd: {
       result: ['success'],
@@ -1054,58 +873,36 @@ export const mockEcsData: Ecs[] = [
         },
         object: {
           primary: ['cron'],
-          secondary: null,
           type: ['user-session'],
         },
         how: ['[/usr/sbin/cron'],
-        message_type: null,
-        sequence: null,
       },
     },
     host: {
       id: ['aa7ca589f1b8220002f2fc61c64cfbf1'],
       name: ['siem-kibana'],
-      ip: null,
     },
-    source: null,
-    destination: null,
-    geo: null,
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
     user: {
       name: ['root'],
     },
     process: {
       pid: [725],
-      name: null,
-      ppid: null,
-      args: null,
       executable: ['/usr/sbin/cron'],
-      title: null,
-      working_directory: null,
     },
-    zeek: null,
   },
   {
     _id: '26',
     timestamp: '2019-03-13T03:34:08.890Z',
     event: {
       action: ['was-authorized'],
-      severity: null,
       module: ['auditd'],
       category: ['user-login'],
-      id: null,
-      dataset: null,
     },
     auditd: {
       result: ['success'],
       session: ['338'],
       data: {
-        acct: null,
         terminal: ['/dev/pts/0'],
-        op: null,
       },
       summary: {
         actor: {
@@ -1114,12 +911,9 @@ export const mockEcsData: Ecs[] = [
         },
         object: {
           primary: ['/dev/pts/0'],
-          secondary: null,
           type: ['user-session'],
         },
         how: ['/sbin/pam_tally2'],
-        message_type: null,
-        sequence: null,
       },
     },
     host: {
@@ -1127,42 +921,25 @@ export const mockEcsData: Ecs[] = [
       name: ['suricata-bangalore'],
       ip: ['139.59.11.147', '10.47.0.5', 'fe80::ec0b:1bff:fe29:80bd'],
     },
-    source: null,
-    destination: null,
-    geo: null,
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
     user: {
       name: ['alice'],
     },
     process: {
       pid: [21170],
-      name: null,
-      ppid: null,
-      args: null,
       executable: ['/sbin/pam_tally2'],
-      title: null,
-      working_directory: null,
     },
-    zeek: null,
   },
   {
     _id: '27',
     timestamp: '2019-03-22T19:13:11.026Z',
     event: {
       action: ['connected-to'],
-      severity: null,
       module: ['auditd'],
       category: ['audit-rule'],
-      id: null,
-      dataset: null,
     },
     auditd: {
       result: ['success'],
       session: ['246'],
-      data: null,
       summary: {
         actor: {
           primary: ['alice'],
@@ -1174,8 +951,6 @@ export const mockEcsData: Ecs[] = [
           type: ['socket'],
         },
         how: ['/usr/bin/wget'],
-        message_type: null,
-        sequence: null,
       },
     },
     host: {
@@ -1183,16 +958,10 @@ export const mockEcsData: Ecs[] = [
       name: ['zeek-london'],
       ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
     },
-    source: null,
     destination: {
       ip: ['93.184.216.34'],
       port: [80],
     },
-    geo: null,
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
     user: {
       name: ['alice'],
     },
@@ -1200,28 +969,21 @@ export const mockEcsData: Ecs[] = [
       pid: [1490],
       name: ['wget'],
       ppid: [1476],
-      args: null,
       executable: ['/usr/bin/wget'],
       title: ['wget www.example.com'],
-      working_directory: null,
     },
-    zeek: null,
   },
   {
     _id: '28',
     timestamp: '2019-03-26T22:12:18.609Z',
     event: {
       action: ['opened-file'],
-      severity: null,
       module: ['auditd'],
       category: ['audit-rule'],
-      id: null,
-      dataset: null,
     },
     auditd: {
       result: ['success'],
       session: ['unset'],
-      data: null,
       summary: {
         actor: {
           primary: ['unset'],
@@ -1229,19 +991,13 @@ export const mockEcsData: Ecs[] = [
         },
         object: {
           primary: ['/proc/15990/attr/current'],
-          secondary: null,
           type: ['file'],
         },
         how: ['/lib/systemd/systemd-journald'],
-        message_type: null,
-        sequence: null,
       },
     },
     file: {
       path: ['/proc/15990/attr/current'],
-      target_path: null,
-      extension: null,
-      type: null,
       device: ['00:00'],
       inode: ['27672309'],
       uid: ['0'],
@@ -1249,22 +1005,13 @@ export const mockEcsData: Ecs[] = [
       gid: ['0'],
       group: ['root'],
       mode: ['0666'],
-      size: null,
-      mtime: null,
-      ctime: null,
     },
     host: {
       id: ['7c21f5ed03b04d0299569d221fe18bbc'],
       name: ['zeek-london'],
       ip: ['46.101.3.136', '10.16.0.5', 'fe80::4066:42ff:fe19:b3b9'],
     },
-    source: null,
-    destination: null,
-    geo: null,
-    suricata: null,
-    network: null,
-    http: null,
-    url: null,
+
     user: {
       name: ['root'],
     },
@@ -1272,12 +1019,10 @@ export const mockEcsData: Ecs[] = [
       pid: [27244],
       name: ['systemd-journal'],
       ppid: [1],
-      args: null,
       executable: ['/lib/systemd/systemd-journald'],
       title: ['/lib/systemd/systemd-journald'],
       working_directory: ['/'],
     },
-    zeek: null,
   },
 ];
 

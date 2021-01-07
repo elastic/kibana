@@ -36,6 +36,9 @@ export const umDynamicSettings: SavedObjectsType = {
       certExpirationThreshold: {
         type: 'long',
       },
+      defaultConnectors: {
+        type: 'keyword',
+      },
       */
     },
   },
@@ -45,7 +48,7 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
   getUptimeDynamicSettings: async (client): Promise<DynamicSettings> => {
     try {
       const obj = await client.get<DynamicSettings>(umDynamicSettings.name, settingsObjectId);
-      return obj.attributes;
+      return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULTS;
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return DYNAMIC_SETTINGS_DEFAULTS;

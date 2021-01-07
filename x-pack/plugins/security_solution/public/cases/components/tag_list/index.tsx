@@ -10,8 +10,6 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadgeGroup,
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -20,10 +18,13 @@ import {
 import styled, { css } from 'styled-components';
 import { isEqual } from 'lodash/fp';
 import * as i18n from './translations';
-import { Form, FormDataProvider, useForm } from '../../../shared_imports';
+import { Form, FormDataProvider, useForm, getUseField, Field } from '../../../shared_imports';
 import { schema } from './schema';
-import { CommonUseField } from '../create';
 import { useGetTags } from '../../containers/use_get_tags';
+
+import { Tags } from './tags';
+
+const CommonUseField = getUseField({ component: Field });
 
 interface TagListProps {
   disabled?: boolean;
@@ -76,7 +77,6 @@ export const TagList = React.memo(
         ),
       [tagOptions]
     );
-
     return (
       <EuiText>
         <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="spaceBetween">
@@ -97,17 +97,9 @@ export const TagList = React.memo(
           )}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-        <MyFlexGroup gutterSize="xs" data-test-subj="case-tags">
+        <MyFlexGroup gutterSize="none" data-test-subj="case-tags">
           {tags.length === 0 && !isEditTags && <p data-test-subj="no-tags">{i18n.NO_TAGS}</p>}
-          <EuiBadgeGroup>
-            {tags.length > 0 &&
-              !isEditTags &&
-              tags.map((tag, key) => (
-                <EuiBadge data-test-subj={`case-tag-${tag}`} color="hollow">
-                  {tag}
-                </EuiBadge>
-              ))}
-          </EuiBadgeGroup>
+          {!isEditTags && <Tags tags={tags} color="hollow" />}
           {isEditTags && (
             <EuiFlexGroup data-test-subj="edit-tags" direction="column">
               <EuiFlexItem>

@@ -3,29 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "license": "Apache-2.0",
-  "dependencies": {
-    "@kbn/babel-preset": "1.0.0",
-    "@kbn/dev-utils": "1.0.0",
-    "@storybook/addon-actions": "^5.3.19",
-    "@storybook/addon-console": "^1.2.1",
-    "@storybook/addon-info": "^5.3.19",
-    "@storybook/addon-knobs": "^5.3.19",
-    "@storybook/addon-options": "^5.3.19",
-    "@storybook/addon-storyshots": "^5.3.19",
-    "@storybook/react": "^5.3.19",
-    "@storybook/theming": "^5.3.19",
-    "copy-webpack-plugin": "^6.0.2",
-    "fast-glob": "2.2.7",
-    "glob-watcher": "5.0.3",
-    "jest-specific-snapshot": "2.0.0",
-    "jest-styled-components": "^7.0.2",
-    "mkdirp": "0.5.1",
-    "mini-css-extract-plugin": "0.7.0",
-    "normalize-path": "3.0.0",
-    "react-docgen-typescript-loader": "3.1.0",
-    "rxjs": "6.5.5",
-    "serve-static": "1.14.1",
-    "styled-components": "^5.1.0",
-    "webpack": "^4.41.5"
+  "main": "./target/index.js",
+  "kibana": {
+    "devOnly": true
+  },
+  "scripts": {
+    "build": "../../node_modules/.bin/tsc",
+    "kbn:bootstrap": "yarn build",
+    "watch": "yarn build --watch"
+  },
+  "devDependencies": {
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }

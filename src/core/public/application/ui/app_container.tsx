@@ -25,8 +25,9 @@ import React, {
   useState,
   MutableRefObject,
 } from 'react';
+import { EuiLoadingElastic } from '@elastic/eui';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import type { MountPoint } from '../../types';
 import { AppLeaveHandler, AppStatus, AppUnmount, Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 import { ScopedHistory } from '../scoped_history';
@@ -39,6 +40,7 @@ interface Props {
   mounter?: Mounter;
   appStatus: AppStatus;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
+  setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
   setIsMounting: (isMounting: boolean) => void;
 }
@@ -48,6 +50,7 @@ export const AppContainer: FunctionComponent<Props> = ({
   appId,
   appPath,
   setAppLeaveHandler,
+  setAppActionMenu,
   createScopedHistory,
   appStatus,
   setIsMounting,
@@ -84,28 +87,40 @@ export const AppContainer: FunctionComponent<Props> = ({
             history: createScopedHistory(appPath),
             element: elementRef.current!,
             onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
+            setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
           })) || null;
       } catch (e) {
         // TODO: add error UI
         // eslint-disable-next-line no-console
         console.error(e);
       } finally {
-        setShowSpinner(false);
-        setIsMounting(false);
+        if (elementRef.current) {
+          setShowSpinner(false);
+          setIsMounting(false);
+        }
       }
     };
 
     mount();
 
     return unmount;
-  }, [appId, appStatus, mounter, createScopedHistory, setAppLeaveHandler, appPath, setIsMounting]);
+  }, [
+    appId,
+    appStatus,
+    mounter,
+    createScopedHistory,
+    setAppLeaveHandler,
+    setAppActionMenu,
+    appPath,
+    setIsMounting,
+  ]);
 
   return (
     <Fragment>
       {appNotFound && <AppNotFound />}
       {showSpinner && (
         <div className="appContainer__loading">
-          <EuiLoadingSpinner size="l" />
+          <EuiLoadingElastic aria-label="Loading application" size="xxl" />
         </div>
       )}
       <div key={appId} ref={elementRef} />

@@ -18,30 +18,43 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Subscription } from 'rxjs';
 
 import { I18nStart } from 'kibana/public';
+import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { VisualizationContainer } from '../../visualizations/public';
+import { FilterManager, Filter } from '../../data/public';
+
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
-import { ControlParams } from './editor_utils';
 import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
-import { FilterManager, Filter } from '../../data/public';
-import { VisParams, Vis } from '../../visualizations/public';
+import { InputControlVisParams } from './types';
 
-export const createInputControlVisController = (deps: InputControlVisDependencies) => {
+export type InputControlVisControllerType = InstanceType<
+  ReturnType<typeof createInputControlVisController>
+>;
+
+export const createInputControlVisController = (
+  deps: InputControlVisDependencies,
+  handlers: IInterpreterRenderHandlers
+) => {
   return class InputControlVisController {
     private I18nContext?: I18nStart['Context'];
+    private _isLoaded = false;
 
     controls: Array<RangeControl | ListControl>;
     queryBarUpdateHandler: () => void;
     filterManager: FilterManager;
     updateSubsciption: any;
-    visParams?: VisParams;
+    timeFilterSubscription: Subscription;
+    visParams?: InputControlVisParams;
 
-    constructor(public el: Element, public vis: Vis) {
+    constructor(public el: Element) {
       this.controls = [];
 
       this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
@@ -50,19 +63,32 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
       this.updateSubsciption = this.filterManager
         .getUpdates$()
         .subscribe(this.queryBarUpdateHandler);
+      this.timeFilterSubscription = deps.data.query.timefilter.timefilter
+        .getTimeUpdate$()
+        .subscribe(() => {
+          if (this.visParams?.useTimeFilter) {
+            this._isLoaded = false;
+          }
+        });
     }
 
-    async render(visData: any, visParams: VisParams) {
-      this.visParams = visParams;
-      this.controls = [];
-      this.controls = await this.initControls();
-      const [{ i18n }] = await deps.core.getStartServices();
-      this.I18nContext = i18n.Context;
+    async render(visParams: InputControlVisParams) {
+      if (!this.I18nContext) {
+        const [{ i18n }] = await deps.core.getStartServices();
+        this.I18nContext = i18n.Context;
+      }
+      if (!this._isLoaded || !isEqual(visParams, this.visParams)) {
+        this.visParams = visParams;
+        this.controls = [];
+        this.controls = await this.initControls(visParams);
+        this._isLoaded = true;
+      }
       this.drawVis();
     }
 
     destroy() {
       this.updateSubsciption.unsubscribe();
+      this.timeFilterSubscription.unsubscribe();
       unmountComponentAtNode(this.el);
       this.controls.forEach((control) => control.destroy());
     }
@@ -74,34 +100,34 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
 
       render(
         <this.I18nContext>
-          <InputControlVis
-            updateFiltersOnChange={this.visParams?.updateFiltersOnChange}
-            controls={this.controls}
-            stageFilter={this.stageFilter}
-            submitFilters={this.submitFilters}
-            resetControls={this.updateControlsFromKbn}
-            clearControls={this.clearControls}
-            hasChanges={this.hasChanges}
-            hasValues={this.hasValues}
-            refreshControl={this.refreshControl}
-          />
+          <VisualizationContainer handlers={handlers}>
+            <InputControlVis
+              updateFiltersOnChange={this.visParams?.updateFiltersOnChange}
+              controls={this.controls}
+              stageFilter={this.stageFilter}
+              submitFilters={this.submitFilters}
+              resetControls={this.updateControlsFromKbn}
+              clearControls={this.clearControls}
+              hasChanges={this.hasChanges}
+              hasValues={this.hasValues}
+              refreshControl={this.refreshControl}
+            />
+          </VisualizationContainer>
         </this.I18nContext>,
         this.el
       );
     };
 
-    async initControls() {
-      const controlParamsList = (this.visParams?.controls as ControlParams[])?.filter(
-        (controlParams) => {
-          // ignore controls that do not have indexPattern or field
-          return controlParams.indexPattern && controlParams.fieldName;
-        }
-      );
+    async initControls(visParams: InputControlVisParams) {
+      const controlParamsList = visParams.controls.filter((controlParams) => {
+        // ignore controls that do not have indexPattern or field
+        return controlParams.indexPattern && controlParams.fieldName;
+      });
 
       const controlFactoryPromises = controlParamsList.map((controlParams) => {
         const factory = getControlFactory(controlParams);
 
-        return factory(controlParams, this.visParams?.useTimeFilter, deps);
+        return factory(controlParams, visParams.useTimeFilter, deps);
       });
       const controls = await Promise.all<RangeControl | ListControl>(controlFactoryPromises);
 

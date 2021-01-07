@@ -9,15 +9,13 @@ import {
   RequestHandler,
   RouteConfig,
   RouteMethod,
-  LegacyCallAPIOptions,
   SavedObjectsClientContract,
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
 } from 'kibana/server';
-import { DynamicSettings } from '../../common/runtime_types';
-import { UMServerLibs } from '../lib/lib';
+import { UMServerLibs, UptimeESClient } from '../lib/lib';
 
 /**
  * Defines the basic properties employed by Uptime routes.
@@ -60,24 +58,18 @@ export type UMRestApiRouteFactory = (libs: UMServerLibs) => UptimeRoute;
 export type UMKibanaRouteWrapper = (uptimeRoute: UptimeRoute) => UMKibanaRoute;
 
 /**
- * This type can store custom parameters used by the internal Uptime route handlers.
- */
-export interface UMRouteParams {
-  callES: (
-    endpoint: string,
-    clientParams?: Record<string, any>,
-    options?: LegacyCallAPIOptions | undefined
-  ) => Promise<any>;
-  dynamicSettings: DynamicSettings;
-  savedObjectsClient: SavedObjectsClientContract;
-}
-
-/**
  * This is the contract we specify internally for route handling.
  */
-export type UMRouteHandler = (
-  params: UMRouteParams,
-  context: RequestHandlerContext,
-  request: KibanaRequest<Record<string, any>, Record<string, any>, Record<string, any>>,
-  response: KibanaResponseFactory
-) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
+export type UMRouteHandler = ({
+  uptimeEsClient,
+  context,
+  request,
+  response,
+  savedObjectsClient,
+}: {
+  uptimeEsClient: UptimeESClient;
+  context: RequestHandlerContext;
+  request: KibanaRequest<Record<string, any>, Record<string, any>, Record<string, any>>;
+  response: KibanaResponseFactory;
+  savedObjectsClient: SavedObjectsClientContract;
+}) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;

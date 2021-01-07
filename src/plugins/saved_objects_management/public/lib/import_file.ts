@@ -17,25 +17,29 @@
  * under the License.
  */
 
-import { HttpStart, SavedObjectsImportError } from 'src/core/public';
+import { HttpStart, SavedObjectsImportFailure } from 'src/core/public';
+import { ImportMode } from '../management_section/objects_table/components/import_mode_control';
 
 interface ImportResponse {
   success: boolean;
   successCount: number;
-  errors?: SavedObjectsImportError[];
+  errors?: SavedObjectsImportFailure[];
 }
 
-export async function importFile(http: HttpStart, file: File, overwriteAll: boolean = false) {
+export async function importFile(
+  http: HttpStart,
+  file: File,
+  { createNewCopies, overwrite }: ImportMode
+) {
   const formData = new FormData();
   formData.append('file', file);
+  const query = createNewCopies ? { createNewCopies } : { overwrite };
   return await http.post<ImportResponse>('/api/saved_objects/_import', {
     body: formData,
     headers: {
       // Important to be undefined, it forces proper headers to be set for FormData
       'Content-Type': undefined,
     },
-    query: {
-      overwrite: overwriteAll,
-    },
+    query,
   });
 }

@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/array-type */
-
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
 import { schema, TypeOf } from '@kbn/config-schema';
 import {
   InfraRouteConfig,
   InfraTSVBResponse,
-  InfraServerPluginDeps,
+  InfraServerPluginSetupDeps,
   CallWithRequestParams,
   InfraDatabaseSearchResponse,
   InfraDatabaseMultiResponse,
@@ -28,7 +26,6 @@ import {
   RequestHandlerContext,
   KibanaResponseFactory,
   RouteMethod,
-  LegacyAPICaller,
 } from '../../../../../../../src/core/server';
 import { RequestHandler } from '../../../../../../../src/core/server';
 import { InfraConfig } from '../../../plugin';
@@ -36,16 +33,16 @@ import { IndexPatternsFetcher, UI_SETTINGS } from '../../../../../../../src/plug
 
 export class KibanaFramework {
   public router: IRouter;
-  public plugins: InfraServerPluginDeps;
+  public plugins: InfraServerPluginSetupDeps;
 
-  constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginDeps) {
+  constructor(core: CoreSetup, config: InfraConfig, plugins: InfraServerPluginSetupDeps) {
     this.router = core.http.createRouter();
     this.plugins = plugins;
   }
 
-  public registerRoute<params = any, query = any, body = any, method extends RouteMethod = any>(
-    config: InfraRouteConfig<params, query, body, method>,
-    handler: RequestHandler<params, query, body>
+  public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+    config: InfraRouteConfig<Params, Query, Body, Method>,
+    handler: RequestHandler<Params, Query, Body>
   ) {
     const defaultOptions = {
       tags: ['access:infra'],
@@ -220,11 +217,7 @@ export class KibanaFramework {
   }
 
   public getIndexPatternsService(requestContext: RequestHandlerContext): IndexPatternsFetcher {
-    return new IndexPatternsFetcher((...rest: Parameters<LegacyAPICaller>) => {
-      rest[1] = rest[1] || {};
-      rest[1].allowNoIndices = true;
-      return requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(...rest);
-    });
+    return new IndexPatternsFetcher(requestContext.core.elasticsearch.client.asCurrentUser, true);
   }
 
   public getSpaceId(request: KibanaRequest): string {

@@ -6,8 +6,9 @@
 
 import { isEmpty } from 'lodash/fp';
 
+import { assertUnreachable } from '../../../common/utility_types';
 import { Direction, HostsFields, HostsSortField } from '../../graphql/types';
-import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
+import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { HostsRequestOptions } from '.';
 
@@ -43,7 +44,7 @@ export const buildHostsQuery = ({
     index: defaultIndex,
     ignoreUnavailable: true,
     body: {
-      ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
+      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...agg,
         host_data: {

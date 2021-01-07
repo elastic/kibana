@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import {
-  _tags,
   _versionOrUndefined,
   created_at,
   created_by,
@@ -21,6 +18,7 @@ import {
   metaOrUndefined,
   name,
   namespace_type,
+  osTypeArray,
   tags,
   tie_breaker_id,
   updated_at,
@@ -30,7 +28,6 @@ import { commentsArray, entriesArray } from '../types';
 
 export const exceptionListItemSchema = t.exact(
   t.type({
-    _tags,
     _version: _versionOrUndefined,
     comments: commentsArray,
     created_at,
@@ -43,6 +40,7 @@ export const exceptionListItemSchema = t.exact(
     meta: metaOrUndefined,
     name,
     namespace_type,
+    os_types: osTypeArray,
     tags,
     tie_breaker_id,
     type: exceptionListItemType,

@@ -12,20 +12,20 @@ describe('getServiceMapServiceNodeInfo', () => {
   describe('with no results', () => {
     it('returns null data', async () => {
       const setup = ({
-        client: {
+        apmEventClient: {
           search: () =>
             Promise.resolve({
               hits: { total: { value: 0 } },
             }),
         },
         indices: {},
+        uiFilters: { environment: 'test environment' },
       } as unknown) as Setup & SetupTimeRange;
-      const environment = 'test environment';
       const serviceName = 'test service name';
       const result = await getServiceMapServiceNodeInfo({
-        uiFilters: { environment },
         setup,
         serviceName,
+        searchAggregatedTransactions: false,
       });
 
       expect(result).toEqual({
@@ -44,27 +44,35 @@ describe('getServiceMapServiceNodeInfo', () => {
     it('returns data', async () => {
       jest.spyOn(getErrorRateModule, 'getErrorRate').mockResolvedValueOnce({
         average: 0.5,
-        erroneousTransactionsRate: [],
+        transactionErrorRate: [],
         noHits: false,
       });
 
       const setup = ({
-        client: {
+        apmEventClient: {
           search: () =>
             Promise.resolve({
-              hits: { total: { value: 1 } },
+              aggregations: {
+                count: { value: 1 },
+                duration: { value: null },
+                avgCpuUsage: { value: null },
+                avgMemoryUsage: { value: null },
+              },
             }),
         },
         indices: {},
         start: 1593460053026000,
         end: 1593497863217000,
+        config: {
+          'xpack.apm.metricsInterval': 30,
+        },
+        uiFilters: { environment: 'test environment' },
       } as unknown) as Setup & SetupTimeRange;
-      const environment = 'test environment';
       const serviceName = 'test service name';
       const result = await getServiceMapServiceNodeInfo({
-        uiFilters: { environment },
         setup,
         serviceName,
+        searchAggregatedTransactions: false,
       });
 
       expect(result).toEqual({

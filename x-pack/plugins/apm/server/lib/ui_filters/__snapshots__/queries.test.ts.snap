@@ -2,27 +2,26 @@
 
 exports[`ui filter queries fetches environments 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+      "metric",
+      "error",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "environments": Object {
         "terms": Object {
           "field": "service.environment",
           "missing": "ENVIRONMENT_NOT_DEFINED",
+          "size": 100,
         },
       },
     },
     "query": Object {
       "bool": Object {
         "filter": Array [
-          Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-                "error",
-                "metric",
-              ],
-            },
-          },
           Object {
             "range": Object {
               "@timestamp": Object {
@@ -42,37 +41,31 @@ Object {
     },
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
 }
 `;
 
 exports[`ui filter queries fetches environments without a service name 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+      "metric",
+      "error",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "environments": Object {
         "terms": Object {
           "field": "service.environment",
           "missing": "ENVIRONMENT_NOT_DEFINED",
+          "size": 100,
         },
       },
     },
     "query": Object {
       "bool": Object {
         "filter": Array [
-          Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-                "error",
-                "metric",
-              ],
-            },
-          },
           Object {
             "range": Object {
               "@timestamp": Object {
@@ -87,10 +80,5 @@ Object {
     },
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
 }
 `;

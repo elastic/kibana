@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { UpdateDocumentByQueryResponse } from 'elasticsearch';
 import { HttpStart } from '../../../../../../../src/core/public';
 
 import {
@@ -16,7 +17,10 @@ import {
 } from '../../../lists_plugin_deps';
 import { updateAlertStatus } from '../../../detections/containers/detection_engine/alerts/api';
 import { getUpdateAlertsQuery } from '../../../detections/components/alerts_table/actions';
-import { buildAlertStatusFilter } from '../../../detections/components/alerts_table/default_config';
+import {
+  buildAlertStatusFilter,
+  buildAlertsRuleIdFilter,
+} from '../../../detections/components/alerts_table/default_config';
 import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
 import { Index } from '../../../../common/detection_engine/schemas/common/schemas';
 import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from './helpers';
@@ -24,12 +28,14 @@ import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from 
 /**
  * Adds exception items to the list. Also optionally closes alerts.
  *
+ * @param ruleId id of the rule where the exception updates will be applied
  * @param exceptionItemsToAddOrUpdate array of ExceptionListItemSchema to add or update
  * @param alertIdToClose - optional string representing alert to close
  * @param bulkCloseIndex - optional index used to create bulk close query
  *
  */
 export type AddOrUpdateExceptionItemsFunc = (
+  ruleId: string,
   exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   alertIdToClose?: string,
   bulkCloseIndex?: Index
@@ -42,8 +48,8 @@ export type ReturnUseAddOrUpdateException = [
 
 export interface UseAddOrUpdateExceptionProps {
   http: HttpStart;
-  onError: (arg: Error) => void;
-  onSuccess: () => void;
+  onError: (arg: Error, code: number | null, message: string | null) => void;
+  onSuccess: (updated: number, conficts: number) => void;
 }
 
 /**
@@ -62,9 +68,10 @@ export const useAddOrUpdateException = ({
   const [isLoading, setIsLoading] = useState(false);
   const addOrUpdateExceptionRef = useRef<AddOrUpdateExceptionItemsFunc | null>(null);
   const addOrUpdateException = useCallback<AddOrUpdateExceptionItemsFunc>(
-    async (exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
+    async (ruleId, exceptionItemsToAddOrUpdate, alertIdToClose, bulkCloseIndex) => {
       if (addOrUpdateExceptionRef.current !== null) {
         addOrUpdateExceptionRef.current(
+          ruleId,
           exceptionItemsToAddOrUpdate,
           alertIdToClose,
           bulkCloseIndex
@@ -116,14 +123,17 @@ export const useAddOrUpdateException = ({
     };
 
     const addOrUpdateExceptionItems: AddOrUpdateExceptionItemsFunc = async (
+      ruleId,
       exceptionItemsToAddOrUpdate,
       alertIdToClose,
       bulkCloseIndex
     ) => {
       try {
         setIsLoading(true);
-        if (alertIdToClose !== null && alertIdToClose !== undefined) {
-          await updateAlertStatus({
+        let alertIdResponse: UpdateDocumentByQueryResponse | undefined;
+        let bulkResponse: UpdateDocumentByQueryResponse | undefined;
+        if (alertIdToClose != null) {
+          alertIdResponse = await updateAlertStatus({
             query: getUpdateAlertsQuery([alertIdToClose]),
             status: 'closed',
             signal: abortCtrl.signal,
@@ -134,12 +144,13 @@ export const useAddOrUpdateException = ({
           const filter = getQueryFilter(
             '',
             'kuery',
-            buildAlertStatusFilter('open'),
+            [...buildAlertsRuleIdFilter(ruleId), ...buildAlertStatusFilter('open')],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false
           );
-          await updateAlertStatus({
+
+          bulkResponse = await updateAlertStatus({
             query: {
               query: filter,
             },
@@ -150,14 +161,27 @@ export const useAddOrUpdateException = ({
 
         await addOrUpdateItems(exceptionItemsToAddOrUpdate);
 
+        // NOTE: there could be some overlap here... it's possible that the first response had conflicts
+        // but that the alert was closed in the second call. In this case, a conflict will be reported even
+        // though it was already resolved. I'm not sure that there's an easy way to solve this, but it should
+        // have minimal impact on the user... they'd see a warning that indicates a possible conflict, but the
+        // state of the alerts and their representation in the UI would be consistent.
+        const updated = (alertIdResponse?.updated ?? 0) + (bulkResponse?.updated ?? 0);
+        const conflicts =
+          alertIdResponse?.version_conflicts ?? 0 + (bulkResponse?.version_conflicts ?? 0);
+
         if (isSubscribed) {
           setIsLoading(false);
-          onSuccess();
+          onSuccess(updated, conflicts);
         }
       } catch (error) {
         if (isSubscribed) {
           setIsLoading(false);
-          onError(error);
+          if (error.body != null) {
+            onError(error, error.body.status_code, error.body.message);
+          } else {
+            onError(error, null, null);
+          }
         }
       }
     };

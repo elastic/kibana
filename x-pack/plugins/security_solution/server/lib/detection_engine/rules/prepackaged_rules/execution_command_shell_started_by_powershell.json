@@ -3,8 +3,10 @@
     "Elastic"
   ],
   "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from PowerShell.exe.",
+  "from": "now-9m",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -15,7 +17,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -28,19 +33,9 @@
       "technique": [
         {
           "id": "T1059",
-          "name": "Command-Line Interface",
+          "name": "Command and Scripting Interpreter",
           "reference": "https://attack.mitre.org/techniques/T1059/"
-        }
-      ]
-    },
-    {
-      "framework": "MITRE ATT&CK",
-      "tactic": {
-        "id": "TA0002",
-        "name": "Execution",
-        "reference": "https://attack.mitre.org/tactics/TA0002/"
-      },
-      "technique": [
+        },
         {
           "id": "T1086",
           "name": "PowerShell",
@@ -50,5 +45,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 6
 }

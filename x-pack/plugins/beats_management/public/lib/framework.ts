@@ -5,10 +5,7 @@
  */
 
 import { difference, get } from 'lodash';
-import {
-  LICENSES,
-  LicenseType,
-} from '../../../../legacy/plugins/beats_management/common/constants/security';
+import { LICENSES, LicenseType } from '../../common/constants/security';
 import { FrameworkAdapter } from './adapters/framework/adapter_types';
 
 export class FrameworkLib {

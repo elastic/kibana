@@ -16,18 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { TriggerContextMapping } from '../../../ui_actions/public';
+import { SavedObject } from '../../../../core/types/saved_objects';
+
+export type VisualizationStage = 'experimental' | 'beta' | 'production';
 
 export interface VisualizationListItem {
   editUrl: string;
   editApp?: string;
+  error?: string;
   icon: string;
   id: string;
-  stage: 'experimental' | 'beta' | 'production';
+  stage: VisualizationStage;
   savedObjectType: string;
   title: string;
   description?: string;
-  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
+  getSupportedTriggers?: () => string[];
   typeTitle: string;
   image?: string;
 }
@@ -35,16 +38,12 @@ export interface VisualizationListItem {
 export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
-  toListItem: (savedObject: {
-    id: string;
-    type: string;
-    attributes: object;
-  }) => VisualizationListItem;
+  toListItem: (savedObject: SavedObject) => VisualizationListItem;
 }
 
-export interface VisTypeAliasPromotion {
+export interface VisTypeAliasPromoTooltip {
   description: string;
-  buttonText: string;
+  link: string;
 }
 
 export interface VisTypeAlias {
@@ -53,10 +52,13 @@ export interface VisTypeAlias {
   name: string;
   title: string;
   icon: string;
-  promotion?: VisTypeAliasPromotion;
+  promotion?: boolean;
+  promoTooltip?: VisTypeAliasPromoTooltip;
   description: string;
-  getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
-  stage: 'experimental' | 'beta' | 'production';
+  note?: string;
+  disabled?: boolean;
+  getSupportedTriggers?: () => string[];
+  stage: VisualizationStage;
 
   appExtensions?: {
     visualizations: VisualizationsAppExtension;
@@ -64,11 +66,13 @@ export interface VisTypeAlias {
   };
 }
 
-const registry: VisTypeAlias[] = [];
+let registry: VisTypeAlias[] = [];
+const discardOnRegister: string[] = [];
 
 interface VisTypeAliasRegistry {
   get: () => VisTypeAlias[];
   add: (newVisTypeAlias: VisTypeAlias) => void;
+  remove: (visTypeAliasName: string) => void;
 }
 
 export const visTypeAliasRegistry: VisTypeAliasRegistry = {
@@ -77,6 +81,22 @@ export const visTypeAliasRegistry: VisTypeAliasRegistry = {
     if (registry.find((visTypeAlias) => visTypeAlias.name === newVisTypeAlias.name)) {
       throw new Error(`${newVisTypeAlias.name} already registered`);
     }
-    registry.push(newVisTypeAlias);
+    // if it exists on discardOnRegister array then we don't allow it to be registered
+    const isToBeDiscarded = discardOnRegister.some(
+      (aliasName) => aliasName === newVisTypeAlias.name
+    );
+    if (!isToBeDiscarded) {
+      registry.push(newVisTypeAlias);
+    }
+  },
+  remove: (visTypeAliasName) => {
+    const isAliasPresent = registry.find((visTypeAlias) => visTypeAlias.name === visTypeAliasName);
+    // in case the alias has not registered yet we store it on an array, in order to not allow it to
+    // be registered in case of a race condition
+    if (!isAliasPresent) {
+      discardOnRegister.push(visTypeAliasName);
+    } else {
+      registry = registry.filter((visTypeAlias) => visTypeAlias.name !== visTypeAliasName);
+    }
   },
 };

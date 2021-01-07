@@ -484,3 +484,30 @@ export const mockCCSGlobIndexPattern: IndexPatternSavedObject = {
     title: '*:*',
   },
 };
+
+export const mockCommaFilebeatAuditbeatGlobIndexPattern: IndexPatternSavedObject = {
+  id: 'filebeat-*,auditbeat-*',
+  type: 'index-pattern',
+  _version: 'abc',
+  attributes: {
+    title: 'filebeat-*,auditbeat-*',
+  },
+};
+
+export const mockCommaFilebeatAuditbeatCCSGlobIndexPattern: IndexPatternSavedObject = {
+  id: '*:filebeat-*,*:auditbeat-*',
+  type: 'index-pattern',
+  _version: 'abc',
+  attributes: {
+    title: '*:filebeat-*,*:auditbeat-*',
+  },
+};
+
+export const mockCommaFilebeatExclusionGlobIndexPattern: IndexPatternSavedObject = {
+  id: 'filebeat-*,-filebeat-7.6.0*',
+  type: 'index-pattern',
+  _version: 'abc',
+  attributes: {
+    title: 'filebeat-*,-filebeat-7.6.0*',
+  },
+};

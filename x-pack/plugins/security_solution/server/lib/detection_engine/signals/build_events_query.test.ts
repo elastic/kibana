@@ -16,6 +16,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: undefined,
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -23,6 +24,12 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [
@@ -31,31 +38,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],
@@ -87,6 +75,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: '',
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -94,6 +83,12 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [
@@ -102,31 +97,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],
@@ -159,6 +135,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: fakeSortId,
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -166,6 +143,12 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [
@@ -174,31 +157,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],
@@ -232,6 +196,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: fakeSortIdNumber,
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -239,6 +204,12 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [
@@ -247,31 +218,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],
@@ -304,6 +256,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: undefined,
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -311,6 +264,12 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
         query: {
           bool: {
             filter: [
@@ -319,31 +278,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],
@@ -383,6 +323,7 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortId: undefined,
       timestampOverride: undefined,
+      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allowNoIndices: true,
@@ -390,6 +331,7 @@ describe('create_signals', () => {
       size: 100,
       ignoreUnavailable: true,
       body: {
+        docvalue_fields: [{ field: '@timestamp', format: 'strict_date_optional_time' }],
         query: {
           bool: {
             filter: [
@@ -398,31 +340,12 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: 'today',
-                              },
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
+                      range: {
+                        '@timestamp': {
+                          gte: 'now-5m',
+                          lte: 'today',
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
                   ],

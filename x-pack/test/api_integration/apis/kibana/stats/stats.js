@@ -30,7 +30,7 @@ export default function ({ getService }) {
         });
 
         it('should return 401 for extended', async () => {
-          await supertestNoAuth.get('/api/stats?extended').expect(401);
+          await supertestNoAuth.get('/api/stats?extended').auth(null, null).expect(401);
         });
       });
 

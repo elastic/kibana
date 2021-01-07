@@ -36,31 +36,28 @@ import { IEmbeddable } from '../../../../';
 
 interface CustomizePanelProps {
   embeddable: IEmbeddable;
-  updateTitle: (newTitle: string | undefined) => void;
+  updateTitle: (newTitle: string | undefined, hideTitle: boolean | undefined) => void;
+  cancel: () => void;
 }
 
 interface State {
   title: string | undefined;
-  hideTitle: boolean;
+  hideTitle: boolean | undefined;
 }
 
 export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
   constructor(props: CustomizePanelProps) {
     super(props);
     this.state = {
-      hideTitle: props.embeddable.getOutput().title === '',
-      title: props.embeddable.getInput().title,
+      hideTitle: props.embeddable.getInput().hidePanelTitles,
+      title: props.embeddable.getInput().title ?? this.props.embeddable.getOutput().defaultTitle,
     };
   }
 
-  private updateTitle = (title: string | undefined) => {
-    // An empty string will mean "use the default value", which is represented by setting
-    // title to undefined (where as an empty string is actually used to indicate "hide title").
-    this.setState({ title: title === '' ? undefined : title });
-  };
-
   private reset = () => {
-    this.setState({ title: undefined });
+    this.setState({
+      title: this.props.embeddable.getOutput().defaultTitle,
+    });
   };
 
   private onHideTitleToggle = () => {
@@ -70,12 +67,11 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
   };
 
   private save = () => {
-    if (this.state.hideTitle) {
-      this.props.updateTitle('');
-    } else {
-      const newTitle = this.state.title === '' ? undefined : this.state.title;
-      this.props.updateTitle(newTitle);
-    }
+    const newTitle =
+      this.state.title === this.props.embeddable.getOutput().defaultTitle
+        ? undefined
+        : this.state.title;
+    this.props.updateTitle(newTitle, this.state.hideTitle);
   };
 
   public render() {
@@ -116,9 +112,8 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
               name="min"
               type="text"
               disabled={this.state.hideTitle}
-              placeholder={this.props.embeddable.getOutput().defaultTitle}
               value={this.state.title || ''}
-              onChange={(e) => this.updateTitle(e.target.value)}
+              onChange={(e) => this.setState({ title: e.target.value })}
               aria-label={i18n.translate(
                 'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleInputAriaLabel',
                 {
@@ -141,9 +136,7 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
           </EuiFormRow>
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiButtonEmpty
-            onClick={() => this.props.updateTitle(this.props.embeddable.getOutput().title)}
-          >
+          <EuiButtonEmpty onClick={() => this.props.cancel()}>
             <FormattedMessage
               id="embeddableApi.customizePanel.modal.cancel"
               defaultMessage="Cancel"

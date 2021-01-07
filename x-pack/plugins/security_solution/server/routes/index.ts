@@ -14,8 +14,12 @@ import { findRulesRoute } from '../lib/detection_engine/routes/rules/find_rules_
 import { deleteRulesRoute } from '../lib/detection_engine/routes/rules/delete_rules_route';
 import { updateRulesRoute } from '../lib/detection_engine/routes/rules/update_rules_route';
 import { patchRulesRoute } from '../lib/detection_engine/routes/rules/patch_rules_route';
-import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
+import { createSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/create_signals_migration_route';
+import { deleteSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/delete_signals_migration_route';
+import { finalizeSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/finalize_signals_migration_route';
+import { getSignalsMigrationStatusRoute } from '../lib/detection_engine/routes/signals/get_signals_migration_status_route';
 import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_signals_route';
+import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
 import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
 import { readTagsRoute } from '../lib/detection_engine/routes/tags/read_tags_route';
 import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/read_privileges_route';
@@ -37,7 +41,7 @@ import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/clean_draft_tim
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
 import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/install_prepacked_timelines_route';
-import { getTimelineByIdRoute } from '../lib/timeline/routes/get_timeline_by_id_route';
+import { getTimelineRoute } from '../lib/timeline/routes/get_timeline_route';
 
 export const initRoutes = (
   router: IRouter,
@@ -70,7 +74,7 @@ export const initRoutes = (
   importTimelinesRoute(router, config, security);
   exportTimelinesRoute(router, config, security);
   getDraftTimelinesRoute(router, config, security);
-  getTimelineByIdRoute(router, config, security);
+  getTimelineRoute(router, config, security);
   cleanDraftTimelinesRoute(router, config, security);
 
   installPrepackedTimelinesRoute(router, config, security);
@@ -82,6 +86,10 @@ export const initRoutes = (
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
   setSignalsStatusRoute(router);
   querySignalsRoute(router);
+  getSignalsMigrationStatusRoute(router);
+  createSignalsMigrationRoute(router, security);
+  finalizeSignalsMigrationRoute(router, security);
+  deleteSignalsMigrationRoute(router, security);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
@@ -93,5 +101,5 @@ export const initRoutes = (
   readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
-  readPrivilegesRoute(router, security, usingEphemeralEncryptionKey);
+  readPrivilegesRoute(router, usingEphemeralEncryptionKey);
 };

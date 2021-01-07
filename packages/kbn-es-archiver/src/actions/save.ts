@@ -22,8 +22,8 @@ import { createWriteStream, mkdirSync } from 'fs';
 import { Readable, Writable } from 'stream';
 import { Client } from 'elasticsearch';
 import { ToolingLog } from '@kbn/dev-utils';
+import { createListStream, createPromiseFromStreams } from '@kbn/utils';
 
-import { createListStream, createPromiseFromStreams } from '../lib/streams';
 import {
   createStats,
   createGenerateIndexRecordsStream,
@@ -39,6 +39,7 @@ export async function saveAction({
   dataDir,
   log,
   raw,
+  query,
 }: {
   name: string;
   indices: string | string[];
@@ -46,6 +47,7 @@ export async function saveAction({
   dataDir: string;
   log: ToolingLog;
   raw: boolean;
+  query?: Record<string, any>;
 }) {
   const outputDir = resolve(dataDir, name);
   const stats = createStats(name, log);
@@ -69,7 +71,7 @@ export async function saveAction({
     // export all documents from matching indexes into data.json.gz
     createPromiseFromStreams([
       createListStream(indices),
-      createGenerateDocRecordsStream(client, stats, progress),
+      createGenerateDocRecordsStream({ client, stats, progress, query }),
       ...createFormatArchiveStreams({ gzip: !raw }),
       createWriteStream(resolve(outputDir, `data.json${raw ? '' : '.gz'}`)),
     ] as [Readable, ...Writable[]]),

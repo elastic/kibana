@@ -20,6 +20,9 @@ import { ImportModal } from './import_modal';
 import { ml } from '../../../services/ml_api_service';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { getDocLinks } from '../../../util/dependency_cache';
+import { HelpMenu } from '../../../components/help_menu';
 
 class NewCalendarUI extends Component {
   static propTypes = {
@@ -54,6 +57,16 @@ class NewCalendarUI extends Component {
   componentDidMount() {
     this.formSetup();
   }
+
+  returnToCalendarsManagementPage = async () => {
+    const {
+      services: {
+        http: { basePath },
+        application: { navigateToUrl },
+      },
+    } = this.props.kibana;
+    await navigateToUrl(`${basePath.get()}/app/ml/${ML_PAGES.CALENDARS_MANAGE}`, true);
+  };
 
   async formSetup() {
     try {
@@ -146,7 +159,7 @@ class NewCalendarUI extends Component {
 
       try {
         await ml.addCalendar(calendar);
-        window.location = '#/settings/calendars_list';
+        await this.returnToCalendarsManagementPage();
       } catch (error) {
         console.log('Error saving calendar', error);
         this.setState({ saving: false });
@@ -167,7 +180,7 @@ class NewCalendarUI extends Component {
 
     try {
       await ml.updateCalendar(calendar);
-      window.location = '#/settings/calendars_list';
+      await this.returnToCalendarsManagementPage();
     } catch (error) {
       console.log('Error saving calendar', error);
       this.setState({ saving: false });
@@ -317,6 +330,8 @@ class NewCalendarUI extends Component {
       isGlobalCalendar,
     } = this.state;
 
+    const helpLink = getDocLinks().links.ml.calendars;
+
     let modal = '';
 
     if (isNewEventModalVisible) {
@@ -339,7 +354,7 @@ class NewCalendarUI extends Component {
     return (
       <Fragment>
         <NavigationMenu tabId="settings" />
-        <EuiPage className="mlCalendarEditForm">
+        <EuiPage className="mlCalendarEditForm" data-test-subj="mlPageCalendarEdit">
           <EuiPageBody>
             <EuiPageContent
               className="mlCalendarEditForm__content"
@@ -378,6 +393,7 @@ class NewCalendarUI extends Component {
             {modal}
           </EuiPageBody>
         </EuiPage>
+        <HelpMenu docLink={helpLink} />
       </Fragment>
     );
   }

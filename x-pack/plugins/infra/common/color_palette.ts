@@ -6,7 +6,7 @@
 import { difference, first, values } from 'lodash';
 import { euiPaletteColorBlind } from '@elastic/eui';
 
-export enum MetricsExplorerColor {
+export enum Color {
   color0 = 'color0',
   color1 = 'color1',
   color2 = 'color2',
@@ -19,41 +19,30 @@ export enum MetricsExplorerColor {
   color9 = 'color9',
 }
 
-export interface MetricsExplorerPalette {
-  [MetricsExplorerColor.color0]: string;
-  [MetricsExplorerColor.color1]: string;
-  [MetricsExplorerColor.color2]: string;
-  [MetricsExplorerColor.color3]: string;
-  [MetricsExplorerColor.color4]: string;
-  [MetricsExplorerColor.color5]: string;
-  [MetricsExplorerColor.color6]: string;
-  [MetricsExplorerColor.color7]: string;
-  [MetricsExplorerColor.color8]: string;
-  [MetricsExplorerColor.color9]: string;
-}
+export type Palette = {
+  [K in keyof typeof Color]: string;
+};
 
 const euiPalette = euiPaletteColorBlind();
 
-export const defaultPalette: MetricsExplorerPalette = {
-  [MetricsExplorerColor.color0]: euiPalette[1], // (blue)
-  [MetricsExplorerColor.color1]: euiPalette[2], // (pink)
-  [MetricsExplorerColor.color2]: euiPalette[0], // (green-ish)
-  [MetricsExplorerColor.color3]: euiPalette[3], // (purple)
-  [MetricsExplorerColor.color4]: euiPalette[4], // (light pink)
-  [MetricsExplorerColor.color5]: euiPalette[5], // (yellow)
-  [MetricsExplorerColor.color6]: euiPalette[6], // (tan)
-  [MetricsExplorerColor.color7]: euiPalette[7], // (orange)
-  [MetricsExplorerColor.color8]: euiPalette[8], // (brown)
-  [MetricsExplorerColor.color9]: euiPalette[9], // (red)
+export const defaultPalette: Palette = {
+  [Color.color0]: euiPalette[1], // (blue)
+  [Color.color1]: euiPalette[2], // (pink)
+  [Color.color2]: euiPalette[0], // (green-ish)
+  [Color.color3]: euiPalette[3], // (purple)
+  [Color.color4]: euiPalette[4], // (light pink)
+  [Color.color5]: euiPalette[5], // (yellow)
+  [Color.color6]: euiPalette[6], // (tan)
+  [Color.color7]: euiPalette[7], // (orange)
+  [Color.color8]: euiPalette[8], // (brown)
+  [Color.color9]: euiPalette[9], // (red)
 };
 
-export const createPaletteTransformer = (palette: MetricsExplorerPalette) => (
-  color: MetricsExplorerColor
-) => palette[color];
+export const createPaletteTransformer = (palette: Palette) => (color: Color) => palette[color];
 
 export const colorTransformer = createPaletteTransformer(defaultPalette);
 
-export const sampleColor = (usedColors: MetricsExplorerColor[] = []): MetricsExplorerColor => {
-  const available = difference(values(MetricsExplorerColor) as MetricsExplorerColor[], usedColors);
-  return first(available) || MetricsExplorerColor.color0;
+export const sampleColor = (usedColors: Color[] = []): Color => {
+  const available = difference(values(Color) as Color[], usedColors);
+  return first(available) || Color.color0;
 };

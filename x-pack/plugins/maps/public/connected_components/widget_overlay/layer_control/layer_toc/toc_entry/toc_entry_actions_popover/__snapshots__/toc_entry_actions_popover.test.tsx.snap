@@ -5,59 +5,44 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
   anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
-    <EuiToolTip
-      anchorClassName="mapLayTocActions__tooltipAnchor"
-      content={
-        <React.Fragment>
-          simulated tooltip content at zoom: 0
-          <div>
-            <span>
-              mockFootnoteIcon
-            </span>
-             
-            simulated footnote at isUsingSearch: true
-          </div>
-        </React.Fragment>
+    <Memo(Connect(TOCEntryButton))
+      displayName="layer 1"
+      escapedDisplayName="layer1"
+      layer={
+        LayerMock {
+          "_dataRequests": Array [],
+          "_descriptor": Object {
+            "__dataRequests": Array [],
+            "alpha": 0.75,
+            "id": "testLayer",
+            "label": null,
+            "maxZoom": 24,
+            "minZoom": 0,
+            "sourceDescriptor": Object {
+              "type": "mySourceType",
+            },
+            "style": null,
+            "visible": true,
+          },
+          "_source": MockSource {
+            "_descriptor": Object {
+              "type": "mySourceType",
+            },
+            "_inspectorAdapters": undefined,
+          },
+        }
       }
-      delay="regular"
-      position="top"
-      title="layer 1"
-    >
-      <EuiButtonEmpty
-        className="mapTocEntry__layerName eui-textLeft"
-        color="text"
-        data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-        flush="left"
-        onClick={[Function]}
-        size="xs"
-      >
-        <span
-          className="mapTocEntry__layerNameIcon"
-        >
-          <span>
-            mockIcon
-          </span>
-        </span>
-        layer 1
-         
-        <React.Fragment>
-          
-          <span>
-            mockFootnoteIcon
-          </span>
-        </React.Fragment>
-      </EuiButtonEmpty>
-    </EuiToolTip>
+      onClick={[Function]}
+    />
   }
   className="mapLayTocActions"
   closePopover={[Function]}
   display="inlineBlock"
   hasArrow={true}
-  id="contextMenu"
+  id="testLayer"
   isOpen={false}
   ownFocus={false}
   panelPaddingSize="none"
-  withTitle={true}
 >
   <EuiContextMenu
     data-test-subj="layerTocActionsPanellayer1"
@@ -82,7 +67,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               "data-test-subj": "layerVisibilityToggleButton",
               "icon": <EuiIcon
                 size="m"
-                type="eye"
+                type="eyeClosed"
               />,
               "name": "Hide layer",
               "onClick": [Function],
@@ -133,59 +118,44 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
   anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
-    <EuiToolTip
-      anchorClassName="mapLayTocActions__tooltipAnchor"
-      content={
-        <React.Fragment>
-          simulated tooltip content at zoom: 0
-          <div>
-            <span>
-              mockFootnoteIcon
-            </span>
-             
-            simulated footnote at isUsingSearch: true
-          </div>
-        </React.Fragment>
+    <Memo(Connect(TOCEntryButton))
+      displayName="layer 1"
+      escapedDisplayName="layer1"
+      layer={
+        LayerMock {
+          "_dataRequests": Array [],
+          "_descriptor": Object {
+            "__dataRequests": Array [],
+            "alpha": 0.75,
+            "id": "testLayer",
+            "label": null,
+            "maxZoom": 24,
+            "minZoom": 0,
+            "sourceDescriptor": Object {
+              "type": "mySourceType",
+            },
+            "style": null,
+            "visible": true,
+          },
+          "_source": MockSource {
+            "_descriptor": Object {
+              "type": "mySourceType",
+            },
+            "_inspectorAdapters": undefined,
+          },
+        }
       }
-      delay="regular"
-      position="top"
-      title="layer 1"
-    >
-      <EuiButtonEmpty
-        className="mapTocEntry__layerName eui-textLeft"
-        color="text"
-        data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-        flush="left"
-        onClick={[Function]}
-        size="xs"
-      >
-        <span
-          className="mapTocEntry__layerNameIcon"
-        >
-          <span>
-            mockIcon
-          </span>
-        </span>
-        layer 1
-         
-        <React.Fragment>
-          
-          <span>
-            mockFootnoteIcon
-          </span>
-        </React.Fragment>
-      </EuiButtonEmpty>
-    </EuiToolTip>
+      onClick={[Function]}
+    />
   }
   className="mapLayTocActions"
   closePopover={[Function]}
   display="inlineBlock"
   hasArrow={true}
-  id="contextMenu"
+  id="testLayer"
   isOpen={false}
   ownFocus={false}
   panelPaddingSize="none"
-  withTitle={true}
 >
   <EuiContextMenu
     data-test-subj="layerTocActionsPanellayer1"
@@ -210,9 +180,123 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               "data-test-subj": "layerVisibilityToggleButton",
               "icon": <EuiIcon
                 size="m"
-                type="eye"
+                type="eyeClosed"
               />,
               "name": "Hide layer",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
+            Object {
+              "data-test-subj": "editLayerButton",
+              "disabled": false,
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
+            Object {
+              "data-test-subj": "cloneLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="copy"
+              />,
+              "name": "Clone layer",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
+            Object {
+              "data-test-subj": "removeLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="trash"
+              />,
+              "name": "Remove layer",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
+          ],
+          "title": "Layer actions",
+        },
+      ]
+    }
+  />
+</EuiPopover>
+`;
+
+exports[`TOCEntryActionsPopover should have "show layer" action when layer is not visible 1`] = `
+<EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
+  anchorPosition="leftUp"
+  button={
+    <Memo(Connect(TOCEntryButton))
+      displayName="layer 1"
+      escapedDisplayName="layer1"
+      layer={
+        LayerMock {
+          "_dataRequests": Array [],
+          "_descriptor": Object {
+            "__dataRequests": Array [],
+            "alpha": 0.75,
+            "id": "testLayer",
+            "label": null,
+            "maxZoom": 24,
+            "minZoom": 0,
+            "sourceDescriptor": Object {
+              "type": "mySourceType",
+            },
+            "style": null,
+            "visible": true,
+          },
+          "_source": MockSource {
+            "_descriptor": Object {
+              "type": "mySourceType",
+            },
+            "_inspectorAdapters": undefined,
+          },
+          "isVisible": [Function],
+        }
+      }
+      onClick={[Function]}
+    />
+  }
+  className="mapLayTocActions"
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="testLayer"
+  isOpen={false}
+  ownFocus={false}
+  panelPaddingSize="none"
+>
+  <EuiContextMenu
+    data-test-subj="layerTocActionsPanellayer1"
+    initialPanelId={0}
+    panels={
+      Array [
+        Object {
+          "id": 0,
+          "items": Array [
+            Object {
+              "data-test-subj": "fitToBoundsButton",
+              "disabled": false,
+              "icon": <EuiIcon
+                size="m"
+                type="expand"
+              />,
+              "name": "Fit to data",
+              "onClick": [Function],
+              "toolTipContent": null,
+            },
+            Object {
+              "data-test-subj": "layerVisibilityToggleButton",
+              "icon": <EuiIcon
+                size="m"
+                type="eye"
+              />,
+              "name": "Show layer",
               "onClick": [Function],
               "toolTipContent": null,
             },
@@ -261,59 +345,44 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
   anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
-    <EuiToolTip
-      anchorClassName="mapLayTocActions__tooltipAnchor"
-      content={
-        <React.Fragment>
-          simulated tooltip content at zoom: 0
-          <div>
-            <span>
-              mockFootnoteIcon
-            </span>
-             
-            simulated footnote at isUsingSearch: true
-          </div>
-        </React.Fragment>
+    <Memo(Connect(TOCEntryButton))
+      displayName="layer 1"
+      escapedDisplayName="layer1"
+      layer={
+        LayerMock {
+          "_dataRequests": Array [],
+          "_descriptor": Object {
+            "__dataRequests": Array [],
+            "alpha": 0.75,
+            "id": "testLayer",
+            "label": null,
+            "maxZoom": 24,
+            "minZoom": 0,
+            "sourceDescriptor": Object {
+              "type": "mySourceType",
+            },
+            "style": null,
+            "visible": true,
+          },
+          "_source": MockSource {
+            "_descriptor": Object {
+              "type": "mySourceType",
+            },
+            "_inspectorAdapters": undefined,
+          },
+        }
       }
-      delay="regular"
-      position="top"
-      title="layer 1"
-    >
-      <EuiButtonEmpty
-        className="mapTocEntry__layerName eui-textLeft"
-        color="text"
-        data-test-subj="layerTocActionsPanelToggleButtonlayer1"
-        flush="left"
-        onClick={[Function]}
-        size="xs"
-      >
-        <span
-          className="mapTocEntry__layerNameIcon"
-        >
-          <span>
-            mockIcon
-          </span>
-        </span>
-        layer 1
-         
-        <React.Fragment>
-          
-          <span>
-            mockFootnoteIcon
-          </span>
-        </React.Fragment>
-      </EuiButtonEmpty>
-    </EuiToolTip>
+      onClick={[Function]}
+    />
   }
   className="mapLayTocActions"
   closePopover={[Function]}
   display="inlineBlock"
   hasArrow={true}
-  id="contextMenu"
+  id="testLayer"
   isOpen={false}
   ownFocus={false}
   panelPaddingSize="none"
-  withTitle={true}
 >
   <EuiContextMenu
     data-test-subj="layerTocActionsPanellayer1"
@@ -338,7 +407,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
               "data-test-subj": "layerVisibilityToggleButton",
               "icon": <EuiIcon
                 size="m"
-                type="eye"
+                type="eyeClosed"
               />,
               "name": "Hide layer",
               "onClick": [Function],

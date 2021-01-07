@@ -20,7 +20,7 @@
 import { EventEmitter } from 'events';
 import { createZoomWarningMsg } from './map_messages';
 import $ from 'jquery';
-import _ from 'lodash';
+import { get, isEqual, escape } from 'lodash';
 import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 import { ORIGIN } from '../common/constants/origin';
@@ -380,7 +380,7 @@ export class KibanaMap extends EventEmitter {
 
     const distanceX = latLngC.distanceTo(latLngX); // calculate distance between c and x (latitude)
     const distanceY = latLngC.distanceTo(latLngY); // calculate distance between c and y (longitude)
-    return _.min([distanceX, distanceY]);
+    return Math.min(distanceX, distanceY);
   }
 
   _getLeafletBounds(resizeOnFail) {
@@ -544,7 +544,7 @@ export class KibanaMap extends EventEmitter {
   }
 
   setBaseLayer(settings) {
-    if (_.isEqual(settings, this._baseLayerSettings)) {
+    if (isEqual(settings, this._baseLayerSettings)) {
       return;
     }
 
@@ -567,7 +567,7 @@ export class KibanaMap extends EventEmitter {
     let baseLayer;
     if (settings.baseLayerType === 'wms') {
       //This is user-input that is rendered with the Leaflet attribution control. Needs to be sanitized.
-      this._baseLayerSettings.options.attribution = _.escape(settings.options.attribution);
+      this._baseLayerSettings.options.attribution = escape(settings.options.attribution);
       baseLayer = this._getWMSBaseLayer(settings.options);
     } else if (settings.baseLayerType === 'tms') {
       baseLayer = this._getTMSBaseLayer(settings.options);
@@ -661,7 +661,7 @@ export class KibanaMap extends EventEmitter {
   _updateDesaturation() {
     const tiles = $('img.leaflet-tile-loaded');
     // Don't apply client-side styling to EMS basemaps
-    if (_.get(this._baseLayerSettings, 'options.origin') === ORIGIN.EMS) {
+    if (get(this._baseLayerSettings, 'options.origin') === ORIGIN.EMS) {
       tiles.addClass('filters-off');
     } else {
       if (this._baseLayerIsDesaturated) {

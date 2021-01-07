@@ -36,35 +36,25 @@ import {
   createToolBarPagerButtonsDirective,
   createToolBarPagerTextDirective,
 } from './application/angular/doc_table/components/pager';
+import { createContextAppLegacy } from './application/components/context_app/context_app_legacy_directive';
 import { createTableRowDirective } from './application/angular/doc_table/components/table_row';
 import { createPagerFactory } from './application/angular/doc_table/lib/pager/pager_factory';
 import { createInfiniteScrollDirective } from './application/angular/doc_table/infinite_scroll';
 import { createDocViewerDirective } from './application/angular/doc_viewer';
-import { CollapsibleSidebarProvider } from './application/angular/directives/collapsible_sidebar/collapsible_sidebar';
-// @ts-ignore
-import { FixedScrollProvider } from './application/angular/directives/fixed_scroll';
-// @ts-ignore
-import { DebounceProviderTimeout } from './application/angular/directives/debounce/debounce';
+import { createDiscoverGridDirective } from './application/components/create_discover_grid_directive';
 import { createRenderCompleteDirective } from './application/angular/directives/render_complete';
 import {
   initAngularBootstrap,
   configureAppAngularModule,
-  KbnAccessibleClickProvider,
   PrivateProvider,
   PromiseServiceCreator,
   registerListenEventListener,
   watchMultiDecorator,
-  createTopNavDirective,
-  createTopNavHelper,
 } from '../../kibana_legacy/public';
-import { createDiscoverSidebarDirective } from './application/components/sidebar';
-import { createHitsCounterDirective } from '././application/components/hits_counter';
-import { createLoadingSpinnerDirective } from '././application/components/loading_spinner/loading_spinner';
-import { createTimechartHeaderDirective } from './application/components/timechart_header';
-import { createContextErrorMessageDirective } from './application/components/context_error_message';
 import { DiscoverStartPlugins } from './plugin';
 import { getScopedHistory } from './kibana_services';
-import { createSkipBottomButtonDirective } from './application/components/skip_bottom_button';
+import { createDiscoverLegacyDirective } from './application/components/create_discover_legacy_directive';
+import { createDiscoverDirective } from './application/components/create_discover_directive';
 
 /**
  * returns the main inner angular module, it contains all the parts of Angular Discover
@@ -88,11 +78,9 @@ export function getInnerAngularModule(
 export function getInnerAngularModuleEmbeddable(
   name: string,
   core: CoreStart,
-  deps: DiscoverStartPlugins,
-  context: PluginInitializerContext
+  deps: DiscoverStartPlugins
 ) {
-  const module = initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
-  return module;
+  return initializeInnerAngularModule(name, core, deps.navigation, deps.data, true);
 }
 
 let initialized = false;
@@ -108,9 +96,7 @@ export function initializeInnerAngularModule(
     createLocalI18nModule();
     createLocalPrivateModule();
     createLocalPromiseModule();
-    createLocalTopNavModule(navigation);
     createLocalStorageModule();
-    createElasticSearchModule(data);
     createPagerFactoryModule();
     createDocTableModule();
     initialized = true;
@@ -130,8 +116,7 @@ export function initializeInnerAngularModule(
       ])
       .config(watchMultiDecorator)
       .directive('icon', (reactDirective) => reactDirective(EuiIcon))
-      .directive('renderComplete', createRenderCompleteDirective)
-      .service('debounce', ['$timeout', DebounceProviderTimeout]);
+      .directive('renderComplete', createRenderCompleteDirective);
   }
 
   return angular
@@ -143,26 +128,15 @@ export function initializeInnerAngularModule(
       'discoverI18n',
       'discoverPrivate',
       'discoverPromise',
-      'discoverTopNav',
       'discoverLocalStorageProvider',
-      'discoverEs',
       'discoverDocTable',
       'discoverPagerFactory',
     ])
     .config(watchMultiDecorator)
     .run(registerListenEventListener)
-    .directive('icon', (reactDirective) => reactDirective(EuiIcon))
-    .directive('kbnAccessibleClick', KbnAccessibleClickProvider)
-    .directive('collapsibleSidebar', CollapsibleSidebarProvider)
-    .directive('fixedScroll', FixedScrollProvider)
     .directive('renderComplete', createRenderCompleteDirective)
-    .directive('discoverSidebar', createDiscoverSidebarDirective)
-    .directive('skipBottomButton', createSkipBottomButtonDirective)
-    .directive('hitsCounter', createHitsCounterDirective)
-    .directive('loadingSpinner', createLoadingSpinnerDirective)
-    .directive('timechartHeader', createTimechartHeaderDirective)
-    .directive('contextErrorMessage', createContextErrorMessageDirective)
-    .service('debounce', ['$timeout', DebounceProviderTimeout]);
+    .directive('discoverLegacy', createDiscoverLegacyDirective)
+    .directive('discover', createDiscoverDirective);
 }
 
 function createLocalPromiseModule() {
@@ -171,13 +145,6 @@ function createLocalPromiseModule() {
 
 function createLocalPrivateModule() {
   angular.module('discoverPrivate', []).provider('Private', PrivateProvider);
-}
-
-function createLocalTopNavModule(navigation: NavigationStart) {
-  angular
-    .module('discoverTopNav', ['react'])
-    .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {
@@ -201,16 +168,6 @@ const createLocalStorageService = function (type: string) {
   };
 };
 
-function createElasticSearchModule(data: DataPublicPluginStart) {
-  angular
-    .module('discoverEs', [])
-    // Elasticsearch client used for requesting data.  Connects to the /elasticsearch proxy
-    // have to be written as function expression, because it's not compiled in dev mode
-    .service('es', function () {
-      return data.search.__LEGACY.esClient;
-    });
-}
-
 function createPagerFactoryModule() {
   angular.module('discoverPagerFactory', []).factory('pagerFactory', createPagerFactory);
 }
@@ -224,5 +181,7 @@ function createDocTableModule() {
     .directive('kbnTableRow', createTableRowDirective)
     .directive('toolBarPagerButtons', createToolBarPagerButtonsDirective)
     .directive('kbnInfiniteScroll', createInfiniteScrollDirective)
-    .directive('docViewer', createDocViewerDirective);
+    .directive('discoverGrid', createDiscoverGridDirective)
+    .directive('docViewer', createDocViewerDirective)
+    .directive('contextAppLegacy', createContextAppLegacy);
 }

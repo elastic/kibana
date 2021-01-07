@@ -12,25 +12,20 @@ export default function canvasCustomElementTest({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common']);
   const find = getService('find');
+  const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/63339
-  describe.skip('custom elements', function () {
+  describe('custom elements', function () {
     this.tags('skipFirefox');
 
     before(async () => {
-      // init data
-      await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('canvas/default');
-
       // open canvas home
       await PageObjects.common.navigateToApp('canvas');
-
       // load test workpad
       await PageObjects.common.navigateToApp('canvas', {
         hash: '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31/page/1',
@@ -66,6 +61,7 @@ export default function canvasCustomElementTest({
       // ensure the custom element is the one expected and click it to add to the workpad
       const customElement = await find.byCssSelector('.canvasElementCard__wrapper');
       const elementName = await customElement.findByCssSelector('.euiCard__title');
+
       expect(await elementName.getVisibleText()).to.contain('My New Element');
       customElement.click();
 

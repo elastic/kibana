@@ -11,8 +11,8 @@ import { getColor } from './get_color';
 import { TimeseriesVisualization } from './timeseries_visualization';
 
 function formatTicksFor(series) {
-  const format = get(series, '.metric.format', '0,0.0');
-  const units = get(series, '.metric.units', '');
+  const format = get(series, 'metric.format', '0,0.0');
+  const units = get(series, 'metric.units', '');
 
   return function formatTicks(val) {
     let formatted = numeral(val).format(format);

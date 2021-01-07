@@ -4,8 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { validateCommonConfig, validateCommonSecrets } from '../case/validators';
-import { ExternalServiceValidation } from '../case/types';
+import { ActionsConfigurationUtilities } from '../../actions_config';
+import {
+  ResilientPublicConfigurationType,
+  ResilientSecretConfigurationType,
+  ExternalServiceValidation,
+} from './types';
+
+import * as i18n from './translations';
+
+export const validateCommonConfig = (
+  configurationUtilities: ActionsConfigurationUtilities,
+  configObject: ResilientPublicConfigurationType
+) => {
+  try {
+    configurationUtilities.ensureUriAllowed(configObject.apiUrl);
+  } catch (allowedListError) {
+    return i18n.ALLOWED_HOSTS_ERROR(allowedListError.message);
+  }
+};
+
+export const validateCommonSecrets = (
+  configurationUtilities: ActionsConfigurationUtilities,
+  secrets: ResilientSecretConfigurationType
+) => {};
 
 export const validate: ExternalServiceValidation = {
   config: validateCommonConfig,

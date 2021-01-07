@@ -6,9 +6,10 @@
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep } from 'lodash/fp';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import { waitFor } from '@testing-library/react';
 
 import '../../../common/mock/match_media';
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
@@ -17,9 +18,18 @@ import { TimelinesTableProps } from './timelines_table';
 import { mockTimelineResults } from '../../../common/mock/timeline_results';
 import { OpenTimeline } from './open_timeline';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from './constants';
-import { TimelineType } from '../../../../common/types/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/lib/kibana');
+
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+
+  return {
+    ...actual,
+    useParams: jest.fn().mockReturnValue({ tabName: 'default' }),
+  };
+});
 
 describe('OpenTimeline', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
@@ -50,7 +60,8 @@ describe('OpenTimeline', () => {
     sortField: DEFAULT_SORT_FIELD,
     title,
     timelineType: TimelineType.default,
-    templateTimelineFilter: [<div />],
+    timelineStatus: TimelineStatus.active,
+    templateTimelineFilter: [<div key="mock-a" />, <div key="mock-b" />],
     totalSearchResultsCount: mockSearchResults.length,
   });
 
@@ -262,5 +273,217 @@ describe('OpenTimeline', () => {
     expect(wrapper.find('[data-test-subj="query-message"]').first().text()).toContain(
       `Showing: ${mockResults.length} timelines with "How was your day?"`
     );
+  });
+
+  test("it should render bulk actions if timelineStatus is active (selecting custom templates' tab)", () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: TimelineStatus.active,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="utility-bar-action"]').exists()).toEqual(true);
+  });
+
+  test('it should disable export-timeline if no timeline is selected', async () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+      selectedItems: [],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    await waitFor(() => {
+      expect(
+        wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
+      ).toEqual(true);
+    });
+  });
+
+  test('it should disable delete timeline if no timeline is selected', async () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+      selectedItems: [],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    await waitFor(() => {
+      expect(
+        wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
+      ).toEqual(true);
+    });
+  });
+
+  test('it should enable export-timeline if a timeline is selected', async () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+      selectedItems: [{}],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    await waitFor(() => {
+      expect(
+        wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
+      ).toEqual(false);
+    });
+  });
+
+  test('it should enable delete timeline if a timeline is selected', async () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+      selectedItems: [{}],
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    await waitFor(() => {
+      expect(
+        wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
+      ).toEqual(false);
+    });
+  });
+
+  test("it should render a selectable timeline table if timelineStatus is active (selecting custom templates' tab)", () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: TimelineStatus.active,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="timelines-table"]').first().prop('actionTimelineToShow')
+    ).toEqual(['createFrom', 'duplicate', 'export', 'selectable', 'delete']);
+  });
+
+  test("it should render selected count if timelineStatus is active (selecting custom templates' tab)", () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: TimelineStatus.active,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="selected-count"]').exists()).toEqual(true);
+  });
+
+  test("it should not render bulk actions if timelineStatus is immutable (selecting Elastic templates' tab)", () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: TimelineStatus.immutable,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="utility-bar-action"]').exists()).toEqual(false);
+  });
+
+  test("it should not render a selectable timeline table if timelineStatus is immutable (selecting Elastic templates' tab)", () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: TimelineStatus.immutable,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="timelines-table"]').first().prop('actionTimelineToShow')
+    ).toEqual(['createFrom', 'duplicate']);
+  });
+
+  test("it should not render selected count if timelineStatus is immutable (selecting Elastic templates' tab)", () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: TimelineStatus.immutable,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="selected-count"]').exists()).toEqual(false);
+  });
+
+  test("it should render bulk actions if timelineStatus is null (no template timelines' tab selected)", () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="utility-bar-action"]').exists()).toEqual(true);
+  });
+
+  test("it should render a selectable timeline table if timelineStatus is null (no template timelines' tab selected)", () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="timelines-table"]').first().prop('actionTimelineToShow')
+    ).toEqual(['createFrom', 'duplicate', 'export', 'selectable', 'delete']);
+  });
+
+  test("it should render selected count if timelineStatus is null (no template timelines' tab selected)", () => {
+    const defaultProps = {
+      ...getDefaultTestProps(mockResults),
+      timelineStatus: null,
+    };
+    const wrapper = mountWithIntl(
+      <ThemeProvider theme={theme}>
+        <OpenTimeline {...defaultProps} />
+      </ThemeProvider>
+    );
+
+    expect(wrapper.find('[data-test-subj="selected-count"]').exists()).toEqual(true);
   });
 });

@@ -90,6 +90,7 @@ describe('useVisualizeAppState', () => {
     expect(createVisualizeAppState).toHaveBeenCalledWith({
       stateDefaults: visualizeAppStateStub,
       kbnUrlStateStorage: undefined,
+      byValue: false,
     });
     expect(mockServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith(
       visualizeAppStateStub.filters
@@ -198,7 +199,7 @@ describe('useVisualizeAppState', () => {
 
       renderHook(() => useVisualizeAppState(mockServices, eventEmitter, savedVisInstance));
 
-      await new Promise((res) => {
+      await new Promise<void>((res) => {
         setTimeout(() => res());
       });
 

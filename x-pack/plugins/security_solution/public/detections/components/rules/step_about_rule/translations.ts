@@ -30,7 +30,7 @@ export const ADD_FALSE_POSITIVE = i18n.translate(
 export const GLOBAL_ENDPOINT_EXCEPTION_LIST = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.endpointExceptionListLabel',
   {
-    defaultMessage: 'Global endpoint exception list',
+    defaultMessage: 'Elastic Endpoint exceptions',
   }
 );
 
@@ -66,13 +66,6 @@ export const CRITICAL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepAboutRuleForm.severityOptionCriticalDescription',
   {
     defaultMessage: 'Critical',
-  }
-);
-
-export const CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customMitreAttackTechniquesFieldRequiredError',
-  {
-    defaultMessage: 'At least one Technique is required with a Tactic.',
   }
 );
 

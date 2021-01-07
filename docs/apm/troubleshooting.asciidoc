@@ -14,6 +14,7 @@ Also, check out the https://discuss.elastic.co/c/apm[APM discussion forum].
 * <<troubleshooting-too-many-transactions>>
 * <<troubleshooting-unknown-route>>
 * <<troubleshooting-fields-unsearchable>>
+* <<service-map-rum-connections>>
 
 [float]
 [[no-apm-data-found]]
@@ -49,7 +50,7 @@ GET /_template/apm-{version}
 *Using Logstash, Kafka, etc.*
 If you're not outputting data directly from APM Server to Elasticsearch (perhaps you're using Logstash or Kafka),
 then the index template will not be set up automatically. Instead, you'll need to
-{apm-server-ref}/_manually_loading_template_configuration.html[load the template manually].
+{apm-server-ref}/apm-server-template.html[load the template manually].
 
 *Using a custom index names*
 This problem can also occur if you've customized the index name that you write APM data to.
@@ -156,7 +157,7 @@ the values in `http.request.cookies` are not indexed and thus not searchable.
 
 *Ensure an index pattern exists*
 As a first step, you should ensure the correct index pattern exists.
-In Kibana, navigate to *Management > Kibana > Index Patterns*.
+Open the main menu, then click *Stack Management > Index Patterns*.
 In the pattern list, you should see an apm index pattern; The default is `apm-*`.
 If you don't, the index pattern doesn't exist. See <<no-apm-data-found>> for information on how to fix this problem.
 
@@ -180,3 +181,19 @@ setup.template.append_fields:
     type: object
     dynamic: true
 ----
+
+[float]
+[[service-map-rum-connections]]
+=== Service maps: no connection between client and server
+
+If the service map is not showing an expected connection between the client and server,
+it's likely because you haven't configured
+{apm-agent-rum}/configuration.html#distributed-tracing-origins[`distributedTracingOrigins`].
+
+
+This setting is necessary, for example, for cross-origin requests.
+If you have a basic web application that provides data via an API on `localhost:4000`,
+and serves HTML from `localhost:4001`, you'd need to set `distributedTracingOrigins: ['https://localhost:4000']`
+to ensure the origin is monitored as a part of distributed tracing.
+In other words, `distributedTracingOrigins` is consulted prior to the agent adding the
+distributed tracing `traceparent` header to each request.

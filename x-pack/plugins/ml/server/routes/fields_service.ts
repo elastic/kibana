@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -13,14 +13,14 @@ import {
 } from './schemas/fields_service_schema';
 import { fieldsServiceProvider } from '../models/fields_service';
 
-function getCardinalityOfFields(context: RequestHandlerContext, payload: any) {
-  const fs = fieldsServiceProvider(context.ml!.mlClient);
+function getCardinalityOfFields(client: IScopedClusterClient, payload: any) {
+  const fs = fieldsServiceProvider(client);
   const { index, fieldNames, query, timeFieldName, earliestMs, latestMs } = payload;
   return fs.getCardinalityOfFields(index, fieldNames, query, timeFieldName, earliestMs, latestMs);
 }
 
-function getTimeFieldRange(context: RequestHandlerContext, payload: any) {
-  const fs = fieldsServiceProvider(context.ml!.mlClient);
+function getTimeFieldRange(client: IScopedClusterClient, payload: any) {
+  const fs = fieldsServiceProvider(client);
   const { index, timeFieldName, query } = payload;
   return fs.getTimeFieldRange(index, timeFieldName, query);
 }
@@ -28,7 +28,7 @@ function getTimeFieldRange(context: RequestHandlerContext, payload: any) {
 /**
  * Routes for fields service
  */
-export function fieldsService({ router, mlLicense }: RouteInitialization) {
+export function fieldsService({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup FieldsService
    *
@@ -50,9 +50,9 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getCardinalityOfFields(context, request.body);
+        const resp = await getCardinalityOfFields(client, request.body);
 
         return response.ok({
           body: resp,
@@ -85,9 +85,9 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const resp = await getTimeFieldRange(context, request.body);
+        const resp = await getTimeFieldRange(client, request.body);
 
         return response.ok({
           body: resp,

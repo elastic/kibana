@@ -142,11 +142,6 @@ export const timelineSchema = gql`
     immutable
   }
 
-  enum TemplateTimelineType {
-    elastic
-    custom
-  }
-
   enum RowRendererId {
     auditd
     auditd_file
@@ -172,19 +167,20 @@ export const timelineSchema = gql`
     filters: [FilterTimelineInput!]
     kqlMode: String
     kqlQuery: SerializedFilterQueryInput
+    indexNames: [String!]
     title: String
     templateTimelineId: String
     templateTimelineVersion: Int
     timelineType: TimelineType
     dateRange: DateRangePickerInput
     savedQueryId: String
-    sort: SortTimelineInput
+    sort: [SortTimelineInput!]
     status: TimelineStatus
   }
 
   input PageInfoTimeline {
-    pageIndex: Float
-    pageSize: Float
+    pageIndex: Float!
+    pageSize: Float!
   }
 
   enum SortFieldTimeline {
@@ -242,10 +238,6 @@ export const timelineSchema = gql`
     ${favoriteTimeline}
   }
 
-  type SortTimelineResult {
-     ${sortTimeline}
-  }
-
   type FilterMetaTimelineResult {
     ${filtersMetaTimeline}
   }
@@ -274,13 +266,14 @@ export const timelineSchema = gql`
     filters: [FilterTimelineResult!]
     kqlMode: String
     kqlQuery: SerializedFilterQueryResult
+    indexNames: [String!]
     notes: [NoteResult!]
     noteIds: [String!]
     pinnedEventIds: [String!]
     pinnedEventsSaveObject: [PinnedEvent!]
     savedQueryId: String
     savedObjectId: String!
-    sort: SortTimelineResult
+    sort: ToAny
     status: TimelineStatus
     title: String
     templateTimelineId: String
@@ -320,8 +313,8 @@ export const timelineSchema = gql`
   #########################
 
   extend type Query {
-    getOneTimeline(id: ID!): TimelineResult!
-    getAllTimeline(pageInfo: PageInfoTimeline, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, templateTimelineType: TemplateTimelineType, status: TimelineStatus): ResponseTimelines!
+    getOneTimeline(id: ID!, timelineType: TimelineType): TimelineResult!
+    getAllTimeline(pageInfo: PageInfoTimeline!, search: String, sort: SortTimeline, onlyUserFavorite: Boolean, timelineType: TimelineType, status: TimelineStatus): ResponseTimelines!
   }
 
   extend type Mutation {

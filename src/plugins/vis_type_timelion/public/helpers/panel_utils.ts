@@ -18,6 +18,7 @@
  */
 
 import { cloneDeep, defaults, mergeWith, compact } from 'lodash';
+import $ from 'jquery';
 import moment, { Moment } from 'moment-timezone';
 
 import { TimefilterContract } from 'src/plugins/data/public';
@@ -49,6 +50,9 @@ interface TimeRangeBounds {
   min: Moment | undefined;
   max: Moment | undefined;
 }
+
+export const ACTIVE_CURSOR = 'ACTIVE_CURSOR_TIMELION';
+export const eventBus = $({});
 
 const colors = [
   '#01A4A4',

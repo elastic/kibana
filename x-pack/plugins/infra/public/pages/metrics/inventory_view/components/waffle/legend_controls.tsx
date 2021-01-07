@@ -184,12 +184,10 @@ export const LegendControls = ({
         closePopover={handleCancelClick}
         id="legendControls"
         button={buttonComponent}
-        withTitle
       >
         <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
-        <EuiForm style={{ width: 500 }}>
+        <EuiForm style={{ minWidth: 400 }}>
           <EuiFormRow
-            fullWidth
             display="columnCompressed"
             label={i18n.translate('xpack.infra.legendControls.colorPaletteLabel', {
               defaultMessage: 'Color palette',
@@ -212,7 +210,6 @@ export const LegendControls = ({
             </>
           </EuiFormRow>
           <EuiFormRow
-            fullWidth
             display="columnCompressed"
             label={i18n.translate('xpack.infra.legendControls.stepsLabel', {
               defaultMessage: 'Number of colors',
@@ -221,12 +218,11 @@ export const LegendControls = ({
             <EuiRange
               id="steps"
               min={2}
-              max={20}
+              max={18}
               step={1}
               value={draftLegend.steps}
               onChange={handleStepsChange}
               showValue
-              compressed
               fullWidth
             />
           </EuiFormRow>
@@ -244,6 +240,10 @@ export const LegendControls = ({
               checked={draftLegend.reverseColors}
               onChange={handleReverseColors}
               compressed
+              style={{
+                position: 'relative',
+                top: '8px',
+              }}
             />
           </EuiFormRow>
           <EuiFormRow
@@ -260,13 +260,17 @@ export const LegendControls = ({
               checked={draftAuto}
               onChange={handleAutoChange}
               compressed
+              style={{
+                position: 'relative',
+                top: '8px',
+              }}
             />
           </EuiFormRow>
           <EuiFormRow
             fullWidth
             label={
               <SwatchLabel
-                color={first(paletteColors) as any}
+                color={first(paletteColors)!}
                 label={i18n.translate('xpack.infra.legendControls.minLabel', {
                   defaultMessage: 'Minimum',
                 })}
@@ -294,7 +298,7 @@ export const LegendControls = ({
             display="columnCompressed"
             label={
               <SwatchLabel
-                color={last(paletteColors) as any}
+                color={last(paletteColors)!}
                 label={i18n.translate('xpack.infra.legendControls.maxLabel', {
                   defaultMessage: 'Maxium',
                 })}
@@ -317,7 +321,7 @@ export const LegendControls = ({
             </div>
           </EuiFormRow>
           <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty type="submit" size="s" onClick={handleCancelClick}>
                 <FormattedMessage

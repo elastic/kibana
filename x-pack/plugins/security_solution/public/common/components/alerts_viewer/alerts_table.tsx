@@ -5,16 +5,15 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 
 import { Filter } from '../../../../../../../src/plugins/data/public';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../events_viewer';
 import { alertsDefaultModel } from './default_headers';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
-import { getInvestigateInResolverAction } from '../../../timelines/components/timeline/body/helpers';
 import * as i18n from './translations';
 import { useKibana } from '../../lib/kibana';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 export interface OwnProps {
   end: string;
@@ -58,7 +57,6 @@ const defaultAlertsFilters: Filter[] = [
 interface Props {
   timelineId: TimelineIdLiteral;
   endDate: string;
-  eventsViewerBodyHeight?: number;
   startDate: string;
   pageFilters?: Filter[];
 }
@@ -66,11 +64,9 @@ interface Props {
 const AlertsTableComponent: React.FC<Props> = ({
   timelineId,
   endDate,
-  eventsViewerBodyHeight,
   startDate,
   pageFilters = [],
 }) => {
-  const dispatch = useDispatch();
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
   const { filterManager } = useKibana().services.data.query;
   const { initializeTimeline } = useManageTimeline();
@@ -82,19 +78,19 @@ const AlertsTableComponent: React.FC<Props> = ({
       filterManager,
       defaultModel: alertsDefaultModel,
       footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-      timelineRowActions: () => [getInvestigateInResolverAction({ dispatch, timelineId })],
       title: i18n.ALERTS_TABLE_TITLE,
       unit: i18n.UNIT,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   return (
     <StatefulEventsViewer
       pageFilters={alertsFilter}
       defaultModel={alertsDefaultModel}
       end={endDate}
-      height={eventsViewerBodyHeight}
       id={timelineId}
+      scopeId={SourcererScopeName.default}
       start={startDate}
     />
   );

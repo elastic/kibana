@@ -5,10 +5,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HeadlessChromiumDriver } from '../../browsers';
-import { AttributesMap, ElementsPositionAndAttribute } from '../../types';
 import { LevelLogger, startTrace } from '../';
+import { HeadlessChromiumDriver } from '../../browsers';
 import { LayoutInstance } from '../layouts';
+import { AttributesMap, ElementsPositionAndAttribute } from './';
 import { CONTEXT_ELEMENTATTRIBUTES } from './constants';
 
 export const getElementPositionAndAttributes = async (

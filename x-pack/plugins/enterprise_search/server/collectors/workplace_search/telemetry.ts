@@ -10,13 +10,14 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { getSavedObjectAttributesFromRepo } from '../lib/telemetry';
 
-interface ITelemetry {
+interface Telemetry {
   ui_viewed: {
     setup_guide: number;
     overview: number;
   };
   ui_error: {
     cannot_connect: number;
+    not_found: number;
   };
   ui_clicked: {
     header_launch_button: number;
@@ -37,7 +38,7 @@ export const registerTelemetryUsageCollector = (
   savedObjects: SavedObjectsServiceStart,
   log: Logger
 ) => {
-  const telemetryUsageCollector = usageCollection.makeUsageCollector<ITelemetry>({
+  const telemetryUsageCollector = usageCollection.makeUsageCollector<Telemetry>({
     type: 'workplace_search',
     fetch: async () => fetchTelemetryMetrics(savedObjects, log),
     isReady: () => true,
@@ -48,6 +49,7 @@ export const registerTelemetryUsageCollector = (
       },
       ui_error: {
         cannot_connect: { type: 'long' },
+        not_found: { type: 'long' },
       },
       ui_clicked: {
         header_launch_button: { type: 'long' },
@@ -72,13 +74,14 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log
     log
   );
 
-  const defaultTelemetrySavedObject: ITelemetry = {
+  const defaultTelemetrySavedObject: Telemetry = {
     ui_viewed: {
       setup_guide: 0,
       overview: 0,
     },
     ui_error: {
       cannot_connect: 0,
+      not_found: 0,
     },
     ui_clicked: {
       header_launch_button: 0,
@@ -100,6 +103,7 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log
     },
     ui_error: {
       cannot_connect: get(savedObjectAttributes, 'ui_error.cannot_connect', 0),
+      not_found: get(savedObjectAttributes, 'ui_error.not_found', 0),
     },
     ui_clicked: {
       header_launch_button: get(savedObjectAttributes, 'ui_clicked.header_launch_button', 0),
@@ -111,5 +115,5 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log
         0
       ),
     },
-  } as ITelemetry;
+  } as Telemetry;
 };

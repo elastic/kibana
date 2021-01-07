@@ -8,7 +8,7 @@ import { transactionGroupsFetcher } from './fetcher';
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../public/utils/testHelpers';
+} from '../../utils/test_helpers';
 
 describe('transaction group queries', () => {
   let mock: SearchParamsMock;
@@ -25,6 +25,7 @@ describe('transaction group queries', () => {
           type: 'top_transactions',
           serviceName: 'foo',
           transactionType: 'bar',
+          searchAggregatedTransactions: false,
         },
         setup,
         bucketSize
@@ -42,6 +43,7 @@ describe('transaction group queries', () => {
       transactionGroupsFetcher(
         {
           type: 'top_traces',
+          searchAggregatedTransactions: false,
         },
         setup,
         bucketSize

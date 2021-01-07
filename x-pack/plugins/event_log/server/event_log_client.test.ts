@@ -7,7 +7,6 @@
 import { KibanaRequest } from 'src/core/server';
 import { EventLogClient } from './event_log_client';
 import { contextMock } from './es/context.mock';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { merge } from 'lodash';
 import moment from 'moment';
 
@@ -15,14 +14,15 @@ describe('EventLogStart', () => {
   describe('findEventsBySavedObject', () => {
     test('verifies that the user can access the specified saved object', async () => {
       const esContext = contextMock.create();
-      const savedObjectsClient = savedObjectsClientMock.create();
+      const savedObjectGetter = jest.fn();
+
       const eventLogClient = new EventLogClient({
         esContext,
-        savedObjectsClient,
+        savedObjectGetter,
         request: FakeRequest(),
       });
 
-      savedObjectsClient.get.mockResolvedValueOnce({
+      savedObjectGetter.mockResolvedValueOnce({
         id: 'saved-object-id',
         type: 'saved-object-type',
         attributes: {},
@@ -31,19 +31,21 @@ describe('EventLogStart', () => {
 
       await eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id');
 
-      expect(savedObjectsClient.get).toHaveBeenCalledWith('saved-object-type', 'saved-object-id');
+      expect(savedObjectGetter).toHaveBeenCalledWith('saved-object-type', 'saved-object-id');
     });
 
     test('throws when the user doesnt have permission to access the specified saved object', async () => {
       const esContext = contextMock.create();
-      const savedObjectsClient = savedObjectsClientMock.create();
+
+      const savedObjectGetter = jest.fn();
+
       const eventLogClient = new EventLogClient({
         esContext,
-        savedObjectsClient,
+        savedObjectGetter,
         request: FakeRequest(),
       });
 
-      savedObjectsClient.get.mockRejectedValue(new Error('Fail'));
+      savedObjectGetter.mockRejectedValue(new Error('Fail'));
 
       expect(
         eventLogClient.findEventsBySavedObject('saved-object-type', 'saved-object-id')
@@ -52,14 +54,16 @@ describe('EventLogStart', () => {
 
     test('fetches all event that reference the saved object', async () => {
       const esContext = contextMock.create();
-      const savedObjectsClient = savedObjectsClientMock.create();
+
+      const savedObjectGetter = jest.fn();
+
       const eventLogClient = new EventLogClient({
         esContext,
-        savedObjectsClient,
+        savedObjectGetter,
         request: FakeRequest(),
       });
 
-      savedObjectsClient.get.mockResolvedValueOnce({
+      savedObjectGetter.mockResolvedValueOnce({
         id: 'saved-object-id',
         type: 'saved-object-type',
         attributes: {},
@@ -110,7 +114,7 @@ describe('EventLogStart', () => {
       ).toEqual(result);
 
       expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
-        esContext.esNames.alias,
+        esContext.esNames.indexPattern,
         undefined,
         'saved-object-type',
         'saved-object-id',
@@ -125,14 +129,16 @@ describe('EventLogStart', () => {
 
     test('fetches all events in time frame that reference the saved object', async () => {
       const esContext = contextMock.create();
-      const savedObjectsClient = savedObjectsClientMock.create();
+
+      const savedObjectGetter = jest.fn();
+
       const eventLogClient = new EventLogClient({
         esContext,
-        savedObjectsClient,
+        savedObjectGetter,
         request: FakeRequest(),
       });
 
-      savedObjectsClient.get.mockResolvedValueOnce({
+      savedObjectGetter.mockResolvedValueOnce({
         id: 'saved-object-id',
         type: 'saved-object-type',
         attributes: {},
@@ -189,7 +195,7 @@ describe('EventLogStart', () => {
       ).toEqual(result);
 
       expect(esContext.esAdapter.queryEventsBySavedObject).toHaveBeenCalledWith(
-        esContext.esNames.alias,
+        esContext.esNames.indexPattern,
         undefined,
         'saved-object-type',
         'saved-object-id',
@@ -206,14 +212,16 @@ describe('EventLogStart', () => {
 
     test('validates that the start date is valid', async () => {
       const esContext = contextMock.create();
-      const savedObjectsClient = savedObjectsClientMock.create();
+
+      const savedObjectGetter = jest.fn();
+
       const eventLogClient = new EventLogClient({
         esContext,
-        savedObjectsClient,
+        savedObjectGetter,
         request: FakeRequest(),
       });
 
-      savedObjectsClient.get.mockResolvedValueOnce({
+      savedObjectGetter.mockResolvedValueOnce({
         id: 'saved-object-id',
         type: 'saved-object-type',
         attributes: {},
@@ -236,14 +244,16 @@ describe('EventLogStart', () => {
 
     test('validates that the end date is valid', async () => {
       const esContext = contextMock.create();
-      const savedObjectsClient = savedObjectsClientMock.create();
+
+      const savedObjectGetter = jest.fn();
+
       const eventLogClient = new EventLogClient({
         esContext,
-        savedObjectsClient,
+        savedObjectGetter,
         request: FakeRequest(),
       });
 
-      savedObjectsClient.get.mockResolvedValueOnce({
+      savedObjectGetter.mockResolvedValueOnce({
         id: 'saved-object-id',
         type: 'saved-object-type',
         attributes: {},
@@ -297,7 +307,8 @@ function fakeEvent(overrides = {}) {
 }
 
 function FakeRequest(): KibanaRequest {
-  const savedObjectsClient = savedObjectsClientMock.create();
+  const savedObjectGetter = jest.fn();
+
   return ({
     headers: {},
     getBasePath: () => '',
@@ -311,6 +322,6 @@ function FakeRequest(): KibanaRequest {
         url: '/',
       },
     },
-    getSavedObjectsClient: () => savedObjectsClient,
+    getSavedObjectsClient: () => savedObjectGetter,
   } as unknown) as KibanaRequest;
 }

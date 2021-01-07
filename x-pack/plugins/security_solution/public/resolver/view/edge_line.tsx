@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
 import React from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { applyMatrix3, distance, angle } from '../models/vector2';
 import { Vector2, Matrix3, EdgeLineMetadata } from '../types';
-import { useResolverTheme, calculateResolverFontSize } from './assets';
+import { fontSize } from './font_size';
+import { useColors } from './use_colors';
 
 interface StyledEdgeLine {
   readonly resolverEdgeColor: string;
@@ -19,9 +22,10 @@ interface StyledEdgeLine {
 const StyledEdgeLine = styled.div<StyledEdgeLine>`
   position: absolute;
   height: ${(props) => {
-    return `${calculateResolverFontSize(props.magFactorX, 12, 8.5)}px`;
+    return `${fontSize(props.magFactorX, 12, 8.5)}px`;
   }};
   background-color: ${(props) => props.resolverEdgeColor};
+  z-index: 10;
 `;
 
 interface StyledElapsedTime {
@@ -52,7 +56,7 @@ const StyledElapsedTime = styled.div<StyledElapsedTime>`
 /**
  * A placeholder line segment view that connects process nodes.
  */
-const EdgeLineComponent = React.memo(
+export const EdgeLine = React.memo(
   ({
     className,
     edgeLineMetadata,
@@ -87,8 +91,8 @@ const EdgeLineComponent = React.memo(
      */
     const screenStart = applyMatrix3(startPosition, projectionMatrix);
     const screenEnd = applyMatrix3(endPosition, projectionMatrix);
-    const [magFactorX] = projectionMatrix;
-    const { colorMap } = useResolverTheme();
+    const [xScale] = projectionMatrix;
+    const colorMap = useColors();
     const elapsedTime = edgeLineMetadata?.elapsedTime;
 
     /**
@@ -96,7 +100,7 @@ const EdgeLineComponent = React.memo(
      * should be the same as the distance between the start and end points.
      */
     const length = distance(screenStart, screenEnd);
-    const scaledTypeSize = calculateResolverFontSize(magFactorX, 10, 7.5);
+    const scaledTypeSize = fontSize(xScale, 10, 7.5);
 
     const style = {
       left: `${screenStart[0]}px`,
@@ -120,18 +124,18 @@ const EdgeLineComponent = React.memo(
     /**
      * Calculates a fractional offset from 0 -> 5% as magFactorX decreases from 1 to a min of .5
      */
-    if (magFactorX < 1) {
-      const fractionalOffset = (1 / magFactorX) * ((1 - magFactorX) * 10);
+    if (xScale < 1) {
+      const fractionalOffset = (1 / xScale) * ((1 - xScale) * 10);
       elapsedTimeLeftPosPct += fractionalOffset;
     }
 
     return (
       <StyledEdgeLine
-        role="presentation"
         className={className}
         style={style}
         resolverEdgeColor={colorMap.resolverEdge}
-        magFactorX={magFactorX}
+        magFactorX={xScale}
+        data-test-subj="resolver:graph:edgeline"
       >
         {elapsedTime && (
           <StyledElapsedTime
@@ -154,7 +158,3 @@ const EdgeLineComponent = React.memo(
     );
   }
 );
-
-EdgeLineComponent.displayName = 'EdgeLine';
-
-export const EdgeLine = EdgeLineComponent;

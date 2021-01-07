@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { euiStyled } from '../../../../../observability/public';
 import { AutoSizer } from '../../../components/auto_sizer';
 import { LogEntryFlyout } from '../../../components/logging/log_entry_flyout';
@@ -13,7 +13,7 @@ import { ScrollableLogTextStreamView } from '../../../components/logging/log_tex
 import { PageContent } from '../../../components/page';
 import { LogFilterState } from '../../../containers/logs/log_filter';
 import {
-  LogFlyout as LogFlyoutState,
+  useLogEntryFlyoutContext,
   WithFlyoutOptionsUrlState,
 } from '../../../containers/logs/log_flyout';
 import { LogHighlightsState } from '../../../containers/logs/log_highlights';
@@ -31,14 +31,13 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { sourceConfiguration, sourceId } = useLogSourceContext();
   const { textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
-    setFlyoutVisibility,
-    flyoutVisible,
-    setFlyoutId,
     surroundingLogsId,
     setSurroundingLogsId,
-    flyoutItem,
-    isLoading,
-  } = useContext(LogFlyoutState.Context);
+    closeFlyout: closeLogEntryFlyout,
+    openFlyout: openLogEntryFlyout,
+    isFlyoutOpen,
+    logEntryId: flyoutLogEntryId,
+  } = useLogEntryFlyoutContext();
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
   const { applyLogFilterQuery } = useContext(LogFilterState.Context);
   const {
@@ -57,23 +56,30 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
 
   const [, { setContextEntry }] = useContext(ViewLogInContext.Context);
 
+  const setFilter = useCallback(
+    (filter, flyoutItemId, timeKey) => {
+      applyLogFilterQuery(filter);
+      if (timeKey) {
+        jumpToTargetPosition(timeKey);
+      }
+      setSurroundingLogsId(flyoutItemId);
+      stopLiveStreaming();
+    },
+    [applyLogFilterQuery, jumpToTargetPosition, setSurroundingLogsId, stopLiveStreaming]
+  );
+
   return (
     <>
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
       <PageViewLogInContext />
-      {flyoutVisible ? (
+      {isFlyoutOpen ? (
         <LogEntryFlyout
-          setFilter={applyLogFilterQuery}
-          setTarget={(timeKey, flyoutItemId) => {
-            jumpToTargetPosition(timeKey);
-            setSurroundingLogsId(flyoutItemId);
-            stopLiveStreaming();
-          }}
-          setFlyoutVisibility={setFlyoutVisibility}
-          flyoutItem={flyoutItem}
-          loading={isLoading}
+          logEntryId={flyoutLogEntryId}
+          onCloseFlyout={closeLogEntryFlyout}
+          onSetFieldFilter={setFilter}
+          sourceId={sourceId}
         />
       ) : null}
       <PageContent key={`${sourceId}-${sourceConfiguration?.version}`}>
@@ -107,8 +113,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               scale={textScale}
               target={targetPosition}
               wrap={textWrap}
-              setFlyoutItem={setFlyoutId}
-              setFlyoutVisibility={setFlyoutVisibility}
+              onOpenLogEntryFlyout={openLogEntryFlyout}
               setContextEntry={setContextEntry}
               highlightedItem={surroundingLogsId ? surroundingLogsId : null}
               currentHighlightKey={currentHighlightKey}

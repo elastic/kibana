@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { UiSettingsParams } from 'kibana/server';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
@@ -32,6 +33,8 @@ import {
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
+  DOC_TABLE_LEGACY,
+  MODIFY_COLUMNS_ON_SWITCH,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -162,5 +165,37 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
+  },
+  [DOC_TABLE_LEGACY]: {
+    name: i18n.translate('discover.advancedSettings.docTableVersionName', {
+      defaultMessage: 'Use legacy table',
+    }),
+    value: true,
+    description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
+      defaultMessage:
+        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen ' +
+        'view. Enable this option if you prefer to fall back to the legacy table.',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:useLegacyDataGrid',
+    },
+  },
+  [MODIFY_COLUMNS_ON_SWITCH]: {
+    name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
+      defaultMessage: 'Modify columns when changing index patterns',
+    }),
+    value: true,
+    description: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchText', {
+      defaultMessage: 'Remove columns that are not available in the new index pattern.',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:modifyColumnsOnSwitchTitle',
+    },
   },
 };

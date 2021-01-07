@@ -19,12 +19,22 @@ describe('FeatureUsageService', () => {
 
   describe('#setup', () => {
     describe('#register', () => {
-      it('throws when registering the same feature twice', () => {
+      it('does not throw when registering the same feature twice with the same license', () => {
         const setup = service.setup();
         setup.register('foo', 'basic');
         expect(() => {
           setup.register('foo', 'basic');
-        }).toThrowErrorMatchingInlineSnapshot(`"Feature 'foo' has already been registered."`);
+        }).not.toThrow();
+      });
+
+      it('throws when registering the same feature again with a different license', () => {
+        const setup = service.setup();
+        setup.register('foo', 'basic');
+        expect(() => {
+          setup.register('foo', 'enterprise');
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"Feature 'foo' has already been registered with another license type. (current: basic, new: enterprise)"`
+        );
       });
     });
   });

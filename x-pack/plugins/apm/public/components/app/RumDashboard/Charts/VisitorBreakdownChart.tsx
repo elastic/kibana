@@ -10,87 +10,84 @@ import {
   DARK_THEME,
   Datum,
   LIGHT_THEME,
+  PartialTheme,
   Partition,
   PartitionLayout,
   Settings,
 } from '@elastic/charts';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import styled from 'styled-components';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
 } from '@elastic/eui/dist/eui_charts_theme';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ChartWrapper } from '../ChartWrapper';
+import { I18LABELS } from '../translations';
+
+const StyleChart = styled.div`
+  height: 100%;
+`;
 
 interface Props {
   options?: Array<{
     count: number;
     name: string;
   }>;
+  loading: boolean;
 }
 
-export function VisitorBreakdownChart({ options }: Props) {
+const theme: PartialTheme = {
+  legend: {
+    verticalWidth: 100,
+  },
+};
+
+export function VisitorBreakdownChart({ loading, options }: Props) {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
+  const euiChartTheme = darkMode
+    ? EUI_CHARTS_THEME_DARK
+    : EUI_CHARTS_THEME_LIGHT;
+
   return (
-    <ChartWrapper loading={false} height="220px">
-      <Chart>
-        <Settings
-          baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
-          theme={
-            darkMode
-              ? EUI_CHARTS_THEME_DARK.theme
-              : EUI_CHARTS_THEME_LIGHT.theme
-          }
-        />
-        <Partition
-          id="spec_1"
-          data={options || []}
-          valueAccessor={(d: Datum) => d.count as number}
-          valueGetter="percent"
-          percentFormatter={(d: number) =>
-            `${Math.round((d + Number.EPSILON) * 100) / 100}%`
-          }
-          layers={[
-            {
-              groupByRollup: (d: Datum) => d.name,
-              nodeLabel: (d: Datum) => d,
-              // fillLabel: { textInvertible: true },
-              shape: {
-                fillColor: (d) => {
-                  const clrs = [
-                    euiLightVars.euiColorVis1_behindText,
-                    euiLightVars.euiColorVis0_behindText,
-                    euiLightVars.euiColorVis2_behindText,
-                    euiLightVars.euiColorVis3_behindText,
-                    euiLightVars.euiColorVis4_behindText,
-                    euiLightVars.euiColorVis5_behindText,
-                    euiLightVars.euiColorVis6_behindText,
-                    euiLightVars.euiColorVis7_behindText,
-                    euiLightVars.euiColorVis8_behindText,
-                    euiLightVars.euiColorVis9_behindText,
-                  ];
-                  return clrs[d.sortIndex];
+    <ChartWrapper loading={loading} height="245px" maxWidth="430px">
+      <StyleChart>
+        <Chart>
+          <Settings
+            showLegend
+            baseTheme={darkMode ? DARK_THEME : LIGHT_THEME}
+            theme={theme}
+          />
+          <Partition
+            id="spec_1"
+            data={
+              options?.length ? options : [{ count: 1, name: I18LABELS.noData }]
+            }
+            valueAccessor={(d: Datum) => d.count as number}
+            valueGetter="percent"
+            percentFormatter={(d: number) =>
+              `${Math.round((d + Number.EPSILON) * 100) / 100}%`
+            }
+            layers={[
+              {
+                groupByRollup: (d: Datum) => d.name,
+                shape: {
+                  fillColor: (d) =>
+                    euiChartTheme.theme.colors?.vizColors?.[d.sortIndex]!,
                 },
               },
-            },
-          ]}
-          config={{
-            partitionLayout: PartitionLayout.sunburst,
-            linkLabel: {
-              maxCount: 32,
-              fontSize: 14,
-            },
-            fontFamily: 'Arial',
-            margin: { top: 0, bottom: 0, left: 0, right: 0 },
-            minFontSize: 1,
-            idealFontSizeJump: 1.1,
-            outerSizeRatio: 0.9, // - 0.5 * Math.random(),
-            emptySizeRatio: 0,
-            circlePadding: 4,
-          }}
-        />
-      </Chart>
+            ]}
+            config={{
+              partitionLayout: PartitionLayout.sunburst,
+              linkLabel: { maximumSection: Infinity, maxCount: 0 },
+              margin: { top: 0, bottom: 0, left: 0, right: 0 },
+              outerSizeRatio: 1, // - 0.5 * Math.random(),
+              circlePadding: 4,
+              clockwiseSectors: false,
+            }}
+          />
+        </Chart>
+      </StyleChart>
     </ChartWrapper>
   );
 }

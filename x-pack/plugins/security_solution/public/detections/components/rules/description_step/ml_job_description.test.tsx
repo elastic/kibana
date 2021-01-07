@@ -7,31 +7,14 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
+import { mockOpenedJob } from '../../../../common/components/ml_popover/api.mock';
 import { MlJobDescription, AuditIcon, JobStatusBadge } from './ml_job_description';
-jest.mock('../../../../common/lib/kibana');
 
-const job = {
-  moduleId: 'moduleId',
-  defaultIndexPattern: 'defaultIndexPattern',
-  isCompatible: true,
-  isInstalled: true,
-  isElasticJob: true,
-  datafeedId: 'datafeedId',
-  datafeedIndices: [],
-  datafeedState: 'datafeedState',
-  description: 'description',
-  groups: [],
-  hasDatafeed: true,
-  id: 'id',
-  isSingleMetricViewerJob: false,
-  jobState: 'jobState',
-  memory_status: 'memory_status',
-  processed_record_count: 0,
-};
+jest.mock('../../../../common/lib/kibana');
 
 describe('MlJobDescription', () => {
   it('renders correctly', () => {
-    const wrapper = shallow(<MlJobDescription job={job} />);
+    const wrapper = shallow(<MlJobDescription jobId={'myJobId'} />);
 
     expect(wrapper.find('[data-test-subj="machineLearningJobId"]')).toHaveLength(1);
   });
@@ -47,7 +30,7 @@ describe('AuditIcon', () => {
 
 describe('JobStatusBadge', () => {
   it('renders correctly', () => {
-    const wrapper = shallow(<JobStatusBadge job={job} />);
+    const wrapper = shallow(<JobStatusBadge job={mockOpenedJob} />);
 
     expect(wrapper.find('EuiBadge')).toHaveLength(1);
   });

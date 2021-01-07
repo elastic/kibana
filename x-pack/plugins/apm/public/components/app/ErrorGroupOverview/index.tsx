@@ -7,6 +7,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -14,43 +15,34 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { useTrackPageview } from '../../../../../observability/public';
-import { PROJECTION } from '../../../../common/projections/typings';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { Projection } from '../../../../common/projections';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { SearchBar } from '../../shared/search_bar';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
+import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
 
-function ErrorGroupOverview() {
+interface ErrorGroupOverviewProps {
+  serviceName: string;
+}
+
+function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   const { urlParams, uiFilters } = useUrlParams();
-
-  const { serviceName, start, end, sortField, sortDirection } = urlParams;
-
-  const { data: errorDistributionData } = useFetcher(() => {
-    if (serviceName && start && end) {
-      return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors/distribution',
-        params: {
-          path: {
-            serviceName,
-          },
-          query: {
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters),
-          },
-        },
-      });
-    }
-  }, [serviceName, start, end, uiFilters]);
+  const { start, end, sortField, sortDirection } = urlParams;
+  const { errorDistributionData } = useErrorGroupDistributionFetcher({
+    serviceName,
+    groupId: undefined,
+  });
 
   const { data: errorGroupListData } = useFetcher(() => {
     const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
 
-    if (serviceName && start && end) {
+    if (start && end) {
       return callApmApi({
-        pathname: '/api/apm/services/{serviceName}/errors',
+        endpoint: 'GET /api/apm/services/{serviceName}/errors',
         params: {
           path: {
             serviceName,
@@ -79,7 +71,7 @@ function ErrorGroupOverview() {
       params: {
         serviceName,
       },
-      projection: PROJECTION.ERROR_GROUPS,
+      projection: Projection.errorGroups,
     };
 
     return config;
@@ -91,36 +83,41 @@ function ErrorGroupOverview() {
 
   return (
     <>
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localUIFiltersConfig} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <EuiPanel>
-            <ErrorDistribution
-              distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
-                {
-                  defaultMessage: 'Error occurrences',
-                }
-              )}
-            />
-          </EuiPanel>
+      <SearchBar />
+      <EuiPage>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <LocalUIFilters {...localUIFiltersConfig} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            <EuiPanel>
+              <ErrorDistribution
+                distribution={errorDistributionData}
+                title={i18n.translate(
+                  'xpack.apm.serviceDetails.metrics.errorOccurrencesChartTitle',
+                  {
+                    defaultMessage: 'Error occurrences',
+                  }
+                )}
+              />
+            </EuiPanel>
 
-          <EuiSpacer size="s" />
-
-          <EuiPanel>
-            <EuiTitle size="xs">
-              <h3>Errors</h3>
-            </EuiTitle>
             <EuiSpacer size="s" />
 
-            <ErrorGroupList items={errorGroupListData} />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <EuiPanel>
+              <EuiTitle size="xs">
+                <h3>Errors</h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+
+              <ErrorGroupList
+                items={errorGroupListData}
+                serviceName={serviceName}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
     </>
   );
 }

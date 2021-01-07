@@ -4,17 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface SerializedAction<Config = unknown> {
-  readonly factoryId: string;
-  readonly name: string;
-  readonly config: Config;
-}
+import { SerializedAction, SerializedEvent, BaseActionConfig } from '../../common/types';
+
+export { SerializedAction, SerializedEvent, BaseActionConfig };
 
 /**
- * Serialized representation of a triggers-action pair, used to persist in storage.
+ * Action factory context passed into ActionFactories' CollectConfig, getDisplayName, getIconType
  */
-export interface SerializedEvent {
-  eventId: string;
+export interface BaseActionFactoryContext {
   triggers: string[];
-  action: SerializedAction;
 }

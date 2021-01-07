@@ -24,7 +24,14 @@ import { take } from 'rxjs/operators';
 import { ViewMode } from '../types';
 import { EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { IEmbeddable, EmbeddableEditorState, EmbeddableStateTransfer } from '../..';
+import {
+  IEmbeddable,
+  EmbeddableEditorState,
+  EmbeddableStateTransfer,
+  SavedObjectEmbeddableInput,
+  EmbeddableInput,
+  Container,
+} from '../..';
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
@@ -109,13 +116,28 @@ export class EditPanelAction implements Action<ActionContext> {
     const app = embeddable ? embeddable.getOutput().editApp : undefined;
     const path = embeddable ? embeddable.getOutput().editPath : undefined;
     if (app && path) {
-      const state = this.currentAppId ? { originatingApp: this.currentAppId } : undefined;
-      return { app, path, state };
+      if (this.currentAppId) {
+        const byValueMode = !(embeddable.getInput() as SavedObjectEmbeddableInput).savedObjectId;
+        const state: EmbeddableEditorState = {
+          originatingApp: this.currentAppId,
+          valueInput: byValueMode ? this.getExplicitInput({ embeddable }) : undefined,
+          embeddableId: embeddable.id,
+        };
+        return { app, path, state };
+      }
+      return { app, path };
     }
   }
 
   public async getHref({ embeddable }: ActionContext): Promise<string> {
     const editUrl = embeddable ? embeddable.getOutput().editUrl : undefined;
     return editUrl ? editUrl : '';
+  }
+
+  private getExplicitInput({ embeddable }: ActionContext): EmbeddableInput {
+    return (
+      (embeddable.getRoot() as Container)?.getInput()?.panels?.[embeddable.id]?.explicitInput ??
+      embeddable.getInput()
+    );
   }
 }

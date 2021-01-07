@@ -25,12 +25,12 @@ import {
   CoreStart,
   ISavedObjectsRepository,
   Plugin,
-} from 'kibana/server';
+} from 'src/core/server';
 import { ConfigType } from './config';
-import { CollectorSet } from './collector';
+import { CollectorSet, CollectorSetPublic } from './collector';
 import { setupRoutes } from './routes';
 
-export type UsageCollectionSetup = CollectorSet;
+export type UsageCollectionSetup = CollectorSetPublic;
 export class UsageCollectionPlugin implements Plugin<CollectorSet> {
   private readonly logger: Logger;
   private savedObjects?: ISavedObjectsRepository;
@@ -49,8 +49,25 @@ export class UsageCollectionPlugin implements Plugin<CollectorSet> {
       maximumWaitTimeForAllCollectorsInS: config.maximumWaitTimeForAllCollectorsInS,
     });
 
+    const globalConfig = await this.initializerContext.config.legacy.globalConfig$
+      .pipe(first())
+      .toPromise();
+
     const router = core.http.createRouter();
-    setupRoutes(router, () => this.savedObjects);
+    setupRoutes({
+      router,
+      getSavedObjects: () => this.savedObjects,
+      collectorSet,
+      config: {
+        allowAnonymous: core.status.isStatusPageAnonymous(),
+        kibanaIndex: globalConfig.kibana.index,
+        kibanaVersion: this.initializerContext.env.packageInfo.version,
+        server: core.http.getServerInfo(),
+        uuid: this.initializerContext.env.instanceUuid,
+      },
+      metrics: core.metrics,
+      overallStatus$: core.status.overall$,
+    });
 
     return collectorSet;
   }

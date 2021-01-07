@@ -8,8 +8,8 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { act } from '@testing-library/react';
 import { EuiButton, EuiCallOut, EuiIcon } from '@elastic/eui';
-import { mountWithIntl, nextTick, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from 'test_utils/find_test_subject';
+import { mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+import { findTestSubject } from '@kbn/test/jest';
 import { LoginForm, PageMode } from './login_form';
 
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
@@ -22,21 +22,38 @@ function expectPageMode(wrapper: ReactWrapper, mode: PageMode) {
           ['loginForm', true],
           ['loginSelector', false],
           ['loginHelp', false],
+          ['autoLoginOverlay', false],
         ]
       : mode === PageMode.Selector
       ? [
           ['loginForm', false],
           ['loginSelector', true],
           ['loginHelp', false],
+          ['autoLoginOverlay', false],
         ]
       : [
           ['loginForm', false],
           ['loginSelector', false],
           ['loginHelp', true],
+          ['autoLoginOverlay', false],
         ];
   for (const [selector, exists] of assertions) {
     expect(findTestSubject(wrapper, selector).exists()).toBe(exists);
   }
+}
+
+function expectAutoLoginOverlay(wrapper: ReactWrapper) {
+  // Everything should be hidden except for the overlay
+  for (const selector of [
+    'loginForm',
+    'loginSelector',
+    'loginHelp',
+    'loginHelpLink',
+    'loginAssistanceMessage',
+  ]) {
+    expect(findTestSubject(wrapper, selector).exists()).toBe(false);
+  }
+  expect(findTestSubject(wrapper, 'autoLoginOverlay').exists()).toBe(true);
 }
 
 describe('LoginForm', () => {
@@ -57,7 +74,9 @@ describe('LoginForm', () => {
           loginAssistanceMessage=""
           selector={{
             enabled: false,
-            providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+            providers: [
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+            ],
           }}
         />
       )
@@ -74,7 +93,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -94,7 +113,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -115,7 +134,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -147,7 +166,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -171,7 +190,7 @@ describe('LoginForm', () => {
       '/some-base-path/app/home#/?_g=()'
     )}`;
     const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
-    coreStartMock.http.post.mockResolvedValue({});
+    coreStartMock.http.post.mockResolvedValue({ location: '/some-base-path/app/home#/?_g=()' });
 
     const wrapper = mountWithIntl(
       <LoginForm
@@ -180,7 +199,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -198,7 +217,14 @@ describe('LoginForm', () => {
 
     expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
     expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
-      body: JSON.stringify({ username: 'username1', password: 'password1' }),
+      body: JSON.stringify({
+        providerType: 'basic',
+        providerName: 'basic1',
+        currentURL: `https://some-host/login?next=${encodeURIComponent(
+          '/some-base-path/app/home#/?_g=()'
+        )}`,
+        params: { username: 'username1', password: 'password1' },
+      }),
     });
 
     expect(window.location.href).toBe('/some-base-path/app/home#/?_g=()');
@@ -215,7 +241,7 @@ describe('LoginForm', () => {
         loginHelp="**some help**"
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true }],
         }}
       />
     );
@@ -254,14 +280,22 @@ describe('LoginForm', () => {
                 usesLoginForm: true,
                 hint: 'Basic hint',
                 icon: 'logoElastic',
+                showInSelector: true,
               },
-              { type: 'saml', name: 'saml1', description: 'Log in w/SAML', usesLoginForm: false },
+              {
+                type: 'saml',
+                name: 'saml1',
+                description: 'Log in w/SAML',
+                usesLoginForm: false,
+                showInSelector: true,
+              },
               {
                 type: 'pki',
                 name: 'pki1',
                 description: 'Log in w/PKI',
                 hint: 'PKI hint',
                 usesLoginForm: false,
+                showInSelector: true,
               },
             ],
           }}
@@ -302,8 +336,15 @@ describe('LoginForm', () => {
                 description: 'Login w/SAML',
                 hint: 'SAML hint',
                 usesLoginForm: false,
+                showInSelector: true,
               },
-              { type: 'pki', name: 'pki1', icon: 'some-icon', usesLoginForm: false },
+              {
+                type: 'pki',
+                name: 'pki1',
+                icon: 'some-icon',
+                usesLoginForm: false,
+                showInSelector: true,
+              },
             ],
           }}
         />
@@ -345,9 +386,21 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', description: 'Login w/SAML', usesLoginForm: false },
-              { type: 'pki', name: 'pki1', description: 'Login w/PKI', usesLoginForm: false },
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              {
+                type: 'saml',
+                name: 'saml1',
+                description: 'Login w/SAML',
+                usesLoginForm: false,
+                showInSelector: true,
+              },
+              {
+                type: 'pki',
+                name: 'pki1',
+                description: 'Login w/PKI',
+                usesLoginForm: false,
+                showInSelector: true,
+              },
             ],
           }}
         />
@@ -363,7 +416,7 @@ describe('LoginForm', () => {
       });
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
-      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login_with', {
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
@@ -390,8 +443,8 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
             ],
           }}
         />
@@ -407,14 +460,63 @@ describe('LoginForm', () => {
       });
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
-      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login_with', {
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
       expect(window.location.href).toBe(currentURL);
       expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
         title: 'Could not perform login.',
+        toastMessage: 'Oh no!',
       });
+    });
+
+    it('shows error with message in the `body`', async () => {
+      const currentURL = `https://some-host/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStartMock.http.post.mockRejectedValue({
+        body: { message: 'Oh no! But with much more details!' },
+        message: 'Oh no!',
+      });
+
+      window.location.href = currentURL;
+      const wrapper = mountWithIntl(
+        <LoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginAssistanceMessage=""
+          selector={{
+            enabled: true,
+            providers: [
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+            ],
+          }}
+        />
+      );
+
+      expectPageMode(wrapper, PageMode.Selector);
+
+      wrapper.findWhere((node) => node.key() === 'saml1').simulate('click');
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
+        body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
+      });
+
+      expect(window.location.href).toBe(currentURL);
+      expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(
+        new Error('Oh no! But with much more details!'),
+        { title: 'Could not perform login.', toastMessage: 'Oh no!' }
+      );
     });
 
     it('properly switches to login form', async () => {
@@ -432,8 +534,8 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
             ],
           }}
         />
@@ -461,8 +563,8 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
             ],
           }}
         />
@@ -498,8 +600,8 @@ describe('LoginForm', () => {
           selector={{
             enabled: true,
             providers: [
-              { type: 'basic', name: 'basic', usesLoginForm: true },
-              { type: 'saml', name: 'saml1', usesLoginForm: false },
+              { type: 'basic', name: 'basic', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
             ],
           }}
         />
@@ -533,6 +635,170 @@ describe('LoginForm', () => {
 
       expect(coreStartMock.http.post).not.toHaveBeenCalled();
       expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('auto login', () => {
+    it('automatically switches to the Login Form mode if provider suggested by the auth provider hint needs it', () => {
+      const coreStartMock = coreMock.createStart();
+      const wrapper = mountWithIntl(
+        <LoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginHelp={'**Hey this is a login help message**'}
+          loginAssistanceMessage="Need assistance?"
+          authProviderHint="basic1"
+          selector={{
+            enabled: true,
+            providers: [
+              { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+            ],
+          }}
+        />
+      );
+
+      expectPageMode(wrapper, PageMode.Form);
+      expect(findTestSubject(wrapper, 'loginHelpLink').text()).toEqual('Need help?');
+      expect(findTestSubject(wrapper, 'loginAssistanceMessage').text()).toEqual('Need assistance?');
+    });
+
+    it('automatically logs in if provider suggested by the auth provider hint is displayed in the selector', async () => {
+      const currentURL = `https://some-host/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStartMock.http.post.mockResolvedValue({
+        location: 'https://external-idp/login?optional-arg=2#optional-hash',
+      });
+
+      window.location.href = currentURL;
+      const wrapper = mountWithIntl(
+        <LoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginHelp={'**Hey this is a login help message**'}
+          loginAssistanceMessage="Need assistance?"
+          authProviderHint="saml1"
+          selector={{
+            enabled: true,
+            providers: [
+              { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+            ],
+          }}
+        />
+      );
+
+      expectAutoLoginOverlay(wrapper);
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
+        body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
+      });
+
+      expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
+      expect(wrapper.find(EuiCallOut).exists()).toBe(false);
+      expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
+    });
+
+    it('automatically logs in if provider suggested by the auth provider hint is not displayed in the selector', async () => {
+      const currentURL = `https://some-host/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStartMock.http.post.mockResolvedValue({
+        location: 'https://external-idp/login?optional-arg=2#optional-hash',
+      });
+
+      window.location.href = currentURL;
+      const wrapper = mountWithIntl(
+        <LoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginHelp={'**Hey this is a login help message**'}
+          loginAssistanceMessage="Need assistance?"
+          authProviderHint="saml1"
+          selector={{
+            enabled: true,
+            providers: [
+              { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: false },
+            ],
+          }}
+        />
+      );
+
+      expectAutoLoginOverlay(wrapper);
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
+        body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
+      });
+
+      expect(window.location.href).toBe('https://external-idp/login?optional-arg=2#optional-hash');
+      expect(wrapper.find(EuiCallOut).exists()).toBe(false);
+      expect(coreStartMock.notifications.toasts.addError).not.toHaveBeenCalled();
+    });
+
+    it('switches to the login selector if could not login with provider suggested by the auth provider hint', async () => {
+      const currentURL = `https://some-host/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+
+      const failureReason = new Error('Oh no!');
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStartMock.http.post.mockRejectedValue(failureReason);
+
+      window.location.href = currentURL;
+      const wrapper = mountWithIntl(
+        <LoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginHelp={'**Hey this is a login help message**'}
+          loginAssistanceMessage="Need assistance?"
+          authProviderHint="saml1"
+          selector={{
+            enabled: true,
+            providers: [
+              { type: 'basic', name: 'basic1', usesLoginForm: true, showInSelector: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false, showInSelector: true },
+            ],
+          }}
+        />
+      );
+
+      expectAutoLoginOverlay(wrapper);
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
+        body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
+      });
+
+      expect(window.location.href).toBe(currentURL);
+      expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
+        title: 'Could not perform login.',
+        toastMessage: 'Oh no!',
+      });
+
+      expectPageMode(wrapper, PageMode.Selector);
+      expect(findTestSubject(wrapper, 'loginHelpLink').text()).toEqual('Need help?');
+      expect(findTestSubject(wrapper, 'loginAssistanceMessage').text()).toEqual('Need assistance?');
     });
   });
 });

@@ -14,7 +14,9 @@ import { ThemeProvider } from 'styled-components';
 import { EuiErrorBoundary } from '@elastic/eui';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { AppLeaveHandler } from '../../../../../src/core/public';
 
+import { ManageUserInfo } from '../detections/components/user_info';
 import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
@@ -31,10 +33,17 @@ import { PageRouter } from './routes';
 interface StartAppComponent extends AppFrontendLibs {
   children: React.ReactNode;
   history: History;
+  onAppLeave: (handler: AppLeaveHandler) => void;
   store: Store<State, Action>;
 }
 
-const StartAppComponent: FC<StartAppComponent> = ({ children, apolloClient, history, store }) => {
+const StartAppComponent: FC<StartAppComponent> = ({
+  children,
+  apolloClient,
+  history,
+  onAppLeave,
+  store,
+}) => {
   const { i18n } = useKibana().services;
 
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
@@ -56,7 +65,11 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, apolloClient, hist
                 <ApolloClientContext.Provider value={apolloClient}>
                   <ThemeProvider theme={theme}>
                     <MlCapabilitiesProvider>
-                      <PageRouter history={history}>{children}</PageRouter>
+                      <ManageUserInfo>
+                        <PageRouter history={history} onAppLeave={onAppLeave}>
+                          {children}
+                        </PageRouter>
+                      </ManageUserInfo>
                     </MlCapabilitiesProvider>
                   </ThemeProvider>
                   <ErrorToastDispatcher />
@@ -76,6 +89,7 @@ const StartApp = memo(StartAppComponent);
 interface SecurityAppComponentProps extends AppFrontendLibs {
   children: React.ReactNode;
   history: History;
+  onAppLeave: (handler: AppLeaveHandler) => void;
   services: StartServices;
   store: Store<State, Action>;
 }
@@ -84,6 +98,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   children,
   apolloClient,
   history,
+  onAppLeave,
   services,
   store,
 }) => (
@@ -93,7 +108,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       ...services,
     }}
   >
-    <StartApp apolloClient={apolloClient} history={history} store={store}>
+    <StartApp apolloClient={apolloClient} history={history} onAppLeave={onAppLeave} store={store}>
       {children}
     </StartApp>
   </KibanaContextProvider>

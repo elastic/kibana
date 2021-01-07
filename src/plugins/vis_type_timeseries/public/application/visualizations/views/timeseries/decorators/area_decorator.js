@@ -32,16 +32,16 @@ export function AreaSeriesDecorator({
   lines,
   color,
   stackAccessors,
-  stackAsPercentage,
+  stackMode,
   points,
   xScaleType,
   yScaleType,
   timeZone,
   enableHistogramMode,
-  useDefaultGroupDomain,
   sortIndex,
   y1AccessorFormat,
   y0AccessorFormat,
+  tickFormat,
 }) {
   const id = seriesId;
   const groupId = seriesGroupId;
@@ -60,13 +60,13 @@ export function AreaSeriesDecorator({
     y1AccessorFormat,
     y0AccessorFormat,
     stackAccessors,
-    stackAsPercentage,
+    stackMode,
     xScaleType,
     yScaleType,
     timeZone,
     enableHistogramMode,
-    useDefaultGroupDomain,
     sortIndex,
+    tickFormat,
     ...areaSeriesStyle,
   };
 

@@ -1,0 +1,40 @@
+get:
+  summary: PackagePolicies - List
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  $ref: ../components/schemas/package_policy.yaml
+              total:
+                type: number
+              page:
+                type: number
+              perPage:
+                type: number
+            required:
+              - items
+  operationId: get-packagePolicies
+  security: []
+  parameters: []
+parameters: []
+post:
+  summary: PackagePolicies - Create
+  operationId: post-packagePolicies
+  responses:
+    '200':
+      description: OK
+  requestBody:
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/new_package_policy.yaml
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml

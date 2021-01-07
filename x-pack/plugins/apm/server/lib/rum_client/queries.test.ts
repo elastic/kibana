@@ -7,11 +7,14 @@
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../public/utils/testHelpers';
+} from '../../utils/test_helpers';
 import { getClientMetrics } from './get_client_metrics';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getRumServices } from './get_rum_services';
+import { getLongTaskMetrics } from './get_long_task_metrics';
+import { getWebCoreVitals } from './get_web_core_vitals';
+import { getJSErrors } from './get_js_errors';
 
 describe('rum client dashboard queries', () => {
   let mock: SearchParamsMock;
@@ -55,6 +58,35 @@ describe('rum client dashboard queries', () => {
     mock = await inspectSearchParams((setup) =>
       getRumServices({
         setup,
+      })
+    );
+    expect(mock.params).toMatchSnapshot();
+  });
+
+  it('fetches rum core vitals', async () => {
+    mock = await inspectSearchParams((setup) =>
+      getWebCoreVitals({
+        setup,
+      })
+    );
+    expect(mock.params).toMatchSnapshot();
+  });
+
+  it('fetches long task metrics', async () => {
+    mock = await inspectSearchParams((setup) =>
+      getLongTaskMetrics({
+        setup,
+      })
+    );
+    expect(mock.params).toMatchSnapshot();
+  });
+
+  it('fetches js errors', async () => {
+    mock = await inspectSearchParams((setup) =>
+      getJSErrors({
+        setup,
+        pageSize: 5,
+        pageIndex: 0,
       })
     );
     expect(mock.params).toMatchSnapshot();

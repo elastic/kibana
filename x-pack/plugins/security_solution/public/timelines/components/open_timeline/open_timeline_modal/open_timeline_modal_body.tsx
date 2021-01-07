@@ -5,7 +5,7 @@
  */
 
 import { EuiModalBody, EuiModalHeader } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
+import React, { Fragment, memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { OpenTimelineProps, ActionTimelineToShow } from '../types';
@@ -38,7 +38,6 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     onToggleShowNotes,
     pageIndex,
     pageSize,
-    query,
     searchResults,
     selectedItems,
     sortDirection,
@@ -61,10 +60,10 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
 
     const SearchRowContent = useMemo(
       () => (
-        <>
+        <Fragment key="search-row-content">
           {!!timelineFilter && timelineFilter}
           {!!templateTimelineFilter && templateTimelineFilter}
-        </>
+        </Fragment>
       ),
       [timelineFilter, templateTimelineFilter]
     );

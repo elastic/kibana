@@ -294,7 +294,7 @@ class MarkdownPanelConfigUi extends Component {
       );
     }
     return (
-      <div>
+      <>
         <EuiTabs size="s">
           <EuiTab
             isSelected={selectedTab === 'markdown'}
@@ -325,7 +325,7 @@ class MarkdownPanelConfigUi extends Component {
           </EuiTab>
         </EuiTabs>
         {view}
-      </div>
+      </>
     );
   }
 }
@@ -334,7 +334,6 @@ MarkdownPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  dateFormat: PropTypes.string,
 };
 
 export const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);

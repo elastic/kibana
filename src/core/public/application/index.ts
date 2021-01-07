@@ -22,7 +22,6 @@ export { Capabilities } from './capabilities';
 export { ScopedHistory } from './scoped_history';
 export {
   App,
-  AppBase,
   AppMount,
   AppMountDeprecated,
   AppUnmount,
@@ -32,6 +31,8 @@ export {
   AppNavLinkStatus,
   AppUpdatableFields,
   AppUpdater,
+  AppMeta,
+  AppSearchDeepLink,
   ApplicationSetup,
   ApplicationStart,
   AppLeaveHandler,
@@ -39,10 +40,10 @@ export {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  LegacyApp,
   NavigateToAppOptions,
   PublicAppInfo,
-  PublicLegacyAppInfo,
+  PublicAppMetaInfo,
+  PublicAppSearchDeepLinkInfo,
   // Internal types
   InternalApplicationSetup,
   InternalApplicationStart,

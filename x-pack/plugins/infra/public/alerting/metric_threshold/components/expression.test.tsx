@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { actionTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { alertTypeRegistryMock } from '../../../../../triggers_actions_ui/public/application/alert_type_registry.mock';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
-import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/application/context/alerts_context';
-import { AlertContextMeta } from '../types';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
+// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
+import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 import React from 'react';
 import { Expressions } from './expression';
@@ -24,6 +21,12 @@ jest.mock('../../../containers/source/use_source_via_http', () => ({
   }),
 }));
 
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({
+    services: mockCoreMock.createStart(),
+  }),
+}));
+
 describe('Expression', () => {
   async function setup(currentOptions: {
     metrics?: MetricsExplorerMetric[];
@@ -34,43 +37,19 @@ describe('Expression', () => {
       criteria: [],
       groupBy: undefined,
       filterQueryText: '',
+      sourceId: 'default',
     };
-
-    const mocks = coreMock.createSetup();
-    const startMocks = coreMock.createStart();
-    const [
-      {
-        application: { capabilities },
-      },
-    ] = await mocks.getStartServices();
-
-    const context: AlertsContextValue<AlertContextMeta> = {
-      http: mocks.http,
-      toastNotifications: mocks.notifications.toasts,
-      actionTypeRegistry: actionTypeRegistryMock.create() as any,
-      alertTypeRegistry: alertTypeRegistryMock.create() as any,
-      docLinks: startMocks.docLinks,
-      capabilities: {
-        ...capabilities,
-        actions: {
-          delete: true,
-          save: true,
-          show: true,
-        },
-      },
-      metadata: {
-        currentOptions,
-      },
-    };
-
     const wrapper = mountWithIntl(
       <Expressions
-        alertsContext={context}
         alertInterval="1m"
+        alertThrottle="1m"
         alertParams={alertParams}
         errors={[]}
         setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}
         setAlertProperty={() => {}}
+        metadata={{
+          currentOptions,
+        }}
       />
     );
 

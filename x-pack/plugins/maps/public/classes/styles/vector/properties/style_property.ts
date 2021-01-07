@@ -8,10 +8,9 @@
 import { ReactElement } from 'react';
 // @ts-ignore
 import { getVectorStyleLabel } from '../components/get_vector_style_label';
-import { FieldMetaOptions } from '../../../../../common/descriptor_types';
-import { VECTOR_STYLES } from '../../../../../common/constants';
+import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
 
-type LegendProps = {
+export type LegendProps = {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   symbolId?: string;
@@ -20,12 +19,12 @@ type LegendProps = {
 export interface IStyleProperty<T> {
   isDynamic(): boolean;
   isComplete(): boolean;
-  formatField(value: string | undefined): string;
+  formatField(value: RawValue): string | number;
   getStyleName(): VECTOR_STYLES;
   getOptions(): T;
   renderLegendDetailRow(legendProps: LegendProps): ReactElement<any> | null;
-  renderFieldMetaPopover(
-    onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
+  renderDataMappingPopover(
+    onChange: (updatedOptions: Partial<T>) => void
   ): ReactElement<any> | null;
   getDisplayStyleName(): string;
 }
@@ -53,9 +52,14 @@ export class AbstractStyleProperty<T> implements IStyleProperty<T> {
     return true;
   }
 
-  formatField(value: string | undefined): string {
-    // eslint-disable-next-line eqeqeq
-    return value == undefined ? '' : value;
+  formatField(value: RawValue): string | number {
+    if (typeof value === 'undefined' || value === null) {
+      return '';
+    } else if (typeof value === 'boolean') {
+      return value.toString();
+    } else {
+      return value;
+    }
   }
 
   getStyleName(): VECTOR_STYLES {
@@ -66,12 +70,12 @@ export class AbstractStyleProperty<T> implements IStyleProperty<T> {
     return this._options;
   }
 
-  renderLegendDetailRow() {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly }: LegendProps): ReactElement<any> | null {
     return null;
   }
 
-  renderFieldMetaPopover(
-    onFieldMetaOptionsChange: (fieldMetaOptions: FieldMetaOptions) => void
+  renderDataMappingPopover(
+    onChange: (updatedOptions: Partial<T>) => void
   ): ReactElement<any> | null {
     return null;
   }

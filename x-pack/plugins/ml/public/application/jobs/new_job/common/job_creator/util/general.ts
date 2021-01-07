@@ -5,13 +5,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
+import { NavigateToPath } from '../../../../../contexts/kibana';
 import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
 } from '../../../../../../../common/constants/aggregation_types';
-import { MLCATEGORY, DOC_COUNT } from '../../../../../../../common/constants/field_types';
+import {
+  MLCATEGORY,
+  DOC_COUNT,
+  _DOC_COUNT,
+} from '../../../../../../../common/constants/field_types';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import {
   EVENT_RATE_FIELD_ID,
@@ -20,12 +26,7 @@ import {
   mlCategory,
 } from '../../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
-import {
-  JobCreatorType,
-  isMultiMetricJobCreator,
-  isPopulationJobCreator,
-  isCategorizationJobCreator,
-} from '../index';
+import { JobCreatorType } from '../index';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {
@@ -116,7 +117,11 @@ export function createDocCountFieldOption(usingAggregations: boolean) {
           label: DOC_COUNT,
         },
       ]
-    : [];
+    : [
+        {
+          label: _DOC_COUNT,
+        },
+      ];
 }
 
 function getDetectorsAdvanced(job: Job, datafeed: Datafeed) {
@@ -247,43 +252,38 @@ function stashCombinedJob(
   mlJobService.tempJobCloningObjects.calendars = jobCreator.calendars;
 }
 
-export function convertToMultiMetricJob(jobCreator: JobCreatorType) {
+export function convertToMultiMetricJob(
+  jobCreator: JobCreatorType,
+  navigateToPath: NavigateToPath
+) {
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
   stashCombinedJob(jobCreator, true, true);
 
-  window.location.href = window.location.href.replace(
-    JOB_TYPE.SINGLE_METRIC,
-    JOB_TYPE.MULTI_METRIC
-  );
+  navigateToPath(`jobs/new_job/${JOB_TYPE.MULTI_METRIC}`, true);
 }
 
-export function convertToAdvancedJob(jobCreator: JobCreatorType) {
+export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
   stashCombinedJob(jobCreator, true, true);
 
-  let jobType = JOB_TYPE.SINGLE_METRIC;
-  if (isMultiMetricJobCreator(jobCreator)) {
-    jobType = JOB_TYPE.MULTI_METRIC;
-  } else if (isPopulationJobCreator(jobCreator)) {
-    jobType = JOB_TYPE.POPULATION;
-  } else if (isCategorizationJobCreator(jobCreator)) {
-    jobType = JOB_TYPE.CATEGORIZATION;
-  }
-
-  window.location.href = window.location.href.replace(jobType, JOB_TYPE.ADVANCED);
+  navigateToPath(`jobs/new_job/${JOB_TYPE.ADVANCED}`, true);
 }
 
-export function resetJob(jobCreator: JobCreatorType) {
+export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.jobId = '';
   stashCombinedJob(jobCreator, true, true);
-
-  window.location.href = '#/jobs/new_job';
+  navigateToPath('/jobs/new_job');
 }
 
-export function advancedStartDatafeed(jobCreator: JobCreatorType) {
-  stashCombinedJob(jobCreator, false, false);
-  window.location.href = '#/jobs';
+export function advancedStartDatafeed(
+  jobCreator: JobCreatorType | null,
+  navigateToPath: NavigateToPath
+) {
+  if (jobCreator !== null) {
+    stashCombinedJob(jobCreator, false, false);
+  }
+  navigateToPath('/jobs');
 }
 
 export function aggFieldPairsCanBeCharted(afs: AggFieldPair[]) {

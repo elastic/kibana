@@ -13,6 +13,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiHideFor,
   EuiBadge,
+  EuiBadgeGroup,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import styled, { css } from 'styled-components';
@@ -52,6 +53,18 @@ const MyActionButton = styled(EuiFlexItem)`
   align-self: flex-end;
 `;
 
+const MyNestedValueContainer = styled.div`
+  margin-left: ${({ theme }) => theme.eui.euiSizeL};
+`;
+
+const MyNestedValue = styled.span`
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
+`;
+
+const ValueBadgeGroup = styled(EuiBadgeGroup)`
+  width: 100%;
+`;
+
 interface ExceptionEntriesComponentProps {
   entries: FormattedEntry[];
   disableDelete: boolean;
@@ -78,10 +91,10 @@ const ExceptionEntriesComponent = ({
         render: (value: string | null, data: FormattedEntry) => {
           if (value != null && data.isNested) {
             return (
-              <>
-                <EuiIconTip type="grabHorizontal" size="m" />
-                {value}
-              </>
+              <MyNestedValueContainer>
+                <EuiIconTip type="nested" size="s" />
+                <MyNestedValue>{value}</MyNestedValue>
+              </MyNestedValueContainer>
             );
           } else {
             return value ?? getEmptyValue();
@@ -107,15 +120,15 @@ const ExceptionEntriesComponent = ({
         render: (values: string | string[] | null) => {
           if (Array.isArray(values)) {
             return (
-              <EuiFlexGroup gutterSize="xs" direction="row" justifyContent="flexStart">
+              <ValueBadgeGroup gutterSize="xs">
                 {values.map((value) => {
                   return (
-                    <EuiFlexItem key={value} grow={false}>
-                      <EuiBadge color="#DDD">{value}</EuiBadge>
-                    </EuiFlexItem>
+                    <EuiBadge color="#DDD" key={value}>
+                      {value}
+                    </EuiBadge>
                   );
                 })}
-              </EuiFlexGroup>
+              </ValueBadgeGroup>
             );
           } else {
             return values ?? getEmptyValue();

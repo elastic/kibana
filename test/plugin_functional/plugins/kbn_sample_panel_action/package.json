@@ -7,15 +7,8 @@
     "templateVersion": "1.0.0"
   },
   "license": "Apache-2.0",
-  "dependencies": {
-    "@elastic/eui": "26.3.1",
-    "react": "^16.12.0"
-  },
   "scripts": {
     "kbn": "node ../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && tsc"
-  },
-  "devDependencies": {
-    "typescript": "3.9.5"
+    "build": "rm -rf './target' && ../../../../node_modules/.bin/tsc"
   }
 }

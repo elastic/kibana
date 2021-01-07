@@ -17,17 +17,25 @@
  * under the License.
  */
 
-export { ConfigService, IConfigService } from './config_service';
-export { RawConfigService, RawConfigurationProvider } from './raw_config_service';
-export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
-export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { CliArgs, Env } from './env';
+export { coreDeprecationProvider } from './deprecation';
+
 export {
+  ConfigService,
+  IConfigService,
+  RawConfigService,
+  RawConfigurationProvider,
+  Config,
+  ConfigPath,
+  isConfigPath,
+  hasConfigPathIntersection,
+  ObjectToConfigAdapter,
+  CliArgs,
+  Env,
   ConfigDeprecation,
   ConfigDeprecationLogger,
   ConfigDeprecationProvider,
   ConfigDeprecationFactory,
-  coreDeprecationProvider,
-} from './deprecation';
-
-export { EnvironmentMode, PackageInfo } from './types';
+  EnvironmentMode,
+  PackageInfo,
+  LegacyObjectToConfigAdapter,
+} from '@kbn/config';

@@ -57,6 +57,7 @@ const mockedResponse: StatusResponse = {
     ],
   },
   metrics: {
+    collected_at: new Date('2020-01-01 01:00:00'),
     collection_interval_in_millis: 1000,
     os: {
       platform: 'darwin' as const,

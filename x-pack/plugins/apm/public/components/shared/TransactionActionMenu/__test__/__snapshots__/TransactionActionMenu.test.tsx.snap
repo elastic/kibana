@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TransactionActionMenu component should match the snapshot 1`] = `
+exports[`TransactionActionMenu component matches the snapshot 1`] = `
 <div>
   <div
     class="euiPopover euiPopover--anchorDownRight"
@@ -10,15 +10,14 @@ exports[`TransactionActionMenu component should match the snapshot 1`] = `
       class="euiPopover__anchor"
     >
       <button
-        class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--iconRight"
+        class="euiButtonEmpty euiButtonEmpty--primary"
         type="button"
       >
         <span
-          class="euiButtonEmpty__content"
+          class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
         >
-          <div
-            aria-hidden="true"
-            class="euiButtonEmpty__icon"
+          <span
+            class="euiButtonContent__icon"
             data-euiicon-type="arrowDown"
           />
           <span

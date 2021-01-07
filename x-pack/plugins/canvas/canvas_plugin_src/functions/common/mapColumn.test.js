@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
-import { testTable, emptyTable } from './__tests__/fixtures/test_tables';
+import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { testTable, emptyTable } from './__fixtures__/test_tables';
 import { mapColumn } from './mapColumn';
 
 const pricePlusTwo = (datatable) => Promise.resolve(datatable.rows[0].price + 2);
@@ -14,13 +14,17 @@ describe('mapColumn', () => {
   const fn = functionWrapper(mapColumn);
 
   it('returns a datatable with a new column with the values from mapping a function over each row in a datatable', () => {
-    return fn(testTable, { name: 'pricePlusTwo', expression: pricePlusTwo }).then((result) => {
+    return fn(testTable, {
+      id: 'pricePlusTwo',
+      name: 'pricePlusTwo',
+      expression: pricePlusTwo,
+    }).then((result) => {
       const arbitraryRowIndex = 2;
 
       expect(result.type).toBe('datatable');
       expect(result.columns).toEqual([
         ...testTable.columns,
-        { name: 'pricePlusTwo', type: 'number' },
+        { id: 'pricePlusTwo', name: 'pricePlusTwo', meta: { type: 'number' } },
       ]);
       expect(result.columns[result.columns.length - 1]).toHaveProperty('name', 'pricePlusTwo');
       expect(result.rows[arbitraryRowIndex]).toHaveProperty('pricePlusTwo');
@@ -35,7 +39,7 @@ describe('mapColumn', () => {
       expect(result.type).toBe('datatable');
       expect(result.columns).toHaveLength(testTable.columns.length);
       expect(result.columns[nameColumnIndex]).toHaveProperty('name', 'name');
-      expect(result.columns[nameColumnIndex]).toHaveProperty('type', 'number');
+      expect(result.columns[nameColumnIndex].meta).toHaveProperty('type', 'number');
       expect(result.rows[arbitraryRowIndex]).toHaveProperty('name', 202);
     });
   });
@@ -45,7 +49,7 @@ describe('mapColumn', () => {
       expect(result.type).toBe('datatable');
       expect(result.columns).toHaveLength(1);
       expect(result.columns[0]).toHaveProperty('name', 'name');
-      expect(result.columns[0]).toHaveProperty('type', 'null');
+      expect(result.columns[0].meta).toHaveProperty('type', 'null');
     });
   });
 
@@ -56,7 +60,7 @@ describe('mapColumn', () => {
         const arbitraryRowIndex = 8;
 
         expect(result.columns[emptyColumnIndex]).toHaveProperty('name', 'empty');
-        expect(result.columns[emptyColumnIndex]).toHaveProperty('type', 'null');
+        expect(result.columns[emptyColumnIndex].meta).toHaveProperty('type', 'null');
         expect(result.rows[arbitraryRowIndex]).toHaveProperty('empty', null);
       });
     });

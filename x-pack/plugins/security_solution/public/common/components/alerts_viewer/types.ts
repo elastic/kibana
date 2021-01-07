@@ -15,11 +15,12 @@ type CommonQueryProps = HostsComponentsQueryProps | NetworkComponentQueryProps;
 export interface AlertsComponentsProps
   extends Pick<
     CommonQueryProps,
-    'deleteQuery' | 'endDate' | 'filterQuery' | 'skip' | 'setQuery' | 'startDate' | 'type'
+    'deleteQuery' | 'endDate' | 'filterQuery' | 'skip' | 'setQuery' | 'startDate'
   > {
   timelineId: TimelineIdLiteral;
   pageFilters: Filter[];
   stackByOptions?: MatrixHistogramOption[];
   defaultFilters?: Filter[];
   defaultStackByOption?: MatrixHistogramOption;
+  indexNames: string[];
 }

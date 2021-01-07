@@ -3,35 +3,25 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { EuiSelectableProps } from '@elastic/eui';
 import React from 'react';
 import { shallow, ShallowWrapper, mount } from 'enzyme';
+
 import { TimelineType } from '../../../../../common/types/timeline';
 import { SortFieldTimeline, Direction } from '../../../../graphql/types';
-import { SearchProps } from './';
+import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from './';
 
+const mockFetchAllTimeline = jest.fn();
+jest.mock('../../../containers/all', () => {
+  return {
+    useGetAllTimeline: jest.fn(() => ({
+      fetchAllTimeline: mockFetchAllTimeline,
+      timelines: [],
+    })),
+  };
+});
 describe('SelectableTimeline', () => {
-  const mockFetchAllTimeline = jest.fn();
-  const mockEuiSelectable = jest.fn();
-
-  jest.doMock('@elastic/eui', () => {
-    const originalModule = jest.requireActual('@elastic/eui');
-    return {
-      ...originalModule,
-      EuiSelectable: mockEuiSelectable.mockImplementation(({ children }) => <div>{children}</div>),
-    };
-  });
-
-  jest.doMock('../../../containers/all', () => {
-    return {
-      useGetAllTimeline: jest.fn(() => ({
-        fetchAllTimeline: mockFetchAllTimeline,
-        timelines: [],
-      })),
-    };
-  });
-
-  const { SelectableTimeline, ORIGINAL_PAGE_SIZE } = jest.requireActual('./');
-
   const props = {
     hideUntitled: false,
     getSelectableOptions: jest.fn(),
@@ -53,10 +43,10 @@ describe('SelectableTimeline', () => {
       });
 
       test('render placeholder', () => {
-        const searchProps: SearchProps = wrapper
+        const searchProps: EuiSelectableProps['searchProps'] = wrapper
           .find('[data-test-subj="selectable-input"]')
           .prop('searchProps');
-        expect(searchProps.placeholder).toEqual('e.g. Timeline name or description');
+        expect(searchProps!.placeholder).toEqual('e.g. Timeline name or description');
       });
     });
 
@@ -71,10 +61,10 @@ describe('SelectableTimeline', () => {
       });
 
       test('render placeholder', () => {
-        const searchProps: SearchProps = wrapper
+        const searchProps: EuiSelectableProps['searchProps'] = wrapper
           .find('[data-test-subj="selectable-input"]')
           .prop('searchProps');
-        expect(searchProps.placeholder).toEqual('e.g. Timeline template name or description');
+        expect(searchProps!.placeholder).toEqual('e.g. Timeline template name or description');
       });
     });
   });
@@ -93,7 +83,6 @@ describe('SelectableTimeline', () => {
       status: null,
       onlyUserFavorite: false,
       timelineType: TimelineType.default,
-      templateTimelineType: null,
     };
     beforeAll(() => {
       mount(<SelectableTimeline {...props} />);
@@ -103,7 +92,7 @@ describe('SelectableTimeline', () => {
       jest.clearAllMocks();
     });
 
-    test('shoule be called with correct args', () => {
+    test('should be called with correct args', () => {
       expect(mockFetchAllTimeline).toBeCalledWith(args);
     });
   });

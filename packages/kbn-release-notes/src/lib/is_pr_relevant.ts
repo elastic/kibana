@@ -18,7 +18,7 @@
  */
 
 import { Version } from './version';
-import { PullRequest } from './pull_request';
+import { PullRequest } from './pr_api';
 import { IGNORE_LABELS } from '../release_notes_config';
 import { IrrelevantPrSummary } from './irrelevant_pr_summary';
 

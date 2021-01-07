@@ -71,9 +71,7 @@ export class ChartLoader {
         splitFieldName,
         splitFieldValue
       );
-      if (resp.error !== undefined) {
-        throw resp.error;
-      }
+
       return resp.results;
     }
     return {};
@@ -105,9 +103,7 @@ export class ChartLoader {
         aggFieldPairNames,
         splitFieldName
       );
-      if (resp.error !== undefined) {
-        throw resp.error;
-      }
+
       return resp.results;
     }
     return {};

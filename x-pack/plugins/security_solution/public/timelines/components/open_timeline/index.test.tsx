@@ -4,45 +4,93 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable react/display-name */
+
+import React from 'react';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
 import { MockedProvider } from 'react-apollo/test-utils';
-import React from 'react';
+import { waitFor } from '@testing-library/react';
+import { useHistory, useParams } from 'react-router-dom';
 
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
-import { TestProviders, apolloClient } from '../../../common/mock/test_providers';
-import { mockOpenTimelineQueryResults } from '../../../common/mock/timeline_results';
-import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
+import '../../../common/mock/formatted_relative';
+import { SecurityPageName } from '../../../app/types';
+import { TimelineType } from '../../../../common/types/timeline';
 
+import { TestProviders, mockOpenTimelineQueryResults } from '../../../common/mock';
+import { getTimelineTabsUrl } from '../../../common/components/link_to';
+
+import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
+import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
+
+import { useTimelineStatus } from './use_timeline_status';
 import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
-import { TimelineTabsStyle } from './types';
-
 import { StatefulOpenTimeline } from '.';
-import { useGetAllTimeline, getAllTimeline } from '../../containers/all';
-jest.mock('../../../common/lib/kibana');
+import { TimelineTabsStyle } from './types';
+import {
+  useTimelineTypes,
+  UseTimelineTypesArgs,
+  UseTimelineTypesResult,
+} from './use_timeline_types';
+
+jest.mock('react-router-dom', () => {
+  const originalModule = jest.requireActual('react-router-dom');
+
+  return {
+    ...originalModule,
+    useParams: jest.fn(),
+    useHistory: jest.fn(),
+  };
+});
+
+jest.mock('./helpers', () => {
+  const originalModule = jest.requireActual('./helpers');
+  return {
+    ...originalModule,
+    queryTimelineById: jest.fn(),
+  };
+});
+
 jest.mock('../../containers/all', () => {
   const originalModule = jest.requireActual('../../containers/all');
   return {
     ...originalModule,
     useGetAllTimeline: jest.fn(),
-    getAllTimeline: originalModule.getAllTimeline,
   };
 });
-jest.mock('./use_timeline_types', () => {
+
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/components/link_to');
+
+jest.mock('../../../common/components/link_to', () => {
+  const originalModule = jest.requireActual('../../../common/components/link_to');
   return {
-    useTimelineTypes: jest.fn().mockReturnValue({
-      timelineType: 'default',
-      timelineTabs: <div data-test-subj="timeline-tab" />,
-      timelineFilters: <div data-test-subj="timeline-filter" />,
-    }),
+    ...originalModule,
+    getTimelineTabsUrl: jest.fn(),
+    useFormatUrl: jest.fn().mockReturnValue({ formatUrl: jest.fn(), search: 'urlSearch' }),
+  };
+});
+
+jest.mock('./use_timeline_status', () => {
+  return {
+    useTimelineStatus: jest.fn(),
   };
 });
 
 describe('StatefulOpenTimeline', () => {
   const title = 'All Timelines / Open Timelines';
+  let mockHistory: History[];
+  const mockInstallPrepackagedTimelines = jest.fn();
+
   beforeEach(() => {
+    (useParams as jest.Mock).mockReturnValue({
+      tabName: TimelineType.default,
+      pageName: SecurityPageName.timelines,
+    });
+    mockHistory = [];
+    (useHistory as jest.Mock).mockReturnValue(mockHistory);
     ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
       fetchAllTimeline: jest.fn(),
       timelines: getAllTimeline(
@@ -53,6 +101,20 @@ describe('StatefulOpenTimeline', () => {
       totalCount: mockOpenTimelineQueryResults[0].result.data.getAllTimeline.totalCount,
       refetch: jest.fn(),
     });
+    ((useTimelineStatus as unknown) as jest.Mock).mockReturnValue({
+      timelineStatus: null,
+      templateTimelineType: null,
+      templateTimelineFilter: <div />,
+      installPrepackagedTimelines: mockInstallPrepackagedTimelines,
+    });
+    mockInstallPrepackagedTimelines.mockClear();
+  });
+
+  afterEach(() => {
+    (getTimelineTabsUrl as jest.Mock).mockClear();
+    (useParams as jest.Mock).mockClear();
+    (useHistory as jest.Mock).mockClear();
+    mockHistory = [];
   });
 
   test('it has the expected initial state', () => {
@@ -61,7 +123,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}
@@ -85,6 +146,107 @@ describe('StatefulOpenTimeline', () => {
     });
   });
 
+  describe("Template timelines' tab", () => {
+    test("should land on correct timelines' tab with url timelines/default", () => {
+      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.timelineType).toBe(TimelineType.default);
+    });
+
+    test("should land on correct timelines' tab with url timelines/template", () => {
+      (useParams as jest.Mock).mockReturnValue({
+        tabName: TimelineType.template,
+        pageName: SecurityPageName.timelines,
+      });
+
+      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.timelineType).toBe(TimelineType.template);
+    });
+
+    test("should land on correct templates' tab after switching tab", () => {
+      (useParams as jest.Mock).mockReturnValue({
+        tabName: TimelineType.template,
+        pageName: SecurityPageName.timelines,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              isModal={false}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+      wrapper
+        .find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}-${TimelineType.template}"]`)
+        .first()
+        .simulate('click');
+      act(() => {
+        expect(history.length).toBeGreaterThan(0);
+      });
+    });
+
+    test("should selecting correct timelines' filter", () => {
+      (useParams as jest.Mock).mockReturnValue({
+        tabName: 'mockTabName',
+        pageName: SecurityPageName.case,
+      });
+
+      const { result } = renderHook<UseTimelineTypesArgs, UseTimelineTypesResult>(
+        () => useTimelineTypes({ defaultTimelineCount: 0, templateTimelineCount: 0 }),
+        {
+          wrapper: ({ children }) => <TestProviders> {children}</TestProviders>,
+        }
+      );
+
+      expect(result.current.timelineType).toBe(TimelineType.default);
+    });
+
+    test('should not change url after switching filter', () => {
+      (useParams as jest.Mock).mockReturnValue({
+        tabName: 'mockTabName',
+        pageName: SecurityPageName.case,
+      });
+
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              isModal={true}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+      wrapper
+        .find(
+          `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineType.template}"]`
+        )
+        .first()
+        .simulate('click');
+      act(() => {
+        expect(mockHistory.length).toEqual(0);
+      });
+    });
+  });
+
   describe('#onQueryChange', () => {
     test('it updates the query state with the expected trimmed value when the user enters a query', () => {
       const wrapper = mount(
@@ -92,7 +254,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -111,7 +272,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -136,7 +296,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -163,7 +322,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -190,7 +348,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -231,7 +388,6 @@ describe('StatefulOpenTimeline', () => {
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -270,7 +426,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -302,7 +457,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -330,7 +484,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -358,7 +511,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -367,18 +519,15 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
+      wrapper.update();
+
+      expect(
+        wrapper.find('[data-test-subj="open-timeline"]').last().prop('itemIdToExpandedNotesRowMap')
+      ).toEqual({});
+
+      wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
+
       await waitFor(() => {
-        wrapper.update();
-
-        expect(
-          wrapper
-            .find('[data-test-subj="open-timeline"]')
-            .last()
-            .prop('itemIdToExpandedNotesRowMap')
-        ).toEqual({});
-
-        wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
-
         expect(
           wrapper
             .find('[data-test-subj="open-timeline"]')
@@ -407,7 +556,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -420,29 +568,17 @@ describe('StatefulOpenTimeline', () => {
         wrapper.update();
 
         wrapper.find('[data-test-subj="expand-notes"]').first().simulate('click');
-        expect(wrapper.find('[data-test-subj="note-previews-container"]').exists()).toEqual(true);
-        expect(wrapper.find('[data-test-subj="updated-by"]').exists()).toEqual(true);
-
-        expect(
-          wrapper
-            .find('[data-test-subj="note-previews-container"]')
-            .find('[data-test-subj="updated-by"]')
-            .first()
-            .text()
-        ).toEqual('elastic');
+        expect(wrapper.find('.euiCommentEvent__headerUsername').exists()).toEqual(true);
+        expect(wrapper.find('.euiCommentEvent__headerUsername').first().text()).toEqual('elastic');
       });
     });
 
-    /**
-     * enable this test when createtTemplateTimeline is ready
-     */
-    test.skip('it renders the tabs', async () => {
+    test('it has the expected initial state for openTimeline - templateTimelineFilter', () => {
       const wrapper = mount(
         <TestProviders>
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -451,11 +587,30 @@ describe('StatefulOpenTimeline', () => {
         </TestProviders>
       );
 
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="timeline-${TimelineTabsStyle.tab}"]`).exists()
-        ).toEqual(true);
-      });
+      expect(wrapper.find('[data-test-subj="open-timeline-subtabs"]').exists()).toEqual(true);
+    });
+
+    test('it has the expected initial state for openTimelineModalBody - templateTimelineFilter', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <StatefulOpenTimeline
+              data-test-subj="stateful-timeline"
+              isModal={true}
+              defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
+              title={title}
+            />
+          </MockedProvider>
+        </TestProviders>
+      );
+
+      expect(
+        wrapper
+          .find(
+            `[data-test-subj="open-timeline-modal-body-${TimelineTabsStyle.filter}-${TimelineType.default}"]`
+          )
+          .exists()
+      ).toEqual(true);
     });
   });
 
@@ -466,7 +621,6 @@ describe('StatefulOpenTimeline', () => {
           <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
             <StatefulOpenTimeline
               data-test-subj="stateful-timeline"
-              apolloClient={apolloClient}
               isModal={false}
               defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
               title={title}
@@ -493,7 +647,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}
@@ -520,7 +673,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}
@@ -556,7 +708,6 @@ describe('StatefulOpenTimeline', () => {
         <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
           <StatefulOpenTimeline
             data-test-subj="stateful-timeline"
-            apolloClient={apolloClient}
             isModal={false}
             defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
             title={title}

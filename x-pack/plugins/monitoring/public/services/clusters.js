@@ -25,7 +25,7 @@ let once = false;
 let inTransit = false;
 
 export function monitoringClustersProvider($injector) {
-  return (clusterUuid, ccs, codePaths) => {
+  return async (clusterUuid, ccs, codePaths) => {
     const { min, max } = Legacy.shims.timefilter.getBounds();
 
     // append clusterUuid if the parameter is given
@@ -36,72 +36,73 @@ export function monitoringClustersProvider($injector) {
 
     const $http = $injector.get('$http');
 
-    function getClusters() {
-      return $http
-        .post(url, {
+    async function getClusters() {
+      try {
+        const response = await $http.post(url, {
           ccs,
           timeRange: {
             min: min.toISOString(),
             max: max.toISOString(),
           },
           codePaths,
-        })
-        .then((response) => response.data)
-        .then((data) => {
-          return formatClusters(data); // return set of clusters
-        })
-        .catch((err) => {
-          const Private = $injector.get('Private');
-          const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
-          return ajaxErrorHandlers(err);
         });
-    }
-
-    function ensureAlertsEnabled() {
-      return $http.post('../api/monitoring/v1/alerts/enable', {}).catch((err) => {
+        return formatClusters(response.data);
+      } catch (err) {
         const Private = $injector.get('Private');
         const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
         return ajaxErrorHandlers(err);
-      });
+      }
     }
 
-    function ensureMetricbeatEnabled() {
-      if (Legacy.shims.isCloud) {
-        return Promise.resolve();
+    async function ensureAlertsEnabled() {
+      try {
+        return $http.post('../api/monitoring/v1/alerts/enable', {});
+      } catch (err) {
+        const Private = $injector.get('Private');
+        const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+        return ajaxErrorHandlers(err);
       }
+    }
 
-      return $http
-        .get('../api/monitoring/v1/elasticsearch_settings/check/internal_monitoring')
-        .then(({ data }) => {
-          showInternalMonitoringToast({
-            legacyIndices: data.legacy_indices,
-            metricbeatIndices: data.mb_indices,
-          });
-        })
-        .catch((err) => {
-          const Private = $injector.get('Private');
-          const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
-          return ajaxErrorHandlers(err);
+    async function ensureMetricbeatEnabled() {
+      if (Legacy.shims.isCloud) {
+        return;
+      }
+      const globalState = $injector.get('globalState');
+      try {
+        const response = await $http.post(
+          '../api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',
+          {
+            ccs: globalState.ccs,
+          }
+        );
+        const { data } = response;
+        showInternalMonitoringToast({
+          legacyIndices: data.legacy_indices,
+          metricbeatIndices: data.mb_indices,
         });
+      } catch (err) {
+        const Private = $injector.get('Private');
+        const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+        return ajaxErrorHandlers(err);
+      }
     }
 
     if (!once && !inTransit) {
       inTransit = true;
-      return getClusters().then((clusters) => {
-        if (clusters.length) {
-          Promise.all([ensureAlertsEnabled(), ensureMetricbeatEnabled()])
-            .then(([{ data }]) => {
-              showSecurityToast(data);
-              once = true;
-            })
-            .catch(() => {
-              // Intentionally swallow the error as this will retry the next page load
-            })
-            .finally(() => (inTransit = false));
+      const clusters = await getClusters();
+      if (clusters.length) {
+        try {
+          const [{ data }] = await Promise.all([ensureAlertsEnabled(), ensureMetricbeatEnabled()]);
+          showSecurityToast(data);
+          once = true;
+        } catch (_err) {
+          // Intentionally swallow the error as this will retry the next page load
         }
-        return clusters;
-      });
+        inTransit = false;
+      }
+      return clusters;
     }
-    return getClusters();
+    return await getClusters();
   };
 }

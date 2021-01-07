@@ -481,7 +481,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     setAggTypePopoverOpen(false);
                   }}
                   ownFocus
-                  withTitle
                   anchorPosition="downLeft"
                 >
                   <div>
@@ -630,7 +629,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     setGroupByPopoverOpen(false);
                   }}
                   ownFocus
-                  withTitle
                   anchorPosition="downLeft"
                 >
                   <div>
@@ -743,7 +741,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     setWatchThresholdPopoverOpen(false);
                   }}
                   ownFocus
-                  withTitle
                   anchorPosition="downLeft"
                 >
                   <div>
@@ -829,7 +826,6 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     setWatchDurationPopoverOpen(false);
                   }}
                   ownFocus
-                  withTitle
                   anchorPosition="downLeft"
                 >
                   <div>
@@ -900,7 +896,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   data-test-subj="saveWatchButton"
                   type="submit"
                   iconType="check"
-                  isDisabled={hasErrors || hasActionErrors}
+                  disabled={hasErrors || hasActionErrors}
                   isLoading={isSaving}
                   onClick={async () => {
                     setIsSaving(true);

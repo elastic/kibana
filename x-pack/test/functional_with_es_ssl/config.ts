@@ -7,7 +7,6 @@
 import { resolve, join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import { services } from './services';
 import { pageObjects } from './page_objects';
 
 // .server-log is specifically not enabled
@@ -25,7 +24,6 @@ const enabledActionTypes = [
   'test.rate-limit',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
@@ -40,7 +38,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const returnedObject = {
     ...xpackFunctionalConfig.getAll(),
     servers,
-    services,
     pageObjects,
     // list paths to the files that contain your plugins tests
     testFiles: [
@@ -76,6 +73,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'my-server-log': {
             actionTypeId: '.server-log',
             name: 'Serverlog#xyz',
+          },
+          'my-email-connector': {
+            actionTypeId: '.email',
+            name: 'Email#test-preconfigured-email',
+            config: {
+              from: 'me@example.com',
+              host: 'localhost',
+              port: '1025',
+            },
           },
         })}`,
       ],

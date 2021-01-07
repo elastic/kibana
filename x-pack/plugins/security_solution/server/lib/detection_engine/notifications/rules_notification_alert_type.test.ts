@@ -10,6 +10,12 @@ import { rulesNotificationAlertType } from './rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
 import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
 import { NotificationExecutorOptions } from './types';
+import {
+  sampleDocSearchResultsNoSortIdNoVersion,
+  sampleDocSearchResultsWithSortId,
+  sampleEmptyDocSearchResults,
+} from '../signals/__mocks__/es_results';
+import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../common/constants';
 jest.mock('./build_signals_query');
 
 describe('rules_notification_alert_type', () => {
@@ -63,9 +69,7 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue({
-        count: 0,
-      });
+      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
 
       await alert.executor(payload);
 
@@ -75,6 +79,79 @@ describe('rules_notification_alert_type', () => {
           index: '.siem-signals',
           ruleId: 'rule-1',
           to: '1576341633400',
+          size: DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
+        })
+      );
+    });
+
+    it('should resolve results_link when meta is undefined to use "/app/security"', async () => {
+      const ruleAlert = getResult();
+      delete ruleAlert.params.meta;
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+
+      await alert.executor(payload);
+      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+
+      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
+        'default',
+        expect.objectContaining({
+          results_link:
+            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:1576255233400,kind:absolute,to:1576341633400)),timeline:(linkTo:!(global),timerange:(from:1576255233400,kind:absolute,to:1576341633400)))',
+        })
+      );
+    });
+
+    it('should resolve results_link when meta is an empty object to use "/app/security"', async () => {
+      const ruleAlert = getResult();
+      ruleAlert.params.meta = {};
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      await alert.executor(payload);
+      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+
+      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
+        'default',
+        expect.objectContaining({
+          results_link:
+            '/app/security/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:1576255233400,kind:absolute,to:1576341633400)),timeline:(linkTo:!(global),timerange:(from:1576255233400,kind:absolute,to:1576341633400)))',
+        })
+      );
+    });
+
+    it('should resolve results_link to custom kibana link when given one', async () => {
+      const ruleAlert = getResult();
+      ruleAlert.params.meta = {
+        kibana_siem_app_url: 'http://localhost',
+      };
+      alertServices.savedObjectsClient.get.mockResolvedValue({
+        id: 'rule-id',
+        type: 'type',
+        references: [],
+        attributes: ruleAlert,
+      });
+      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      await alert.executor(payload);
+      expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
+
+      const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
+      expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
+        'default',
+        expect.objectContaining({
+          results_link:
+            'http://localhost/detections/rules/id/rule-id?timerange=(global:(linkTo:!(timeline),timerange:(from:1576255233400,kind:absolute,to:1576341633400)),timeline:(linkTo:!(global),timerange:(from:1576255233400,kind:absolute,to:1576341633400)))',
         })
       );
     });
@@ -87,9 +164,7 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue({
-        count: 0,
-      });
+      alertServices.callCluster.mockResolvedValue(sampleEmptyDocSearchResults());
 
       await alert.executor(payload);
 
@@ -104,9 +179,7 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue({
-        count: 10,
-      });
+      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsNoSortIdNoVersion());
 
       await alert.executor(payload);
 
@@ -114,7 +187,7 @@ describe('rules_notification_alert_type', () => {
 
       const [{ value: alertInstanceMock }] = alertServices.alertInstanceFactory.mock.results;
       expect(alertInstanceMock.replaceState).toHaveBeenCalledWith(
-        expect.objectContaining({ signals_count: 10 })
+        expect.objectContaining({ signals_count: 100 })
       );
       expect(alertInstanceMock.scheduleActions).toHaveBeenCalledWith(
         'default',

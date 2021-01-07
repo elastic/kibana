@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
 import { CspConfig } from '../csp';
 import { mockRouter, RouterMock } from './router/router.mock';
-import { configMock } from '../config/config.mock';
 import {
   InternalHttpServiceSetup,
   HttpServiceSetup,
@@ -35,6 +36,8 @@ import { sessionStorageMock } from './cookie_session_storage.mocks';
 import { OnPostAuthToolkit } from './lifecycle/on_post_auth';
 import { OnPreAuthToolkit } from './lifecycle/on_pre_auth';
 import { OnPreResponseToolkit } from './lifecycle/on_pre_response';
+import { configMock } from '../config/mocks';
+import { ExternalUrlConfig } from '../external_url';
 
 type BasePathMocked = jest.Mocked<InternalHttpServiceSetup['basePath']>;
 type AuthMocked = jest.Mocked<InternalHttpServiceSetup['auth']>;
@@ -58,8 +61,12 @@ export type InternalHttpServiceStartMock = jest.Mocked<InternalHttpServiceStart>
   basePath: BasePathMocked;
 };
 
-const createBasePathMock = (serverBasePath = '/mock-server-basepath'): BasePathMocked => ({
+const createBasePathMock = (
+  serverBasePath = '/mock-server-basepath',
+  publicBaseUrl = 'http://myhost.com/mock-server-basepath'
+): BasePathMocked => ({
   serverBasePath,
+  publicBaseUrl,
   get: jest.fn().mockReturnValue(serverBasePath),
   set: jest.fn(),
   prepend: jest.fn(),
@@ -86,6 +93,7 @@ const createInternalSetupContractMock = () => {
       start: jest.fn(),
       stop: jest.fn(),
       config: jest.fn().mockReturnValue(configMock.create()),
+      // @ts-expect-error somehow it thinks that `Server` isn't a `Construtable`
     } as unknown) as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreRouting: jest.fn(),
@@ -98,6 +106,7 @@ const createInternalSetupContractMock = () => {
     registerStaticDir: jest.fn(),
     basePath: createBasePathMock(),
     csp: CspConfig.DEFAULT,
+    externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     getAuthHeaders: jest.fn(),
     getServerInfo: jest.fn(),
@@ -196,6 +205,7 @@ const createAuthToolkitMock = (): jest.Mocked<AuthToolkit> => ({
 });
 
 const createOnPreResponseToolkitMock = (): jest.Mocked<OnPreResponseToolkit> => ({
+  render: jest.fn(),
   next: jest.fn(),
 });
 

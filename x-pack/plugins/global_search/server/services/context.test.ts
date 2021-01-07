@@ -27,11 +27,15 @@ describe('getContextFactory', () => {
     expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledTimes(1);
     expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledWith(soClient);
 
+    expect(coreStart.capabilities.resolveCapabilities).toHaveBeenCalledTimes(1);
+    expect(coreStart.capabilities.resolveCapabilities).toHaveBeenCalledWith(request);
+
     expect(context).toEqual({
       core: {
         savedObjects: expect.any(Object),
         elasticsearch: expect.any(Object),
         uiSettings: expect.any(Object),
+        capabilities: expect.any(Object),
       },
     });
   });

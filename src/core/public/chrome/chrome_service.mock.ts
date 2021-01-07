@@ -17,14 +17,9 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
-import {
-  ChromeBadge,
-  ChromeBrand,
-  ChromeBreadcrumb,
-  ChromeService,
-  InternalChromeStart,
-  NavType,
-} from './';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { ChromeBadge, ChromeBrand, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
 
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
@@ -47,14 +42,13 @@ const createStartContractMock = () => {
     docTitle: {
       change: jest.fn(),
       reset: jest.fn(),
-      __legacy: {
-        setBaseTitle: jest.fn(),
-      },
     },
     navControls: {
       registerLeft: jest.fn(),
+      registerCenter: jest.fn(),
       registerRight: jest.fn(),
       getLeft$: jest.fn(),
+      getCenter$: jest.fn(),
       getRight$: jest.fn(),
     },
     setAppTitle: jest.fn(),
@@ -69,11 +63,12 @@ const createStartContractMock = () => {
     setBadge: jest.fn(),
     getBreadcrumbs$: jest.fn(),
     setBreadcrumbs: jest.fn(),
+    getBreadcrumbsAppendExtension$: jest.fn(),
+    setBreadcrumbsAppendExtension: jest.fn(),
     getHelpExtension$: jest.fn(),
     setHelpExtension: jest.fn(),
     setHelpSupportUrl: jest.fn(),
     getIsNavDrawerLocked$: jest.fn(),
-    getNavType$: jest.fn(),
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
   };
@@ -83,10 +78,10 @@ const createStartContractMock = () => {
   startContract.getApplicationClasses$.mockReturnValue(new BehaviorSubject(['class-name']));
   startContract.getBadge$.mockReturnValue(new BehaviorSubject({} as ChromeBadge));
   startContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb]));
+  startContract.getBreadcrumbsAppendExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
-  startContract.getNavType$.mockReturnValue(new BehaviorSubject('modern' as NavType));
   return startContract;
 };
 

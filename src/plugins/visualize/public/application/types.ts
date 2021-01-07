@@ -33,6 +33,7 @@ import {
   ChromeStart,
   ToastsStart,
   ScopedHistory,
+  AppMountParameters,
 } from 'kibana/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import {
@@ -42,9 +43,11 @@ import {
 } from 'src/plugins/kibana_utils/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
-import { EmbeddableStart } from 'src/plugins/embeddable/public';
-import { KibanaLegacyStart } from 'src/plugins/kibana_legacy/public';
-import { ConfigSchema } from '../../config';
+import { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
+import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { EventEmitter } from 'events';
+import { DashboardStart } from '../../../dashboard/public';
+import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 
 export type PureVisState = SavedVisState;
 
@@ -92,10 +95,11 @@ export interface EditorRenderProps {
 }
 
 export interface VisualizeServices extends CoreStart {
+  stateTransferService: EmbeddableStateTransfer;
   embeddable: EmbeddableStart;
   history: History;
   kbnUrlStateStorage: IKbnUrlStateStorage;
-  kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
   pluginInitializerContext: PluginInitializerContext;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
@@ -111,7 +115,9 @@ export interface VisualizeServices extends CoreStart {
   createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
-  featureFlagConfig: ConfigSchema;
+  dashboard: DashboardStart;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
 export interface SavedVisInstance {
@@ -121,7 +127,23 @@ export interface SavedVisInstance {
   embeddableHandler: VisualizeEmbeddableContract;
 }
 
+export interface ByValueVisInstance {
+  vis: Vis;
+  savedVis: VisSavedObject;
+  savedSearch?: SavedObject;
+  embeddableHandler: VisualizeEmbeddableContract;
+}
+
+export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
+
+export type VisEditorConstructor = new (
+  element: HTMLElement,
+  vis: Vis,
+  eventEmitter: EventEmitter,
+  embeddableHandler: VisualizeEmbeddableContract
+) => IEditorController;
+
 export interface IEditorController {
-  render(props: EditorRenderProps): void;
+  render(props: EditorRenderProps): Promise<void> | void;
   destroy(): void;
 }

@@ -5,8 +5,9 @@
  */
 
 import { KibanaRequest } from '../../../../../src/core/server';
+import { ALL_SPACES_ID } from '../../common/constants';
 import { SpacesService } from '../plugin';
-import { CheckPrivilegesWithRequest, CheckPrivilegesResponse } from './check_privileges';
+import { CheckPrivilegesWithRequest, CheckPrivilegesResponse } from './types';
 
 export type CheckSavedObjectsPrivilegesWithRequest = (
   request: KibanaRequest
@@ -14,8 +15,12 @@ export type CheckSavedObjectsPrivilegesWithRequest = (
 
 export type CheckSavedObjectsPrivileges = (
   actions: string | string[],
-  namespaceOrNamespaces?: string | string[]
+  namespaceOrNamespaces?: string | Array<undefined | string>
 ) => Promise<CheckPrivilegesResponse>;
+
+function uniq<T>(arr: T[]): T[] {
+  return Array.from(new Set<T>(arr));
+}
 
 export const checkSavedObjectsPrivilegesWithRequestFactory = (
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest,
@@ -26,24 +31,35 @@ export const checkSavedObjectsPrivilegesWithRequestFactory = (
   ): CheckSavedObjectsPrivileges {
     return async function checkSavedObjectsPrivileges(
       actions: string | string[],
-      namespaceOrNamespaces?: string | string[]
+      namespaceOrNamespaces?: string | Array<undefined | string>
     ) {
       const spacesService = getSpacesService();
-      if (!spacesService) {
-        // Spaces disabled, authorizing globally
-        return await checkPrivilegesWithRequest(request).globally(actions);
-      } else if (Array.isArray(namespaceOrNamespaces)) {
-        // Spaces enabled, authorizing against multiple spaces
-        if (!namespaceOrNamespaces.length) {
-          throw new Error(`Can't check saved object privileges for 0 namespaces`);
+      const privileges = { kibana: actions };
+
+      if (spacesService) {
+        if (Array.isArray(namespaceOrNamespaces)) {
+          // Spaces enabled, authorizing against multiple spaces
+          if (!namespaceOrNamespaces.length) {
+            throw new Error(`Can't check saved object privileges for 0 namespaces`);
+          }
+          const spaceIds = uniq(
+            namespaceOrNamespaces.map((x) => spacesService.namespaceToSpaceId(x))
+          );
+
+          if (!spaceIds.includes(ALL_SPACES_ID)) {
+            return await checkPrivilegesWithRequest(request).atSpaces(spaceIds, privileges);
+          }
+        } else {
+          // Spaces enabled, authorizing against a single space
+          const spaceId = spacesService.namespaceToSpaceId(namespaceOrNamespaces);
+          if (spaceId !== ALL_SPACES_ID) {
+            return await checkPrivilegesWithRequest(request).atSpace(spaceId, privileges);
+          }
         }
-        const spaceIds = namespaceOrNamespaces.map((x) => spacesService.namespaceToSpaceId(x));
-        return await checkPrivilegesWithRequest(request).atSpaces(spaceIds, actions);
-      } else {
-        // Spaces enabled, authorizing against a single space
-        const spaceId = spacesService.namespaceToSpaceId(namespaceOrNamespaces);
-        return await checkPrivilegesWithRequest(request).atSpace(spaceId, actions);
       }
+
+      // Spaces plugin is disabled OR we are checking privileges for "all spaces", authorizing globally
+      return await checkPrivilegesWithRequest(request).globally(privileges);
     };
   };
 };

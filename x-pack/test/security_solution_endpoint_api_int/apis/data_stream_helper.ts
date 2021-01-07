@@ -10,6 +10,8 @@ import {
   eventsIndexPattern,
   alertsIndexPattern,
   policyIndexPattern,
+  metadataCurrentIndexPattern,
+  telemetryIndexPattern,
 } from '../../../plugins/security_solution/common/endpoint/constants';
 
 export async function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
@@ -25,8 +27,38 @@ export async function deleteDataStream(getService: (serviceName: 'es') => Client
   );
 }
 
+export async function deleteAllDocsFromIndex(
+  getService: (serviceName: 'es') => Client,
+  index: string
+) {
+  const client = getService('es');
+  await client.deleteByQuery(
+    {
+      body: {
+        query: {
+          match_all: {},
+        },
+      },
+      index: `${index}`,
+    },
+    {
+      ignore: [404],
+    }
+  );
+}
+
 export async function deleteMetadataStream(getService: (serviceName: 'es') => Client) {
   await deleteDataStream(getService, metadataIndexPattern);
+}
+
+export async function deleteAllDocsFromMetadataIndex(getService: (serviceName: 'es') => Client) {
+  await deleteAllDocsFromIndex(getService, metadataIndexPattern);
+}
+
+export async function deleteAllDocsFromMetadataCurrentIndex(
+  getService: (serviceName: 'es') => Client
+) {
+  await deleteAllDocsFromIndex(getService, metadataCurrentIndexPattern);
 }
 
 export async function deleteEventsStream(getService: (serviceName: 'es') => Client) {
@@ -39,4 +71,8 @@ export async function deleteAlertsStream(getService: (serviceName: 'es') => Clie
 
 export async function deletePolicyStream(getService: (serviceName: 'es') => Client) {
   await deleteDataStream(getService, policyIndexPattern);
+}
+
+export async function deleteTelemetryStream(getService: (serviceName: 'es') => Client) {
+  await deleteDataStream(getService, telemetryIndexPattern);
 }

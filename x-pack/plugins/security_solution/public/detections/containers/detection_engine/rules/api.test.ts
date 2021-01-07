@@ -6,7 +6,9 @@
 
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
-  addRule,
+  createRule,
+  updateRule,
+  patchRule,
   fetchRules,
   fetchRuleById,
   enableRules,
@@ -19,8 +21,14 @@ import {
   fetchTags,
   getPrePackagedRulesStatus,
 } from './api';
-import { ruleMock, rulesMock } from './mock';
-
+import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import {
+  getCreateRulesSchemaMock,
+  getUpdateRulesSchemaMock,
+} from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
+import { rulesMock } from './mock';
+import { buildEsQuery } from 'src/plugins/data/common';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../../common/lib/kibana');
@@ -29,25 +37,56 @@ const fetchMock = jest.fn();
 mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
 describe('Detections Rules API', () => {
-  describe('addRule', () => {
+  describe('createRule', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(ruleMock);
+      fetchMock.mockResolvedValue(getRulesSchemaMock());
     });
 
-    test('check parameter url, body', async () => {
-      await addRule({ rule: ruleMock, signal: abortCtrl.signal });
+    test('POSTs rule', async () => {
+      const payload = getCreateRulesSchemaMock();
+      await createRule({ rule: payload, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
         body:
-          '{"description":"some desc","enabled":true,"false_positives":[],"filters":[],"from":"now-360s","index":["apm-*-transaction*","auditbeat-*","endgame-*","filebeat-*","packetbeat-*","winlogbeat-*"],"interval":"5m","rule_id":"bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf","language":"kuery","risk_score":75,"name":"Test rule","query":"user.email: \'root@elastic.co\'","references":[],"severity":"high","tags":["APM"],"to":"now","type":"query","threat":[],"throttle":null}',
+          '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1"}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
     });
+  });
 
-    test('happy path', async () => {
-      const ruleResp = await addRule({ rule: ruleMock, signal: abortCtrl.signal });
-      expect(ruleResp).toEqual(ruleMock);
+  describe('updateRule', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(getRulesSchemaMock());
+    });
+
+    test('PUTs rule', async () => {
+      const payload = getUpdateRulesSchemaMock();
+      await updateRule({ rule: payload, signal: abortCtrl.signal });
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
+        body:
+          '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","id":"04128c15-0d1b-4716-a4c5-46997ac7f3bd"}',
+        method: 'PUT',
+        signal: abortCtrl.signal,
+      });
+    });
+  });
+
+  describe('patchRule', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(getRulesSchemaMock());
+    });
+
+    test('PATCHs rule', async () => {
+      const payload = getPatchRulesSchemaMock();
+      await patchRule({ ruleProperties: payload, signal: abortCtrl.signal });
+      expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
+        body: JSON.stringify(payload),
+        method: 'PATCH',
+        signal: abortCtrl.signal,
+      });
     });
   });
 
@@ -165,7 +204,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_find', {
         method: 'GET',
         query: {
-          filter: 'alert.attributes.tags: hello AND alert.attributes.tags: world',
+          filter: 'alert.attributes.tags: "hello" AND alert.attributes.tags: "world"',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -173,6 +212,75 @@ describe('Detections Rules API', () => {
         },
         signal: abortCtrl.signal,
       });
+    });
+
+    test('query with tags KQL parses without errors when tags contain characters such as left parenthesis (', async () => {
+      await fetchRules({
+        filterOptions: {
+          filter: 'ruleName',
+          sortField: 'enabled',
+          sortOrder: 'desc',
+          showCustomRules: true,
+          showElasticRules: true,
+          tags: ['('],
+        },
+        signal: abortCtrl.signal,
+      });
+      const [
+        [
+          ,
+          {
+            query: { filter },
+          },
+        ],
+      ] = fetchMock.mock.calls;
+      expect(() => buildEsQuery(undefined, { query: filter, language: 'kuery' }, [])).not.toThrow();
+    });
+
+    test('query KQL parses without errors when filter contains characters such as double quotes', async () => {
+      await fetchRules({
+        filterOptions: {
+          filter: '"test"',
+          sortField: 'enabled',
+          sortOrder: 'desc',
+          showCustomRules: true,
+          showElasticRules: true,
+          tags: [],
+        },
+        signal: abortCtrl.signal,
+      });
+      const [
+        [
+          ,
+          {
+            query: { filter },
+          },
+        ],
+      ] = fetchMock.mock.calls;
+      expect(() => buildEsQuery(undefined, { query: filter, language: 'kuery' }, [])).not.toThrow();
+    });
+
+    test('query KQL parses without errors when tags contains characters such as double quotes', async () => {
+      await fetchRules({
+        filterOptions: {
+          filter: '"test"',
+          sortField: 'enabled',
+          sortOrder: 'desc',
+          showCustomRules: true,
+          showElasticRules: true,
+          tags: ['"test"'],
+        },
+        signal: abortCtrl.signal,
+      });
+      const [
+        [
+          ,
+          {
+            query: { filter },
+          },
+        ],
+      ] = fetchMock.mock.calls;
+      expect(() => buildEsQuery(undefined, { query: filter, language: 'kuery' }, [])).not.toThrow();
     });
 
     test('check parameter url, query with all options', async () => {
@@ -191,7 +299,7 @@ describe('Detections Rules API', () => {
         method: 'GET',
         query: {
           filter:
-            'alert.attributes.name: ruleName AND alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND alert.attributes.tags: hello AND alert.attributes.tags: world',
+            'alert.attributes.name: ruleName AND alert.attributes.tags: "__internal_immutable:false" AND alert.attributes.tags: "__internal_immutable:true" AND (alert.attributes.tags: "hello" AND alert.attributes.tags: "world")',
           page: 1,
           per_page: 20,
           sort_field: 'enabled',
@@ -210,7 +318,7 @@ describe('Detections Rules API', () => {
   describe('fetchRuleById', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(ruleMock);
+      fetchMock.mockResolvedValue(getRulesSchemaMock());
     });
 
     test('check parameter url, query', async () => {
@@ -226,7 +334,7 @@ describe('Detections Rules API', () => {
 
     test('happy path', async () => {
       const ruleResp = await fetchRuleById({ id: 'mySuperRuleId', signal: abortCtrl.signal });
-      expect(ruleResp).toEqual(ruleMock);
+      expect(ruleResp).toEqual(getRulesSchemaMock());
     });
   });
 
@@ -305,7 +413,12 @@ describe('Detections Rules API', () => {
   describe('createPrepackagedRules', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue('unknown');
+      fetchMock.mockResolvedValue({
+        rules_installed: 0,
+        rules_updated: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
+      });
     });
 
     test('check parameter url when creating pre-packaged rules', async () => {
@@ -317,7 +430,12 @@ describe('Detections Rules API', () => {
     });
     test('happy path', async () => {
       const resp = await createPrepackagedRules({ signal: abortCtrl.signal });
-      expect(resp).toEqual(true);
+      expect(resp).toEqual({
+        rules_installed: 0,
+        rules_updated: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
+      });
     });
   });
 

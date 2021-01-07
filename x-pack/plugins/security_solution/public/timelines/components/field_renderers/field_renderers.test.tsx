@@ -7,7 +7,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { FlowTarget, GetIpOverviewQuery, HostEcsFields } from '../../../graphql/types';
 import { TestProviders } from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { getEmptyValue } from '../../../common/components/empty_value';
@@ -21,12 +20,22 @@ import {
   reputationRenderer,
   DefaultFieldRenderer,
   DEFAULT_MORE_MAX_HEIGHT,
+  DefaultFieldRendererOverflow,
   MoreContainer,
 } from './field_renderers';
-import { mockData } from '../../../network/components/ip_overview/mock';
+import { mockData } from '../../../network/components/details/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
+import { AutonomousSystem, FlowTarget } from '../../../../common/search_strategy';
+import { HostEcs } from '../../../../common/ecs/host';
 
-type AutonomousSystem = GetIpOverviewQuery.AutonomousSystem;
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
 
 describe('Field Renderers', () => {
   const mount = useMountAppended();
@@ -98,15 +107,15 @@ describe('Field Renderers', () => {
   });
 
   describe('#hostIdRenderer', () => {
-    const emptyIdHost: Partial<HostEcsFields> = {
+    const emptyIdHost: Partial<HostEcs> = {
       name: ['test'],
-      id: null,
+      id: undefined,
       ip: ['10.10.10.10'],
     };
-    const emptyIpHost: Partial<HostEcsFields> = {
+    const emptyIpHost: Partial<HostEcs> = {
       name: ['test'],
       id: ['test'],
-      ip: null,
+      ip: undefined,
     };
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
@@ -136,18 +145,18 @@ describe('Field Renderers', () => {
   });
 
   describe('#hostNameRenderer', () => {
-    const emptyIdHost: Partial<HostEcsFields> = {
+    const emptyIdHost: Partial<HostEcs> = {
       name: ['test'],
-      id: null,
+      id: undefined,
       ip: ['10.10.10.10'],
     };
-    const emptyIpHost: Partial<HostEcsFields> = {
+    const emptyIpHost: Partial<HostEcs> = {
       name: ['test'],
       id: ['test'],
-      ip: null,
+      ip: undefined,
     };
-    const emptyNameHost: Partial<HostEcsFields> = {
-      name: null,
+    const emptyNameHost: Partial<HostEcs> = {
+      name: undefined,
       id: ['test'],
       ip: ['10.10.10.10'],
     };
@@ -329,6 +338,47 @@ describe('Field Renderers', () => {
       );
 
       expect(render).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('DefaultFieldRendererOverflow', () => {
+    const idPrefix = 'prefix-1';
+    const rowItems = ['item1', 'item2', 'item3', 'item4', 'item5', 'item6', 'item7'];
+
+    test('it should render the length of items after the overflowIndexStart', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <DefaultFieldRendererOverflow
+            idPrefix={idPrefix}
+            rowItems={rowItems}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={5}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.text()).toEqual(' ,+2 More');
+      expect(wrapper.find('[data-test-subj="more-container"]').first().exists()).toBe(false);
+    });
+
+    test('it should render the items after overflowIndexStart in the popover', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <DefaultFieldRendererOverflow
+            idPrefix={idPrefix}
+            rowItems={rowItems}
+            moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
+            overflowIndexStart={5}
+          />
+        </TestProviders>
+      );
+
+      wrapper.find('button').first().simulate('click');
+      wrapper.update();
+      expect(wrapper.find('.euiPopover').first().exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="more-container"]').first().text()).toEqual(
+        'item6item7'
+      );
     });
   });
 });

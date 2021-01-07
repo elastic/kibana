@@ -6,11 +6,15 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { Alert } from '../../../../../../triggers_actions_ui/public';
 import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover/actions_popover_container';
+import { EnabledAlerts } from './enabled_alerts';
+import { MonitorUrl } from './monitor_url';
+import { MostRecentRun } from './most_recent_run';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -27,25 +31,33 @@ interface MonitorListDrawerProps {
    * Monitor details to be fetched from rest api using monitorId
    */
   monitorDetails: MonitorDetails;
+  loading: boolean;
 }
 
 /**
  * The elements shown when the user expands the monitor list rows.
  */
 
-export function MonitorListDrawerComponent({ summary, monitorDetails }: MonitorListDrawerProps) {
+export function MonitorListDrawerComponent({
+  summary,
+  monitorDetails,
+  loading,
+}: MonitorListDrawerProps) {
   const monitorUrl = summary?.state?.url?.full || '';
 
   return summary && summary.state.summaryPings ? (
     <ContainerDiv>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
-          <EuiText>
-            <EuiLink href={monitorUrl} target="_blank">
-              {monitorUrl}
-              <EuiIcon size="s" type="popout" color="subbdued" />
-            </EuiLink>
-          </EuiText>
+          <EuiFlexGroup style={{ maxWidth: 1000 }}>
+            <EuiFlexItem>
+              <MonitorUrl monitorUrl={monitorUrl} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <MostRecentRun summary={summary} />
+              {/* TODO: add link to details page */}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ActionsPopover summary={summary} />
@@ -53,6 +65,9 @@ export function MonitorListDrawerComponent({ summary, monitorDetails }: MonitorL
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <MonitorStatusList summaryPings={summary.state.summaryPings} />
+      <EuiSpacer size="s" />
+      <EnabledAlerts loading={loading} monitorAlerts={monitorDetails?.alerts as Alert[]} />
+      <EuiSpacer size="s" />
       {monitorDetails && monitorDetails.error && (
         <MostRecentError
           error={monitorDetails.error}

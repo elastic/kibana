@@ -492,37 +492,6 @@ find the mean by index.
 |one or more numbers or arrays of numbers
 |===
 
-*Returns*: `number` | `Array.<number>`. The maximum value of all numbers if
-`args` contains only numbers. Returns an array with the the maximum values at each
-index, including all scalar numbers in `args` in the calculation at each index if
-`args` contains at least one array.
-
-*Throws*: `'Array length mismatch'` if `args` contains arrays of different lengths
-
-*Example*
-[source, js]
-------------
-max(1, 2, 3) // returns 3
-max([10, 20, 30, 40], 15) // returns [15, 20, 30, 40]
-max([1, 9], 4, [3, 5]) // returns [max([1, 4, 3]), max([9, 4, 5])] = [4, 9]
-------------
-
-[float]
-=== mean( ...args )
-
-Finds the mean value of one of more numbers/arrays of numbers passed into the function.
-If at least one array of numbers is passed into the function, the function will
-find the mean by index.
-
-[cols="3*^<"]
-|===
-|Param |Type |Description
-
-|...args
-|number \| Array.<number>
-|one or more numbers or arrays of numbers
-|===
-
 *Returns*: `number` | `Array.<number>`. The mean value of all numbers if `args`
 contains only numbers. Returns an array with the the mean values of each index,
 including all scalar numbers in `args` in the calculation at each index if `args`

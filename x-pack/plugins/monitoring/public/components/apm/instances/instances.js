@@ -26,8 +26,10 @@ import { APM_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
-function getColumns(setupMode) {
+function getColumns(alerts, setupMode) {
   return [
     {
       name: i18n.translate('xpack.monitoring.apm.instances.nameTitle', {
@@ -36,7 +38,7 @@ function getColumns(setupMode) {
       field: 'name',
       render: (name, apm) => {
         let setupModeStatus = null;
-        if (setupMode && setupMode.enabled) {
+        if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
           const list = get(setupMode, 'data.byUuid', {});
           const status = list[apm.uuid] || {};
           const instance = {
@@ -125,11 +127,11 @@ function getColumns(setupMode) {
   ];
 }
 
-export function ApmServerInstances({ apms, setupMode }) {
+export function ApmServerInstances({ apms, alerts, setupMode }) {
   const { pagination, sorting, onTableChange, data } = apms;
 
   let setupModeCallout = null;
-  if (setupMode.enabled && setupMode.data) {
+  if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
     setupModeCallout = (
       <ListingCallOut
         setupModeData={setupMode.data}
@@ -154,16 +156,16 @@ export function ApmServerInstances({ apms, setupMode }) {
             />
           </h1>
         </EuiScreenReaderOnly>
+        <EuiPanel>
+          <Status stats={data.stats} alerts={alerts} />
+        </EuiPanel>
+        <EuiSpacer size="m" />
         <EuiPageContent>
-          <EuiPanel>
-            <Status stats={data.stats} />
-          </EuiPanel>
-          <EuiSpacer size="m" />
           {setupModeCallout}
           <EuiMonitoringTable
             className="apmInstancesTable"
             rows={data.apms}
-            columns={getColumns(setupMode)}
+            columns={getColumns(alerts, setupMode)}
             sorting={sorting}
             pagination={pagination}
             setupMode={setupMode}

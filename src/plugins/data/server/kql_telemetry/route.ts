@@ -27,7 +27,7 @@ export function registerKqlTelemetryRoute(
 ) {
   router.post(
     {
-      path: '/api/kibana/kql_opt_in_telemetry',
+      path: '/api/kibana/kql_opt_in_stats',
       validate: {
         body: schema.object({
           opt_in: schema.boolean(),
@@ -45,7 +45,7 @@ export function registerKqlTelemetryRoute(
       const counterName = optIn ? 'optInCount' : 'optOutCount';
 
       try {
-        await internalRepository.incrementCounter('kql-telemetry', 'kql-telemetry', counterName);
+        await internalRepository.incrementCounter('kql-telemetry', 'kql-telemetry', [counterName]);
       } catch (error) {
         logger.warn(`Unable to increment counter: ${error}`);
         return response.customError({

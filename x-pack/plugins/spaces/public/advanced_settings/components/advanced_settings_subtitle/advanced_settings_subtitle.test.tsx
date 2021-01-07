@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { AdvancedSettingsSubtitle } from './advanced_settings_subtitle';
 import { EuiCallOut } from '@elastic/eui';
 import { act } from '@testing-library/react';

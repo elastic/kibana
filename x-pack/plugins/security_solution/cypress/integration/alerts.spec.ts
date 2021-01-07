@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { newRule } from '../objects/rule';
 import {
-  NUMBER_OF_ALERTS,
+  ALERTS,
+  ALERTS_COUNT,
   SELECTED_ALERTS,
   SHOWING_ALERTS,
-  ALERTS,
   TAKE_ACTION_POPOVER_BTN,
 } from '../screens/alerts';
 
@@ -24,29 +25,35 @@ import {
   waitForAlertsToBeLoaded,
   markInProgressFirstAlert,
   goToInProgressAlerts,
+  waitForAlertsIndexToBeCreated,
 } from '../tasks/alerts';
-import { esArchiverLoad } from '../tasks/es_archiver';
+import { createCustomRuleActivated } from '../tasks/api_calls/rules';
+import { cleanKibana } from '../tasks/common';
+import { waitForAlertsToPopulate } from '../tasks/create_new_rule';
 import { loginAndWaitForPage } from '../tasks/login';
+import { refreshPage } from '../tasks/security_header';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Alerts', () => {
+describe.skip('Alerts', () => {
   context('Closing alerts', () => {
     beforeEach(() => {
-      esArchiverLoad('alerts');
+      cleanKibana();
       loginAndWaitForPage(DETECTIONS_URL);
+      waitForAlertsPanelToBeLoaded();
+      waitForAlertsIndexToBeCreated();
+      createCustomRuleActivated(newRule);
+      refreshPage();
+      waitForAlertsToPopulate();
     });
 
     it('Closes and opens alerts', () => {
-      waitForAlertsPanelToBeLoaded();
-      waitForAlertsToBeLoaded();
-
-      cy.get(NUMBER_OF_ALERTS)
+      const numberOfAlertsToBeClosed = 3;
+      cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((numberOfAlerts) => {
           cy.get(SHOWING_ALERTS).should('have.text', `Showing ${numberOfAlerts} alerts`);
 
-          const numberOfAlertsToBeClosed = 3;
           selectNumberOfAlerts(numberOfAlertsToBeClosed);
 
           cy.get(SELECTED_ALERTS).should(
@@ -56,14 +63,9 @@ describe('Alerts', () => {
 
           closeAlerts();
           waitForAlerts();
-          cy.reload();
-          waitForAlerts();
 
           const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
-          cy.get(NUMBER_OF_ALERTS).should(
-            'have.text',
-            expectedNumberOfAlertsAfterClosing.toString()
-          );
+          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlertsAfterClosing.toString());
 
           cy.get(SHOWING_ALERTS).should(
             'have.text',
@@ -73,7 +75,7 @@ describe('Alerts', () => {
           goToClosedAlerts();
           waitForAlerts();
 
-          cy.get(NUMBER_OF_ALERTS).should('have.text', numberOfAlertsToBeClosed.toString());
+          cy.get(ALERTS_COUNT).should('have.text', numberOfAlertsToBeClosed.toString());
           cy.get(SHOWING_ALERTS).should(
             'have.text',
             `Showing ${numberOfAlertsToBeClosed.toString()} alerts`
@@ -87,14 +89,9 @@ describe('Alerts', () => {
 
           openAlerts();
           waitForAlerts();
-          cy.reload();
-          waitForAlertsToBeLoaded();
-          waitForAlerts();
-          goToClosedAlerts();
-          waitForAlerts();
 
           const expectedNumberOfClosedAlertsAfterOpened = 2;
-          cy.get(NUMBER_OF_ALERTS).should(
+          cy.get(ALERTS_COUNT).should(
             'have.text',
             expectedNumberOfClosedAlertsAfterOpened.toString()
           );
@@ -114,17 +111,12 @@ describe('Alerts', () => {
             `Showing ${expectedNumberOfOpenedAlerts.toString()} alerts`
           );
 
-          cy.get('[data-test-subj="server-side-event-count"]').should(
-            'have.text',
-            expectedNumberOfOpenedAlerts.toString()
-          );
+          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfOpenedAlerts.toString());
         });
     });
 
     it('Closes one alert when more than one opened alerts are selected', () => {
-      waitForAlertsToBeLoaded();
-
-      cy.get(NUMBER_OF_ALERTS)
+      cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((numberOfAlerts) => {
           const numberOfAlertsToBeClosed = 1;
@@ -135,86 +127,108 @@ describe('Alerts', () => {
           cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
 
           closeFirstAlert();
-          cy.reload();
-          waitForAlertsToBeLoaded();
           waitForAlerts();
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeClosed;
-          cy.get(NUMBER_OF_ALERTS).invoke('text').should('eq', expectedNumberOfAlerts.toString());
-          cy.get(SHOWING_ALERTS)
-            .invoke('text')
-            .should('eql', `Showing ${expectedNumberOfAlerts.toString()} alerts`);
+          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts.toString());
+          cy.get(SHOWING_ALERTS).should(
+            'have.text',
+            `Showing ${expectedNumberOfAlerts.toString()} alerts`
+          );
 
           goToClosedAlerts();
           waitForAlerts();
 
-          cy.get(NUMBER_OF_ALERTS)
-            .invoke('text')
-            .should('eql', numberOfAlertsToBeClosed.toString());
-          cy.get(SHOWING_ALERTS)
-            .invoke('text')
-            .should('eql', `Showing ${numberOfAlertsToBeClosed.toString()} alert`);
+          cy.get(ALERTS_COUNT).should('have.text', numberOfAlertsToBeClosed.toString());
+          cy.get(SHOWING_ALERTS).should(
+            'have.text',
+            `Showing ${numberOfAlertsToBeClosed.toString()} alert`
+          );
           cy.get(ALERTS).should('have.length', numberOfAlertsToBeClosed);
         });
     });
   });
+
   context('Opening alerts', () => {
     beforeEach(() => {
-      esArchiverLoad('closed_alerts');
+      cleanKibana();
       loginAndWaitForPage(DETECTIONS_URL);
+      waitForAlertsPanelToBeLoaded();
+      waitForAlertsIndexToBeCreated();
+      createCustomRuleActivated(newRule);
+      refreshPage();
+      waitForAlertsToPopulate();
+      selectNumberOfAlerts(5);
+
+      cy.get(SELECTED_ALERTS).should('have.text', `Selected 5 alerts`);
+
+      closeAlerts();
+      waitForAlerts();
+      refreshPage();
     });
 
     it('Open one alert when more than one closed alerts are selected', () => {
-      waitForAlerts();
-      goToClosedAlerts();
-      waitForAlertsToBeLoaded();
+      waitForAlertsToPopulate();
 
-      cy.get(NUMBER_OF_ALERTS)
+      cy.get(ALERTS_COUNT)
         .invoke('text')
-        .then((numberOfAlerts) => {
-          const numberOfAlertsToBeOpened = 1;
-          const numberOfAlertsToBeSelected = 3;
-
-          cy.get(TAKE_ACTION_POPOVER_BTN).should('have.attr', 'disabled');
-          selectNumberOfAlerts(numberOfAlertsToBeSelected);
-          cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
-
-          openFirstAlert();
-          cy.reload();
+        .then((numberOfOpenedAlertsText) => {
+          const numberOfOpenedAlerts = parseInt(numberOfOpenedAlertsText, 10);
           goToClosedAlerts();
-          waitForAlertsToBeLoaded();
-          waitForAlerts();
-
-          const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
-          cy.get(NUMBER_OF_ALERTS).invoke('text').should('eq', expectedNumberOfAlerts.toString());
-          cy.get(SHOWING_ALERTS)
+          cy.get(ALERTS_COUNT)
             .invoke('text')
-            .should('eql', `Showing ${expectedNumberOfAlerts.toString()} alerts`);
+            .then((numberOfAlerts) => {
+              const numberOfAlertsToBeOpened = 1;
+              const numberOfAlertsToBeSelected = 3;
 
-          goToOpenedAlerts();
-          waitForAlerts();
+              cy.get(TAKE_ACTION_POPOVER_BTN).should('have.attr', 'disabled');
+              selectNumberOfAlerts(numberOfAlertsToBeSelected);
+              cy.get(SELECTED_ALERTS).should(
+                'have.text',
+                `Selected ${numberOfAlertsToBeSelected} alerts`
+              );
 
-          cy.get(NUMBER_OF_ALERTS)
-            .invoke('text')
-            .should('eql', numberOfAlertsToBeOpened.toString());
-          cy.get(SHOWING_ALERTS)
-            .invoke('text')
-            .should('eql', `Showing ${numberOfAlertsToBeOpened.toString()} alert`);
-          cy.get(ALERTS).should('have.length', numberOfAlertsToBeOpened);
+              cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
+
+              openFirstAlert();
+              waitForAlerts();
+
+              const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
+              cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts.toString());
+              cy.get(SHOWING_ALERTS).should(
+                'have.text',
+                `Showing ${expectedNumberOfAlerts.toString()} alerts`
+              );
+
+              goToOpenedAlerts();
+              waitForAlerts();
+
+              cy.get(ALERTS_COUNT).should(
+                'have.text',
+                (numberOfOpenedAlerts + numberOfAlertsToBeOpened).toString()
+              );
+              cy.get(SHOWING_ALERTS).should(
+                'have.text',
+                `Showing ${(numberOfOpenedAlerts + numberOfAlertsToBeOpened).toString()} alerts`
+              );
+            });
         });
     });
   });
+
   context('Marking alerts as in-progress', () => {
     beforeEach(() => {
-      esArchiverLoad('alerts');
+      cleanKibana();
       loginAndWaitForPage(DETECTIONS_URL);
+      waitForAlertsPanelToBeLoaded();
+      waitForAlertsIndexToBeCreated();
+      createCustomRuleActivated(newRule);
+      refreshPage();
+      waitForAlertsToPopulate();
     });
 
     it('Mark one alert in progress when more than one open alerts are selected', () => {
-      waitForAlerts();
-      waitForAlertsToBeLoaded();
-
-      cy.get(NUMBER_OF_ALERTS)
+      cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((numberOfAlerts) => {
           const numberOfAlertsToBeMarkedInProgress = 1;
@@ -225,26 +239,23 @@ describe('Alerts', () => {
           cy.get(TAKE_ACTION_POPOVER_BTN).should('not.have.attr', 'disabled');
 
           markInProgressFirstAlert();
-          cy.reload();
-          goToOpenedAlerts();
           waitForAlertsToBeLoaded();
-          waitForAlerts();
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedInProgress;
-          cy.get(NUMBER_OF_ALERTS).invoke('text').should('eq', expectedNumberOfAlerts.toString());
-          cy.get(SHOWING_ALERTS)
-            .invoke('text')
-            .should('eql', `Showing ${expectedNumberOfAlerts.toString()} alerts`);
+          cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts.toString());
+          cy.get(SHOWING_ALERTS).should(
+            'have.text',
+            `Showing ${expectedNumberOfAlerts.toString()} alerts`
+          );
 
           goToInProgressAlerts();
           waitForAlerts();
 
-          cy.get(NUMBER_OF_ALERTS)
-            .invoke('text')
-            .should('eql', numberOfAlertsToBeMarkedInProgress.toString());
-          cy.get(SHOWING_ALERTS)
-            .invoke('text')
-            .should('eql', `Showing ${numberOfAlertsToBeMarkedInProgress.toString()} alert`);
+          cy.get(ALERTS_COUNT).should('have.text', numberOfAlertsToBeMarkedInProgress.toString());
+          cy.get(SHOWING_ALERTS).should(
+            'have.text',
+            `Showing ${numberOfAlertsToBeMarkedInProgress.toString()} alert`
+          );
           cy.get(ALERTS).should('have.length', numberOfAlertsToBeMarkedInProgress);
         });
     });

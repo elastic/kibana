@@ -312,7 +312,10 @@ export default ({ getService }: FtrProviderContext) => {
         result
           // @ts-expect-error destIndex exists only on MigrationResult status: 'migrated';
           .map(({ status, destIndex }) => ({ status, destIndex }))
-          .sort((a) => (a.destIndex ? 0 : 1))
+          .sort(({ destIndex: a }, { destIndex: b }) =>
+            // sort by destIndex in ascending order, keeping falsy values at the end
+            (a && !b) || a < b ? -1 : (!a && b) || a > b ? 1 : 0
+          )
       ).to.eql([
         { status: 'migrated', destIndex: '.migration-c_2' },
         { status: 'skipped', destIndex: undefined },
@@ -379,14 +382,12 @@ async function migrateIndex({
   index,
   migrations,
   mappingProperties,
-  validateDoc,
   obsoleteIndexTemplatePattern,
 }: {
   esClient: ElasticsearchClient;
   index: string;
   migrations: Record<string, SavedObjectMigrationMap>;
   mappingProperties: SavedObjectsTypeMappingDefinitions;
-  validateDoc?: (doc: any) => void;
   obsoleteIndexTemplatePattern?: string;
 }) {
   const typeRegistry = new SavedObjectTypeRegistry();
@@ -396,7 +397,6 @@ async function migrateIndex({
   const documentMigrator = new DocumentMigrator({
     kibanaVersion: '99.9.9',
     typeRegistry,
-    validateDoc: validateDoc || _.noop,
     log: getLogMock(),
   });
 

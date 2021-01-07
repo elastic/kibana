@@ -20,6 +20,7 @@
 import { ISavedObjectsRepository } from './repository';
 
 const create = (): jest.Mocked<ISavedObjectsRepository> => ({
+  checkConflicts: jest.fn(),
   create: jest.fn(),
   bulkCreate: jest.fn(),
   bulkUpdate: jest.fn(),
@@ -32,6 +33,7 @@ const create = (): jest.Mocked<ISavedObjectsRepository> => ({
   deleteFromNamespaces: jest.fn(),
   deleteByNamespace: jest.fn(),
   incrementCounter: jest.fn(),
+  removeReferencesTo: jest.fn(),
 });
 
 export const savedObjectsRepositoryMock = { create };

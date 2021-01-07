@@ -43,24 +43,39 @@ dependency list!
 [discrete]
 === Test coverage
 
-* Does the feature have sufficient unit test coverage? (does it handle
-storeinSessions?)
-* Does the feature have sufficient Functional UI test coverage?
-* Does the feature have sufficient Rest API coverage test coverage?
-* Does the feature have sufficient Integration test coverage?
+Testing UI code is hard. We strive for https://github.com/elastic/engineering/blob/master/kibana_dev_principles.md#automate-tests-through-ci[total automated test coverage] of our code and UX,
+but this is difficult to measure and we're constrained by time. During development, test coverage
+measurement is subjective and manual, based on our understanding of the feature. Code coverage
+reports indicate possible gaps, but it ultimately comes down to a judgment call. Here are some
+guidelines to help you ensure sufficient automated test coverage.
+
+* Every PR should be accompanied by tests.
+* Check the before and after automated test coverage metrics. If coverage has gone down you might
+have missed some tests.
+* Cover failure cases, edge cases, and happy paths with your tests.
+* Pay special attention to code that could contain bugs that harm to the user. "Harm" includes
+direct problems like data loss and data entering a bad state, as well as indirect problems like
+making a poor business decision based on misinformation presented by the UI. For example, state
+migrations and security permissions are important areas to cover.
+* Pay special attention to public APIs, which may be used in unexpected ways. Any code you release
+for consumption by other plugins should be rigorously tested with many permutations.
+* Include end-to-end tests for areas where the logic spans global state, URLs, and multiple plugin APIs.
+* Every time a bug is reported, add a test to cover it.
+* Retrospectively gauge the quality of the code you ship by tracking how many bugs are reported for
+features that are released. How can you reduce this number by improving your testing approach?
 
 [discrete]
 === Browser coverage
 
-Refer to the list of browsers and OS {kib} supports
+Refer to the list of browsers and OS {kib} supports:
 https://www.elastic.co/support/matrix
 
 Does the feature work efficiently on the list of supported browsers? 
 
 [discrete]
-=== Upgrade Scenarios - Migration scenarios- 
+=== Upgrade and Migration scenarios
 
-Does the feature affect old
-indices, saved objects ? - Has the feature been tested with {kib}
-aliases - Read/Write privileges of the indices before and after the
+* Does the feature affect old indices or saved objects?
+* Has the feature been tested with {kib} aliases?
+* Read/Write privileges of the indices before and after the
 upgrade?

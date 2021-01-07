@@ -16,7 +16,7 @@ jest.mock('lodash', () => ({
 }));
 
 jest.mock('../../kibana_services', () => {
-  const services = require.requireActual('../../kibana_services');
+  const services = jest.requireActual('../../kibana_services');
   return {
     ...services,
     getUiStatsReporter: jest.fn(() => () => {}),
@@ -25,7 +25,9 @@ jest.mock('../../kibana_services', () => {
 
 const { setup } = pageHelpers.jobCreate;
 
-describe('Create Rollup Job, step 6: Review', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/69783
+// FLAKY: https://github.com/elastic/kibana/issues/70043
+describe.skip('Create Rollup Job, step 6: Review', () => {
   let find;
   let exists;
   let actions;

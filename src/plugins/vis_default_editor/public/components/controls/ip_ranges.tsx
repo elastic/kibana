@@ -56,7 +56,7 @@ function IpRangesParamEditor({
   );
 
   return (
-    <EuiFormRow fullWidth={true} id={`visEditorIpRange${agg.id}`} compressed>
+    <EuiFormRow fullWidth={true} id={`visEditorIpRange${agg.id}`} display="rowCompressed">
       {agg.params.ipRangeType === IpRangeTypes.MASK ? (
         <MaskList
           list={value.mask}

@@ -6,11 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import { EuiSelectableProps } from '@elastic/eui/src/components/selectable/selectable';
+import { EuiPopover, EuiPopoverTitle, EuiSelectable, EuiSelectableProps } from '@elastic/eui';
 import { IndexPatternRef } from './types';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { ToolbarButtonProps, ToolbarButton } from '../toolbar_button';
+import { ToolbarButtonProps, ToolbarButton } from '../shared_components';
 
 export type ChangeIndexPatternTriggerProps = ToolbarButtonProps & {
   label: string;
@@ -57,13 +56,18 @@ export function ChangeIndexPattern({
         panelPaddingSize="s"
         ownFocus
       >
-        <div style={{ width: 320 }}>
+        <div style={{ width: 320 }} data-test-subj="lnsChangeIndexPatternPopup">
           <EuiPopoverTitle>
             {i18n.translate('xpack.lens.indexPattern.changeIndexPatternTitle', {
               defaultMessage: 'Change index pattern',
             })}
           </EuiPopoverTitle>
-          <EuiSelectable
+          <EuiSelectable<{
+            key?: string;
+            label: string;
+            value?: string;
+            checked?: 'on' | 'off' | undefined;
+          }>
             {...selectableProps}
             searchable
             singleSelection="always"

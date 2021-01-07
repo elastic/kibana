@@ -17,7 +17,8 @@ import {
   DocValueFieldsInput,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
-import { Hit, Hits, SearchHit, TotalValue } from '../types';
+import { Hit, Hits, SearchHit } from '../types';
+import { TotalValue } from '../../../common/detection_engine/types';
 
 export interface HostsAdapter {
   getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData>;

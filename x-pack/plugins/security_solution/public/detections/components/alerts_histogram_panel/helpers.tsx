@@ -10,6 +10,8 @@ import { HistogramData, AlertsAggregation, AlertsBucket, AlertsGroupBucket } fro
 import { AlertSearchResponse } from '../../containers/detection_engine/alerts/types';
 import * as i18n from './translations';
 
+const EMPTY_ALERTS_DATA: HistogramData[] = [];
+
 export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggregation> | null) => {
   const groupBuckets: AlertsGroupBucket[] =
     alertsData?.aggregations?.alertsByGrouping?.buckets ?? [];
@@ -18,13 +20,14 @@ export const formatAlertsData = (alertsData: AlertSearchResponse<{}, AlertsAggre
 
     return [
       ...acc,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       ...alertsBucket.map(({ key, doc_count }: AlertsBucket) => ({
         x: key,
         y: doc_count,
         g: group,
       })),
     ];
-  }, []);
+  }, EMPTY_ALERTS_DATA);
 };
 
 export const getAlertsHistogramQuery = (

@@ -26,6 +26,7 @@ import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
 import { CalculationVars, newVariable } from './vars';
+import { METRIC_TYPES } from '../../../../common/metric_types';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -99,6 +100,7 @@ export function CalculationAgg(props) {
             onChange={handleChange}
             name="variables"
             model={model}
+            exclude={[METRIC_TYPES.TOP_HIT]}
           />
         </EuiFlexItem>
 

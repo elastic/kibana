@@ -47,9 +47,7 @@ export class Management {
          * Cast the ImmutableReducer to a regular reducer for compatibility with
          * the subplugin architecture (which expects plain redux reducers.)
          */
-        reducer: {
-          management: managementReducer,
-        } as ManagementPluginReducer,
+        reducer: { management: managementReducer } as ManagementPluginReducer,
         middleware: managementMiddlewareFactory(core, plugins),
       },
     };

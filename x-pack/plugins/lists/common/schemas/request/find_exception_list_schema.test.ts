@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import {
   getFindExceptionListSchemaDecodedMock,
@@ -37,7 +37,7 @@ describe('find_exception_list_schema', () => {
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected: FindExceptionListSchemaDecoded = {
       filter: undefined,
-      namespace_type: 'single',
+      namespace_type: ['single'],
       page: undefined,
       per_page: undefined,
       sort_field: undefined,

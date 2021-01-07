@@ -361,9 +361,10 @@ export class IndexActionsContextMenu extends Component {
               <FormattedMessage
                 id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeWarningDescription"
                 defaultMessage="
-                  Force merging a large index or an index that is not read-only can
-                  potentially cause performance and stability issues in the cluster
-                  if it is not run properly (run against non-read-only indices) or run during peak hours.
+                  Don't force-merge indices to which you're still writing, or to which you'll write
+                  again in the future. Instead, rely on the automatic background merge process to
+                  perform merges as needed to keep the index running smoothly. If you write to
+                  a force-merged index then its performance may become much worse.
                 "
               />
             </p>
@@ -745,7 +746,6 @@ export class IndexActionsContextMenu extends Component {
                 isOpen={this.state.isPopoverOpen}
                 closePopover={this.closePopover}
                 panelPaddingSize="none"
-                withTitle
                 anchorPosition={anchorPosition}
                 repositionOnScroll
               >

@@ -13,6 +13,7 @@ import {
   esFilters,
   FilterManager,
   UI_SETTINGS,
+  IndexPattern,
 } from '../../../../../../../../src/plugins/data/public';
 import { SeverityBadge } from '../severity_badge';
 
@@ -140,7 +141,11 @@ describe('helpers', () => {
         filterManager: mockFilterManager,
         query: mockQueryBarWithFilters.query,
         savedId: mockQueryBarWithFilters.saved_id,
-        indexPatterns: { fields: [{ name: 'test name', type: 'test type' }], title: 'test title' },
+        indexPatterns: ({
+          fields: [{ name: 'event.category', type: 'test type' }],
+          title: 'test title',
+          getFormatterForField: () => ({ convert: (val: unknown) => val }),
+        } as unknown) as IndexPattern,
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
       const filterLabelComponent = wrapper.find(esFilters.FilterLabel).at(0);
@@ -163,8 +168,11 @@ describe('helpers', () => {
         query: mockQueryBarWithQuery.query,
         savedId: mockQueryBarWithQuery.saved_id,
       });
-      expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL} </>);
-      expect(result[0].description).toEqual(<>{mockQueryBarWithQuery.query} </>);
+
+      expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL}</>);
+      expect(shallow(result[0].description as React.ReactElement).text()).toEqual(
+        mockQueryBarWithQuery.query
+      );
     });
 
     test('returns expected array of ListItems when "savedId" exists', () => {
@@ -204,7 +212,9 @@ describe('helpers', () => {
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
       expect(result[0].title).toEqual('Mitre Attack');
-      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual('');
+      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
+        'Collection (TA000999)'
+      );
       expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
         'Audio Capture (T1123)'
       );
@@ -226,16 +236,27 @@ describe('helpers', () => {
       expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
         'Collection (TA0009)'
       );
-      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual('');
+      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
+        'Audio Capture (T1123456)'
+      );
     });
 
-    test('returns with corresponding tactic and technique link text', () => {
+    test('returns empty technique link if no corresponding subtechnique id found', () => {
       const result: ListItems[] = buildThreatDescription({
         label: 'Mitre Attack',
         threat: [
           {
             framework: 'MITRE ATTACK',
-            technique: [{ reference: 'https://test.com', name: 'Audio Capture', id: 'T1123' }],
+            technique: [
+              {
+                reference: 'https://test.com',
+                name: 'Audio Capture',
+                id: 'T1123',
+                subtechnique: [
+                  { reference: 'https://test.com', name: 'Audio Capture Data', id: 'T1123.000123' },
+                ],
+              },
+            ],
             tactic: { reference: 'https://test.com', name: 'Collection', id: 'TA0009' },
           },
         ],
@@ -248,16 +269,59 @@ describe('helpers', () => {
       expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
         'Audio Capture (T1123)'
       );
+      expect(wrapper.find('[data-test-subj="threatSubtechniqueLink"]').text()).toEqual(
+        'Audio Capture Data (T1123.000123)'
+      );
     });
 
-    test('returns corresponding number of tactic and technique links', () => {
+    test('returns with corresponding tactic, technique, and subtechnique link text', () => {
       const result: ListItems[] = buildThreatDescription({
         label: 'Mitre Attack',
         threat: [
           {
             framework: 'MITRE ATTACK',
             technique: [
-              { reference: 'https://test.com', name: 'Audio Capture', id: 'T1123' },
+              {
+                reference: 'https://test.com',
+                name: 'Archive Collected Data',
+                id: 'T1560',
+                subtechnique: [
+                  { reference: 'https://test.com', name: 'Archive via Library', id: 'T1560.002' },
+                ],
+              },
+            ],
+            tactic: { reference: 'https://test.com', name: 'Collection', id: 'TA0009' },
+          },
+        ],
+      });
+      const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
+      expect(result[0].title).toEqual('Mitre Attack');
+      expect(wrapper.find('[data-test-subj="threatTacticLink"]').text()).toEqual(
+        'Collection (TA0009)'
+      );
+      expect(wrapper.find('[data-test-subj="threatTechniqueLink"]').text()).toEqual(
+        'Archive Collected Data (T1560)'
+      );
+      expect(wrapper.find('[data-test-subj="threatSubtechniqueLink"]').text()).toEqual(
+        'Archive via Library (T1560.002)'
+      );
+    });
+
+    test('returns corresponding number of tactic, technique, and subtechnique links', () => {
+      const result: ListItems[] = buildThreatDescription({
+        label: 'Mitre Attack',
+        threat: [
+          {
+            framework: 'MITRE ATTACK',
+            technique: [
+              {
+                reference: 'https://test.com',
+                name: 'Archive Collected Data',
+                id: 'T1560',
+                subtechnique: [
+                  { reference: 'https://test.com', name: 'Archive via Library', id: 'T1560.002' },
+                ],
+              },
               { reference: 'https://test.com', name: 'Clipboard Data', id: 'T1115' },
             ],
             tactic: { reference: 'https://test.com', name: 'Collection', id: 'TA0009' },
@@ -265,7 +329,14 @@ describe('helpers', () => {
           {
             framework: 'MITRE ATTACK',
             technique: [
-              { reference: 'https://test.com', name: 'Automated Collection', id: 'T1119' },
+              {
+                reference: 'https://test.com',
+                name: 'Account Discovery',
+                id: 'T1087',
+                subtechnique: [
+                  { reference: 'https://test.com', name: 'Cloud Account', id: 'T1087.004' },
+                ],
+              },
             ],
             tactic: { reference: 'https://test.com', name: 'Discovery', id: 'TA0007' },
           },
@@ -275,6 +346,7 @@ describe('helpers', () => {
 
       expect(wrapper.find('[data-test-subj="threatTacticLink"]')).toHaveLength(2);
       expect(wrapper.find('[data-test-subj="threatTechniqueLink"]')).toHaveLength(3);
+      expect(wrapper.find('[data-test-subj="threatSubtechniqueLink"]')).toHaveLength(2);
     });
   });
 
@@ -424,6 +496,12 @@ describe('helpers', () => {
       const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threshold');
 
       expect(result.description).toEqual('Threshold');
+    });
+
+    it('returns a humanized description for a threat_match type', () => {
+      const [result]: ListItems[] = buildRuleTypeDescription('Test label', 'threat_match');
+
+      expect(result.description).toEqual('Indicator Match');
     });
   });
 });

@@ -42,7 +42,7 @@ export const move = ({
   sourceGroup: DataProvidersAnd[];
 }): {
   updatedDestinationGroup: DataProvidersAnd[];
-  updatedSourceGroup: DataProvidersAnd[];
+  updatedSourcererScope: DataProvidersAnd[];
 } => {
   const sourceClone = [...sourceGroup];
   const destinationClone = [...destinationGroup];
@@ -56,7 +56,7 @@ export const move = ({
 
   return {
     updatedDestinationGroup: deDuplicatedDestinationGroup,
-    updatedSourceGroup: sourceClone,
+    updatedSourcererScope: sourceClone,
   };
 };
 
@@ -169,7 +169,7 @@ export const moveProvidersBetweenGroups = ({
     const moveProviderFromSourceIndex = source.index;
     const moveProviderToDestinationIndex = destination.index;
 
-    const { updatedDestinationGroup, updatedSourceGroup } = move({
+    const { updatedDestinationGroup, updatedSourcererScope } = move({
       destinationGroup,
       moveProviderFromSourceIndex,
       moveProviderToDestinationIndex,
@@ -180,7 +180,7 @@ export const moveProvidersBetweenGroups = ({
       (acc, group, i) => [
         ...acc,
         i === sourceGroupIndex
-          ? [...updatedSourceGroup]
+          ? [...updatedSourcererScope]
           : i === destinationGroupIndex
           ? [...updatedDestinationGroup]
           : [...group],

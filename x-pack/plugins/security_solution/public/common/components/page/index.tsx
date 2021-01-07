@@ -8,27 +8,36 @@ import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon, EuiPage } from '@e
 import styled, { createGlobalStyle } from 'styled-components';
 
 import {
+  GLOBAL_HEADER_HEIGHT,
   FULL_SCREEN_TOGGLED_CLASS_NAME,
   SCROLLING_DISABLED_CLASS_NAME,
 } from '../../../../common/constants';
+
+export const SecuritySolutionAppWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+`;
+SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
 
 /*
   SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
 */
 export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
-  /* dirty hack to fix draggables with tooltip on FF */
-  body#siem-app {
-    position: static;
-  }
-  /* end of dirty hack to fix draggables with tooltip on FF */
-
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }
 
   div.application {
     background-color: rgba(0,0,0,0);
+
+    // Security App wrapper
+    > div {
+      display: flex;
+      flex: 1 1 auto;
+    }
   }
 
   .euiPopover__panel.euiPopover__panel-isOpen {
@@ -62,17 +71,32 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     z-index: 9950;
   }
 
-  /** applies a "toggled" button style to the Full Screen button */
+  /* applies a "toggled" button style to the Full Screen button */
   .${FULL_SCREEN_TOGGLED_CLASS_NAME} {
     ${({ theme }) => `background-color: ${theme.eui.euiColorPrimary} !important`};
   }
 
-  .${SCROLLING_DISABLED_CLASS_NAME} body {
-    overflow-y: hidden;
+  .${SCROLLING_DISABLED_CLASS_NAME} ${SecuritySolutionAppWrapper} {
+    max-height: calc(100vh - ${GLOBAL_HEADER_HEIGHT}px);
   }
 
-  .${SCROLLING_DISABLED_CLASS_NAME} #kibana-body {
-    overflow-y: hidden;
+  /*
+     EuiScreenReaderOnly has a default 1px height and width. These extra pixels
+     were adding additional height to every table row in the alerts table on the
+     Detections page. As a result of this extra height, the Detections page was
+     displaying unnecessary scroll bars and unnecessary empty space bellow the
+     alerts table. Thus, we set the height and width of all EuiScreenReaderOnly
+     to zero.
+  */
+  .euiScreenReaderOnly {
+    clip: rect(1px, 1px, 1px, 1px);
+    clip-path: inset(50%);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
   }
 `;
 

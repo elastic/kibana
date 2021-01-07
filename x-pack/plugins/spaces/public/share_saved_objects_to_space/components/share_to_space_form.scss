@@ -1,0 +1,10 @@
+// make icon occupy the same space as an EuiSwitch
+// icon is size m, which is the native $euiSize value
+// see @elastic/eui/src/components/icon/_variables.scss
+.spcShareToSpaceIncludeRelated .euiIcon {
+  margin-right: $euiSwitchWidth - $euiSize;
+}
+
+.spcShareToSpaceIncludeRelated__label {
+  font-size: $euiFontSizeS;
+}

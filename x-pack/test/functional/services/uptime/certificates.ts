@@ -7,9 +7,11 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function UptimeCertProvider({ getService }: FtrProviderContext) {
+export function UptimeCertProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+
+  const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
 
   const changeSearchField = async (text: string) => {
     const input = await testSubjects.find('uptimeCertSearch');
@@ -22,14 +24,6 @@ export function UptimeCertProvider({ getService }: FtrProviderContext) {
   };
 
   return {
-    async isUptimeDataMissing() {
-      return retry.tryForTime(60 * 1000, async () => {
-        if (await testSubjects.exists('data-missing', { timeout: 0 })) {
-          await refreshApp();
-        }
-        await testSubjects.missingOrFail('data-missing');
-      });
-    },
     async hasViewCertButton() {
       return retry.tryForTime(15000, async () => {
         await testSubjects.existOrFail('uptimeCertificatesLink');
@@ -61,8 +55,16 @@ export function UptimeCertProvider({ getService }: FtrProviderContext) {
       const self = this;
       return retry.tryForTime(60 * 1000, async () => {
         await changeSearchField(monId);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await self.hasCertificates(1);
       });
+    },
+    async displaysEmptyMessage() {
+      await testSubjects.existOrFail('uptimeCertsEmptyMessage');
+      const emptyText = await testSubjects.getVisibleText('uptimeCertsEmptyMessage');
+      expect(emptyText).to.eql(
+        'No Certificates found. Note: Certificates are only visible for Heartbeat 7.8+'
+      );
     },
   };
 }

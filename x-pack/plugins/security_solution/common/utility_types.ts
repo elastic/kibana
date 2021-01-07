@@ -26,3 +26,21 @@ export const stringEnum = <T>(enumObj: T, enumName = 'enum') =>
         : runtimeTypes.failure(u, c),
     (a) => (a as unknown) as string
   );
+
+/**
+ * Unreachable Assertion helper for scenarios like exhaustive switches.
+ * For references see: https://stackoverflow.com/questions/39419170/how-do-i-check-that-a-switch-block-is-exhaustive-in-typescript
+ * This "x" should _always_ be a type of "never" and not change to "unknown" or any other type. See above link or the generic
+ * concept of exhaustive checks in switch blocks.
+ *
+ * Optionally you can avoid the use of this by using early returns and TypeScript will clear your type checking without complaints
+ * but there are situations and times where this function might still be needed.
+ * @param x Unreachable field
+ * @param message Message of error thrown
+ */
+export const assertUnreachable = (
+  x: never, // This should always be a type of "never"
+  message = 'Unknown Field in switch statement'
+): never => {
+  throw new Error(`${message}: ${x}`);
+};

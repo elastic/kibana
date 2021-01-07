@@ -21,9 +21,10 @@ export {
   useRequest,
   UseRequestConfig,
   WithPrivileges,
-  Monaco,
+  XJson,
   JsonEditor,
   OnJsonEditorUpdateHandler,
+  attemptToURIDecode,
 } from '../../../../src/plugins/es_ui_shared/public/';
 
 export {
@@ -36,6 +37,8 @@ export {
   ValidationFuncArg,
   FormData,
   UseField,
+  UseArray,
+  ArrayItem,
   FormHook,
   useFormContext,
   FormDataProvider,
@@ -43,6 +46,9 @@ export {
   FieldConfig,
   FieldHook,
   getFieldValidityAndErrorMessage,
+  ValidationFunc,
+  ValidationConfig,
+  useFormData,
 } from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
@@ -57,11 +63,18 @@ export {
   FormRow,
   ToggleField,
   ComboBoxField,
+  RadioGroupField,
+  NumericField,
+  SelectField,
+  CheckBoxField,
+  TextField,
 } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {
   isJSON,
   isEmptyString,
 } from '../../../../src/plugins/es_ui_shared/static/validators/string';
+
+export { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 
 export const useKibana = () => _useKibana<AppServices>();

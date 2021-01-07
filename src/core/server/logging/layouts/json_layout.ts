@@ -18,11 +18,9 @@
  */
 
 import moment from 'moment-timezone';
-import { merge } from 'lodash';
-import { schema, TypeOf } from '@kbn/config-schema';
-
-import { LogRecord } from '../log_record';
-import { Layout } from './layouts';
+import { merge } from '@kbn/std';
+import { schema } from '@kbn/config-schema';
+import { LogRecord, Layout } from '@kbn/logging';
 
 const { literal, object } = schema;
 
@@ -31,7 +29,9 @@ const jsonLayoutSchema = object({
 });
 
 /** @internal */
-export type JsonLayoutConfigType = TypeOf<typeof jsonLayoutSchema>;
+export interface JsonLayoutConfigType {
+  kind: 'json';
+}
 
 /**
  * Layout that just converts `LogRecord` into JSON string.
@@ -53,22 +53,19 @@ export class JsonLayout implements Layout {
   }
 
   public format(record: LogRecord): string {
-    return JSON.stringify(
-      merge(
-        {
-          '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-          message: record.message,
-          error: JsonLayout.errorToSerializableObject(record.error),
-          log: {
-            level: record.level.id.toUpperCase(),
-            logger: record.context,
-          },
-          process: {
-            pid: record.pid,
-          },
-        },
-        record.meta
-      )
-    );
+    const log = {
+      '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+      message: record.message,
+      error: JsonLayout.errorToSerializableObject(record.error),
+      log: {
+        level: record.level.id.toUpperCase(),
+        logger: record.context,
+      },
+      process: {
+        pid: record.pid,
+      },
+    };
+    const output = record.meta ? merge(log, record.meta) : log;
+    return JSON.stringify(output);
   }
 }

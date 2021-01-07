@@ -36,13 +36,11 @@ export class RoleMappingsAPIClient {
   }
 
   public async saveRoleMapping(roleMapping: RoleMapping) {
-    const payload = { ...roleMapping };
-    delete payload.name;
+    const { name, ...payload } = roleMapping;
 
-    return this.http.post(
-      `/internal/security/role_mapping/${encodeURIComponent(roleMapping.name)}`,
-      { body: JSON.stringify(payload) }
-    );
+    return this.http.post(`/internal/security/role_mapping/${encodeURIComponent(name)}`, {
+      body: JSON.stringify(payload),
+    });
   }
 
   public async deleteRoleMappings(names: string[]): Promise<DeleteRoleMappingsResponse> {

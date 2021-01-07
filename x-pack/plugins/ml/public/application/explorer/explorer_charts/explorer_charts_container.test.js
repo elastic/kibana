@@ -40,6 +40,12 @@ jest.mock('../../services/job_service', () => ({
   },
 }));
 
+jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
+  withKibana: (comp) => {
+    return comp;
+  },
+}));
+
 describe('ExplorerChartsContainer', () => {
   const mockedGetBBox = { x: 0, y: -11.5, width: 12.1875, height: 14.5 };
   const originalGetBBox = SVGElement.prototype.getBBox;
@@ -47,10 +53,27 @@ describe('ExplorerChartsContainer', () => {
   beforeEach(() => (SVGElement.prototype.getBBox = () => mockedGetBBox));
   afterEach(() => (SVGElement.prototype.getBBox = originalGetBBox));
 
+  const kibanaContextMock = {
+    services: {
+      application: { navigateToApp: jest.fn() },
+      http: {
+        basePath: {
+          get: jest.fn(),
+        },
+      },
+      share: {
+        urlGenerators: { getUrlGenerator: jest.fn() },
+      },
+    },
+  };
   test('Minimal Initialization', () => {
     const wrapper = shallow(
       <I18nProvider>
-        <ExplorerChartsContainer {...getDefaultChartsData()} />
+        <ExplorerChartsContainer
+          {...getDefaultChartsData()}
+          kibana={kibanaContextMock}
+          severity={10}
+        />
       </I18nProvider>
     );
 
@@ -71,10 +94,11 @@ describe('ExplorerChartsContainer', () => {
       ],
       chartsPerRow: 1,
       tooManyBuckets: false,
+      severity: 10,
     };
     const wrapper = mount(
       <I18nProvider>
-        <ExplorerChartsContainer {...props} />
+        <ExplorerChartsContainer {...props} kibana={kibanaContextMock} />
       </I18nProvider>
     );
 
@@ -98,10 +122,11 @@ describe('ExplorerChartsContainer', () => {
       ],
       chartsPerRow: 1,
       tooManyBuckets: false,
+      severity: 10,
     };
     const wrapper = mount(
       <I18nProvider>
-        <ExplorerChartsContainer {...props} />
+        <ExplorerChartsContainer {...props} kibana={kibanaContextMock} />
       </I18nProvider>
     );
 

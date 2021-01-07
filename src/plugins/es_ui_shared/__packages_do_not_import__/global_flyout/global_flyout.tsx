@@ -54,7 +54,7 @@ export const GlobalFlyoutProvider: React.FC = ({ children }) => {
   const [showFlyout, setShowFlyout] = useState(false);
   const [activeContent, setActiveContent] = useState<Content<any> | undefined>(undefined);
 
-  const { id, Component, props, flyoutProps } = activeContent ?? {};
+  const { id, Component, props, flyoutProps, cleanUpFunc } = activeContent ?? {};
 
   const addContent: Context['addContent'] = useCallback((content) => {
     setActiveContent((prev) => {
@@ -77,11 +77,19 @@ export const GlobalFlyoutProvider: React.FC = ({ children }) => {
 
   const removeContent: Context['removeContent'] = useCallback(
     (contentId: string) => {
+      // Note: when we will actually deal with multi content then
+      // there will be more logic here! :)
       if (contentId === id) {
+        setActiveContent(undefined);
+
+        if (cleanUpFunc) {
+          cleanUpFunc();
+        }
+
         closeFlyout();
       }
     },
-    [id, closeFlyout]
+    [id, closeFlyout, cleanUpFunc]
   );
 
   const mergedFlyoutProps = useMemo(() => {
@@ -130,14 +138,6 @@ export const useGlobalFlyout = () => {
   const contents = useRef<Set<string> | undefined>(undefined);
   const { removeContent, addContent: addContentToContext } = ctx;
 
-  useEffect(() => {
-    isMounted.current = true;
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
   const getContents = useCallback(() => {
     if (contents.current === undefined) {
       contents.current = new Set();
@@ -154,13 +154,21 @@ export const useGlobalFlyout = () => {
   );
 
   useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
     return () => {
       if (!isMounted.current) {
         // When the component unmounts, remove all the content it has added to the flyout
         Array.from(getContents()).forEach(removeContent);
       }
     };
-  }, [removeContent]);
+  }, [removeContent, getContents]);
 
   return { ...ctx, addContent };
 };

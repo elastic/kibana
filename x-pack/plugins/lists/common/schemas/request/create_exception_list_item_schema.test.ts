@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 import { getCreateCommentsArrayMock } from '../types/create_comment.mock';
 import { getCommentsMock } from '../types/comment.mock';
 import { CommentsArray } from '../types';
@@ -31,6 +31,7 @@ describe('create_exception_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "description"', () => {
     const payload = getCreateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.description;
     const decoded = createExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -43,6 +44,7 @@ describe('create_exception_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "name"', () => {
     const payload = getCreateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.name;
     const decoded = createExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -55,6 +57,7 @@ describe('create_exception_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "type"', () => {
     const payload = getCreateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete payload.type;
     const decoded = createExceptionListItemSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -67,6 +70,7 @@ describe('create_exception_list_item_schema', () => {
 
   test('it should fail validation when supplied an undefined for "list_id"', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete inputPayload.list_id;
     const decoded = createExceptionListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
@@ -133,6 +137,7 @@ describe('create_exception_list_item_schema', () => {
   test('it should fail validation when supplied an undefined for "entries"', () => {
     const inputPayload = getCreateExceptionListItemSchemaMock();
     const outputPayload = getCreateExceptionListItemSchemaMock();
+    // @ts-expect-error
     delete inputPayload.entries;
     outputPayload.entries = [];
     const decoded = createExceptionListItemSchema.decode(inputPayload);
@@ -163,19 +168,6 @@ describe('create_exception_list_item_schema', () => {
     const outputPayload = getCreateExceptionListItemSchemaMock();
     delete inputPayload.tags;
     outputPayload.tags = [];
-    const decoded = createExceptionListItemSchema.decode(inputPayload);
-    const checked = exactCheck(inputPayload, decoded);
-    const message = pipe(checked, foldLeftRight);
-    delete (message.schema as CreateExceptionListItemSchema).item_id;
-    expect(getPaths(left(message.errors))).toEqual([]);
-    expect(message.schema).toEqual(outputPayload);
-  });
-
-  test('it should pass validation when supplied an undefined for "_tags" but return an array and generate a correct body not counting the auto generated uuid', () => {
-    const inputPayload = getCreateExceptionListItemSchemaMock();
-    const outputPayload = getCreateExceptionListItemSchemaMock();
-    delete inputPayload._tags;
-    outputPayload._tags = [];
     const decoded = createExceptionListItemSchema.decode(inputPayload);
     const checked = exactCheck(inputPayload, decoded);
     const message = pipe(checked, foldLeftRight);

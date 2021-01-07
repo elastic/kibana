@@ -5,12 +5,14 @@
  */
 import { LegacyScopedClusterClient, IRouter } from 'kibana/server';
 
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { isEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
+  features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
 }
 

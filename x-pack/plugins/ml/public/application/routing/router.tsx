@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
-import { HashRouter, Route, RouteProps } from 'react-router-dom';
+import React, { useEffect, FC } from 'react';
+import { useHistory, useLocation, Router, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
-import { IUiSettingsClient, ChromeStart } from 'kibana/public';
+import { AppMountParameters, IUiSettingsClient, ChromeStart } from 'kibana/public';
 import { ChromeBreadcrumb } from 'kibana/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
+
+import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { MlContext, MlContextValue } from '../contexts/ml';
 import { UrlStateProvider } from '../util/url_state';
 
@@ -33,9 +35,11 @@ export interface PageProps {
 }
 
 interface PageDependencies {
-  setBreadcrumbs: ChromeStart['setBreadcrumbs'];
-  indexPatterns: IndexPatternsContract;
   config: IUiSettingsClient;
+  history: AppMountParameters['history'];
+  indexPatterns: IndexPatternsContract;
+  setBreadcrumbs: ChromeStart['setBreadcrumbs'];
+  redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
@@ -44,28 +48,79 @@ export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children 
   );
 };
 
-export const MlRouter: FC<{ pageDeps: PageDependencies }> = ({ pageDeps }) => {
-  const setBreadcrumbs = pageDeps.setBreadcrumbs;
+/**
+ * This component provides compatibility with the previous hash based
+ * URL format used by HashRouter. Even if we migrate all internal URLs
+ * to one without hashes, we should keep this redirect in place to
+ * support legacy bookmarks and as a fallback for unmigrated URLs
+ * from other plugins.
+ */
+const LegacyHashUrlRedirect: FC = ({ children }) => {
+  const history = useHistory();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash.startsWith('#/')) {
+      history.push(location.hash.replace('#', ''));
+    }
+  }, [location.hash]);
+
+  return <>{children}</>;
+};
+
+/**
+ * `MlRoutes` creates a React Router Route for every routeFactory
+ * and passes on the `navigateToPath` helper.
+ */
+const MlRoutes: FC<{
+  pageDeps: PageDependencies;
+}> = ({ pageDeps }) => {
+  const navigateToPath = useNavigateToPath();
+  const {
+    services: {
+      http: { basePath },
+    },
+  } = useMlKibana();
 
   return (
-    <HashRouter>
-      <UrlStateProvider>
-        <div className="ml-app">
-          {Object.entries(routes).map(([name, route]) => (
-            <Route
-              key={name}
-              path={route.path}
-              exact
-              render={(props) => {
-                window.setTimeout(() => {
-                  setBreadcrumbs(route.breadcrumbs);
-                });
-                return route.render(props, pageDeps);
-              }}
-            />
-          ))}
-        </div>
-      </UrlStateProvider>
-    </HashRouter>
+    <>
+      {Object.entries(routes).map(([name, routeFactory]) => {
+        const route = routeFactory(navigateToPath, basePath.get());
+
+        return (
+          <Route
+            key={name}
+            path={route.path}
+            exact
+            render={(props) => {
+              window.setTimeout(() => {
+                pageDeps.setBreadcrumbs(route.breadcrumbs);
+              });
+              return route.render(props, pageDeps);
+            }}
+          />
+        );
+      })}
+    </>
   );
 };
+
+/**
+ * `MlRouter` is based on `BrowserRouter` and takes in `ScopedHistory` provided
+ * by Kibana. `LegacyHashUrlRedirect` provides compatibility with legacy hash based URLs.
+ * `UrlStateProvider` manages state stored in `_g/_a` URL parameters which can be
+ * use in components further down via `useUrlState()`.
+ */
+export const MlRouter: FC<{
+  pageDeps: PageDependencies;
+}> = ({ pageDeps }) => (
+  <Router history={pageDeps.history}>
+    <LegacyHashUrlRedirect>
+      <UrlStateProvider>
+        <div className="ml-app" data-test-subj="mlApp">
+          <MlRoutes pageDeps={pageDeps} />
+        </div>
+      </UrlStateProvider>
+    </LegacyHashUrlRedirect>
+  </Router>
+);

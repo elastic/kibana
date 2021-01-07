@@ -19,8 +19,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '../../http';
+import { CoreUsageDataSetup } from '../../core_usage_data';
 
-export const registerDeleteRoute = (router: IRouter) => {
+interface RouteDependencies {
+  coreUsageData: CoreUsageDataSetup;
+}
+
+export const registerDeleteRoute = (router: IRouter, { coreUsageData }: RouteDependencies) => {
   router.delete(
     {
       path: '/{type}/{id}',
@@ -29,11 +34,19 @@ export const registerDeleteRoute = (router: IRouter) => {
           type: schema.string(),
           id: schema.string(),
         }),
+        query: schema.object({
+          force: schema.maybe(schema.boolean()),
+        }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
-      const result = await context.core.savedObjects.client.delete(type, id);
+      const { force } = req.query;
+
+      const usageStatsClient = coreUsageData.getClient();
+      usageStatsClient.incrementSavedObjectsDelete({ request: req }).catch(() => {});
+
+      const result = await context.core.savedObjects.client.delete(type, id, { force });
       return res.ok({ body: result });
     })
   );

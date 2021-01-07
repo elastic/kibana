@@ -17,14 +17,19 @@ import {
 } from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { createStore, State } from '../../../common/store';
-import { KpiNetworkComponent } from '.';
-import { mockData } from './mock';
+import { NetworkKpiComponent } from '.';
 
-describe('KpiNetwork Component', () => {
+describe('NetworkKpiComponent', () => {
   const state: State = mockGlobalState;
-  const from = '2019-06-15T06:00:00.000Z';
-  const to = '2019-06-18T06:00:00.000Z';
-  const narrowDateRange = jest.fn();
+  const props = {
+    filterQuery: '',
+    from: '2019-06-15T06:00:00.000Z',
+    indexNames: [],
+    narrowDateRange: jest.fn(),
+    setQuery: jest.fn(),
+    skip: true,
+    to: '2019-06-18T06:00:00.000Z',
+  };
 
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(
@@ -46,38 +51,14 @@ describe('KpiNetwork Component', () => {
   });
 
   describe('rendering', () => {
-    test('it renders loading icons', () => {
-      const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
-          <KpiNetworkComponent
-            data={mockData.KpiNetwork}
-            from={from}
-            id="kpiNetwork"
-            loading={true}
-            to={to}
-            narrowDateRange={narrowDateRange}
-          />
-        </ReduxStoreProvider>
-      );
-
-      expect(wrapper.find('KpiNetworkComponent')).toMatchSnapshot();
-    });
-
     test('it renders the default widget', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <KpiNetworkComponent
-            data={mockData.KpiNetwork}
-            from={from}
-            id="kpiNetwork"
-            loading={false}
-            to={to}
-            narrowDateRange={narrowDateRange}
-          />
+          <NetworkKpiComponent {...props} />
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('KpiNetworkComponent')).toMatchSnapshot();
+      expect(wrapper.find('NetworkKpiComponent')).toMatchSnapshot();
     });
   });
 });

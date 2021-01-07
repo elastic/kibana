@@ -4,24 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest, RequestHandlerContext, KibanaResponseFactory } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory, RequestHandlerContext } from 'kibana/server';
 import { coreMock, httpServerMock } from 'src/core/server/mocks';
 import { ReportingCore } from '../../';
-import { createMockReportingCore } from '../../test_helpers';
-import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 import { ReportingInternalSetup } from '../../core';
+import {
+  createMockConfig,
+  createMockConfigSchema,
+  createMockReportingCore,
+} from '../../test_helpers';
+import { authorizedUserPreRoutingFactory } from './authorized_user_pre_routing';
 
 let mockCore: ReportingCore;
-const kbnConfig = {
-  'server.basePath': '/sbp',
-};
-const reportingConfig = {
-  'roles.allow': ['reporting_user'],
-};
-const mockReportingConfig = {
-  get: (...keys: string[]) => (reportingConfig as any)[keys.join('.')] || 'whoah!',
-  kbnConfig: { get: (...keys: string[]) => (kbnConfig as any)[keys.join('.')] },
-};
+const mockConfig: any = { 'server.basePath': '/sbp', 'roles.allow': ['reporting_user'] };
+const mockReportingConfigSchema = createMockConfigSchema(mockConfig);
+const mockReportingConfig = createMockConfig(mockReportingConfigSchema);
 
 const getMockContext = () =>
   (({
@@ -30,7 +27,7 @@ const getMockContext = () =>
 
 const getMockRequest = () =>
   ({
-    url: { port: '5601', query: '', path: '/foo' },
+    url: { port: '5601', search: '', pathname: '/foo' },
     route: { path: '/foo', options: {} },
   } as KibanaRequest);
 
@@ -46,7 +43,7 @@ describe('authorized_user_pre_routing', function () {
     mockCore = await createMockReportingCore(mockReportingConfig);
   });
 
-  it('should return from handler with a "null" user when security plugin is not found', async function () {
+  it('should return from handler with a "false" user when security plugin is not found', async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore
@@ -58,7 +55,7 @@ describe('authorized_user_pre_routing', function () {
 
     let handlerCalled = false;
     authorizedUserPreRouting((user: unknown) => {
-      expect(user).toBe(null); // verify the user is a null value
+      expect(user).toBe(false); // verify the user is a false value
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
     })(getMockContext(), getMockRequest(), mockResponseFactory);
@@ -66,7 +63,7 @@ describe('authorized_user_pre_routing', function () {
     expect(handlerCalled).toBe(true);
   });
 
-  it('should return from handler with a "null" user when security is disabled', async function () {
+  it('should return from handler with a "false" user when security is disabled', async function () {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore
@@ -82,7 +79,7 @@ describe('authorized_user_pre_routing', function () {
 
     let handlerCalled = false;
     authorizedUserPreRouting((user: unknown) => {
-      expect(user).toBe(null); // verify the user is a null value
+      expect(user).toBe(false); // verify the user is a false value
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
     })(getMockContext(), getMockRequest(), mockResponseFactory);
@@ -133,7 +130,7 @@ describe('authorized_user_pre_routing', function () {
     ).toMatchObject({ body: `Sorry, you don't have access to Reporting` });
   });
 
-  it('should return from handler when security is enabled and user has explicitly allowed role', async function (done) {
+  it('should return from handler when security is enabled and user has explicitly allowed role', function (done) {
     mockCore.getPluginSetupDeps = () =>
       (({
         // @ts-ignore

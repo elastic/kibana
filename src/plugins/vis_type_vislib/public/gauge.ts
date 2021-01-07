@@ -19,23 +19,25 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { ColorMode, ColorSchemas, ColorSchemaParams, Labels, Style } from '../../charts/public';
 import { RangeValues, Schemas } from '../../vis_default_editor/public';
 import { AggGroupNames } from '../../data/public';
-import { GaugeOptions } from './components/options';
-import { getGaugeCollections, Alignments, GaugeTypes } from './utils/collections';
-import { ColorModes, ColorSchemas, ColorSchemaParams, Labels, Style } from '../../charts/public';
-import { createVislibVisController } from './vis_controller';
-import { VisTypeVislibDependencies } from './plugin';
+import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+
+import { Alignment, GaugeType, BasicVislibParams, VislibChartType } from './types';
+import { getGaugeCollections } from './editor';
+import { toExpressionAst } from './to_ast';
+import { GaugeOptions } from './editor/components';
 
 export interface Gauge extends ColorSchemaParams {
   backStyle: 'Full';
   gaugeStyle: 'Full';
   orientation: 'vertical';
   type: 'meter';
-  alignment: Alignments;
+  alignment: Alignment;
   colorsRange: RangeValues[];
   extendRange: boolean;
-  gaugeType: GaugeTypes;
+  gaugeType: GaugeType;
   labels: Labels;
   percentageMode: boolean;
   outline?: boolean;
@@ -55,30 +57,31 @@ export interface GaugeVisParams {
   gauge: Gauge;
 }
 
-export const createGaugeVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'gauge',
   title: i18n.translate('visTypeVislib.gauge.gaugeTitle', { defaultMessage: 'Gauge' }),
   icon: 'visGauge',
   description: i18n.translate('visTypeVislib.gauge.gaugeDescription', {
-    defaultMessage:
-      "Gauges indicate the status of a metric. Use it to show how a metric's value relates to reference threshold values.",
+    defaultMessage: 'Show the status of a metric.',
   }),
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
+  toExpressionAst,
   visConfig: {
     defaults: {
-      type: 'gauge',
+      type: VislibChartType.Gauge,
       addTooltip: true,
       addLegend: true,
       isDisplayWarning: false,
       gauge: {
-        alignment: Alignments.AUTOMATIC,
+        alignment: Alignment.Automatic,
         extendRange: true,
         percentageMode: false,
-        gaugeType: GaugeTypes.ARC,
+        gaugeType: GaugeType.Arc,
         gaugeStyle: 'Full',
         backStyle: 'Full',
         orientation: 'vertical',
         colorSchema: ColorSchemas.GreenToRed,
-        gaugeColorMode: ColorModes.LABELS,
+        gaugeColorMode: ColorMode.Labels,
         colorsRange: [
           { from: 0, to: 50 },
           { from: 50, to: 75 },
@@ -109,7 +112,6 @@ export const createGaugeVisTypeDefinition = (deps: VisTypeVislibDependencies) =>
       },
     },
   },
-  visualization: createVislibVisController(deps),
   editorConfig: {
     collections: getGaugeCollections(),
     optionsTemplate: GaugeOptions,
@@ -145,4 +147,4 @@ export const createGaugeVisTypeDefinition = (deps: VisTypeVislibDependencies) =>
     ]),
   },
   useCustomNoDataScreen: true,
-});
+};

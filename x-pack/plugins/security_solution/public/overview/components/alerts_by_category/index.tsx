@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 
 import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/alerts_viewer/translations';
-import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
+import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import {
@@ -19,14 +19,14 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
-import { HostsTableType, HostsType } from '../../../hosts/store/model';
+import { HostsTableType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
 import {
   alertsStackByOptions,
   histogramConfigs,
 } from '../../../common/components/alerts_viewer/histogram_configs';
-import { MatrixHisrogramConfigs } from '../../../common/components/matrix_histogram/types';
+import { MatrixHistogramConfigs } from '../../../common/components/matrix_histogram/types';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
@@ -35,39 +35,32 @@ import { LinkButton } from '../../../common/components/links';
 
 const ID = 'alertsByCategoryOverview';
 
-const NO_FILTERS: Filter[] = [];
-const DEFAULT_QUERY: Query = { query: '', language: 'kuery' };
 const DEFAULT_STACK_BY = 'event.module';
 
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
-  filters?: Filter[];
+  filters: Filter[];
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
-  query?: Query;
+  indexNames: string[];
+  query: Query;
 }
 
 const AlertsByCategoryComponent: React.FC<Props> = ({
   deleteQuery,
-  filters = NO_FILTERS,
+  filters,
   from,
   hideHeaderChildren = false,
   indexPattern,
-  query = DEFAULT_QUERY,
+  indexNames,
+  query,
   setQuery,
   to,
 }) => {
-  useEffect(() => {
-    return () => {
-      if (deleteQuery) {
-        deleteQuery({ id: ID });
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const kibana = useKibana();
+  const {
+    uiSettings,
+    application: { navigateToApp },
+  } = useKibana().services;
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.hosts);
-  const { navigateToApp } = kibana.services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
   const goToHostAlerts = useCallback(
@@ -93,7 +86,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     [goToHostAlerts, formatUrl]
   );
 
-  const alertsByCategoryHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+  const alertsByCategoryHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       defaultStackByOption:
@@ -106,21 +99,34 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     []
   );
 
-  return (
-    <MatrixHistogramContainer
-      endDate={to}
-      filterQuery={convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
+  const filterQuery = useMemo(
+    () =>
+      convertToBuildEsQuery({
+        config: esQuery.getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters,
-      })}
+      }),
+    [filters, indexPattern, uiSettings, query]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (deleteQuery) {
+        deleteQuery({ id: ID });
+      }
+    };
+  }, [deleteQuery]);
+
+  return (
+    <MatrixHistogram
+      endDate={to}
+      filterQuery={filterQuery}
       headerChildren={hideHeaderChildren ? null : alertsCountViewAlertsButton}
       id={ID}
+      indexNames={indexNames}
       setQuery={setQuery}
-      sourceId="default"
       startDate={from}
-      type={HostsType.page}
       {...alertsByCategoryHistogramConfigs}
     />
   );

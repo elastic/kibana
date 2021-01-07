@@ -19,27 +19,35 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { LegacyAPICaller, SharedGlobalConfig } from '../../../../../core/server';
+import { SharedGlobalConfig } from 'kibana/server';
+import { SearchResponse } from 'elasticsearch';
+import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
 import { Usage } from './register';
+interface SearchTelemetry {
+  'search-telemetry': Usage;
+}
+type ESResponse = SearchResponse<SearchTelemetry>;
 
 export function fetchProvider(config$: Observable<SharedGlobalConfig>) {
-  return async (callCluster: LegacyAPICaller): Promise<Usage> => {
+  return async ({ esClient }: CollectorFetchContext): Promise<Usage> => {
     const config = await config$.pipe(first()).toPromise();
-
-    const response = await callCluster('search', {
-      index: config.kibana.index,
-      body: {
-        query: { term: { type: { value: 'search-telemetry' } } },
+    const { body: esResponse } = await esClient.search<ESResponse>(
+      {
+        index: config.kibana.index,
+        body: {
+          query: { term: { type: { value: 'search-telemetry' } } },
+        },
       },
-      ignore: [404],
-    });
-
-    return response.hits.hits.length
-      ? (response.hits.hits[0]._source as Usage)
-      : {
-          successCount: 0,
-          errorCount: 0,
-          averageDuration: null,
-        };
+      { ignore: [404] }
+    );
+    const size = esResponse?.hits?.hits?.length ?? 0;
+    if (!size) {
+      return {
+        successCount: 0,
+        errorCount: 0,
+        averageDuration: null,
+      };
+    }
+    return esResponse.hits.hits[0]._source['search-telemetry'];
   };
 }

@@ -19,7 +19,7 @@ const {
   SPACE_1: { spaceId: SPACE_1_ID },
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
-const { fail404 } = testCaseFailures;
+const { fail400, fail404 } = testCaseFailures;
 
 const createTestCases = (spaceId: string) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
@@ -28,8 +28,18 @@ const createTestCases = (spaceId: string) => {
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail404(spaceId !== DEFAULT_SPACE_ID) },
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, ...fail404(spaceId !== SPACE_2_ID) },
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail400() },
+    // try to delete this object again, this time using the `force` option
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, force: true },
     {
       ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+      ...fail400(spaceId === DEFAULT_SPACE_ID || spaceId === SPACE_1_ID),
+      ...fail404(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
+    },
+    // try to delete this object again, this time using the `force` option
+    {
+      ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
+      force: true,
       ...fail404(spaceId !== DEFAULT_SPACE_ID && spaceId !== SPACE_1_ID),
     },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },

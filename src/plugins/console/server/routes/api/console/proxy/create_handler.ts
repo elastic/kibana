@@ -21,7 +21,7 @@ import { Agent, IncomingMessage } from 'http';
 import * as url from 'url';
 import { pick, trimStart, trimEnd } from 'lodash';
 
-import { KibanaRequest, Logger, RequestHandler } from 'kibana/server';
+import { KibanaRequest, RequestHandler } from 'kibana/server';
 
 import { ESConfigForProxy } from '../../../../types';
 import {
@@ -31,19 +31,14 @@ import {
   setHeaders,
 } from '../../../../lib';
 
-import { Body, Query } from './validation_config';
-
 // TODO: find a better way to get information from the request like remoteAddress and remotePort
 // for forwarding.
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../core/server/http/router';
 
-export interface CreateHandlerDependencies {
-  log: Logger;
-  readLegacyESConfig: () => ESConfigForProxy;
-  pathFilters: RegExp[];
-  proxyConfigCollection: ProxyConfigCollection;
-}
+import { RouteDependencies } from '../../../';
+
+import { Body, Query } from './validation_config';
 
 function toURL(base: string, path: string) {
   const urlResult = new url.URL(`${trimEnd(base, '/')}/${trimStart(path, '/')}`);
@@ -120,14 +115,8 @@ function getProxyHeaders(req: KibanaRequest) {
 
 export const createHandler = ({
   log,
-  readLegacyESConfig,
-  pathFilters,
-  proxyConfigCollection,
-}: CreateHandlerDependencies): RequestHandler<unknown, Query, Body> => async (
-  ctx,
-  request,
-  response
-) => {
+  proxy: { readLegacyESConfig, pathFilters, proxyConfigCollection },
+}: RouteDependencies): RequestHandler<unknown, Query, Body> => async (ctx, request, response) => {
   const { body, query } = request;
   const { path, method } = query;
 
@@ -140,7 +129,7 @@ export const createHandler = ({
     });
   }
 
-  const legacyConfig = readLegacyESConfig();
+  const legacyConfig = await readLegacyESConfig();
   const { hosts } = legacyConfig;
   let esIncomingMessage: IncomingMessage;
 

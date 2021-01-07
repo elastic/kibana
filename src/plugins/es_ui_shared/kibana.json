@@ -4,7 +4,6 @@
   "ui": true,
   "server": true,
   "extraPublicDirs": [
-    "static/ace_x_json/hooks",
     "static/validators/string",
     "static/forms/hook_form_lib",
     "static/forms/helpers",

@@ -2,6 +2,13 @@
 
 exports[`getAllEnvironments fetches all environments 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+      "error",
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "environments": Object {
@@ -16,15 +23,6 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-                "error",
-                "metric",
-              ],
-            },
-          },
-          Object {
             "term": Object {
               "service.name": "test",
             },
@@ -34,16 +32,18 @@ Object {
     },
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
 }
 `;
 
 exports[`getAllEnvironments fetches all environments with includeMissing 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+      "error",
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "environments": Object {
@@ -58,15 +58,6 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-                "error",
-                "metric",
-              ],
-            },
-          },
-          Object {
             "term": Object {
               "service.name": "test",
             },
@@ -76,10 +67,5 @@ Object {
     },
     "size": 0,
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
 }
 `;

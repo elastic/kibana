@@ -1,8 +1,13 @@
 .dshAppContainer {
   display: flex;
   flex-direction: column;
-  height: 100%; // TODO #64541 - can delete this
   flex: 1;
+}
+
+.dashboardViewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .dshStartScreen {
@@ -19,6 +24,7 @@
 }
 
 .dshEmptyWidget {
+  background-color: $euiColorLightestShade;
   border: $euiBorderThin;
   border-style: dashed;
   border-radius: $euiBorderRadius;

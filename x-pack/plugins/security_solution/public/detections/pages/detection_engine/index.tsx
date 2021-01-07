@@ -5,37 +5,32 @@
  */
 
 import React from 'react';
-import { Route, Switch, RouteComponentProps } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 
-import { ManageUserInfo } from '../../components/user_info';
 import { CreateRulePage } from './rules/create';
 import { DetectionEnginePage } from './detection_engine';
 import { EditRulePage } from './rules/edit';
 import { RuleDetailsPage } from './rules/details';
 import { RulesPage } from './rules';
 
-type Props = Partial<RouteComponentProps<{}>> & { url: string };
-
-const DetectionEngineContainerComponent: React.FC<Props> = () => (
-  <ManageUserInfo>
-    <Switch>
-      <Route path="/rules/id/:detailName/edit">
-        <EditRulePage />
-      </Route>
-      <Route path="/rules/id/:detailName">
-        <RuleDetailsPage />
-      </Route>
-      <Route path="/rules/create">
-        <CreateRulePage />
-      </Route>
-      <Route path="/rules">
-        <RulesPage />
-      </Route>
-      <Route exact path="" strict>
-        <DetectionEnginePage />
-      </Route>
-    </Switch>
-  </ManageUserInfo>
+const DetectionEngineContainerComponent: React.FC = () => (
+  <Switch>
+    <Route path="/rules/id/:detailName/edit">
+      <EditRulePage />
+    </Route>
+    <Route path="/rules/id/:detailName">
+      <RuleDetailsPage />
+    </Route>
+    <Route path="/rules/create">
+      <CreateRulePage />
+    </Route>
+    <Route path="/rules">
+      <RulesPage />
+    </Route>
+    <Route exact path="" strict>
+      <DetectionEnginePage />
+    </Route>
+  </Switch>
 );
 
 export const DetectionEngineContainer = React.memo(DetectionEngineContainerComponent);

@@ -70,13 +70,13 @@ function NewsItem({ item }: { item: INewsItem }) {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiLink href={item.link_url.en} target="_blank">
-                  <EuiText size="xs">
+                <EuiText size="xs">
+                  <EuiLink href={item.link_url.en} target="_blank" external>
                     {i18n.translate('xpack.observability.news.readFullStory', {
                       defaultMessage: 'Read full story',
                     })}
-                  </EuiText>
-                </EuiLink>
+                  </EuiLink>
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

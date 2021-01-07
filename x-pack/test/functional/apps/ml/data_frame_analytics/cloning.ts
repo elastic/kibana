@@ -13,8 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Flaky: https://github.com/elastic/kibana/issues/70885
-  describe.skip('jobs cloning supported by UI form', function () {
+  describe('jobs cloning supported by UI form', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -149,7 +148,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
-          await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.job.id as string);
+          await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.job.id as string, 1);
           await ml.dataFrameAnalyticsTable.cloneJob(testData.job.id as string);
         });
 
@@ -160,66 +159,65 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testResources.deleteIndexPatternByTitle(cloneDestIndex);
         });
 
-        it('should open the wizard with a proper header', async () => {
+        it('opens the existing job in the data frame analytics job wizard', async () => {
+          await ml.testExecution.logTestStep('should open the wizard with a proper header');
           const headerText = await ml.dataFrameAnalyticsCreation.getHeaderText();
           expect(headerText).to.match(/Clone job/);
           await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
         });
 
-        it('should have correct init form values for config step', async () => {
+        it('navigates through the wizard, checks and sets all needed fields', async () => {
+          await ml.testExecution.logTestStep(
+            'should have correct init form values for config step'
+          );
           await ml.dataFrameAnalyticsCreation.assertInitialCloneJobConfigStep(
             testData.job as DataFrameAnalyticsConfig
           );
-        });
 
-        it('should continue to the additional options step', async () => {
+          await ml.testExecution.logTestStep('should continue to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
-        });
 
-        it('should have correct init form values for additional options step', async () => {
+          await ml.testExecution.logTestStep(
+            'should have correct init form values for additional options step'
+          );
           await ml.dataFrameAnalyticsCreation.assertInitialCloneJobAdditionalOptionsStep(
             testData.job.analysis as DataFrameAnalyticsConfig['analysis']
           );
-        });
 
-        it('should continue to the details step', async () => {
+          await ml.testExecution.logTestStep('should continue to the details step');
           await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
-        });
 
-        it('should have correct init form values for details step', async () => {
+          await ml.testExecution.logTestStep(
+            'should have correct init form values for details step'
+          );
           await ml.dataFrameAnalyticsCreation.assertInitialCloneJobDetailsStep(
             testData.job as DataFrameAnalyticsConfig
           );
           await ml.dataFrameAnalyticsCreation.setJobId(cloneJobId);
           await ml.dataFrameAnalyticsCreation.setDestIndex(cloneDestIndex);
-        });
 
-        it('should continue to the create step', async () => {
+          await ml.testExecution.logTestStep('should continue to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
         });
 
-        it('should have enabled Create button on a valid form input', async () => {
+        it('runs the clone analytics job and displays it correctly in the job list', async () => {
+          await ml.testExecution.logTestStep(
+            'should have enabled Create button on a valid form input'
+          );
           expect(await ml.dataFrameAnalyticsCreation.isCreateButtonDisabled()).to.be(false);
-        });
 
-        it('should create a clone job', async () => {
+          await ml.testExecution.logTestStep('should create a clone job');
           await ml.dataFrameAnalyticsCreation.createAnalyticsJob(cloneJobId);
-        });
 
-        it('should finish analytics processing', async () => {
+          await ml.testExecution.logTestStep('should finish analytics processing');
           await ml.dataFrameAnalytics.waitForAnalyticsCompletion(cloneJobId);
-        });
 
-        it('should display the created job in the analytics table', async () => {
+          await ml.testExecution.logTestStep(
+            'should display the created job in the analytics table'
+          );
           await ml.dataFrameAnalyticsCreation.navigateToJobManagementPage();
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
-          await ml.dataFrameAnalyticsTable.filterWithSearchString(cloneJobId);
-          const rows = await ml.dataFrameAnalyticsTable.parseAnalyticsTable();
-          const filteredRows = rows.filter((row) => row.id === cloneJobId);
-          expect(filteredRows).to.have.length(
-            1,
-            `Filtered analytics table should have 1 row for job id '${cloneJobId}' (got matching items '${filteredRows}')`
-          );
+          await ml.dataFrameAnalyticsTable.filterWithSearchString(cloneJobId, 1);
         });
       });
     }

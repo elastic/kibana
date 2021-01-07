@@ -8,7 +8,7 @@ import React from 'react';
 import { getOr } from 'lodash/fp';
 
 import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';
-import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
+import { useNetworkTopNFlow } from '../../containers/network_top_n_flow';
 import { networkModel } from '../../store';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
@@ -19,48 +19,42 @@ const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 export const IPsQueryTabBody = ({
   endDate,
   filterQuery,
+  indexNames,
   skip,
   startDate,
   setQuery,
   flowTarget,
-}: IPsQueryTabBodyProps) => (
-  <NetworkTopNFlowQuery
-    endDate={endDate}
-    flowTarget={flowTarget}
-    filterQuery={filterQuery}
-    skip={skip}
-    sourceId="default"
-    startDate={startDate}
-    type={networkModel.NetworkType.page}
-  >
-    {({
-      id,
-      inspect,
-      isInspected,
-      loading,
-      loadPage,
-      networkTopNFlow,
-      pageInfo,
-      refetch,
-      totalCount,
-    }) => (
-      <NetworkTopNFlowTableManage
-        data={networkTopNFlow}
-        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-        flowTargeted={flowTarget}
-        id={id}
-        inspect={inspect}
-        isInspect={isInspected}
-        loading={loading}
-        loadPage={loadPage}
-        refetch={refetch}
-        setQuery={setQuery}
-        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-        totalCount={totalCount}
-        type={networkModel.NetworkType.page}
-      />
-    )}
-  </NetworkTopNFlowQuery>
-);
+}: IPsQueryTabBodyProps) => {
+  const [
+    loading,
+    { id, inspect, isInspected, loadPage, networkTopNFlow, pageInfo, refetch, totalCount },
+  ] = useNetworkTopNFlow({
+    endDate,
+    flowTarget,
+    filterQuery,
+    indexNames,
+    skip,
+    startDate,
+    type: networkModel.NetworkType.page,
+  });
+
+  return (
+    <NetworkTopNFlowTableManage
+      data={networkTopNFlow}
+      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+      flowTargeted={flowTarget}
+      id={id}
+      inspect={inspect}
+      isInspect={isInspected}
+      loading={loading}
+      loadPage={loadPage}
+      refetch={refetch}
+      setQuery={setQuery}
+      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+      totalCount={totalCount}
+      type={networkModel.NetworkType.page}
+    />
+  );
+};
 
 IPsQueryTabBody.displayName = 'IPsQueryTabBody';

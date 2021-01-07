@@ -522,6 +522,53 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async assertTransformAdvancedSettingsAccordionExists() {
+      await testSubjects.existOrFail('transformWizardAccordionAdvancedSettings');
+    },
+
+    // for now we expect this to be used only for opening the accordion
+    async openTransformAdvancedSettingsAccordion() {
+      await this.assertTransformAdvancedSettingsAccordionExists();
+      await testSubjects.click('transformWizardAccordionAdvancedSettings');
+      await this.assertTransformFrequencyInputExists();
+      await this.assertTransformMaxPageSearchSizeInputExists();
+    },
+
+    async assertTransformFrequencyInputExists() {
+      await testSubjects.existOrFail('transformFrequencyInput');
+      expect(await testSubjects.isDisplayed('transformFrequencyInput')).to.eql(
+        true,
+        `Expected 'Frequency' input to be displayed`
+      );
+    },
+
+    async assertTransformFrequencyValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute('transformFrequencyInput', 'value');
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Transform frequency input text should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async assertTransformMaxPageSearchSizeInputExists() {
+      await testSubjects.existOrFail('transformMaxPageSearchSizeInput');
+      expect(await testSubjects.isDisplayed('transformMaxPageSearchSizeInput')).to.eql(
+        true,
+        `Expected 'Maximum page search size' input to be displayed`
+      );
+    },
+
+    async assertTransformMaxPageSearchSizeValue(expectedValue: number) {
+      const actualValue = await testSubjects.getAttribute(
+        'transformMaxPageSearchSizeInput',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Transform maximum page search size input text should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
     async assertCreateAndStartButtonExists() {
       await testSubjects.existOrFail('transformWizardCreateAndStartButton');
       expect(await testSubjects.isDisplayed('transformWizardCreateAndStartButton')).to.eql(

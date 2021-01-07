@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Feature } from '../../../features/server';
+import { KibanaFeature } from '../../../features/server';
 
-export function validateReservedPrivileges(features: Feature[]) {
+export function validateReservedPrivileges(features: KibanaFeature[]) {
   const seenPrivilegeIds = new Set<string>();
 
   for (const feature of features) {

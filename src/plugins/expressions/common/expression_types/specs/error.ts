@@ -20,18 +20,16 @@
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
 import { ExpressionValueRender } from './render';
 import { getType } from '../get_type';
+import { SerializableState } from '../../../../kibana_utils/common';
+import { ErrorLike } from '../../util';
 
 const name = 'error';
 
 export type ExpressionValueError = ExpressionValueBoxed<
   'error',
   {
-    error: {
-      message: string;
-      name?: string;
-      stack?: string;
-    };
-    info?: unknown;
+    error: ErrorLike;
+    info?: SerializableState;
   }
 >;
 

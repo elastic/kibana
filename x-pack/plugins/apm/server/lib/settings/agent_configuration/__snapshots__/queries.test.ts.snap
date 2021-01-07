@@ -84,6 +84,41 @@ Object {
 }
 `;
 
+exports[`agent configuration queries getAllEnvironments fetches all environments 1`] = `
+Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+      "error",
+      "metric",
+    ],
+  },
+  "body": Object {
+    "aggs": Object {
+      "environments": Object {
+        "terms": Object {
+          "field": "service.environment",
+          "missing": undefined,
+          "size": 100,
+        },
+      },
+    },
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "service.name": "foo",
+            },
+          },
+        ],
+      },
+    },
+    "size": 0,
+  },
+}
+`;
+
 exports[`agent configuration queries getExistingEnvironmentsForService fetches unavailable environments 1`] = `
 Object {
   "body": Object {
@@ -92,7 +127,7 @@ Object {
         "terms": Object {
           "field": "service.environment",
           "missing": "ALL_OPTION_VALUE",
-          "size": 50,
+          "size": 100,
         },
       },
     },
@@ -115,37 +150,26 @@ Object {
 
 exports[`agent configuration queries getServiceNames fetches service names 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "transaction",
+      "error",
+      "metric",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "services": Object {
         "terms": Object {
           "field": "service.name",
+          "min_doc_count": 0,
           "size": 50,
         },
       },
     },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "terms": Object {
-              "processor.event": Array [
-                "transaction",
-                "error",
-                "metric",
-              ],
-            },
-          },
-        ],
-      },
-    },
     "size": 0,
+    "timeout": "1ms",
   },
-  "index": Array [
-    "myIndex",
-    "myIndex",
-    "myIndex",
-  ],
 }
 `;
 

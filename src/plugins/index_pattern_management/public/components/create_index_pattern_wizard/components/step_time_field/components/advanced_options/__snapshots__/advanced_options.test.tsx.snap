@@ -7,7 +7,7 @@ exports[`AdvancedOptions should hide if not showing 1`] = `
     onClick={[Function]}
   >
     <FormattedMessage
-      defaultMessage="Show advanced options"
+      defaultMessage="Show advanced settings"
       id="indexPatternManagement.createIndexPattern.stepTime.options.showButton"
       values={Object {}}
     />
@@ -25,7 +25,7 @@ exports[`AdvancedOptions should render normally 1`] = `
     onClick={[Function]}
   >
     <FormattedMessage
-      defaultMessage="Hide advanced options"
+      defaultMessage="Hide advanced settings"
       id="indexPatternManagement.createIndexPattern.stepTime.options.hideButton"
       values={Object {}}
     />

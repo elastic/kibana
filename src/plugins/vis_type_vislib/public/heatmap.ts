@@ -18,17 +18,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Position } from '@elastic/charts';
 
 import { RangeValues, Schemas } from '../../vis_default_editor/public';
 import { AggGroupNames } from '../../data/public';
-import { AxisTypes, getHeatmapCollections, Positions, ScaleTypes } from './utils/collections';
-import { HeatmapOptions } from './components/options';
-import { createVislibVisController } from './vis_controller';
-import { TimeMarker } from './vislib/visualizations/time_marker';
-import { CommonVislibParams, ValueAxis } from './types';
-import { VisTypeVislibDependencies } from './plugin';
 import { ColorSchemas, ColorSchemaParams } from '../../charts/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../plugins/visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../visualizations/public';
+import { ValueAxis, ScaleType, AxisType } from '../../vis_type_xy/public';
+
+import { HeatmapOptions, getHeatmapCollections } from './editor';
+import { TimeMarker } from './vislib/visualizations/time_marker';
+import { CommonVislibParams, BasicVislibParams, VislibChartType } from './types';
+import { toExpressionAst } from './to_ast';
 
 export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams {
   type: 'heatmap';
@@ -42,24 +43,22 @@ export interface HeatmapVisParams extends CommonVislibParams, ColorSchemaParams 
   times: TimeMarker[];
 }
 
-export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+export const heatmapVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'heatmap',
-  title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat Map' }),
+  title: i18n.translate('visTypeVislib.heatmap.heatmapTitle', { defaultMessage: 'Heat map' }),
   icon: 'heatmap',
   description: i18n.translate('visTypeVislib.heatmap.heatmapDescription', {
-    defaultMessage: 'Shade cells within a matrix',
+    defaultMessage: 'Shade data in cells in a matrix.',
   }),
-  getSupportedTriggers: () => {
-    return [VIS_EVENT_TO_TRIGGER.filter];
-  },
-  visualization: createVislibVisController(deps),
+  toExpressionAst,
+  getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   visConfig: {
     defaults: {
-      type: 'heatmap',
+      type: VislibChartType.Heatmap,
       addTooltip: true,
       addLegend: true,
       enableHover: false,
-      legendPosition: Positions.RIGHT,
+      legendPosition: Position.Right,
       times: [],
       colorsNumber: 4,
       colorSchema: ColorSchemas.Greens,
@@ -71,9 +70,9 @@ export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) 
         {
           show: false,
           id: 'ValueAxis-1',
-          type: AxisTypes.VALUE,
+          type: AxisType.Value,
           scale: {
-            type: ScaleTypes.LINEAR,
+            type: ScaleType.Linear,
             defaultYExtents: false,
           },
           labels: {
@@ -85,9 +84,6 @@ export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) 
         },
       ],
     },
-  },
-  events: {
-    brush: { disabled: false },
   },
   editorConfig: {
     collections: getHeatmapCollections(),
@@ -142,4 +138,4 @@ export const createHeatmapVisTypeDefinition = (deps: VisTypeVislibDependencies) 
       },
     ]),
   },
-});
+};

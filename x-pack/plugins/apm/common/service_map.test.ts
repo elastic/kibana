@@ -8,7 +8,7 @@ import { License } from '../../licensing/common/license';
 import * as serviceMap from './service_map';
 
 describe('service map helpers', () => {
-  describe('isValidPlatinumLicense', () => {
+  describe('isActivePlatinumLicense', () => {
     describe('with an expired license', () => {
       it('returns false', () => {
         const license = new License({
@@ -22,7 +22,7 @@ describe('service map helpers', () => {
           signature: 'test signature',
         });
 
-        expect(serviceMap.isValidPlatinumLicense(license)).toEqual(false);
+        expect(serviceMap.isActivePlatinumLicense(license)).toEqual(false);
       });
     });
 
@@ -39,7 +39,7 @@ describe('service map helpers', () => {
           signature: 'test signature',
         });
 
-        expect(serviceMap.isValidPlatinumLicense(license)).toEqual(false);
+        expect(serviceMap.isActivePlatinumLicense(license)).toEqual(false);
       });
     });
 
@@ -56,7 +56,7 @@ describe('service map helpers', () => {
           signature: 'test signature',
         });
 
-        expect(serviceMap.isValidPlatinumLicense(license)).toEqual(true);
+        expect(serviceMap.isActivePlatinumLicense(license)).toEqual(true);
       });
     });
 
@@ -73,7 +73,7 @@ describe('service map helpers', () => {
           signature: 'test signature',
         });
 
-        expect(serviceMap.isValidPlatinumLicense(license)).toEqual(true);
+        expect(serviceMap.isActivePlatinumLicense(license)).toEqual(true);
       });
     });
 
@@ -90,7 +90,7 @@ describe('service map helpers', () => {
           signature: 'test signature',
         });
 
-        expect(serviceMap.isValidPlatinumLicense(license)).toEqual(true);
+        expect(serviceMap.isActivePlatinumLicense(license)).toEqual(true);
       });
     });
   });

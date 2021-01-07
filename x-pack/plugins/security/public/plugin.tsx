@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SecurityOssPluginSetup, SecurityOssPluginStart } from 'src/plugins/security_oss/public';
 import {
   CoreSetup,
   CoreStart,
@@ -32,9 +33,11 @@ import { AuthenticationService, AuthenticationServiceSetup } from './authenticat
 import { ConfigType } from './config';
 import { ManagementService } from './management';
 import { accountManagementApp } from './account_management';
+import { SecurityCheckupService } from './security_checkup';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
+  securityOss: SecurityOssPluginSetup;
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
 }
@@ -42,6 +45,7 @@ export interface PluginSetupDependencies {
 export interface PluginStartDependencies {
   data: DataPublicPluginStart;
   features: FeaturesPluginStart;
+  securityOss: SecurityOssPluginStart;
   management?: ManagementStart;
 }
 
@@ -58,6 +62,7 @@ export class SecurityPlugin
   private readonly navControlService = new SecurityNavControlService();
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly managementService = new ManagementService();
+  private readonly securityCheckupService = new SecurityCheckupService();
   private authc!: AuthenticationServiceSetup;
   private readonly config: ConfigType;
 
@@ -67,7 +72,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { home, licensing, management }: PluginSetupDependencies
+    { home, licensing, management, securityOss }: PluginSetupDependencies
   ) {
     const { http, notifications } = core;
     const { anonymousPaths } = http;
@@ -82,8 +87,11 @@ export class SecurityPlugin
 
     const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
 
+    this.securityCheckupService.setup({ securityOssSetup: securityOss });
+
     this.authc = this.authenticationService.setup({
       application: core.application,
+      fatalErrors: core.fatalErrors,
       config: this.config,
       getStartServices: core.getStartServices,
       http: core.http,
@@ -115,16 +123,16 @@ export class SecurityPlugin
       home.featureCatalogue.register({
         id: 'security',
         title: i18n.translate('xpack.security.registerFeature.securitySettingsTitle', {
-          defaultMessage: 'Security Settings',
+          defaultMessage: 'Manage permissions',
         }),
         description: i18n.translate('xpack.security.registerFeature.securitySettingsDescription', {
-          defaultMessage:
-            'Protect your data and easily manage who has access to what with users and roles.',
+          defaultMessage: 'Control who has access and what tasks they can perform.',
         }),
         icon: 'securityApp',
-        path: '/app/management/security/users',
+        path: '/app/management/security/roles',
         showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
+        order: 600,
       });
     }
 
@@ -136,12 +144,15 @@ export class SecurityPlugin
     };
   }
 
-  public start(core: CoreStart, { management }: PluginStartDependencies) {
+  public start(core: CoreStart, { management, securityOss }: PluginStartDependencies) {
     this.sessionTimeout.start();
-    this.navControlService.start({ core });
+    this.securityCheckupService.start({ securityOssStart: securityOss, docLinks: core.docLinks });
+
     if (management) {
-      this.managementService.start();
+      this.managementService.start({ capabilities: core.application.capabilities });
     }
+
+    return { navControlService: this.navControlService.start({ core }) };
   }
 
   public stop() {
@@ -149,6 +160,7 @@ export class SecurityPlugin
     this.navControlService.stop();
     this.securityLicenseService.stop();
     this.managementService.stop();
+    this.securityCheckupService.stop();
   }
 }
 

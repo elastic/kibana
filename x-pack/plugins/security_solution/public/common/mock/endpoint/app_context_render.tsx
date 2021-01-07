@@ -17,7 +17,7 @@ import { apolloClientObservable, kibanaObservable } from '../test_providers';
 import { createStore, State } from '../../store';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
-import { createKibanaContextProviderMock } from '../kibana_react';
+import { createKibanaContextProviderMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createSecuritySolutionStorageMock } from '..';
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
@@ -29,7 +29,7 @@ export interface AppContextTestRender {
   store: Store<State>;
   history: ReturnType<typeof createMemoryHistory>;
   coreStart: ReturnType<typeof coreMock.createStart>;
-  depsStart: Pick<StartPlugins, 'data' | 'ingestManager'>;
+  depsStart: Pick<StartPlugins, 'data' | 'fleet'>;
   middlewareSpy: MiddlewareActionSpyHelper;
   /**
    * A wrapper around `AppRootContext` component. Uses the mocked modules as input to the

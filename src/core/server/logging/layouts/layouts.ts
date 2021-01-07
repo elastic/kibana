@@ -18,23 +18,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { Layout } from '@kbn/logging';
+import { assertNever } from '@kbn/std';
 
-import { assertNever } from '../../../utils';
-import { LogRecord } from '../log_record';
 import { JsonLayout, JsonLayoutConfigType } from './json_layout';
 import { PatternLayout, PatternLayoutConfigType } from './pattern_layout';
 
 const { oneOf } = schema;
 
-type LayoutConfigType = PatternLayoutConfigType | JsonLayoutConfigType;
-
-/**
- * Entity that can format `LogRecord` instance into a string.
- * @internal
- */
-export interface Layout {
-  format(record: LogRecord): string;
-}
+export type LayoutConfigType = PatternLayoutConfigType | JsonLayoutConfigType;
 
 /** @internal */
 export class Layouts {

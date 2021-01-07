@@ -5,8 +5,55 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
+        "axisTitlesVisibilitySettings": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "x": Array [
+                    true,
+                  ],
+                  "yLeft": Array [
+                    true,
+                  ],
+                  "yRight": Array [
+                    true,
+                  ],
+                },
+                "function": "lens_xy_axisTitlesVisibilityConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "description": Array [
+          "",
+        ],
         "fittingFunction": Array [
           "Carry",
+        ],
+        "gridlinesVisibilitySettings": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "x": Array [
+                    false,
+                  ],
+                  "yLeft": Array [
+                    true,
+                  ],
+                  "yRight": Array [
+                    true,
+                  ],
+                },
+                "function": "lens_xy_gridlinesConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
         ],
         "layers": Array [
           Object {
@@ -73,11 +120,42 @@ Object {
             "type": "expression",
           },
         ],
+        "tickLabelsVisibilitySettings": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "x": Array [
+                    false,
+                  ],
+                  "yLeft": Array [
+                    true,
+                  ],
+                  "yRight": Array [
+                    true,
+                  ],
+                },
+                "function": "lens_xy_tickLabelsConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "title": Array [
+          "",
+        ],
+        "valueLabels": Array [
+          "hide",
+        ],
         "xTitle": Array [
-          "col_a",
+          "",
+        ],
+        "yRightTitle": Array [
+          "",
         ],
         "yTitle": Array [
-          "col_b",
+          "",
         ],
       },
       "function": "lens_xy_chart",

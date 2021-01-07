@@ -45,7 +45,7 @@ export function registerValueSuggestionsRoute(
           {
             field: schema.string(),
             query: schema.string(),
-            boolFilter: schema.maybe(schema.any()),
+            filters: schema.maybe(schema.any()),
           },
           { unknowns: 'allow' }
         ),
@@ -53,7 +53,7 @@ export function registerValueSuggestionsRoute(
     },
     async (context, request, response) => {
       const config = await config$.pipe(first()).toPromise();
-      const { field: fieldName, query, boolFilter } = request.body;
+      const { field: fieldName, query, filters } = request.body;
       const { index } = request.params;
       const { client } = context.core.elasticsearch.legacy;
       const signal = getRequestAbortedSignal(request.events.aborted$);
@@ -66,7 +66,7 @@ export function registerValueSuggestionsRoute(
       const indexPattern = await findIndexPatternById(context.core.savedObjects.client, index);
 
       const field = indexPattern && getFieldByName(fieldName, indexPattern);
-      const body = await getBody(autocompleteSearchOptions, field || fieldName, query, boolFilter);
+      const body = await getBody(autocompleteSearchOptions, field || fieldName, query, filters);
 
       try {
         const result = await client.callAsCurrentUser('search', { index, body }, { signal });
@@ -84,10 +84,11 @@ export function registerValueSuggestionsRoute(
 }
 
 async function getBody(
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
   query: string,
-  boolFilter: Filter[] = []
+  filters: Filter[] = []
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
 
@@ -107,7 +108,7 @@ async function getBody(
     terminate_after,
     query: {
       bool: {
-        filter: boolFilter,
+        filter: filters,
       },
     },
     aggs: {

@@ -51,6 +51,7 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
         '--telemetry.optIn=false',
+        '--savedObjects.maxImportPayloadBytes=10485760',
       ],
     },
 
@@ -58,6 +59,7 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+        'visualization:visualize:legacyChartsLibrary': true,
       },
     },
 
@@ -229,6 +231,21 @@ export default async function ({ readConfigFile }) {
           kibana: [],
         },
 
+        kibana_timefield: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['without-timefield', 'with-timefield'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+
         kibana_large_strings: {
           elasticsearch: {
             cluster: [],
@@ -264,7 +281,7 @@ export default async function ({ readConfigFile }) {
             cluster: [],
             indices: [
               {
-                names: ['animals-*'],
+                names: ['animals-*', 'dogbreeds'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },
@@ -272,6 +289,18 @@ export default async function ({ readConfigFile }) {
             run_as: [],
           },
           kibana: [],
+        },
+
+        test_alias1_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['alias1'],
+                privileges: ['read', 'view_index_metadata'],
+              },
+            ],
+          },
         },
       },
       defaultRoles: ['test_logstash_reader', 'kibana_admin'],

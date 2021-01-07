@@ -6,6 +6,8 @@
 
 import { Action } from 'redux-actions';
 import { IHttpFetchError } from 'src/core/public';
+import { Alert } from '../../../../alerts/common';
+import { UptimeAlertTypeParams } from '../alerts/alerts';
 
 export interface AsyncAction<Payload, SuccessPayload> {
   get: (payload: Payload) => Action<Payload>;
@@ -52,4 +54,11 @@ export interface DeleteJobResults {
     [status: string]: boolean;
     error?: any;
   };
+}
+
+export interface AlertsResult {
+  page: number;
+  perPage: number;
+  total: number;
+  data: Array<Alert<UptimeAlertTypeParams>>;
 }

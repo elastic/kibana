@@ -6,6 +6,8 @@
 
 import {
   EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPageContent,
   EuiSpacer,
   EuiText,
@@ -20,8 +22,9 @@ import { Component, default as React, Fragment } from 'react';
 import { Subscription } from 'rxjs';
 import { ApplicationStart, ToastsSetup } from 'src/core/public';
 import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
+import { JOB_STATUSES as JobStatuses } from '../../common/constants';
 import { Poller } from '../../common/poller';
-import { JobStatuses } from '../../constants';
+import { durationToNumber } from '../../common/schema_utils';
 import { checkLicense } from '../lib/license_check';
 import { JobQueueEntry, ReportingAPIClient } from '../lib/reporting_api_client';
 import { ClientConfigType } from '../plugin';
@@ -31,23 +34,24 @@ import {
   ReportErrorButton,
   ReportInfoButton,
 } from './buttons';
+import { ReportDiagnostic } from './report_diagnostic';
 
 export interface Job {
   id: string;
   type: string;
   object_type: string;
   object_title: string;
-  created_by?: string;
+  created_by?: string | false;
   created_at: string;
   started_at?: string;
   completed_at?: string;
   status: string;
   statusLabel: string;
-  max_size_reached: boolean;
+  max_size_reached?: boolean;
   attempts: number;
   max_attempts: number;
   csv_contains_formulas: boolean;
-  warnings: string[];
+  warnings?: string[];
 }
 
 export interface Props {
@@ -134,23 +138,38 @@ class ReportListingUi extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
-        <EuiTitle>
-          <h1>
-            <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
-          </h1>
-        </EuiTitle>
-        <EuiText color="subdued" size="s">
-          <p>
-            <FormattedMessage
-              id="xpack.reporting.listing.reports.subtitle"
-              defaultMessage="Find reports generated in Kibana applications here"
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer />
-        {this.renderTable()}
-      </EuiPageContent>
+      <div>
+        <EuiPageContent horizontalPosition="center" className="euiPageBody--restrictWidth-default">
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.reporting.listing.reportstitle"
+                    defaultMessage="Reports"
+                  />
+                </h1>
+              </EuiTitle>
+              <EuiText color="subdued" size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.reporting.listing.reports.subtitle"
+                    defaultMessage="Get reports generated in Kibana applications."
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          {this.renderTable()}
+        </EuiPageContent>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
+          <EuiFlexItem grow={false}>
+            <ReportDiagnostic apiClient={this.props.apiClient} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     );
   }
 
@@ -165,17 +184,19 @@ class ReportListingUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
+    const { pollConfig, license$ } = this.props;
+    const pollFrequencyInMillis = durationToNumber(pollConfig.jobsRefresh.interval);
     this.poller = new Poller({
       functionToPoll: () => {
         return this.fetchJobs();
       },
-      pollFrequencyInMillis: this.props.pollConfig.jobsRefresh.interval,
+      pollFrequencyInMillis,
       trailing: false,
       continuePollingOnError: true,
-      pollFrequencyErrorMultiplier: this.props.pollConfig.jobsRefresh.intervalErrorMultiplier,
+      pollFrequencyErrorMultiplier: pollConfig.jobsRefresh.intervalErrorMultiplier,
     });
     this.poller.start();
-    this.licenseSubscription = this.props.license$.subscribe(this.licenseHandler);
+    this.licenseSubscription = license$.subscribe(this.licenseHandler);
   }
 
   private licenseHandler = (license: ILicense) => {

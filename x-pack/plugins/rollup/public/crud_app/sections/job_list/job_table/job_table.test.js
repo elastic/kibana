@@ -6,13 +6,13 @@
 
 import { Pager } from '@elastic/eui';
 
-import { registerTestBed } from '../../../../../../../test_utils';
+import { registerTestBed } from '@kbn/test/jest';
 import { getJobs, jobCount } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
 
 jest.mock('../../../../kibana_services', () => {
-  const services = require.requireActual('../../../../kibana_services');
+  const services = jest.requireActual('../../../../kibana_services');
   return {
     ...services,
     trackUiMetric: jest.fn(),

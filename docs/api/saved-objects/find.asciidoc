@@ -44,7 +44,10 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
   (Optional, array|string) The fields to return in the `attributes` key of the response.
 
 `sort_field`::
-  (Optional, string) The field that sorts the response.
+  (Optional, string) Sorts the response. Includes "root" and "type" fields. "root" fields exist for all saved objects, such as "updated_at".
+  "type" fields are specific to an object type, such as fields returned in the `attributes` key of the response. When a single type is
+  defined in the `type` parameter, the "root" and "type" fields are allowed, and validity checks are made in that order. When multiple types
+  are defined in the `type` parameter, only "root" fields are allowed.
 
 `has_reference`::
   (Optional, object) Filters to objects that have a relationship with the type and ID combination.

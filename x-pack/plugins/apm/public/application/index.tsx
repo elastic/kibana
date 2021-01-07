@@ -5,40 +5,43 @@
  */
 
 import { ApmRoute } from '@elastic/apm-rum-react';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
-import styled, { ThemeProvider, DefaultTheme } from 'styled-components';
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-import { CoreStart, AppMountParameters } from '../../../../../src/core/public';
-import { ApmPluginSetupDeps } from '../plugin';
-import { ApmPluginContext } from '../context/ApmPluginContext';
-import { LicenseProvider } from '../context/LicenseContext';
-import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
-import { LocationProvider } from '../context/LocationContext';
-import { MatchedRouteProvider } from '../context/MatchedRouteContext';
-import { UrlParamsProvider } from '../context/UrlParamsContext';
-import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
+import 'react-vis/dist/style.css';
+import styled, { DefaultTheme, ThemeProvider } from 'styled-components';
+import { ConfigSchema } from '../';
+import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
+  RedirectAppLinks,
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
-import { px, units } from '../style/variables';
-import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
-import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { routes } from '../components/app/Main/route_config';
-import { history, resetHistory } from '../utils/history';
-import { ConfigSchema } from '..';
-import 'react-vis/dist/style.css';
+import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
+import {
+  ApmPluginContext,
+  ApmPluginContextValue,
+} from '../context/apm_plugin/apm_plugin_context';
+import { LicenseProvider } from '../context/license/license_context';
+import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import { createCallApmApi } from '../services/rest/createCallApmApi';
+import { createStaticIndexPattern } from '../services/rest/index_pattern';
+import { setHelpExtension } from '../setHelpExtension';
+import { setReadonlyBadge } from '../updateBadge';
 
 const MainContainer = styled.div`
-  padding: ${px(units.plus)};
   height: 100%;
 `;
 
 function App() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+
+  useBreadcrumbs(routes);
 
   return (
     <ThemeProvider
@@ -49,7 +52,6 @@ function App() {
       })}
     >
       <MainContainer data-test-subj="apmMainContainer" role="main">
-        <UpdateBreadcrumbs routes={routes} />
         <Route component={ScrollToTopOnPathChange} />
         <Switch>
           {routes.map((route, i) => (
@@ -61,74 +63,70 @@ function App() {
   );
 }
 
-function ApmAppRoot({
-  core,
-  deps,
-  routerHistory,
-  config,
+export function ApmAppRoot({
+  apmPluginContextValue,
+  startDeps,
 }: {
-  core: CoreStart;
-  deps: ApmPluginSetupDeps;
-  routerHistory: typeof history;
-  config: ConfigSchema;
+  apmPluginContextValue: ApmPluginContextValue;
+  startDeps: ApmPluginStartDeps;
 }) {
+  const { appMountParameters, core } = apmPluginContextValue;
+  const { history } = appMountParameters;
   const i18nCore = core.i18n;
-  const plugins = deps;
-  const apmPluginContextValue = {
-    config,
-    core,
-    plugins,
-  };
+
   return (
-    <ApmPluginContext.Provider value={apmPluginContextValue}>
-      <AlertsContextProvider
-        value={{
-          http: core.http,
-          docLinks: core.docLinks,
-          capabilities: core.application.capabilities,
-          toastNotifications: core.notifications.toasts,
-          actionTypeRegistry: plugins.triggers_actions_ui.actionTypeRegistry,
-          alertTypeRegistry: plugins.triggers_actions_ui.alertTypeRegistry,
-        }}
-      >
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
+    <RedirectAppLinks application={core.application}>
+      <ApmPluginContext.Provider value={apmPluginContextValue}>
+        <KibanaContextProvider services={{ ...core, ...startDeps }}>
           <i18nCore.Context>
-            <Router history={routerHistory}>
-              <LocationProvider>
-                <MatchedRouteProvider routes={routes}>
-                  <UrlParamsProvider>
-                    <LoadingIndicatorProvider>
-                      <LicenseProvider>
-                        <App />
-                      </LicenseProvider>
-                    </LoadingIndicatorProvider>
-                  </UrlParamsProvider>
-                </MatchedRouteProvider>
-              </LocationProvider>
+            <Router history={history}>
+              <UrlParamsProvider>
+                <LicenseProvider>
+                  <App />
+                </LicenseProvider>
+              </UrlParamsProvider>
             </Router>
           </i18nCore.Context>
         </KibanaContextProvider>
-      </AlertsContextProvider>
-    </ApmPluginContext.Provider>
+      </ApmPluginContext.Provider>
+    </RedirectAppLinks>
   );
 }
 
 /**
  * This module is rendered asynchronously in the Kibana platform.
  */
+
 export const renderApp = (
   core: CoreStart,
-  deps: ApmPluginSetupDeps,
-  { element }: AppMountParameters,
-  config: ConfigSchema
+  setupDeps: ApmPluginSetupDeps,
+  appMountParameters: AppMountParameters,
+  config: ConfigSchema,
+  startDeps: ApmPluginStartDeps
 ) => {
-  resetHistory();
+  const { element } = appMountParameters;
+  const apmPluginContextValue = {
+    appMountParameters,
+    config,
+    core,
+    plugins: setupDeps,
+  };
+
+  // render APM feedback link in global help menu
+  setHelpExtension(core);
+  setReadonlyBadge(core);
+  createCallApmApi(core.http);
+
+  // Automatically creates static index pattern and stores as saved object
+  createStaticIndexPattern().catch((e) => {
+    // eslint-disable-next-line no-console
+    console.log('Error creating static index pattern', e);
+  });
+
   ReactDOM.render(
     <ApmAppRoot
-      core={core}
-      deps={deps}
-      routerHistory={history}
-      config={config}
+      apmPluginContextValue={apmPluginContextValue}
+      startDeps={startDeps}
     />,
     element
   );

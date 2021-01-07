@@ -32,15 +32,15 @@ export function BarSeriesDecorator({
   bars,
   color,
   stackAccessors,
-  stackAsPercentage,
+  stackMode,
   xScaleType,
   yScaleType,
   timeZone,
   enableHistogramMode,
-  useDefaultGroupDomain,
   sortIndex,
   y1AccessorFormat,
   y0AccessorFormat,
+  tickFormat,
 }) {
   const id = seriesId;
   const groupId = seriesGroupId;
@@ -59,13 +59,13 @@ export function BarSeriesDecorator({
     y1AccessorFormat,
     y0AccessorFormat,
     stackAccessors,
-    stackAsPercentage,
+    stackMode,
     xScaleType,
     yScaleType,
     timeZone,
     enableHistogramMode,
-    useDefaultGroupDomain,
     sortIndex,
+    tickFormat,
     ...barSeriesStyle,
   };
 

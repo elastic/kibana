@@ -3,15 +3,52 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import {
+  AlertType,
+  AlertInstanceState,
+  AlertInstanceContext,
+  AlertExecutorOptions,
+  ActionGroupIdsOf,
+} from '../../../../../alerts/server';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api/metrics_explorer';
 import { createMetricThresholdExecutor, FIRED_ACTIONS } from './metric_threshold_executor';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID, Comparator } from './types';
 import { InfraBackendLibs } from '../../infra_types';
 import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
+import {
+  groupActionVariableDescription,
+  alertStateActionVariableDescription,
+  reasonActionVariableDescription,
+  timestampActionVariableDescription,
+  valueActionVariableDescription,
+  metricActionVariableDescription,
+  thresholdActionVariableDescription,
+} from '../common/messages';
 
-export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
+export type MetricThresholdAlertType = AlertType<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
+  Record<string, any>,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext,
+  ActionGroupIdsOf<typeof FIRED_ACTIONS>
+>;
+export type MetricThresholdAlertExecutorOptions = AlertExecutorOptions<
+  /**
+   * TODO: Remove this use of `any` by utilizing a proper type
+   */
+  Record<string, any>,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext,
+  ActionGroupIdsOf<typeof FIRED_ACTIONS>
+>;
+
+export function registerMetricThresholdAlertType(libs: InfraBackendLibs): MetricThresholdAlertType {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),
@@ -31,62 +68,11 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     metric: schema.never(),
   });
 
-  const groupActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.groupActionVariableDescription',
-    {
-      defaultMessage: 'Name of the group reporting data',
-    }
-  );
-
-  const alertStateActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.alertStateActionVariableDescription',
-    {
-      defaultMessage: 'Current state of the alert',
-    }
-  );
-
-  const reasonActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.reasonActionVariableDescription',
-    {
-      defaultMessage:
-        'A description of why the alert is in this state, including which metrics have crossed which thresholds',
-    }
-  );
-
-  const timestampActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.timestampDescription',
-    {
-      defaultMessage: 'A timestamp of when the alert was detected.',
-    }
-  );
-
-  const valueActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.valueActionVariableDescription',
-    {
-      defaultMessage:
-        'The value of the metric in the specified condition. Usage: (ctx.value.condition0, ctx.value.condition1, etc...).',
-    }
-  );
-
-  const metricActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.metricActionVariableDescription',
-    {
-      defaultMessage:
-        'The metric name in the specified condition. Usage: (ctx.metric.condition0, ctx.metric.condition1, etc...).',
-    }
-  );
-
-  const thresholdActionVariableDescription = i18n.translate(
-    'xpack.infra.metrics.alerting.threshold.alerting.thresholdActionVariableDescription',
-    {
-      defaultMessage:
-        'The threshold value of the metric for the specified condition. Usage: (ctx.threshold.condition0, ctx.threshold.condition1, etc...).',
-    }
-  );
-
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
-    name: 'Metric threshold',
+    name: i18n.translate('xpack.infra.metrics.alertName', {
+      defaultMessage: 'Metric threshold',
+    }),
     validate: {
       params: schema.object(
         {
@@ -105,6 +91,7 @@ export function registerMetricThresholdAlertType(libs: InfraBackendLibs) {
     },
     defaultActionGroupId: FIRED_ACTIONS.id,
     actionGroups: [FIRED_ACTIONS],
+    minimumLicenseRequired: 'basic',
     executor: createMetricThresholdExecutor(libs),
     actionVariables: {
       context: [

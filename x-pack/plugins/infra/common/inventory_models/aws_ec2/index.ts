@@ -31,4 +31,5 @@ export const awsEC2: InventoryModel = {
   },
   requiredMetrics: ['awsEC2CpuUtilization', 'awsEC2NetworkTraffic', 'awsEC2DiskIOBytes'],
   tooltipMetrics: ['cpu', 'rx', 'tx'],
+  nodeFilter: [{ term: { 'event.dataset': 'aws.ec2' } }],
 };

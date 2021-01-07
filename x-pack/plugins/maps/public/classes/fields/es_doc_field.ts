@@ -15,18 +15,22 @@ import { IVectorSource } from '../sources/vector_source';
 
 export class ESDocField extends AbstractField implements IField {
   private readonly _source: IESSource;
+  private readonly _canReadFromGeoJson: boolean;
 
   constructor({
     fieldName,
     source,
     origin,
+    canReadFromGeoJson = true,
   }: {
     fieldName: string;
     source: IESSource;
     origin: FIELD_ORIGIN;
+    canReadFromGeoJson?: boolean;
   }) {
     super({ fieldName, origin });
     this._source = source;
+    this._canReadFromGeoJson = canReadFromGeoJson;
   }
 
   canValueBeFormatted(): boolean {
@@ -56,11 +60,22 @@ export class ESDocField extends AbstractField implements IField {
     return indexPatternField ? indexPatternField.type : '';
   }
 
+  async getLabel(): Promise<string> {
+    const indexPatternField = await this._getIndexPatternField();
+    return indexPatternField && indexPatternField.displayName
+      ? indexPatternField.displayName
+      : super.getLabel();
+  }
+
   supportsFieldMeta(): boolean {
     return true;
   }
 
-  async getOrdinalFieldMetaRequest(): Promise<unknown> {
+  canReadFromGeoJson(): boolean {
+    return this._canReadFromGeoJson;
+  }
+
+  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
     const indexPatternField = await this._getIndexPatternField();
 
     if (
@@ -72,18 +87,43 @@ export class ESDocField extends AbstractField implements IField {
 
     // TODO remove local typing once Kibana has figured out a core place for Elasticsearch aggregation request types
     // https://github.com/elastic/kibana/issues/60102
-    const extendedStats: { script?: unknown; field?: string } = {};
+    const metricAggConfig: { script?: unknown; field?: string } = {};
     if (indexPatternField.scripted) {
-      extendedStats.script = {
+      metricAggConfig.script = {
         source: indexPatternField.script,
         lang: indexPatternField.lang,
       };
     } else {
-      extendedStats.field = this.getName();
+      metricAggConfig.field = this.getName();
     }
     return {
-      [this.getName()]: {
-        extended_stats: extendedStats,
+      [`${this.getName()}_range`]: {
+        extended_stats: metricAggConfig,
+      },
+    };
+  }
+
+  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
+    const indexPatternField = await this._getIndexPatternField();
+
+    if (!indexPatternField || indexPatternField.type !== 'number') {
+      return null;
+    }
+
+    const metricAggConfig: { script?: unknown; field?: string; percents: number[] } = {
+      percents: [0, ...percentiles],
+    };
+    if (indexPatternField.scripted) {
+      metricAggConfig.script = {
+        source: indexPatternField.script,
+        lang: indexPatternField.lang,
+      };
+    } else {
+      metricAggConfig.field = this.getName();
+    }
+    return {
+      [`${this.getName()}_percentiles`]: {
+        percentiles: metricAggConfig,
       },
     };
   }
@@ -108,7 +148,7 @@ export class ESDocField extends AbstractField implements IField {
       topTerms.field = this.getName();
     }
     return {
-      [this.getName()]: {
+      [`${this.getName()}_terms`]: {
         terms: topTerms,
       },
     };

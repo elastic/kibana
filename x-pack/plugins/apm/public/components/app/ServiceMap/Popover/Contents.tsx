@@ -15,7 +15,7 @@ import React, { MouseEvent } from 'react';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
 import { ServiceStatsFetcher } from './ServiceStatsFetcher';
-import { popoverWidth } from '../cytoscapeOptions';
+import { popoverWidth } from '../cytoscape_options';
 
 interface ContentsProps {
   isService: boolean;
@@ -31,7 +31,7 @@ interface ContentsProps {
 // This method of detecting IE is from a Stack Overflow answer:
 // https://stackoverflow.com/a/21825207
 //
-// @ts-ignore `documentMode` is not recognized as a valid property of `document`.
+// @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 function FlexColumnGroup(props: {

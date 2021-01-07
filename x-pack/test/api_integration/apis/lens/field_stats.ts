@@ -14,7 +14,6 @@ const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
@@ -274,6 +273,139 @@ export default ({ getService }: FtrProviderContext) => {
               {
                 count: 73,
                 key: 'JP',
+              },
+            ],
+          },
+        });
+      });
+
+      it('should return top values for ip fields', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            timeFieldName: '@timestamp',
+            field: {
+              name: 'ip',
+              type: 'ip',
+            },
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
+          sampledValues: 4633,
+          topValues: {
+            buckets: [
+              {
+                count: 13,
+                key: '177.194.175.66',
+              },
+              {
+                count: 12,
+                key: '18.55.141.62',
+              },
+              {
+                count: 12,
+                key: '53.55.251.105',
+              },
+              {
+                count: 11,
+                key: '21.111.249.239',
+              },
+              {
+                count: 11,
+                key: '97.63.84.25',
+              },
+              {
+                count: 11,
+                key: '100.99.207.174',
+              },
+              {
+                count: 11,
+                key: '112.34.138.226',
+              },
+              {
+                count: 11,
+                key: '194.68.89.92',
+              },
+              {
+                count: 11,
+                key: '235.186.79.201',
+              },
+              {
+                count: 10,
+                key: '57.79.108.136',
+              },
+            ],
+          },
+        });
+      });
+
+      it('should return histograms for scripted date fields', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            timeFieldName: '@timestamp',
+            field: {
+              name: 'scripted date',
+              type: 'date',
+              scripted: true,
+              script: '1234',
+              lang: 'painless',
+            },
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          histogram: {
+            buckets: [
+              {
+                count: 4634,
+                key: 0,
+              },
+            ],
+          },
+          totalDocuments: 4634,
+        });
+      });
+
+      it('should return top values for scripted string fields', async () => {
+        const { body } = await supertest
+          .post('/api/lens/index_stats/logstash-2015.09.22/field')
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: { match_all: {} },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+            timeFieldName: '@timestamp',
+            field: {
+              name: 'scripted string',
+              type: 'string',
+              scripted: true,
+              script: 'return "hello"',
+              lang: 'painless',
+            },
+          })
+          .expect(200);
+
+        expect(body).to.eql({
+          totalDocuments: 4634,
+          sampledDocuments: 4634,
+          sampledValues: 4634,
+          topValues: {
+            buckets: [
+              {
+                count: 4634,
+                key: 'hello',
               },
             ],
           },

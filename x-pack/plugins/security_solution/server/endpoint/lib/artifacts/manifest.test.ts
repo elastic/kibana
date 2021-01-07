@@ -94,6 +94,36 @@ describe('manifest', () => {
             relative_url:
               '/api/endpoint/artifacts/download/endpoint-exceptionlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           },
+          'endpoint-trustlist-linux-v1': {
+            compression_algorithm: 'zlib',
+            decoded_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+            decoded_size: 432,
+            encoded_sha256: '975382ab55d019cbab0bbac207a54e2a7d489fad6e8f6de34fc6402e5ef37b1e',
+            encoded_size: 147,
+            encryption_algorithm: 'none',
+            relative_url:
+              '/api/endpoint/artifacts/download/endpoint-trustlist-linux-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          },
+          'endpoint-trustlist-macos-v1': {
+            compression_algorithm: 'zlib',
+            decoded_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+            decoded_size: 432,
+            encoded_sha256: '975382ab55d019cbab0bbac207a54e2a7d489fad6e8f6de34fc6402e5ef37b1e',
+            encoded_size: 147,
+            encryption_algorithm: 'none',
+            relative_url:
+              '/api/endpoint/artifacts/download/endpoint-trustlist-macos-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          },
+          'endpoint-trustlist-windows-v1': {
+            compression_algorithm: 'zlib',
+            decoded_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+            decoded_size: 432,
+            encoded_sha256: '975382ab55d019cbab0bbac207a54e2a7d489fad6e8f6de34fc6402e5ef37b1e',
+            encoded_size: 147,
+            encryption_algorithm: 'none',
+            relative_url:
+              '/api/endpoint/artifacts/download/endpoint-trustlist-windows-v1/96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          },
         },
         manifest_version: '1.0.0',
         schema_version: 'v1',
@@ -107,6 +137,9 @@ describe('manifest', () => {
         ids: [
           'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           'endpoint-exceptionlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          'endpoint-trustlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          'endpoint-trustlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
         ],
       });
     });
@@ -117,6 +150,21 @@ describe('manifest', () => {
         {
           id:
             'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+          type: 'delete',
+        },
+        {
+          id:
+            'endpoint-trustlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
           type: 'delete',
         },
         {
@@ -139,6 +187,9 @@ describe('manifest', () => {
       expect(keys).toEqual([
         'endpoint-exceptionlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
         'endpoint-exceptionlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+        'endpoint-trustlist-macos-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+        'endpoint-trustlist-windows-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+        'endpoint-trustlist-linux-v1-96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
       ]);
     });
 

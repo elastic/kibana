@@ -6,8 +6,8 @@
 
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useFetcher } from '../../../../hooks/useFetcher';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
@@ -16,23 +16,26 @@ import { BreakdownItem } from '../../../../../typings/ui_filters';
 export function PageViewsTrend() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, serviceName } = urlParams;
+  const { start, end, searchTerm } = urlParams;
 
-  const [breakdowns, setBreakdowns] = useState<BreakdownItem[]>([]);
+  const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
+      const { serviceName } = uiFilters;
+
       if (start && end && serviceName) {
         return callApmApi({
-          pathname: '/api/apm/rum-client/page-view-trends',
+          endpoint: 'GET /api/apm/rum-client/page-view-trends',
           params: {
             query: {
               start,
               end,
               uiFilters: JSON.stringify(uiFilters),
-              ...(breakdowns.length > 0
+              urlQuery: searchTerm,
+              ...(breakdown
                 ? {
-                    breakdowns: JSON.stringify(breakdowns),
+                    breakdowns: JSON.stringify(breakdown),
                   }
                 : {}),
             },
@@ -41,12 +44,8 @@ export function PageViewsTrend() {
       }
       return Promise.resolve(undefined);
     },
-    [end, start, serviceName, uiFilters, breakdowns]
+    [end, start, uiFilters, breakdown, searchTerm]
   );
-
-  const onBreakdownChange = (values: BreakdownItem[]) => {
-    setBreakdowns(values);
-  };
 
   return (
     <div>
@@ -56,11 +55,11 @@ export function PageViewsTrend() {
             <h3>{I18LABELS.pageViews}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ width: 170 }}>
           <BreakdownFilter
-            id={'pageView'}
-            selectedBreakdowns={breakdowns}
-            onBreakdownChange={onBreakdownChange}
+            selectedBreakdown={breakdown}
+            onBreakdownChange={setBreakdown}
+            dataTestSubj={'pvBreakdownFilter'}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

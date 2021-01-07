@@ -20,6 +20,7 @@
 import { HttpServiceSetup } from 'src/core/server';
 import { ISavedObjectsManagement } from '../services';
 import { registerFindRoute } from './find';
+import { registerGetRoute } from './get';
 import { registerScrollForCountRoute } from './scroll_count';
 import { registerScrollForExportRoute } from './scroll_export';
 import { registerRelationshipsRoute } from './relationships';
@@ -33,6 +34,7 @@ interface RegisterRouteOptions {
 export function registerRoutes({ http, managementServicePromise }: RegisterRouteOptions) {
   const router = http.createRouter();
   registerFindRoute(router, managementServicePromise);
+  registerGetRoute(router, managementServicePromise);
   registerScrollForCountRoute(router);
   registerScrollForExportRoute(router);
   registerRelationshipsRoute(router, managementServicePromise);

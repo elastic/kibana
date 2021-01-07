@@ -18,8 +18,15 @@
  */
 
 import { SavedObject } from '../../../plugins/saved_objects/public';
-import { AggConfigOptions, SearchSourceFields } from '../../../plugins/data/public';
+import {
+  AggConfigOptions,
+  SearchSourceFields,
+  TimefilterContract,
+} from '../../../plugins/data/public';
+import { ExpressionAstExpression } from '../../expressions/public';
+
 import { SerializedVis, Vis, VisParams } from './vis';
+import { ExprVis } from './expressions/vis';
 
 export { Vis, SerializedVis, VisParams };
 
@@ -31,7 +38,7 @@ export interface VisualizationController {
 
 export type VisualizationControllerConstructor = new (
   el: HTMLElement,
-  vis: Vis
+  vis: ExprVis
 ) => VisualizationController;
 
 export interface SavedVisState {
@@ -60,3 +67,14 @@ export interface VisResponseValue {
   visConfig: object;
   params?: object;
 }
+
+export interface VisToExpressionAstParams {
+  timefilter: TimefilterContract;
+  timeRange?: any;
+  abortSignal?: AbortSignal;
+}
+
+export type VisToExpressionAst<TVisParams = VisParams> = (
+  vis: Vis<TVisParams>,
+  params: VisToExpressionAstParams
+) => Promise<ExpressionAstExpression> | ExpressionAstExpression;

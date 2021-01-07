@@ -5,29 +5,26 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
-import {
-  AnomalySwimlaneEmbeddable,
-  SwimLaneDrilldownContext,
-} from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { MlCoreSetup } from '../plugin';
-import { ML_APP_URL_GENERATOR } from '../url_generator';
+import { ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
 export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getStartServices']) {
-  return createAction<typeof OPEN_IN_ANOMALY_EXPLORER_ACTION>({
+  return createAction<SwimLaneDrilldownContext>({
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
-    getIconType(context: ActionContextMapping[typeof OPEN_IN_ANOMALY_EXPLORER_ACTION]): string {
-      return 'tableOfContents';
+    getIconType(context): string {
+      return 'visTable';
     },
     getDisplayName() {
       return i18n.translate('xpack.ml.actions.openInAnomalyExplorerTitle', {
         defaultMessage: 'Open in Anomaly Explorer',
       });
     },
-    async getHref({ embeddable, data }: SwimLaneDrilldownContext): Promise<string> {
+    async getHref({ embeddable, data }): Promise<string> {
       const [, pluginsStart] = await getStartServices();
       const urlGenerator = pluginsStart.share.urlGenerators.getUrlGenerator(ML_APP_URL_GENERATOR);
       const { jobIds, timeRange, viewBy } = embeddable.getInput();
@@ -35,23 +32,25 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
 
       return urlGenerator.createUrl({
         page: 'explorer',
-        jobIds,
-        timeRange,
-        mlExplorerSwimlane: {
-          viewByFromPage: fromPage,
-          viewByPerPage: perPage,
-          viewByFieldName: viewBy,
-          ...(data
-            ? {
-                selectedType: data.type,
-                selectedTimes: data.times,
-                selectedLanes: data.lanes,
-              }
-            : {}),
+        pageState: {
+          jobIds,
+          timeRange,
+          mlExplorerSwimlane: {
+            viewByFromPage: fromPage,
+            viewByPerPage: perPage,
+            viewByFieldName: viewBy,
+            ...(data
+              ? {
+                  selectedType: data.type,
+                  selectedTimes: data.times,
+                  selectedLanes: data.lanes,
+                }
+              : {}),
+          },
         },
       });
     },
-    async execute({ embeddable, data }: SwimLaneDrilldownContext) {
+    async execute({ embeddable, data }) {
       if (!embeddable) {
         throw new Error('Not possible to execute an action without the embeddable context');
       }
@@ -60,7 +59,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
       await application.navigateToUrl(anomalyExplorerUrl!);
     },
     async isCompatible({ embeddable }: SwimLaneDrilldownContext) {
-      return embeddable instanceof AnomalySwimlaneEmbeddable;
+      return embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE;
     },
   });
 }

@@ -18,4 +18,4 @@
  */
 
 export { DiscoverSidebar } from './discover_sidebar';
-export { createDiscoverSidebarDirective } from './discover_sidebar_directive';
+export { DiscoverSidebarResponsive } from './discover_sidebar_responsive';

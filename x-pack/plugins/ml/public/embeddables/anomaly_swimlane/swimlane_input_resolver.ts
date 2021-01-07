@@ -20,11 +20,6 @@ import {
 } from 'rxjs/operators';
 import { CoreStart } from 'kibana/public';
 import { TimeBuckets } from '../../application/util/time_buckets';
-import {
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneEmbeddableOutput,
-  AnomalySwimlaneServices,
-} from './anomaly_swimlane_embeddable';
 import { MlStartDependencies } from '../../plugin';
 import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
@@ -41,6 +36,11 @@ import { AnomalyDetectorService } from '../../application/services/anomaly_detec
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
 import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../../ui_actions/apply_influencer_filters_action';
+import {
+  AnomalySwimlaneEmbeddableInput,
+  AnomalySwimlaneEmbeddableOutput,
+  AnomalySwimlaneServices,
+} from '..';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
 

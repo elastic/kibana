@@ -6,8 +6,10 @@
   "false_positives": [
     "Automated tools such as Jenkins may encode or decode files as part of their normal behavior. These events can be filtered by the process executable or username values."
   ],
+  "from": "now-9m",
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -18,7 +20,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -33,17 +38,7 @@
           "id": "T1140",
           "name": "Deobfuscate/Decode Files or Information",
           "reference": "https://attack.mitre.org/techniques/T1140/"
-        }
-      ]
-    },
-    {
-      "framework": "MITRE ATT&CK",
-      "tactic": {
-        "id": "TA0005",
-        "name": "Defense Evasion",
-        "reference": "https://attack.mitre.org/tactics/TA0005/"
-      },
-      "technique": [
+        },
         {
           "id": "T1027",
           "name": "Obfuscated Files or Information",
@@ -53,5 +48,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 5
 }

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Duration } from 'moment';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../../../common/constants/index_patterns';
 import { Dictionary } from '../../../../../common/types/common';
 
@@ -16,20 +17,15 @@ import {
   AnomaliesTableData,
   ExplorerJob,
   AppStateSelectedCells,
-  TimeRangeBounds,
   OverallSwimlaneData,
   SwimlaneData,
   ViewBySwimLaneData,
 } from '../../explorer_utils';
-import { Annotations, EsAggregationResult } from '../../../../../common/types/annotations';
+import { AnnotationsTable } from '../../../../../common/types/annotations';
 import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
 
 export interface ExplorerState {
-  annotations: {
-    annotationsData: Annotations;
-    aggregations: EsAggregationResult;
-  };
-  bounds: TimeRangeBounds | undefined;
+  annotations: AnnotationsTable;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
   filterActive: boolean;
@@ -46,7 +42,7 @@ export interface ExplorerState {
   queryString: string;
   selectedCells: AppStateSelectedCells | undefined;
   selectedJobs: ExplorerJob[] | null;
-  swimlaneBucketInterval: any;
+  swimlaneBucketInterval: Duration | undefined;
   swimlaneContainerWidth: number;
   tableData: AnomaliesTableData;
   tableQueryString: string;
@@ -67,10 +63,10 @@ function getDefaultIndexPattern() {
 export function getExplorerDefaultState(): ExplorerState {
   return {
     annotations: {
+      error: undefined,
       annotationsData: [],
       aggregations: {},
     },
-    bounds: undefined,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
     filterActive: false,

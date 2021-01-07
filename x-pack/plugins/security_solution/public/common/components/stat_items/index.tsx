@@ -17,8 +17,12 @@ import {
 import { get, getOr } from 'lodash/fp';
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
-import { KpiHostsData, KpiNetworkData } from '../../../graphql/types';
+import {
+  HostsKpiStrategyResponse,
+  NetworkKpiStrategyResponse,
+} from '../../../../common/search_strategy';
 import { AreaChart } from '../charts/areachart';
 import { BarChart } from '../charts/barchart';
 import { ChartSeriesData, ChartData, ChartSeriesConfigs, UpdateDateRange } from '../charts/common';
@@ -58,7 +62,7 @@ export interface StatItems {
   enableBarChart?: boolean;
   fields: StatItem[];
   grow?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | true | false | null;
-  index: number;
+  index?: number;
   key: string;
   statKey?: string;
 }
@@ -112,12 +116,12 @@ export const barchartConfigs = (config?: { onElementClick?: ElementClickListener
 
 export const addValueToFields = (
   fields: StatItem[],
-  data: KpiHostsData | KpiNetworkData
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse
 ): StatItem[] => fields.map((field) => ({ ...field, value: get(field.key, data) }));
 
 export const addValueToAreaChart = (
   fields: StatItem[],
-  data: KpiHostsData | KpiNetworkData
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse
 ): ChartSeriesData[] =>
   fields
     .filter((field) => get(`${field.key}Histogram`, data) != null)
@@ -129,7 +133,7 @@ export const addValueToAreaChart = (
 
 export const addValueToBarChart = (
   fields: StatItem[],
-  data: KpiHostsData | KpiNetworkData
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse
 ): ChartSeriesData[] => {
   if (fields.length === 0) return [];
   return fields.reduce((acc: ChartSeriesData[], field: StatItem, idx: number) => {
@@ -158,7 +162,7 @@ export const addValueToBarChart = (
 
 export const useKpiMatrixStatus = (
   mappings: Readonly<StatItems[]>,
-  data: KpiHostsData | KpiNetworkData,
+  data: HostsKpiStrategyResponse | NetworkKpiStrategyResponse,
   id: string,
   from: string,
   to: string,
@@ -281,7 +285,21 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
         </InspectButtonContainer>
       </FlexItem>
     );
-  }
+  },
+  (prevProps, nextProps) =>
+    prevProps.description === nextProps.description &&
+    prevProps.enableAreaChart === nextProps.enableAreaChart &&
+    prevProps.enableBarChart === nextProps.enableBarChart &&
+    prevProps.from === nextProps.from &&
+    prevProps.grow === nextProps.grow &&
+    prevProps.id === nextProps.id &&
+    prevProps.index === nextProps.index &&
+    prevProps.narrowDateRange === nextProps.narrowDateRange &&
+    prevProps.statKey === nextProps.statKey &&
+    prevProps.to === nextProps.to &&
+    deepEqual(prevProps.areaChart, nextProps.areaChart) &&
+    deepEqual(prevProps.barChart, nextProps.barChart) &&
+    deepEqual(prevProps.fields, nextProps.fields)
 );
 
 StatItemsComponent.displayName = 'StatItemsComponent';

@@ -14,6 +14,8 @@ import { WIZARD_STEPS, StepProps } from '../step_types';
 import { JobCreatorContext } from '../job_creator_context';
 import { AdvancedSection } from './components/advanced_section';
 import { AdditionalSection } from './components/additional_section';
+import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
+import { isAdvancedJobCreator } from '../../../common/job_creator';
 
 interface Props extends StepProps {
   advancedExpanded: boolean;
@@ -30,7 +32,7 @@ export const JobDetailsStep: FC<Props> = ({
   additionalExpanded,
   setAdditionalExpanded,
 }) => {
-  const { jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
+  const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
   const [nextActive, setNextActive] = useState(false);
 
   useEffect(() => {
@@ -70,7 +72,15 @@ export const JobDetailsStep: FC<Props> = ({
             previous={() => setCurrentStep(WIZARD_STEPS.PICK_FIELDS)}
             next={() => setCurrentStep(WIZARD_STEPS.VALIDATION)}
             nextActive={nextActive}
-          />
+          >
+            {isAdvancedJobCreator(jobCreator) && (
+              <JsonEditorFlyout
+                isDisabled={false}
+                jobEditorMode={EDITOR_MODE.EDITABLE}
+                datafeedEditorMode={EDITOR_MODE.EDITABLE}
+              />
+            )}
+          </WizardNav>
         </Fragment>
       )}
     </Fragment>

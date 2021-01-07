@@ -13,7 +13,6 @@ import { euiStyled } from '../../../../../observability/public';
 import { TextScale } from '../../../../common/log_text_scale';
 import { TimeKey, UniqueTimeKey } from '../../../../common/time';
 import { callWithoutRepeats } from '../../../utils/handlers';
-import { LogColumnConfiguration } from '../../../utils/source_configuration';
 import { AutoSizer } from '../../auto_sizer';
 import { NoData } from '../../empty_states';
 import { InfraLoadingPanel } from '../../loading';
@@ -27,9 +26,10 @@ import { VerticalScrollPanel } from './vertical_scroll_panel';
 import { useColumnWidths, LogEntryColumnWidths } from './log_entry_column';
 import { LogDateRow } from './log_date_row';
 import { LogEntry } from '../../../../common/http_api';
+import { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 
 interface ScrollableLogTextStreamViewProps {
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   items: StreamItem[];
   scale: TextScale;
   wrap: boolean;
@@ -51,8 +51,7 @@ interface ScrollableLogTextStreamViewProps {
   }) => any;
   loadNewerItems: () => void;
   reloadItems: () => void;
-  setFlyoutItem?: (id: string) => void;
-  setFlyoutVisibility?: (visible: boolean) => void;
+  onOpenLogEntryFlyout?: (logEntryId?: string) => void;
   setContextEntry?: (entry: LogEntry) => void;
   highlightedItem: string | null;
   currentHighlightKey: UniqueTimeKey | null;
@@ -60,6 +59,7 @@ interface ScrollableLogTextStreamViewProps {
   endDateExpression: string;
   updateDateRange: (range: { startDateExpression?: string; endDateExpression?: string }) => void;
   startLiveStreaming: () => void;
+  hideScrollbar?: boolean;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -142,14 +142,14 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       lastLoadedTime,
       updateDateRange,
       startLiveStreaming,
-      setFlyoutItem,
-      setFlyoutVisibility,
+      onOpenLogEntryFlyout,
       setContextEntry,
     } = this.props;
+    const hideScrollbar = this.props.hideScrollbar ?? true;
 
     const { targetId, items, isScrollLocked } = this.state;
     const hasItems = items.length > 0;
-    const hasFlyoutAction = !!(setFlyoutItem && setFlyoutVisibility);
+    const hasFlyoutAction = !!onOpenLogEntryFlyout;
     const hasContextAction = !!setContextEntry;
 
     return (
@@ -196,7 +196,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         width={width}
                         onVisibleChildrenChange={this.handleVisibleChildrenChange}
                         target={targetId}
-                        hideScrollbar={true}
+                        hideScrollbar={hideScrollbar}
                         data-test-subj={'logStream'}
                         isLocked={isScrollLocked}
                         entriesCount={items.length}
@@ -303,12 +303,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
   }
 
   private handleOpenFlyout = (id: string) => {
-    const { setFlyoutItem, setFlyoutVisibility } = this.props;
-
-    if (setFlyoutItem && setFlyoutVisibility) {
-      setFlyoutItem(id);
-      setFlyoutVisibility(true);
-    }
+    this.props.onOpenLogEntryFlyout?.(id);
   };
 
   private handleOpenViewLogInContext = (entry: LogEntry) => {
@@ -326,8 +321,6 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     }
   };
 
-  // this is actually a method but not recognized as such
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   private handleVisibleChildrenChange = callWithoutRepeats(
     ({
       topChild,
@@ -379,7 +372,7 @@ const WithColumnWidths: React.FunctionComponent<{
     columnWidths: LogEntryColumnWidths;
     CharacterDimensionsProbe: React.ComponentType;
   }) => React.ReactElement<any> | null;
-  columnConfigurations: LogColumnConfiguration[];
+  columnConfigurations: LogColumnRenderConfiguration[];
   scale: TextScale;
 }> = ({ children, columnConfigurations, scale }) => {
   const childParams = useColumnWidths({ columnConfigurations, scale });

@@ -13,28 +13,9 @@ describe('ReadySignal', () => {
     readySignal = createReadySignal<number>();
   });
 
-  test('works as expected', async (done) => {
-    let value = 41;
-
-    timeoutSet(100, async () => {
-      expect(value).toBe(41);
-    });
-
-    timeoutSet(250, async () => readySignal.signal(42));
-
-    timeoutSet(400, async () => {
-      expect(value).toBe(42);
-
-      const innerValue = await readySignal.wait();
-      expect(innerValue).toBe(42);
-      done();
-    });
-
-    value = await readySignal.wait();
-    expect(value).toBe(42);
+  test('works as expected', async () => {
+    readySignal.signal(42);
+    const ready = await readySignal.wait();
+    expect(ready).toBe(42);
   });
 });
-
-function timeoutSet(ms: number, fn: () => Promise<unknown>): void {
-  setTimeout(fn, ms);
-}

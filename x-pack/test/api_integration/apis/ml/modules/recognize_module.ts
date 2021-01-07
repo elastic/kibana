@@ -8,9 +8,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
@@ -114,6 +113,36 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         moduleIds: [],
+      },
+    },
+    {
+      testTitleSuffix: 'for heartbeat dataset',
+      sourceDataArchive: 'ml/module_heartbeat',
+      indexPattern: 'ft_module_heartbeat',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['uptime_heartbeat'],
+      },
+    },
+    {
+      testTitleSuffix: 'for auditbeat dataset',
+      sourceDataArchive: 'ml/module_auditbeat',
+      indexPattern: 'ft_module_auditbeat',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['auditbeat_process_hosts_ecs', 'security_linux', 'siem_auditbeat'],
+      },
+    },
+    {
+      testTitleSuffix: 'for security endpoint dataset',
+      sourceDataArchive: 'ml/module_security_endpoint',
+      indexPattern: 'ft_logs-endpoint.events.*',
+      user: USER.ML_POWERUSER,
+      expected: {
+        responseCode: 200,
+        moduleIds: ['security_linux', 'security_windows'],
       },
     },
   ];

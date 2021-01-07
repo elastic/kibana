@@ -18,16 +18,18 @@
  */
 
 import supertest from 'supertest';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { HttpService, InternalHttpServiceSetup } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { Env } from '../../config';
-import { getEnvOptions } from '../../config/__mocks__/env';
+import { getEnvOptions } from '../../config/mocks';
 import { CapabilitiesService, CapabilitiesSetup } from '..';
 import { createHttpServer } from '../../http/test_utils';
 
 const coreId = Symbol('core');
-const env = Env.createDefault(getEnvOptions());
+
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
 describe('CapabilitiesService', () => {
   let server: HttpService;
@@ -70,17 +72,57 @@ describe('CapabilitiesService', () => {
           `);
     });
 
-    it('uses the service capabilities providers', async () => {
-      serviceSetup.registerProvider(() => ({
+    it('uses the service capabilities providers and switchers', async () => {
+      const getInitialCapabilities = () => ({
         catalogue: {
           something: true,
         },
-      }));
+        management: {},
+        navLinks: {},
+      });
+      serviceSetup.registerProvider(() => getInitialCapabilities());
+
+      const switcher = jest.fn((_, capabilities) => capabilities);
+      serviceSetup.registerSwitcher(switcher);
 
       const result = await supertest(httpSetup.server.listener)
         .post('/api/core/capabilities')
         .send({ applications: [] })
         .expect(200);
+
+      expect(switcher).toHaveBeenCalledTimes(1);
+      expect(switcher).toHaveBeenCalledWith(expect.anything(), getInitialCapabilities(), false);
+      expect(result.body).toMatchInlineSnapshot(`
+        Object {
+          "catalogue": Object {
+            "something": true,
+          },
+          "management": Object {},
+          "navLinks": Object {},
+        }
+      `);
+    });
+
+    it('passes useDefaultCapabilities to registered switchers', async () => {
+      const getInitialCapabilities = () => ({
+        catalogue: {
+          something: true,
+        },
+        management: {},
+        navLinks: {},
+      });
+      serviceSetup.registerProvider(() => getInitialCapabilities());
+
+      const switcher = jest.fn((_, capabilities) => capabilities);
+      serviceSetup.registerSwitcher(switcher);
+
+      const result = await supertest(httpSetup.server.listener)
+        .post('/api/core/capabilities?useDefaultCapabilities=true')
+        .send({ applications: [] })
+        .expect(200);
+
+      expect(switcher).toHaveBeenCalledTimes(1);
+      expect(switcher).toHaveBeenCalledWith(expect.anything(), getInitialCapabilities(), true);
       expect(result.body).toMatchInlineSnapshot(`
         Object {
           "catalogue": Object {

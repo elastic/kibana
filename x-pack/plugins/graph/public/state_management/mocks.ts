@@ -17,8 +17,6 @@ import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } fro
 import { Workspace, GraphWorkspaceSavedObject, IndexPatternSavedObject } from '../types';
 import { IndexPattern } from '../../../../../src/plugins/data/public';
 
-jest.mock('ui/new_platform');
-
 export interface MockedGraphEnvironment {
   store: GraphStore;
   mockedDeps: jest.Mocked<GraphStoreDependencies>;
@@ -63,7 +61,9 @@ export function createMockGraphStore({
     getWorkspace: jest.fn(() => workspaceMock),
     getSavedWorkspace: jest.fn(() => savedWorkspace),
     indexPatternProvider: {
-      get: jest.fn(() => Promise.resolve(({} as unknown) as IndexPattern)),
+      get: jest.fn(() =>
+        Promise.resolve(({ id: '123', title: 'test-pattern' } as unknown) as IndexPattern)
+      ),
     },
     indexPatterns: [
       ({ id: '123', attributes: { title: 'test-pattern' } } as unknown) as IndexPatternSavedObject,

@@ -92,7 +92,7 @@ export default function ({ getService }) {
         .send(beat)
         .expect(401);
 
-      expect(body.error.message).to.be('Invalid access token');
+      expect(body.message).to.be('Invalid access token');
 
       const beatInEs = await es.get({
         index: ES_INDEX_NAME,
@@ -115,7 +115,7 @@ export default function ({ getService }) {
         .send(beat)
         .expect(404);
 
-      expect(body.error.message).to.be('Beat not found');
+      expect(body.message).to.be('Beat not found');
     });
   });
 }

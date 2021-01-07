@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import {
   NotificationsService,
   NotificationsSetup,

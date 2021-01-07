@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PackageConfig } from '../../../../../ingest_manager/common';
-import { createPackageConfigMock } from '../../../../../ingest_manager/common/mocks';
+import { PackagePolicy } from '../../../../../fleet/common';
+import { createPackagePolicyMock } from '../../../../../fleet/common/mocks';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import {
   getInternalArtifactMock,
@@ -16,13 +16,20 @@ import { ArtifactConstants } from './common';
 import { Manifest } from './manifest';
 
 export const getMockArtifacts = async (opts?: { compress: boolean }) => {
-  return Promise.all(
-    ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
+  return Promise.all([
+    // Exceptions items
+    ...ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
       async (os) => {
         return getInternalArtifactMock(os, 'v1', opts);
       }
-    )
-  );
+    ),
+    // Trusted Apps items
+    ...ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS.map<
+      Promise<InternalArtifactCompleteSchema>
+    >(async (os) => {
+      return getInternalArtifactMock(os, 'v1', opts, ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME);
+    }),
+  ]);
 };
 
 export const getMockArtifactsWithDiff = async (opts?: { compress: boolean }) => {
@@ -69,9 +76,9 @@ export const getEmptyMockManifest = async (opts?: { compress: boolean }) => {
   return manifest;
 };
 
-export const createPackageConfigWithInitialManifestMock = (): PackageConfig => {
-  const packageConfig = createPackageConfigMock();
-  packageConfig.inputs[0].config!.artifact_manifest = {
+export const createPackagePolicyWithInitialManifestMock = (): PackagePolicy => {
+  const packagePolicy = createPackagePolicyMock();
+  packagePolicy.inputs[0].config!.artifact_manifest = {
     value: {
       artifacts: {
         'endpoint-exceptionlist-macos-v1': {
@@ -99,12 +106,12 @@ export const createPackageConfigWithInitialManifestMock = (): PackageConfig => {
       schema_version: 'v1',
     },
   };
-  return packageConfig;
+  return packagePolicy;
 };
 
-export const createPackageConfigWithManifestMock = (): PackageConfig => {
-  const packageConfig = createPackageConfigMock();
-  packageConfig.inputs[0].config!.artifact_manifest = {
+export const createPackagePolicyWithManifestMock = (): PackagePolicy => {
+  const packagePolicy = createPackagePolicyMock();
+  packagePolicy.inputs[0].config!.artifact_manifest = {
     value: {
       artifacts: {
         'endpoint-exceptionlist-macos-v1': {
@@ -133,5 +140,5 @@ export const createPackageConfigWithManifestMock = (): PackageConfig => {
     },
   };
 
-  return packageConfig;
+  return packagePolicy;
 };

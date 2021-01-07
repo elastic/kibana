@@ -8,7 +8,7 @@ import React, { memo, MouseEventHandler } from 'react';
 import { EuiLink, EuiLinkProps, EuiButton, EuiButtonProps } from '@elastic/eui';
 import { useNavigateToAppEventHandler } from '../../hooks/endpoint/use_navigate_to_app_event_handler';
 
-type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
+export type LinkToAppProps = (EuiLinkProps | EuiButtonProps) & {
   /** the app id - normally the value of the `id` in that plugin's `kibana.json`  */
   appId: string;
   /** Any app specific path (route) */
@@ -35,7 +35,6 @@ export const LinkToApp = memo<LinkToAppProps>(
             {children}
           </EuiButton>
         ) : (
-          // eslint-disable-next-line @elastic/eui/href-or-on-click
           <EuiLink {...otherProps} onClick={handleOnClick}>
             {children}
           </EuiLink>

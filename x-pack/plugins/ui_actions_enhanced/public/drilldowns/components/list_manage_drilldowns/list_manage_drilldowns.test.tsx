@@ -5,16 +5,12 @@
  */
 
 import React from 'react';
-import { cleanup, fireEvent, render } from '@testing-library/react/pure';
+import { fireEvent, render } from '@testing-library/react';
 import {
   DrilldownListItem,
   ListManageDrilldowns,
   TEST_SUBJ_DRILLDOWN_ITEM,
 } from './list_manage_drilldowns';
-
-// TODO: for some reason global cleanup from RTL doesn't work
-// afterEach is not available for it globally during setup
-afterEach(cleanup);
 
 const drilldowns: DrilldownListItem[] = [
   { id: '1', actionName: 'Dashboard', drilldownName: 'Drilldown 1' },

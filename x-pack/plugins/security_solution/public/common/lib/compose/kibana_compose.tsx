@@ -8,7 +8,6 @@ import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemo
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import introspectionQueryResultData from '../../../graphql/introspection.json';
 import { AppFrontendLibs } from '../lib';
 import { getLinks } from './helpers';
@@ -18,6 +17,7 @@ export function composeLibs(core: CoreStart): AppFrontendLibs {
   const cache = new InMemoryCache({
     dataIdFromObject: () => null,
     fragmentMatcher: new IntrospectionFragmentMatcher({
+      // @ts-expect-error apollo-cache-inmemory types don't match actual introspection data
       introspectionQueryResultData,
     }),
   });

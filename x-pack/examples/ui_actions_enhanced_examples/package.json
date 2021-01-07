@@ -8,10 +8,7 @@
   },
   "license": "Apache-2.0",
   "scripts": {
-    "kbn": "node ../../scripts/kbn.js",
-    "build": "rm -rf './target' && tsc"
-  },
-  "devDependencies": {
-    "typescript": "3.9.5"
+    "kbn": "node ../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../node_modules/.bin/tsc"
   }
 }

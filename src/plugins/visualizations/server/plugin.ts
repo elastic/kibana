@@ -19,6 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
+import { Observable } from 'rxjs';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -32,16 +34,19 @@ import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
 import { visualizationSavedObjectType } from './saved_objects';
 
 import { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
+import { registerVisualizationsCollector } from './usage_collector';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart> {
   private readonly logger: Logger;
+  private readonly config: Observable<{ kibana: { index: string } }>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
     this.logger.debug('visualizations: Setup');
 
     core.savedObjects.registerType(visualizationSavedObjectType);
@@ -60,6 +65,10 @@ export class VisualizationsPlugin
         schema: schema.boolean(),
       },
     });
+
+    if (plugins.usageCollection) {
+      registerVisualizationsCollector(plugins.usageCollection, this.config);
+    }
 
     return {};
   }

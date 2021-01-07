@@ -67,7 +67,9 @@ export function PanelConfig(props) {
     return (
       <FormValidationContext.Provider value={updateControlValidity}>
         <VisDataContext.Provider value={visData}>
-          <Component {...props} />
+          <div data-test-subj={`tvbPanelConfig__${model.type}`}>
+            <Component {...props} />
+          </div>
         </VisDataContext.Provider>
       </FormValidationContext.Provider>
     );
@@ -88,6 +90,6 @@ PanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  dateFormat: PropTypes.string,
   visData$: PropTypes.object,
+  getConfig: PropTypes.func,
 };

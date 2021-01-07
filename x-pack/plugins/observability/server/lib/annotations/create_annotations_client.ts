@@ -7,7 +7,7 @@
 import { LegacyAPICaller, Logger } from 'kibana/server';
 import * as t from 'io-ts';
 import { Client } from 'elasticsearch';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { ILicense } from '../../../../licensing/server';
 import {
   createAnnotationRt,

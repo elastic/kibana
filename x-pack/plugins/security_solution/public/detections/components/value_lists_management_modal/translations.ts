@@ -13,7 +13,7 @@ export const MODAL_TITLE = i18n.translate('xpack.securitySolution.lists.uploadVa
 export const FILE_PICKER_LABEL = i18n.translate(
   'xpack.securitySolution.lists.uploadValueListDescription',
   {
-    defaultMessage: 'Upload single value lists to use while writing rules or rule exceptions.',
+    defaultMessage: 'Upload single value lists to use while writing rule exceptions.',
   }
 );
 
@@ -73,6 +73,13 @@ export const COLUMN_FILE_NAME = i18n.translate(
   'xpack.securitySolution.lists.valueListsTable.fileNameColumn',
   {
     defaultMessage: 'Filename',
+  }
+);
+
+export const COLUMN_TYPE = i18n.translate(
+  'xpack.securitySolution.lists.valueListsTable.typeColumn',
+  {
+    defaultMessage: 'Type',
   }
 );
 
@@ -160,3 +167,31 @@ export const TEXT_RADIO = i18n.translate(
     defaultMessage: 'Text',
   }
 );
+
+export const REFERENCE_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.lists.referenceModalTitle',
+  {
+    defaultMessage: 'Remove value list',
+  }
+);
+
+export const REFERENCE_MODAL_CANCEL_BUTTON = i18n.translate(
+  'xpack.securitySolution.lists.referenceModalCancelButton',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const REFERENCE_MODAL_CONFIRM_BUTTON = i18n.translate(
+  'xpack.securitySolution.lists.referenceModalDeleteButton',
+  {
+    defaultMessage: 'Remove value list',
+  }
+);
+
+export const referenceErrorMessage = (referenceCount: number) =>
+  i18n.translate('xpack.securitySolution.lists.referenceModalDescription', {
+    defaultMessage:
+      'This value list is associated with ({referenceCount}) exception {referenceCount, plural, =1 {list} other {lists}}. Removing this list will remove all exception items that reference this value list.',
+    values: { referenceCount },
+  });

@@ -6,15 +6,14 @@
 
 import moment from 'moment';
 import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
-import { APICaller } from '../framework';
 import { savedObjectsAdapter } from '../../saved_objects';
+import { UptimeESClient, createUptimeESClient } from '../../lib';
 
 interface UptimeTelemetryCollector {
   [key: number]: UptimeTelemetry;
 }
-
 // seconds in an hour
 const BUCKET_SIZE = 3600;
 // take buckets in the last day
@@ -47,10 +46,10 @@ export class KibanaTelemetryAdapter {
             autoRefreshEnabled: {
               type: 'boolean',
             },
-            autorefreshInterval: { type: 'long' },
-            dateRangeEnd: { type: 'date' },
-            dateRangeStart: { type: 'date' },
-            monitor_frequency: { type: 'long' },
+            autorefreshInterval: { type: 'array', items: { type: 'long' } },
+            dateRangeEnd: { type: 'array', items: { type: 'date' } },
+            dateRangeStart: { type: 'array', items: { type: 'date' } },
+            monitor_frequency: { type: 'array', items: { type: 'long' } },
             monitor_name_stats: {
               avg_length: { type: 'float' },
               max_length: { type: 'long' },
@@ -69,10 +68,11 @@ export class KibanaTelemetryAdapter {
           },
         },
       },
-      fetch: async (callCluster: APICaller) => {
+      fetch: async ({ esClient }: CollectorFetchContext) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
-          await this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
+          const uptimeEsClient = createUptimeESClient({ esClient, savedObjectsClient });
+          await this.countNoOfUniqueMonitorAndLocations(uptimeEsClient, savedObjectsClient);
         }
         const report = this.getReport();
         return { last_24_hours: { hits: { ...report } } };
@@ -125,7 +125,7 @@ export class KibanaTelemetryAdapter {
   }
 
   public static async countNoOfUniqueMonitorAndLocations(
-    callCluster: APICaller,
+    callCluster: UptimeESClient,
     savedObjectsClient: ISavedObjectsRepository | SavedObjectsClientContract
   ) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
@@ -187,11 +187,12 @@ export class KibanaTelemetryAdapter {
       },
     };
 
-    const result = await callCluster('search', params);
+    const { body: result } = await callCluster.search(params);
+
     const numberOfUniqueMonitors: number = result?.aggregations?.unique_monitors?.value ?? 0;
     const numberOfUniqueLocations: number = result?.aggregations?.unique_locations?.value ?? 0;
-    const monitorNameStats: any = result?.aggregations?.monitor_name;
-    const locationNameStats: any = result?.aggregations?.observer_loc_name;
+    const monitorNameStats = result?.aggregations?.monitor_name;
+    const locationNameStats = result?.aggregations?.observer_loc_name;
     const uniqueMonitors: any = result?.aggregations?.monitors.buckets;
 
     const bucketId = this.getBucketToIncrement();

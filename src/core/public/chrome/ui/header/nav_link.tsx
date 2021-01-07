@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../../..';
 import { HttpStart } from '../../../http';
+import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
@@ -29,7 +30,6 @@ export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement,
 
 interface Props {
   link: ChromeNavLink;
-  legacyMode: boolean;
   appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
@@ -44,7 +44,6 @@ interface Props {
 // But FlyoutMenuItem isn't exported from EUI
 export function createEuiListItem({
   link,
-  legacyMode,
   appId,
   basePath,
   onClick = () => {},
@@ -52,12 +51,7 @@ export function createEuiListItem({
   dataTestSubj,
   externalLink = false,
 }: Props) {
-  const { legacy, active, id, title, disabled, euiIconType, icon, tooltip } = link;
-  let { href } = link;
-
-  if (legacy) {
-    href = link.url && !active ? link.url : link.baseUrl;
-  }
+  const { href, id, title, disabled, euiIconType, icon, tooltip } = link;
 
   return {
     label: tooltip ?? title,
@@ -70,8 +64,6 @@ export function createEuiListItem({
 
       if (
         !externalLink && // ignore external links
-        !legacyMode && // ignore when in legacy mode
-        !legacy && // ignore links to legacy apps
         event.button === 0 && // ignore everything but left clicks
         !isModifiedOrPrevented(event)
       ) {
@@ -79,8 +71,7 @@ export function createEuiListItem({
         navigateToApp(id);
       }
     },
-    // Legacy apps use `active` property, NP apps should match the current app
-    isActive: active || appId === id,
+    isActive: appId === id,
     isDisabled: disabled,
     'data-test-subj': dataTestSubj,
     ...(basePath && {
@@ -97,6 +88,7 @@ export interface RecentNavLink {
   title: string;
   'aria-label': string;
   iconType?: string;
+  onClick: React.MouseEventHandler;
 }
 
 /**
@@ -112,11 +104,12 @@ export interface RecentNavLink {
 export function createRecentNavLink(
   recentLink: ChromeRecentlyAccessedHistoryItem,
   navLinks: ChromeNavLink[],
-  basePath: HttpStart['basePath']
-) {
+  basePath: HttpStart['basePath'],
+  navigateToUrl: InternalApplicationStart['navigateToUrl']
+): RecentNavLink {
   const { link, label } = recentLink;
   const href = relativeToAbsolute(basePath.prepend(link));
-  const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl ?? nl.subUrlBase));
+  const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
   let titleAndAriaLabel = label;
 
   if (navLink) {
@@ -135,5 +128,12 @@ export function createRecentNavLink(
     title: titleAndAriaLabel,
     'aria-label': titleAndAriaLabel,
     iconType: navLink?.euiIconType,
+    /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
+    onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+      if (event.button === 0 && !isModifiedOrPrevented(event)) {
+        event.preventDefault();
+        navigateToUrl(href);
+      }
+    },
   };
 }

@@ -5,12 +5,13 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
+import { GetStoppedPartitionResult } from '../../../../common/types/results';
 import { HttpService } from '../http_service';
-
 import { basePath } from './index';
-
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
+import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
 import { PartitionFieldsDefinition } from '../results_service/result_service_rx';
+import { PartitionFieldsConfig } from '../../../../common/types/storage';
 
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
@@ -23,8 +24,9 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     latestMs: number,
     dateFormatTz: string,
     maxRecords: number,
-    maxExamples: number,
-    influencersFilterQuery: any
+    maxExamples?: number,
+    influencersFilterQuery?: any,
+    functionDescription?: string
   ) {
     const body = JSON.stringify({
       jobIds,
@@ -38,6 +40,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       maxRecords,
       maxExamples,
       influencersFilterQuery,
+      functionDescription,
     });
 
     return httpService.http$<any>({
@@ -87,9 +90,17 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     searchTerm: Record<string, string>,
     criteriaFields: Array<{ fieldName: string; fieldValue: any }>,
     earliestMs: number,
-    latestMs: number
+    latestMs: number,
+    fieldsConfig?: PartitionFieldsConfig
   ) {
-    const body = JSON.stringify({ jobId, searchTerm, criteriaFields, earliestMs, latestMs });
+    const body = JSON.stringify({
+      jobId,
+      searchTerm,
+      criteriaFields,
+      earliestMs,
+      latestMs,
+      fieldsConfig,
+    });
     return httpService.http$<PartitionFieldsDefinition>({
       path: `${basePath()}/results/partition_fields_values`,
       method: 'POST',
@@ -97,8 +108,8 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  anomalySearch(obj: any) {
-    const body = JSON.stringify(obj);
+  anomalySearch(query: any, jobIds: string[]) {
+    const body = JSON.stringify({ query, jobIds });
     return httpService.http<any>({
       path: `${basePath()}/results/anomaly_search`,
       method: 'POST',
@@ -106,10 +117,25 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  anomalySearch$(obj: any) {
-    const body = JSON.stringify(obj);
+  anomalySearch$(query: any, jobIds: string[]) {
+    const body = JSON.stringify({ query, jobIds });
     return httpService.http$<any>({
       path: `${basePath()}/results/anomaly_search`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  getCategoryStoppedPartitions(
+    jobIds: string[],
+    fieldToBucket?: typeof JOB_ID | typeof PARTITION_FIELD_VALUE
+  ) {
+    const body = JSON.stringify({
+      jobIds,
+      fieldToBucket,
+    });
+    return httpService.http<GetStoppedPartitionResult>({
+      path: `${basePath()}/results/category_stopped_partitions`,
       method: 'POST',
       body,
     });

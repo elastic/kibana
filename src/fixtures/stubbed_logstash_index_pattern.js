@@ -17,11 +17,16 @@
  * under the License.
  */
 
-import StubIndexPattern from 'test_utils/stub_index_pattern';
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 
 import { getKbnFieldType } from '../plugins/data/common';
-import { npSetup } from '../legacy/ui/public/new_platform/new_platform.karma_mock';
+import { getStubIndexPattern } from '../plugins/data/public/test_utils';
+import { uiSettingsServiceMock } from '../core/public/ui_settings/ui_settings_service.mock';
+
+const uiSettingSetupMock = uiSettingsServiceMock.createSetupContract();
+uiSettingSetupMock.get.mockImplementation((item, defaultValue) => {
+  return defaultValue;
+});
 
 export default function stubbedLogstashIndexPatternService() {
   const mockLogstashFields = stubbedLogstashFields();
@@ -41,13 +46,9 @@ export default function stubbedLogstashIndexPatternService() {
     };
   });
 
-  const indexPattern = new StubIndexPattern(
-    'logstash-*',
-    (cfg) => cfg,
-    'time',
-    fields,
-    npSetup.core
-  );
+  const indexPattern = getStubIndexPattern('logstash-*', (cfg) => cfg, 'time', fields, {
+    uiSettings: uiSettingSetupMock,
+  });
 
   indexPattern.id = 'logstash-*';
   indexPattern.isTimeNanosBased = () => false;

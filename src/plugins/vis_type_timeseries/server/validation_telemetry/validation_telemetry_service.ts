@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyAPICaller, CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { tsvbTelemetrySavedObjectType } from '../saved_objects';
 
@@ -49,13 +49,15 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
         usageCollection.makeUsageCollector<Usage>({
           type: 'tsvb-validation',
           isReady: () => this.kibanaIndex !== '',
-          fetch: async (callCluster: LegacyAPICaller) => {
+          fetch: async ({ esClient }) => {
             try {
-              const response = await callCluster('get', {
-                index: this.kibanaIndex,
-                id: 'tsvb-validation-telemetry:tsvb-validation-telemetry',
-                ignore: [404],
-              });
+              const { body: response } = await esClient.get(
+                {
+                  index: this.kibanaIndex,
+                  id: 'tsvb-validation-telemetry:tsvb-validation-telemetry',
+                },
+                { ignore: [404] }
+              );
               return {
                 failed_validations:
                   response?._source?.['tsvb-validation-telemetry']?.failedRequests || 0,
@@ -83,7 +85,7 @@ export class ValidationTelemetryService implements Plugin<ValidationTelemetrySer
           await internalRepository.incrementCounter(
             'tsvb-validation-telemetry',
             'tsvb-validation-telemetry',
-            'failedRequests'
+            ['failedRequests']
           );
         } catch (e) {
           // swallow error, validation telemetry shouldn't fail anything else

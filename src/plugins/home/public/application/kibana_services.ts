@@ -27,9 +27,9 @@ import {
   IUiSettingsClient,
   ApplicationStart,
 } from 'kibana/public';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { TelemetryPluginStart } from '../../../telemetry/public';
-import { KibanaLegacyStart } from '../../../kibana_legacy/public';
+import { UrlForwardingStart } from '../../../url_forwarding/public';
 import { TutorialService } from '../services/tutorials';
 import { FeatureCatalogueRegistry } from '../services/feature_catalogue';
 import { EnvironmentService } from '../services/environment';
@@ -41,14 +41,14 @@ export interface HomeKibanaServices {
   chrome: ChromeStart;
   application: ApplicationStart;
   uiSettings: IUiSettingsClient;
-  kibanaLegacy: KibanaLegacyStart;
+  urlForwarding: UrlForwardingStart;
   homeConfig: ConfigSchema;
   featureCatalogue: FeatureCatalogueRegistry;
   http: HttpStart;
   savedObjectsClient: SavedObjectsClientContract;
   toastNotifications: NotificationsSetup['toasts'];
   banners: OverlayStart['banners'];
-  trackUiMetric: (type: UiStatsMetricType, eventNames: string | string[], count?: number) => void;
+  trackUiMetric: (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void;
   getBasePath: () => string;
   docLinks: DocLinksStart;
   addBasePath: (url: string) => string;

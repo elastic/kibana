@@ -17,14 +17,27 @@ export interface TransformElasticToListItemOptions {
   type: Type;
 }
 
+export interface TransformElasticHitToListItemOptions {
+  hits: SearchResponse<SearchEsListItemSchema>['hits']['hits'];
+  type: Type;
+}
+
 export const transformElasticToListItem = ({
   response,
   type,
 }: TransformElasticToListItemOptions): ListItemArraySchema => {
-  return response.hits.hits.map((hit) => {
+  return transformElasticHitsToListItem({ hits: response.hits.hits, type });
+};
+
+export const transformElasticHitsToListItem = ({
+  hits,
+  type,
+}: TransformElasticHitToListItemOptions): ListItemArraySchema => {
+  return hits.map((hit) => {
     const {
       _id,
       _source: {
+        /* eslint-disable @typescript-eslint/naming-convention */
         created_at,
         deserializer,
         serializer,
@@ -34,6 +47,7 @@ export const transformElasticToListItem = ({
         list_id,
         tie_breaker_id,
         meta,
+        /* eslint-enable @typescript-eslint/naming-convention */
       },
     } = hit;
     const value = findSourceValue(hit._source);

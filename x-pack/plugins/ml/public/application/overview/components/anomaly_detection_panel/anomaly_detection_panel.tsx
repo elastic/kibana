@@ -16,12 +16,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useMlKibana } from '../../../contexts/kibana';
+import { useMlKibana, useMlUrlGenerator, useNavigateToPath } from '../../../contexts/kibana';
 import { AnomalyDetectionTable } from './table';
 import { ml } from '../../../services/ml_api_service';
 import { getGroupsFromJobs, getStatsBarData, getJobsWithTimerange } from './utils';
 import { Dictionary } from '../../../../../common/types/common';
 import { MlSummaryJobs, MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 export type GroupsDictionary = Dictionary<Group>;
 
@@ -38,8 +39,6 @@ type MaxScoresByGroup = Dictionary<{
   maxScore: number;
   index?: number;
 }>;
-
-const createJobLink = '#/jobs/new_job/step/index_or_search';
 
 function getDefaultAnomalyScores(groups: Group[]): MaxScoresByGroup {
   const anomalyScores: MaxScoresByGroup = {};
@@ -58,6 +57,23 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
   const {
     services: { notifications },
   } = useMlKibana();
+  const mlUrlGenerator = useMlUrlGenerator();
+  const navigateToPath = useNavigateToPath();
+
+  const redirectToJobsManagementPage = async () => {
+    const path = await mlUrlGenerator.createUrl({
+      page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    });
+    await navigateToPath(path, true);
+  };
+
+  const redirectToCreateJobSelectIndexPage = async () => {
+    const path = await mlUrlGenerator.createUrl({
+      page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+    });
+    await navigateToPath(path, true);
+  };
+
   const [isLoading, setIsLoading] = useState(false);
   const [groups, setGroups] = useState<GroupsDictionary>({});
   const [groupsCount, setGroupsCount] = useState<number>(0);
@@ -157,7 +173,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
   return (
     <EuiPanel className={panelClass}>
       {typeof errorMessage !== 'undefined' && errorDisplay}
-      {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}   
+      {isLoading && <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />}
       {isLoading === false && typeof errorMessage === 'undefined' && groupsCount === 0 && (
         <EuiEmptyPrompt
           iconType="createSingleMetricJob"
@@ -180,10 +196,11 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
           actions={
             <EuiButton
               color="primary"
-              href={createJobLink}
+              onClick={redirectToCreateJobSelectIndexPage}
               fill
               iconType="plusInCircle"
               isDisabled={jobCreationDisabled}
+              data-test-subj="mlOverviewCreateADJobButton"
             >
               {i18n.translate('xpack.ml.overview.anomalyDetection.createJobButtonText', {
                 defaultMessage: 'Create job',
@@ -202,7 +219,7 @@ export const AnomalyDetectionPanel: FC<Props> = ({ jobCreationDisabled }) => {
                 defaultMessage: 'Refresh',
               })}
             </EuiButtonEmpty>
-            <EuiButton size="s" fill href="#/jobs?">
+            <EuiButton size="s" fill onClick={redirectToJobsManagementPage}>
               {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
                 defaultMessage: 'Manage jobs',
               })}

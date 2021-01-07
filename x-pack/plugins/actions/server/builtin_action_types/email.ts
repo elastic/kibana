@@ -14,9 +14,24 @@ import { portSchema } from './lib/schemas';
 import { Logger } from '../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
+import { renderMustacheString, renderMustacheObject } from '../lib/mustache_renderer';
+
+export type EmailActionType = ActionType<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType,
+  unknown
+>;
+export type EmailActionTypeExecutorOptions = ActionTypeExecutorOptions<
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  ActionParamsType
+>;
 
 // config definition
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
+
+const EMAIL_FOOTER_DIVIDER = '\n\n--\n\n';
 
 const ConfigSchemaProps = {
   service: schema.nullable(schema.string()),
@@ -24,16 +39,16 @@ const ConfigSchemaProps = {
   port: schema.nullable(portSchema()),
   secure: schema.nullable(schema.boolean()),
   from: schema.string(),
+  hasAuth: schema.boolean({ defaultValue: true }),
 };
 
 const ConfigSchema = schema.object(ConfigSchemaProps);
 
 function validateConfig(
   configurationUtilities: ActionsConfigurationUtilities,
-  configObject: unknown
+  configObject: ActionTypeConfigType
 ): string | void {
-  // avoids circular reference ...
-  const config = configObject as ActionTypeConfigType;
+  const config = configObject;
 
   // Make sure service is set, or if not, both host/port must be set.
   // If service is set, host/port are ignored, when the email is sent.
@@ -55,16 +70,16 @@ function validateConfig(
       return '[port] is required if [service] is not provided';
     }
 
-    if (!configurationUtilities.isWhitelistedHostname(config.host)) {
-      return `[host] value '${config.host}' is not in the whitelistedHosts configuration`;
+    if (!configurationUtilities.isHostnameAllowed(config.host)) {
+      return `[host] value '${config.host}' is not in the allowedHosts configuration`;
     }
   } else {
     const host = getServiceNameHost(config.service);
     if (host == null) {
       return `[service] value '${config.service}' is not valid`;
     }
-    if (!configurationUtilities.isWhitelistedHostname(host)) {
-      return `[service] value '${config.service}' resolves to host '${host}' which is not in the whitelistedHosts configuration`;
+    if (!configurationUtilities.isHostnameAllowed(host)) {
+      return `[service] value '${config.service}' resolves to host '${host}' which is not in the allowedHosts configuration`;
     }
   }
 }
@@ -89,6 +104,16 @@ const ParamsSchema = schema.object(
     bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
     subject: schema.string(),
     message: schema.string(),
+    // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
+    // provide a more contextual URL in the footer (ex: URL to the alert details page)
+    kibanaFooterLink: schema.object({
+      path: schema.string({ defaultValue: '/' }),
+      text: schema.string({
+        defaultValue: i18n.translate('xpack.actions.builtin.email.kibanaFooterLinkText', {
+          defaultMessage: 'Go to Kibana',
+        }),
+      }),
+    }),
   },
   {
     validate: validateParams,
@@ -109,14 +134,16 @@ function validateParams(paramsObject: unknown): string | void {
 
 interface GetActionTypeParams {
   logger: Logger;
+  publicBaseUrl?: string;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
 // action type definition
-export function getActionType(params: GetActionTypeParams): ActionType {
-  const { logger, configurationUtilities } = params;
+export const ActionTypeId = '.email';
+export function getActionType(params: GetActionTypeParams): EmailActionType {
+  const { logger, publicBaseUrl, configurationUtilities } = params;
   return {
-    id: '.email',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
@@ -128,20 +155,36 @@ export function getActionType(params: GetActionTypeParams): ActionType {
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
-    executor: curry(executor)({ logger }),
+    renderParameterTemplates,
+    executor: curry(executor)({ logger, publicBaseUrl }),
+  };
+}
+
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>
+): ActionParamsType {
+  return {
+    // most of the params need no escaping
+    ...renderMustacheObject(params, variables),
+    // message however, needs to escaped as markdown
+    message: renderMustacheString(params.message, variables, 'markdown'),
   };
 }
 
 // action executor
 
 async function executor(
-  { logger }: { logger: Logger },
-  execOptions: ActionTypeExecutorOptions
-): Promise<ActionTypeExecutorResult> {
+  {
+    logger,
+    publicBaseUrl,
+  }: { logger: GetActionTypeParams['logger']; publicBaseUrl: GetActionTypeParams['publicBaseUrl'] },
+  execOptions: EmailActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const config = execOptions.config as ActionTypeConfigType;
-  const secrets = execOptions.secrets as ActionTypeSecretsType;
-  const params = execOptions.params as ActionParamsType;
+  const config = execOptions.config;
+  const secrets = execOptions.secrets;
+  const params = execOptions.params;
 
   const transport: Transport = {};
 
@@ -161,6 +204,11 @@ async function executor(
     transport.secure = getSecureValue(config.secure, config.port);
   }
 
+  const footerMessage = getFooterMessage({
+    publicBaseUrl,
+    kibanaFooterLink: params.kibanaFooterLink,
+  });
+
   const sendEmailOptions: SendEmailOptions = {
     transport,
     routing: {
@@ -171,8 +219,10 @@ async function executor(
     },
     content: {
       subject: params.subject,
-      message: params.message,
+      message: `${params.message}${EMAIL_FOOTER_DIVIDER}${footerMessage}`,
     },
+    proxySettings: execOptions.proxySettings,
+    hasAuth: config.hasAuth,
   };
 
   let result;
@@ -215,4 +265,26 @@ function getSecureValue(secure: boolean | null | undefined, port: number | null)
   if (secure != null) return secure;
   if (port === 465) return true;
   return false;
+}
+
+function getFooterMessage({
+  publicBaseUrl,
+  kibanaFooterLink,
+}: {
+  publicBaseUrl: GetActionTypeParams['publicBaseUrl'];
+  kibanaFooterLink: ActionParamsType['kibanaFooterLink'];
+}) {
+  if (!publicBaseUrl) {
+    return i18n.translate('xpack.actions.builtin.email.sentByKibanaMessage', {
+      defaultMessage: 'This message was sent by Kibana.',
+    });
+  }
+
+  return i18n.translate('xpack.actions.builtin.email.customViewInKibanaMessage', {
+    defaultMessage: 'This message was sent by Kibana. [{kibanaFooterLinkText}]({link}).',
+    values: {
+      kibanaFooterLinkText: kibanaFooterLink.text,
+      link: `${publicBaseUrl}${kibanaFooterLink.path === '/' ? '' : kibanaFooterLink.path}`,
+    },
+  });
 }

@@ -19,11 +19,8 @@ import {
   EuiLink,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { getJobIdUrl } from '../../../../../util/get_job_id_url';
-
 import { getAnalysisType, DataFrameAnalyticsId } from '../../../../common';
 import {
-  getDataFrameAnalyticsProgress,
   getDataFrameAnalyticsProgressPhase,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
@@ -33,6 +30,9 @@ import {
   DataFrameAnalyticsStats,
 } from './common';
 import { useActions } from './use_actions';
+import { useMlLink } from '../../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { JobSpacesList } from '../../../../../components/job_spaces_list';
 
 enum TASK_STATE_COLOR {
   analyzing = 'primary',
@@ -76,7 +76,6 @@ export const progressColumn = {
   name: i18n.translate('xpack.ml.dataframe.analyticsList.progress', {
     defaultMessage: 'Progress',
   }),
-  sortable: (item: DataFrameAnalyticsListRow) => getDataFrameAnalyticsProgress(item.stats),
   truncateText: true,
   render(item: DataFrameAnalyticsListRow) {
     const { currentPhase, progress, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);
@@ -136,18 +135,24 @@ export const progressColumn = {
   'data-test-subj': 'mlAnalyticsTableColumnProgress',
 };
 
-export const getDFAnalyticsJobIdLink = (item: DataFrameAnalyticsListRow) => (
-  <EuiLink href={getJobIdUrl('data_frame_analytics', item.id)}>{item.id}</EuiLink>
-);
+export const DFAnalyticsJobIdLink = ({ jobId }: { jobId: string }) => {
+  const href = useMlLink({
+    page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    pageState: { jobId },
+  });
+
+  return <EuiLink href={href}>{jobId}</EuiLink>;
+};
 
 export const useColumns = (
   expandedRowItemIds: DataFrameAnalyticsId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<DataFrameAnalyticsId[]>>,
   isManagementTable: boolean = false,
-  isMlEnabledInSpace: boolean = true
+  isMlEnabledInSpace: boolean = true,
+  spacesEnabled: boolean = true,
+  refresh: () => void = () => {}
 ) => {
   const { actions, modals } = useActions(isManagementTable);
-
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
     if (index !== -1) {
@@ -196,13 +201,17 @@ export const useColumns = (
       'data-test-subj': 'mlAnalyticsTableRowDetailsToggle',
     },
     {
-      name: 'ID',
+      field: DataFrameAnalyticsListColumn.id,
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.id', {
+        defaultMessage: 'ID',
+      }),
       sortable: (item: DataFrameAnalyticsListRow) => item.id,
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnId',
       scope: 'row',
-      render: (item: DataFrameAnalyticsListRow) =>
-        isManagementTable ? getDFAnalyticsJobIdLink(item) : item.id,
+      render: (jobId: string) => {
+        return isManagementTable ? <DFAnalyticsJobIdLink jobId={jobId} /> : jobId;
+      },
     },
     {
       field: DataFrameAnalyticsListColumn.description,
@@ -212,6 +221,14 @@ export const useColumns = (
       sortable: true,
       truncateText: true,
       'data-test-subj': 'mlAnalyticsTableColumnJobDescription',
+    },
+    {
+      field: DataFrameAnalyticsListColumn.memoryStatus,
+      name: i18n.translate('xpack.ml.dataframe.analyticsList.memoryStatus', {
+        defaultMessage: 'Memory status',
+      }),
+      truncateText: true,
+      'data-test-subj': 'mlAnalyticsTableColumnJobMemoryStatus',
     },
     {
       field: DataFrameAnalyticsListColumn.configSourceIndex,
@@ -258,19 +275,29 @@ export const useColumns = (
       }),
       actions,
       width: isManagementTable === true ? '100px' : '150px',
+      'data-test-subj': 'mlAnalyticsTableColumnActions',
     },
   ];
 
   if (isManagementTable === true) {
-    // insert before last column
-    columns.splice(columns.length - 1, 0, {
-      name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
-        defaultMessage: 'Spaces',
-      }),
-      render: () => <EuiBadge color={'hollow'}>{'all'}</EuiBadge>,
-      width: '75px',
-    });
-
+    if (spacesEnabled === true) {
+      // insert before last column
+      columns.splice(columns.length - 1, 0, {
+        name: i18n.translate('xpack.ml.jobsList.analyticsSpacesLabel', {
+          defaultMessage: 'Spaces',
+        }),
+        render: (item: DataFrameAnalyticsListRow) =>
+          Array.isArray(item.spaceIds) ? (
+            <JobSpacesList
+              spaceIds={item.spaceIds ?? []}
+              jobId={item.id}
+              jobType="data-frame-analytics"
+              refresh={refresh}
+            />
+          ) : null,
+        width: '90px',
+      });
+    }
     // Remove actions if Ml not enabled in current space
     if (isMlEnabledInSpace === false) {
       columns.pop();

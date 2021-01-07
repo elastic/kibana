@@ -132,7 +132,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
         />
       </span>
     );
-  } else if (allIndicesLength) {
+  } else {
     statusIcon = undefined;
     statusColor = 'warning';
     statusMessage = (

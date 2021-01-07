@@ -17,8 +17,19 @@ import { ScopeExpression } from './scope_expression';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { getScopeFieldDefaults } from './utils';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
 
 function NoFilterListsCallOut() {
+  const mlUrlGenerator = useMlUrlGenerator();
+  const navigateToPath = useNavigateToPath();
+  const redirectToFilterManagementPage = async () => {
+    const path = await mlUrlGenerator.createUrl({
+      page: ML_PAGES.FILTER_LISTS_MANAGE,
+    });
+    await navigateToPath(path, true);
+  };
+
   return (
     <EuiCallOut
       title={
@@ -36,7 +47,7 @@ function NoFilterListsCallOut() {
             to create the list of values you want to include or exclude in the rule."
           values={{
             filterListsLink: (
-              <EuiLink href="#/settings/filter_lists">
+              <EuiLink onClick={redirectToFilterManagementPage}>
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.scopeSection.createFilterListsDescription.filterListsLinkText"
                   defaultMessage="Filter Lists"

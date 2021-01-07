@@ -10,6 +10,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
+  const archiveName = 'apm_8.0.0';
+
   describe('Has data', () => {
     describe('when data is not loaded', () => {
       it('returns false when there is no data', async () => {
@@ -28,8 +30,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
     describe('when data is loaded', () => {
-      before(() => esArchiver.load('8.0.0'));
-      after(() => esArchiver.unload('8.0.0'));
+      before(() => esArchiver.load(archiveName));
+      after(() => esArchiver.unload(archiveName));
 
       it('returns true when there is at least one document on transaction, error or metrics indices', async () => {
         const response = await supertest.get('/api/apm/observability_overview/has_data');

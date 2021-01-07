@@ -5,16 +5,18 @@
  */
 
 import _ from 'lodash';
-import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
+import { LicenseType } from '../../../../../licensing/server';
+import { KibanaFeature, FeatureKibanaPrivileges } from '../../../../../features/server';
 import { subFeaturePrivilegeIterator } from './sub_feature_privilege_iterator';
 
 interface IteratorOptions {
   augmentWithSubFeaturePrivileges: boolean;
+  licenseType: LicenseType;
   predicate?: (privilegeId: string, privilege: FeatureKibanaPrivileges) => boolean;
 }
 
 export function* featurePrivilegeIterator(
-  feature: Feature,
+  feature: KibanaFeature,
   options: IteratorOptions
 ): IterableIterator<{ privilegeId: string; privilege: FeatureKibanaPrivileges }> {
   for (const entry of Object.entries(feature.privileges ?? {})) {
@@ -25,7 +27,10 @@ export function* featurePrivilegeIterator(
     }
 
     if (options.augmentWithSubFeaturePrivileges) {
-      yield { privilegeId, privilege: mergeWithSubFeatures(privilegeId, privilege, feature) };
+      yield {
+        privilegeId,
+        privilege: mergeWithSubFeatures(privilegeId, privilege, feature, options.licenseType),
+      };
     } else {
       yield { privilegeId, privilege };
     }
@@ -35,10 +40,11 @@ export function* featurePrivilegeIterator(
 function mergeWithSubFeatures(
   privilegeId: string,
   privilege: FeatureKibanaPrivileges,
-  feature: Feature
+  feature: KibanaFeature,
+  licenseType: LicenseType
 ) {
   const mergedConfig = _.cloneDeep(privilege);
-  for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature)) {
+  for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature, licenseType)) {
     if (subFeaturePrivilege.includeIn !== 'read' && subFeaturePrivilege.includeIn !== privilegeId) {
       continue;
     }

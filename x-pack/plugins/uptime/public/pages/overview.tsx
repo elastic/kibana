@@ -8,9 +8,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { useDispatch } from 'react-redux';
 import { useGetUrlParams } from '../hooks';
-import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { PageHeader } from './page_header';
 import { IIndexPattern } from '../../../../../src/plugins/data/public';
 import { useUpdateKueryString } from '../hooks';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
@@ -18,6 +17,8 @@ import { useTrackPageview } from '../../../observability/public';
 import { MonitorList } from '../components/overview/monitor_list/monitor_list_container';
 import { EmptyState, FilterGroup, KueryBar, ParsingErrorCallout } from '../components/overview';
 import { StatusPanel } from '../components/overview/status_panel';
+import { getConnectorsAction, getMonitorAlertsAction } from '../state/alerts/alerts';
+import { useInitApp } from '../hooks/use_init_app';
 
 interface Props {
   loading: boolean;
@@ -45,24 +46,25 @@ export const OverviewPageComponent = React.memo(
     useTrackPageview({ app: 'uptime', path: 'overview' });
     useTrackPageview({ app: 'uptime', path: 'overview', delay: 15000 });
 
+    useInitApp();
+
     const [esFilters, error] = useUpdateKueryString(indexPattern, search, urlFilters);
 
     useEffect(() => {
       setEsKueryFilters(esFilters ?? '');
     }, [esFilters, setEsKueryFilters]);
 
-    const linkParameters = stringifyUrlParams(params, true);
+    const dispatch = useDispatch();
 
-    const heading = i18n.translate('xpack.uptime.overviewPage.headerText', {
-      defaultMessage: 'Overview',
-      description: `The text that will be displayed in the app's heading when the Overview page loads.`,
-    });
+    useEffect(() => {
+      dispatch(getConnectorsAction.get());
+      dispatch(getMonitorAlertsAction.get());
+    }, [dispatch]);
 
     useBreadcrumbs([]); // No extra breadcrumbs on overview
 
     return (
       <>
-        <PageHeader headingText={heading} extraLinks={true} datePicker={true} />
         <EmptyState>
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
             <EuiFlexItem grow={1} style={{ flexBasis: 485 }}>
@@ -78,10 +80,10 @@ export const OverviewPageComponent = React.memo(
             </EuiFlexItemStyled>
             {error && !loading && <ParsingErrorCallout error={error} />}
           </EuiFlexGroup>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="xs" />
           <StatusPanel />
           <EuiSpacer size="s" />
-          <MonitorList filters={esFilters} linkParameters={linkParameters} />
+          <MonitorList filters={esFilters} />
         </EmptyState>
       </>
     );

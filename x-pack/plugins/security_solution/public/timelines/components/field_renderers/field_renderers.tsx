@@ -7,15 +7,15 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getOr } from 'lodash/fp';
-import React, { Fragment, useState } from 'react';
+import React, { useCallback, Fragment, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { HostEcs } from '../../../../common/ecs/host';
 import {
   AutonomousSystem,
   FlowTarget,
-  HostEcsFields,
-  IpOverviewData,
-} from '../../../graphql/types';
+  NetworkDetailsStrategyResponse,
+} from '../../../../common/search_strategy';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { DefaultDraggable } from '../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
@@ -27,7 +27,7 @@ import {
   ReputationLinkSetting,
 } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
-import * as i18n from '../../../network/components/ip_overview/translations';
+import * as i18n from '../../../network/components/details/translations';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
   flex-grow: unset;
@@ -38,7 +38,10 @@ export const IpOverviewId = 'ip-overview';
 /** The default max-height of the popover used to show "+n More" items (e.g. `+9 More`) */
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
-export const locationRenderer = (fieldNames: string[], data: IpOverviewData): React.ReactElement =>
+export const locationRenderer = (
+  fieldNames: string[],
+  data: NetworkDetailsStrategyResponse['networkDetails']
+): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every((fieldName) => getOr(null, fieldName, data)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj="location-field">
       {fieldNames.map((fieldName, index) => {
@@ -92,7 +95,7 @@ export const autonomousSystemRenderer = (
   );
 
 interface HostIdRendererTypes {
-  host: HostEcsFields;
+  host: HostEcs;
   ipFilter?: string;
   noLink?: boolean;
 }
@@ -124,8 +127,12 @@ export const hostIdRenderer = ({
     getEmptyTagValue()
   );
 
-export const hostNameRenderer = (host: HostEcsFields, ipFilter?: string): React.ReactElement =>
-  host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
+export const hostNameRenderer = (host?: HostEcs, ipFilter?: string): React.ReactElement =>
+  host &&
+  host.name &&
+  host.name[0] &&
+  host.ip &&
+  (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
     <DefaultDraggable
       id={`host-name-renderer-default-draggable-${IpOverviewId}-host-name`}
       field={'host.name'}
@@ -156,8 +163,6 @@ interface DefaultFieldRendererProps {
 
 type OverflowRenderer = (item: string | ReputationLinkSetting) => JSX.Element;
 
-// TODO: This causes breaks between elements until the ticket below is fixed
-// https://github.com/elastic/ingest-dev/issues/474
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
   attrName,
   displayCount = 1,
@@ -255,25 +260,31 @@ MoreContainer.displayName = 'MoreContainer';
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
   ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
+    const button = useMemo(
+      () => (
+        <>
+          {' ,'}
+          <EuiButtonEmpty size="xs" onClick={togglePopover}>
+            {`+${rowItems.length - overflowIndexStart} `}
+            <FormattedMessage
+              id="xpack.securitySolution.fieldRenderers.moreLabel"
+              defaultMessage="More"
+            />
+          </EuiButtonEmpty>
+        </>
+      ),
+      [togglePopover, overflowIndexStart, rowItems.length]
+    );
+
     return (
       <EuiFlexItem grow={false}>
         {rowItems.length > overflowIndexStart && (
           <EuiPopover
             id="popover"
-            button={
-              <>
-                {' ,'}
-                <EuiButtonEmpty size="xs" onClick={() => setIsOpen(!isOpen)}>
-                  {`+${rowItems.length - overflowIndexStart} `}
-                  <FormattedMessage
-                    id="xpack.securitySolution.fieldRenderers.moreLabel"
-                    defaultMessage="More"
-                  />
-                </EuiButtonEmpty>
-              </>
-            }
+            button={button}
             isOpen={isOpen}
-            closePopover={() => setIsOpen(!isOpen)}
+            closePopover={togglePopover}
             repositionOnScroll
           >
             <MoreContainer

@@ -6,6 +6,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
 import { take } from 'rxjs/operators';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '../../features/server';
 // @ts-ignore
 import { getEcommerceSavedObjects } from './sample_data/ecommerce_saved_objects';
@@ -27,6 +28,7 @@ import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
+import { EMSSettings } from '../common/ems_settings';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -50,7 +52,7 @@ export class MapsPlugin implements Plugin {
   _initHomeData(
     home: HomeServerPluginSetup,
     prependBasePath: (path: string) => string,
-    mapConfig: any
+    emsSettings: EMSSettings
   ) {
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map',
@@ -123,7 +125,7 @@ export class MapsPlugin implements Plugin {
       home.tutorials.registerTutorial(
         emsBoundariesSpecProvider({
           prependBasePath,
-          emsLandingPageUrl: mapConfig.emsLandingPageUrl,
+          emsLandingPageUrl: emsSettings.getEMSLandingPageUrl(),
         })
       );
     }
@@ -145,31 +147,32 @@ export class MapsPlugin implements Plugin {
       return;
     }
 
-    let routesInitialized = false;
+    let isEnterprisePlus = false;
+    let lastLicenseId: string | undefined;
+    const emsSettings = new EMSSettings(mapsLegacyConfig, () => isEnterprisePlus);
     licensing.license$.subscribe((license: ILicense) => {
-      const { state } = license.check('maps', 'basic');
-      if (state === 'valid' && !routesInitialized) {
-        routesInitialized = true;
-        initRoutes(
-          core.http.createRouter(),
-          license.uid,
-          mapsLegacyConfig,
-          this.kibanaVersion,
-          this._logger
-        );
-      }
+      const enterprise = license.check(APP_ID, 'enterprise');
+      isEnterprisePlus = enterprise.state === 'valid';
+      lastLicenseId = license.uid;
     });
 
-    this._initHomeData(home, core.http.basePath.prepend, currentConfig);
+    initRoutes(
+      core.http.createRouter(),
+      () => lastLicenseId,
+      emsSettings,
+      this.kibanaVersion,
+      this._logger
+    );
 
-    features.registerFeature({
+    this._initHomeData(home, core.http.basePath.prepend, emsSettings);
+
+    features.registerKibanaFeature({
       id: APP_ID,
       name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
         defaultMessage: 'Maps',
       }),
-      order: 600,
-      icon: APP_ICON,
-      navLinkId: APP_ID,
+      order: 400,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       app: [APP_ID, 'kibana'],
       catalogue: [APP_ID],
       privileges: {
@@ -178,7 +181,7 @@ export class MapsPlugin implements Plugin {
           catalogue: [APP_ID],
           savedObject: {
             all: [MAP_SAVED_OBJECT_TYPE, 'query'],
-            read: ['index-pattern'],
+            read: ['index-pattern', 'tag'],
           },
           ui: ['save', 'show', 'saveQuery'],
         },
@@ -187,7 +190,7 @@ export class MapsPlugin implements Plugin {
           catalogue: [APP_ID],
           savedObject: {
             all: [],
-            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query'],
+            read: [MAP_SAVED_OBJECT_TYPE, 'index-pattern', 'query', 'tag'],
           },
           ui: ['show'],
         },

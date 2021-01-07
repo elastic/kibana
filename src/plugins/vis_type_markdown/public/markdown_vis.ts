@@ -19,21 +19,26 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { MarkdownVisWrapper } from './markdown_vis_controller';
 import { MarkdownOptions } from './markdown_options';
 import { SettingsOptions } from './settings_options_lazy';
 import { DefaultEditorSize } from '../../vis_default_editor/public';
+import { VisGroups } from '../../visualizations/public';
+import { toExpressionAst } from './to_ast';
 
 export const markdownVisDefinition = {
   name: 'markdown',
   title: 'Markdown',
   isAccessible: true,
   icon: 'visText',
-  description: i18n.translate('visTypeMarkdown.markdownDescription', {
-    defaultMessage: 'Create a document using markdown syntax',
+  group: VisGroups.TOOLS,
+  titleInWizard: i18n.translate('visTypeMarkdown.markdownTitleInWizard', {
+    defaultMessage: 'Text',
   }),
+  description: i18n.translate('visTypeMarkdown.markdownDescription', {
+    defaultMessage: 'Add text and images to your dashboard.',
+  }),
+  toExpressionAst,
   visConfig: {
-    component: MarkdownVisWrapper,
     defaults: {
       fontSize: 12,
       openLinksInNewTab: false,

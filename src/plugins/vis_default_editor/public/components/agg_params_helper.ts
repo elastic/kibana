@@ -26,7 +26,7 @@ import {
   IAggType,
   IndexPattern,
   IndexPatternField,
-} from 'src/plugins/data/public';
+} from '../../../data/public';
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
 import { AggTypeState, AggParamsState } from './agg_params_state';
@@ -93,7 +93,7 @@ function getAggParamsToRender({
         }
       }
       fields = filterAggTypeFields(availableFields, agg);
-      indexedFields = groupAndSortBy(fields, 'type', 'name');
+      indexedFields = groupAndSortBy(fields, 'type', 'displayName', 'name');
 
       if (fields && !indexedFields.length && index > 0) {
         // don't draw the rest of the options if there are no indexed fields and it's an extra param (index > 0).

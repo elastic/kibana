@@ -18,9 +18,7 @@
  */
 
 import { Container, isErrorEmbeddable } from '../../../..';
-// @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { nextTick } from '@kbn/test/jest';
 import { CustomizePanelTitleAction } from './customize_panel_action';
 import {
   ContactCardEmbeddable,

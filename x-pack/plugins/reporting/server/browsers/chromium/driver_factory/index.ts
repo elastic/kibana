@@ -9,22 +9,17 @@ import del from 'del';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import {
-  Browser,
-  ConsoleMessage,
-  LaunchOptions,
-  Page,
-  Request as PuppeteerRequest,
-} from 'puppeteer';
+import puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
+import { getChromiumDisconnectedError } from '../';
 import { BROWSER_TYPE } from '../../../../common/constants';
+import { durationToNumber } from '../../../../common/schema_utils';
 import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger } from '../../../lib';
 import { safeChildProcess } from '../../safe_child_process';
 import { HeadlessChromiumDriver } from '../driver';
-import { puppeteerLaunch } from '../puppeteer';
 import { args } from './args';
 
 type BrowserConfig = CaptureConfig['browser']['chromium'];
@@ -58,33 +53,11 @@ export class HeadlessChromiumDriverFactory {
 
   type = BROWSER_TYPE;
 
-  test(logger: LevelLogger) {
-    const chromiumArgs = args({
-      userDataDir: this.userDataDir,
-      viewport: { width: 800, height: 600 },
-      disableSandbox: this.browserConfig.disableSandbox,
-      proxy: this.browserConfig.proxy,
-    });
-
-    return puppeteerLaunch({
-      userDataDir: this.userDataDir,
-      executablePath: this.binaryPath,
-      ignoreHTTPSErrors: true,
-      args: chromiumArgs,
-    } as LaunchOptions).catch((error: Error) => {
-      logger.error(
-        `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports.`
-      );
-      logger.error(error);
-      return null;
-    });
-  }
-
   /*
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone: string },
+    { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone?: string },
     pLogger: LevelLogger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
@@ -92,11 +65,12 @@ export class HeadlessChromiumDriverFactory {
       logger.info(`Creating browser page driver`);
 
       const chromiumArgs = this.getChromiumArgs(viewport);
+      logger.debug(`Chromium launch args set to: ${chromiumArgs}`);
 
-      let browser: Browser;
-      let page: Page;
+      let browser: puppeteer.Browser;
+      let page: puppeteer.Page;
       try {
-        browser = await puppeteerLaunch({
+        browser = await puppeteer.launch({
           pipe: !this.browserConfig.inspect,
           userDataDir: this.userDataDir,
           executablePath: this.binaryPath,
@@ -105,23 +79,29 @@ export class HeadlessChromiumDriverFactory {
           env: {
             TZ: browserTimezone,
           },
-        } as LaunchOptions);
+        } as puppeteer.LaunchOptions);
 
         page = await browser.newPage();
 
         // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
         // All waitFor methods have their own timeout config passed in to them
-        page.setDefaultTimeout(this.captureConfig.timeouts.openUrl);
+        page.setDefaultTimeout(durationToNumber(this.captureConfig.timeouts.openUrl));
 
         logger.debug(`Browser page driver created`);
       } catch (err) {
-        observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
+        observer.error(new Error(`Error spawning Chromium browser!`));
+        observer.error(err);
         throw err;
       }
 
       const childProcess = {
         async kill() {
-          await browser.close();
+          try {
+            await browser.close();
+          } catch (err) {
+            // do not throw
+            logger.error(err);
+          }
         },
       };
       const { terminate$ } = safeChildProcess(logger, childProcess);
@@ -167,14 +147,15 @@ export class HeadlessChromiumDriverFactory {
         // the unsubscribe function isn't `async` so we're going to make our best effort at
         // deleting the userDataDir and if it fails log an error.
         del(userDataDir, { force: true }).catch((error) => {
-          logger.error(`error deleting user data directory at [${userDataDir}]: [${error}]`);
+          logger.error(`error deleting user data directory at [${userDataDir}]!`);
+          logger.error(error);
         });
       });
     });
   }
 
-  getBrowserLogger(page: Page, logger: LevelLogger): Rx.Observable<void> {
-    const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
+  getBrowserLogger(page: puppeteer.Page, logger: LevelLogger): Rx.Observable<void> {
+    const consoleMessages$ = Rx.fromEvent<puppeteer.ConsoleMessage>(page, 'console').pipe(
       map((line) => {
         if (line.type() === 'error') {
           logger.error(line.text(), ['headless-browser-console']);
@@ -184,7 +165,7 @@ export class HeadlessChromiumDriverFactory {
       })
     );
 
-    const pageRequestFailed$ = Rx.fromEvent<PuppeteerRequest>(page, 'requestfailed').pipe(
+    const pageRequestFailed$ = Rx.fromEvent<puppeteer.Request>(page, 'requestfailed').pipe(
       map((req) => {
         const failure = req.failure && req.failure();
         if (failure) {
@@ -198,7 +179,7 @@ export class HeadlessChromiumDriverFactory {
     return Rx.merge(consoleMessages$, pageRequestFailed$);
   }
 
-  getProcessLogger(browser: Browser, logger: LevelLogger): Rx.Observable<void> {
+  getProcessLogger(browser: puppeteer.Browser, logger: LevelLogger): Rx.Observable<void> {
     const childProcess = browser.process();
     // NOTE: The browser driver can not observe stdout and stderr of the child process
     // Puppeteer doesn't give a handle to the original ChildProcess object
@@ -214,12 +195,12 @@ export class HeadlessChromiumDriverFactory {
     return processClose$; // ideally, this would also merge with observers for stdout and stderr
   }
 
-  getPageExit(browser: Browser, page: Page) {
+  getPageExit(browser: puppeteer.Browser, page: puppeteer.Page) {
     const pageError$ = Rx.fromEvent<Error>(page, 'error').pipe(
       mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.errorDetected', {
-            defaultMessage: 'Reporting detected an error: {err}',
+            defaultMessage: 'Reporting encountered an error: {err}',
             values: { err: err.toString() },
           })
         );
@@ -230,7 +211,7 @@ export class HeadlessChromiumDriverFactory {
       mergeMap((err) => {
         return Rx.throwError(
           i18n.translate('xpack.reporting.browsers.chromium.pageErrorDetected', {
-            defaultMessage: `Reporting detected an error on the page: {err}`,
+            defaultMessage: `Reporting encountered an error on the page: {err}`,
             values: { err: err.toString() },
           })
         );
@@ -238,15 +219,7 @@ export class HeadlessChromiumDriverFactory {
     );
 
     const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
-      mergeMap(() =>
-        Rx.throwError(
-          new Error(
-            i18n.translate('xpack.reporting.browsers.chromium.chromiumClosed', {
-              defaultMessage: `Reporting detected that Chromium has closed.`,
-            })
-          )
-        )
-      )
+      mergeMap(() => Rx.throwError(getChromiumDisconnectedError()))
     );
 
     return Rx.merge(pageError$, uncaughtExceptionPageError$, browserDisconnect$);

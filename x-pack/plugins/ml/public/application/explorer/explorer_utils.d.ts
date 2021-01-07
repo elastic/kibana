@@ -6,6 +6,7 @@
 
 import { Moment } from 'moment';
 
+import { AnnotationsTable } from '../../../common/types/annotations';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { SwimlaneType } from './explorer_constants';
 
@@ -111,7 +112,7 @@ export declare const loadAnnotationsTableData: (
   selectedJobs: ExplorerJob[],
   interval: number,
   bounds: TimeRangeBounds
-) => Promise<any[]>;
+) => Promise<AnnotationsTable>;
 
 export declare interface AnomaliesTableData {
   anomalies: any[];
@@ -185,7 +186,13 @@ export declare interface FilterData {
 export declare interface AppStateSelectedCells {
   type: SwimlaneType;
   lanes: string[];
-  times: number[];
+  times: [number, number];
   showTopFieldValues?: boolean;
   viewByFieldName?: string;
 }
+
+export declare const removeFilterFromQueryString: (
+  currentQueryString: string,
+  fieldName: string,
+  fieldValue: string
+) => string;

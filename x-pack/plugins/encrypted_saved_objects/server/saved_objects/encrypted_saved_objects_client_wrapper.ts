@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import uuid from 'uuid';
 import {
   SavedObject,
   SavedObjectsBaseOptions,
@@ -13,6 +12,7 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -21,8 +21,11 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsRemoveReferencesToOptions,
   ISavedObjectTypeRegistry,
-} from 'src/core/server';
+  SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsUtils,
+} from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsService } from '../crypto';
 import { getDescriptorNamespace } from './get_descriptor_namespace';
@@ -34,19 +37,18 @@ interface EncryptedSavedObjectsClientOptions {
   getCurrentUser: () => AuthenticatedUser | undefined;
 }
 
-/**
- * Generates UUIDv4 ID for the any newly created saved object that is supposed to contain
- * encrypted attributes.
- */
-function generateID() {
-  return uuid.v4();
-}
-
 export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientContract {
   constructor(
     private readonly options: EncryptedSavedObjectsClientOptions,
     public readonly errors = options.baseClient.errors
   ) {}
+
+  public async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options?: SavedObjectsBaseOptions
+  ) {
+    return await this.options.baseClient.checkConflicts(objects, options);
+  }
 
   public async create<T>(
     type: string,
@@ -57,16 +59,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       return await this.options.baseClient.create(type, attributes, options);
     }
 
-    // Saved objects with encrypted attributes should have IDs that are hard to guess especially
-    // since IDs are part of the AAD used during encryption, that's why we control them within this
-    // wrapper and don't allow consumers to specify their own IDs directly.
-    if (options.id) {
-      throw new Error(
-        'Predefined IDs are not allowed for saved objects with encrypted attributes.'
-      );
-    }
-
-    const id = generateID();
+    const id = getValidId(options.id, options.version, options.overwrite);
     const namespace = getDescriptorNamespace(
       this.options.baseTypeRegistry,
       type,
@@ -89,7 +82,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
   public async bulkCreate<T>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsBaseOptions & Pick<SavedObjectsCreateOptions, 'overwrite'>
   ) {
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
@@ -100,16 +93,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
           return object;
         }
 
-        // Saved objects with encrypted attributes should have IDs that are hard to guess especially
-        // since IDs are part of the AAD used during encryption, that's why we control them within this
-        // wrapper and don't allow consumers to specify their own IDs directly.
-        if (object.id) {
-          throw new Error(
-            'Predefined IDs are not allowed for saved objects with encrypted attributes.'
-          );
-        }
-
-        const id = generateID();
+        const id = getValidId(object.id, object.version, options?.overwrite);
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           object.type,
@@ -142,14 +126,14 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // sequential processing.
     const encryptedObjects = await Promise.all(
       objects.map(async (object) => {
-        const { type, id, attributes } = object;
+        const { type, id, attributes, namespace: objectNamespace } = object;
         if (!this.options.service.isRegistered(type)) {
           return object;
         }
         const namespace = getDescriptorNamespace(
           this.options.baseTypeRegistry,
           type,
-          options?.namespace
+          objectNamespace ?? options?.namespace
         );
         return {
           ...object,
@@ -243,6 +227,14 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     return await this.options.baseClient.deleteFromNamespaces(type, id, namespaces, options);
   }
 
+  public async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ): Promise<SavedObjectsRemoveReferencesToResponse> {
+    return await this.options.baseClient.removeReferencesTo(type, id, options);
+  }
+
   /**
    * Strips encrypted attributes from any non-bulk Saved Objects API response. If type isn't
    * registered, response is returned as is.
@@ -302,4 +294,27 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
     return response;
   }
+}
+
+// Saved objects with encrypted attributes should have IDs that are hard to guess especially
+// since IDs are part of the AAD used during encryption, that's why we control them within this
+// wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
+function getValidId(
+  id: string | undefined,
+  version: string | undefined,
+  overwrite: boolean | undefined
+) {
+  if (id) {
+    // only allow a specified ID if we're overwriting an existing ESO with a Version
+    // this helps us ensure that the document really was previously created using ESO
+    // and not being used to get around the specified ID limitation
+    const canSpecifyID = (overwrite && version) || SavedObjectsUtils.isRandomId(id);
+    if (!canSpecifyID) {
+      throw new Error(
+        'Predefined IDs are not allowed for saved objects with encrypted attributes, unless the ID has been generated using `SavedObjectsUtils.generateId`.'
+      );
+    }
+    return id;
+  }
+  return SavedObjectsUtils.generateId();
 }

@@ -9,15 +9,11 @@
     "embeddable",
     "inspector",
     "kibanaLegacy",
+    "urlForwarding",
     "navigation",
     "uiActions",
-    "visualizations"
+    "savedObjects"
   ],
-  "optionalPlugins": ["home", "share"],
-  "requiredBundles": [
-    "kibanaUtils",
-    "home",
-    "savedObjects",
-    "kibanaReact"
-  ]
+  "optionalPlugins": ["home", "share", "usageCollection"],
+  "requiredBundles": ["kibanaUtils", "home", "kibanaReact"]
 }

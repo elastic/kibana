@@ -17,22 +17,22 @@
  * under the License.
  */
 
-import { expectType } from 'tsd';
+import { expectAssignable } from 'tsd';
 import { Values } from '../index';
 
 // Arrays
 type STRING = Values<string[]>;
 type ASDF_FOO = Values<Array<'asdf' | 'foo'>>;
 
-expectType<STRING>('adf');
-expectType<ASDF_FOO>('asdf');
-expectType<ASDF_FOO>('foo');
+expectAssignable<STRING>('adf');
+expectAssignable<ASDF_FOO>('asdf');
+expectAssignable<ASDF_FOO>('foo');
 
 // Objects
 type STRING2 = Values<Record<number, string>>;
 type FOO = Values<Record<number, 'foo'>>;
 type BAR = Values<{ foo: 'bar' }>;
 
-expectType<STRING2>('adf');
-expectType<FOO>('foo');
-expectType<BAR>('bar');
+expectAssignable<STRING2>('adf');
+expectAssignable<FOO>('foo');
+expectAssignable<BAR>('bar');

@@ -16,12 +16,12 @@ import {
   EuiLoadingContent,
   EuiPagination,
   EuiPopover,
-  Direction,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { FC, memo, useState, useEffect, ComponentType } from 'react';
+import React, { FC, memo, useState, useMemo, useEffect, ComponentType } from 'react';
 import styled from 'styled-components';
 
+import { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import { AuthTableColumns } from '../../../hosts/components/authentications_table';
 import { HostsTableColumns } from '../../../hosts/components/hosts_table';
@@ -29,11 +29,11 @@ import { NetworkDnsColumns } from '../../../network/components/network_dns_table
 import { NetworkHttpColumns } from '../../../network/components/network_http_table/columns';
 import {
   NetworkTopNFlowColumns,
-  NetworkTopNFlowColumnsIpDetails,
+  NetworkTopNFlowColumnsNetworkDetails,
 } from '../../../network/components/network_top_n_flow_table/columns';
 import {
   NetworkTopCountriesColumns,
-  NetworkTopCountriesColumnsIpDetails,
+  NetworkTopCountriesColumnsNetworkDetails,
 } from '../../../network/components/network_top_countries_table/columns';
 import { TlsColumns } from '../../../network/components/tls_table/columns';
 import { UncommonProcessTableColumns } from '../../../hosts/components/uncommon_process_table';
@@ -78,9 +78,9 @@ declare type BasicTableColumns =
   | NetworkDnsColumns
   | NetworkHttpColumns
   | NetworkTopCountriesColumns
-  | NetworkTopCountriesColumnsIpDetails
+  | NetworkTopCountriesColumnsNetworkDetails
   | NetworkTopNFlowColumns
-  | NetworkTopNFlowColumnsIpDetails
+  | NetworkTopNFlowColumnsNetworkDetails
   | TlsColumns
   | UncommonProcessTableColumns
   | UsersColumns;
@@ -228,6 +228,19 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     ));
   const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
 
+  const tableSorting = useMemo(
+    () =>
+      sorting
+        ? {
+            sort: {
+              field: sorting.field,
+              direction: sorting.direction,
+            },
+          }
+        : undefined,
+    [sorting]
+  );
+
   return (
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
@@ -251,16 +264,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
               columns={columns}
               items={pageOfItems}
               onChange={onChange}
-              sorting={
-                sorting
-                  ? {
-                      sort: {
-                        field: sorting.field,
-                        direction: sorting.direction,
-                      },
-                    }
-                  : undefined
-              }
+              sorting={tableSorting}
             />
             <FooterAction>
               <EuiFlexItem>
@@ -325,7 +329,7 @@ const FooterAction = styled(EuiFlexGroup).attrs(() => ({
 
 FooterAction.displayName = 'FooterAction';
 
-const PaginationEuiFlexItem = styled(EuiFlexItem)`
+export const PaginationEuiFlexItem = styled(EuiFlexItem)`
   @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
     .euiButtonIcon:last-child {
       margin-left: 28px;

@@ -26,13 +26,11 @@ export const Bar = styled.aside.attrs({
   className: 'siemUtilityBar',
 })<BarProps>`
   ${({ border, theme }) => css`
-    ${
-      border &&
-      css`
-        border-bottom: ${theme.eui.euiBorderThin};
-        padding-bottom: ${theme.eui.paddingSizes.s};
-      `
-    }
+    ${border &&
+    css`
+      border-bottom: ${theme.eui.euiBorderThin};
+      padding-bottom: ${theme.eui.paddingSizes.s};
+    `}
 
     @media only screen and (min-width: ${theme.eui.euiBreakpoints.l}) {
       display: flex;
@@ -117,7 +115,7 @@ export const BarText = styled.p.attrs({
   className: 'siemUtilityBar__text',
 })`
   ${({ theme }) => css`
-    color: ${theme.eui.textColors.subdued};
+    color: ${theme.eui.euiTextSubduedColor};
     font-size: ${theme.eui.euiFontSizeXS};
     line-height: ${theme.eui.euiLineHeight};
     white-space: nowrap;

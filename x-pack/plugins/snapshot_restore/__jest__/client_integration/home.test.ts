@@ -12,6 +12,7 @@ import {
   setupEnvironment,
   pageHelpers,
   nextTick,
+  delay,
   getRandomString,
   findTestSubject,
 } from './helpers';
@@ -19,13 +20,6 @@ import { HomeTestBed } from './helpers/home.helpers';
 import { REPOSITORY_NAME } from './helpers/constant';
 
 const { setup } = pageHelpers.home;
-
-jest.mock('ui/new_platform');
-
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
 
 // Mocking FormattedDate and FormattedTime due to timezone differences on CI
 jest.mock('@kbn/i18n/react', () => {
@@ -404,7 +398,7 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await nextTick(100);
+          await delay(100);
           testBed.component.update();
         });
       });
@@ -433,7 +427,7 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await nextTick(2000);
+          await delay(2000);
           testBed.component.update();
         });
       });
@@ -473,7 +467,7 @@ describe('<SnapshotRestoreHome />', () => {
 
         await act(async () => {
           testBed.actions.selectTab('snapshots');
-          await nextTick(2000);
+          await delay(2000);
           testBed.component.update();
         });
       });

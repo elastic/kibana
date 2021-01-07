@@ -22,6 +22,7 @@ import { MountPoint } from '../../../types';
 
 interface Props {
   extension?: MountPoint<HTMLDivElement>;
+  display?: 'block' | 'inlineBlock';
 }
 
 export class HeaderExtension extends React.Component<Props> {
@@ -46,7 +47,12 @@ export class HeaderExtension extends React.Component<Props> {
   }
 
   public render() {
-    return <div ref={this.ref} />;
+    return (
+      <div
+        ref={this.ref}
+        style={{ display: this.props.display === 'inlineBlock' ? 'inline-block' : undefined }}
+      />
+    );
   }
 
   private renderExtension() {

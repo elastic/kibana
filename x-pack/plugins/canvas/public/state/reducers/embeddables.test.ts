@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-jest.mock('ui/new_platform');
+
 import { State } from '../../../types';
 import { updateEmbeddableExpression } from '../actions/embeddable';
 import { embeddableReducer } from './embeddable';

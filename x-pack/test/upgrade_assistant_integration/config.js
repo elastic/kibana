@@ -31,13 +31,7 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'X-Pack Upgrade Assistant Integration Tests',
     },
-    kbnTestServer: {
-      ...xPackFunctionalTestsConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
-        '--optimize.enabled=false',
-      ],
-    },
+    kbnTestServer: xPackFunctionalTestsConfig.get('kbnTestServer'),
     esTestCluster: {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
       dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),

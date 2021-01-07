@@ -5,6 +5,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { ChartsPluginSetup, ChartsPluginStart } from 'src/plugins/charts/public';
 import {
   CoreSetup,
   CoreStart,
@@ -24,6 +25,7 @@ import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
+import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 // @ts-expect-error untyped local
 import { argTypeSpecs } from './expression_types/arg_types';
 import { transitions } from './transitions';
@@ -39,8 +41,10 @@ export { CoreStart, CoreSetup };
 export interface CanvasSetupDeps {
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  bfetch: BfetchPublicSetup;
+  charts: ChartsPluginSetup;
 }
 
 export interface CanvasStartDeps {
@@ -48,6 +52,7 @@ export interface CanvasStartDeps {
   expressions: ExpressionsStart;
   inspector: InspectorStart;
   uiActions: UiActionsStart;
+  charts: ChartsPluginStart;
 }
 
 /**
@@ -86,7 +91,7 @@ export class CanvasPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       id: 'canvas',
       title: 'Canvas',
-      euiIconType: 'canvasApp',
+      euiIconType: 'logoKibana',
       order: 3000,
       updater$: this.appUpdater,
       mount: async (params: AppMountParameters) => {
@@ -114,7 +119,9 @@ export class CanvasPlugin
       },
     });
 
-    plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    if (plugins.home) {
+      plugins.home.featureCatalogue.register(featureCatalogueEntry);
+    }
 
     canvasApi.addArgumentUIs(argTypeSpecs);
     canvasApi.addTransitions(transitions);

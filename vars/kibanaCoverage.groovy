@@ -145,7 +145,7 @@ def generateReports(title) {
     source src/dev/ci_setup/setup_env.sh true
     # bootstrap from x-pack folder
     cd x-pack
-    yarn kbn bootstrap --prefer-offline
+    yarn kbn bootstrap
     # Return to project root
     cd ..
     . src/dev/code_coverage/shell_scripts/extract_archives.sh
@@ -169,31 +169,31 @@ def uploadCombinedReports() {
   )
 }
 
-def ingestData(jobName, buildNum, buildUrl, previousSha, title) {
+def ingestData(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, title) {
   kibanaPipeline.bash("""
     source src/dev/ci_setup/setup_env.sh
-    yarn kbn bootstrap --prefer-offline
+    yarn kbn bootstrap
     # Using existing target/kibana-coverage folder
-    . src/dev/code_coverage/shell_scripts/ingest_coverage.sh '${jobName}' ${buildNum} '${buildUrl}' ${previousSha}
+    . src/dev/code_coverage/shell_scripts/generate_team_assignments_and_ingest_coverage.sh '${jobName}' ${buildNum} '${buildUrl}' '${previousSha}' '${teamAssignmentsPath}'
   """, title)
 }
 
-def ingestWithVault(jobName, buildNum, buildUrl, previousSha, title) {
+def ingestWithVault(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, title) {
   def vaultSecret = 'secret/kibana-issues/prod/coverage/elasticsearch'
   withVaultSecret(secret: vaultSecret, secret_field: 'host', variable_name: 'HOST_FROM_VAULT') {
     withVaultSecret(secret: vaultSecret, secret_field: 'username', variable_name: 'USER_FROM_VAULT') {
       withVaultSecret(secret: vaultSecret, secret_field: 'password', variable_name: 'PASS_FROM_VAULT') {
-        ingestData(jobName, buildNum, buildUrl, previousSha, title)
+        ingestData(jobName, buildNum, buildUrl, previousSha, teamAssignmentsPath, title)
       }
     }
   }
 }
 
-def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, title) {
+def ingest(jobName, buildNumber, buildUrl, timestamp, previousSha, teamAssignmentsPath, title) {
   withEnv([
     "TIME_STAMP=${timestamp}",
   ]) {
-    ingestWithVault(jobName, buildNumber, buildUrl, previousSha, title)
+    ingestWithVault(jobName, buildNumber, buildUrl, previousSha, teamAssignmentsPath, title)
   }
 }
 
@@ -249,6 +249,7 @@ def xpackProks() {
     'xpack-ciGroup8' : kibanaPipeline.xpackCiGroupProcess(8),
     'xpack-ciGroup9' : kibanaPipeline.xpackCiGroupProcess(9),
     'xpack-ciGroup10': kibanaPipeline.xpackCiGroupProcess(10),
+    'xpack-ciGroup11': kibanaPipeline.xpackCiGroupProcess(11),
   ]
 }
 

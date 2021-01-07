@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../__mocks__/shallow_usecontext.mock';
-
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -21,7 +19,7 @@ describe('ViewContentHeader', () => {
   it('renders with title and alignItems', () => {
     const wrapper = shallow(<ViewContentHeader {...props} />);
 
-    expect(wrapper.find('h2').text()).toEqual('Header');
+    expect(wrapper.find('h3').text()).toEqual('Header');
     expect(wrapper.find(EuiFlexGroup).prop('alignItems')).toEqual('flexStart');
   });
 
@@ -36,5 +34,21 @@ describe('ViewContentHeader', () => {
     const wrapper = shallow(<ViewContentHeader {...props} action={<div className="action" />} />);
 
     expect(wrapper.find('.action')).toHaveLength(1);
+  });
+
+  it('renders small heading', () => {
+    const wrapper = shallow(
+      <ViewContentHeader titleSize="s" {...props} action={<div className="action" />} />
+    );
+
+    expect(wrapper.find('h4')).toHaveLength(1);
+  });
+
+  it('renders large heading', () => {
+    const wrapper = shallow(
+      <ViewContentHeader titleSize="l" {...props} action={<div className="action" />} />
+    );
+
+    expect(wrapper.find('h2')).toHaveLength(1);
   });
 });

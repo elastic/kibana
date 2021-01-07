@@ -5,7 +5,7 @@
  */
 
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { Alert } from '../../../../../alerts/common';
+import { Alert, AlertTypeParams } from '../../../../../alerts/common';
 import { AlertsClient } from '../../../../../alerts/server';
 import { createRules } from './create_rules';
 import { PartialFilter } from '../types';
@@ -14,14 +14,15 @@ export const installPrepackagedRules = (
   alertsClient: AlertsClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string
-): Array<Promise<Alert>> =>
-  rules.reduce<Array<Promise<Alert>>>((acc, rule) => {
+): Array<Promise<Alert<AlertTypeParams>>> =>
+  rules.reduce<Array<Promise<Alert<AlertTypeParams>>>>((acc, rule) => {
     const {
       anomaly_threshold: anomalyThreshold,
       author,
       building_block_type: buildingBlockType,
       description,
       enabled,
+      event_category_override: eventCategoryOverride,
       false_positives: falsePositives,
       from,
       query,
@@ -47,6 +48,13 @@ export const installPrepackagedRules = (
       to,
       type,
       threat,
+      threat_filters: threatFilters,
+      threat_mapping: threatMapping,
+      threat_language: threatLanguage,
+      concurrent_searches: concurrentSearches,
+      items_per_search: itemsPerSearch,
+      threat_query: threatQuery,
+      threat_index: threatIndex,
       threshold,
       timestamp_override: timestampOverride,
       references,
@@ -66,6 +74,7 @@ export const installPrepackagedRules = (
         buildingBlockType,
         description,
         enabled,
+        eventCategoryOverride,
         falsePositives,
         from,
         immutable: true, // At the moment we force all prepackaged rules to be immutable
@@ -93,6 +102,13 @@ export const installPrepackagedRules = (
         to,
         type,
         threat,
+        threatFilters,
+        threatMapping,
+        threatLanguage,
+        concurrentSearches,
+        itemsPerSearch,
+        threatQuery,
+        threatIndex,
         threshold,
         timestampOverride,
         references,

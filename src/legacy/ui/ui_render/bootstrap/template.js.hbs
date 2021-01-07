@@ -77,14 +77,9 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
         '{{this}}',
       {{/each}}
     ], function () {
-      {{#unless legacyBundlePath}}
-        __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
-      {{/unless}}
+      __kbnBundles__.get('entry/core/public').__kbnBootstrap__();
 
       load([
-        {{#if legacyBundlePath}}
-          '{{legacyBundlePath}}',
-        {{/if}}
         {{#each styleSheetPaths}}
           '{{this}}',
         {{/each}}

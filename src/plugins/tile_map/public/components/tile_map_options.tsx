@@ -21,8 +21,13 @@ import React, { useEffect } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
-import { BasicOptions, RangeOption, SelectOption, SwitchOption } from '../../../charts/public';
+import {
+  VisOptionsProps,
+  BasicOptions,
+  SelectOption,
+  SwitchOption,
+  RangeOption,
+} from '../../../vis_default_editor/public';
 import { WmsOptions, TileMapVisParams, MapTypes } from '../../../maps_legacy/public';
 
 export type TileMapOptionsProps = VisOptionsProps<TileMapVisParams>;
@@ -76,7 +81,7 @@ function TileMapOptions(props: TileMapOptionsProps) {
         <BasicOptions {...props} />
 
         <SwitchOption
-          disabled={!vis.type.visConfig.canDesaturate}
+          disabled={!vis.type.visConfig?.canDesaturate}
           label={i18n.translate('tileMap.visParams.desaturateTilesLabel', {
             defaultMessage: 'Desaturate tiles',
           })}

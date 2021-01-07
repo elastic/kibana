@@ -17,23 +17,35 @@
  * under the License.
  */
 
-import {
-  ActionByType,
-  APPLY_FILTER_TRIGGER,
-  createAction,
-  UiActionsStart,
-} from '../../../../plugins/ui_actions/public';
+import { Datatable } from 'src/plugins/expressions/public';
+import { Action, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 import type { Filter } from '../../common/es_query/filters';
-import type { ValueClickContext } from '../../../embeddable/public';
 
 export type ValueClickActionContext = ValueClickContext;
 export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
 
+export interface ValueClickContext {
+  // Need to make this unknown to prevent circular dependencies.
+  // Apps using this property will need to cast to `IEmbeddable`.
+  embeddable?: unknown;
+  data: {
+    data: Array<{
+      table: Pick<Datatable, 'rows' | 'columns'>;
+      column: number;
+      row: number;
+      value: any;
+    }>;
+    timeFieldName?: string;
+    negate?: boolean;
+  };
+}
+
 export function createValueClickAction(
   getStartServices: () => { uiActions: UiActionsStart }
-): ActionByType<typeof ACTION_VALUE_CLICK> {
-  return createAction<typeof ACTION_VALUE_CLICK>({
+): Action {
+  return createAction({
     type: ACTION_VALUE_CLICK,
     id: ACTION_VALUE_CLICK,
     shouldAutoExecute: async () => true,

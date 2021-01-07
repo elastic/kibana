@@ -4,7 +4,7 @@
 
 ## PluginConfigDescriptor.deprecations property
 
-Provider for the [ConfigDeprecation](./kibana-plugin-core-server.configdeprecation.md) to apply to the plugin configuration.
+Provider for the  to apply to the plugin configuration.
 
 <b>Signature:</b>
 

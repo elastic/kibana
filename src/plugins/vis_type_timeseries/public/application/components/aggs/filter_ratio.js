@@ -18,25 +18,25 @@
  */
 
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { AggSelect } from './agg_select';
 import { FieldSelect } from './field_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { createTextHandler } from '../lib/create_text_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFieldText,
   EuiSpacer,
   EuiFormRow,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
 import { getSupportedFieldsByMetricType } from '../lib/get_supported_fields_by_metric_type';
+import { getDataStart } from '../../../services';
+import { QueryBarWrapper } from '../query_bar_wrapper';
 
 const isFieldHistogram = (fields, indexPattern, field) => {
   const indexFields = fields[indexPattern];
@@ -49,15 +49,24 @@ const isFieldHistogram = (fields, indexPattern, field) => {
 export const FilterRatioAgg = (props) => {
   const { series, fields, panel } = props;
 
-  const handleChange = createChangeHandler(props.onChange, props.model);
+  const handleChange = useMemo(() => createChangeHandler(props.onChange, props.model), [
+    props.model,
+    props.onChange,
+  ]);
   const handleSelectChange = createSelectHandler(handleChange);
-  const handleTextChange = createTextHandler(handleChange);
+  const handleNumeratorQueryChange = useCallback((query) => handleChange({ numerator: query }), [
+    handleChange,
+  ]);
+  const handleDenominatorQueryChange = useCallback(
+    (query) => handleChange({ denominator: query }),
+    [handleChange]
+  );
   const indexPattern =
     (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
   const defaults = {
-    numerator: '*',
-    denominator: '*',
+    numerator: getDataStart().query.queryString.getDefaultQuery(),
+    denominator: getDataStart().query.queryString.getDefaultQuery(),
     metric_agg: 'count',
   };
 
@@ -101,7 +110,11 @@ export const FilterRatioAgg = (props) => {
               />
             }
           >
-            <EuiFieldText onChange={handleTextChange('numerator')} value={model.numerator} />
+            <QueryBarWrapper
+              query={model.numerator}
+              onChange={handleNumeratorQueryChange}
+              indexPatterns={[indexPattern]}
+            />
           </EuiFormRow>
         </EuiFlexItem>
 
@@ -115,7 +128,11 @@ export const FilterRatioAgg = (props) => {
               />
             }
           >
-            <EuiFieldText onChange={handleTextChange('denominator')} value={model.denominator} />
+            <QueryBarWrapper
+              query={model.denominator}
+              onChange={handleDenominatorQueryChange}
+              indexPatterns={[indexPattern]}
+            />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

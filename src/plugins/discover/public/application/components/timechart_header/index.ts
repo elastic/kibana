@@ -18,4 +18,3 @@
  */
 
 export { TimechartHeader } from './timechart_header';
-export { createTimechartHeaderDirective } from './timechart_header_directive';

@@ -5,13 +5,13 @@
  */
 
 import { HttpSetup } from 'src/core/public';
-import { FeatureConfig, Feature } from '.';
+import { KibanaFeatureConfig, KibanaFeature } from '.';
 
 export class FeaturesAPIClient {
   constructor(private readonly http: HttpSetup) {}
 
   public async getFeatures() {
-    const features = await this.http.get<FeatureConfig[]>('/api/features');
-    return features.map((config) => new Feature(config));
+    const features = await this.http.get<KibanaFeatureConfig[]>('/api/features');
+    return features.map((config) => new KibanaFeature(config));
   }
 }

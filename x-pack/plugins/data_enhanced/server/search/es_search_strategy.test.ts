@@ -4,13 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from '../../../../../src/core/server';
-import { pluginInitializerContextConfigMock } from '../../../../../src/core/server/mocks';
 import { enhancedEsSearchStrategyProvider } from './es_search_strategy';
+import { BehaviorSubject } from 'rxjs';
+import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server/search';
 
 const mockAsyncResponse = {
-  id: 'foo',
-  response: {
+  body: {
+    id: 'foo',
+    response: {
+      _shards: {
+        total: 10,
+        failed: 1,
+        skipped: 2,
+        successful: 7,
+      },
+    },
+  },
+};
+
+const mockRollupResponse = {
+  body: {
     _shards: {
       total: 10,
       failed: 1,
@@ -20,97 +33,148 @@ const mockAsyncResponse = {
   },
 };
 
-const mockRollupResponse = {
-  _shards: {
-    total: 10,
-    failed: 1,
-    skipped: 2,
-    successful: 7,
-  },
-};
-
 describe('ES search strategy', () => {
   const mockApiCaller = jest.fn();
+  const mockGetCaller = jest.fn();
+  const mockSubmitCaller = jest.fn();
+  const mockDeleteCaller = jest.fn();
   const mockLogger: any = {
-    info: () => {},
+    debug: () => {},
   };
-  const mockContext = {
-    core: { elasticsearch: { legacy: { client: { callAsCurrentUser: mockApiCaller } } } },
-  };
-  const mockConfig$ = pluginInitializerContextConfigMock<any>({}).legacy.globalConfig$;
+  const mockDeps = ({
+    uiSettingsClient: {
+      get: jest.fn(),
+    },
+    esClient: {
+      asCurrentUser: {
+        asyncSearch: {
+          get: mockGetCaller,
+          submit: mockSubmitCaller,
+          delete: mockDeleteCaller,
+        },
+        transport: { request: mockApiCaller },
+      },
+    },
+  } as unknown) as SearchStrategyDependencies;
+  const mockConfig$ = new BehaviorSubject<any>({
+    elasticsearch: {
+      shardTimeout: {
+        asMilliseconds: () => {
+          return 100;
+        },
+      },
+    },
+  });
 
   beforeEach(() => {
     mockApiCaller.mockClear();
+    mockGetCaller.mockClear();
+    mockSubmitCaller.mockClear();
+    mockDeleteCaller.mockClear();
   });
 
-  it('returns a strategy with `search`', async () => {
+  it('returns a strategy with `search and `cancel`', async () => {
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
     expect(typeof esSearch.search).toBe('function');
   });
 
-  it('makes a POST request to async search with params when no ID is provided', async () => {
-    mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
+  describe('search', () => {
+    it('makes a POST request to async search with params when no ID is provided', async () => {
+      mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-    const params = { index: 'logstash-*', body: { query: {} } };
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+      const params = { index: 'logstash-*', body: { query: {} } };
+      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
+      await esSearch.search({ params }, {}, mockDeps).toPromise();
 
-    expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
-    const { method, path, body } = mockApiCaller.mock.calls[0][1];
-    expect(method).toBe('POST');
-    expect(path).toBe('/logstash-*/_async_search');
-    expect(body).toEqual({ query: {} });
-  });
-
-  it('makes a GET request to async search with ID when ID is provided', async () => {
-    mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
-
-    const params = { index: 'logstash-*', body: { query: {} } };
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
-
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { id: 'foo', params });
-
-    expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
-    const { method, path, body } = mockApiCaller.mock.calls[0][1];
-    expect(method).toBe('GET');
-    expect(path).toBe('/_async_search/foo');
-    expect(body).toEqual(undefined);
-  });
-
-  it('encodes special characters in the path', async () => {
-    mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
-
-    const params = { index: 'foo-程', body: {} };
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
-
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
-
-    expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
-    const { method, path } = mockApiCaller.mock.calls[0][1];
-    expect(method).toBe('POST');
-    expect(path).toBe('/foo-%E7%A8%8B/_async_search');
-  });
-
-  it('calls the rollup API if the index is a rollup type', async () => {
-    mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
-
-    const params = { index: 'foo-程', body: {} };
-    const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
-
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, {
-      indexType: 'rollup',
-      params,
+      expect(mockSubmitCaller).toBeCalled();
+      const request = mockSubmitCaller.mock.calls[0][0];
+      expect(request.index).toEqual(params.index);
+      expect(request.body).toEqual(params.body);
     });
 
-    expect(mockApiCaller).toBeCalled();
-    expect(mockApiCaller.mock.calls[0][0]).toBe('transport.request');
-    const { method, path } = mockApiCaller.mock.calls[0][1];
-    expect(method).toBe('POST');
-    expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
+    it('makes a GET request to async search with ID when ID is provided', async () => {
+      mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+      const params = { index: 'logstash-*', body: { query: {} } };
+      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+      await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
+
+      expect(mockGetCaller).toBeCalled();
+      const request = mockGetCaller.mock.calls[0][0];
+      expect(request.id).toEqual('foo');
+      expect(request).toHaveProperty('wait_for_completion_timeout');
+      expect(request).toHaveProperty('keep_alive');
+    });
+
+    it('calls the rollup API if the index is a rollup type', async () => {
+      mockApiCaller.mockResolvedValueOnce(mockRollupResponse);
+
+      const params = { index: 'foo-程', body: {} };
+      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+      await esSearch
+        .search(
+          {
+            indexType: 'rollup',
+            params,
+          },
+          {},
+          mockDeps
+        )
+        .toPromise();
+
+      expect(mockApiCaller).toBeCalled();
+      const { method, path } = mockApiCaller.mock.calls[0][0];
+      expect(method).toBe('POST');
+      expect(path).toBe('/foo-%E7%A8%8B/_rollup_search');
+    });
+
+    it('sets wait_for_completion_timeout and keep_alive in the request', async () => {
+      mockSubmitCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+      const params = { index: 'foo-*', body: {} };
+      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+      await esSearch.search({ params }, {}, mockDeps).toPromise();
+
+      expect(mockSubmitCaller).toBeCalled();
+      const request = mockSubmitCaller.mock.calls[0][0];
+      expect(request).toHaveProperty('wait_for_completion_timeout');
+      expect(request).toHaveProperty('keep_alive');
+    });
+  });
+
+  describe('cancel', () => {
+    it('makes a DELETE request to async search with the provided ID', async () => {
+      mockDeleteCaller.mockResolvedValueOnce(200);
+
+      const id = 'some_id';
+      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+      await esSearch.cancel!(id, {}, mockDeps);
+
+      expect(mockDeleteCaller).toBeCalled();
+      const request = mockDeleteCaller.mock.calls[0][0];
+      expect(request).toEqual({ id });
+    });
+  });
+
+  describe('extend', () => {
+    it('makes a GET request to async search with the provided ID and keepAlive', async () => {
+      mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+      const id = 'some_other_id';
+      const keepAlive = '1d';
+      const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
+
+      await esSearch.extend!(id, keepAlive, {}, mockDeps);
+
+      expect(mockGetCaller).toBeCalled();
+      const request = mockGetCaller.mock.calls[0][0];
+      expect(request).toEqual({ id, keep_alive: keepAlive });
+    });
   });
 });

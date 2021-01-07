@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { DraggableWrapper, DragEffects } from '../drag_and_drop/draggable_wrapper';
-import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
+import {
+  IS_OPERATOR,
+  QueryOperator,
+} from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 
@@ -16,39 +19,43 @@ interface Props {
   entityValue: string;
 }
 
-export const EntityDraggableComponent = ({
+export const EntityDraggableComponent: React.FC<Props> = ({
   idPrefix,
   entityName,
   entityValue,
-}: Props): JSX.Element => {
+}) => {
   const id = escapeDataProviderId(`entity-draggable-${idPrefix}-${entityName}-${entityValue}`);
-  return (
-    <DraggableWrapper
-      key={id}
-      dataProvider={{
-        and: [],
-        enabled: true,
-        id,
-        name: entityValue,
-        excluded: false,
-        kqlQuery: '',
-        queryMatch: {
-          field: entityName,
-          value: entityValue,
-          operator: IS_OPERATOR,
-        },
-      }}
-      render={(dataProvider, _, snapshot) =>
-        snapshot.isDragging ? (
-          <DragEffects>
-            <Provider dataProvider={dataProvider} />
-          </DragEffects>
-        ) : (
-          <>{`${entityName}: "${entityValue}"`}</>
-        )
-      }
-    />
+
+  const dataProviderProp = useMemo(
+    () => ({
+      and: [],
+      enabled: true,
+      id,
+      name: entityValue,
+      excluded: false,
+      kqlQuery: '',
+      queryMatch: {
+        field: entityName,
+        value: entityValue,
+        operator: IS_OPERATOR as QueryOperator,
+      },
+    }),
+    [entityName, entityValue, id]
   );
+
+  const render = useCallback(
+    (dataProvider, _, snapshot) =>
+      snapshot.isDragging ? (
+        <DragEffects>
+          <Provider dataProvider={dataProvider} />
+        </DragEffects>
+      ) : (
+        <>{`${entityName}: "${entityValue}"`}</>
+      ),
+    [entityName, entityValue]
+  );
+
+  return <DraggableWrapper key={id} dataProvider={dataProviderProp} render={render} />;
 };
 
 EntityDraggableComponent.displayName = 'EntityDraggableComponent';

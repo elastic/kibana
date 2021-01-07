@@ -43,30 +43,21 @@ export const createLogEntryCategoryExamplesQuery = (
       },
     },
     sort: [{ [timestampField]: 'asc' }, { [tiebreakerField]: 'asc' }],
+    _source: false,
+    fields: ['event.dataset', 'message', 'container.id', 'host.name', 'log.file.path'],
   },
-  _source: ['event.dataset', 'message', 'container.id', 'host.name', 'log.file.path'],
   index: indices,
   size: exampleCount,
 });
 
 export const logEntryCategoryExampleHitRT = rt.type({
   _id: rt.string,
-  _source: rt.partial({
-    event: rt.partial({
-      dataset: rt.string,
-    }),
-    message: rt.string,
-    container: rt.partial({
-      id: rt.string,
-    }),
-    host: rt.partial({
-      name: rt.string,
-    }),
-    log: rt.partial({
-      file: rt.partial({
-        path: rt.string,
-      }),
-    }),
+  fields: rt.partial({
+    'event.dataset': rt.array(rt.string),
+    message: rt.array(rt.string),
+    'container.id': rt.array(rt.string),
+    'host.name': rt.array(rt.string),
+    'log.file.path': rt.array(rt.string),
   }),
   sort: rt.tuple([rt.number, rt.number]),
 });
@@ -82,4 +73,5 @@ export const logEntryCategoryExamplesResponseRT = rt.intersection([
   }),
 ]);
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export type logEntryCategoryExamplesResponse = rt.TypeOf<typeof logEntryCategoryExamplesResponseRT>;

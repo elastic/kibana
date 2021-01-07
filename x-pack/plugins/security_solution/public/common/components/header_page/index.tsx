@@ -15,6 +15,8 @@ import { Title } from './title';
 import { DraggableArguments, BadgeOptions, TitleProp } from './types';
 import { useFormatUrl } from '../link_to';
 import { SecurityPageName } from '../../../app/types';
+import { Sourcerer } from '../sourcerer';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 interface HeaderProps {
   border?: boolean;
@@ -69,9 +71,12 @@ interface BackOptions {
 
 export interface HeaderPageProps extends HeaderProps {
   backOptions?: BackOptions;
+  /** A component to be displayed as the back button. Used only if `backOption` is not defined */
+  backComponent?: React.ReactNode;
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
   draggableArguments?: DraggableArguments;
+  hideSourcerer?: boolean;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
   title: TitleProp;
@@ -80,10 +85,12 @@ export interface HeaderPageProps extends HeaderProps {
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   backOptions,
+  backComponent,
   badgeOptions,
   border,
   children,
   draggableArguments,
+  hideSourcerer = false,
   isLoading,
   subtitle,
   subtitle2,
@@ -119,6 +126,8 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
             </LinkBack>
           )}
 
+          {!backOptions && backComponent && <>{backComponent}</>}
+
           {titleNode || (
             <Title
               draggableArguments={draggableArguments}
@@ -138,6 +147,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
           </FlexItem>
         )}
       </EuiFlexGroup>
+      {!hideSourcerer && <Sourcerer scope={SourcererScopeName.default} />}
     </Header>
   );
 };

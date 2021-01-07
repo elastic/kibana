@@ -1,0 +1,1 @@
+The markdown visualization that can be used to place text panels on dashboards.

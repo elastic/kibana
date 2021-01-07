@@ -17,15 +17,9 @@
  * under the License.
  */
 
-import {
-  TriggerRegistry,
-  ActionRegistry,
-  TriggerToActionsRegistry,
-  TriggerId,
-  TriggerContextMapping,
-} from '../types';
+import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
 import { ActionInternal, Action, ActionDefinition, ActionContext } from '../actions';
-import { Trigger, TriggerContext } from '../triggers/trigger';
+import { Trigger } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
 import { UiActionsExecutionService } from './ui_actions_execution_service';
@@ -67,7 +61,7 @@ export class UiActionsService {
     this.triggerToActions.set(trigger.id, []);
   };
 
-  public readonly getTrigger = <T extends TriggerId>(triggerId: T): TriggerContract<T> => {
+  public readonly getTrigger = (triggerId: string): TriggerContract => {
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
@@ -99,7 +93,11 @@ export class UiActionsService {
     this.actions.delete(actionId);
   };
 
-  public readonly attachAction = <T extends TriggerId>(triggerId: T, actionId: string): void => {
+  public readonly hasAction = (actionId: string): boolean => {
+    return this.actions.has(actionId);
+  };
+
+  public readonly attachAction = (triggerId: string, actionId: string): void => {
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
@@ -115,7 +113,7 @@ export class UiActionsService {
     }
   };
 
-  public readonly detachAction = (triggerId: TriggerId, actionId: string) => {
+  public readonly detachAction = (triggerId: string, actionId: string) => {
     const trigger = this.triggers.get(triggerId);
 
     if (!trigger) {
@@ -135,14 +133,10 @@ export class UiActionsService {
   /**
    * `addTriggerAction` is similar to `attachAction` as it attaches action to a
    * trigger, but it also registers the action, if it has not been registered, yet.
-   *
-   * `addTriggerAction` also infers better typing of the `action` argument.
    */
-  public readonly addTriggerAction = <T extends TriggerId>(
-    triggerId: T,
-    // The action can accept partial or no context, but if it needs context not provided
-    // by this type of trigger, typescript will complain. yay!
-    action: Action<TriggerContextMapping[T]>
+  public readonly addTriggerAction = (
+    triggerId: string,
+    action: ActionDefinition // TODO: remove `Action` https://github.com/elastic/kibana/issues/74501
   ): void => {
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);
@@ -158,9 +152,7 @@ export class UiActionsService {
     return this.actions.get(id) as ActionInternal<T>;
   };
 
-  public readonly getTriggerActions = <T extends TriggerId>(
-    triggerId: T
-  ): Array<Action<TriggerContextMapping[T]>> => {
+  public readonly getTriggerActions = (triggerId: string): Action[] => {
     // This line checks if trigger exists, otherwise throws.
     this.getTrigger!(triggerId);
 
@@ -170,18 +162,24 @@ export class UiActionsService {
       .map((actionId) => this.actions.get(actionId) as ActionInternal)
       .filter(Boolean);
 
-    return actions as Array<Action<TriggerContext<T>>>;
+    return actions as Action[];
   };
 
-  public readonly getTriggerCompatibleActions = async <T extends TriggerId>(
-    triggerId: T,
-    context: TriggerContextMapping[T]
-  ): Promise<Array<Action<TriggerContextMapping[T]>>> => {
+  public readonly getTriggerCompatibleActions = async (
+    triggerId: string,
+    context: object
+  ): Promise<Action[]> => {
     const actions = this.getTriggerActions!(triggerId);
-    const isCompatibles = await Promise.all(actions.map((action) => action.isCompatible(context)));
+    const isCompatibles = await Promise.all(
+      actions.map((action) =>
+        action.isCompatible({
+          ...context,
+          trigger: this.getTrigger(triggerId),
+        })
+      )
+    );
     return actions.reduce(
-      (acc: Array<Action<TriggerContextMapping[T]>>, action, i) =>
-        isCompatibles[i] ? [...acc, action] : acc,
+      (acc: Action[], action, i) => (isCompatibles[i] ? [...acc, action] : acc),
       []
     );
   };
@@ -191,11 +189,8 @@ export class UiActionsService {
    *
    * Use `plugins.uiActions.getTrigger(triggerId).exec(params)` instead.
    */
-  public readonly executeTriggerActions = async <T extends TriggerId>(
-    triggerId: T,
-    context: TriggerContext<T>
-  ) => {
-    const trigger = this.getTrigger<T>(triggerId);
+  public readonly executeTriggerActions = async (triggerId: string, context: object) => {
+    const trigger = this.getTrigger(triggerId);
     await trigger.exec(context);
   };
 

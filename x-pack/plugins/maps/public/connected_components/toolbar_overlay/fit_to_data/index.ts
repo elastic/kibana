@@ -4,23 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AnyAction, Dispatch } from 'redux';
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { MapStoreState } from '../../../reducers/store';
 import { fitToDataBounds } from '../../../actions';
-import { getFittableLayers } from '../../../selectors/map_selectors';
+import { getLayerList } from '../../../selectors/map_selectors';
 import { FitToData } from './fit_to_data';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    layerList: getFittableLayers(state),
+    layerList: getLayerList(state),
   };
 }
 
-function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
     fitToBounds: () => {
-      dispatch<any>(fitToDataBounds());
+      dispatch(fitToDataBounds());
     },
   };
 }

@@ -5,7 +5,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Feature } from '../../../../../features/common';
+import { KibanaFeature } from '../../../../../features/common';
 import { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
@@ -16,7 +16,7 @@ import {
 } from './model';
 
 const roleGrantsSubFeaturePrivileges = (
-  features: Feature[],
+  features: KibanaFeature[],
   role: TypeOf<ReturnType<typeof getPutPayloadSchema>>
 ) => {
   if (!role.kibana) {
@@ -42,7 +42,6 @@ const roleGrantsSubFeaturePrivileges = (
 export function definePutRolesRoutes({
   router,
   authz,
-  clusterClient,
   getFeatures,
   getFeatureUsageService,
 }: RouteDefinitionParams) {
@@ -64,12 +63,11 @@ export function definePutRolesRoutes({
       const { name } = request.params;
 
       try {
-        const rawRoles: Record<string, ElasticsearchRole> = await clusterClient
-          .asScoped(request)
-          .callAsCurrentUser('shield.getRole', {
-            name: request.params.name,
-            ignore: [404],
-          });
+        const {
+          body: rawRoles,
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole<
+          Record<string, ElasticsearchRole>
+        >({ name: request.params.name }, { ignore: [404] });
 
         const body = transformPutPayloadToElasticsearchRole(
           request.body,
@@ -77,11 +75,12 @@ export function definePutRolesRoutes({
           rawRoles[name] ? rawRoles[name].applications : []
         );
 
-        const [features] = await Promise.all<Feature[]>([
+        const [features] = await Promise.all([
           getFeatures(),
-          clusterClient
-            .asScoped(request)
-            .callAsCurrentUser('shield.putRole', { name: request.params.name, body }),
+          context.core.elasticsearch.client.asCurrentUser.security.putRole({
+            name: request.params.name,
+            body,
+          }),
         ]);
 
         if (roleGrantsSubFeaturePrivileges(features, request.body)) {

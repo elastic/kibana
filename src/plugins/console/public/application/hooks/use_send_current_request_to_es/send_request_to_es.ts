@@ -18,7 +18,8 @@
  */
 
 import { extractDeprecationMessages } from '../../../lib/utils';
-import { collapseLiteralStrings } from '../../../../../es_ui_shared/public';
+import { XJson } from '../../../../../es_ui_shared/public';
+const { collapseLiteralStrings } = XJson;
 // @ts-ignore
 import * as es from '../../../lib/es/es';
 import { BaseResponseType } from '../../../types';

@@ -4,51 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiModal,
-  EuiOverlayMask,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import uuid from 'uuid';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
-import { APP_ID } from '../../../../../common/constants';
-import {
-  TimelineTypeLiteral,
-  TimelineStatus,
-  TimelineType,
-  TimelineStatusLiteral,
-  TimelineId,
-} from '../../../../../common/types/timeline';
-import { SecurityPageName } from '../../../../app/types';
-import { timelineSelectors } from '../../../../timelines/store/timeline';
-import { getCreateCaseUrl } from '../../../../common/components/link_to';
-import { State } from '../../../../common/store';
-import { useKibana } from '../../../../common/lib/kibana';
-import { Note } from '../../../../common/lib/note';
+import { TimelineTypeLiteral, TimelineType } from '../../../../../common/types/timeline';
+import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
-import { Notes } from '../../notes';
-import { AssociateNote, UpdateNote } from '../../notes/helpers';
-
-import { NOTES_PANEL_WIDTH } from './notes_size';
-import { ButtonContainer, DescriptionContainer, LabelText, NameField, StyledStar } from './styles';
 import * as i18n from './translations';
-import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
+import { TimelineInput } from '../../../store/timeline/actions';
 import { useCreateTimelineButton } from './use_create_timeline';
-
-export const historyToolTip = 'The chronological history of actions related to this timeline';
-export const streamLiveToolTip = 'Update the Timeline as new data arrives';
-export const newTimelineToolTip = 'Create a new timeline';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 
 const NotesCountBadge = (styled(EuiBadge)`
   margin-left: 5px;
@@ -56,214 +24,42 @@ const NotesCountBadge = (styled(EuiBadge)`
 
 NotesCountBadge.displayName = 'NotesCountBadge';
 
-type CreateTimeline = ({
-  id,
-  show,
-  timelineType,
-}: {
-  id: string;
-  show?: boolean;
-  timelineType?: TimelineTypeLiteral;
-}) => void;
-type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
-type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
-type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
+export type SaveTimeline = (args: TimelineInput) => void;
 
-export const StarIcon = React.memo<{
-  isFavorite: boolean;
+interface AddToFavoritesButtonProps {
   timelineId: string;
-  updateIsFavorite: UpdateIsFavorite;
-}>(({ isFavorite, timelineId: id, updateIsFavorite }) => (
-  // TODO: 1 error is: Visible, non-interactive elements with click handlers must have at least one keyboard listener
-  // TODO: 2 error is: Elements with the 'button' interactive role must be focusable
-  // TODO: Investigate this error
-  // eslint-disable-next-line
-  <div role="button" onClick={() => updateIsFavorite({ id, isFavorite: !isFavorite })}>
-    {isFavorite ? (
-      <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content={i18n.FAVORITE}>
-        <StyledStar data-test-subj="timeline-favorite-filled-star" type="starFilled" size="l" />
-      </EuiToolTip>
-    ) : (
-      <EuiToolTip content={i18n.NOT_A_FAVORITE}>
-        <StyledStar data-test-subj="timeline-favorite-empty-star" type="starEmpty" size="l" />
-      </EuiToolTip>
-    )}
-  </div>
-));
-StarIcon.displayName = 'StarIcon';
-
-interface DescriptionProps {
-  description: string;
-  timelineId: string;
-  updateDescription: UpdateDescription;
 }
 
-export const Description = React.memo<DescriptionProps>(
-  ({ description, timelineId, updateDescription }) => (
-    <EuiToolTip data-test-subj="timeline-description-tool-tip" content={i18n.DESCRIPTION_TOOL_TIP}>
-      <DescriptionContainer data-test-subj="description-container">
-        <EuiFieldText
-          aria-label={i18n.TIMELINE_DESCRIPTION}
-          data-test-subj="timeline-description"
-          fullWidth={true}
-          onChange={(e) => updateDescription({ id: timelineId, description: e.target.value })}
-          placeholder={i18n.DESCRIPTION}
-          spellCheck={true}
-          value={description}
-        />
-      </DescriptionContainer>
-    </EuiToolTip>
-  )
-);
-Description.displayName = 'Description';
+const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({ timelineId }) => {
+  const dispatch = useDispatch();
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
-interface NameProps {
-  timelineId: string;
-  timelineType: TimelineType;
-  title: string;
-  updateTitle: UpdateTitle;
-}
+  const isFavorite = useShallowEqualSelector(
+    (state) => (getTimeline(state, timelineId) ?? timelineDefaults).isFavorite
+  );
 
-export const Name = React.memo<NameProps>(({ timelineId, timelineType, title, updateTitle }) => {
-  const handleChange = useCallback((e) => updateTitle({ id: timelineId, title: e.target.value }), [
-    timelineId,
-    updateTitle,
-  ]);
+  const handleClick = useCallback(
+    () => dispatch(timelineActions.updateIsFavorite({ id: timelineId, isFavorite: !isFavorite })),
+    [dispatch, timelineId, isFavorite]
+  );
 
   return (
-    <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
-      <NameField
-        aria-label={i18n.TIMELINE_TITLE}
-        data-test-subj="timeline-title"
-        onChange={handleChange}
-        placeholder={
-          timelineType === TimelineType.template ? i18n.UNTITLED_TEMPLATE : i18n.UNTITLED_TIMELINE
-        }
-        spellCheck={true}
-        value={title}
-      />
-    </EuiToolTip>
+    <EuiButton
+      isSelected={isFavorite}
+      fill={isFavorite}
+      iconType={isFavorite ? 'starFilled' : 'starEmpty'}
+      onClick={handleClick}
+      data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
+    >
+      {isFavorite ? i18n.REMOVE_FROM_FAVORITES : i18n.ADD_TO_FAVORITES}
+    </EuiButton>
   );
-});
-Name.displayName = 'Name';
+};
+AddToFavoritesButtonComponent.displayName = 'AddToFavoritesButtonComponent';
 
-interface NewCaseProps {
-  compact?: boolean;
-  graphEventId?: string;
-  onClosePopover: () => void;
-  timelineId: string;
-  timelineStatus: TimelineStatus;
-  timelineTitle: string;
-}
-
-export const NewCase = React.memo<NewCaseProps>(
-  ({ compact, graphEventId, onClosePopover, timelineId, timelineStatus, timelineTitle }) => {
-    const dispatch = useDispatch();
-    const { savedObjectId } = useSelector((state: State) =>
-      timelineSelectors.selectTimeline(state, timelineId)
-    );
-    const { navigateToApp } = useKibana().services.application;
-    const buttonText = compact ? i18n.ATTACH_TO_NEW_CASE : i18n.ATTACH_TIMELINE_TO_NEW_CASE;
-
-    const handleClick = useCallback(() => {
-      onClosePopover();
-
-      dispatch(showTimeline({ id: TimelineId.active, show: false }));
-
-      navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-        path: getCreateCaseUrl(),
-      }).then(() =>
-        dispatch(
-          setInsertTimeline({
-            graphEventId,
-            timelineId,
-            timelineSavedObjectId: savedObjectId,
-            timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
-          })
-        )
-      );
-    }, [
-      dispatch,
-      graphEventId,
-      navigateToApp,
-      onClosePopover,
-      savedObjectId,
-      timelineId,
-      timelineTitle,
-    ]);
-
-    const button = useMemo(
-      () => (
-        <EuiButtonEmpty
-          data-test-subj="attach-timeline-case"
-          color={compact ? undefined : 'text'}
-          iconSide="left"
-          iconType="paperClip"
-          disabled={timelineStatus === TimelineStatus.draft}
-          onClick={handleClick}
-          size={compact ? 'xs' : undefined}
-        >
-          {buttonText}
-        </EuiButtonEmpty>
-      ),
-      [compact, timelineStatus, handleClick, buttonText]
-    );
-    return timelineStatus === TimelineStatus.draft ? (
-      <EuiToolTip position="left" content={i18n.ATTACH_TIMELINE_TO_CASE_TOOLTIP}>
-        {button}
-      </EuiToolTip>
-    ) : (
-      button
-    );
-  }
-);
-NewCase.displayName = 'NewCase';
-
-interface ExistingCaseProps {
-  compact?: boolean;
-  onClosePopover: () => void;
-  onOpenCaseModal: () => void;
-  timelineStatus: TimelineStatus;
-}
-export const ExistingCase = React.memo<ExistingCaseProps>(
-  ({ compact, onClosePopover, onOpenCaseModal, timelineStatus }) => {
-    const handleClick = useCallback(() => {
-      onClosePopover();
-      onOpenCaseModal();
-    }, [onOpenCaseModal, onClosePopover]);
-    const buttonText = compact
-      ? i18n.ATTACH_TO_EXISTING_CASE
-      : i18n.ATTACH_TIMELINE_TO_EXISTING_CASE;
-
-    const button = useMemo(
-      () => (
-        <EuiButtonEmpty
-          data-test-subj="attach-timeline-existing-case"
-          color={compact ? undefined : 'text'}
-          iconSide="left"
-          iconType="paperClip"
-          disabled={timelineStatus === TimelineStatus.draft}
-          onClick={handleClick}
-          size={compact ? 'xs' : undefined}
-        >
-          {buttonText}
-        </EuiButtonEmpty>
-      ),
-      [buttonText, handleClick, timelineStatus, compact]
-    );
-    return timelineStatus === TimelineStatus.draft ? (
-      <EuiToolTip position="left" content={i18n.ATTACH_TIMELINE_TO_CASE_TOOLTIP}>
-        {button}
-      </EuiToolTip>
-    ) : (
-      button
-    );
-  }
-);
-ExistingCase.displayName = 'ExistingCase';
+export const AddToFavoritesButton = React.memo(AddToFavoritesButtonComponent);
 
 export interface NewTimelineProps {
-  createTimeline?: CreateTimeline;
   closeGearMenu?: () => void;
   outline?: boolean;
   timelineId: string;
@@ -272,9 +68,6 @@ export interface NewTimelineProps {
 
 export const NewTimeline = React.memo<NewTimelineProps>(
   ({ closeGearMenu, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
-    const uiCapabilities = useKibana().services.application.capabilities;
-    const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
-
     const { getButton } = useCreateTimelineButton({
       timelineId,
       timelineType: TimelineType.default,
@@ -282,73 +75,38 @@ export const NewTimeline = React.memo<NewTimelineProps>(
     });
     const button = getButton({ outline, title });
 
-    return capabilitiesCanUserCRUD ? button : null;
+    return button;
   }
 );
 NewTimeline.displayName = 'NewTimeline';
 
 interface NotesButtonProps {
-  animate?: boolean;
-  associateNote: AssociateNote;
-  getNotesByIds: (noteIds: string[]) => Note[];
-  noteIds: string[];
-  size: 's' | 'l';
-  status: TimelineStatusLiteral;
+  ariaLabel?: string;
   showNotes: boolean;
   toggleShowNotes: () => void;
-  text?: string;
   toolTip?: string;
-  updateNote: UpdateNote;
   timelineType: TimelineTypeLiteral;
 }
-
-const getNewNoteId = (): string => uuid.v4();
-
-interface LargeNotesButtonProps {
-  noteIds: string[];
-  text?: string;
-  toggleShowNotes: () => void;
-}
-
-const LargeNotesButton = React.memo<LargeNotesButtonProps>(({ noteIds, text, toggleShowNotes }) => (
-  <EuiButton
-    data-test-subj="timeline-notes-button-large"
-    onClick={() => toggleShowNotes()}
-    size="m"
-  >
-    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
-      <EuiFlexItem grow={false}>
-        <EuiIcon color="subdued" size="m" type="editorComment" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {text && text.length ? <LabelText>{text}</LabelText> : null}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <NotesCountBadge data-test-subj="timeline-notes-count" color="hollow">
-          {noteIds.length}
-        </NotesCountBadge>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiButton>
-));
-LargeNotesButton.displayName = 'LargeNotesButton';
 
 interface SmallNotesButtonProps {
-  noteIds: string[];
+  ariaLabel?: string;
   toggleShowNotes: () => void;
   timelineType: TimelineTypeLiteral;
 }
 
+export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
+
 const SmallNotesButton = React.memo<SmallNotesButtonProps>(
-  ({ noteIds, toggleShowNotes, timelineType }) => {
+  ({ ariaLabel = i18n.NOTES, toggleShowNotes, timelineType }) => {
     const isTemplate = timelineType === TimelineType.template;
 
     return (
       <EuiButtonIcon
-        aria-label={i18n.NOTES}
+        aria-label={ariaLabel}
+        className={NOTES_BUTTON_CLASS_NAME}
         data-test-subj="timeline-notes-button-small"
         iconType="editorComment"
-        onClick={() => toggleShowNotes()}
+        onClick={toggleShowNotes}
         isDisabled={isTemplate}
       />
     );
@@ -356,96 +114,19 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
 );
 SmallNotesButton.displayName = 'SmallNotesButton';
 
-/**
- * The internal implementation of the `NotesButton`
- */
-const NotesButtonComponent = React.memo<NotesButtonProps>(
-  ({
-    animate = true,
-    associateNote,
-    getNotesByIds,
-    noteIds,
-    showNotes,
-    size,
-    status,
-    toggleShowNotes,
-    text,
-    updateNote,
-    timelineType,
-  }) => (
-    <ButtonContainer animate={animate} data-test-subj="timeline-notes-button-container">
-      <>
-        {size === 'l' ? (
-          <LargeNotesButton noteIds={noteIds} text={text} toggleShowNotes={toggleShowNotes} />
-        ) : (
-          <SmallNotesButton
-            noteIds={noteIds}
-            toggleShowNotes={toggleShowNotes}
-            timelineType={timelineType}
-          />
-        )}
-        {size === 'l' && showNotes ? (
-          <EuiOverlayMask>
-            <EuiModal maxWidth={NOTES_PANEL_WIDTH} onClose={toggleShowNotes}>
-              <Notes
-                associateNote={associateNote}
-                getNewNoteId={getNewNoteId}
-                getNotesByIds={getNotesByIds}
-                status={status}
-                noteIds={noteIds}
-                updateNote={updateNote}
-              />
-            </EuiModal>
-          </EuiOverlayMask>
-        ) : null}
-      </>
-    </ButtonContainer>
-  )
-);
-NotesButtonComponent.displayName = 'NotesButtonComponent';
-
 export const NotesButton = React.memo<NotesButtonProps>(
-  ({
-    animate = true,
-    associateNote,
-    getNotesByIds,
-    noteIds,
-    showNotes,
-    size,
-    status,
-    timelineType,
-    toggleShowNotes,
-    toolTip,
-    text,
-    updateNote,
-  }) =>
+  ({ ariaLabel, showNotes, timelineType, toggleShowNotes, toolTip }) =>
     showNotes ? (
-      <NotesButtonComponent
-        animate={animate}
-        associateNote={associateNote}
-        getNotesByIds={getNotesByIds}
-        noteIds={noteIds}
-        showNotes={showNotes}
-        size={size}
-        status={status}
+      <SmallNotesButton
+        ariaLabel={ariaLabel}
         toggleShowNotes={toggleShowNotes}
-        text={text}
-        updateNote={updateNote}
         timelineType={timelineType}
       />
     ) : (
       <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
-        <NotesButtonComponent
-          animate={animate}
-          associateNote={associateNote}
-          getNotesByIds={getNotesByIds}
-          noteIds={noteIds}
-          showNotes={showNotes}
-          size={size}
-          status={status}
+        <SmallNotesButton
+          ariaLabel={ariaLabel}
           toggleShowNotes={toggleShowNotes}
-          text={text}
-          updateNote={updateNote}
           timelineType={timelineType}
         />
       </EuiToolTip>

@@ -13,6 +13,7 @@ const {
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
+  FOCUS_CONNECTOR_FIELD,
 } = CLIENT_DEFAULTS;
 
 export const stringifyUrlParams = (params: Partial<UptimeUrlParams>, ignoreEmpty = false) => {
@@ -34,6 +35,9 @@ export const stringifyUrlParams = (params: Partial<UptimeUrlParams>, ignoreEmpty
         delete params[key];
       }
       if (key === 'autorefreshInterval' && val === AUTOREFRESH_INTERVAL) {
+        delete params[key];
+      }
+      if (key === 'focusConnectorField' && val === FOCUS_CONNECTOR_FIELD) {
         delete params[key];
       }
     });

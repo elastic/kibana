@@ -68,6 +68,7 @@ export const createEmbeddable = async (
 
   const input: MapEmbeddableInput = {
     title: i18n.MAP_TITLE,
+    attributes: { title: '' },
     id: uuid.v4(),
     filters,
     hidePanelTitles: true,
@@ -114,8 +115,8 @@ export const createEmbeddable = async (
 
   if (!isErrorEmbeddable(embeddableObject)) {
     embeddableObject.setRenderTooltipContent(renderTooltipContent);
-    // @ts-ignore
-    await embeddableObject.setLayerList(getLayerList(indexPatterns));
+    // @ts-expect-error
+    embeddableObject.setLayerList(getLayerList(indexPatterns));
   }
 
   // Wire up to app refresh action
@@ -150,7 +151,15 @@ export const findMatchingIndexPatterns = ({
       const pattern = kip.attributes.title;
       return (
         !ignoredIndexPatterns.includes(pattern) &&
-        siemDefaultIndices.some((sdi) => minimatch(sdi, pattern))
+        siemDefaultIndices.some((sdi) => {
+          const splitPattern = pattern.split(',') ?? [];
+          return splitPattern.length > 1
+            ? splitPattern.some((p) => {
+                const isMatch = minimatch(sdi, p);
+                return isMatch && p.charAt(0) === '-' ? false : isMatch;
+              })
+            : minimatch(sdi, pattern);
+        })
       );
     });
   } catch {

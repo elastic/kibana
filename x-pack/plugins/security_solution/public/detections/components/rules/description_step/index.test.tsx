@@ -7,7 +7,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import {
-  StepRuleDescriptionComponent,
+  StepRuleDescription,
   addFilterStateIfNotThere,
   buildListItems,
   getDescriptionItem,
@@ -23,7 +23,6 @@ import {
   mockAboutStepRule,
   mockDefineStepRule,
 } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import * as i18n from './translations';
@@ -53,24 +52,24 @@ describe('description_step', () => {
     mockAboutStep = mockAboutStepRule();
   });
 
-  describe('StepRuleDescriptionComponent', () => {
+  describe('StepRuleDescription', () => {
     test('renders tow columns when "columns" is "multi"', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent columns="multi" data={mockAboutStep} schema={schema} />
+        <StepRuleDescription columns="multi" data={mockAboutStep} schema={schema} />
       );
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(2);
     });
 
     test('renders single column when "columns" is "single"', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent columns="single" data={mockAboutStep} schema={schema} />
+        <StepRuleDescription columns="single" data={mockAboutStep} schema={schema} />
       );
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
     });
 
     test('renders one column with title and description split when "columns" is "singleSplit', () => {
       const wrapper = shallow(
-        <StepRuleDescriptionComponent columns="singleSplit" data={mockAboutStep} schema={schema} />
+        <StepRuleDescription columns="singleSplit" data={mockAboutStep} schema={schema} />
       );
       expect(wrapper.find('[data-test-subj="listItemColumnStepRuleDescription"]')).toHaveLength(1);
       expect(
@@ -300,7 +299,6 @@ describe('description_step', () => {
     describe('queryBar', () => {
       test('returns array of ListItems when queryBar exist', () => {
         const mockQueryBar = {
-          isNew: false,
           queryBar: {
             query: {
               query: 'user.name: root or user.name: admin',
@@ -317,8 +315,10 @@ describe('description_step', () => {
           mockFilterManager
         );
 
-        expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL} </>);
-        expect(result[0].description).toEqual(<>{mockQueryBar.queryBar.query.query} </>);
+        expect(result[0].title).toEqual(<>{i18n.QUERY_LABEL}</>);
+        expect(shallow(result[0].description as React.ReactElement).text()).toEqual(
+          mockQueryBar.queryBar.query.query
+        );
       });
     });
 
@@ -370,7 +370,6 @@ describe('description_step', () => {
     describe('threshold', () => {
       test('returns threshold description when threshold exist and field is empty', () => {
         const mockThreshold = {
-          isNew: false,
           threshold: {
             field: [''],
             value: 100,
@@ -392,7 +391,6 @@ describe('description_step', () => {
 
       test('returns threshold description when threshold exist and field is set', () => {
         const mockThreshold = {
-          isNew: false,
           threshold: {
             field: ['user.name'],
             value: 100,

@@ -14,7 +14,6 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import { Links } from '../../links';
 
 interface Props {
@@ -23,18 +22,9 @@ interface Props {
   isLoading: boolean;
   reset: () => void;
   links: Links;
-  isNavDrawerLocked: boolean;
-  isNavLegacy: boolean;
 }
 
-export function MainControls({
-  toggleRequestFlyout,
-  isRequestFlyoutOpen,
-  reset,
-  links,
-  isNavDrawerLocked,
-  isNavLegacy,
-}: Props) {
+export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, links }: Props) {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const items = [
@@ -88,17 +78,8 @@ export function MainControls({
     </EuiContextMenuItem>,
   ];
 
-  // TODO #64541
-  // Can delete all this class stuff
-  let classes = '';
-  if (isNavLegacy) {
-    classes = classNames('painlessLab__bottomBar', {
-      'painlessLab__bottomBar-isNavDrawerLocked': isNavDrawerLocked,
-    });
-  }
-
   return (
-    <EuiBottomBar paddingSize="s" className={classes}>
+    <EuiBottomBar paddingSize="s">
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
@@ -121,7 +102,6 @@ export function MainControls({
                 isOpen={isHelpOpen}
                 closePopover={() => setIsHelpOpen(false)}
                 panelPaddingSize="none"
-                withTitle
                 anchorPosition="upLeft"
               >
                 <EuiContextMenuPanel items={items} />

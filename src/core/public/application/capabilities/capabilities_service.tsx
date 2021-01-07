@@ -17,9 +17,9 @@
  * under the License.
  */
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { deepFreeze } from '@kbn/std';
 
 import { Capabilities } from '../../../types/capabilities';
-import { deepFreeze } from '../../../utils';
 import { HttpStart } from '../../http';
 
 interface StartDeps {
@@ -38,7 +38,9 @@ export interface CapabilitiesStart {
  */
 export class CapabilitiesService {
   public async start({ appIds, http }: StartDeps): Promise<CapabilitiesStart> {
+    const useDefaultCapabilities = http.anonymousPaths.isAnonymous(window.location.pathname);
     const capabilities = await http.post<Capabilities>('/api/core/capabilities', {
+      query: useDefaultCapabilities ? { useDefaultCapabilities } : undefined,
       body: JSON.stringify({ applications: appIds }),
     });
 

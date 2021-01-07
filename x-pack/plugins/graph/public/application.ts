@@ -9,7 +9,11 @@
 // They can stay even after NP cutover
 import angular from 'angular';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
-import '../../../../webpackShims/ace';
+
+import 'brace';
+import 'brace/mode/json';
+import '@elastic/ui-ace/ui-ace';
+
 // required for i18nIdDirective and `ngSanitize` angular module
 import 'angular-sanitize';
 // required for ngRoute
@@ -23,11 +27,12 @@ import {
   SavedObjectsClientContract,
   ToastsStart,
   OverlayStart,
+  AppMountParameters,
 } from 'kibana/public';
 // @ts-ignore
 import { initGraphApp } from './app';
 import { Plugin as DataPlugin, IndexPatternsContract } from '../../../../src/plugins/data/public';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { LicensingPluginStart } from '../../licensing/public';
 import { checkLicense } from '../common/check_license';
 import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
 import { Storage } from '../../../../src/plugins/kibana_utils/public';
@@ -55,7 +60,7 @@ export interface GraphDependencies {
   capabilities: Record<string, boolean | Record<string, boolean>>;
   coreStart: AppMountContext['core'];
   navigation: NavigationStart;
-  licensing: LicensingPluginSetup;
+  licensing: LicensingPluginStart;
   chrome: ChromeStart;
   toastNotifications: ToastsStart;
   indexPatterns: IndexPatternsContract;
@@ -69,6 +74,7 @@ export interface GraphDependencies {
   overlays: OverlayStart;
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 export const renderApp = ({ appBasePath, element, kibanaLegacy, ...deps }: GraphDependencies) => {
@@ -115,7 +121,7 @@ const thirdPartyAngularDependencies = ['ngSanitize', 'ngRoute', 'react', 'ui.boo
 function mountGraphApp(appBasePath: string, element: HTMLElement) {
   const mountpoint = document.createElement('div');
   mountpoint.setAttribute('class', 'gphAppWrapper');
-  // eslint-disable-next-line
+  // eslint-disable-next-line no-unsanitized/property
   mountpoint.innerHTML = mainTemplate(appBasePath);
   // bootstrap angular into detached element and attach it later to
   // make angular-within-angular possible

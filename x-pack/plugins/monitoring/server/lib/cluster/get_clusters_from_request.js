@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { notFound } from 'boom';
+import { notFound } from '@hapi/boom';
 import { set } from '@elastic/safer-lodash-set';
 import { findIndex } from 'lodash';
 import { getClustersStats } from './get_clusters_stats';
@@ -133,6 +133,16 @@ export async function getClustersFromRequest(
           continue;
         }
 
+        if (!alertsClient) {
+          cluster.alerts = {
+            list: {},
+            alertsMeta: {
+              enabled: false,
+            },
+          };
+          continue;
+        }
+
         // check the license type of the production cluster for alerts feature support
         const license = cluster.license || {};
         const prodLicenseInfo = checkLicenseForAlerts(
@@ -141,27 +151,36 @@ export async function getClustersFromRequest(
           'production'
         );
         if (prodLicenseInfo.clusterAlerts.enabled) {
-          cluster.alerts = {
-            list: await fetchStatus(
-              alertsClient,
-              req.server.plugins.monitoring.info,
-              undefined,
-              cluster.cluster_uuid,
-              start,
-              end,
-              []
-            ),
-            alertsMeta: {
-              enabled: true,
-            },
-          };
+          try {
+            cluster.alerts = {
+              list: await fetchStatus(
+                alertsClient,
+                req.server.plugins.monitoring.info,
+                undefined,
+                cluster.cluster_uuid
+              ),
+              alertsMeta: {
+                enabled: true,
+              },
+            };
+          } catch (err) {
+            req.logger.warn(
+              `Unable to fetch alert status because '${err.message}'. Alerts may not properly show up in the UI.`
+            );
+            cluster.alerts = {
+              list: {},
+              alertsMeta: {
+                enabled: true,
+              },
+            };
+          }
           continue;
         }
 
         cluster.alerts = {
           list: {},
           alertsMeta: {
-            enabled: true,
+            enabled: false,
           },
           clusterMeta: {
             enabled: false,

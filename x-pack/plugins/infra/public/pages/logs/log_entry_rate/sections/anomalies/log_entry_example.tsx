@@ -37,6 +37,7 @@ import {
 } from '../../../../../utils/source_configuration';
 import { localizedDate } from '../../../../../../common/formatters/datetime';
 import { LogEntryAnomaly } from '../../../../../../common/http_api';
+import { useLogEntryFlyoutContext } from '../../../../../containers/logs/log_flyout';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'time' as const;
@@ -44,6 +45,13 @@ export const exampleTimestampFormat = 'time' as const;
 const MENU_LABEL = i18n.translate('xpack.infra.logAnomalies.logEntryExamplesMenuLabel', {
   defaultMessage: 'View actions for log entry',
 });
+
+const VIEW_DETAILS_LABEL = i18n.translate(
+  'xpack.infra.logs.analysis.logEntryExamplesViewDetailsLabel',
+  {
+    defaultMessage: 'View details',
+  }
+);
 
 const VIEW_IN_STREAM_LABEL = i18n.translate(
   'xpack.infra.logs.analysis.logEntryExamplesViewInStreamLabel',
@@ -79,6 +87,8 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
   const setItemIsHovered = useCallback(() => setIsHovered(true), []);
   const setItemIsNotHovered = useCallback(() => setIsHovered(false), []);
+
+  const { openFlyout: openLogEntryFlyout } = useLogEntryFlyoutContext();
 
   // handle special cases for the dataset value
   const humanFriendlyDataset = getFriendlyNameForPartitionId(dataset);
@@ -117,6 +127,12 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
 
     return [
       {
+        label: VIEW_DETAILS_LABEL,
+        onClick: () => {
+          openLogEntryFlyout(id);
+        },
+      },
+      {
         label: VIEW_IN_STREAM_LABEL,
         onClick: viewInStreamLinkProps.onClick,
         href: viewInStreamLinkProps.href,
@@ -127,7 +143,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
         href: viewAnomalyInMachineLearningLinkProps.href,
       },
     ];
-  }, [viewInStreamLinkProps, viewAnomalyInMachineLearningLinkProps]);
+  }, [id, openLogEntryFlyout, viewInStreamLinkProps, viewAnomalyInMachineLearningLinkProps]);
 
   return (
     <LogEntryRowWrapper
@@ -142,7 +158,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
         <LogEntryMessageColumn
           columnValue={{
             columnId: messageColumnId,
-            message: [{ field: 'message', value: message, highlights: [] }],
+            message: [{ field: 'message', value: [message], highlights: [] }],
           }}
           highlights={noHighlights}
           isActiveHighlight={false}
@@ -154,7 +170,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
           columnValue={{
             columnId: datasetColumnId,
             field: 'event.dataset',
-            value: humanFriendlyDataset,
+            value: [humanFriendlyDataset],
             highlights: [],
           }}
           highlights={noHighlights}

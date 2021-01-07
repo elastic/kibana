@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { DataVisualizer } from '../data_visualizer';
 
 import { validateJobObject } from './validate_job_object';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { Detector } from '../../../common/types/anomaly_detection_jobs';
 import { MessageId, JobValidationMessage } from '../../../common/constants/messages';
+import { isValidAggregationField } from '../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 
 function isValidCategorizationConfig(job: CombinedJob, fieldName: string): boolean {
   return (
@@ -22,6 +24,11 @@ function isValidCategorizationConfig(job: CombinedJob, fieldName: string): boole
 function isScriptField(job: CombinedJob, fieldName: string): boolean {
   const scriptFields = Object.keys(job.datafeed_config.script_fields ?? {});
   return scriptFields.includes(fieldName);
+}
+
+function isRuntimeMapping(job: CombinedJob, fieldName: string): boolean {
+  const runtimeMappings = Object.keys(job.datafeed_config.runtime_mappings ?? {});
+  return runtimeMappings.includes(fieldName);
 }
 
 // Thresholds to determine whether cardinality is
@@ -43,12 +50,9 @@ type Validator = (obj: {
   messages: Messages;
 }>;
 
-const validateFactory = (
-  mlClusterClient: ILegacyScopedClusterClient,
-  job: CombinedJob
-): Validator => {
-  const { callAsCurrentUser } = mlClusterClient;
-  const dv = new DataVisualizer(mlClusterClient);
+const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Validator => {
+  const { asCurrentUser } = client;
+  const dv = new DataVisualizer(client);
 
   const modelPlotConfigTerms = job?.model_plot_config?.terms ?? '';
   const modelPlotConfigFieldCount =
@@ -69,6 +73,7 @@ const validateFactory = (
     const relevantDetectors = detectors.filter((detector) => {
       return typeof detector[fieldName] !== 'undefined';
     });
+    const datafeedConfig = job.datafeed_config;
 
     if (relevantDetectors.length > 0) {
       try {
@@ -77,15 +82,37 @@ const validateFactory = (
         ] as string[];
 
         // use fieldCaps endpoint to get data about whether fields are aggregatable
-        const fieldCaps = await callAsCurrentUser('fieldCaps', {
+        const { body: fieldCaps } = await asCurrentUser.fieldCaps({
           index: job.datafeed_config.indices.join(','),
           fields: uniqueFieldNames,
         });
+        const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
 
         let aggregatableFieldNames: string[] = [];
         // parse fieldCaps to return an array of just the fields which are aggregatable
         if (typeof fieldCaps === 'object' && typeof fieldCaps.fields === 'object') {
           aggregatableFieldNames = uniqueFieldNames.filter((field) => {
+            if (
+              typeof datafeedConfig?.script_fields === 'object' &&
+              datafeedConfig?.script_fields.hasOwnProperty(field)
+            ) {
+              return true;
+            }
+            if (
+              typeof datafeedConfig?.runtime_mappings === 'object' &&
+              datafeedConfig?.runtime_mappings.hasOwnProperty(field)
+            ) {
+              return true;
+            }
+
+            // if datafeed has aggregation fields, check recursively if field exist
+            if (
+              datafeedAggregations !== undefined &&
+              isValidAggregationField(datafeedAggregations, field)
+            ) {
+              return true;
+            }
+
             if (typeof fieldCaps.fields[field] !== 'undefined') {
               const fieldType = Object.keys(fieldCaps.fields[field])[0];
               return fieldCaps.fields[field][fieldType].aggregatable;
@@ -99,37 +126,60 @@ const validateFactory = (
           job.datafeed_config.query,
           aggregatableFieldNames,
           0,
-          job.data_description.time_field
+          job.data_description.time_field,
+          undefined,
+          undefined,
+          datafeedConfig
         );
 
-        uniqueFieldNames.forEach((uniqueFieldName) => {
-          const field = stats.aggregatableExistsFields.find(
-            (fieldData) => fieldData.fieldName === uniqueFieldName
-          );
-          if (field !== undefined && typeof field === 'object' && field.stats) {
-            modelPlotCardinality +=
-              modelPlotConfigFieldCount > 0 ? modelPlotConfigFieldCount : field.stats.cardinality!;
+        if (stats.totalCount === 0) {
+          messages.push({
+            id: 'cardinality_no_results',
+          });
+        } else {
+          uniqueFieldNames.forEach((uniqueFieldName) => {
+            const aggregatableNotExistsField = stats.aggregatableNotExistsFields.find(
+              (fieldData) => fieldData.fieldName === uniqueFieldName
+            );
 
-            if (isInvalid(field.stats.cardinality!)) {
+            if (aggregatableNotExistsField !== undefined) {
               messages.push({
-                id: messageId || (`cardinality_${type}_field` as MessageId),
+                id: 'cardinality_field_not_exists',
                 fieldName: uniqueFieldName,
               });
+            } else {
+              const field = stats.aggregatableExistsFields.find(
+                (fieldData) => fieldData.fieldName === uniqueFieldName
+              );
+              if (field !== undefined && typeof field === 'object' && field.stats) {
+                modelPlotCardinality +=
+                  modelPlotConfigFieldCount > 0
+                    ? modelPlotConfigFieldCount
+                    : field.stats.cardinality!;
+
+                if (isInvalid(field.stats.cardinality!)) {
+                  messages.push({
+                    id: messageId || (`cardinality_${type}_field` as MessageId),
+                    fieldName: uniqueFieldName,
+                  });
+                }
+              } else {
+                // only report uniqueFieldName as not aggregatable if it's not part
+                // of a valid categorization configuration and if it's not a scripted field or runtime mapping.
+                if (
+                  !isValidCategorizationConfig(job, uniqueFieldName) &&
+                  !isScriptField(job, uniqueFieldName) &&
+                  !isRuntimeMapping(job, uniqueFieldName)
+                ) {
+                  messages.push({
+                    id: 'field_not_aggregatable',
+                    fieldName: uniqueFieldName,
+                  });
+                }
+              }
             }
-          } else {
-            // only report uniqueFieldName as not aggregatable if it's not part
-            // of a valid categorization configuration and if it's not a scripted field.
-            if (
-              !isValidCategorizationConfig(job, uniqueFieldName) &&
-              !isScriptField(job, uniqueFieldName)
-            ) {
-              messages.push({
-                id: 'field_not_aggregatable',
-                fieldName: uniqueFieldName,
-              });
-            }
-          }
-        });
+          });
+        }
       } catch (e) {
         // checkAggregatableFieldsExist may return an error if 'fielddata' is
         // disabled for text fields (which is the default). If there was only
@@ -154,7 +204,7 @@ const validateFactory = (
 };
 
 export async function validateCardinality(
-  mlClusterClient: ILegacyScopedClusterClient,
+  client: IScopedClusterClient,
   job?: CombinedJob
 ): Promise<Messages> | never {
   const messages: Messages = [];
@@ -174,7 +224,7 @@ export async function validateCardinality(
   }
 
   // validate({ type, isInvalid }) asynchronously returns an array of validation messages
-  const validate = validateFactory(mlClusterClient, job);
+  const validate = validateFactory(client, job);
 
   const modelPlotEnabled = job.model_plot_config?.enabled ?? false;
 

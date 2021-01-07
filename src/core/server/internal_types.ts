@@ -32,13 +32,14 @@ import {
   InternalSavedObjectsServiceStart,
 } from './saved_objects';
 import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
-import { UuidServiceSetup } from './uuid';
-import { InternalMetricsServiceStart } from './metrics';
+import { InternalEnvironmentServiceSetup } from './environment';
+import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
-import { AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { InternalLoggingServiceSetup } from './logging';
+import { CoreUsageDataStart } from './core_usage_data';
+import { I18nServiceSetup } from './i18n';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -46,14 +47,15 @@ export interface InternalCoreSetup {
   context: ContextSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
+  i18n: I18nServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;
   uiSettings: InternalUiSettingsServiceSetup;
-  uuid: UuidServiceSetup;
+  environment: InternalEnvironmentServiceSetup;
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
-  auditTrail: AuditTrailSetup;
   logging: InternalLoggingServiceSetup;
+  metrics: InternalMetricsServiceSetup;
 }
 
 /**
@@ -66,7 +68,7 @@ export interface InternalCoreStart {
   metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
-  auditTrail: AuditTrailStart;
+  coreUsageData: CoreUsageDataStart;
 }
 
 /**

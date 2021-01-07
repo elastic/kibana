@@ -14,6 +14,8 @@ export const CASES_URL = '/api/cases';
 export const CASE_DETAILS_URL = `${CASES_URL}/{case_id}`;
 export const CASE_CONFIGURE_URL = `${CASES_URL}/configure`;
 export const CASE_CONFIGURE_CONNECTORS_URL = `${CASE_CONFIGURE_URL}/connectors`;
+export const CASE_CONFIGURE_CONNECTOR_DETAILS_URL = `${CASE_CONFIGURE_CONNECTORS_URL}/{connector_id}`;
+export const CASE_CONFIGURE_PUSH_URL = `${CASE_CONFIGURE_CONNECTOR_DETAILS_URL}/push`;
 export const CASE_COMMENTS_URL = `${CASE_DETAILS_URL}/comments`;
 export const CASE_COMMENT_DETAILS_URL = `${CASE_DETAILS_URL}/comments/{comment_id}`;
 export const CASE_REPORTERS_URL = `${CASES_URL}/reporters`;
@@ -28,5 +30,11 @@ export const CASE_USER_ACTIONS_URL = `${CASE_DETAILS_URL}/user_actions`;
 export const ACTION_URL = '/api/actions';
 export const ACTION_TYPES_URL = '/api/actions/list_action_types';
 export const SERVICENOW_ACTION_TYPE_ID = '.servicenow';
+export const JIRA_ACTION_TYPE_ID = '.jira';
+export const RESILIENT_ACTION_TYPE_ID = '.resilient';
 
-export const SUPPORTED_CONNECTORS = ['.servicenow', '.jira', '.resilient'];
+export const SUPPORTED_CONNECTORS = [
+  SERVICENOW_ACTION_TYPE_ID,
+  JIRA_ACTION_TYPE_ID,
+  RESILIENT_ACTION_TYPE_ID,
+];

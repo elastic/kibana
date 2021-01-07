@@ -8,9 +8,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
@@ -74,13 +73,13 @@ export default ({ getService }: FtrProviderContext) => {
       );
     });
 
-    it('should not allow to update calendar for user without required permission ', async () => {
+    it('should not allow to update calendar for user without required permission', async () => {
       await supertest
         .put(`/api/ml/calendars/${calendarId}`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
         .send(updateCalendarRequestBody)
-        .expect(404);
+        .expect(403);
     });
 
     it('should not allow to update calendar for unauthorized user', async () => {
@@ -89,13 +88,13 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
         .send(updateCalendarRequestBody)
-        .expect(404);
+        .expect(403);
     });
 
-    it('should return error if invalid calendarId ', async () => {
+    it('should return error if invalid calendarId', async () => {
       await supertest
         .put(`/api/ml/calendars/calendar_id_dne`)
-        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
         .send(updateCalendarRequestBody)
         .expect(404);

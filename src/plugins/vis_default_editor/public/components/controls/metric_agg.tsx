@@ -53,7 +53,12 @@ function MetricAggParamEditor({
   const onChange = useCallback((ev) => setValue(ev.target.value), [setValue]);
 
   return (
-    <EuiFormRow label={label} fullWidth isInvalid={showValidation && !isValid} compressed>
+    <EuiFormRow
+      label={label}
+      fullWidth
+      isInvalid={showValidation && !isValid}
+      display="rowCompressed"
+    >
       <EuiSelect
         compressed
         fullWidth

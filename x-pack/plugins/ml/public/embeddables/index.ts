@@ -5,8 +5,11 @@
  */
 
 import { AnomalySwimlaneEmbeddableFactory } from './anomaly_swimlane';
-import { MlCoreSetup } from '../plugin';
-import { EmbeddableSetup } from '../../../../../src/plugins/embeddable/public';
+import type { MlCoreSetup } from '../plugin';
+import type { EmbeddableSetup } from '../../../../../src/plugins/embeddable/public';
+
+export * from './constants';
+export * from './types';
 
 export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {
   const anomalySwimlaneEmbeddableFactory = new AnomalySwimlaneEmbeddableFactory(

@@ -23,8 +23,8 @@ import {
   mockReadPkcs12Truststore,
 } from './elasticsearch_config.test.mocks';
 
+import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
 import { ElasticsearchConfig, config } from './elasticsearch_config';
-import { applyDeprecations, configDeprecationFactory } from '../config/deprecation';
 
 const CONFIG_PATH = 'elasticsearch';
 

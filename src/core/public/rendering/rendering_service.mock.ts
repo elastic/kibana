@@ -16,26 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { RenderingStart, RenderingService } from './rendering_service';
-
-const createStartContractMock = () => {
-  const setupContract: jest.Mocked<RenderingStart> = {
-    legacyTargetDomElement: document.createElement('div'),
-  };
-  return setupContract;
-};
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { RenderingService } from './rendering_service';
 
 type RenderingServiceContract = PublicMethodsOf<RenderingService>;
 const createMock = () => {
   const mocked: jest.Mocked<RenderingServiceContract> = {
     start: jest.fn(),
   };
-  mocked.start.mockReturnValue(createStartContractMock());
   return mocked;
 };
 
 export const renderingServiceMock = {
   create: createMock,
-  createStartContract: createStartContractMock,
 };

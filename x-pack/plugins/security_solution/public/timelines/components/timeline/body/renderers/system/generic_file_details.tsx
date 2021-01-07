@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 
 import { BrowserFields } from '../../../../../../common/containers/source';
-import { Ecs } from '../../../../../../graphql/types';
+import { Ecs } from '../../../../../../../common/ecs';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
 import { OverflowField } from '../../../../../../common/components/tables/helpers';
 

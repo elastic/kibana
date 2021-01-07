@@ -4,22 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { datafeedsProvider } from './datafeeds';
 import { jobsProvider } from './jobs';
 import { groupsProvider } from './groups';
 import { newJobCapsProvider } from './new_job_caps';
 import { newJobChartsProvider, topCategoriesProvider } from './new_job';
 import { modelSnapshotProvider } from './model_snapshots';
+import type { MlClient } from '../../lib/ml_client';
 
-export function jobServiceProvider(mlClusterClient: ILegacyScopedClusterClient) {
+export function jobServiceProvider(client: IScopedClusterClient, mlClient: MlClient) {
   return {
-    ...datafeedsProvider(mlClusterClient),
-    ...jobsProvider(mlClusterClient),
-    ...groupsProvider(mlClusterClient),
-    ...newJobCapsProvider(mlClusterClient),
-    ...newJobChartsProvider(mlClusterClient),
-    ...topCategoriesProvider(mlClusterClient),
-    ...modelSnapshotProvider(mlClusterClient),
+    ...datafeedsProvider(mlClient),
+    ...jobsProvider(client, mlClient),
+    ...groupsProvider(mlClient),
+    ...newJobCapsProvider(client),
+    ...newJobChartsProvider(client),
+    ...topCategoriesProvider(mlClient),
+    ...modelSnapshotProvider(mlClient),
   };
 }

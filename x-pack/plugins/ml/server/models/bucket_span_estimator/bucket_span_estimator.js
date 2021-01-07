@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { cloneDeep, each, remove, sortBy, get } from 'lodash';
 
-import { mlLog } from '../../client/log';
+import { mlLog } from '../../lib/log';
 
 import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';
 import { polledDataCheckerFactory } from './polled_data_checker';
 
-export function estimateBucketSpanFactory(mlClusterClient) {
-  const { callAsCurrentUser, callAsInternalUser } = mlClusterClient;
-  const PolledDataChecker = polledDataCheckerFactory(mlClusterClient);
-  const SingleSeriesChecker = singleSeriesCheckerFactory(mlClusterClient);
+export function estimateBucketSpanFactory(client) {
+  const { asCurrentUser, asInternalUser } = client;
+  const PolledDataChecker = polledDataCheckerFactory(client);
+  const SingleSeriesChecker = singleSeriesCheckerFactory(client);
 
   class BucketSpanEstimator {
     constructor(
@@ -91,7 +91,7 @@ export function estimateBucketSpanFactory(mlClusterClient) {
           } else {
             // loop over partition values
             for (let j = 0; j < this.splitFieldValues.length; j++) {
-              const queryCopy = _.cloneDeep(this.query);
+              const queryCopy = cloneDeep(this.query);
               // add a term to the query to filter on the partition value
               queryCopy.bool.must.push({
                 term: {
@@ -151,7 +151,7 @@ export function estimateBucketSpanFactory(mlClusterClient) {
               }
             };
 
-            _.each(this.checkers, (check) => {
+            each(this.checkers, (check) => {
               check.check
                 .run()
                 .then((interval) => {
@@ -174,7 +174,7 @@ export function estimateBucketSpanFactory(mlClusterClient) {
     }
 
     processResults() {
-      const allResults = _.map(this.checkers, 'result');
+      const allResults = this.checkers.map((c) => c.result);
 
       let reducedResults = [];
       const numberOfSplitFields = this.splitFieldValues.length || 1;
@@ -185,8 +185,8 @@ export function estimateBucketSpanFactory(mlClusterClient) {
         const pos = i * numberOfSplitFields;
         let resultsSubset = allResults.slice(pos, pos + numberOfSplitFields);
         // remove results of tests which have failed
-        resultsSubset = _.remove(resultsSubset, (res) => res !== null);
-        resultsSubset = _.sortBy(resultsSubset, (r) => r.ms);
+        resultsSubset = remove(resultsSubset, (res) => res !== null);
+        resultsSubset = sortBy(resultsSubset, (r) => r.ms);
 
         const tempMedian = this.findMedian(resultsSubset);
         if (tempMedian !== null) {
@@ -194,7 +194,7 @@ export function estimateBucketSpanFactory(mlClusterClient) {
         }
       }
 
-      reducedResults = _.sortBy(reducedResults, (r) => r.ms);
+      reducedResults = sortBy(reducedResults, (r) => r.ms);
 
       return this.findMedian(reducedResults);
     }
@@ -242,21 +242,22 @@ export function estimateBucketSpanFactory(mlClusterClient) {
 
   const getFieldCardinality = function (index, field) {
     return new Promise((resolve, reject) => {
-      callAsCurrentUser('search', {
-        index,
-        size: 0,
-        body: {
-          aggs: {
-            field_count: {
-              cardinality: {
-                field,
+      asCurrentUser
+        .search({
+          index,
+          size: 0,
+          body: {
+            aggs: {
+              field_count: {
+                cardinality: {
+                  field,
+                },
               },
             },
           },
-        },
-      })
-        .then((resp) => {
-          const value = _.get(resp, ['aggregations', 'field_count', 'value'], 0);
+        })
+        .then(({ body }) => {
+          const value = get(body, ['aggregations', 'field_count', 'value'], 0);
           resolve(value);
         })
         .catch((resp) => {
@@ -274,28 +275,30 @@ export function estimateBucketSpanFactory(mlClusterClient) {
       getFieldCardinality(index, field)
         .then((value) => {
           const numPartitions = Math.floor(value / NUM_PARTITIONS) || 1;
-          callAsCurrentUser('search', {
-            index,
-            size: 0,
-            body: {
-              query,
-              aggs: {
-                fields_bucket_counts: {
-                  terms: {
-                    field,
-                    include: {
-                      partition: 0,
-                      num_partitions: numPartitions,
+          asCurrentUser
+            .search({
+              index,
+              size: 0,
+              body: {
+                query,
+                aggs: {
+                  fields_bucket_counts: {
+                    terms: {
+                      field,
+                      include: {
+                        partition: 0,
+                        num_partitions: numPartitions,
+                      },
                     },
                   },
                 },
               },
-            },
-          })
-            .then((partitionResp) => {
-              if (_.has(partitionResp, 'aggregations.fields_bucket_counts.buckets')) {
-                const buckets = partitionResp.aggregations.fields_bucket_counts.buckets;
-                fieldValues = _.map(buckets, (b) => b.key);
+            })
+            .then(({ body }) => {
+              // eslint-disable-next-line camelcase
+              if (body.aggregations?.fields_bucket_counts?.buckets !== undefined) {
+                const buckets = body.aggregations.fields_bucket_counts.buckets;
+                fieldValues = buckets.map((b) => b.key);
               }
               resolve(fieldValues);
             })
@@ -333,21 +336,21 @@ export function estimateBucketSpanFactory(mlClusterClient) {
     return new Promise((resolve, reject) => {
       // fetch the `search.max_buckets` cluster setting so we're able to
       // adjust aggregations to not exceed that limit.
-      callAsInternalUser('cluster.getSettings', {
-        flatSettings: true,
-        includeDefaults: true,
-        filterPath: '*.*max_buckets',
-      })
-        .then((settings) => {
-          if (typeof settings !== 'object') {
+      asInternalUser.cluster
+        .getSettings({
+          flat_settings: true,
+          include_defaults: true,
+          filter_path: '*.*max_buckets',
+        })
+        .then(({ body }) => {
+          if (typeof body !== 'object') {
             reject('Unable to retrieve cluster settings');
           }
 
           // search.max_buckets could exist in default, persistent or transient cluster settings
-          const maxBucketsSetting = (settings.defaults ||
-            settings.persistent ||
-            settings.transient ||
-            {})['search.max_buckets'];
+          const maxBucketsSetting = (body.defaults || body.persistent || body.transient || {})[
+            'search.max_buckets'
+          ];
 
           if (maxBucketsSetting === undefined) {
             reject('Unable to retrieve cluster setting search.max_buckets');

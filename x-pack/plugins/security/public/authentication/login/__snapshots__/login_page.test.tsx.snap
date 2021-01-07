@@ -133,45 +133,6 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
 />
 `;
 
-exports[`LoginPage enabled form state renders as expected when info message is set 1`] = `
-<LoginForm
-  http={
-    Object {
-      "addLoadingCountSource": [MockFunction],
-      "get": [MockFunction],
-    }
-  }
-  infoMessage="Your session has timed out. Please log in again."
-  loginAssistanceMessage=""
-  notifications={
-    Object {
-      "toasts": Object {
-        "add": [MockFunction],
-        "addDanger": [MockFunction],
-        "addError": [MockFunction],
-        "addInfo": [MockFunction],
-        "addSuccess": [MockFunction],
-        "addWarning": [MockFunction],
-        "get$": [MockFunction],
-        "remove": [MockFunction],
-      },
-    }
-  }
-  selector={
-    Object {
-      "enabled": false,
-      "providers": Array [
-        Object {
-          "name": "basic1",
-          "type": "basic",
-          "usesLoginForm": true,
-        },
-      ],
-    }
-  }
-/>
-`;
-
 exports[`LoginPage enabled form state renders as expected when loginAssistanceMessage is set 1`] = `
 <LoginForm
   http={
@@ -180,7 +141,6 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
       "get": [MockFunction],
     }
   }
-  infoMessage="Your session has timed out. Please log in again."
   loginAssistanceMessage="This is an *important* message"
   notifications={
     Object {
@@ -219,7 +179,6 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
       "get": [MockFunction],
     }
   }
-  infoMessage="Your session has timed out. Please log in again."
   loginAssistanceMessage=""
   loginHelp="**some-help**"
   notifications={

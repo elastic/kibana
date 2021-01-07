@@ -5,6 +5,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
+// We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
+import { coreMock as mockCoreMock } from 'src/core/public/mocks';
 
 import { useLogSummary } from './log_summary';
 
@@ -15,6 +17,10 @@ import { datemathToEpochMillis } from '../../../utils/datemath';
 // We use a second variable with a type cast to help the compiler further down the line.
 jest.mock('./api/fetch_log_summary', () => ({ fetchLogSummary: jest.fn() }));
 const fetchLogSummaryMock = fetchLogSummary as jest.MockedFunction<typeof fetchLogSummary>;
+
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibanaContextForPlugin: () => ({ services: mockCoreMock.createStart() }),
+}));
 
 describe('useLogSummary hook', () => {
   beforeEach(() => {
@@ -53,7 +59,8 @@ describe('useLogSummary hook', () => {
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         sourceId: 'INITIAL_SOURCE_ID',
-      })
+      }),
+      expect.anything()
     );
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
@@ -64,7 +71,8 @@ describe('useLogSummary hook', () => {
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         sourceId: 'CHANGED_SOURCE_ID',
-      })
+      }),
+      expect.anything()
     );
     expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
   });
@@ -96,7 +104,8 @@ describe('useLogSummary hook', () => {
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         query: 'INITIAL_FILTER_QUERY',
-      })
+      }),
+      expect.anything()
     );
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
@@ -107,7 +116,8 @@ describe('useLogSummary hook', () => {
     expect(fetchLogSummaryMock).toHaveBeenLastCalledWith(
       expect.objectContaining({
         query: 'CHANGED_FILTER_QUERY',
-      })
+      }),
+      expect.anything()
     );
     expect(result.current.buckets).toEqual(secondMockResponse.data.buckets);
   });
@@ -132,7 +142,8 @@ describe('useLogSummary hook', () => {
       expect.objectContaining({
         startTimestamp: firstRange.startTimestamp,
         endTimestamp: firstRange.endTimestamp,
-      })
+      }),
+      expect.anything()
     );
 
     const secondRange = createMockDateRange('now-20s', 'now');
@@ -145,7 +156,8 @@ describe('useLogSummary hook', () => {
       expect.objectContaining({
         startTimestamp: secondRange.startTimestamp,
         endTimestamp: secondRange.endTimestamp,
-      })
+      }),
+      expect.anything()
     );
   });
 });

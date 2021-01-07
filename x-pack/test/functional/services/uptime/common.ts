@@ -6,11 +6,13 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function UptimeCommonProvider({ getService }: FtrProviderContext) {
+export function UptimeCommonProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
   const find = getService('find');
+
+  const { header } = getPageObjects(['header']);
 
   return {
     async assertExists(key: string) {
@@ -90,6 +92,16 @@ export function UptimeCommonProvider({ getService }: FtrProviderContext) {
         `xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem${size.toString()}`,
         5000
       );
+    },
+    async waitUntilDataIsLoaded() {
+      await header.waitUntilLoadingHasFinished();
+      return retry.tryForTime(60 * 1000, async () => {
+        if (await testSubjects.exists('data-missing')) {
+          await testSubjects.click('superDatePickerApplyTimeButton');
+          await header.waitUntilLoadingHasFinished();
+        }
+        await testSubjects.missingOrFail('data-missing');
+      });
     },
   };
 }

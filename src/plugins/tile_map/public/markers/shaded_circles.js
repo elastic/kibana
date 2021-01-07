@@ -19,7 +19,6 @@
 
 import _ from 'lodash';
 import { ScaledCirclesMarkers } from './scaled_circles';
-import { L } from '../../../maps_legacy/public';
 
 export class ShadedCirclesMarkers extends ScaledCirclesMarkers {
   getMarkerFunction() {
@@ -27,7 +26,7 @@ export class ShadedCirclesMarkers extends ScaledCirclesMarkers {
     const scaleFactor = 0.8;
     return (feature, latlng) => {
       const radius = this._geohashMinDistance(feature) * scaleFactor;
-      return L.circle(latlng, radius);
+      return this._leaflet.circle(latlng, radius);
     };
   }
 
@@ -49,12 +48,12 @@ export class ShadedCirclesMarkers extends ScaledCirclesMarkers {
     //   clockwise, each value being an array of [lat, lng]
 
     // center lat and southeast lng
-    const east = L.latLng([centerPoint[0], geohashRect[2][1]]);
+    const east = this._leaflet.latLng([centerPoint[0], geohashRect[2][1]]);
     // southwest lat and center lng
-    const north = L.latLng([geohashRect[3][0], centerPoint[1]]);
+    const north = this._leaflet.latLng([geohashRect[3][0], centerPoint[1]]);
 
     // get latLng of geohash center point
-    const center = L.latLng([centerPoint[0], centerPoint[1]]);
+    const center = this._leaflet.latLng([centerPoint[0], centerPoint[1]]);
 
     // get smallest radius at center of geohash grid rectangle
     const eastRadius = Math.floor(center.distanceTo(east));

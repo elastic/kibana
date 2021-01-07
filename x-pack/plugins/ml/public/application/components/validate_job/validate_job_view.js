@@ -32,6 +32,8 @@ import { getDocLinks } from '../../util/dependency_cache';
 
 import { VALIDATION_STATUS } from '../../../../common/constants/validation';
 import { getMostSevereMessageStatus } from '../../../../common/util/validation_utils';
+import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 const defaultIconType = 'questionInCircle';
 const getDefaultState = () => ({
@@ -182,7 +184,7 @@ Modal.propType = {
   title: PropTypes.string,
 };
 
-export class ValidateJob extends Component {
+export class ValidateJobUI extends Component {
   constructor(props) {
     super(props);
     this.state = getDefaultState();
@@ -206,45 +208,103 @@ export class ValidateJob extends Component {
     const duration = typeof getDuration === 'function' ? getDuration() : undefined;
     const fields = this.props.fields;
 
+    // Run job validation only if a job config has been passed on and the duration makes sense to run it.
+    // Otherwise we skip the call and display a generic warning, but let the user move on to the next wizard step.
     if (typeof job === 'object') {
-      let shouldShowLoadingIndicator = true;
+      if (typeof duration === 'object' && duration.start !== null && duration.end !== null) {
+        let shouldShowLoadingIndicator = true;
 
-      this.props.mlJobService.validateJob({ duration, fields, job }).then((data) => {
-        shouldShowLoadingIndicator = false;
+        this.props.ml
+          .validateJob({ duration, fields, job })
+          .then((messages) => {
+            shouldShowLoadingIndicator = false;
+
+            const messagesContainError = messages.some((m) => m.status === VALIDATION_STATUS.ERROR);
+
+            if (messagesContainError) {
+              messages.push({
+                id: 'job_validation_includes_error',
+                text: i18n.translate('xpack.ml.validateJob.jobValidationIncludesErrorText', {
+                  defaultMessage:
+                    'Job validation has failed, but you can still continue and create the job. Please be aware the job may encounter problems when running.',
+                }),
+                status: VALIDATION_STATUS.WARNING,
+              });
+            }
+
+            this.setState({
+              ...this.state,
+              ui: {
+                ...this.state.ui,
+                iconType: statusToEuiIconType(getMostSevereMessageStatus(messages)),
+                isLoading: false,
+                isModalVisible: true,
+              },
+              data: {
+                messages,
+                success: true,
+              },
+              title: job.job_id,
+            });
+            if (typeof this.props.setIsValid === 'function') {
+              this.props.setIsValid(!messagesContainError);
+            }
+          })
+          .catch((error) => {
+            const { toasts } = this.props.kibana.services.notifications;
+            const toastNotificationService = toastNotificationServiceProvider(toasts);
+            toastNotificationService.displayErrorToast(
+              error,
+              i18n.translate('xpack.ml.jobService.validateJobErrorTitle', {
+                defaultMessage: 'Job Validation Error',
+              })
+            );
+          });
+
+        // wait for 250ms before triggering the loading indicator
+        // to avoid flickering when there's a loading time below
+        // 250ms for the job validation data
+        const delay = 250;
+        setTimeout(() => {
+          if (shouldShowLoadingIndicator) {
+            this.setState({
+              ...this.state,
+              ui: {
+                ...this.state.ui,
+                isLoading: true,
+                isModalVisible: false,
+              },
+            });
+          }
+        }, delay);
+      } else {
         this.setState({
           ...this.state,
           ui: {
             ...this.state.ui,
-            iconType: statusToEuiIconType(getMostSevereMessageStatus(data.messages)),
+            iconType: statusToEuiIconType(VALIDATION_STATUS.WARNING),
             isLoading: false,
             isModalVisible: true,
           },
-          data,
+          data: {
+            messages: [
+              {
+                id: 'job_validation_skipped',
+                text: i18n.translate('xpack.ml.validateJob.jobValidationSkippedText', {
+                  defaultMessage:
+                    'Job validation could not be run because of insufficient sample data. Please be aware the job may encounter problems when running.',
+                }),
+                status: VALIDATION_STATUS.WARNING,
+              },
+            ],
+            success: true,
+          },
           title: job.job_id,
         });
         if (typeof this.props.setIsValid === 'function') {
-          this.props.setIsValid(
-            data.messages.some((m) => m.status === VALIDATION_STATUS.ERROR) === false
-          );
+          this.props.setIsValid(true);
         }
-      });
-
-      // wait for 250ms before triggering the loading indicator
-      // to avoid flickering when there's a loading time below
-      // 250ms for the job validation data
-      const delay = 250;
-      setTimeout(() => {
-        if (shouldShowLoadingIndicator) {
-          this.setState({
-            ...this.state,
-            ui: {
-              ...this.state.ui,
-              isLoading: true,
-              isModalVisible: false,
-            },
-          });
-        }
-      }, delay);
+      }
     }
   };
 
@@ -335,15 +395,17 @@ export class ValidateJob extends Component {
     );
   }
 }
-ValidateJob.propTypes = {
+ValidateJobUI.propTypes = {
   fields: PropTypes.object,
   fill: PropTypes.bool,
   getDuration: PropTypes.func,
   getJobConfig: PropTypes.func.isRequired,
   isCurrentJobConfig: PropTypes.bool,
   isDisabled: PropTypes.bool,
-  mlJobService: PropTypes.object.isRequired,
+  ml: PropTypes.object.isRequired,
   embedded: PropTypes.bool,
   setIsValid: PropTypes.func,
   idFilterList: PropTypes.array,
 };
+
+export const ValidateJob = withKibana(ValidateJobUI);

@@ -20,28 +20,22 @@ import {
   EmbeddableSetup,
   EmbeddableStart,
 } from '../../../../src/plugins/embeddable/public';
-import {
-  CustomTimeRangeAction,
-  CUSTOM_TIME_RANGE,
-  TimeRangeActionContext,
-} from './custom_time_range_action';
-import {
-  CustomTimeRangeBadge,
-  CUSTOM_TIME_RANGE_BADGE,
-  TimeBadgeActionContext,
-} from './custom_time_range_badge';
+import { CustomTimeRangeAction } from './custom_time_range_action';
+import { CustomTimeRangeBadge } from './custom_time_range_badge';
 import { CommonlyUsedRange } from './types';
 import { UiActionsServiceEnhancements } from './services';
-import { ILicense, LicensingPluginStart } from '../../licensing/public';
+import { ILicense, LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { createFlyoutManageDrilldowns } from './drilldowns';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import { createStartServicesGetter, Storage } from '../../../../src/plugins/kibana_utils/public';
+import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhancement';
 
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
   uiActions: UiActionsSetup;
+  licensing: LicensingPluginSetup;
 }
 
-interface StartDependencies {
+export interface StartDependencies {
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   licensing: LicensingPluginStart;
@@ -53,36 +47,45 @@ export interface SetupContract
 
 export interface StartContract
   extends UiActionsStart,
-    Pick<UiActionsServiceEnhancements, 'getActionFactory' | 'getActionFactories'> {
+    Pick<
+      UiActionsServiceEnhancements,
+      | 'getActionFactory'
+      | 'hasActionFactory'
+      | 'getActionFactories'
+      | 'telemetry'
+      | 'extract'
+      | 'inject'
+    > {
   FlyoutManageDrilldowns: ReturnType<typeof createFlyoutManageDrilldowns>;
-}
-
-declare module '../../../../src/plugins/ui_actions/public' {
-  export interface ActionContextMapping {
-    [CUSTOM_TIME_RANGE]: TimeRangeActionContext;
-    [CUSTOM_TIME_RANGE_BADGE]: TimeBadgeActionContext;
-  }
 }
 
 export class AdvancedUiActionsPublicPlugin
   implements Plugin<SetupContract, StartContract, SetupDependencies, StartDependencies> {
-  readonly licenceInfo = new BehaviorSubject<ILicense | undefined>(undefined);
+  readonly licenseInfo = new BehaviorSubject<ILicense | undefined>(undefined);
   private getLicenseInfo(): ILicense {
-    if (!this.licenceInfo.getValue()) {
+    if (!this.licenseInfo.getValue()) {
       throw new Error(
-        'AdvancedUiActionsPublicPlugin: Licence is not ready! Licence becomes available only after setup.'
+        'AdvancedUiActionsPublicPlugin: License is not ready! License becomes available only after setup.'
       );
     }
-    return this.licenceInfo.getValue()!;
+    return this.licenseInfo.getValue()!;
   }
-  private readonly enhancements = new UiActionsServiceEnhancements({
-    getLicenseInfo: () => this.getLicenseInfo(),
-  });
+  private enhancements?: UiActionsServiceEnhancements;
   private subs: Subscription[] = [];
 
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { uiActions }: SetupDependencies): SetupContract {
+  public setup(
+    core: CoreSetup<StartDependencies>,
+    { embeddable, uiActions, licensing }: SetupDependencies
+  ): SetupContract {
+    const startServices = createStartServicesGetter(core.getStartServices);
+    this.enhancements = new UiActionsServiceEnhancements({
+      getLicense: () => this.getLicenseInfo(),
+      featureUsageSetup: licensing.featureUsage,
+      getFeatureUsageStart: () => startServices().plugins.licensing.featureUsage,
+    });
+    embeddable.registerEnhancement(dynamicActionEnhancement(this.enhancements));
     return {
       ...uiActions,
       ...this.enhancements,
@@ -90,7 +93,7 @@ export class AdvancedUiActionsPublicPlugin
   }
 
   public start(core: CoreStart, { uiActions, licensing }: StartDependencies): StartContract {
-    this.subs.push(licensing.license$.subscribe(this.licenceInfo));
+    this.subs.push(licensing.license$.subscribe(this.licenseInfo));
 
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get(
@@ -113,12 +116,14 @@ export class AdvancedUiActionsPublicPlugin
 
     return {
       ...uiActions,
-      ...this.enhancements,
+      ...this.enhancements!,
       FlyoutManageDrilldowns: createFlyoutManageDrilldowns({
-        actionFactories: this.enhancements.getActionFactories(),
+        actionFactories: this.enhancements!.getActionFactories(),
+        getTrigger: (triggerId) => uiActions.getTrigger(triggerId),
         storage: new Storage(window?.localStorage),
         toastService: core.notifications.toasts,
         docsLink: core.docLinks.links.dashboard.drilldowns,
+        triggerPickerDocsLink: core.docLinks.links.dashboard.drilldownsTriggerPicker,
       }),
     };
   }

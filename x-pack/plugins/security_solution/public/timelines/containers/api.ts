@@ -6,6 +6,9 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+// Prefer importing entire lodash library, e.g. import { get } from "lodash"
+// eslint-disable-next-line no-restricted-imports
+import isEmpty from 'lodash/isEmpty';
 
 import { throwErrors } from '../../../../case/common/api';
 import {
@@ -99,44 +102,63 @@ export const persistTimeline = async ({
   timeline,
   version,
 }: RequestPersistTimeline): Promise<TimelineResponse | TimelineErrorResponse> => {
-  if (timelineId == null && timeline.status === TimelineStatus.draft && timeline) {
-    const draftTimeline = await cleanDraftTimeline({
-      timelineType: timeline.timelineType!,
-      templateTimelineId: timeline.templateTimelineId ?? undefined,
-      templateTimelineVersion: timeline.templateTimelineVersion ?? undefined,
-    });
+  try {
+    if (isEmpty(timelineId) && timeline.status === TimelineStatus.draft && timeline) {
+      const draftTimeline = await cleanDraftTimeline({
+        timelineType: timeline.timelineType!,
+        templateTimelineId: timeline.templateTimelineId ?? undefined,
+        templateTimelineVersion: timeline.templateTimelineVersion ?? undefined,
+      });
 
-    const templateTimelineInfo =
-      timeline.timelineType! === TimelineType.template
-        ? {
-            templateTimelineId:
-              draftTimeline.data.persistTimeline.timeline.templateTimelineId ??
-              timeline.templateTimelineId,
-            templateTimelineVersion:
-              draftTimeline.data.persistTimeline.timeline.templateTimelineVersion ??
-              timeline.templateTimelineVersion,
-          }
-        : {};
+      const templateTimelineInfo =
+        timeline.timelineType! === TimelineType.template
+          ? {
+              templateTimelineId:
+                draftTimeline.data.persistTimeline.timeline.templateTimelineId ??
+                timeline.templateTimelineId,
+              templateTimelineVersion:
+                draftTimeline.data.persistTimeline.timeline.templateTimelineVersion ??
+                timeline.templateTimelineVersion,
+            }
+          : {};
+
+      return patchTimeline({
+        timelineId: draftTimeline.data.persistTimeline.timeline.savedObjectId,
+        timeline: {
+          ...timeline,
+          ...templateTimelineInfo,
+        },
+        version: draftTimeline.data.persistTimeline.timeline.version ?? '',
+      });
+    }
+
+    if (isEmpty(timelineId)) {
+      return postTimeline({ timeline });
+    }
 
     return patchTimeline({
-      timelineId: draftTimeline.data.persistTimeline.timeline.savedObjectId,
-      timeline: {
-        ...timeline,
-        ...templateTimelineInfo,
-      },
-      version: draftTimeline.data.persistTimeline.timeline.version ?? '',
+      timelineId: timelineId ?? '-1',
+      timeline,
+      version: version ?? '',
     });
+  } catch (err) {
+    if (err.status_code === 403 || err.body.status_code === 403) {
+      return Promise.resolve({
+        data: {
+          persistTimeline: {
+            code: 403,
+            message: err.message || err.body.message,
+            timeline: {
+              ...timeline,
+              savedObjectId: '',
+              version: '',
+            },
+          },
+        },
+      });
+    }
+    return Promise.resolve(err);
   }
-
-  if (timelineId == null) {
-    return postTimeline({ timeline });
-  }
-
-  return patchTimeline({
-    timelineId,
-    timeline,
-    version: version ?? '',
-  });
 };
 
 export const importTimelines = async ({

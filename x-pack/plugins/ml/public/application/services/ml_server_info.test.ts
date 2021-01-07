@@ -28,9 +28,8 @@ describe('ml_server_info initial state', () => {
 });
 
 describe('ml_server_info', () => {
-  beforeEach(async (done) => {
+  beforeEach(async () => {
     await loadMlServerInfo();
-    done();
   });
 
   describe('cloud information', () => {
@@ -41,23 +40,21 @@ describe('ml_server_info', () => {
   });
 
   describe('defaults', () => {
-    it('should get defaults', async (done) => {
+    it('should get defaults', async () => {
       const defaults = getNewJobDefaults();
 
       expect(defaults.anomaly_detectors.model_memory_limit).toBe('128mb');
       expect(defaults.anomaly_detectors.categorization_examples_limit).toBe(4);
       expect(defaults.anomaly_detectors.model_snapshot_retention_days).toBe(1);
       expect(defaults.datafeeds.scroll_size).toBe(1000);
-      done();
     });
   });
 
   describe('limits', () => {
-    it('should get limits', async (done) => {
+    it('should get limits', async () => {
       const limits = getNewJobLimits();
 
       expect(limits.max_model_memory_limit).toBe('128mb');
-      done();
     });
   });
 

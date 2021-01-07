@@ -16,13 +16,12 @@ import {
 } from '../../common/constants';
 import { UptimeApp, UptimeAppProps } from './uptime_app';
 import { ClientPluginsSetup, ClientPluginsStart } from './plugin';
-import { PLUGIN } from '../../common/constants/plugin';
 
 export function renderApp(
   core: CoreStart,
   plugins: ClientPluginsSetup,
   startPlugins: ClientPluginsStart,
-  { element }: AppMountParameters
+  appMountParameters: AppMountParameters
 ) {
   const {
     application: { capabilities },
@@ -67,14 +66,14 @@ export function renderApp(
           },
         ],
       }),
-    routerBasename: basePath.prepend(PLUGIN.ROUTER_BASE_NAME),
     setBadge,
+    appMountParameters,
     setBreadcrumbs: core.chrome.setBreadcrumbs,
   };
 
-  ReactDOM.render(<UptimeApp {...props} />, element);
+  ReactDOM.render(<UptimeApp {...props} />, appMountParameters.element);
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    ReactDOM.unmountComponentAtNode(appMountParameters.element);
   };
 }

@@ -7,8 +7,9 @@
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import supertestAsPromised from 'supertest-as-promised';
 import { format, UrlObject } from 'url';
+import path from 'path';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
-import { PromiseReturnType } from '../../../plugins/apm/typings/common';
+import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 
 interface Settings {
@@ -49,14 +50,22 @@ export function createTestConfig(settings: Settings) {
     return {
       testFiles,
       servers,
+      esArchiver: {
+        directory: path.resolve(__dirname, './fixtures/es_archiver'),
+      },
       services: {
         ...services,
         supertest: supertestAsApmReadUser,
         supertestAsApmReadUser,
+        supertestAsNoAccessUser: supertestAsApmUser(servers.kibana, ApmUser.noAccessUser),
         supertestAsApmWriteUser: supertestAsApmUser(servers.kibana, ApmUser.apmWriteUser),
         supertestAsApmAnnotationsWriteUser: supertestAsApmUser(
           servers.kibana,
           ApmUser.apmAnnotationsWriteUser
+        ),
+        supertestAsApmReadUserWithoutMlAccess: supertestAsApmUser(
+          servers.kibana,
+          ApmUser.apmReadUserWithoutMlAccess
         ),
       },
       junit: {

@@ -17,9 +17,8 @@
  * under the License.
  */
 
+import { configDeprecationFactory, applyDeprecations } from '@kbn/config';
 import { coreDeprecationProvider } from './core_deprecations';
-import { configDeprecationFactory } from './deprecation_factory';
-import { applyDeprecations } from './apply_deprecations';
 
 const initialEnv = { ...process.env };
 
@@ -83,14 +82,41 @@ describe('core deprecations', () => {
 
   describe('xsrfDeprecation', () => {
     it('logs a warning if server.xsrf.whitelist is set', () => {
-      const { messages } = applyCoreDeprecations({
+      const { migrated, messages } = applyCoreDeprecations({
         server: { xsrf: { whitelist: ['/path'] } },
+      });
+      expect(migrated.server.xsrf.allowlist).toEqual(['/path']);
+      expect(messages).toMatchInlineSnapshot(`
+        Array [
+          "\\"server.xsrf.whitelist\\" is deprecated and has been replaced by \\"server.xsrf.allowlist\\"",
+        ]
+      `);
+    });
+  });
+
+  describe('server.cors', () => {
+    it('renames server.cors to server.cors.enabled', () => {
+      const { migrated } = applyCoreDeprecations({
+        server: { cors: true },
+      });
+      expect(migrated.server.cors).toEqual({ enabled: true });
+    });
+    it('logs a warning message about server.cors renaming', () => {
+      const { messages } = applyCoreDeprecations({
+        server: { cors: true },
       });
       expect(messages).toMatchInlineSnapshot(`
         Array [
-          "It is not recommended to disable xsrf protections for API endpoints via [server.xsrf.whitelist]. It will be removed in 8.0 release. Instead, supply the \\"kbn-xsrf\\" header.",
+          "\\"server.cors\\" is deprecated and has been replaced by \\"server.cors.enabled\\"",
         ]
       `);
+    });
+    it('does not log deprecation message when server.cors.enabled set', () => {
+      const { migrated, messages } = applyCoreDeprecations({
+        server: { cors: { enabled: true } },
+      });
+      expect(migrated.server.cors).toEqual({ enabled: true });
+      expect(messages.length).toBe(0);
     });
   });
 

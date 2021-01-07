@@ -18,6 +18,7 @@
  */
 import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { Plugin, CoreStart, CoreSetup } from '../../../core/public';
 
 import { telemetryManagementSectionWrapper } from './components/telemetry_management_section_wrapper';
@@ -36,18 +37,43 @@ export interface TelemetryPluginConfig {
 export interface TelemetryManagementSectionPluginDepsSetup {
   telemetry: TelemetryPluginSetup;
   advancedSettings: AdvancedSettingsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
-export class TelemetryManagementSectionPlugin implements Plugin {
+export interface TelemetryManagementSectionPluginSetup {
+  toggleSecuritySolutionExample: (enabled: boolean) => void;
+}
+
+export class TelemetryManagementSectionPlugin
+  implements Plugin<TelemetryManagementSectionPluginSetup> {
+  private showSecuritySolutionExample = false;
+  private shouldShowSecuritySolutionExample = () => {
+    return this.showSecuritySolutionExample;
+  };
+
   public setup(
     core: CoreSetup,
-    { advancedSettings, telemetry: { telemetryService } }: TelemetryManagementSectionPluginDepsSetup
+    {
+      advancedSettings,
+      usageCollection,
+      telemetry: { telemetryService },
+    }: TelemetryManagementSectionPluginDepsSetup
   ) {
     advancedSettings.component.register(
       advancedSettings.component.componentType.PAGE_FOOTER_COMPONENT,
-      telemetryManagementSectionWrapper(telemetryService),
+      telemetryManagementSectionWrapper(
+        telemetryService,
+        this.shouldShowSecuritySolutionExample,
+        usageCollection?.applicationUsageTracker
+      ),
       true
     );
+
+    return {
+      toggleSecuritySolutionExample: (enabled: boolean) => {
+        this.showSecuritySolutionExample = enabled;
+      },
+    };
   }
 
   public start(core: CoreStart) {}

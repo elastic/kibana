@@ -19,7 +19,7 @@
 
 import { buildExistsFilter, getExistsFilterField } from './exists_filter';
 import { IIndexPattern } from '../../index_patterns';
-import { fields } from '../../index_patterns/fields/fields.mocks.ts';
+import { fields } from '../../index_patterns/fields/fields.mocks';
 
 describe('exists filter', function () {
   const indexPattern: IIndexPattern = ({

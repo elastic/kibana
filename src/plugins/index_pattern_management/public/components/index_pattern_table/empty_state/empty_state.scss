@@ -1,0 +1,23 @@
+@import '../../../variables';
+@import '../../../templates';
+
+.inpEmptyState {
+  // override EUI specificity
+  max-width: $inpEmptyStateMaxWidth !important; // sass-lint:disable-line no-important
+}
+
+.inpEmptyState__cardGrid {
+  justify-content: center;
+}
+
+.inpEmptyState__card {
+  min-width: $euiSizeXL * 6;
+}
+
+.inpEmptyState__footer {
+  @extend %inp-empty-state-footer;
+}
+
+.inpEmptyState__footerFlexItem {
+  min-width: $euiSizeXL * 7;
+}

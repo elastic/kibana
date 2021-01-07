@@ -4,30 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
+
 import { NewTimeline, NewTimelineProps } from './helpers';
 import { useCreateTimelineButton } from './use_create_timeline';
 
-jest.mock('./use_create_timeline', () => ({
-  useCreateTimelineButton: jest.fn(),
-}));
+jest.mock('../../../../common/hooks/use_selector');
 
-jest.mock('../../../../common/lib/kibana', () => {
-  return {
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          navigateToApp: () => Promise.resolve(),
-          capabilities: {
-            siem: {
-              crud: true,
-            },
+jest.mock('./use_create_timeline');
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: {
+        navigateToApp: () => Promise.resolve(),
+        capabilities: {
+          siem: {
+            crud: true,
           },
         },
       },
-    }),
-  };
-});
+    },
+  }),
+}));
 
 describe('NewTimeline', () => {
   const mockGetButton = jest.fn();
@@ -42,7 +41,7 @@ describe('NewTimeline', () => {
     describe('default', () => {
       beforeAll(() => {
         (useCreateTimelineButton as jest.Mock).mockReturnValue({ getButton: mockGetButton });
-        shallow(<NewTimeline {...props} />);
+        mount(<NewTimeline {...props} />);
       });
 
       afterAll(() => {

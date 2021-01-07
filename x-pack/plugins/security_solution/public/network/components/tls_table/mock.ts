@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TlsData } from '../../../graphql/types';
+import { NetworkTlsStrategyResponse } from '../../../../common/search_strategy';
 
-export const mockTlsData: TlsData = {
+export const mockTlsData: NetworkTlsStrategyResponse = {
   totalCount: 2,
   edges: [
     {
@@ -51,4 +51,5 @@ export const mockTlsData: TlsData = {
     fakeTotalCount: 50,
     showMorePagesIndicator: true,
   },
+  rawResponse: {} as NetworkTlsStrategyResponse['rawResponse'],
 };

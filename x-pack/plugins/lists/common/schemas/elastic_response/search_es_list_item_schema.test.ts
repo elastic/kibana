@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { SearchEsListItemSchema, searchEsListItemSchema } from './search_es_list_item_schema';
 import { getSearchEsListItemMock } from './search_es_list_item_schema.mock';
@@ -22,7 +22,7 @@ describe('search_es_list_item_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
-  test('it should not validate with a madeup value', () => {
+  test('it should FAIL validation when a madeup value', () => {
     const payload: SearchEsListItemSchema & { madeupValue: string } = {
       ...getSearchEsListItemMock(),
       madeupValue: 'madeupvalue',

@@ -6,10 +6,9 @@
 /* eslint-disable max-classes-per-file */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
 import { AbstractLayer, ILayer } from '../../../../../../classes/layers/layer';
 import { AbstractSource, ISource } from '../../../../../../classes/sources/source';
-import { AbstractStyle, IStyle } from '../../../../../../classes/styles/style';
 
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 
@@ -17,20 +16,17 @@ let supportsFitToBounds: boolean;
 
 class MockSource extends AbstractSource implements ISource {}
 
-class MockStyle extends AbstractStyle implements IStyle {}
-
 class LayerMock extends AbstractLayer implements ILayer {
   constructor() {
     const sourceDescriptor = {
       type: 'mySourceType',
     };
     const source = new MockSource(sourceDescriptor);
-    const style = new MockStyle({ type: 'myStyleType' });
     const layerDescriptor = {
       id: 'testLayer',
       sourceDescriptor,
     };
-    super({ layerDescriptor, source, style });
+    super({ layerDescriptor, source });
   }
 
   async supportsFitToBounds(): Promise<boolean> {
@@ -39,19 +35,6 @@ class LayerMock extends AbstractLayer implements ILayer {
 
   isVisible() {
     return true;
-  }
-
-  getIconAndTooltipContent(zoom: number, isUsingSearch: boolean) {
-    return {
-      icon: <span>mockIcon</span>,
-      tooltipContent: `simulated tooltip content at zoom: ${zoom}`,
-      footnotes: [
-        {
-          icon: <span>mockFootnoteIcon</span>,
-          message: `simulated footnote at isUsingSearch: ${isUsingSearch}`,
-        },
-      ],
-    };
   }
 }
 
@@ -63,11 +46,9 @@ const defaultProps = {
   fitToBounds: () => {},
   isEditButtonDisabled: false,
   isReadOnly: false,
-  isUsingSearch: true,
   layer: new LayerMock(),
   removeLayer: () => {},
   toggleVisible: () => {},
-  zoom: 0,
 };
 
 describe('TOCEntryActionsPopover', () => {
@@ -76,7 +57,7 @@ describe('TOCEntryActionsPopover', () => {
   });
 
   test('is rendered', async () => {
-    const component = shallowWithIntl(<TOCEntryActionsPopover {...defaultProps} />);
+    const component = shallow(<TOCEntryActionsPopover {...defaultProps} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -87,9 +68,7 @@ describe('TOCEntryActionsPopover', () => {
   });
 
   test('should not show edit actions in read only mode', async () => {
-    const component = shallowWithIntl(
-      <TOCEntryActionsPopover {...defaultProps} isReadOnly={true} />
-    );
+    const component = shallow(<TOCEntryActionsPopover {...defaultProps} isReadOnly={true} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));
@@ -101,7 +80,22 @@ describe('TOCEntryActionsPopover', () => {
 
   test('should disable fit to data when supportsFitToBounds is false', async () => {
     supportsFitToBounds = false;
-    const component = shallowWithIntl(<TOCEntryActionsPopover {...defaultProps} />);
+    const component = shallow(<TOCEntryActionsPopover {...defaultProps} />);
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  test('should have "show layer" action when layer is not visible', async () => {
+    const layer = new LayerMock();
+    layer.isVisible = () => {
+      return false;
+    };
+    const component = shallow(<TOCEntryActionsPopover {...defaultProps} layer={layer} />);
 
     // Ensure all promises resolve
     await new Promise((resolve) => process.nextTick(resolve));

@@ -37,7 +37,7 @@ describe('extractTimeFields', () => {
     expect(extractTimeFields(fields)).toEqual([
       { display: '@timestamp', fieldName: '@timestamp' },
       { isDisabled: true, display: '───', fieldName: '' },
-      { display: `I don't want to use the Time Filter`, fieldName: undefined },
+      { display: `I don't want to use the time filter`, fieldName: undefined },
     ]);
   });
 });

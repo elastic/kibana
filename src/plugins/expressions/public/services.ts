@@ -18,24 +18,19 @@
  */
 
 import { NotificationsStart } from 'kibana/public';
-import { createKibanaUtilsCore, createGetterSetter } from '../../kibana_utils/public';
-import { ExpressionInterpreter } from './types';
-import { ExpressionsSetup } from './plugin';
-import { ExpressionsService } from '../common';
+import { createGetterSetter } from '../../kibana_utils/public';
+import { ExpressionsService, ExpressionRendererRegistry } from '../common';
 
-export const { getCoreStart, setCoreStart } = createKibanaUtilsCore();
-
-export const [getInterpreter, setInterpreter] = createGetterSetter<ExpressionInterpreter>(
-  'Interpreter'
-);
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
 
-export const [getRenderersRegistry, setRenderersRegistry] = createGetterSetter<
-  ExpressionsSetup['__LEGACY']['renderers']
->('Renderers registry');
+export const [
+  getRenderersRegistry,
+  setRenderersRegistry,
+] = createGetterSetter<ExpressionRendererRegistry>('Renderers registry');
 
-export const [getExpressionsService, setExpressionsService] = createGetterSetter<
-  ExpressionsService
->('ExpressionsService');
+export const [
+  getExpressionsService,
+  setExpressionsService,
+] = createGetterSetter<ExpressionsService>('ExpressionsService');

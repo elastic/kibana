@@ -12,7 +12,7 @@ import {
 import { InfraSource } from '../../../../../common/http_api/source_api';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
-import { AlertServices, AlertExecutorOptions } from '../../../../../../alerts/server';
+import { AlertServices } from '../../../../../../alerts/server';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
@@ -35,17 +35,19 @@ interface CompositeAggregationsResponse {
   };
 }
 
-export const evaluateAlert = (
+export interface EvaluatedAlertParams {
+  criteria: MetricExpressionParams[];
+  groupBy: string | undefined | string[];
+  filterQuery: string | undefined;
+}
+
+export const evaluateAlert = <Params extends EvaluatedAlertParams = EvaluatedAlertParams>(
   callCluster: AlertServices['callCluster'],
-  params: AlertExecutorOptions['params'],
+  params: Params,
   config: InfraSource['configuration'],
   timeframe?: { start: number; end: number }
 ) => {
-  const { criteria, groupBy, filterQuery } = params as {
-    criteria: MetricExpressionParams[];
-    groupBy: string | undefined | string[];
-    filterQuery: string | undefined;
-  };
+  const { criteria, groupBy, filterQuery } = params;
   return Promise.all(
     criteria.map(async (criterion) => {
       const currentValues = await getMetric(
@@ -67,10 +69,15 @@ export const evaluateAlert = (
           currentValue: Array.isArray(points) ? last(points)?.value : NaN,
           timestamp: Array.isArray(points) ? last(points)?.key : NaN,
           shouldFire: Array.isArray(points)
-            ? points.map((point) => comparisonFunction(point.value, threshold))
+            ? points.map(
+                (point) =>
+                  typeof point.value === 'number' && comparisonFunction(point.value, threshold)
+              )
             : [false],
-          isNoData: points === null,
-          isError: isNaN(points),
+          isNoData: Array.isArray(points)
+            ? points.map((point) => point?.value === null || point === null)
+            : [points === null],
+          isError: isNaN(Array.isArray(points) ? last(points)?.value : points),
         };
       });
     })
@@ -172,7 +179,7 @@ const getValuesFromAggregations = (
     }
     return buckets.map((bucket) => ({
       key: bucket.key_as_string,
-      value: bucket.aggregatedValue.value,
+      value: bucket.aggregatedValue?.value ?? null,
     }));
   } catch (e) {
     return NaN; // Error state

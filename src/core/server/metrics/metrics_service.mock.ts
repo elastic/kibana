@@ -17,24 +17,24 @@
  * under the License.
  */
 import { BehaviorSubject } from 'rxjs';
-import { MetricsService } from './metrics_service';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import type { MetricsService } from './metrics_service';
 import {
   InternalMetricsServiceSetup,
   InternalMetricsServiceStart,
+  MetricsServiceSetup,
   MetricsServiceStart,
 } from './types';
 
 const createInternalSetupContractMock = () => {
-  const setupContract: jest.Mocked<InternalMetricsServiceSetup> = {};
-  return setupContract;
-};
-
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<MetricsServiceStart> = {
+  const setupContract: jest.Mocked<InternalMetricsServiceSetup> = {
+    collectionInterval: 30000,
     getOpsMetrics$: jest.fn(),
   };
-  startContract.getOpsMetrics$.mockReturnValue(
+  setupContract.getOpsMetrics$.mockReturnValue(
     new BehaviorSubject({
+      collected_at: new Date('2020-01-01 01:00:00'),
       process: {
         memory: {
           heap: { total_in_bytes: 1, used_in_bytes: 1, size_limit: 1 },
@@ -56,11 +56,21 @@ const createStartContractMock = () => {
       concurrent_connections: 1,
     })
   );
+  return setupContract;
+};
+
+const createSetupContractMock = () => {
+  const startContract: jest.Mocked<MetricsServiceSetup> = createInternalSetupContractMock();
   return startContract;
 };
 
 const createInternalStartContractMock = () => {
-  const startContract: jest.Mocked<InternalMetricsServiceStart> = createStartContractMock();
+  const startContract: jest.Mocked<InternalMetricsServiceStart> = createInternalSetupContractMock();
+  return startContract;
+};
+
+const createStartContractMock = () => {
+  const startContract: jest.Mocked<MetricsServiceStart> = createInternalSetupContractMock();
   return startContract;
 };
 
@@ -68,8 +78,8 @@ type MetricsServiceContract = PublicMethodsOf<MetricsService>;
 
 const createMock = () => {
   const mocked: jest.Mocked<MetricsServiceContract> = {
-    setup: jest.fn().mockReturnValue(createInternalSetupContractMock()),
-    start: jest.fn().mockReturnValue(createInternalStartContractMock()),
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
+    start: jest.fn().mockReturnValue(createStartContractMock()),
     stop: jest.fn(),
   };
   return mocked;
@@ -77,7 +87,7 @@ const createMock = () => {
 
 export const metricsServiceMock = {
   create: createMock,
-  createSetupContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
   createStartContract: createStartContractMock,
   createInternalSetupContract: createInternalSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,

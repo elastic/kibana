@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DeleteButton } from './delete_button';
-export { DeleteButtonModal } from './delete_button_modal';
 export { useDeleteAction } from './use_delete_action';
+export { DeleteActionModal } from './delete_action_modal';
+export { isDeleteActionDisabled, DeleteActionName } from './delete_action_name';

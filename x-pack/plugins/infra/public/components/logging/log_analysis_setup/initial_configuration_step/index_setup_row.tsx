@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCheckbox, EuiCode, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiCheckbox, EuiCode, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback } from 'react';
-import { DatasetFilter } from '../../../../../common/log_analysis';
+import React, { useCallback, useMemo } from 'react';
+import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
 import { IndexSetupDatasetFilter } from './index_setup_dataset_filter';
 import { AvailableIndex, ValidationUIError } from './validation';
 
@@ -16,7 +16,14 @@ export const IndexSetupRow: React.FC<{
   isDisabled: boolean;
   onChangeDatasetFilter: (indexName: string, datasetFilter: DatasetFilter) => void;
   onChangeIsSelected: (indexName: string, isSelected: boolean) => void;
-}> = ({ index, isDisabled, onChangeDatasetFilter, onChangeIsSelected }) => {
+  previousQualityWarnings: QualityWarning[];
+}> = ({
+  index,
+  isDisabled,
+  onChangeDatasetFilter,
+  onChangeIsSelected,
+  previousQualityWarnings,
+}) => {
   const changeIsSelected = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChangeIsSelected(index.name, event.currentTarget.checked);
@@ -29,6 +36,29 @@ export const IndexSetupRow: React.FC<{
     [index.name, onChangeDatasetFilter]
   );
 
+  const datasets = useMemo(
+    () =>
+      index.validity === 'valid'
+        ? index.availableDatasets.map((availableDataset) => ({
+            dataset: availableDataset,
+            warnings: previousQualityWarnings.filter(({ dataset }) => dataset === availableDataset),
+          }))
+        : [],
+    [index, previousQualityWarnings]
+  );
+
+  const datasetIndependentQualityWarnings = useMemo(
+    () => previousQualityWarnings.filter(({ dataset }) => dataset === ''),
+    [previousQualityWarnings]
+  );
+
+  const hasWarnings = useMemo(
+    () =>
+      datasetIndependentQualityWarnings.length > 0 ||
+      datasets.some(({ warnings }) => warnings.length > 0),
+    [datasetIndependentQualityWarnings, datasets]
+  );
+
   const isSelected = index.validity === 'valid' && index.isSelected;
 
   return (
@@ -37,7 +67,23 @@ export const IndexSetupRow: React.FC<{
         <EuiCheckbox
           key={index.name}
           id={index.name}
-          label={<EuiCode>{index.name}</EuiCode>}
+          label={
+            <>
+              <EuiCode>{index.name}</EuiCode>{' '}
+              {index.validity === 'valid' && hasWarnings ? (
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.infra.logs.analsysisSetup.indexQualityWarningTooltipMessage"
+                      defaultMessage="While analyzing the log messages from these indices we've detected some problems which might indicate a reduced quality of the results. Consider excluding these indices or problematic datasets from the analysis."
+                    />
+                  }
+                  type="alert"
+                  color="warning"
+                />
+              ) : null}
+            </>
+          }
           onChange={changeIsSelected}
           checked={isSelected}
           disabled={isDisabled || index.validity === 'invalid'}
@@ -45,12 +91,10 @@ export const IndexSetupRow: React.FC<{
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {index.validity === 'invalid' ? (
-          <EuiToolTip content={formatValidationError(index.errors)}>
-            <EuiIcon type="alert" color="danger" />
-          </EuiToolTip>
+          <EuiIconTip content={formatValidationError(index.errors)} type="alert" color="danger" />
         ) : index.validity === 'valid' ? (
           <IndexSetupDatasetFilter
-            availableDatasets={index.availableDatasets}
+            availableDatasets={datasets}
             datasetFilter={index.datasetFilter}
             isDisabled={!isSelected || isDisabled}
             onChangeDatasetFilter={changeDatasetFilter}

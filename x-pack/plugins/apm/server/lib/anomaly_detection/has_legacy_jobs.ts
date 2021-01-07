@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import Boom from '@hapi/boom';
+import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { Setup } from '../helpers/setup_request';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
@@ -12,10 +15,15 @@ export async function hasLegacyJobs(setup: Setup) {
   const { ml } = setup;
 
   if (!ml) {
-    return false;
+    throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
-  const response = await getMlJobsWithAPMGroup(ml);
+  const mlCapabilities = await ml.mlSystem.mlCapabilities();
+  if (!mlCapabilities.mlFeatureEnabledInSpace) {
+    throw Boom.forbidden(ML_ERRORS.ML_NOT_AVAILABLE_IN_SPACE);
+  }
+
+  const response = await getMlJobsWithAPMGroup(ml.anomalyDetectors);
   return response.jobs.some(
     (job) =>
       job.job_id.endsWith('high_mean_response_time') &&

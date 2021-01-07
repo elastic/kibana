@@ -6,8 +6,10 @@
   "false_positives": [
     "Security tools and device drivers may run these programs in order to enumerate kernel modules. Use of these programs by ordinary users is uncommon. These can be exempted by process name or username."
   ],
+  "from": "now-9m",
   "index": [
-    "auditbeat-*"
+    "auditbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -18,7 +20,10 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Discovery"
   ],
   "threat": [
     {
@@ -38,5 +43,5 @@
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 4
 }

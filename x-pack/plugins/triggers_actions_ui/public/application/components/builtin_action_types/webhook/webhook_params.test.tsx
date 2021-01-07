@@ -4,22 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import WebhookParamsFields from './webhook_params';
-import { DocLinksStart } from 'kibana/public';
 
 describe('WebhookParamsFields renders', () => {
   test('all params fields is rendered', () => {
     const actionParams = {
       body: 'test message',
     };
+
     const wrapper = mountWithIntl(
       <WebhookParamsFields
         actionParams={actionParams}
         errors={{ body: [] }}
         editAction={() => {}}
         index={0}
-        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
       />
     );
     expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();

@@ -3,24 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { fetchHasData } from '../../data_handler';
-import { useFetcher } from '../../hooks/use_fetcher';
+import { useHasData } from '../../hooks/use_has_data';
+import { LoadingObservability } from '../overview/loading_observability';
 
 export function HomePage() {
   const history = useHistory();
-  const { data = {} } = useFetcher(() => fetchHasData(), []);
+  const { hasAnyData, isAllRequestsComplete } = useHasData();
 
-  const values = Object.values(data);
-  const hasSomeData = values.length ? values.some((hasData) => hasData) : null;
+  useEffect(() => {
+    if (hasAnyData === true) {
+      history.push({ pathname: '/overview' });
+    } else if (hasAnyData === false && isAllRequestsComplete === true) {
+      history.push({ pathname: '/landing' });
+    }
+  }, [hasAnyData, isAllRequestsComplete, history]);
 
-  if (hasSomeData === true) {
-    history.push({ pathname: '/overview' });
-  }
-  if (hasSomeData === false) {
-    history.push({ pathname: '/landing' });
-  }
-
-  return <></>;
+  return <LoadingObservability />;
 }

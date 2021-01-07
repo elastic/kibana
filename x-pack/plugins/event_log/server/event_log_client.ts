@@ -6,12 +6,13 @@
 
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { LegacyClusterClient, SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
-import { SpacesServiceSetup } from '../../spaces/server';
+import { LegacyClusterClient, KibanaRequest } from 'src/core/server';
+import { SpacesServiceStart } from '../../spaces/server';
 
 import { EsContext } from './es';
 import { IEventLogClient } from './types';
 import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+import { SavedObjectGetter } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 
@@ -58,26 +59,21 @@ export type FindOptionsType = Pick<
 
 interface EventLogServiceCtorParams {
   esContext: EsContext;
-  savedObjectsClient: SavedObjectsClientContract;
-  spacesService?: SpacesServiceSetup;
+  savedObjectGetter: SavedObjectGetter;
+  spacesService?: SpacesServiceStart;
   request: KibanaRequest;
 }
 
 // note that clusterClient may be null, indicating we can't write to ES
 export class EventLogClient implements IEventLogClient {
   private esContext: EsContext;
-  private savedObjectsClient: SavedObjectsClientContract;
-  private spacesService?: SpacesServiceSetup;
+  private savedObjectGetter: SavedObjectGetter;
+  private spacesService?: SpacesServiceStart;
   private request: KibanaRequest;
 
-  constructor({
-    esContext,
-    savedObjectsClient,
-    spacesService,
-    request,
-  }: EventLogServiceCtorParams) {
+  constructor({ esContext, savedObjectGetter, spacesService, request }: EventLogServiceCtorParams) {
     this.esContext = esContext;
-    this.savedObjectsClient = savedObjectsClient;
+    this.savedObjectGetter = savedObjectGetter;
     this.spacesService = spacesService;
     this.request = request;
   }
@@ -93,10 +89,10 @@ export class EventLogClient implements IEventLogClient {
     const namespace = space && this.spacesService?.spaceIdToNamespace(space.id);
 
     // verify the user has the required permissions to view this saved object
-    await this.savedObjectsClient.get(type, id);
+    await this.savedObjectGetter(type, id);
 
     return await this.esContext.esAdapter.queryEventsBySavedObject(
-      this.esContext.esNames.alias,
+      this.esContext.esNames.indexPattern,
       namespace,
       type,
       id,

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { SavedObjectsErrorHelpers } from './errors';
 
@@ -269,6 +269,53 @@ describe('savedObjectsClient/errorTypes', () => {
           const error = Boom.notFound();
           SavedObjectsErrorHelpers.decorateConflictError(error);
           expect(error.output).toHaveProperty('statusCode', 404);
+        });
+      });
+    });
+  });
+
+  describe('TooManyRequests error', () => {
+    describe('decorateTooManyRequestsError', () => {
+      it('returns original object', () => {
+        const error = new Error();
+        expect(SavedObjectsErrorHelpers.decorateTooManyRequestsError(error)).toBe(error);
+      });
+
+      it('makes the error identifiable as a TooManyRequests error', () => {
+        const error = new Error();
+        expect(SavedObjectsErrorHelpers.isTooManyRequestsError(error)).toBe(false);
+        SavedObjectsErrorHelpers.decorateTooManyRequestsError(error);
+        expect(SavedObjectsErrorHelpers.isTooManyRequestsError(error)).toBe(true);
+      });
+
+      it('adds boom properties', () => {
+        const error = SavedObjectsErrorHelpers.decorateTooManyRequestsError(new Error());
+        expect(error).toHaveProperty('isBoom', true);
+      });
+
+      describe('error.output', () => {
+        it('defaults to message of error', () => {
+          const error = SavedObjectsErrorHelpers.decorateTooManyRequestsError(new Error('foobar'));
+          expect(error.output.payload).toHaveProperty('message', 'foobar');
+        });
+
+        it('prefixes message with passed reason', () => {
+          const error = SavedObjectsErrorHelpers.decorateTooManyRequestsError(
+            new Error('foobar'),
+            'biz'
+          );
+          expect(error.output.payload).toHaveProperty('message', 'biz: foobar');
+        });
+
+        it('sets statusCode to 429', () => {
+          const error = SavedObjectsErrorHelpers.decorateTooManyRequestsError(new Error('foo'));
+          expect(error.output).toHaveProperty('statusCode', 429);
+        });
+
+        it('preserves boom properties of input', () => {
+          const error = Boom.tooManyRequests();
+          SavedObjectsErrorHelpers.decorateTooManyRequestsError(error);
+          expect(error.output).toHaveProperty('statusCode', 429);
         });
       });
     });

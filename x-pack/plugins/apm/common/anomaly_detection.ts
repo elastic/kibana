@@ -5,27 +5,45 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ANOMALY_SEVERITY } from '../../ml/common';
+import {
+  getSeverityType,
+  getSeverityColor as mlGetSeverityColor,
+} from '../../ml/common';
+import { ServiceHealthStatus } from './service_health_status';
 
 export interface ServiceAnomalyStats {
   transactionType?: string;
   anomalyScore?: number;
   actualValue?: number;
   jobId?: string;
+  healthStatus: ServiceHealthStatus;
 }
 
-export const MLErrorMessages: Record<ErrorCode, string> = {
-  INSUFFICIENT_LICENSE: i18n.translate(
-    'xpack.apm.anomaly_detection.error.insufficient_license',
+export function getSeverity(score: number | undefined) {
+  if (score === undefined) {
+    return ANOMALY_SEVERITY.UNKNOWN;
+  }
+
+  return getSeverityType(score);
+}
+
+export function getSeverityColor(score: number) {
+  return mlGetSeverityColor(score);
+}
+
+export const ML_ERRORS = {
+  INVALID_LICENSE: i18n.translate(
+    'xpack.apm.anomaly_detection.error.invalid_license',
     {
-      defaultMessage:
-        'You must have a platinum license to use Anomaly Detection',
+      defaultMessage: `To use anomaly detection, you must be subscribed to an Elastic Platinum license. With it, you'll be able to monitor your services with the aid of machine learning.`,
     }
   ),
   MISSING_READ_PRIVILEGES: i18n.translate(
     'xpack.apm.anomaly_detection.error.missing_read_privileges',
     {
       defaultMessage:
-        'You must have "read" privileges to Machine Learning in order to view Anomaly Detection jobs',
+        'You must have "read" privileges to Machine Learning and APM in order to view Anomaly Detection jobs',
     }
   ),
   MISSING_WRITE_PRIVILEGES: i18n.translate(
@@ -47,16 +65,4 @@ export const MLErrorMessages: Record<ErrorCode, string> = {
       defaultMessage: 'Machine learning is not available in the selected space',
     }
   ),
-  UNEXPECTED: i18n.translate('xpack.apm.anomaly_detection.error.unexpected', {
-    defaultMessage: 'An unexpected error occurred',
-  }),
 };
-
-export enum ErrorCode {
-  INSUFFICIENT_LICENSE = 'INSUFFICIENT_LICENSE',
-  MISSING_READ_PRIVILEGES = 'MISSING_READ_PRIVILEGES',
-  MISSING_WRITE_PRIVILEGES = 'MISSING_WRITE_PRIVILEGES',
-  ML_NOT_AVAILABLE = 'ML_NOT_AVAILABLE',
-  ML_NOT_AVAILABLE_IN_SPACE = 'ML_NOT_AVAILABLE_IN_SPACE',
-  UNEXPECTED = 'UNEXPECTED',
-}

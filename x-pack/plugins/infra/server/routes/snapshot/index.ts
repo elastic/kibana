@@ -3,17 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
-import { parseFilterQuery } from '../../utils/serialized_query';
 import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_api/snapshot_api';
 import { throwErrors } from '../../../common/runtime_types';
 import { createSearchClient } from '../../lib/create_search_client';
+import { getNodes } from './lib/get_nodes';
 
 const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
@@ -30,43 +30,22 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       try {
-        const {
-          filterQuery,
-          nodeType,
-          groupBy,
-          sourceId,
-          metrics,
-          timerange,
-          accountId,
-          region,
-          includeTimeseries,
-          overrideCompositeSize,
-        } = pipe(
+        const snapshotRequest = pipe(
           SnapshotRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
+
         const source = await libs.sources.getSourceConfiguration(
           requestContext.core.savedObjects.client,
-          sourceId
+          snapshotRequest.sourceId
         );
-        UsageCollector.countNode(nodeType);
-        const options = {
-          filterQuery: parseFilterQuery(filterQuery),
-          accountId,
-          region,
-          nodeType,
-          groupBy,
-          sourceConfiguration: source.configuration,
-          metrics,
-          timerange,
-          includeTimeseries,
-          overrideCompositeSize,
-        };
 
+        UsageCollector.countNode(snapshotRequest.nodeType);
         const client = createSearchClient(requestContext, framework);
-        const nodesWithInterval = await libs.snapshot.getNodes(client, options);
+        const snapshotResponse = await getNodes(client, snapshotRequest, source);
+
         return response.ok({
-          body: SnapshotNodeResponseRT.encode(nodesWithInterval),
+          body: SnapshotNodeResponseRT.encode(snapshotResponse),
         });
       } catch (error) {
         return response.internalError({

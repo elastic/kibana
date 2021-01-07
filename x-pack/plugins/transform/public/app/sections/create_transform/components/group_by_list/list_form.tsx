@@ -8,8 +8,9 @@ import React, { Fragment } from 'react';
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
+import { AggName } from '../../../../../../common/types/aggregations';
+
 import {
-  AggName,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
   PivotGroupByConfigWithUiSupportDict,

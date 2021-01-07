@@ -105,18 +105,27 @@ export class ApiService {
     return result;
   }
 
-  public async simulatePipeline(testConfig: {
+  public async simulatePipeline(reqBody: {
     documents: object[];
     verbose?: boolean;
-    pipeline: Omit<Pipeline, 'name'>;
+    pipeline: Pick<Pipeline, 'processors' | 'on_failure'>;
   }) {
     const result = await this.sendRequest({
       path: `${API_BASE_PATH}/simulate`,
       method: 'post',
-      body: JSON.stringify(testConfig),
+      body: JSON.stringify(reqBody),
     });
 
     this.trackUiMetric(UIM_PIPELINE_SIMULATE);
+
+    return result;
+  }
+
+  public async loadDocument(index: string, id: string) {
+    const result = await this.sendRequest({
+      path: `${API_BASE_PATH}/documents/${encodeURIComponent(index)}/${encodeURIComponent(id)}`,
+      method: 'get',
+    });
 
     return result;
   }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RuleType } from '../detection_engine/types';
+import { Type } from '../detection_engine/schemas/common/schemas';
 
 // Based on ML Job/Datafeed States from x-pack/legacy/plugins/ml/common/constants/states.js
 const enabledStates = ['started', 'opened'];
@@ -23,4 +23,4 @@ export const isJobFailed = (jobState: string, datafeedState: string): boolean =>
   return failureStates.includes(jobState) || failureStates.includes(datafeedState);
 };
 
-export const isMlRule = (ruleType: RuleType) => ruleType === 'machine_learning';
+export const isMlRule = (ruleType: Type | undefined) => ruleType === 'machine_learning';

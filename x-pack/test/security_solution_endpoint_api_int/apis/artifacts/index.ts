@@ -9,7 +9,7 @@ import { createHash } from 'crypto';
 import { inflateSync } from 'zlib';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { getSupertestWithoutAuth } from '../../../ingest_manager_api_integration/apis/fleet/agents/services';
+import { getSupertestWithoutAuth } from '../../../fleet_api_integration/apis/agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -23,21 +23,19 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('endpoint/artifacts/api_feature', { useCreate: true });
 
       const { body: enrollmentApiKeysResponse } = await supertest
-        .get(`/api/ingest_manager/fleet/enrollment-api-keys`)
+        .get(`/api/fleet/enrollment-api-keys`)
         .expect(200);
       expect(enrollmentApiKeysResponse.list).length(2);
 
       const { body: enrollmentApiKeyResponse } = await supertest
-        .get(
-          `/api/ingest_manager/fleet/enrollment-api-keys/${enrollmentApiKeysResponse.list[0].id}`
-        )
+        .get(`/api/fleet/enrollment-api-keys/${enrollmentApiKeysResponse.list[0].id}`)
         .expect(200);
       expect(enrollmentApiKeyResponse.item).to.have.key('api_key');
       const enrollmentAPIToken = enrollmentApiKeyResponse.item.api_key;
 
       // 2. Enroll agent
       const { body: enrollmentResponse } = await supertestWithoutAuth
-        .post(`/api/ingest_manager/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', `ApiKey ${enrollmentAPIToken}`)
         .send({
@@ -54,7 +52,6 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-      expect(enrollmentResponse.success).to.eql(true);
 
       agentAccessAPIKey = enrollmentResponse.item.access_api_key;
     });

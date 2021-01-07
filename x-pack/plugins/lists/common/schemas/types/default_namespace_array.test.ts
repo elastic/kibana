@@ -7,7 +7,7 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 
-import { foldLeftRight, getPaths } from '../../siem_common_deps';
+import { foldLeftRight, getPaths } from '../../shared_imports';
 
 import { DefaultNamespaceArray, DefaultNamespaceArrayType } from './default_namespace_array';
 
@@ -21,7 +21,7 @@ describe('default_namespace_array', () => {
     expect(message.schema).toEqual(['single']);
   });
 
-  test('it should NOT validate a numeric value', () => {
+  test('it should FAIL validation of numeric value', () => {
     const payload = 5;
     const decoded = DefaultNamespaceArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);
@@ -86,7 +86,7 @@ describe('default_namespace_array', () => {
     expect(message.schema).toEqual(['single', 'agnostic', 'single']);
   });
 
-  test('it should not validate 3 elements of "single,agnostic,junk" since the 3rd value is junk', () => {
+  test('it should FAIL validation when given 3 elements of "single,agnostic,junk" since the 3rd value is junk', () => {
     const payload: DefaultNamespaceArrayType = 'single,agnostic,junk';
     const decoded = DefaultNamespaceArray.decode(payload);
     const message = pipe(decoded, foldLeftRight);

@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import _ from 'lodash';
 import uuid from 'uuid/v4';
 
 import {
@@ -66,6 +67,7 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
         right: {
           id: uuid(),
           applyGlobalQuery: true,
+          applyGlobalTime: true,
         },
       } as JoinDescriptor,
     ]);

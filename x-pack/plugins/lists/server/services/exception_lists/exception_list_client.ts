@@ -27,6 +27,7 @@ import {
   FindExceptionListItemOptions,
   FindExceptionListOptions,
   FindExceptionListsItemOptions,
+  FindValueListExceptionListsItems,
   GetEndpointListItemOptions,
   GetExceptionListItemOptions,
   GetExceptionListOptions,
@@ -44,8 +45,12 @@ import { deleteExceptionList } from './delete_exception_list';
 import { deleteExceptionListItem, deleteExceptionListItemById } from './delete_exception_list_item';
 import { findExceptionListItem } from './find_exception_list_item';
 import { findExceptionList } from './find_exception_list';
-import { findExceptionListsItem } from './find_exception_list_items';
+import {
+  findExceptionListsItem,
+  findValueListExceptionListItems,
+} from './find_exception_list_items';
 import { createEndpointList } from './create_endpoint_list';
+import { createEndpointTrustedAppsList } from './create_endpoint_trusted_apps_list';
 
 export class ExceptionListClient {
   private readonly user: string;
@@ -91,25 +96,36 @@ export class ExceptionListClient {
   };
 
   /**
+   * Create the Trusted Apps Agnostic list if it does not yet exist (`null` is returned if it does exist)
+   */
+  public createTrustedAppsList = async (): Promise<ExceptionListSchema | null> => {
+    const { savedObjectsClient, user } = this;
+    return createEndpointTrustedAppsList({
+      savedObjectsClient,
+      user,
+      version: 1,
+    });
+  };
+
+  /**
    * This is the same as "createListItem" except it applies specifically to the agnostic endpoint list and will
    * auto-call the "createEndpointList" for you so that you have the best chance of the agnostic endpoint
    * being there and existing before the item is inserted into the agnostic endpoint list.
    */
   public createEndpointListItem = async ({
-    _tags,
     comments,
     description,
     entries,
     itemId,
     meta,
     name,
+    osTypes,
     tags,
     type,
   }: CreateEndpointListItemOptions): Promise<ExceptionListItemSchema> => {
     const { savedObjectsClient, user } = this;
     await this.createEndpointList();
     return createExceptionListItem({
-      _tags,
       comments,
       description,
       entries,
@@ -118,6 +134,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType: 'agnostic',
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -126,13 +143,12 @@ export class ExceptionListClient {
   };
 
   /**
-   * This is the same as "updateListItem" except it applies specifically to the endpoint list and will
+   * This is the same as "updateExceptionListItem" except it applies specifically to the endpoint list and will
    * auto-call the "createEndpointList" for you so that you have the best chance of the endpoint
    * being there if it did not exist before. If the list did not exist before, then creating it here will still cause a
    * return of null but at least the list exists again.
    */
   public updateEndpointListItem = async ({
-    _tags,
     _version,
     comments,
     description,
@@ -141,13 +157,13 @@ export class ExceptionListClient {
     itemId,
     meta,
     name,
+    osTypes,
     tags,
     type,
   }: UpdateEndpointListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
     await this.createEndpointList();
     return updateExceptionListItem({
-      _tags,
       _version,
       comments,
       description,
@@ -157,6 +173,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType: 'agnostic',
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -176,7 +193,6 @@ export class ExceptionListClient {
   };
 
   public createExceptionList = async ({
-    _tags,
     description,
     immutable,
     listId,
@@ -189,7 +205,6 @@ export class ExceptionListClient {
   }: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
     const { savedObjectsClient, user } = this;
     return createExceptionList({
-      _tags,
       description,
       immutable,
       listId,
@@ -205,7 +220,6 @@ export class ExceptionListClient {
   };
 
   public updateExceptionList = async ({
-    _tags,
     _version,
     id,
     description,
@@ -213,13 +227,13 @@ export class ExceptionListClient {
     meta,
     name,
     namespaceType,
+    osTypes,
     tags,
     type,
     version,
   }: UpdateExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return updateExceptionList({
-      _tags,
       _version,
       description,
       id,
@@ -227,6 +241,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -250,7 +265,6 @@ export class ExceptionListClient {
   };
 
   public createExceptionListItem = async ({
-    _tags,
     comments,
     description,
     entries,
@@ -259,12 +273,12 @@ export class ExceptionListClient {
     meta,
     name,
     namespaceType,
+    osTypes,
     tags,
     type,
   }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
     const { savedObjectsClient, user } = this;
     return createExceptionListItem({
-      _tags,
       comments,
       description,
       entries,
@@ -273,6 +287,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -281,7 +296,6 @@ export class ExceptionListClient {
   };
 
   public updateExceptionListItem = async ({
-    _tags,
     _version,
     comments,
     description,
@@ -291,12 +305,12 @@ export class ExceptionListClient {
     meta,
     name,
     namespaceType,
+    osTypes,
     tags,
     type,
   }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
     return updateExceptionListItem({
-      _tags,
       _version,
       comments,
       description,
@@ -306,6 +320,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -396,6 +411,24 @@ export class ExceptionListClient {
       savedObjectsClient,
       sortField,
       sortOrder,
+    });
+  };
+
+  public findValueListExceptionListItems = async ({
+    perPage,
+    page,
+    sortField,
+    sortOrder,
+    valueListId,
+  }: FindValueListExceptionListsItems): Promise<FoundExceptionListItemSchema | null> => {
+    const { savedObjectsClient } = this;
+    return findValueListExceptionListItems({
+      page,
+      perPage,
+      savedObjectsClient,
+      sortField,
+      sortOrder,
+      valueListId,
     });
   };
 

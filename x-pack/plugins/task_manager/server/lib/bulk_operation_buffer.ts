@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { keyBy, map } from 'lodash';
+import { Logger } from 'src/core/server';
+import { map } from 'lodash';
 import { Subject, race, from } from 'rxjs';
 import { bufferWhen, filter, bufferCount, flatMap, mapTo, first } from 'rxjs/operators';
 import { either, Result, asOk, asErr, Ok, Err } from './result_type';
@@ -12,6 +13,7 @@ import { either, Result, asOk, asErr, Ok, Err } from './result_type';
 export interface BufferOptions {
   bufferMaxDuration?: number;
   bufferMaxOperations?: number;
+  logger?: Logger;
 }
 
 export interface Entity {
@@ -41,14 +43,14 @@ const FLUSH = true;
 
 export function createBuffer<Input extends Entity, ErrorOutput, Output extends Entity = Input>(
   bulkOperation: BulkOperation<Input, ErrorOutput, Output>,
-  { bufferMaxDuration = 0, bufferMaxOperations = Number.MAX_VALUE }: BufferOptions = {}
+  { bufferMaxDuration = 0, bufferMaxOperations = Number.MAX_VALUE, logger }: BufferOptions = {}
 ): Operation<Input, ErrorOutput, Output> {
   const flushBuffer = new Subject<void>();
 
   const storeUpdateBuffer = new Subject<{
     entity: Input;
     onSuccess: (entity: Ok<Output>) => void;
-    onFailure: (error: Err<ErrorOutput>) => void;
+    onFailure: (error: Err<ErrorOutput | Error>) => void;
   }>();
 
   storeUpdateBuffer
@@ -56,24 +58,61 @@ export function createBuffer<Input extends Entity, ErrorOutput, Output extends E
       bufferWhen(() => flushBuffer),
       filter((tasks) => tasks.length > 0)
     )
-    .subscribe((entities) => {
-      const entityById = keyBy(entities, ({ entity: { id } }) => id);
-      bulkOperation(map(entities, 'entity'))
+    .subscribe((bufferedEntities) => {
+      bulkOperation(map(bufferedEntities, 'entity'))
         .then((results) => {
           results.forEach((result) =>
             either(
               result,
               (entity) => {
-                entityById[entity.id].onSuccess(asOk(entity));
+                either(
+                  pullFirstWhere(bufferedEntities, ({ entity: { id } }) => id === entity.id),
+                  ({ onSuccess }) => {
+                    onSuccess(asOk(entity));
+                  },
+                  () => {
+                    if (logger) {
+                      logger.warn(
+                        `Unhandled successful Bulk Operation result: ${
+                          entity?.id ? entity.id : entity
+                        }`
+                      );
+                    }
+                  }
+                );
               },
               ({ entity, error }: OperationError<Input, ErrorOutput>) => {
-                entityById[entity.id].onFailure(asErr(error));
+                either(
+                  pullFirstWhere(bufferedEntities, ({ entity: { id } }) => id === entity.id),
+                  ({ onFailure }) => {
+                    onFailure(asErr(error));
+                  },
+                  () => {
+                    if (logger) {
+                      logger.warn(
+                        `Unhandled failed Bulk Operation result: ${entity?.id ? entity.id : entity}`
+                      );
+                    }
+                  }
+                );
               }
             )
           );
+
+          // if any `bufferedEntities` remain in the array then there was no result we could map to them in the bulkOperation
+          // call their failure handler to avoid hanging the promise returned to the call site
+          bufferedEntities.forEach((unhandledBufferedEntity) => {
+            unhandledBufferedEntity.onFailure(
+              asErr(
+                new Error(
+                  `Unhandled buffered operation for entity: ${unhandledBufferedEntity.entity.id}`
+                )
+              )
+            );
+          });
         })
         .catch((ex) => {
-          entities.forEach(({ onFailure }) => onFailure(asErr(ex)));
+          bufferedEntities.forEach(({ onFailure }) => onFailure(asErr(ex)));
         });
     });
 
@@ -119,4 +158,11 @@ function resolveIn(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+function pullFirstWhere<T>(collection: T[], predicate: (entity: T) => boolean): Result<T, void> {
+  const indexOfFirstEntity = collection.findIndex(predicate);
+  return indexOfFirstEntity >= 0
+    ? asOk(collection.splice(indexOfFirstEntity, 1)[0])
+    : asErr(undefined);
 }

@@ -17,6 +17,7 @@ declare global {
   namespace jest {
     interface Matchers<R, T> {
       toYieldEqualTo(expectedYield: T extends AsyncIterable<infer E> ? E : never): Promise<R>;
+      toYieldObjectEqualTo(expectedYield: unknown): Promise<R>;
     }
   }
 }
@@ -33,9 +34,75 @@ expect.extend({
     expected: T
   ): Promise<{ pass: boolean; message: () => string }> {
     // Used in printing out the pass or fail message
-    const matcherName = 'toSometimesYieldEqualTo';
+    const matcherName = 'toYieldEqualTo';
     const options: jest.MatcherHintOptions = {
       comment: 'deep equality with any yielded value',
+      isNot: this.isNot,
+      promise: this.promise,
+    };
+    // The last value received: Used in printing the message
+    const received: T[] = [];
+
+    // Set to true if the test passes.
+    let lastCheckPassed: boolean = false;
+
+    // Async iterate over the iterable
+    for await (const next of receivedIterable) {
+      // keep track of all received values. Used in pass and fail messages
+      received.push(next);
+      // Use deep equals to compare the value to the expected value
+      if (this.equals(next, expected)) {
+        lastCheckPassed = true;
+      } else if (lastCheckPassed) {
+        // the previous check passed but this one didn't
+        lastCheckPassed = false;
+        break;
+      }
+    }
+
+    // Use `pass` as set in the above loop (or initialized to `false`)
+    // See https://jestjs.io/docs/en/expect#custom-matchers-api and https://jestjs.io/docs/en/expect#thisutils
+    const message = lastCheckPassed
+      ? () =>
+          `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\n` +
+          `Expected: not ${this.utils.printExpected(expected)}\n${
+            this.utils.stringify(expected) !== this.utils.stringify(received[received.length - 1]!)
+              ? `Received:     ${this.utils.printReceived(received[received.length - 1])}`
+              : ''
+          }`
+      : () =>
+          `${this.utils.matcherHint(matcherName, undefined, undefined, options)}\n\nCompared ${
+            received.length
+          } yields.\n\n${received
+            .map(
+              (next, index) =>
+                `yield ${index + 1}:\n\n${this.utils.printDiffOrStringify(
+                  expected,
+                  next,
+                  'Expected',
+                  'Received',
+                  this.expand
+                )}`
+            )
+            .join(`\n\n`)}`;
+
+    return { message, pass: lastCheckPassed };
+  },
+  /**
+   * A custom matcher that takes an async generator and compares each value it yields to an expected value.
+   * This uses the same equality logic as `toMatchObject`.
+   * If any yielded value equals the expected value, the matcher will pass.
+   * If the generator ends with none of the yielded values matching, it will fail.
+   */
+  async toYieldObjectEqualTo<T>(
+    this: jest.MatcherContext,
+    receivedIterable: AsyncIterable<T>,
+    expected: T
+  ): Promise<{ pass: boolean; message: () => string }> {
+    // Used in printing out the pass or fail message
+    const matcherName = 'toYieldObjectEqualTo';
+    const options: jest.MatcherHintOptions = {
+      comment: 'subset equality with any yielded value',
       isNot: this.isNot,
       promise: this.promise,
     };
@@ -50,7 +117,7 @@ expect.extend({
       // keep track of all received values. Used in pass and fail messages
       received.push(next);
       // Use deep equals to compare the value to the expected value
-      if (this.equals(next, expected)) {
+      if ((this.equals(next, expected), [this.utils.iterableEquality, this.utils.subsetEquality])) {
         // If the value is equal, break
         pass = true;
         break;

@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiIconTip,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IndexPatternField } from './types';
 import { FieldItem } from './field_item';
@@ -39,14 +40,16 @@ export interface FieldsAccordionProps {
   onToggle: (open: boolean) => void;
   id: string;
   label: string;
+  helpTooltip?: string;
   hasLoaded: boolean;
   fieldsCount: number;
   isFiltered: boolean;
   paginatedFields: IndexPatternField[];
   fieldProps: FieldItemSharedProps;
   renderCallout: JSX.Element;
-  exists: boolean;
+  exists: (field: IndexPatternField) => boolean;
   showExistenceFetchError?: boolean;
+  hideDetails?: boolean;
 }
 
 export const InnerFieldsAccordion = function InnerFieldsAccordion({
@@ -54,6 +57,7 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   onToggle,
   id,
   label,
+  helpTooltip,
   hasLoaded,
   fieldsCount,
   isFiltered,
@@ -61,14 +65,26 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   fieldProps,
   renderCallout,
   exists,
+  hideDetails,
   showExistenceFetchError,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
-    (field: IndexPatternField) => {
-      return <FieldItem {...fieldProps} key={field.name} field={field} exists={!!exists} />;
-    },
-    [fieldProps, exists]
+    (field: IndexPatternField) => (
+      <FieldItem
+        {...fieldProps}
+        key={field.name}
+        field={field}
+        exists={exists(field)}
+        hideDetails={hideDetails}
+      />
+    ),
+    [fieldProps, exists, hideDetails]
   );
+
+  const titleClassname = classNames({
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    lnsInnerIndexPatternDataPanel__titleTooltip: !!helpTooltip,
+  });
 
   return (
     <EuiAccordion
@@ -78,7 +94,20 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
       id={id}
       buttonContent={
         <EuiText size="xs">
-          <strong>{label}</strong>
+          <strong className={titleClassname}>{label}</strong>
+          {!!helpTooltip && (
+            <EuiIconTip
+              aria-label={helpTooltip}
+              type="questionInCircle"
+              color="subdued"
+              size="s"
+              position="right"
+              content={helpTooltip}
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
+            />
+          )}
         </EuiText>
       }
       extraAction={
@@ -105,9 +134,9 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
       <EuiSpacer size="s" />
       {hasLoaded &&
         (!!fieldsCount ? (
-          <div className="lnsInnerIndexPatternDataPanel__fieldItems">
+          <ul className="lnsInnerIndexPatternDataPanel__fieldItems">
             {paginatedFields && paginatedFields.map(renderField)}
-          </div>
+          </ul>
         ) : (
           renderCallout
         ))}

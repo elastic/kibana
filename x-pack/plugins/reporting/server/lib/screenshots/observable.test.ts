@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../browsers/chromium/puppeteer', () => ({
-  puppeteerLaunch: () => ({
+jest.mock('puppeteer', () => ({
+  launch: () => ({
     // Fixme needs event emitters
     newPage: () => ({
       setDefaultTimeout: jest.fn(),
@@ -15,24 +15,40 @@ jest.mock('../../browsers/chromium/puppeteer', () => ({
   }),
 }));
 
+import moment from 'moment';
 import * as Rx from 'rxjs';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { HeadlessChromiumDriver } from '../../browsers';
-import { LevelLogger } from '../';
-import { createMockBrowserDriverFactory, createMockLayoutInstance } from '../../test_helpers';
-import { CaptureConfig, ConditionalHeaders, ElementsPositionAndAttribute } from '../../types';
+import { ConditionalHeaders } from '../../export_types/common';
+import {
+  createMockBrowserDriverFactory,
+  createMockConfig,
+  createMockConfigSchema,
+  createMockLayoutInstance,
+  createMockLevelLogger,
+} from '../../test_helpers';
+import { ElementsPositionAndAttribute } from './';
 import * as contexts from './constants';
 import { screenshotsObservableFactory } from './observable';
 
 /*
  * Mocks
  */
-const mockLogger = jest.fn(loggingSystemMock.create);
-const logger = new LevelLogger(mockLogger());
+const logger = createMockLevelLogger();
 
-const mockConfig = { timeouts: { openUrl: 13 } } as CaptureConfig;
-const mockLayout = createMockLayoutInstance(mockConfig);
+const reportingConfig = {
+  capture: {
+    loadDelay: moment.duration(2, 's'),
+    timeouts: {
+      openUrl: moment.duration(2, 'm'),
+      waitForElements: moment.duration(20, 's'),
+      renderComplete: moment.duration(10, 's'),
+    },
+  },
+};
+const mockSchema = createMockConfigSchema(reportingConfig);
+const mockConfig = createMockConfig(mockSchema);
+const captureConfig = mockConfig.get('capture');
+const mockLayout = createMockLayoutInstance(captureConfig);
 
 /*
  * Tests
@@ -45,7 +61,7 @@ describe('Screenshot Observable Pipeline', () => {
   });
 
   it('pipelines a single url into screenshot and timeRange', async () => {
-    const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+    const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
     const result = await getScreenshots$({
       logger,
       urls: ['/welcome/home/start/index.htm'],
@@ -106,7 +122,7 @@ describe('Screenshot Observable Pipeline', () => {
     });
 
     // test
-    const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+    const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
     const result = await getScreenshots$({
       logger,
       urls: ['/welcome/home/start/index2.htm', '/welcome/home/start/index.php3?page=./home.php'],
@@ -205,7 +221,7 @@ describe('Screenshot Observable Pipeline', () => {
       });
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
       const getScreenshot = async () => {
         return await getScreenshots$({
           logger,
@@ -227,10 +243,10 @@ describe('Screenshot Observable Pipeline', () => {
                       "attributes": Object {},
                       "position": Object {
                         "boundingClientRect": Object {
-                          "height": 200,
+                          "height": 100,
                           "left": 0,
                           "top": 0,
-                          "width": 200,
+                          "width": 100,
                         },
                         "scroll": Object {
                           "x": 0,
@@ -255,10 +271,10 @@ describe('Screenshot Observable Pipeline', () => {
                       "attributes": Object {},
                       "position": Object {
                         "boundingClientRect": Object {
-                          "height": 200,
+                          "height": 100,
                           "left": 0,
                           "top": 0,
-                          "width": 200,
+                          "width": 100,
                         },
                         "scroll": Object {
                           "x": 0,
@@ -281,7 +297,7 @@ describe('Screenshot Observable Pipeline', () => {
             `);
     });
 
-    it('recovers if exit$ fires a timeout signal', async () => {
+    it('observes page exit', async () => {
       // mocks
       const mockGetCreatePage = (driver: HeadlessChromiumDriver) =>
         jest
@@ -300,7 +316,7 @@ describe('Screenshot Observable Pipeline', () => {
       });
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
       const getScreenshot = async () => {
         return await getScreenshots$({
           logger,
@@ -311,38 +327,7 @@ describe('Screenshot Observable Pipeline', () => {
         }).toPromise();
       };
 
-      await expect(getScreenshot()).resolves.toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "elementsPositionAndAttributes": Array [
-                    Object {
-                      "attributes": Object {},
-                      "position": Object {
-                        "boundingClientRect": Object {
-                          "height": 200,
-                          "left": 0,
-                          "top": 0,
-                          "width": 200,
-                        },
-                        "scroll": Object {
-                          "x": 0,
-                          "y": 0,
-                        },
-                      },
-                    },
-                  ],
-                  "error": "Instant timeout has fired!",
-                  "screenshots": Array [
-                    Object {
-                      "base64EncodedData": "allyourBase64",
-                      "description": undefined,
-                      "title": undefined,
-                    },
-                  ],
-                  "timeRange": null,
-                },
-              ]
-            `);
+      await expect(getScreenshot()).rejects.toMatchInlineSnapshot(`"Instant timeout has fired!"`);
     });
 
     it(`uses defaults for element positions and size when Kibana page is not ready`, async () => {
@@ -354,6 +339,8 @@ describe('Screenshot Observable Pipeline', () => {
 
         if (mockCall === contexts.CONTEXT_ELEMENTATTRIBUTES) {
           return Promise.resolve(null);
+        } else if (mockCall === contexts.CONTEXT_GETBROWSERDIMENSIONS) {
+          return Promise.resolve([800, 600]);
         } else {
           return Promise.resolve();
         }
@@ -364,7 +351,7 @@ describe('Screenshot Observable Pipeline', () => {
       mockLayout.getViewport = () => null;
 
       // test
-      const getScreenshots$ = screenshotsObservableFactory(mockConfig, mockBrowserDriverFactory);
+      const getScreenshots$ = screenshotsObservableFactory(captureConfig, mockBrowserDriverFactory);
       const getScreenshot = async () => {
         return await getScreenshots$({
           logger,

@@ -7,7 +7,7 @@
 import url from 'url';
 
 interface AbsoluteURLFactoryOptions {
-  defaultBasePath: string;
+  basePath: string;
   protocol: string;
   hostname: string;
   port: string | number;
@@ -17,14 +17,9 @@ export const getAbsoluteUrlFactory = ({
   protocol,
   hostname,
   port,
-  defaultBasePath,
+  basePath,
 }: AbsoluteURLFactoryOptions) => {
-  return function getAbsoluteUrl({
-    basePath = defaultBasePath,
-    hash = '',
-    path = '/app/kibana',
-    search = '',
-  } = {}) {
+  return function getAbsoluteUrl({ hash = '', path = '/app/kibana', search = '' } = {}) {
     return url.format({
       protocol,
       hostname,

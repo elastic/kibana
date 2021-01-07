@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Index, CallAsCurrentUser } from '../types';
+import { CallAsCurrentUser } from '../types';
+import { Index } from '../index';
 
 export type Enricher = (indices: Index[], callAsCurrentUser: CallAsCurrentUser) => Promise<Index[]>;
 

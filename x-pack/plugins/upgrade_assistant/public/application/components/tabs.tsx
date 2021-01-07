@@ -239,7 +239,7 @@ export class UpgradeAssistantTabs extends React.Component<Props, TabsState> {
 
     this.setState({ telemetryState: TelemetryState.Running });
 
-    await this.props.http.fetch('/api/upgrade_assistant/telemetry/ui_open', {
+    await this.props.http.fetch('/api/upgrade_assistant/stats/ui_open', {
       method: 'PUT',
       body: JSON.stringify(set({}, tabName, true)),
     });

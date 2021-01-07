@@ -7,7 +7,7 @@
 import React, { ReactElement } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { EuiPanel, EuiToolTip } from '@elastic/eui';
-import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { mountWithIntl as mount } from '@kbn/test/jest';
 import { EditorFrame } from './editor_frame';
 import { DatasourcePublicAPI, DatasourceSuggestion, Visualization } from '../../types';
 import { act } from 'react-dom/test-utils';
@@ -23,6 +23,7 @@ import { DragDrop } from '../../drag_drop';
 import { FrameLayout } from './frame_layout';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
@@ -55,8 +56,11 @@ function getDefaultProps() {
       uiActions: uiActionsPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
+      charts: chartPluginMock.createStartContract(),
     },
+    palettes: chartPluginMock.createPaletteRegistry(),
     showNoDataPopover: jest.fn(),
+    searchSessionId: 'sessionId',
   };
 }
 
@@ -170,25 +174,22 @@ describe('editor_frame', () => {
             doc={{
               visualizationType: 'testVis',
               title: '',
-              expression: '',
               state: {
                 datasourceStates: {
                   testDatasource: datasource1State,
                   testDatasource2: datasource2State,
                 },
                 visualization: {},
-                datasourceMetaData: {
-                  filterableIndexPatterns: [],
-                },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
+              references: [],
             }}
           />
         );
       });
-      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State);
-      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State);
+      expect(mockDatasource.initialize).toHaveBeenCalledWith(datasource1State, [], undefined);
+      expect(mockDatasource2.initialize).toHaveBeenCalledWith(datasource2State, [], undefined);
       expect(mockDatasource3.initialize).not.toHaveBeenCalled();
     });
 
@@ -236,10 +237,11 @@ describe('editor_frame', () => {
     });
 
     it('should pass the public frame api into visualization initialize', async () => {
+      const defaultProps = getDefaultProps();
       await act(async () => {
         mount(
           <EditorFrame
-            {...getDefaultProps()}
+            {...defaultProps}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -262,6 +264,8 @@ describe('editor_frame', () => {
         query: { query: '', language: 'lucene' },
         filters: [],
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        availablePalettes: defaultProps.palettes,
+        searchSessionId: 'sessionId',
       });
     });
 
@@ -427,21 +431,6 @@ describe('editor_frame', () => {
             },
             Object {
               "arguments": Object {
-                "filters": Array [
-                  "[]",
-                ],
-                "query": Array [
-                  "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
-                ],
-                "timeRange": Array [
-                  "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
-                ],
-              },
-              "function": "kibana_context",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
                 "layerIds": Array [
                   "first",
                 ],
@@ -499,19 +488,16 @@ describe('editor_frame', () => {
             doc={{
               visualizationType: 'testVis',
               title: '',
-              expression: '',
               state: {
                 datasourceStates: {
                   testDatasource: {},
                   testDatasource2: {},
                 },
                 visualization: {},
-                datasourceMetaData: {
-                  filterableIndexPatterns: [],
-                },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
+              references: [],
             }}
           />
         );
@@ -533,21 +519,6 @@ describe('editor_frame', () => {
             Object {
               "arguments": Object {},
               "function": "kibana",
-              "type": "function",
-            },
-            Object {
-              "arguments": Object {
-                "filters": Array [
-                  "[]",
-                ],
-                "query": Array [
-                  "{\\"query\\":\\"\\",\\"language\\":\\"lucene\\"}",
-                ],
-                "timeRange": Array [
-                  "{\\"from\\":\\"\\",\\"to\\":\\"\\"}",
-                ],
-              },
-              "function": "kibana_context",
               "type": "function",
             },
             Object {
@@ -632,7 +603,8 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      // validation requires to calls this getConfiguration API
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -711,7 +683,8 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      // validation requires to calls this getConfiguration API
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -747,19 +720,16 @@ describe('editor_frame', () => {
             doc={{
               visualizationType: 'testVis',
               title: '',
-              expression: '',
               state: {
                 datasourceStates: {
                   testDatasource: {},
                   testDatasource2: {},
                 },
                 visualization: {},
-                datasourceMetaData: {
-                  filterableIndexPatterns: [],
-                },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
+              references: [],
             }}
           />
         );
@@ -802,19 +772,16 @@ describe('editor_frame', () => {
             doc={{
               visualizationType: 'testVis',
               title: '',
-              expression: '',
               state: {
                 datasourceStates: {
                   testDatasource: datasource1State,
                   testDatasource2: datasource2State,
                 },
                 visualization: {},
-                datasourceMetaData: {
-                  filterableIndexPatterns: [],
-                },
                 query: { query: '', language: 'lucene' },
                 filters: [],
               },
+              references: [],
             }}
           />
         );
@@ -842,7 +809,6 @@ describe('editor_frame', () => {
 
     it('should give access to the datasource state in the datasource factory function', async () => {
       const datasourceState = {};
-      const dateRange = { fromDate: 'now-1w', toDate: 'now' };
       mockDatasource.initialize.mockResolvedValue(datasourceState);
       mockDatasource.getLayers.mockReturnValue(['first']);
 
@@ -850,7 +816,6 @@ describe('editor_frame', () => {
         mount(
           <EditorFrame
             {...getDefaultProps()}
-            dateRange={dateRange}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -865,7 +830,6 @@ describe('editor_frame', () => {
       });
 
       expect(mockDatasource.getPublicAPI).toHaveBeenCalledWith({
-        dateRange,
         state: datasourceState,
         layerId: 'first',
       });
@@ -1008,6 +972,7 @@ describe('editor_frame', () => {
         expect.objectContaining({
           datasourceLayers: expect.objectContaining({ first: mockDatasource.publicAPIMock }),
         }),
+        undefined,
         undefined
       );
       expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
@@ -1017,6 +982,32 @@ describe('editor_frame', () => {
   });
 
   describe('suggestions', () => {
+    it('should fetch suggestions of currently active datasource when initializes from visualization trigger', async () => {
+      await act(async () => {
+        mount(
+          <EditorFrame
+            {...getDefaultProps()}
+            initialContext={{
+              indexPatternId: '1',
+              fieldName: 'test',
+            }}
+            visualizationMap={{
+              testVis: mockVisualization,
+            }}
+            datasourceMap={{
+              testDatasource: mockDatasource,
+              testDatasource2: mockDatasource2,
+            }}
+            initialDatasourceId="testDatasource"
+            initialVisualizationId="testVis"
+            ExpressionRenderer={expressionRendererMock}
+          />
+        );
+      });
+
+      expect(mockDatasource.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalled();
+    });
+
     it('should fetch suggestions of currently active datasource', async () => {
       await act(async () => {
         mount(
@@ -1154,7 +1145,7 @@ describe('editor_frame', () => {
           .find(EuiPanel)
           .map((el) => el.parents(EuiToolTip).prop('content'))
       ).toEqual([
-        'Current',
+        'Current visualization',
         'Suggestion1',
         'Suggestion2',
         'Suggestion3',
@@ -1206,7 +1197,8 @@ describe('editor_frame', () => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
+      // validation requires to calls this getConfiguration API
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(5);
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
@@ -1253,6 +1245,7 @@ describe('editor_frame', () => {
                 ...mockDatasource,
                 getDatasourceSuggestionsForField: () => [generateSuggestion()],
                 getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+                getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
               },
             }}
             initialDatasourceId="testDatasource"
@@ -1319,9 +1312,10 @@ describe('editor_frame', () => {
                 ...mockDatasource,
                 getDatasourceSuggestionsForField: () => [generateSuggestion()],
                 getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+                getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
-                  if (dragging !== 'draggedField') {
-                    setDragging('draggedField');
+                  if (!dragging || dragging.id !== 'draggedField') {
+                    setDragging({ id: 'draggedField' });
                   }
                 },
               },
@@ -1415,9 +1409,10 @@ describe('editor_frame', () => {
                 ...mockDatasource,
                 getDatasourceSuggestionsForField: () => [generateSuggestion()],
                 getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
+                getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
-                  if (dragging !== 'draggedField') {
-                    setDragging('draggedField');
+                  if (!dragging || dragging.id !== 'draggedField') {
+                    setDragging({ id: 'draggedField' });
                   }
                 },
               },
@@ -1460,9 +1455,10 @@ describe('editor_frame', () => {
         })
       );
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mockDatasource.getMetaData.mockReturnValue({
-        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
-      });
+      mockDatasource.getPersistableState = jest.fn((x) => ({
+        state: x,
+        savedObjectReferences: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
+      }));
       mockVisualization.initialize.mockReturnValue({ initialState: true });
 
       await act(async () => {
@@ -1487,14 +1483,20 @@ describe('editor_frame', () => {
 
       expect(onChange).toHaveBeenCalledTimes(2);
       expect(onChange).toHaveBeenNthCalledWith(1, {
-        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+        filterableIndexPatterns: ['1'],
         doc: {
-          expression: '',
           id: undefined,
+          description: undefined,
+          references: [
+            {
+              id: '1',
+              name: 'index-pattern-0',
+              type: 'index-pattern',
+            },
+          ],
           state: {
             visualization: null, // Not yet loaded
-            datasourceMetaData: { filterableIndexPatterns: [{ id: '1', title: 'resolved' }] },
-            datasourceStates: { testDatasource: undefined },
+            datasourceStates: { testDatasource: {} },
             query: { query: '', language: 'lucene' },
             filters: [],
           },
@@ -1502,18 +1504,23 @@ describe('editor_frame', () => {
           type: 'lens',
           visualizationType: 'testVis',
         },
+        isSaveable: false,
       });
       expect(onChange).toHaveBeenLastCalledWith({
-        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
+        filterableIndexPatterns: ['1'],
         doc: {
-          expression: '',
+          references: [
+            {
+              id: '1',
+              name: 'index-pattern-0',
+              type: 'index-pattern',
+            },
+          ],
+          description: undefined,
           id: undefined,
           state: {
             visualization: { initialState: true }, // Now loaded
-            datasourceMetaData: {
-              filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
-            },
-            datasourceStates: { testDatasource: undefined },
+            datasourceStates: { testDatasource: {} },
             query: { query: '', language: 'lucene' },
             filters: [],
           },
@@ -1521,6 +1528,7 @@ describe('editor_frame', () => {
           type: 'lens',
           visualizationType: 'testVis',
         },
+        isSaveable: false,
       });
     });
 
@@ -1562,11 +1570,10 @@ describe('editor_frame', () => {
       expect(onChange).toHaveBeenNthCalledWith(3, {
         filterableIndexPatterns: [],
         doc: {
-          expression: expect.stringContaining('vis "expression"'),
           id: undefined,
+          references: [],
           state: {
-            datasourceMetaData: { filterableIndexPatterns: [] },
-            datasourceStates: { testDatasource: undefined },
+            datasourceStates: { testDatasource: { datasource: '' } },
             visualization: { initialState: true },
             query: { query: 'new query', language: 'lucene' },
             filters: [],
@@ -1575,6 +1582,7 @@ describe('editor_frame', () => {
           type: 'lens',
           visualizationType: 'testVis',
         },
+        isSaveable: true,
       });
     });
 
@@ -1583,9 +1591,10 @@ describe('editor_frame', () => {
 
       mockDatasource.initialize.mockResolvedValue({});
       mockDatasource.getLayers.mockReturnValue(['first']);
-      mockDatasource.getMetaData.mockReturnValue({
-        filterableIndexPatterns: [{ id: '1', title: 'resolved' }],
-      });
+      mockDatasource.getPersistableState = jest.fn((x) => ({
+        state: x,
+        savedObjectReferences: [{ type: 'index-pattern', id: '1', name: '' }],
+      }));
       mockVisualization.initialize.mockReturnValue({ initialState: true });
 
       await act(async () => {

@@ -18,10 +18,11 @@
  */
 
 import moment from 'moment';
+
+import { configServiceMock } from '../config/mocks';
 import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
 import { mockCoreContext } from '../core_context.mock';
-import { configServiceMock } from '../config/config_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { take } from 'rxjs/operators';
 
@@ -81,21 +82,23 @@ describe('MetricsService', () => {
       // `advanceTimersByTime` only ensure the interval handler is executed
       // however the `reset` call is executed after the async call to `collect`
       // meaning that we are going to miss the call if we don't wait for the
-      // actual observable emission that is performed after
-      const waitForNextEmission = () => getOpsMetrics$().pipe(take(1)).toPromise();
+      // actual observable emission that is performed after. The extra
+      // `nextTick` is to ensure we've done a complete roundtrip of the event
+      // loop.
+      const nextEmission = async () => {
+        jest.advanceTimersByTime(testInterval);
+        await getOpsMetrics$().pipe(take(1)).toPromise();
+        await new Promise((resolve) => process.nextTick(resolve));
+      };
 
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(1);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(1);
 
-      let nextEmission = waitForNextEmission();
-      jest.advanceTimersByTime(testInterval);
-      await nextEmission;
+      await nextEmission();
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(2);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(2);
 
-      nextEmission = waitForNextEmission();
-      jest.advanceTimersByTime(testInterval);
-      await nextEmission;
+      await nextEmission();
       expect(mockOpsCollector.collect).toHaveBeenCalledTimes(3);
       expect(mockOpsCollector.reset).toHaveBeenCalledTimes(3);
     });
@@ -104,6 +107,27 @@ describe('MetricsService', () => {
       await expect(metricsService.start()).rejects.toThrowErrorMatchingInlineSnapshot(
         `"#setup() needs to be run first"`
       );
+    });
+
+    it('emits the last value on each getOpsMetrics$ call', async () => {
+      const firstMetrics = { metric: 'first' };
+      const secondMetrics = { metric: 'second' };
+      mockOpsCollector.collect
+        .mockResolvedValueOnce(firstMetrics)
+        .mockResolvedValueOnce(secondMetrics);
+
+      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.start();
+
+      const nextEmission = async () => {
+        jest.advanceTimersByTime(testInterval);
+        const emission = await getOpsMetrics$().pipe(take(1)).toPromise();
+        await new Promise((resolve) => process.nextTick(resolve));
+        return emission;
+      };
+
+      expect(await nextEmission()).toEqual({ metric: 'first' });
+      expect(await nextEmission()).toEqual({ metric: 'second' });
     });
   });
 

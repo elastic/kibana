@@ -27,12 +27,12 @@ import {
 } from 'angular';
 import $ from 'jquery';
 import { set } from '@elastic/safer-lodash-set';
-import { cloneDeep, forOwn, get } from 'lodash';
+import { get } from 'lodash';
 import * as Rx from 'rxjs';
 import { ChromeBreadcrumb, EnvironmentMode, PackageInfo } from 'kibana/public';
 import { History } from 'history';
 
-import { CoreStart, LegacyCoreStart } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 import { isSystemApiRequest } from '../utils';
 import { formatAngularHttpError, isAngularHttpError } from '../notify/lib';
 
@@ -72,32 +72,18 @@ function isDummyRoute($route: any, isLocalAngular: boolean) {
 
 export const configureAppAngularModule = (
   angularModule: IModule,
-  newPlatform:
-    | LegacyCoreStart
-    | {
-        core: CoreStart;
-        readonly env: {
-          mode: Readonly<EnvironmentMode>;
-          packageInfo: Readonly<PackageInfo>;
-        };
-      },
+  newPlatform: {
+    core: CoreStart;
+    readonly env: {
+      mode: Readonly<EnvironmentMode>;
+      packageInfo: Readonly<PackageInfo>;
+    };
+  },
   isLocalAngular: boolean,
   getHistory?: () => History
 ) => {
   const core = 'core' in newPlatform ? newPlatform.core : newPlatform;
-  const packageInfo =
-    'env' in newPlatform
-      ? newPlatform.env.packageInfo
-      : newPlatform.injectedMetadata.getLegacyMetadata();
-
-  if ('injectedMetadata' in newPlatform) {
-    forOwn(newPlatform.injectedMetadata.getInjectedVars(), (val, name) => {
-      if (name !== undefined) {
-        // The legacy platform modifies some of these values, clone to an unfrozen object.
-        angularModule.value(name, cloneDeep(val));
-      }
-    });
-  }
+  const packageInfo = newPlatform.env.packageInfo;
 
   angularModule
     .value('kbnVersion', packageInfo.version)
@@ -105,13 +91,7 @@ export const configureAppAngularModule = (
     .value('buildSha', packageInfo.buildSha)
     .value('esUrl', getEsUrl(core))
     .value('uiCapabilities', core.application.capabilities)
-    .config(
-      setupCompileProvider(
-        'injectedMetadata' in newPlatform
-          ? newPlatform.injectedMetadata.getLegacyMetadata().devMode
-          : newPlatform.env.mode.dev
-      )
-    )
+    .config(setupCompileProvider(newPlatform.env.mode.dev))
     .config(setupLocationProvider())
     .config($setupXsrfRequestInterceptor(packageInfo.version))
     .run(capture$httpLoadingCount(core))

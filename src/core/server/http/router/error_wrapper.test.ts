@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { KibanaResponse, KibanaResponseFactory, kibanaResponseFactory } from './response';
 import { wrapErrors } from './error_wrapper';
 import { KibanaRequest, RequestHandler, RequestHandlerContext } from 'kibana/server';

@@ -5,78 +5,157 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { schema } from '@kbn/config-schema';
-import { times } from 'lodash';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { curry, times } from 'lodash';
+import { ES_TEST_INDEX_NAME } from '../../../../lib';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
-import { AlertType, AlertExecutorOptions } from '../../../../../../../plugins/alerts/server';
+import {
+  AlertType,
+  AlertInstanceState,
+  AlertInstanceContext,
+  AlertTypeState,
+  AlertTypeParams,
+} from '../../../../../../../plugins/alerts/server';
 
-export function defineAlertTypes(
-  core: CoreSetup<FixtureStartDeps>,
-  { alerts }: Pick<FixtureSetupDeps, 'alerts'>
-) {
-  const clusterClient = core.elasticsearch.legacy.client;
-  const alwaysFiringAlertType: AlertType = {
+export const EscapableStrings = {
+  escapableBold: '*bold*',
+  escapableBacktic: 'back`tic',
+  escapableBackticBold: '`*bold*`',
+  escapableHtml: '<&>',
+  escapableDoubleQuote: '"double quote"',
+  escapableLineFeed: 'line\x0afeed',
+};
+
+export const DeepContextVariables = {
+  objectA: {
+    stringB: 'B',
+    arrayC: [
+      { stringD: 'D1', numberE: 42 },
+      { stringD: 'D2', numberE: 43 },
+    ],
+    objectF: {
+      stringG: 'G',
+      nullG: null,
+      undefinedG: undefined,
+    },
+  },
+  stringH: 'H',
+  arrayI: [44, 45],
+  nullJ: null,
+  undefinedK: undefined,
+};
+
+function getAlwaysFiringAlertType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+    groupsToScheduleActionsInSeries: schema.maybe(schema.arrayOf(schema.nullable(schema.string()))),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State extends AlertTypeState {
+    groupInSeriesIndex?: number;
+  }
+  interface InstanceState extends AlertInstanceState {
+    instanceStateValue: boolean;
+  }
+  interface InstanceContext extends AlertInstanceContext {
+    instanceContextValue: boolean;
+  }
+  const result: AlertType<
+    ParamsType & AlertTypeParams,
+    State,
+    InstanceState,
+    InstanceContext,
+    'default' | 'other'
+  > = {
     id: 'test.always-firing',
     name: 'Test: Always Firing',
     actionGroups: [
       { id: 'default', name: 'Default' },
       { id: 'other', name: 'Other' },
     ],
+    validate: {
+      params: paramsSchema,
+    },
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     actionVariables: {
       state: [{ name: 'instanceStateValue', description: 'the instance state value' }],
       params: [{ name: 'instanceParamsValue', description: 'the instance params value' }],
       context: [{ name: 'instanceContextValue', description: 'the instance context value' }],
     },
-    async executor(alertExecutorOptions: AlertExecutorOptions) {
-      const {
-        services,
-        params,
-        state,
-        alertId,
-        spaceId,
-        namespace,
-        name,
-        tags,
-        createdBy,
-        updatedBy,
-      } = alertExecutorOptions;
-      let group = 'default';
-      const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
-
-      if (params.groupsToScheduleActionsInSeries) {
-        const index = state.groupInSeriesIndex || 0;
-        group = params.groupsToScheduleActionsInSeries[index];
-      }
-
-      if (group) {
-        services
-          .alertInstanceFactory('1')
-          .replaceState({ instanceStateValue: true })
-          .scheduleActions(group, {
-            instanceContextValue: true,
-          });
-      }
-      await services.callCluster('index', {
-        index: params.index,
-        refresh: 'wait_for',
-        body: {
-          state,
-          params,
-          reference: params.reference,
-          source: 'alert:test.always-firing',
-          alertInfo,
-        },
-      });
-      return {
-        globalStateValue: true,
-        groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
-      };
-    },
+    executor: curry(alwaysFiringExecutor)(),
   };
-  // Alert types
-  const cumulativeFiringAlertType: AlertType = {
+  return result;
+}
+
+async function alwaysFiringExecutor(alertExecutorOptions: any) {
+  const {
+    services,
+    params,
+    state,
+    alertId,
+    spaceId,
+    namespace,
+    name,
+    tags,
+    createdBy,
+    updatedBy,
+  } = alertExecutorOptions;
+  let group: string | null = 'default';
+  let subgroup: string | null = null;
+  const alertInfo = { alertId, spaceId, namespace, name, tags, createdBy, updatedBy };
+
+  if (params.groupsToScheduleActionsInSeries) {
+    const index = state.groupInSeriesIndex || 0;
+    const [scheduledGroup, scheduledSubgroup] = (
+      params.groupsToScheduleActionsInSeries[index] ?? ''
+    ).split(':');
+
+    group = scheduledGroup;
+    subgroup = scheduledSubgroup;
+  }
+
+  if (group) {
+    const instance = services.alertInstanceFactory('1').replaceState({ instanceStateValue: true });
+
+    if (subgroup) {
+      instance.scheduleActionsWithSubGroup(group, subgroup, {
+        instanceContextValue: true,
+      });
+    } else {
+      instance.scheduleActions(group, {
+        instanceContextValue: true,
+      });
+    }
+  }
+
+  await services.scopedClusterClient.index({
+    index: params.index,
+    refresh: 'wait_for',
+    body: {
+      state,
+      params,
+      reference: params.reference,
+      source: 'alert:test.always-firing',
+      alertInfo,
+    },
+  });
+  return {
+    globalStateValue: true,
+    groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
+  };
+}
+
+function getCumulativeFiringAlertType() {
+  interface State extends AlertTypeState {
+    runCount?: number;
+  }
+  interface InstanceState extends AlertInstanceState {
+    instanceStateValue: boolean;
+  }
+  const result: AlertType<{}, State, InstanceState, {}, 'default' | 'other'> = {
     id: 'test.cumulative-firing',
     name: 'Test: Cumulative Firing',
     actionGroups: [
@@ -85,7 +164,8 @@ export function defineAlertTypes(
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
-    async executor(alertExecutorOptions: AlertExecutorOptions) {
+    minimumLicenseRequired: 'basic',
+    async executor(alertExecutorOptions) {
       const { services, state } = alertExecutorOptions;
       const group = 'default';
 
@@ -103,7 +183,19 @@ export function defineAlertTypes(
       };
     },
   };
-  const neverFiringAlertType: AlertType = {
+  return result;
+}
+
+function getNeverFiringAlertType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State extends AlertTypeState {
+    globalStateValue: boolean;
+  }
+  const result: AlertType<ParamsType, State, {}, {}, 'default'> = {
     id: 'test.never-firing',
     name: 'Test: Never firing',
     actionGroups: [
@@ -112,9 +204,13 @@ export function defineAlertTypes(
         name: 'Default',
       },
     ],
+    validate: {
+      params: paramsSchema,
+    },
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
-    async executor({ services, params, state }: AlertExecutorOptions) {
+    minimumLicenseRequired: 'basic',
+    async executor({ services, params, state }) {
       await services.callCluster('index', {
         index: params.index,
         refresh: 'wait_for',
@@ -130,9 +226,21 @@ export function defineAlertTypes(
       };
     },
   };
-  const failingAlertType: AlertType = {
+  return result;
+}
+
+function getFailingAlertType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: AlertType<ParamsType, {}, {}, {}, 'default'> = {
     id: 'test.failing',
     name: 'Test: Failing',
+    validate: {
+      params: paramsSchema,
+    },
     actionGroups: [
       {
         id: 'default',
@@ -141,7 +249,8 @@ export function defineAlertTypes(
     ],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
-    async executor({ services, params, state }: AlertExecutorOptions) {
+    minimumLicenseRequired: 'basic',
+    async executor({ services, params, state }) {
       await services.callCluster('index', {
         index: params.index,
         refresh: 'wait_for',
@@ -155,7 +264,20 @@ export function defineAlertTypes(
       throw new Error('Failed to execute alert type');
     },
   };
-  const authorizationAlertType: AlertType = {
+  return result;
+}
+
+function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
+  const clusterClient = core.elasticsearch.legacy.client;
+  const paramsSchema = schema.object({
+    callClusterAuthorizationIndex: schema.string(),
+    savedObjectsClientType: schema.string(),
+    savedObjectsClientId: schema.string(),
+    index: schema.string(),
+    reference: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: AlertType<ParamsType, {}, {}, {}, 'default'> = {
     id: 'test.authorization',
     name: 'Test: Authorization',
     actionGroups: [
@@ -166,16 +288,11 @@ export function defineAlertTypes(
     ],
     defaultActionGroupId: 'default',
     producer: 'alertsFixture',
+    minimumLicenseRequired: 'basic',
     validate: {
-      params: schema.object({
-        callClusterAuthorizationIndex: schema.string(),
-        savedObjectsClientType: schema.string(),
-        savedObjectsClientId: schema.string(),
-        index: schema.string(),
-        reference: schema.string(),
-      }),
+      params: paramsSchema,
     },
-    async executor({ services, params, state }: AlertExecutorOptions) {
+    async executor({ services, params, state }) {
       // Call cluster
       let callClusterSuccess = false;
       let callClusterError;
@@ -239,7 +356,15 @@ export function defineAlertTypes(
       });
     },
   };
-  const validationAlertType: AlertType = {
+  return result;
+}
+
+function getValidationAlertType() {
+  const paramsSchema = schema.object({
+    param1: schema.string(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: AlertType<ParamsType, {}, {}, {}, 'default'> = {
     id: 'test.validation',
     name: 'Test: Validation',
     actionGroups: [
@@ -249,34 +374,123 @@ export function defineAlertTypes(
       },
     ],
     producer: 'alertsFixture',
+    minimumLicenseRequired: 'basic',
     defaultActionGroupId: 'default',
     validate: {
-      params: schema.object({
-        param1: schema.string(),
-      }),
+      params: paramsSchema,
     },
-    async executor({ services, params, state }: AlertExecutorOptions) {},
+    async executor() {},
   };
-  const noopAlertType: AlertType = {
+  return result;
+}
+
+function getPatternFiringAlertType() {
+  const paramsSchema = schema.object({
+    pattern: schema.recordOf(
+      schema.string(),
+      schema.arrayOf(schema.oneOf([schema.boolean(), schema.string()]))
+    ),
+    reference: schema.maybe(schema.string()),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  interface State extends AlertTypeState {
+    patternIndex?: number;
+  }
+  const result: AlertType<ParamsType, State, {}, {}, 'default'> = {
+    id: 'test.patternFiring',
+    name: 'Test: Firing on a Pattern',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    async executor(alertExecutorOptions) {
+      const { services, state, params } = alertExecutorOptions;
+      const pattern = params.pattern;
+      if (typeof pattern !== 'object') throw new Error('pattern is not an object');
+      let maxPatternLength = 0;
+      for (const [instanceId, instancePattern] of Object.entries(pattern)) {
+        if (!Array.isArray(instancePattern)) {
+          throw new Error(`pattern for instance ${instanceId} is not an array`);
+        }
+        maxPatternLength = Math.max(maxPatternLength, instancePattern.length);
+      }
+
+      if (params.reference) {
+        await services.scopedClusterClient.index({
+          index: ES_TEST_INDEX_NAME,
+          refresh: 'wait_for',
+          body: {
+            reference: params.reference,
+            source: 'alert:test.patternFiring',
+            ...alertExecutorOptions,
+          },
+        });
+      }
+
+      // get the pattern index, return if past it
+      const patternIndex = state.patternIndex ?? 0;
+      if (patternIndex >= maxPatternLength) {
+        return { patternIndex };
+      }
+
+      // fire if pattern says to
+      for (const [instanceId, instancePattern] of Object.entries(pattern)) {
+        const scheduleByPattern = instancePattern[patternIndex];
+        if (scheduleByPattern === true) {
+          services.alertInstanceFactory(instanceId).scheduleActions('default', {
+            ...EscapableStrings,
+            deep: DeepContextVariables,
+          });
+        } else if (typeof scheduleByPattern === 'string') {
+          services
+            .alertInstanceFactory(instanceId)
+            .scheduleActionsWithSubGroup('default', scheduleByPattern);
+        }
+      }
+
+      return {
+        patternIndex: patternIndex + 1,
+      };
+    },
+  };
+  return result;
+}
+
+export function defineAlertTypes(
+  core: CoreSetup<FixtureStartDeps>,
+  { alerts }: Pick<FixtureSetupDeps, 'alerts'>
+) {
+  const noopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
-    async executor({ services, params, state }: AlertExecutorOptions) {},
+    minimumLicenseRequired: 'basic',
+    async executor() {},
   };
-  const onlyContextVariablesAlertType: AlertType = {
+  const goldNoopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
+    id: 'test.gold.noop',
+    name: 'Test: Noop',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'gold',
+    async executor() {},
+  };
+  const onlyContextVariablesAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.onlyContextVariables',
     name: 'Test: Only Context Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
     actionVariables: {
       context: [{ name: 'aContextVariable', description: 'this is a context variable' }],
     },
-    async executor(opts: AlertExecutorOptions) {},
+    async executor() {},
   };
-  const onlyStateVariablesAlertType: AlertType = {
+  const onlyStateVariablesAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.onlyStateVariables',
     name: 'Test: Only State Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
@@ -285,9 +499,10 @@ export function defineAlertTypes(
     actionVariables: {
       state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
     },
-    async executor(opts: AlertExecutorOptions) {},
+    minimumLicenseRequired: 'basic',
+    async executor() {},
   };
-  const throwAlertType: AlertType = {
+  const throwAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
     id: 'test.throw',
     name: 'Test: Throw',
     actionGroups: [
@@ -296,50 +511,41 @@ export function defineAlertTypes(
         name: 'Default',
       },
     ],
-    producer: 'alerting',
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
-    async executor({ services, params, state }: AlertExecutorOptions) {
+    minimumLicenseRequired: 'basic',
+    async executor() {
       throw new Error('this alert is intended to fail');
     },
   };
-  const patternFiringAlertType: AlertType = {
-    id: 'test.patternFiring',
-    name: 'Test: Firing on a Pattern',
-    actionGroups: [{ id: 'default', name: 'Default' }],
-    producer: 'alerting',
+  const longRunningAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
+    id: 'test.longRunning',
+    name: 'Test: Long Running',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alertsFixture',
     defaultActionGroupId: 'default',
-    async executor(alertExecutorOptions: AlertExecutorOptions) {
-      const { services, state, params } = alertExecutorOptions;
-      const pattern = params.pattern;
-      if (!Array.isArray(pattern)) throw new Error('pattern is not an array');
-      if (pattern.length === 0) throw new Error('pattern is empty');
-
-      // get the pattern index, return if past it
-      const patternIndex = state.patternIndex ?? 0;
-      if (patternIndex > pattern.length) {
-        return { patternIndex };
-      }
-
-      // fire if pattern says to
-      if (pattern[patternIndex]) {
-        services.alertInstanceFactory('instance').scheduleActions('default');
-      }
-
-      return {
-        patternIndex: (patternIndex + 1) % pattern.length,
-      };
+    minimumLicenseRequired: 'basic',
+    async executor() {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     },
   };
 
-  alerts.registerType(alwaysFiringAlertType);
-  alerts.registerType(cumulativeFiringAlertType);
-  alerts.registerType(neverFiringAlertType);
-  alerts.registerType(failingAlertType);
-  alerts.registerType(validationAlertType);
-  alerts.registerType(authorizationAlertType);
+  alerts.registerType(getAlwaysFiringAlertType());
+  alerts.registerType(getCumulativeFiringAlertType());
+  alerts.registerType(getNeverFiringAlertType());
+  alerts.registerType(getFailingAlertType());
+  alerts.registerType(getValidationAlertType());
+  alerts.registerType(getAuthorizationAlertType(core));
   alerts.registerType(noopAlertType);
   alerts.registerType(onlyContextVariablesAlertType);
   alerts.registerType(onlyStateVariablesAlertType);
-  alerts.registerType(patternFiringAlertType);
+  alerts.registerType(getPatternFiringAlertType());
   alerts.registerType(throwAlertType);
+  alerts.registerType(longRunningAlertType);
+  alerts.registerType(goldNoopAlertType);
 }

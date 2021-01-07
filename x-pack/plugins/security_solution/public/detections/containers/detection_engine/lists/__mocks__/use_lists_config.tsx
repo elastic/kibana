@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const useListsConfig = jest.fn().mockReturnValue({});
+import { getUseListsConfigMock } from '../use_lists_config.mock';
+
+export const useListsConfig = jest.fn(getUseListsConfigMock);

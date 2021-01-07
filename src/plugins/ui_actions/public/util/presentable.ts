@@ -22,7 +22,7 @@ import { UiComponent } from 'src/plugins/kibana_utils/public';
 /**
  * Represents something that can be displayed to user in UI.
  */
-export interface Presentable<Context extends object = object> {
+export interface Presentable<Context = unknown> {
   /**
    * ID that uniquely identifies this object.
    */
@@ -68,4 +68,20 @@ export interface Presentable<Context extends object = object> {
    * the context and should be displayed to user, otherwise resolves to false.
    */
   isCompatible(context: Context): Promise<boolean>;
+
+  /**
+   * Grouping where this item should appear as a submenu. Each entry is a new
+   * sub-menu level. For example, used to show drilldowns and sharing options
+   * in panel context menu in a sub-menu.
+   */
+  readonly grouping?: PresentableGrouping<Context>;
 }
+
+export interface PresentableGroup<Context = unknown>
+  extends Partial<
+    Pick<Presentable<Context>, 'getDisplayName' | 'getDisplayNameTooltip' | 'getIconType' | 'order'>
+  > {
+  id: string;
+}
+
+export type PresentableGrouping<Context = unknown> = Array<PresentableGroup<Context>>;

@@ -58,7 +58,12 @@ const emptyOption: EuiComboBoxOptionOption = {
   label: '',
 };
 
-const excludeFrequentOptions: EuiComboBoxOptionOption[] = [{ label: 'all' }, { label: 'none' }];
+const excludeFrequentOptions: EuiComboBoxOptionOption[] = [
+  { label: 'all' },
+  { label: 'none' },
+  { label: 'by' },
+  { label: 'over' },
+];
 
 export const AdvancedDetectorModal: FC<Props> = ({
   payload,

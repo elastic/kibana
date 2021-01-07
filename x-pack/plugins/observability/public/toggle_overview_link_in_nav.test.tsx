@@ -3,47 +3,58 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { CoreStart } from 'kibana/public';
+
+import { Subject } from 'rxjs';
+import { AppUpdater, AppNavLinkStatus } from '../../../../src/core/public';
+import { applicationServiceMock } from '../../../../src/core/public/mocks';
 
 import { toggleOverviewLinkInNav } from './toggle_overview_link_in_nav';
 
 describe('toggleOverviewLinkInNav', () => {
-  const update = jest.fn();
-  afterEach(() => {
-    update.mockClear();
+  let applicationStart: ReturnType<typeof applicationServiceMock.createStartContract>;
+  let subjectMock: jest.Mocked<Subject<AppUpdater>>;
+
+  beforeEach(() => {
+    applicationStart = applicationServiceMock.createStartContract();
+    subjectMock = {
+      next: jest.fn(),
+    } as any;
   });
+
   it('hides overview menu', () => {
-    const core = ({
-      application: {
-        capabilities: {
-          navLinks: {
-            apm: false,
-            logs: false,
-            metrics: false,
-            uptime: false,
-          },
-        },
+    applicationStart.capabilities = {
+      management: {},
+      catalogue: {},
+      navLinks: {
+        apm: false,
+        logs: false,
+        metrics: false,
+        uptime: false,
       },
-      chrome: { navLinks: { update } },
-    } as unknown) as CoreStart;
-    toggleOverviewLinkInNav(core);
-    expect(update).toHaveBeenCalledWith('observability-overview', { hidden: true });
+    };
+
+    toggleOverviewLinkInNav(subjectMock, applicationStart);
+
+    expect(subjectMock.next).toHaveBeenCalledTimes(1);
+    const updater = subjectMock.next.mock.calls[0][0]!;
+    expect(updater({} as any)).toEqual({
+      navLinkStatus: AppNavLinkStatus.hidden,
+    });
   });
   it('shows overview menu', () => {
-    const core = ({
-      application: {
-        capabilities: {
-          navLinks: {
-            apm: true,
-            logs: false,
-            metrics: false,
-            uptime: false,
-          },
-        },
+    applicationStart.capabilities = {
+      management: {},
+      catalogue: {},
+      navLinks: {
+        apm: true,
+        logs: false,
+        metrics: false,
+        uptime: false,
       },
-      chrome: { navLinks: { update } },
-    } as unknown) as CoreStart;
-    toggleOverviewLinkInNav(core);
-    expect(update).not.toHaveBeenCalled();
+    };
+
+    toggleOverviewLinkInNav(subjectMock, applicationStart);
+
+    expect(subjectMock.next).not.toHaveBeenCalled();
   });
 });

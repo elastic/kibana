@@ -31,6 +31,7 @@ export const JobConfigurationOutdatedCallout: React.FC<{
       values={{
         moduleName,
       }}
+      tagName="p"
     />
   </RecreateJobCallout>
 );

@@ -90,6 +90,12 @@ class VisualizationChart extends React.Component<VisualizationChartProps> {
     const { vis } = this.props;
     const Visualization = vis.type.visualization;
 
+    if (!Visualization) {
+      throw new Error(
+        'Tried to use VisualizationChart component with a vis without visualization property.'
+      );
+    }
+
     this.visualization = new Visualization(this.chartDiv.current, vis);
 
     // We know that containerDiv.current will never be null, since we will always

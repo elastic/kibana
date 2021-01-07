@@ -18,7 +18,6 @@
  */
 import { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/camelcase */
 export const document = (specService: SpecDefinitionsService) => {
   specService.addEndpointDescription('update', {
     data_autocomplete_rules: {

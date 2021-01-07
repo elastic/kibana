@@ -27,7 +27,7 @@ export const pickSavedTimeline = (
     savedTimeline.updatedBy = userInfo?.username ?? UNAUTHENTICATED_USER;
   }
 
-  if (savedTimeline.status === TimelineStatus.draft) {
+  if (savedTimeline.status === TimelineStatus.draft || savedTimeline.status == null) {
     savedTimeline.status = !isEmpty(savedTimeline.title)
       ? TimelineStatus.active
       : TimelineStatus.draft;

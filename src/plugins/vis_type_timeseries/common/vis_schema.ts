@@ -80,8 +80,8 @@ export const metricsItems = schema.object({
   field: stringOptionalNullable,
   id: stringRequired,
   metric_agg: stringOptionalNullable,
-  numerator: stringOptionalNullable,
-  denominator: stringOptionalNullable,
+  numerator: schema.maybe(queryObject),
+  denominator: schema.maybe(queryObject),
   sigma: stringOptionalNullable,
   unit: stringOptionalNullable,
   model_type: stringOptionalNullable,
@@ -104,6 +104,7 @@ export const metricsItems = schema.object({
       })
     )
   ),
+  numberOfSignificantValueDigits: numberOptional,
   percentiles: schema.maybe(
     schema.arrayOf(
       schema.object({
@@ -111,7 +112,7 @@ export const metricsItems = schema.object({
         field: stringOptionalNullable,
         mode: schema.oneOf([schema.literal('line'), schema.literal('band')]),
         shade: schema.oneOf([numberOptional, stringOptionalNullable]),
-        value: schema.oneOf([numberOptional, stringOptionalNullable]),
+        value: schema.maybe(schema.oneOf([numberOptional, stringOptionalNullable])),
         percentile: stringOptionalNullable,
       })
     )
@@ -119,17 +120,16 @@ export const metricsItems = schema.object({
   type: stringRequired,
   value: stringOptionalNullable,
   values: schema.maybe(schema.nullable(schema.arrayOf(schema.nullable(schema.string())))),
+  size: stringOrNumberOptionalNullable,
+  agg_with: stringOptionalNullable,
+  order: stringOptionalNullable,
+  order_by: stringOptionalNullable,
 });
 
 const splitFiltersItems = schema.object({
   id: stringOptionalNullable,
   color: stringOptionalNullable,
-  filter: schema.maybe(
-    schema.object({
-      language: schema.string(),
-      query: schema.string(),
-    })
-  ),
+  filter: schema.maybe(queryObject),
   label: stringOptionalNullable,
 });
 
@@ -165,6 +165,7 @@ export const seriesItems = schema.object({
   hide_in_legend: numberIntegerOptional,
   hidden: schema.maybe(schema.boolean()),
   id: stringRequired,
+  ignore_global_filter: numberOptional,
   label: stringOptionalNullable,
   line_width: numberOptionalOrEmptyString,
   metrics: schema.arrayOf(metricsItems),
@@ -174,6 +175,7 @@ export const seriesItems = schema.object({
   separate_axis: numberIntegerOptional,
   seperate_axis: numberIntegerOptional,
   series_index_pattern: stringOptionalNullable,
+  series_max_bars: numberIntegerOptional,
   series_time_field: stringOptionalNullable,
   series_interval: stringOptionalNullable,
   series_drop_last_bucket: numberIntegerOptional,
@@ -228,11 +230,13 @@ export const panel = schema.object({
   ignore_global_filters: numberOptional,
   ignore_global_filter: numberOptional,
   index_pattern: stringRequired,
+  max_bars: numberIntegerOptional,
   interval: stringRequired,
   isModelInvalid: schema.maybe(schema.boolean()),
   legend_position: stringOptionalNullable,
   markdown: stringOptionalNullable,
   markdown_scrollbars: numberIntegerOptional,
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   markdown_openLinksInNewTab: numberIntegerOptional,
   markdown_vertical_align: stringOptionalNullable,
   markdown_less: stringOptionalNullable,
@@ -249,7 +253,14 @@ export const panel = schema.object({
   ),
   time_field: stringOptionalNullable,
   time_range_mode: stringOptionalNullable,
-  type: stringRequired,
+  type: schema.oneOf([
+    schema.literal('table'),
+    schema.literal('gauge'),
+    schema.literal('markdown'),
+    schema.literal('top_n'),
+    schema.literal('timeseries'),
+    schema.literal('metric'),
+  ]),
 });
 
 export const visPayloadSchema = schema.object({
@@ -265,10 +276,10 @@ export const visPayloadSchema = schema.object({
       })
     ),
   }),
-  savedObjectId: schema.maybe(schema.string()),
   timerange: schema.object({
     timezone: stringRequired,
     min: stringRequired,
     max: stringRequired,
   }),
+  sessionId: schema.maybe(schema.string()),
 });

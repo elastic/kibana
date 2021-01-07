@@ -9,10 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { isEqual } from 'lodash';
 import React, { Component } from 'react';
 import uuidv4 from 'uuid/v4';
-import {
-  BeatTag,
-  ConfigurationBlock,
-} from '../../../../../../legacy/plugins/beats_management/common/domain_types';
+import { BeatTag, ConfigurationBlock } from '../../../../common/domain_types';
 import { TagEdit } from '../../../components/tag/tag_edit';
 import { AppPageProps } from '../../../frontend_types';
 interface PageState {

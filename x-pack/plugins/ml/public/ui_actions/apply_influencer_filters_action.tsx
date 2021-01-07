@@ -5,14 +5,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionContextMapping, createAction } from '../../../../../src/plugins/ui_actions/public';
-import {
-  AnomalySwimlaneEmbeddable,
-  SwimLaneDrilldownContext,
-} from '../embeddables/anomaly_swimlane/anomaly_swimlane_embeddable';
+import { createAction } from '../../../../../src/plugins/ui_actions/public';
 import { MlCoreSetup } from '../plugin';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../application/explorer/explorer_constants';
 import { Filter, FilterStateStore } from '../../../../../src/plugins/data/common';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
 
 export const APPLY_INFLUENCER_FILTERS_ACTION = 'applyInfluencerFiltersAction';
 
@@ -21,18 +18,18 @@ export const CONTROLLED_BY_SWIM_LANE_FILTER = 'anomaly-swim-lane';
 export function createApplyInfluencerFiltersAction(
   getStartServices: MlCoreSetup['getStartServices']
 ) {
-  return createAction<typeof APPLY_INFLUENCER_FILTERS_ACTION>({
+  return createAction<SwimLaneDrilldownContext>({
     id: 'apply-to-current-view',
     type: APPLY_INFLUENCER_FILTERS_ACTION,
-    getIconType(context: ActionContextMapping[typeof APPLY_INFLUENCER_FILTERS_ACTION]): string {
+    getIconType(context: SwimLaneDrilldownContext): string {
       return 'filter';
     },
     getDisplayName() {
       return i18n.translate('xpack.ml.actions.applyInfluencersFiltersTitle', {
-        defaultMessage: 'Filer for value',
+        defaultMessage: 'Filter for value',
       });
     },
-    async execute({ data }: SwimLaneDrilldownContext) {
+    async execute({ data }) {
       if (!data) {
         throw new Error('No swim lane selection data provided');
       }
@@ -70,10 +67,10 @@ export function createApplyInfluencerFiltersAction(
         })
       );
     },
-    async isCompatible({ embeddable, data }: SwimLaneDrilldownContext) {
+    async isCompatible({ embeddable, data }) {
       // Only compatible with view by influencer swim lanes and single selection
       return (
-        embeddable instanceof AnomalySwimlaneEmbeddable &&
+        embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE &&
         data !== undefined &&
         data.type === SWIMLANE_TYPE.VIEW_BY &&
         data.viewByFieldName !== VIEW_BY_JOB_LABEL &&

@@ -5,8 +5,9 @@
  */
 
 import { useMemo } from 'react';
-import { callApi, FetchOptions } from '../services/rest/callApi';
-import { useApmPluginContext } from './useApmPluginContext';
+import { callApi } from '../services/rest/callApi';
+import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
+import { FetchOptions } from '../../common/fetch_options';
 
 export function useCallApi() {
   const { http } = useApmPluginContext().core;

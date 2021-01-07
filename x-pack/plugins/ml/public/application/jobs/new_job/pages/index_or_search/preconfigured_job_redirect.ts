@@ -4,19 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ApplicationStart } from 'kibana/public';
 import { IndexPatternsContract } from '../../../../../../../../../src/plugins/data/public';
 import { mlJobService } from '../../../../services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
-export async function preConfiguredJobRedirect(indexPatterns: IndexPatternsContract) {
+export async function preConfiguredJobRedirect(
+  indexPatterns: IndexPatternsContract,
+  basePath: string,
+  navigateToUrl: ApplicationStart['navigateToUrl']
+) {
   const { job } = mlJobService.tempJobCloningObjects;
   if (job) {
     try {
       await loadIndexPatterns(indexPatterns);
       const redirectUrl = getWizardUrlFromCloningJob(job);
-      window.location.href = `#/${redirectUrl}`;
+      await navigateToUrl(`${basePath}/app/ml/${redirectUrl}`);
       return Promise.reject();
     } catch (error) {
       return Promise.resolve();
