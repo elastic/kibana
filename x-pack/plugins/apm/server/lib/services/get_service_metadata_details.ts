@@ -13,7 +13,6 @@ import {
   CONTAINER,
   HOST,
   KUBERNETES,
-  PROCESSOR_EVENT,
   SERVICE,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
@@ -68,7 +67,6 @@ export async function getServiceMetadataDetails({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { range: rangeFilter(start, end) },
     ...setup.esFilter,
   ];
@@ -82,9 +80,7 @@ export async function getServiceMetadataDetails({
   ];
 
   const params = {
-    apm: {
-      events: [ProcessorEvent.transaction],
-    },
+    apm: { events: [ProcessorEvent.metric] },
     body: {
       size: 1,
       _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],

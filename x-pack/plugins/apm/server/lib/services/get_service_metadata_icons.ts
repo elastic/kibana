@@ -9,7 +9,6 @@ import {
   CLOUD_PROVIDER,
   CONTAINER_ID,
   KUBERNETES,
-  PROCESSOR_EVENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
@@ -40,15 +39,12 @@ export async function getServiceMetadataIcons({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
     { range: rangeFilter(start, end) },
     ...setup.esFilter,
   ];
 
   const params = {
-    apm: {
-      events: [ProcessorEvent.transaction],
-    },
+    apm: { events: [ProcessorEvent.metric] },
     terminateAfter: 1,
     body: {
       size: 1,
