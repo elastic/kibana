@@ -6,7 +6,7 @@
 
 import { render } from 'enzyme';
 import React from 'react';
-import { Download } from '..';
+import { Download } from '.';
 
 describe('<Download />', () => {
   test('has canvasDownload class', () => {
