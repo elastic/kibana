@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import { setApplicationUsageTracker, TrackApplicationView } from './track_application_view';
+import { ApplicationUsageContext, TrackApplicationView } from './track_application_view';
 import { IApplicationUsageTracker } from '../../plugin';
 import { fireEvent } from '@testing-library/react';
 
@@ -39,13 +39,14 @@ describe('TrackApplicationView', () => {
       flushTrackedView: jest.fn(),
       updateViewClickCounter: jest.fn(),
     };
-    setApplicationUsageTracker(applicationUsageTrackerMock);
     expect(applicationUsageTrackerMock.trackApplicationViewUsage).not.toHaveBeenCalled();
     const viewId = 'testView';
     const component = mountWithIntl(
-      <TrackApplicationView viewId={viewId}>
-        <h1>Hello</h1>
-      </TrackApplicationView>
+      <ApplicationUsageContext.Provider value={applicationUsageTrackerMock}>
+        <TrackApplicationView viewId={viewId}>
+          <h1>Hello</h1>
+        </TrackApplicationView>
+      </ApplicationUsageContext.Provider>
     );
     expect(applicationUsageTrackerMock.trackApplicationViewUsage).toHaveBeenCalledWith(viewId);
     expect(applicationUsageTrackerMock.updateViewClickCounter).not.toHaveBeenCalled();

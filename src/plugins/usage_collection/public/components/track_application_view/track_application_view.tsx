@@ -17,10 +17,14 @@
  * under the License.
  */
 
-import React, { FC } from 'react';
+import React, { createContext, FC } from 'react';
 import { TrackApplicationViewComponent } from './track_application_view_component';
 import { IApplicationUsageTracker } from '../../plugin';
 import { TrackApplicationViewProps } from './types';
+
+export const ApplicationUsageContext = createContext<IApplicationUsageTracker | undefined>(
+  undefined
+);
 
 /**
  * React component to track the number of clicks and minutes on screen of the children components.
@@ -28,22 +32,28 @@ import { TrackApplicationViewProps } from './types';
  * @constructor
  */
 export const TrackApplicationView: FC<TrackApplicationViewProps> = (props) => {
-  const propsWithTracker = { ...props, applicationUsageTracker };
-  return <TrackApplicationViewComponent {...propsWithTracker} />;
+  return (
+    <ApplicationUsageContext.Consumer>
+      {(value) => {
+        const propsWithTracker = { ...props, applicationUsageTracker: value };
+        return <TrackApplicationViewComponent {...propsWithTracker} />;
+      }}
+    </ApplicationUsageContext.Consumer>
+  );
 };
 
-/**
- * Maintain in memory the applicationUsageTracker in the browser.
- * There should only exist one reporter at a time, so this is not a big deal to have a global variable.
- * @private
- */
-let applicationUsageTracker: IApplicationUsageTracker | undefined;
-
-/**
- * Lazy setter of the singleton applicationUsageTracker. To be called by the plugin once the reporter is initialised.
- * @param newApplicationUsageTracker The new applicationUsageTracker to be set.
- * @private
- */
-export function setApplicationUsageTracker(newApplicationUsageTracker: IApplicationUsageTracker) {
-  applicationUsageTracker = newApplicationUsageTracker;
-}
+// /**
+//  * Maintain in memory the applicationUsageTracker in the browser.
+//  * There should only exist one reporter at a time, so this is not a big deal to have a global variable.
+//  * @private
+//  */
+// let applicationUsageTracker: IApplicationUsageTracker | undefined;
+//
+// /**
+//  * Lazy setter of the singleton applicationUsageTracker. To be called by the plugin once the reporter is initialised.
+//  * @param newApplicationUsageTracker The new applicationUsageTracker to be set.
+//  * @private
+//  */
+// export function setApplicationUsageTracker(newApplicationUsageTracker: IApplicationUsageTracker) {
+//   applicationUsageTracker = newApplicationUsageTracker;
+// }

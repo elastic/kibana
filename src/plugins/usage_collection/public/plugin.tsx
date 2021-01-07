@@ -19,6 +19,7 @@
 
 import { Reporter, METRIC_TYPE, ApplicationUsageTracker } from '@kbn/analytics';
 import { Subject, merge, Subscription } from 'rxjs';
+import React from 'react';
 import { Storage } from '../../kibana_utils/public';
 import { createReporter, trackApplicationUsageChange } from './services';
 import {
@@ -28,7 +29,7 @@ import {
   CoreStart,
   HttpSetup,
 } from '../../../core/public';
-import { setApplicationUsageTracker } from './components/track_application_view';
+import { ApplicationUsageContext } from './components/track_application_view';
 
 export interface PublicConfigType {
   uiCounters: {
@@ -42,6 +43,9 @@ export type IApplicationUsageTracker = Pick<
 >;
 
 export interface UsageCollectionSetup {
+  components: {
+    ApplicationUsageTrackingProvider: React.FC;
+  };
   allowTrackUserAgent: (allow: boolean) => void;
   applicationUsageTracker: IApplicationUsageTracker;
   reportUiCounter: Reporter['reportUiCounter'];
@@ -95,9 +99,15 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup, Usage
     this.applicationUsageTracker = new ApplicationUsageTracker(this.reporter);
 
     const applicationUsageTracker = this.getPublicApplicationUsageTracker();
-    setApplicationUsageTracker(applicationUsageTracker);
 
     return {
+      components: {
+        ApplicationUsageTrackingProvider: (props) => (
+          <ApplicationUsageContext.Provider value={applicationUsageTracker}>
+            {props.children}
+          </ApplicationUsageContext.Provider>
+        ),
+      },
       applicationUsageTracker,
       allowTrackUserAgent: (allow: boolean) => {
         this.trackUserAgent = allow;

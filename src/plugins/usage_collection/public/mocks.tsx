@@ -17,8 +17,10 @@
  * under the License.
  */
 
+import React from 'react';
 import { ApplicationUsageTracker } from '@kbn/analytics';
 import { UsageCollectionSetup, METRIC_TYPE } from '.';
+import { ApplicationUsageContext } from './components/track_application_view';
 
 export type Setup = jest.Mocked<UsageCollectionSetup>;
 
@@ -34,6 +36,13 @@ export const createApplicationUsageTrackerMock = (): ApplicationUsageTracker => 
 const createSetupContract = (): Setup => {
   const applicationUsageTrackerMock = createApplicationUsageTrackerMock();
   const setupContract: Setup = {
+    components: {
+      ApplicationUsageTrackingProvider: (props) => (
+        <ApplicationUsageContext.Provider value={applicationUsageTrackerMock}>
+          {props.children}
+        </ApplicationUsageContext.Provider>
+      ),
+    },
     applicationUsageTracker: applicationUsageTrackerMock,
     allowTrackUserAgent: jest.fn(),
     reportUiCounter: jest.fn(),

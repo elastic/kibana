@@ -18,4 +18,4 @@
  */
 
 export type { TrackApplicationViewProps } from './types';
-export { setApplicationUsageTracker, TrackApplicationView } from './track_application_view';
+export { ApplicationUsageContext, TrackApplicationView } from './track_application_view';
