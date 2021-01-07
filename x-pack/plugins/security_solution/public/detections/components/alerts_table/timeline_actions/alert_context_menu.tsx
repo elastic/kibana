@@ -87,7 +87,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   const { addWarning } = useAppToasts();
 
-  const getAlertStatus = useCallback(() => {
+  const alertStatus = useMemo(() => {
     return ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status);
   }, [ecsRowData]);
 
@@ -341,11 +341,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 
   const statusFilters = useMemo(() => {
-    if (!getAlertStatus()) {
+    if (!alertStatus) {
       return [];
     }
 
-    switch (getAlertStatus()) {
+    switch (alertStatus) {
       case 'open':
         return [inProgressAlertActionComponent, closeAlertActionComponent];
       case 'in-progress':
@@ -359,7 +359,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     closeAlertActionComponent,
     inProgressAlertActionComponent,
     openAlertActionComponent,
-    getAlertStatus,
+    alertStatus,
   ]);
 
   const items = useMemo(
@@ -393,7 +393,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           alertData={ecsRowData}
           onCancel={onAddExceptionCancel}
           onConfirm={onAddExceptionConfirm}
-          alertStatus={getAlertStatus()}
+          alertStatus={alertStatus}
           onRuleChange={onRuleChange}
         />
       )}
