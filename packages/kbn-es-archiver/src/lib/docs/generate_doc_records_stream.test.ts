@@ -18,22 +18,21 @@
  */
 
 import sinon from 'sinon';
-import expect from '@kbn/expect';
 import { delay } from 'bluebird';
 import { createListStream, createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
-import { createGenerateDocRecordsStream } from '../generate_doc_records_stream';
-import { Progress } from '../../progress';
-import { createStubStats, createStubClient } from './stubs';
+import { createGenerateDocRecordsStream } from './generate_doc_records_stream';
+import { Progress } from '../progress';
+import { createStubStats, createStubClient } from './__mocks__/stubs';
 
 describe('esArchiver: createGenerateDocRecordsStream()', () => {
   it('scolls 1000 documents at a time', async () => {
     const stats = createStubStats();
     const client = createStubClient([
       (name, params) => {
-        expect(name).to.be('search');
-        expect(params).to.have.property('index', 'logstash-*');
-        expect(params).to.have.property('size', 1000);
+        expect(name).toBe('search');
+        expect(params).toHaveProperty('index', 'logstash-*');
+        expect(params).toHaveProperty('size', 1000);
         return {
           hits: {
             total: 0,
@@ -49,18 +48,18 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       createGenerateDocRecordsStream({ client, stats, progress }),
     ]);
 
-    expect(progress.getTotal()).to.be(0);
-    expect(progress.getComplete()).to.be(0);
+    expect(progress.getTotal()).toBe(0);
+    expect(progress.getComplete()).toBe(0);
   });
 
   it('uses a 1 minute scroll timeout', async () => {
     const stats = createStubStats();
     const client = createStubClient([
       (name, params) => {
-        expect(name).to.be('search');
-        expect(params).to.have.property('index', 'logstash-*');
-        expect(params).to.have.property('scroll', '1m');
-        expect(params).to.have.property('rest_total_hits_as_int', true);
+        expect(name).toBe('search');
+        expect(params).toHaveProperty('index', 'logstash-*');
+        expect(params).toHaveProperty('scroll', '1m');
+        expect(params).toHaveProperty('rest_total_hits_as_int', true);
         return {
           hits: {
             total: 0,
@@ -76,8 +75,8 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       createGenerateDocRecordsStream({ client, stats, progress }),
     ]);
 
-    expect(progress.getTotal()).to.be(0);
-    expect(progress.getComplete()).to.be(0);
+    expect(progress.getTotal()).toBe(0);
+    expect(progress.getComplete()).toBe(0);
   });
 
   it('consumes index names and scrolls completely before continuing', async () => {
@@ -85,8 +84,8 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
     let checkpoint = Date.now();
     const client = createStubClient([
       async (name, params) => {
-        expect(name).to.be('search');
-        expect(params).to.have.property('index', 'index1');
+        expect(name).toBe('search');
+        expect(params).toHaveProperty('index', 'index1');
         await delay(200);
         return {
           _scroll_id: 'index1ScrollId',
@@ -94,17 +93,17 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         };
       },
       async (name, params) => {
-        expect(name).to.be('scroll');
-        expect(params).to.have.property('scrollId', 'index1ScrollId');
-        expect(Date.now() - checkpoint).to.not.be.lessThan(200);
+        expect(name).toBe('scroll');
+        expect(params).toHaveProperty('scrollId', 'index1ScrollId');
+        expect(Date.now() - checkpoint).not.toBeLessThan(200);
         checkpoint = Date.now();
         await delay(200);
         return { hits: { total: 2, hits: [{ _id: 2, _index: 'foo' }] } };
       },
       async (name, params) => {
-        expect(name).to.be('search');
-        expect(params).to.have.property('index', 'index2');
-        expect(Date.now() - checkpoint).to.not.be.lessThan(200);
+        expect(name).toBe('search');
+        expect(params).toHaveProperty('index', 'index2');
+        expect(Date.now() - checkpoint).not.toBeLessThan(200);
         checkpoint = Date.now();
         await delay(200);
         return { hits: { total: 0, hits: [] } };
@@ -118,7 +117,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       createConcatStream([]),
     ]);
 
-    expect(docRecords).to.eql([
+    expect(docRecords).toEqual([
       {
         type: 'doc',
         value: {
@@ -139,7 +138,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       },
     ]);
     sinon.assert.calledTwice(stats.archivedDoc as any);
-    expect(progress.getTotal()).to.be(2);
-    expect(progress.getComplete()).to.be(2);
+    expect(progress.getTotal()).toBe(2);
+    expect(progress.getComplete()).toBe(2);
   });
 });
