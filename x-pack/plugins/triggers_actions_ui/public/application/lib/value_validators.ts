@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { constant } from 'lodash';
+import { constant, get, set } from 'lodash';
+import { UserConfiguredActionConnector, IErrorObject, Alert } from '../../types';
 
 export function throwIfAbsent<T>(message: string) {
   return (value: T | undefined): T => {
@@ -43,3 +44,58 @@ export const isValidUrl = (urlString: string, protocol?: string) => {
     return false;
   }
 };
+
+export function getConnectorWithInvalidatedFields(
+  connector: UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>,
+  configErrors: IErrorObject,
+  secretsErrors: IErrorObject,
+  baseConnectorErrors: IErrorObject
+) {
+  Object.keys(configErrors).forEach((errorKey) => {
+    if (configErrors[errorKey].length >= 1 && get(connector.config, errorKey) === undefined) {
+      set(connector.config, errorKey, null);
+    }
+  });
+  Object.keys(secretsErrors).forEach((errorKey) => {
+    if (secretsErrors[errorKey].length >= 1 && get(connector.secrets, errorKey) === undefined) {
+      set(connector.secrets, errorKey, null);
+    }
+  });
+  Object.keys(baseConnectorErrors).forEach((errorKey) => {
+    if (baseConnectorErrors[errorKey].length >= 1 && get(connector, errorKey) === undefined) {
+      set(connector, errorKey, null);
+    }
+  });
+  return connector;
+}
+
+export function getAlertWithInvalidatedFields(
+  alert: Alert,
+  paramsErrors: IErrorObject,
+  baseAlertErrors: IErrorObject,
+  actionsErrors: Record<string, IErrorObject>
+) {
+  Object.keys(paramsErrors).forEach((errorKey) => {
+    if (paramsErrors[errorKey].length >= 1 && get(alert.params, errorKey) === undefined) {
+      set(alert.params, errorKey, null);
+    }
+  });
+  Object.keys(baseAlertErrors).forEach((errorKey) => {
+    if (baseAlertErrors[errorKey].length >= 1 && get(alert, errorKey) === undefined) {
+      set(alert, errorKey, null);
+    }
+  });
+  Object.keys(actionsErrors).forEach((actionId) => {
+    const actionToValidate = alert.actions.find((action) => action.id === actionId);
+    Object.keys(actionsErrors[actionId]).forEach((errorKey) => {
+      if (
+        actionToValidate &&
+        actionsErrors[actionId][errorKey].length >= 1 &&
+        get(actionToValidate!.params, errorKey) === undefined
+      ) {
+        set(actionToValidate!.params, errorKey, null);
+      }
+    });
+  });
+  return alert;
+}

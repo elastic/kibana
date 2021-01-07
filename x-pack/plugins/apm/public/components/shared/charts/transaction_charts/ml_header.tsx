@@ -10,6 +10,7 @@ import { isEmpty } from 'lodash';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { MLSingleMetricLink } from '../../Links/MachineLearningLinks/MLSingleMetricLink';
 
@@ -33,12 +34,13 @@ const ShiftedEuiText = styled(EuiText)`
 export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
+  const { transactionType } = useApmServiceContext();
 
   if (!hasValidMlLicense || !mlJobId) {
     return null;
   }
 
-  const { kuery, transactionType } = urlParams;
+  const { kuery } = urlParams;
 
   const hasKuery = !isEmpty(kuery);
   const icon = hasKuery ? (
