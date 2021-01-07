@@ -1,0 +1,18 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": ["common/**/*", "public/**/*"],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../dashboard/tsconfig.json" },
+    //
+    // The following are dependencies that have not been typed yet.
+    // { "path": "../saved_objects/tsconfig.json" },
+  ]
+}
