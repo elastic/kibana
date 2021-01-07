@@ -16,11 +16,14 @@ import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import {
   MlSummaryJob,
   AuditMessage,
-  Job,
-  JobStats,
   DatafeedWithStats,
   CombinedJobWithStats,
 } from '../../../common/types/anomaly_detection_jobs';
+import {
+  MlJobsResponse,
+  MlJobsStatsResponse,
+  JobsExistResponse,
+} from '../../../common/types/job_service';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider, MlDatafeedsResponse, MlDatafeedsStatsResponse } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
@@ -33,16 +36,6 @@ import {
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
-
-export interface MlJobsResponse {
-  jobs: Job[];
-  count: number;
-}
-
-export interface MlJobsStatsResponse {
-  jobs: JobStats[];
-  count: number;
-}
 
 interface Results {
   [id: string]: {
@@ -420,10 +413,18 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
   // Checks if each of the jobs in the specified list of IDs exist.
   // Job IDs in supplied array may contain wildcard '*' characters
   // e.g. *_low_request_rate_ecs
-  async function jobsExist(jobIds: string[] = [], allSpaces: boolean = false) {
+  async function jobsExist(
+    jobIds: string[] = [],
+    allSpaces: boolean = false
+  ): Promise<JobsExistResponse> {
     const results: { [id: string]: boolean } = {};
     for (const jobId of jobIds) {
       try {
+        if (jobId === '') {
+          results[jobId] = false;
+          continue;
+        }
+
         const { body } = allSpaces
           ? await client.asInternalUser.ml.getJobs<MlJobsResponse>({
               job_id: jobId,

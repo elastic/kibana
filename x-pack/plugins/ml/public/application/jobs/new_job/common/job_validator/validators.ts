@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import { Observable, Subject } from 'rxjs';
 import {
@@ -13,6 +14,7 @@ import {
 } from '../../../../services/ml_api_service';
 import { JobCreator } from '../job_creator';
 import { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import { BasicValidations } from './job_validator';
 
 export enum VALIDATOR_SEVERITY {
   ERROR,
@@ -26,7 +28,22 @@ export interface CardinalityValidatorError {
   };
 }
 
+const jobExistsErrorMessage = i18n.translate(
+  'xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists',
+  {
+    defaultMessage:
+      'Job ID already exists. A job ID cannot be the same as an existing job or group.',
+  }
+);
+
 export type CardinalityValidatorResult = CardinalityValidatorError | null;
+
+export type JobExistsResult = {
+  jobIdExists: BasicValidations['jobId'];
+} | null;
+export type GroupsExistResult = {
+  groupIdsExist: BasicValidations['groupIds'];
+} | null;
 
 export function isCardinalityModelPlotHigh(
   cardinalityValidationResult: CardinalityValidationResult
@@ -72,6 +89,74 @@ export function cardinalityValidator(
         }
       }
       return null;
+    })
+  );
+}
+
+export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<JobExistsResult> {
+  return jobCreator$.pipe(
+    map((jobCreator) => {
+      return {
+        jobCreator,
+        jobId: jobCreator.jobId,
+      };
+    }),
+    // No need to perform an API call if the analysis configuration hasn't been changed
+    distinctUntilChanged((prev, curr) => {
+      return prev.jobId === curr.jobId;
+    }),
+    switchMap(({ jobId }) => {
+      return ml.jobs.jobsExist$([jobId], true);
+    }),
+    map((jobExistsResults) => {
+      const dd = Object.values(jobExistsResults);
+      if (dd[0] === true) {
+        return {
+          jobIdExists: {
+            valid: false,
+            message: jobExistsErrorMessage,
+          },
+        };
+      }
+      return {
+        jobIdExists: {
+          valid: true,
+        },
+      };
+    })
+  );
+}
+
+export function groupIdsValidator(jobCreator$: Subject<JobCreator>): Observable<GroupsExistResult> {
+  return jobCreator$.pipe(
+    map((jobCreator) => {
+      return {
+        jobCreator,
+        groups: jobCreator.groups,
+      };
+    }),
+    // No need to perform an API call if the analysis configuration hasn't been changed
+    distinctUntilChanged((prev, curr) => {
+      return JSON.stringify(prev.groups) === JSON.stringify(curr.groups);
+    }),
+    switchMap(({ groups }) => {
+      return ml.jobs.jobsExist$(groups, true);
+    }),
+    map((jobExistsResults) => {
+      const dd = Object.values(jobExistsResults);
+      if (dd[0] === true) {
+        return {
+          groupIdsExist: {
+            valid: false,
+            message: jobExistsErrorMessage,
+          },
+        };
+      }
+      return {
+        groupIdsExist: {
+          valid: true,
+        },
+      };
     })
   );
 }

@@ -43,7 +43,7 @@ import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
-import { MlJobsStatsResponse } from '../job_service/jobs';
+import { MlJobsStatsResponse } from '../../../common/types/job_service';
 import { JobSavedObjectService } from '../../saved_objects';
 
 const ML_DIR = 'ml';

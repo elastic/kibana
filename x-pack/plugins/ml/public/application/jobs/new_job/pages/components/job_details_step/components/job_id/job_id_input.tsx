@@ -24,8 +24,8 @@ export const JobIdInput: FC = () => {
   useEffect(() => {
     const isEmptyId = jobId === '';
     setValidation({
-      valid: isEmptyId === true || jobValidator.jobId.valid,
-      message: isEmptyId === false ? jobValidator.jobId.message : '',
+      valid: isEmptyId === true || jobValidator.latestValidationResult.jobId?.valid === true,
+      message: isEmptyId === false ? jobValidator.latestValidationResult.jobId?.message : '',
     });
   }, [jobValidatorUpdated]);
 
