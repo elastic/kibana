@@ -318,7 +318,7 @@ describe('API Keys', () => {
       });
       expect(mockScopedClusterClient.asCurrentUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
-          id: '123',
+          ids: ['123'],
         },
       });
     });
@@ -345,7 +345,7 @@ describe('API Keys', () => {
       });
       expect(mockScopedClusterClient.asCurrentUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
-          id: '123',
+          ids: ['123'],
         },
       });
     });
@@ -378,7 +378,7 @@ describe('API Keys', () => {
       });
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
-          id: '123',
+          ids: ['123'],
         },
       });
     });
@@ -405,7 +405,7 @@ describe('API Keys', () => {
       });
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledWith({
         body: {
-          id: '123',
+          ids: ['123'],
         },
       });
     });
