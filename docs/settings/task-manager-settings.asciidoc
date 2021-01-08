@@ -1,0 +1,32 @@
+[role="xpack"]
+[[task-manager-settings-kb]]
+=== Task Manager settings in {kib}
+++++
+<titleabbrev>Task Manager settings</titleabbrev>
+++++
+
+Task Manager runs background tasks by polling for work on an interval.  You can configure its behavior to tune for performance and throughput.
+
+[float]
+[[task-manager-settings]]
+==== Task Manager settings 
+
+[cols="2*<"]
+|===
+| `xpack.task_manager.max_attempts`
+  | The maximum number of times a task will be attempted before being abandoned as failed.  Defaults to 3.
+
+| `xpack.task_manager.poll_interval`
+  | How often, in milliseconds, the task manager will look for more work.  Defaults to 3000 and cannot be lower than 100.
+
+| `xpack.task_manager.request_capacity`
+  | How many requests can Task Manager buffer before it rejects new requests.  Defaults to 1000.
+
+| `xpack.task_manager.index`
+  | The name of the index used to store task information.  Defaults to `.kibana_task_manager`.
+
+  | `xpack.task_manager.max_workers`
+  | The maximum number of tasks that this Kibana instance will run simultaneously.  Defaults to 10.
+  
+
+|===

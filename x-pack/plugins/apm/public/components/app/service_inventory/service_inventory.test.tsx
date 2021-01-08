@@ -21,7 +21,7 @@ import {
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import * as useLocalUIFilters from '../../../hooks/useLocalUIFilters';
 import * as useDynamicIndexPatternHooks from '../../../hooks/use_dynamic_index_pattern';
-import { SessionStorageMock } from '../../../services/__test__/SessionStorageMock';
+import { SessionStorageMock } from '../../../services/__mocks__/SessionStorageMock';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import * as hook from './use_anomaly_detection_jobs_fetcher';
 

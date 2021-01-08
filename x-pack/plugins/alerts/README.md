@@ -142,8 +142,41 @@ This example receives server and threshold as parameters. It will read the CPU u
 
 ```typescript
 import { schema } from '@kbn/config-schema';
+import {
+	Alert,
+	AlertTypeParams,
+	AlertTypeState,
+	AlertInstanceState,
+	AlertInstanceContext
+} from 'x-pack/plugins/alerts/common';
 ...
-server.newPlatform.setup.plugins.alerts.registerType({
+interface MyAlertTypeParams extends AlertTypeParams {
+	server: string;
+	threshold: number;
+}
+
+interface MyAlertTypeState extends AlertTypeState {
+	lastChecked: number;
+}
+
+interface MyAlertTypeInstanceState extends AlertInstanceState {
+	cpuUsage: number;
+}
+
+interface MyAlertTypeInstanceContext extends AlertInstanceContext {
+	server: string;
+	hasCpuUsageIncreased: boolean;
+}
+
+type MyAlertTypeActionGroups = 'default' | 'warning';
+  
+const myAlertType: AlertType<
+	MyAlertTypeParams,
+	MyAlertTypeState,
+	MyAlertTypeInstanceState,
+	MyAlertTypeInstanceContext,
+	MyAlertTypeActionGroups
+> = {
 	id: 'my-alert-type',
 	name: 'My alert type',
 	validate: {
@@ -180,7 +213,7 @@ server.newPlatform.setup.plugins.alerts.registerType({
 		services,
 		params,
 		state,
-	}: AlertExecutorOptions) {
+	}: AlertExecutorOptions<MyAlertTypeParams, MyAlertTypeState, MyAlertTypeInstanceState, MyAlertTypeInstanceContext, MyAlertTypeActionGroups>) {
 		// Let's assume params is { server: 'server_1', threshold: 0.8 }
 		const { server, threshold } = params;
 
@@ -219,7 +252,9 @@ server.newPlatform.setup.plugins.alerts.registerType({
 		};
 	},
 	producer: 'alerting',
-});
+};
+
+server.newPlatform.setup.plugins.alerts.registerType(myAlertType);
 ```
 
 This example only receives threshold as a parameter. It will read the CPU usage of all the servers and schedule individual actions if the reading for a server is greater than the threshold. This is a better implementation than above as only one query is performed for all the servers instead of one query per server.
