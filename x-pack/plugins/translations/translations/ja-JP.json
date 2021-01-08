@@ -17153,7 +17153,6 @@
     "xpack.security.roles.breadcrumb": "ロール",
     "xpack.security.roles.createBreadcrumb": "作成",
     "xpack.security.users.breadcrumb": "ユーザー",
-    "xpack.security.users.createBreadcrumb": "作成",
     "xpack.securitySolution.accessibility.tooltipWithKeyboardShortcut.pressTooltipLabel": "プレス",
     "xpack.securitySolution.add_filter_to_global_search_bar.filterForValueHoverAction": "値でフィルター",
     "xpack.securitySolution.add_filter_to_global_search_bar.filterOutValueHoverAction": "値を除外",

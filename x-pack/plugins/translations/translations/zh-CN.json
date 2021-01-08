@@ -17197,7 +17197,6 @@
     "xpack.security.roles.breadcrumb": "角色",
     "xpack.security.roles.createBreadcrumb": "创建",
     "xpack.security.users.breadcrumb": "用户",
-    "xpack.security.users.createBreadcrumb": "创建",
     "xpack.securitySolution.accessibility.tooltipWithKeyboardShortcut.pressTooltipLabel": "按",
     "xpack.securitySolution.add_filter_to_global_search_bar.filterForValueHoverAction": "筛留值",
     "xpack.securitySolution.add_filter_to_global_search_bar.filterOutValueHoverAction": "筛除值",
