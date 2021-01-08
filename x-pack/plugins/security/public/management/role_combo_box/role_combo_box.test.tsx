@@ -52,7 +52,6 @@ describe('RoleComboBox', () => {
     expect(wrapper).toMatchInlineSnapshot(`
       <EuiComboBox
         async={false}
-        className="rolesDropdown"
         compressed={false}
         data-test-subj="rolesDropdown"
         fullWidth={false}

@@ -50,7 +50,8 @@ export class RoleValidator {
     if (role.name.length > MAX_NAME_LENGTH) {
       return invalid(
         i18n.translate('xpack.security.management.editRole.validateRole.nameLengthWarningMessage', {
-          defaultMessage: `Name must not exceed ${MAX_NAME_LENGTH} characters.`,
+          defaultMessage: 'Name must not exceed {maxLength} characters.',
+          values: { maxLength: MAX_NAME_LENGTH },
         })
       );
     }

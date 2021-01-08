@@ -224,6 +224,8 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
               autoComplete="new-password"
             />
           </EuiFormRow>
+          {/* Hidden submit button is required for enter key to trigger form submission */}
+          <input type="submit" hidden />
         </EuiForm>
       )}
     </FormFlyout>

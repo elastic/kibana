@@ -125,7 +125,8 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           errors.username = i18n.translate(
             'xpack.security.management.users.userForm.usernameMaxLengthError',
             {
-              defaultMessage: `Username must be no more than ${MAX_NAME_LENGTH} characters.`,
+              defaultMessage: 'Username must not exceed {maxLength} characters.',
+              values: { maxLength: MAX_NAME_LENGTH },
             }
           );
         } else if (values.username.trim() !== values.username) {
