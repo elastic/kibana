@@ -6,6 +6,7 @@
 
 import { once } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { CoreStart } from 'kibana/public';
 import { JOB_ID_MAX_LENGTH, VALIDATION_STATUS } from './validation';
 
 export type MessageId = keyof ReturnType<typeof getMessages>;
@@ -40,8 +41,7 @@ export type JobValidationMessage = {
 };
 
 export const getMessages = once(() => {
-  const createJobsDocsUrl = `https://www.elastic.co/guide/en/machine-learning/{{version}}/create-jobs.html`;
-
+  const docLinks: CoreStart['docLinks'];
   return {
     categorizer_detector_missing_per_partition_field: {
       status: VALIDATION_STATUS.ERROR,
@@ -52,8 +52,7 @@ export const getMessages = once(() => {
             'Partition field must be set for detectors that reference "mlcategory" when per-partition categorization is enabled.',
         }
       ),
-      url:
-        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-categories.html',
+      url: `${docLinks.links.ml.anomalyDetectionCategories}`,
     },
     categorizer_varying_per_partition_fields: {
       status: VALIDATION_STATUS.ERROR,
@@ -68,8 +67,7 @@ export const getMessages = once(() => {
           },
         }
       ),
-      url:
-        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-categories.html',
+      url: `${docLinks.links.ml.anomalyDetectionCategories}`,
     },
     field_not_aggregatable: {
       status: VALIDATION_STATUS.ERROR,
@@ -79,16 +77,14 @@ export const getMessages = once(() => {
           fieldName: '"{{fieldName}}"',
         },
       }),
-      url:
-        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-aggregation.html',
+      url: `${docLinks.links.ml.anomalyDetectionAggs}`,
     },
     fields_not_aggregatable: {
       status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.fieldsNotAggregatableMessage', {
         defaultMessage: 'One of the detector fields is not an aggregatable field.',
       }),
-      url:
-        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-aggregation.html',
+      url: `${docLinks.links.ml.anomalyDetectionAggs}`,
     },
     cardinality_no_results: {
       status: VALIDATION_STATUS.WARNING,
@@ -119,8 +115,7 @@ export const getMessages = once(() => {
           },
         }
       ),
-      url:
-        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-aggregation.html',
+      url: `${docLinks.links.ml.anomalyDetectionAggs}`,
     },
     cardinality_by_field: {
       status: VALIDATION_STATUS.WARNING,
@@ -131,7 +126,7 @@ export const getMessages = once(() => {
           fieldName: 'by_field "{{fieldName}}"',
         },
       }),
-      url: `${createJobsDocsUrl}#cardinality`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsCardinality}`,
     },
     cardinality_over_field_low: {
       status: VALIDATION_STATUS.WARNING,
@@ -145,7 +140,7 @@ export const getMessages = once(() => {
           },
         }
       ),
-      url: `${createJobsDocsUrl}#cardinality`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsCardinality}`,
     },
     cardinality_over_field_high: {
       status: VALIDATION_STATUS.WARNING,
@@ -159,7 +154,7 @@ export const getMessages = once(() => {
           },
         }
       ),
-      url: `${createJobsDocsUrl}#cardinality`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsCardinality}`,
     },
     cardinality_partition_field: {
       status: VALIDATION_STATUS.WARNING,
@@ -173,7 +168,7 @@ export const getMessages = once(() => {
           },
         }
       ),
-      url: `${createJobsDocsUrl}#cardinality`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsCardinality}`,
     },
     cardinality_model_plot_high: {
       status: VALIDATION_STATUS.WARNING,
@@ -197,8 +192,7 @@ export const getMessages = once(() => {
           defaultMessage: 'Categorization filters checks passed.',
         }
       ),
-      url:
-        'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-configuring-categories.html',
+      url: `${docLinks.links.ml.anomalyDetectionCategories}`,
     },
     categorization_filters_invalid: {
       status: VALIDATION_STATUS.ERROR,
@@ -213,16 +207,14 @@ export const getMessages = once(() => {
           },
         }
       ),
-      url:
-        'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-analysisconfig',
+      url: `${docLinks.links.ml.createAnomalyDetectionJobsRequestBody}`,
     },
     bucket_span_empty: {
       status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.bucketSpanEmptyMessage', {
         defaultMessage: 'The bucket span field must be specified.',
       }),
-      url:
-        'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-analysisconfig',
+      url: `${docLinks.links.ml.createAnomalyDetectionJobsRequestBody}`,
     },
     bucket_span_estimation_mismatch: {
       status: VALIDATION_STATUS.INFO,
@@ -243,7 +235,7 @@ export const getMessages = once(() => {
           },
         }
       ),
-      url: `${createJobsDocsUrl}#bucket-span`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsBucketSpan}`,
     },
     bucket_span_high: {
       status: VALIDATION_STATUS.INFO,
@@ -254,7 +246,7 @@ export const getMessages = once(() => {
         defaultMessage:
           'Bucket span is 1 day or more. Be aware that days are considered as UTC days, not local days.',
       }),
-      url: `${createJobsDocsUrl}#bucket-span`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsBucketSpan}`,
     },
     bucket_span_valid: {
       status: VALIDATION_STATUS.SUCCESS,
@@ -267,8 +259,7 @@ export const getMessages = once(() => {
           bucketSpan: '"{{bucketSpan}}"',
         },
       }),
-      url:
-        'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-analysisconfig',
+      url: `${docLinks.links.ml.createAnomalyDetectionJobsRequestBody}`,
     },
     bucket_span_invalid: {
       status: VALIDATION_STATUS.ERROR,
@@ -279,8 +270,7 @@ export const getMessages = once(() => {
         defaultMessage:
           'The specified bucket span is not a valid time interval format e.g. 10m, 1h. It also needs to be higher than zero.',
       }),
-      url:
-        'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-analysisconfig',
+      url: `${docLinks.links.ml.createAnomalyDetectionJobsRequestBody}`,
     },
     detectors_duplicates: {
       status: VALIDATION_STATUS.ERROR,
@@ -297,21 +287,21 @@ export const getMessages = once(() => {
           partitionFieldNameParam: `'partition_field_name'`,
         },
       }),
-      url: `${createJobsDocsUrl}#detectors`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsDetectors}`,
     },
     detectors_empty: {
       status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsEmptyMessage', {
         defaultMessage: 'No detectors were found. At least one detector must be specified.',
       }),
-      url: `${createJobsDocsUrl}#detectors`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsDetectors}`,
     },
     detectors_function_empty: {
       status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.detectorsFunctionEmptyMessage', {
         defaultMessage: 'One of the detector functions is empty.',
       }),
-      url: `${createJobsDocsUrl}#detectors`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsDetectors}`,
     },
     detectors_function_not_empty: {
       status: VALIDATION_STATUS.SUCCESS,
@@ -327,7 +317,7 @@ export const getMessages = once(() => {
           defaultMessage: 'Presence of detector functions validated in all detectors.',
         }
       ),
-      url: `${createJobsDocsUrl}#detectors`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsDetectors}`,
     },
     index_fields_invalid: {
       status: VALIDATION_STATUS.ERROR,
@@ -348,7 +338,7 @@ export const getMessages = once(() => {
           'The job configuration includes more than 3 influencers. ' +
           'Consider using fewer influencers or creating multiple jobs.',
       }),
-      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
+      url: `${docLinks.links.ml.influencers}`,
     },
     influencer_low: {
       status: VALIDATION_STATUS.WARNING,
@@ -356,7 +346,7 @@ export const getMessages = once(() => {
         defaultMessage:
           'No influencers have been configured. Picking an influencer is strongly recommended.',
       }),
-      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
+      url: `${docLinks.links.ml.influencers}`,
     },
     influencer_low_suggestion: {
       status: VALIDATION_STATUS.WARNING,
@@ -368,7 +358,7 @@ export const getMessages = once(() => {
           values: { influencerSuggestion: '{{influencerSuggestion}}' },
         }
       ),
-      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
+      url: `${docLinks.links.ml.influencers}`,
     },
     influencer_low_suggestions: {
       status: VALIDATION_STATUS.WARNING,
@@ -380,15 +370,14 @@ export const getMessages = once(() => {
           values: { influencerSuggestion: '{{influencerSuggestion}}' },
         }
       ),
-      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
+      url: `${docLinks.links.ml.influencers}`,
     },
     job_id_empty: {
       status: VALIDATION_STATUS.ERROR,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.jobIdEmptyMessage', {
         defaultMessage: 'Job ID field must not be empty.',
       }),
-      url:
-        'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
+      url: `${docLinks.links.ml.createAnomalyDetectionJobsPathParams}`,
     },
     job_id_invalid: {
       status: VALIDATION_STATUS.ERROR,
@@ -397,8 +386,7 @@ export const getMessages = once(() => {
           'Job ID is invalid. It can contain lowercase alphanumeric (a-z and 0-9) characters, ' +
           'hyphens or underscores and must start and end with an alphanumeric character.',
       }),
-      url:
-        'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
+      url: `${docLinks.links.ml.createAnomalyDetectionJobsPathParams}`,
     },
     job_id_invalid_max_length: {
       status: VALIDATION_STATUS.ERROR,
@@ -412,8 +400,7 @@ export const getMessages = once(() => {
           },
         }
       ),
-      url:
-        'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
+      url: `${docLinks.links.ml.createAnomalyDetectionJobsPathParams}`,
     },
     job_id_valid: {
       status: VALIDATION_STATUS.SUCCESS,
@@ -429,8 +416,7 @@ export const getMessages = once(() => {
           maxLength: JOB_ID_MAX_LENGTH,
         },
       }),
-      url:
-        'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
+      url: `${docLinks.links.ml.createAnomalyDetectionJobsPathParams}`,
     },
     job_group_id_invalid: {
       status: VALIDATION_STATUS.ERROR,
@@ -439,8 +425,7 @@ export const getMessages = once(() => {
           'One of the job group names is invalid. They can contain lowercase ' +
           'alphanumeric (a-z and 0-9) characters, hyphens or underscores and must start and end with an alphanumeric character.',
       }),
-      url:
-        'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
+      url: `${docLinks.links.ml.createAnomalyDetectionJobsRequestBody}`,
     },
     job_group_id_invalid_max_length: {
       status: VALIDATION_STATUS.ERROR,
@@ -454,8 +439,7 @@ export const getMessages = once(() => {
           },
         }
       ),
-      url:
-        'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
+      url: `${docLinks.links.ml.createAnomalyDetectionJobsRequestBody}`,
     },
     job_group_id_valid: {
       status: VALIDATION_STATUS.SUCCESS,
@@ -471,8 +455,7 @@ export const getMessages = once(() => {
           maxLength: JOB_ID_MAX_LENGTH,
         },
       }),
-      url:
-        'https://www.elastic.co/guide/en/elasticsearch/reference/{{version}}/ml-job-resource.html#ml-job-resource',
+      url: `${docLinks.links.ml.createAnomalyDetectionJobsRequestBody}`,
     },
     missing_summary_count_field_name: {
       status: VALIDATION_STATUS.ERROR,
@@ -499,7 +482,7 @@ export const getMessages = once(() => {
       text: i18n.translate('xpack.ml.models.jobValidation.messages.successCardinalityMessage', {
         defaultMessage: 'Cardinality of detector fields is within recommended bounds.',
       }),
-      url: `${createJobsDocsUrl}#cardinality`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsCardinality}`,
     },
     success_bucket_span: {
       status: VALIDATION_STATUS.SUCCESS,
@@ -510,14 +493,14 @@ export const getMessages = once(() => {
         defaultMessage: 'Format of {bucketSpan} is valid and passed validation checks.',
         values: { bucketSpan: '"{{bucketSpan}}"' },
       }),
-      url: `${createJobsDocsUrl}#bucket-span`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsBucketSpan}`,
     },
     success_influencers: {
       status: VALIDATION_STATUS.SUCCESS,
       text: i18n.translate('xpack.ml.models.jobValidation.messages.successInfluencersMessage', {
         defaultMessage: 'Influencer configuration passed the validation checks.',
       }),
-      url: 'https://www.elastic.co/guide/en/machine-learning/{{version}}/ml-influencers.html',
+      url: `${docLinks.links.ml.influencers}`,
     },
     estimated_mml_greater_than_max_mml: {
       status: VALIDATION_STATUS.WARNING,
@@ -555,7 +538,7 @@ export const getMessages = once(() => {
           '1MB and should be specified in bytes e.g. 10MB.',
         values: { mml: '{{mml}}' },
       }),
-      url: `${createJobsDocsUrl}#model-memory-limits`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsModelMemory}`,
     },
     half_estimated_mml_greater_than_mml: {
       status: VALIDATION_STATUS.WARNING,
@@ -567,7 +550,7 @@ export const getMessages = once(() => {
             'memory limit and will likely hit the hard limit.',
         }
       ),
-      url: `${createJobsDocsUrl}#model-memory-limits`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsModelMemory}`,
     },
     estimated_mml_greater_than_mml: {
       status: VALIDATION_STATUS.INFO,
@@ -578,7 +561,7 @@ export const getMessages = once(() => {
             'The estimated model memory limit is greater than the model memory limit you have configured.',
         }
       ),
-      url: `${createJobsDocsUrl}#model-memory-limits`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsModelMemory}`,
     },
     success_mml: {
       status: VALIDATION_STATUS.SUCCESS,
@@ -588,7 +571,7 @@ export const getMessages = once(() => {
       text: i18n.translate('xpack.ml.models.jobValidation.messages.successMmlMessage', {
         defaultMessage: 'Valid and within the estimated model memory limit.',
       }),
-      url: `${createJobsDocsUrl}#model-memory-limits`,
+      url: `${docLinks.links.ml.anomalyDetectionJobTipsModelMemory}`,
     },
     success_time_range: {
       status: VALIDATION_STATUS.SUCCESS,
