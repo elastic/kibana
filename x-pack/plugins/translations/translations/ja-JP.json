@@ -16938,7 +16938,7 @@
     "xpack.security.management.editRole.updateRoleText": "ロールを更新",
     "xpack.security.management.editRole.validateRole.indicesTypeErrorMessage": "{elasticIndices} は数列でなければなりません",
     "xpack.security.management.editRole.validateRole.nameAllowedCharactersWarningMessage": "名前は文字またはアンダーラインで始まり、文字、アンダーライン、数字のみ使用できます。",
-    "xpack.security.management.editRole.validateRole.nameLengthWarningMessage": "名前は 1024 文字以内でなければなりません",
+    "xpack.security.management.editRole.validateRole.nameLengthWarningMessage": "名前は {maxLength} 文字以内でなければなりません",
     "xpack.security.management.editRole.validateRole.onePrivilegeRequiredWarningMessage": "権限が最低 1 つ必要です",
     "xpack.security.management.editRole.validateRole.oneSpaceRequiredWarningMessage": "スペースが最低 1 つ必要です",
     "xpack.security.management.editRole.validateRole.privilegeRequiredWarningMessage": "権限が必要です",

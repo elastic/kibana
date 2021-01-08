@@ -16982,7 +16982,7 @@
     "xpack.security.management.editRole.updateRoleText": "更新角色",
     "xpack.security.management.editRole.validateRole.indicesTypeErrorMessage": "{elasticIndices} 应为数组",
     "xpack.security.management.editRole.validateRole.nameAllowedCharactersWarningMessage": "名称必须以字母或下划线开头，且只能包含字母、下划线和数字。",
-    "xpack.security.management.editRole.validateRole.nameLengthWarningMessage": "名称不能超过 1024 个字符",
+    "xpack.security.management.editRole.validateRole.nameLengthWarningMessage": "名称不能超过 {maxLength} 个字符",
     "xpack.security.management.editRole.validateRole.onePrivilegeRequiredWarningMessage": "至少需要一个权限",
     "xpack.security.management.editRole.validateRole.oneSpaceRequiredWarningMessage": "至少需要一个工作区",
     "xpack.security.management.editRole.validateRole.privilegeRequiredWarningMessage": "“权限”必填",
