@@ -261,6 +261,7 @@ export const sendAlertToTimelineAction = async ({
       notes: null,
       timeline: {
         ...timelineDefaults,
+        kqlMode: 'search',
         dataProviders: [
           {
             and: [],
