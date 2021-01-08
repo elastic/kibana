@@ -127,11 +127,15 @@ describe('<TemplateEdit />', () => {
       const expected = {
         name: 'index_template_without_mappings',
         indexPatterns: ['indexPattern1'],
+        dataStream: {
+          hidden: true,
+          anyUnknownKey: 'should_be_kept',
+        },
         version,
         _kbnMeta: {
           type: 'default',
           isLegacy: templateToEdit._kbnMeta.isLegacy,
-          hasDatastream: false,
+          hasDatastream: true,
         },
       };
 
