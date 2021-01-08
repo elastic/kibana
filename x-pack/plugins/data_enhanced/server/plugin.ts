@@ -13,9 +13,9 @@ import {
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 import { registerSessionRoutes } from './routes';
-import { backgroundSessionMapping } from './saved_objects';
+import { searchSessionMapping } from './saved_objects';
 import {
-  BackgroundSessionService,
+  SearchSessionService,
   enhancedEsSearchStrategyProvider,
   eqlSearchStrategyProvider,
 } from './search';
@@ -28,7 +28,7 @@ interface SetupDependencies {
 
 export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDependencies> {
   private readonly logger: Logger;
-  private sessionService!: BackgroundSessionService;
+  private sessionService!: SearchSessionService;
 
   constructor(private initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('data_enhanced');
@@ -38,7 +38,7 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
     const usage = deps.usageCollection ? usageProvider(core) : undefined;
 
     core.uiSettings.register(getUiSettings());
-    core.savedObjects.registerType(backgroundSessionMapping);
+    core.savedObjects.registerType(searchSessionMapping);
 
     deps.data.search.registerSearchStrategy(
       ENHANCED_ES_SEARCH_STRATEGY,
@@ -54,7 +54,7 @@ export class EnhancedDataServerPlugin implements Plugin<void, void, SetupDepende
       eqlSearchStrategyProvider(this.logger)
     );
 
-    this.sessionService = new BackgroundSessionService(this.logger);
+    this.sessionService = new SearchSessionService(this.logger);
 
     deps.data.__enhance({
       search: {
