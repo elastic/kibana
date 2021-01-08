@@ -17,11 +17,12 @@ import {
   ErroredTask,
   RanTask,
   TaskTiming,
+  isTaskManagerStatEvent,
 } from '../task_events';
 import { isOk, Ok, unwrap } from '../lib/result_type';
 import { ConcreteTaskInstance } from '../task';
 import { TaskRunResult } from '../task_running';
-import { FillPoolResult } from '../lib/fill_pool';
+import { FillPoolResult, TimedFillPoolResult } from '../lib/fill_pool';
 import {
   AveragedStat,
   calculateRunningAverage,
@@ -35,6 +36,7 @@ import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
 
 interface FillPoolStat extends JsonObject {
   last_successful_poll: string;
+  duration: number[];
   result_frequency_percent_as_number: FillPoolResult[];
 }
 
@@ -45,6 +47,7 @@ interface ExecutionStat extends JsonObject {
 
 export interface TaskRunStat extends JsonObject {
   drift: number[];
+  load: number[];
   execution: ExecutionStat;
   polling: FillPoolStat | Omit<FillPoolStat, 'last_successful_poll'>;
 }
@@ -74,6 +77,7 @@ type ResultFrequencySummary = ResultFrequency & {
 
 export interface SummarizedTaskRunStat extends JsonObject {
   drift: AveragedStat;
+  load: AveragedStat;
   execution: {
     duration: Record<string, AveragedStat>;
     result_frequency_percent_as_number: Record<string, ResultFrequencySummary>;
@@ -86,7 +90,9 @@ export function createTaskRunAggregator(
   runningAverageWindowSize: number
 ): AggregatedStatProvider<TaskRunStat> {
   const taskRunEventToStat = createTaskRunEventToStat(runningAverageWindowSize);
-  const taskRunEvents$: Observable<Omit<TaskRunStat, 'polling'>> = taskPollingLifecycle.events.pipe(
+  const taskRunEvents$: Observable<
+    Pick<TaskRunStat, 'drift' | 'execution'>
+  > = taskPollingLifecycle.events.pipe(
     filter((taskEvent: TaskLifecycleEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent)),
     map((taskEvent: TaskLifecycleEvent) => {
       const { task, result }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
@@ -94,21 +100,39 @@ export function createTaskRunAggregator(
     })
   );
 
+  const loadQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  const taskManagerLoadStatEvents$: Observable<
+    Pick<TaskRunStat, 'load'>
+  > = taskPollingLifecycle.events.pipe(
+    filter(
+      (taskEvent: TaskLifecycleEvent) =>
+        isTaskManagerStatEvent(taskEvent) &&
+        taskEvent.id === 'load' &&
+        isOk<number, never>(taskEvent.event)
+    ),
+    map((taskEvent: TaskLifecycleEvent) => {
+      return {
+        load: loadQueue(((taskEvent.event as unknown) as Ok<number>).value),
+      };
+    })
+  );
+
   const resultFrequencyQueue = createRunningAveragedStat<FillPoolResult>(runningAverageWindowSize);
+  const pollingDurationQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const taskPollingEvents$: Observable<
     Pick<TaskRunStat, 'polling'>
   > = taskPollingLifecycle.events.pipe(
     filter(
       (taskEvent: TaskLifecycleEvent) =>
-        isTaskPollingCycleEvent(taskEvent) && isOk<FillPoolResult, unknown>(taskEvent.event)
+        isTaskPollingCycleEvent(taskEvent) && isOk<TimedFillPoolResult, unknown>(taskEvent.event)
     ),
     map((taskEvent: TaskLifecycleEvent) => {
+      const { result, timing } = ((taskEvent.event as unknown) as Ok<TimedFillPoolResult>).value;
       return {
         polling: {
           last_successful_poll: new Date().toISOString(),
-          result_frequency_percent_as_number: resultFrequencyQueue(
-            ((taskEvent.event as unknown) as Ok<FillPoolResult>).value
-          ),
+          duration: pollingDurationQueue(timing!.stop - timing!.start),
+          result_frequency_percent_as_number: resultFrequencyQueue(result),
         },
       };
     })
@@ -118,21 +142,29 @@ export function createTaskRunAggregator(
     taskRunEvents$.pipe(
       startWith({ drift: [], execution: { duration: {}, result_frequency_percent_as_number: {} } })
     ),
+    taskManagerLoadStatEvents$.pipe(startWith({ load: [] })),
     taskPollingEvents$.pipe(
       startWith({
         polling: { result_frequency_percent_as_number: [] },
       })
     ),
   ]).pipe(
-    map(([taskRun, polling]: [Omit<TaskRunStat, 'polling'>, Pick<TaskRunStat, 'polling'>]) => {
-      return {
-        key: 'runtime',
-        value: {
-          ...taskRun,
-          ...polling,
-        },
-      } as AggregatedStat<TaskRunStat>;
-    })
+    map(
+      ([taskRun, load, polling]: [
+        Pick<TaskRunStat, 'drift' | 'execution'>,
+        Pick<TaskRunStat, 'load'>,
+        Pick<TaskRunStat, 'polling'>
+      ]) => {
+        return {
+          key: 'runtime',
+          value: {
+            ...taskRun,
+            ...load,
+            ...polling,
+          },
+        } as AggregatedStat<TaskRunStat>;
+      }
+    )
   );
 }
 
@@ -176,9 +208,14 @@ const DEFAULT_POLLING_FREQUENCIES = {
 
 export function summarizeTaskRunStat(
   {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    polling: { last_successful_poll, result_frequency_percent_as_number: pollingResultFrequency },
+    polling: {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      last_successful_poll,
+      duration: pollingDuration,
+      result_frequency_percent_as_number: pollingResultFrequency,
+    },
     drift,
+    load,
     execution: { duration, result_frequency_percent_as_number: executionResultFrequency },
   }: TaskRunStat,
   config: TaskManagerConfig
@@ -187,12 +224,14 @@ export function summarizeTaskRunStat(
     value: {
       polling: {
         ...(last_successful_poll ? { last_successful_poll } : {}),
+        duration: calculateRunningAverage(pollingDuration as number[]),
         result_frequency_percent_as_number: {
           ...DEFAULT_POLLING_FREQUENCIES,
           ...calculateFrequency<FillPoolResult>(pollingResultFrequency as FillPoolResult[]),
         },
       },
       drift: calculateRunningAverage(drift),
+      load: calculateRunningAverage(load),
       execution: {
         duration: mapValues(duration, (typedDurations) => calculateRunningAverage(typedDurations)),
         result_frequency_percent_as_number: mapValues(

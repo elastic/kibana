@@ -5,6 +5,7 @@
  */
 
 import { performance } from 'perf_hooks';
+import { TaskTiming, startTaskTimer } from '../task_events';
 import { TaskPoolRunResult } from '../task_pool';
 import { Result, map } from './result_type';
 
@@ -21,6 +22,10 @@ type BatchRun<T> = (tasks: T[]) => Promise<TaskPoolRunResult>;
 type Fetcher<T, E> = () => Promise<Result<T[], E>>;
 type Converter<T1, T2> = (t: T1) => T2;
 
+export interface TimedFillPoolResult {
+  result: FillPoolResult;
+  timing: TaskTiming;
+}
 /**
  * Given a function that runs a batch of tasks (e.g. taskPool.run), a function
  * that fetches task records (e.g. store.fetchAvailableTasks), and a function
@@ -37,9 +42,14 @@ export async function fillPool<TRecord, TRunner>(
   fetchAvailableTasks: Fetcher<TRecord, FillPoolResult>,
   converter: Converter<TRecord, TRunner>,
   run: BatchRun<TRunner>
-): Promise<FillPoolResult> {
+): Promise<TimedFillPoolResult> {
   performance.mark('fillPool.start');
-  return map<TRecord[], FillPoolResult, Promise<FillPoolResult>>(
+  const stopTaskTimer = startTaskTimer();
+  const augmentTimingTo = (result: FillPoolResult): TimedFillPoolResult => ({
+    result,
+    timing: stopTaskTimer(),
+  });
+  return map<TRecord[], FillPoolResult, Promise<TimedFillPoolResult>>(
     await fetchAvailableTasks(),
     async (instances) => {
       if (!instances.length) {
@@ -49,7 +59,7 @@ export async function fillPool<TRecord, TRunner>(
           'fillPool.start',
           'fillPool.bailNoTasks'
         );
-        return FillPoolResult.NoTasksClaimed;
+        return augmentTimingTo(FillPoolResult.NoTasksClaimed);
       }
 
       const tasks = instances.map(converter);
@@ -62,15 +72,15 @@ export async function fillPool<TRecord, TRunner>(
             'fillPool.start',
             'fillPool.bailExhaustedCapacity'
           );
-          return FillPoolResult.RanOutOfCapacity;
+          return augmentTimingTo(FillPoolResult.RanOutOfCapacity);
         case TaskPoolRunResult.RunningAtCapacity:
           performance.mark('fillPool.cycle');
-          return FillPoolResult.RunningAtCapacity;
+          return augmentTimingTo(FillPoolResult.RunningAtCapacity);
         default:
           performance.mark('fillPool.cycle');
-          return FillPoolResult.PoolFilled;
+          return augmentTimingTo(FillPoolResult.PoolFilled);
       }
     },
-    async (result) => result
+    async (result) => augmentTimingTo(result)
   );
 }

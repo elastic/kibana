@@ -29,7 +29,7 @@ import {
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
-import { FillPoolResult } from './lib/fill_pool';
+import { TimedFillPoolResult } from './lib/fill_pool';
 
 const VERSION_CONFLICT_STATUS = 409;
 
@@ -126,11 +126,11 @@ export class TaskScheduling {
             }, taskEvent.event);
           } else {
             either<
-              RanTask | ConcreteTaskInstance | FillPoolResult,
+              RanTask | ConcreteTaskInstance | TimedFillPoolResult | number,
               Error | ErroredTask | Option<ConcreteTaskInstance>
             >(
               taskEvent.event,
-              (taskInstance: RanTask | ConcreteTaskInstance | FillPoolResult) => {
+              (taskInstance: RanTask | ConcreteTaskInstance | TimedFillPoolResult | number) => {
                 // resolve if the task has run sucessfully
                 if (isTaskRunEvent(taskEvent)) {
                   subscription.unsubscribe();

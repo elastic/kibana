@@ -24,8 +24,9 @@ import {
   asTaskRunRequestEvent,
   TaskPollingCycle,
   asTaskPollingCycleEvent,
+  TaskManagerStat,
 } from './task_events';
-import { fillPool, FillPoolResult } from './lib/fill_pool';
+import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
 import { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import { ConcreteTaskInstance } from './task';
@@ -56,7 +57,8 @@ export type TaskLifecycleEvent =
   | TaskRun
   | TaskClaim
   | TaskRunRequest
-  | TaskPollingCycle;
+  | TaskPollingCycle
+  | TaskManagerStat;
 
 /**
  * The public interface into the task manager system.
@@ -99,8 +101,9 @@ export class TaskPollingLifecycle {
     this.definitions = definitions;
     this.store = taskStore;
 
+    const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
     // pipe store events into the lifecycle event stream
-    this.store.events.subscribe((event) => this.events$.next(event));
+    this.store.events.subscribe(emitEvent);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: config.max_workers,
@@ -111,6 +114,7 @@ export class TaskPollingLifecycle {
       logger,
       maxWorkers$: maxWorkersConfiguration$,
     });
+    this.pool.load.subscribe(emitEvent);
 
     const {
       max_poll_inactivity_cycles: maxPollInactivityCycles,
@@ -119,10 +123,10 @@ export class TaskPollingLifecycle {
 
     // the task poller that polls for work on fixed intervals and on demand
     const poller$: Observable<
-      Result<FillPoolResult, PollingError<string>>
-    > = createObservableMonitor<Result<FillPoolResult, PollingError<string>>, Error>(
+      Result<TimedFillPoolResult, PollingError<string>>
+    > = createObservableMonitor<Result<TimedFillPoolResult, PollingError<string>>, Error>(
       () =>
-        createTaskPoller<string, FillPoolResult>({
+        createTaskPoller<string, TimedFillPoolResult>({
           logger,
           pollInterval$: pollIntervalConfiguration$,
           bufferCapacity: config.request_capacity,
@@ -189,7 +193,7 @@ export class TaskPollingLifecycle {
     return !this.pollingSubscription.closed;
   }
 
-  private pollForWork = async (...tasksToClaim: string[]): Promise<FillPoolResult> => {
+  private pollForWork = async (...tasksToClaim: string[]): Promise<TimedFillPoolResult> => {
     return fillPool(
       // claim available tasks
       () =>
@@ -206,7 +210,9 @@ export class TaskPollingLifecycle {
     );
   };
 
-  private subscribeToPoller(poller$: Observable<Result<FillPoolResult, PollingError<string>>>) {
+  private subscribeToPoller(
+    poller$: Observable<Result<TimedFillPoolResult, PollingError<string>>>
+  ) {
     return poller$
       .pipe(
         tap(
@@ -221,7 +227,7 @@ export class TaskPollingLifecycle {
           })
         )
       )
-      .subscribe((event: Result<FillPoolResult, PollingError<string>>) => {
+      .subscribe((event: Result<TimedFillPoolResult, PollingError<string>>) => {
         this.emitEvent(asTaskPollingCycleEvent<string>(event));
       });
   }
