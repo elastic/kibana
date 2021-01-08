@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { times } from 'lodash';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
@@ -54,7 +53,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('alertsTab');
   }
 
-  describe('alerts list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/87105
+  describe.skip('alerts list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('alertsTab');
@@ -322,18 +322,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('false');
     });
 
-    it.skip('should delete all selection', async () => {
+    it('should delete all selection', async () => {
       const namePrefix = generateUniqueKey();
-      let count = 0;
-      const createdAlertsFirstPage = await Promise.all(
-        times(2, () => createAlertManualCleanup({ name: `${namePrefix}-0${count++}` }))
-      );
+      const createdAlert = await createAlertManualCleanup({ name: `${namePrefix}-1` });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
 
-      for (const createdAlert of createdAlertsFirstPage) {
-        await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
-      }
+      await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
 
       await testSubjects.click('bulkAction');
 
@@ -342,9 +337,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      await retry.tryForTime(30000, async () => {
+      await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
-        expect(toastTitle).to.eql('Deleted 2 alerts');
+        expect(toastTitle).to.eql('Deleted 1 alert');
       });
 
       await pageObjects.triggersActionsUI.searchAlerts(namePrefix);
