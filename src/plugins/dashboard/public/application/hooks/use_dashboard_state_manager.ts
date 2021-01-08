@@ -58,6 +58,7 @@ export const useDashboardStateManager = (
     initializerContext,
     savedObjectsTagging,
     dashboardCapabilities,
+    dashboardPanelStorage,
   } = useKibana<DashboardAppServices>().services;
 
   // Destructure and rename services; makes the Effect hook more specific, makes later
@@ -86,11 +87,13 @@ export const useDashboardStateManager = (
       useHash: uiSettings.get('state:storeInSessionStorage'),
       ...withNotifyOnErrors(toasts),
     });
+
     const allowByValueEmbeddables = initializerContext.config.get<DashboardFeatureFlagConfig>()
       .allowByValueEmbeddables;
 
     const stateManager = new DashboardStateManager({
       hasTaggingCapabilities,
+      dashboardPanelStorage,
       hideWriteControls,
       history,
       kbnUrlStateStorage,
@@ -175,6 +178,10 @@ export const useDashboardStateManager = (
       })
     );
 
+    if (stateManager.getIsEditMode()) {
+      stateManager.restoreUnsavedPanels();
+    }
+
     setDashboardStateManager(stateManager);
 
     return () => {
@@ -188,6 +195,7 @@ export const useDashboardStateManager = (
     filterManager,
     hasTaggingCapabilities,
     initializerContext.config,
+    dashboardPanelStorage,
     hideWriteControls,
     history,
     kibanaVersion,

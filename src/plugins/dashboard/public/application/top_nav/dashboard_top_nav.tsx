@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -42,7 +40,6 @@ import {
 import { NavAction } from '../../types';
 import { DashboardSavedObject } from '../..';
 import { DashboardStateManager } from '../dashboard_state_manager';
-import { leaveConfirmStrings } from '../../dashboard_strings';
 import { saveDashboard } from '../lib';
 import {
   DashboardAppServices,
@@ -57,6 +54,7 @@ import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
 import { PanelToolbar } from './panel_toolbar';
+import { confirmDiscardUnsavedChanges } from '../listing/discard_changes_confirm';
 import { DashboardContainer } from '..';
 
 export interface DashboardTopNavState {
@@ -148,7 +146,7 @@ export function DashboardTopNav({
       if (!willLoseChanges) {
         dashboardStateManager.switchViewMode(newMode);
         if (newMode === ViewMode.EDIT) {
-          dashboardStateManager.hydrateUnsavedPanels();
+          dashboardStateManager.restoreUnsavedPanels();
         }
         return;
       }
@@ -169,18 +167,7 @@ export function DashboardTopNav({
         redirectTo({ destination: 'dashboard', id: savedDashboard.id });
       }
 
-      core.overlays
-        .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
-          confirmButtonText: leaveConfirmStrings.getConfirmButtonText(),
-          cancelButtonText: leaveConfirmStrings.getCancelButtonText(),
-          defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-          title: leaveConfirmStrings.getDiscardTitle(),
-        })
-        .then((isConfirmed) => {
-          if (isConfirmed) {
-            revertChangesAndExitEditMode();
-          }
-        });
+      confirmDiscardUnsavedChanges(core.overlays, revertChangesAndExitEditMode);
     },
     [redirectTo, timefilter, core.overlays, savedDashboard.id, dashboardStateManager]
   );

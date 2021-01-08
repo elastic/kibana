@@ -27,7 +27,12 @@ import { FilterUtils } from './lib/filter_utils';
 import { DashboardContainer } from './embeddable';
 import { DashboardSavedObject } from '../saved_dashboards';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
-import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
+import {
+  getAppStateDefaults,
+  migrateAppState,
+  getDashboardIdFromUrl,
+  DashboardPanelStorage,
+} from './lib';
 import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardAppState,
@@ -38,7 +43,6 @@ import {
 } from '../types';
 
 import { ViewMode } from '../services/embeddable';
-import { Storage } from '../../../kibana_utils/public';
 import { UsageCollectionSetup } from '../services/usage_collection';
 import { Filter, Query, TimefilterContract as Timefilter } from '../services/data';
 import type { SavedObjectTagDecoratorTypeGuard } from '../services/saved_objects_tagging_oss';
@@ -49,9 +53,7 @@ import {
   ReduxLikeStateContainer,
   syncState,
 } from '../services/kibana_utils';
-
-const DASHBOARD_PANELS_SESSION_KEY = 'dashboardStateManagerPanels';
-const DASHBOARD_PANELS_UNSAVED_ID = 'unsavedDashboard';
+import { STATE_STORAGE_KEY } from '../url_generator';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -86,9 +88,8 @@ export class DashboardStateManager {
     DashboardAppStateTransitions
   >;
   private readonly stateContainerChangeSub: Subscription;
-  private readonly STATE_STORAGE_KEY = '_a';
   private readonly kbnUrlStateStorage: IKbnUrlStateStorage;
-  private readonly sessionStorage: Storage;
+  private readonly dashboardPanelStorage?: DashboardPanelStorage;
   private readonly stateSyncRef: ISyncStateRef;
   private readonly allowByValueEmbeddables: boolean;
 
@@ -103,22 +104,24 @@ export class DashboardStateManager {
    * @param
    */
   constructor({
-    savedDashboard,
-    hideWriteControls,
-    kibanaVersion,
-    kbnUrlStateStorage,
     history,
+    kibanaVersion,
+    savedDashboard,
     usageCollection,
-    allowByValueEmbeddables,
+    hideWriteControls,
+    kbnUrlStateStorage,
+    dashboardPanelStorage,
     hasTaggingCapabilities,
+    allowByValueEmbeddables,
   }: {
-    savedDashboard: DashboardSavedObject;
-    hideWriteControls: boolean;
-    kibanaVersion: string;
-    kbnUrlStateStorage: IKbnUrlStateStorage;
     history: History;
-    usageCollection?: UsageCollectionSetup;
+    kibanaVersion: string;
+    hideWriteControls: boolean;
     allowByValueEmbeddables: boolean;
+    savedDashboard: DashboardSavedObject;
+    usageCollection?: UsageCollectionSetup;
+    kbnUrlStateStorage: IKbnUrlStateStorage;
+    dashboardPanelStorage?: DashboardPanelStorage;
     hasTaggingCapabilities: SavedObjectTagDecoratorTypeGuard;
   }) {
     this.kibanaVersion = kibanaVersion;
@@ -134,16 +137,16 @@ export class DashboardStateManager {
       kibanaVersion,
       usageCollection
     );
-    this.sessionStorage = new Storage(sessionStorage);
+    this.dashboardPanelStorage = dashboardPanelStorage;
     this.kbnUrlStateStorage = kbnUrlStateStorage;
 
-    // setup initial state by merging defaults with state from url
+    // setup initial state by merging defaults with state from url & panels storage
     // also run migration, as state in url could be of older version
     const initialState = migrateAppState(
       {
         ...this.stateDefaults,
         ...this.getUnsavedPanelState(),
-        ...this.kbnUrlStateStorage.get<DashboardAppState>(this.STATE_STORAGE_KEY),
+        ...this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY),
       },
       kibanaVersion,
       usageCollection
@@ -179,9 +182,9 @@ export class DashboardStateManager {
       this.changeListeners.forEach((listener) => listener({ dirty: this.isDirty }));
     });
 
-    // setup state syncing utils. state container will be synced with url into `this.STATE_STORAGE_KEY` query param
+    // setup state syncing utils. state container will be synced with url into `STATE_STORAGE_KEY` query param
     this.stateSyncRef = syncState<DashboardAppStateInUrl>({
-      storageKey: this.STATE_STORAGE_KEY,
+      storageKey: STATE_STORAGE_KEY,
       stateContainer: {
         ...this.stateContainer,
         get: () => this.toUrlState(this.stateContainer.get()),
@@ -273,10 +276,10 @@ export class DashboardStateManager {
 
     if (dirty) {
       this.stateContainer.transitions.set('panels', Object.values(convertedPanelStateMap));
-      this.setUnsavedPanels(this.getPanels());
-
       if (dirtyBecauseOfInitialStateMigration) {
         this.saveState({ replace: true });
+      } else {
+        this.setUnsavedPanels(this.getPanels());
       }
     }
 
@@ -495,7 +498,7 @@ export class DashboardStateManager {
     // get viewMode should work properly even before the state container is created
     return this.stateContainer
       ? this.appState.viewMode
-      : this.kbnUrlStateStorage.get<DashboardAppState>(this.STATE_STORAGE_KEY)?.viewMode ??
+      : this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY)?.viewMode ??
           ViewMode.VIEW;
   }
 
@@ -605,7 +608,7 @@ export class DashboardStateManager {
   private saveState({ replace }: { replace: boolean }): boolean {
     // schedules setting current state to url
     this.kbnUrlStateStorage.set<DashboardAppStateInUrl>(
-      this.STATE_STORAGE_KEY,
+      STATE_STORAGE_KEY,
       this.toUrlState(this.stateContainer.get())
     );
     // immediately forces scheduled updates and changes location
@@ -641,7 +644,7 @@ export class DashboardStateManager {
     }
   }
 
-  public hydrateUnsavedPanels() {
+  public restoreUnsavedPanels() {
     const unsavedState = this.getUnsavedPanelState();
     if (!unsavedState || unsavedState.panels?.length === 0) {
       return;
@@ -651,7 +654,7 @@ export class DashboardStateManager {
         {
           ...this.stateDefaults,
           ...unsavedState,
-          ...this.kbnUrlStateStorage.get<DashboardAppState>(this.STATE_STORAGE_KEY),
+          ...this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY),
         },
         this.kibanaVersion,
         this.usageCollection
@@ -660,31 +663,30 @@ export class DashboardStateManager {
   }
 
   public clearUnsavedPanels() {
-    if (!this.allowByValueEmbeddables) {
+    if (!this.allowByValueEmbeddables || !this.dashboardPanelStorage) {
       return;
     }
-    const sessionStoragePanels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
-    sessionStoragePanels[this.savedDashboard.id || DASHBOARD_PANELS_UNSAVED_ID] = undefined;
-    this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStoragePanels);
+    this.dashboardPanelStorage.clearPanels(this.savedDashboard?.id);
   }
 
   private getUnsavedPanelState(): { panels?: SavedDashboardPanel[] } {
-    if (!this.allowByValueEmbeddables || this.getIsViewMode()) {
+    if (!this.allowByValueEmbeddables || this.getIsViewMode() || !this.dashboardPanelStorage) {
       return {};
     }
-    const panels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY)?.[
-      this.savedDashboard.id || DASHBOARD_PANELS_UNSAVED_ID
-    ];
+    const panels = this.dashboardPanelStorage.getPanels(this.savedDashboard?.id);
     return panels ? { panels } : {};
   }
 
   private setUnsavedPanels(newPanels: SavedDashboardPanel[]) {
-    if (!this.allowByValueEmbeddables || this.getIsViewMode() || !this.getIsDirty()) {
+    if (
+      !this.allowByValueEmbeddables ||
+      this.getIsViewMode() ||
+      !this.getIsDirty() ||
+      !this.dashboardPanelStorage
+    ) {
       return;
     }
-    const sessionStoragePanels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
-    sessionStoragePanels[this.savedDashboard.id || DASHBOARD_PANELS_UNSAVED_ID] = newPanels;
-    this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStoragePanels);
+    this.dashboardPanelStorage.setPanels(this.savedDashboard?.id, newPanels);
   }
 
   private toUrlState(state: DashboardAppState): DashboardAppStateInUrl {

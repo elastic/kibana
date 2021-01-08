@@ -35,10 +35,7 @@ export function getDashboardTitle(
 ): string {
   const isEditMode = viewMode === ViewMode.EDIT;
   let displayTitle: string;
-  const newDashboardTitle = i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
-    defaultMessage: 'New Dashboard',
-  });
-  const dashboardTitle = isNew ? newDashboardTitle : title;
+  const dashboardTitle = isNew ? getNewDashboardTitle() : title;
 
   if (isEditMode && isDirty) {
     displayTitle = i18n.translate('dashboard.strings.dashboardUnsavedEditTitle', {
@@ -187,6 +184,11 @@ export const dashboardReplacePanelAction = {
 /*
   Dashboard Editor
 */
+export const getNewDashboardTitle = () =>
+  i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
+    defaultMessage: 'New Dashboard',
+  });
+
 export const shareModalStrings = {
   getTopMenuCheckbox: () =>
     i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
@@ -316,5 +318,25 @@ export const dashboardListingTable = {
   getDescriptionColumnName: () =>
     i18n.translate('dashboard.listing.table.descriptionColumnName', {
       defaultMessage: 'Description',
+    }),
+};
+
+export const dashboardUnsavedListingStrings = {
+  getUnsavedChangesTitle: (plural = false) =>
+    i18n.translate('dashboard.listing.unsaved.unsavedChangesTitle', {
+      defaultMessage: 'You have unsaved changes in the following {dash}',
+      values: {
+        dash: plural
+          ? dashboardListingTable.getEntityNamePlural()
+          : dashboardListingTable.getEntityName(),
+      },
+    }),
+  getEditTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.editTitle', {
+      defaultMessage: 'Continue Editing',
+    }),
+  getDiscardTitle: () =>
+    i18n.translate('dashboard.listing.unsaved.discardTitle', {
+      defaultMessage: 'Discard changes',
     }),
 };

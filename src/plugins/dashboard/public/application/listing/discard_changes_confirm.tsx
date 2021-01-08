@@ -17,19 +17,21 @@
  * under the License.
  */
 
-export {
-  Storage,
-  unhashUrl,
-  syncState,
-  ISyncStateRef,
-  getQueryParams,
-  setStateToKbnUrl,
-  removeQueryParam,
-  withNotifyOnErrors,
-  IKbnUrlStateStorage,
-  createKbnUrlTracker,
-  SavedObjectNotFound,
-  createStateContainer,
-  ReduxLikeStateContainer,
-  createKbnUrlStateStorage,
-} from '../../../kibana_utils/public';
+import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
+import { OverlayStart } from '../../../../../core/public';
+import { leaveConfirmStrings } from '../../dashboard_strings';
+
+export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCallback: () => void) =>
+  overlays
+    .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
+      confirmButtonText: leaveConfirmStrings.getConfirmButtonText(),
+      cancelButtonText: leaveConfirmStrings.getCancelButtonText(),
+      buttonColor: 'danger',
+      defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+      title: leaveConfirmStrings.getDiscardTitle(),
+    })
+    .then((isConfirmed) => {
+      if (isConfirmed) {
+        discardCallback();
+      }
+    });

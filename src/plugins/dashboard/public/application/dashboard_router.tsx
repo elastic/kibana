@@ -26,7 +26,7 @@ import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom
 
 import { DashboardListing } from './listing';
 import { DashboardApp } from './dashboard_app';
-import { addHelpMenuToAppChrome } from './lib';
+import { addHelpMenuToAppChrome, DashboardPanelStorage } from './lib';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { getDashboardPageTitle, dashboardReadonlyBadge } from '../dashboard_strings';
 import { createDashboardEditUrl, DashboardConstants } from '../dashboard_constants';
@@ -102,6 +102,7 @@ export async function mountApp({
     indexPatterns: dataStart.indexPatterns,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
+    dashboardPanelStorage: new DashboardPanelStorage(),
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     dashboardCapabilities: {
@@ -129,7 +130,7 @@ export async function mountApp({
     let destination;
     if (redirectTo.destination === 'dashboard') {
       destination = redirectTo.id
-        ? createDashboardEditUrl(redirectTo.id)
+        ? createDashboardEditUrl(redirectTo.id, redirectTo.editMode)
         : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
     } else {
       destination = createDashboardListingFilterUrl(redirectTo.filter);
