@@ -25,9 +25,7 @@ import { closeTimeline, createNewTimeline } from '../tasks/timeline';
 import { HOSTS_URL } from '../urls/navigation';
 import { cleanKibana } from '../tasks/common';
 
-// FLAKY: https://github.com/elastic/kibana/issues/85098
-// FLAKY: https://github.com/elastic/kibana/issues/62060
-describe.skip('timeline data providers', () => {
+describe('timeline data providers', () => {
   before(() => {
     cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
