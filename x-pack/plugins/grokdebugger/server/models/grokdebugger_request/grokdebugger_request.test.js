@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { GrokdebuggerRequest } from '../grokdebugger_request';
+import { GrokdebuggerRequest } from './grokdebugger_request';
 
 // FAILING: https://github.com/elastic/kibana/issues/51372
 describe.skip('grokdebugger_request', () => {
@@ -24,18 +23,18 @@ describe.skip('grokdebugger_request', () => {
     describe('fromDownstreamJSON factory method', () => {
       it('returns correct GrokdebuggerRequest instance from downstreamRequest', () => {
         const grokdebuggerRequest = GrokdebuggerRequest.fromDownstreamJSON(downstreamRequest);
-        expect(grokdebuggerRequest.rawEvent).to.eql(downstreamRequest.rawEvent);
-        expect(grokdebuggerRequest.pattern).to.eql(downstreamRequest.pattern);
-        expect(grokdebuggerRequest.customPatterns).to.eql({});
+        expect(grokdebuggerRequest.rawEvent).toEqual(downstreamRequest.rawEvent);
+        expect(grokdebuggerRequest.pattern).toEqual(downstreamRequest.pattern);
+        expect(grokdebuggerRequest.customPatterns).toEqual({});
       });
 
       it('returns correct GrokdebuggerRequest instance from downstreamRequest when custom patterns are specified', () => {
         const grokdebuggerRequest = GrokdebuggerRequest.fromDownstreamJSON(
           downstreamRequestWithCustomPatterns
         );
-        expect(grokdebuggerRequest.rawEvent).to.eql(downstreamRequest.rawEvent);
-        expect(grokdebuggerRequest.pattern).to.eql(downstreamRequest.pattern);
-        expect(grokdebuggerRequest.customPatterns).to.eql('%{FOO:bar}');
+        expect(grokdebuggerRequest.rawEvent).toEqual(downstreamRequest.rawEvent);
+        expect(grokdebuggerRequest.pattern).toEqual(downstreamRequest.pattern);
+        expect(grokdebuggerRequest.customPatterns).toEqual('%{FOO:bar}');
       });
     });
 
@@ -67,7 +66,7 @@ describe.skip('grokdebugger_request', () => {
         };
         const grokdebuggerRequest = GrokdebuggerRequest.fromDownstreamJSON(downstreamRequest);
         const upstreamJson = grokdebuggerRequest.upstreamJSON;
-        expect(upstreamJson).to.eql(expectedUpstreamJSON);
+        expect(upstreamJson).toEqual(expectedUpstreamJSON);
       });
 
       it('returns the upstream simulate JSON request when custom patterns are specified', () => {
@@ -99,7 +98,7 @@ describe.skip('grokdebugger_request', () => {
           downstreamRequestWithCustomPatterns
         );
         const upstreamJson = grokdebuggerRequest.upstreamJSON;
-        expect(upstreamJson).to.eql(expectedUpstreamJSON);
+        expect(upstreamJson).toEqual(expectedUpstreamJSON);
       });
     });
   });
