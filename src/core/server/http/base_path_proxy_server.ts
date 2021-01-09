@@ -147,7 +147,7 @@ export class BasePathProxyServer {
           xforward: true,
           mapUri: async (request) => {
             return {
-              // Passing in the headers is a workaround until this is fixed:
+              // Passing in this header to merge it is a workaround until this is fixed:
               // https://github.com/hapijs/h2o2/issues/124
               headers:
                 request.headers['content-length'] != null
