@@ -5,30 +5,64 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { ThemeProvider } from 'styled-components';
 
+import { KibanaVersionContext } from '../../fleet/public';
+import { useUiSetting$ } from '../../../../src/plugins/kibana_react/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginStartDependencies } from './types';
 import { OsqueryApp } from './components/app';
-import { PLUGIN_NAME } from '../common';
+import { DEFAULT_DARK_MODE, PLUGIN_NAME } from '../common';
 import { KibanaContextProvider } from './common/lib/kibana';
 
+const OsqueryAppContext = () => {
+  const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+  const theme = useMemo(
+    () => ({
+      eui: darkMode ? euiDarkVars : euiLightVars,
+      darkMode,
+    }),
+    [darkMode]
+  );
+
+  return (
+    <ThemeProvider theme={theme}>
+      <OsqueryApp />
+    </ThemeProvider>
+  );
+};
+
 export const renderApp = (
-  { notifications, http }: CoreStart,
+  core: CoreStart,
   services: AppPluginStartDependencies,
-  { appBasePath, element }: AppMountParameters
+  { element, history }: AppMountParameters,
+  storage: Storage,
+  kibanaVersion: string
 ) => {
   ReactDOM.render(
-    <KibanaContextProvider services={{ appName: PLUGIN_NAME, notifications, http, ...services }}>
+    <KibanaContextProvider
+      services={{
+        appName: PLUGIN_NAME,
+        ...core,
+        ...services,
+        storage,
+      }}
+    >
       <EuiErrorBoundary>
-        <Router basename={appBasePath}>
-          <I18nProvider>
-            <OsqueryApp />
-          </I18nProvider>
-        </Router>
+        <KibanaVersionContext.Provider value={kibanaVersion}>
+          <Router history={history}>
+            <I18nProvider>
+              <OsqueryAppContext />
+            </I18nProvider>
+          </Router>
+        </KibanaVersionContext.Provider>
       </EuiErrorBoundary>
     </KibanaContextProvider>,
     element

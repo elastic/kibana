@@ -6,10 +6,9 @@
   "configPath": ["xpack", "osquery"],
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "dataEnhanced", "navigation"],
+  "requiredPlugins": ["data", "dataEnhanced", "fleet", "navigation"],
   "optionalPlugins": [
-    "fleet",
     "home"
   ],
-"requiredBundles": ["kibanaUtils", "kibanaReact"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "kibanaUtils"]
 }

@@ -57,7 +57,7 @@ const RowActions = React.memo<{
   onUpgradeClick: () => void;
 }>(({ agent, refresh, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
   const { getHref } = useLink();
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasWriteCapabilities = useCapabilities().write;
 
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
@@ -88,11 +88,9 @@ const RowActions = React.memo<{
           />
         </EuiContextMenuItem>,
         <EuiContextMenuItem
-          disabled={!hasWriteCapabilites || !agent.active}
+          disabled={!hasWriteCapabilities || !agent.active}
           icon="trash"
-          onClick={() => {
-            onUnenrollClick();
-          }}
+          onClick={onUnenrollClick}
         >
           {isUnenrolling ? (
             <FormattedMessage
@@ -109,9 +107,7 @@ const RowActions = React.memo<{
         <EuiContextMenuItem
           icon="refresh"
           disabled={!isAgentUpgradeable(agent, kibanaVersion)}
-          onClick={() => {
-            onUpgradeClick();
-          }}
+          onClick={onUpgradeClick}
         >
           <FormattedMessage
             id="xpack.fleet.agentList.upgradeOneButton"
@@ -132,10 +128,10 @@ function safeMetadata(val: any) {
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { notifications } = useStartServices();
-  useBreadcrumbs('fleet_agent_list');
+  // useBreadcrumbs('fleet_agent_list');
   const { getHref } = useLink();
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasWriteCapabilities = useCapabilities().write;
   const isGoldPlus = useLicense().isGoldPlus();
   const kibanaVersion = useKibanaVersion();
 
@@ -468,7 +464,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         </h2>
       }
       actions={
-        hasWriteCapabilites ? (
+        hasWriteCapabilities ? (
           <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
             <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
           </EuiButton>

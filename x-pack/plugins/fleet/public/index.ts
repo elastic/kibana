@@ -6,6 +6,9 @@
 import { PluginInitializerContext } from 'src/core/public';
 import { FleetPlugin } from './plugin';
 
+export { AgentListPage } from './applications/fleet/sections/agents/agent_list_page';
+export { KibanaVersionContext } from './applications/fleet/hooks/use_kibana_version';
+
 export { FleetSetup, FleetStart } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {

@@ -5,3 +5,4 @@
  */
 
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
+export const DEFAULT_DARK_MODE = 'theme:darkMode';

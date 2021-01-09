@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './constants';
+
 export const PLUGIN_ID = 'osquery';
 export const PLUGIN_NAME = 'osquery';

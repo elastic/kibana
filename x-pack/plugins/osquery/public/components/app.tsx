@@ -22,6 +22,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { AgentListPage } from '../../../fleet/public';
+
 import { useKibana } from '../common/lib/kibana';
 
 import { PLUGIN_NAME } from '../../common';
@@ -98,6 +100,8 @@ export const OsqueryApp = () => {
             <EuiSpacer />
 
             <AgentsTable />
+
+            <AgentListPage />
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
