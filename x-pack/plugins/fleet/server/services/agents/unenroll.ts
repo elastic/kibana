@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { chunk } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { AgentSOAttributes } from '../../types';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
@@ -81,10 +80,10 @@ export async function forceUnenrollAgent(
 
   await Promise.all([
     agent.access_api_key_id
-      ? APIKeyService.invalidateAPIKey(soClient, agent.access_api_key_id)
+      ? APIKeyService.invalidateAPIKeys(soClient, [agent.access_api_key_id])
       : undefined,
     agent.default_api_key_id
-      ? APIKeyService.invalidateAPIKey(soClient, agent.default_api_key_id)
+      ? APIKeyService.invalidateAPIKeys(soClient, [agent.default_api_key_id])
       : undefined,
   ]);
 
@@ -130,16 +129,8 @@ export async function forceUnenrollAgents(
   });
 
   // Invalidate all API keys
-  // ES doesn't provide a bulk invalidate API, so this could take a long time depending on
-  // number of keys to invalidate. We run these in batches to avoid overloading ES.
   if (apiKeys.length) {
-    const BATCH_SIZE = 500;
-    const batches = chunk(apiKeys, BATCH_SIZE);
-    for (const apiKeysBatch of batches) {
-      await Promise.all(
-        apiKeysBatch.map((apiKey) => APIKeyService.invalidateAPIKey(soClient, apiKey))
-      );
-    }
+    APIKeyService.invalidateAPIKeys(soClient, apiKeys);
   }
 
   // Update the necessary agents

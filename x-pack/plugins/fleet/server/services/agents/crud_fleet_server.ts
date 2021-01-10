@@ -7,13 +7,9 @@ import Boom from '@hapi/boom';
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
 import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
-import {
-  AGENT_SAVED_OBJECT_TYPE,
-  AGENT_EVENT_SAVED_OBJECT_TYPE,
-  AGENTS_INDEX,
-} from '../../constants';
+import { AGENT_SAVED_OBJECT_TYPE, AGENTS_INDEX } from '../../constants';
 import { ESSearchHit } from '../../../../../typings/elasticsearch';
-import { AgentSOAttributes, Agent, AgentEventSOAttributes, ListWithKuery } from '../../types';
+import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { savedObjectToAgent } from './saved_objects';
 import { searchHitToAgent } from './helpers';
