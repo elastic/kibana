@@ -17,13 +17,5 @@
  * under the License.
  */
 
-export const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
-
-export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
-export interface RuntimeField {
-  name: string;
-  type: RuntimeType;
-  script: {
-    source: string;
-  };
-}
+// eslint-disable-next-line
+export type { RuntimeFieldStart, RuntimeField } from '../../../../x-pack/plugins/runtime_field_editor/public';

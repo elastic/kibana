@@ -18,19 +18,31 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { OverlayStart } from 'src/core/public';
+import type { RuntimeFieldStart } from './types';
 import { loadEditor } from './load_editor';
+import { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../data/public';
 
 // eslint-disable-next-line
-export interface IndexPatternFieldEditorSetupDependencies {}
+export interface IndexPatternFieldEditorSetupDependencies {
+}
 
-// eslint-disable-next-line
-export interface IndexPatternFieldEditorStartDependencies {}
+export interface IndexPatternFieldEditorStartDependencies {
+  runtimeFieldEditor?: RuntimeFieldStart;
+}
 
 // eslint-disable-next-line
 interface IndexPatternFieldEditorServiceSetup {}
 
 export interface IndexPatternFieldEditorServiceStart {
-  loadEditor: typeof loadEditor;
+  loadEditor: () => Promise<
+    (
+      openFlyout: OverlayStart['openFlyout'],
+      indexPattern: IndexPattern,
+      indexPatternsService: DataPublicPluginStart['indexPatterns'],
+      indexPatternField?: IndexPatternField
+    ) => void
+  >;
 }
 
 export type IndexPatternFieldEditorSetup = IndexPatternFieldEditorServiceSetup;
@@ -53,9 +65,11 @@ export class IndexPatternFieldEditorPlugin
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: IndexPatternFieldEditorStartDependencies) {
+    const { docLinks, uiSettings } = core;
+    const { runtimeFieldEditor } = plugins;
     return {
-      loadEditor,
+      loadEditor: loadEditor(docLinks, uiSettings, runtimeFieldEditor?.RuntimeFieldEditor),
     };
   }
 

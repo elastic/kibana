@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import type { RuntimeField } from 'src/plugins/runtime_fields/common';
 import { KbnFieldType, getKbnFieldType } from '../../kbn_field_types';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import type { IFieldType } from './types';
-import type { RuntimeField } from '../temp_types';
 import { FieldSpec, IndexPattern } from '../..';
 import { shortenDottedString } from '../../utils';
 

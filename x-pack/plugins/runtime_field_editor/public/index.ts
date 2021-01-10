@@ -12,7 +12,12 @@ export {
   RuntimeFieldFormState,
 } from './components';
 export { RUNTIME_FIELD_OPTIONS } from './constants';
-export { RuntimeField, RuntimeType, PluginSetup as RuntimeFieldsSetup } from './types';
+export {
+  RuntimeField,
+  RuntimeType,
+  PluginSetup as RuntimeFieldsSetup,
+  PluginStart as RuntimeFieldStart,
+} from './types';
 
 export function plugin() {
   return new RuntimeFieldsPlugin();

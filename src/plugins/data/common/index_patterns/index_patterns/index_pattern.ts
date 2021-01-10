@@ -18,6 +18,7 @@
  */
 
 import _, { each, reject } from 'lodash';
+import type { RuntimeField } from '../../../../runtime_fields/common';
 import { FieldAttrs, FieldAttrSet } from '../..';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
@@ -27,7 +28,6 @@ import { formatHitProvider } from './format_hit';
 import { flattenHitWrapper } from './flatten_hit';
 import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
 import { IndexPatternSpec, TypeMeta, SourceFilter, IndexPatternFieldMap } from '../types';
-import { RuntimeField } from '../temp_types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
 
 interface IndexPatternDeps {
@@ -199,10 +199,18 @@ export class IndexPattern implements IIndexPattern {
       };
     });
 
+    const runtimeFields = this.fields.reduce((col, field) => {
+      if (field.runtimeField) {
+        col[field.name] = field.runtimeField;
+      }
+      return col;
+    }, {} as Record<string, RuntimeField>);
+
     return {
       storedFields: ['*'],
       scriptFields,
       docvalueFields,
+      runtimeFields,
     };
   }
 

@@ -493,6 +493,18 @@ export class SearchSource {
     };
     body.stored_fields = storedFields;
 
+    body.runtime_mappings = index.fields
+      .filter((field) => field.runtimeField)
+      .reduce((col, field) => {
+        col[field.name] = {
+          type: field.runtimeField.type,
+          script: {
+            source: field.runtimeField.script.source,
+          },
+        };
+        return col;
+      }, {});
+
     // apply source filters from index pattern if specified by the user
     let filteredDocvalueFields = docvalueFields;
     if (index) {
@@ -528,6 +540,11 @@ export class SearchSource {
         body.script_fields = pick(
           body.script_fields,
           Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
+        );
+        // TODO verify this works
+        body.runtime_mappings = pick(
+          body.runtime_mappings,
+          Object.keys(body.runtime_mappings).filter((f) => uniqFieldNames.includes(f))
         );
       }
 

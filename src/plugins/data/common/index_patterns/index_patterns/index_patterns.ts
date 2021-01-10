@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import type { RuntimeField } from 'src/plugins/runtime_fields/common';
 import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
@@ -39,7 +40,6 @@ import {
   FieldSpec,
   IndexPatternFieldMap,
 } from '../types';
-import { RuntimeField } from '../temp_types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../kibana_utils/common';

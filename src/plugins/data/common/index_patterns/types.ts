@@ -20,9 +20,9 @@
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
+import type { RuntimeField } from 'src/plugins/runtime_fields/common';
 import { IFieldType } from './fields';
 import { SerializedFieldFormat } from '../../../expressions/common';
-import { RuntimeField } from './temp_types';
 import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;

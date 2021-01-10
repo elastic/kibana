@@ -4,5 +4,6 @@
   "server": false,
   "ui": true,
   "requiredPlugins": [],
+  "optionalPlugins": ["runtimeFieldEditor"],
   "requiredBundles": ["kibanaReact"]
 }

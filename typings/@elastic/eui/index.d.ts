@@ -16,6 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
+// import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
 // TODO: Remove once typescript definitions are in EUI

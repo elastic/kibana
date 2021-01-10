@@ -17,6 +17,15 @@
  * under the License.
  */
 
-export const loadEditor = async () => {
-  return import('./components');
+import type { DocLinksStart, IUiSettingsClient } from 'src/core/public';
+// eslint-disable-next-line
+import type { RuntimeFieldStart } from '../../../../x-pack/plugins/runtime_field_editor/public';
+
+export const loadEditor = (
+  dockLinks: DocLinksStart,
+  uiSettings: IUiSettingsClient,
+  runtimeFieldEditor?: RuntimeFieldStart['RuntimeFieldEditor']
+) => async () => {
+  const { indexPatternFieldEditorFlyoutContent } = await import('./components');
+  return indexPatternFieldEditorFlyoutContent(dockLinks, uiSettings, runtimeFieldEditor);
 };

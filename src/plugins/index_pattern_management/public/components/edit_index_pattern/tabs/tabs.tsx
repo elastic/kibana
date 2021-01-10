@@ -150,11 +150,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                   fill
                   onClick={async () => {
                     const editor = await indexPatternFieldEditor.loadEditor();
-                    editor.indexPatternFieldEditorFlyoutContent(
-                      overlays.openFlyout,
-                      indexPattern,
-                      data.indexPatterns
-                    );
+                    editor(overlays.openFlyout, indexPattern, data.indexPatterns);
                   }}
                 >
                   Add field
@@ -211,13 +207,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
                 }}
                 newEditField={async (ip, indexPatternField) => {
                   const editor = await indexPatternFieldEditor.loadEditor();
-
-                  editor.indexPatternFieldEditorFlyoutContent(
-                    overlays.openFlyout,
-                    ip,
-                    data.indexPatterns,
-                    indexPatternField
-                  );
+                  editor(overlays.openFlyout, ip, data.indexPatterns, indexPatternField);
                 }}
               />
             </Fragment>

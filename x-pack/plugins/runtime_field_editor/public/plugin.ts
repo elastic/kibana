@@ -7,6 +7,7 @@ import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
 import { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getRuntimeFieldEditorLoader } from './load_editor';
+import { RuntimeFieldEditor } from './components/runtime_field_editor';
 
 export class RuntimeFieldsPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -17,7 +18,9 @@ export class RuntimeFieldsPlugin
   }
 
   public start(core: CoreStart, plugins: StartPlugins) {
-    return {};
+    return {
+      RuntimeFieldEditor,
+    };
   }
 
   public stop() {
