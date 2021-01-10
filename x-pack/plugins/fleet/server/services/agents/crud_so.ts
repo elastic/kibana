@@ -189,29 +189,6 @@ export async function updateAgent(
 }
 
 export async function deleteAgent(soClient: SavedObjectsClientContract, agentId: string) {
-  const agent = await getAgent(soClient, agentId);
-  if (agent.type === 'EPHEMERAL') {
-    // Delete events
-    let more = true;
-    while (more === true) {
-      const { saved_objects: events } = await soClient.find<AgentEventSOAttributes>({
-        type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-        fields: ['id'],
-        search: agentId,
-        searchFields: ['agent_id'],
-        perPage: 1000,
-      });
-      if (events.length === 0) {
-        more = false;
-      }
-      for (const event of events) {
-        await soClient.delete(AGENT_EVENT_SAVED_OBJECT_TYPE, event.id);
-      }
-    }
-    await soClient.delete(AGENT_SAVED_OBJECT_TYPE, agentId);
-    return;
-  }
-
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     active: false,
   });

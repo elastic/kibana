@@ -45,14 +45,15 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
     });
   }
   const soClient = context.core.savedObjects.client;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const unenrollAgents =
     request.body?.force === true ? AgentService.forceUnenrollAgents : AgentService.unenrollAgents;
 
   try {
     if (Array.isArray(request.body.agents)) {
-      await unenrollAgents(soClient, { agentIds: request.body.agents });
+      await unenrollAgents(soClient, esClient, { agentIds: request.body.agents });
     } else {
-      await unenrollAgents(soClient, { kuery: request.body.agents });
+      await unenrollAgents(soClient, esClient, { kuery: request.body.agents });
     }
 
     const body: PostBulkAgentUnenrollResponse = {};

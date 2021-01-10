@@ -26,6 +26,7 @@ export async function unenrollAgent(soClient: SavedObjectsClientContract, agentI
 
 export async function unenrollAgents(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   options:
     | {
         agentIds: string[];
@@ -39,7 +40,7 @@ export async function unenrollAgents(
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
       : (
-          await listAllAgents(soClient, {
+          await listAllAgents(soClient, esClient, {
             kuery: options.kuery,
             showInactive: false,
           })
@@ -95,6 +96,7 @@ export async function forceUnenrollAgent(
 
 export async function forceUnenrollAgents(
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   options:
     | {
         agentIds: string[];
@@ -108,7 +110,7 @@ export async function forceUnenrollAgents(
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
       : (
-          await listAllAgents(soClient, {
+          await listAllAgents(soClient, esClient, {
             kuery: options.kuery,
             showInactive: false,
           })

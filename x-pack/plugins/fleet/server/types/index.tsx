@@ -72,13 +72,13 @@ export {
   SettingsSOAttributes,
   InstallType,
   InstallSource,
-  // Fleet Server types
-  FleetServerEnrollmentAPIKey,
   // Agent Request types
   PostAgentEnrollRequest,
   PostAgentCheckinRequest,
   DataType,
   dataTypes,
+  // Fleet Server types
+  FleetServerEnrollmentAPIKey,
 } from '../../common';
 
 export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];

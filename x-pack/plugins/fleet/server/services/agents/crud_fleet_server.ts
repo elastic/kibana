@@ -6,14 +6,15 @@
 import Boom from '@hapi/boom';
 import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
 
-import { isAgentUpgradeable } from '../../../common';
+import { isAgentUpgradeable, SO_SEARCH_LIMIT } from '../../../common';
 import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
   AGENTS_INDEX,
 } from '../../constants';
+import { ESSearchHit } from '../../../../../typings/elasticsearch';
 import { AgentSOAttributes, Agent, AgentEventSOAttributes, ListWithKuery } from '../../types';
-import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
+import { escapeSearchQueryPhrase, normalizeKuery } from '../saved_object';
 import { savedObjectToAgent } from './saved_objects';
 import { searchHitToAgent } from './helpers';
 import { appContextService } from '../../services';
@@ -95,7 +96,7 @@ export async function listAgents(
 }
 
 export async function listAllAgents(
-  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
     showInactive: boolean;
   }
@@ -103,32 +104,16 @@ export async function listAllAgents(
   agents: Agent[];
   total: number;
 }> {
-  const { sortField = 'enrolled_at', sortOrder = 'desc', kuery, showInactive = false } = options;
-  const filters = [];
-
-  if (kuery && kuery !== '') {
-    filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
-  }
-
-  if (showInactive === false) {
-    filters.push(ACTIVE_AGENT_CONDITION);
-  }
-
-  const { saved_objects: agentSOs, total } = await findAllSOs<AgentSOAttributes>(soClient, {
-    type: AGENT_SAVED_OBJECT_TYPE,
-    kuery: _joinFilters(filters),
-    sortField,
-    sortOrder,
-  });
+  const res = await listAgents(esClient, { ...options, page: 1, perPage: SO_SEARCH_LIMIT });
 
   return {
-    agents: agentSOs.map(savedObjectToAgent),
-    total,
+    agents: res.agents,
+    total: res.total,
   };
 }
 
 export async function countInactiveAgents(
-  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   options: Pick<ListWithKuery, 'kuery'>
 ): Promise<number> {
   const { kuery } = options;
@@ -138,19 +123,23 @@ export async function countInactiveAgents(
     filters.push(normalizeKuery(AGENT_SAVED_OBJECT_TYPE, kuery));
   }
 
-  const { total } = await soClient.find<AgentSOAttributes>({
-    type: AGENT_SAVED_OBJECT_TYPE,
-    filter: _joinFilters(filters),
-    perPage: 0,
+  const res = await esClient.search({
+    index: AGENTS_INDEX,
+    size: 0,
+    track_total_hits: true,
+    q: _joinFilters(filters),
   });
 
-  return total;
+  return res.body.hits.total.value;
 }
 
-export async function getAgent(soClient: SavedObjectsClientContract, agentId: string) {
-  const agent = savedObjectToAgent(
-    await soClient.get<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId)
-  );
+export async function getAgent(esClient: ElasticsearchClient, agentId: string) {
+  const agentHit = await esClient.get<ESSearchHit<AgentSOAttributes>>({
+    index: AGENTS_INDEX,
+    id: agentId,
+  });
+  const agent = searchHitToAgent(agentHit.body);
+
   return agent;
 }
 
@@ -201,31 +190,12 @@ export async function updateAgent(
   });
 }
 
-export async function deleteAgent(soClient: SavedObjectsClientContract, agentId: string) {
-  const agent = await getAgent(soClient, agentId);
-  if (agent.type === 'EPHEMERAL') {
-    // Delete events
-    let more = true;
-    while (more === true) {
-      const { saved_objects: events } = await soClient.find<AgentEventSOAttributes>({
-        type: AGENT_EVENT_SAVED_OBJECT_TYPE,
-        fields: ['id'],
-        search: agentId,
-        searchFields: ['agent_id'],
-        perPage: 1000,
-      });
-      if (events.length === 0) {
-        more = false;
-      }
-      for (const event of events) {
-        await soClient.delete(AGENT_EVENT_SAVED_OBJECT_TYPE, event.id);
-      }
-    }
-    await soClient.delete(AGENT_SAVED_OBJECT_TYPE, agentId);
-    return;
-  }
-
-  await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
-    active: false,
+export async function deleteAgent(esClient: ElasticsearchClient, agentId: string) {
+  await esClient.update({
+    id: agentId,
+    index: AGENT_SAVED_OBJECT_TYPE,
+    body: {
+      active: false,
+    },
   });
 }
