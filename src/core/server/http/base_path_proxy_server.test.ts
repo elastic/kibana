@@ -66,7 +66,7 @@ describe('BasePathProxyServer', () => {
     config = ({
       name: 'kibana',
       host: '127.0.0.1',
-      port: 10002,
+      port: 10012,
       compression: { enabled: true },
       requestId: {
         allowFromAnyIp: true,
@@ -99,7 +99,7 @@ describe('BasePathProxyServer', () => {
     } as HttpConfig;
 
     // setup and start the proxy server
-    const proxyConfig: HttpConfig = { ...config, port: 10003 };
+    const proxyConfig: HttpConfig = { ...config, port: 10013 };
     const devConfig = new DevConfig({ basePathProxyTarget: config.port });
     proxyServer = new BasePathProxyServer(logger, proxyConfig, devConfig);
     const options: Readonly<BasePathProxyServerOptions> = {
