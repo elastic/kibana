@@ -26,7 +26,7 @@ describe('Overview Page', () => {
     expandHostStats();
 
     HOST_STATS.forEach((stat) => {
-      cy.get(stat.domId).invoke('text').should('eq', stat.value);
+      cy.get(stat.domId).should('have.text', stat.value);
     });
   });
 
@@ -36,7 +36,7 @@ describe('Overview Page', () => {
     expandNetworkStats();
 
     NETWORK_STATS.forEach((stat) => {
-      cy.get(stat.domId).invoke('text').should('eq', stat.value);
+      cy.get(stat.domId).should('have.text', stat.value);
     });
   });
 

@@ -16,10 +16,7 @@ import {
   ReferenceOrValueEmbeddable,
   VALUE_CLICK_TRIGGER,
 } from '../../../../../src/plugins/embeddable/public';
-import {
-  ActionExecutionContext,
-  TriggerContextMapping,
-} from '../../../../../src/plugins/ui_actions/public';
+import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   APPLY_FILTER_TRIGGER,
@@ -107,7 +104,9 @@ export class MapEmbeddable
 
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+    this._subscription = this.getUpdated$().subscribe(() =>
+      this.onContainerStateChanged(this.input)
+    );
   }
 
   private async _initializeSaveMap() {
@@ -204,7 +203,7 @@ export class MapEmbeddable
     return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
 
-  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+  public supportedTriggers(): string[] {
     return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
   }
 
