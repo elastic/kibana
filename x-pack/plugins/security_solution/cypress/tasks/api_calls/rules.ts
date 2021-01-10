@@ -25,6 +25,7 @@ export const createCustomRule = (rule: CustomRule, ruleId = 'rule_testing') =>
       enabled: false,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
   });
 
 export const createCustomRuleActivated = (rule: CustomRule, ruleId = 'rule_testing') =>
@@ -47,6 +48,7 @@ export const createCustomRuleActivated = (rule: CustomRule, ruleId = 'rule_testi
       tags: ['rule1'],
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
   });
 
 export const deleteCustomRule = (ruleId = 'rule_testing') => {
