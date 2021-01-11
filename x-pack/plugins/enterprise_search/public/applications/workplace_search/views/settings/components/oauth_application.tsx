@@ -131,6 +131,7 @@ export const OauthApplication: React.FC = () => {
             </EuiFormRow>
             <EuiSpacer size="xl" />
             <EuiFormRow
+              data-test-subj="RedirectURIsRow"
               label={REDIRECT_URIS_LABEL}
               helpText={redirectUriHelpText}
               isInvalid={redirectUriInvalid}
