@@ -49,7 +49,7 @@ def upload() {
 
     withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
       kibanaPipeline.bash("""
-        gsutil -m cp -r -z js,css,html '*' 'gs://${getStorybooksBucket()}/${getDestinationDir()}/${buildState.get('checkoutInfo').commit}/'
+        gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${getStorybooksBucket()}/${getDestinationDir()}/${buildState.get('checkoutInfo').commit}/'
         gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${getStorybooksBucket()}/${getDestinationDir()}/latest/'
       """, "Upload Storybooks to GCS")
     }
