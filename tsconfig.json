@@ -56,7 +56,6 @@
     { "path": "./src/plugins/expressions/tsconfig.json" },
     { "path": "./src/plugins/home/tsconfig.json" },
     { "path": "./src/plugins/inspector/tsconfig.json" },
-    { "path": "./src/plugins/input_control_vis/tsconfig.json" },
     { "path": "./src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "./src/plugins/kibana_react/tsconfig.json" },
     { "path": "./src/plugins/kibana_usage_collection/tsconfig.json" },
