@@ -41,19 +41,3 @@ export const TrackApplicationView: FC<TrackApplicationViewProps> = (props) => {
     </ApplicationUsageContext.Consumer>
   );
 };
-
-// /**
-//  * Maintain in memory the applicationUsageTracker in the browser.
-//  * There should only exist one reporter at a time, so this is not a big deal to have a global variable.
-//  * @private
-//  */
-// let applicationUsageTracker: IApplicationUsageTracker | undefined;
-//
-// /**
-//  * Lazy setter of the singleton applicationUsageTracker. To be called by the plugin once the reporter is initialised.
-//  * @param newApplicationUsageTracker The new applicationUsageTracker to be set.
-//  * @private
-//  */
-// export function setApplicationUsageTracker(newApplicationUsageTracker: IApplicationUsageTracker) {
-//   applicationUsageTracker = newApplicationUsageTracker;
-// }
