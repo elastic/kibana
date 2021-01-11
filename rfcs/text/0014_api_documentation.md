@@ -8,9 +8,53 @@ Automatically generate API documentation for every plugin that exposes a public 
 This does not cover REST API docs, but is targetted towards our javascript
 plugin APIs.
 
-# Screenshots
+# Terminology
 
-TODO when there are better screenshots.
+**API** - Every function, class, interface, type, variable, etc that a plugin exports from it's index.ts file, or start or setup
+contract, is part of the plugins public functionality and services. This set of functionality is called a plugins _API_.
+
+**Declaration** - Each function, class, interface, type, variable, etc, that is part of a plugins public API is a "declaration". This
+terminology is motivated by [these docs](https://www.typescriptlang.org/docs/handbook/modules.html#exporting-a-declaration).
+
+# Information available for each declaration
+
+We have the following pieces of information available from each declaration:
+
+- Label. The name of the function, class, interface, etc.
+
+- Description. Any comment that was able to be extracted.
+
+- Tags. Any `@blahblah` tags that were extracted from comments. Will allow us to mark certain functionality or types as beta or 
+deprecated and show them differently in the UI.
+
+- Kind. This can be thought of as the _kind_ of type. It allows us to group each type into a category. It can be a primitive, or a
+more complex grouping. Possibilities are: array, string, number, boolean, object, class, interface, function, compound (unions or intersections)
+
+- Required or optional. (whether or not the type was written with `| undefined` or `?`). This terminology makes the most sense for function
+parameters. It degrades when thinking about an exported variable that might be undefined.
+
+- Signature. This is only relevant for some types: functions, objects, type, arrays and compound. Classes and interfaces would be too large.
+For primitives, this is equivalent to "type".
+
+- Children. Only relevant for some types, this would include parameters for functions, class members and functions for classes, properties for
+interfaces and objects. This makes the structure recursive. Each child is a nested API component.
+
+- Return comment. Only relevant for function types.
+
+![image](../images/api_info.png)
+
+```ts
+interface ApiDec {
+  label: string;
+  type: TypeKind; // string, number, boolean, class, interface, function, type, etc.
+  description: TextWithLinks;
+  signature: TextWithLinks;
+  tags: string[];  // Declarations may be tagged as beta, or deprecated.
+  children: ApiDec[]; // Recursive - this could be function parameters, class members, or interface/object properties.
+  returnComment?: TextWithLinks
+}
+
+```
 
 # Architecture design
 
@@ -22,20 +66,19 @@ They will be hosted online wherever the new docs system ends up. This can tempor
 
 ## Types
 
-The primary types used.
+### TypeKind
+
+TypeKind is an enum that will identify what "category" or "group" name we can call this particular export. Is it a function, an interface, a class a variable, etc.
+This list is likely incomplete, and we'll expand as needed.
 
 ```ts
-/**
- * The kinds of typescript types we want to show in the docs. `Unknown` is used if
- * we aren't accounting for a particular type. See {@link getPropertyTypeKind}
- */
 export enum TypeKind {
   ClassKind = 'Class',
   FunctionKind = 'Function',
   ObjectKind = 'Object',
   InterfaceKind = 'Interface',
   /**
-   * Maps to the typescript syntax kind `TypeReferences`.
+   * Maps to the typescript syntax kind `TypeReferences`. Would be used for example with `export type Foo = ...`
    */
   TypeKind = 'Type',
   /**
@@ -48,19 +91,20 @@ export enum TypeKind {
   Array = 'Array',
 
   /**
-   * This will cover things like string | number, or A & B, for lack of something better to put here.
+   * This will cover things like string | number, or A & B, for lack of something better.
    */
   CompoundType = 'CompoundType',
 }
+```
 
-export interface PluginDocDef {
-  id: string;
-  serviceFolders?: readonly string[];
-  public: ApiDocDef[];
-  server: ApiDocDef[];
-  common: ApiDocDef[];
-}
 
+### Text with reference links
+
+This may only be needed in phase 1. If we can embed DocLink components inside the description, or signature,
+we could use something like a react component type for those properties. However, we'll need to build the
+text with those DocLinks, and this information will allow us to do that.
+
+```ts
 /**
  * This is used for displaying code or comments that may contain reference links. For example, a function
  * signature that is `(a: import("src/plugin_b").Bar) => void` will be parsed into the following Array:
@@ -87,84 +131,22 @@ export interface Reference {
   section: string;
   text: string;
 }
+```
 
-/**
- * This type should eventually be replaced by something inside elastic-docs.
- * It's what will be passed to an elastic-docs supplied component to make
- * the API docs pretty.
- */
-export interface ApiDocDef {
-  /**
-   * Used for an anchor link to this Api. Can't use label as there can be two labels with the same
-   * text within the Client section and the Server section.
-   */
-  id?: string;
+### A plugin's API
 
-  /**
-   * The name of the api.
-   */
-  label: string;
+A plugins API is broken into public, server and common components.  `serviceFolders` is a way for the system to
+write separate mdx files depending on where each declaration is defined. This is because certain plugins (and core)
+are huge, and can't be rendered in a single page.
 
-  /**
-   * Should the list be expanded or collapsed initially?
-   */
-  initialIsOpen?: boolean;
-
-  /**
-   * The kind of type this API represents, e.g. string, number, Object, Interface, Class.
-   */
-  type: TypeKind;
-
-  /**
-   * Certain types have children. For instance classes have class members, functions will list
-   * their parameters here, classes will list their class members here, and objects and interfaces
-   * will list their properties.
-   */
-  children?: ApiDocDef[];
-
-  /**
-   * TODO
-   */
-  isRequired?: boolean;
-
-  /**
-   * Api node comment.
-   */
-  description?: TextWithLinks;
-
-  /**
-   * If the type is a function, it's signature should be displayed. Currently this overlaps with type
-   * sometimes, and will sometimes be left empty for large types (like classes and interfaces).
-   */
-  signature?: TextWithLinks;
-
-  /**
-   * Relevant for functions with @returns comments.
-   */
-  returnComment?: TextWithLinks;
-
-  /**
-   * Will contain the tags on a comment, like `beta` or `deprecated`.
-   * Won't include param or returns tags.
-   */
-  tags?: string[];
-
-  /**
-   * Every plugn that exposes functionality from their setup and start contract
-   * should have a single exported type for each. These get pulled to the top because
-   * they are accessed differently than other exported functionality and types.
-   */
-  lifecycle?: Lifecycle;
-
-  /**
-   * Used to create links to github to view the code for this API.
-   */
-  source: {
-    path: string;
-    lineNumber: number;
-  };
+```ts
+export interface PluginApi {
+  id: string;
+  serviceFolders?: readonly string[];
+  public: ApiDec[];
+  server: ApiDec[];
+  common: ApiDec[];
 }
-
 ```
 
 ## Overview
