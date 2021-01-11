@@ -10,6 +10,13 @@ import { FileBasedFieldVisConfig } from '../../../stats_table/types';
 
 export const FileBasedNumberContentPreview = ({ config }: { config: FileBasedFieldVisConfig }) => {
   const stats = config.stats;
+  if (
+    stats === undefined ||
+    stats.min === undefined ||
+    stats.median === undefined ||
+    stats.max === undefined
+  )
+    return null;
   return (
     <EuiFlexGroup direction={'column'}>
       <EuiFlexGroup gutterSize="xs">
