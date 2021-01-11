@@ -65,6 +65,7 @@ export interface DataVisualizerFileBasedAppState {
   sortDirection: string;
   visibleFieldTypes?: string[];
   visibleFieldNames?: string[];
+  showDistributions?: boolean;
 }
 
 export type MlGenericUrlState = MLPageState<
