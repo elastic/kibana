@@ -17,15 +17,25 @@
  * under the License.
  */
 
-export { LoadingIndicator } from './loading_indicator';
-export {
-  Header,
-  ChromeHelpExtensionLinkBase,
-  ChromeHelpExtensionMenuLink,
-  ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
-  ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  NavType,
-} from './header';
-export { Footer } from './footer';
+import React, { FC } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
+import { ChromeUserBanner } from '../../types';
+import { HeaderExtension } from '../header/header_extension';
+
+export interface FooterProps {
+  footerBanner$: Observable<ChromeUserBanner | undefined>;
+}
+
+export const Footer: FC<FooterProps> = ({ footerBanner$ }) => {
+  const footerBanner = useObservable(footerBanner$, undefined);
+  if (!footerBanner) {
+    return null;
+  }
+
+  return (
+    <div className="footerGlobalNav" data-test-subj="footerGlobalNav">
+      <HeaderExtension display="block" extension={footerBanner.content} />
+    </div>
+  );
+};

@@ -17,15 +17,4 @@
  * under the License.
  */
 
-export { LoadingIndicator } from './loading_indicator';
-export {
-  Header,
-  ChromeHelpExtensionLinkBase,
-  ChromeHelpExtensionMenuLink,
-  ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
-  ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  NavType,
-} from './header';
-export { Footer } from './footer';
+export { Footer, FooterProps } from './footer';

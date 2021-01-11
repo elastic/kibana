@@ -34,7 +34,7 @@ import { ChromeDocTitle, DocTitleService } from './doc_title';
 import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
-import { Header } from './ui';
+import { Header, Footer } from './ui';
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 import {
   ChromeBadge,
@@ -43,6 +43,7 @@ import {
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
   InternalChromeStart,
+  ChromeUserBanner,
 } from './types';
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -124,6 +125,21 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
+
+    const footerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
+    const headerBanner$ = new BehaviorSubject<ChromeUserBanner | undefined>(undefined);
+    const bodyClasses$ = combineLatest([footerBanner$, headerBanner$]).pipe(
+      map(([footerBanner, headerBanner]) => {
+        const bodyClasses: string[] = [];
+        if (footerBanner) {
+          bodyClasses.push('kbnBody--hasFooterBanner');
+        }
+        if (headerBanner) {
+          bodyClasses.push('kbnBody--hasHeaderBanner');
+        }
+        return bodyClasses;
+      })
+    );
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
@@ -218,6 +234,8 @@ export class ChromeService {
         />
       ),
 
+      getFooterComponent: () => <Footer footerBanner$={footerBanner$} />,
+
       setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
 
       getBrand$: () => brand$.pipe(takeUntil(this.stop$)),
@@ -288,6 +306,12 @@ export class ChromeService {
       setCustomNavLink: (customNavLink?: ChromeNavLink) => {
         customNavLink$.next(customNavLink);
       },
+
+      setFooterBanner: (footerBanner?: ChromeUserBanner) => {
+        footerBanner$.next(footerBanner);
+      },
+
+      getBodyClasses$: () => bodyClasses$.pipe(takeUntil(this.stop$)),
     };
   }
 

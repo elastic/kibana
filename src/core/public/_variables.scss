@@ -1,3 +1,4 @@
 @import '@elastic/eui/src/global_styling/variables/header';
 
 $kbnHeaderOffset: $euiHeaderHeightCompensation * 2;
+$kbnFooterBannerHeight: $euiHeaderHeightCompensation * 1.2;

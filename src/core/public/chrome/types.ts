@@ -48,6 +48,11 @@ export interface ChromeBreadcrumbsAppendExtension {
 }
 
 /** @public */
+export interface ChromeUserBanner {
+  content: MountPoint<HTMLDivElement>;
+}
+
+/** @public */
 export interface ChromeHelpExtension {
   /**
    * Provide your plugin's name to create a header for separation
@@ -222,13 +227,29 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
+
+  /**
+   * TODO: doc
+   * @param footerBanner
+   */
+  setFooterBanner(footerBanner?: ChromeUserBanner): void;
+
+  /**
+   * Get the current set of classNames that will be set on the body element.
+   */
+  getBodyClasses$(): Observable<string[]>;
 }
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
   /**
-   * Used only by MountingService to render the header UI
+   * Used only by the rendering service to render the header UI
    * @internal
    */
   getHeaderComponent(): JSX.Element;
+  /**
+   * Used only by by the rendering service to render the footer UI
+   * @internal
+   */
+  getFooterComponent(): JSX.Element;
 }
