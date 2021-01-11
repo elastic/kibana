@@ -3207,7 +3207,6 @@
     "savedObjectsManagement.objects.savedObjectsTitle": "已保存对象",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel": "取消",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel": "删除",
-    "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel": "正在删除……",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.idColumnName": "ID",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.titleColumnName": "标题",
     "savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.typeColumnName": "类型",
