@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientCommon } from '../..';
+import { GetCollectionFieldsOptions, IndexField, SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
@@ -45,6 +45,8 @@ import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';
+import { FieldDescriptor } from '../../../server/index_patterns/fetcher';
+import { formatIndexFields } from './utils';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
@@ -215,18 +217,52 @@ export class IndexPatternsService {
   };
 
   /**
+   * Get field list by providing { collection }
+   * @param options
+   */
+  getFieldsForWildcardCollection = async (options: GetCollectionFieldsOptions) => {
+    const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
+    const responsesIndexFields = await Promise.all(
+      options.collection
+        .map((index) =>
+          this.apiClient.getFieldsForWildcard({
+            pattern: index,
+            metaFields,
+            type: options.type,
+            rollupIndex: options.rollupIndex,
+            allowNoIndex: options.allowNoIndex,
+          })
+        )
+        .map((p) => p.catch((e) => false))
+    );
+    const indexFields: IndexField[] = await formatIndexFields(
+      responsesIndexFields.filter((rif) => rif !== false) as FieldDescriptor[][],
+      options.collection
+    );
+    console.log('collection fields:', indexFields);
+    return indexFields;
+  };
+
+  /**
    * Get field list by providing { pattern }
    * @param options
    */
   getFieldsForWildcard = async (options: GetFieldsOptions) => {
+    console.log('LOG IndexPatternsService getFieldsForWildcard', options);
+    if (options.collection != null) {
+      return await this.getFieldsForWildcardCollection(options as GetCollectionFieldsOptions);
+    }
+
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    return this.apiClient.getFieldsForWildcard({
+    const patternFields = await this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
     });
+    console.log('LOG pattern fields:', patternFields);
+    return patternFields;
   };
 
   /**
@@ -236,13 +272,15 @@ export class IndexPatternsService {
   getFieldsForIndexPattern = async (
     indexPattern: IndexPattern | IndexPatternSpec,
     options?: GetFieldsOptions
-  ) =>
-    this.getFieldsForWildcard({
+  ) => {
+    console.log('LOG getFieldsForIndexPattern in IndexPatternsService');
+    return this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
       ...options,
       pattern: indexPattern.title as string,
     });
+  };
 
   /**
    * Refresh field list for a given index pattern
@@ -285,6 +323,7 @@ export class IndexPatternsService {
     options: GetFieldsOptions,
     fieldAttrs: FieldAttrs = {}
   ) => {
+    console.log('LOG refreshFieldSpecMap');
     const fieldsAsArr = Object.values(fields);
     const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
     try {
@@ -340,16 +379,19 @@ export class IndexPatternsService {
       id,
       version,
       attributes: {
-        title,
-        timeFieldName,
-        intervalName,
-        fields,
-        sourceFilters,
-        fieldFormatMap,
-        typeMeta,
-        type,
-        fieldAttrs,
+        activeCollection,
+        aliasCollection,
         allowNoIndex,
+        fieldAttrs,
+        fieldFormatMap,
+        fields,
+        intervalName,
+        label,
+        sourceFilters,
+        timeFieldName,
+        title,
+        type,
+        typeMeta,
       },
     } = savedObject;
 
@@ -360,18 +402,21 @@ export class IndexPatternsService {
     const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
 
     return {
-      id,
-      version,
-      title,
-      intervalName,
-      timeFieldName,
-      sourceFilters: parsedSourceFilters,
-      fields: this.fieldArrayToMap(parsedFields, parsedFieldAttrs),
-      typeMeta: parsedTypeMeta,
-      type,
-      fieldFormats: parsedFieldFormatMap,
-      fieldAttrs: parsedFieldAttrs,
+      activeCollection,
+      aliasCollection,
       allowNoIndex,
+      fieldAttrs: parsedFieldAttrs,
+      fieldFormats: parsedFieldFormatMap,
+      fields: this.fieldArrayToMap(parsedFields, parsedFieldAttrs),
+      id,
+      intervalName,
+      label,
+      sourceFilters: parsedSourceFilters,
+      timeFieldName,
+      title: title ?? label,
+      type,
+      typeMeta: parsedTypeMeta,
+      version,
     };
   };
 
@@ -386,7 +431,8 @@ export class IndexPatternsService {
     }
 
     const spec = this.savedObjectToSpec(savedObject);
-    const { title, type, typeMeta } = spec;
+
+    const { activeCollection: collection, title, type, typeMeta } = spec;
     spec.fieldAttrs = savedObject.attributes.fieldAttrs
       ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
@@ -397,6 +443,7 @@ export class IndexPatternsService {
         id,
         spec.title as string,
         {
+          collection,
           pattern: title as string,
           metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
           type,

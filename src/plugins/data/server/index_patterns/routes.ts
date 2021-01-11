@@ -96,7 +96,7 @@ export function registerRoutes(
       } catch (error) {
         return response.badRequest();
       }
-
+      console.log('PATTERNHERE:', pattern);
       try {
         const fields = await indexPatterns.getFieldsForWildcard({
           pattern,

@@ -38,6 +38,7 @@ export class IndexPatternsApiServer implements IIndexPatternsApiClient {
     allowNoIndex,
   }: GetFieldsOptions) {
     const indexPatterns = new IndexPatternsFetcher(this.esClient, allowNoIndex);
+    console.log('this one getFieldsForWildcard');
     return await indexPatterns.getFieldsForWildcard({
       pattern,
       metaFields,

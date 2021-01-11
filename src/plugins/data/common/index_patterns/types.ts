@@ -28,7 +28,7 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export interface IIndexPattern {
   fields: IFieldType[];
-  title: string;
+  title: string; // deprecate or remove?
   id?: string;
   type?: string;
   timeFieldName?: string;
@@ -42,7 +42,7 @@ export interface IIndexPattern {
 export interface IndexPatternAttributes {
   type: string;
   fields: string;
-  title: string;
+  title?: string; // deprecate or remove?
   typeMeta: string;
   timeFieldName?: string;
   intervalName?: string;
@@ -53,6 +53,10 @@ export interface IndexPatternAttributes {
    * prevents errors when index pattern exists before indices
    */
   allowNoIndex?: boolean;
+
+  activeCollection?: string[];
+  aliasCollection?: string[];
+  label?: string;
 }
 
 export interface FieldAttrs {
@@ -100,12 +104,17 @@ export interface SavedObjectsClientCommon {
 }
 
 export interface GetFieldsOptions {
+  collection?: string[];
   pattern: string;
   type?: string;
   lookBack?: boolean;
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
+}
+
+export interface GetCollectionFieldsOptions extends GetFieldsOptions {
+  collection: string[];
 }
 
 export interface GetFieldsOptionsTimePattern {
@@ -189,7 +198,7 @@ export type IndexPatternFieldMap = Record<string, FieldSpec>;
 export interface IndexPatternSpec {
   id?: string;
   version?: string;
-  title?: string;
+  title?: string; // deprecate or remove?
   intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
@@ -199,8 +208,46 @@ export interface IndexPatternSpec {
   fieldFormats?: Record<string, SerializedFieldFormat>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
+  activeCollection?: string[];
+  aliasCollection?: string[];
+  label?: string;
 }
 
 export interface SourceFilter {
   value: string;
 }
+
+export type Maybe<T> = T | null;
+interface FieldInfo {
+  category: string;
+  description?: string;
+  example?: string | number;
+  format?: string;
+  name: string;
+  type?: string;
+}
+export interface IndexField {
+  /** Where the field belong */
+  category: string;
+  /** Example of field's value */
+  example?: Maybe<string | number>;
+  /** whether the field's belong to an alias index */
+  indexes: Array<Maybe<string>>;
+  /** The name of the field */
+  name: string;
+  /** The type of the field's values as recognized by Kibana */
+  type: string;
+  /** Whether the field's values can be efficiently searched for */
+  searchable: boolean;
+  /** Whether the field's values can be aggregated */
+  aggregatable: boolean;
+  /** Description of the field */
+  description?: Maybe<string>;
+  format?: Maybe<string>;
+  /** the elastic type as mapped in the index */
+  esTypes?: string[];
+  subType?: IFieldSubType;
+  readFromDocValues: boolean;
+}
+
+export type BeatFields = Record<string, FieldInfo>;

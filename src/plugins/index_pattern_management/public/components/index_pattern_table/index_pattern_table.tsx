@@ -37,7 +37,7 @@ import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_re
 import { IndexPatternManagmentContext } from '../../types';
 import { CreateButton } from '../create_button';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
-import { getIndexPatterns } from '../utils';
+import { getIndexPatterns, getIndexPatternsCollection } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { EmptyState } from './empty_state';
 import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
@@ -107,6 +107,10 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         uiSettings.get('defaultIndex'),
         indexPatternManagementStart
       );
+      console.log('LOG KIPs', {
+        defaultIndex: uiSettings.get('defaultIndex'),
+        gettedIndexPatterns,
+      });
       setIsLoadingIndexPatterns(false);
       setCreationOptions(options);
       setIndexPatterns(gettedIndexPatterns);

@@ -20,50 +20,51 @@ import { IIndexPattern } from 'src/plugins/data/public';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { IndexPatternManagementStart } from '../plugin';
 
-export async function getIndexPatterns(
+export const getIndexPatterns = async (
   savedObjectsClient: SavedObjectsClientContract,
   defaultIndex: string,
   indexPatternManagementStart: IndexPatternManagementStart
-) {
-  return (
-    savedObjectsClient
-      .find<IIndexPattern>({
-        type: 'index-pattern',
-        fields: ['title', 'type'],
-        perPage: 10000,
-      })
-      .then((response) =>
-        response.savedObjects
-          .map((pattern) => {
-            const id = pattern.id;
-            const title = pattern.get('title');
-            const isDefault = defaultIndex === id;
+) => {
+  const response = await savedObjectsClient.find<IIndexPattern>({
+    type: 'index-pattern',
+    fields: ['title', 'label', 'activeCollection', 'aliasCollection'],
+    perPage: 10000,
+  });
+  return response.savedObjects.length > 0
+    ? response.savedObjects
+        .map((pattern) => {
+          const id = pattern.id;
+          const title = pattern.get('title') != null ? pattern.get('title') : pattern.get('label');
+          const activeCollection = pattern.get('activeCollection');
+          const aliasCollection = pattern.get('aliasCollection');
+          const isDefault = defaultIndex === id;
 
-            const tags = (indexPatternManagementStart as IndexPatternManagementStart).list.getIndexPatternTags(
-              pattern,
-              isDefault
-            );
+          const tags = (indexPatternManagementStart as IndexPatternManagementStart).list.getIndexPatternTags(
+            pattern,
+            isDefault
+          );
 
-            return {
-              id,
-              title,
-              default: isDefault,
-              tags,
-              // the prepending of 0 at the default pattern takes care of prioritization
-              // so the sorting will but the default index on top
-              // or on bottom of a the table
-              sort: `${isDefault ? '0' : '1'}${title}`,
-            };
-          })
-          .sort((a, b) => {
-            if (a.sort < b.sort) {
-              return -1;
-            } else if (a.sort > b.sort) {
-              return 1;
-            } else {
-              return 0;
-            }
-          })
-      ) || []
-  );
-}
+          return {
+            activeCollection,
+            aliasCollection,
+            default: isDefault,
+            id,
+            tags,
+            // the prepending of 0 at the default pattern takes care of prioritization
+            // so the sorting will but the default index on top
+            // or on bottom of a the table
+            sort: `${isDefault ? '0' : '1'}${title}`,
+            title,
+          };
+        })
+        .sort((a, b) => {
+          if (a.sort < b.sort) {
+            return -1;
+          } else if (a.sort > b.sort) {
+            return 1;
+          } else {
+            return 0;
+          }
+        })
+    : [];
+};
