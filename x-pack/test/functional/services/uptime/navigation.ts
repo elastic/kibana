@@ -68,6 +68,12 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
           },
           async () => {
             await browser.refresh();
+            await retry.try(async () => {
+              const isUptimeAppVisible = await testSubjects.exists('uptimeApp');
+              if (!isUptimeAppVisible) {
+                throw new Error('Uptime app not visible');
+              }
+            });
           }
         );
         await testSubjects.existOrFail('uptimeMonitorPage', {
