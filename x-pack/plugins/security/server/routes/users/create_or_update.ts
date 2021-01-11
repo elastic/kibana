@@ -30,12 +30,7 @@ export function defineCreateOrUpdateUserRoutes({ router }: RouteDefinitionParams
       try {
         await context.core.elasticsearch.client.asCurrentUser.security.putUser({
           username: request.params.username,
-          // Omit `username`, `enabled` and all fields with `null` value.
-          body: Object.fromEntries(
-            Object.entries(request.body).filter(
-              ([key, value]) => value !== null && key !== 'enabled' && key !== 'username'
-            )
-          ),
+          body: request.body,
         });
 
         return response.ok({ body: request.body });

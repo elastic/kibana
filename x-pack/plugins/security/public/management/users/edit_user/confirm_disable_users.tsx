@@ -25,6 +25,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
   onSuccess,
 }) => {
   const { services } = useKibana();
+  const isSystemUser = usernames[0] === 'kibana' || usernames[0] === 'kibana_system';
 
   const [state, disableUsers] = useAsyncFn(async () => {
     for (const username of usernames) {
@@ -60,32 +61,59 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
       })}
       onCancel={onCancel}
       onConfirm={disableUsers}
-      confirmButtonText={i18n.translate(
-        'xpack.security.management.users.confirmDisableUsers.confirmButton',
-        {
-          defaultMessage: '{isLoading, select, true{Disabling user…} other{Disable user}}',
-          values: { isLoading: state.loading },
-        }
-      )}
+      confirmButtonText={
+        isSystemUser
+          ? i18n.translate(
+              'xpack.security.management.users.changePasswordFlyout.confirmSystemPasswordButton',
+              {
+                defaultMessage:
+                  '{isLoading, select, true{Disabling user…} other{I understand, disable this user}}',
+                values: { isLoading: state.loading },
+              }
+            )
+          : i18n.translate('xpack.security.management.users.confirmDisableUsers.confirmButton', {
+              defaultMessage:
+                '{isLoading, select, true{Disabling {count, plural, one{user} other{users}}…} other{Disable {count, plural, one{user} other{users}}}}',
+              values: { count: usernames.length, isLoading: state.loading },
+            })
+      }
+      confirmButtonColor={isSystemUser ? 'danger' : undefined}
       isLoading={state.loading}
       ownFocus
     >
-      <EuiText>
-        <p>
-          <FormattedMessage
-            id="xpack.security.management.users.confirmDisableUsers.description"
-            defaultMessage="{count, plural, one{The user} other{These users}} will be disabled and will no longer be able to access the stack{count, plural, one{.} other{:}}"
-            values={{ count: usernames.length }}
-          />
-        </p>
-        {usernames.length > 1 && (
-          <ul>
-            {usernames.map((username) => (
-              <li key={username}>{username}</li>
-            ))}
-          </ul>
-        )}
-      </EuiText>
+      {isSystemUser ? (
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.security.management.users.changePasswordFlyout.systemUserDescription"
+              defaultMessage="Disabling this user will prevent Kibana from communicating with Elasticsearch."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.security.management.users.changePasswordFlyout.systemUserDescription"
+              defaultMessage="Once disabled, you must manually update your config file with credentials for a different system user and restart Kibana."
+            />
+          </p>
+        </EuiText>
+      ) : (
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.security.management.users.confirmDisableUsers.description"
+              defaultMessage="This action will prevent {count, plural, one{the user} other{these users}} from accessing the stack{count, plural, one{.} other{:}}"
+              values={{ count: usernames.length, username: <strong>{usernames[0]}</strong> }}
+            />
+          </p>
+          {usernames.length > 1 && (
+            <ul>
+              {usernames.map((username) => (
+                <li key={username}>{username}</li>
+              ))}
+            </ul>
+          )}
+        </EuiText>
+      )}
     </ConfirmModal>
   );
 };

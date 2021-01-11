@@ -6,12 +6,16 @@
 
 import React, { FunctionComponent } from 'react';
 import {
+  EuiCallOut,
   EuiFieldPassword,
+  EuiFlexGroup,
   EuiForm,
   EuiFormRow,
+  EuiIcon,
   EuiLoadingContent,
   EuiSpacer,
   EuiText,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -47,6 +51,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
   const { services } = useKibana();
   const { value: currentUser, loading: isLoading } = useCurrentUser();
   const isCurrentUser = currentUser?.username === username;
+  const isSystemUser = username === 'kibana' || username === 'kibana_system';
 
   const [form, eventHandlers] = useForm({
     onSubmit: async (values) => {
@@ -141,16 +146,27 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
     <FormFlyout
       title={i18n.translate('xpack.security.management.users.changePasswordFlyout.title', {
         defaultMessage: 'Change password',
+        values: { username },
       })}
       onCancel={onCancel}
       onSubmit={form.submit}
-      submitButtonText={i18n.translate(
-        'xpack.security.management.users.changePasswordFlyout.confirmButton',
-        {
-          defaultMessage: '{isSubmitting, select, true{Changing password…} other{Change password}}',
-          values: { isSubmitting: form.isSubmitting },
-        }
-      )}
+      submitButtonText={
+        isSystemUser
+          ? i18n.translate(
+              'xpack.security.management.users.changePasswordFlyout.confirmSystemPasswordButton',
+              {
+                defaultMessage:
+                  '{isSubmitting, select, true{Changing password…} other{I understand, change this password}}',
+                values: { isSubmitting: form.isSubmitting },
+              }
+            )
+          : i18n.translate('xpack.security.management.users.changePasswordFlyout.confirmButton', {
+              defaultMessage:
+                '{isSubmitting, select, true{Changing password…} other{Change password}}',
+              values: { isSubmitting: form.isSubmitting },
+            })
+      }
+      submitButtonColor={isSystemUser ? 'danger' : undefined}
       isLoading={form.isSubmitting}
       isDisabled={isLoading || (form.isSubmitted && form.isInvalid)}
       size="s"
@@ -160,15 +176,52 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
         <EuiLoadingContent />
       ) : (
         <EuiForm component="form" {...eventHandlers}>
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.users.changePasswordFlyout.description"
-                defaultMessage="Once changed, the user will no longer be able to log in using their previous password."
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer />
+          {isSystemUser ? (
+            <>
+              <EuiCallOut
+                title={i18n.translate(
+                  'xpack.security.management.users.changePasswordFlyout.systemUserTitle',
+                  { defaultMessage: 'This is extremely important!' }
+                )}
+                color="danger"
+                iconType="alert"
+              >
+                <p>
+                  <FormattedMessage
+                    id="xpack.security.management.users.changePasswordFlyout.systemUserDescription"
+                    defaultMessage="Changing this password will prevent Kibana from communicating with Elasticsearch."
+                  />
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.security.management.users.changePasswordFlyout.systemUserDescription"
+                    defaultMessage="Once changed, you must manually update your config file with the new password and restart Kibana."
+                  />
+                </p>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          ) : undefined}
+
+          <EuiFormRow
+            label={i18n.translate(
+              'xpack.security.management.users.changePasswordFlyout.userLabel',
+              {
+                defaultMessage: 'User',
+              }
+            )}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="user" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSpacer size="xs" />
+                <EuiText>{username}</EuiText>
+                <EuiSpacer size="xs" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
 
           {isCurrentUser ? (
             <EuiFormRow
@@ -182,7 +235,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
               <EuiFieldPassword
                 name="current_password"
                 type="dual"
-                defaultValue={form.values.current_password}
+                value={form.values.current_password}
                 isInvalid={form.touched.current_password && !!form.errors.current_password}
                 autoComplete="password"
               />
@@ -203,7 +256,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
             <EuiFieldPassword
               name="password"
               type="dual"
-              defaultValue={form.values.password}
+              value={form.values.password}
               isInvalid={form.touched.password && !!form.errors.password}
               autoComplete="new-password"
             />
@@ -219,11 +272,12 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
             <EuiFieldPassword
               name="confirm_password"
               type="dual"
-              defaultValue={form.values.confirm_password}
+              value={form.values.confirm_password}
               isInvalid={form.touched.confirm_password && !!form.errors.confirm_password}
               autoComplete="new-password"
             />
           </EuiFormRow>
+
           {/* Hidden submit button is required for enter key to trigger form submission */}
           <input type="submit" hidden />
         </EuiForm>

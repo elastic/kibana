@@ -31,6 +31,8 @@ import { RolesAPIClient } from '../../roles';
 import { RoleComboBox } from '../../role_combo_box';
 import { UserAPIClient } from '..';
 
+export const THROTTLE_USERS_WAIT = 10000;
+
 export interface UserFormValues {
   username?: string;
   full_name: string;
@@ -49,17 +51,19 @@ export interface UserFormProps {
   onSuccess?(): void;
 }
 
+const defaultDefaultValues: UserFormValues = {
+  username: '',
+  password: '',
+  confirm_password: '',
+  full_name: '',
+  email: '',
+  roles: [],
+};
+
 export const UserForm: FunctionComponent<UserFormProps> = ({
   isNewUser = false,
   isReservedUser = false,
-  defaultValues = {
-    username: '',
-    password: '',
-    confirm_password: '',
-    full_name: '',
-    email: '',
-    roles: [],
-  },
+  defaultValues = defaultDefaultValues,
   onSuccess,
   onCancel,
 }) => {
@@ -71,7 +75,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getUsersThrottled = useCallback(
-    throttle(() => new UserAPIClient(services.http!).getUsers(), 10000),
+    throttle(() => new UserAPIClient(services.http!).getUsers(), THROTTLE_USERS_WAIT),
     [services.http]
   );
 
@@ -197,6 +201,10 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
   });
 
   useEffect(() => {
+    form.reset(defaultValues);
+  }, [defaultValues]);
+
+  useEffect(() => {
     getRoles();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -249,7 +257,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           <EuiFieldText
             name="username"
             icon="user"
-            defaultValue={form.values.username}
+            value={form.values.username}
             isLoading={form.isValidating}
             isInvalid={form.touched.username && !!form.errors.username}
             disabled={!isNewUser}
@@ -267,7 +275,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             >
               <EuiFieldText
                 name="full_name"
-                defaultValue={form.values.full_name}
+                value={form.values.full_name}
                 isInvalid={form.touched.full_name && !!form.errors.full_name}
               />
             </EuiFormRow>
@@ -280,7 +288,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             >
               <EuiFieldText
                 name="email"
-                defaultValue={form.values.email}
+                value={form.values.email}
                 isInvalid={form.touched.email && !!form.errors.email}
               />
             </EuiFormRow>
@@ -313,7 +321,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             <EuiFieldPassword
               name="password"
               type="dual"
-              defaultValue={form.values.password}
+              value={form.values.password}
               isInvalid={form.touched.password && !!form.errors.password}
               autoComplete="new-password"
             />
@@ -328,7 +336,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             <EuiFieldPassword
               name="confirm_password"
               type="dual"
-              defaultValue={form.values.confirm_password}
+              value={form.values.confirm_password}
               isInvalid={form.touched.confirm_password && !!form.errors.confirm_password}
               autoComplete="new-password"
             />

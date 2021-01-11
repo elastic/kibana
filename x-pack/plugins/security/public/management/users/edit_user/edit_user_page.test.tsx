@@ -49,7 +49,7 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    await findByText(/^User is disabled and cannot access the stack/i);
+    await findByText(/User is disabled/i);
   });
 
   it('warns when viewing deprecated user', async () => {
@@ -73,8 +73,8 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    await findByText(/^User is deprecated/i);
-    await findByText(/^Please use .new_user. instead/i);
+    await findByText(/User is deprecated/i);
+    await findByText(/Please use .new_user. instead/i);
 
     fireEvent.click(await findByRole('button', { name: 'Back to users' }));
 
@@ -98,7 +98,7 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    await findByText(/^User is built-in and cannot be updated or deleted/i);
+    await findByText(/User is built-in/i);
 
     fireEvent.click(await findByRole('button', { name: 'Back to users' }));
 
@@ -132,7 +132,7 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    await findByText(/^Role .deprecated_role. is deprecated. Please use .new_role. instead/i);
+    await findByText(/Role .deprecated_role. is deprecated. Please use .new_role. instead/i);
   });
 
   it('updates user when submitting form and redirects back', async () => {

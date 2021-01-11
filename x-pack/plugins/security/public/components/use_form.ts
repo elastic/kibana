@@ -82,6 +82,7 @@ export interface FormState<Values, Result> {
   setValue(name: string, value: any): Promise<void>;
   setError(name: string, message: string): void;
   setTouched(name: string): Promise<void>;
+  reset(values: Values): void;
   submit(): Promise<Result | undefined>;
   values: Values;
   errors: ValidationErrors<Values>;
@@ -161,6 +162,12 @@ export function useFormState<Values extends FormValues, Result>({
     setError: (name, message) => {
       setErrors(setDeep(errors, name, message));
       setTouched(setDeep(touched, name, true));
+    },
+    reset: (values) => {
+      setValues(values);
+      setErrors({});
+      setTouched({});
+      setSubmitCount(0);
     },
     submit: () => submitForm(values),
     values,

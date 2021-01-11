@@ -96,32 +96,13 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       </EuiPageContentHeader>
       <EuiPageContentBody>
         <EuiHorizontalRule />
-        {user.enabled === false ? (
-          <>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.security.management.users.editUserPage.disabledUserWarning"
-                  defaultMessage="User is disabled and cannot access the stack."
-                />
-              }
-            >
-              <EuiButton onClick={() => setAction('enableUser')} size="s">
-                <FormattedMessage
-                  id="xpack.security.management.users.editUserPage.enableUserButton"
-                  defaultMessage="Enable user"
-                />
-              </EuiButton>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        ) : isDeprecatedUser ? (
+        {isDeprecatedUser ? (
           <>
             <EuiCallOut
               title={
                 <FormattedMessage
                   id="xpack.security.management.users.editUserPage.deprecatedUserWarning"
-                  defaultMessage="User is deprecated."
+                  defaultMessage="This user is deprecated."
                 />
               }
               iconType="alert"
@@ -137,11 +118,30 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               title={
                 <FormattedMessage
                   id="xpack.security.management.users.editUserPage.reservedUserWarning"
-                  defaultMessage="User is built-in and cannot be updated or deleted."
+                  defaultMessage="This user is built-in and can't be updated or deleted."
                 />
               }
               iconType="lock"
             />
+            <EuiSpacer />
+          </>
+        ) : user.enabled === false ? (
+          <>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.security.management.users.editUserPage.disabledUserWarning"
+                  defaultMessage="This user is disabled and can't access the stack."
+                />
+              }
+            >
+              <EuiButton onClick={() => setAction('enableUser')} size="s">
+                <FormattedMessage
+                  id="xpack.security.management.users.editUserPage.enableUserButton"
+                  defaultMessage="Enable user"
+                />
+              </EuiButton>
+            </EuiCallOut>
             <EuiSpacer />
           </>
         ) : undefined}
@@ -201,7 +201,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                 <EuiDescriptionListDescription>
                   <FormattedMessage
                     id="xpack.security.management.users.editUserPage.changePasswordDescription"
-                    defaultMessage="Once changed, the user will no longer be able to log in using their previous
+                    defaultMessage="Once changed, the user will not be able to log in using their previous
                     password."
                   />
                 </EuiDescriptionListDescription>
@@ -217,70 +217,70 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
+
         <EuiSpacer />
+        {user.enabled === false ? (
+          <EuiPanel color="subdued" hasShadow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem>
+                <EuiDescriptionList>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.security.management.users.editUserPage.enableUserTitle"
+                      defaultMessage="Enable user"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    <FormattedMessage
+                      id="xpack.security.management.users.editUserPage.enableUserDescription"
+                      defaultMessage="Allow the user to access the stack."
+                    />
+                  </EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={() => setAction('enableUser')} size="s">
+                  <FormattedMessage
+                    id="xpack.security.management.users.editUserPage.enableUserButton"
+                    defaultMessage="Enable user"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        ) : (
+          <EuiPanel color="subdued" hasShadow={false}>
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem>
+                <EuiDescriptionList>
+                  <EuiDescriptionListTitle>
+                    <FormattedMessage
+                      id="xpack.security.management.users.editUserPage.disableUserTitle"
+                      defaultMessage="Disable user"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>
+                    <FormattedMessage
+                      id="xpack.security.management.users.editUserPage.disableUserDescription"
+                      defaultMessage="Prevent the user from accessing the stack."
+                    />
+                  </EuiDescriptionListDescription>
+                </EuiDescriptionList>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={() => setAction('disableUser')} size="s">
+                  <FormattedMessage
+                    id="xpack.security.management.users.editUserPage.disableUserButton"
+                    defaultMessage="Disable user"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        )}
 
         {!isReservedUser && (
           <>
-            {user.enabled === false ? (
-              <EuiPanel color="subdued" hasShadow={false}>
-                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                  <EuiFlexItem>
-                    <EuiDescriptionList>
-                      <EuiDescriptionListTitle>
-                        <FormattedMessage
-                          id="xpack.security.management.users.editUserPage.enableUserTitle"
-                          defaultMessage="Enable user"
-                        />
-                      </EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription>
-                        <FormattedMessage
-                          id="xpack.security.management.users.editUserPage.enableUserDescription"
-                          defaultMessage="Once enable, the user will be able to access the stack."
-                        />
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => setAction('enableUser')} size="s">
-                      <FormattedMessage
-                        id="xpack.security.management.users.editUserPage.enableUserButton"
-                        defaultMessage="Enable user"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            ) : (
-              <EuiPanel color="subdued" hasShadow={false}>
-                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                  <EuiFlexItem>
-                    <EuiDescriptionList>
-                      <EuiDescriptionListTitle>
-                        <FormattedMessage
-                          id="xpack.security.management.users.editUserPage.disableUserTitle"
-                          defaultMessage="Disable user"
-                        />
-                      </EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription>
-                        <FormattedMessage
-                          id="xpack.security.management.users.editUserPage.disableUserDescription"
-                          defaultMessage="Once disabled, the user will no longer be able to access the stack."
-                        />
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => setAction('disableUser')} size="s">
-                      <FormattedMessage
-                        id="xpack.security.management.users.editUserPage.disableUserButton"
-                        defaultMessage="Disable user"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            )}
-
             <EuiSpacer />
             <EuiPanel color="subdued" hasShadow={false}>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -295,8 +295,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                     <EuiDescriptionListDescription>
                       <FormattedMessage
                         id="xpack.security.management.users.editUserPage.deleteUserDescription"
-                        defaultMessage="The user will be permanently deleted and will no longer be able to access
-                              the stack."
+                        defaultMessage="Permanently delete the user from the stack."
                       />
                     </EuiDescriptionListDescription>
                   </EuiDescriptionList>

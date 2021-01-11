@@ -65,7 +65,7 @@ export const FormFlyout: FunctionComponent<FormFlyoutProps> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty flush="left" isDisabled={isLoading} onClick={onCancel}>
+              <EuiButtonEmpty flush="right" isDisabled={isLoading} onClick={onCancel}>
                 <FormattedMessage
                   id="xpack.security.formFlyout.cancelButton"
                   defaultMessage="Cancel"

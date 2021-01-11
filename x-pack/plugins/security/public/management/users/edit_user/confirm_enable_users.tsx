@@ -60,8 +60,9 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
       confirmButtonText={i18n.translate(
         'xpack.security.management.users.confirmEnableUsers.confirmButton',
         {
-          defaultMessage: '{isLoading, select, true{Disabling user…} other{Enable user}}',
-          values: { isLoading: state.loading },
+          defaultMessage:
+            '{isLoading, select, true{Enabling {count, plural, one{user} other{users}}…} other{Enable {count, plural, one{user} other{users}}}}',
+          values: { count: usernames.length, isLoading: state.loading },
         }
       )}
       isLoading={state.loading}
@@ -71,7 +72,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
         <p>
           <FormattedMessage
             id="xpack.security.management.users.confirmEnableUsers.description"
-            defaultMessage="{count, plural, one{The user} other{These users}} will be enabled and will be able to access the stack{count, plural, one{.} other{:}}"
+            defaultMessage="This action will allow {count, plural, one{the user} other{these users}} to access the stack{count, plural, one{.} other{:}}"
             values={{ count: usernames.length }}
           />
         </p>

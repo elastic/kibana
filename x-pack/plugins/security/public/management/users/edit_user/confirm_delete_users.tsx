@@ -61,7 +61,7 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
         'xpack.security.management.users.confirmDeleteUsers.confirmButton',
         {
           defaultMessage:
-            '{isLoading, select, true{Deleting user…} other{I understand, permanently delete {count, plural, one{this user} other{these users}}}}',
+            '{isLoading, select, true{Deleting {count, plural, one{user} other{users}}…} other{I understand, permanently delete {count, plural, one{this user} other{these users}}}}',
           values: { count: usernames.length, isLoading: state.loading },
         }
       )}
@@ -73,7 +73,7 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
         <p>
           <FormattedMessage
             id="xpack.security.management.users.confirmDeleteUsers.description"
-            defaultMessage="{count, plural, one{The user} other{These users}} will be deleted and will no longer be able to access the stack{count, plural, one{.} other{:}}"
+            defaultMessage="This action will permanently delete {count, plural, one{the user} other{these users}} from the stack{count, plural, one{.} other{:}}"
             values={{ count: usernames.length }}
           />
         </p>
@@ -87,7 +87,8 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
         <p>
           <FormattedMessage
             id="xpack.security.management.users.confirmDelete.cannotUndoWarning"
-            defaultMessage="You cannot undo this action."
+            defaultMessage="You can't recover deleted users."
+            values={{ count: usernames.length }}
           />
         </p>
       </EuiText>
