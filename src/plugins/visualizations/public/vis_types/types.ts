@@ -20,7 +20,8 @@ import { EventEmitter } from 'events';
 import { IconType } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { Adapters } from 'src/plugins/inspector';
-import { CoreStart, SavedObject } from 'src/core/public';
+import { CoreStart } from 'src/core/public';
+import { SavedObject } from 'src/plugins/saved_objects/public';
 import {
   IndexPattern,
   AggGroupNames,
