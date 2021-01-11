@@ -7,10 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useUrlParams } from '../../../../../../../context/url_params_context/use_url_params';
-import {
-  ENVIRONMENT_ALL,
-  isEnvironmentEqualToQueryEnvironment,
-} from '../../../../../../../../common/environment_filter_values';
+import { getEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import {
   SPAN_NAME,
@@ -20,7 +17,7 @@ import {
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { StickyProperties } from '../../../../../../shared/StickyProperties';
-import { ServiceOrTransactionsOverviewLink } from '../../../../../../shared/Links/apm/service_transactions_overview';
+import { ServiceOrTransactionsOverviewLink } from '../../../../../../shared/Links/apm/service_transactions_overview_link';
 import { TransactionDetailLink } from '../../../../../../shared/Links/apm/TransactionDetailLink';
 
 interface Props {
@@ -33,12 +30,10 @@ export function StickySpanProperties({ span, transaction }: Props) {
     urlParams: { environment },
   } = useUrlParams();
 
-  const nextEnvironment = isEnvironmentEqualToQueryEnvironment(
+  const nextEnvironment = getEnvironmentUrlParam(
     transaction?.service.environment,
     environment
-  )
-    ? environment
-    : ENVIRONMENT_ALL.value;
+  );
 
   const spanName = span.span.name;
   const transactionStickyProperties = transaction

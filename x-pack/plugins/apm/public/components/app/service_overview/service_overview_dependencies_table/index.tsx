@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   ENVIRONMENT_ALL,
-  isEnvironmentEqualToQueryEnvironment,
+  getEnvironmentUrlParam,
 } from '../../../../../common/environment_filter_values';
 import {
   asDuration,
@@ -43,6 +43,10 @@ interface Props {
 }
 
 export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
+  const {
+    urlParams: { start, end, environment },
+  } = useUrlParams();
+
   const columns: Array<EuiBasicTableColumn<ServiceDependencyItem>> = [
     {
       field: 'name',
@@ -69,14 +73,10 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
                   {item.type === 'service' ? (
                     <ServiceOverviewLink
                       serviceName={item.serviceName}
-                      environment={
-                        isEnvironmentEqualToQueryEnvironment(
-                          item.environment,
-                          environment
-                        )
-                          ? environment
-                          : ENVIRONMENT_ALL.value
-                      }
+                      environment={getEnvironmentUrlParam(
+                        item.environment,
+                        environment
+                      )}
                     >
                       {item.name}
                     </ServiceOverviewLink>
@@ -168,10 +168,6 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
       sortable: true,
     },
   ];
-
-  const {
-    urlParams: { start, end, environment },
-  } = useUrlParams();
 
   const { data = [], status } = useFetcher(() => {
     if (!start || !end) {

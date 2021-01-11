@@ -8,11 +8,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { APMQueryParams } from '../url_helpers';
-import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
+import { APMLinkExtendProps, useAPMHref } from './APMLink';
 
 interface ServiceOverviewLinkProps extends APMLinkExtendProps {
   serviceName: string;
@@ -23,8 +22,20 @@ const persistedFilters: Array<keyof APMQueryParams> = [
   'latencyAggregationType',
 ];
 
-export function useServiceOverviewHref(serviceName: string) {
-  return useAPMHref(`/services/${serviceName}/overview`, persistedFilters);
+export function useServiceOverviewHref(
+  serviceName: string,
+  environment?: string
+) {
+  const query = environment
+    ? {
+        environment,
+      }
+    : {};
+  return useAPMHref({
+    path: `/services/${serviceName}/overview`,
+    persistedFilters,
+    query,
+  });
 }
 
 export function ServiceOverviewLink({
@@ -32,16 +43,6 @@ export function ServiceOverviewLink({
   environment,
   ...rest
 }: ServiceOverviewLinkProps) {
-  const { urlParams } = useUrlParams();
-
-  return (
-    <APMLink
-      path={`/services/${serviceName}/overview`}
-      query={{
-        ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
-        environment: environment ?? urlParams.environment,
-      }}
-      {...rest}
-    />
-  );
+  const href = useServiceOverviewHref(serviceName, environment);
+  return <EuiLink href={href} {...rest} />;
 }

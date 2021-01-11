@@ -27,7 +27,6 @@ import {
   removeTimelineColumn,
   removeTimelineProvider,
   updateTimelineColumns,
-  updateTimelineDescription,
   updateTimelineItemsPerPage,
   updateTimelinePerPageOptions,
   updateTimelineProviderEnabled,
@@ -37,7 +36,7 @@ import {
   updateTimelineRange,
   updateTimelineShowTimeline,
   updateTimelineSort,
-  updateTimelineTitle,
+  updateTimelineTitleAndDescription,
   upsertTimelineColumn,
 } from './helpers';
 import { ColumnHeaderOptions, TimelineModel } from './model';
@@ -835,65 +834,40 @@ describe('Timeline', () => {
     });
   });
 
-  describe('#updateTimelineDescription', () => {
-    const newDescription = 'a new description';
-
-    test('should return a new reference and not the same reference', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: newDescription,
-        timelineById: timelineByIdMock,
-      });
-      expect(update).not.toBe(timelineByIdMock);
-    });
-
-    test('should update the timeline description', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: newDescription,
-        timelineById: timelineByIdMock,
-      });
-      expect(update.foo.description).toEqual(newDescription);
-    });
-
-    test('should always trim all leading whitespace and allow only one trailing space', () => {
-      const update = updateTimelineDescription({
-        id: 'foo',
-        description: '      breathing room      ',
-        timelineById: timelineByIdMock,
-      });
-      expect(update.foo.description).toEqual('breathing room ');
-    });
-  });
-
-  describe('#updateTimelineTitle', () => {
+  describe('#updateTimelineTitleAndDescription', () => {
     const newTitle = 'a new title';
+    const newDescription = 'breathing room';
 
     test('should return a new reference and not the same reference', () => {
-      const update = updateTimelineTitle({
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: '',
         title: newTitle,
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
     });
 
-    test('should update the timeline title', () => {
-      const update = updateTimelineTitle({
+    test('should update the timeline title and description', () => {
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: newDescription,
         title: newTitle,
         timelineById: timelineByIdMock,
       });
       expect(update.foo.title).toEqual(newTitle);
+      expect(update.foo.description).toEqual(newDescription);
     });
 
-    test('should always trim all leading whitespace and allow only one trailing space', () => {
-      const update = updateTimelineTitle({
+    test('should always trim all leading whitespace', () => {
+      const update = updateTimelineTitleAndDescription({
         id: 'foo',
+        description: '      breathing room      ',
         title: '      room at the back      ',
         timelineById: timelineByIdMock,
       });
-      expect(update.foo.title).toEqual('room at the back ');
+      expect(update.foo.title).toEqual('room at the back');
+      expect(update.foo.description).toEqual('breathing room');
     });
   });
 

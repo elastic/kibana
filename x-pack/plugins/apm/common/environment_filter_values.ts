@@ -34,12 +34,17 @@ export function getEnvironmentLabel(environment: string) {
   return environmentLabels[environment] || environment;
 }
 
-export function isEnvironmentEqualToQueryEnvironment(
-  environment?: string,
+export function getEnvironmentUrlParam(
+  requestedEnvironment?: string,
   queryEnvironment?: string
 ) {
-  const environmentToCheck = environment ?? ENVIRONMENT_NOT_DEFINED.value;
-  const queryEnvironmentToCheck = queryEnvironment ?? ENVIRONMENT_ALL.value;
+  const normalizedRequestedEnvironment =
+    requestedEnvironment || ENVIRONMENT_NOT_DEFINED.value;
+  const normalizedQueryEnvironment = queryEnvironment || ENVIRONMENT_ALL.value;
 
-  return environmentToCheck === queryEnvironmentToCheck;
+  if (normalizedRequestedEnvironment === normalizedQueryEnvironment) {
+    return queryEnvironment;
+  }
+
+  return ENVIRONMENT_ALL.value;
 }

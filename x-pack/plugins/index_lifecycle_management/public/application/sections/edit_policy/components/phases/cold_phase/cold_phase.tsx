@@ -178,7 +178,7 @@ export const ColdPhase: FunctionComponent = () => {
                         id="xpack.indexLifecycleMgmt.editPolicy.coldPhase.freezeIndexExplanationText"
                         defaultMessage="Make the index read-only and minimize its memory footprint."
                       />{' '}
-                      <LearnMoreLink docPath="frozen-indices.html" />
+                      <LearnMoreLink docPath="ilm-freeze.html" />
                     </EuiTextColor>
                   }
                   fullWidth

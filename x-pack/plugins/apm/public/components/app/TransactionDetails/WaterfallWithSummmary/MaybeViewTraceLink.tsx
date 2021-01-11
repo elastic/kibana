@@ -7,10 +7,7 @@
 import React from 'react';
 import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ENVIRONMENT_ALL,
-  isEnvironmentEqualToQueryEnvironment,
-} from '../../../../../common/environment_filter_values';
+import { getEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
@@ -78,12 +75,10 @@ export const MaybeViewTraceLink = ({
 
     // the user is viewing a zoomed in version of the trace. Link to the full trace
   } else {
-    const nextEnvironment = isEnvironmentEqualToQueryEnvironment(
+    const nextEnvironment = getEnvironmentUrlParam(
       rootTransaction?.service.environment,
       environment
-    )
-      ? environment
-      : ENVIRONMENT_ALL.value;
+    );
 
     return (
       <EuiFlexItem grow={false}>

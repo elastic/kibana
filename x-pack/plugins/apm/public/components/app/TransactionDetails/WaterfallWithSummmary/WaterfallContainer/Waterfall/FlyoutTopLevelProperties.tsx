@@ -7,10 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useUrlParams } from '../../../../../../context/url_params_context/use_url_params';
-import {
-  ENVIRONMENT_ALL,
-  isEnvironmentEqualToQueryEnvironment,
-} from '../../../../../../../common/environment_filter_values';
+import { getEnvironmentUrlParam } from '../../../../../../../common/environment_filter_values';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -18,7 +15,7 @@ import {
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { TransactionDetailLink } from '../../../../../shared/Links/apm/TransactionDetailLink';
 import { StickyProperties } from '../../../../../shared/StickyProperties';
-import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview';
+import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview_link';
 
 interface Props {
   transaction?: Transaction;
@@ -33,12 +30,10 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
     return null;
   }
 
-  const nextEnvironment = isEnvironmentEqualToQueryEnvironment(
+  const nextEnvironment = getEnvironmentUrlParam(
     transaction?.service.environment,
     environment
-  )
-    ? environment
-    : ENVIRONMENT_ALL.value;
+  );
 
   const stickyProperties = [
     {
