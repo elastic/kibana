@@ -28,10 +28,7 @@ import { DashboardContainer } from './embeddable';
 import { DashboardSavedObject } from '../saved_dashboards';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
-import {
-  convertPanelStateToSavedDashboardPanel,
-  convertSavedDashboardPanelToPanelState,
-} from '../../common/embeddable/embeddable_saved_object_converters';
+import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardAppState,
   DashboardAppStateDefaults,
