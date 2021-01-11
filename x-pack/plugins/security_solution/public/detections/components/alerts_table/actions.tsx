@@ -11,6 +11,7 @@ import { get, getOr, isEmpty, find } from 'lodash/fp';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
+import type { Filter } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import { TimelineId, TimelineStatus, TimelineType } from '../../../../common/types/timeline';
 import { updateAlertStatus } from '../../containers/detection_engine/alerts/api';
 import { SendAlertToTimelineActionProps, UpdateAlertStatusActionProps } from './types';
@@ -114,6 +115,15 @@ export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
 
   return { to, from };
 };
+
+const getFiltersFromRule = (filters: string[]): Filter[] =>
+  filters.map((filterString) => {
+    try {
+      return JSON.parse(filterString);
+    } catch (e) {
+      return filterString;
+    }
+  });
 
 export const getThresholdAggregationDataProvider = (
   ecsData: Ecs,
@@ -261,6 +271,7 @@ export const sendAlertToTimelineAction = async ({
       notes: null,
       timeline: {
         ...timelineDefaults,
+        filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
         dataProviders: [
           {
             and: [],
