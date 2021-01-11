@@ -339,7 +339,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
           ? Promise.all(
               objects.map(async (objectItem) => await (await client).get({ id: objectItem.id }))
             )
-          : new Promise(() => []);
+          : Promise.resolve([]);
     });
 
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
