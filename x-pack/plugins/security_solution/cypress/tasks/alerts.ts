@@ -110,13 +110,18 @@ export const waitForAlerts = () => {
 };
 
 export const waitForAlertsIndexToBeCreated = () => {
-  cy.request({ url: '/api/detection_engine/index', retryOnStatusCodeFailure: true }).then(
-    (response) => {
-      if (response.status !== 200) {
-        cy.wait(7500);
-      }
+  cy.request({
+    url: '/api/detection_engine/index',
+    failOnStatusCode: false,
+  }).then((response) => {
+    if (response.status !== 200) {
+      cy.request({
+        method: 'POST',
+        url: `/api/detection_engine/index`,
+        headers: { 'kbn-xsrf': 'create-signals-index' },
+      });
     }
-  );
+  });
 };
 
 export const waitForAlertsPanelToBeLoaded = () => {
