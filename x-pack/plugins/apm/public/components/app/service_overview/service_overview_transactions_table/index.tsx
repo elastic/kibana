@@ -23,7 +23,6 @@ import {
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { useLatencyAggregationType } from '../../../../hooks/use_latency_Aggregation_type';
 import {
   APIReturnType,
   callApmApi,
@@ -31,7 +30,7 @@ import {
 import { px, unit } from '../../../../style/variables';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ImpactBar } from '../../../shared/ImpactBar';
-import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { TransactionOverviewLink } from '../../../shared/Links/apm/transaction_overview_link';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
@@ -54,10 +53,16 @@ const DEFAULT_SORT = {
   field: 'impact' as const,
 };
 
-function getLatencyAggregationTypeLabel(
-  latencyAggregationType?: LatencyAggregationType
-) {
+function getLatencyAggregationTypeLabel(latencyAggregationType?: string) {
   switch (latencyAggregationType) {
+    case 'avg': {
+      i18n.translate(
+        'xpack.apm.serviceOverview.transactionsTableColumnLatency.avg',
+        {
+          defaultMessage: 'Latency (avg.)',
+        }
+      );
+    }
     case 'p95': {
       return i18n.translate(
         'xpack.apm.serviceOverview.transactionsTableColumnLatency.p95',
@@ -74,24 +79,15 @@ function getLatencyAggregationTypeLabel(
         }
       );
     }
-    default: {
-      return i18n.translate(
-        'xpack.apm.serviceOverview.transactionsTableColumnLatency.avg',
-        {
-          defaultMessage: 'Latency (avg.)',
-        }
-      );
-    }
   }
 }
 
 export function ServiceOverviewTransactionsTable(props: Props) {
   const { serviceName } = props;
   const { transactionType } = useApmServiceContext();
-  const latencyAggregationType = useLatencyAggregationType();
   const {
     uiFilters,
-    urlParams: { start, end },
+    urlParams: { start, end, latencyAggregationType },
   } = useUrlParams();
 
   const [tableOptions, setTableOptions] = useState<{
@@ -135,7 +131,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
           sortField: tableOptions.sort.field,
           sortDirection: tableOptions.sort.direction,
           transactionType,
-          latencyAggregationType,
+          latencyAggregationType: latencyAggregationType as LatencyAggregationType,
         },
       },
     }).then((response) => {
@@ -187,6 +183,7 @@ export function ServiceOverviewTransactionsTable(props: Props) {
                 serviceName={serviceName}
                 transactionName={name}
                 transactionType={type}
+                latencyAggregationType={latencyAggregationType}
               >
                 {name}
               </TransactionDetailLink>
@@ -282,7 +279,10 @@ export function ServiceOverviewTransactionsTable(props: Props) {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <TransactionOverviewLink serviceName={serviceName}>
+            <TransactionOverviewLink
+              serviceName={serviceName}
+              latencyAggregationType={latencyAggregationType}
+            >
               {i18n.translate(
                 'xpack.apm.serviceOverview.transactionsTableLinkText',
                 {
