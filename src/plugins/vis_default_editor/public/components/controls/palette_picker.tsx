@@ -44,6 +44,7 @@ export function PalettePicker<ParamName extends string>({
       })}
     >
       <EuiColorPalettePicker
+        fullWidth
         data-test-subj="visEditorPalettePicker"
         compressed
         palettes={palettes
