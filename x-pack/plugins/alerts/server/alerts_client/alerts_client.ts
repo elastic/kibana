@@ -43,7 +43,6 @@ import {
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
-import { deleteTaskIfItExists } from '../lib/delete_task_if_it_exists';
 import { RegistryAlertType, UntypedNormalizedAlertType } from '../alert_type_registry';
 import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
 import { IEventLogClient } from '../../../../plugins/event_log/server';
@@ -602,7 +601,7 @@ export class AlertsClient {
     const removeResult = await this.unsecuredSavedObjectsClient.delete('alert', id);
 
     await Promise.all([
-      taskIdToRemove ? deleteTaskIfItExists(this.taskManager, taskIdToRemove) : null,
+      taskIdToRemove ? this.taskManager.removeIfExists(taskIdToRemove) : null,
       apiKeyToInvalidate
         ? markApiKeyForInvalidation(
             { apiKey: apiKeyToInvalidate },
@@ -1060,7 +1059,7 @@ export class AlertsClient {
 
       await Promise.all([
         attributes.scheduledTaskId
-          ? deleteTaskIfItExists(this.taskManager, attributes.scheduledTaskId)
+          ? this.taskManager.removeIfExists(attributes.scheduledTaskId)
           : null,
         apiKeyToInvalidate
           ? await markApiKeyForInvalidation(

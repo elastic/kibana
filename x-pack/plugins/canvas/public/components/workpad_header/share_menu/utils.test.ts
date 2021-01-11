@@ -7,7 +7,7 @@
 jest.mock('../../../../common/lib/fetch');
 
 import { getPdfUrl, createPdf, LayoutType } from './utils';
-import { workpads } from '../../../../__tests__/fixtures/workpads';
+import { workpads } from '../../../../__fixtures__/workpads';
 import { fetch } from '../../../../common/lib/fetch';
 import { IBasePath } from 'kibana/public';
 
