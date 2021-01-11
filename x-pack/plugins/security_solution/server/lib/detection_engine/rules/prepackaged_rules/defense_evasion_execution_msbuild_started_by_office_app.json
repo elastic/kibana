@@ -50,7 +50,8 @@
         "id": "TA0002",
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
-      }
+      },
+      "technique": []
     }
   ],
   "type": "query",
