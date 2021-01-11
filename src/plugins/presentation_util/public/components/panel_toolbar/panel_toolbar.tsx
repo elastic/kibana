@@ -151,7 +151,7 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, quickButtons = []
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">
             <EuiButtonGroup
-              legend="Text style"
+              legend="Quick buttons"
               options={buttonGroupOptions}
               onChange={(id) => onChangeIconsMulti(id)}
               type="multi"
