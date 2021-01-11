@@ -492,7 +492,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -525,7 +525,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -559,7 +559,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -629,7 +629,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -667,7 +667,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -696,7 +696,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: true, shouldReplaceDimension: true }
       );
     });
 
@@ -816,7 +816,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        false
+        { shouldRemoveDimension: true, shouldReplaceDimension: false }
       );
 
       const comboBox = wrapper
@@ -847,7 +847,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -945,7 +945,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
   });
@@ -1037,7 +1037,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -1068,7 +1068,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -1097,7 +1097,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -1126,7 +1126,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -1155,7 +1155,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
 
@@ -1185,7 +1185,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             },
           },
         },
-        true
+        { shouldRemoveDimension: false, shouldReplaceDimension: true }
       );
     });
   });
@@ -1238,7 +1238,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      false
+      { shouldRemoveDimension: true, shouldReplaceDimension: false }
     );
 
     const comboBox = wrapper
@@ -1268,7 +1268,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -1311,7 +1311,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -1337,7 +1337,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -1474,7 +1474,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      true
+      { shouldRemoveDimension: false, shouldReplaceDimension: true }
     );
   });
 
@@ -1523,7 +1523,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           },
         },
       },
-      false
+      { shouldRemoveDimension: false, shouldReplaceDimension: false }
     );
   });
 

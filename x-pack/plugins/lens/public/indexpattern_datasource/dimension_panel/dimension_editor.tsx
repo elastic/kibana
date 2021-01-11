@@ -122,7 +122,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
   const setStateWrapper = (layer: IndexPatternLayer) => {
-    setState(mergeLayer({ state, layerId, newLayer: layer }), Boolean(layer.columns[columnId]));
+    const currentOperationType =
+      operationDefinitionMap[layer.columns[columnId]?.operationType]?.input;
+    const hasIncompleteColumns = layer.incompleteColumns?.[columnId];
+    setState(mergeLayer({ state, layerId, newLayer: layer }), {
+      shouldReplaceDimension: Boolean(layer.columns[columnId]),
+      // clear the dimension if there's an incomplete column pending && current operation is a simple field operation
+      shouldRemoveDimension: Boolean(
+        hasIncompleteColumns && currentOperationType !== 'fullReference'
+      ),
+    });
   };
 
   const selectedOperationDefinition =
