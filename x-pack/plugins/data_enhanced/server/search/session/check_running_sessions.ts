@@ -55,7 +55,6 @@ export async function checkRunningSessions(
               session.attributes.idMapping[searchKey] = {
                 ...session.attributes.idMapping[searchKey],
                 ...currentStatus,
-                ...(currentStatus.status === SearchStatus.ERROR ? {} : { error: undefined }),
               };
             };
 

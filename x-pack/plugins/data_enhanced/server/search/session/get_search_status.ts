@@ -31,10 +31,12 @@ export async function getSearchStatus(
   } else if (!response.is_partial && !response.is_running) {
     return {
       status: SearchStatus.COMPLETE,
+      error: undefined,
     };
   } else {
     return {
       status: SearchStatus.IN_PROGRESS,
+      error: undefined,
     };
   }
 }
