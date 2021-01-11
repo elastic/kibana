@@ -15,9 +15,12 @@ import {
   EuiFilterGroup,
   EuiPanel,
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import useMeasure from 'react-use/lib/useMeasure';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 import { createStateContainerReactHelpers } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
@@ -184,7 +187,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
   const [logsPanelRef, { height: logPanelHeight }] = useMeasure();
 
   const agentVersion = agent.local_metadata?.elastic?.agent?.version;
-  const isLogLevelSelectionAvailable = useMemo(() => {
+  const isLogFeatureAvailable = useMemo(() => {
     if (!agentVersion) {
       return false;
     }
@@ -194,6 +197,31 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
     }
     return semverGte(agentVersionWithPrerelease, '7.11.0');
   }, [agentVersion]);
+
+  if (!isLogFeatureAvailable) {
+    return (
+      <EuiCallOut
+        size="m"
+        color="warning"
+        title={
+          <FormattedMessage
+            id="xpack.fleet.agentLogs.oldAgentWarningTitle"
+            defaultMessage="The logs viewer is only compatible with Elastic Agents version 7.11 and higher. Please upgrade your Elastic Agent on the Agents details page, or by {downloadLink} a newer version."
+            values={{
+              downloadLink: (
+                <EuiLink href="https://ela.st/download-elastic-agent" external target="_blank">
+                  <FormattedMessage
+                    id="xpack.fleet.agentLogs.downloadLink"
+                    defaultMessage="downloading"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      />
+    );
+  }
 
   return (
     <WrapperFlexGroup direction="column" gutterSize="m">
@@ -271,11 +299,9 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
           />
         </EuiPanel>
       </EuiFlexItem>
-      {isLogLevelSelectionAvailable && (
-        <EuiFlexItem grow={false}>
-          <SelectLogLevel agent={agent} />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <SelectLogLevel agent={agent} />
+      </EuiFlexItem>
     </WrapperFlexGroup>
   );
 });
