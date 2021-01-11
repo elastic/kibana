@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './session_service';
-export { registerSearchSessionsTask, scheduleSearchSessionsTasks } from './monitoring_task';
+export enum SearchStatus {
+  IN_PROGRESS = 'in_progress',
+  ERROR = 'error',
+  COMPLETE = 'complete',
+}
