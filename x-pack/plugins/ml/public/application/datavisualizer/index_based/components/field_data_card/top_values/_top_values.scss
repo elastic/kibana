@@ -1,6 +1,6 @@
 
 .mlTopValuesValueLabelContainer {
-  padding-right: $euiSizeM;
+  margin-right: $euiSizeM;
   &.mlTopValuesValueLabelContainer--small {
     width:70px;
   }
@@ -11,6 +11,6 @@
 }
 
 .mlTopValuesPercentLabelContainer {
-  padding-left: $euiSizeM;
+  margin-left: $euiSizeM;
   width:70px;
 }
