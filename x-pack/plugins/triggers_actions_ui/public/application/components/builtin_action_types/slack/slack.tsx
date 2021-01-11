@@ -5,7 +5,11 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ActionTypeModel, ValidationResult } from '../../../../types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+  ConnectorValidationResult,
+} from '../../../../types';
 import { SlackActionParams, SlackSecrets, SlackActionConnector } from '../types';
 import { isValidUrl } from '../../../lib/value_validators';
 
@@ -25,14 +29,15 @@ export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackAct
         defaultMessage: 'Send to Slack',
       }
     ),
-    validateConnector: (action: SlackActionConnector): ValidationResult => {
-      const validationResult = { errors: {} };
-      const errors = {
+    validateConnector: (
+      action: SlackActionConnector
+    ): ConnectorValidationResult<unknown, SlackSecrets> => {
+      const secretsErrors = {
         webhookUrl: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = { config: { errors: {} }, secrets: { errors: secretsErrors } };
       if (!action.secrets.webhookUrl) {
-        errors.webhookUrl.push(
+        secretsErrors.webhookUrl.push(
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.error.requiredWebhookUrlText',
             {
@@ -42,7 +47,7 @@ export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackAct
         );
       } else if (action.secrets.webhookUrl) {
         if (!isValidUrl(action.secrets.webhookUrl)) {
-          errors.webhookUrl.push(
+          secretsErrors.webhookUrl.push(
             i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.error.invalidWebhookUrlText',
               {
@@ -51,7 +56,7 @@ export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackAct
             )
           );
         } else if (!isValidUrl(action.secrets.webhookUrl, 'https:')) {
-          errors.webhookUrl.push(
+          secretsErrors.webhookUrl.push(
             i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.error.requireHttpsWebhookUrlText',
               {
@@ -63,12 +68,13 @@ export function getActionType(): ActionTypeModel<unknown, SlackSecrets, SlackAct
       }
       return validationResult;
     },
-    validateParams: (actionParams: SlackActionParams): ValidationResult => {
-      const validationResult = { errors: {} };
+    validateParams: (
+      actionParams: SlackActionParams
+    ): GenericValidationResult<SlackActionParams> => {
       const errors = {
         message: new Array<string>(),
       };
-      validationResult.errors = errors;
+      const validationResult = { errors };
       if (!actionParams.message?.length) {
         errors.message.push(
           i18n.translate(

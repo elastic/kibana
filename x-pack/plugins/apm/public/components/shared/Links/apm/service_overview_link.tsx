@@ -8,11 +8,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { APMQueryParams } from '../url_helpers';
-import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
+import { APMLinkExtendProps, useAPMHref } from './APMLink';
 
 interface ServiceOverviewLinkProps extends APMLinkExtendProps {
   serviceName: string;
@@ -30,13 +29,6 @@ export function ServiceOverviewLink({
   serviceName,
   ...rest
 }: ServiceOverviewLinkProps) {
-  const { urlParams } = useUrlParams();
-
-  return (
-    <APMLink
-      path={`/services/${serviceName}/overview`}
-      query={pickKeys(urlParams as APMQueryParams, ...persistedFilters)}
-      {...rest}
-    />
-  );
+  const href = useServiceOverviewHref(serviceName);
+  return <EuiLink href={href} {...rest} />;
 }
