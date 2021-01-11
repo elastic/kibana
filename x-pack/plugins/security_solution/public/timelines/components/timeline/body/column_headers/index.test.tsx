@@ -38,6 +38,7 @@ describe('ColumnHeaders', () => {
     const sort: Sort[] = [
       {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: Direction.desc,
       },
     ];
@@ -108,10 +109,12 @@ describe('ColumnHeaders', () => {
     let mockSort: Sort[] = [
       {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: Direction.desc,
       },
       {
         columnId: 'host.name',
+        columnType: 'text',
         sortDirection: Direction.asc,
       },
     ];
@@ -126,10 +129,12 @@ describe('ColumnHeaders', () => {
       mockSort = [
         {
           columnId: '@timestamp',
+          columnType: 'number',
           sortDirection: Direction.desc,
         },
         {
           columnId: 'host.name',
+          columnType: 'text',
           sortDirection: Direction.asc,
         },
       ];
@@ -162,13 +167,15 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.desc,
             },
             {
               columnId: 'host.name',
+              columnType: 'text',
               sortDirection: Direction.asc,
             },
-            { columnId: 'event.category', sortDirection: Direction.desc },
+            { columnId: 'event.category', columnType: 'text', sortDirection: Direction.desc },
           ],
         })
       );
@@ -201,9 +208,10 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.asc,
             },
-            { columnId: 'host.name', sortDirection: Direction.asc },
+            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.asc },
           ],
         })
       );
@@ -236,9 +244,10 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.desc,
             },
-            { columnId: 'host.name', sortDirection: Direction.desc },
+            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.desc },
           ],
         })
       );
