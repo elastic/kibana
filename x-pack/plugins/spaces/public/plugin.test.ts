@@ -13,7 +13,6 @@ import {
   createManagementSectionMock,
 } from '../../../../src/plugins/management/public/mocks';
 import { advancedSettingsMock } from '../../../../src/plugins/advanced_settings/public/mocks';
-import { featuresPluginMock } from '../../features/public/mocks';
 
 describe('Spaces plugin', () => {
   describe('#setup', () => {
@@ -102,7 +101,7 @@ describe('Spaces plugin', () => {
       const plugin = new SpacesPlugin();
       plugin.setup(coreSetup, { spacesOss });
 
-      plugin.start(coreStart, { features: featuresPluginMock.createStart() });
+      plugin.start(coreStart);
 
       expect(coreStart.chrome.navControls.registerLeft).toHaveBeenCalled();
     });

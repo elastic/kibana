@@ -91,20 +91,15 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       spacesManager: this.spacesManager,
     });
 
-    plugins.spacesOss.registerSpacesApi(
-      core.getStartServices().then(([_core, _deps, startContract]) => startContract)
-    );
+    plugins.spacesOss.registerSpacesApi(this.createSpacesApi());
 
     return {};
   }
 
-  public start(core: CoreStart, plugins: PluginsStart): SpacesApi {
+  public start(core: CoreStart) {
     initSpacesNavControl(this.spacesManager, core);
 
-    return {
-      activeSpace$: this.spacesManager.onActiveSpaceChange$,
-      getActiveSpace: () => this.spacesManager.getActiveSpace(),
-    };
+    return this.createSpacesApi();
   }
 
   public stop() {
@@ -112,5 +107,12 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       this.managementService.stop();
       this.managementService = undefined;
     }
+  }
+
+  private createSpacesApi(): SpacesApi {
+    return {
+      activeSpace$: this.spacesManager.onActiveSpaceChange$,
+      getActiveSpace: () => this.spacesManager.getActiveSpace(),
+    };
   }
 }

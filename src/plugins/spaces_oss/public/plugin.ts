@@ -29,25 +29,12 @@ export class SpacesOssPlugin implements Plugin<SpacesOssPluginSetup, SpacesOssPl
 
   public setup() {
     return {
-      registerSpacesApi: (provider: Promise<SpacesApi>) => {
+      registerSpacesApi: (provider: SpacesApi) => {
         if (this.apiRegistered) {
           throw new Error('Spaces API can only be registered once');
         }
         this.apiRegistered = true;
-
-        provider.then(
-          (api) => {
-            this.api = api;
-          },
-          (error) => {
-            // eslint-disable-next-line no-console
-            console.log(
-              'Error during Spaces API promise resolution. Spaces API has been disabled',
-              error
-            );
-            this.apiRegistered = false;
-          }
-        );
+        this.api = provider;
       },
     };
   }

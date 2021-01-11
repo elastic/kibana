@@ -28,19 +28,11 @@ describe('SpacesOssPlugin', () => {
   });
 
   describe('#start', () => {
-    // need to wait for api promises to resolve
-    const nextTick = () =>
-      new Promise((resolve) => {
-        window.setTimeout(resolve, 0);
-      });
-
     it('returns the spaces API if registered', async () => {
       const spacesApi = spacesApiMock.create();
       const { registerSpacesApi } = plugin.setup();
 
-      registerSpacesApi(Promise.resolve(spacesApi));
-
-      await nextTick();
+      registerSpacesApi(spacesApi);
 
       const { getSpacesApi, isSpacesAvailable } = plugin.start();
 
@@ -50,21 +42,6 @@ describe('SpacesOssPlugin', () => {
 
     it('does not return the spaces API if not registered', async () => {
       plugin.setup();
-
-      await nextTick();
-
-      const { getSpacesApi, isSpacesAvailable } = plugin.start();
-
-      expect(isSpacesAvailable()).toBe(false);
-      expect(getSpacesApi()).toBeUndefined();
-    });
-
-    it('does not return the spaces API if resolution promise rejects', async () => {
-      const { registerSpacesApi } = plugin.setup();
-
-      registerSpacesApi(Promise.reject(new Error('something went bad')));
-
-      await nextTick();
 
       const { getSpacesApi, isSpacesAvailable } = plugin.start();
 

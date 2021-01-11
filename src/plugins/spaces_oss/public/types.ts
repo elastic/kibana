@@ -24,12 +24,8 @@ export interface SpacesOssPluginSetup {
    * Register a provider for the Spaces API.
    *
    * Only one provider can be registered, subsequent calls to this method will fail.
-   *
-   * @remarks The promise should not resolve any later than the end of the start lifecycle
-   *          (after `getStartServices` resolves). Not respecting this condition may cause
-   *          runtime failures.
    */
-  registerSpacesApi(provider: Promise<SpacesApi>): void;
+  registerSpacesApi(provider: SpacesApi): void;
 }
 
 export interface SpacesOssPluginStart {
