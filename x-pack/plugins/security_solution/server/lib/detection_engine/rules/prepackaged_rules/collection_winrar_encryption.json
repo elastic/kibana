@@ -28,9 +28,9 @@
     {
       "framework": "MITRE ATT&CK",
       "tactic": {
-        "id": "TA0010",
-        "name": "Exfiltration",
-        "reference": "https://attack.mitre.org/tactics/TA0010/"
+        "id": "TA0009",
+        "name": "Collection",
+        "reference": "https://attack.mitre.org/tactics/TA0009/"
       },
       "technique": [
         {
