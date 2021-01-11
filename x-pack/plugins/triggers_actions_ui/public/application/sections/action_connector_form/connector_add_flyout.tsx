@@ -24,12 +24,17 @@ import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
-import { ActionType, ActionConnector, ActionTypeRegistryContract } from '../../../types';
-import { connectorReducer } from './connector_reducer';
+import {
+  ActionType,
+  ActionConnector,
+  ActionTypeRegistryContract,
+  UserConfiguredActionConnector,
+} from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { createActionConnector } from '../../lib/action_connector_api';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
+import { createConnectorReducer, InitialConnector, ConnectorReducer } from './connector_reducer';
 import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
 
 export interface ConnectorAddFlyoutProps {
@@ -59,15 +64,32 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
 
   // hooks
-  const initialConnector = {
+  const initialConnector: InitialConnector<Record<string, unknown>, Record<string, unknown>> = {
     actionTypeId: actionType?.id ?? '',
     config: {},
     secrets: {},
-  } as ActionConnector;
-  const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
-  const setActionProperty = (key: string, value: any) => {
+  };
+
+  const reducer: ConnectorReducer<
+    Record<string, unknown>,
+    Record<string, unknown>
+  > = createConnectorReducer<Record<string, unknown>, Record<string, unknown>>();
+  const [{ connector }, dispatch] = useReducer(reducer, {
+    connector: initialConnector as UserConfiguredActionConnector<
+      Record<string, unknown>,
+      Record<string, unknown>
+    >,
+  });
+
+  const setActionProperty = <Key extends keyof ActionConnector>(
+    key: Key,
+    value:
+      | UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>[Key]
+      | null
+  ) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
+
   const setConnector = (value: any) => {
     dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
   };
