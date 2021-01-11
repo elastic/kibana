@@ -19,7 +19,6 @@
     "src/plugins/expressions/**/*",
     "src/plugins/home/**/*",
     "src/plugins/inspector/**/*",
-    "src/plugins/input_control_vis/**/*",
     "src/plugins/kibana_legacy/**/*",
     "src/plugins/kibana_react/**/*",
     "src/plugins/kibana_usage_collection/**/*",
@@ -35,7 +34,8 @@
     "src/plugins/telemetry_collection_manager/**/*",
     "src/plugins/ui_actions/**/*",
     "src/plugins/url_forwarding/**/*",
-    "src/plugins/usage_collection/**/*"
+    "src/plugins/usage_collection/**/*",
+    "src/plugins/presentation_util/**/*"
     // In the build we actually exclude **/public/**/* from this config so that
     // we can run the TSC on both this and the .browser version of this config
     // file, but if we did it during development IDEs would not be able to find
