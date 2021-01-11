@@ -229,7 +229,7 @@ describe('getSeriesAndDomain', () => {
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#ca8eae",
-                "value": "Content downloading: 0.552ms",
+                "value": "Content downloading (CSS): 0.552ms",
               },
             },
             "x": 0,
@@ -281,7 +281,7 @@ describe('getSeriesAndDomain', () => {
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#9170b8",
-                "value": "Content downloading: 3.068ms",
+                "value": "Content downloading (JS): 3.068ms",
               },
             },
             "x": 1,
@@ -386,7 +386,7 @@ describe('getSeriesAndDomain', () => {
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#ca8eae",
-                "value": "Content downloading: 0.552ms",
+                "value": "Content downloading (CSS): 0.552ms",
               },
             },
             "x": 0,
@@ -399,7 +399,7 @@ describe('getSeriesAndDomain', () => {
               "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#9170b8",
-                "value": "Content downloading: 2.793ms",
+                "value": "Content downloading (JS): 2.793ms",
               },
             },
             "x": 1,

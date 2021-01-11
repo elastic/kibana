@@ -38,6 +38,23 @@ const getColourForMimeType = (mimeType?: string) => {
   return colourPalette[key];
 };
 
+const getFriendlyTooltipValue = ({
+  value,
+  timing,
+  mimeType,
+}: {
+  value: number;
+  timing: Timings;
+  mimeType?: string;
+}) => {
+  let label = FriendlyTimingLabels[timing];
+  if (timing === Timings.Receive && mimeType) {
+    const formattedMimeType: MimeType = MimeTypesMap[mimeType];
+    label += ` (${FriendlyMimetypeLabels[formattedMimeType]})`;
+  }
+  return `${label}: ${formatValueForDisplay(value)}ms`;
+};
+
 export const getSeriesAndDomain = (items: NetworkItems) => {
   const getValueForOffset = (item: NetworkItem) => {
     return item.requestSentTime;
@@ -92,9 +109,11 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
             colour,
             showTooltip: true,
             tooltipProps: {
-              value: `${FriendlyTimingLabels[timing]}: ${formatValueForDisplay(
-                y - currentOffset
-              )}ms`,
+              value: getFriendlyTooltipValue({
+                value: y - currentOffset,
+                timing,
+                mimeType: item.mimeType,
+              }),
               colour,
             },
           },
@@ -118,7 +137,11 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
           showTooltip: hasTotal,
           tooltipProps: hasTotal
             ? {
-                value: `${FriendlyTimingLabels.receive}: ${formatValueForDisplay(total)}ms`,
+                value: getFriendlyTooltipValue({
+                  value: total,
+                  timing: Timings.Receive,
+                  mimeType: item.mimeType,
+                }),
                 colour: mimeTypeColour,
               }
             : undefined,
