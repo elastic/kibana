@@ -26,7 +26,7 @@ import {
 import {
   CASE_DETAILS_DESCRIPTION,
   CASE_DETAILS_PAGE_TITLE,
-  CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN,
+  // CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN,
   CASE_DETAILS_STATUS,
   CASE_DETAILS_TAGS,
   CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME,
@@ -52,20 +52,26 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { CASES_URL } from '../urls/navigation';
 
 describe('Cases', () => {
-  const mycase = { ...case1 };
-
   beforeEach(() => {
     cleanKibana();
-    createTimeline(case1.timeline).then((response) => {
-      mycase.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
-    });
+    createTimeline(case1.timeline).then((response) =>
+      cy
+        .wrap({
+          ...case1,
+          timeline: {
+            ...case1.timeline,
+            id: response.body.data.persistTimeline.timeline.savedObjectId,
+          },
+        })
+        .as('mycase')
+    );
   });
 
-  it('Creates a new case with timeline and opens the timeline', () => {
+  it('Creates a new case with timeline and opens the timeline', function () {
     loginAndWaitForPageWithoutDateRange(CASES_URL);
     goToCreateNewCase();
-    fillCasesMandatoryfields(mycase);
-    attachTimeline(mycase);
+    fillCasesMandatoryfields(this.mycase);
+    attachTimeline(this.mycase);
     createCase();
     backToCases();
 
@@ -76,9 +82,9 @@ describe('Cases', () => {
     cy.get(ALL_CASES_OPEN_CASES_COUNT).should('have.text', 'Open (1)');
     cy.get(ALL_CASES_REPORTERS_COUNT).should('have.text', 'Reporter1');
     cy.get(ALL_CASES_TAGS_COUNT).should('have.text', 'Tags2');
-    cy.get(ALL_CASES_NAME).should('have.text', mycase.name);
-    cy.get(ALL_CASES_REPORTER).should('have.text', mycase.reporter);
-    mycase.tags.forEach((tag, index) => {
+    cy.get(ALL_CASES_NAME).should('have.text', this.mycase.name);
+    cy.get(ALL_CASES_REPORTER).should('have.text', this.mycase.reporter);
+    (this.mycase as typeof case1).tags.forEach((tag, index) => {
       cy.get(ALL_CASES_TAGS(index)).should('have.text', tag);
     });
     cy.get(ALL_CASES_COMMENTS_COUNT).should('have.text', '0');
@@ -89,24 +95,24 @@ describe('Cases', () => {
 
     goToCaseDetails();
 
-    const expectedTags = mycase.tags.join('');
-    cy.get(CASE_DETAILS_PAGE_TITLE).should('have.text', mycase.name);
+    const expectedTags = this.mycase.tags.join('');
+    cy.get(CASE_DETAILS_PAGE_TITLE).should('have.text', this.mycase.name);
     cy.get(CASE_DETAILS_STATUS).should('have.text', 'Open');
-    cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME).should('have.text', mycase.reporter);
+    cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_USERNAME).should('have.text', this.mycase.reporter);
     cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT).should('have.text', 'added description');
     cy.get(CASE_DETAILS_DESCRIPTION).should(
       'have.text',
-      `${mycase.description} ${mycase.timeline.title}`
+      `${this.mycase.description} ${this.mycase.timeline.title}`
     );
-    cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('have.text', mycase.reporter);
-    cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('have.text', mycase.reporter);
+    cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('have.text', this.mycase.reporter);
+    cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('have.text', this.mycase.reporter);
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
-    cy.get(CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN).should('have.attr', 'disabled');
+    // cy.get(CASE_DETAILS_PUSH_TO_EXTERNAL_SERVICE_BTN).should('have.attr', 'disabled');
 
     openCaseTimeline();
 
-    cy.get(TIMELINE_TITLE).contains(mycase.timeline.title);
-    cy.get(TIMELINE_DESCRIPTION).contains(mycase.timeline.description);
-    cy.get(TIMELINE_QUERY).invoke('text').should('eq', mycase.timeline.query);
+    cy.get(TIMELINE_TITLE).contains(this.mycase.timeline.title);
+    cy.get(TIMELINE_DESCRIPTION).contains(this.mycase.timeline.description);
+    cy.get(TIMELINE_QUERY).should('have.text', this.mycase.timeline.query);
   });
 });
