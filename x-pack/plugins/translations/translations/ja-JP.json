@@ -13339,8 +13339,6 @@
     "xpack.ml.feature.reserved.description": "ユーザーアクセスを許可するには、machine_learning_user か machine_learning_admin ロールのどちらかを割り当てる必要があります。",
     "xpack.ml.featureRegistry.mlFeatureName": "機械学習",
     "xpack.ml.fieldDataCard.cardBoolean.valuesLabel": "値",
-    "xpack.ml.fieldDataCard.cardDate.medianLabel": "中間",
-    "xpack.ml.fieldDataCard.cardDate.minLabel": "分",
     "xpack.ml.fieldDataCard.cardDate.summaryTableTitle": "まとめ",
     "xpack.ml.fieldDataCard.cardIp.topValuesLabel": "トップの値",
     "xpack.ml.fieldDataCard.cardKeyword.topValuesLabel": "トップの値",
