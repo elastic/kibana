@@ -1,0 +1,20 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+    // add all the folders containg files to be compiled
+  ],
+  "references": [
+    { "path": "../licensing/tsconfig.json" }
+    // add references to other TypeScript projects your plugin dependes on
+  ]
+}
