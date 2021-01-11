@@ -29,12 +29,14 @@ interface MetricsRequestHandlerParams {
   input: KibanaContext | null;
   uiState: Record<string, any>;
   visParams: TimeseriesVisParams;
+  searchSessionId?: string;
 }
 
 export const metricsRequestHandler = async ({
   input,
   uiState,
   visParams,
+  searchSessionId,
 }: MetricsRequestHandlerParams): Promise<TimeseriesVisData | {}> => {
   const config = getUISettings();
   const timezone = getTimezone(config);
@@ -47,21 +49,37 @@ export const metricsRequestHandler = async ({
 
     validateInterval(parsedTimeRange, visParams, maxBuckets);
 
-    const resp = await getCoreStart().http.post(ROUTES.VIS_DATA, {
-      body: JSON.stringify({
-        timerange: {
-          timezone,
-          ...parsedTimeRange,
+    const isCurrentSession = () =>
+      !!searchSessionId && searchSessionId === dataSearch.search.session.getSessionId();
+    const untrackSearch =
+      isCurrentSession() &&
+      dataSearch.search.session.trackSearch({
+        abort: () => {
+          // TODO: support search cancellations
         },
-        query: input?.query,
-        filters: input?.filters,
-        panels: [visParams],
-        state: uiStateObj,
-        sessionId: dataSearch.search.session.getSessionId(),
-      }),
-    });
+      });
 
-    return resp;
+    try {
+      return await getCoreStart().http.post(ROUTES.VIS_DATA, {
+        body: JSON.stringify({
+          timerange: {
+            timezone,
+            ...parsedTimeRange,
+          },
+          query: input?.query,
+          filters: input?.filters,
+          panels: [visParams],
+          state: uiStateObj,
+          sessionId: searchSessionId,
+          isRestore: isCurrentSession() ? dataSearch.search.session.isRestore() : false,
+          isStored: isCurrentSession() ? dataSearch.search.session.isStored() : false,
+        }),
+      });
+    } finally {
+      if (untrackSearch && isCurrentSession()) {
+        untrackSearch();
+      }
+    }
   }
 
   return {};

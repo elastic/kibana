@@ -76,6 +76,8 @@ export function runRoute(
             })
           ),
           sessionId: schema.maybe(schema.string()),
+          isRestore: schema.maybe(schema.boolean()),
+          isStored: schema.maybe(schema.boolean()),
         }),
       },
     },

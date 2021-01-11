@@ -73,12 +73,15 @@ export function getTimelionRequestHandler({
     filters,
     query,
     visParams,
+    searchSessionId,
   }: {
     timeRange: TimeRange;
     filters: Filter[];
     query: Query;
     visParams: TimelionVisParams;
+    searchSessionId?: string;
   }): Promise<TimelionSuccessResponse> {
+    const dataSearch = getDataSearch();
     const expression = visParams.expression;
 
     if (!expression) {
@@ -93,7 +96,15 @@ export function getTimelionRequestHandler({
 
     // parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
-    const sessionId = getDataSearch().session.getSessionId();
+    const isCurrentSession = () =>
+      !!searchSessionId && searchSessionId === dataSearch.session.getSessionId();
+    const untrackSearch =
+      isCurrentSession() &&
+      dataSearch.session.trackSearch({
+        abort: () => {
+          // TODO: support search cancellations
+        },
+      });
 
     try {
       return await http.post('/api/timelion/run', {
@@ -110,7 +121,9 @@ export function getTimelionRequestHandler({
             interval: visParams.interval,
             timezone,
           },
-          sessionId,
+          sessionId: searchSessionId,
+          isRestore: isCurrentSession() ? dataSearch.session.isRestore() : false,
+          isStored: isCurrentSession() ? dataSearch.session.isStored() : false,
         }),
       });
     } catch (e) {
@@ -124,6 +137,10 @@ export function getTimelionRequestHandler({
         throw err;
       } else {
         throw e;
+      }
+    } finally {
+      if (untrackSearch && isCurrentSession()) {
+        untrackSearch();
       }
     }
   };

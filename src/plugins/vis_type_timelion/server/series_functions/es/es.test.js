@@ -60,19 +60,24 @@ describe('es', () => {
         });
     });
 
-    test('should call data search with sessionId', async () => {
+    test('should call data search with sessionId, isRestore and isStored', async () => {
       tlConfig = {
         ...stubRequestAndServer({ rawResponse: esResponse }),
         request: {
           body: {
-            sessionId: 1,
+            sessionId: '1',
+            isRestore: true,
+            isStored: false,
           },
         },
       };
 
       await invoke(es, [5], tlConfig);
 
-      expect(tlConfig.context.search.search.mock.calls[0][1]).toHaveProperty('sessionId', 1);
+      const res = tlConfig.context.search.search.mock.calls[0][1];
+      expect(res).toHaveProperty('sessionId', '1');
+      expect(res).toHaveProperty('isRestore', true);
+      expect(res).toHaveProperty('isStored', false);
     });
 
     test('returns a seriesList', () => {

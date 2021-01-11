@@ -134,6 +134,8 @@ export default new Datasource('es', {
         body,
         {
           sessionId: tlConfig.request?.body.sessionId,
+          isRestore: tlConfig.request?.body.isRestore,
+          isStored: tlConfig.request?.body.isStored,
         },
         tlConfig.context
       )
