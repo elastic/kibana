@@ -23,34 +23,39 @@ import {
   SavedObjectsClientContract,
   SavedObjectsType,
   SavedObject,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectReference,
 } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
-import { SavedObjectsResolveImportErrorsOptions, ISavedObjectTypeRegistry } from '..';
+import { ISavedObjectTypeRegistry } from '..';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
-import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
+import {
+  resolveSavedObjectsImportErrors,
+  ResolveSavedObjectsImportErrorsOptions,
+} from './resolve_import_errors';
 
-import { validateRetries } from './validate_retries';
-import { collectSavedObjects } from './collect_saved_objects';
-import { regenerateIds } from './regenerate_ids';
-import { validateReferences } from './validate_references';
-import { checkConflicts } from './check_conflicts';
-import { getImportIdMapForRetries } from './check_origin_conflicts';
-import { splitOverwrites } from './split_overwrites';
-import { createSavedObjects } from './create_saved_objects';
-import { createObjectsFilter } from './create_objects_filter';
+import {
+  validateRetries,
+  collectSavedObjects,
+  regenerateIds,
+  validateReferences,
+  checkConflicts,
+  getImportIdMapForRetries,
+  splitOverwrites,
+  createSavedObjects,
+  createObjectsFilter,
+} from './lib';
 
-jest.mock('./validate_retries');
-jest.mock('./create_objects_filter');
-jest.mock('./collect_saved_objects');
-jest.mock('./regenerate_ids');
-jest.mock('./validate_references');
-jest.mock('./check_conflicts');
-jest.mock('./check_origin_conflicts');
-jest.mock('./split_overwrites');
-jest.mock('./create_saved_objects');
+jest.mock('./lib/validate_retries');
+jest.mock('./lib/create_objects_filter');
+jest.mock('./lib/collect_saved_objects');
+jest.mock('./lib/regenerate_ids');
+jest.mock('./lib/validate_references');
+jest.mock('./lib/check_conflicts');
+jest.mock('./lib/check_origin_conflicts');
+jest.mock('./lib/split_overwrites');
+jest.mock('./lib/create_saved_objects');
 
 const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
   fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
@@ -95,7 +100,7 @@ describe('#importSavedObjectsFromStream', () => {
         // other attributes aren't needed for the purposes of injecting metadata
         management: { icon: `${type}-icon` },
       } as any)
-  ): SavedObjectsResolveImportErrorsOptions => {
+  ): ResolveSavedObjectsImportErrorsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();
@@ -134,7 +139,7 @@ describe('#importSavedObjectsFromStream', () => {
       attributes: { title },
     };
   };
-  const createError = (): SavedObjectsImportError => {
+  const createError = (): SavedObjectsImportFailure => {
     const title = 'some-title';
     return {
       type: 'foo-type',

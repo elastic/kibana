@@ -39,10 +39,10 @@ interface GrantAPIKeyParams {
 }
 
 /**
- * Represents the params for invalidating an API key
+ * Represents the params for invalidating multiple API keys
  */
-export interface InvalidateAPIKeyParams {
-  id: string;
+export interface InvalidateAPIKeysParams {
+  ids: string[];
 }
 
 /**
@@ -222,16 +222,16 @@ export class APIKeys {
   }
 
   /**
-   * Tries to invalidate an API key.
+   * Tries to invalidate an API keys.
    * @param request Request instance.
-   * @param params The params to invalidate an API key.
+   * @param params The params to invalidate an API keys.
    */
-  async invalidate(request: KibanaRequest, params: InvalidateAPIKeyParams) {
+  async invalidate(request: KibanaRequest, params: InvalidateAPIKeysParams) {
     if (!this.license.isEnabled()) {
       return null;
     }
 
-    this.logger.debug('Trying to invalidate an API key as current user');
+    this.logger.debug(`Trying to invalidate ${params.ids.length} an API key as current user`);
 
     let result;
     try {
@@ -240,12 +240,18 @@ export class APIKeys {
         await this.clusterClient
           .asScoped(request)
           .asCurrentUser.security.invalidateApiKey<InvalidateAPIKeyResult>({
-            body: { ids: [params.id] },
+            body: { ids: params.ids },
           })
       ).body;
-      this.logger.debug('API key was invalidated successfully as current user');
+      this.logger.debug(
+        `API keys by ids=[${params.ids.join(', ')}] was invalidated successfully as current user`
+      );
     } catch (e) {
-      this.logger.error(`Failed to invalidate API key as current user: ${e.message}`);
+      this.logger.error(
+        `Failed to invalidate API keys by ids=[${params.ids.join(', ')}] as current user: ${
+          e.message
+        }`
+      );
       throw e;
     }
 
@@ -253,27 +259,29 @@ export class APIKeys {
   }
 
   /**
-   * Tries to invalidate an API key by using the internal user.
-   * @param params The params to invalidate an API key.
+   * Tries to invalidate the API keys by using the internal user.
+   * @param params The params to invalidate the API keys.
    */
-  async invalidateAsInternalUser(params: InvalidateAPIKeyParams) {
+  async invalidateAsInternalUser(params: InvalidateAPIKeysParams) {
     if (!this.license.isEnabled()) {
       return null;
     }
 
-    this.logger.debug('Trying to invalidate an API key');
+    this.logger.debug(`Trying to invalidate ${params.ids.length} API keys`);
 
     let result;
     try {
       // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
       result = (
         await this.clusterClient.asInternalUser.security.invalidateApiKey<InvalidateAPIKeyResult>({
-          body: { ids: [params.id] },
+          body: { ids: params.ids },
         })
       ).body;
-      this.logger.debug('API key was invalidated successfully');
+      this.logger.debug(`API keys by ids=[${params.ids.join(', ')}] was invalidated successfully`);
     } catch (e) {
-      this.logger.error(`Failed to invalidate API key: ${e.message}`);
+      this.logger.error(
+        `Failed to invalidate API keys by ids=[${params.ids.join(', ')}]: ${e.message}`
+      );
       throw e;
     }
 

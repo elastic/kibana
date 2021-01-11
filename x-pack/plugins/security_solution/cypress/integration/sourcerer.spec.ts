@@ -34,8 +34,10 @@ describe.skip('Sourcerer', () => {
   });
 
   beforeEach(() => {
+    cy.clearLocalStorage();
     loginAndWaitForPage(HOSTS_URL);
   });
+
   describe('Default scope', () => {
     it('has SIEM index patterns selected on initial load', () => {
       openSourcerer();
@@ -46,6 +48,7 @@ describe.skip('Sourcerer', () => {
       openSourcerer();
       isSourcererOptions([`metrics-*`, `logs-*`]);
     });
+
     it('selected KIP gets added to sourcerer', () => {
       setSourcererOption(`metrics-*`);
       openSourcerer();
@@ -69,10 +72,12 @@ describe.skip('Sourcerer', () => {
       isNotSourcererSelection(`metrics-*`);
     });
   });
+
   describe('Timeline scope', () => {
     const alertPatterns = ['.siem-signals-default'];
     const rawPatterns = ['auditbeat-*'];
     const allPatterns = [...alertPatterns, ...rawPatterns];
+
     it('Radio buttons select correct sourcerer patterns', () => {
       openTimelineUsingToggle();
       openSourcerer('timeline');
@@ -84,6 +89,7 @@ describe.skip('Sourcerer', () => {
       alertPatterns.forEach((ss) => isSourcererSelection(ss, 'timeline'));
       rawPatterns.forEach((ss) => isNotSourcererSelection(ss, 'timeline'));
     });
+
     it('Adding an option results in the custom radio becoming active', () => {
       openTimelineUsingToggle();
       openSourcerer('timeline');
@@ -94,17 +100,13 @@ describe.skip('Sourcerer', () => {
       openSourcerer('timeline');
       isCustomRadio();
     });
-    it.skip('Selected index patterns are properly queried', () => {
+
+    it('Selected index patterns are properly queried', () => {
       openTimelineUsingToggle();
       populateTimeline();
       openSourcerer('timeline');
       deselectSourcererOptions(rawPatterns, 'timeline');
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((strCount) => {
-          const intCount = +strCount;
-          cy.wrap(intCount).should('eq', 0);
-        });
+      cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.eql(0));
     });
   });
 });

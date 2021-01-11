@@ -16,22 +16,46 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { collectSavedObjects } from './collect_saved_objects';
-import { createObjectsFilter } from './create_objects_filter';
-import { splitOverwrites } from './split_overwrites';
+
+import { Readable } from 'stream';
+import { SavedObject, SavedObjectsClientContract, SavedObjectsImportRetry } from '../types';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import {
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportResponse,
-  SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportSuccess,
 } from './types';
-import { regenerateIds } from './regenerate_ids';
-import { validateReferences } from './validate_references';
-import { validateRetries } from './validate_retries';
-import { createSavedObjects } from './create_saved_objects';
-import { getImportIdMapForRetries } from './check_origin_conflicts';
-import { SavedObject } from '../types';
-import { checkConflicts } from './check_conflicts';
+import {
+  collectSavedObjects,
+  createObjectsFilter,
+  splitOverwrites,
+  regenerateIds,
+  validateReferences,
+  validateRetries,
+  createSavedObjects,
+  getImportIdMapForRetries,
+  checkConflicts,
+} from './lib';
+
+/**
+ * Options to control the "resolve import" operation.
+ */
+export interface ResolveSavedObjectsImportErrorsOptions {
+  /** The stream of {@link SavedObject | saved objects} to resolve errors from */
+  readStream: Readable;
+  /** The maximum number of object to import */
+  objectLimit: number;
+  /** client to use to perform the import operation */
+  savedObjectsClient: SavedObjectsClientContract;
+  /** The registry of all known saved object types */
+  typeRegistry: ISavedObjectTypeRegistry;
+  /** saved object import references to retry */
+  retries: SavedObjectsImportRetry[];
+  /** if specified, will import in given namespace */
+  namespace?: string;
+  /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
+  createNewCopies: boolean;
+}
 
 /**
  * Resolve and return saved object import errors.
@@ -47,12 +71,12 @@ export async function resolveSavedObjectsImportErrors({
   typeRegistry,
   namespace,
   createNewCopies,
-}: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse> {
+}: ResolveSavedObjectsImportErrorsOptions): Promise<SavedObjectsImportResponse> {
   // throw a BadRequest error if we see invalid retries
   validateRetries(retries);
 
   let successCount = 0;
-  let errorAccumulator: SavedObjectsImportError[] = [];
+  let errorAccumulator: SavedObjectsImportFailure[] = [];
   let importIdMap: Map<string, { id?: string; omitOriginId?: boolean }> = new Map();
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
   const filter = createObjectsFilter(retries);
