@@ -166,6 +166,7 @@ describe('copySavedObjectsToSpaces', () => {
     `);
 
     expect(savedObjectsExporter.exportByObjects).toHaveBeenCalledWith({
+      request: expect.any(Object),
       excludeExportDetails: true,
       includeReferencesDeep: true,
       namespace,
