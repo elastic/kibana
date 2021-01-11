@@ -6,25 +6,20 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../../shared_imports';
-import { useGetTags } from '../../containers/use_get_tags';
-import { Tags } from './tags';
+import { SyncAlertsToggle } from './sync_alerts_toggle';
 import { schema, FormProps } from './schema';
 
-jest.mock('../../containers/use_get_tags');
-const useGetTagsMock = useGetTags as jest.Mock;
-
-describe('Tags', () => {
+describe('SyncAlertsToggle', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
     const { form } = useForm<FormProps>({
-      defaultValue: { tags: [] },
+      defaultValue: { syncAlerts: true },
       schema: {
-        tags: schema.tags,
+        syncAlerts: schema.syncAlerts,
       },
     });
 
@@ -35,44 +30,49 @@ describe('Tags', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    useGetTagsMock.mockReturnValue({ tags: ['test'] });
   });
 
   it('it renders', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <Tags isLoading={false} />
+        <SyncAlertsToggle isLoading={false} />
       </MockHookWrapperComponent>
     );
 
+    expect(wrapper.find(`[data-test-subj="caseSyncAlerts"]`).exists()).toBeTruthy();
+  });
+
+  it('it toggles the switch', async () => {
+    const wrapper = mount(
+      <MockHookWrapperComponent>
+        <SyncAlertsToggle isLoading={false} />
+      </MockHookWrapperComponent>
+    );
+
+    wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
+
     await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="caseTags"]`).exists()).toBeTruthy();
+      expect(globalForm.getFormData()).toEqual({ syncAlerts: false });
     });
   });
 
-  it('it disables the input when loading', async () => {
+  it('it shows the correct labels', async () => {
     const wrapper = mount(
       <MockHookWrapperComponent>
-        <Tags isLoading={true} />
+        <SyncAlertsToggle isLoading={false} />
       </MockHookWrapperComponent>
     );
 
-    expect(wrapper.find(EuiComboBox).prop('disabled')).toBeTruthy();
-  });
-
-  it('it changes the tags', async () => {
-    const wrapper = mount(
-      <MockHookWrapperComponent>
-        <Tags isLoading={false} />
-      </MockHookWrapperComponent>
+    expect(wrapper.find(`[data-test-subj="caseSyncAlerts"] .euiSwitch__label`).first().text()).toBe(
+      'On'
     );
+
+    wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
 
     await waitFor(() => {
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange(['test', 'case'].map((tag) => ({ label: tag })));
+      expect(
+        wrapper.find(`[data-test-subj="caseSyncAlerts"] .euiSwitch__label`).first().text()
+      ).toBe('Off');
     });
-
-    expect(globalForm.getFormData()).toEqual({ tags: ['test', 'case'] });
   });
 });
