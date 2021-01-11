@@ -19,6 +19,14 @@
 
 import { SpacesApi } from './api';
 
+interface SpacesAvailableStartContract extends SpacesApi {
+  isSpacesAvailable: true;
+}
+
+interface SpacesUnavailableStartContract {
+  isSpacesAvailable: false;
+}
+
 export interface SpacesOssPluginSetup {
   /**
    * Register a provider for the Spaces API.
@@ -28,15 +36,4 @@ export interface SpacesOssPluginSetup {
   registerSpacesApi(provider: SpacesApi): void;
 }
 
-export interface SpacesOssPluginStart {
-  /**
-   * Returns true if the Spaces feature is available (if a provider registered the API)
-   */
-  isSpacesAvailable(): boolean;
-
-  /**
-   * Returns the Spaces API, if registered.
-   * This will always returns a value if `isSpacesAvailable` returns true, and undefined otherwise.
-   */
-  getSpacesApi(): SpacesApi | undefined;
-}
+export type SpacesOssPluginStart = SpacesAvailableStartContract | SpacesUnavailableStartContract;

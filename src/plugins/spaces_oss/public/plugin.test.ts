@@ -34,19 +34,19 @@ describe('SpacesOssPlugin', () => {
 
       registerSpacesApi(spacesApi);
 
-      const { getSpacesApi, isSpacesAvailable } = plugin.start();
+      const { isSpacesAvailable, ...api } = plugin.start();
 
-      expect(isSpacesAvailable()).toBe(true);
-      expect(getSpacesApi()).toStrictEqual(spacesApi);
+      expect(isSpacesAvailable).toBe(true);
+      expect(api).toStrictEqual(spacesApi);
     });
 
     it('does not return the spaces API if not registered', async () => {
       plugin.setup();
 
-      const { getSpacesApi, isSpacesAvailable } = plugin.start();
+      const { isSpacesAvailable, ...api } = plugin.start();
 
-      expect(isSpacesAvailable()).toBe(false);
-      expect(getSpacesApi()).toBeUndefined();
+      expect(isSpacesAvailable).toBe(false);
+      expect(Object.keys(api)).toHaveLength(0);
     });
   });
 });

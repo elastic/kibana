@@ -40,9 +40,15 @@ export class SpacesOssPlugin implements Plugin<SpacesOssPluginSetup, SpacesOssPl
   }
 
   public start() {
-    return {
-      isSpacesAvailable: () => this.apiRegistered,
-      getSpacesApi: () => this.api,
-    };
+    if (this.apiRegistered) {
+      return {
+        isSpacesAvailable: this.apiRegistered,
+        ...this.api!,
+      };
+    } else {
+      return {
+        isSpacesAvailable: this.apiRegistered,
+      };
+    }
   }
 }

@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { spacesApiMock } from '../api.mock';
 import { SpacesOssPluginSetup, SpacesOssPluginStart } from '..';
 
 const createSetupContract = (): jest.Mocked<SpacesOssPluginSetup> => ({
@@ -24,8 +25,8 @@ const createSetupContract = (): jest.Mocked<SpacesOssPluginSetup> => ({
 });
 
 const createStartContract = (): jest.Mocked<SpacesOssPluginStart> => ({
-  isSpacesAvailable: jest.fn(),
-  getSpacesApi: jest.fn(),
+  isSpacesAvailable: true,
+  ...spacesApiMock.create(),
 });
 
 export const spacesOssPluginMock = {
