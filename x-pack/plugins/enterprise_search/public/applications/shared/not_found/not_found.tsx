@@ -37,9 +37,11 @@ interface NotFoundProps {
     ID: string;
     SUPPORT_URL: string;
   };
+  // Optional breadcrumbs
+  breadcrumbs?: string[];
 }
 
-export const NotFound: React.FC<NotFoundProps> = ({ product = {} }) => {
+export const NotFound: React.FC<NotFoundProps> = ({ product = {}, breadcrumbs }) => {
   const { hasGoldLicense } = useValues(LicensingLogic);
   const supportUrl = hasGoldLicense ? LICENSED_SUPPORT_URL : product.SUPPORT_URL;
 
@@ -64,7 +66,7 @@ export const NotFound: React.FC<NotFoundProps> = ({ product = {} }) => {
 
   return (
     <>
-      <SetPageChrome />
+      <SetPageChrome trail={breadcrumbs} />
       <SendTelemetry action="error" metric="not_found" />
 
       <EuiPageContent>
