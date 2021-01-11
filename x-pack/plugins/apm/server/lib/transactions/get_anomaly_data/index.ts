@@ -46,13 +46,18 @@ export async function getAnomalySeries({
 
   const { intervalString } = getBucketSize({ start, end });
 
+  // move the start back with one bucket size, to ensure to get anomaly data in the beginning
+  // this is required because ML has a minimum bucket size (default is 900s) so if our buckets
+  // are smaller, we might have several null buckets in the beginning
+  const mlStart = start - 900 * 1000;
+
   const [anomaliesResponse, jobIds] = await Promise.all([
     anomalySeriesFetcher({
       serviceName,
       transactionType,
       intervalString,
       ml,
-      start,
+      start: mlStart,
       end,
     }),
     getMLJobIds(ml.anomalyDetectors, environment),
@@ -64,6 +69,7 @@ export async function getAnomalySeries({
     .filter((bucket) => jobIds.includes(bucket.key as string))
     .map((bucket) => {
       const dateBuckets = bucket.ml_avg_response_times.buckets;
+
       return {
         jobId: bucket.key as string,
         anomalyScore: compact(
@@ -88,7 +94,7 @@ export async function getAnomalySeries({
             };
           })
         ),
-        anomalyBoundaries: bucket.ml_avg_response_times.buckets
+        anomalyBoundaries: dateBuckets
           .filter(
             (dateBucket) =>
               dateBucket.lower.value !== null && dateBucket.upper.value !== null

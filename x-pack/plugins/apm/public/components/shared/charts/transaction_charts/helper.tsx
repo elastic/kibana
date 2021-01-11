@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { TimeFormatter } from '../../../../../common/utils/formatters';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import { APMChartSpec, Coordinate } from '../../../../../typings/timeseries';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
 
 export function getResponseTimeTickFormatter(formatter: TimeFormatter) {
@@ -23,11 +24,14 @@ export function getResponseTimeTooltipFormatter(formatter: TimeFormatter) {
   };
 }
 
-export function getMaxY(timeSeries?: Array<TimeSeries<Coordinate>>) {
-  if (timeSeries) {
-    const coordinates = timeSeries.flatMap((serie) => serie.data);
-    const numbers = coordinates.map((c) => (c.y ? c.y : 0));
-    return Math.max(...numbers, 0);
+export function getMaxY(specs?: Array<APMChartSpec<Coordinate>>) {
+  const values = specs
+    ?.flatMap((spec) => spec.data)
+    .map((coord) => coord.y)
+    .filter(isFiniteNumber);
+
+  if (values?.length) {
+    return Math.max(...values, 0);
   }
   return 0;
 }

@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { AccessorFn, Fit } from '@elastic/charts';
 import { Maybe } from '../typings/common';
 
 export interface Coordinate {
@@ -15,7 +16,13 @@ export interface RectCoordinate {
   x0: number;
 }
 
-export interface TimeSeries<
+type Accessor = Array<string | number | AccessorFn>;
+
+export type TimeSeries<
+  TCoordinate extends { x: number } = Coordinate | RectCoordinate
+> = APMChartSpec<TCoordinate>;
+
+export interface APMChartSpec<
   TCoordinate extends { x: number } = Coordinate | RectCoordinate
 > {
   title: string;
@@ -27,6 +34,9 @@ export interface TimeSeries<
   type: string;
   color: string;
   areaColor?: string;
+  fit?: Exclude<Fit, 'explicit'>;
+  stackAccessors?: Accessor;
+  splitSeriesAccessors?: Accessor;
 }
 
 export type ChartType = 'area' | 'linemark';

@@ -39,7 +39,11 @@ export async function anomalySeriesFetcher({
             { term: { by_field_value: transactionType } },
             {
               range: {
-                timestamp: { gte: start, lte: end, format: 'epoch_millis' },
+                timestamp: {
+                  gte: start,
+                  lte: end,
+                  format: 'epoch_millis',
+                },
               },
             },
           ],
