@@ -60,9 +60,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const dispatch = useDispatch();
   const [, dispatchToaster] = useStateToaster();
   const [isPopoverOpen, setPopover] = useState(false);
-  const [alertStatus, setAlertStatus] = useState<Status | undefined>(
-    (ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status)) ?? undefined
-  );
   const eventId = ecsRowData._id;
   const ruleId = useMemo(
     (): string | null =>
@@ -89,6 +86,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   }, [ecsRowData]);
 
   const { addWarning } = useAppToasts();
+
+  const alertStatus = useMemo(() => {
+    return ecsRowData.signal?.status && (ecsRowData.signal.status[0] as Status);
+  }, [ecsRowData]);
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -122,9 +123,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const onAddExceptionConfirm = useCallback(
     (didCloseAlert: boolean, didBulkCloseAlert) => {
       closeAddExceptionModal();
-      if (didCloseAlert) {
-        setAlertStatus('closed');
-      }
       if (timelineId !== TimelineId.active || didBulkCloseAlert) {
         refetch();
       }
@@ -154,7 +152,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         }
         displaySuccessToast(title, dispatchToaster);
       }
-      setAlertStatus(newStatus);
     },
     [dispatchToaster, addWarning]
   );
@@ -359,10 +356,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         return [];
     }
   }, [
-    alertStatus,
     closeAlertActionComponent,
     inProgressAlertActionComponent,
     openAlertActionComponent,
+    alertStatus,
   ]);
 
   const items = useMemo(
