@@ -69,7 +69,8 @@ describe('last_value', () => {
       const esAggsFn = lastValueOperation.toEsAggsFn(
         { ...lastValueColumn, params: { ...lastValueColumn.params } },
         'col1',
-        {} as IndexPattern
+        {} as IndexPattern,
+        layer
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -311,13 +312,13 @@ describe('last_value', () => {
   it('should return disabledStatus if indexPattern does contain date field', () => {
     const indexPattern = createMockedIndexPattern();
 
-    expect(lastValueOperation.getDisabledStatus!(indexPattern)).toEqual(undefined);
+    expect(lastValueOperation.getDisabledStatus!(indexPattern, layer)).toEqual(undefined);
 
     const indexPatternWithoutTimeFieldName = {
       ...indexPattern,
       timeFieldName: undefined,
     };
-    expect(lastValueOperation.getDisabledStatus!(indexPatternWithoutTimeFieldName)).toEqual(
+    expect(lastValueOperation.getDisabledStatus!(indexPatternWithoutTimeFieldName, layer)).toEqual(
       undefined
     );
 
@@ -326,7 +327,10 @@ describe('last_value', () => {
       fields: indexPattern.fields.filter((f) => f.type !== 'date'),
     };
 
-    const disabledStatus = lastValueOperation.getDisabledStatus!(indexPatternWithoutTimefields);
+    const disabledStatus = lastValueOperation.getDisabledStatus!(
+      indexPatternWithoutTimefields,
+      layer
+    );
     expect(disabledStatus).toEqual(
       'This function requires the presence of a date field in your index'
     );

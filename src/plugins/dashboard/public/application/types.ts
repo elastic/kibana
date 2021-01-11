@@ -34,6 +34,7 @@ import { SavedObjectsTaggingApi } from '../services/saved_objects_tagging_oss';
 import { DataPublicPluginStart, IndexPatternsContract } from '../services/data';
 import { SavedObjectLoader, SavedObjectsStart } from '../services/saved_objects';
 import { DashboardPanelStorage } from './lib';
+import { UrlForwardingStart } from '../../../url_forwarding/public';
 
 export type DashboardRedirect = (props: RedirectToProps) => void;
 export type RedirectToProps =
@@ -76,6 +77,7 @@ export interface DashboardAppServices {
   uiSettings: IUiSettingsClient;
   restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
+  urlForwarding: UrlForwardingStart;
   savedDashboards: SavedObjectLoader;
   scopedHistory: () => ScopedHistory;
   indexPatterns: IndexPatternsContract;

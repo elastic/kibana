@@ -31,9 +31,16 @@
       },
       "technique": [
         {
-          "id": "T1101",
-          "name": "Security Support Provider",
-          "reference": "https://attack.mitre.org/techniques/T1101/"
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.005",
+              "name": "Security Support Provider",
+              "reference": "https://attack.mitre.org/techniques/T1547/005/"
+            }
+          ]
         }
       ]
     }

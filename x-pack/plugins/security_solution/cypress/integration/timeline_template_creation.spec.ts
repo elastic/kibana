@@ -44,7 +44,7 @@ import { openTimeline } from '../tasks/timelines';
 import { OVERVIEW_URL } from '../urls/navigation';
 
 describe('Timeline Templates', () => {
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });

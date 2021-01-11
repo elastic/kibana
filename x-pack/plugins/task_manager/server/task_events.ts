@@ -9,7 +9,7 @@ import { Option } from 'fp-ts/lib/Option';
 import { ConcreteTaskInstance } from './task';
 
 import { Result, Err } from './lib/result_type';
-import { FillPoolResult } from './lib/fill_pool';
+import { ClaimAndFillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
 import { TaskRunResult } from './task_running';
 
@@ -19,23 +19,25 @@ export enum TaskEventType {
   TASK_RUN = 'TASK_RUN',
   TASK_RUN_REQUEST = 'TASK_RUN_REQUEST',
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
+  TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
 }
 
 export interface TaskTiming {
   start: number;
   stop: number;
 }
+export type WithTaskTiming<T> = T & { timing: TaskTiming };
 
 export function startTaskTimer(): () => TaskTiming {
   const start = Date.now();
   return () => ({ start, stop: Date.now() });
 }
 
-export interface TaskEvent<T, E> {
-  id?: string;
+export interface TaskEvent<OkResult, ErrorResult, ID = string> {
+  id?: ID;
   timing?: TaskTiming;
   type: TaskEventType;
-  event: Result<T, E>;
+  event: Result<OkResult, ErrorResult>;
 }
 export interface RanTask {
   task: ConcreteTaskInstance;
@@ -49,7 +51,17 @@ export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRun = TaskEvent<RanTask, ErroredTask>;
 export type TaskClaim = TaskEvent<ConcreteTaskInstance, Option<ConcreteTaskInstance>>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
-export type TaskPollingCycle<T = string> = TaskEvent<FillPoolResult, PollingError<T>>;
+export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
+
+export type TaskManagerStats = 'load';
+export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
+
+export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
+  ? OkResult
+  : never;
+export type ErrResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
+  ? ErrorResult
+  : never;
 
 export function asTaskMarkRunningEvent(
   id: string,
@@ -105,13 +117,24 @@ export function asTaskRunRequestEvent(
 }
 
 export function asTaskPollingCycleEvent<T = string>(
-  event: Result<FillPoolResult, PollingError<T>>,
+  event: Result<ClaimAndFillPoolResult, PollingError<T>>,
   timing?: TaskTiming
 ): TaskPollingCycle<T> {
   return {
     type: TaskEventType.TASK_POLLING_CYCLE,
     event,
     timing,
+  };
+}
+
+export function asTaskManagerStatEvent(
+  id: TaskManagerStats,
+  event: Result<number, never>
+): TaskManagerStat {
+  return {
+    id,
+    type: TaskEventType.TASK_MANAGER_STAT,
+    event,
   };
 }
 
@@ -135,4 +158,9 @@ export function isTaskPollingCycleEvent<T = string>(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskPollingCycle<T> {
   return taskEvent.type === TaskEventType.TASK_POLLING_CYCLE;
+}
+export function isTaskManagerStatEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is TaskManagerStat {
+  return taskEvent.type === TaskEventType.TASK_MANAGER_STAT;
 }

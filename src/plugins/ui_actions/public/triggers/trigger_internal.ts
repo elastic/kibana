@@ -20,18 +20,17 @@
 import { Trigger } from './trigger';
 import { TriggerContract } from './trigger_contract';
 import { UiActionsService } from '../service';
-import { TriggerId, TriggerContextMapping } from '../types';
 
 /**
  * Internal representation of a trigger kept for consumption only internally
  * within `ui_actions` plugin.
  */
-export class TriggerInternal<T extends TriggerId> {
-  public readonly contract = new TriggerContract<T>(this);
+export class TriggerInternal<Context extends object = object> {
+  public readonly contract: TriggerContract<Context> = new TriggerContract<Context>(this);
 
-  constructor(public readonly service: UiActionsService, public readonly trigger: Trigger<T>) {}
+  constructor(public readonly service: UiActionsService, public readonly trigger: Trigger) {}
 
-  public async execute(context: TriggerContextMapping[T], alwaysShowPopup?: boolean) {
+  public async execute(context: Context, alwaysShowPopup?: boolean) {
     const triggerId = this.trigger.id;
     const actions = await this.service.getTriggerCompatibleActions!(triggerId, context);
 
