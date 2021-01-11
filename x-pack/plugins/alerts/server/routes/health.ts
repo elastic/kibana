@@ -30,7 +30,7 @@ interface XPackUsageSecurity {
 export function healthRoute(
   router: IRouter,
   licenseState: ILicenseState,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup
 ) {
   router.get(
     {
@@ -64,7 +64,7 @@ export function healthRoute(
 
         const frameworkHealth: AlertingFrameworkHealth = {
           isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),
-          hasPermanentEncryptionKey: !encryptedSavedObjects.usingEphemeralEncryptionKey,
+          hasPermanentEncryptionKey: !!encryptedSavedObjects,
           alertingFrameworkHeath,
         };
 

@@ -13,7 +13,7 @@ import { isSavedObjectExecutionSource } from './lib';
 
 interface CreateExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
-  isESOUsingEphemeralEncryptionKey: boolean;
+  isESOAvailable: boolean;
   actionTypeRegistry: ActionTypeRegistryContract;
   preconfiguredActions: PreConfiguredAction[];
 }
@@ -32,16 +32,16 @@ export type ExecutionEnqueuer = (
 export function createExecutionEnqueuerFunction({
   taskManager,
   actionTypeRegistry,
-  isESOUsingEphemeralEncryptionKey,
+  isESOAvailable,
   preconfiguredActions,
 }: CreateExecuteFunctionOptions) {
   return async function execute(
     unsecuredSavedObjectsClient: SavedObjectsClientContract,
     { id, params, spaceId, source, apiKey }: ExecuteOptions
   ) {
-    if (isESOUsingEphemeralEncryptionKey === true) {
+    if (!isESOAvailable) {
       throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        `Unable to execute action because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
       );
     }
 

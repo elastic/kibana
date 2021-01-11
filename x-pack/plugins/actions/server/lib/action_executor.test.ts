@@ -16,7 +16,7 @@ import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
 
-const actionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false });
+const actionExecutor = new ActionExecutor({ isESOAvailable: true });
 const services = actionsMock.createServices();
 
 const actionsClient = actionsClientMock.create();
@@ -309,8 +309,8 @@ test('should not throws an error if actionType is preconfigured', async () => {
   });
 });
 
-test('throws an error when passing isESOUsingEphemeralEncryptionKey with value of true', async () => {
-  const customActionExecutor = new ActionExecutor({ isESOUsingEphemeralEncryptionKey: true });
+test('throws an error when passing isESOAvailable with value of false', async () => {
+  const customActionExecutor = new ActionExecutor({ isESOAvailable: false });
   customActionExecutor.initialize({
     logger: loggingSystemMock.create().get(),
     spaces: spacesMock,

@@ -127,7 +127,7 @@ export interface AlertingPluginsSetup {
   security?: SecurityPluginSetup;
   taskManager: TaskManagerSetupContract;
   actions: ActionsPluginSetupContract;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
   eventLog: IEventLogService;
@@ -136,7 +136,7 @@ export interface AlertingPluginsSetup {
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
   taskManager: TaskManagerStartContract;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   features: FeaturesPluginStart;
   eventLog: IEventLogClientService;
   licensing: LicensingPluginStart;
@@ -150,7 +150,7 @@ export class AlertingPlugin {
   private alertTypeRegistry?: AlertTypeRegistry;
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private licenseState: ILicenseState | null = null;
-  private isESOUsingEphemeralEncryptionKey?: boolean;
+  private isESOAvailable: boolean = false;
   private security?: SecurityPluginSetup;
   private readonly alertsClientFactory: AlertsClientFactory;
   private readonly telemetryLogger: Logger;
@@ -186,20 +186,19 @@ export class AlertingPlugin {
       };
     });
 
-    this.isESOUsingEphemeralEncryptionKey =
-      plugins.encryptedSavedObjects.usingEphemeralEncryptionKey;
+    this.isESOAvailable = !!plugins.encryptedSavedObjects;
 
-    if (this.isESOUsingEphemeralEncryptionKey) {
+    if (!this.isESOAvailable) {
       this.logger.warn(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
+    } else {
+      setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects!);
     }
 
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
-
-    setupSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
 
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
@@ -305,7 +304,7 @@ export class AlertingPlugin {
 
   public start(core: CoreStart, plugins: AlertingPluginsStart): PluginStartContract {
     const {
-      isESOUsingEphemeralEncryptionKey,
+      isESOAvailable,
       logger,
       taskRunnerFactory,
       alertTypeRegistry,
@@ -316,57 +315,59 @@ export class AlertingPlugin {
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
-    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: ['alert'],
-    });
-
-    const spaceIdToNamespace = (spaceId?: string) => {
-      return plugins.spaces && spaceId
-        ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
-        : undefined;
-    };
-
-    alertsClientFactory.initialize({
-      alertTypeRegistry: alertTypeRegistry!,
-      logger,
-      taskManager: plugins.taskManager,
-      securityPluginSetup: security,
-      securityPluginStart: plugins.security,
-      encryptedSavedObjectsClient,
-      spaceIdToNamespace,
-      getSpaceId(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getSpaceId(request);
-      },
-      async getSpace(request: KibanaRequest) {
-        return plugins.spaces?.spacesService.getActiveSpace(request);
-      },
-      actions: plugins.actions,
-      features: plugins.features,
-      eventLog: plugins.eventLog,
-      kibanaVersion: this.kibanaVersion,
-    });
-
     const getAlertsClientWithRequest = (request: KibanaRequest) => {
-      if (isESOUsingEphemeralEncryptionKey === true) {
+      if (!isESOAvailable) {
         throw new Error(
-          `Unable to create alerts client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+          `Unable to create alerts client because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
       return alertsClientFactory!.create(request, core.savedObjects);
     };
 
-    taskRunnerFactory.initialize({
-      logger,
-      getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
-      getAlertsClientWithRequest,
-      spaceIdToNamespace,
-      actionsPlugin: plugins.actions,
-      encryptedSavedObjectsClient,
-      basePathService: core.http.basePath,
-      eventLogger: this.eventLogger!,
-      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
-      alertTypeRegistry: this.alertTypeRegistry!,
-    });
+    if (isESOAvailable) {
+      const encryptedSavedObjectsClient = plugins.encryptedSavedObjects!.getClient({
+        includedHiddenTypes: ['alert'],
+      });
+
+      const spaceIdToNamespace = (spaceId?: string) => {
+        return plugins.spaces && spaceId
+          ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
+          : undefined;
+      };
+
+      alertsClientFactory.initialize({
+        alertTypeRegistry: alertTypeRegistry!,
+        logger,
+        taskManager: plugins.taskManager,
+        securityPluginSetup: security,
+        securityPluginStart: plugins.security,
+        encryptedSavedObjectsClient,
+        spaceIdToNamespace,
+        getSpaceId(request: KibanaRequest) {
+          return plugins.spaces?.spacesService.getSpaceId(request);
+        },
+        async getSpace(request: KibanaRequest) {
+          return plugins.spaces?.spacesService.getActiveSpace(request);
+        },
+        actions: plugins.actions,
+        features: plugins.features,
+        eventLog: plugins.eventLog,
+        kibanaVersion: this.kibanaVersion,
+      });
+
+      taskRunnerFactory.initialize({
+        logger,
+        getServices: this.getServicesFactory(core.savedObjects, core.elasticsearch),
+        getAlertsClientWithRequest,
+        spaceIdToNamespace,
+        actionsPlugin: plugins.actions,
+        encryptedSavedObjectsClient,
+        basePathService: core.http.basePath,
+        eventLogger: this.eventLogger!,
+        internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
+        alertTypeRegistry: this.alertTypeRegistry!,
+      });
+    }
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
       const client = getAlertsClientWithRequest(request);

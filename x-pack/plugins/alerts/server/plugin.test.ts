@@ -24,7 +24,7 @@ describe('Alerting Plugin', () => {
     let coreSetup: ReturnType<typeof coreMock.createSetup>;
     let pluginsSetup: jest.Mocked<AlertingPluginsSetup>;
 
-    it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
+    it('should log warning when Encrypted Saved Objects plugin is not available', async () => {
       const context = coreMock.createPluginInitializerContext<AlertsConfig>({
         healthCheck: {
           interval: '5m',
@@ -50,9 +50,9 @@ describe('Alerting Plugin', () => {
       });
 
       expect(setupMocks.status.set).toHaveBeenCalledTimes(1);
-      expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
+      expect(encryptedSavedObjectsSetup).toEqual(true);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     });
 
@@ -109,7 +109,7 @@ describe('Alerting Plugin', () => {
 
   describe('start()', () => {
     describe('getAlertsClientWithRequest()', () => {
-      it('throws error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to true', async () => {
+      it('throws error when encryptedSavedObjects plugin is not available', async () => {
         const context = coreMock.createPluginInitializerContext<AlertsConfig>({
           healthCheck: {
             interval: '5m',
@@ -140,15 +140,15 @@ describe('Alerting Plugin', () => {
           taskManager: taskManagerMock.createStart(),
         });
 
-        expect(encryptedSavedObjectsSetup.usingEphemeralEncryptionKey).toEqual(true);
+        expect(encryptedSavedObjectsSetup).toBeUndefined();
         expect(() =>
           startContract.getAlertsClientWithRequest({} as KibanaRequest)
         ).toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create alerts client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+          `"Unable to create alerts client because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
       });
 
-      it(`doesn't throw error when encryptedSavedObjects plugin has usingEphemeralEncryptionKey set to false`, async () => {
+      it(`doesn't throw error when encryptedSavedObjects plugin is available`, async () => {
         const context = coreMock.createPluginInitializerContext<AlertsConfig>({
           healthCheck: {
             interval: '5m',
@@ -162,7 +162,6 @@ describe('Alerting Plugin', () => {
 
         const encryptedSavedObjectsSetup = {
           ...encryptedSavedObjectsMock.createSetup(),
-          usingEphemeralEncryptionKey: false,
         };
         plugin.setup(coreMock.createSetup(), {
           licensing: licensingMock.createSetup(),

@@ -32,9 +32,7 @@ export function createActionTypeRegistry(): {
   const actionTypeRegistry = new ActionTypeRegistry({
     taskManager: taskManagerMock.createSetup(),
     licensing: licensingMock.createSetup(),
-    taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-    ),
+    taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor({ isESOAvailable: true })),
     actionsConfigUtils: actionsConfigMock.create(),
     licenseState: licenseStateMock.create(),
     preconfiguredActions: [],

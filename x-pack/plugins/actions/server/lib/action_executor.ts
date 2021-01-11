@@ -48,10 +48,10 @@ export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
 export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
-  private readonly isESOUsingEphemeralEncryptionKey: boolean;
+  private readonly isESOAvailable: boolean;
 
-  constructor({ isESOUsingEphemeralEncryptionKey }: { isESOUsingEphemeralEncryptionKey: boolean }) {
-    this.isESOUsingEphemeralEncryptionKey = isESOUsingEphemeralEncryptionKey;
+  constructor({ isESOAvailable }: { isESOAvailable: boolean }) {
+    this.isESOAvailable = isESOAvailable;
   }
 
   public initialize(actionExecutorContext: ActionExecutorContext) {
@@ -72,7 +72,7 @@ export class ActionExecutor {
       throw new Error('ActionExecutor not initialized');
     }
 
-    if (this.isESOUsingEphemeralEncryptionKey === true) {
+    if (!this.isESOAvailable) {
       throw new Error(
         `Unable to execute action because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
       );

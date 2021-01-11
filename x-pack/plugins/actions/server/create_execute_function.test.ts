@@ -27,7 +27,7 @@ describe('execute()', () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOAvailable: true,
       preconfiguredActions: [],
     });
     savedObjectsClient.get.mockResolvedValueOnce({
@@ -86,7 +86,7 @@ describe('execute()', () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
       actionTypeRegistry: actionTypeRegistryMock.create(),
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOAvailable: true,
       preconfiguredActions: [
         {
           id: '123',
@@ -157,10 +157,10 @@ describe('execute()', () => {
     );
   });
 
-  test('throws when passing isESOUsingEphemeralEncryptionKey with true as a value', async () => {
+  test('throws when passing isESOAvailable with false as a value', async () => {
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: true,
+      isESOAvailable: false,
       actionTypeRegistry: actionTypeRegistryMock.create(),
       preconfiguredActions: [],
     });
@@ -180,7 +180,7 @@ describe('execute()', () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOAvailable: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [],
     });
@@ -210,7 +210,7 @@ describe('execute()', () => {
     const mockedActionTypeRegistry = actionTypeRegistryMock.create();
     const executeFn = createExecutionEnqueuerFunction({
       taskManager: mockTaskManager,
-      isESOUsingEphemeralEncryptionKey: false,
+      isESOAvailable: true,
       actionTypeRegistry: mockedActionTypeRegistry,
       preconfiguredActions: [
         {
