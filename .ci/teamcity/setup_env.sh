@@ -40,6 +40,8 @@ if is_pr; then
   tc_set_env ghprbGhRepository "elastic/kibana" # TODO?
   tc_set_env ghprbActualCommit "$GITHUB_PR_TRIGGERED_SHA"
   tc_set_env BUILD_URL "$TEAMCITY_BUILD_URL"
+
+  set_git_merge_base
 else
   tc_set_env ELASTIC_APM_ACTIVE "${CI_REPORTING_ENABLED-}"
   tc_set_env CHECKS_REPORTER_ACTIVE false
