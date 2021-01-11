@@ -6,20 +6,16 @@
 
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiToolTip,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { FULL_SCREEN } from '../timeline/body/column_headers/translations';
-import { EXIT_FULL_SCREEN } from '../../../common/components/exit_full_screen/translations';
-import { DEFAULT_INDEX_KEY, FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
+import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,
