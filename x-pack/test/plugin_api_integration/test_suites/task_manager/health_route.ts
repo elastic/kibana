@@ -33,12 +33,14 @@ interface MonitoringStats {
       timestamp: string;
       value: {
         drift: Record<string, object>;
+        load: Record<string, object>;
         execution: {
           duration: Record<string, Record<string, object>>;
           result_frequency_percent_as_number: Record<string, Record<string, object>>;
         };
         polling: {
           last_successful_poll: string;
+          duration: Record<string, object>;
           result_frequency_percent_as_number: Record<string, number>;
         };
       };
@@ -170,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         runtime: {
-          value: { drift, polling, execution },
+          value: { drift, load, polling, execution },
         },
       } = (await getHealth()).stats;
 
@@ -182,10 +184,20 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof polling.result_frequency_percent_as_number.RunningAtCapacity).to.eql('number');
       expect(typeof polling.result_frequency_percent_as_number.Failed).to.eql('number');
 
+      expect(typeof polling.duration.p50).to.eql('number');
+      expect(typeof polling.duration.p90).to.eql('number');
+      expect(typeof polling.duration.p95).to.eql('number');
+      expect(typeof polling.duration.p99).to.eql('number');
+
       expect(typeof drift.p50).to.eql('number');
       expect(typeof drift.p90).to.eql('number');
       expect(typeof drift.p95).to.eql('number');
       expect(typeof drift.p99).to.eql('number');
+
+      expect(typeof load.p50).to.eql('number');
+      expect(typeof load.p90).to.eql('number');
+      expect(typeof load.p95).to.eql('number');
+      expect(typeof load.p99).to.eql('number');
 
       expect(typeof execution.duration.sampleTask.p50).to.eql('number');
       expect(typeof execution.duration.sampleTask.p90).to.eql('number');
