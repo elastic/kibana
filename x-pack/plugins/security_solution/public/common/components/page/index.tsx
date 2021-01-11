@@ -26,6 +26,11 @@ SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
   and `EuiPopover`, `EuiToolTip` global styles
 */
 export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimary: string } } }>`
+  // fixes double scrollbar on views with EventsTable
+  #kibana-body {
+    overflow: hidden;
+  }
+
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }
