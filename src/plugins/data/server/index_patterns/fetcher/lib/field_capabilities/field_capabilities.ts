@@ -45,6 +45,8 @@ export async function getFieldCapabilities(
   const esFieldCaps = await callFieldCapsApi(callCluster, indices, fieldCapsOptions);
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
 
+  // const t1 = performance.now();
+
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     .filter((name) => !name.startsWith('_'))
     .concat(metaFields)
@@ -70,8 +72,17 @@ export async function getFieldCapabilities(
         readFromDocValues: false,
       })
     )
-    .map(mergeOverrides)
-    .filter((field) => (filters?.aggregatable ? field.aggregatable === true : true));
+    .map(mergeOverrides);
 
-  return sortBy(allFieldsUnsorted, 'name');
+  const filteredFields =
+    filters != null
+      ? filters.aggregatable === true
+        ? allFieldsUnsorted.filter((field) => field.aggregatable === true)
+        : allFieldsUnsorted
+      : allFieldsUnsorted;
+
+  // const t2 = performance.now();
+  // console.log(`Loop took ${t2-t1} milliseconds.`);
+
+  return sortBy(filters != null ? filteredFields : allFieldsUnsorted, 'name');
 }
