@@ -405,8 +405,8 @@ export const StepDetailsForm: FC<Props> = React.memo(
 
           <EuiSpacer size={'m'} />
 
-          <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
-            <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
+            <EuiFlexItem style={{ flexBasis: '400px' }} grow={false}>
               <EuiFormRow
                 label={i18n.translate('xpack.transform.stepDetailsForm.destinationIndexLabel', {
                   defaultMessage: 'Destination index',
