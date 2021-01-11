@@ -31,7 +31,7 @@ describe('EventLogStart', () => {
 
       await eventLogClient.findEventsBySavedObjectIds('saved-object-type', ['saved-object-id']);
 
-      expect(savedObjectGetter).toHaveBeenCalledWith('saved-object-type', 'saved-object-id');
+      expect(savedObjectGetter).toHaveBeenCalledWith('saved-object-type', ['saved-object-id']);
     });
 
     test('throws when the user doesnt have permission to access the specified saved object', async () => {
@@ -117,7 +117,7 @@ describe('EventLogStart', () => {
         esContext.esNames.indexPattern,
         undefined,
         'saved-object-type',
-        'saved-object-id',
+        ['saved-object-id'],
         {
           page: 1,
           per_page: 10,
@@ -198,7 +198,7 @@ describe('EventLogStart', () => {
         esContext.esNames.indexPattern,
         undefined,
         'saved-object-type',
-        'saved-object-id',
+        ['saved-object-id'],
         {
           page: 1,
           per_page: 10,

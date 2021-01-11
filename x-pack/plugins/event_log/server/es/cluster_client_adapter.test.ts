@@ -365,10 +365,10 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "term": Object {
-                              "kibana.saved_objects.id": Object {
-                                "value": "saved-object-id",
-                              },
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
                             },
                           },
                           Object {
@@ -444,10 +444,10 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "term": Object {
-                              "kibana.saved_objects.id": Object {
-                                "value": "saved-object-id",
-                              },
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
                             },
                           },
                           Object {
@@ -553,10 +553,10 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "term": Object {
-                              "kibana.saved_objects.id": Object {
-                                "value": "saved-object-id",
-                              },
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
                             },
                           },
                           Object {
@@ -643,10 +643,10 @@ describe('queryEventsBySavedObject', () => {
                             },
                           },
                           Object {
-                            "term": Object {
-                              "kibana.saved_objects.id": Object {
-                                "value": "saved-object-id",
-                              },
+                            "terms": Object {
+                              "kibana.saved_objects.id": Array [
+                                "saved-object-id",
+                              ],
                             },
                           },
                           Object {

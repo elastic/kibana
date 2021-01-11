@@ -39,7 +39,7 @@ describe('find', () => {
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
       {
-        params: { ids: ['1'], type: 'action' },
+        params: { id: '1', type: 'action' },
       },
       ['ok']
     );
@@ -50,7 +50,7 @@ describe('find', () => {
 
     const [type, ids] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
     expect(type).toEqual(`action`);
-    expect(ids).toEqual(`[1]`);
+    expect(ids).toEqual(['1']);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: result,
@@ -73,7 +73,7 @@ describe('find', () => {
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
       {
-        params: { ids: ['1'], type: 'action' },
+        params: { id: '1', type: 'action' },
         query: { page: 3, per_page: 10 },
       },
       ['ok']
@@ -83,9 +83,9 @@ describe('find', () => {
 
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
 
-    const [type, id, options] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
+    const [type, ids, options] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
     expect(type).toEqual(`action`);
-    expect(id).toEqual(`1`);
+    expect(ids).toEqual(['1']);
     expect(options).toMatchObject({});
 
     expect(res.ok).toHaveBeenCalledWith({
@@ -109,7 +109,7 @@ describe('find', () => {
     const [context, req, res] = mockHandlerArguments(
       eventLogClient,
       {
-        params: { ids: ['1'], type: 'action' },
+        params: { id: '1', type: 'action' },
         query: { page: 3, per_page: 10 },
       },
       ['ok']

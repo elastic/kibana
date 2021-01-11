@@ -51,7 +51,7 @@ describe('find_by_ids', () => {
 
     const [type, ids] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
     expect(type).toEqual(`action`);
-    expect(ids).toEqual(`1`);
+    expect(ids).toEqual(['1']);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: result,
@@ -87,7 +87,7 @@ describe('find_by_ids', () => {
 
     const [type, id, options] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
     expect(type).toEqual(`action`);
-    expect(id).toEqual(`1`);
+    expect(id).toEqual(['1']);
     expect(options).toMatchObject({});
 
     expect(res.ok).toHaveBeenCalledWith({
@@ -105,7 +105,7 @@ describe('find_by_ids', () => {
 
     findByIdsRoute(router, systemLogger);
 
-    const [, handler] = router.get.mock.calls[0];
+    const [, handler] = router.post.mock.calls[0];
     eventLogClient.findEventsBySavedObjectIds.mockRejectedValueOnce(new Error('oof!'));
 
     const [context, req, res] = mockHandlerArguments(

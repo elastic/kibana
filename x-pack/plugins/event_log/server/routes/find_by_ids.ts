@@ -55,7 +55,7 @@ export const findByIdsRoute = (router: IRouter, systemLogger: Logger) => {
           body: await eventLogClient.findEventsBySavedObjectIds(type, ids, query),
         });
       } catch (err) {
-        const call = `findEventsBySavedObject(${type}, [${ids}], ${JSON.stringify(query)})`;
+        const call = `findEventsBySavedObjectIds(${type}, [${ids}], ${JSON.stringify(query)})`;
         systemLogger.debug(`error calling eventLog ${call}: ${err.message}`);
         return res.notFound();
       }
