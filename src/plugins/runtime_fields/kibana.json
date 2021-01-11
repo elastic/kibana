@@ -1,0 +1,6 @@
+{
+  "id": "runtimeFields",
+  "version": "kibana",
+  "server": false,
+  "ui": true
+}

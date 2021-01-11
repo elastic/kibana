@@ -39,16 +39,23 @@ import { createSessionRestorationDataProvider } from '../lib/session_restoration
 import { DashboardStateManager } from '../dashboard_state_manager';
 import { getDashboardTitle } from '../../dashboard_strings';
 import { DashboardAppServices } from '../types';
+import { ViewMode } from '../../services/embeddable';
 
 // TS is picky with type guards, we can't just inline `() => false`
 function defaultTaggingGuard(_obj: SavedObject): _obj is TagDecoratedSavedObject {
   return false;
 }
 
+interface DashboardStateManagerReturn {
+  dashboardStateManager: DashboardStateManager | null;
+  viewMode: ViewMode | null;
+  setViewMode: (value: ViewMode) => void;
+}
+
 export const useDashboardStateManager = (
   savedDashboard: DashboardSavedObject | null,
   history: History
-): DashboardStateManager | null => {
+): DashboardStateManagerReturn => {
   const {
     data: dataPlugin,
     core,
@@ -72,6 +79,7 @@ export const useDashboardStateManager = (
   const [dashboardStateManager, setDashboardStateManager] = useState<DashboardStateManager | null>(
     null
   );
+  const [viewMode, setViewMode] = useState<ViewMode | null>(null);
 
   const hasTaggingCapabilities = savedObjectsTagging?.ui.hasTagDecoration || defaultTaggingGuard;
 
@@ -172,6 +180,7 @@ export const useDashboardStateManager = (
     );
 
     setDashboardStateManager(stateManager);
+    setViewMode(stateManager.getViewMode());
 
     return () => {
       stateManager?.destroy();
@@ -196,5 +205,5 @@ export const useDashboardStateManager = (
     usageCollection,
   ]);
 
-  return dashboardStateManager;
+  return { dashboardStateManager, viewMode, setViewMode };
 };
