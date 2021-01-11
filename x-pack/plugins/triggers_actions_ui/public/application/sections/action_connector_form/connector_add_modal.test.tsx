@@ -7,7 +7,7 @@ import * as React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { ConnectorAddModal } from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { ValidationResult, ActionType } from '../../../types';
+import { ActionType, ConnectorValidationResult, GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 
@@ -33,20 +33,19 @@ describe('connector_add_modal', () => {
     };
   });
   it('renders connector modal form if addModalVisible is true', () => {
-    const actionTypeModel = {
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
 

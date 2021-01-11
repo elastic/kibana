@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { mapToLayerWithId } from './util';
 import { BaseVisTypeOptions } from '../../visualizations/public';
 import { truncatedColorSchemas } from '../../charts/public';
-import { Schemas } from '../../vis_default_editor/public';
 import { ORIGIN } from '../../maps_legacy/public';
 import { getDeprecationMessage } from './get_deprecation_message';
 import { RegionMapVisualizationDependencies } from './plugin';
@@ -64,7 +63,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         vectorLayers: [],
         tmsLayers: [],
       },
-      schemas: new Schemas([
+      schemas: [
         {
           group: 'metrics',
           name: 'metric',
@@ -98,7 +97,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
           max: 1,
           aggFilter: ['terms'],
         },
-      ]),
+      ],
     },
     toExpressionAst,
     setup: async (vis) => {

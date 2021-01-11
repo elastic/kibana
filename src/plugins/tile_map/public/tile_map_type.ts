@@ -18,8 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
-import { Schemas } from '../../vis_default_editor/public';
+import { convertToGeoJson, MapTypes } from '../../maps_legacy/public';
 import { truncatedColorSchemas } from '../../charts/public';
 
 // @ts-expect-error
@@ -119,7 +118,7 @@ export function createTileMapTypeDefinition(
         tmsLayers: [],
       },
       optionsTemplate: TileMapOptionsLazy,
-      schemas: new Schemas([
+      schemas: [
         {
           group: 'metrics',
           name: 'metric',
@@ -141,7 +140,7 @@ export function createTileMapTypeDefinition(
           min: 1,
           max: 1,
         },
-      ]),
+      ],
     },
     setup: async (vis) => {
       let tmsLayers;

@@ -9,7 +9,7 @@ import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
-import { ISessionService, SearchTimeoutError, SessionState } from 'src/plugins/data/public';
+import { ISessionService, SearchTimeoutError, SearchSessionState } from 'src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/public/mocks';
 import { BehaviorSubject } from 'rxjs';
@@ -45,12 +45,12 @@ function mockFetchImplementation(responses: any[]) {
 describe('EnhancedSearchInterceptor', () => {
   let mockUsageCollector: any;
   let sessionService: jest.Mocked<ISessionService>;
-  let sessionState$: BehaviorSubject<SessionState>;
+  let sessionState$: BehaviorSubject<SearchSessionState>;
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
-    sessionState$ = new BehaviorSubject<SessionState>(SessionState.None);
+    sessionState$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
     const dataPluginMockStart = dataPluginMock.createStartContract();
     sessionService = {
       ...(dataPluginMockStart.search.session as jest.Mocked<ISessionService>),
@@ -408,7 +408,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(next).toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
 
-      sessionState$.next(SessionState.BackgroundLoading);
+      sessionState$.next(SearchSessionState.BackgroundLoading);
 
       await timeTravel(240);
 
