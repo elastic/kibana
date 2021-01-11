@@ -5,4 +5,4 @@
  */
 
 export { MountWithReduxProvider } from './helper';
-export * from './helper/component_test_helpers';
+export * from './helper/enzyme_helpers';

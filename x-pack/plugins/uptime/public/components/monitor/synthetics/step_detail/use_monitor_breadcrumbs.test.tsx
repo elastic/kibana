@@ -8,7 +8,7 @@ import { ChromeBreadcrumb } from 'kibana/public';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { of } from 'rxjs';
-import { render } from '../../../../lib';
+import { render } from '../../../../lib/helper/rtl_helpers';
 import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
 import { OVERVIEW_ROUTE } from '../../../../../common/constants';
 import { Ping } from '../../../../../common/runtime_types/ping';
