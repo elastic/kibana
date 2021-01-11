@@ -8,11 +8,9 @@ import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
-import { AgentListPage } from '../../../../fleet/public';
-
-import { OsqueryEditor } from '../../editor';
 import { useActionDetails } from '../../actions/use_action_details';
 import { ResultTabs } from './tabs';
+import { LiveQueryForm } from '../form';
 
 const EditLiveQueryPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
@@ -27,9 +25,7 @@ const EditLiveQueryPageComponent = () => {
 
   return (
     <>
-      <AgentListPage />
-      <EuiSpacer />
-      <OsqueryEditor defaultValue={actionDetails?._source?.data.commands[0].query} />
+      <LiveQueryForm />
       <EuiSpacer />
       <ResultTabs />
     </>

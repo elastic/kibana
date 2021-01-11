@@ -4,20 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 
-import { getUseField, Field, Form, useForm } from '../../shared_imports';
+import { getUseField, UseField, Field, Form, useForm } from '../../shared_imports';
+import { formSchema } from './schema';
+import { AgentsTableField } from './agents_table_field';
+import { CodeEditorField } from './code_editor_field';
 
 const FORM_ID = 'liveQueryForm';
+
+const CommonUseField = getUseField({ component: Field });
 
 const LiveQueryFormComponent = () => {
   const initialState = useMemo(
     () => ({
-      title,
-      description,
+      agents: [],
+      commands: [],
     }),
-    [title, description]
+    []
   );
+  const handleSubmit = useCallback((payload) => {
+    console.error('payload sub,it', payload);
+    return Promise.resolve();
+  }, []);
+
   const { form } = useForm({
     id: FORM_ID,
     schema: formSchema,
@@ -28,7 +39,15 @@ const LiveQueryFormComponent = () => {
     defaultValue: initialState,
   });
 
-  return <div>dupa</div>;
+  const { isSubmitted, isSubmitting, submit } = form;
+
+  return (
+    <Form form={form}>
+      <UseField path="agents" component={AgentsTableField} />
+      <EuiSpacer />
+      <UseField path="commands" component={CodeEditorField} />
+    </Form>
+  );
 };
 
 export const LiveQueryForm = React.memo(LiveQueryFormComponent);
