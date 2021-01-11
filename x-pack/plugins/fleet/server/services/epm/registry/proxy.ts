@@ -38,7 +38,7 @@ export function getProxyAgent(options: GetProxyAgentParams): ProxyAgent {
 export function getProxyAgentOptions(options: GetProxyAgentParams): HttpsProxyAgentOptions {
   const endpointParsed = new URL(options.targetUrl);
   const proxyParsed = new URL(options.proxyUrl);
-  const authValue = proxyParsed.password
+  const authValue = proxyParsed.username
     ? `${proxyParsed.username}:${proxyParsed.password}`
     : undefined;
 
