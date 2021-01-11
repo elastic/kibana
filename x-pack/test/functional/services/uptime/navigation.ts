@@ -62,8 +62,9 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
       if (!(await testSubjects.exists('uptimeMonitorPage', { timeout: 0 }))) {
         await retry.try(
           async () => {
-            await testSubjects.exists(`monitor-page-link-${monitorId}`);
-            await testSubjects.click(`monitor-page-link-${monitorId}`);
+            const pageLink = `monitor-page-link-${monitorId}`;
+            await testSubjects.exists(pageLink);
+            await testSubjects.click(pageLink);
           },
           async () => {
             await browser.refresh();
