@@ -78,9 +78,10 @@ These are "Cold" stat which are updated at a regular cadence, configured by the 
 #### The Runtime Section
 The `runtime` tracks Task Manager's performance as it runs, making note of task execution time, _drift_ etc.
 These include:
-  - The time it takes a task to run (mean and median, using a configurable running average window, `50` by default)
-  - The average _drift_ that tasks experience (mean and median, using the same configurable running average window as above). Drift tells us how long after a task's scheduled a task typically executes.
-  - The polling rate (the timestamp of the last time a polling cycle completed) and the result [`No tasks | Filled task pool | Unexpectedly ran out of workers`] frequency the past 50 polling cycles (using the same window size as the one used for running averages)
+  - The time it takes a task to run (p50, p90, p95 & p99, using a configurable running average window, `50` by default)
+  - The average _drift_ that tasks experience (p50, p90, p95 & p99, using the same configurable running average window as above). Drift tells us how long after a task's scheduled a task typically executes.
+  - The average _load_ (p50, p90, p95 & p99, using the same configurable running average window as above). Load tells us what percentage of workers is in use at the end of each polling cycle.
+  - The polling rate (the timestamp of the last time a polling cycle completed), the polling health stats (number of version clashes and mismatches) and the result [`No tasks | Filled task pool | Unexpectedly ran out of workers`] frequency the past 50 polling cycles (using the same window size as the one used for running averages)
   - The `Success | Retry | Failure ratio` by task type. This is different than the workload stats which tell you what's in the queue, but ca't keep track of retries and of non recurring tasks as they're wiped off the index when completed.
 
 These are "Hot" stats which are updated reactively as Tasks are executed and interacted with.
@@ -220,10 +221,21 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
                         "Failed": 0
                     }
                 },
-                /* on average, the tasks in this deployment run 1.7s after their scheduled time */
+                /* on average, 50% of the tasks in this deployment run at most 1.7s after their scheduled time */
                 "drift": {
-                    "mean": 1720,
-                    "median": 2276
+                    "p50": 1720,
+                    "p90": 2274,
+                    "p95": 2574,
+                    "p99": 3221
+                },
+                /* on average, 50% of the tasks polling cycles in this deployment result at most in 25% of workers being in use.
+                    We track this in percentages rather than absolute count as max_workers can change over time in response
+                    to changing circumstance. */
+                "load": {
+                    "p50": 25,
+                    "p90": 80,
+                    "p95": 100,
+                    "p99": 100
                 },
                 "execution": {
                     "duration": {
