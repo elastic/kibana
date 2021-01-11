@@ -44,7 +44,7 @@ const checkModel = (model) => Array.isArray(model.variables) && model.script !==
 
 export function CalculationAgg(props) {
   const htmlId = htmlIdGenerator();
-  const { siblings, model, indexPattern } = props;
+  const { siblings, model, indexPattern, fields } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -98,6 +98,7 @@ export function CalculationAgg(props) {
             id={htmlId('variables')}
             metrics={siblings}
             indexPattern={indexPattern}
+            fields={fields}
             onChange={handleChange}
             name="variables"
             model={model}
