@@ -73,7 +73,7 @@ export const PageTabs = () => {
   };
 
   return (
-    <EuiTabs display="condensed" style={{ paddingLeft: 16 }}>
+    <EuiTabs display="condensed" style={{ paddingLeft: 16 }} data-test-subj="uptimeTabs">
       {renderTabs()}
     </EuiTabs>
   );
