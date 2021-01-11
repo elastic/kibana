@@ -64,8 +64,6 @@ import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_st
 import { IESSource } from '../../sources/es_source';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 
-const ABORT_SYNC_DATA = 'ABORT_SYNC_DATA';
-
 interface SourceResult {
   refreshed: boolean;
   featureCollection?: FeatureCollection;
@@ -386,11 +384,11 @@ export class VectorLayer extends AbstractLayer {
         join,
         propertiesMap,
       };
-    } catch (e) {
-      if (!(e instanceof DataRequestAbortError)) {
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
         onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
       }
-      throw new Error(ABORT_SYNC_DATA);
+      throw error;
     }
   }
 
@@ -537,7 +535,7 @@ export class VectorLayer extends AbstractLayer {
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(dataRequestId, requestToken, error.message);
       }
-      throw new Error(ABORT_SYNC_DATA);
+      throw error;
     }
   }
 
@@ -643,7 +641,7 @@ export class VectorLayer extends AbstractLayer {
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(dataRequestId, requestToken, error.message);
       }
-      throw new Error(ABORT_SYNC_DATA);
+      throw error;
     }
   }
 
@@ -734,7 +732,7 @@ export class VectorLayer extends AbstractLayer {
       stopLoading(dataRequestId, requestToken, formatters, nextMeta);
     } catch (error) {
       onLoadError(dataRequestId, requestToken, error.message);
-      throw new Error(ABORT_SYNC_DATA);
+      throw error;
     }
   }
 
@@ -772,8 +770,9 @@ export class VectorLayer extends AbstractLayer {
       const joinStates = await this._syncJoins(syncContext, style);
       this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
     } catch (error) {
-      // Error captured for failing data request
-      // Exception thrown to abort sync data thread
+      if (!(error instanceof DataRequestAbortError)) {
+        throw error;
+      }
     }
   }
 
