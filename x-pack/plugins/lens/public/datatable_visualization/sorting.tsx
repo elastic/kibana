@@ -84,8 +84,8 @@ export function getSortingCriteria(
   }
   // use a string sorter for the rest
   return (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => {
-    const aString = formatter?.convert(rowA[sortBy]);
-    const bString = formatter?.convert(rowB[sortBy]);
+    const aString = formatter.convert(rowA[sortBy]);
+    const bString = formatter.convert(rowB[sortBy]);
     return directionFactor * aString.localeCompare(bString);
   };
 }
