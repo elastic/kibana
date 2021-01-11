@@ -74,7 +74,10 @@ export function DashboardApp({
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   const savedDashboard = useSavedDashboard(savedDashboardId, history);
-  const dashboardStateManager = useDashboardStateManager(savedDashboard, history);
+  const { dashboardStateManager, viewMode, setViewMode } = useDashboardStateManager(
+    savedDashboard,
+    history
+  );
   const dashboardContainer = useDashboardContainer(dashboardStateManager, history, false);
 
   const refreshDashboardContainer = useCallback(
@@ -138,6 +141,10 @@ export function DashboardApp({
           return searchSessionIdFromURL ?? data.search.session.start();
         })();
 
+        if (changes.viewMode) {
+          setViewMode(changes.viewMode);
+        }
+
         dashboardContainer.updateInput({
           ...changes,
           ...(newSearchSessionId && { searchSessionId: newSearchSessionId }),
@@ -147,6 +154,7 @@ export function DashboardApp({
     [
       history,
       data.query,
+      setViewMode,
       embedSettings,
       dashboardContainer,
       data.search.session,
@@ -246,7 +254,7 @@ export function DashboardApp({
 
   return (
     <div className="app-container dshAppContainer">
-      {savedDashboard && dashboardStateManager && dashboardContainer && (
+      {savedDashboard && dashboardStateManager && dashboardContainer && viewMode && (
         <>
           <DashboardTopNav
             {...{
@@ -257,6 +265,7 @@ export function DashboardApp({
               dashboardContainer,
               dashboardStateManager,
             }}
+            viewMode={viewMode}
             lastDashboardId={savedDashboardId}
             timefilter={data.query.timefilter.timefilter}
             onQuerySubmit={(_payload, isUpdate) => {

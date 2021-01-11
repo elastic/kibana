@@ -7,7 +7,12 @@
 import { getGridTile, getTile } from './get_tile';
 import { TILE_GRIDAGGS, TILE_SEARCHES } from './__tests__/tile_es_responses';
 import { Logger } from 'src/core/server';
-import { ES_GEO_FIELD_TYPE, MVT_SOURCE_LAYER_NAME, RENDER_AS } from '../../common/constants';
+import {
+  ES_GEO_FIELD_TYPE,
+  KBN_IS_CENTROID_FEATURE,
+  MVT_SOURCE_LAYER_NAME,
+  RENDER_AS,
+} from '../../common/constants';
 
 // @ts-expect-error
 import { VectorTile, VectorTileLayer } from '@mapbox/vector-tile';
@@ -18,7 +23,6 @@ interface ITileLayerJsonExpectation {
   version: number;
   name: string;
   extent: number;
-  length: number;
   features: Array<{
     id: string | number | undefined;
     type: number;
@@ -75,7 +79,6 @@ describe('getTile', () => {
       version: 2,
       name: 'source_layer',
       extent: 4096,
-      length: 1,
       features: [
         {
           id: undefined,
@@ -96,6 +99,18 @@ describe('getTile', () => {
               { x: 840, y: 1600 },
             ],
           ],
+        },
+        {
+          id: undefined,
+          type: 1,
+          properties: {
+            __kbn__feature_id__: 'poly:G7PRMXQBgyyZ-h5iYibj:0',
+            _id: 'G7PRMXQBgyyZ-h5iYibj',
+            _index: 'poly',
+            [KBN_IS_CENTROID_FEATURE]: true,
+          },
+          extent: 4096,
+          pointArrays: [[{ x: 1470, y: 1702 }]],
         },
       ],
     });
@@ -166,7 +181,6 @@ describe('getGridTile', () => {
       version: 2,
       name: 'source_layer',
       extent: 4096,
-      length: 1,
       features: [
         {
           id: undefined,
@@ -189,7 +203,6 @@ describe('getGridTile', () => {
       version: 2,
       name: 'source_layer',
       extent: 4096,
-      length: 1,
       features: [
         {
           id: undefined,
@@ -208,6 +221,17 @@ describe('getGridTile', () => {
               { x: 1216, y: 1536 },
             ],
           ],
+        },
+        {
+          id: undefined,
+          type: 1,
+          properties: {
+            ['avg_of_TOTAL_AV']: 5398920.390458991,
+            doc_count: 42637,
+            [KBN_IS_CENTROID_FEATURE]: true,
+          },
+          extent: 4096,
+          pointArrays: [[{ x: 1200, y: 1552 }]],
         },
       ],
     });
