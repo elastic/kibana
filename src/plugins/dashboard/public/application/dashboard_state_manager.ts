@@ -223,10 +223,21 @@ export class DashboardStateManager {
     const savedDashboardPanelMap: { [key: string]: SavedDashboardPanel } = {};
 
     const input = dashboardContainer.getInput();
+
+    if (input.expandedPanelId !== this.getExpandedPanelId()) {
+      this.setExpandedPanelId(input.expandedPanelId);
+    }
+
     this.getPanels().forEach((savedDashboardPanel) => {
       if (input.panels[savedDashboardPanel.panelIndex] !== undefined) {
         savedDashboardPanelMap[savedDashboardPanel.panelIndex] = savedDashboardPanel;
       } else {
+        if (
+          this.getExpandedPanelId() &&
+          savedDashboardPanel.panelIndex === this.getExpandedPanelId()
+        ) {
+          this.setExpandedPanelId(undefined);
+        }
         // A panel was deleted.
         dirty = true;
       }
@@ -270,10 +281,6 @@ export class DashboardStateManager {
 
     if (input.isFullScreenMode !== this.getFullScreenMode()) {
       this.setFullScreenMode(input.isFullScreenMode);
-    }
-
-    if (input.expandedPanelId !== this.getExpandedPanelId()) {
-      this.setExpandedPanelId(input.expandedPanelId);
     }
 
     if (!_.isEqual(input.query, this.getQuery())) {
