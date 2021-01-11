@@ -17,17 +17,16 @@
  * under the License.
  */
 
-import { Component, ReactNode } from 'react';
+import { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { UsageCollectionSetup } from '../plugin';
+import { IApplicationUsageTracker } from '../../plugin';
+import { TrackApplicationViewProps } from './types';
 
-interface Props {
-  viewId: string;
-  applicationUsageTracker?: UsageCollectionSetup['applicationUsageTracker'];
-  children: ReactNode;
+interface Props extends TrackApplicationViewProps {
+  applicationUsageTracker?: IApplicationUsageTracker;
 }
 
-export class TrackApplicationView extends Component<Props> {
+export class TrackApplicationViewComponent extends Component<Props> {
   onClick = () => {
     const { applicationUsageTracker, viewId } = this.props;
     applicationUsageTracker?.updateViewClickCounter(viewId);
