@@ -7,7 +7,6 @@
 import { Query } from 'src/plugins/data/public';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { ES_GEO_FIELD_TYPE, SCALING_TYPES } from '../../../../common/constants';
-import { VectorStyle } from '../../styles/vector/vector_style';
 import { ESSearchSource } from './es_search_source';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 import { getIsGoldPlus } from '../../../licensed_features';
@@ -24,7 +23,7 @@ export function createLayerDescriptor({
   geoFieldName,
   geoFieldType,
   query,
-}: CreateLayerDescriptorParams): LayerDescriptor | null {
+}: CreateLayerDescriptorParams): LayerDescriptor {
   // Prefer clusters for geo_shapes if liscensing is enabled.
   const scalingType =
     geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT ||
