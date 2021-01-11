@@ -255,7 +255,11 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_object, outcome }
    */
-  async resolve<T = unknown>(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
+  public async resolve<T = unknown>(
+    type: string,
+    id: string,
+    options: SavedObjectsBaseOptions = {}
+  ) {
     throwErrorIfNamespaceSpecified(options);
 
     return await this.client.resolve<T>(type, id, {
