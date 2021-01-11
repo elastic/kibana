@@ -12,7 +12,7 @@ import { Option, some, map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs/operators';
 import { Logger } from '../../../../src/core/server';
 
-import { Result, asErr, mapErr, asOk } from './lib/result_type';
+import { Result, asErr, mapErr, asOk, map } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskManagerConfig } from './config';
 
@@ -227,8 +227,14 @@ export class TaskPollingLifecycle {
           })
         )
       )
-      .subscribe((event: Result<TimedFillPoolResult, PollingError<string>>) => {
-        this.emitEvent(asTaskPollingCycleEvent<string>(event));
+      .subscribe((result: Result<TimedFillPoolResult, PollingError<string>>) => {
+        this.emitEvent(
+          map(
+            result,
+            ({ timing, ...event }) => asTaskPollingCycleEvent<string>(asOk(event), timing),
+            (event) => asTaskPollingCycleEvent<string>(asErr(event))
+          )
+        );
       });
   }
 }
@@ -238,18 +244,22 @@ export async function claimAvailableTasks(
   claim: (opts: OwnershipClaimingOpts) => Promise<ClaimOwnershipResult>,
   availableWorkers: number,
   logger: Logger
-): Promise<Result<ClaimOwnershipResult['docs'], FillPoolResult>> {
+): Promise<Result<ClaimOwnershipResult, FillPoolResult>> {
   if (availableWorkers > 0) {
     performance.mark('claimAvailableTasks_start');
 
     try {
-      const { docs, claimedTasks } = await claim({
+      const claimResult = await claim({
         size: availableWorkers,
         claimOwnershipUntil: intervalFromNow('30s')!,
         claimTasksById,
       });
+      const {
+        docs,
+        stats: { tasksClaimed },
+      } = claimResult;
 
-      if (claimedTasks === 0) {
+      if (tasksClaimed === 0) {
         performance.mark('claimAvailableTasks.noTasks');
       }
       performance.mark('claimAvailableTasks_stop');
@@ -259,14 +269,14 @@ export async function claimAvailableTasks(
         'claimAvailableTasks_stop'
       );
 
-      if (docs.length !== claimedTasks) {
+      if (docs.length !== tasksClaimed) {
         logger.warn(
-          `[Task Ownership error]: ${claimedTasks} tasks were claimed by Kibana, but ${
+          `[Task Ownership error]: ${tasksClaimed} tasks were claimed by Kibana, but ${
             docs.length
           } task(s) were fetched (${docs.map((doc) => doc.id).join(', ')})`
         );
       }
-      return asOk(docs);
+      return asOk(claimResult);
     } catch (ex) {
       if (identifyEsError(ex).includes('cannot execute [inline] scripts')) {
         logger.warn(

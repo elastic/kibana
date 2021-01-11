@@ -5,8 +5,11 @@
  */
 
 import { performance } from 'perf_hooks';
-import { TaskTiming, startTaskTimer } from '../task_events';
+import { ConcreteTaskInstance } from '../task';
+import { WithTaskTiming, startTaskTimer } from '../task_events';
 import { TaskPoolRunResult } from '../task_pool';
+import { TaskManagerRunner } from '../task_running';
+import { ClaimOwnershipResult } from '../task_store';
 import { Result, map } from './result_type';
 
 export enum FillPoolResult {
@@ -18,14 +21,11 @@ export enum FillPoolResult {
   PoolFilled = 'PoolFilled',
 }
 
-type BatchRun<T> = (tasks: T[]) => Promise<TaskPoolRunResult>;
-type Fetcher<T, E> = () => Promise<Result<T[], E>>;
-type Converter<T1, T2> = (t: T1) => T2;
-
-export interface TimedFillPoolResult {
+export type ClaimAndFillPoolResult = Partial<Pick<ClaimOwnershipResult, 'stats'>> & {
   result: FillPoolResult;
-  timing: TaskTiming;
-}
+};
+export type TimedFillPoolResult = WithTaskTiming<ClaimAndFillPoolResult>;
+
 /**
  * Given a function that runs a batch of tasks (e.g. taskPool.run), a function
  * that fetches task records (e.g. store.fetchAvailableTasks), and a function
@@ -38,31 +38,35 @@ export interface TimedFillPoolResult {
  * @param fetchAvailableTasks - a function that fetches task records (e.g. store.fetchAvailableTasks)
  * @param converter - a function that converts task records to the appropriate task runner
  */
-export async function fillPool<TRecord, TRunner>(
-  fetchAvailableTasks: Fetcher<TRecord, FillPoolResult>,
-  converter: Converter<TRecord, TRunner>,
-  run: BatchRun<TRunner>
+export async function fillPool(
+  fetchAvailableTasks: () => Promise<Result<ClaimOwnershipResult, FillPoolResult>>,
+  converter: (taskInstance: ConcreteTaskInstance) => TaskManagerRunner,
+  run: (tasks: TaskManagerRunner[]) => Promise<TaskPoolRunResult>
 ): Promise<TimedFillPoolResult> {
   performance.mark('fillPool.start');
   const stopTaskTimer = startTaskTimer();
-  const augmentTimingTo = (result: FillPoolResult): TimedFillPoolResult => ({
+  const augmentTimingTo = (
+    result: FillPoolResult,
+    stats?: ClaimOwnershipResult['stats']
+  ): TimedFillPoolResult => ({
     result,
+    stats,
     timing: stopTaskTimer(),
   });
-  return map<TRecord[], FillPoolResult, Promise<TimedFillPoolResult>>(
+  return map<ClaimOwnershipResult, FillPoolResult, Promise<TimedFillPoolResult>>(
     await fetchAvailableTasks(),
-    async (instances) => {
-      if (!instances.length) {
+    async ({ docs, stats }) => {
+      if (!docs.length) {
         performance.mark('fillPool.bailNoTasks');
         performance.measure(
           'fillPool.activityDurationUntilNoTasks',
           'fillPool.start',
           'fillPool.bailNoTasks'
         );
-        return augmentTimingTo(FillPoolResult.NoTasksClaimed);
+        return augmentTimingTo(FillPoolResult.NoTasksClaimed, stats);
       }
 
-      const tasks = instances.map(converter);
+      const tasks = docs.map(converter);
 
       switch (await run(tasks)) {
         case TaskPoolRunResult.RanOutOfCapacity:
@@ -72,13 +76,13 @@ export async function fillPool<TRecord, TRunner>(
             'fillPool.start',
             'fillPool.bailExhaustedCapacity'
           );
-          return augmentTimingTo(FillPoolResult.RanOutOfCapacity);
+          return augmentTimingTo(FillPoolResult.RanOutOfCapacity, stats);
         case TaskPoolRunResult.RunningAtCapacity:
           performance.mark('fillPool.cycle');
-          return augmentTimingTo(FillPoolResult.RunningAtCapacity);
+          return augmentTimingTo(FillPoolResult.RunningAtCapacity, stats);
         default:
           performance.mark('fillPool.cycle');
-          return augmentTimingTo(FillPoolResult.PoolFilled);
+          return augmentTimingTo(FillPoolResult.PoolFilled, stats);
       }
     },
     async (result) => augmentTimingTo(result)

@@ -7,7 +7,7 @@
 import { combineLatest, Observable } from 'rxjs';
 import { filter, startWith, map } from 'rxjs/operators';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
-import { mapValues } from 'lodash';
+import { isNumber, mapValues } from 'lodash';
 import { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import {
@@ -22,7 +22,7 @@ import {
 import { isOk, Ok, unwrap } from '../lib/result_type';
 import { ConcreteTaskInstance } from '../task';
 import { TaskRunResult } from '../task_running';
-import { FillPoolResult, TimedFillPoolResult } from '../lib/fill_pool';
+import { FillPoolResult, ClaimAndFillPoolResult } from '../lib/fill_pool';
 import {
   AveragedStat,
   calculateRunningAverage,
@@ -37,6 +37,8 @@ import { TaskExecutionFailureThreshold, TaskManagerConfig } from '../config';
 interface FillPoolStat extends JsonObject {
   last_successful_poll: string;
   duration: number[];
+  claim_conflicts: number[];
+  claim_mismatches: number[];
   result_frequency_percent_as_number: FillPoolResult[];
 }
 
@@ -119,19 +121,35 @@ export function createTaskRunAggregator(
 
   const resultFrequencyQueue = createRunningAveragedStat<FillPoolResult>(runningAverageWindowSize);
   const pollingDurationQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  const claimConflictsQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  const claimMismatchesQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const taskPollingEvents$: Observable<
     Pick<TaskRunStat, 'polling'>
   > = taskPollingLifecycle.events.pipe(
     filter(
       (taskEvent: TaskLifecycleEvent) =>
-        isTaskPollingCycleEvent(taskEvent) && isOk<TimedFillPoolResult, unknown>(taskEvent.event)
+        isTaskPollingCycleEvent(taskEvent) && isOk<ClaimAndFillPoolResult, unknown>(taskEvent.event)
     ),
     map((taskEvent: TaskLifecycleEvent) => {
-      const { result, timing } = ((taskEvent.event as unknown) as Ok<TimedFillPoolResult>).value;
+      const {
+        result,
+        stats: { tasksClaimed, tasksUpdated, tasksConflicted } = {},
+      } = ((taskEvent.event as unknown) as Ok<ClaimAndFillPoolResult>).value;
+      const duration = (taskEvent?.timing?.stop ?? 0) - (taskEvent?.timing?.start ?? 0);
       return {
         polling: {
           last_successful_poll: new Date().toISOString(),
-          duration: pollingDurationQueue(timing!.stop - timing!.start),
+          // Track how long the polling cycle took from begining until all claimed tasks were marked as running
+          duration: duration ? pollingDurationQueue(duration) : pollingDurationQueue(),
+          // Track how many version conflicts occured during polling
+          claim_conflicts: isNumber(tasksConflicted)
+            ? claimConflictsQueue(tasksConflicted)
+            : claimConflictsQueue(),
+          // Track how much of a mismatch there is between claimed and updated
+          claim_mismatches:
+            isNumber(tasksClaimed) && isNumber(tasksUpdated)
+              ? claimMismatchesQueue(tasksUpdated - tasksClaimed)
+              : claimMismatchesQueue(),
           result_frequency_percent_as_number: resultFrequencyQueue(result),
         },
       };
@@ -145,7 +163,12 @@ export function createTaskRunAggregator(
     taskManagerLoadStatEvents$.pipe(startWith({ load: [] })),
     taskPollingEvents$.pipe(
       startWith({
-        polling: { result_frequency_percent_as_number: [] },
+        polling: {
+          duration: [],
+          claim_conflicts: [],
+          claim_mismatches: [],
+          result_frequency_percent_as_number: [],
+        },
       })
     ),
   ]).pipe(
@@ -213,6 +236,8 @@ export function summarizeTaskRunStat(
       last_successful_poll,
       duration: pollingDuration,
       result_frequency_percent_as_number: pollingResultFrequency,
+      claim_conflicts: claimConflicts,
+      claim_mismatches: claimMismatches,
     },
     drift,
     load,
@@ -225,6 +250,8 @@ export function summarizeTaskRunStat(
       polling: {
         ...(last_successful_poll ? { last_successful_poll } : {}),
         duration: calculateRunningAverage(pollingDuration as number[]),
+        claim_conflicts: calculateRunningAverage(claimConflicts as number[]),
+        claim_mismatches: calculateRunningAverage(claimMismatches as number[]),
         result_frequency_percent_as_number: {
           ...DEFAULT_POLLING_FREQUENCIES,
           ...calculateFrequency<FillPoolResult>(pollingResultFrequency as FillPoolResult[]),
