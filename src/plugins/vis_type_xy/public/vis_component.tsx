@@ -247,7 +247,8 @@ const VisComponent = (props: VisComponentProps) => {
     return { accessor, formatter };
   });
 
-  const allSeries = useMemo(() => getAllSeries(visData.rows, splitAccessors), [
+  const allSeries = useMemo(() => getAllSeries(visData.rows, splitAccessors, config.aspects.y), [
+    config.aspects.y,
     splitAccessors,
     visData.rows,
   ]);
@@ -271,20 +272,30 @@ const VisComponent = (props: VisComponentProps) => {
           [
             {
               name: seriesName,
-              rankAtDepth: splitAccessors ? allSeries.findIndex((name) => name === seriesName) : 0,
-              totalSeriesAtDepth: splitAccessors ? allSeries.length : 1,
+              rankAtDepth: splitAccessors
+                ? allSeries.findIndex((name) => name === seriesName)
+                : config.aspects.y.findIndex((aspect) => aspect.accessor === series.yAccessor),
+              totalSeriesAtDepth: splitAccessors ? allSeries.length : config.aspects.y.length,
             },
           ],
           {
             maxDepth: 1,
-            totalSeries: splitAccessors ? allSeries.length : 1,
+            totalSeries: splitAccessors ? allSeries.length : config.aspects.y.length,
             behindText: false,
             syncColors,
           }
         );
       return outputColor || null;
     },
-    [allSeries, getSeriesName, props.uiState, splitAccessors, syncColors, visParams.palette.name]
+    [
+      allSeries,
+      config.aspects.y,
+      getSeriesName,
+      props.uiState,
+      splitAccessors,
+      syncColors,
+      visParams.palette.name,
+    ]
   );
   const xAccessor = getXAccessor(config.aspects.x);
   const splitSeriesAccessors = config.aspects.series

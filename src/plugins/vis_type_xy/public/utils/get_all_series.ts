@@ -18,7 +18,7 @@
  */
 import { TickFormatter } from '@elastic/charts';
 import { DatatableRow } from '../../../expressions/public';
-import { Column } from '../types';
+import { Column, Aspect } from '../types';
 
 interface SplitAccessors {
   accessor: Column['id'];
@@ -27,10 +27,12 @@ interface SplitAccessors {
 
 export const getAllSeries = (
   rows: DatatableRow[],
-  splitAccessors: SplitAccessors[] | undefined
+  splitAccessors: SplitAccessors[] | undefined,
+  yAspects: Aspect[]
 ) => {
   const allSeries: string[] = [];
   if (!splitAccessors) return [];
+
   rows.forEach((row) => {
     let seriesName = '';
     splitAccessors?.forEach(({ accessor, formatter }) => {
@@ -42,8 +44,18 @@ export const getAllSeries = (
         seriesName = name;
       }
     });
-    if (!allSeries.includes(seriesName)) {
-      allSeries.push(seriesName);
+
+    // multiple y axis
+    if (yAspects.length > 1) {
+      yAspects.forEach((aspect) => {
+        if (!allSeries.includes(`${seriesName}: ${aspect.title}`)) {
+          allSeries.push(`${seriesName}: ${aspect.title}`);
+        }
+      });
+    } else {
+      if (!allSeries.includes(seriesName)) {
+        allSeries.push(seriesName);
+      }
     }
   });
   return allSeries;
