@@ -64,7 +64,7 @@ export function MockKibanaProvider<ExtraCore>({
 }: MockKibanaProviderProps<ExtraCore>) {
   const coreOptions = {
     ...mockCore(),
-    core,
+    ...core,
   };
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
