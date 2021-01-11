@@ -76,6 +76,7 @@ export interface DashboardTopNavProps {
   indexPatterns: IndexPattern[];
   redirectTo: DashboardRedirect;
   lastDashboardId?: string;
+  viewMode: ViewMode;
 }
 
 export function DashboardTopNav({
@@ -88,6 +89,7 @@ export function DashboardTopNav({
   indexPatterns,
   redirectTo,
   timefilter,
+  viewMode,
 }: DashboardTopNavProps) {
   const {
     core,
@@ -422,7 +424,7 @@ export function DashboardTopNav({
     const showSearchBar = showQueryBar || showFilterBar;
 
     const topNav = getTopNavConfig(
-      dashboardStateManager.getViewMode(),
+      viewMode,
       dashboardTopNavActions,
       dashboardCapabilities.hideWriteControls
     );
@@ -469,7 +471,7 @@ export function DashboardTopNav({
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
-      {!dashboardStateManager.getIsViewMode() ? (
+      {viewMode !== ViewMode.VIEW ? (
         <PanelToolbar onAddPanelClick={createNew} onLibraryClick={addFromLibrary} />
       ) : null}
     </>
