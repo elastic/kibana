@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { GrokdebuggerResponse } from '../grokdebugger_response';
+import { GrokdebuggerResponse } from './grokdebugger_response';
 
 describe('grokdebugger_response', () => {
   describe('GrokdebuggerResponse', () => {
@@ -37,8 +36,8 @@ describe('grokdebugger_response', () => {
           client: '55.3.244.1',
         };
         const grokdebuggerResponse = GrokdebuggerResponse.fromUpstreamJSON(upstreamJson);
-        expect(grokdebuggerResponse.structuredEvent).to.eql(expectedStructuredEvent);
-        expect(grokdebuggerResponse.error).to.eql({});
+        expect(grokdebuggerResponse.structuredEvent).toEqual(expectedStructuredEvent);
+        expect(grokdebuggerResponse.error).toEqual({});
       });
 
       it('returns correct GrokdebuggerResponse instance when there are valid grok parse errors', () => {
@@ -61,8 +60,8 @@ describe('grokdebugger_response', () => {
           ],
         };
         const grokdebuggerResponse = GrokdebuggerResponse.fromUpstreamJSON(upstreamJson);
-        expect(grokdebuggerResponse.structuredEvent).to.eql({});
-        expect(grokdebuggerResponse.error).to.be(
+        expect(grokdebuggerResponse.structuredEvent).toEqual({});
+        expect(grokdebuggerResponse.error).toBe(
           'Provided Grok patterns do not match data in the input'
         );
       });
