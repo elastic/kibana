@@ -60,6 +60,9 @@ export const DeleteConfirmModal: FC<DeleteConfirmModalProps> = ({
       </EuiOverlayMask>
     );
   }
+
+  // can't use `EuiConfirmModal` here as the confirm modal body is wrapped
+  // inside a `<p>` element, causing UI glitches with the table.
   return (
     <EuiOverlayMask>
       <EuiModal initialFocus="soDeleteConfirmModalConfirmBtn" onClose={onCancel}>
