@@ -6,15 +6,15 @@
 
 import uuid from 'uuid';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { deleteTaskIfItExists } from './delete_task_if_it_exists';
+import { removeIfExists } from './remove_if_exists';
 import { taskStoreMock } from '../task_store.mock';
 
-describe('deleteTaskIfItExists', () => {
+describe('removeIfExists', () => {
   test('removes the task by its ID', async () => {
     const ts = taskStoreMock.create({});
     const id = uuid.v4();
 
-    expect(await deleteTaskIfItExists(ts, id)).toBe(undefined);
+    expect(await removeIfExists(ts, id)).toBe(undefined);
 
     expect(ts.remove).toHaveBeenCalledWith(id);
   });
@@ -25,7 +25,7 @@ describe('deleteTaskIfItExists', () => {
 
     ts.remove.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError('task', id));
 
-    expect(await deleteTaskIfItExists(ts, id)).toBe(undefined);
+    expect(await removeIfExists(ts, id)).toBe(undefined);
 
     expect(ts.remove).toHaveBeenCalledWith(id);
   });
@@ -37,7 +37,7 @@ describe('deleteTaskIfItExists', () => {
     const error = SavedObjectsErrorHelpers.createInvalidVersionError(uuid.v4());
     ts.remove.mockRejectedValue(error);
 
-    expect(deleteTaskIfItExists(ts, id)).rejects.toBe(error);
+    expect(removeIfExists(ts, id)).rejects.toBe(error);
 
     expect(ts.remove).toHaveBeenCalledWith(id);
   });

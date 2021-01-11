@@ -56,7 +56,7 @@ export async function scheduleSearchSessionsTasks(
   taskManager: TaskManagerStartContract,
   logger: Logger
 ) {
-  await taskManager.deleteTaskIfItExists(SEARCH_SESSIONS_TASK_ID);
+  await taskManager.removeIfExists(SEARCH_SESSIONS_TASK_ID);
 
   try {
     await taskManager.ensureScheduled({

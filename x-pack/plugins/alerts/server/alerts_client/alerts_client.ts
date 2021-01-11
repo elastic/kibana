@@ -601,7 +601,7 @@ export class AlertsClient {
     const removeResult = await this.unsecuredSavedObjectsClient.delete('alert', id);
 
     await Promise.all([
-      taskIdToRemove ? this.taskManager.deleteTaskIfItExists(taskIdToRemove) : null,
+      taskIdToRemove ? this.taskManager.removeIfExists(taskIdToRemove) : null,
       apiKeyToInvalidate
         ? markApiKeyForInvalidation(
             { apiKey: apiKeyToInvalidate },
@@ -1059,7 +1059,7 @@ export class AlertsClient {
 
       await Promise.all([
         attributes.scheduledTaskId
-          ? this.taskManager.deleteTaskIfItExists(attributes.scheduledTaskId)
+          ? this.taskManager.removeIfExists(attributes.scheduledTaskId)
           : null,
         apiKeyToInvalidate
           ? await markApiKeyForInvalidation(

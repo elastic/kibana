@@ -6,7 +6,14 @@
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 import { TaskStore } from '../task_store';
 
-export async function deleteTaskIfItExists(taskStore: TaskStore, taskId: string) {
+/**
+ * Removes a task from the store, ignoring a not found error
+ * Other errors are re-thrown
+ *
+ * @param taskStore
+ * @param taskId
+ */
+export async function removeIfExists(taskStore: TaskStore, taskId: string) {
   try {
     await taskStore.remove(taskId);
   } catch (err) {
