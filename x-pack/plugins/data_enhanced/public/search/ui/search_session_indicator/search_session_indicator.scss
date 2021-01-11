@@ -1,0 +1,23 @@
+.searchSessionIndicator {
+  padding: 0 $euiSizeXS;
+}
+
+@include euiBreakpoint('xs', 's') {
+  .searchSessionIndicator__popoverContainer.euiFlexGroup--responsive .euiFlexItem {
+    margin-bottom: $euiSizeXS !important;
+  }
+}
+
+.searchSessionIndicator__verticalDivider {
+  @include euiBreakpoint('xs', 's') {
+    margin-left: $euiSizeXS;
+    padding-left: $euiSizeXS;
+  }
+
+  @include euiBreakpoint('m', 'l', 'xl') {
+    border-left: $euiBorderThin;
+    align-self: stretch;
+    margin-left: $euiSizeS;
+    padding-left: $euiSizeS;
+  }
+}

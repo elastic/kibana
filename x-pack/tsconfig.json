@@ -10,6 +10,7 @@
     "plugins/embeddable_enhanced/**/*",
     "plugins/licensing/**/*",
     "plugins/security_solution/cypress/**/*",
+    "plugins/task_manager/**/*",
     "plugins/telemetry_collection_xpack/**/*",
     "plugins/ui_actions_enhanced/**/*",
     "test/**/*"
@@ -20,11 +21,13 @@
   },
   "references": [
     { "path": "../src/core/tsconfig.json" },
+    { "path": "../src/plugins/management/tsconfig.json" },
     { "path": "../src/plugins/bfetch/tsconfig.json" },
     { "path": "../src/plugins/data/tsconfig.json" },
     { "path": "../src/plugins/dev_tools/tsconfig.json" },
     { "path": "../src/plugins/embeddable/tsconfig.json" },
     { "path": "../src/plugins/expressions/tsconfig.json" },
+    { "path": "../src/plugins/home/tsconfig.json" },
     { "path": "../src/plugins/inspector/tsconfig.json" },
     { "path": "../src/plugins/kibana_legacy/tsconfig.json" },
     { "path": "../src/plugins/kibana_react/tsconfig.json" },
@@ -33,6 +36,7 @@
     { "path": "../src/plugins/navigation/tsconfig.json" },
     { "path": "../src/plugins/newsfeed/tsconfig.json" },
     { "path": "../src/plugins/saved_objects/tsconfig.json" },
+    { "path": "../src/plugins/saved_objects_tagging_oss/tsconfig.json" },
     { "path": "../src/plugins/security_oss/tsconfig.json" },
     { "path": "../src/plugins/share/tsconfig.json" },
     { "path": "../src/plugins/telemetry/tsconfig.json" },
@@ -46,6 +50,7 @@
     { "path": "./plugins/features/tsconfig.json" },
     { "path": "./plugins/embeddable_enhanced/tsconfig.json" },
     { "path": "./plugins/licensing/tsconfig.json" },
+    { "path": "./plugins/task_manager/tsconfig.json" },
     { "path": "./plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" }
   ]
