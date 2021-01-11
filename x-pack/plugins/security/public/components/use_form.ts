@@ -163,8 +163,8 @@ export function useFormState<Values extends FormValues, Result>({
       setErrors(setDeep(errors, name, message));
       setTouched(setDeep(touched, name, true));
     },
-    reset: (values) => {
-      setValues(values);
+    reset: (nextValues) => {
+      setValues(nextValues);
       setErrors({});
       setTouched({});
       setSubmitCount(0);

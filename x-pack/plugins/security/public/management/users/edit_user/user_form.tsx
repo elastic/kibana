@@ -202,7 +202,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
 
   useEffect(() => {
     form.reset(defaultValues);
-  }, [defaultValues]);
+  }, [defaultValues]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     getRoles();
