@@ -31,7 +31,6 @@ import { Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';
-import { ValidationTelemetryService } from './validation_telemetry';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { PluginStart } from '../../data/server';
 import { visDataRoutes } from './routes/vis';
@@ -72,11 +71,8 @@ export interface Framework {
 }
 
 export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
-  private validationTelementryService: ValidationTelemetryService;
-
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
-    this.validationTelementryService = new ValidationTelemetryService();
   }
 
   public setup(
@@ -103,12 +99,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
     };
 
     (async () => {
-      const validationTelemetry = await this.validationTelementryService.setup(core, {
-        ...plugins,
-        globalConfig$,
-      });
-      visDataRoutes(router, framework, validationTelemetry);
-
+      visDataRoutes(router, framework);
       fieldsRoutes(framework);
     })();
 
