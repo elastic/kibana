@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonEmpty } from '@elastic/eui';
@@ -30,16 +30,15 @@ export const AddConnectorFlyout = ({ focusInput }: Props) => {
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(getConnectorsAction.get());
-    focusInput();
-  }, [addFlyoutVisible, dispatch, focusInput]);
-
   const ConnectorAddFlyout = useMemo(
     () =>
       getAddConnectorFlyout({
         consumer: 'uptime',
-        onClose: () => setAddFlyoutVisibility(false),
+        onClose: () => {
+          dispatch(getConnectorsAction.get());
+          setAddFlyoutVisibility(false);
+          focusInput();
+        },
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
