@@ -122,16 +122,16 @@ const getAvailableFields = (
   selectedFields: IFieldType[],
   fieldTypeFilter: string[]
 ): IFieldType[] => {
-  const map = new Map<string, IFieldType>();
+  const fieldsByName = new Map<string, IFieldType>();
 
-  existingFields.forEach((f) => map.set(f.name, f));
-  selectedFields.forEach((f) => map.set(f.name, f));
+  existingFields.forEach((f) => fieldsByName.set(f.name, f));
+  selectedFields.forEach((f) => fieldsByName.set(f.name, f));
 
-  const array = Array.from(map.values());
+  const uniqueFields = Array.from(fieldsByName.values());
 
   if (fieldTypeFilter.length > 0) {
-    return array.filter(({ type }) => fieldTypeFilter.includes(type));
+    return uniqueFields.filter(({ type }) => fieldTypeFilter.includes(type));
   }
 
-  return array;
+  return uniqueFields;
 };
