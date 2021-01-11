@@ -266,6 +266,7 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'keyword',
     },
     sort: {
+      dynamic: false,
       properties: {
         columnId: {
           type: 'keyword',
