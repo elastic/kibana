@@ -111,7 +111,7 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
   );
 };
 
-/** Returns a boolean of whether the user is on the policy details page or not */
+/** Returns a the license info */
 export const license = (state: Immutable<PolicyDetailsState>) => {
   return state.license;
 };
