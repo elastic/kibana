@@ -51,9 +51,12 @@ export const ID_TOGGLE_FIELD = '[data-test-subj="toggle-field-_id"]';
 
 export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]';
 
+export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-button"]';
+
 export const NOTES = '[data-test-subj="note-card-body"]';
 
-export const NOTE_BY_NOTE_ID = (noteId: string) => `[data-test-subj="note-preview-${noteId}"]`;
+export const NOTE_BY_NOTE_ID = (noteId: string) =>
+  `[data-test-subj="note-preview-${noteId}"] .euiMarkdownFormat`;
 
 export const NOTE_CONTENT = (noteId: string) => `${NOTE_BY_NOTE_ID(noteId)} p`;
 
@@ -86,6 +89,18 @@ export const SAVE_FILTER_BTN = '[data-test-subj="saveFilter"]';
 export const SEARCH_OR_FILTER_CONTAINER =
   '[data-test-subj="timeline-search-or-filter-search-container"]';
 
+export const QUERY_TAB_EVENTS_TABLE = '[data-test-subj="query-events-table"]';
+
+export const QUERY_TAB_EVENTS_BODY = '[data-test-subj="query-tab-flyout-body"]';
+
+export const QUERY_TAB_EVENTS_FOOTER = '[data-test-subj="query-tab-flyout-footer"]';
+
+export const PINNED_TAB_EVENTS_TABLE = '[data-test-subj="pinned-events-table"]';
+
+export const PINNED_TAB_EVENTS_BODY = '[data-test-subj="pinned-tab-flyout-body"]';
+
+export const PINNED_TAB_EVENTS_FOOTER = '[data-test-subj="pinned-tab-flyout-footer"]';
+
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const STAR_ICON = '[data-test-subj="timeline-favorite-empty-star"]';
@@ -108,10 +123,8 @@ export const TIMELINE_DROPPED_DATA_PROVIDERS = '[data-test-subj="providerContain
 export const TIMELINE_FIELDS_BUTTON =
   '[data-test-subj="timeline"] [data-test-subj="show-field-browser"]';
 
-export const TIMELINE_FILTER = (filter: TimelineFilter) => {
-  // The space at the end of the line is required. We want to keep it until it is updated.
-  return `[data-test-subj="filter filter-enabled filter-key-${filter.field} filter-value-${filter.value} filter-unpinned "]`;
-};
+export const TIMELINE_FILTER = (filter: TimelineFilter) =>
+  `[data-test-subj="filter filter-enabled filter-key-${filter.field} filter-value-${filter.value} filter-unpinned"]`;
 
 export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';
 
@@ -124,9 +137,9 @@ export const TIMELINE_FILTER_VALUE =
 
 export const TIMELINE_FLYOUT = '[data-test-subj="eui-flyout"]';
 
-export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="eui-flyout-header"]';
+export const TIMELINE_FLYOUT_HEADER = '[data-test-subj="query-tab-flyout-header"]';
 
-export const TIMELINE_FLYOUT_BODY = '[data-test-subj="eui-flyout-body"]';
+export const TIMELINE_FLYOUT_BODY = '[data-test-subj="query-tab-flyout-body"]';
 
 export const TIMELINE_INSPECT_BUTTON = `${TIMELINE_FLYOUT} [data-test-subj="inspect-icon-button"]`;
 
