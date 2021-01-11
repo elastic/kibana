@@ -13,10 +13,6 @@ export const ANALYTICS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.title',
   { defaultMessage: 'Analytics' }
 );
-export const DOCUMENTS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engine.documents.title',
-  { defaultMessage: 'Documents' }
-);
 export const SCHEMA_TITLE = i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.title', {
   defaultMessage: 'Schema',
 });
