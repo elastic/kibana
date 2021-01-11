@@ -22,7 +22,7 @@ import classNames from 'classnames';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from '../../chrome_service';
+import { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from '../../types';
 import { HeaderExtension } from './header_extension';
 
 interface Props {

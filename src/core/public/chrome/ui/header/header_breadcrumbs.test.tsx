@@ -22,7 +22,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
-import { ChromeBreadcrumbsAppendExtension } from '../../chrome_service';
+import { ChromeBreadcrumbsAppendExtension } from '../../types';
 
 describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {

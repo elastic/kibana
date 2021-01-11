@@ -42,7 +42,7 @@ import {
 } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { ChromeBreadcrumbsAppendExtension, ChromeHelpExtension } from '../../chrome_service';
+import { ChromeBreadcrumbsAppendExtension, ChromeHelpExtension } from '../../types';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';

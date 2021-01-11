@@ -21,7 +21,7 @@ import { EuiBetaBadge } from '@elastic/eui';
 import React, { Component } from 'react';
 import * as Rx from 'rxjs';
 
-import { ChromeBadge } from '../../chrome_service';
+import { ChromeBadge } from '../../types';
 
 interface Props {
   badge$: Rx.Observable<ChromeBadge | undefined>;
