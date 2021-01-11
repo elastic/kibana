@@ -21,7 +21,7 @@ import {
 import * as api from './api';
 import { CaseServices } from './use_get_case_user_actions';
 import { CaseConnector, ConnectorTypes, CommentType } from '../../../../case/common/api';
-
+import moment from 'moment';
 jest.mock('./api');
 jest.mock('../../common/components/link_to', () => {
   const originalModule = jest.requireActual('../../common/components/link_to');
@@ -31,7 +31,6 @@ jest.mock('../../common/components/link_to', () => {
     useFormatUrl: jest.fn().mockReturnValue({ formatUrl: jest.fn(), search: 'urlSearch' }),
   };
 });
-
 describe('usePostPushToService', () => {
   const abortCtrl = new AbortController();
   const updateCase = jest.fn();
@@ -306,6 +305,8 @@ describe('usePostPushToService', () => {
   });
 
   it('formatServiceRequestData - Alert comment content', () => {
+    const mockDuration = moment.duration(1);
+    jest.spyOn(moment, 'duration').mockReturnValue(mockDuration);
     formatUrl.mockReturnValue('https://app.com/detections');
     const caseServices = sampleCaseServices;
     const result = formatServiceRequestData({
@@ -327,7 +328,7 @@ describe('usePostPushToService', () => {
     });
 
     expect(result.comments![0].comment).toEqual(
-      '[Alert](https://app.com/detections?filters=!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,key:_id,negate:!f,params:(query:alert-id-1),type:phrase),query:(match:(_id:(query:alert-id-1,type:phrase)))))&sourcerer=(default:!())&timerange=(global:(linkTo:!(timeline),timerange:(from:%272020-11-20T15:29:28.373Z%27,kind:absolute,to:%272020-11-20T15:35:28.373Z%27)),timeline:(linkTo:!(global),timerange:(from:%272020-11-20T15:29:28.373Z%27,kind:absolute,to:%272020-11-20T15:35:28.373Z%27)))) added to case.'
+      '[Alert](https://app.com/detections?filters=!((%27$state%27:(store:appState),meta:(alias:!n,disabled:!f,key:_id,negate:!f,params:(query:alert-id-1),type:phrase),query:(match:(_id:(query:alert-id-1,type:phrase)))))&sourcerer=(default:!())&timerange=(global:(linkTo:!(timeline),timerange:(from:%272020-11-20T15:35:28.372Z%27,kind:absolute,to:%272020-11-20T15:35:28.373Z%27)),timeline:(linkTo:!(global),timerange:(from:%272020-11-20T15:35:28.372Z%27,kind:absolute,to:%272020-11-20T15:35:28.373Z%27)))) added to case.'
     );
   });
 

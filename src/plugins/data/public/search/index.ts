@@ -45,7 +45,7 @@ export {
   SessionService,
   ISessionService,
   SearchSessionInfoProvider,
-  SessionState,
+  SearchSessionState,
   SessionsClient,
   ISessionsClient,
 } from './session';

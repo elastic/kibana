@@ -23,7 +23,11 @@ import { Observable, Subject, Subscription } from 'rxjs';
 import { PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
 import { UrlGeneratorId, UrlGeneratorStateMapping } from '../../../../share/public/';
 import { ConfigSchema } from '../../../config';
-import { createSessionStateContainer, SessionState, SessionStateContainer } from './session_state';
+import {
+  createSessionStateContainer,
+  SearchSessionState,
+  SessionStateContainer,
+} from './search_session_state';
 import { ISessionsClient } from './sessions_client';
 
 export type ISessionService = PublicContract<SessionService>;
@@ -33,12 +37,12 @@ export interface TrackSearchDescriptor {
 }
 
 /**
- * Provide info about current search session to be stored in backgroundSearch saved object
+ * Provide info about current search session to be stored in the Search Session saved object
  */
 export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId> {
   /**
    * User-facing name of the session.
-   * e.g. will be displayed in background sessions management list
+   * e.g. will be displayed in saved Search Sessions management list
    */
   getName: () => Promise<string>;
   getUrlGeneratorData: () => Promise<{
@@ -52,7 +56,7 @@ export interface SearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGenera
  * Responsible for tracking a current search session. Supports only a single session at a time.
  */
 export class SessionService {
-  public readonly state$: Observable<SessionState>;
+  public readonly state$: Observable<SearchSessionState>;
   private readonly state: SessionStateContainer<TrackSearchDescriptor>;
 
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
@@ -95,7 +99,7 @@ export class SessionService {
 
   /**
    * Set a provider of info about current session
-   * This will be used for creating a background session saved object
+   * This will be used for creating a search session saved object
    * @param searchSessionInfoProvider
    */
   public setSearchSessionInfoProvider<ID extends UrlGeneratorId = UrlGeneratorId>(
@@ -184,7 +188,7 @@ export class SessionService {
   private refresh$ = new Subject<void>();
   /**
    * Observable emits when search result refresh was requested
-   * For example, search to background UI could have it's own "refresh" button
+   * For example, the UI could have it's own "refresh" button
    * Application would use this observable to handle user interaction on that button
    */
   public onRefresh$ = this.refresh$.asObservable();
