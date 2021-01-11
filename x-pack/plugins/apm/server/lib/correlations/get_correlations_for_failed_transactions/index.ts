@@ -12,7 +12,10 @@ import {
 } from '../process_significant_term_aggs';
 import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
 import { ESFilter } from '../../../../../../typings/elasticsearch';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  rangeFilter,
+  termFilter,
+} from '../../../../common/utils/es_dsl_helpers';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -42,22 +45,13 @@ export async function getCorrelationsForFailedTransactions({
 }) {
   const { start, end, esFilter, apmEventClient } = setup;
 
-  const backgroundFilters: ESFilter[] = [
+  const backgroundFilters = [
     ...esFilter,
-    { range: rangeFilter(start, end) },
+    rangeFilter(start, end),
+    ...termFilter(SERVICE_NAME, serviceName),
+    ...termFilter(TRANSACTION_TYPE, transactionType),
+    ...termFilter(TRANSACTION_NAME, transactionName),
   ];
-
-  if (serviceName) {
-    backgroundFilters.push({ term: { [SERVICE_NAME]: serviceName } });
-  }
-
-  if (transactionType) {
-    backgroundFilters.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-  }
-
-  if (transactionName) {
-    backgroundFilters.push({ term: { [TRANSACTION_NAME]: transactionName } });
-  }
 
   const params = {
     apm: { events: [ProcessorEvent.transaction] },

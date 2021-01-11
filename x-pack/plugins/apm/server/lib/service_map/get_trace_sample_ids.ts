@@ -5,7 +5,6 @@
  */
 import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
-import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -14,7 +13,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeFilter, termFilter } from '../../../common/utils/es_dsl_helpers';
 import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
@@ -31,24 +30,16 @@ export async function getTraceSampleIds({
 }) {
   const { start, end, apmEventClient, config } = setup;
 
-  const rangeQuery = { range: rangeFilter(start, end) };
-
   const query = {
     bool: {
       filter: [
-        {
-          exists: {
-            field: SPAN_DESTINATION_SERVICE_RESOURCE,
-          },
-        },
-        rangeQuery,
-      ] as ESFilter[],
+        { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
+        rangeFilter(start, end),
+        ...termFilter(SERVICE_NAME, serviceName),
+        ...getEnvironmentUiFilterES(environment),
+      ],
     },
-  } as { bool: { filter: ESFilter[]; must_not?: ESFilter[] | ESFilter } };
-
-  if (serviceName) {
-    query.bool.filter.push({ term: { [SERVICE_NAME]: serviceName } });
-  }
+  };
 
   query.bool.filter.push(...getEnvironmentUiFilterES(environment));
 

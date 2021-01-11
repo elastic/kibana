@@ -13,7 +13,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeFilter } from '../../../common/utils/es_dsl_helpers';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { getBucketSize } from '../helpers/get_bucket_size';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -51,7 +51,7 @@ export async function getErrorRate({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    rangeFilter(start, end),
     {
       terms: { [EVENT_OUTCOME]: [EventOutcome.failure, EventOutcome.success] },
     },

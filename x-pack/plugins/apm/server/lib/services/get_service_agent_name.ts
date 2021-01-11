@@ -8,7 +8,7 @@ import {
   AGENT_NAME,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeFilter } from '../../../common/utils/es_dsl_helpers';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 
@@ -40,7 +40,7 @@ export async function getServiceAgentName({
         bool: {
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
-            { range: rangeFilter(start, end) },
+            rangeFilter(start, end),
           ],
         },
       },

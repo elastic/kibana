@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeFilter } from '../../../common/utils/es_dsl_helpers';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -40,10 +39,10 @@ async function fetcher({
 }: Options) {
   const { start, end, apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
-  const filter: ESFilter[] = [
+  const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    { range: rangeFilter(start, end) },
+    rangeFilter(start, end),
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),

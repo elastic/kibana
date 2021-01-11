@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { rangeFilter, termFilter } from '../../../common/utils/es_dsl_helpers';
 import { APMConfig } from '../..';
 import { AlertingPlugin } from '../../../../alerts/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
@@ -90,18 +91,8 @@ export function registerTransactionErrorRateAlertType({
                   },
                 },
                 { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-                ...(alertParams.serviceName
-                  ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
-                  : []),
-                ...(alertParams.transactionType
-                  ? [
-                      {
-                        term: {
-                          [TRANSACTION_TYPE]: alertParams.transactionType,
-                        },
-                      },
-                    ]
-                  : []),
+                ...termFilter(SERVICE_NAME, alertParams.serviceName),
+                ...termFilter(TRANSACTION_TYPE, alertParams.transactionType),
                 ...getEnvironmentUiFilterES(alertParams.environment),
               ],
             },

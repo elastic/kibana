@@ -10,7 +10,7 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../common/utils/range_filter';
+import { rangeFilter } from '../../common/utils/es_dsl_helpers';
 import {
   getProcessorEventForAggregatedTransactions,
   getDocumentTypeFilterForAggregatedTransactions,
@@ -43,7 +43,7 @@ export function getTransactionsProjection({
 
   const bool = {
     filter: [
-      { range: rangeFilter(start, end) },
+      rangeFilter(start, end),
       ...transactionNameFilter,
       ...transactionTypeFilter,
       ...serviceNameFilter,

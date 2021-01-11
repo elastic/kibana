@@ -7,7 +7,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeFilter } from '../../../common/utils/es_dsl_helpers';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -42,7 +42,7 @@ export async function getServiceTransactionTypes({
               searchAggregatedTransactions
             ),
             { term: { [SERVICE_NAME]: serviceName } },
-            { range: rangeFilter(start, end) },
+            rangeFilter(start, end),
           ],
         },
       },

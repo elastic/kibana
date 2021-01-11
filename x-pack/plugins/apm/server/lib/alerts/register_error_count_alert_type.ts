@@ -8,6 +8,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { isEmpty } from 'lodash';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+import { termFilter } from '../../../common/utils/es_dsl_helpers';
 import { APMConfig } from '../..';
 import {
   AlertingPlugin,
@@ -100,9 +101,7 @@ export function registerErrorCountAlertType({
                   },
                 },
                 { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                ...(alertParams.serviceName
-                  ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
-                  : []),
+                ...termFilter(SERVICE_NAME, alertParams.serviceName),
                 ...getEnvironmentUiFilterES(alertParams.environment),
               ],
             },

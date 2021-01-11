@@ -5,7 +5,7 @@
  */
 
 import { EventOutcome } from '../../../../common/event_outcome';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeFilter } from '../../../../common/utils/es_dsl_helpers';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import {
   EVENT_OUTCOME,
@@ -76,7 +76,7 @@ export async function getServiceInstanceTransactionStats({
       query: {
         bool: {
           filter: [
-            { range: rangeFilter(start, end) },
+            rangeFilter(start, end),
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
             ...esFilter,

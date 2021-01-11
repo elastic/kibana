@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { isEmpty } from 'lodash';
+import { termFilter } from '../../../common/utils/range_filter';
 import { getSeverity } from '../../../common/anomaly_detection';
 import { ANOMALY_SEVERITY } from '../../../../ml/common';
 import { KibanaRequest } from '../../../../../../src/core/server';
@@ -119,24 +120,8 @@ export function registerTransactionDurationAnomalyAlertType({
                     },
                   },
                 },
-                ...(alertParams.serviceName
-                  ? [
-                      {
-                        term: {
-                          partition_field_value: alertParams.serviceName,
-                        },
-                      },
-                    ]
-                  : []),
-                ...(alertParams.transactionType
-                  ? [
-                      {
-                        term: {
-                          by_field_value: alertParams.transactionType,
-                        },
-                      },
-                    ]
-                  : []),
+                ...termFilter('partition_field_value', alertParams.serviceName),
+                ...termFilter('by_field_value', alertParams.transactionType),
                 {
                   range: {
                     record_score: {

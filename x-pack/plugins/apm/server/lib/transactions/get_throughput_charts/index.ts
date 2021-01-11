@@ -11,7 +11,10 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  rangeFilter,
+  termFilter,
+} from '../../../../common/utils/es_dsl_helpers';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -40,21 +43,18 @@ async function searchThroughput({
   searchAggregatedTransactions: boolean;
   intervalString: string;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient, esFilter } = setup;
 
-  const filter: ESFilter[] = [
+  const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    rangeFilter(start, end),
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
     { term: { [TRANSACTION_TYPE]: transactionType } },
-    ...setup.esFilter,
+    ...termFilter(TRANSACTION_NAME, transactionName),
+    ...esFilter,
   ];
-
-  if (transactionName) {
-    filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
-  }
 
   const field = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions

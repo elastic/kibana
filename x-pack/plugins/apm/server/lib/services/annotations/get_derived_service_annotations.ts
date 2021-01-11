@@ -10,7 +10,7 @@ import {
   SERVICE_NAME,
   SERVICE_VERSION,
 } from '../../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeFilter } from '../../../../common/utils/es_dsl_helpers';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -31,7 +31,7 @@ export async function getDerivedServiceAnnotations({
 }) {
   const { start, end, apmEventClient } = setup;
 
-  const filter: ESFilter[] = [
+  const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
@@ -53,7 +53,7 @@ export async function getDerivedServiceAnnotations({
           size: 0,
           query: {
             bool: {
-              filter: [...filter, { range: rangeFilter(start, end) }],
+              filter: [...filter, rangeFilter(start, end)],
             },
           },
           aggs: {

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
@@ -11,7 +11,10 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  rangeFilter,
+  termFilter,
+} from '../../../../common/utils/es_dsl_helpers';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -45,22 +48,16 @@ async function searchLatency({
   const { start, end, apmEventClient } = setup;
   const { intervalString } = getBucketSize({ start, end });
 
-  const filter: ESFilter[] = [
+  const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    rangeFilter(start, end),
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),
+    ...termFilter(TRANSACTION_NAME, transactionName),
+    ...termFilter(TRANSACTION_TYPE, transactionType),
     ...setup.esFilter,
   ];
-
-  if (transactionName) {
-    filter.push({ term: { [TRANSACTION_NAME]: transactionName } });
-  }
-
-  if (transactionType) {
-    filter.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-  }
 
   const transactionDurationField = getTransactionDurationFieldForAggregatedTransactions(
     searchAggregatedTransactions

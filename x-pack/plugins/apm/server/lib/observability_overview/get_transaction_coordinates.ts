@@ -8,7 +8,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeFilter } from '../../../common/utils/es_dsl_helpers';
 import { Coordinates } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
@@ -39,7 +39,7 @@ export async function getTransactionCoordinates({
       size: 0,
       query: {
         bool: {
-          filter: [{ range: rangeFilter(start, end) }],
+          filter: [rangeFilter(start, end)],
         },
       },
       aggs: {

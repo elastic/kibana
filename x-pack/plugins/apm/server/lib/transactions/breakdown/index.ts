@@ -17,7 +17,10 @@ import {
   TRANSACTION_BREAKDOWN_COUNT,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  rangeFilter,
+  termFilter,
+} from '../../../../common/utils/es_dsl_helpers';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
@@ -76,17 +79,6 @@ export async function getTransactionBreakdown({
     },
   };
 
-  const filters = [
-    { term: { [SERVICE_NAME]: serviceName } },
-    { term: { [TRANSACTION_TYPE]: transactionType } },
-    { range: rangeFilter(start, end) },
-    ...esFilter,
-  ];
-
-  if (transactionName) {
-    filters.push({ term: { [TRANSACTION_NAME]: transactionName } });
-  }
-
   const params = {
     apm: {
       events: [ProcessorEvent.metric],
@@ -95,7 +87,13 @@ export async function getTransactionBreakdown({
       size: 0,
       query: {
         bool: {
-          filter: filters,
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
+            ...termFilter(TRANSACTION_NAME, transactionName),
+            rangeFilter(start, end),
+            ...esFilter,
+          ],
         },
       },
       aggs: {

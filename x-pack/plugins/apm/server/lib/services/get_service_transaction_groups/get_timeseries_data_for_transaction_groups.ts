@@ -7,7 +7,7 @@
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import { rangeFilter } from '../../../../common/utils/es_dsl_helpers';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
@@ -75,7 +75,7 @@ export async function getTimeseriesDataForTransactionGroups({
             { terms: { [TRANSACTION_NAME]: transactionNames } },
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [TRANSACTION_TYPE]: transactionType } },
-            { range: rangeFilter(start, end) },
+            rangeFilter(start, end),
             ...esFilter,
           ],
         },

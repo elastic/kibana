@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../../../typings/elasticsearch';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { rangeFilter } from '../../../../common/utils/range_filter';
+import {
+  rangeFilter,
+  termFilter,
+} from '../../../../common/utils/es_dsl_helpers';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getBuckets({
@@ -25,15 +27,12 @@ export async function getBuckets({
   setup: Setup & SetupTimeRange;
 }) {
   const { start, end, esFilter, apmEventClient } = setup;
-  const filter: ESFilter[] = [
+  const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    ...termFilter(ERROR_GROUP_ID, groupId),
+    rangeFilter(start, end),
     ...esFilter,
   ];
-
-  if (groupId) {
-    filter.push({ term: { [ERROR_GROUP_ID]: groupId } });
-  }
 
   const params = {
     apm: {

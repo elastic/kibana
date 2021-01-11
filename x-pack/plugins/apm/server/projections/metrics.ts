@@ -9,7 +9,7 @@ import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../common/utils/range_filter';
+import { rangeFilter } from '../../common/utils/es_dsl_helpers';
 import { SERVICE_NODE_NAME_MISSING } from '../../common/service_nodes';
 import { ProcessorEvent } from '../../common/processor_event';
 
@@ -38,7 +38,7 @@ export function getMetricsProjection({
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
-    { range: rangeFilter(start, end) },
+    rangeFilter(start, end),
     ...getServiceNodeNameFilters(serviceNodeName),
     ...esFilter,
   ];

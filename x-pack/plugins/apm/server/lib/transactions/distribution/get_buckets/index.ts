@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
-import { rangeFilter } from '../../../../../common/utils/range_filter';
+import { rangeFilter } from '../../../../../common/utils/es_dsl_helpers';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -70,7 +70,7 @@ export async function getBuckets({
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [TRANSACTION_TYPE]: transactionType } },
     { term: { [TRANSACTION_NAME]: transactionName } },
-    { range: rangeFilter(start, end) },
+    rangeFilter(start, end),
     ...esFilter,
   ];
 

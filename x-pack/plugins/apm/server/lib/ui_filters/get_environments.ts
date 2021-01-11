@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeFilter, termFilter } from '../../../common/utils/es_dsl_helpers';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
@@ -25,14 +24,6 @@ export async function getEnvironments({
   searchAggregatedTransactions: boolean;
 }) {
   const { start, end, apmEventClient, config } = setup;
-
-  const filter: ESFilter[] = [{ range: rangeFilter(start, end) }];
-
-  if (serviceName) {
-    filter.push({
-      term: { [SERVICE_NAME]: serviceName },
-    });
-  }
 
   const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
@@ -50,7 +41,10 @@ export async function getEnvironments({
       size: 0,
       query: {
         bool: {
-          filter,
+          filter: [
+            rangeFilter(start, end),
+            ...termFilter(SERVICE_NAME, serviceName),
+          ],
         },
       },
       aggs: {

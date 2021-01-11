@@ -10,7 +10,7 @@ import {
   TRANSACTION_TYPE,
   SERVICE_LANGUAGE_NAME,
 } from '../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../common/utils/range_filter';
+import { rangeFilter } from '../../common/utils/es_dsl_helpers';
 import { ProcessorEvent } from '../../common/processor_event';
 import { TRANSACTION_PAGE_LOAD } from '../../common/transaction_types';
 
@@ -27,7 +27,7 @@ export function getRumPageLoadTransactionsProjection({
 
   const bool = {
     filter: [
-      { range: rangeFilter(start, end) },
+      rangeFilter(start, end),
       { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
       ...(checkFetchStartFieldExists
         ? [
@@ -78,7 +78,7 @@ export function getRumErrorsProjection({
 
   const bool = {
     filter: [
-      { range: rangeFilter(start, end) },
+      rangeFilter(start, end),
       { term: { [AGENT_NAME]: 'rum-js' } },
       {
         term: {

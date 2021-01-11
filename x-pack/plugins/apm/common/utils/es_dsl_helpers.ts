@@ -6,10 +6,16 @@
 
 export function rangeFilter(start: number, end: number) {
   return {
-    '@timestamp': {
-      gte: start,
-      lte: end,
-      format: 'epoch_millis',
+    range: {
+      '@timestamp': {
+        gte: start,
+        lte: end,
+        format: 'epoch_millis',
+      },
     },
   };
+}
+
+export function termFilter(termField: string, termValue?: string) {
+  return termValue ? [{ term: { [termField]: termValue } }] : [];
 }

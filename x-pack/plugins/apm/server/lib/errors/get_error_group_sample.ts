@@ -10,7 +10,7 @@ import {
   TRANSACTION_SAMPLED,
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeFilter } from '../../../common/utils/es_dsl_helpers';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
@@ -36,7 +36,7 @@ export async function getErrorGroupSample({
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             { term: { [ERROR_GROUP_ID]: groupId } },
-            { range: rangeFilter(start, end) },
+            rangeFilter(start, end),
             ...esFilter,
           ],
           should: [{ term: { [TRANSACTION_SAMPLED]: true } }],

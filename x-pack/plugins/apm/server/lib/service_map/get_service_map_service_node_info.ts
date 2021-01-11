@@ -18,7 +18,7 @@ import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
-import { rangeFilter } from '../../../common/utils/range_filter';
+import { rangeFilter } from '../../../common/utils/es_dsl_helpers';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
   getProcessorEventForAggregatedTransactions,
@@ -55,8 +55,8 @@ export async function getServiceMapServiceNodeInfo({
 }: Options & { serviceName: string }) {
   const { start, end, uiFilters } = setup;
 
-  const filter: ESFilter[] = [
-    { range: rangeFilter(start, end) },
+  const filter = [
+    rangeFilter(start, end),
     { term: { [SERVICE_NAME]: serviceName } },
     ...getEnvironmentUiFilterES(uiFilters.environment),
   ];
