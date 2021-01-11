@@ -17,7 +17,13 @@ import type {
   ISearchStrategy,
   PluginStart as DataPluginStart,
 } from '../../../../../../src/plugins/data/server';
-import { getLogEntryCursorFromHit } from '../../../common/log_entry';
+import {
+  getLogEntryCursorFromHit,
+  LogEntryAfterCursor,
+  logEntryAfterCursorRT,
+  LogEntryBeforeCursor,
+  logEntryBeforeCursorRT,
+} from '../../../common/log_entry';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   LogEntriesSearchRequestParams,
@@ -68,20 +74,22 @@ export const logEntriesSearchStrategyProvider = ({
           concatMap(({ params }) =>
             sourceConfiguration$.pipe(
               map(
-                ({ configuration }): IEsSearchRequest => ({
-                  params: createGetLogEntriesQuery(
-                    configuration.logAlias,
-                    params.startTimestamp,
-                    params.endTimestamp,
-                    undefined, // TODO: determine cursor
-                    params.size,
-                    configuration.fields.timestamp,
-                    configuration.fields.tiebreaker,
-                    [], // TODO: determine fields list
-                    params.query,
-                    undefined // TODO: map over highlight terms OR reduce to one term in request
-                  ),
-                })
+                ({ configuration }): IEsSearchRequest => {
+                  return {
+                    params: createGetLogEntriesQuery(
+                      configuration.logAlias,
+                      params.startTimestamp,
+                      params.endTimestamp,
+                      pickCursor(params),
+                      params.size,
+                      configuration.fields.timestamp,
+                      configuration.fields.tiebreaker,
+                      [], // TODO: determine fields list
+                      params.query,
+                      undefined // TODO: map over highlight terms OR reduce to one term in request
+                    ),
+                  };
+                }
               )
             )
           )
@@ -134,3 +142,15 @@ const createLogEntryFromHit = (hit: LogEntryHit) => ({
   cursor: getLogEntryCursorFromHit(hit),
   fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
 });
+
+const pickCursor = (
+  params: LogEntriesSearchRequestParams
+): LogEntryAfterCursor | LogEntryBeforeCursor | null => {
+  if (logEntryAfterCursorRT.is(params)) {
+    return pick(params, ['after']);
+  } else if (logEntryBeforeCursorRT.is(params)) {
+    return pick(params, ['before']);
+  }
+
+  return null;
+};

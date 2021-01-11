@@ -8,7 +8,7 @@ import * as rt from 'io-ts';
 import { logSourceColumnConfigurationRT } from '../../http_api/log_sources';
 import {
   logEntryAfterCursorRT,
-  logEntryAroundCursorRT,
+  // logEntryAroundCursorRT,
   logEntryBeforeCursorRT,
   logEntryCursorRT,
   logEntryRT,
@@ -42,16 +42,16 @@ export const logEntriesAfterSearchRequestParamsRT = rt.intersection([
   logEntryAfterCursorRT,
 ]);
 
-export const logEntriesCenteredSearchRequestParamsRT = rt.intersection([
-  logEntriesBaseSearchRequestParamsRT,
-  logEntryAroundCursorRT,
-]);
+// export const logEntriesCenteredSearchRequestParamsRT = rt.intersection([
+//   logEntriesBaseSearchRequestParamsRT,
+//   logEntryAroundCursorRT,
+// ]);
 
 export const logEntriesSearchRequestParamsRT = rt.union([
   logEntriesBaseSearchRequestParamsRT,
   logEntriesBeforeSearchRequestParamsRT,
   logEntriesAfterSearchRequestParamsRT,
-  logEntriesCenteredSearchRequestParamsRT,
+  // logEntriesCenteredSearchRequestParamsRT,
 ]);
 
 export type LogEntriesSearchRequestParams = rt.TypeOf<typeof logEntriesSearchRequestParamsRT>;
