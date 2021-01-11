@@ -10,8 +10,8 @@ import { mount } from 'enzyme';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { TestProviders } from '../../../common/mock';
 import { basicCase, basicPush } from '../../containers/mock';
-import { CaseViewActions } from './actions';
-import * as i18n from './translations';
+import { Actions } from './actions';
+import * as i18n from '../case_view/translations';
 jest.mock('../../containers/use_delete_cases');
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 
@@ -39,14 +39,16 @@ describe('CaseView actions', () => {
     isDeleted: false,
     isDisplayConfirmDeleteModal: false,
   };
+
   beforeEach(() => {
     jest.resetAllMocks();
     useDeleteCasesMock.mockImplementation(() => defaultDeleteState);
   });
+
   it('clicking trash toggles modal', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseViewActions caseData={basicCase} currentExternalIncident={null} />
+        <Actions caseData={basicCase} currentExternalIncident={null} />
       </TestProviders>
     );
 
@@ -56,6 +58,7 @@ describe('CaseView actions', () => {
     wrapper.find('button[data-test-subj="property-actions-trash"]').simulate('click');
     expect(handleToggleModal).toHaveBeenCalled();
   });
+
   it('toggle delete modal and confirm', () => {
     useDeleteCasesMock.mockImplementation(() => ({
       ...defaultDeleteState,
@@ -63,7 +66,7 @@ describe('CaseView actions', () => {
     }));
     const wrapper = mount(
       <TestProviders>
-        <CaseViewActions caseData={basicCase} currentExternalIncident={null} />
+        <Actions caseData={basicCase} currentExternalIncident={null} />
       </TestProviders>
     );
 
@@ -73,10 +76,11 @@ describe('CaseView actions', () => {
       { id: basicCase.id, title: basicCase.title },
     ]);
   });
+
   it('displays active incident link', () => {
     const wrapper = mount(
       <TestProviders>
-        <CaseViewActions
+        <Actions
           caseData={basicCase}
           currentExternalIncident={{
             ...basicPush,
