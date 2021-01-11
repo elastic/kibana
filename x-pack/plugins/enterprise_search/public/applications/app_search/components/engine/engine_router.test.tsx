@@ -57,8 +57,7 @@ describe('EngineRouter', () => {
   });
 
   it('redirects to engines list and flashes an error if the engine param was not found', () => {
-    (useParams as jest.Mock).mockReturnValue({ engineName: '404-engine' });
-    setMockValues({ ...values, engineNotFound: true });
+    setMockValues({ ...values, engineNotFound: true, engineName: '404-engine' });
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(Redirect).prop('to')).toEqual('/engines');
