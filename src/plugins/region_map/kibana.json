@@ -15,7 +15,7 @@
   ],
   "requiredBundles": [
     "kibanaUtils",
-    "charts", 
+    "charts",
     "visDefaultEditor"
   ]
 }
