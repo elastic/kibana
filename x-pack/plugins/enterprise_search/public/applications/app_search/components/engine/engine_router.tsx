@@ -69,17 +69,15 @@ export const EngineRouter: React.FC = () => {
     },
   } = useValues(AppLogic);
 
-  const { dataLoading, engineNotFound } = useValues(EngineLogic);
+  const { engineName: engineNameFromUrl } = useParams() as { engineName: string };
+  const { engineName, dataLoading, engineNotFound } = useValues(EngineLogic);
   const { setEngineName, initializeEngine, clearEngine } = useActions(EngineLogic);
 
-  const { engineName } = useParams() as { engineName: string };
-  const engineBreadcrumb = [ENGINES_TITLE, engineName];
-
   useEffect(() => {
-    setEngineName(engineName);
+    setEngineName(engineNameFromUrl);
     initializeEngine();
     return clearEngine;
-  }, [engineName]);
+  }, [engineNameFromUrl]);
 
   if (engineNotFound) {
     setQueuedErrorMessage(
@@ -91,7 +89,10 @@ export const EngineRouter: React.FC = () => {
     return <Redirect to={ENGINES_PATH} />;
   }
 
-  if (dataLoading) return <Loading />;
+  const isLoadingNewEngine = engineName !== engineNameFromUrl;
+  if (isLoadingNewEngine || dataLoading) return <Loading />;
+
+  const engineBreadcrumb = [ENGINES_TITLE, engineName];
 
   return (
     <Switch>

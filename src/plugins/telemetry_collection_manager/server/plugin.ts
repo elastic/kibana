@@ -26,7 +26,6 @@ import {
   Logger,
   IClusterClient,
   SavedObjectsServiceStart,
-  ILegacyClusterClient,
 } from 'src/core/server';
 
 import {
@@ -53,7 +52,6 @@ export class TelemetryCollectionManagerPlugin
   private collectionStrategy: CollectionStrategy<any> | undefined;
   private usageGetterMethodPriority = -1;
   private usageCollection?: UsageCollectionSetup;
-  private legacyElasticsearchClient?: ILegacyClusterClient;
   private elasticsearchClient?: IClusterClient;
   private savedObjectsService?: SavedObjectsServiceStart;
   private readonly isDistributable: boolean;
@@ -77,7 +75,6 @@ export class TelemetryCollectionManagerPlugin
   }
 
   public start(core: CoreStart) {
-    this.legacyElasticsearchClient = core.elasticsearch.legacy.client; // TODO: Remove when all the collectors have migrated
     this.elasticsearchClient = core.elasticsearch.client;
     this.savedObjectsService = core.savedObjects;
 
@@ -129,9 +126,6 @@ export class TelemetryCollectionManagerPlugin
     config: StatsGetterConfig,
     usageCollection: UsageCollectionSetup
   ): StatsCollectionConfig | undefined {
-    const callCluster = config.unencrypted
-      ? this.legacyElasticsearchClient?.asScoped(config.request).callAsCurrentUser
-      : this.legacyElasticsearchClient?.callAsInternalUser;
     // Scope the new elasticsearch Client appropriately and pass to the stats collection config
     const esClient = config.unencrypted
       ? this.elasticsearchClient?.asScoped(config.request).asCurrentUser
@@ -143,8 +137,8 @@ export class TelemetryCollectionManagerPlugin
     // Provide the kibanaRequest so opted-in plugins can scope their custom clients only if the request is not encrypted
     const kibanaRequest = config.unencrypted ? config.request : void 0;
 
-    if (callCluster && esClient && soClient) {
-      return { callCluster, usageCollection, esClient, soClient, kibanaRequest };
+    if (esClient && soClient) {
+      return { usageCollection, esClient, soClient, kibanaRequest };
     }
   }
 

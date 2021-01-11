@@ -103,7 +103,7 @@ export const isNotificationAlertExecutor = (
 };
 
 export type NotificationAlertTypeDefinition = Omit<
-  AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext>,
+  AlertType<AlertTypeParams, AlertTypeState, AlertInstanceState, AlertInstanceContext, 'default'>,
   'executor'
 > & {
   executor: ({

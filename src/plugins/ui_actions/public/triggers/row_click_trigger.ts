@@ -19,11 +19,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { Trigger } from '.';
-import { Datatable } from '../../../expressions';
+import type { Datatable } from '../../../expressions';
 
 export const ROW_CLICK_TRIGGER = 'ROW_CLICK_TRIGGER';
 
-export const rowClickTrigger: Trigger<'ROW_CLICK_TRIGGER'> = {
+export const rowClickTrigger: Trigger = {
   id: ROW_CLICK_TRIGGER,
   title: i18n.translate('uiActions.triggers.rowClickTitle', {
     defaultMessage: 'Table row click',
