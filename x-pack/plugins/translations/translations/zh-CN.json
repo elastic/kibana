@@ -13182,8 +13182,6 @@
     "xpack.ml.feature.reserved.description": "要向用户授予访问权限，还应分配 machine_learning_user 或 machine_learning_admin 角色。",
     "xpack.ml.featureRegistry.mlFeatureName": "Machine Learning",
     "xpack.ml.fieldDataCard.cardBoolean.valuesLabel": "值",
-    "xpack.ml.fieldDataCard.cardDate.medianLabel": "中值",
-    "xpack.ml.fieldDataCard.cardDate.minLabel": "min",
     "xpack.ml.fieldDataCard.cardDate.summaryTableTitle": "摘要",
     "xpack.ml.fieldDataCard.cardIp.topValuesLabel": "排名最前值",
     "xpack.ml.fieldDataCard.cardKeyword.topValuesLabel": "排名最前值",
