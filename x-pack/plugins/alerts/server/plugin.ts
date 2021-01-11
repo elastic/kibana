@@ -374,7 +374,7 @@ export class AlertingPlugin {
       return (objects?: SavedObjectsBulkGetObject[]) =>
         objects
           ? Promise.all(objects.map(async (objectItem) => await client.get({ id: objectItem.id })))
-          : new Promise(() => []);
+          : Promise.resolve([]);
     });
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
