@@ -50,7 +50,7 @@ export interface FieldVisStats {
   max?: number;
   median?: number;
   min?: number;
-  topValues?: Array<{ key: number; doc_count: number }>;
+  topValues?: Array<{ key: number | string; doc_count: number }>;
   topValuesSampleSize?: number;
   topValuesSamplerShardSize?: number;
   examples?: Array<string | object>;

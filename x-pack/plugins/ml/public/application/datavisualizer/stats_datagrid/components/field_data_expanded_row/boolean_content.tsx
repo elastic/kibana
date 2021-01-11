@@ -28,9 +28,28 @@ function getPercentLabel(value: number): string {
 export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
   const { stats } = config;
   if (stats === undefined) return null;
-  const { count, trueCount, falseCount } = stats;
-  if (count === undefined || trueCount === undefined || falseCount === undefined) return null;
+  const { count } = stats;
+  // use stats from index based config
+  let { trueCount, falseCount } = stats;
+
+  // use stats from file based find structure results
+  if (trueCount === undefined || falseCount === undefined) {
+    const modifiedConfig = config;
+    if (modifiedConfig?.stats?.topValues) {
+      modifiedConfig.stats.topValues.forEach((doc) => {
+        if (doc.doc_count !== undefined) {
+          if (doc.key === 'false') {
+            falseCount = doc.doc_count;
+          }
+          if (doc.key === 'true') {
+            trueCount = doc.doc_count;
+          }
+        }
+      });
+    }
+  }
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
+  if (count === undefined || trueCount === undefined || falseCount === undefined) return null;
 
   return (
     <div className="mlFieldDataCard__stats">
@@ -71,7 +90,6 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
             isValueContainedInElement: false,
             showValueLabel: true,
           }}
-          color={['rgba(230, 194, 32, 0.5)', 'rgba(224, 187, 20, 0.71)']}
           splitSeriesAccessors={['x']}
           stackAccessors={['x']}
           xAccessor="x"
