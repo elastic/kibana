@@ -417,11 +417,11 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     jobIds: string[] = [],
     allSpaces: boolean = false
   ): Promise<JobsExistResponse> {
-    const results: { [id: string]: boolean } = {};
+    const results: JobsExistResponse = {};
     for (const jobId of jobIds) {
       try {
         if (jobId === '') {
-          results[jobId] = false;
+          results[jobId] = { exists: false, isGroup: false };
           continue;
         }
 
@@ -432,13 +432,15 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
           : await mlClient.getJobs<MlJobsResponse>({
               job_id: jobId,
             });
-        results[jobId] = body.count > 0;
+
+        const isGroup = body.jobs.some((j) => j.groups.includes(jobId));
+        results[jobId] = { exists: body.count > 0, isGroup };
       } catch (e) {
         // if a non-wildcarded job id is supplied, the get jobs endpoint will 404
         if (e.statusCode !== 404) {
           throw e;
         }
-        results[jobId] = false;
+        results[jobId] = { exists: false, isGroup: false };
       }
     }
     return results;

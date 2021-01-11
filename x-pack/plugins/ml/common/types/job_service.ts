@@ -17,5 +17,8 @@ export interface MlJobsStatsResponse {
 }
 
 export interface JobsExistResponse {
-  [jobId: string]: boolean;
+  [jobId: string]: {
+    exists: boolean;
+    isGroup: boolean;
+  };
 }

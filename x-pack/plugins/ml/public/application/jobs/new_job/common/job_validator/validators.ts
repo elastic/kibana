@@ -117,7 +117,7 @@ export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<Job
     }),
     map((jobExistsResults) => {
       const jobs = Object.values(jobExistsResults);
-      if (jobs[0] === true) {
+      if (jobs[0] && jobs[0].exists === true) {
         return {
           jobIdExists: {
             valid: false,
@@ -151,7 +151,9 @@ export function groupIdsValidator(jobCreator$: Subject<JobCreator>): Observable<
     }),
     map((jobExistsResults) => {
       const groups = Object.values(jobExistsResults);
-      if (groups.some((g) => g === true)) {
+      // only match jobs that exist but aren't groups.
+      // as we should allow existing groups to be reused.
+      if (groups.some((g) => g.exists === true && g.isGroup === false)) {
         return {
           groupIdsExist: {
             valid: false,
