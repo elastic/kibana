@@ -202,16 +202,16 @@ export const hasFilterKeyError = (
     ) {
       return `This key '${key}' does NOT match the filter proposition SavedObjectType.attributes.key`;
     }
-    if (
-      (keySplit.length === 2 && !fieldDefined(indexMapping, keySplit[1])) ||
-      (keySplit.length > 2 &&
-        !fieldDefined(
-          indexMapping,
-          `${keySplit[0]}.${keySplit.slice(2, keySplit.length).join('.')}`
-        ))
-    ) {
-      return `This key '${key}' does NOT exist in ${types.join()} saved object index patterns`;
-    }
+    // if (
+    //   (keySplit.length === 2 && !fieldDefined(indexMapping, keySplit[1])) ||
+    //   (keySplit.length > 2 &&
+    //     !fieldDefined(
+    //       indexMapping,
+    //       `${keySplit[0]}.${keySplit.slice(2, keySplit.length).join('.')}`
+    //     ))
+    // ) {
+    //   return `This key '${key}' does NOT exist in ${types.join()} saved object index patterns`;
+    // }
   }
   return null;
 };

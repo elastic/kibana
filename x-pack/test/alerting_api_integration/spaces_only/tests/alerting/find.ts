@@ -84,5 +84,51 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           data: [],
         });
     });
+
+    it('should be able to sort on alert param values', async () => {
+      await Promise.all([
+        createAlert({ params: { strValue: 'b' } }),
+        createAlert({ params: { strValue: 'c' } }),
+        createAlert({ params: { strValue: 'a' } }),
+      ]);
+
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/_find?sort_field=params.strValue`
+      );
+
+      expect(response.status).to.eql(200);
+      expect(response.body.total).to.equal(3);
+      expect(response.body.data[0].params.strValue).to.eql('a');
+      expect(response.body.data[1].params.strValue).to.eql('b');
+      expect(response.body.data[2].params.strValue).to.eql('c');
+    });
+
+    it('should be able to filter on alert param values', async () => {
+      await Promise.all([
+        createAlert({ params: { strValue: 'my a' } }),
+        createAlert({ params: { strValue: 'my b' } }),
+        createAlert({ params: { strValue: 'my c' } }),
+      ]);
+
+      const response = await supertest.get(
+        `${getUrlPrefix(
+          Spaces.space1.id
+        )}/api/alerts/_find?filter=alert.attributes.params.strValue:"my b"`
+      );
+
+      expect(response.status).to.eql(200);
+      expect(response.body.total).to.equal(1);
+      expect(response.body.data[0].params.strValue).to.eql('my b');
+    });
+
+    async function createAlert(overwrites = {}) {
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData(overwrites))
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+      return createdAlert;
+    }
   });
 }
