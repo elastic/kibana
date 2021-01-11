@@ -88,7 +88,6 @@ export const ConfirmDeleteUsers: FunctionComponent<ConfirmDeleteUsersProps> = ({
           <FormattedMessage
             id="xpack.security.management.users.confirmDelete.cannotUndoWarning"
             defaultMessage="You can't recover deleted users."
-            values={{ count: usernames.length }}
           />
         </p>
       </EuiText>

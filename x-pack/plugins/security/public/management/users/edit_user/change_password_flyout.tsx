@@ -146,7 +146,6 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
     <FormFlyout
       title={i18n.translate('xpack.security.management.users.changePasswordFlyout.title', {
         defaultMessage: 'Change password',
-        values: { username },
       })}
       onCancel={onCancel}
       onSubmit={form.submit}
@@ -188,7 +187,7 @@ export const ChangePasswordFlyout: FunctionComponent<ChangePasswordFlyoutProps> 
               >
                 <p>
                   <FormattedMessage
-                    id="xpack.security.management.users.changePasswordFlyout.systemUserDescription"
+                    id="xpack.security.management.users.changePasswordFlyout.systemUserWarning"
                     defaultMessage="Changing this password will prevent Kibana from communicating with Elasticsearch."
                   />
                 </p>

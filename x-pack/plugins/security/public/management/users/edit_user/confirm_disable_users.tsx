@@ -64,7 +64,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
       confirmButtonText={
         isSystemUser
           ? i18n.translate(
-              'xpack.security.management.users.changePasswordFlyout.confirmSystemPasswordButton',
+              'xpack.security.management.users.confirmDisableUsers.confirmSystemPasswordButton',
               {
                 defaultMessage:
                   '{isLoading, select, true{Disabling user…} other{I understand, disable this user}}',
@@ -85,13 +85,13 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.security.management.users.changePasswordFlyout.systemUserDescription"
+              id="xpack.security.management.users.confirmDisableUsers.systemUserWarning"
               defaultMessage="Disabling this user will prevent Kibana from communicating with Elasticsearch."
             />
           </p>
           <p>
             <FormattedMessage
-              id="xpack.security.management.users.changePasswordFlyout.systemUserDescription"
+              id="xpack.security.management.users.confirmDisableUsers.systemUserDescription"
               defaultMessage="Once disabled, you must manually update your config file with credentials for a different system user and restart Kibana."
             />
           </p>
@@ -102,7 +102,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
             <FormattedMessage
               id="xpack.security.management.users.confirmDisableUsers.description"
               defaultMessage="This action will prevent {count, plural, one{the user} other{these users}} from accessing the stack{count, plural, one{.} other{:}}"
-              values={{ count: usernames.length, username: <strong>{usernames[0]}</strong> }}
+              values={{ count: usernames.length }}
             />
           </p>
           {usernames.length > 1 && (
