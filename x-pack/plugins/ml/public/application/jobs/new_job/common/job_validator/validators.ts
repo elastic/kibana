@@ -35,6 +35,13 @@ const jobExistsErrorMessage = i18n.translate(
       'Job ID already exists. A job ID cannot be the same as an existing job or group.',
   }
 );
+const groupExistsErrorMessage = i18n.translate(
+  'xpack.ml.newJob.wizard.validateJob.jobNameAlreadyExists',
+  {
+    defaultMessage:
+      'Group ID already exists. A group ID cannot be the same as an existing group or job.',
+  }
+);
 
 export type CardinalityValidatorResult = CardinalityValidatorError | null;
 
@@ -109,8 +116,8 @@ export function jobIdValidator(jobCreator$: Subject<JobCreator>): Observable<Job
       return ml.jobs.jobsExist$([jobId], true);
     }),
     map((jobExistsResults) => {
-      const dd = Object.values(jobExistsResults);
-      if (dd[0] === true) {
+      const jobs = Object.values(jobExistsResults);
+      if (jobs[0] === true) {
         return {
           jobIdExists: {
             valid: false,
@@ -143,12 +150,12 @@ export function groupIdsValidator(jobCreator$: Subject<JobCreator>): Observable<
       return ml.jobs.jobsExist$(groups, true);
     }),
     map((jobExistsResults) => {
-      const dd = Object.values(jobExistsResults);
-      if (dd[0] === true) {
+      const groups = Object.values(jobExistsResults);
+      if (groups.some((g) => g === true)) {
         return {
           groupIdsExist: {
             valid: false,
-            message: jobExistsErrorMessage,
+            message: groupExistsErrorMessage,
           },
         };
       }

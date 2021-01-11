@@ -62,7 +62,18 @@ export const GroupsInput: FC = () => {
   }
 
   useEffect(() => {
-    setValidation(jobValidator.groupIds);
+    const valid =
+      jobValidator.groupIds.valid === true &&
+      jobValidator.latestValidationResult.groupIdsExist?.valid === true;
+    const message =
+      jobValidator.groupIds.message === undefined
+        ? jobValidator.latestValidationResult.groupIdsExist?.message
+        : jobValidator.groupIds.message;
+
+    setValidation({
+      valid,
+      message,
+    });
   }, [jobValidatorUpdated]);
 
   return (

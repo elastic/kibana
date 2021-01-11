@@ -23,9 +23,18 @@ export const JobIdInput: FC = () => {
 
   useEffect(() => {
     const isEmptyId = jobId === '';
+    let valid = isEmptyId === true || jobValidator.jobId.valid;
+    let message = isEmptyId === false ? jobValidator.jobId.message : '';
+
+    valid = valid && jobValidator.latestValidationResult.jobIdExists?.valid === true;
+    message =
+      message === '' || message === undefined
+        ? jobValidator.latestValidationResult.jobIdExists?.message
+        : message;
+
     setValidation({
-      valid: isEmptyId === true || jobValidator.latestValidationResult.jobId?.valid === true,
-      message: isEmptyId === false ? jobValidator.latestValidationResult.jobId?.message : '',
+      valid,
+      message,
     });
   }, [jobValidatorUpdated]);
 
