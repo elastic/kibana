@@ -28,7 +28,10 @@ import { DashboardContainer } from './embeddable';
 import { DashboardSavedObject } from '../saved_dashboards';
 import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 import { getAppStateDefaults, migrateAppState, getDashboardIdFromUrl } from './lib';
-import { convertPanelStateToSavedDashboardPanel } from '../../common/embeddable/embeddable_saved_object_converters';
+import {
+  convertPanelStateToSavedDashboardPanel,
+  convertSavedDashboardPanelToPanelState,
+} from '../../common/embeddable/embeddable_saved_object_converters';
 import {
   DashboardAppState,
   DashboardAppStateDefaults,
@@ -224,20 +227,10 @@ export class DashboardStateManager {
 
     const input = dashboardContainer.getInput();
 
-    if (input.expandedPanelId !== this.getExpandedPanelId()) {
-      this.setExpandedPanelId(input.expandedPanelId);
-    }
-
     this.getPanels().forEach((savedDashboardPanel) => {
       if (input.panels[savedDashboardPanel.panelIndex] !== undefined) {
         savedDashboardPanelMap[savedDashboardPanel.panelIndex] = savedDashboardPanel;
       } else {
-        if (
-          this.getExpandedPanelId() &&
-          savedDashboardPanel.panelIndex === this.getExpandedPanelId()
-        ) {
-          this.setExpandedPanelId(undefined);
-        }
         // A panel was deleted.
         dirty = true;
       }
@@ -245,9 +238,14 @@ export class DashboardStateManager {
 
     const convertedPanelStateMap: { [key: string]: SavedDashboardPanel } = {};
 
+    let expandedPanelValid = false;
     Object.values(input.panels).forEach((panelState) => {
       if (savedDashboardPanelMap[panelState.explicitInput.id] === undefined) {
         dirty = true;
+      }
+
+      if (panelState.explicitInput.id === input.expandedPanelId) {
+        expandedPanelValid = true;
       }
 
       convertedPanelStateMap[panelState.explicitInput.id] = convertPanelStateToSavedDashboardPanel(
@@ -281,6 +279,12 @@ export class DashboardStateManager {
 
     if (input.isFullScreenMode !== this.getFullScreenMode()) {
       this.setFullScreenMode(input.isFullScreenMode);
+    }
+
+    if (expandedPanelValid && input.expandedPanelId !== this.getExpandedPanelId()) {
+      this.setExpandedPanelId(input.expandedPanelId);
+    } else if (!expandedPanelValid && this.getExpandedPanelId()) {
+      this.setExpandedPanelId(undefined);
     }
 
     if (!_.isEqual(input.query, this.getQuery())) {
