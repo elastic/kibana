@@ -7,7 +7,7 @@
 import { isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import * as i18n from './translations';
+import * as i18n from '../case_view/translations';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { PropertyActions } from '../property_actions';
@@ -20,7 +20,7 @@ interface CaseViewActions {
   disabled?: boolean;
 }
 
-const CaseViewActionsComponent: React.FC<CaseViewActions> = ({
+const ActionsComponent: React.FC<CaseViewActions> = ({
   caseData,
   currentExternalIncident,
   disabled = false,
@@ -80,4 +80,4 @@ const CaseViewActionsComponent: React.FC<CaseViewActions> = ({
   );
 };
 
-export const CaseViewActions = React.memo(CaseViewActionsComponent);
+export const Actions = React.memo(ActionsComponent);

@@ -3,12 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { TaskManagerStartContract } from '../../../task_manager/server';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import { TaskStore } from '../task_store';
 
-export async function deleteTaskIfItExists(taskManager: TaskManagerStartContract, taskId: string) {
+/**
+ * Removes a task from the store, ignoring a not found error
+ * Other errors are re-thrown
+ *
+ * @param taskStore
+ * @param taskId
+ */
+export async function removeIfExists(taskStore: TaskStore, taskId: string) {
   try {
-    await taskManager.remove(taskId);
+    await taskStore.remove(taskId);
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       throw err;
