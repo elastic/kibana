@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import clusterDataFixture from './fixtures/cluster_data';
-import { handleResponse } from '../handle_response';
+import clusterDataFixture from './__fixtures__/cluster_data';
+import { handleResponse } from './handle_response';
 
 const { nodeStats, clusterStats, shardStats, timeOptions } = clusterDataFixture;
 const pageOfNodes = [
