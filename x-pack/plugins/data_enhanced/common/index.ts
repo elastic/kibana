@@ -14,7 +14,6 @@ export {
   pollSearch,
   SearchSessionSavedObject,
   SearchSessionSavedObjectAttributes,
-  SearchSessionFindOptions,
   SearchSessionStatus,
   SearchSessionRequestInfo,
 } from './search';
