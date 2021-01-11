@@ -17,31 +17,22 @@
  * under the License.
  */
 
-import { coreMock } from '../../../core/public/mocks';
 import { spacesApiMock } from './api.mock';
 import { SpacesOssPlugin } from './plugin';
 
 describe('SpacesOssPlugin', () => {
   let plugin: SpacesOssPlugin;
-  let coreSetup: ReturnType<typeof coreMock.createSetup>;
 
   beforeEach(() => {
-    coreSetup = coreMock.createSetup();
     plugin = new SpacesOssPlugin();
   });
 
   describe('#start', () => {
-    let coreStart: ReturnType<typeof coreMock.createStart>;
-
     // need to wait for api promises to resolve
     const nextTick = () =>
       new Promise((resolve) => {
         window.setTimeout(resolve, 0);
       });
-
-    beforeEach(() => {
-      coreStart = coreMock.createStart();
-    });
 
     it('returns the spaces API if registered', async () => {
       const spacesApi = spacesApiMock.create();

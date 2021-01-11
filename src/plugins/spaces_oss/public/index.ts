@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
 import { SpacesOssPlugin } from './plugin';
 
 export { SpacesOssPluginSetup, SpacesOssPluginStart } from './types';
 
 export { SpacesApi } from './api';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new SpacesOssPlugin(initializerContext);
+export const plugin = () => new SpacesOssPlugin();
