@@ -30,6 +30,7 @@ import {
   updateColumnParam,
   resetIncomplete,
   FieldBasedIndexPatternColumn,
+  canTransition,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
@@ -147,15 +148,20 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const operationsWithCompatibility = [...possibleOperations].map((operationType) => {
     const definition = operationDefinitionMap[operationType];
 
+    const currentField =
+      selectedColumn &&
+      hasField(selectedColumn) &&
+      currentIndexPattern.getFieldByName(selectedColumn.sourceField);
     return {
       operationType,
-      compatibleWithCurrentField:
-        !selectedColumn ||
-        (selectedColumn &&
-          hasField(selectedColumn) &&
-          definition.input === 'field' &&
-          fieldByOperation[operationType]?.has(selectedColumn.sourceField)) ||
-        (selectedColumn && !hasField(selectedColumn) && definition.input === 'none'),
+      compatibleWithCurrentField: canTransition({
+        layer: state.layers[layerId],
+        columnId,
+        op: operationType,
+        indexPattern: currentIndexPattern,
+        field: currentField || undefined,
+        filterOperations: props.filterOperations,
+      }),
       disabledStatus:
         definition.getDisabledStatus &&
         definition.getDisabledStatus(
