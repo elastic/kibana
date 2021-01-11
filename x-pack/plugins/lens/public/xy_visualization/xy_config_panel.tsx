@@ -336,8 +336,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                       <EuiIconTip
                         color="subdued"
                         content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
-                          defaultMessage: `Lens provides a set of fitting functions to apply specific behaviour if 
-    there are missing values in an area or line chart. Missing values are drawn using dotted 
+                          defaultMessage: `When there are missing values in an area or line chart these can be represented in different ways in **Lens**. Missing values are drawn using dotted 
     lines, and will not fill missing values at the left side of the chart.`,
                         })}
                         iconProps={{

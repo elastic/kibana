@@ -368,15 +368,15 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
     >
       <p>
         {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBasicExplanation', {
-          defaultMessage: 'Splits a date field into buckets by interval.',
+          defaultMessage: 'The auto date histogram splits a date field into buckets by interval.',
         })}
       </p>
 
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
-          defaultMessage="The Lens editor chooses an automatic interval for you by dividing the selected time range by the 
-                  {targetBarSetting} Kibana advanced setting. The calculation tries to present “nice” time interval buckets. The maximum 
+          defaultMessage="**Lens** automatically chooses an interval for you by dividing the specified time range by the 
+                  {targetBarSetting} advanced setting. The calculation tries to present “nice” time interval buckets. The maximum 
                   number of bars is set by the {maxBarSetting} value."
           values={{
             maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
@@ -387,7 +387,7 @@ const AutoDateHistogramPopover = ({ data }: { data: DataPublicPluginStart }) => 
 
       <p>
         {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoAdvancedExplanation', {
-          defaultMessage: 'The specific interval follows this logic:',
+          defaultMessage: 'The interval follows this logic:',
         })}
       </p>
 

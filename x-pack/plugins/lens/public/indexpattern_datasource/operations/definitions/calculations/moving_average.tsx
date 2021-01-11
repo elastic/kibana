@@ -191,15 +191,15 @@ const MovingAveragePopup = () => {
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.basicExplanation"
-          defaultMessage="The Moving Average slides a window across the data and emits the average value of that window."
+          defaultMessage="Moving average slides a window across the data and displays the average value in the window."
         />
       </p>
 
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.longerExplanation"
-          defaultMessage="The Lens Moving Average uses a simple arithmetic mean of the window and applies a skip policy for gaps: 
-            this means that for missing values the bucket is skipped and the calculation is performed on the next one."
+          defaultMessage="To calculate the moving average, **Lens** uses the mean of the window and applies a skip policy for gaps.
+            For missing values, the bucket is skipped and the calculation is performed on the next value."
         />
       </p>
 
@@ -220,14 +220,14 @@ const MovingAveragePopup = () => {
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.windowLimitations"
-          defaultMessage="Note that the window does not include the current value."
+          defaultMessage="The window does not include the current value."
         />
       </p>
 
       <p>
         <FormattedMessage
           id="xpack.lens.indexPattern.movingAverage.limitations"
-          defaultMessage=" It works only for date histograms."
+          defaultMessage=" The moving average is supported only for date histograms."
         />
       </p>
     </HelpPopover>
