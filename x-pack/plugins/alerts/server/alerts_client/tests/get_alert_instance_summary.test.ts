@@ -199,7 +199,9 @@ describe('getAlertInstanceSummary()', () => {
     expect(eventLogClient.findEventsBySavedObjectIds.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "alert",
-        Array ["1"],
+        Array [
+          "1",
+        ],
         Object {
           "end": "2019-02-12T21:01:22.479Z",
           "page": 1,
