@@ -45,6 +45,7 @@ export function FlyoutFooter({
             <DeleteButton customLinkId={customLinkId} onDelete={onDelete} />
           )}
           <EuiButton
+            data-test-subj="saveButton"
             fill
             type="submit"
             isLoading={isSaving}

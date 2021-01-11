@@ -27,6 +27,7 @@ import { callApmApi } from '../../../../services/rest/createCallApmApi';
 
 const APM_INDEX_LABELS = [
   {
+    dataTestSubj: 'sourcemapIndice',
     configurationName: 'apm_oss.sourcemapIndices',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.sourcemapIndicesLabel',
@@ -34,12 +35,14 @@ const APM_INDEX_LABELS = [
     ),
   },
   {
+    dataTestSubj: 'errorIndices',
     configurationName: 'apm_oss.errorIndices',
     label: i18n.translate('xpack.apm.settings.apmIndices.errorIndicesLabel', {
       defaultMessage: 'Error Indices',
     }),
   },
   {
+    dataTestSubj: 'onboardingIndices',
     configurationName: 'apm_oss.onboardingIndices',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.onboardingIndicesLabel',
@@ -47,12 +50,14 @@ const APM_INDEX_LABELS = [
     ),
   },
   {
+    dataTestSubj: 'spanIndices',
     configurationName: 'apm_oss.spanIndices',
     label: i18n.translate('xpack.apm.settings.apmIndices.spanIndicesLabel', {
       defaultMessage: 'Span Indices',
     }),
   },
   {
+    dataTestSubj: 'transactionIndices',
     configurationName: 'apm_oss.transactionIndices',
     label: i18n.translate(
       'xpack.apm.settings.apmIndices.transactionIndicesLabel',
@@ -60,6 +65,7 @@ const APM_INDEX_LABELS = [
     ),
   },
   {
+    dataTestSubj: 'metricsIndices',
     configurationName: 'apm_oss.metricsIndices',
     label: i18n.translate('xpack.apm.settings.apmIndices.metricsIndicesLabel', {
       defaultMessage: 'Metrics Indices',
@@ -187,40 +193,43 @@ export function ApmIndices() {
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiForm>
-              {APM_INDEX_LABELS.map(({ configurationName, label }) => {
-                const matchedConfiguration = data.find(
-                  ({ configurationName: configName }) =>
-                    configName === configurationName
-                );
-                const defaultValue = matchedConfiguration
-                  ? matchedConfiguration.defaultValue
-                  : '';
-                const savedUiIndexValue = apmIndices[configurationName] || '';
-                return (
-                  <EuiFormRow
-                    key={configurationName}
-                    label={label}
-                    helpText={i18n.translate(
-                      'xpack.apm.settings.apmIndices.helpText',
-                      {
-                        defaultMessage:
-                          'Overrides {configurationName}: {defaultValue}',
-                        values: { configurationName, defaultValue },
-                      }
-                    )}
-                    fullWidth
-                  >
-                    <EuiFieldText
-                      disabled={!canSave}
+              {APM_INDEX_LABELS.map(
+                ({ configurationName, label, dataTestSubj }) => {
+                  const matchedConfiguration = data.find(
+                    ({ configurationName: configName }) =>
+                      configName === configurationName
+                  );
+                  const defaultValue = matchedConfiguration
+                    ? matchedConfiguration.defaultValue
+                    : '';
+                  const savedUiIndexValue = apmIndices[configurationName] || '';
+                  return (
+                    <EuiFormRow
+                      key={configurationName}
+                      label={label}
+                      helpText={i18n.translate(
+                        'xpack.apm.settings.apmIndices.helpText',
+                        {
+                          defaultMessage:
+                            'Overrides {configurationName}: {defaultValue}',
+                          values: { configurationName, defaultValue },
+                        }
+                      )}
                       fullWidth
-                      name={configurationName}
-                      placeholder={defaultValue}
-                      value={savedUiIndexValue}
-                      onChange={handleChangeIndexConfigurationEvent}
-                    />
-                  </EuiFormRow>
-                );
-              })}
+                    >
+                      <EuiFieldText
+                        data-test-subj={dataTestSubj}
+                        disabled={!canSave}
+                        fullWidth
+                        name={configurationName}
+                        placeholder={defaultValue}
+                        value={savedUiIndexValue}
+                        onChange={handleChangeIndexConfigurationEvent}
+                      />
+                    </EuiFormRow>
+                  );
+                }
+              )}
               <EuiSpacer />
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
