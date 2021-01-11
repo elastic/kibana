@@ -465,6 +465,7 @@ export class IndexPatternsService {
       metaFields,
     });
 
+    console.log('LOGGG create: indexPattern', indexPattern);
     if (!skipFetchFields) {
       await this.refreshFields(indexPattern);
     }
@@ -481,6 +482,7 @@ export class IndexPatternsService {
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
+    console.log('LOGGG createAndSave: indexPattern', indexPattern);
     await this.createSavedObject(indexPattern, override);
     await this.setDefault(indexPattern.id!);
     return indexPattern;
@@ -501,8 +503,9 @@ export class IndexPatternsService {
         throw new DuplicateIndexPatternError(`Duplicate index pattern: ${indexPattern.title}`);
       }
     }
-
+    console.log('LOGGG createSavedObject: indexPattern', indexPattern);
     const body = indexPattern.getAsSavedObjectBody();
+    console.log('LOGGG createSavedObject: body', body);
     const response = await this.savedObjectsClient.create(savedObjectType, body, {
       id: indexPattern.id,
     });

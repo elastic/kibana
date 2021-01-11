@@ -162,6 +162,7 @@ export class CreateIndexPatternWizard extends Component<
     const { indexPattern } = this.state;
 
     try {
+      console.log('createIndexPattern', indexPatternId);
       emptyPattern = await this.context.services.data.indexPatterns.createAndSave({
         id: indexPatternId,
         title: indexPattern,
