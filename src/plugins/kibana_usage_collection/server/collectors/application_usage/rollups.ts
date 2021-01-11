@@ -96,11 +96,22 @@ export async function rollDailyData(logger: Logger, savedObjectsClient?: ISavedO
           })),
           { overwrite: true }
         );
-        await Promise.all(
+        const promiseStatuses = await Promise.allSettled(
           rawApplicationUsageTransactional.map(
             ({ id }) => savedObjectsClient.delete(SAVED_OBJECTS_TRANSACTIONAL_TYPE, id) // There is no bulkDelete :(
           )
         );
+        const rejectedPromises = promiseStatuses.filter(
+          (settledResult): settledResult is PromiseRejectedResult =>
+            settledResult.status === 'rejected'
+        );
+        if (rejectedPromises.length > 0) {
+          throw new Error(
+            `Failed to delete some items in ${SAVED_OBJECTS_TRANSACTIONAL_TYPE}: ${JSON.stringify(
+              rejectedPromises.map(({ reason }) => reason)
+            )}`
+          );
+        }
       }
     } while (toCreate.size > 0);
   } catch (err) {
