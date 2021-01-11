@@ -25,7 +25,7 @@
 
     // optionalPlugins from ./kibana.json
     // TODO { "path": "../security/tsconfig.json" },
-    // TODO { "path": "../features/tsconfig.json" },
+    { "path": "../features/tsconfig.json" },
     // TODO { "path": "../cloud/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
