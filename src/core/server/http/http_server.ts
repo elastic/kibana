@@ -6,7 +6,7 @@
  * Public License, v 1.
  */
 
-import { Server } from '@hapi/hapi';
+import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
@@ -33,6 +33,7 @@ import {
 import { IsAuthenticated, AuthStateStorage, GetAuthState } from './auth_state_storage';
 import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
+import { getEcsResponseLog } from './logging';
 import { HttpServiceSetup, HttpServerInfo } from './types';
 
 /** @internal */
@@ -112,6 +113,7 @@ export class HttpServer {
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
+    this.setupResponseLogging();
     this.setupRequestStateAssignment(config);
 
     return {
@@ -280,6 +282,29 @@ export class HttpServer {
         return h.continue;
       });
     }
+  }
+
+  private setupResponseLogging() {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.stopped) {
+      this.log.warn(`setupResponseLogging called after stop`);
+    }
+
+    const log = this.logger.get('http', 'server', this.name, 'response');
+
+    const handleResponse = (request: Request) => {
+      const { message, ...rest } = getEcsResponseLog(request);
+      log.debug(message!, rest);
+    };
+
+    this.server.events.on('response', handleResponse);
+    this.server.ext('onPreStop', () => {
+      if (this.server) {
+        this.server.events.removeListener('response', handleResponse);
+      }
+    });
   }
 
   private setupRequestStateAssignment(config: HttpConfig) {
