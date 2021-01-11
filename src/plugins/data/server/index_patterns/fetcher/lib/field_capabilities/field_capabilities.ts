@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import { defaults, keyBy, sortBy } from 'lodash';
+import { defaults, isEmpty, keyBy, sortBy } from 'lodash';
 
 import { ElasticsearchClient } from 'kibana/server';
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
 import { FieldDescriptor } from '../../index_patterns_fetcher';
+
+// import { performance } from 'perf_hooks';
 
 /**
  *  Get the field capabilities for field in `indices`, excluding
@@ -74,12 +76,11 @@ export async function getFieldCapabilities(
     )
     .map(mergeOverrides);
 
-  const filteredFields =
-    filters != null
-      ? filters.aggregatable === true
-        ? allFieldsUnsorted.filter((field) => field.aggregatable === true)
-        : allFieldsUnsorted
-      : allFieldsUnsorted;
+  const filteredFields = !isEmpty(filters)
+    ? filters?.aggregatable === true
+      ? allFieldsUnsorted.filter((field) => field.aggregatable === true)
+      : allFieldsUnsorted
+    : allFieldsUnsorted;
 
   // const t2 = performance.now();
   // console.log(`Loop took ${t2-t1} milliseconds.`);
