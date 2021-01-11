@@ -71,9 +71,9 @@ function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   secretsObject: ActionTypeSecretsType
 ) {
-  let url: URL;
+  const configuredUrl = secretsObject.webhookUrl;
   try {
-    url = new URL(secretsObject.webhookUrl);
+    new URL(configuredUrl);
   } catch (err) {
     return i18n.translate('xpack.actions.builtin.teams.teamsConfigurationErrorNoHostname', {
       defaultMessage: 'error configuring teams action: unable to parse host name from webhookUrl',
@@ -81,7 +81,7 @@ function validateActionTypeConfig(
   }
 
   try {
-    configurationUtilities.ensureHostnameAllowed(url.hostname);
+    configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
     return i18n.translate('xpack.actions.builtin.teams.teamsConfigurationError', {
       defaultMessage: 'error configuring teams action: {message}',

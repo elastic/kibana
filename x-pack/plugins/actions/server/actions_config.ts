@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
-import { URL } from 'url';
+import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
@@ -22,7 +22,7 @@ export enum EnabledActionTypes {
 }
 
 enum AllowListingField {
-  url = 'url',
+  URL = 'url',
   hostname = 'hostname',
 }
 
@@ -56,17 +56,17 @@ function disabledActionTypeErrorMessage(actionType: string) {
   });
 }
 
-function isAllowed({ allowedHosts }: ActionsConfigType, hostname: string): boolean {
+function isAllowed({ allowedHosts }: ActionsConfigType, hostname: string | null): boolean {
   const allowed = new Set(allowedHosts);
   if (allowed.has(AllowedHosts.Any)) return true;
-  if (allowed.has(hostname)) return true;
+  if (hostname && allowed.has(hostname)) return true;
   return false;
 }
 
 function isHostnameAllowedInUri(config: ActionsConfigType, uri: string): boolean {
   return pipe(
-    tryCatch(() => new URL(uri)),
-    map((url) => url.hostname),
+    tryCatch(() => url.parse(uri)),
+    map((parsedUrl) => parsedUrl.hostname),
     mapNullable((hostname) => isAllowed(config, hostname)),
     getOrElse<boolean>(() => false)
   );
@@ -94,7 +94,7 @@ export function getActionsConfigurationUtilities(
     isActionTypeEnabled,
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
-        throw new Error(allowListErrorMessage(AllowListingField.url, uri));
+        throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
       }
     },
     ensureHostnameAllowed(hostname: string) {
