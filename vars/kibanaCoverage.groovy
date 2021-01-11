@@ -60,7 +60,6 @@ def uploadCoverageHtmls(prefix) {
   [
     'target/kibana-coverage/functional-combined',
     'target/kibana-coverage/jest-combined',
-    'target/kibana-coverage/mocha-combined',
   ].each { uploadWithVault(prefix, it) }
 }
 
@@ -78,7 +77,6 @@ def prokLinks(title) {
   kibanaPipeline.bash('''
 cat << EOF > src/dev/code_coverage/www/index_partial_2.html
         <a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/jest-combined/index.html">Latest Jest</a>
-        <a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/mocha-combined/index.html">Latest Mocha</a>
         <a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/functional-combined/index.html">Latest FTR</a>
       </nav>
     </div>
@@ -151,7 +149,6 @@ def generateReports(title) {
     . src/dev/code_coverage/shell_scripts/extract_archives.sh
     . src/dev/code_coverage/shell_scripts/fix_html_reports_parallel.sh
     . src/dev/code_coverage/shell_scripts/merge_jest_and_functional.sh
-    . src/dev/code_coverage/shell_scripts/copy_mocha_reports.sh
     # zip combined reports
     tar -czf kibana-coverage.tar.gz target/kibana-coverage/**/*
   """, title)

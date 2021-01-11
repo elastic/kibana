@@ -2,6 +2,7 @@
   "include": [],
   "references": [
     { "path": "./src/core/tsconfig.json" },
+    { "path": "./src/plugins/apm_oss/tsconfig.json" },
     { "path": "./src/plugins/bfetch/tsconfig.json" },
     { "path": "./src/plugins/data/tsconfig.json" },
     { "path": "./src/plugins/dev_tools/tsconfig.json" },
@@ -24,5 +25,6 @@
     { "path": "./src/plugins/ui_actions/tsconfig.json" },
     { "path": "./src/plugins/url_forwarding/tsconfig.json" },
     { "path": "./src/plugins/usage_collection/tsconfig.json" },
+    { "path": "./src/plugins/management/tsconfig.json" },
   ]
 }
