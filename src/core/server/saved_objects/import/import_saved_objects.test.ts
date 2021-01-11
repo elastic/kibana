@@ -23,26 +23,28 @@ import {
   SavedObjectsClientContract,
   SavedObjectsType,
   SavedObject,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
 } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
-import { SavedObjectsImportOptions, ISavedObjectTypeRegistry } from '..';
+import { ISavedObjectTypeRegistry } from '..';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
-import { importSavedObjectsFromStream } from './import_saved_objects';
+import { importSavedObjectsFromStream, ImportSavedObjectsOptions } from './import_saved_objects';
 
-import { collectSavedObjects } from './collect_saved_objects';
-import { regenerateIds } from './regenerate_ids';
-import { validateReferences } from './validate_references';
-import { checkConflicts } from './check_conflicts';
-import { checkOriginConflicts } from './check_origin_conflicts';
-import { createSavedObjects } from './create_saved_objects';
+import {
+  collectSavedObjects,
+  regenerateIds,
+  validateReferences,
+  checkConflicts,
+  checkOriginConflicts,
+  createSavedObjects,
+} from './lib';
 
-jest.mock('./collect_saved_objects');
-jest.mock('./regenerate_ids');
-jest.mock('./validate_references');
-jest.mock('./check_conflicts');
-jest.mock('./check_origin_conflicts');
-jest.mock('./create_saved_objects');
+jest.mock('./lib/collect_saved_objects');
+jest.mock('./lib/regenerate_ids');
+jest.mock('./lib/validate_references');
+jest.mock('./lib/check_conflicts');
+jest.mock('./lib/check_origin_conflicts');
+jest.mock('./lib/create_saved_objects');
 
 const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
   fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
@@ -79,17 +81,18 @@ describe('#importSavedObjectsFromStream', () => {
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
 
-  const setupOptions = (createNewCopies: boolean = false): SavedObjectsImportOptions => {
+  const setupOptions = (
+    createNewCopies: boolean = false,
+    getTypeImpl: (name: string) => any = (type: string) =>
+      ({
+        // other attributes aren't needed for the purposes of injecting metadata
+        management: { icon: `${type}-icon` },
+      } as any)
+  ): ImportSavedObjectsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();
-    typeRegistry.getType.mockImplementation(
-      (type: string) =>
-        ({
-          // other attributes aren't needed for the purposes of injecting metadata
-          management: { icon: `${type}-icon` },
-        } as any)
-    );
+    typeRegistry.getType.mockImplementation(getTypeImpl);
     return {
       readStream,
       objectLimit,
@@ -100,17 +103,20 @@ describe('#importSavedObjectsFromStream', () => {
       createNewCopies,
     };
   };
-  const createObject = (): SavedObject<{
+  const createObject = ({
+    type = 'foo-type',
+    title = 'some-title',
+  }: { type?: string; title?: string } = {}): SavedObject<{
     title: string;
   }> => {
     return {
-      type: 'foo-type',
+      type,
       id: uuidv4(),
       references: [],
-      attributes: { title: 'some-title' },
+      attributes: { title },
     };
   };
-  const createError = (): SavedObjectsImportError => {
+  const createError = (): SavedObjectsImportFailure => {
     const title = 'some-title';
     return {
       type: 'foo-type',
@@ -416,6 +422,51 @@ describe('#importSavedObjectsFromStream', () => {
           successResults,
           errors: errorResults,
         });
+      });
+    });
+
+    test('uses `type.management.getTitle` to resolve the titles', async () => {
+      const obj1 = createObject({ type: 'foo' });
+      const obj2 = createObject({ type: 'bar', title: 'bar-title' });
+
+      const options = setupOptions(false, (type) => {
+        if (type === 'foo') {
+          return {
+            management: { getTitle: () => 'getTitle-foo', icon: `${type}-icon` },
+          };
+        }
+        return {
+          management: { icon: `${type}-icon` },
+        };
+      });
+
+      getMockFn(checkConflicts).mockResolvedValue({
+        errors: [],
+        filteredObjects: [],
+        importIdMap: new Map(),
+        pendingOverwrites: new Set(),
+      });
+      getMockFn(createSavedObjects).mockResolvedValue({ errors: [], createdObjects: [obj1, obj2] });
+
+      const result = await importSavedObjectsFromStream(options);
+      // successResults only includes the imported object's type, id, and destinationId (if a new one was generated)
+      const successResults = [
+        {
+          type: obj1.type,
+          id: obj1.id,
+          meta: { title: 'getTitle-foo', icon: `${obj1.type}-icon` },
+        },
+        {
+          type: obj2.type,
+          id: obj2.id,
+          meta: { title: 'bar-title', icon: `${obj2.type}-icon` },
+        },
+      ];
+
+      expect(result).toEqual({
+        success: true,
+        successCount: 2,
+        successResults,
       });
     });
 

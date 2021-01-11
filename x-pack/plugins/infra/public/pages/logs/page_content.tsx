@@ -82,7 +82,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
                 )}
                 size="s"
                 color="primary"
-                iconType="plusInCircle"
+                iconType="indexOpen"
               >
                 {ADD_DATA_LABEL}
               </EuiButtonEmpty>

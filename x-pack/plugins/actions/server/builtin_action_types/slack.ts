@@ -52,6 +52,7 @@ const ParamsSchema = schema.object({
 
 // action type definition
 
+export const ActionTypeId = '.slack';
 // customizing executor is only used for tests
 export function getActionType({
   logger,
@@ -63,7 +64,7 @@ export function getActionType({
   executor?: ExecutorType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 }): SlackActionType {
   return {
-    id: '.slack',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',

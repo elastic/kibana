@@ -15,6 +15,7 @@ export interface State {
   canUserCRUD: boolean | null;
   hasIndexManage: boolean | null;
   hasIndexWrite: boolean | null;
+  hasIndexUpdateDelete: boolean | null;
   isSignalIndexExists: boolean | null;
   isAuthenticated: boolean | null;
   hasEncryptionKey: boolean | null;
@@ -27,6 +28,7 @@ export const initialState: State = {
   canUserCRUD: null,
   hasIndexManage: null,
   hasIndexWrite: null,
+  hasIndexUpdateDelete: null,
   isSignalIndexExists: null,
   isAuthenticated: null,
   hasEncryptionKey: null,
@@ -44,6 +46,10 @@ export type Action =
   | {
       type: 'updateHasIndexWrite';
       hasIndexWrite: boolean | null;
+    }
+  | {
+      type: 'updateHasIndexUpdateDelete';
+      hasIndexUpdateDelete: boolean | null;
     }
   | {
       type: 'updateIsSignalIndexExists';
@@ -88,6 +94,12 @@ export const userInfoReducer = (state: State, action: Action): State => {
       return {
         ...state,
         hasIndexWrite: action.hasIndexWrite,
+      };
+    }
+    case 'updateHasIndexUpdateDelete': {
+      return {
+        ...state,
+        hasIndexUpdateDelete: action.hasIndexUpdateDelete,
       };
     }
     case 'updateIsSignalIndexExists': {
@@ -151,6 +163,7 @@ export const useUserInfo = (): State => {
       canUserCRUD,
       hasIndexManage,
       hasIndexWrite,
+      hasIndexUpdateDelete,
       isSignalIndexExists,
       isAuthenticated,
       hasEncryptionKey,
@@ -166,6 +179,7 @@ export const useUserInfo = (): State => {
     hasEncryptionKey: isApiEncryptionKey,
     hasIndexManage: hasApiIndexManage,
     hasIndexWrite: hasApiIndexWrite,
+    hasIndexUpdateDelete: hasApiIndexUpdateDelete,
   } = usePrivilegeUser();
   const {
     loading: indexNameLoading,
@@ -196,6 +210,19 @@ export const useUserInfo = (): State => {
       dispatch({ type: 'updateHasIndexWrite', hasIndexWrite: hasApiIndexWrite });
     }
   }, [dispatch, loading, hasIndexWrite, hasApiIndexWrite]);
+
+  useEffect(() => {
+    if (
+      !loading &&
+      hasIndexUpdateDelete !== hasApiIndexUpdateDelete &&
+      hasApiIndexUpdateDelete != null
+    ) {
+      dispatch({
+        type: 'updateHasIndexUpdateDelete',
+        hasIndexUpdateDelete: hasApiIndexUpdateDelete,
+      });
+    }
+  }, [dispatch, loading, hasIndexUpdateDelete, hasApiIndexUpdateDelete]);
 
   useEffect(() => {
     if (
@@ -272,6 +299,7 @@ export const useUserInfo = (): State => {
     canUserCRUD,
     hasIndexManage,
     hasIndexWrite,
+    hasIndexUpdateDelete,
     signalIndexName,
     signalIndexMappingOutdated,
   };
