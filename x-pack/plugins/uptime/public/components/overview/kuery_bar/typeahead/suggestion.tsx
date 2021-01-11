@@ -11,7 +11,7 @@ import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public
 import { euiStyled } from '../../../../../../observability/public';
 
 const SuggestionItem = euiStyled.div<{ selected: boolean }>`
-  background: ${(props) => (props.selected ? props.theme.eui.euiColorMediumShade : 'initial')};
+  background: ${(props) => (props.selected ? props.theme.eui.euiColorLightestShade : 'initial')};
 `;
 
 function getIconColor(type: string) {

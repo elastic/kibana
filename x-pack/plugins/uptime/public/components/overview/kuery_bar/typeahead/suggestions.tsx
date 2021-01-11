@@ -6,7 +6,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { isEmpty } from 'lodash';
-import { tint } from 'polished';
+import { rgba } from 'polished';
 import { Suggestion } from './suggestion';
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
 import { euiStyled } from '../../../../../../observability/public';
@@ -31,15 +31,28 @@ export function px(value: number): string {
 
 const List = euiStyled.ul`
   width: 100%;
-  border: 1px solid ${(props) => props.theme.eui.euiColorLightestShade};
+  border: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
   border-radius: ${px(units.quarter)};
-  box-shadow: 0px ${px(units.quarter)} ${px(units.double)} ${(props) =>
-  tint(0.1, props.theme.eui.euiColorFullShade)};
-  background: ${(props) => props.theme.eui.euiColorLightestShade};
+  background-color: ${(props) => props.theme.eui.euiColorEmptyShade};
   z-index: 10;
   max-height: ${px(unit * 20)};
-  overflow: scroll;
+  overflow: auto;
   position: absolute;
+
+  &::-webkit-scrollbar {
+    height: ${({ theme }) => theme.eui.euiScrollBar};
+    width: ${({ theme }) => theme.eui.euiScrollBar};
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-clip: content-box;
+    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
+    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
+  }
+  &::-webkit-scrollbar-corner,
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `;
 
 interface SuggestionsProps {
