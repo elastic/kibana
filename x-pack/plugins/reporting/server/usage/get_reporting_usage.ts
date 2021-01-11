@@ -157,7 +157,7 @@ export async function getReportingUsage(
               aggs: { pdf: { terms: { field: OBJECT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } } },
             },
             [LAYOUT_TYPES_KEY]: {
-              filter: { term: { jobtype: PRINTABLE_PDF_JOBTYPE } },
+              filter: { term: { jobtype: PRINTABLE_PDF_JOBTYPE } }, // filter for PDF export type
               aggs: { pdf: { terms: { field: LAYOUT_TYPES_FIELD, size: DEFAULT_TERMS_SIZE } } },
             },
           },

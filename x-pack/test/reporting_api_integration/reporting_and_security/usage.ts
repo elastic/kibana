@@ -15,14 +15,14 @@ interface UsageStats {
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const reportingAPI = getService('reportingAPI');
   const usageAPI = getService('usageAPI');
 
   describe('Usage', () => {
-    before(async () => {
+    beforeEach(async () => {
       await esArchiver.load(OSS_KIBANA_ARCHIVE_PATH);
       await esArchiver.load(OSS_DATA_ARCHIVE_PATH);
 
@@ -173,6 +173,46 @@ export default function ({ getService }: FtrProviderContext) {
         reportingAPI.expectAllTimePdfLayoutStats(usage, 'print', 2);
         reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'csv', 0);
         reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 2);
+      });
+
+      it('should handle multiple export types and layouts', async () => {
+        // Data from the dashboards/current archive
+        await reportingAPI.expectAllJobsToFinishSuccessfully(
+          await Promise.all([
+            reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_DASHBOARD_7_11),
+            reportingAPI.postJob(GenerationUrls.PDF_PRINT_DASHBOARD_7_11),
+            reportingAPI.postJob(GenerationUrls.PNG_DASHBOARD_7_11),
+            reportingAPI.postJob(GenerationUrls.PDF_VISUALIZE_7_11),
+            reportingAPI.postJob(GenerationUrls.PNG_VISUALIZE_7_11),
+          ])
+        );
+
+        // Add Canvas worksheet saved object (erases the existing .kibana index)
+        await esArchiver.load('canvas/reports');
+
+        // Data from the canvas/reports archive
+        await reportingAPI.expectAllJobsToFinishSuccessfully(
+          await Promise.all([
+            reportingAPI.postJob(GenerationUrls.PDF_PRESERVE_CANVAS_7_11),
+            reportingAPI.postJob(GenerationUrls.PDF_CANVAS_7_11),
+          ])
+        );
+
+        const usage = await usageAPI.getUsageStats();
+
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'csv', 0); // 0
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'png', 2); // 2 PNGs (1 Dashboard, 1 Visualize)
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 5); // 5 PDFs (2 Dashboard, 2 Canvas, 1 Visualize)
+
+        reportingAPI.expectRecentPdfAppStats(usage, 'dashboard', 2); // 2 PDFs from Dashboard
+        reportingAPI.expectRecentPdfAppStats(usage, 'canvas_workpad', 2); // 2 PDF from Canvas
+        reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 1); // 1 PDF from Visualize
+
+        reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 3); // 3 Preserve Layout PDFs (1 Dashboard, 1 Visualize, 1 Canvas) [PNG not counted, but is also preserve_layout]
+        reportingAPI.expectRecentPdfLayoutStats(usage, 'print', 1); // 1 Print Layout PDF from Dashboard
+        reportingAPI.expectRecentPdfLayoutStats(usage, 'canvas', 1); // 1 Canvas Layout PDF from Canvas
+
+        await esArchiver.unload('canvas/reports');
       });
     });
   });
