@@ -29,7 +29,7 @@ describe('createSelectHandler', () => {
       changeHandler = createSelectHandler(handleChange);
     });
 
-    test('should calls handleChange() function the with correct data', () => {
+    test('should calls handleChange() function with the correct data', () => {
       const fn = changeHandler('test');
 
       fn([{ value: 'foo', label: 'foo' }]);
