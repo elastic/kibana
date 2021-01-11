@@ -92,6 +92,7 @@ describe('service', () => {
       const result = await createTrustedApp(exceptionsListClient, {
         name: 'linux trusted app 1',
         description: 'Linux trusted app 1',
+        effectScope: { type: 'global' },
         os: OperatingSystem.LINUX,
         entries: [
           createConditionEntry(ConditionEntryField.PATH, '/bin/malware'),
