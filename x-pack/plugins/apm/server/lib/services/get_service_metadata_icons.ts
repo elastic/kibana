@@ -11,10 +11,10 @@ import {
   KUBERNETES,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { ContainerType } from '../../../common/service_metadata';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 type ServiceMetadataIconsRaw = Pick<
@@ -31,9 +31,11 @@ interface ServiceMetadataIcons {
 export async function getServiceMetadataIcons({
   serviceName,
   setup,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
 }): Promise<ServiceMetadataIcons> {
   const { start, end, apmEventClient } = setup;
 
@@ -44,7 +46,13 @@ export async function getServiceMetadataIcons({
   ];
 
   const params = {
-    apm: { events: [ProcessorEvent.metric] },
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
     terminateAfter: 1,
     body: {
       size: 1,

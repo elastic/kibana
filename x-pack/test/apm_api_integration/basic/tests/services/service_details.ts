@@ -67,6 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 "name": "java",
                 "version": "1.19.1-SNAPSHOT.null",
               },
+              "framework": "Servlet API",
               "runtime": Object {
                 "name": "Java",
                 "version": "11.0.9.1",

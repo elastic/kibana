@@ -59,7 +59,15 @@ export const serviceMetadataDetailsRoute = createRoute({
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
 
-    return getServiceMetadataDetails({ serviceName, setup });
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getServiceMetadataDetails({
+      serviceName,
+      setup,
+      searchAggregatedTransactions,
+    });
   },
 });
 
@@ -74,7 +82,15 @@ export const serviceMetadataIconsRoute = createRoute({
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
 
-    return getServiceMetadataIcons({ serviceName, setup });
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return getServiceMetadataIcons({
+      serviceName,
+      setup,
+      searchAggregatedTransactions,
+    });
   },
 });
 

@@ -18,10 +18,10 @@ import {
   SERVICE_NODE_NAME,
   SERVICE_VERSION,
 } from '../../../common/elasticsearch_fieldnames';
-import { ProcessorEvent } from '../../../common/processor_event';
 import { ContainerType } from '../../../common/service_metadata';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
+import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 type ServiceMetadataDetailsRaw = Pick<
@@ -59,9 +59,11 @@ interface ServiceMetadataDetails {
 export async function getServiceMetadataDetails({
   serviceName,
   setup,
+  searchAggregatedTransactions,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
 }): Promise<ServiceMetadataDetails> {
   const { start, end, apmEventClient } = setup;
 
@@ -80,7 +82,13 @@ export async function getServiceMetadataDetails({
   ];
 
   const params = {
-    apm: { events: [ProcessorEvent.metric] },
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
     body: {
       size: 1,
       _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],
