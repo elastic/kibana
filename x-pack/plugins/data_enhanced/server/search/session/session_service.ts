@@ -14,7 +14,9 @@ import {
   SavedObjectsClientContract,
   Logger,
   SavedObject,
+  CoreSetup,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsFindOptions,
 } from '../../../../../../src/core/server';
 import {
   IKibanaSearchRequest,
@@ -30,20 +32,26 @@ import {
   SearchStrategyDependencies,
 } from '../../../../../../src/plugins/data/server';
 import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../../../task_manager/server';
+import {
   SearchSessionSavedObjectAttributes,
-  SearchSessionFindOptions,
   SearchSessionRequestInfo,
   SearchSessionStatus,
 } from '../../../common';
 import { SEARCH_SESSION_TYPE } from '../../saved_objects';
 import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
-
-const INMEM_MAX_SESSIONS = 10000;
-const DEFAULT_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
-export const INMEM_TRACKING_INTERVAL = 10 * 1000;
-export const INMEM_TRACKING_TIMEOUT_SEC = 60;
-export const MAX_UPDATE_RETRIES = 3;
+import { registerSearchSessionsTask, scheduleSearchSessionsTasks } from './monitoring_task';
+import {
+  DEFAULT_EXPIRATION,
+  INMEM_MAX_SESSIONS,
+  INMEM_TRACKING_INTERVAL,
+  INMEM_TRACKING_TIMEOUT_SEC,
+  MAX_UPDATE_RETRIES,
+} from './constants';
+import { SearchStatus } from './types';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -55,6 +63,14 @@ export interface SessionInfo {
   ids: Map<string, SearchSessionRequestInfo>;
 }
 
+interface SetupDependencies {
+  taskManager: TaskManagerSetupContract;
+}
+
+interface StartDependencies {
+  taskManager: TaskManagerStartContract;
+  config$: Observable<ConfigSchema>;
+}
 export class SearchSessionService implements ISessionService {
   /**
    * Map of sessionId to { [requestHash]: searchId }
@@ -66,8 +82,12 @@ export class SearchSessionService implements ISessionService {
 
   constructor(private readonly logger: Logger) {}
 
-  public async start(core: CoreStart, config$: Observable<ConfigSchema>) {
-    return this.setupMonitoring(core, config$);
+  public setup(core: CoreSetup, deps: SetupDependencies) {
+    registerSearchSessionsTask(core, deps.taskManager, this.logger);
+  }
+
+  public async start(core: CoreStart, deps: StartDependencies) {
+    return this.setupMonitoring(core, deps);
   }
 
   public stop() {
@@ -75,9 +95,10 @@ export class SearchSessionService implements ISessionService {
     clearTimeout(this.monitorTimer);
   }
 
-  private setupMonitoring = async (core: CoreStart, config$: Observable<ConfigSchema>) => {
-    const config = await config$.pipe(first()).toPromise();
+  private setupMonitoring = async (core: CoreStart, deps: StartDependencies) => {
+    const config = await deps.config$.pipe(first()).toPromise();
     if (config.search.sendToBackground.enabled) {
+      scheduleSearchSessionsTasks(deps.taskManager, this.logger);
       this.logger.debug(`setupMonitoring | Enabling monitoring`);
       const internalRepo = core.savedObjects.createInternalRepository([SEARCH_SESSION_TYPE]);
       this.internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
@@ -281,7 +302,7 @@ export class SearchSessionService implements ISessionService {
 
   // TODO: Throw an error if this session doesn't belong to this user
   public find = (
-    options: SearchSessionFindOptions,
+    options: Omit<SavedObjectsFindOptions, 'type'>,
     { savedObjectsClient }: SearchSessionDependencies
   ) => {
     return savedObjectsClient.find<SearchSessionSavedObjectAttributes>({
@@ -326,6 +347,7 @@ export class SearchSessionService implements ISessionService {
     const searchInfo = {
       id: searchId,
       strategy: strategy!,
+      status: SearchStatus.IN_PROGRESS,
     };
 
     // If there is already a saved object for this session, update it to include this request/ID.
@@ -387,7 +409,7 @@ export class SearchSessionService implements ISessionService {
         save: (sessionId: string, attributes: Partial<SearchSessionSavedObjectAttributes>) =>
           this.save(sessionId, attributes, deps),
         get: (sessionId: string) => this.get(sessionId, deps),
-        find: (options: SearchSessionFindOptions) => this.find(options, deps),
+        find: (options: SavedObjectsFindOptions) => this.find(options, deps),
         update: (sessionId: string, attributes: Partial<SearchSessionSavedObjectAttributes>) =>
           this.update(sessionId, attributes, deps),
         delete: (sessionId: string) => this.delete(sessionId, deps),
