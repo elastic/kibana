@@ -12,7 +12,8 @@ export {
   EqlSearchStrategyResponse,
   IAsyncSearchOptions,
   pollSearch,
-  BackgroundSessionSavedObjectAttributes,
-  BackgroundSessionFindOptions,
-  BackgroundSessionStatus,
+  SearchSessionSavedObjectAttributes,
+  SearchSessionFindOptions,
+  SearchSessionStatus,
+  SearchSessionRequestInfo,
 } from './search';
