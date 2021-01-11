@@ -64,10 +64,7 @@ export function buildConfigFromDetector(job, detectorIndex) {
         ]);
     }
 
-    if (detector.function === ML_JOB_AGGREGATION.NON_ZERO_COUNT && cardinalityField !== undefined) {
-      config.metricFunction = ES_AGGREGATION.CARDINALITY;
-      config.metricFieldName = cardinalityField;
-    } else {
+    if (detector.function !== ML_JOB_AGGREGATION.NON_ZERO_COUNT && cardinalityField === undefined) {
       // For count detectors using summary_count_field, plot sum(summary_count_field_name)
       config.metricFunction = ES_AGGREGATION.SUM;
       config.metricFieldName = summaryCountFieldName;
