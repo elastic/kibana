@@ -18,7 +18,7 @@
  */
 
 import { filter } from 'lodash';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -161,6 +161,43 @@ export const EditIndexPattern = withRouter(
 
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
 
+    const indexPatternCollections = useMemo(
+      () => (
+        <>
+          {indexPattern.aliasCollection && (
+            <div>
+              <FormattedMessage
+                id="indexPatternManagement.editIndexPattern.indexPatternCollections.aliasCollection"
+                defaultMessage="Active Aliases in Collection: "
+              />
+              {indexPattern.aliasCollection.map((label) => (
+                <EuiBadge color="hollow" key={label}>
+                  {label}
+                </EuiBadge>
+              ))}
+            </div>
+          )}
+          {indexPattern.activeCollection && (
+            <div>
+              <FormattedMessage
+                id="indexPatternManagement.editIndexPattern.indexPatternCollections.activeCollection"
+                defaultMessage="All Aliases in Collection: "
+              />
+              {indexPattern.activeCollection.map((label) => (
+                <EuiBadge color="hollow" key={label}>
+                  {label}
+                </EuiBadge>
+              ))}
+            </div>
+          )}
+          {(indexPattern.aliasCollection || indexPattern.activeCollection) && (
+            <EuiSpacer size="m" />
+          )}
+        </>
+      ),
+      [indexPattern.activeCollection, indexPattern.aliasCollection]
+    );
+
     return (
       <EuiPanel paddingSize={'l'}>
         <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
@@ -186,6 +223,7 @@ export const EditIndexPattern = withRouter(
             </EuiFlexGroup>
           )}
           <EuiSpacer size="m" />
+          {indexPatternCollections}
           <EuiText>
             <p>
               <FormattedMessage

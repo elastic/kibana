@@ -1,0 +1,6 @@
+.inpBlockColumn {
+  display: block;
+  & > span.euiBadge:first-child {
+    margin-left: 4px;
+  }
+}

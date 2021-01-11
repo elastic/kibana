@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import './columns.scss';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -28,6 +28,7 @@ import {
   EuiBadgeGroup,
   EuiPageContent,
   EuiTitle,
+  HorizontalAlignment,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -37,7 +38,7 @@ import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_re
 import { IndexPatternManagmentContext } from '../../types';
 import { CreateButton } from '../create_button';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
-import { getIndexPatterns, getIndexPatternsCollection } from '../utils';
+import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { EmptyState } from './empty_state';
 import { MatchedItem, ResolveIndexResponseItemAlias } from '../create_index_pattern_wizard/types';
@@ -107,10 +108,6 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         uiSettings.get('defaultIndex'),
         indexPatternManagementStart
       );
-      console.log('LOG KIPs', {
-        defaultIndex: uiSettings.get('defaultIndex'),
-        gettedIndexPatterns,
-      });
       setIsLoadingIndexPatterns(false);
       setCreationOptions(options);
       setIndexPatterns(gettedIndexPatterns);
@@ -176,6 +173,23 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       ),
       dataType: 'string' as const,
       sortable: ({ sort }: { sort: string }) => sort,
+      width: '25%',
+    },
+    {
+      align: 'right' as HorizontalAlignment,
+      className: 'inpBlockColumn',
+      field: 'aliasCollection',
+      name: '',
+      render: (no?: string[]) =>
+        no ? (
+          <>
+            {no.map((label) => (
+              <EuiBadge color="hollow" key={label}>
+                {label}
+              </EuiBadge>
+            ))}
+          </>
+        ) : null,
     },
   ];
 

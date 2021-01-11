@@ -248,21 +248,18 @@ export class IndexPatternsService {
    * @param options
    */
   getFieldsForWildcard = async (options: GetFieldsOptions) => {
-    console.log('LOG IndexPatternsService getFieldsForWildcard', options);
     if (options.collection != null) {
       return await this.getFieldsForWildcardCollection(options as GetCollectionFieldsOptions);
     }
 
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    const patternFields = await this.apiClient.getFieldsForWildcard({
+    return await this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
     });
-    console.log('LOG pattern fields:', patternFields);
-    return patternFields;
   };
 
   /**
@@ -273,7 +270,6 @@ export class IndexPatternsService {
     indexPattern: IndexPattern | IndexPatternSpec,
     options?: GetFieldsOptions
   ) => {
-    console.log('LOG getFieldsForIndexPattern in IndexPatternsService');
     return this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
@@ -323,7 +319,6 @@ export class IndexPatternsService {
     options: GetFieldsOptions,
     fieldAttrs: FieldAttrs = {}
   ) => {
-    console.log('LOG refreshFieldSpecMap');
     const fieldsAsArr = Object.values(fields);
     const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
     try {
@@ -529,7 +524,6 @@ export class IndexPatternsService {
 
   async createAndSave(spec: IndexPatternSpec, override = false, skipFetchFields = false) {
     const indexPattern = await this.create(spec, skipFetchFields);
-    console.log('LOGGG createAndSave: indexPattern', indexPattern);
     await this.createSavedObject(indexPattern, override);
     await this.setDefault(indexPattern.id!);
     return indexPattern;
@@ -550,9 +544,7 @@ export class IndexPatternsService {
         throw new DuplicateIndexPatternError(`Duplicate index pattern: ${indexPattern.title}`);
       }
     }
-    console.log('LOGGG createSavedObject: indexPattern', indexPattern);
     const body = indexPattern.getAsSavedObjectBody();
-    console.log('LOGGG createSavedObject: body', body);
     const response = await this.savedObjectsClient.create(savedObjectType, body, {
       id: indexPattern.id,
     });
