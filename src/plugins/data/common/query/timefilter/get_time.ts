@@ -38,11 +38,10 @@ export function getAbsoluteTimeRange(
   timeRange: TimeRange,
   { forceNow }: { forceNow?: Date } = {}
 ): TimeRange {
-  const from = dateMath.parse(timeRange.from, { forceNow });
-  const to = dateMath.parse(timeRange.to, { forceNow, roundUp: true });
+  const { min, max } = calculateBounds(timeRange, { forceNow });
   return {
-    from: from ? from.toISOString() : timeRange.from,
-    to: to ? to.toISOString() : timeRange.to,
+    from: min ? min.toISOString() : timeRange.from,
+    to: max ? max.toISOString() : timeRange.to,
   };
 }
 
