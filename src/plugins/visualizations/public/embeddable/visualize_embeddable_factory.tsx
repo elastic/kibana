@@ -163,7 +163,7 @@ export class VisualizeEmbeddableFactory
     }
   }
 
-  public async create(input: VisualizeInput & { savedVis?: SerializedVis }, parent?: IContainer) {
+  public async create(input: VisualizeInput & { visType?: string }, parent?: IContainer) {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     if (input.savedVis) {
@@ -182,6 +182,7 @@ export class VisualizeEmbeddableFactory
       showNewVisModal({
         originatingApp: await this.getCurrentAppId(),
         outsideVisualizeApp: true,
+        visType: input?.visType,
       });
       return undefined;
     }

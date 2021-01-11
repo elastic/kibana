@@ -23,11 +23,11 @@ import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
+import { VisualizeInput } from 'src/plugins/visualizations/public';
 import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
   EmbeddableFactoryNotFoundError,
-  EmbeddableInput,
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
@@ -137,11 +137,30 @@ export function DashboardTopNav({
 
   const createNew = useCallback(async () => {
     const type = 'visualization';
+    const factory = embeddable.getEmbeddableFactory<VisualizeInput>(type);
+    if (!factory) {
+      throw new EmbeddableFactoryNotFoundError(type);
+    }
+
+    await factory.create({} as VisualizeInput, dashboardContainer);
+  }, [dashboardContainer, embeddable]);
+
+  const createNewMarkdown = useCallback(async () => {
+    const type = 'visualization';
+    const factory = embeddable.getEmbeddableFactory<VisualizeInput>(type);
+    if (!factory) {
+      throw new EmbeddableFactoryNotFoundError(type);
+    }
+    await factory.create({ visType: 'markdown' } as VisualizeInput, dashboardContainer);
+  }, [dashboardContainer, embeddable]);
+
+  const createNewInputControl = useCallback(async () => {
+    const type = 'visualization';
     const factory = embeddable.getEmbeddableFactory(type);
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }
-    await factory.create({} as EmbeddableInput, dashboardContainer);
+    await factory.create({ visType: 'input_control_vis' } as VisualizeInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
 
   const clearAddPanel = useCallback(() => {
@@ -482,8 +501,8 @@ export function DashboardTopNav({
   );
 
   const quickButtons = [
-    { iconType: 'visText', tooltip: 'Markdown', action: () => {} },
-    { iconType: 'controlsHorizontal', tooltip: 'Input controls', action: () => {} },
+    { iconType: 'visText', tooltip: 'Markdown', action: createNewMarkdown },
+    { iconType: 'controlsHorizontal', tooltip: 'Input control', action: createNewInputControl },
   ];
 
   return (

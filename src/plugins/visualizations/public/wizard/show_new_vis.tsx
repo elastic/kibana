@@ -40,6 +40,7 @@ export interface ShowNewVisModalParams {
   originatingApp?: string;
   outsideVisualizeApp?: boolean;
   createByValue?: boolean;
+  visType?: string;
 }
 
 /**
@@ -52,6 +53,7 @@ export function showNewVisModal({
   onClose,
   originatingApp,
   outsideVisualizeApp,
+  visType,
 }: ShowNewVisModalParams = {}) {
   const container = document.createElement('div');
   let isClosed = false;
@@ -89,6 +91,7 @@ export function showNewVisModal({
           usageCollection={getUsageCollector()}
           application={getApplication()}
           docLinks={getDocLinks()}
+          visType={visType}
         />
       </Suspense>
     </I18nProvider>

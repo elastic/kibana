@@ -52,6 +52,7 @@ interface TypeSelectionProps {
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
+  visType?: string;
 }
 
 interface TypeSelectionState {
@@ -92,6 +93,11 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
   public render() {
     if (!this.props.isOpen) {
+      return null;
+    }
+
+    if (this.props.visType) {
+      this.onVisTypeSelected(this.props.visTypesRegistry.get(this.props.visType));
       return null;
     }
 

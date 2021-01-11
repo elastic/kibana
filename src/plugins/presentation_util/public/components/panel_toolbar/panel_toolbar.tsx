@@ -46,6 +46,8 @@ interface Props {
   primaryActionButton: JSX.Element;
   /** The Embeddable Container where embeddables should be added */
   container: IContainer;
+  /** Array of buttons for quick actions */
+  quickButtons?: QuickButtons[];
 }
 
 interface QuickButtons {
@@ -56,7 +58,6 @@ interface QuickButtons {
 
 interface Services {
   core: CoreStart;
-  quickButtons?: QuickButtons[];
   embeddable: EmbeddableStart;
 }
 
@@ -130,12 +131,13 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, quickButtons = []
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">
             {quickButtons.map(({ iconType, tooltip, action }: QuickButtons) => (
-              <EuiFlexItem>
-                <EuiToolTip title={tooltip}>
+              <EuiFlexItem id={tooltip}>
+                <EuiToolTip content={tooltip}>
                   <EuiButtonIcon
                     className="panelToolbarButton"
                     iconType={iconType}
                     onClick={action}
+                    aria-label={`Create new ${tooltip}`}
                   />
                 </EuiToolTip>
               </EuiFlexItem>
