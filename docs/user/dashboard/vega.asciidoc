@@ -1,13 +1,25 @@
 [[vega]]
 === Create panels with Vega
 
-With *Vega*, you configure the visualization panels by editing the *Vega* and *Vega-Lite* specs.
+With *Vega*, you create visualizations by editing the *Vega* and *Vega-Lite* specs.
+
+The specs use https://hjson.github.io/[HJSON], which is similar to JSON, but optimized for editing. 
+
+HJSON supports the following:
+
+* Comments using // or /* syntax
+* Object keys without quotes
+* String values without quotes
+* Optional commas
+* Double or single quotes
+* Multiline strings
 
 [float]
-==== Tutorial: Create custom panels with Vega and Vega-lite
+==== Tutorials: Create custom panels with Vega and Vega-lite
 
-You collected sales data for your store, and you want to visualize and analyze the data on a dashboard. To create custom panels of the data, use *Vega* and *Vega-Lite* to 
-create a stacked area chart and an area chart.
+To become familiar with how to use *Vega* and *Vega-Lite*, follow the tutorials to help you learn how to edit the specs and create custom visualizations.
+
+As you edit the specs, work in small steps, and frequently save your work. Small changes can cause unexpected results. To save, click *Save* in the toolbar.
 
 [float]
 ===== Add the data and create the dashboard
@@ -36,18 +48,9 @@ A pre-populated line chart displays the total number of documents.
 . Change the <<set-time-filter,time range>> to *Last 7 days*.
 
 [float]
-===== Create a stacked area chart
+===== Create a stacked area chart from an {es} search query
 
-To create a stacked area chart, edit the Vega-Lite spec. The Vega-Lite spec uses https://hjson.github.io/[HJSON], which is similar to JSON, but optimized for editing. 
-
-HJSON supports the following:
-
-* Comments using // or /* syntax
-* Object keys without quotes
-* String values without quotes
-* Optional commas
-* Double or single quotes
-* Multiline strings
+To learn how to edit and use the *Vega-Lite* spec, create a stacked area chart from an {es} query.
 
 . In the *Vega-Lite* spec, replace `index: _all` with the following, then click *Update*:
 
@@ -513,26 +516,10 @@ The selection is controlled by a signal. To view the signal, click *Inspect* in 
 ====
 
 [float]
-==== Save the panel
-
-Save and add the panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. Enter the *Title* and an optional *Description*. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
-
-[float]
 [[vega-tutorial-update-kibana-filters-from-vega]]
-=== Create an area chart
+=== Tutorial: Update {kib} filters from Vega
 
-To build an area chart using an {es} search query, edit the *Vega* spec, 
-then add click and drag handlers to update the {kib} filters.
+To build an area chart using an {es} search query, edit the *Vega* spec, then add click and drag handlers to update the {kib} filters.
 
 In the *Vega* spec, enter the following, then click *Update*:
 
@@ -1114,18 +1101,3 @@ dragging:
 
 ----
 ====
-
-[float]
-===== Save the panel
-
-Save and add the panel to the dashboard.
-
-. From the toolbar, click *Save*.
-
-. Enter the *Title* and an optional *Description*. 
-
-. From the *Tags* drop down, select any applicable tags. 
-
-. Select *Add to Dashboard after saving*.
-
-. Click *Save and return*.
