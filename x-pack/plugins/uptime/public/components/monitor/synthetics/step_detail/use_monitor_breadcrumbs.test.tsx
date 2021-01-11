@@ -13,6 +13,7 @@ import { useMonitorBreadcrumb } from './use_monitor_breadcrumb';
 import { OVERVIEW_ROUTE } from '../../../../../common/constants';
 import { Ping } from '../../../../../common/runtime_types/ping';
 import { JourneyState } from '../../../../state/reducers/journey';
+import { chromeServiceMock } from 'src/core/public/mocks';
 
 describe('useMonitorBreadcrumbs', () => {
   it('sets the given breadcrumbs', () => {
@@ -64,6 +65,7 @@ const mockCore: () => [() => ChromeBreadcrumb[], any] = () => {
       navigateToUrl: jest.fn(),
     },
     chrome: {
+      ...chromeServiceMock.createStartContract,
       setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
         breadcrumbObj = newBreadcrumbs;
       },
