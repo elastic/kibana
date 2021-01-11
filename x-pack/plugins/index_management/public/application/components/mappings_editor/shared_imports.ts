@@ -58,7 +58,7 @@ export {
   RuntimeField,
   RuntimeFieldEditorFlyoutContent,
   RuntimeFieldEditorFlyoutContentProps,
-} from '../../../../../runtime_fields/public';
+} from '../../../../../runtime_field_editor/public';
 
 export { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 

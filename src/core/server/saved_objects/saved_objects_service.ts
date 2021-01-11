@@ -49,6 +49,8 @@ import {
 import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
+import { SavedObjectsExporter, ISavedObjectsExporter } from './export';
+import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
@@ -149,11 +151,6 @@ export interface SavedObjectsServiceSetup {
    * ```
    */
   registerType: (type: SavedObjectsType) => void;
-
-  /**
-   * Returns the maximum number of objects allowed for import or export operations.
-   */
-  getImportExportObjectLimit: () => number;
 }
 
 /**
@@ -212,6 +209,14 @@ export interface SavedObjectsServiceStart {
    * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
    */
   createSerializer: () => SavedObjectsSerializer;
+  /**
+   * Creates an {@link ISavedObjectsExporter | exporter} bound to given client.
+   */
+  createExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+  /**
+   * Creates an {@link ISavedObjectsImporter | importer} bound to given client.
+   */
+  createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
   /**
    * Returns the {@link ISavedObjectTypeRegistry | registry} containing all registered
    * {@link SavedObjectsType | saved object types}
@@ -340,7 +345,6 @@ export class SavedObjectsService
         }
         this.typeRegistry.registerType(type);
       },
-      getImportExportObjectLimit: () => this.config!.maxImportExportSize,
     };
   }
 
@@ -451,6 +455,17 @@ export class SavedObjectsService
       createScopedRepository: repositoryFactory.createScopedRepository,
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
+      createExporter: (savedObjectsClient) =>
+        new SavedObjectsExporter({
+          savedObjectsClient,
+          exportSizeLimit: this.config!.maxImportExportSize,
+        }),
+      createImporter: (savedObjectsClient) =>
+        new SavedObjectsImporter({
+          savedObjectsClient,
+          typeRegistry: this.typeRegistry,
+          importSizeLimit: this.config!.maxImportExportSize,
+        }),
       getTypeRegistry: () => this.typeRegistry,
     };
   }
