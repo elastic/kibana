@@ -98,7 +98,6 @@ const TopNav = ({
           stateTransfer: services.stateTransferService,
           savedObjectsClient,
           embeddableId,
-          onAppLeave,
         },
         services
       );
@@ -117,7 +116,6 @@ const TopNav = ({
     services,
     embeddableId,
     savedObjectsClient,
-    onAppLeave,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
     vis.data.indexPattern ? [vis.data.indexPattern] : []
@@ -145,8 +143,9 @@ const TopNav = ({
       // Confirm when the user has made any changes to an existing visualizations
       // or when the user has configured something without saving
       if (
-        ((originatingApp && originatingApp === 'dashboards') || originatingApp === 'canvas') &&
-        (hasUnappliedChanges || hasUnsavedChanges)
+        originatingApp &&
+        (hasUnappliedChanges || hasUnsavedChanges) &&
+        !services.stateTransferService.isTransferInProgress
       ) {
         return actions.confirm(
           i18n.translate('visualize.confirmModal.confirmTextDescription', {
@@ -161,10 +160,11 @@ const TopNav = ({
     });
   }, [
     onAppLeave,
-    hasUnappliedChanges,
-    hasUnsavedChanges,
-    visualizeCapabilities.save,
     originatingApp,
+    hasUnsavedChanges,
+    hasUnappliedChanges,
+    visualizeCapabilities.save,
+    services.stateTransferService.isTransferInProgress,
   ]);
 
   useEffect(() => {
