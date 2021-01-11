@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { resetContext } from 'kea';
+import { LogicMounter } from '../../../__mocks__/kea.mock';
 
 import { mockHttpValues } from '../../../__mocks__';
 jest.mock('../../../shared/http', () => ({
@@ -57,24 +57,7 @@ describe('CredentialsLogic', () => {
     fullEngineAccessChecked: false,
   };
 
-  const mount = (defaults?: object) => {
-    if (!defaults) {
-      resetContext({});
-    } else {
-      resetContext({
-        defaults: {
-          enterprise_search: {
-            app_search: {
-              credentials_logic: {
-                ...defaults,
-              },
-            },
-          },
-        },
-      });
-    }
-    CredentialsLogic.mount();
-  };
+  const { mount } = new LogicMounter(CredentialsLogic);
 
   const newToken = {
     id: 1,
