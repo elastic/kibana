@@ -176,4 +176,83 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
       ]);
     });
   });
+
+  describe('filters', () => {
+    it('filters aggregatable fields', async () => {
+      const fieldsFromFieldCaps = [
+        { name: 'foo', aggregatable: true },
+        { name: 'bar', aggregatable: false },
+      ];
+
+      stubDeps({ fieldsFromFieldCaps });
+
+      expect(
+        await getFieldCapabilities(undefined, undefined, undefined, { aggregatable: true })
+      ).toEqual([
+        {
+          name: 'foo',
+          aggregatable: true,
+          type: 'string',
+          searchable: false,
+          readFromDocValues: false,
+        },
+      ]);
+    });
+
+    it('ignores empty filters', async () => {
+      const fieldsFromFieldCaps = [
+        { name: 'foo', aggregatable: true },
+        { name: 'bar', aggregatable: false },
+      ];
+
+      stubDeps({ fieldsFromFieldCaps });
+
+      expect(await getFieldCapabilities(undefined, undefined, undefined, {})).toEqual([
+        {
+          name: 'bar',
+          aggregatable: false,
+          type: 'string',
+          searchable: false,
+          readFromDocValues: false,
+        },
+        {
+          name: 'foo',
+          aggregatable: true,
+          type: 'string',
+          searchable: false,
+          readFromDocValues: false,
+        },
+      ]);
+    });
+
+    it('ignores unknown filters', async () => {
+      const fieldsFromFieldCaps = [
+        { name: 'foo', aggregatable: true },
+        { name: 'bar', aggregatable: false },
+      ];
+
+      stubDeps({ fieldsFromFieldCaps });
+
+      expect(
+        await getFieldCapabilities(undefined, undefined, undefined, {
+          unsupportedFilter: 'hello, world',
+        })
+      ).toEqual([
+        {
+          name: 'bar',
+          aggregatable: false,
+          type: 'string',
+          searchable: false,
+          readFromDocValues: false,
+        },
+        {
+          name: 'foo',
+          aggregatable: true,
+          type: 'string',
+          searchable: false,
+          readFromDocValues: false,
+        },
+      ]);
+    });
+  });
 });

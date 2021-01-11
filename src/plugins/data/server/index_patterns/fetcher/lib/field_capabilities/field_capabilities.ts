@@ -25,8 +25,6 @@ import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
 import { FieldDescriptor } from '../../index_patterns_fetcher';
 
-// import { performance } from 'perf_hooks';
-
 /**
  *  Get the field capabilities for field in `indices`, excluding
  *  all internal/underscore-prefixed fields that are not in `metaFields`
@@ -46,8 +44,6 @@ export async function getFieldCapabilities(
 ) {
   const esFieldCaps = await callFieldCapsApi(callCluster, indices, fieldCapsOptions);
   const fieldsFromFieldCapsByName = keyBy(readFieldCapsResponse(esFieldCaps.body), 'name');
-
-  // const t1 = performance.now();
 
   const allFieldsUnsorted = Object.keys(fieldsFromFieldCapsByName)
     .filter((name) => !name.startsWith('_'))
@@ -82,8 +78,5 @@ export async function getFieldCapabilities(
       : allFieldsUnsorted
     : allFieldsUnsorted;
 
-  // const t2 = performance.now();
-  // console.log(`Loop took ${t2-t1} milliseconds.`);
-
-  return sortBy(filters != null ? filteredFields : allFieldsUnsorted, 'name');
+  return sortBy(filteredFields, 'name');
 }
