@@ -20,7 +20,6 @@
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 
 import { AppMountParameters, OverlayRef } from 'kibana/public';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../kibana_react/public';
 import {
@@ -31,6 +30,7 @@ import {
 } from '../types';
 import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
+import type { IndexPattern } from '../../../../data/public';
 
 interface VisualizeTopNavProps {
   currentAppState: VisualizeAppState;
@@ -80,7 +80,7 @@ const TopNav = ({
     },
     [visInstance.embeddableHandler]
   );
-  const stateTransfer = services.embeddable.getStateTransfer();
+  const savedObjectsClient = services.savedObjects.client;
 
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
@@ -95,9 +95,9 @@ const TopNav = ({
           visInstance,
           stateContainer,
           visualizationIdFromUrl,
-          stateTransfer,
+          stateTransfer: services.stateTransferService,
+          savedObjectsClient,
           embeddableId,
-          onAppLeave,
         },
         services
       );
@@ -115,10 +115,11 @@ const TopNav = ({
     visualizationIdFromUrl,
     services,
     embeddableId,
-    stateTransfer,
-    onAppLeave,
+    savedObjectsClient,
   ]);
-  const [indexPattern, setIndexPattern] = useState(vis.data.indexPattern);
+  const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>(
+    vis.data.indexPattern ? [vis.data.indexPattern] : []
+  );
   const showDatePicker = () => {
     // tsvb loads without an indexPattern initially (TODO investigate).
     // hide timefilter only if timeFieldName is explicitly undefined.
@@ -142,8 +143,9 @@ const TopNav = ({
       // Confirm when the user has made any changes to an existing visualizations
       // or when the user has configured something without saving
       if (
-        ((originatingApp && originatingApp === 'dashboards') || originatingApp === 'canvas') &&
-        (hasUnappliedChanges || hasUnsavedChanges)
+        originatingApp &&
+        (hasUnappliedChanges || hasUnsavedChanges) &&
+        !services.stateTransferService.isTransferInProgress
       ) {
         return actions.confirm(
           i18n.translate('visualize.confirmModal.confirmTextDescription', {
@@ -158,21 +160,35 @@ const TopNav = ({
     });
   }, [
     onAppLeave,
-    hasUnappliedChanges,
-    hasUnsavedChanges,
-    visualizeCapabilities.save,
     originatingApp,
+    hasUnsavedChanges,
+    hasUnappliedChanges,
+    visualizeCapabilities.save,
+    services.stateTransferService.isTransferInProgress,
   ]);
 
   useEffect(() => {
-    if (!vis.data.indexPattern) {
-      services.data.indexPatterns.getDefault().then((index) => {
-        if (index) {
-          setIndexPattern(index);
+    const asyncSetIndexPattern = async () => {
+      let indexes: IndexPattern[] | undefined;
+
+      if (vis.type.getUsedIndexPattern) {
+        indexes = await vis.type.getUsedIndexPattern(vis.params);
+      }
+      if (!indexes || !indexes.length) {
+        const defaultIndex = await services.data.indexPatterns.getDefault();
+        if (defaultIndex) {
+          indexes = [defaultIndex];
         }
-      });
+      }
+      if (indexes) {
+        setIndexPatterns(indexes);
+      }
+    };
+
+    if (!vis.data.indexPattern) {
+      asyncSetIndexPattern();
     }
-  }, [services.data.indexPatterns, vis.data.indexPattern]);
+  }, [vis.params, vis.type, services.data.indexPatterns, vis.data.indexPattern]);
 
   return isChromeVisible ? (
     /**
@@ -189,7 +205,7 @@ const TopNav = ({
       onQuerySubmit={handleRefresh}
       savedQueryId={currentAppState.savedQuery}
       onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
-      indexPatterns={indexPattern ? [indexPattern] : undefined}
+      indexPatterns={indexPatterns}
       screenTitle={vis.title}
       showAutoRefreshOnly={!showDatePicker()}
       showDatePicker={showDatePicker()}
@@ -207,7 +223,7 @@ const TopNav = ({
     <TopNavMenu
       appName={APP_NAME}
       setMenuMountPoint={setHeaderActionMenu}
-      indexPatterns={indexPattern ? [indexPattern] : undefined}
+      indexPatterns={indexPatterns}
       showSearchBar
       showSaveQuery={false}
       showDatePicker={false}

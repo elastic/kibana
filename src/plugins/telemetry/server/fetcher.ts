@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import moment from 'moment';
 import { Observable, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
 // @ts-ignore
@@ -32,7 +31,7 @@ import {
   SavedObjectsClientContract,
   SavedObjectsClient,
   CoreStart,
-  ILegacyCustomClusterClient,
+  ICustomClusterClient,
 } from '../../../core/server';
 import {
   getTelemetryOptIn,
@@ -66,7 +65,7 @@ export class FetcherTask {
   private isSending = false;
   private internalRepository?: SavedObjectsClientContract;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
-  private elasticsearchClient?: ILegacyCustomClusterClient;
+  private elasticsearchClient?: ICustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.config$ = initializerContext.config.create();
@@ -80,7 +79,7 @@ export class FetcherTask {
   ) {
     this.internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
     this.telemetryCollectionManager = telemetryCollectionManager;
-    this.elasticsearchClient = elasticsearch.legacy.createClient('telemetry-fetcher');
+    this.elasticsearchClient = elasticsearch.createClient('telemetry-fetcher');
 
     this.intervalId = timer(this.initialCheckDelayMs, this.checkIntervalMs).subscribe(() =>
       this.sendIfDue()
@@ -213,7 +212,6 @@ export class FetcherTask {
   private async fetchTelemetry() {
     return await this.telemetryCollectionManager!.getStats({
       unencrypted: false,
-      timestamp: moment().valueOf(),
     });
   }
 

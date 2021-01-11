@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type CreatePackagePolicyFrom = 'package' | 'policy' | 'edit';
+export type CreatePackagePolicyFrom = 'package' | 'package-edit' | 'policy' | 'edit';
 export type PackagePolicyFormState = 'VALID' | 'INVALID' | 'CONFIRM' | 'LOADING' | 'SUBMITTED';

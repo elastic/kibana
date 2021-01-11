@@ -12,16 +12,18 @@ import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/s
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
-import { getBeforeSetup, setGlobalDate } from './lib';
 import { InvalidatePendingApiKey } from '../../types';
+import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { auditServiceMock } from '../../../../security/server/audit/index.mock';
+import { getBeforeSetup, setGlobalDate } from './lib';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertsAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
+const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
 
 const kibanaVersion = 'v7.10.0';
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
@@ -39,10 +41,12 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
   kibanaVersion,
+  auditLogger,
 };
 
 beforeEach(() => {
   getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
+  (auditLogger.log as jest.Mock).mockClear();
 });
 
 setGlobalDate();
@@ -109,6 +113,45 @@ describe('disable()', () => {
     });
   });
 
+  describe('auditLogger', () => {
+    test('logs audit event when disabling an alert', async () => {
+      await alertsClient.disable({ id: '1' });
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_disable',
+            outcome: 'unknown',
+          }),
+          kibana: { saved_object: { id: '1', type: 'alert' } },
+        })
+      );
+    });
+
+    test('logs audit event when not authorised to disable an alert', async () => {
+      authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(alertsClient.disable({ id: '1' })).rejects.toThrow();
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'alert_disable',
+            outcome: 'failure',
+          }),
+          kibana: {
+            saved_object: {
+              id: '1',
+              type: 'alert',
+            },
+          },
+          error: {
+            code: 'Error',
+            message: 'Unauthorized',
+          },
+        })
+      );
+    });
+  });
+
   test('disables an alert', async () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
@@ -156,7 +199,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
     expect(
       (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
     ).toBe('123');
@@ -211,7 +254,7 @@ describe('disable()', () => {
         version: '123',
       }
     );
-    expect(taskManager.remove).toHaveBeenCalledWith('task-123');
+    expect(taskManager.removeIfExists).toHaveBeenCalledWith('task-123');
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -237,7 +280,7 @@ describe('disable()', () => {
 
     await alertsClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
-    expect(taskManager.remove).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -271,7 +314,7 @@ describe('disable()', () => {
 
     await alertsClient.disable({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
-    expect(taskManager.remove).toHaveBeenCalled();
+    expect(taskManager.removeIfExists).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'disable(): Failed to load API key to invalidate on alert 1: Fail'
@@ -295,7 +338,7 @@ describe('disable()', () => {
   });
 
   test('throws when failing to remove task from task manager', async () => {
-    taskManager.remove.mockRejectedValueOnce(new Error('Failed to remove task'));
+    taskManager.removeIfExists.mockRejectedValueOnce(new Error('Failed to remove task'));
 
     await expect(alertsClient.disable({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to remove task"`

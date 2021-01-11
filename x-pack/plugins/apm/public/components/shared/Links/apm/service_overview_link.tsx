@@ -8,20 +8,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { APMLink, APMLinkExtendProps, useAPMHref } from './APMLink';
+import { APMQueryParams } from '../url_helpers';
+import { APMLinkExtendProps, useAPMHref } from './APMLink';
 
 interface ServiceOverviewLinkProps extends APMLinkExtendProps {
   serviceName: string;
 }
 
+const persistedFilters: Array<keyof APMQueryParams> = [
+  'latencyAggregationType',
+];
+
 export function useServiceOverviewHref(serviceName: string) {
-  return useAPMHref(`/services/${serviceName}/overview`);
+  return useAPMHref(`/services/${serviceName}/overview`, persistedFilters);
 }
 
 export function ServiceOverviewLink({
   serviceName,
   ...rest
 }: ServiceOverviewLinkProps) {
-  return <APMLink path={`/services/${serviceName}/overview`} {...rest} />;
+  const href = useServiceOverviewHref(serviceName);
+  return <EuiLink href={href} {...rest} />;
 }

@@ -335,7 +335,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
           : i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
               defaultMessage: 'Available fields',
             }),
-
+        helpText: i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {
+          defaultMessage:
+            'Available fields have data in the first 500 documents that match your filters. To view all fields, expand Empty fields. Some field types cannot be visualized in Lens, including full text and geographic fields.',
+        }),
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
         hideDetails: fieldInfoUnavailable,
@@ -356,6 +359,10 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         }),
         defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noEmptyDataLabel', {
           defaultMessage: `There are no empty fields.`,
+        }),
+        helpText: i18n.translate('xpack.lens.indexPattern.emptyFieldsLabelHelp', {
+          defaultMessage:
+            'Empty fields did not contain any values in the first 500 documents based on your filters.',
         }),
       },
       MetaFields: {
@@ -563,7 +570,8 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
                 '{availableFields} available {availableFields, plural, one {field} other {fields}}. {emptyFields} empty {emptyFields, plural, one {field} other {fields}}. {metaFields} meta {metaFields, plural, one {field} other {fields}}.',
               values: {
                 availableFields: fieldGroups.AvailableFields.fields.length,
-                emptyFields: fieldGroups.EmptyFields.fields.length,
+                // empty fields can be undefined if there is no existence information to be fetched
+                emptyFields: fieldGroups.EmptyFields?.fields.length || 0,
                 metaFields: fieldGroups.MetaFields.fields.length,
               },
             })}

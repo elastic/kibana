@@ -43,6 +43,7 @@ export declare class IndexPatternField implements IFieldType
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
+|  [deleteCount()](./kibana-plugin-plugins-data-public.indexpatternfield.deletecount.md) |  |  |
 |  [toJSON()](./kibana-plugin-plugins-data-public.indexpatternfield.tojson.md) |  |  |
 |  [toSpec({ getFormatterForField, })](./kibana-plugin-plugins-data-public.indexpatternfield.tospec.md) |  |  |
 

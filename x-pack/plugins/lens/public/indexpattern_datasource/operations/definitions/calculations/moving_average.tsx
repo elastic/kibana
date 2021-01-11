@@ -11,12 +11,19 @@ import { EuiFormRow } from '@elastic/eui';
 import { EuiFieldNumber } from '@elastic/eui';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
-import { checkForDateHistogram, dateBasedOperationToExpression, hasDateField } from './utils';
+import {
+  buildLabelFunction,
+  checkForDateHistogram,
+  getErrorsForDateReference,
+  dateBasedOperationToExpression,
+  hasDateField,
+} from './utils';
 import { updateColumnParam } from '../../layer_helpers';
-import { useDebounceWithOptions } from '../helpers';
+import { isValidNumber, useDebounceWithOptions } from '../helpers';
+import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import type { OperationDefinition, ParamEditorProps } from '..';
 
-const ofName = (name?: string) => {
+const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.movingAverageOf', {
     defaultMessage: 'Moving average of {name}',
     values: {
@@ -27,7 +34,7 @@ const ofName = (name?: string) => {
         }),
     },
   });
-};
+});
 
 export type MovingAverageIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -44,7 +51,7 @@ export const movingAverageOperation: OperationDefinition<
   type: 'moving_average',
   priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.movingAverage', {
-    defaultMessage: 'Moving Average',
+    defaultMessage: 'Moving average',
   }),
   input: 'fullReference',
   selectionStyle: 'full',
@@ -54,15 +61,17 @@ export const movingAverageOperation: OperationDefinition<
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
-  getPossibleOperation: () => {
-    return {
-      dataType: 'number',
-      isBucketed: false,
-      scale: 'ratio',
-    };
+  getPossibleOperation: (indexPattern) => {
+    if (hasDateField(indexPattern)) {
+      return {
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      };
+    }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label);
+    return ofName(columns[column.references[0]]?.label, column.timeScale);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'moving_average', {
@@ -72,12 +81,13 @@ export const movingAverageOperation: OperationDefinition<
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const metric = layer.columns[referenceIds[0]];
     return {
-      label: ofName(metric?.label),
+      label: ofName(metric?.label, previousColumn?.timeScale),
       dataType: 'number',
       operationType: 'moving_average',
       isBucketed: false,
       scale: 'ratio',
       references: referenceIds,
+      timeScale: previousColumn?.timeScale,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
@@ -91,35 +101,43 @@ export const movingAverageOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern) => {
     return hasDateField(newIndexPattern);
   },
-  getErrorMessage: (layer: IndexPatternLayer) => {
-    return checkForDateHistogram(
+  onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
+  getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
+    return getErrorsForDateReference(
       layer,
+      columnId,
       i18n.translate('xpack.lens.indexPattern.movingAverage', {
-        defaultMessage: 'Moving Average',
+        defaultMessage: 'Moving average',
       })
     );
   },
+  getDisabledStatus(indexPattern, layer) {
+    return checkForDateHistogram(
+      layer,
+      i18n.translate('xpack.lens.indexPattern.movingAverage', {
+        defaultMessage: 'Moving average',
+      })
+    )?.join(', ');
+  },
+  timeScalingMode: 'optional',
 };
 
 function MovingAverageParamEditor({
-  state,
-  setState,
+  layer,
+  updateLayer,
   currentColumn,
-  layerId,
+  columnId,
 }: ParamEditorProps<MovingAverageIndexPatternColumn>) {
   const [inputValue, setInputValue] = useState(String(currentColumn.params.window));
 
   useDebounceWithOptions(
     () => {
-      if (inputValue === '') {
-        return;
-      }
-      const inputNumber = Number(inputValue);
-      setState(
+      if (!isValidNumber(inputValue, true, undefined, 1)) return;
+      const inputNumber = parseInt(inputValue, 10);
+      updateLayer(
         updateColumnParam({
-          state,
-          layerId,
-          currentColumn,
+          layer,
+          columnId,
           paramName: 'window',
           value: inputNumber,
         })
@@ -129,6 +147,7 @@ function MovingAverageParamEditor({
     256,
     [inputValue]
   );
+
   return (
     <EuiFormRow
       label={i18n.translate('xpack.lens.indexPattern.movingAverage.window', {
@@ -136,11 +155,15 @@ function MovingAverageParamEditor({
       })}
       display="columnCompressed"
       fullWidth
+      isInvalid={!isValidNumber(inputValue)}
     >
       <EuiFieldNumber
         compressed
         value={inputValue}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
+        min={1}
+        step={1}
+        isInvalid={!isValidNumber(inputValue)}
       />
     </EuiFormRow>
   );

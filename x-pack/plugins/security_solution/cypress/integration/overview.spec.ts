@@ -13,15 +13,20 @@ import { OVERVIEW_URL } from '../urls/navigation';
 
 import overviewFixture from '../fixtures/overview_search_strategy.json';
 import emptyInstance from '../fixtures/empty_instance.json';
+import { cleanKibana } from '../tasks/common';
 
 describe('Overview Page', () => {
+  before(() => {
+    cleanKibana();
+  });
+
   it('Host stats render with correct values', () => {
     cy.stubSearchStrategyApi(overviewFixture, 'overviewHost');
     loginAndWaitForPage(OVERVIEW_URL);
     expandHostStats();
 
     HOST_STATS.forEach((stat) => {
-      cy.get(stat.domId).invoke('text').should('eq', stat.value);
+      cy.get(stat.domId).should('have.text', stat.value);
     });
   });
 
@@ -31,7 +36,7 @@ describe('Overview Page', () => {
     expandNetworkStats();
 
     NETWORK_STATS.forEach((stat) => {
-      cy.get(stat.domId).invoke('text').should('eq', stat.value);
+      cy.get(stat.domId).should('have.text', stat.value);
     });
   });
 

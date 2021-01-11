@@ -59,7 +59,7 @@ const getResponseMock = (base = {}) => base;
 
 const getMockFetchClients = (resp: any) => {
   const fetchParamsMock = createCollectorFetchContextMock();
-  fetchParamsMock.callCluster.mockResolvedValue(resp);
+  fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: resp });
   return fetchParamsMock;
 };
 describe('license checks', () => {
@@ -463,7 +463,6 @@ describe('Ready for collection observable', () => {
     expect(args).toMatchInlineSnapshot(`
       Object {
         "fetch": [Function],
-        "formatForBulkUpload": [Function],
         "isReady": [Function],
         "schema": Object {
           "PNG": Object {

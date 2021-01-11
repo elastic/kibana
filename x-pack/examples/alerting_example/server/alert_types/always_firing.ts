@@ -11,16 +11,16 @@ import {
   DEFAULT_INSTANCES_TO_GENERATE,
   ALERTING_EXAMPLE_APP_ID,
   AlwaysFiringParams,
+  AlwaysFiringActionGroupIds,
 } from '../../common/constants';
 
-const ACTION_GROUPS = [
-  { id: 'small', name: 'Small t-shirt' },
-  { id: 'medium', name: 'Medium t-shirt' },
-  { id: 'large', name: 'Large t-shirt' },
-];
-const DEFAULT_ACTION_GROUP = 'small';
+type ActionGroups = 'small' | 'medium' | 'large';
+const DEFAULT_ACTION_GROUP: ActionGroups = 'small';
 
-function getTShirtSizeByIdAndThreshold(id: string, thresholds: AlwaysFiringParams['thresholds']) {
+function getTShirtSizeByIdAndThreshold(
+  id: string,
+  thresholds: AlwaysFiringParams['thresholds']
+): ActionGroups {
   const idAsNumber = parseInt(id, 10);
   if (!isNaN(idAsNumber)) {
     if (thresholds?.large && thresholds.large < idAsNumber) {
@@ -36,11 +36,22 @@ function getTShirtSizeByIdAndThreshold(id: string, thresholds: AlwaysFiringParam
   return DEFAULT_ACTION_GROUP;
 }
 
-export const alertType: AlertType<AlwaysFiringParams> = {
+export const alertType: AlertType<
+  AlwaysFiringParams,
+  { count?: number },
+  { triggerdOnCycle: number },
+  never,
+  AlwaysFiringActionGroupIds
+> = {
   id: 'example.always-firing',
   name: 'Always firing',
-  actionGroups: ACTION_GROUPS,
+  actionGroups: [
+    { id: 'small', name: 'Small t-shirt' },
+    { id: 'medium', name: 'Medium t-shirt' },
+    { id: 'large', name: 'Large t-shirt' },
+  ],
   defaultActionGroupId: DEFAULT_ACTION_GROUP,
+  minimumLicenseRequired: 'basic',
   async executor({
     services,
     params: { instances = DEFAULT_INSTANCES_TO_GENERATE, thresholds },

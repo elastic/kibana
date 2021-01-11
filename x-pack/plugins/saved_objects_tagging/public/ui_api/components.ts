@@ -7,7 +7,7 @@
 import { OverlayStart } from 'src/core/public';
 import { SavedObjectsTaggingApiUiComponent } from '../../../../../src/plugins/saved_objects_tagging_oss/public';
 import { TagsCapabilities } from '../../common';
-import { ITagInternalClient, ITagsCache } from '../tags';
+import { ITagInternalClient, ITagsCache } from '../services';
 import {
   getConnectedTagListComponent,
   getConnectedTagSelectorComponent,

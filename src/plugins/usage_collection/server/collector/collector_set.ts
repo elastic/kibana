@@ -20,7 +20,6 @@
 import { snakeCase } from 'lodash';
 import {
   Logger,
-  LegacyAPICaller,
   ElasticsearchClient,
   ISavedObjectsRepository,
   SavedObjectsClientContract,
@@ -29,14 +28,29 @@ import {
 import { Collector, CollectorOptions } from './collector';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 
-type AnyCollector = Collector<any, any, any>;
-type AnyUsageCollector = UsageCollector<any, any>;
+type AnyCollector = Collector<any, any>;
 
 interface CollectorSetConfig {
   logger: Logger;
   maximumWaitTimeForAllCollectorsInS?: number;
   collectors?: AnyCollector[];
 }
+
+/**
+ * Public interface of the CollectorSet (makes it easier to mock only the public methods)
+ */
+export type CollectorSetPublic = Pick<
+  CollectorSet,
+  | 'makeStatsCollector'
+  | 'makeUsageCollector'
+  | 'registerCollector'
+  | 'getCollectorByType'
+  | 'areAllCollectorsReady'
+  | 'bulkFetch'
+  | 'bulkFetchUsage'
+  | 'toObject'
+  | 'toApiFieldNames'
+>;
 
 export class CollectorSet {
   private _waitingForAllCollectorsTimestamp?: number;
@@ -55,13 +69,12 @@ export class CollectorSet {
    */
   public makeStatsCollector = <
     TFetchReturn,
-    TFormatForBulkUpload,
     WithKibanaRequest extends boolean,
     ExtraOptions extends object = {}
   >(
-    options: CollectorOptions<TFetchReturn, TFormatForBulkUpload, WithKibanaRequest, ExtraOptions>
+    options: CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
   ) => {
-    return new Collector<TFetchReturn, TFormatForBulkUpload, ExtraOptions>(this.logger, options);
+    return new Collector<TFetchReturn, ExtraOptions>(this.logger, options);
   };
 
   /**
@@ -70,32 +83,23 @@ export class CollectorSet {
    */
   public makeUsageCollector = <
     TFetchReturn,
-    TFormatForBulkUpload = { usage: { [key: string]: TFetchReturn } },
     // TODO: Right now, users will need to explicitly claim `true` for TS to allow `kibanaRequest` usage.
     //  If we improve `telemetry-check-tools` so plugins do not need to specify TFetchReturn,
     //  we'll be able to remove the type defaults and TS will successfully infer the config value as provided in JS.
     WithKibanaRequest extends boolean = false,
     ExtraOptions extends object = {}
   >(
-    options: UsageCollectorOptions<
-      TFetchReturn,
-      TFormatForBulkUpload,
-      WithKibanaRequest,
-      ExtraOptions
-    >
+    options: UsageCollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
   ) => {
-    return new UsageCollector<TFetchReturn, TFormatForBulkUpload, ExtraOptions>(
-      this.logger,
-      options
-    );
+    return new UsageCollector<TFetchReturn, ExtraOptions>(this.logger, options);
   };
 
   /**
    * Registers a collector to be used when collecting all the usage and stats data
    * @param collector Collector to be added to the set (previously created via `makeUsageCollector` or `makeStatsCollector`)
    */
-  public registerCollector = <TFetchReturn, TFormatForBulkUpload, ExtraOptions extends object>(
-    collector: Collector<TFetchReturn, TFormatForBulkUpload, ExtraOptions>
+  public registerCollector = <TFetchReturn, ExtraOptions extends object>(
+    collector: Collector<TFetchReturn, ExtraOptions>
   ) => {
     // check instanceof
     if (!(collector instanceof Collector)) {
@@ -116,10 +120,6 @@ export class CollectorSet {
 
   public getCollectorByType = (type: string) => {
     return [...this.collectors.values()].find((c) => c.type === type);
-  };
-
-  public isUsageCollector = (x: AnyUsageCollector | any): x is AnyUsageCollector => {
-    return x instanceof UsageCollector;
   };
 
   public areAllCollectorsReady = async (collectorSet: CollectorSet = this) => {
@@ -170,7 +170,6 @@ export class CollectorSet {
   };
 
   public bulkFetch = async (
-    callCluster: LegacyAPICaller,
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract | ISavedObjectsRepository,
     kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
@@ -181,7 +180,6 @@ export class CollectorSet {
         this.logger.debug(`Fetching data from ${collector.type} collector`);
         try {
           const context = {
-            callCluster,
             esClient,
             soClient,
             ...(collector.extendFetchContext.kibanaRequest && { kibanaRequest }),
@@ -205,20 +203,18 @@ export class CollectorSet {
   /*
    * @return {new CollectorSet}
    */
-  public getFilteredCollectorSet = (filter: (col: AnyCollector) => boolean) => {
+  private getFilteredCollectorSet = (filter: (col: AnyCollector) => boolean) => {
     const filtered = [...this.collectors.values()].filter(filter);
     return this.makeCollectorSetFromArray(filtered);
   };
 
   public bulkFetchUsage = async (
-    callCluster: LegacyAPICaller,
     esClient: ElasticsearchClient,
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
     kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
   ) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
     return await this.bulkFetch(
-      callCluster,
       esClient,
       savedObjectsClient,
       kibanaRequest,
@@ -265,16 +261,6 @@ export class CollectorSet {
         [newName]: getValueOrRecurse(value),
       };
     }, {});
-  };
-
-  // TODO: remove
-  public map = (mapFn: any) => {
-    return [...this.collectors.values()].map(mapFn);
-  };
-
-  // TODO: remove
-  public some = (someFn: any) => {
-    return [...this.collectors.values()].some(someFn);
   };
 
   private makeCollectorSetFromArray = (collectors: AnyCollector[]) => {

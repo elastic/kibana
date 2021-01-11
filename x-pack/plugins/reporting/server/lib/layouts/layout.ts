@@ -17,6 +17,10 @@ export abstract class Layout {
   public id: string = '';
   public groupCount: number = 0;
 
+  public hasHeader: boolean = true;
+  public hasFooter: boolean = true;
+  public useReportingBranding: boolean = true;
+
   constructor(id: string) {
     this.id = id;
   }
@@ -29,11 +33,13 @@ export abstract class Layout {
     pageSizeParams: PageSizeParams
   ): CustomPageSize | PredefinedPageSize;
 
+  // Return the dimensions unscaled dimensions (before multiplying the zoom factor)
+  // driver.setViewport() Adds a top and left margin to the viewport, and then multiplies by the scaling factor
   public abstract getViewport(itemsCount: number): ViewZoomWidthHeight | null;
 
   public abstract getBrowserZoom(): number;
 
   public abstract getBrowserViewport(): Size;
 
-  public abstract getCssOverridesPath(): string;
+  public abstract getCssOverridesPath(): string | undefined;
 }

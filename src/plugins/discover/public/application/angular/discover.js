@@ -23,8 +23,7 @@ import { debounceTime } from 'rxjs/operators';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { i18n } from '@kbn/i18n';
-import { getState, splitState } from './discover_state';
-
+import { createSearchSessionRestorationDataProvider, getState, splitState } from './discover_state';
 import { RequestAdapter } from '../../../../inspector/public';
 import {
   connectToQueryState,
@@ -33,9 +32,9 @@ import {
   syncQueryStateWithUrl,
 } from '../../../../data/public';
 import { getSortArray } from './doc_table';
-import { createFixedScroll } from './directives/fixed_scroll';
 import * as columnActions from './doc_table/actions/columns';
 import indexTemplateLegacy from './discover_legacy.html';
+import indexTemplateGrid from './discover_datagrid.html';
 import { addHelpMenuToAppChrome } from '../components/help_menu/help_menu_util';
 import { discoverResponseHandler } from './response_handler';
 import {
@@ -60,17 +59,19 @@ import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_patte
 import { addFatalError } from '../../../../kibana_legacy/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
-import { removeQueryParam, getQueryParams } from '../../../../kibana_utils/public';
+import { getQueryParams, removeQueryParam } from '../../../../kibana_utils/public';
 import {
   DEFAULT_COLUMNS_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
-import { resolveIndexPattern, loadIndexPattern } from '../helpers/resolve_index_pattern';
+import { loadIndexPattern, resolveIndexPattern } from '../helpers/resolve_index_pattern';
 import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { calcFieldCounts } from '../helpers/calc_field_counts';
+import { getDefaultSort } from './doc_table/lib/get_default_sort';
 
 const services = getServices();
 
@@ -85,7 +86,7 @@ const {
   toastNotifications,
   uiSettings: config,
   trackUiMetric,
-} = services;
+} = getServices();
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -123,7 +124,9 @@ app.config(($routeProvider) => {
   };
   const discoverRoute = {
     ...defaults,
-    template: indexTemplateLegacy,
+    template: getServices().uiSettings.get('doc_table:legacy', true)
+      ? indexTemplateLegacy
+      : indexTemplateGrid,
     reloadOnSearch: false,
     resolve: {
       savedObjects: function ($route, Promise) {
@@ -181,7 +184,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
+function discoverController($element, $route, $scope, $timeout, Promise, uiCapabilities) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -201,8 +204,15 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   };
 
   const history = getHistory();
-  // used for restoring background session
+  // used for restoring a search session
   let isInitialSearch = true;
+
+  // search session requested a data refresh
+  subscriptions.add(
+    data.search.session.onRefresh$.subscribe(() => {
+      refetch$.next();
+    })
+  );
 
   const state = getState({
     getStateDefaults,
@@ -210,6 +220,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     history,
     toasts: core.notifications.toasts,
   });
+
   const {
     appStateContainer,
     startSync: startStateSync,
@@ -280,6 +291,14 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     }
   });
 
+  data.search.session.setSearchSessionInfoProvider(
+    createSearchSessionRestorationDataProvider({
+      appStateContainer,
+      data,
+      getSavedSearchId: () => savedSearch.id,
+    })
+  );
+
   $scope.setIndexPattern = async (id) => {
     const nextIndexPattern = await indexPatterns.get(id);
     if (nextIndexPattern) {
@@ -323,6 +342,8 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
   $scope.showSaveQuery = uiCapabilities.discover.saveQuery;
+  $scope.showTimeCol =
+    !config.get('doc_table:hideTimeColumn', false) && $scope.indexPattern.timeFieldName;
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -395,9 +416,13 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
   function getStateDefaults() {
     const query = $scope.searchSource.getField('query') || data.query.queryString.getDefaultQuery();
-    return {
+    const sort = getSortArray(savedSearch.sort, $scope.indexPattern);
+
+    const defaultState = {
       query,
-      sort: getSortArray(savedSearch.sort, $scope.indexPattern),
+      sort: !sort.length
+        ? getDefaultSort($scope.indexPattern, config.get(SORT_DEFAULT_ORDER_SETTING, 'desc'))
+        : sort,
       columns:
         savedSearch.columns.length > 0
           ? savedSearch.columns
@@ -406,6 +431,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       interval: 'auto',
       filters: _.cloneDeep($scope.searchSource.getOwnField('filter')),
     };
+    if (savedSearch.grid) {
+      defaultState.grid = savedSearch.grid;
+    }
+
+    return defaultState;
   }
 
   $scope.state.index = $scope.indexPattern.id;
@@ -418,8 +448,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     savedSearch: savedSearch,
     indexPatternList: $route.current.locals.savedObjects.ip.list,
     config: config,
-    fixedScroll: createFixedScroll($scope, $timeout),
     setHeaderActionMenu: getHeaderActionMenuMounter(),
+    filterManager,
+    setAppState,
     data,
   };
 
@@ -763,6 +794,17 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     const columns = columnActions.moveColumn($scope.state.columns, columnName, newIndex);
     setAppState({ columns });
   };
+
+  $scope.setColumns = function setColumns(columns) {
+    // remove first element of columns if it's the configured timeFieldName, which is prepended automatically
+    const actualColumns =
+      $scope.indexPattern.timeFieldName && $scope.indexPattern.timeFieldName === columns[0]
+        ? columns.slice(1)
+        : columns;
+    $scope.state = { ...$scope.state, columns: actualColumns };
+    setAppState({ columns: actualColumns });
+  };
+
   async function setupVisualization() {
     // If no timefield has been specified we don't create a histogram of messages
     if (!getTimeField()) return;

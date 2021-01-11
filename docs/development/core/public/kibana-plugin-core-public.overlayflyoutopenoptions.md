@@ -18,5 +18,7 @@ export interface OverlayFlyoutOpenOptions
 |  ["data-test-subj"](./kibana-plugin-core-public.overlayflyoutopenoptions._data-test-subj_.md) | <code>string</code> |  |
 |  [className](./kibana-plugin-core-public.overlayflyoutopenoptions.classname.md) | <code>string</code> |  |
 |  [closeButtonAriaLabel](./kibana-plugin-core-public.overlayflyoutopenoptions.closebuttonarialabel.md) | <code>string</code> |  |
+|  [maxWidth](./kibana-plugin-core-public.overlayflyoutopenoptions.maxwidth.md) | <code>boolean &#124; number &#124; string</code> |  |
 |  [ownFocus](./kibana-plugin-core-public.overlayflyoutopenoptions.ownfocus.md) | <code>boolean</code> |  |
+|  [size](./kibana-plugin-core-public.overlayflyoutopenoptions.size.md) | <code>EuiFlyoutSize</code> |  |
 

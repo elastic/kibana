@@ -69,15 +69,13 @@ const paginationFromUrlParams = (urlParams: UrlPaginationParams): Pagination => 
   // Search params can appear multiple times in the URL, in which case the value for them,
   // once parsed, would be an array. In these case, we take the last value defined
   pagination.currentPage = Number(
-    (Array.isArray(urlParams.currentPage)
-      ? urlParams.currentPage[urlParams.currentPage.length - 1]
-      : urlParams.currentPage) ?? pagination.currentPage
+    (Array.isArray(urlParams.currentPage) ? urlParams.currentPage.pop() : urlParams.currentPage) ??
+      pagination.currentPage
   );
   pagination.pageSize =
     Number(
-      (Array.isArray(urlParams.pageSize)
-        ? urlParams.pageSize[urlParams.pageSize.length - 1]
-        : urlParams.pageSize) ?? pagination.pageSize
+      (Array.isArray(urlParams.pageSize) ? urlParams.pageSize.pop() : urlParams.pageSize) ??
+        pagination.pageSize
     ) ?? pagination.pageSize;
 
   // If Current Page is not a valid positive integer, set it to 1

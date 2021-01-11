@@ -21,6 +21,9 @@ import supertest from 'supertest';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { registerBulkUpdateRoute } from '../bulk_update';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
+import { CoreUsageStatsClient } from '../../../core_usage_data';
+import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_stats_client.mock';
+import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { setupServer } from '../test_utils';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
@@ -30,13 +33,17 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
+  let coreUsageStatsClient: jest.Mocked<CoreUsageStatsClient>;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
 
     const router = httpSetup.createRouter('/api/saved_objects/');
-    registerBulkUpdateRoute(router);
+    coreUsageStatsClient = coreUsageStatsClientMock.create();
+    coreUsageStatsClient.incrementSavedObjectsBulkUpdate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
+    const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+    registerBulkUpdateRoute(router, { coreUsageData });
 
     await server.start();
   });
@@ -45,7 +52,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
     await server.stop();
   });
 
-  it('formats successful response', async () => {
+  it('formats successful response and records usage stats', async () => {
     const time = Date.now().toLocaleString();
     const clientResponse = [
       {
@@ -92,6 +99,9 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
       .expect(200);
 
     expect(result.body).toEqual({ saved_objects: clientResponse });
+    expect(coreUsageStatsClient.incrementSavedObjectsBulkUpdate).toHaveBeenCalledWith({
+      request: expect.anything(),
+    });
   });
 
   it('calls upon savedObjectClient.bulkUpdate', async () => {

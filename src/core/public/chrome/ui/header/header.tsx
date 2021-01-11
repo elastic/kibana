@@ -138,6 +138,7 @@ export function Header({
                     helpSupportUrl$={observables.helpSupportUrl$}
                     kibanaDocLink={kibanaDocLink}
                     kibanaVersion={kibanaVersion}
+                    navigateToUrl={application.navigateToUrl}
                   />,
                   <HeaderNavControls navControls$={observables.navControlsRight$} />,
                 ],

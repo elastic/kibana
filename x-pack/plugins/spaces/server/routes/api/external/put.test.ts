@@ -23,6 +23,7 @@ import { initPutSpacesApi } from './put';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { ObjectType } from '@kbn/config-schema';
 import { SpacesClientService } from '../../../spaces_client';
+import { usageStatsServiceMock } from '../../../usage_stats/usage_stats_service.mock';
 
 describe('PUT /api/spaces/space', () => {
   const spacesSavedObjects = createSpaces();
@@ -47,6 +48,8 @@ describe('PUT /api/spaces/space', () => {
       basePath: httpService.basePath,
     });
 
+    const usageStatsServicePromise = Promise.resolve(usageStatsServiceMock.createSetupContract());
+
     const clientServiceStart = clientService.start(coreStart);
 
     const spacesServiceStart = service.start({
@@ -57,9 +60,9 @@ describe('PUT /api/spaces/space', () => {
     initPutSpacesApi({
       externalRouter: router,
       getStartServices: async () => [coreStart, {}, {}],
-      getImportExportObjectLimit: () => 1000,
       log,
       getSpacesService: () => spacesServiceStart,
+      usageStatsServicePromise,
     });
 
     const [routeDefinition, routeHandler] = router.put.mock.calls[0];

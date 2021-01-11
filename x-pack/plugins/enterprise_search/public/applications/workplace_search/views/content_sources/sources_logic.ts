@@ -14,7 +14,7 @@ import { HttpLogic } from '../../../shared/http';
 
 import {
   flashAPIErrors,
-  setSuccessMessage,
+  setQueuedSuccessMessage,
   FlashMessagesLogic,
 } from '../../../shared/flash_messages';
 
@@ -225,7 +225,7 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
         }
       );
 
-      setSuccessMessage(
+      setQueuedSuccessMessage(
         [
           successfullyConnectedMessage,
           additionalConfiguration ? additionalConfigurationMessage : '',
@@ -282,8 +282,8 @@ const updateSourcesOnToggle = (
  * can diplay "Add New" instead of "Connect", the latter of which is displated only when a connector
  * has been configured but there are no connected sources yet.
  */
-const mergeServerAndStaticData = (
-  serverData: ContentSourceDetails[],
+export const mergeServerAndStaticData = (
+  serverData: Connector[],
   staticData: SourceDataItem[],
   contentSources: ContentSourceDetails[]
 ) => {

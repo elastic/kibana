@@ -7,10 +7,17 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
-import { checkForDateHistogram, dateBasedOperationToExpression, hasDateField } from './utils';
+import {
+  buildLabelFunction,
+  getErrorsForDateReference,
+  checkForDateHistogram,
+  dateBasedOperationToExpression,
+  hasDateField,
+} from './utils';
+import { DEFAULT_TIME_SCALE } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
 
-const ofName = (name?: string) => {
+const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.CounterRateOf', {
     defaultMessage: 'Counter rate of {name}',
     values: {
@@ -21,7 +28,7 @@ const ofName = (name?: string) => {
         }),
     },
   });
-};
+});
 
 export type CounterRateIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -46,28 +53,33 @@ export const counterRateOperation: OperationDefinition<
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
-  getPossibleOperation: () => {
-    return {
-      dataType: 'number',
-      isBucketed: false,
-      scale: 'ratio',
-    };
+  getPossibleOperation: (indexPattern) => {
+    if (hasDateField(indexPattern)) {
+      return {
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      };
+    }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label);
+    const ref = columns[column.references[0]];
+    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined, column.timeScale);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
   },
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
     const metric = layer.columns[referenceIds[0]];
+    const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
     return {
-      label: ofName(metric?.label),
+      label: ofName(metric && 'sourceField' in metric ? metric.sourceField : undefined, timeScale),
       dataType: 'number',
       operationType: 'counter_rate',
       isBucketed: false,
       scale: 'ratio',
       references: referenceIds,
+      timeScale,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
@@ -80,12 +92,22 @@ export const counterRateOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern) => {
     return hasDateField(newIndexPattern);
   },
-  getErrorMessage: (layer: IndexPatternLayer) => {
-    return checkForDateHistogram(
+  getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
+    return getErrorsForDateReference(
       layer,
+      columnId,
       i18n.translate('xpack.lens.indexPattern.counterRate', {
         defaultMessage: 'Counter rate',
       })
     );
   },
+  getDisabledStatus(indexPattern, layer) {
+    return checkForDateHistogram(
+      layer,
+      i18n.translate('xpack.lens.indexPattern.counterRate', {
+        defaultMessage: 'Counter rate',
+      })
+    )?.join(', ');
+  },
+  timeScalingMode: 'mandatory',
 };

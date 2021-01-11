@@ -5,19 +5,21 @@
  */
 
 import { parse } from 'url';
+import { NEXT_URL_QUERY_STRING_PARAMETER } from './constants';
 import { isInternalURL } from './is_internal_url';
 
 export function parseNext(href: string, basePath = '') {
   const { query, hash } = parse(href, true);
-  if (!query.next) {
+
+  let next = query[NEXT_URL_QUERY_STRING_PARAMETER];
+  if (!next) {
     return `${basePath}/`;
   }
 
-  let next: string;
-  if (Array.isArray(query.next) && query.next.length > 0) {
-    next = query.next[0];
+  if (Array.isArray(next) && next.length > 0) {
+    next = next[0];
   } else {
-    next = query.next as string;
+    next = next as string;
   }
 
   // validate that `next` is not attempting a redirect to somewhere

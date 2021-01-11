@@ -191,7 +191,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
     return [sortedData, _barSeriesSpec, _showLegend, _chartHeight];
   }, [totalFeatureImportance]);
 
-  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
+  const docLink = docLinks.links.ml.featureImportance;
   const tickFormatter = useCallback((d) => Number(d.toPrecision(3)).toString(), []);
 
   // do not expand by default if no feature importance data
@@ -237,11 +237,11 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         }
       }
     }
-    return undefined;
   }, [totalFeatureImportance, jobConfig]);
   return (
     <>
       <ExpandableSection
+        urlStateKey={'feature_importance'}
         isExpanded={noDataCallOut === undefined}
         dataTestId="FeatureImportanceSummary"
         title={
@@ -256,7 +256,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
             iconType="help"
             iconSide="left"
             color="primary"
-            href={`${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/ml-feature-importance.html`}
+            href={docLink}
           >
             <FormattedMessage
               id="xpack.ml.dataframe.analytics.exploration.featureImportanceDocsLink"

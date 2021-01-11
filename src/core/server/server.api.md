@@ -7,6 +7,7 @@
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
 import { CatCommonParams } from 'elasticsearch';
@@ -47,6 +48,7 @@ import { DeleteScriptParams } from 'elasticsearch';
 import { DeleteTemplateParams } from 'elasticsearch';
 import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
+import { Duration as Duration_2 } from 'moment-timezone';
 import { EnvironmentMode } from '@kbn/config';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
@@ -101,7 +103,6 @@ import { IngestGetPipelineParams } from 'elasticsearch';
 import { IngestPutPipelineParams } from 'elasticsearch';
 import { IngestSimulateParams } from 'elasticsearch';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
@@ -122,6 +123,7 @@ import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
 import { Readable } from 'stream';
@@ -160,7 +162,7 @@ import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
-import { UiStatsMetricType } from '@kbn/analytics';
+import { UiCounterMetricType } from '@kbn/analytics';
 import { UpdateDocumentByQueryParams } from 'elasticsearch';
 import { UpdateDocumentParams } from 'elasticsearch';
 import { URL } from 'url';
@@ -177,9 +179,10 @@ export interface AppCategory {
 // Warning: (ae-forgotten-export) The symbol "ConsoleAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "FileAppenderConfig" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "LegacyAppenderConfig" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "RollingFileAppenderConfig" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig;
+export type AppenderConfigType = ConsoleAppenderConfig | FileAppenderConfig | LegacyAppenderConfig | RollingFileAppenderConfig;
 
 // @public @deprecated (undocumented)
 export interface AssistanceAPIResponse {
@@ -269,9 +272,10 @@ export interface AuthToolkit {
 // @public
 export class BasePath {
     // @internal
-    constructor(serverBasePath?: string);
+    constructor(serverBasePath?: string, publicBaseUrl?: string);
     get: (request: KibanaRequest | LegacyRequest) => string;
     prepend: (path: string) => string;
+    readonly publicBaseUrl?: string;
     remove: (path: string) => string;
     readonly serverBasePath: string;
     set: (request: KibanaRequest | LegacyRequest, requestSpecificBasePath: string) => void;
@@ -307,7 +311,7 @@ export interface CapabilitiesStart {
 }
 
 // @public
-export type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capabilities) => Partial<Capabilities> | Promise<Partial<Capabilities>>;
+export type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capabilities, useDefaultCapabilities: boolean) => Partial<Capabilities> | Promise<Partial<Capabilities>>;
 
 // @alpha
 export const config: {
@@ -409,7 +413,7 @@ export interface CoreConfigUsageData {
         };
         xsrf: {
             disableProtection: boolean;
-            whitelistConfigured: boolean;
+            allowlistConfigured: boolean;
         };
         requestId: {
             allowFromAnyIp: boolean;
@@ -521,7 +525,7 @@ export interface CoreStatus {
 }
 
 // @internal
-export interface CoreUsageData {
+export interface CoreUsageData extends CoreUsageStats {
     // (undocumented)
     config: CoreConfigUsageData;
     // (undocumented)
@@ -533,6 +537,180 @@ export interface CoreUsageData {
 // @internal
 export interface CoreUsageDataStart {
     getCoreUsageData(): Promise<CoreUsageData>;
+}
+
+// @internal
+export interface CoreUsageStats {
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkCreate.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkGet.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsBulkUpdate.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsCreate.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsDelete.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.allTypesSelected.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.allTypesSelected.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsExport.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsFind.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsGet.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.createNewCopiesEnabled.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.createNewCopiesEnabled.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.overwriteEnabled.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.overwriteEnabled.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsImport.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.createNewCopiesEnabled.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsResolveImportErrors.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.custom.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.custom.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.no'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.default.kibanaRequest.yes'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.namespace.default.total'?: number;
+    // (undocumented)
+    'apiCalls.savedObjectsUpdate.total'?: number;
 }
 
 // @public (undocumented)
@@ -731,9 +909,6 @@ export interface Explanation {
 }
 
 // @public
-export function exportSavedObjectsToStream({ types, hasReference, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
-
-// @public
 export interface FakeRequest {
     headers: Headers;
 }
@@ -824,7 +999,7 @@ export interface HttpResponseOptions {
 // @public
 export type HttpResponsePayload = undefined | string | Record<string, any> | Buffer | Stream;
 
-// @public (undocumented)
+// @public
 export interface HttpServerInfo {
     hostname: string;
     name: string;
@@ -896,6 +1071,18 @@ export interface ICustomClusterClient extends IClusterClient {
 }
 
 // @public
+export interface IExternalUrlConfig {
+    readonly policy: IExternalUrlPolicy[];
+}
+
+// @public
+export interface IExternalUrlPolicy {
+    allow: boolean;
+    host?: string;
+    protocol?: string;
+}
+
+// @public
 export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
     // (undocumented)
     readonly options: HttpResponseOptions;
@@ -934,9 +1121,6 @@ export interface ImageValidation {
     };
 }
 
-// @public
-export function importSavedObjectsFromStream({ readStream, objectLimit, overwrite, createNewCopies, savedObjectsClient, typeRegistry, namespace, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
-
 // @public @deprecated (undocumented)
 export interface IndexSettingsDeprecationInfo {
     // (undocumented)
@@ -967,6 +1151,12 @@ export interface IRouter {
 
 // @public
 export type IsAuthenticated = (request: KibanaRequest | LegacyRequest) => boolean;
+
+// @public (undocumented)
+export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
+
+// @public (undocumented)
+export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
 
 // @public
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
@@ -1324,6 +1514,7 @@ export interface LegacyCallAPIOptions {
 export class LegacyClusterClient implements ILegacyClusterClient {
     constructor(config: LegacyElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: ScopeableRequest): ILegacyScopedClusterClient;
+    // @deprecated
     callAsInternalUser: LegacyAPICaller;
     close(): void;
     }
@@ -1351,7 +1542,7 @@ export type LegacyElasticsearchClientConfig = Pick<ConfigOptions, 'keepAlive' | 
 };
 
 // @public
-export interface LegacyElasticsearchError extends Boom {
+export interface LegacyElasticsearchError extends Boom.Boom {
     // (undocumented)
     [code]?: string;
 }
@@ -1371,7 +1562,9 @@ export interface LegacyRequest extends Request {
 // @public @deprecated
 export class LegacyScopedClusterClient implements ILegacyScopedClusterClient {
     constructor(internalAPICaller: LegacyAPICaller, scopedAPICaller: LegacyAPICaller, headers?: Headers | undefined);
+    // @deprecated
     callAsCurrentUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
+    // @deprecated
     callAsInternalUser(endpoint: string, clientParams?: Record<string, any>, options?: LegacyCallAPIOptions): Promise<any>;
     }
 
@@ -1702,6 +1895,8 @@ export interface RequestHandlerContext {
         savedObjects: {
             client: SavedObjectsClientContract;
             typeRegistry: ISavedObjectTypeRegistry;
+            exporter: ISavedObjectsExporter;
+            importer: ISavedObjectsImporter;
         };
         elasticsearch: {
             client: IScopedClusterClient;
@@ -1723,9 +1918,6 @@ export type RequestHandlerContextProvider<TContextName extends keyof RequestHand
 
 // @public
 export type RequestHandlerWrapper = <P, Q, B, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory>(handler: RequestHandler<P, Q, B, Method, ResponseFactory>) => RequestHandler<P, Q, B, Method, ResponseFactory>;
-
-// @public
-export function resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, createNewCopies, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 
 // @public
 export type ResponseError = string | Error | {
@@ -1856,6 +2048,13 @@ export interface SavedObjectAttributes {
 
 // @public
 export type SavedObjectAttributeSingle = string | number | boolean | null | undefined | SavedObjectAttributes;
+
+// @public (undocumented)
+export interface SavedObjectExportBaseOptions {
+    excludeExportDetails?: boolean;
+    includeReferencesDeep?: boolean;
+    namespace?: string;
+}
 
 // @public
 export interface SavedObjectMigrationContext {
@@ -2158,19 +2357,43 @@ export class SavedObjectsErrorHelpers {
 }
 
 // @public
-export interface SavedObjectsExportOptions {
-    excludeExportDetails?: boolean;
-    exportSizeLimit: number;
-    hasReference?: SavedObjectsFindOptionsReference[];
-    includeReferencesDeep?: boolean;
-    namespace?: string;
-    objects?: Array<{
+export interface SavedObjectsExportByObjectOptions extends SavedObjectExportBaseOptions {
+    objects: Array<{
         id: string;
         type: string;
     }>;
-    savedObjectsClient: SavedObjectsClientContract;
+}
+
+// @public
+export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOptions {
+    hasReference?: SavedObjectsFindOptionsReference[];
     search?: string;
-    types?: string[];
+    types: string[];
+}
+
+// @public (undocumented)
+export class SavedObjectsExporter {
+    // (undocumented)
+    #private;
+    constructor({ savedObjectsClient, exportSizeLimit, }: {
+        savedObjectsClient: SavedObjectsClientContract;
+        exportSizeLimit: number;
+    });
+    exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<import("stream").Readable>;
+    exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<import("stream").Readable>;
+    }
+
+// @public (undocumented)
+export class SavedObjectsExportError extends Error {
+    constructor(type: string, message: string, attributes?: Record<string, any> | undefined);
+    // (undocumented)
+    readonly attributes?: Record<string, any> | undefined;
+    // (undocumented)
+    static exportSizeExceeded(limit: number): SavedObjectsExportError;
+    // (undocumented)
+    static objectFetchError(objects: SavedObject[]): SavedObjectsExportError;
+    // (undocumented)
+    readonly type: string;
 }
 
 // @public
@@ -2260,8 +2483,39 @@ export interface SavedObjectsImportConflictError {
     type: 'conflict';
 }
 
+// @public (undocumented)
+export class SavedObjectsImporter {
+    // (undocumented)
+    #private;
+    constructor({ savedObjectsClient, typeRegistry, importSizeLimit, }: {
+        savedObjectsClient: SavedObjectsClientContract;
+        typeRegistry: ISavedObjectTypeRegistry;
+        importSizeLimit: number;
+    });
+    import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+}
+
+// @public (undocumented)
+export class SavedObjectsImportError extends Error {
+    // (undocumented)
+    readonly attributes?: Record<string, any> | undefined;
+    // (undocumented)
+    static importSizeExceeded(limit: number): SavedObjectsImportError;
+    // (undocumented)
+    static nonUniqueImportObjects(nonUniqueEntries: string[]): SavedObjectsImportError;
+    // (undocumented)
+    static nonUniqueRetryDestinations(nonUniqueRetryDestinations: string[]): SavedObjectsImportError;
+    // (undocumented)
+    static nonUniqueRetryObjects(nonUniqueRetryObjects: string[]): SavedObjectsImportError;
+    // (undocumented)
+    static referencesFetchError(objects: SavedObject[]): SavedObjectsImportError;
+    // (undocumented)
+    readonly type: string;
+}
+
 // @public
-export interface SavedObjectsImportError {
+export interface SavedObjectsImportFailure {
     // (undocumented)
     error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
@@ -2293,17 +2547,14 @@ export interface SavedObjectsImportMissingReferencesError {
 export interface SavedObjectsImportOptions {
     createNewCopies: boolean;
     namespace?: string;
-    objectLimit: number;
     overwrite: boolean;
     readStream: Readable;
-    savedObjectsClient: SavedObjectsClientContract;
-    typeRegistry: ISavedObjectTypeRegistry;
 }
 
 // @public
 export interface SavedObjectsImportResponse {
     // (undocumented)
-    errors?: SavedObjectsImportError[];
+    errors?: SavedObjectsImportFailure[];
     // (undocumented)
     success: boolean;
     // (undocumented)
@@ -2365,7 +2616,14 @@ export interface SavedObjectsImportUnsupportedTypeError {
 }
 
 // @public (undocumented)
+export interface SavedObjectsIncrementCounterField {
+    fieldName: string;
+    incrementBy?: number;
+}
+
+// @public (undocumented)
 export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+    initialize?: boolean;
     // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     refresh?: MutatingOperationRefreshSetting;
@@ -2412,8 +2670,6 @@ export interface SavedObjectsRawDoc {
     //
     // (undocumented)
     _source: SavedObjectsRawDocSource;
-    // (undocumented)
-    _type?: string;
 }
 
 // @public (undocumented)
@@ -2444,7 +2700,7 @@ export class SavedObjectsRepository {
     // (undocumented)
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
+    incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
@@ -2459,18 +2715,15 @@ export interface SavedObjectsRepositoryFactory {
 export interface SavedObjectsResolveImportErrorsOptions {
     createNewCopies: boolean;
     namespace?: string;
-    objectLimit: number;
     readStream: Readable;
     retries: SavedObjectsImportRetry[];
-    savedObjectsClient: SavedObjectsClientContract;
-    typeRegistry: ISavedObjectTypeRegistry;
 }
 
 // @public
 export class SavedObjectsSerializer {
     // @internal
     constructor(registry: ISavedObjectTypeRegistry);
-    generateRawId(namespace: string | undefined, type: string, id?: string): string;
+    generateRawId(namespace: string | undefined, type: string, id: string): string;
     isRawSavedObject(rawDoc: SavedObjectsRawDoc): boolean;
     rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc;
     savedObjectToRaw(savedObj: SavedObjectSanitizedDoc): SavedObjectsRawDoc;
@@ -2479,13 +2732,14 @@ export class SavedObjectsSerializer {
 // @public
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
-    getImportExportObjectLimit: () => number;
     registerType: (type: SavedObjectsType) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
 // @public
 export interface SavedObjectsServiceStart {
+    createExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+    createImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
     createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
     createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) => ISavedObjectsRepository;
     createSerializer: () => SavedObjectsSerializer;
@@ -2552,6 +2806,8 @@ export interface SavedObjectsUpdateResponse<T = unknown> extends Omit<SavedObjec
 // @public (undocumented)
 export class SavedObjectsUtils {
     static createEmptyFindResponse: <T>({ page, perPage, }: SavedObjectsFindOptions) => SavedObjectsFindResponse<T>;
+    static generateId(): string;
+    static isRandomId(id: string | undefined): boolean;
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
@@ -2700,7 +2956,7 @@ export interface ShardsResponse {
 
 // @public (undocumented)
 export type SharedGlobalConfig = RecursiveReadonly<{
-    kibana: Pick<KibanaConfigType_2, typeof SharedGlobalConfigKeys.kibana[number]>;
+    kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
     elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
     savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
@@ -2749,7 +3005,7 @@ export interface UiSettingsParams<T = unknown> {
     description?: string;
     // @deprecated
     metric?: {
-        type: UiStatsMetricType;
+        type: UiCounterMetricType;
         name: string;
     };
     name?: string;

@@ -59,20 +59,7 @@ export const useNetworkKpiUniqueFlows = ({
   const [
     networkKpiUniqueFlowsRequest,
     setNetworkKpiUniqueFlowsRequest,
-  ] = useState<NetworkKpiUniqueFlowsRequestOptions | null>(
-    !skip
-      ? {
-          defaultIndex: indexNames,
-          factoryQueryType: NetworkKpiQueries.uniqueFlows,
-          filterQuery: createFilter(filterQuery),
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-        }
-      : null
-  );
+  ] = useState<NetworkKpiUniqueFlowsRequestOptions | null>(null);
 
   const [
     networkKpiUniqueFlowsResponse,
@@ -90,7 +77,7 @@ export const useNetworkKpiUniqueFlows = ({
 
   const networkKpiUniqueFlowsSearch = useCallback(
     (request: NetworkKpiUniqueFlowsRequestOptions | null) => {
-      if (request == null) {
+      if (request == null || skip) {
         return;
       }
 
@@ -147,7 +134,7 @@ export const useNetworkKpiUniqueFlows = ({
         abortCtrl.current.abort();
       };
     },
-    [data.search, notifications.toasts]
+    [data.search, notifications.toasts, skip]
   );
 
   useEffect(() => {
@@ -163,12 +150,12 @@ export const useNetworkKpiUniqueFlows = ({
           to: endDate,
         },
       };
-      if (!skip && !deepEqual(prevRequest, myRequest)) {
+      if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
     networkKpiUniqueFlowsSearch(networkKpiUniqueFlowsRequest);

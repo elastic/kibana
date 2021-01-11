@@ -55,6 +55,9 @@ export default function ({ getService }) {
       const stats = body[0];
 
       expect(stats.collection).to.be('local');
+      expect(stats.collectionSource).to.be('local_xpack');
+
+      // License should exist in X-Pack
       expect(stats.license.issuer).to.be.a('string');
       expect(stats.license.status).to.be('active');
 

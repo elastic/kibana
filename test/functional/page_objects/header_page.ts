@@ -25,29 +25,25 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
-  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
   class HeaderPage {
-    public async clickDiscover() {
+    public async clickDiscover(ignoreAppLeaveWarning = false) {
       await appsMenu.clickLink('Discover', { category: 'kibana' });
+      await this.onAppLeaveWarning(ignoreAppLeaveWarning);
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
-    public async clickVisualize() {
+    public async clickVisualize(ignoreAppLeaveWarning = false) {
       await appsMenu.clickLink('Visualize', { category: 'kibana' });
+      await this.onAppLeaveWarning(ignoreAppLeaveWarning);
       await this.awaitGlobalLoadingIndicatorHidden();
-      await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
-        const firstBreadcrumb = await globalNav.getFirstBreadcrumb();
-        if (firstBreadcrumb !== 'Visualize') {
-          log.debug('-- first breadcrumb =', firstBreadcrumb);
-          return false;
-        }
-
-        return true;
+      await retry.waitFor('Visualize app to be loaded', async () => {
+        const isNavVisible = await testSubjects.exists('top-nav');
+        return isNavVisible;
       });
     }
 
@@ -94,6 +90,17 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
     public async awaitKibanaChrome() {
       log.debug('awaitKibanaChrome');
       await testSubjects.find('kibanaChrome', defaultFindTimeout * 10);
+    }
+
+    public async onAppLeaveWarning(ignoreWarning = false) {
+      await retry.try(async () => {
+        const warning = await testSubjects.exists('confirmModalTitleText');
+        if (warning) {
+          await testSubjects.click(
+            ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+          );
+        }
+      });
     }
   }
 

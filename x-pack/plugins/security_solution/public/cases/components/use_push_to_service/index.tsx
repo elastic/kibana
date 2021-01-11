@@ -16,11 +16,12 @@ import { getConfigureCasesUrl, useFormatUrl } from '../../../common/components/l
 import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
-import { CaseConnector, ActionConnector } from '../../../../../case/common/api';
+import { CaseConnector, ActionConnector, CaseStatuses } from '../../../../../case/common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { LinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
 import { ErrorMessage } from '../callout/types';
+import { Alert } from '../case_view';
 
 export interface UsePushToService {
   caseId: string;
@@ -31,6 +32,7 @@ export interface UsePushToService {
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
   isValidConnector: boolean;
+  alerts: Record<string, Alert>;
 }
 
 export interface ReturnUsePushToService {
@@ -47,6 +49,7 @@ export const usePushToService = ({
   updateCase,
   userCanCrud,
   isValidConnector,
+  alerts,
 }: UsePushToService): ReturnUsePushToService => {
   const history = useHistory();
   const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.case);
@@ -61,9 +64,10 @@ export const usePushToService = ({
         caseServices,
         connector,
         updateCase,
+        alerts,
       });
     }
-  }, [caseId, caseServices, connector, postPushToService, updateCase]);
+  }, [alerts, caseId, caseServices, connector, postPushToService, updateCase]);
 
   const goToConfigureCases = useCallback(
     (ev) => {
@@ -133,7 +137,7 @@ export const usePushToService = ({
         },
       ];
     }
-    if (caseStatus === 'closed') {
+    if (caseStatus === CaseStatuses.closed) {
       errors = [
         ...errors,
         {

@@ -6,7 +6,7 @@ import builds.default.defaultCiGroups
 import builds.oss.OssBuild
 import builds.oss.OssPluginFunctional
 import builds.oss.ossCiGroups
-import builds.test.ApiServerIntegration
+import builds.oss.OssApiServerIntegration
 import builds.test.JestIntegration
 import dependsOn
 import jetbrains.buildServer.configs.kotlin.v2019_2.*
@@ -49,7 +49,7 @@ val defaultBuildsToClone = listOf(
 val defaultCloned = defaultBuildsToClone.map { cloneForVerify(it) }
 
 val integrationsBuildsToClone = listOf(
-  ApiServerIntegration,
+  OssApiServerIntegration,
   JestIntegration
 )
 

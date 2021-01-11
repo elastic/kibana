@@ -34,9 +34,11 @@ import {
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
+import { ISessionService } from './session';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
+  sessionService: ISessionService;
 }
 
 export interface SearchStrategyDependencies {
@@ -84,6 +86,12 @@ export interface ISearchStrategy<
     deps: SearchStrategyDependencies
   ) => Observable<SearchStrategyResponse>;
   cancel?: (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => Promise<void>;
+  extend?: (
+    id: string,
+    keepAlive: string,
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => Promise<void>;
 }
 
 export interface ISearchStart<

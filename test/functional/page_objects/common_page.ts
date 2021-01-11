@@ -21,9 +21,8 @@ import { delay } from 'bluebird';
 import expect from '@kbn/expect';
 // @ts-ignore
 import fetch from 'node-fetch';
+import { getUrl } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
-// @ts-ignore not TS yet
-import getUrl from '../../../src/test_utils/get_url';
 
 export function CommonPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -467,6 +466,13 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         const button = await find.byButtonText('Dismiss');
         await button.click();
       }
+    }
+
+    /**
+     * Get visible text of the Welcome Banner
+     */
+    async getWelcomeText() {
+      return await testSubjects.getVisibleText('global-banner-item');
     }
   }
 

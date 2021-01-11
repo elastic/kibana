@@ -24,7 +24,7 @@ import { RouteDefinitionParams } from '..';
  */
 export function defineCommonRoutes({
   router,
-  authc,
+  getAuthenticationService,
   basePath,
   license,
   logger,
@@ -55,7 +55,7 @@ export function defineCommonRoutes({
         }
 
         try {
-          const deauthenticationResult = await authc.logout(request);
+          const deauthenticationResult = await getAuthenticationService().logout(request);
           if (deauthenticationResult.failed()) {
             return response.customError(wrapIntoCustomErrorResponse(deauthenticationResult.error));
           }
@@ -82,7 +82,7 @@ export function defineCommonRoutes({
           );
         }
 
-        return response.ok({ body: authc.getCurrentUser(request)! });
+        return response.ok({ body: getAuthenticationService().getCurrentUser(request)! });
       })
     );
   }
@@ -142,7 +142,7 @@ export function defineCommonRoutes({
 
       const redirectURL = parseNext(currentURL, basePath.serverBasePath);
       try {
-        const authenticationResult = await authc.login(request, {
+        const authenticationResult = await getAuthenticationService().login(request, {
           provider: { name: providerName },
           redirectURL,
           value: getLoginAttemptForProviderType(providerType, redirectURL, params),
@@ -178,7 +178,7 @@ export function defineCommonRoutes({
       }
 
       try {
-        await authc.acknowledgeAccessAgreement(request);
+        await getAuthenticationService().acknowledgeAccessAgreement(request);
       } catch (err) {
         logger.error(err);
         return response.internalError();

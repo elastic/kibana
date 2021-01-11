@@ -34,6 +34,18 @@ describe('BasePath', () => {
     });
   });
 
+  describe('publicBaseUrl', () => {
+    it('defaults to an undefined', () => {
+      const basePath = new BasePath();
+      expect(basePath.publicBaseUrl).toBe(undefined);
+    });
+
+    it('returns the publicBaseUrl', () => {
+      const basePath = new BasePath('/server', 'http://myhost.com/server');
+      expect(basePath.publicBaseUrl).toBe('http://myhost.com/server');
+    });
+  });
+
   describe('#get()', () => {
     it('returns base path associated with an incoming Legacy.Request request', () => {
       const request = httpServerMock.createRawRequest();

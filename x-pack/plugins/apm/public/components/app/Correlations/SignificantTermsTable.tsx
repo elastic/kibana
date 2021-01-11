@@ -5,13 +5,15 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiIcon, EuiToolTip, EuiLink } from '@elastic/eui';
+import { EuiIcon, EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { EuiBasicTable } from '@elastic/eui';
-import { asPercent, asInteger } from '../../../../common/utils/formatters';
+import { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
+import { asInteger, asPercent } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { createHref } from '../../shared/Links/url_helpers';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { createHref, push } from '../../shared/Links/url_helpers';
 
 type CorrelationsApiResponse =
   | APIReturnType<'GET /api/apm/correlations/failed_transactions'>
@@ -24,39 +26,32 @@ type SignificantTerm = NonNullable<
 interface Props<T> {
   significantTerms?: T[];
   status: FETCH_STATUS;
+  cardinalityColumnName: string;
   setSelectedSignificantTerm: (term: T | null) => void;
 }
 
 export function SignificantTermsTable<T extends SignificantTerm>({
   significantTerms,
   status,
+  cardinalityColumnName,
   setSelectedSignificantTerm,
 }: Props<T>) {
   const history = useHistory();
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<T>> = [
     {
-      field: 'matches',
-      name: 'Matches',
+      width: '100px',
+      field: 'score',
+      name: 'Score',
       render: (_: any, term: T) => {
-        return (
-          <EuiToolTip
-            position="top"
-            content={`(${asInteger(term.fgCount)} of ${asInteger(
-              term.bgCount
-            )} requests)`}
-          >
-            <>
-              <EuiBadge
-                color={
-                  term.fgCount / term.bgCount > 0.03 ? 'primary' : 'secondary'
-                }
-              >
-                {asPercent(term.fgCount, term.bgCount)}
-              </EuiBadge>
-              ({Math.round(term.score)})
-            </>
-          </EuiToolTip>
-        );
+        return <EuiCode>{Math.round(term.score)}</EuiCode>;
+      },
+    },
+    {
+      field: 'cardinality',
+      name: cardinalityColumnName,
+      render: (_: any, term: T) => {
+        const matches = asPercent(term.fgCount, term.bgCount);
+        return `${asInteger(term.fgCount)} (${matches})`;
       },
     },
     {
@@ -64,13 +59,45 @@ export function SignificantTermsTable<T extends SignificantTerm>({
       name: 'Field name',
     },
     {
-      field: 'filedValue',
+      field: 'fieldValue',
       name: 'Field value',
       render: (_: any, term: T) => String(term.fieldValue).slice(0, 50),
     },
     {
-      field: 'filedValue',
-      name: '',
+      width: '100px',
+      actions: [
+        {
+          name: 'Focus',
+          description: 'Focus on this term',
+          icon: 'magnifyWithPlus',
+          type: 'icon',
+          onClick: (term: T) => {
+            push(history, {
+              query: {
+                kuery: `${term.fieldName}:"${encodeURIComponent(
+                  term.fieldValue
+                )}"`,
+              },
+            });
+          },
+        },
+        {
+          name: 'Exclude',
+          description: 'Exclude this term',
+          icon: 'magnifyWithMinus',
+          type: 'icon',
+          onClick: (term: T) => {
+            push(history, {
+              query: {
+                kuery: `not ${term.fieldName}:"${encodeURIComponent(
+                  term.fieldValue
+                )}"`,
+              },
+            });
+          },
+        },
+      ],
+      name: 'Actions',
       render: (_: any, term: T) => {
         return (
           <>
@@ -85,6 +112,7 @@ export function SignificantTermsTable<T extends SignificantTerm>({
             >
               <EuiIcon type="magnifyWithPlus" />
             </EuiLink>
+            &nbsp;/&nbsp;
             <EuiLink
               href={createHref(history, {
                 query: {

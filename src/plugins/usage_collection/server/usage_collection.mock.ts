@@ -37,13 +37,6 @@ export const createUsageCollectionSetupMock = () => {
     bulkFetch: jest.fn(),
     bulkFetchUsage: jest.fn(),
     getCollectorByType: jest.fn(),
-    getFilteredCollectorSet: jest.fn(),
-    // @ts-ignore jest.fn doesn't play nice with type guards
-    isUsageCollector: jest.fn(),
-    makeCollectorSetFromArray: jest.fn(),
-    map: jest.fn(),
-    maximumWaitTimeForAllCollectorsInS: 0,
-    some: jest.fn(),
     toApiFieldNames: jest.fn(),
     toObject: jest.fn(),
     makeStatsCollector: jest.fn().mockImplementation((cfg) => new Collector(logger, cfg)),
@@ -57,7 +50,6 @@ export const createUsageCollectionSetupMock = () => {
 
 export function createCollectorFetchContextMock(): jest.Mocked<CollectorFetchContext<false>> {
   const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext<false>> = {
-    callCluster: elasticsearchServiceMock.createLegacyClusterClient().callAsInternalUser,
     esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
     soClient: savedObjectsRepositoryMock.create(),
   };
@@ -68,7 +60,6 @@ export function createCollectorFetchContextWithKibanaMock(): jest.Mocked<
   CollectorFetchContext<true>
 > {
   const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext<true>> = {
-    callCluster: elasticsearchServiceMock.createLegacyClusterClient().callAsInternalUser,
     esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
     soClient: savedObjectsRepositoryMock.create(),
     kibanaRequest: httpServerMock.createKibanaRequest(),

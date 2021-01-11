@@ -87,6 +87,7 @@ export function createApmEventClient({
         params: {
           ...withPossibleLegacyDataFilter,
           ignore_throttled: !includeFrozen,
+          ignore_unavailable: true,
         },
         request,
         debug,

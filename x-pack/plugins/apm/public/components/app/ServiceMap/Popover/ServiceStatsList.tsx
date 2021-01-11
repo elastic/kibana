@@ -20,7 +20,7 @@ export const ItemRow = styled('tr')`
 `;
 
 export const ItemTitle = styled('td')`
-  color: ${({ theme }) => theme.eui.textColors.subdued};
+  color: ${({ theme }) => theme.eui.euiTextSubduedColor};
   padding-right: 1rem;
 `;
 

@@ -22,6 +22,7 @@ import { noop } from 'lodash';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { aggGeoTileFnName } from './geo_tile_fn';
 import { KBN_FIELD_TYPES } from '../../../../common';
 import { METRIC_TYPES } from '../metrics/metric_agg_types';
 import { BaseAggParams } from '../types';
@@ -39,6 +40,7 @@ export interface AggParamsGeoTile extends BaseAggParams {
 export const getGeoTitleBucketAgg = () =>
   new BucketAggType({
     name: BUCKET_TYPES.GEOTILE_GRID,
+    expressionName: aggGeoTileFnName,
     title: geotileGridTitle,
     params: [
       {

@@ -22,16 +22,21 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggGeoTile';
+export const aggGeoTileFnName = 'aggGeoTile';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.GEOTILE_GRID>;
 
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<
+  typeof aggGeoTileFnName,
+  Input,
+  AggArgs,
+  Output
+>;
 
 export const aggGeoTile = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggGeoTileFnName,
   help: i18n.translate('data.search.aggs.function.buckets.geoTile.help', {
     defaultMessage: 'Generates a serialized agg config for a Geo Tile agg',
   }),

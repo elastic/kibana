@@ -33,7 +33,6 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
       quiet: false,
       silent: false,
       watch: false,
-      repl: false,
       basePath: false,
       disableOptimizer: true,
       cache: true,

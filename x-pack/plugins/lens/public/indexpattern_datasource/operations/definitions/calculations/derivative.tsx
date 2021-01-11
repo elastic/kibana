@@ -7,10 +7,17 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPatternLayer } from '../../../types';
-import { checkForDateHistogram, dateBasedOperationToExpression, hasDateField } from './utils';
+import {
+  buildLabelFunction,
+  checkForDateHistogram,
+  getErrorsForDateReference,
+  dateBasedOperationToExpression,
+  hasDateField,
+} from './utils';
+import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
 
-const ofName = (name?: string) => {
+const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.derivativeOf', {
     defaultMessage: 'Differences of {name}',
     values: {
@@ -21,7 +28,7 @@ const ofName = (name?: string) => {
         }),
     },
   });
-};
+});
 
 export type DerivativeIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -45,28 +52,35 @@ export const derivativeOperation: OperationDefinition<
       validateMetadata: (meta) => meta.dataType === 'number' && !meta.isBucketed,
     },
   ],
-  getPossibleOperation: () => {
-    return {
-      dataType: 'number',
-      isBucketed: false,
-      scale: 'ratio',
-    };
+  getPossibleOperation: (indexPattern) => {
+    if (hasDateField(indexPattern)) {
+      return {
+        dataType: 'number',
+        isBucketed: false,
+        scale: 'ratio',
+      };
+    }
   },
   getDefaultLabel: (column, indexPattern, columns) => {
-    return ofName(columns[column.references[0]]?.label);
+    const ref = columns[column.references[0]];
+    return ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined, column.timeScale);
   },
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'derivative');
   },
   buildColumn: ({ referenceIds, previousColumn, layer }) => {
-    const metric = layer.columns[referenceIds[0]];
+    const ref = layer.columns[referenceIds[0]];
     return {
-      label: ofName(metric?.label),
+      label: ofName(
+        ref && 'sourceField' in ref ? ref.sourceField : undefined,
+        previousColumn?.timeScale
+      ),
       dataType: 'number',
       operationType: 'derivative',
       isBucketed: false,
       scale: 'ratio',
       references: referenceIds,
+      timeScale: previousColumn?.timeScale,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
@@ -79,12 +93,23 @@ export const derivativeOperation: OperationDefinition<
   isTransferable: (column, newIndexPattern) => {
     return hasDateField(newIndexPattern);
   },
-  getErrorMessage: (layer: IndexPatternLayer) => {
-    return checkForDateHistogram(
+  onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
+  getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
+    return getErrorsForDateReference(
       layer,
+      columnId,
       i18n.translate('xpack.lens.indexPattern.derivative', {
         defaultMessage: 'Differences',
       })
     );
   },
+  getDisabledStatus(indexPattern, layer) {
+    return checkForDateHistogram(
+      layer,
+      i18n.translate('xpack.lens.indexPattern.derivative', {
+        defaultMessage: 'Differences',
+      })
+    )?.join(', ');
+  },
+  timeScalingMode: 'optional',
 };

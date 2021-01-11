@@ -14,15 +14,14 @@ import { EventsHeading, EventsHeadingTitleButton, EventsHeadingTitleSpan } from 
 import { Sort } from '../../sort';
 import { SortIndicator } from '../../sort/sort_indicator';
 import { HeaderToolTipContent } from '../header_tooltip_content';
-import { getSortDirection } from './helpers';
-
+import { getSortDirection, getSortIndex } from './helpers';
 interface HeaderContentProps {
   children: React.ReactNode;
   header: ColumnHeaderOptions;
   isLoading: boolean;
   isResizing: boolean;
   onClick: () => void;
-  sort: Sort;
+  sort: Sort[];
 }
 
 const HeaderContentComponent: React.FC<HeaderContentProps> = ({
@@ -33,7 +32,7 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
   onClick,
   sort,
 }) => (
-  <EventsHeading data-test-subj="header" isLoading={isLoading}>
+  <EventsHeading data-test-subj={`header-${header.id}`} isLoading={isLoading}>
     {header.aggregatable ? (
       <EventsHeadingTitleButton
         data-test-subj="header-sort-button"
@@ -51,6 +50,7 @@ const HeaderContentComponent: React.FC<HeaderContentProps> = ({
         <SortIndicator
           data-test-subj="header-sort-indicator"
           sortDirection={getSortDirection({ header, sort })}
+          sortNumber={getSortIndex({ header, sort })}
         />
       </EventsHeadingTitleButton>
     ) : (

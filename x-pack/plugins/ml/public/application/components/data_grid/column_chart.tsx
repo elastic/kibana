@@ -18,34 +18,41 @@ interface Props {
   chartData: ChartData;
   columnType: EuiDataGridColumn;
   dataTestSubj: string;
+  hideLabel?: boolean;
+  maxChartColumns?: number;
 }
 
-export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj }) => {
-  const { data, legendText, xScaleType } = useColumnChart(chartData, columnType);
+const columnChartTheme = {
+  background: { color: 'transparent' },
+  chartMargins: {
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 1,
+  },
+  chartPaddings: {
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  scales: { barsPadding: 0.1 },
+};
+export const ColumnChart: FC<Props> = ({
+  chartData,
+  columnType,
+  dataTestSubj,
+  hideLabel,
+  maxChartColumns,
+}) => {
+  const { data, legendText, xScaleType } = useColumnChart(chartData, columnType, maxChartColumns);
 
   return (
     <div data-test-subj={dataTestSubj}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
         <div className="mlDataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
           <Chart>
-            <Settings
-              theme={{
-                background: { color: 'transparent' },
-                chartMargins: {
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 1,
-                },
-                chartPaddings: {
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                },
-                scales: { barsPadding: 0.1 },
-              }}
-            />
+            <Settings theme={columnChartTheme} />
             <BarSeries
               id="histogram"
               name="count"
@@ -68,7 +75,7 @@ export const ColumnChart: FC<Props> = ({ chartData, columnType, dataTestSubj }) 
       >
         {legendText}
       </div>
-      <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>
+      {!hideLabel && <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>}
     </div>
   );
 };

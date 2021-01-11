@@ -8,7 +8,7 @@ import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 
 // TODO: this should really be imported from EUI

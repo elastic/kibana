@@ -8,9 +8,10 @@ import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   IErrorObject,
-  AlertsContextValue,
   AlertTypeParamsExpressionProps,
 } from '../../../../../../triggers_actions_ui/public';
 import { ES_GEO_FIELD_TYPES } from '../../types';
@@ -23,7 +24,6 @@ import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/i
 interface Props {
   dateField: string;
   geoField: string;
-  alertsContext: AlertsContextValue;
   errors: IErrorObject;
   setAlertParamsDate: (date: string) => void;
   setAlertParamsGeoField: (geoField: string) => void;
@@ -31,21 +31,22 @@ interface Props {
   setIndexPattern: (indexPattern: IIndexPattern) => void;
   indexPattern: IIndexPattern;
   isInvalid: boolean;
+  data: DataPublicPluginStart;
 }
 
 export const EntityIndexExpression: FunctionComponent<Props> = ({
   setAlertParamsDate,
   setAlertParamsGeoField,
   errors,
-  alertsContext,
   setIndexPattern,
   indexPattern,
   isInvalid,
   dateField: timeField,
   geoField,
+  data,
 }) => {
-  const { dataUi, dataIndexPatterns, http } = alertsContext;
-  const IndexPatternSelect = (dataUi && dataUi.IndexPatternSelect) || null;
+  const { http } = useKibana().services;
+  const IndexPatternSelect = (data.ui && data.ui.IndexPatternSelect) || null;
 
   const usePrevious = <T extends unknown>(value: T): T | undefined => {
     const ref = useRef<T>();
@@ -98,8 +99,8 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
           }}
           value={indexPattern.id}
           IndexPatternSelectComponent={IndexPatternSelect}
-          indexPatternService={dataIndexPatterns}
-          http={http}
+          indexPatternService={data.indexPatterns}
+          http={http!}
           includedGeoTypes={ES_GEO_FIELD_TYPES}
         />
       </EuiFormRow>

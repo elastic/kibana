@@ -95,6 +95,7 @@ export default async function ({ readConfigFile }) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+        'visualization:visualize:legacyChartsLibrary': true,
       },
     },
     // the apps section defines the urls that
@@ -403,6 +404,25 @@ export default async function ({ readConfigFile }) {
         global_ccr_role: {
           elasticsearch: {
             cluster: ['manage', 'manage_ccr'],
+          },
+          kibana: [
+            {
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        manage_rollups_role: {
+          elasticsearch: {
+            cluster: ['manage', 'manage_rollup'],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['read', 'delete', 'create_index', 'view_index_metadata'],
+              },
+            ],
           },
           kibana: [
             {

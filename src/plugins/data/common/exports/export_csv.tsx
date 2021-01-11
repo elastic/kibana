@@ -22,7 +22,7 @@
 import { FormatFactory } from 'src/plugins/data/common/field_formats/utils';
 import { Datatable } from 'src/plugins/expressions';
 
-const LINE_FEED_CHARACTER = '\r\n';
+export const LINE_FEED_CHARACTER = '\r\n';
 const nonAlphaNumRE = /[^a-zA-Z0-9]/;
 const allDoubleQuoteRE = /"/g;
 export const CSV_MIME_TYPE = 'text/plain;charset=utf-8';

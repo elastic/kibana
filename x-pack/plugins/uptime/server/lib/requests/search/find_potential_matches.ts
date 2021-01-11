@@ -5,7 +5,6 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { get } from 'lodash';
 import { QueryContext } from './query_context';
 
 /**
@@ -21,9 +20,10 @@ export const findPotentialMatches = async (
 ) => {
   const { body: queryResult } = await query(queryContext, searchAfter, size);
   const monitorIds: string[] = [];
-  get<any>(queryResult, 'aggregations.monitors.buckets', []).forEach((b: any) => {
+
+  (queryResult.aggregations?.monitors.buckets ?? []).forEach((b) => {
     const monitorId = b.key.monitor_id;
-    monitorIds.push(monitorId);
+    monitorIds.push(monitorId as string);
   });
 
   return {
@@ -71,11 +71,6 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
       },
     },
     aggs: {
-      has_timespan: {
-        filter: {
-          exists: { field: 'monitor.timespan' },
-        },
-      },
       monitors: {
         composite: {
           size,

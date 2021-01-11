@@ -5,8 +5,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
+import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
+
+import { getInvalidFieldMessage, getSafeName } from './helpers';
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -17,7 +21,9 @@ const IS_BUCKETED = false;
 function ofName(name: string) {
   return i18n.translate('xpack.lens.indexPattern.cardinalityOf', {
     defaultMessage: 'Unique count of {name}',
-    values: { name },
+    values: {
+      name,
+    },
   });
 }
 
@@ -42,6 +48,8 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
   },
+  getErrorMessage: (layer, columnId, indexPattern) =>
+    getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 
@@ -52,8 +60,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
-  getDefaultLabel: (column, indexPattern) =>
-    ofName(indexPattern.getFieldByName(column.sourceField)!.displayName),
+  getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
   buildColumn({ field, previousColumn }) {
     return {
       label: ofName(field.displayName),
@@ -71,16 +78,14 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
           : undefined,
     };
   },
-  toEsAggsConfig: (column, columnId) => ({
-    id: columnId,
-    enabled: true,
-    type: OPERATION_TYPE,
-    schema: 'metric',
-    params: {
+  toEsAggsFn: (column, columnId) => {
+    return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {
+      id: columnId,
+      enabled: true,
+      schema: 'metric',
       field: column.sourceField,
-      missing: 0,
-    },
-  }),
+    }).toAst();
+  },
   onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,

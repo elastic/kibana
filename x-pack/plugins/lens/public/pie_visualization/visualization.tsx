@@ -245,6 +245,34 @@ export const getPieVisualization = ({
     );
   },
 
+  getWarningMessages(state, frame) {
+    if (state?.layers.length === 0 || !frame.activeData) {
+      return;
+    }
+
+    const metricColumnsWithArrayValues = [];
+
+    for (const layer of state.layers) {
+      const { layerId, metric } = layer;
+      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      if (!rows || !metric) {
+        break;
+      }
+      const columnToLabel = frame.datasourceLayers[layerId].getOperationForColumnId(metric)?.label;
+
+      const hasArrayValues = rows.some((row) => Array.isArray(row[metric]));
+      if (hasArrayValues) {
+        metricColumnsWithArrayValues.push(columnToLabel || metric);
+      }
+    }
+    return metricColumnsWithArrayValues.map((label) => (
+      <>
+        <strong>{label}</strong> contains array values. Your visualization may not render as
+        expected.
+      </>
+    ));
+  },
+
   getErrorMessages(state, frame) {
     // not possible to break it?
     return undefined;

@@ -1143,6 +1143,77 @@ router.get(
 );
 ----
 
+==== Accessing the client from a collector's `fetch` method
+
+At the moment, the `fetch` method's context receives preconfigured 
+<<scoped-services, scoped clients>> for Elasticsearch and SavedObjects. 
+To help in the transition, both, the legacy (`callCluster`) and new clients are provided, 
+but we strongly discourage using the deprecated legacy ones for any new implementation.
+
+[source,typescript]
+----
+usageCollection.makeUsageCollector<MyUsage>({
+  type: 'my-collector',
+  isReady: async () => true, // Logic to confirm the `fetch` method is ready to be called
+  schema: {...},
+  async fetch(context) {
+    const { callCluster, esClient, soClient } = context;
+    
+    // Before:
+    const result = callCluster('search', options)
+
+    // After:
+    const { body: result } = esClient.search(options);
+    
+    return result;
+  }
+});
+----
+
+Regarding the `soClient`, it is encouraged to use it instead of the plugin's owned SavedObject's repository 
+as we used to do in the past.
+
+Before:
+
+[source,typescript]
+----
+function getUsageCollector(
+  usageCollection: UsageCollectionSetup, 
+  getSavedObjectsRepository: () => ISavedObjectsRepository | undefined
+) {
+  usageCollection.makeUsageCollector<MyUsage>({
+    type: 'my-collector',
+    isReady: () => typeof getSavedObjectsRepository() !== 'undefined',
+    schema: {...},
+    async fetch() {
+      const savedObjectsRepository = getSavedObjectsRepository();
+      
+      const { attributes: result } = await savedObjectsRepository.get('my-so-type', 'my-so-id');
+      
+      return result;
+    }
+  });  
+}
+----
+
+After:
+
+[source,typescript]
+----
+function getUsageCollector(usageCollection: UsageCollectionSetup) {
+  usageCollection.makeUsageCollector<MyUsage>({
+    type: 'my-collector',
+    isReady: () => true,
+    schema: {...},
+    async fetch({ soClient }) {
+      const { attributes: result } = await soClient.get('my-so-type', 'my-so-id');
+      
+      return result;
+    }
+  });  
+}
+----
+
 ==== Creating a custom client
 
 Note that the `plugins` option is no longer available on the new

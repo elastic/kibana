@@ -47,12 +47,12 @@ const packages: Package[] = [
     extractMethod: 'gunzip',
     archives: {
       'darwin-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/darwin-x64-72.gz',
-        sha256: '983106049bb86e21b7f823144b2b83e3f1408217401879b3cde0312c803512c9',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/darwin-x64-83.gz',
+        sha256: 'b45cd8296fd6eb2a091399c20111af43093ba30c99ed9e5d969278f5ff69ba8f',
       },
       'linux-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/linux-x64-72.gz',
-        sha256: '8b6692037f7b0df24dabc9c9b039038d1c3a3110f62121616b406c482169710a',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/linux-x64-83.gz',
+        sha256: '1bbc3f90f0ba105772b37c04e3a718f69544b4df01dda00435c2b8e50b2ad0d9',
       },
 
       // ARM build is currently done manually as Github Actions used in upstream project
@@ -62,16 +62,16 @@ const packages: Package[] = [
       // * checkout the node-re2 project,
       // * install Node using the same minor used by Kibana
       // * npm install, which will also create a build
-      // * gzip -c build/Release/re2.node > linux-arm64-72.gz
+      // * gzip -c build/Release/re2.node > linux-arm64-83.gz
       // * upload to kibana-ci-proxy-cache bucket
       'linux-arm64': {
         url:
-          'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.15.4/linux-arm64-72.gz',
-        sha256: '5942353ec9cf46a39199818d474f7af137cfbb1bc5727047fe22f31f36602a7e',
+          'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.15.4/linux-arm64-83.gz',
+        sha256: '4eb524ca9a79dea9c07342e487fbe91591166fdbc022ae987104840df948a4e9',
       },
       'win32-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-72.gz',
-        sha256: '0a6991e693577160c3e9a3f196bd2518368c52d920af331a1a183313e0175604',
+        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-83.gz',
+        sha256: 'efe939d3cda1d64ee3ee3e60a20613b95166d55632e702c670763ea7e69fca06',
       },
     },
   },

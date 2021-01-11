@@ -29,32 +29,48 @@ function expectAuthenticateCall(
   expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledWith('shield.authenticate');
 }
 
+enum CredentialsType {
+  Basic = 'Basic',
+  ApiKey = 'ApiKey',
+  None = 'ES native anonymous',
+}
+
 describe('AnonymousAuthenticationProvider', () => {
   const user = mockAuthenticatedUser({
     authentication_provider: { type: 'anonymous', name: 'anonymous1' },
   });
 
-  for (const useBasicCredentials of [true, false]) {
-    describe(`with ${useBasicCredentials ? '`Basic`' : '`ApiKey`'} credentials`, () => {
+  for (const credentialsType of [
+    CredentialsType.Basic,
+    CredentialsType.ApiKey,
+    CredentialsType.None,
+  ]) {
+    describe(`with ${credentialsType} credentials`, () => {
       let provider: AnonymousAuthenticationProvider;
       let mockOptions: ReturnType<typeof mockAuthenticationProviderOptions>;
       let authorization: string;
       beforeEach(() => {
         mockOptions = mockAuthenticationProviderOptions({ name: 'anonymous1' });
 
-        provider = useBasicCredentials
-          ? new AnonymousAuthenticationProvider(mockOptions, {
-              credentials: { username: 'user', password: 'pass' },
-            })
-          : new AnonymousAuthenticationProvider(mockOptions, {
-              credentials: { apiKey: 'some-apiKey' },
-            });
-        authorization = useBasicCredentials
-          ? new HTTPAuthorizationHeader(
+        let credentials;
+        switch (credentialsType) {
+          case CredentialsType.Basic:
+            credentials = { username: 'user', password: 'pass' };
+            authorization = new HTTPAuthorizationHeader(
               'Basic',
               new BasicHTTPAuthorizationHeaderCredentials('user', 'pass').toString()
-            ).toString()
-          : new HTTPAuthorizationHeader('ApiKey', 'some-apiKey').toString();
+            ).toString();
+            break;
+          case CredentialsType.ApiKey:
+            credentials = { apiKey: 'some-apiKey' };
+            authorization = new HTTPAuthorizationHeader('ApiKey', 'some-apiKey').toString();
+            break;
+          default:
+            credentials = 'elasticsearch_anonymous_user' as 'elasticsearch_anonymous_user';
+            break;
+        }
+
+        provider = new AnonymousAuthenticationProvider(mockOptions, { credentials });
       });
 
       describe('`login` method', () => {
@@ -111,23 +127,29 @@ describe('AnonymousAuthenticationProvider', () => {
         });
 
         it('does not handle authentication via `authorization` header.', async () => {
-          const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
+          const originalAuthorizationHeader = 'Basic credentials';
+          const request = httpServerMock.createKibanaRequest({
+            headers: { authorization: originalAuthorizationHeader },
+          });
           await expect(provider.authenticate(request)).resolves.toEqual(
             AuthenticationResult.notHandled()
           );
 
           expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-          expect(request.headers.authorization).toBe(authorization);
+          expect(request.headers.authorization).toBe(originalAuthorizationHeader);
         });
 
         it('does not handle authentication via `authorization` header even if state exists.', async () => {
-          const request = httpServerMock.createKibanaRequest({ headers: { authorization } });
+          const originalAuthorizationHeader = 'Basic credentials';
+          const request = httpServerMock.createKibanaRequest({
+            headers: { authorization: originalAuthorizationHeader },
+          });
           await expect(provider.authenticate(request, {})).resolves.toEqual(
             AuthenticationResult.notHandled()
           );
 
           expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
-          expect(request.headers.authorization).toBe(authorization);
+          expect(request.headers.authorization).toBe(originalAuthorizationHeader);
         });
 
         it('succeeds for non-AJAX requests if state is available.', async () => {
@@ -191,7 +213,7 @@ describe('AnonymousAuthenticationProvider', () => {
           expect(request.headers).not.toHaveProperty('authorization');
         });
 
-        if (!useBasicCredentials) {
+        if (credentialsType === CredentialsType.ApiKey) {
           it('properly handles extended format for the ApiKey credentials', async () => {
             provider = new AnonymousAuthenticationProvider(mockOptions, {
               credentials: { apiKey: { id: 'some-id', key: 'some-key' } },
@@ -237,9 +259,19 @@ describe('AnonymousAuthenticationProvider', () => {
       });
 
       it('`getHTTPAuthenticationScheme` method', () => {
-        expect(provider.getHTTPAuthenticationScheme()).toBe(
-          useBasicCredentials ? 'basic' : 'apikey'
-        );
+        let expectedAuthenticationScheme;
+        switch (credentialsType) {
+          case CredentialsType.Basic:
+            expectedAuthenticationScheme = 'basic';
+            break;
+          case CredentialsType.ApiKey:
+            expectedAuthenticationScheme = 'apikey';
+            break;
+          default:
+            expectedAuthenticationScheme = null;
+            break;
+        }
+        expect(provider.getHTTPAuthenticationScheme()).toBe(expectedAuthenticationScheme);
       });
     });
   }

@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/82445
-  describe.skip('discover doc table', function describeIndexTests() {
+  describe('discover doc table', function describeIndexTests() {
     const defaultRowsLimit = 50;
     const rowsHardLimit = 500;
 
@@ -132,13 +131,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add more columns to the table', async function () {
-        const [column] = extraColumns;
-        await PageObjects.discover.findFieldByName(column);
-        log.debug(`add a ${column} column`);
-        await PageObjects.discover.clickFieldListItemAdd(column);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        // test the header now
-        expect(await PageObjects.discover.getDocHeader()).to.have.string(column);
+        for (const column of extraColumns) {
+          await PageObjects.discover.clearFieldSearchInput();
+          await PageObjects.discover.findFieldByName(column);
+          await PageObjects.discover.clickFieldListItemAdd(column);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          // test the header now
+          expect(await PageObjects.discover.getDocHeader()).to.have.string(column);
+        }
       });
 
       it('should remove columns from the table', async function () {

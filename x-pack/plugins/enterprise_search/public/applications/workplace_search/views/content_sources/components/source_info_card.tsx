@@ -7,13 +7,13 @@
 import React from 'react';
 
 import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { SourceIcon } from '../../../components/shared/source_icon';
@@ -31,77 +31,56 @@ export const SourceInfoCard: React.FC<SourceInfoCardProps> = ({
   dateCreated,
   isFederatedSource,
 }) => (
-  <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+  <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
     <EuiFlexItem>
-      <EuiDescriptionList textStyle="reverse" className="content-source-meta">
-        <EuiDescriptionListTitle>
-          <span className="content-source-meta__title">Connector</span>
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          <EuiFlexGroup
-            gutterSize="xs"
-            alignItems="center"
-            className="content-source-meta__content"
-          >
-            <EuiFlexItem grow={false}>
-              <SourceIcon
-                className="content-source-meta__icon"
-                serviceType={sourceType}
-                name={sourceType}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <span title={sourceName} className="eui-textTruncate">
-                {sourceName}
-              </span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiDescriptionListDescription>
-      </EuiDescriptionList>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiSpacer className="euiSpacer--vertical" />
-    </EuiFlexItem>
-    <EuiFlexItem grow={isFederatedSource}>
-      <EuiDescriptionList textStyle="reverse" className="content-source-meta">
-        <EuiDescriptionListTitle>
-          <span className="content-source-meta__title">Created</span>
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          <EuiFlexGroup
-            gutterSize="xs"
-            alignItems="center"
-            className="content-source-meta__content"
-          >
-            <EuiFlexItem>{dateCreated}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiDescriptionListDescription>
-      </EuiDescriptionList>
-    </EuiFlexItem>
-    {isFederatedSource && (
-      <>
-        <EuiFlexItem grow={false}>
-          <EuiSpacer className="euiSpacer--vertical" />
+      <EuiFlexGroup gutterSize="none" justifyContent="flexStart" alignItems="center">
+        <EuiFlexItem grow={null}>
+          <SourceIcon
+            className="content-source-meta__icon"
+            serviceType={sourceType}
+            name={sourceType}
+            fullBleed
+            size="l"
+          />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiDescriptionList textStyle="reverse" className="content-source-meta">
-            <EuiDescriptionListTitle>
-              <span className="content-source-meta__title">Status</span>
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <EuiFlexGroup
-                gutterSize="xs"
-                alignItems="center"
-                className="content-source-meta__content"
-              >
-                <EuiFlexItem>
-                  <EuiHealth color="success">Ready to search</EuiHealth>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiDescriptionListDescription>
-          </EuiDescriptionList>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <h5 style={{ paddingLeft: 8 }}>{sourceName}</h5>
+          </EuiTitle>
         </EuiFlexItem>
-      </>
-    )}
+      </EuiFlexGroup>
+      {isFederatedSource && (
+        <EuiFlexGroup gutterSize="none" justifyContent="flexStart">
+          <EuiFlexItem grow={null}>
+            <EuiSpacer size="xs" />
+            <EuiBadge iconType="online" iconSide="left">
+              Remote Source
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </EuiFlexItem>
+
+    <EuiFlexItem>
+      <EuiText textAlign="right" size="s">
+        <strong>Created: </strong>
+        {dateCreated}
+      </EuiText>
+
+      {isFederatedSource && (
+        <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
+          <EuiFlexItem grow={null}>
+            <EuiText textAlign="right" size="s">
+              <strong>Status: </strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={null}>
+            <EuiText textAlign="right" size="s">
+              <EuiHealth color="success">Ready to search</EuiHealth>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </EuiFlexItem>
   </EuiFlexGroup>
 );

@@ -44,7 +44,10 @@ interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
-  handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject | Boom<any>>;
+  handler: (
+    req: Request,
+    responseToolkit: ResponseToolkit
+  ) => Promise<ResponseObject | Boom.Boom<any>>;
 }
 
 /**

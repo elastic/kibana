@@ -9,7 +9,7 @@ import { IBasePath } from 'kibana/public';
 import React from 'react';
 import url from 'url';
 import { InfraAppId } from '../../../../../infra/public';
-import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { fromQuery } from './url_helpers';
 
 interface InfraQueryParams {

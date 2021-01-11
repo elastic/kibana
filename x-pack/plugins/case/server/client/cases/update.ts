@@ -9,6 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import { SavedObjectsFindResponse } from 'kibana/server';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
 
 import {
@@ -19,6 +20,7 @@ import {
   ESCasePatchRequest,
   CasePatchRequest,
   CasesResponse,
+  CaseStatuses,
 } from '../../../common/api';
 import { buildCaseUserActions } from '../../services/user_actions/helpers';
 import {
@@ -33,7 +35,10 @@ export const update = ({
   caseService,
   userActionService,
   request,
-}: CaseClientFactoryArguments) => async ({ cases }: CaseClientUpdate): Promise<CasesResponse> => {
+}: CaseClientFactoryArguments) => async ({
+  caseClient,
+  cases,
+}: CaseClientUpdate): Promise<CasesResponse> => {
   const query = pipe(
     excess(CasesPatchRequestRt).decode(cases),
     fold(throwErrors(Boom.badRequest), identity)
@@ -98,12 +103,16 @@ export const update = ({
       cases: updateFilterCases.map((thisCase) => {
         const { id: caseId, version, ...updateCaseAttributes } = thisCase;
         let closedInfo = {};
-        if (updateCaseAttributes.status && updateCaseAttributes.status === 'closed') {
+        if (updateCaseAttributes.status && updateCaseAttributes.status === CaseStatuses.closed) {
           closedInfo = {
             closed_at: updatedDt,
             closed_by: { email, full_name, username },
           };
-        } else if (updateCaseAttributes.status && updateCaseAttributes.status === 'open') {
+        } else if (
+          updateCaseAttributes.status &&
+          (updateCaseAttributes.status === CaseStatuses.open ||
+            updateCaseAttributes.status === CaseStatuses['in-progress'])
+        ) {
           closedInfo = {
             closed_at: null,
             closed_by: null,
@@ -121,6 +130,68 @@ export const update = ({
         };
       }),
     });
+
+    // If a status update occurred and the case is synced then we need to update all alerts' status
+    // attached to the case to the new status.
+    const casesWithStatusChangedAndSynced = updateFilterCases.filter((caseToUpdate) => {
+      const currentCase = myCases.saved_objects.find((c) => c.id === caseToUpdate.id);
+      return (
+        currentCase != null &&
+        caseToUpdate.status != null &&
+        currentCase.attributes.status !== caseToUpdate.status &&
+        currentCase.attributes.settings.syncAlerts
+      );
+    });
+
+    // If syncAlerts setting turned on we need to update all alerts' status
+    // attached to the case to the current status.
+    const casesWithSyncSettingChangedToOn = updateFilterCases.filter((caseToUpdate) => {
+      const currentCase = myCases.saved_objects.find((c) => c.id === caseToUpdate.id);
+      return (
+        currentCase != null &&
+        caseToUpdate.settings?.syncAlerts != null &&
+        currentCase.attributes.settings.syncAlerts !== caseToUpdate.settings.syncAlerts &&
+        caseToUpdate.settings.syncAlerts
+      );
+    });
+
+    for (const theCase of [
+      ...casesWithSyncSettingChangedToOn,
+      ...casesWithStatusChangedAndSynced,
+    ]) {
+      const currentCase = myCases.saved_objects.find((c) => c.id === theCase.id);
+      const totalComments = await caseService.getAllCaseComments({
+        client: savedObjectsClient,
+        caseId: theCase.id,
+        options: {
+          fields: [],
+          filter: 'cases-comments.attributes.type: alert',
+          page: 1,
+          perPage: 1,
+        },
+      });
+
+      const caseComments = (await caseService.getAllCaseComments({
+        client: savedObjectsClient,
+        caseId: theCase.id,
+        options: {
+          fields: [],
+          filter: 'cases-comments.attributes.type: alert',
+          page: 1,
+          perPage: totalComments.total,
+        },
+        // The filter guarantees that the comments will be of type alert
+      })) as SavedObjectsFindResponse<{ alertId: string }>;
+
+      const commentIds = caseComments.saved_objects.map(({ attributes: { alertId } }) => alertId);
+      if (commentIds.length > 0) {
+        caseClient.updateAlertsStatus({
+          ids: commentIds,
+          // Either there is a status update or the syncAlerts got turned on.
+          status: theCase.status ?? currentCase?.attributes.status ?? CaseStatuses.open,
+        });
+      }
+    }
 
     const returnUpdatedCase = myCases.saved_objects
       .filter((myCase) =>

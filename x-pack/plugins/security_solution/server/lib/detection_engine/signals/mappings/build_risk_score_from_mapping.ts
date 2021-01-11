@@ -11,35 +11,78 @@ import {
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { SignalSource } from '../types';
 
-interface BuildRiskScoreFromMappingProps {
+export interface BuildRiskScoreFromMappingProps {
   eventSource: SignalSource;
   riskScore: RiskScore;
   riskScoreMapping: RiskScoreMappingOrUndefined;
 }
 
-interface BuildRiskScoreFromMappingReturn {
+export interface BuildRiskScoreFromMappingReturn {
   riskScore: RiskScore;
   riskScoreMeta: Meta; // TODO: Stricter types
 }
 
+/**
+ * Calculates the final risk score for a detection alert based on:
+ *   - source event object that can potentially contain fields representing risk score
+ *   - the default score specified by the user
+ *   - (optional) score mapping specified by the user ("map this field to the score")
+ *
+ * NOTE: Current MVP support is for mapping from a single field.
+ */
 export const buildRiskScoreFromMapping = ({
   eventSource,
   riskScore,
   riskScoreMapping,
 }: BuildRiskScoreFromMappingProps): BuildRiskScoreFromMappingReturn => {
-  // MVP support is for mapping from a single field
-  if (riskScoreMapping != null && riskScoreMapping.length > 0) {
-    const mappedField = riskScoreMapping[0].field;
-    // TODO: Expand by verifying fieldType from index via  doc._index
-    const mappedValue = get(mappedField, eventSource);
-    if (
-      typeof mappedValue === 'number' &&
-      Number.isSafeInteger(mappedValue) &&
-      mappedValue >= 0 &&
-      mappedValue <= 100
-    ) {
-      return { riskScore: mappedValue, riskScoreMeta: { riskScoreOverridden: true } };
+  if (!riskScoreMapping || !riskScoreMapping.length) {
+    return defaultScore(riskScore);
+  }
+
+  // TODO: Expand by verifying fieldType from index via  doc._index
+  const eventField = riskScoreMapping[0].field;
+  const eventValue = get(eventField, eventSource);
+  const eventValues = Array.isArray(eventValue) ? eventValue : [eventValue];
+
+  const validNumbers = eventValues.map(toValidNumberOrMinusOne).filter((n) => n > -1);
+
+  if (validNumbers.length > 0) {
+    const maxNumber = getMaxOf(validNumbers);
+    return overriddenScore(maxNumber);
+  }
+
+  return defaultScore(riskScore);
+};
+
+function toValidNumberOrMinusOne(value: unknown): number {
+  if (typeof value === 'number' && isValidNumber(value)) {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const num = Number(value);
+    if (isValidNumber(num)) {
+      return num;
     }
   }
+
+  return -1;
+}
+
+function isValidNumber(value: number): boolean {
+  return Number.isFinite(value) && value >= 0 && value <= 100;
+}
+
+function getMaxOf(array: number[]) {
+  // NOTE: It's safer to use reduce rather than Math.max(...array). The latter won't handle large input.
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/max
+  return array.reduce((a, b) => Math.max(a, b));
+}
+
+function defaultScore(riskScore: RiskScore): BuildRiskScoreFromMappingReturn {
   return { riskScore, riskScoreMeta: {} };
-};
+}
+
+function overriddenScore(riskScore: RiskScore): BuildRiskScoreFromMappingReturn {
+  return { riskScore, riskScoreMeta: { riskScoreOverridden: true } };
+}

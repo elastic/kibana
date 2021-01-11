@@ -14,6 +14,8 @@ import { FramePublicAPI } from '../types';
 import { State } from './types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_service/mocks';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { EuiColorPicker } from '@elastic/eui';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -322,6 +324,8 @@ describe('XY Config panels', () => {
           accessor="bar"
           groupId="left"
           state={{ ...state, layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }] }}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
         />
       );
 
@@ -343,6 +347,8 @@ describe('XY Config panels', () => {
           accessor="bar"
           groupId="left"
           state={state}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
         />
       );
 
@@ -352,6 +358,83 @@ describe('XY Config panels', () => {
         .prop('options') as EuiButtonGroupProps['options'];
 
       expect(options!.map(({ label }) => label)).toEqual(['Auto', 'Left', 'Right']);
+    });
+
+    test('sets the color of a dimension to the color from palette service if not set explicitly', () => {
+      const state = testState();
+      const component = mount(
+        <DimensionEditor
+          layerId={state.layers[0].layerId}
+          frame={{
+            ...frame,
+            activeData: {
+              first: {
+                type: 'datatable',
+                columns: [],
+                rows: [{ bar: 123 }],
+              },
+            },
+          }}
+          setState={jest.fn()}
+          accessor="bar"
+          groupId="left"
+          state={{
+            ...state,
+            layers: [
+              {
+                seriesType: 'bar',
+                layerId: 'first',
+                splitAccessor: undefined,
+                xAccessor: 'foo',
+                accessors: ['bar'],
+              },
+            ],
+          }}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+        />
+      );
+
+      expect(component.find(EuiColorPicker).prop('color')).toEqual('black');
+    });
+
+    test('uses the overwrite color if set', () => {
+      const state = testState();
+      const component = mount(
+        <DimensionEditor
+          layerId={state.layers[0].layerId}
+          frame={{
+            ...frame,
+            activeData: {
+              first: {
+                type: 'datatable',
+                columns: [],
+                rows: [{ bar: 123 }],
+              },
+            },
+          }}
+          setState={jest.fn()}
+          accessor="bar"
+          groupId="left"
+          state={{
+            ...state,
+            layers: [
+              {
+                seriesType: 'bar',
+                layerId: 'first',
+                splitAccessor: undefined,
+                xAccessor: 'foo',
+                accessors: ['bar'],
+                yConfig: [{ forAccessor: 'bar', color: 'red' }],
+              },
+            ],
+          }}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+        />
+      );
+
+      expect(component.find(EuiColorPicker).prop('color')).toEqual('red');
     });
   });
 });

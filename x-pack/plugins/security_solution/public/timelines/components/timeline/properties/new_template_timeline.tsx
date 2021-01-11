@@ -8,7 +8,6 @@ import React from 'react';
 
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 
-import { useKibana } from '../../../../common/lib/kibana';
 import { useCreateTimelineButton } from './use_create_timeline';
 
 interface OwnProps {
@@ -24,9 +23,6 @@ export const NewTemplateTimelineComponent: React.FC<OwnProps> = ({
   title,
   timelineId = TimelineId.active,
 }) => {
-  const uiCapabilities = useKibana().services.application.capabilities;
-  const capabilitiesCanUserCRUD: boolean = !!uiCapabilities.siem.crud;
-
   const { getButton } = useCreateTimelineButton({
     timelineId,
     timelineType: TimelineType.template,
@@ -35,7 +31,7 @@ export const NewTemplateTimelineComponent: React.FC<OwnProps> = ({
 
   const button = getButton({ outline, title });
 
-  return capabilitiesCanUserCRUD ? button : null;
+  return button;
 };
 
 export const NewTemplateTimeline = React.memo(NewTemplateTimelineComponent);

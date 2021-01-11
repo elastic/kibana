@@ -6,7 +6,17 @@
 
 import React from 'react';
 import { useValues } from 'kea';
-import { EuiLink, EuiButton, EuiButtonProps, EuiLinkAnchorProps, EuiPanel } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonEmptyProps,
+  EuiButtonProps,
+  EuiLinkAnchorProps,
+  EuiPanel,
+  EuiCard,
+  EuiCardProps,
+} from '@elastic/eui';
 import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
 import { KibanaLogic } from '../kibana';
@@ -83,6 +93,18 @@ export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
   </ReactRouterHelper>
 );
 
+type ReactRouterEuiButtonEmptyProps = ReactRouterProps & EuiButtonEmptyProps;
+export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
+    <EuiButtonEmpty {...rest} />
+  </ReactRouterHelper>
+);
+
 type ReactRouterEuiPanelProps = ReactRouterProps & EuiPanelProps;
 export const EuiPanelTo: React.FC<ReactRouterEuiPanelProps> = ({
   to,
@@ -92,5 +114,17 @@ export const EuiPanelTo: React.FC<ReactRouterEuiPanelProps> = ({
 }) => (
   <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
     <EuiPanel {...rest} />
+  </ReactRouterHelper>
+);
+
+type ReactRouterEuiCardProps = ReactRouterProps & EuiCardProps;
+export const EuiCardTo: React.FC<ReactRouterEuiCardProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
+    <EuiCard {...rest} />
   </ReactRouterHelper>
 );

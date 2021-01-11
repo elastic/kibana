@@ -11,6 +11,7 @@ export const ML_PAGES = {
   ANOMALY_EXPLORER: 'explorer',
   SINGLE_METRIC_VIEWER: 'timeseriesexplorer',
   DATA_FRAME_ANALYTICS_JOBS_MANAGE: 'data_frame_analytics',
+  DATA_FRAME_ANALYTICS_CREATE_JOB: 'data_frame_analytics/new_job',
   DATA_FRAME_ANALYTICS_MODELS_MANAGE: 'data_frame_analytics/models',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
   DATA_FRAME_ANALYTICS_MAP: 'data_frame_analytics/map',

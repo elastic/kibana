@@ -4,77 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiOverlayMask, EuiModal, EuiToolTip } from '@elastic/eui';
-
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { timelineActions } from '../../../store/timeline';
-import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
 
+import { TimelineId } from '../../../../../common/types/timeline';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { timelineActions } from '../../../store/timeline';
+import { getTimelineSaveModalByIdSelector } from './selectors';
 import { TimelineTitleAndDescription } from './title_and_description';
 import { EDIT } from './translations';
 
 export interface SaveTimelineComponentProps {
+  initialFocus: 'title' | 'description';
   timelineId: string;
   toolTip?: string;
 }
 
 export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
-  ({ timelineId, toolTip }) => {
-    const [showSaveTimelineOverlay, setShowSaveTimelineOverlay] = useState<boolean>(false);
-    const onToggleSaveTimeline = useCallback(() => {
-      setShowSaveTimelineOverlay((prevShowSaveTimelineOverlay) => !prevShowSaveTimelineOverlay);
-    }, [setShowSaveTimelineOverlay]);
-
+  ({ initialFocus, timelineId, toolTip }) => {
     const dispatch = useDispatch();
-    const updateTitle = useCallback(
-      ({ id, title, disableAutoSave }: { id: string; title: string; disableAutoSave?: boolean }) =>
-        dispatch(timelineActions.updateTitle({ id, title, disableAutoSave })),
-      [dispatch]
-    );
+    const getTimelineSaveModal = useMemo(() => getTimelineSaveModalByIdSelector(), []);
+    const show = useDeepEqualSelector((state) => getTimelineSaveModal(state, timelineId));
+    const [showSaveTimelineOverlay, setShowSaveTimelineOverlay] = useState<boolean>(false);
 
-    const updateDescription = useCallback(
-      ({
-        id,
-        description,
-        disableAutoSave,
-      }: {
-        id: string;
-        description: string;
-        disableAutoSave?: boolean;
-      }) => dispatch(timelineActions.updateDescription({ id, description, disableAutoSave })),
-      [dispatch]
-    );
+    const closeSaveTimeline = useCallback(() => {
+      setShowSaveTimelineOverlay(false);
+      if (show) {
+        dispatch(
+          timelineActions.toggleModalSaveTimeline({
+            id: TimelineId.active,
+            showModalSaveTimeline: false,
+          })
+        );
+      }
+    }, [dispatch, setShowSaveTimelineOverlay, show]);
+
+    const openSaveTimeline = useCallback(() => {
+      setShowSaveTimelineOverlay(true);
+    }, [setShowSaveTimelineOverlay]);
 
     const saveTimelineButtonIcon = useMemo(
       () => (
         <EuiButtonIcon
           aria-label={EDIT}
-          onClick={onToggleSaveTimeline}
+          onClick={openSaveTimeline}
           iconType="pencil"
           data-test-subj="save-timeline-button-icon"
         />
       ),
-      [onToggleSaveTimeline]
+      [openSaveTimeline]
     );
 
-    return showSaveTimelineOverlay ? (
+    return (initialFocus === 'title' && show) || showSaveTimelineOverlay ? (
       <>
         {saveTimelineButtonIcon}
-        <EuiOverlayMask>
-          <EuiModal
-            data-test-subj="save-timeline-modal"
-            maxWidth={NOTES_PANEL_WIDTH}
-            onClose={onToggleSaveTimeline}
-          >
-            <TimelineTitleAndDescription
-              timelineId={timelineId}
-              toggleSaveTimeline={onToggleSaveTimeline}
-              updateTitle={updateTitle}
-              updateDescription={updateDescription}
-            />
-          </EuiModal>
-        </EuiOverlayMask>
+        <TimelineTitleAndDescription
+          data-test-subj="save-timeline-modal-comp"
+          closeSaveTimeline={closeSaveTimeline}
+          initialFocus={initialFocus}
+          timelineId={timelineId}
+          showWarning={initialFocus === 'title' && show}
+        />
       </>
     ) : (
       <EuiToolTip content={toolTip ?? ''} data-test-subj="save-timeline-btn-tooltip">

@@ -6,7 +6,12 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { PolicyFromES, SerializedPolicy, ListNodesRouteResponse } from '../../../common/types';
+import {
+  PolicyFromES,
+  SerializedPolicy,
+  ListNodesRouteResponse,
+  ListSnapshotReposResponse,
+} from '../../../common/types';
 
 import {
   UIM_POLICY_DELETE,
@@ -110,5 +115,12 @@ export const useLoadSnapshotPolicies = () => {
     path: `snapshot_policies`,
     method: 'get',
     initialData: [],
+  });
+};
+
+export const useLoadSnapshotRepositories = () => {
+  return useRequest<ListSnapshotReposResponse>({
+    path: `snapshot_repositories`,
+    method: 'get',
   });
 };

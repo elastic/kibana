@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { CollectorSet } from './collector_set';
+export { CollectorSet, CollectorSetPublic } from './collector_set';
 export {
   Collector,
   AllowedSchemaTypes,

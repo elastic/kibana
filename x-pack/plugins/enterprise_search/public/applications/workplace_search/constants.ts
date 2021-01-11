@@ -52,6 +52,9 @@ export const NAV = {
       defaultMessage: 'View my personal dashboard',
     }
   ),
+  SEARCH: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.searchApplication', {
+    defaultMessage: 'Go to search application',
+  }),
 };
 
 export const MAX_TABLE_ROW_ICONS = 3;
@@ -260,3 +263,52 @@ export const GITHUB_LINK_TITLE = i18n.translate(
 );
 
 export const CUSTOM_SERVICE_TYPE = 'custom';
+
+export const DOCUMENTATION_LINK_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.documentation',
+  {
+    defaultMessage: 'Documentation',
+  }
+);
+
+export const PUBLIC_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.publicKey.label',
+  {
+    defaultMessage: 'Public Key',
+  }
+);
+
+export const CONSUMER_KEY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.consumerKey.label',
+  {
+    defaultMessage: 'Consumer Key',
+  }
+);
+
+export const BASE_URI_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.baseUri.label',
+  {
+    defaultMessage: 'Base URI',
+  }
+);
+
+export const BASE_URL_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.baseUrl.label',
+  {
+    defaultMessage: 'Base URL',
+  }
+);
+
+export const CLIENT_ID_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.clientId.label',
+  {
+    defaultMessage: 'Client id',
+  }
+);
+
+export const CLIENT_SECRET_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearc.clientSecret.label',
+  {
+    defaultMessage: 'Client secret',
+  }
+);

@@ -13,7 +13,7 @@ import {
 import { SearchServiceSetup, SearchServiceStart } from './services';
 
 export type GlobalSearchPluginSetup = Pick<SearchServiceSetup, 'registerResultProvider'>;
-export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find'>;
+export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find' | 'getSearchableTypes'>;
 
 /**
  * GlobalSearch result provider, to be registered using the {@link GlobalSearchPluginSetup | global search API}
@@ -44,4 +44,10 @@ export interface GlobalSearchResultProvider {
     search: GlobalSearchProviderFindParams,
     options: GlobalSearchProviderFindOptions
   ): Observable<GlobalSearchProviderResult[]>;
+
+  /**
+   * Method that should return all the possible {@link GlobalSearchProviderResult.type | type} of results that
+   * this provider can return.
+   */
+  getSearchableTypes: () => string[] | Promise<string[]>;
 }

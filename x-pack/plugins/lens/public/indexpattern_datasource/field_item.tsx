@@ -181,49 +181,56 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     />
   );
   return (
-    <EuiPopover
-      ownFocus
-      className="lnsFieldItem__popoverAnchor"
-      display="block"
-      data-test-subj="lnsFieldListPanelField"
-      container={document.querySelector<HTMLElement>('.application') || undefined}
-      button={
-        <DragDrop
-          label={field.displayName}
-          value={value}
-          data-test-subj={`lnsFieldListPanelField-${field.name}`}
-          draggable
-        >
-          <FieldButton
-            className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
-              exists ? 'exists' : 'missing'
-            }`}
-            isActive={infoIsOpen}
-            onClick={togglePopover}
-            aria-label={i18n.translate('xpack.lens.indexPattern.fieldStatsButtonAriaLabel', {
-              defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
-              values: {
-                fieldName: field.displayName,
-                fieldType: field.type,
-              },
-            })}
-            fieldIcon={lensFieldIcon}
-            fieldName={
-              <EuiHighlight search={wrapOnDot(highlight)}>
-                {wrapOnDot(field.displayName)}
-              </EuiHighlight>
-            }
-            fieldInfoIcon={lensInfoIcon}
-          />
-        </DragDrop>
-      }
-      isOpen={infoIsOpen}
-      closePopover={() => setOpen(false)}
-      anchorPosition="rightUp"
-      panelClassName="lnsFieldItem__fieldPanel"
-    >
-      <FieldItemPopoverContents {...state} {...props} />
-    </EuiPopover>
+    <li>
+      <EuiPopover
+        ownFocus
+        className="lnsFieldItem__popoverAnchor"
+        display="block"
+        data-test-subj="lnsFieldListPanelField"
+        container={document.querySelector<HTMLElement>('.application') || undefined}
+        button={
+          <DragDrop
+            label={field.displayName}
+            value={value}
+            data-test-subj={`lnsFieldListPanelField-${field.name}`}
+            draggable
+          >
+            <FieldButton
+              className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
+                exists ? 'exists' : 'missing'
+              }`}
+              isActive={infoIsOpen}
+              onClick={togglePopover}
+              buttonProps={{
+                ['aria-label']: i18n.translate(
+                  'xpack.lens.indexPattern.fieldStatsButtonAriaLabel',
+                  {
+                    defaultMessage: '{fieldName}: {fieldType}. Hit enter for a field preview.',
+                    values: {
+                      fieldName: field.displayName,
+                      fieldType: field.type,
+                    },
+                  }
+                ),
+              }}
+              fieldIcon={lensFieldIcon}
+              fieldName={
+                <EuiHighlight search={wrapOnDot(highlight)}>
+                  {wrapOnDot(field.displayName)}
+                </EuiHighlight>
+              }
+              fieldInfoIcon={lensInfoIcon}
+            />
+          </DragDrop>
+        }
+        isOpen={infoIsOpen}
+        closePopover={() => setOpen(false)}
+        anchorPosition="rightUp"
+        panelClassName="lnsFieldItem__fieldPanel"
+      >
+        <FieldItemPopoverContents {...state} {...props} />
+      </EuiPopover>
+    </li>
   );
 };
 

@@ -21,6 +21,7 @@ import { getSharingData } from './get_sharing_data';
 import { IUiSettingsClient } from 'kibana/public';
 import { createSearchSourceMock } from '../../../../data/common/search/search_source/mocks';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
+import { SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 
 describe('getSharingData', () => {
   test('returns valid data for sharing', async () => {
@@ -29,7 +30,10 @@ describe('getSharingData', () => {
       searchSourceMock,
       { columns: [] },
       ({
-        get: () => {
+        get: (key: string) => {
+          if (key === SORT_DEFAULT_ORDER_SETTING) {
+            return 'desc';
+          }
           return false;
         },
       } as unknown) as IUiSettingsClient,
@@ -46,10 +50,8 @@ describe('getSharingData', () => {
         ],
         "searchRequest": Object {
           "body": Object {
-            "_source": Object {
-              "includes": Array [],
-            },
-            "docvalue_fields": Array [],
+            "_source": Object {},
+            "fields": Array [],
             "query": Object {
               "bool": Object {
                 "filter": Array [],
@@ -59,8 +61,16 @@ describe('getSharingData', () => {
               },
             },
             "script_fields": Object {},
-            "sort": Array [],
-            "stored_fields": Array [],
+            "sort": Array [
+              Object {
+                "_score": Object {
+                  "order": "desc",
+                },
+              },
+            ],
+            "stored_fields": Array [
+              "*",
+            ],
           },
           "index": "the-index-pattern-title",
         },

@@ -22,15 +22,15 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
 import { getParsedValue } from '../utils/get_parsed_value';
 
-const fnName = 'aggAvg';
+export const aggAvgFnName = 'aggAvg';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof METRIC_TYPES.AVG>;
 type Output = AggExpressionType;
-type FunctionDefinition = ExpressionFunctionDefinition<typeof fnName, Input, AggArgs, Output>;
+type FunctionDefinition = ExpressionFunctionDefinition<typeof aggAvgFnName, Input, AggArgs, Output>;
 
 export const aggAvg = (): FunctionDefinition => ({
-  name: fnName,
+  name: aggAvgFnName,
   help: i18n.translate('data.search.aggs.function.metrics.avg.help', {
     defaultMessage: 'Generates a serialized agg config for a Avg agg',
   }),

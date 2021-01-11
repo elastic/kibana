@@ -9,6 +9,7 @@ import {
   dataPluginMock,
   Start as DataPublicStartMock,
 } from '../../../../../../../src/plugins/data/public/mocks';
+import { fleetMock } from '../../../../../fleet/public/mocks';
 
 type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
   indexPatterns: Omit<DataPublicStartMock['indexPatterns'], 'getFieldsForWildcard'> & {
@@ -56,9 +57,6 @@ export const depsStartMock: () => DepsStartMock = () => {
 
   return {
     data: dataMock,
-    fleet: {
-      isInitialized: () => Promise.resolve(true),
-      registerExtension: jest.fn(),
-    },
+    fleet: fleetMock.createStartMock(),
   };
 };

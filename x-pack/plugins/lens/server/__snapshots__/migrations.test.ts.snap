@@ -156,6 +156,7 @@ Object {
     "title": "mylens",
     "visualizationType": "lnsXY",
   },
+  "id": "mock-saved-object-id",
   "references": Array [
     Object {
       "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",

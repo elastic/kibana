@@ -117,11 +117,18 @@ export class LegacyLoggingServer {
   public log({ level, context, message, error, timestamp, meta = {} }: LogRecord) {
     const { tags = [], ...metadata } = meta;
 
-    this.events.emit('log', {
-      data: getDataToLog(error, metadata, message),
-      tags: [getLegacyLogLevel(level), ...context.split('.'), ...tags],
-      timestamp: timestamp.getTime(),
-    });
+    this.events
+      .emit('log', {
+        data: getDataToLog(error, metadata, message),
+        tags: [getLegacyLogLevel(level), ...context.split('.'), ...tags],
+        timestamp: timestamp.getTime(),
+      })
+      // @ts-expect-error @hapi/podium emit is actually an async function
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error('An unexpected error occurred while writing to the log:', err.stack);
+        process.exit(1);
+      });
   }
 
   public stop() {

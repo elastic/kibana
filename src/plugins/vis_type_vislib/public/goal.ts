@@ -19,14 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { GaugeOptions } from './components/options';
-import { getGaugeCollections, GaugeTypes } from './utils/collections';
-import { ColorModes, ColorSchemas } from '../../charts/public';
 import { AggGroupNames } from '../../data/public';
-import { Schemas } from '../../vis_default_editor/public';
-import { toExpressionAst } from './to_ast';
+import { ColorMode, ColorSchemas } from '../../charts/public';
 import { BaseVisTypeOptions } from '../../visualizations/public';
-import { BasicVislibParams } from './types';
+
+import { getGaugeCollections, GaugeOptions } from './editor';
+import { toExpressionAst } from './to_ast';
+import { GaugeType, BasicVislibParams } from './types';
 
 export const goalVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'goal',
@@ -46,13 +45,13 @@ export const goalVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
         verticalSplit: false,
         autoExtend: false,
         percentageMode: true,
-        gaugeType: GaugeTypes.ARC,
+        gaugeType: GaugeType.Arc,
         gaugeStyle: 'Full',
         backStyle: 'Full',
         orientation: 'vertical',
         useRanges: false,
         colorSchema: ColorSchemas.GreenToRed,
-        gaugeColorMode: ColorModes.NONE,
+        gaugeColorMode: ColorMode.None,
         colorsRange: [{ from: 0, to: 10000 }],
         invertColors: false,
         labels: {
@@ -79,7 +78,7 @@ export const goalVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   editorConfig: {
     collections: getGaugeCollections(),
     optionsTemplate: GaugeOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -108,7 +107,7 @@ export const goalVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
-    ]),
+    ],
   },
   useCustomNoDataScreen: true,
 };

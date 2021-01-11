@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import './index.scss';
-
 import { PluginInitializerContext } from '../../../core/public';
 import { InputControlVisPlugin as Plugin } from './plugin';
 

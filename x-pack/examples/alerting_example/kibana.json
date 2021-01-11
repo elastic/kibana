@@ -4,6 +4,7 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["triggersActionsUi", "charts", "data", "alerts", "actions", "features", "developerExamples"],
-  "optionalPlugins": []
+  "requiredPlugins": ["triggersActionsUi", "charts", "data", "alerts", "actions", "kibanaReact", "features", "developerExamples"],
+  "optionalPlugins": [],
+  "requiredBundles": ["kibanaReact"]
 }

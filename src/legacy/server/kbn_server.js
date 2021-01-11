@@ -122,7 +122,7 @@ export default class KbnServer {
 
     if (process.env.isDevCliChild) {
       // help parent process know when we are ready
-      process.send(['WORKER_LISTENING']);
+      process.send(['SERVER_LISTENING']);
     }
 
     server.log(

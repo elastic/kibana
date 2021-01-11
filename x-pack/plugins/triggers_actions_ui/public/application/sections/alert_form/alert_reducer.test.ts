@@ -18,6 +18,7 @@ describe('alert reducer', () => {
       },
       actions: [],
       tags: [],
+      notifyWhen: 'onActionGroupChange',
     } as unknown) as Alert;
   });
 
