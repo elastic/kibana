@@ -5,15 +5,12 @@
  */
 
 import { MockedKeys } from '@kbn/utility-types/jest';
-import { waitFor } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 import { mount, ReactWrapper } from 'enzyme';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import moment from 'moment';
 import React from 'react';
-import sinon from 'sinon';
 import { coreMock } from 'src/core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { SavedObjectsFindResponse } from 'src/core/server';
 import { SessionsClient } from 'src/plugins/data/public/search';
 import { SessionsMgmtConfigSchema } from '../../';
 import { STATUS, UISession } from '../../../../../common/search/sessions_mgmt';
@@ -107,10 +104,37 @@ describe('Background Search Session Management Table', () => {
   });
 
   describe('fetching sessions data', () => {
+    test('re-fetches data', async () => {
+      jest.useFakeTimers();
+      sessionsClient.find = jest.fn();
+      mockConfig = {
+        ...mockConfig,
+        refreshInterval: moment.duration(10, 'seconds'),
+      };
+
+      mount(
+        <LocaleWrapper>
+          <SearchSessionsMgmtTable
+            core={mockCoreStart}
+            api={api}
+            timezone="UTC"
+            initialTable={[]}
+            config={mockConfig}
+          />
+        </LocaleWrapper>
+      );
+
+      act(() => {
+        jest.advanceTimersByTime(20000);
+      });
+
+      expect(sessionsClient.find).toBeCalledTimes(2);
+
+      jest.useRealTimers();
+    });
+
     test('refresh button uses the session client', async () => {
-      const findSessions = sinon
-        .stub(sessionsClient, 'find')
-        .callsFake(async () => ({} as SavedObjectsFindResponse<unknown>));
+      sessionsClient.find = jest.fn();
 
       mockConfig = {
         ...mockConfig,
@@ -130,7 +154,7 @@ describe('Background Search Session Management Table', () => {
         </LocaleWrapper>
       );
 
-      expect(findSessions.called).toBe(false);
+      expect(sessionsClient.find).not.toBeCalled();
 
       const buttonSelector = `[data-test-subj="session-mgmt-table-btn-refresh"] button`;
 
@@ -139,7 +163,7 @@ describe('Background Search Session Management Table', () => {
         table.update();
       });
 
-      expect(findSessions.called).toBe(true);
+      expect(sessionsClient.find).toBeCalledTimes(1);
     });
   });
 });

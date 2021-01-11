@@ -35,7 +35,7 @@ const DeleteConfirm = ({
     defaultMessage: 'Cancel',
   });
   const message = i18n.translate('xpack.data.mgmt.searchSessions.deleteModal.message', {
-    defaultMessage: `You can't recover deleted sessions`,
+    defaultMessage: `A deleted session can be recovered by re-running the search.`,
   });
 
   return (

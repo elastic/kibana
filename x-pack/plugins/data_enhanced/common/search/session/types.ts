@@ -24,6 +24,10 @@ export interface SearchSessionSavedObjectAttributes {
   idMapping: Record<string, SearchSessionRequestInfo>;
 }
 
+export interface SearchSessionSavedObject {
+  id: string;
+  attributes: SearchSessionSavedObjectAttributes;
+}
 export interface SearchSessionRequestInfo {
   id: string; // ID of the async search request
   strategy: string; // Search strategy used to submit the search request

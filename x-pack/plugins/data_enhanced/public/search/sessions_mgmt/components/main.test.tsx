@@ -6,7 +6,7 @@
 
 import { MockedKeys } from '@kbn/utility-types/jest';
 import { mount, ReactWrapper } from 'enzyme';
-import { CoreSetup, DocLinksStart } from 'kibana/public';
+import { CoreSetup, CoreStart, DocLinksStart } from 'kibana/public';
 import moment from 'moment';
 import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
@@ -19,6 +19,7 @@ import { LocaleWrapper, mockUrls } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
 
 let mockCoreSetup: MockedKeys<CoreSetup>;
+let mockCoreStart: MockedKeys<CoreStart>;
 let mockConfig: SessionsMgmtConfigSchema;
 let sessionsClient: SessionsClient;
 let initialTable: UISession[];
@@ -27,6 +28,7 @@ let api: SearchSessionsMgmtAPI;
 describe('Background Search Session Management Main', () => {
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
+    mockCoreStart = coreMock.createStart();
     mockConfig = {
       expiresSoonWarning: moment.duration(1, 'days'),
       maxSessions: 2000,
@@ -74,6 +76,7 @@ describe('Background Search Session Management Main', () => {
       main = mount(
         <LocaleWrapper>
           <SearchSessionsMgmtMain
+            core={mockCoreStart}
             api={api}
             http={mockCoreSetup.http}
             timezone="UTC"

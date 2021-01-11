@@ -13,8 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const sendToBackground = getService('sendToBackground');
   const esArchiver = getService('esArchiver');
 
-  describe('Background search sessions Management UI', () => {
-    describe('New sessions', () => {
+  describe('Search search sessions Management UI', () => {
+    describe('New search sessions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
       });
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Archived sessions', () => {
+    describe('Archived search sessions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('management/kibana/search_sessions');
       });
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('shows no items found', async () => {
         expectSnapshot(
-          await testSubjects.find('backgroundSessionsMgmtTable').then((n) => n.getVisibleText())
+          await testSubjects.find('searchSessionsMgmtTable').then((n) => n.getVisibleText())
         ).toMatchInline(`
           "App
           Name

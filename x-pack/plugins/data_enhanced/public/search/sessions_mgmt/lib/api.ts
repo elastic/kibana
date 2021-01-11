@@ -12,15 +12,10 @@ import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import { SessionsMgmtConfigSchema } from '../';
 import type { ISessionsClient } from '../../../../../../../src/plugins/data/public';
-import type { SearchSessionSavedObjectAttributes } from '../../../../common';
+import type { SearchSessionSavedObject } from '../../../../common';
 import { ACTION, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 
 type UrlGeneratorsStart = SharePluginStart['urlGenerators'];
-
-interface SearchSessionSavedObject {
-  id: string;
-  attributes: SearchSessionSavedObjectAttributes;
-}
 
 // Helper: factory for a function to map server objects to UI objects
 const mapToUISession = (

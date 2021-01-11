@@ -8,9 +8,9 @@ import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
-import * as Rx from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
+import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '../';
 import { SessionsMgmtConfigSchema } from '../..';
 import { ActionComplete, UISession } from '../../../../../common/search/sessions_mgmt';
@@ -19,7 +19,7 @@ import { getColumns } from '../../lib/get_columns';
 import { getAppFilter } from './app_filter';
 import { getStatusFilter } from './status_filter';
 
-const TABLE_ID = 'backgroundSessionsMgmtTable';
+const TABLE_ID = 'searchSessionsMgmtTable';
 
 interface Props {
   core: CoreStart;
@@ -39,45 +39,55 @@ export function SearchSessionsMgmtTable({
 }: Props) {
   const [tableData, setTableData] = useState<UISession[]>(initialTable ? initialTable : []);
   const [isLoading, setIsLoading] = useState(false);
+  const [debouncedIsLoading, setDebouncedIsLoading] = useState(false);
   const [pagination, setPagination] = useState({ pageIndex: 0 });
+  const [refreshInterval, setRefreshInterval] = useState<number | undefined>(undefined);
+  const showLatestResultsHandler = useRef<Function>();
+
+  // Debounce rendering the state of the Refresh button
+  useDebounce(
+    () => {
+      setDebouncedIsLoading(isLoading);
+    },
+    250,
+    [isLoading]
+  );
+
+  // Convert the config interval to ms
+  useEffect(() => {
+    setRefreshInterval(moment.duration(config.refreshInterval).asMilliseconds());
+  }, [config.refreshInterval]);
 
   // refresh behavior
-  const doRefresh = async () => {
+  const doRefresh = useCallback(async () => {
     setIsLoading(true);
-    await api.fetchTableData().then((results) => {
-      if (results) {
+    try {
+      const renderResults = (results: UISession[]) => {
         setTableData(results);
+      };
+      showLatestResultsHandler.current = renderResults;
+      const results = await api.fetchTableData();
+      if (results) {
+        // Ignore results from any but the latest api call
+        if (showLatestResultsHandler.current === renderResults) renderResults(results);
+      } else {
+        renderResults([]);
       }
-    });
+    } catch (e) {
+      setTableData([]);
+    }
     setIsLoading(false);
-  };
+  }, [api]);
 
-  // configurable auto-refresh
-  useEffect(() => {
-    const refreshInterval = moment.duration(config.refreshInterval);
-    const refreshRx = Rx.interval(refreshInterval.asMilliseconds())
-      .pipe(
-        switchMap(doRefresh),
-        catchError((err) => {
-          // eslint-disable-next-line no-console
-          console.error(err);
-          return Rx.of(null);
-        })
-      )
-      .subscribe();
-
-    return () => {
-      refreshRx.unsubscribe();
-    };
-  });
+  useInterval(doRefresh, refreshInterval);
 
   // When action such as cancel, delete, extend occurs, use the async return
   // value to refresh the table
-  const handleActionCompleted: ActionComplete = (results: UISession[] | null) => {
+  const handleActionCompleted: ActionComplete = useCallback((results: UISession[] | null) => {
     if (results) {
       setTableData(results);
     }
-  };
+  }, []);
 
   // table config: search / filters
   const search: EuiSearchBarProps = {
@@ -89,8 +99,8 @@ export function SearchSessionsMgmtTable({
           fill
           iconType="refresh"
           onClick={doRefresh}
-          disabled={isLoading}
-          isLoading={isLoading}
+          disabled={debouncedIsLoading}
+          isLoading={debouncedIsLoading}
           data-test-subj="session-mgmt-table-btn-refresh"
         >
           <FormattedMessage

@@ -9,7 +9,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
-  describe('background sessions management', function () {
+  describe('search sessions management', function () {
     this.tags('ciGroup3');
 
     before(async () => {

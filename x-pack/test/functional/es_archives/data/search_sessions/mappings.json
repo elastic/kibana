@@ -302,7 +302,7 @@
           "dynamic": "false",
           "type": "object"
         },
-        "background-session": {
+        "search-session": {
           "properties": {
             "appId": {
               "type": "keyword"

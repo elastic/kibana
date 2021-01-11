@@ -161,8 +161,8 @@ export const StatusIndicator = (props: StatusIndicatorProps) => {
 
     if (statusDef) {
       const { toolTipContent } = statusDef;
-      let icon: ReactElement | string | undefined = statusDef.icon;
-      let label: ReactElement | string = statusDef.label;
+      let icon: ReactElement | undefined = statusDef.icon;
+      let label: ReactElement = statusDef.label;
 
       if (icon && toolTipContent) {
         icon = <EuiToolTip content={toolTipContent}>{icon}</EuiToolTip>;
