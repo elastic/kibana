@@ -21,7 +21,7 @@ import { omit, pick, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MetricsItemsSchema } from './types';
 
-export const lookup: Record<string, any> = {
+export const lookup: Record<string, unknown> = {
   count: i18n.translate('visTypeTimeseries.aggLookup.countLabel', { defaultMessage: 'Count' }),
   calculation: i18n.translate('visTypeTimeseries.aggLookup.calculationLabel', {
     defaultMessage: 'Calculation',

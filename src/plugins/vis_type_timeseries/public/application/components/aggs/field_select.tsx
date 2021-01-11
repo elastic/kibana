@@ -67,6 +67,10 @@ export function FieldSelect({
   uiRestrictions,
   'data-test-subj': dataTestSubj = 'metricsIndexPatternFieldsSelect',
 }: FieldSelectProps) {
+  if (type === METRIC_TYPES.COUNT) {
+    return null;
+  }
+
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = [];
   let newPlaceholder = placeholder;
   const groupedOptions: EuiComboBoxProps<string>['options'] = Object.values(
@@ -116,10 +120,6 @@ export function FieldSelect({
       group.options.sort(sortByLabel);
     }
   });
-
-  if (type === METRIC_TYPES.COUNT) {
-    return null;
-  }
 
   if (value && !selectedOptions.length) {
     onChange([]);

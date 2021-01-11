@@ -36,7 +36,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const PositiveOnlyAgg = (props) => {
-  const { siblings, fields, indexPatten } = props;
+  const { siblings, fields, indexPattern } = props;
 
   const defaults = { unit: '' };
   const model = { ...defaults, ...props.model };
@@ -85,7 +85,7 @@ export const PositiveOnlyAgg = (props) => {
               onChange={handleSelectChange('field')}
               metrics={siblings}
               metric={model}
-              fields={fields[indexPatten]}
+              fields={fields[indexPattern]}
               value={model.field}
               exclude={[METRIC_TYPES.TOP_HIT]}
             />
@@ -99,7 +99,7 @@ export const PositiveOnlyAgg = (props) => {
 PositiveOnlyAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
-  indexPatten: PropTypes.string,
+  indexPattern: PropTypes.string,
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,

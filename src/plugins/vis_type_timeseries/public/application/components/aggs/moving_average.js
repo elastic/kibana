@@ -316,7 +316,7 @@ export const MovingAverageAgg = (props) => {
 MovingAverageAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
-  indexPatten: PropTypes.string,
+  indexPattern: PropTypes.string,
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,

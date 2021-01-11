@@ -24,7 +24,7 @@ describe('extractIndexPatterns(vis)', () => {
   let panel: PanelSchema;
 
   beforeEach(() => {
-    panel = ({
+    panel = {
       index_pattern: '*',
       series: [
         {
@@ -37,7 +37,7 @@ describe('extractIndexPatterns(vis)', () => {
         },
       ],
       annotations: [{ index_pattern: 'notes-*' }, { index_pattern: 'example-1-*' }],
-    } as unknown) as PanelSchema;
+    } as PanelSchema;
   });
 
   test('should return index patterns', () => {
