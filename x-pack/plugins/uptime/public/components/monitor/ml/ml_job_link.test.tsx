@@ -6,21 +6,15 @@
 
 import React from 'react';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { TriggersAndActionsUIPublicPluginStart } from '../../../../../../plugins/triggers_actions_ui/public';
 import { MLJobLink } from './ml_job_link';
 
 describe('ML JobLink', () => {
   it('renders without errors', () => {
     const expectedHref = `/app/ml#/explorer?_g=(ml:(jobIds:!(testmonitor_high_latency_by_geo)),refreshInterval:(pause:!t,value:0),time:(from:'',to:''))&_a=(mlExplorerFilter:(filterActive:!t,filteredFields:!(monitor.id,testMonitor)),mlExplorerSwimlane:(viewByFieldName:observer.geo.name))`;
-    const { getByRole, getByText } = render<{
-      triggersActionsUi: Partial<TriggersAndActionsUIPublicPluginStart>;
-    }>(
+    const { getByRole, getByText } = render(
       <MLJobLink dateRange={{ to: '', from: '' }} basePath="" monitorId="testMonitor">
         <div>Test link</div>
-      </MLJobLink>,
-      {
-        core: { triggersActionsUi: { getEditAlertFlyout: jest.fn() } },
-      }
+      </MLJobLink>
     );
 
     const jobLink = getByRole('link');
