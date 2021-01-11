@@ -118,7 +118,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
           showTooltip: hasTotal,
           tooltipProps: hasTotal
             ? {
-                value: `${FriendlyTimingLabels.total}: ${formatValueForDisplay(total)}ms`,
+                value: `${FriendlyTimingLabels.receive}: ${formatValueForDisplay(total)}ms`,
                 colour: mimeTypeColour,
               }
             : undefined,

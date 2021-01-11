@@ -15,7 +15,6 @@ export enum Timings {
   Send = 'send',
   Wait = 'wait',
   Receive = 'receive',
-  Total = 'total',
 }
 
 export const FriendlyTimingLabels = {
@@ -49,9 +48,6 @@ export const FriendlyTimingLabels = {
       defaultMessage: 'Content downloading',
     }
   ),
-  [Timings.Total]: i18n.translate('xpack.uptime.synthetics.waterfallChart.labels.timings.total', {
-    defaultMessage: 'Content downloading',
-  }),
 };
 
 export const TIMING_ORDER = [
