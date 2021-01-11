@@ -21,8 +21,10 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
 
   const _meta: FormInternal['_meta'] = {
     hot: {
-      useRollover: Boolean(hot?.actions?.rollover),
       isUsingDefaultRollover: isUsingDefaultRollover(policy),
+      customRollover: {
+        enabled: Boolean(hot?.actions?.rollover),
+      },
       bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
       readonlyEnabled: Boolean(hot?.actions?.readonly),
     },
@@ -53,13 +55,13 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
         if (draft.phases.hot.actions.rollover.max_size) {
           const maxSize = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_size);
           draft.phases.hot.actions.rollover.max_size = maxSize.size;
-          draft._meta.hot.maxStorageSizeUnit = maxSize.units;
+          draft._meta.hot.customRollover.maxStorageSizeUnit = maxSize.units;
         }
 
         if (draft.phases.hot.actions.rollover.max_age) {
           const maxAge = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_age);
           draft.phases.hot.actions.rollover.max_age = maxAge.size;
-          draft._meta.hot.maxAgeUnit = maxAge.units;
+          draft._meta.hot.customRollover.maxAgeUnit = maxAge.units;
         }
       }
 
