@@ -7,6 +7,7 @@
   "exclude": [
     "src/**/__fixtures__/**/*",
     "src/core/**/*",
+    "src/plugins/management/**/*",
     "src/plugins/apm_oss/**/*",
     "src/plugins/bfetch/**/*",
     "src/plugins/data/**/*",
@@ -38,6 +39,7 @@
   ],
   "references": [
     { "path": "./src/core/tsconfig.json" },
+    { "path": "./src/plugins/management/tsconfig.json"},
     { "path": "./src/plugins/apm_oss/tsconfig.json" },
     { "path": "./src/plugins/bfetch/tsconfig.json" },
     { "path": "./src/plugins/data/tsconfig.json" },
