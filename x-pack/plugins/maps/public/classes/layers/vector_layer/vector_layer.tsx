@@ -386,7 +386,7 @@ export class VectorLayer extends AbstractLayer {
       };
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
+        onLoadError(sourceDataId, requestToken, `Join error: ${error.message}`);
       }
       throw error;
     }
