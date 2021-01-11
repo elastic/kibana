@@ -130,7 +130,7 @@ async function slackExecutor(
   let httpProxyAgent: Agent | undefined;
   if (execOptions.proxySettings) {
     const httpProxyAgents = getProxyAgents(execOptions.proxySettings, logger);
-    httpProxyAgent = webhookUrl.startsWith('https')
+    httpProxyAgent = webhookUrl.toLowerCase().startsWith('https')
       ? httpProxyAgents.httpsAgent
       : httpProxyAgents.httpAgent;
 
