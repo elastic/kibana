@@ -85,3 +85,31 @@ export const UNSAVED_TIMELINE_WARNING = (timelineType: TimelineTypeLiteral) =>
     values: { timeline: timelineType === TimelineType.template ? 'timeline template' : 'timeline' },
     defaultMessage: 'You have an unsaved {timeline}. Do you wish to save it?',
   });
+
+export const TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.titleTitle',
+  {
+    defaultMessage: 'Title',
+  }
+);
+
+export const TIMELINE_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.titleAriaLabel',
+  {
+    defaultMessage: 'Title',
+  }
+);
+
+export const TIMELINE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.descriptionLabel',
+  {
+    defaultMessage: 'Description',
+  }
+);
+
+export const OPTIONAL = i18n.translate(
+  'xpack.securitySolution.timeline.saveTimeline.modal.optionalLabel',
+  {
+    defaultMessage: 'Optional',
+  }
+);

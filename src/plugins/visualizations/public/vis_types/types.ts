@@ -18,12 +18,10 @@
  */
 
 import { IconType } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Adapters } from 'src/plugins/inspector';
-import { IndexPattern } from 'src/plugins/data/public';
 import { VisEditorConstructor } from 'src/plugins/visualize/public';
-import { ISchemas } from 'src/plugins/vis_default_editor/public';
-import { TriggerContextMapping } from '../../../ui_actions/public';
+import { IndexPattern, AggGroupNames, AggParam, AggGroupName } from '../../../data/public';
 import { Vis, VisParams, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
 
 export interface VisTypeOptions {
@@ -38,6 +36,29 @@ export enum VisGroups {
   PROMOTED = 'promoted',
   TOOLS = 'tools',
   AGGBASED = 'aggbased',
+}
+
+export interface ISchemas {
+  [AggGroupNames.Buckets]: Schema[];
+  [AggGroupNames.Metrics]: Schema[];
+  all: Schema[];
+}
+
+export interface Schema {
+  aggFilter: string[];
+  editor: boolean | string;
+  group: AggGroupName;
+  max: number;
+  min: number;
+  name: string;
+  params: AggParam[];
+  title: string;
+  defaults: unknown;
+  hideCustomLabel?: boolean;
+  mustBeFirst?: boolean;
+  aggSettings?: any;
+  disabled?: boolean;
+  tooltip?: ReactNode;
 }
 
 /**
@@ -64,7 +85,7 @@ export interface VisType<TVisParams = unknown> {
   /**
    * If given, it will return the supported triggers for this vis.
    */
-  readonly getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
+  readonly getSupportedTriggers?: () => string[];
 
   /**
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.

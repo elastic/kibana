@@ -27,7 +27,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { fontSizes, px, truncate, unit } from '../../../../style/variables';
 import { ManagedTable, ITableColumn } from '../../../shared/ManagedTable';
 import { EnvironmentBadge } from '../../../shared/EnvironmentBadge';
-import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview';
+import { ServiceOrTransactionsOverviewLink } from '../../../shared/Links/apm/service_transactions_overview_link';
 import { AgentIcon } from '../../../shared/AgentIcon';
 import { HealthBadge } from './HealthBadge';
 import { ServiceListMetric } from './ServiceListMetric';
@@ -104,7 +104,7 @@ export function getServiceColumns({
             id="service-name-tooltip"
             anchorClassName="apmServiceList__serviceNameTooltip"
           >
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               {agentName && (
                 <EuiFlexItem grow={false}>
                   <AgentIcon agentName={agentName} />
@@ -234,7 +234,12 @@ export function ServiceList({ items, noItemsMessage }: Props) {
     : 'transactionsPerMinute';
 
   return (
-    <EuiFlexGroup direction="column" responsive={false} alignItems="flexEnd">
+    <EuiFlexGroup
+      gutterSize="xs"
+      direction="column"
+      responsive={false}
+      alignItems="flexEnd"
+    >
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
