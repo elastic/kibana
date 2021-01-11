@@ -236,7 +236,7 @@ interface MockedApi<
 interface EpmPackageDetailsResponseProvidersMock {
   epmGetInfo: jest.MockedFunction<() => GetInfoResponse>;
   epmGetFile: jest.MockedFunction<() => string>;
-  epmGetSummary: jest.MockedFunction<() => GetStatsResponse>;
+  epmGetStats: jest.MockedFunction<() => GetStatsResponse>;
   fleetSetup: jest.MockedFunction<() => GetFleetStatusResponse>;
   packagePolicyList: jest.MockedFunction<() => GetPackagePoliciesResponse>;
   agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
@@ -712,7 +712,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     perPage: 100,
   };
 
-  const epmGetSummaryResponse: GetStatsResponse = {
+  const epmGetStatsResponse: GetStatsResponse = {
     response: {
       agent_policy_count: 2,
     },
@@ -731,7 +731,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     responseProvider: {
       epmGetInfo: jest.fn().mockReturnValue(epmPackageResponse),
       epmGetFile: jest.fn().mockReturnValue(packageReadMe),
-      epmGetSummary: jest.fn().mockReturnValue(epmGetSummaryResponse),
+      epmGetStats: jest.fn().mockReturnValue(epmGetStatsResponse),
       fleetSetup: jest.fn().mockReturnValue(agentsSetupResponse),
       packagePolicyList: jest.fn().mockReturnValue(packagePoliciesResponse),
       agentPolicyList: jest.fn().mockReturnValue(agentPoliciesResponse),
@@ -767,7 +767,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
 
       if (path === epmRouteService.getStatsPath('nginx')) {
         markApiCallAsHandled();
-        return mockedApiInterface.responseProvider.epmGetSummary();
+        return mockedApiInterface.responseProvider.epmGetStats();
       }
 
       const err = new Error(`API [GET ${path}] is not MOCKED!`);

@@ -16,9 +16,33 @@ describe('When using EPM `get` services', () => {
     soClient = savedObjectsClientMock.create();
   });
 
-  describe('and invoking getPackageUsageSummary()', () => {
+  describe('and invoking getPackageUsageStats()', () => {
     beforeEach(() => {
       const savedObjects: Array<SavedObjectsFindResult<PackagePolicySOAttributes>> = [
+        {
+          type: 'ingest-package-policies',
+          id: 'dcf83172-c38e-4501-b236-9f479da8a7d6',
+          attributes: {
+            name: 'system-3',
+            description: '',
+            namespace: 'default',
+            policy_id: '22222-22222-2222-2222',
+            enabled: true,
+            output_id: '',
+            inputs: [],
+            package: { name: 'system', title: 'System', version: '0.10.4' },
+            revision: 1,
+            created_at: '2020-12-22T21:28:05.380Z',
+            created_by: 'elastic',
+            updated_at: '2020-12-22T21:28:05.380Z',
+            updated_by: 'elastic',
+          },
+          references: [],
+          migrationVersion: { 'ingest-package-policies': '7.11.0' },
+          updated_at: '2020-12-22T21:28:05.383Z',
+          version: 'WzE1NTAsMV0=',
+          score: 0,
+        },
         {
           type: 'ingest-package-policies',
           id: '5b61eb5c-d94c-48a6-a17c-b0d1f7c65336',
@@ -50,30 +74,6 @@ describe('When using EPM `get` services', () => {
             description: '',
             namespace: 'default',
             policy_id: '11111-111111-11111-11111',
-            enabled: true,
-            output_id: '',
-            inputs: [],
-            package: { name: 'system', title: 'System', version: '0.10.4' },
-            revision: 1,
-            created_at: '2020-12-22T21:28:05.380Z',
-            created_by: 'elastic',
-            updated_at: '2020-12-22T21:28:05.380Z',
-            updated_by: 'elastic',
-          },
-          references: [],
-          migrationVersion: { 'ingest-package-policies': '7.11.0' },
-          updated_at: '2020-12-22T21:28:05.383Z',
-          version: 'WzE1NTAsMV0=',
-          score: 0,
-        },
-        {
-          type: 'ingest-package-policies',
-          id: 'dcf83172-c38e-4501-b236-9f479da8a7d6',
-          attributes: {
-            name: 'system-3',
-            description: '',
-            namespace: 'default',
-            policy_id: '22222-22222-2222-2222',
             enabled: true,
             output_id: '',
             inputs: [],
