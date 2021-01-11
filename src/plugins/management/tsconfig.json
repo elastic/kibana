@@ -10,12 +10,13 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "../../../typings/**/*"
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../home/tsconfig.json" },
-    { "path": "../kibana_utils/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../home/tsconfig.json"},
+    { "path": "../kibana_react/tsconfig.json"},
+    { "path": "../kibana_utils/tsconfig.json"}
   ]
 }
