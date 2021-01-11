@@ -66,14 +66,14 @@ def build() {
 
 def buildAndUpload() {
   def sha = buildState.get('checkoutInfo').commit
-  def context = 'kibana-ci-storybooks'
+  def context = 'ci/storybooks'
 
   githubCommitStatus.create(sha, 'pending', 'Building Storybooks', context)
 
   try {
     build()
     upload()
-    githubCommitStatus.create(sha, 'success', 'Storybooks built', context, buildState.get('storybooksUrl'))
+    githubCommitStatus.create(sha, 'success', 'Storybooks built', context, getUrlForCommit())
   } catch(ex) {
     githubCommitStatus.create(sha, 'error', 'Building Storybooks failed', context)
     throw ex
