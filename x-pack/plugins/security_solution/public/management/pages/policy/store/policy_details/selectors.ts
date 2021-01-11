@@ -111,7 +111,7 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) => {
   );
 };
 
-/** Returns a the license info */
+/** Returns the license info fetched from the license service */
 export const license = (state: Immutable<PolicyDetailsState>) => {
   return state.license;
 };
