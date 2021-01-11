@@ -215,7 +215,6 @@ export class CoreSystem {
         http,
         injectedMetadata,
         notifications,
-        uiSettings,
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });

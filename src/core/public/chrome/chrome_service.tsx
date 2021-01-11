@@ -31,7 +31,6 @@ import { DocLinksStart } from '../doc_links';
 import { HttpStart } from '../http';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
-import { IUiSettingsClient } from '../ui_settings';
 import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 import { ChromeDocTitle, DocTitleService } from './doc_title';
 import { ChromeNavControls, NavControlsService } from './nav_controls';
@@ -90,7 +89,6 @@ interface StartDeps {
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
-  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */
@@ -143,7 +141,6 @@ export class ChromeService {
     http,
     injectedMetadata,
     notifications,
-    uiSettings,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
