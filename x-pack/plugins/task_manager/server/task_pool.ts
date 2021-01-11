@@ -83,7 +83,7 @@ export class TaskPool {
   public get availableWorkers() {
     // emit load whenever we check how many available workers there are
     // this should happen less often than the actual changes to the worker queue
-    // so is lighter than emitting the load every time we add/remove a task fro mthe queue
+    // so is lighter than emitting the load every time we add/remove a task from the queue
     this.load$.next(asTaskManagerStatEvent('load', asOk(this.workerLoad)));
     return this.maxWorkers - this.occupiedWorkers;
   }
