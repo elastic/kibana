@@ -7,8 +7,8 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
-const SEND_TO_BACKGROUND_TEST_SUBJ = 'backgroundSessionIndicator';
-const SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ = 'backgroundSessionIndicatorPopoverContainer';
+const SEND_TO_BACKGROUND_TEST_SUBJ = 'searchSessionIndicator';
+const SEND_TO_BACKGROUND_POPOVER_CONTENT_TEST_SUBJ = 'searchSessionIndicatorPopoverContainer';
 
 type SessionStateType =
   | 'none'
@@ -42,26 +42,26 @@ export function SendToBackgroundProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async viewBackgroundSessions() {
+    public async viewSearchSessions() {
       await this.ensurePopoverOpened();
-      await testSubjects.click('backgroundSessionIndicatorViewBackgroundSessionsLink');
+      await testSubjects.click('searchSessionIndicatorviewSearchSessionsLink');
     }
 
     public async save() {
       await this.ensurePopoverOpened();
-      await testSubjects.click('backgroundSessionIndicatorSaveBtn');
+      await testSubjects.click('searchSessionIndicatorSaveBtn');
       await this.ensurePopoverClosed();
     }
 
     public async cancel() {
       await this.ensurePopoverOpened();
-      await testSubjects.click('backgroundSessionIndicatorCancelBtn');
+      await testSubjects.click('searchSessionIndicatorCancelBtn');
       await this.ensurePopoverClosed();
     }
 
     public async refresh() {
       await this.ensurePopoverOpened();
-      await testSubjects.click('backgroundSessionIndicatorRefreshBtn');
+      await testSubjects.click('searchSessionIndicatorRefreshBtn');
       await this.ensurePopoverClosed();
     }
 
