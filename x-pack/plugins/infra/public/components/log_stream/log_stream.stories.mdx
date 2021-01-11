@@ -30,7 +30,6 @@ export const fetch = function (url, params) {
           body.endTimestamp,
           body.columns || DEFAULT_SOURCE_CONFIGURATION.data.configuration.logColumns
         );
-        console.log(entries[150]);
         return {
           data: {
             entries,
