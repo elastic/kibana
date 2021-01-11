@@ -533,7 +533,7 @@ export class DataRecognizer {
       const jobInfo = await this._jobsService.jobsExist(jobIds);
 
       // Check if the value for any of the jobs is false.
-      const doJobsExist = Object.values(jobInfo).includes(false) === false;
+      const doJobsExist = Object.values(jobInfo).every((j) => j.exists === true);
       results.jobsExist = doJobsExist;
 
       if (doJobsExist === true) {
