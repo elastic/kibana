@@ -324,6 +324,8 @@ export {
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
   SavedObjectsExportError,
+  SavedObjectsTypeExportHook,
+  SavedObjectsExportContext,
   SavedObjectsImporter,
   ISavedObjectsImporter,
   SavedObjectsImportError,

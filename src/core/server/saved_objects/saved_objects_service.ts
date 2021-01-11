@@ -49,11 +49,12 @@ import {
 import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
-import { SavedObjectsExporter, ISavedObjectsExporter } from './export';
+import { SavedObjectsExporter, ISavedObjectsExporter, SavedObjectsTypeExportHook } from './export';
 import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
+
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -151,6 +152,11 @@ export interface SavedObjectsServiceSetup {
    * ```
    */
   registerType: (type: SavedObjectsType) => void;
+
+  /**
+   * TODO: documentation
+   */
+  registerExportHook: (type: string, exportHook: SavedObjectsTypeExportHook) => void;
 }
 
 /**
@@ -280,6 +286,7 @@ export class SavedObjectsService
   private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
+  private exportHooks: Map<string, SavedObjectsTypeExportHook> = new Map();
 
   private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
@@ -344,6 +351,13 @@ export class SavedObjectsService
           throw new Error('cannot call `registerType` after service startup.');
         }
         this.typeRegistry.registerType(type);
+      },
+      registerExportHook: (type, hook) => {
+        if (this.started) {
+          throw new Error('cannot call `registerExportHook` after service startup.');
+        }
+        // TODO
+        this.exportHooks.set(type, hook);
       },
     };
   }
@@ -458,6 +472,7 @@ export class SavedObjectsService
       createExporter: (savedObjectsClient) =>
         new SavedObjectsExporter({
           savedObjectsClient,
+          exportHooks: Object.fromEntries(this.exportHooks),
           exportSizeLimit: this.config!.maxImportExportSize,
         }),
       createImporter: (savedObjectsClient) =>

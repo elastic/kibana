@@ -17,10 +17,13 @@
  * under the License.
  */
 
-import { SavedObjectsFindOptionsReference } from '../types';
+import { KibanaRequest } from '../../http';
+import { SavedObject, SavedObjectsFindOptionsReference } from '../types';
 
 /** @public */
 export interface SavedObjectExportBaseOptions {
+  /** The http request initiating the export. */
+  request: KibanaRequest;
   /** flag to also include all related saved objects in the export stream. */
   includeReferencesDeep?: boolean;
   /** flag to not append {@link SavedObjectsExportResultDetails | export details} to the end of the export stream. */
@@ -75,3 +78,18 @@ export interface SavedObjectsExportResultDetails {
     type: string;
   }>;
 }
+
+/**
+ * @public
+ */
+export interface SavedObjectsExportContext {
+  request: KibanaRequest;
+}
+
+/**
+ * @public
+ */
+export type SavedObjectsTypeExportHook = <T = unknown>(
+  objects: Array<SavedObject<T>>,
+  context: SavedObjectsExportContext
+) => SavedObject[] | Promise<SavedObject[]>;

@@ -27,8 +27,10 @@ import {
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
+  SavedObjectsTypeExportHook,
 } from './types';
 import { SavedObjectsExportError } from './errors';
+import { applyExportHooks } from './apply_export_hooks';
 
 /**
  * @public
@@ -40,16 +42,20 @@ export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
  */
 export class SavedObjectsExporter {
   readonly #savedObjectsClient: SavedObjectsClientContract;
+  readonly #exportHooks: Record<string, SavedObjectsTypeExportHook>;
   readonly #exportSizeLimit: number;
 
   constructor({
     savedObjectsClient,
+    exportHooks,
     exportSizeLimit,
   }: {
     savedObjectsClient: SavedObjectsClientContract;
+    exportHooks: Record<string, SavedObjectsTypeExportHook>;
     exportSizeLimit: number;
   }) {
     this.#savedObjectsClient = savedObjectsClient;
+    this.#exportHooks = exportHooks;
     this.#exportSizeLimit = exportSizeLimit;
   }
 
@@ -63,6 +69,7 @@ export class SavedObjectsExporter {
   public async exportByTypes(options: SavedObjectsExportByTypeOptions) {
     const objects = await this.fetchByTypes(options);
     return this.processObjects(objects, {
+      request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
       excludeExportDetails: options.excludeExportDetails,
       namespace: options.namespace,
@@ -82,6 +89,7 @@ export class SavedObjectsExporter {
     }
     const objects = await this.fetchByObjects(options);
     return this.processObjects(objects, {
+      request: options.request,
       includeReferencesDeep: options.includeReferencesDeep,
       excludeExportDetails: options.excludeExportDetails,
       namespace: options.namespace,
@@ -91,6 +99,7 @@ export class SavedObjectsExporter {
   private async processObjects(
     savedObjects: SavedObject[],
     {
+      request,
       excludeExportDetails = false,
       includeReferencesDeep = false,
       namespace,
@@ -98,6 +107,12 @@ export class SavedObjectsExporter {
   ) {
     let exportedObjects: Array<SavedObject<unknown>>;
     let missingReferences: SavedObjectsExportResultDetails['missingReferences'] = [];
+
+    savedObjects = await applyExportHooks({
+      objects: savedObjects,
+      request,
+      exportHooks: this.#exportHooks,
+    });
 
     if (includeReferencesDeep) {
       const fetchResult = await fetchNestedDependencies(

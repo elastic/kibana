@@ -19,6 +19,7 @@
 
 import { SavedObjectsExporter } from './saved_objects_exporter';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
+import { httpServerMock } from '../../http/http_server.mocks';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '@kbn/utils';
 
@@ -27,6 +28,8 @@ async function readStreamToCompletion(stream: Readable) {
 }
 
 const exportSizeLimit = 500;
+const request = httpServerMock.createKibanaRequest();
+const exportHooks = {};
 
 describe('getSortedObjectsForExport()', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
@@ -34,7 +37,7 @@ describe('getSortedObjectsForExport()', () => {
 
   beforeEach(() => {
     savedObjectsClient = savedObjectsClientMock.create();
-    exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit });
+    exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit, exportHooks });
   });
 
   describe('#exportByTypes', () => {
@@ -67,6 +70,7 @@ describe('getSortedObjectsForExport()', () => {
         page: 0,
       });
       const exportStream = await exporter.exportByTypes({
+        request,
         types: ['index-pattern', 'search'],
       });
 
@@ -157,6 +161,7 @@ describe('getSortedObjectsForExport()', () => {
         page: 0,
       });
       const exportStream = await exporter.exportByTypes({
+        request,
         types: ['index-pattern', 'search'],
       });
 
@@ -245,6 +250,7 @@ describe('getSortedObjectsForExport()', () => {
         page: 0,
       });
       const exportStream = await exporter.exportByTypes({
+        request,
         types: ['index-pattern', 'search'],
         excludeExportDetails: true,
       });
@@ -304,6 +310,7 @@ describe('getSortedObjectsForExport()', () => {
         page: 0,
       });
       const exportStream = await exporter.exportByTypes({
+        request,
         types: ['index-pattern', 'search'],
         search: 'foo',
       });
@@ -386,6 +393,7 @@ describe('getSortedObjectsForExport()', () => {
         page: 0,
       });
       const exportStream = await exporter.exportByTypes({
+        request,
         types: ['index-pattern', 'search'],
         hasReference: [
           {
@@ -479,6 +487,7 @@ describe('getSortedObjectsForExport()', () => {
         page: 0,
       });
       const exportStream = await exporter.exportByTypes({
+        request,
         types: ['index-pattern', 'search'],
         namespace: 'foo',
       });
@@ -542,7 +551,7 @@ describe('getSortedObjectsForExport()', () => {
     });
 
     test('export selected types throws error when exceeding exportSizeLimit', async () => {
-      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1 });
+      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1, exportHooks });
 
       savedObjectsClient.find.mockResolvedValueOnce({
         total: 2,
@@ -573,6 +582,7 @@ describe('getSortedObjectsForExport()', () => {
       });
       await expect(
         exporter.exportByTypes({
+          request,
           types: ['index-pattern', 'search'],
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't export more than 1 objects"`);
@@ -614,6 +624,7 @@ describe('getSortedObjectsForExport()', () => {
         ],
       });
       const exportStream = await exporter.exportByTypes({
+        request,
         types: ['index-pattern'],
       });
       const response = await readStreamToCompletion(exportStream);
@@ -678,6 +689,7 @@ describe('getSortedObjectsForExport()', () => {
         ],
       });
       const exportStream = await exporter.exportByObjects({
+        request,
         objects: [
           {
             type: 'index-pattern',
@@ -770,6 +782,7 @@ describe('getSortedObjectsForExport()', () => {
       });
       await expect(
         exporter.exportByObjects({
+          request,
           objects: [
             {
               type: 'index-pattern',
@@ -785,9 +798,10 @@ describe('getSortedObjectsForExport()', () => {
     });
 
     test('export selected objects throws error when exceeding exportSizeLimit', async () => {
-      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1 });
+      exporter = new SavedObjectsExporter({ savedObjectsClient, exportSizeLimit: 1, exportHooks });
 
       const exportOpts = {
+        request,
         objects: [
           {
             type: 'index-pattern',
@@ -814,6 +828,7 @@ describe('getSortedObjectsForExport()', () => {
         ],
       });
       const exportStream = await exporter.exportByObjects({
+        request,
         objects: [
           { type: 'multi', id: '1' },
           { type: 'multi', id: '2' },
@@ -857,6 +872,7 @@ describe('getSortedObjectsForExport()', () => {
         ],
       });
       const exportStream = await exporter.exportByObjects({
+        request,
         objects: [
           {
             type: 'search',
