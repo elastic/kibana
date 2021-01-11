@@ -54,17 +54,23 @@ export function registerLicensedFeatures(licensingPlugin: LicensingPluginSetup) 
 }
 
 let licensingPluginStart: LicensingPluginStart;
-export function setLicensingPluginStart(licensingPlugin: LicensingPluginStart) {
+
+function updateLicenseState(license: ILicense) {
+  const gold = license.check(APP_ID, 'gold');
+  isGoldPlus = gold.state === 'valid';
+
+  const enterprise = license.check(APP_ID, 'enterprise');
+  isEnterprisePlus = enterprise.state === 'valid';
+
+  licenseId = license.uid;
+}
+
+export async function setLicensingPluginStart(licensingPlugin: LicensingPluginStart) {
+  const license = await licensingPlugin.refresh();
+  updateLicenseState(license);
+
   licensingPluginStart = licensingPlugin;
-  licensingPluginStart.license$.subscribe((license: ILicense) => {
-    const gold = license.check(APP_ID, 'gold');
-    isGoldPlus = gold.state === 'valid';
-
-    const enterprise = license.check(APP_ID, 'enterprise');
-    isEnterprisePlus = enterprise.state === 'valid';
-
-    licenseId = license.uid;
-  });
+  licensingPluginStart.license$.subscribe(updateLicenseState);
 }
 
 export function notifyLicensedFeatureUsage(licensedFeature: LICENSED_FEATURES) {

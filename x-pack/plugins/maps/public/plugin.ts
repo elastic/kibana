@@ -158,8 +158,8 @@ export class MapsPlugin
     });
   }
 
-  public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
-    setLicensingPluginStart(plugins.licensing);
+  public async start(core: CoreStart, plugins: MapsPluginStartDependencies): Promise<MapsStartApi> {
+    await setLicensingPluginStart(plugins.licensing);
     plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     setStartServices(core, plugins);
     // unregisters the OSS alias
