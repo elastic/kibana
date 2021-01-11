@@ -20,6 +20,6 @@ export interface ISearchStart
 |  [search](./kibana-plugin-plugins-data-public.isearchstart.search.md) | <code>ISearchGeneric</code> | low level search [ISearchGeneric](./kibana-plugin-plugins-data-public.isearchgeneric.md) |
 |  [searchSource](./kibana-plugin-plugins-data-public.isearchstart.searchsource.md) | <code>ISearchStartSearchSource</code> | high level search [ISearchStartSearchSource](./kibana-plugin-plugins-data-public.isearchstartsearchsource.md) |
 |  [session](./kibana-plugin-plugins-data-public.isearchstart.session.md) | <code>ISessionService</code> | Current session management [ISessionService](./kibana-plugin-plugins-data-public.isessionservice.md) |
-|  [sessionsClient](./kibana-plugin-plugins-data-public.isearchstart.sessionsclient.md) | <code>ISessionsClient</code> | Background search sessions SO CRUD [ISessionsClient](./kibana-plugin-plugins-data-public.isessionsclient.md) |
+|  [sessionsClient](./kibana-plugin-plugins-data-public.isearchstart.sessionsclient.md) | <code>ISessionsClient</code> | Search sessions SO CRUD [ISessionsClient](./kibana-plugin-plugins-data-public.isessionsclient.md) |
 |  [showError](./kibana-plugin-plugins-data-public.isearchstart.showerror.md) | <code>(e: Error) =&gt; void</code> |  |
 

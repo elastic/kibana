@@ -102,7 +102,8 @@ pageLoadAssetSize:
   visualizations: 295025
   visualize: 57431
   watcher: 43598
-  runtimeFields: 41752
+  runtimeFields: 10000
   stackAlerts: 29684
   visTypePie: 34051
   presentationUtil: 28545
+  runtimeFieldEditor: 46986
