@@ -19,8 +19,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
@@ -403,81 +401,75 @@ export const StepDetailsForm: FC<Props> = React.memo(
             />
           </EuiFormRow>
 
-          <EuiSpacer size={'m'} />
+          <EuiFormRow
+            label={i18n.translate('xpack.transform.stepDetailsForm.destinationIndexLabel', {
+              defaultMessage: 'Destination index',
+            })}
+            isInvalid={!indexNameEmpty && !indexNameValid}
+            helpText={
+              indexNameExists &&
+              i18n.translate('xpack.transform.stepDetailsForm.destinationIndexHelpText', {
+                defaultMessage:
+                  'An index with this name already exists. Be aware that running this transform will modify this destination index.',
+              })
+            }
+            error={
+              !indexNameEmpty &&
+              !indexNameValid && [
+                <Fragment>
+                  {i18n.translate('xpack.transform.stepDetailsForm.destinationIndexInvalidError', {
+                    defaultMessage: 'Invalid destination index name.',
+                  })}
+                  <br />
+                  <EuiLink href={esIndicesCreateIndex} target="_blank">
+                    {i18n.translate(
+                      'xpack.transform.stepDetailsForm.destinationIndexInvalidErrorLink',
+                      {
+                        defaultMessage: 'Learn more about index name limitations.',
+                      }
+                    )}
+                  </EuiLink>
+                </Fragment>,
+              ]
+            }
+          >
+            <EuiFieldText
+              value={destinationIndex}
+              onChange={(e) => setDestinationIndex(e.target.value)}
+              aria-label={i18n.translate(
+                'xpack.transform.stepDetailsForm.destinationIndexInputAriaLabel',
+                {
+                  defaultMessage: 'Choose a unique destination index name.',
+                }
+              )}
+              isInvalid={!indexNameEmpty && !indexNameValid}
+              data-test-subj="transformDestinationIndexInput"
+            />
+          </EuiFormRow>
 
-          <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-            <EuiFlexItem style={{ flexBasis: '400px' }} grow={false}>
-              <EuiFormRow
-                label={i18n.translate('xpack.transform.stepDetailsForm.destinationIndexLabel', {
-                  defaultMessage: 'Destination index',
-                })}
-                isInvalid={!indexNameEmpty && !indexNameValid}
-                helpText={
-                  indexNameExists &&
-                  i18n.translate('xpack.transform.stepDetailsForm.destinationIndexHelpText', {
-                    defaultMessage:
-                      'An index with this name already exists. Be aware that running this transform will modify this destination index.',
-                  })
-                }
-                error={
-                  !indexNameEmpty &&
-                  !indexNameValid && [
-                    <Fragment>
-                      {i18n.translate(
-                        'xpack.transform.stepDetailsForm.destinationIndexInvalidError',
-                        {
-                          defaultMessage: 'Invalid destination index name.',
-                        }
-                      )}
-                      <br />
-                      <EuiLink href={esIndicesCreateIndex} target="_blank">
-                        {i18n.translate(
-                          'xpack.transform.stepDetailsForm.destinationIndexInvalidErrorLink',
-                          {
-                            defaultMessage: 'Learn more about index name limitations.',
-                          }
-                        )}
-                      </EuiLink>
-                    </Fragment>,
-                  ]
-                }
-              >
-                <EuiFieldText
-                  value={destinationIndex}
-                  onChange={(e) => setDestinationIndex(e.target.value)}
-                  aria-label={i18n.translate(
-                    'xpack.transform.stepDetailsForm.destinationIndexInputAriaLabel',
-                    {
-                      defaultMessage: 'Choose a unique destination index name.',
-                    }
-                  )}
-                  isInvalid={!indexNameEmpty && !indexNameValid}
-                  data-test-subj="transformDestinationIndexInput"
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            {stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
-              <EuiFlexItem>
-                <EuiCallOut color="warning" iconType="alert" size="m">
-                  <p>
-                    <FormattedMessage
-                      id="xpack.transform.stepDetailsForm.destinationIndexWarning"
-                      defaultMessage="Note that dynamic mappings based on the source fields will be used if the destination index does not exist. If alternate mappings are required, use the {docsLink} prior to starting the transform. If the transform fails, please check the messages tab for the transform on the Stack Management page for errors."
-                      values={{
-                        docsLink: (
-                          <EuiLink href={esIndicesCreateIndex} target="_blank">
-                            {i18n.translate('xpack.transform.stepDetailsForm.createIndexAPI', {
-                              defaultMessage: 'Create index API',
-                            })}
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </p>
-                </EuiCallOut>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
+          {stepDefineState.transformFunction === TRANSFORM_FUNCTION.LATEST ? (
+            <>
+              <EuiSpacer size={'m'} />
+              <EuiCallOut color="warning" iconType="alert" size="m">
+                <p>
+                  <FormattedMessage
+                    id="xpack.transform.stepDetailsForm.destinationIndexWarning"
+                    defaultMessage="Before you start the transform, use index templates or the {docsLink} to ensure the mappings for your destination index match the source index. If the transform fails, check the messages tab on the Stack Management page for errors."
+                    values={{
+                      docsLink: (
+                        <EuiLink href={esIndicesCreateIndex} target="_blank">
+                          {i18n.translate('xpack.transform.stepDetailsForm.createIndexAPI', {
+                            defaultMessage: 'Create index API',
+                          })}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiCallOut>
+              <EuiSpacer size={'m'} />
+            </>
+          ) : null}
 
           <EuiFormRow
             isInvalid={createIndexPattern && indexPatternTitleExists}
