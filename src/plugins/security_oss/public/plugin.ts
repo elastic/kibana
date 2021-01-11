@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import {
+import type {
   Capabilities,
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
-import { ConfigType } from './config';
+import type { ConfigType } from './config';
 import {
   InsecureClusterService,
   InsecureClusterServiceSetup,

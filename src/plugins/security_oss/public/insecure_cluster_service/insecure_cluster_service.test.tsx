@@ -20,7 +20,7 @@
 import { nextTick } from '@kbn/test/jest';
 import { coreMock } from '../../../../core/public/mocks';
 import { mockAppStateService } from '../app_state/app_state_service.mock';
-import { ConfigType } from '../config';
+import type { ConfigType } from '../config';
 import { InsecureClusterService } from './insecure_cluster_service';
 
 let mockOnDismissCallback: (persist: boolean) => void = jest.fn().mockImplementation(() => {

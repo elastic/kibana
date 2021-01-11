@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { AppState } from '../../common';
-import { AppStateServiceStart } from './app_state_service';
+import type { AppState } from '../../common';
+import type { AppStateServiceStart } from './app_state_service';
 
 export const mockAppStateService = {
   createStart: (): jest.Mocked<AppStateServiceStart> => {

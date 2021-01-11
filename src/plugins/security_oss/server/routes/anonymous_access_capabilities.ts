@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { IRouter } from 'kibana/server';
-import { AnonymousAccessService } from '../plugin';
+import type { IRouter } from 'kibana/server';
+import type { AnonymousAccessService } from '../plugin';
 
 interface Deps {
   router: IRouter;

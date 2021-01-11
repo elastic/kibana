@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import {
+import type {
   Capabilities,
   CoreSetup,
   KibanaRequest,
@@ -37,8 +37,7 @@ export interface SecurityOssPluginSetup {
   showInsecureClusterWarning$: BehaviorSubject<boolean>;
 
   /**
-   * Set the provider function that returns a service that can deal with various aspects of the
-   * anonymous access.
+   * Set the provider function that returns a service to deal with the anonymous access.
    * @param provider
    */
   setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessService) => void;
@@ -51,8 +50,8 @@ export interface AnonymousAccessService {
   readonly isAnonymousAccessEnabled: boolean;
 
   /**
-   * A map of query string parameters that should be specified in URL so that anonymous user can use
-   * to automatically log in to Kibana.
+   * A map of query string parameters that should be specified in the URL pointing to Kibana so
+   * that anonymous user can automatically log in.
    */
   readonly accessURLParameters: Readonly<Map<string, string>> | null;
 

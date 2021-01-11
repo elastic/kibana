@@ -5,7 +5,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { Logger } from '../../../../../src/core/server';
+import type { Logger } from '../../../../../src/core/server';
 import { ConfigSchema, createConfig } from '../config';
 import { AnonymousAccessService } from './anonymous_access_service';
 

@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { IRouter, Logger } from 'kibana/server';
+import type { IRouter, Logger } from 'kibana/server';
 import { combineLatest, Observable } from 'rxjs';
 import type { AppState } from '../../common';
 import { createClusterDataCheck } from '../check_cluster_data';
 import type { ConfigType } from '../config';
-import { AnonymousAccessService } from '../plugin';
+import type { AnonymousAccessService } from '../plugin';
 
 interface Deps {
   router: IRouter;

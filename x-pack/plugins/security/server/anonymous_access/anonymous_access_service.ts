@@ -132,7 +132,7 @@ export class AnonymousAccessService {
   }
 
   /**
-   * Checks if anonymous service account can authenticate to Elasticsearch using configured credentials.
+   * Checks if anonymous service account can authenticate to Elasticsearch using currently configured credentials.
    * @param clusterClient
    */
   private async canAuthenticateAnonymousServiceAccount(clusterClient: IClusterClient) {

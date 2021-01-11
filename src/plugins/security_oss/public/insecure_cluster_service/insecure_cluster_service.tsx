@@ -21,8 +21,8 @@ import { CoreSetup, CoreStart, MountPoint, Toast } from 'kibana/public';
 
 import { BehaviorSubject, combineLatest, from } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import { ConfigType } from '../config';
-import { AppStateServiceStart } from '../app_state';
+import type { ConfigType } from '../config';
+import type { AppStateServiceStart } from '../app_state';
 import { defaultAlertText, defaultAlertTitle } from './components';
 
 interface SetupDeps {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UnwrapPromise } from '@kbn/utility-types';
+import type { UnwrapPromise } from '@kbn/utility-types';
 import supertest from 'supertest';
 import { setupServer } from '../../../../../core/server/test_utils';
 import { AnonymousAccessService } from '../../plugin';
