@@ -5,12 +5,11 @@
  */
 
 import React, { useRef, useState, useEffect } from 'react';
-import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 import { tint } from 'polished';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { Suggestion } from './suggestion';
 import { QuerySuggestion } from '../../../../../../../../src/plugins/data/public';
+import { euiStyled } from '../../../../../../observability/public';
 
 export const unit = 16;
 
@@ -30,12 +29,13 @@ export function px(value: number): string {
   return `${value}px`;
 }
 
-const List = styled.ul`
+const List = euiStyled.ul`
   width: 100%;
-  border: 1px solid ${theme.euiColorLightShade};
+  border: 1px solid ${(props) => props.theme.eui.euiColorLightestShade};
   border-radius: ${px(units.quarter)};
-  box-shadow: 0px ${px(units.quarter)} ${px(units.double)} ${tint(0.1, theme.euiColorFullShade)};
-  background: #fff;
+  box-shadow: 0px ${px(units.quarter)} ${px(units.double)} ${(props) =>
+  tint(0.1, props.theme.eui.euiColorFullShade)};
+  background: ${(props) => props.theme.eui.euiColorLightestShade};
   z-index: 10;
   max-height: ${px(unit * 20)};
   overflow: scroll;
