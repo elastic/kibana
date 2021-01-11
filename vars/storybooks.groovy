@@ -47,23 +47,14 @@ def upload() {
 
     writeFile(file: 'index.html', text: html)
 
-    googleStorageUpload(
-      credentialsId: 'kibana-ci-gcs-plugin',
-      bucket: "gs://${getStorybooksBucket()}/${getDestinationDir()}/${buildState.get('checkoutInfo').commit}",
-      pattern: "**/*",
-      sharedPublicly: false,
-      showInline: true,
-    )
+    withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
+      kibanaPipeline.bash("""
+        gsutil -m cp -r -z js,css,html '*' 'gs://${getStorybooksBucket()}/${getDestinationDir()}/${buildState.get('checkoutInfo').commit}/'
+        gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${getStorybooksBucket()}/${getDestinationDir()}/latest/'
+      """, "Upload Storybooks to GCS")
+    }
 
     buildState.set('storybooksUrl', getUrlForCommit())
-
-    googleStorageUpload(
-      credentialsId: 'kibana-ci-gcs-plugin',
-      bucket: "gs://${getStorybooksBucket()}/${getDestinationDir()}/latest",
-      pattern: "index.html",
-      sharedPublicly: false,
-      showInline: true,
-    )
   }
 }
 
