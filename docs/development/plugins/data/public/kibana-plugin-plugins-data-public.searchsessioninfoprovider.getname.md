@@ -4,7 +4,7 @@
 
 ## SearchSessionInfoProvider.getName property
 
-User-facing name of the session. e.g. will be displayed in background sessions management list
+User-facing name of the session. e.g. will be displayed in saved Search Sessions management list
 
 <b>Signature:</b>
 

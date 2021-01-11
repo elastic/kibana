@@ -11,7 +11,7 @@ import { EuiLink } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { TableListView } from '../../../../../../src/plugins/kibana_react/public';
 import { goToSpecifiedPath } from '../../render_app';
-import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { APP_ID, getEditPath, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   getMapsCapabilities,
   getToasts,
@@ -47,7 +47,7 @@ const tableColumns: Array<EuiBasicTableColumn<any>> = [
       <EuiLink
         onClick={(e: MouseEvent) => {
           e.preventDefault();
-          goToSpecifiedPath(`/${MAP_PATH}/${record.id}`);
+          goToSpecifiedPath(getEditPath(record.id));
         }}
         data-test-subj={`mapListingTitleLink-${record.title.split(' ').join('-')}`}
       >
