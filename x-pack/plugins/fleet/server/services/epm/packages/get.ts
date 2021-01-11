@@ -13,15 +13,11 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
-import {
-  ArchivePackage,
-  InstallSource,
-  RegistryPackage,
-  EpmPackageAdditions,
-} from '../../../../common/types';
+import { ArchivePackage, RegistryPackage, EpmPackageAdditions } from '../../../../common/types';
 import { Installation, PackageInfo, KibanaAssetType } from '../../../types';
 import * as Registry from '../registry';
 import { createInstallableFrom, isRequiredPackage } from './index';
+import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
 
@@ -110,13 +106,10 @@ export async function getPackageInfo(options: {
   const getPackageRes = await getPackageFromSource({
     pkgName,
     pkgVersion,
-    pkgInstallSource:
-      savedObject?.attributes.version === pkgVersion
-        ? savedObject?.attributes.install_source
-        : 'registry',
+    savedObjectsClient,
+    installedPkg: savedObject?.attributes,
   });
-  const paths = getPackageRes.paths;
-  const packageInfo = getPackageRes.packageInfo;
+  const { paths, packageInfo } = getPackageRes;
 
   // add properties that aren't (or aren't yet) on the package
   const additions: EpmPackageAdditions = {
@@ -167,28 +160,53 @@ export const getPackageUsageStats = async ({
   };
 };
 
+interface PackageResponse {
+  paths: string[];
+  packageInfo: ArchivePackage | RegistryPackage;
+}
+type GetPackageResponse = PackageResponse | undefined;
+
 // gets package from install_source if it exists otherwise gets from registry
 export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
-  pkgInstallSource?: InstallSource;
-}): Promise<{
-  paths: string[] | undefined;
-  packageInfo: RegistryPackage | ArchivePackage;
-}> {
-  const { pkgName, pkgVersion, pkgInstallSource } = options;
-  // TODO: Check package storage before checking registry
-  let res;
-  if (pkgInstallSource === 'upload') {
+  installedPkg?: Installation;
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<PackageResponse> {
+  const { pkgName, pkgVersion, installedPkg, savedObjectsClient } = options;
+  let res: GetPackageResponse;
+  // if the package is installed
+
+  if (installedPkg && installedPkg.version === pkgVersion) {
+    const { install_source: pkgInstallSource } = installedPkg;
+    // check cache
     res = getArchivePackage({
       name: pkgName,
       version: pkgVersion,
     });
+    if (!res) {
+      res = await getEsPackage(
+        pkgName,
+        pkgVersion,
+        installedPkg.package_assets,
+        savedObjectsClient
+      );
+    }
+    // for packages not in cache or package storage and installed from registry, check registry
+    if (!res && pkgInstallSource === 'registry') {
+      try {
+        res = await Registry.getRegistryPackage(pkgName, pkgVersion);
+        // TODO: add to cache and storage here?
+      } catch (error) {
+        // treating this is a 404 as no status code returned
+        // in the unlikely event its missing from cache, storage, and never installed from registry
+      }
+    }
   } else {
+    // else package is not installed or installed and missing from cache and storage and installed from registry
     res = await Registry.getRegistryPackage(pkgName, pkgVersion);
   }
-  if (!res.packageInfo || !res.paths)
-    throw new Error(`package info for ${pkgName}-${pkgVersion} does not exist`);
+  if (!res) throw new Error(`package info for ${pkgName}-${pkgVersion} does not exist`);
   return {
     paths: res.paths,
     packageInfo: res.packageInfo,
