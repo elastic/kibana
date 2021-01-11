@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'timePicker', 'header']);
 
@@ -59,10 +60,15 @@ export function UptimeNavigationProvider({ getService, getPageObjects }: FtrProv
     goToMonitor: async (monitorId: string) => {
       // only go to monitor page if not already there
       if (!(await testSubjects.exists('uptimeMonitorPage', { timeout: 0 }))) {
-        await testSubjects.exists(`monitor-page-link-${monitorId}`);
-        await retry.try(async () => {
-          await testSubjects.click(`monitor-page-link-${monitorId}`);
-        });
+        await retry.try(
+          async () => {
+            await testSubjects.exists(`monitor-page-link-${monitorId}`);
+            await testSubjects.click(`monitor-page-link-${monitorId}`);
+          },
+          async () => {
+            await browser.refresh();
+          }
+        );
         await testSubjects.existOrFail('uptimeMonitorPage', {
           timeout: 30000,
         });
