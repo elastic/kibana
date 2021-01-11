@@ -4662,7 +4662,7 @@
     "visTypeVislib.heatmap.segmentTitle": "X 軸",
     "visTypeVislib.heatmap.splitTitle": "チャートを分割",
     "visTypePie.pie.metricTitle": "スライスサイズ",
-    "visTypeVislib.pie.pieDescription": "全体に対する比率でデータを比較します。",
+    "visTypePie.pie.pieDescription": "全体に対する比率でデータを比較します。",
     "visTypePie.pie.pieTitle": "円",
     "visTypePie.pie.segmentTitle": "スライスの分割",
     "visTypePie.pie.splitTitle": "チャートを分割",

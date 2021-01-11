@@ -4667,7 +4667,7 @@
     "visTypeVislib.heatmap.segmentTitle": "X 轴",
     "visTypeVislib.heatmap.splitTitle": "拆分图表",
     "visTypePie.pie.metricTitle": "切片大小",
-    "visTypeVislib.pie.pieDescription": "以整体的比例比较数据。",
+    "visTypePie.pie.pieDescription": "以整体的比例比较数据。",
     "visTypePie.pie.pieTitle": "饼图",
     "visTypePie.pie.segmentTitle": "拆分切片",
     "visTypePie.pie.splitTitle": "拆分图表",
