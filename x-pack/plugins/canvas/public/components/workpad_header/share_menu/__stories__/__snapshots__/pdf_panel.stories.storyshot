@@ -89,6 +89,7 @@ exports[`Storyshots components/WorkpadHeader/ShareMenu/PDFPanel default 1`] = `
     <button
       className="euiButton euiButton--primary euiButton--small euiButton--fill"
       data-test-subj="generateReportButton"
+      disabled={false}
       onClick={[Function]}
       style={
         Object {

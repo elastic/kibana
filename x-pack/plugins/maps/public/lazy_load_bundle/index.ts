@@ -52,6 +52,7 @@ interface LazyLoadedMapModules {
     emsLayerId,
     leftFieldName,
     termsFieldName,
+    termsSize,
     colorSchema,
     indexPatternId,
     indexPatternTitle,
@@ -62,12 +63,14 @@ interface LazyLoadedMapModules {
     emsLayerId?: string;
     leftFieldName?: string;
     termsFieldName?: string;
+    termsSize?: number;
     colorSchema: string;
     indexPatternId?: string;
     indexPatternTitle?: string;
     metricAgg: string;
     metricFieldName?: string;
   }) => LayerDescriptor | null;
+  createBasemapLayerDescriptor: () => LayerDescriptor | null;
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
@@ -86,6 +89,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       registerSource,
       createTileMapLayerDescriptor,
       createRegionMapLayerDescriptor,
+      createBasemapLayerDescriptor,
     } = await import('./lazy');
 
     resolve({
@@ -98,6 +102,7 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       registerSource,
       createTileMapLayerDescriptor,
       createRegionMapLayerDescriptor,
+      createBasemapLayerDescriptor,
     });
   });
   return loadModulesPromise;

@@ -5,11 +5,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionAST } from '@kbn/interpreter/common';
-import { TimeScaleUnit } from '../../../time_scale';
-import { IndexPattern, IndexPatternLayer } from '../../../types';
+import type { ExpressionFunctionAST } from '@kbn/interpreter/common';
+import type { TimeScaleUnit } from '../../../time_scale';
+import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
-import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import type { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { isColumnValidAsReference } from '../../layer_helpers';
+import { operationDefinitionMap } from '..';
 
 export const buildLabelFunction = (ofName: (name?: string) => string) => (
   name?: string,
@@ -39,6 +41,61 @@ export function checkForDateHistogram(layer: IndexPatternLayer, name: string) {
       },
     }),
   ];
+}
+
+export function checkReferences(layer: IndexPatternLayer, columnId: string) {
+  const column = layer.columns[columnId] as ReferenceBasedIndexPatternColumn;
+
+  const errors: string[] = [];
+
+  column.references.forEach((referenceId, index) => {
+    if (!layer.columns[referenceId]) {
+      errors.push(
+        i18n.translate('xpack.lens.indexPattern.missingReferenceError', {
+          defaultMessage: '"{dimensionLabel}" is not fully configured',
+          values: {
+            dimensionLabel: column.label,
+          },
+        })
+      );
+    } else {
+      const referenceColumn = layer.columns[referenceId]!;
+      const definition = operationDefinitionMap[column.operationType];
+      if (definition.input !== 'fullReference') {
+        throw new Error('inconsistent state - column is not a reference operation');
+      }
+      const requirements = definition.requiredReferences[index];
+      const isValid = isColumnValidAsReference({
+        validation: requirements,
+        column: referenceColumn,
+      });
+
+      if (!isValid) {
+        errors.push(
+          i18n.translate('xpack.lens.indexPattern.invalidReferenceConfiguration', {
+            defaultMessage: 'Dimension "{dimensionLabel}" is configured incorrectly',
+            values: {
+              dimensionLabel: column.label,
+            },
+          })
+        );
+      }
+    }
+  });
+  return errors.length ? errors : undefined;
+}
+
+export function getErrorsForDateReference(
+  layer: IndexPatternLayer,
+  columnId: string,
+  name: string
+) {
+  const dateErrors = checkForDateHistogram(layer, name) ?? [];
+  const referenceErrors = checkReferences(layer, columnId) ?? [];
+  if (dateErrors.length || referenceErrors.length) {
+    return [...dateErrors, ...referenceErrors];
+  }
+  return;
 }
 
 export function hasDateField(indexPattern: IndexPattern) {

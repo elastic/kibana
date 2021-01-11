@@ -18,66 +18,35 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ActionConnectorFieldsProps } from '../../../../types';
-import { CasesConfigurationMapping, FieldMapping, createDefaultMapping } from '../case_mappings';
 
 import * as i18n from './translations';
 import { ServiceNowActionConnector } from './types';
-import { connectorConfiguration } from './config';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
 > = ({ action, editActionSecrets, editActionConfig, errors, consumer, readOnly }) => {
   const { docLinks } = useKibana().services;
+  const { apiUrl } = action.config;
 
-  // TODO: remove incidentConfiguration later, when Case ServiceNow will move their fields to the level of action execution
-  const { apiUrl, incidentConfiguration, isCaseOwned } = action.config;
-  const mapping = incidentConfiguration ? incidentConfiguration.mapping : [];
-
-  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl != null;
+  const isApiUrlInvalid: boolean = errors.apiUrl.length > 0 && apiUrl !== undefined;
 
   const { username, password } = action.secrets;
 
-  const isUsernameInvalid: boolean = errors.username.length > 0 && username != null;
-  const isPasswordInvalid: boolean = errors.password.length > 0 && password != null;
-
-  // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
-  if (consumer === 'case') {
-    if (isEmpty(mapping)) {
-      editActionConfig('incidentConfiguration', {
-        mapping: createDefaultMapping(connectorConfiguration.fields as any),
-      });
-    }
-    if (!isCaseOwned) {
-      editActionConfig('isCaseOwned', true);
-    }
-  }
+  const isUsernameInvalid: boolean = errors.username.length > 0 && username !== undefined;
+  const isPasswordInvalid: boolean = errors.password.length > 0 && password !== undefined;
 
   const handleOnChangeActionConfig = useCallback(
     (key: string, value: string) => editActionConfig(key, value),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [editActionConfig]
   );
 
   const handleOnChangeSecretConfig = useCallback(
     (key: string, value: string) => editActionSecrets(key, value),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [editActionSecrets]
   );
-
-  const handleOnChangeMappingConfig = useCallback(
-    (newMapping: CasesConfigurationMapping[]) =>
-      editActionConfig('incidentConfiguration', {
-        ...action.config.incidentConfiguration,
-        mapping: newMapping,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [action.config]
-  );
-
   return (
     <>
       <EuiFlexGroup>
@@ -185,21 +154,6 @@ const ServiceNowConnectorFields: React.FC<
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {consumer === 'case' && ( // TODO: remove this block later, when Case ServiceNow will move their fields to the level of action execution
-        <>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem data-test-subj="case-servicenow-mappings">
-              <FieldMapping
-                disabled={true}
-                connectorConfiguration={connectorConfiguration}
-                mapping={mapping as CasesConfigurationMapping[]}
-                onChangeMapping={handleOnChangeMappingConfig}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      )}
     </>
   );
 };

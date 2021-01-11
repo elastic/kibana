@@ -14,21 +14,26 @@ export const createJourneyRoute: UMRestApiRouteFactory = (libs: UMServerLibs) =>
   validate: {
     params: schema.object({
       checkGroup: schema.string(),
+      _debug: schema.maybe(schema.boolean()),
     }),
   },
-  handler: async ({ uptimeEsClient }, _context, request, response) => {
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
     const { checkGroup } = request.params;
     const result = await libs.requests.getJourneySteps({
       uptimeEsClient,
       checkGroup,
     });
 
-    return response.ok({
-      body: {
-        checkGroup,
-        steps: result,
-      },
+    const details = await libs.requests.getJourneyDetails({
+      uptimeEsClient,
+      checkGroup,
     });
+
+    return {
+      checkGroup,
+      steps: result,
+      details,
+    };
   },
 });
 
@@ -40,18 +45,16 @@ export const createJourneyFailedStepsRoute: UMRestApiRouteFactory = (libs: UMSer
       checkGroups: schema.arrayOf(schema.string()),
     }),
   },
-  handler: async ({ uptimeEsClient }, _context, request, response) => {
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
     const { checkGroups } = request.query;
     const result = await libs.requests.getJourneyFailedSteps({
       uptimeEsClient,
       checkGroups,
     });
 
-    return response.ok({
-      body: {
-        checkGroups,
-        steps: result,
-      },
-    });
+    return {
+      checkGroups,
+      steps: result,
+    };
   },
 });

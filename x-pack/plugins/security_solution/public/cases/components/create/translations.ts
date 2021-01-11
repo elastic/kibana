@@ -18,6 +18,20 @@ export const STEP_ONE_TITLE = i18n.translate(
 export const STEP_TWO_TITLE = i18n.translate(
   'xpack.securitySolution.components.create.stepTwoTitle',
   {
+    defaultMessage: 'Case settings',
+  }
+);
+
+export const STEP_THREE_TITLE = i18n.translate(
+  'xpack.securitySolution.components.create.stepThreeTitle',
+  {
     defaultMessage: 'External Connector Fields',
+  }
+);
+
+export const SYNC_ALERTS_LABEL = i18n.translate(
+  'xpack.securitySolution.components.create.syncAlertsLabel',
+  {
+    defaultMessage: 'Sync alert status with case status',
   }
 );

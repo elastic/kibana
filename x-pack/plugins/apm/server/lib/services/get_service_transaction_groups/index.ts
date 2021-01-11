@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getTimeseriesDataForTransactionGroups } from './get_timeseries_data_for_transaction_groups';
 import {
@@ -21,6 +22,8 @@ export async function getServiceTransactionGroups({
   sortDirection,
   sortField,
   searchAggregatedTransactions,
+  transactionType,
+  latencyAggregationType,
 }: {
   serviceName: string;
   setup: Setup & SetupTimeRange;
@@ -30,6 +33,8 @@ export async function getServiceTransactionGroups({
   sortDirection: 'asc' | 'desc';
   sortField: ServiceOverviewTransactionGroupSortField;
   searchAggregatedTransactions: boolean;
+  transactionType: string;
+  latencyAggregationType: LatencyAggregationType;
 }) {
   const { apmEventClient, start, end, esFilter } = setup;
 
@@ -48,6 +53,8 @@ export async function getServiceTransactionGroups({
     sortDirection,
     size,
     searchAggregatedTransactions,
+    transactionType,
+    latencyAggregationType,
   });
 
   const transactionNames = transactionGroups.map((group) => group.name);
@@ -62,6 +69,8 @@ export async function getServiceTransactionGroups({
     serviceName,
     size,
     transactionNames,
+    transactionType,
+    latencyAggregationType,
   });
 
   return {
@@ -70,6 +79,8 @@ export async function getServiceTransactionGroups({
       timeseriesData,
       start,
       end,
+      latencyAggregationType,
+      transactionType,
     }),
     totalTransactionGroups,
     isAggregationAccurate,

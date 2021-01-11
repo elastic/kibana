@@ -67,6 +67,42 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    describe('on the Malware protections section', () => {
+      let policyInfo: PolicyTestResourceInfo;
+
+      beforeEach(async () => {
+        policyInfo = await policyTestResources.createPolicy();
+        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
+        await testSubjects.existOrFail('malwareProtectionsForm');
+      });
+
+      afterEach(async () => {
+        if (policyInfo) {
+          await policyInfo.cleanup();
+        }
+      });
+
+      it('should show the custom message text area when the Notify User checkbox is checked', async () => {
+        expect(await testSubjects.isChecked('malwareUserNotificationCheckbox')).to.be(true);
+        await testSubjects.existOrFail('malwareUserNotificationCustomMessage');
+      });
+      it('should not show the custom message text area when the Notify User checkbox is unchecked', async () => {
+        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('malwareUserNotificationCheckbox');
+        expect(await testSubjects.isChecked('malwareUserNotificationCheckbox')).to.be(false);
+        await testSubjects.missingOrFail('malwareUserNotificationCustomMessage');
+      });
+      it('should preserve a custom notification message upon saving', async () => {
+        const customMessage = await testSubjects.find('malwareUserNotificationCustomMessage');
+        await customMessage.clearValue();
+        await customMessage.type('a custom malware notification message');
+        await pageObjects.policy.confirmAndSave();
+        await testSubjects.existOrFail('policyDetailsSuccessMessage');
+        expect(await testSubjects.getVisibleText('malwareUserNotificationCustomMessage')).to.equal(
+          'a custom malware notification message'
+        );
+      });
+    });
+
     describe('and the save button is clicked', () => {
       let policyInfo: PolicyTestResourceInfo;
 
@@ -222,7 +258,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
               },
@@ -241,7 +277,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
                 antivirus_registration: {
@@ -366,7 +402,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
               },
@@ -385,7 +421,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
                 antivirus_registration: {
@@ -503,7 +539,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
               },
@@ -522,7 +558,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 popup: {
                   malware: {
                     enabled: true,
-                    message: 'Elastic Security { action } { filename }',
+                    message: 'Elastic Security {action} {filename}',
                   },
                 },
                 antivirus_registration: {
@@ -551,35 +587,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         if (policyInfo) {
           await policyInfo.cleanup();
         }
-      });
-
-      it('should show callout', async () => {
-        await testSubjects.existOrFail('endpointPackagePolicy_edit');
-      });
-
-      it('should show actions button with expected action items', async () => {
-        const actionsButton = await pageObjects.ingestManagerCreatePackagePolicy.findEndpointActionsButton();
-        await actionsButton.click();
-        const menuPanel = await testSubjects.find('endpointActionsMenuPanel');
-        const actionItems = await menuPanel.findAllByTagName<'button'>('button');
-        const expectedItems = ['Edit Trusted Applications'];
-
-        for (const action of actionItems) {
-          const buttonText = await action.getVisibleText();
-          expect(buttonText).to.be(expectedItems.find((item) => item === buttonText));
-        }
-      });
-
-      it('should navigate to Trusted Apps', async () => {
-        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('trustedApps');
-        await pageObjects.trustedApps.ensureIsOnTrustedAppsListPage();
-      });
-
-      it('should show the back button on Trusted Apps Page and navigate back to fleet', async () => {
-        await pageObjects.ingestManagerCreatePackagePolicy.selectEndpointAction('trustedApps');
-        const backButton = await pageObjects.trustedApps.findTrustedAppsListPageBackButton();
-        await backButton.click();
-        await pageObjects.ingestManagerCreatePackagePolicy.ensureOnEditPageOrFail();
       });
 
       it('should show the endpoint policy form', async () => {

@@ -8,20 +8,30 @@ import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useFetcher } from './use_fetcher';
 import { useUrlParams } from '../context/url_params_context/use_url_params';
+import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTheme } from './use_theme';
+import { useLatencyAggregationType } from './use_latency_Aggregation_type';
 
 export function useTransactionLatencyChartsFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
+  const { transactionType } = useApmServiceContext();
+  const latencyAggregationType = useLatencyAggregationType();
   const theme = useTheme();
   const {
-    urlParams: { transactionType, start, end, transactionName },
+    urlParams: { start, end, transactionName },
     uiFilters,
   } = useUrlParams();
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
-      if (serviceName && start && end) {
+      if (
+        serviceName &&
+        start &&
+        end &&
+        transactionType &&
+        latencyAggregationType
+      ) {
         return callApmApi({
           endpoint:
             'GET /api/apm/services/{serviceName}/transactions/charts/latency',
@@ -33,17 +43,33 @@ export function useTransactionLatencyChartsFetcher() {
               transactionType,
               transactionName,
               uiFilters: JSON.stringify(uiFilters),
+              latencyAggregationType,
             },
           },
         });
       }
     },
-    [serviceName, start, end, transactionName, transactionType, uiFilters]
+    [
+      serviceName,
+      start,
+      end,
+      transactionName,
+      transactionType,
+      uiFilters,
+      latencyAggregationType,
+    ]
   );
 
   const memoizedData = useMemo(
-    () => getLatencyChartSelector({ latencyChart: data, theme }),
-    [data, theme]
+    () =>
+      getLatencyChartSelector({
+        latencyChart: data,
+        theme,
+        latencyAggregationType,
+      }),
+    // It should only update when the data has changed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [data]
   );
 
   return {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 import { ExternalServiceCredentials, ExternalService, ExternalServiceParams } from './types';
 
@@ -35,13 +35,21 @@ export const createExternalService = (
 
   const urlWithoutTrailingSlash = url.endsWith('/') ? url.slice(0, -1) : url;
   const incidentUrl = `${urlWithoutTrailingSlash}/${INCIDENT_URL}`;
-  const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^internal_type=string&active=true&read_only=false&sysparm_fields=max_length,element,column_label`;
+  const fieldsUrl = `${urlWithoutTrailingSlash}/${SYS_DICTIONARY}?sysparm_query=name=task^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
   const axiosInstance = axios.create({
     auth: { username, password },
   });
 
   const getIncidentViewURL = (id: string) => {
     return `${urlWithoutTrailingSlash}/${VIEW_INCIDENT_URL}${id}`;
+  };
+
+  const checkInstance = (res: AxiosResponse) => {
+    if (res.status === 200 && res.data.result == null) {
+      throw new Error(
+        `There is an issue with your Service Now Instance. Please check ${res.request.connection.servername}`
+      );
+    }
   };
 
   const getIncident = async (id: string) => {
@@ -52,7 +60,7 @@ export const createExternalService = (
         logger,
         proxySettings,
       });
-
+      checkInstance(res);
       return { ...res.data.result };
     } catch (error) {
       throw new Error(
@@ -70,7 +78,7 @@ export const createExternalService = (
         proxySettings,
         params,
       });
-
+      checkInstance(res);
       return res.data.result.length > 0 ? { ...res.data.result } : undefined;
     } catch (error) {
       throw new Error(
@@ -89,7 +97,7 @@ export const createExternalService = (
         method: 'post',
         data: { ...(incident as Record<string, unknown>) },
       });
-
+      checkInstance(res);
       return {
         title: res.data.result.number,
         id: res.data.result.sys_id,
@@ -112,7 +120,7 @@ export const createExternalService = (
         data: { ...(incident as Record<string, unknown>) },
         proxySettings,
       });
-
+      checkInstance(res);
       return {
         title: res.data.result.number,
         id: res.data.result.sys_id,
@@ -137,12 +145,10 @@ export const createExternalService = (
         logger,
         proxySettings,
       });
-
+      checkInstance(res);
       return res.data.result.length > 0 ? res.data.result : [];
     } catch (error) {
-      throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get common fields. Error: ${error.message}`)
-      );
+      throw new Error(getErrorMessage(i18n.NAME, `Unable to get fields. Error: ${error.message}`));
     }
   };
 

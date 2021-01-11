@@ -35,6 +35,7 @@ export const createAddBookToLibraryAction = () =>
       i18n.translate('embeddableExamples.book.addToLibrary', {
         defaultMessage: 'Add Book To Library',
       }),
+    id: ACTION_ADD_BOOK_TO_LIBRARY,
     type: ACTION_ADD_BOOK_TO_LIBRARY,
     order: 100,
     getIconType: () => 'folderCheck',

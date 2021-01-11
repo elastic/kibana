@@ -275,8 +275,10 @@ export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderCont
     public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
       const isOptionsListOpen = await testSubjects.exists('~comboBoxOptionsList');
       if (!isOptionsListOpen) {
-        const toggleBtn = await comboBoxElement.findByTestSubject('comboBoxToggleListButton');
-        await toggleBtn.click();
+        await retry.try(async () => {
+          const toggleBtn = await comboBoxElement.findByTestSubject('comboBoxInput');
+          await toggleBtn.click();
+        });
       }
     }
 

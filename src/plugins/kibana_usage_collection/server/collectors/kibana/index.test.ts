@@ -20,12 +20,13 @@
 import {
   loggingSystemMock,
   pluginInitializerContextConfigMock,
+  elasticsearchServiceMock,
 } from '../../../../../core/server/mocks';
 import {
   Collector,
+  createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
-import { createCollectorFetchContextMock } from '../../../../usage_collection/server/mocks';
 import { registerKibanaUsageCollector } from './';
 
 const logger = loggingSystemMock.createLogger();
@@ -43,7 +44,9 @@ describe('telemetry_kibana', () => {
 
   const getMockFetchClients = (hits?: unknown[]) => {
     const fetchParamsMock = createCollectorFetchContextMock();
-    fetchParamsMock.callCluster.mockResolvedValue({ hits: { hits } });
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    esClient.search.mockResolvedValue({ body: { hits: { hits } } } as any);
+    fetchParamsMock.esClient = esClient;
     return fetchParamsMock;
   };
 

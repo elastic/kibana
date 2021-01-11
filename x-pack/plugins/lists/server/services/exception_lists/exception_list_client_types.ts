@@ -196,8 +196,16 @@ export interface FindExceptionListsItemOptions {
   sortOrder: SortOrderOrUndefined;
 }
 
+export interface FindValueListExceptionListsItems {
+  valueListId: Id;
+  perPage: PerPageOrUndefined;
+  page: PageOrUndefined;
+  sortField: SortFieldOrUndefined;
+  sortOrder: SortOrderOrUndefined;
+}
+
 export interface FindExceptionListOptions {
-  namespaceType: NamespaceType;
+  namespaceType: NamespaceTypeArray;
   filter: FilterOrUndefined;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;

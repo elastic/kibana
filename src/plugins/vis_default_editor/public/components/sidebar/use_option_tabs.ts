@@ -20,9 +20,10 @@
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { Vis } from 'src/plugins/visualizations/public';
-import { DefaultEditorDataTab, DefaultEditorDataTabProps } from './data_tab';
+import { Vis } from '../../../../visualizations/public';
+
 import { VisOptionsProps } from '../../vis_options_props';
+import { DefaultEditorDataTab, DefaultEditorDataTabProps } from './data_tab';
 
 export interface OptionTab {
   editor: React.ComponentType<VisOptionsProps | DefaultEditorDataTabProps>;
@@ -34,7 +35,7 @@ export interface OptionTab {
 export const useOptionTabs = ({ type: visType }: Vis): [OptionTab[], (name: string) => void] => {
   const [optionTabs, setOptionTabs] = useState<OptionTab[]>(() => {
     const tabs = [
-      ...(visType.schemas.buckets || visType.schemas.metrics
+      ...(visType.schemas.buckets?.length || visType.schemas.metrics?.length
         ? [
             {
               name: 'data',

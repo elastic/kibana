@@ -22,8 +22,8 @@ import { config, HttpConfig } from './http_config';
 import { CspConfig } from '../csp';
 import { ExternalUrlConfig } from '../external_url';
 
-const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
-const invalidHostname = 'asdf$%^';
+const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost', '0.0.0.0'];
+const invalidHostnames = ['asdf$%^', '0'];
 
 jest.mock('os', () => {
   const original = jest.requireActual('os');
@@ -48,11 +48,10 @@ test('accepts valid hostnames', () => {
 });
 
 test('throws if invalid hostname', () => {
-  const httpSchema = config.schema;
-  const obj = {
-    host: invalidHostname,
-  };
-  expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+  for (const host of invalidHostnames) {
+    const httpSchema = config.schema;
+    expect(() => httpSchema.validate({ host })).toThrowErrorMatchingSnapshot();
+  }
 });
 
 describe('requestId', () => {
@@ -304,9 +303,9 @@ describe('with compression', () => {
 
   test('throws if invalid referrer whitelist', () => {
     const httpSchema = config.schema;
-    const invalidHostnames = {
+    const nonEmptyArray = {
       compression: {
-        referrerWhitelist: [invalidHostname],
+        referrerWhitelist: invalidHostnames,
       },
     };
     const emptyArray = {
@@ -314,7 +313,7 @@ describe('with compression', () => {
         referrerWhitelist: [],
       },
     };
-    expect(() => httpSchema.validate(invalidHostnames)).toThrowErrorMatchingSnapshot();
+    expect(() => httpSchema.validate(nonEmptyArray)).toThrowErrorMatchingSnapshot();
     expect(() => httpSchema.validate(emptyArray)).toThrowErrorMatchingSnapshot();
   });
 
@@ -331,51 +330,67 @@ describe('with compression', () => {
 });
 
 describe('cors', () => {
-  describe('origin', () => {
+  describe('allowOrigin', () => {
     it('list cannot be empty', () => {
       expect(() =>
         config.schema.validate({
           cors: {
-            origin: [],
+            allowOrigin: [],
           },
         })
       ).toThrowErrorMatchingInlineSnapshot(`
-              "[cors.origin]: types that failed validation:
-              - [cors.origin.0]: expected value to equal [*]
-              - [cors.origin.1]: array size is [0], but cannot be smaller than [1]"
-          `);
+        "[cors.allowOrigin]: types that failed validation:
+        - [cors.allowOrigin.0]: array size is [0], but cannot be smaller than [1]
+        - [cors.allowOrigin.1]: array size is [0], but cannot be smaller than [1]"
+      `);
     });
 
     it('list of valid URLs', () => {
-      const origin = ['http://127.0.0.1:3000', 'https://elastic.co'];
+      const allowOrigin = ['http://127.0.0.1:3000', 'https://elastic.co'];
       expect(
         config.schema.validate({
-          cors: { origin },
-        }).cors.origin
-      ).toStrictEqual(origin);
+          cors: { allowOrigin },
+        }).cors.allowOrigin
+      ).toStrictEqual(allowOrigin);
 
       expect(() =>
         config.schema.validate({
           cors: {
-            origin: ['*://elastic.co/*'],
+            allowOrigin: ['*://elastic.co/*'],
           },
         })
       ).toThrow();
     });
 
     it('can be configured as "*" wildcard', () => {
-      expect(config.schema.validate({ cors: { origin: '*' } }).cors.origin).toBe('*');
+      expect(config.schema.validate({ cors: { allowOrigin: ['*'] } }).cors.allowOrigin).toEqual([
+        '*',
+      ]);
+    });
+
+    it('cannot mix wildcard "*" with valid URLs', () => {
+      expect(
+        () =>
+          config.schema.validate({ cors: { allowOrigin: ['*', 'https://elastic.co'] } }).cors
+            .allowOrigin
+      ).toThrowErrorMatchingInlineSnapshot(`
+        "[cors.allowOrigin]: types that failed validation:
+        - [cors.allowOrigin.0.0]: expected URI with scheme [http|https].
+        - [cors.allowOrigin.1.1]: expected value to equal [*]"
+      `);
     });
   });
   describe('credentials', () => {
-    it('cannot use wildcard origin if "credentials: true"', () => {
+    it('cannot use wildcard allowOrigin if "credentials: true"', () => {
       expect(
-        () => config.schema.validate({ cors: { credentials: true, origin: '*' } }).cors.origin
+        () =>
+          config.schema.validate({ cors: { allowCredentials: true, allowOrigin: ['*'] } }).cors
+            .allowOrigin
       ).toThrowErrorMatchingInlineSnapshot(
         `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
       );
       expect(
-        () => config.schema.validate({ cors: { credentials: true } }).cors.origin
+        () => config.schema.validate({ cors: { allowCredentials: true } }).cors.allowOrigin
       ).toThrowErrorMatchingInlineSnapshot(
         `"[cors]: Cannot specify wildcard origin \\"*\\" with \\"credentials: true\\". Please provide a list of allowed origins."`
       );

@@ -505,9 +505,11 @@ The task manager's public API is create / delete / list. Updates aren't directly
 ## Testing
 
 - Unit tests:
+
+   Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
+
    ```
-   cd x-pack
-   node scripts/jest --testPathPattern=task_manager --watch
+   yarn test:jest x-pack/plugins/task_manager --watch
    ```
 - Integration tests:
    ```

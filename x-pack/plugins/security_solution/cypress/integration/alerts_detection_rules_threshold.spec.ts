@@ -58,14 +58,14 @@ import {
 } from '../tasks/alerts';
 import {
   changeToThreeHundredRowsPerPage,
-  deleteRule,
   filterByCustomRules,
   goToCreateNewRule,
   goToRuleDetails,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRulesToBeLoaded,
 } from '../tasks/alerts_detection_rules';
-import { createTimeline, deleteTimeline } from '../tasks/api_calls/timelines';
+import { createTimeline } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 import {
   createAndActivateRule,
   fillAboutRuleAndContinue,
@@ -79,7 +79,7 @@ import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
 
-describe('Detection rules, threshold', () => {
+describe.skip('Detection rules, threshold', () => {
   const expectedUrls = newThresholdRule.referenceUrls.join('');
   const expectedFalsePositives = newThresholdRule.falsePositivesExamples.join('');
   const expectedTags = newThresholdRule.tags.join('');
@@ -88,14 +88,10 @@ describe('Detection rules, threshold', () => {
   const rule = { ...newThresholdRule };
 
   beforeEach(() => {
+    cleanKibana();
     createTimeline(newThresholdRule.timeline).then((response) => {
       rule.timeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
     });
-  });
-
-  afterEach(() => {
-    deleteTimeline(rule.timeline.id!);
-    deleteRule();
   });
 
   it('Creates and activates a new threshold rule', () => {
@@ -173,7 +169,7 @@ describe('Detection rules, threshold', () => {
     waitForTheRuleToBeExecuted();
     waitForAlertsToPopulate();
 
-    cy.get(NUMBER_OF_ALERTS).invoke('text').then(parseFloat).should('be.below', 100);
+    cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text()).to.be.lt(100));
     cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
     cy.get(ALERT_RULE_VERSION).first().should('have.text', '1');
     cy.get(ALERT_RULE_METHOD).first().should('have.text', 'threshold');

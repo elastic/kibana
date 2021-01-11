@@ -7,6 +7,7 @@
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
 import Boom from '@hapi/boom';
+import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -18,7 +19,6 @@ import { History } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { Location } from 'history';
 import { LocationDescriptorObject } from 'history';
 import { Logger } from '@kbn/logging';
@@ -56,11 +56,10 @@ export interface App<HistoryLocationState = unknown> {
     exactRoute?: boolean;
     icon?: string;
     id: string;
+    meta?: AppMeta;
     mount: AppMount<HistoryLocationState> | AppMountDeprecated<HistoryLocationState>;
     navLinkStatus?: AppNavLinkStatus;
     order?: number;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "AppSubLink"
-    searchDeepLinks?: AppSearchDeepLink[];
     status?: AppStatus;
     title: string;
     tooltip?: string;
@@ -92,6 +91,8 @@ export enum AppLeaveActionType {
 // @public
 export interface AppLeaveConfirmAction {
     // (undocumented)
+    callback?: () => void;
+    // (undocumented)
     text: string;
     // (undocumented)
     title?: string;
@@ -110,7 +111,7 @@ export interface AppLeaveDefaultAction {
 // Warning: (ae-forgotten-export) The symbol "AppLeaveActionFactory" needs to be exported by the entry point index.d.ts
 //
 // @public
-export type AppLeaveHandler = (factory: AppLeaveActionFactory) => AppLeaveAction;
+export type AppLeaveHandler = (factory: AppLeaveActionFactory, nextAppId?: string) => AppLeaveAction;
 
 // @public (undocumented)
 export interface ApplicationSetup {
@@ -133,6 +134,12 @@ export interface ApplicationStart {
     navigateToUrl(url: string): Promise<void>;
     // @deprecated
     registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
+}
+
+// @public
+export interface AppMeta {
+    keywords?: string[];
+    searchDeepLinks?: AppSearchDeepLink[];
 }
 
 // @public
@@ -184,9 +191,11 @@ export type AppSearchDeepLink = {
 } & ({
     path: string;
     searchDeepLinks?: AppSearchDeepLink[];
+    keywords?: string[];
 } | {
     path?: string;
     searchDeepLinks: AppSearchDeepLink[];
+    keywords?: string[];
 });
 
 // @public
@@ -199,7 +208,7 @@ export enum AppStatus {
 export type AppUnmount = () => void;
 
 // @public
-export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'searchDeepLinks'>;
+export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip' | 'defaultPath' | 'meta'>;
 
 // @public
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
@@ -485,6 +494,7 @@ export interface DocLinksStart {
             readonly urlDrilldownTemplateSyntax: string;
             readonly urlDrilldownVariables: string;
         };
+        readonly discover: Record<string, string>;
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;
@@ -514,6 +524,7 @@ export interface DocLinksStart {
         readonly aggs: {
             readonly date_histogram: string;
             readonly date_range: string;
+            readonly date_format_pattern: string;
             readonly filter: string;
             readonly filters: string;
             readonly geohash_grid: string;
@@ -543,6 +554,7 @@ export interface DocLinksStart {
             readonly sum: string;
             readonly top_hits: string;
         };
+        readonly runtimeFields: string;
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -557,6 +569,7 @@ export interface DocLinksStart {
         };
         readonly addData: string;
         readonly kibana: string;
+        readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
             readonly gettingStarted: string;
@@ -571,13 +584,17 @@ export interface DocLinksStart {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
-        readonly ml: {
-            readonly guide: string;
-            readonly anomalyDetection: string;
-            readonly anomalyDetectionJobs: string;
-            readonly dataFrameAnalytics: string;
-        };
+        readonly ml: Record<string, string>;
+        readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
+        readonly apis: Record<string, string>;
+        readonly observability: Record<string, string>;
+        readonly alerting: Record<string, string>;
+        readonly maps: Record<string, string>;
+        readonly monitoring: Record<string, string>;
+        readonly security: Record<string, string>;
+        readonly watcher: Record<string, string>;
+        readonly ccs: Record<string, string>;
     };
 }
 
@@ -1010,16 +1027,23 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
 export type PluginOpaqueId = symbol;
 
 // @public
-export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'searchDeepLinks'> & {
+export type PublicAppInfo = Omit<App, 'mount' | 'updater$' | 'meta'> & {
     status: AppStatus;
     navLinkStatus: AppNavLinkStatus;
     appRoute: string;
+    meta: PublicAppMetaInfo;
+};
+
+// @public
+export type PublicAppMetaInfo = Omit<AppMeta, 'keywords' | 'searchDeepLinks'> & {
+    keywords: string[];
     searchDeepLinks: PublicAppSearchDeepLinkInfo[];
 };
 
 // @public
-export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks'> & {
+export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLinks' | 'keywords'> & {
     searchDeepLinks: PublicAppSearchDeepLinkInfo[];
+    keywords: string[];
 };
 
 // @public
@@ -1222,7 +1246,7 @@ export interface SavedObjectsImportConflictError {
 }
 
 // @public
-export interface SavedObjectsImportError {
+export interface SavedObjectsImportFailure {
     // (undocumented)
     error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
@@ -1253,7 +1277,7 @@ export interface SavedObjectsImportMissingReferencesError {
 // @public
 export interface SavedObjectsImportResponse {
     // (undocumented)
-    errors?: SavedObjectsImportError[];
+    errors?: SavedObjectsImportFailure[];
     // (undocumented)
     success: boolean;
     // (undocumented)

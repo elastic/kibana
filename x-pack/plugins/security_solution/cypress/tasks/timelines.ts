@@ -19,7 +19,7 @@ export const exportTimeline = (timelineId: string) => {
 };
 
 export const openTimeline = (id: string) => {
-  cy.get(TIMELINE(id)).click();
+  cy.get(TIMELINE(id), { timeout: 500 }).click();
 };
 
 export const waitForTimelinesPanelToBeLoaded = () => {

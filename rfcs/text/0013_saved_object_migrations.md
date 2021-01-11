@@ -278,10 +278,10 @@ Note:
     migration in parallel, only one version will win. E.g. if 7.11 and 7.12
     are started in parallel and migrate from a 7.9 index, either 7.11 or 7.12
     should succeed and accept writes, but not both.
-   1. Checks that `.kibana` alias is still pointing to the source index
-   2. Points the `.kibana_7.10.0` and `.kibana` aliases to the target index.
-   3. Removes the temporary index `.kibana_7.10.0_reindex_temp`
-   4. If this fails with a "required alias [.kibana] does not exist" error fetch `.kibana` again:
+   10. Checks that `.kibana` alias is still pointing to the source index
+   11. Points the `.kibana_7.10.0` and `.kibana` aliases to the target index.
+   12. Removes the temporary index `.kibana_7.10.0_reindex_temp`
+   13. If this fails with a "required alias [.kibana] does not exist" error fetch `.kibana` again:
       1. If `.kibana` is _not_ pointing to our target index fail the migration.
       2. If `.kibana` is pointing to our target index the migration has succeeded and we can proceed to step (10).
 12.  Start serving traffic. All saved object reads/writes happen through the

@@ -17,7 +17,7 @@ interface Props {
   summary: MonitorSummary;
 }
 
-const parseCurrentFilters = (filters: string) => {
+export const parseCurrentFilters = (filters: string) => {
   let parsedFilters: Map<string, string[]>;
   try {
     parsedFilters = new Map<string, string[]>(JSON.parse(filters));

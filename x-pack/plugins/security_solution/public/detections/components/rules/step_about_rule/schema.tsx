@@ -13,8 +13,7 @@ import {
   ValidationFunc,
   ERROR_CODE,
 } from '../../../../shared_imports';
-import { IMitreEnterpriseAttack, AboutStepRule } from '../../../pages/detection_engine/rules/types';
-import { isMitreAttackInvalid } from '../mitre/helpers';
+import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
 import * as I18n from './translations';
@@ -192,29 +191,6 @@ export const schema: FormSchema<AboutStepRule> = {
       }
     ),
     labelAppend: OptionalFieldLabel,
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ value, path }] = args;
-          let hasTechniqueError = false;
-          (value as IMitreEnterpriseAttack[]).forEach((v) => {
-            if (isMitreAttackInvalid(v.tactic.name, v.technique)) {
-              hasTechniqueError = true;
-            }
-          });
-          return hasTechniqueError
-            ? {
-                code: 'ERR_FIELD_MISSING',
-                path: `${path}.tactic`,
-                message: I18n.CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED,
-              }
-            : undefined;
-        },
-        exitOnFail: false,
-      },
-    ],
   },
   timestampOverride: {
     type: FIELD_TYPES.TEXT,

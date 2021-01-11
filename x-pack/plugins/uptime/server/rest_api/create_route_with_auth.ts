@@ -13,10 +13,22 @@ export const createRouteWithAuth = (
 ): UptimeRoute => {
   const restRoute = routeCreator(libs);
   const { handler, method, path, options, ...rest } = restRoute;
-  const licenseCheckHandler: UMRouteHandler = async (customParams, context, request, response) => {
+  const licenseCheckHandler: UMRouteHandler = async ({
+    uptimeEsClient,
+    context,
+    request,
+    response,
+    savedObjectsClient,
+  }) => {
     const { statusCode, message } = libs.license(context.licensing.license);
     if (statusCode === 200) {
-      return handler(customParams, context, request, response);
+      return handler({
+        uptimeEsClient,
+        context,
+        request,
+        response,
+        savedObjectsClient,
+      });
     }
     switch (statusCode) {
       case 400:
@@ -29,6 +41,7 @@ export const createRouteWithAuth = (
         return response.internalError();
     }
   };
+
   return {
     method,
     path,

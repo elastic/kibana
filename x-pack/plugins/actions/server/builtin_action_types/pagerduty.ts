@@ -117,6 +117,7 @@ function validateParams(paramsObject: unknown): string | void {
   }
 }
 
+export const ActionTypeId = '.pagerduty';
 // action type definition
 export function getActionType({
   logger,
@@ -126,7 +127,7 @@ export function getActionType({
   configurationUtilities: ActionsConfigurationUtilities;
 }): PagerDutyActionType {
   return {
-    id: '.pagerduty',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.pagerdutyTitle', {
       defaultMessage: 'PagerDuty',

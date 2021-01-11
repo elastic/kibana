@@ -12,33 +12,28 @@ import {
 } from '../objects/timeline';
 
 import { TIMELINE_TEMPLATES_URL } from '../urls/navigation';
-import {
-  createTimelineTemplate,
-  deleteTimeline as deleteTimelineTemplate,
-} from '../tasks/api_calls/timelines';
+import { createTimelineTemplate } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 
 describe('Export timelines', () => {
-  let templateResponse: Cypress.Response;
-  let templateId: string;
-
-  before(() => {
+  beforeEach(() => {
+    cleanKibana();
     cy.intercept('POST', 'api/timeline/_export?file_name=timelines_export.ndjson').as('export');
     createTimelineTemplate(timelineTemplate).then((response) => {
-      templateResponse = response;
-      templateId = response.body.data.persistTimeline.timeline.savedObjectId;
+      cy.wrap(response).as('templateResponse');
+      cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
     });
   });
 
-  after(() => {
-    deleteTimelineTemplate(templateId);
-  });
-
-  it('Exports a custom timeline template', () => {
+  it('Exports a custom timeline template', function () {
     loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
-    exportTimeline(templateId!);
+    exportTimeline(this.templateId);
 
     cy.wait('@export').then(({ response }) => {
-      cy.wrap(response!.body).should('eql', expectedExportedTimelineTemplate(templateResponse));
+      cy.wrap(response!.body).should(
+        'eql',
+        expectedExportedTimelineTemplate(this.templateResponse)
+      );
     });
   });
 });

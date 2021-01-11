@@ -30,6 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             pageIndex: 0,
             sortDirection: 'desc',
             sortField: 'occurrences',
+            transactionType: 'request',
           })}`
         );
 
@@ -57,6 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             pageIndex: 0,
             sortDirection: 'desc',
             sortField: 'occurrences',
+            transactionType: 'request',
           })}`
         );
 
@@ -114,6 +116,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             pageIndex: 0,
             sortDirection: 'desc',
             sortField: 'occurrences',
+            transactionType: 'request',
           })}`
         );
 
@@ -135,6 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             pageIndex: 0,
             sortDirection: 'desc',
             sortField: 'occurrences',
+            transactionType: 'request',
           })}`
         );
 
@@ -156,6 +160,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             pageIndex: 0,
             sortDirection: 'desc',
             sortField: 'last_seen',
+            transactionType: 'request',
           })}`
         );
 
@@ -179,6 +184,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             pageIndex: 0,
             sortDirection: 'desc',
             sortField: 'occurrences',
+            transactionType: 'request',
           })}`
         );
 
@@ -203,6 +209,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 pageIndex,
                 sortDirection: 'desc',
                 sortField: 'occurrences',
+                transactionType: 'request',
               })}`
             );
 

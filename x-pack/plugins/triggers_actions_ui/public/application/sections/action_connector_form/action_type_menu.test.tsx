@@ -8,7 +8,7 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
-import { ValidationResult } from '../../../types';
+import { ConnectorValidationResult, GenericValidationResult } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
 jest.mock('../../../common/lib/kibana');
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -34,20 +34,19 @@ describe('connector_add_flyout', () => {
 
   it('renders action type menu with proper EuiCards for registered action types', () => {
     const onActionTypeChange = jest.fn();
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
@@ -72,20 +71,19 @@ describe('connector_add_flyout', () => {
 
   it(`doesn't renders action types that are disabled via config`, () => {
     const onActionTypeChange = jest.fn();
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
@@ -110,20 +108,19 @@ describe('connector_add_flyout', () => {
 
   it(`renders action types as disabled when disabled by license`, () => {
     const onActionTypeChange = jest.fn();
-    const actionType = {
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
+      validateConnector: (): ConnectorValidationResult<unknown, unknown> => {
+        return {};
       },
-      validateParams: (): ValidationResult => {
+      validateParams: (): GenericValidationResult<unknown> => {
         const validationResult = { errors: {} };
         return validationResult;
       },
       actionConnectorFields: null,
-      actionParamsFields: null,
-    };
+    });
     actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(

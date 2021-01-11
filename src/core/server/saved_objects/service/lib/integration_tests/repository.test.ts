@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { InternalCoreStart } from 'src/core/server/internal_types';
+import { InternalCoreStart } from '../../../../internal_types';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import { Root } from '../../../../root';
 

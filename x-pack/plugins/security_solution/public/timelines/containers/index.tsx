@@ -213,7 +213,6 @@ export const useTimelineEvents = ({
         pageName !== activeTimeline.getPageName()
       ) {
         activeTimeline.setPageName(pageName);
-
         abortCtrl.current.abort();
         setLoading(false);
         prevTimelineRequest.current = activeTimeline.getRequest();

@@ -36,6 +36,7 @@ import {
   SearchSessionInfoProvider,
 } from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
+import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../url_generator';
 
 export interface AppState {
@@ -47,6 +48,10 @@ export interface AppState {
    * Array of applied filters
    */
   filters?: Filter[];
+  /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
   /**
    * id of the used index pattern
    */

@@ -22,15 +22,17 @@ import { EuiResizeObserver } from '@elastic/eui';
 import { debounce } from 'lodash';
 
 import { IInterpreterRenderHandlers } from '../../expressions/public';
+import type { PersistedState } from '../../visualizations/public';
 import { ChartsPluginSetup } from '../../charts/public';
 
 import { VislibRenderValue } from './vis_type_vislib_vis_fn';
 import { createVislibVisController, VislibVisController } from './vis_controller';
 import { VisTypeVislibCoreSetup } from './plugin';
+import { PieRenderValue } from './pie_fn';
 
 import './index.scss';
 
-type VislibWrapperProps = VislibRenderValue & {
+type VislibWrapperProps = (VislibRenderValue | PieRenderValue) & {
   core: VisTypeVislibCoreSetup;
   charts: ChartsPluginSetup;
   handlers: IInterpreterRenderHandlers;
@@ -59,16 +61,18 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
       visController.current?.destroy();
       visController.current = null;
     };
-  }, [core, charts, handlers]);
+  }, [core, charts]);
 
   useEffect(updateChart, [updateChart]);
 
   useEffect(() => {
     if (handlers.uiState) {
-      handlers.uiState.on('change', updateChart);
+      const uiState = handlers.uiState as PersistedState;
+
+      uiState.on('change', updateChart);
 
       return () => {
-        handlers.uiState?.off('change', updateChart);
+        uiState?.off('change', updateChart);
       };
     }
   }, [handlers.uiState, updateChart]);

@@ -27,6 +27,7 @@ import {
   TimelineId,
   TimelineStatus,
   TimelineType,
+  TimelineTabs,
 } from '../../../../common/types/timeline';
 
 import {
@@ -42,11 +43,7 @@ import {
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
 } from '../../../timelines/store/timeline/actions';
-import {
-  ColumnHeaderOptions,
-  TimelineModel,
-  TimelineTabs,
-} from '../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
 import {
@@ -399,13 +396,15 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   to,
   ruleNote,
 }: UpdateTimeline): (() => void) => () => {
-  dispatch(
-    sourcererActions.initTimelineIndexPatterns({
-      id: SourcererScopeName.timeline,
-      selectedPatterns: timeline.indexNames,
-      eventType: timeline.eventType,
-    })
-  );
+  if (!isEmpty(timeline.indexNames)) {
+    dispatch(
+      sourcererActions.initTimelineIndexPatterns({
+        id: SourcererScopeName.timeline,
+        selectedPatterns: timeline.indexNames,
+        eventType: timeline.eventType,
+      })
+    );
+  }
   if (
     timeline.status === TimelineStatus.immutable &&
     timeline.timelineType === TimelineType.template

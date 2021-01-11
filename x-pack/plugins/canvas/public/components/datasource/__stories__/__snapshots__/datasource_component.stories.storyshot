@@ -6,6 +6,7 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
 >
   <button
     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton"
+    disabled={false}
     onClick={[Function]}
     type="button"
   >
@@ -51,6 +52,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
 >
   <button
     className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft canvasDataSource__triggerButton"
+    disabled={false}
     onClick={[Function]}
     type="button"
   >
@@ -90,6 +92,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
     >
       <button
         className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+        disabled={false}
         onClick={[Function]}
         type="button"
       >

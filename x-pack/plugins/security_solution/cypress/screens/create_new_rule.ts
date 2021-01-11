@@ -33,8 +33,7 @@ export const COMBO_BOX_RESULT = '.euiFilterSelectItem';
 
 export const CREATE_AND_ACTIVATE_BTN = '[data-test-subj="create-activate"]';
 
-export const CUSTOM_QUERY_INPUT =
-  '[data-test-subj="detectionEngineStepDefineRuleQueryBar"] [data-test-subj="queryInput"]';
+export const CUSTOM_QUERY_INPUT = '[data-test-subj="queryInput"]';
 
 export const THREAT_MATCH_QUERY_INPUT =
   '[data-test-subj="detectionEngineStepDefineThreatRuleQueryBar"] [data-test-subj="queryInput"]';
@@ -102,7 +101,11 @@ export const REFERENCE_URLS_INPUT =
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
-export const RISK_INPUT = '.euiRangeInput';
+export const DEFAULT_RISK_SCORE_INPUT =
+  '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeInput';
+
+export const DEFAULT_RISK_SCORE_SLIDER =
+  '[data-test-subj="detectionEngineStepAboutRuleRiskScore-defaultRiskRange"].euiRangeSlider';
 
 export const RISK_MAPPING_OVERRIDE_OPTION = '#risk_score-mapping-override';
 

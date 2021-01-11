@@ -63,7 +63,7 @@ const PanelDisplayNames: Record<DetailViewPanelName, string> = {
     defaultMessage: 'Settings',
   }),
   custom: i18n.translate('xpack.fleet.epm.packageDetailsNav.packageCustomLinkText', {
-    defaultMessage: 'Custom',
+    defaultMessage: 'Advanced',
   }),
 };
 

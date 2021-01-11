@@ -108,10 +108,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
 type SuccessCountField = keyof Omit<DeleteTransformStatus, 'destinationIndex'>;
 
 export const useDeleteTransforms = () => {
-  const {
-    overlays,
-    ml: { extractErrorMessage },
-  } = useAppDependencies();
+  const { overlays } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
@@ -188,7 +185,7 @@ export const useDeleteTransforms = () => {
           });
         }
         if (status.transformDeleted?.error) {
-          const error = extractErrorMessage(status.transformDeleted.error);
+          const error = status.transformDeleted.error.reason;
           toastNotifications.addDanger({
             title: i18n.translate('xpack.transform.transformList.deleteTransformErrorMessage', {
               defaultMessage: 'An error occurred deleting the transform {transformId}',
@@ -201,7 +198,7 @@ export const useDeleteTransforms = () => {
         }
 
         if (status.destIndexDeleted?.error) {
-          const error = extractErrorMessage(status.destIndexDeleted.error);
+          const error = status.destIndexDeleted.error.reason;
           toastNotifications.addDanger({
             title: i18n.translate(
               'xpack.transform.deleteTransform.deleteAnalyticsWithIndexErrorMessage',
@@ -217,7 +214,7 @@ export const useDeleteTransforms = () => {
         }
 
         if (status.destIndexPatternDeleted?.error) {
-          const error = extractErrorMessage(status.destIndexPatternDeleted.error);
+          const error = status.destIndexPatternDeleted.error.reason;
           toastNotifications.addDanger({
             title: i18n.translate(
               'xpack.transform.deleteTransform.deleteAnalyticsWithIndexPatternErrorMessage',

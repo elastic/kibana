@@ -21,12 +21,12 @@ import { useConfigurationIssues } from '../../../form';
 import { ActiveBadge, DescribedFormRow } from '../../';
 
 import {
-  useRolloverPath,
   MinAgeInputField,
   ForcemergeField,
   SetPriorityInputField,
   DataTierAllocationField,
   ShrinkField,
+  ReadonlyField,
 } from '../shared_fields';
 
 const i18nTexts = {
@@ -46,13 +46,12 @@ const formFieldPaths = {
 
 export const WarmPhase: FunctionComponent = () => {
   const { policy } = useEditPolicyContext();
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase, isUsingRollover } = useConfigurationIssues();
   const [formData] = useFormData({
-    watch: [useRolloverPath, formFieldPaths.enabled, formFieldPaths.warmPhaseOnRollover],
+    watch: [formFieldPaths.enabled, formFieldPaths.warmPhaseOnRollover],
   });
 
   const enabled = get(formData, formFieldPaths.enabled);
-  const hotPhaseRolloverEnabled = get(formData, useRolloverPath);
   const warmPhaseOnRollover = get(formData, formFieldPaths.warmPhaseOnRollover);
 
   return (
@@ -98,7 +97,7 @@ export const WarmPhase: FunctionComponent = () => {
           <>
             {enabled && (
               <>
-                {hotPhaseRolloverEnabled && (
+                {isUsingRollover && (
                   <UseField
                     path={formFieldPaths.warmPhaseOnRollover}
                     component={ToggleField}
@@ -110,7 +109,7 @@ export const WarmPhase: FunctionComponent = () => {
                     }}
                   />
                 )}
-                {(!warmPhaseOnRollover || !hotPhaseRolloverEnabled) && (
+                {(!warmPhaseOnRollover || !isUsingRollover) && (
                   <>
                     <EuiSpacer size="m" />
                     <MinAgeInputField phase="warm" />
@@ -173,6 +172,9 @@ export const WarmPhase: FunctionComponent = () => {
             {!isUsingSearchableSnapshotInHotPhase && <ShrinkField phase="warm" />}
 
             {!isUsingSearchableSnapshotInHotPhase && <ForcemergeField phase="warm" />}
+
+            <ReadonlyField phase={'warm'} />
+
             {/* Data tier allocation section */}
             <DataTierAllocationField
               description={i18nTexts.dataTierAllocation.description}

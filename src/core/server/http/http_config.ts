@@ -48,17 +48,20 @@ export const config = {
       cors: schema.object(
         {
           enabled: schema.boolean({ defaultValue: false }),
-          credentials: schema.boolean({ defaultValue: false }),
-          origin: schema.oneOf(
-            [schema.literal('*'), schema.arrayOf(hostURISchema, { minSize: 1 })],
+          allowCredentials: schema.boolean({ defaultValue: false }),
+          allowOrigin: schema.oneOf(
+            [
+              schema.arrayOf(hostURISchema, { minSize: 1 }),
+              schema.arrayOf(schema.literal('*'), { minSize: 1, maxSize: 1 }),
+            ],
             {
-              defaultValue: '*',
+              defaultValue: ['*'],
             }
           ),
         },
         {
           validate(value) {
-            if (value.credentials === true && value.origin === '*') {
+            if (value.allowCredentials === true && value.allowOrigin.includes('*')) {
               return 'Cannot specify wildcard origin "*" with "credentials: true". Please provide a list of allowed origins.';
             }
           },
@@ -70,6 +73,11 @@ export const config = {
       host: schema.string({
         defaultValue: 'localhost',
         hostname: true,
+        validate(value) {
+          if (value === '0') {
+            return 'value 0 is not a valid hostname (use "0.0.0.0" to bind to all interfaces)';
+          }
+        },
       }),
       maxPayload: schema.byteSize({
         defaultValue: '1048576b',
@@ -168,8 +176,8 @@ export class HttpConfig {
   public port: number;
   public cors: {
     enabled: boolean;
-    credentials: boolean;
-    origin: '*' | string[];
+    allowCredentials: boolean;
+    allowOrigin: string[];
   };
   public customResponseHeaders: Record<string, string | string[]>;
   public maxPayload: ByteSizeValue;

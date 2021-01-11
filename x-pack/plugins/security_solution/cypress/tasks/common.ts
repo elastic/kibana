@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { esArchiverResetKibana } from './es_archiver';
+
 const primaryButton = 0;
 
 /**
@@ -55,8 +57,76 @@ export const drop = (dropTarget: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
-export const reload = (afterReload: () => void) => {
+export const reload = () => {
   cy.reload();
   cy.contains('a', 'Security');
-  afterReload();
+};
+
+export const cleanKibana = () => {
+  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'alert',
+            },
+          },
+          {
+            match: {
+              'alert.alertTypeId': 'siem.signals',
+            },
+          },
+          {
+            match: {
+              'alert.consumer': 'siem',
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'cases',
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
+    query: {
+      bool: {
+        filter: [
+          {
+            match: {
+              type: 'siem-ui-timeline',
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  cy.request(
+    'POST',
+    `${Cypress.env(
+      'ELASTICSEARCH_URL'
+    )}/.lists-*,.items-*,.siem-signals-*/_delete_by_query?conflicts=proceed&scroll_size=10000`,
+    {
+      query: {
+        match_all: {},
+      },
+    }
+  );
+
+  esArchiverResetKibana();
 };

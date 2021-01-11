@@ -5,3 +5,5 @@
  */
 
 export * from './data_tiers';
+
+export * from './rollover';

@@ -9,7 +9,7 @@ import { EuiLink } from '@elastic/eui';
 
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { getRuleDetailsUrl, useFormatUrl } from '../../../common/components/link_to';
+import { getRuleDetailsUrl } from '../../../common/components/link_to';
 import { SecurityPageName } from '../../../app/types';
 
 import { Alert } from '../case_view';
@@ -23,16 +23,15 @@ const AlertCommentEventComponent: React.FC<Props> = ({ alert }) => {
   const ruleName = alert?.rule?.name ?? null;
   const ruleId = alert?.rule?.id ?? null;
   const { navigateToApp } = useKibana().services.application;
-  const { formatUrl } = useFormatUrl(SecurityPageName.detections);
 
   const onLinkClick = useCallback(
     (ev: { preventDefault: () => void }) => {
       ev.preventDefault();
       navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
-        path: formatUrl(getRuleDetailsUrl(ruleId ?? '')),
+        path: getRuleDetailsUrl(ruleId ?? ''),
       });
     },
-    [ruleId, formatUrl, navigateToApp]
+    [ruleId, navigateToApp]
   );
 
   return ruleId != null && ruleName != null ? (

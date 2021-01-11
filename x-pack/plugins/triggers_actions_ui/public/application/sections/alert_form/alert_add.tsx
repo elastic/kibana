@@ -10,11 +10,10 @@ import { i18n } from '@kbn/i18n';
 import {
   ActionTypeRegistryContract,
   Alert,
-  AlertAction,
   AlertTypeRegistryContract,
-  IErrorObject,
+  AlertUpdates,
 } from '../../../types';
-import { AlertForm, isValidAlert, validateBaseProperties } from './alert_form';
+import { AlertForm, getAlertErrors, isValidAlert } from './alert_form';
 import { alertReducer, InitialAlert, InitialAlertReducer } from './alert_reducer';
 import { createAlert } from '../../lib/alert_api';
 import { HealthCheck } from '../../components/health_check';
@@ -23,13 +22,13 @@ import { hasShowActionsCapability } from '../../lib/capabilities';
 import AlertAddFooter from './alert_add_footer';
 import { HealthContextProvider } from '../../context/health_context';
 import { useKibana } from '../../../common/lib/kibana';
+import { getAlertWithInvalidatedFields } from '../../lib/value_validators';
 
 export interface AlertAddProps<MetaData = Record<string, any>> {
   consumer: string;
-  addFlyoutVisible: boolean;
   alertTypeRegistry: AlertTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Alert>;
@@ -39,10 +38,9 @@ export interface AlertAddProps<MetaData = Record<string, any>> {
 
 const AlertAdd = ({
   consumer,
-  addFlyoutVisible,
   alertTypeRegistry,
   actionTypeRegistry,
-  setAddFlyoutVisibility,
+  onClose,
   canChangeTrigger,
   alertTypeId,
   initialValues,
@@ -88,13 +86,15 @@ const AlertAdd = ({
   const canShowActions = hasShowActionsCapability(capabilities);
 
   useEffect(() => {
-    setAlertProperty('alertTypeId', alertTypeId ?? null);
+    if (alertTypeId) {
+      setAlertProperty('alertTypeId', alertTypeId);
+    }
   }, [alertTypeId]);
 
   const closeFlyout = useCallback(() => {
-    setAddFlyoutVisibility(false);
     setAlert(initialAlert);
-  }, [initialAlert, setAddFlyoutVisibility]);
+    onClose();
+  }, [initialAlert, onClose]);
 
   const saveAlertAndCloseFlyout = async () => {
     const savedAlert = await onSaveAlert();
@@ -107,47 +107,28 @@ const AlertAdd = ({
     }
   };
 
-  if (!addFlyoutVisible) {
-    return null;
-  }
-
   const alertType = alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null;
-  const errors = {
-    ...(alertType ? alertType.validate(alert.params).errors : []),
-    ...validateBaseProperties(alert).errors,
-  } as IErrorObject;
-  const hasErrors = !isValidAlert(alert, errors);
-
-  const actionsErrors: Array<{
-    errors: IErrorObject;
-  }> = alert.actions.map((alertAction: AlertAction) =>
-    actionTypeRegistry.get(alertAction.actionTypeId)?.validateParams(alertAction.params)
+  const { alertActionsErrors, alertBaseErrors, alertErrors, alertParamsErrors } = getAlertErrors(
+    alert as Alert,
+    actionTypeRegistry,
+    alertType
   );
-
-  const hasActionErrors =
-    actionsErrors.find(
-      (errorObj: { errors: IErrorObject }) =>
-        errorObj &&
-        !!Object.keys(errorObj.errors).find((errorKey) => errorObj.errors[errorKey].length >= 1)
-    ) !== undefined;
 
   // Confirm before saving if user is able to add actions but hasn't added any to this alert
   const shouldConfirmSave = canShowActions && alert.actions?.length === 0;
 
   async function onSaveAlert(): Promise<Alert | undefined> {
     try {
-      if (isValidAlert(alert, errors)) {
-        const newAlert = await createAlert({ http, alert });
-        toasts.addSuccess(
-          i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
-            defaultMessage: 'Created alert "{alertName}"',
-            values: {
-              alertName: newAlert.name,
-            },
-          })
-        );
-        return newAlert;
-      }
+      const newAlert = await createAlert({ http, alert: alert as AlertUpdates });
+      toasts.addSuccess(
+        i18n.translate('xpack.triggersActionsUI.sections.alertAdd.saveSuccessNotificationText', {
+          defaultMessage: 'Created alert "{alertName}"',
+          values: {
+            alertName: newAlert.name,
+          },
+        })
+      );
+      return newAlert;
     } catch (errorRes) {
       toasts.addDanger(
         errorRes.body?.message ??
@@ -182,7 +163,7 @@ const AlertAdd = ({
               <AlertForm
                 alert={alert}
                 dispatch={dispatch}
-                errors={errors}
+                errors={alertErrors}
                 canChangeTrigger={canChangeTrigger}
                 operation={i18n.translate(
                   'xpack.triggersActionsUI.sections.alertAdd.operationName',
@@ -197,9 +178,20 @@ const AlertAdd = ({
             </EuiFlyoutBody>
             <AlertAddFooter
               isSaving={isSaving}
-              hasErrors={hasErrors || hasActionErrors}
               onSave={async () => {
                 setIsSaving(true);
+                if (!isValidAlert(alert, alertErrors, alertActionsErrors)) {
+                  setAlert(
+                    getAlertWithInvalidatedFields(
+                      alert as Alert,
+                      alertParamsErrors,
+                      alertBaseErrors,
+                      alertActionsErrors
+                    )
+                  );
+                  setIsSaving(false);
+                  return;
+                }
                 if (shouldConfirmSave) {
                   setIsConfirmAlertSaveModalOpen(true);
                 } else {
