@@ -270,6 +270,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
         columnId: {
           type: 'keyword',
         },
+        columnType: {
+          type: 'keyword',
+        },
         sortDirection: {
           type: 'keyword',
         },

@@ -208,6 +208,7 @@ describe('alert actions', () => {
             sort: [
               {
                 columnId: '@timestamp',
+                columnType: 'number',
                 sortDirection: 'desc',
               },
             ],
