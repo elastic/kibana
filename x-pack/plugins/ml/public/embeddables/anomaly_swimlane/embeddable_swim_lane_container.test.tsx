@@ -20,7 +20,6 @@ import { SwimlaneContainer } from '../../application/explorer/swimlane_container
 import { MlDependencies } from '../../application/app';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { TriggerContract } from 'src/plugins/ui_actions/public/triggers';
-import { TriggerId } from 'src/plugins/ui_actions/public';
 import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
 
 jest.mock('./swimlane_input_resolver', () => ({
@@ -43,7 +42,7 @@ describe('ExplorerSwimlaneContainer', () => {
   let refresh: BehaviorSubject<any>;
   let services: jest.Mocked<[CoreStart, MlDependencies, AnomalySwimlaneServices]>;
   let embeddableContext: AnomalySwimlaneEmbeddable;
-  let trigger: jest.Mocked<TriggerContract<TriggerId>>;
+  let trigger: jest.Mocked<TriggerContract>;
 
   const onInputChange = jest.fn();
   const onOutputChange = jest.fn();
@@ -54,7 +53,7 @@ describe('ExplorerSwimlaneContainer', () => {
       id: 'test-swimlane-embeddable',
     } as Partial<AnomalySwimlaneEmbeddableInput>);
 
-    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract<TriggerId>>;
+    trigger = ({ exec: jest.fn() } as unknown) as jest.Mocked<TriggerContract>;
 
     const uiActionsMock = uiActionsPluginMock.createStartContract();
     uiActionsMock.getTrigger.mockReturnValue(trigger);
