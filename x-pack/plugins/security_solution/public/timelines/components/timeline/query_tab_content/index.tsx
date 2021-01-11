@@ -273,7 +273,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       <FullWidthFlexGroup>
         <ScrollableFlexItem grow={2}>
           <HideShowContainer $isVisible={!timelineFullScreen}>
-            <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
+            <StyledEuiFlyoutHeader
+              data-test-subj={`${activeTab}-tab-flyout-header`}
+              hasBorder={false}
+            >
               <EuiFlexGroup gutterSize="s" data-test-subj="timeline-date-picker-container">
                 <DatePicker grow={1}>
                   <SuperDatePicker id="timeline" timelineId={timelineId} />
@@ -303,7 +306,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           </HideShowContainer>
 
           <EventDetailsWidthProvider>
-            <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+            <StyledEuiFlyoutBody
+              data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
+              className="timeline-flyout-body"
+            >
               <StatefulBody
                 activePage={pageInfo.activePage}
                 browserFields={browserFields}
@@ -320,7 +326,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             </StyledEuiFlyoutBody>
 
             <StyledEuiFlyoutFooter
-              data-test-subj="eui-flyout-footer"
+              data-test-subj={`${TimelineTabs.query}-tab-flyout-footer`}
               className="timeline-flyout-footer"
             >
               {!isBlankTimeline && (
