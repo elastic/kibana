@@ -80,7 +80,7 @@ export const Template = (args) => <LogStream {...args} />;
 
 The purpose of this component is to allow you, the developer, to have your very own Log Stream in your plugin.
 
-The plugin is exposed through `infra/public`. Since Kibana uses relative paths is up to you to find how to import it (sorry).
+The component is exposed through `infra/public`. Since Kibana uses relative paths is up to you to find how to import it (sorry).
 
 ```tsx
 import { LogStream } from '../../../../../../infra/public';
@@ -174,7 +174,7 @@ If the default columns don't work for the use case of your plugin, or you don't 
 
 ### With a `columns` prop
 
-The easiest way is to specify what columns you want with the `props` column.
+The easiest way is to specify what columns you want with the `columns` prop.
 
 ```tsx
 <LogStream
