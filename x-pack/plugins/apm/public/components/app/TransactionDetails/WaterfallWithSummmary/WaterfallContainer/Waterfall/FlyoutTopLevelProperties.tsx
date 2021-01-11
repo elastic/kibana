@@ -12,7 +12,7 @@ import {
   TRANSACTION_NAME,
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
-import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview';
+import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview_link';
 import { TransactionDetailLink } from '../../../../../shared/Links/apm/transaction_detail_link';
 import { StickyProperties } from '../../../../../shared/StickyProperties';
 
