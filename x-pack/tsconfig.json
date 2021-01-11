@@ -10,6 +10,7 @@
     "plugins/embeddable_enhanced/**/*",
     "plugins/licensing/**/*",
     "plugins/security_solution/cypress/**/*",
+    "plugins/task_manager/**/*",
     "plugins/telemetry_collection_xpack/**/*",
     "plugins/ui_actions_enhanced/**/*",
     "test/**/*"
@@ -48,6 +49,7 @@
     { "path": "./plugins/features/tsconfig.json" },
     { "path": "./plugins/embeddable_enhanced/tsconfig.json" },
     { "path": "./plugins/licensing/tsconfig.json" },
+    { "path": "./plugins/task_manager/tsconfig.json" },
     { "path": "./plugins/telemetry_collection_xpack/tsconfig.json" },
     { "path": "./plugins/ui_actions_enhanced/tsconfig.json" }
   ]

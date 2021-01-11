@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 
 import { AggGroupNames } from '../../data/public';
-import { Schemas } from '../../vis_default_editor/public';
 import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
 import { getPositions } from '../../vis_type_xy/public';
 
@@ -69,7 +68,7 @@ export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
       legendPositions: getPositions(),
     },
     optionsTemplate: PieOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -102,7 +101,7 @@ export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
-    ]),
+    ],
   },
   hierarchicalData: true,
   responseHandler: 'vislib_slices',
