@@ -22,10 +22,12 @@
   .euiTableRow-isExpandedRow {
 
     .euiTableRowCell{
-      background-color: transparent !important;
+      background-color: $euiColorEmptyShade !important;
       border-top: 0px;
       border-bottom: $euiBorderThin;
-
+      &:hover {
+        background-color: $euiColorEmptyShade !important;
+      }
     }
   }
   .mlDataVisualizerSummaryTable {
