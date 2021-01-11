@@ -13,12 +13,13 @@ import { FormattedRelative } from '@kbn/i18n/react';
 
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
-import { focusActiveTimelineButton } from '../../timeline/helpers';
+import {
+  ACTIVE_TIMELINE_BUTTON_CLASS_NAME,
+  focusActiveTimelineButton,
+} from '../../timeline/helpers';
 import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/translations';
 import { timelineActions } from '../../../store/timeline';
 import * as i18n from './translations';
-
-export const ACTIVE_TIMELINE_BUTTON_CLASS_NAME = 'active-timeline-button';
 
 const ButtonWrapper = styled(EuiFlexItem)`
   flex-direction: row;

@@ -13,11 +13,9 @@ import { IS_DRAGGING_CLASS_NAME } from '../../../../common/components/drag_and_d
 import { DataProvider } from '../../timeline/data_providers/data_provider';
 import { flattenIntoAndGroups } from '../../timeline/data_providers/helpers';
 import { DataProviders } from '../../timeline/data_providers';
+import { FLYOUT_BUTTON_BAR_CLASS_NAME, FLYOUT_BUTTON_CLASS_NAME } from '../../timeline/helpers';
 import { FlyoutHeaderPanel } from '../header';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-
-export const FLYOUT_BUTTON_BAR_CLASS_NAME = 'timeline-flyout-button-bar';
-export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
 
 export const getBadgeCount = (dataProviders: DataProvider[]): number =>
   flattenIntoAndGroups(dataProviders).reduce((total, group) => total + group.length, 0);
