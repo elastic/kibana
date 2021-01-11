@@ -9,6 +9,7 @@
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import * as redux from 'react-redux';
+import * as reactRouterDom from 'react-router-dom';
 
 export function mockMoment() {
   // avoid timezone issues
@@ -26,4 +27,8 @@ export function mockReduxHooks(response?: any) {
   jest.spyOn(redux, 'useDispatch').mockReturnValue(jest.fn());
 
   jest.spyOn(redux, 'useSelector').mockReturnValue(response);
+}
+
+export function mockReactRouterDomHooks({ useParamsResponse }: { useParamsResponse: any }) {
+  jest.spyOn(reactRouterDom, 'useParams').mockReturnValue(useParamsResponse);
 }
