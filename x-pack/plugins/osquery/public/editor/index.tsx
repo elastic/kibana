@@ -17,19 +17,25 @@ const EDITOR_SET_OPTIONS = {
   // useWorker: false,
 };
 
-const OsqueryEditorComponent = () => {
+interface OsqueryEditorProps {
+  defaultValue: string;
+}
+
+const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({ defaultValue }) => {
   const onChange = useCallback((newValue) => {
     console.log('change', newValue);
   }, []);
 
   return (
     <AceEditor
+      value={defaultValue}
       mode="sql"
       theme="tomorrow"
       onChange={onChange}
       name="osquery_editor"
       setOptions={EDITOR_SET_OPTIONS}
       editorProps={{ $blockScrolling: true }}
+      height="200px"
     />
   );
 };

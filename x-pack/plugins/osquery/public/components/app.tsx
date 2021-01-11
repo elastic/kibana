@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Switch, Route } from 'react-router-dom';
 
 import {
-  EuiButton,
-  EuiHorizontalRule,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -18,36 +16,13 @@ import {
   EuiPageContentHeader,
   EuiPageHeader,
   EuiTitle,
-  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 
-import { AgentListPage } from '../../../fleet/public';
-
-import { useKibana } from '../common/lib/kibana';
-
 import { PLUGIN_NAME } from '../../common';
-import { AgentsTable } from '../agents/agents_table';
-import { OsqueryEditor } from '../editor';
+import { LiveQuery } from '../live_query';
 
-export const OsqueryApp = () => {
-  const { http, notifications } = useKibana().services;
-  // Use React hooks to manage state.
-  const [timestamp, setTimestamp] = useState<string | undefined>();
-
-  const onClickHandler = () => {
-    // Use the core http service to make a response to the server API.
-    http.get('/api/osquery/example').then((res) => {
-      setTimestamp(res.time);
-      // Use the core notifications service to display a success message.
-      notifications.toasts.addSuccess(
-        i18n.translate('osquery.dataUpdated', {
-          defaultMessage: 'Data updated',
-        })
-      );
-    });
-  };
-
+export const OsqueryAppComponent = () => {
   return (
     <EuiPage restrictWidth="1000px">
       <EuiPageBody>
@@ -63,48 +38,21 @@ export const OsqueryApp = () => {
           </EuiTitle>
         </EuiPageHeader>
         <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="osquery.congratulationsTitle"
-                  defaultMessage="Congratulations, you have successfully created a new Kibana Plugin!"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiPageContentHeader>
           <EuiPageContentBody>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="osquery.content"
-                  defaultMessage="Look through the generated code and check out the plugin development documentation."
-                />
-              </p>
-              <EuiHorizontalRule />
-              <p>
-                <FormattedMessage
-                  id="osquery.timestampText"
-                  defaultMessage="Last timestamp: {time}"
-                  values={{ time: timestamp ? timestamp : 'Unknown' }}
-                />
-              </p>
-              <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                <FormattedMessage id="osquery.buttonText" defaultMessage="Get data" />
-              </EuiButton>
-            </EuiText>
-
-            <EuiSpacer />
-            <OsqueryEditor />
-
             <EuiSpacer />
 
-            <AgentsTable />
+            <Switch>
+              <Route path={`/live_query`}>
+                <LiveQuery />
+              </Route>
+            </Switch>
 
-            <AgentListPage />
+            <EuiSpacer />
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
   );
 };
+
+export const OsqueryApp = React.memo(OsqueryAppComponent);

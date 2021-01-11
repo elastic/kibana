@@ -63,16 +63,3 @@ export const buildAgentsQuery = ({
 
   return dslQuery;
 };
-
-// type QueryOrder = { lastSeen: Direction } | { _key: Direction };
-
-// const getQueryOrder = (sort: SortField<HostsFields>): QueryOrder => {
-//   switch (sort.field) {
-//     case HostsFields.lastSeen:
-//       return { lastSeen: sort.direction };
-//     case HostsFields.hostName:
-//       return { _key: sort.direction };
-//     default:
-//       return assertUnreachable(sort.field as never);
-//   }
-// };
