@@ -45,9 +45,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('trustedAppDeleteButton');
       await testSubjects.click('trustedAppDeletionConfirm');
       await testSubjects.waitForDeleted('trustedAppDeletionConfirm');
-      expect(await testSubjects.getVisibleText('trustedAppsListViewCountLabel')).to.equal(
-        '0 trusted applications'
-      );
+      expect(await testSubjects.existOrFail('trustedAppEmptyState'));
     });
   });
 };

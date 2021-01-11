@@ -227,11 +227,15 @@ function endDataLoad(
   data: object,
   meta: DataMeta
 ) {
-  return async (
+  return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     dispatch(unregisterCancelCallback(requestToken));
+    const dataRequest = getDataRequestDescriptor(getState(), layerId, dataId);
+    if (dataRequest && dataRequest.dataRequestToken !== requestToken) {
+      throw new DataRequestAbortError();
+    }
 
     const features = data && 'features' in data ? (data as FeatureCollection).features : [];
 
