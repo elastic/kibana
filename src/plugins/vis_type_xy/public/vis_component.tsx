@@ -48,6 +48,7 @@ import {
   LegendToggle,
   getBrushFromChartBrushEventFn,
   ClickTriggerEvent,
+  PaletteRegistry,
 } from '../../charts/public';
 import { Datatable, IInterpreterRenderHandlers } from '../../expressions/public';
 import type { PersistedState } from '../../visualizations/public';
@@ -66,7 +67,7 @@ import {
 } from './utils';
 import { XYAxis, XYEndzones, XYCurrentTime, XYSettings, XYThresholdLine } from './components';
 import { getConfig } from './config';
-import { getThemeService, getDataActions, getPalettesService } from './services';
+import { getThemeService, getDataActions } from './services';
 import { ChartType } from '../common';
 
 import './_chart.scss';
@@ -83,6 +84,7 @@ export interface VisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
   syncColors: boolean;
+  palettes: PaletteRegistry;
 }
 
 export type VisComponentType = typeof VisComponent;
@@ -222,7 +224,7 @@ const VisComponent = (props: VisComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams, syncColors } = props;
+  const { visData, visParams, syncColors, palettes } = props;
 
   const config = getConfig(visData, visParams);
   const timeZone = getTimeZone();
@@ -266,25 +268,23 @@ const VisComponent = (props: VisComponentProps) => {
       if (Object.keys(overwriteColors).includes(seriesName)) {
         return overwriteColors[seriesName];
       }
-      const outputColor = getPalettesService()
-        .get(visParams.palette.name)
-        .getColor(
-          [
-            {
-              name: seriesName,
-              rankAtDepth: splitAccessors
-                ? allSeries.findIndex((name) => name === seriesName)
-                : config.aspects.y.findIndex((aspect) => aspect.accessor === series.yAccessor),
-              totalSeriesAtDepth: splitAccessors ? allSeries.length : config.aspects.y.length,
-            },
-          ],
+      const outputColor = palettes.get(visParams.palette.name).getColor(
+        [
           {
-            maxDepth: 1,
-            totalSeries: splitAccessors ? allSeries.length : config.aspects.y.length,
-            behindText: false,
-            syncColors,
-          }
-        );
+            name: seriesName,
+            rankAtDepth: splitAccessors
+              ? allSeries.findIndex((name) => name === seriesName)
+              : config.aspects.y.findIndex((aspect) => aspect.accessor === series.yAccessor),
+            totalSeriesAtDepth: splitAccessors ? allSeries.length : config.aspects.y.length,
+          },
+        ],
+        {
+          maxDepth: 1,
+          totalSeries: splitAccessors ? allSeries.length : config.aspects.y.length,
+          behindText: false,
+          syncColors,
+        }
+      );
       return outputColor || null;
     },
     [
@@ -295,6 +295,7 @@ const VisComponent = (props: VisComponentProps) => {
       splitAccessors,
       syncColors,
       visParams.palette.name,
+      palettes,
     ]
   );
   const xAccessor = getXAccessor(config.aspects.x);

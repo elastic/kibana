@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -27,15 +27,16 @@ import {
   SwitchOption,
   PalettePicker,
 } from '../../../../../../vis_default_editor/public';
+import { PaletteRegistry } from '../../../../../../charts/public';
 
 import { ChartType } from '../../../../../common';
 import { VisParams } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
-import { getPalettesService } from '../../../../services';
-import { getTrackUiMetric } from '../../../../services';
+import { getPalettesService, getTrackUiMetric } from '../../../../services';
 
 export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>) {
   const trackUiMetric = getTrackUiMetric();
+  const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
   const { stateParams, setValue, vis, aggs } = props;
 
   const hasLineChart = stateParams.seriesParams.some(
@@ -43,6 +44,14 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
       (type === ChartType.Line || type === ChartType.Area) &&
       aggs.aggs.find(({ id }) => id === paramId)?.enabled
   );
+
+  useEffect(() => {
+    const fetchPalettes = async () => {
+      const palettes = await getPalettesService().getPalettes();
+      setPalettesRegistry(palettes);
+    };
+    fetchPalettes();
+  }, []);
 
   return (
     <>
@@ -83,17 +92,19 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
         />
       )}
 
-      <PalettePicker
-        palettes={getPalettesService()}
-        activePalette={stateParams.palette}
-        paramName="palette"
-        setPalette={(paramName, value) => {
-          if (trackUiMetric) {
-            trackUiMetric(METRIC_TYPE.CLICK, 'palette_selected');
-          }
-          setValue(paramName, value);
-        }}
-      />
+      {palettesRegistry && (
+        <PalettePicker
+          palettes={palettesRegistry}
+          activePalette={stateParams.palette}
+          paramName="palette"
+          setPalette={(paramName, value) => {
+            if (trackUiMetric) {
+              trackUiMetric(METRIC_TYPE.CLICK, 'palette_selected');
+            }
+            setValue(paramName, value);
+          }}
+        />
+      )}
     </>
   );
 }

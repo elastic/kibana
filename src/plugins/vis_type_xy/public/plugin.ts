@@ -77,9 +77,7 @@ export class VisTypeXyPlugin
     if (!core.uiSettings.get(LEGACY_CHARTS_LIBRARY, false)) {
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
-      charts.palettes.getPalettes().then((palettes) => {
-        setPalettesService(palettes);
-      });
+      setPalettesService(charts.palettes);
       [createVisTypeXyVisFn].forEach(expressions.registerFunction);
       expressions.registerRenderer(xyVisRenderer);
       visTypesDefinitions.forEach(visualizations.createBaseVisualization);
