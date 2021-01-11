@@ -174,10 +174,34 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
             "status": "OK",
             "value": {
                 "polling": {
-                        /* When was the last polling cycle? */
+                    /* When was the last polling cycle? */
                     "last_successful_poll": "2020-10-05T17:57:55.411Z",
-                        /* What is the frequency of polling cycle result?
-                            Here we see 94% of "NoTasksClaimed" and 6%  "PoolFilled" */
+                    /* Running average of polling duration measuring the time from the scheduled polling cycle
+                        start until all claimed tasks are marked as running */
+					"duration": {
+						"p50": 4,
+						"p90": 12,
+						"p95": 12,
+						"p99": 12
+					},
+                    /* Running average of number of version clashes caused by the markAvailableTasksAsClaimed stage
+                        of the polling cycle */
+					"claim_conflicts": {
+						"p50": 0,
+						"p90": 0,
+						"p95": 0,
+						"p99": 0
+					},
+                    /* Running average of mismatch between the number of tasks updated by the markAvailableTasksAsClaimed stage
+                        of the polling cycle and the number of docs found by the sweepForClaimedTasks stage */
+					"claim_mismatches": {
+						"p50": 0,
+						"p90": 0,
+						"p95": 0,
+						"p99": 0
+					},
+                    /* What is the frequency of polling cycle result?
+                        Here we see 94% of "NoTasksClaimed" and 6%  "PoolFilled" */
                     "result_frequency_percent_as_number": {
                         /* This tells us that the polling cycle didnt claim any new tasks */
                         "NoTasksClaimed": 94,
@@ -203,7 +227,7 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
                 },
                 "execution": {
                     "duration": {
-                               /* on average, the `endpoint:user-artifact-packager` tasks take 15ms to run */
+                        /* on average, the `endpoint:user-artifact-packager` tasks take 15ms to run */
                         "endpoint:user-artifact-packager": {
                             "mean": 15,
                             "median": 14.5
@@ -230,7 +254,8 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
                         }
                     },
                     "result_frequency_percent_as_number": {
-                               /* and 100% of `endpoint:user-artifact-packager` have completed in success (within the running average window, so the past 50 runs (by default, configrable by `monitored_stats_running_average_window`) */
+                        /* and 100% of `endpoint:user-artifact-packager` have completed in success (within the running average window,
+                            so the past 50 runs (by default, configrable by `monitored_stats_running_average_window`) */
                         "endpoint:user-artifact-packager": {
                             "status": "OK",
                             "Success": 100,
