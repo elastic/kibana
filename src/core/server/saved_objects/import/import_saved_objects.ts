@@ -17,17 +17,38 @@
  * under the License.
  */
 
-import { collectSavedObjects } from './collect_saved_objects';
+import { Readable } from 'stream';
+import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { SavedObjectsClientContract } from '../types';
+import { SavedObjectsImportFailure, SavedObjectsImportResponse } from './types';
 import {
-  SavedObjectsImportError,
-  SavedObjectsImportResponse,
-  SavedObjectsImportOptions,
-} from './types';
-import { validateReferences } from './validate_references';
-import { checkOriginConflicts } from './check_origin_conflicts';
-import { createSavedObjects } from './create_saved_objects';
-import { checkConflicts } from './check_conflicts';
-import { regenerateIds } from './regenerate_ids';
+  validateReferences,
+  checkOriginConflicts,
+  createSavedObjects,
+  checkConflicts,
+  regenerateIds,
+  collectSavedObjects,
+} from './lib';
+
+/**
+ * Options to control the import operation.
+ */
+export interface ImportSavedObjectsOptions {
+  /** The stream of {@link SavedObject | saved objects} to import */
+  readStream: Readable;
+  /** The maximum number of object to import */
+  objectLimit: number;
+  /** If true, will override existing object if present. Note: this has no effect when used with the `createNewCopies` option. */
+  overwrite: boolean;
+  /** {@link SavedObjectsClientContract | client} to use to perform the import operation */
+  savedObjectsClient: SavedObjectsClientContract;
+  /** The registry of all known saved object types */
+  typeRegistry: ISavedObjectTypeRegistry;
+  /** if specified, will import in given namespace, else will import as global object */
+  namespace?: string;
+  /** If true, will create new copies of import objects, each with a random `id` and undefined `originId`. */
+  createNewCopies: boolean;
+}
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -43,8 +64,8 @@ export async function importSavedObjectsFromStream({
   savedObjectsClient,
   typeRegistry,
   namespace,
-}: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
-  let errorAccumulator: SavedObjectsImportError[] = [];
+}: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
+  let errorAccumulator: SavedObjectsImportFailure[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
 
   // Get the objects to import
