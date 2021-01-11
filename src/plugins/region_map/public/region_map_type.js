@@ -22,7 +22,6 @@ import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
 import { RegionMapOptions } from './components/region_map_options';
 import { truncatedColorSchemas } from '../../charts/public';
-import { Schemas } from '../../vis_default_editor/public';
 import { ORIGIN } from '../../maps_legacy/public';
 import { getDeprecationMessage } from './get_deprecation_message';
 
@@ -64,7 +63,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         vectorLayers: [],
         tmsLayers: [],
       },
-      schemas: new Schemas([
+      schemas: [
         {
           group: 'metrics',
           name: 'metric',
@@ -98,7 +97,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
           max: 1,
           aggFilter: ['terms'],
         },
-      ]),
+      ],
     },
     setup: async (vis) => {
       const serviceSettings = await getServiceSettings();
