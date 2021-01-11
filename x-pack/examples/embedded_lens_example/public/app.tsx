@@ -17,6 +17,7 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
+import { IndexPattern } from 'src/plugins/data/public';
 import { CoreStart } from 'kibana/public';
 import { TypedLensByValueInput } from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
@@ -24,20 +25,20 @@ import { StartDependencies } from './plugin';
 // Generate a Lens state based on some app-specific input parameters.
 // `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
 function getLensAttributes(
-  defaultIndex: string,
+  defaultIndexPattern: IndexPattern,
   color: string
 ): TypedLensByValueInput['attributes'] {
   return {
     visualizationType: 'lnsXY',
-    title: '',
+    title: 'Prefilled from example app',
     references: [
       {
-        id: defaultIndex,
+        id: defaultIndexPattern.id!,
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: defaultIndex,
+        id: defaultIndexPattern.id!,
         name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
@@ -64,7 +65,7 @@ function getLensAttributes(
                   operationType: 'date_histogram',
                   params: { interval: 'auto' },
                   scale: 'interval',
-                  sourceField: '@timestamp',
+                  sourceField: defaultIndexPattern.timeFieldName!,
                 },
               },
             },
@@ -95,7 +96,11 @@ function getLensAttributes(
   };
 }
 
-export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
+export const App = (props: {
+  core: CoreStart;
+  plugins: StartDependencies;
+  defaultIndexPattern: IndexPattern | null;
+}) => {
   const [color, setColor] = useState('green');
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   return (
@@ -119,51 +124,54 @@ export const App = (props: { core: CoreStart; plugins: StartDependencies }) => {
               the series which causes Lens to re-render. The Edit button will take the current
               configuration and navigate to a prefilled editor.
             </p>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={() => {
-                    // eslint-disable-next-line no-bitwise
-                    const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
-                    setColor(newColor);
+            {props.defaultIndexPattern && props.defaultIndexPattern.isTimeBased() ? (
+              <>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={() => {
+                        // eslint-disable-next-line no-bitwise
+                        const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
+                        setColor(newColor);
+                      }}
+                    >
+                      Change color
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      isDisabled={!props.plugins.lens.canUseEditor()}
+                      onClick={() => {
+                        props.plugins.lens.navigateToPrefilledEditor({
+                          id: '',
+                          timeRange: {
+                            from: 'now-5d',
+                            to: 'now',
+                          },
+                          attributes: getLensAttributes(props.defaultIndexPattern!, color),
+                        });
+                        // eslint-disable-next-line no-bitwise
+                        const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
+                        setColor(newColor);
+                      }}
+                    >
+                      Edit
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <LensComponent
+                  id=""
+                  style={{ height: 500 }}
+                  timeRange={{
+                    from: 'now-5d',
+                    to: 'now',
                   }}
-                >
-                  Change color
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  isDisabled={!props.plugins.lens.canUseEditor()}
-                  onClick={() => {
-                    props.plugins.lens.navigateToPrefilledEditor({
-                      id: '',
-                      timeRange: {
-                        from: 'now-5d',
-                        to: 'now',
-                      },
-                      attributes: getLensAttributes(
-                        props.core.uiSettings.get('defaultIndex'),
-                        color
-                      ),
-                    });
-                    // eslint-disable-next-line no-bitwise
-                    const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
-                    setColor(newColor);
-                  }}
-                >
-                  Edit
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <LensComponent
-              id=""
-              style={{ height: 500 }}
-              timeRange={{
-                from: 'now-5d',
-                to: 'now',
-              }}
-              attributes={getLensAttributes(props.core.uiSettings.get('defaultIndex'), color)}
-            />
+                  attributes={getLensAttributes(props.defaultIndexPattern, color)}
+                />
+              </>
+            ) : (
+              <p>This demo only works if your default index pattern is set and time based</p>
+            )}
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>

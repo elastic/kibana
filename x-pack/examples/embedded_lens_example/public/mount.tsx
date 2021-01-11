@@ -19,7 +19,10 @@ export const mount = (coreSetup: CoreSetup<StartDependencies>) => async ({
     core,
     plugins,
   };
-  const reactElement = <App {...deps} />;
+
+  const defaultIndexPattern = await plugins.data.indexPatterns.getDefault();
+
+  const reactElement = <App {...deps} defaultIndexPattern={defaultIndexPattern} />;
   render(reactElement, element);
   return () => unmountComponentAtNode(element);
 };
