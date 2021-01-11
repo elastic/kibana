@@ -66,7 +66,9 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
         x: index,
         y0: 0,
         y: 0,
-        config: null,
+        config: {
+          showTooltip: false,
+        },
       });
       return acc;
     }
@@ -88,6 +90,7 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
           y,
           config: {
             colour,
+            showTooltip: true,
             tooltipProps: {
               value: `${FriendlyTimingLabels[timing]}: ${formatValueForDisplay(
                 y - currentOffset
@@ -101,7 +104,8 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
     });
 
     /* if no specific timing values are found, use the total time
-     * if total titme is not available use 0 */
+     * if total time is not available use 0, set showTooltip to false,
+     * and omit tooltip props */
     if (!acc.find((entry) => entry.x === index)) {
       const total = item.timings.total;
       const hasTotal = total !== -1;
@@ -109,15 +113,16 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
         x: index,
         y0: hasTotal ? currentOffset : 0,
         y: hasTotal ? currentOffset + item.timings.total : 0,
-        config: hasTotal
-          ? {
-              colour: mimeTypeColour,
-              tooltipProps: {
+        config: {
+          colour: hasTotal ? mimeTypeColour : '',
+          showTooltip: hasTotal,
+          tooltipProps: hasTotal
+            ? {
                 value: `${FriendlyTimingLabels.total}: ${formatValueForDisplay(total)}ms`,
                 colour: mimeTypeColour,
-              },
-            }
-          : null,
+              }
+            : undefined,
+        },
       });
     }
     return acc;

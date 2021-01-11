@@ -148,6 +148,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b9a888",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b9a888",
                 "value": "Queued / Blocked: 0.854ms",
@@ -160,6 +161,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#54b399",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#54b399",
                 "value": "DNS: 3.560ms",
@@ -172,6 +174,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#da8b45",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#da8b45",
                 "value": "Connecting: 25.721ms",
@@ -184,6 +187,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#edc5a2",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#edc5a2",
                 "value": "TLS: 55.387ms",
@@ -196,6 +200,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#d36086",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#d36086",
                 "value": "Sending request: 0.360ms",
@@ -208,6 +213,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b0c9e0",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b0c9e0",
                 "value": "Waiting (TTFB): 34.578ms",
@@ -220,6 +226,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#ca8eae",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#ca8eae",
                 "value": "Content downloading: 0.552ms",
@@ -232,6 +239,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b9a888",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b9a888",
                 "value": "Queued / Blocked: 84.546ms",
@@ -244,6 +252,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#d36086",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#d36086",
                 "value": "Sending request: 0.239ms",
@@ -256,6 +265,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b0c9e0",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b0c9e0",
                 "value": "Waiting (TTFB): 52.561ms",
@@ -268,6 +278,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#9170b8",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#9170b8",
                 "value": "Content downloading: 3.068ms",
@@ -294,6 +305,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b9a888",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b9a888",
                 "value": "Queued / Blocked: 0.854ms",
@@ -306,6 +318,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#54b399",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#54b399",
                 "value": "DNS: 3.560ms",
@@ -318,6 +331,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#da8b45",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#da8b45",
                 "value": "Connecting: 25.721ms",
@@ -330,6 +344,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#edc5a2",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#edc5a2",
                 "value": "TLS: 55.387ms",
@@ -342,6 +357,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#d36086",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#d36086",
                 "value": "Sending request: 0.360ms",
@@ -354,6 +370,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#b0c9e0",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#b0c9e0",
                 "value": "Waiting (TTFB): 34.578ms",
@@ -366,6 +383,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#ca8eae",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#ca8eae",
                 "value": "Content downloading: 0.552ms",
@@ -378,6 +396,7 @@ describe('getSeriesAndDomain', () => {
           Object {
             "config": Object {
               "colour": "#9170b8",
+              "showTooltip": true,
               "tooltipProps": Object {
                 "colour": "#9170b8",
                 "value": "Content downloading: 2.793ms",
@@ -402,7 +421,11 @@ describe('getSeriesAndDomain', () => {
         },
         "series": Array [
           Object {
-            "config": null,
+            "config": Object {
+              "colour": "",
+              "showTooltip": false,
+              "tooltipProps": undefined,
+            },
             "x": 0,
             "y": 0,
             "y0": 0,
@@ -422,7 +445,9 @@ describe('getSeriesAndDomain', () => {
         },
         "series": Array [
           Object {
-            "config": null,
+            "config": Object {
+              "showTooltip": false,
+            },
             "x": 0,
             "y": 0,
             "y0": 0,
