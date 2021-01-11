@@ -167,6 +167,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: windows.advanced,
         events: windows.events,
         malware: windows.malware,
+        ransomware: windows.ransomware,
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
       },
@@ -174,6 +175,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
+        ransomware: mac.ransomware,
         popup: mac.popup,
       },
       linux: {

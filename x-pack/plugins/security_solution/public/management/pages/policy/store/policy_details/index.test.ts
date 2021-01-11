@@ -282,8 +282,13 @@ describe('policy details: ', () => {
                       security: true,
                     },
                     malware: { mode: 'prevent' },
+                    ransomware: { mode: 'prevent' },
                     popup: {
                       malware: {
+                        enabled: true,
+                        message: '',
+                      },
+                      ransomware: {
                         enabled: true,
                         message: '',
                       },
@@ -296,8 +301,13 @@ describe('policy details: ', () => {
                   mac: {
                     events: { process: true, file: true, network: true },
                     malware: { mode: 'prevent' },
+                    ransomware: { mode: 'prevent' },
                     popup: {
                       malware: {
+                        enabled: true,
+                        message: '',
+                      },
+                      ransomware: {
                         enabled: true,
                         message: '',
                       },

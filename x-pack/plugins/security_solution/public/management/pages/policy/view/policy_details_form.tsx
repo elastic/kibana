@@ -11,6 +11,7 @@ import { MalwareProtections } from './policy_forms/protections/malware';
 import { LinuxEvents, MacEvents, WindowsEvents } from './policy_forms/events';
 import { AdvancedPolicyForms } from './policy_advanced';
 import { AntivirusRegistrationForm } from './components/antivirus_registration_form';
+import { Ransomware } from './policy_forms/protections/ransomware';
 
 export const PolicyDetailsForm = memo(() => {
   const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
@@ -31,6 +32,8 @@ export const PolicyDetailsForm = memo(() => {
 
       <EuiSpacer size="xs" />
       <MalwareProtections />
+      <EuiSpacer size="xs" />
+      <Ransomware />
       <EuiSpacer size="l" />
 
       <EuiText size="xs" color="subdued">

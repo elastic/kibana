@@ -24,8 +24,15 @@ export const factory = (): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
       },
+      ransomware: {
+        mode: ProtectionModes.prevent,
+      },
       popup: {
         malware: {
+          message: '',
+          enabled: true,
+        },
+        ransomware: {
           message: '',
           enabled: true,
         },
@@ -46,8 +53,15 @@ export const factory = (): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
       },
+      ransomware: {
+        mode: ProtectionModes.prevent,
+      },
       popup: {
         malware: {
+          message: '',
+          enabled: true,
+        },
+        ransomware: {
           message: '',
           enabled: true,
         },

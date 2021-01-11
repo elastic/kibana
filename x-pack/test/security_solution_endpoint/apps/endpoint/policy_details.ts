@@ -255,10 +255,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
+                    enabled: true,
+                    message: '',
                   },
                 },
               },
@@ -274,10 +279,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
+                    enabled: true,
+                    message: '',
                   },
                 },
                 antivirus_registration: {
@@ -399,10 +409,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
+                    enabled: true,
+                    message: '',
                   },
                 },
               },
@@ -418,10 +433,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
+                    enabled: true,
+                    message: '',
                   },
                 },
                 antivirus_registration: {
@@ -536,10 +556,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 events: { file: true, network: true, process: true },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
+                    enabled: true,
+                    message: '',
                   },
                 },
               },
@@ -555,10 +580,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
                 },
                 logging: { file: 'info' },
                 malware: { mode: 'prevent' },
+                ransomware: { mode: 'prevent' },
                 popup: {
                   malware: {
                     enabled: true,
                     message: 'Elastic Security {action} {filename}',
+                  },
+                  ransomware: {
+                    enabled: true,
+                    message: '',
                   },
                 },
                 antivirus_registration: {
