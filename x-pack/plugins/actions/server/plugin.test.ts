@@ -50,25 +50,24 @@ describe('Actions Plugin', () => {
       };
     });
 
-    it('should log warning when Encrypted Saved Objects plugin is using an ephemeral encryption key', async () => {
+    it('should log warning when Encrypted Saved Objects plugin is not available', async () => {
       // coreMock.createSetup doesn't support Plugin generics
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await plugin.setup(coreSetup as any, pluginsSetup);
-      expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
+      expect(pluginsSetup.encryptedSavedObjects).toBeUndefined();
       expect(context.logger.get().warn).toHaveBeenCalledWith(
-        'APIs are disabled because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
+        'APIs are disabled because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
     });
 
     describe('routeHandlerContext.getActionsClient()', () => {
-      it('should not throw error when ESO plugin not using a generated key', async () => {
+      it('should not throw error when ESO plugin is available', async () => {
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await plugin.setup(coreSetup as any, {
           ...pluginsSetup,
           encryptedSavedObjects: {
-            ...pluginsSetup.encryptedSavedObjects,
-            usingEphemeralEncryptionKey: false,
+            ...pluginsSetup.encryptedSavedObjects!,
           },
         });
 
@@ -227,14 +226,13 @@ describe('Actions Plugin', () => {
         expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
       });
 
-      it('should not throw error when ESO plugin not using a generated key', async () => {
+      it('should not throw error when ESO plugin is available', async () => {
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await plugin.setup(coreSetup as any, {
           ...pluginsSetup,
           encryptedSavedObjects: {
-            ...pluginsSetup.encryptedSavedObjects,
-            usingEphemeralEncryptionKey: false,
+            ...pluginsSetup.encryptedSavedObjects!,
           },
         });
         const pluginStart = await plugin.start(coreStart, pluginsStart);
@@ -242,17 +240,17 @@ describe('Actions Plugin', () => {
         await pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest());
       });
 
-      it('should throw error when ESO plugin using generated key', async () => {
+      it('should throw error when ESO plugin is not available', async () => {
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await plugin.setup(coreSetup as any, pluginsSetup);
-        const pluginStart = await plugin.start(coreStart, pluginsStart);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
 
-        expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
+        expect(pluginsSetup.encryptedSavedObjects).toBeUndefined();
         await expect(
           pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest())
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+          `"Unable to create actions client because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
       });
     });
