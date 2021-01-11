@@ -5,9 +5,10 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useUpdateCase, UseUpdateCase, UpdateKey } from './use_update_case';
+import { useUpdateCase, UseUpdateCase } from './use_update_case';
 import { basicCase } from './mock';
 import * as api from './api';
+import { UpdateKey } from './types';
 
 jest.mock('./api');
 
@@ -24,7 +25,7 @@ describe('useUpdateCase', () => {
     updateKey,
     updateValue: 'updated description',
     updateCase,
-    version: basicCase.version,
+    caseData: basicCase,
     onSuccess,
     onError,
   };

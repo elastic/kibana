@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import Boom, { Payload } from '@hapi/boom';
 import { SavedObjectsImportError } from 'src/core/server';
 
@@ -13,7 +14,6 @@ export const createEmptyFailureResponse = (errors?: Array<SavedObjectsImportErro
     }
     return error as SavedObjectsImportError;
   });
-
   return {
     success: false,
     successCount: 0,
