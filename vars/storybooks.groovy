@@ -66,7 +66,7 @@ def build() {
 
 def buildAndUpload() {
   def sha = buildState.get('checkoutInfo').commit
-  def context = 'ci/storybooks'
+  def context = 'Build and Publish Storybooks'
 
   githubCommitStatus.create(sha, 'pending', 'Building Storybooks', context)
 
