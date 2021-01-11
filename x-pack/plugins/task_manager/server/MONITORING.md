@@ -178,28 +178,28 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
                     "last_successful_poll": "2020-10-05T17:57:55.411Z",
                     /* Running average of polling duration measuring the time from the scheduled polling cycle
                         start until all claimed tasks are marked as running */
-					"duration": {
-						"p50": 4,
-						"p90": 12,
-						"p95": 12,
-						"p99": 12
-					},
+                    "duration": {
+                        "p50": 4,
+                        "p90": 12,
+                        "p95": 12,
+                        "p99": 12
+                    },
                     /* Running average of number of version clashes caused by the markAvailableTasksAsClaimed stage
                         of the polling cycle */
-					"claim_conflicts": {
-						"p50": 0,
-						"p90": 0,
-						"p95": 0,
-						"p99": 0
-					},
+                    "claim_conflicts": {
+                        "p50": 0,
+                        "p90": 0,
+                        "p95": 0,
+                        "p99": 0
+                    },
                     /* Running average of mismatch between the number of tasks updated by the markAvailableTasksAsClaimed stage
                         of the polling cycle and the number of docs found by the sweepForClaimedTasks stage */
-					"claim_mismatches": {
-						"p50": 0,
-						"p90": 0,
-						"p95": 0,
-						"p99": 0
-					},
+                    "claim_mismatches": {
+                        "p50": 0,
+                        "p90": 0,
+                        "p95": 0,
+                        "p99": 0
+                    },
                     /* What is the frequency of polling cycle result?
                         Here we see 94% of "NoTasksClaimed" and 6%  "PoolFilled" */
                     "result_frequency_percent_as_number": {
