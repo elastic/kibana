@@ -35,6 +35,7 @@ export type DataEnhancedStart = ReturnType<DataEnhancedPlugin['start']>;
 export class DataEnhancedPlugin
   implements Plugin<void, void, DataEnhancedSetupDependencies, DataEnhancedStartDependencies> {
   private enhancedSearchInterceptor!: EnhancedSearchInterceptor;
+  private config!: ConfigSchema;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -63,9 +64,9 @@ export class DataEnhancedPlugin
       },
     });
 
-    const { search: searchConfig } = this.initializerContext.config.get();
-    if (searchConfig.sendToBackground.enabled) {
-      const { sessionsManagement: sessionsMgmtConfig } = searchConfig.sendToBackground;
+    this.config = this.initializerContext.config.get<ConfigSchema>();
+    if (this.config.search.sendToBackground.enabled) {
+      const { sessionsManagement: sessionsMgmtConfig } = this.config.search.sendToBackground;
       registerSearchSessionsMgmt(core, sessionsMgmtConfig, { management });
     }
   }
@@ -73,7 +74,7 @@ export class DataEnhancedPlugin
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
     setAutocompleteService(plugins.data.autocomplete);
 
-    if (this.initializerContext.config.get().search.sendToBackground.enabled) {
+    if (this.config.search.sendToBackground.enabled) {
       core.chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
           React.createElement(
