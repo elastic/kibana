@@ -77,7 +77,6 @@ export const updateAlertStatusAction = async ({
     setEventsLoading({ eventIds: alertIds, isLoading: true });
 
     const queryObject = query ? { query: JSON.parse(query) } : getUpdateAlertsQuery(alertIds);
-
     const response = await updateAlertStatus({ query: queryObject, status: selectedStatus });
     // TODO: Only delete those that were successfully updated from updatedRules
     setEventsDeleted({ eventIds: alertIds, isDeleted: true });
