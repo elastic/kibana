@@ -1,7 +1,26 @@
 [[add-aggregation-based-visualization-panels]]
 == Create aggregation-based visualization panels
 
-Aggregation-based visualization panels allow you to visualize aggregated data from a <<save-open-search,saved search>> or <<index-patterns, index pattern>>. 
+Aggregation-based visualizations are the core {kib} panels, and are not optimized
+for a specific use case. If you are new to {kib}, <<create-panels-with-lens,Lens>> is recommended as a
+simpler way to get started.
+
+The main features that these panel types have compared to other {kib} panel types are:
+
+* Support for heat map, tag cloud, gauge, and goal chart types
+* Support for split charts at up to 3 levels of aggregation, more than *Lens* and *TSVB*
+* Time series data is not required
+* Ability to use a <<save-open-search,saved search>> as an input
+* Data table can be sorted, also supports summary row and percentage column features
+* Can assign specific colors to series
+* Ability for plugin authors to extend the features
+
+These panel types also have some limitations:
+
+* Not as simple as *Lens*
+* Limited styling options
+* No support for math
+* No support for multiple indices
 
 [float]
 [[types-of-visualization-panels]]
@@ -21,7 +40,7 @@ Use area charts to compare two or more categories over time, and display the mag
 
 a| *Data table*
 
-Displays your raw data or aggregation results in a tabular format. Use data tables to display server configuration details, track counts, min,
+Displays your aggregation results in a tabular format. Use data tables to display server configuration details, track counts, min,
 or max values for a specific field, and monitor the status of key services.
 
 | image:images/data_table.png[Data table]
@@ -99,7 +118,7 @@ Choose the type of panel you want to create, then use the editor to configure th
 
 . From the editor, add the <<aggregation-reference,aggregations>> you want to visualize, then click *Update*. 
 +
-NOTE: To use *auto* from the *Minimal interval* dropdown, the *Date Histogram* aggregation must be the primary field. 
+NOTE: For the *Date Histogram* to use an *auto interval*, the date field must match the primary time field of the index pattern.
 
 . To change the order, drag the aggregations along the editor. 
 + 

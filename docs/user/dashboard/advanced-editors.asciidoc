@@ -20,19 +20,18 @@ image::images/tsvb.png[TSVB UI]
 
 [float]
 [[vega-advanced-editor]]
-=== Vega
+=== Custom visualizations
 
-*Vega* and *Vega-Lite* provide the grammar language, using a JSON-based syntax, for building custom panels.
+*Vega* and *Vega-Lite* are visualization grammars that are integrated into {kib} for custom visualizations.
 
-* *Vega* &mdash; A powerful and feature-rich grammar language.
+* *Vega-Lite* &mdash; A high-level grammar for rapid analysis
 
-* *Vega-Lite* &mdash; A simplified and easier to use grammar language.
+* *Vega* &mdash; A declarative language with support for interactivity
 
 *Vega* and *Vega-Lite* panels can display one or more data sources, including {es}, Elastic Map Service,
-URL, or static data, and support <<reference-for-kibana-extensions,{kib} extensions>> that allow you to embed the panels on your dashboard and add interactive tools. With *Vega* and *Vega-Lite*, the types of 
-panels you can create are endless.
+URL, or static data, and support <<reference-for-kibana-extensions,{kib} extensions>> that allow you to embed the panels on your dashboard and add interactive tools.
 
-Use *Vega* and *Vega-Lite* when you want to create visualizations with:
+Use *Vega* or *Vega-Lite* when you want to create visualizations with:
 
 * Aggregations that use `nested` or `parent/child` mapping
 * Aggregations without an index pattern
@@ -42,6 +41,8 @@ Use *Vega* and *Vega-Lite* when you want to create visualizations with:
 * Scatter charts, sankey charts, and custom maps
 * An unsupported visual theme
 
+These grammars have some limitations: they do not support tables, and can't run queries conditionally.
+
 image::images/vega.png[Vega UI]
 
 For detailed *Vega* and *Vega-Lite* information and examples, refer to <<resources-and-examples,Resources and examples>>. 
@@ -50,18 +51,15 @@ For detailed *Vega* and *Vega-Lite* information and examples, refer to <<resourc
 [[timelion-advanced-editor]]
 === Timelion
 
-*Timelion* is a time series data visualizer that enables you to combine independent data sources within a single visualization.
-On *Timelion* visualizations, your data is displayed along a scale that changes color according to where your data falls on the specified scale. 
-Use the gauge to show how metric values relate to reference threshold values, or determine how a specified field is performing versus how it is expected to perform.
-
 *Timelion* is driven by a simple expression language that you use to:
 
-* Retrieve time series data
-* Perform calculations to find the answers to complex questions
+* Retrieve time series data from one or more indices
+* Perform math across time series
 * Visualize the results
 
-image:images/gauge.png[Gauge]
+image:dashboard/images/timelion.png[Timelion]
 
 include::tsvb.asciidoc[]
 include::vega.asciidoc[]
+include::vega-reference.asciidoc[]
 include::timelion.asciidoc[]
