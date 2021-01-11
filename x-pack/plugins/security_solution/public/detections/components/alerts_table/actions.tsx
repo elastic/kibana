@@ -286,15 +286,6 @@ export const sendAlertToTimelineAction = async ({
           end: to,
         },
         eventType: 'all',
-        /*
-        filters: [
-          buildQueryFilter(
-            ecsData.signal?.rule?.filters,
-            ecsData._index ?? '',
-            (ecsData.signal?.rule?.filters as Filter).meta?.alias ?? ''
-          ),
-        ],
-        */
         kqlQuery: {
           filterQuery: {
             kuery: {
