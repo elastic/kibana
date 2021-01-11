@@ -20,7 +20,7 @@ export const ConfirmAlertClose: React.FC<Props> = ({ onConfirm, onCancel }) => {
         title={i18n.translate(
           'xpack.triggersActionsUI.sections.confirmAlertClose.confirmAlertCloseTitle',
           {
-            defaultMessage: 'Discard changes to alert?',
+            defaultMessage: 'Discard unsaved changes to alert?',
           }
         )}
         onCancel={onCancel}
@@ -43,7 +43,7 @@ export const ConfirmAlertClose: React.FC<Props> = ({ onConfirm, onCancel }) => {
         <p>
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.confirmAlertClose.confirmAlertCloseMessage"
-            defaultMessage="Once you discard your changes, there's no getting them back."
+            defaultMessage="You can't recover unsaved changes."
           />
         </p>
       </EuiConfirmModal>
