@@ -28,26 +28,45 @@ import {
   euiPaletteNegative,
   euiPalettePositive,
   euiPaletteWarm,
-  euiPaletteColorBlindBehindText,
   euiPaletteForStatus,
   euiPaletteForTemperature,
   euiPaletteComplimentary,
+  euiPaletteColorBlindBehindText,
 } from '@elastic/eui';
-import { ChartsPluginSetup } from '../../../../../../src/plugins/charts/public';
+import { flatten, zip } from 'lodash';
+import {
+  ChartsPluginSetup,
+  createColorPalette as createLegacyColorPalette,
+} from '../../../../../../src/plugins/charts/public';
 import { lightenColor } from './lighten_color';
 import { ChartColorConfiguration, PaletteDefinition, SeriesLayer } from './types';
 import { LegacyColorsService } from '../legacy_colors';
+import { MappedColors } from '../mapped_colors';
 
 function buildRoundRobinCategoricalWithMappedColors(): Omit<PaletteDefinition, 'title'> {
   const colors = euiPaletteColorBlind({ rotations: 2 });
   const behindTextColors = euiPaletteColorBlindBehindText({ rotations: 2 });
+  const behindTextColorMap: Record<string, string> = Object.fromEntries(
+    zip(colors, behindTextColors)
+  );
+  const mappedColors = new MappedColors(undefined, (num: number) => {
+    return flatten(new Array(Math.ceil(num / 10)).fill(colors)).map((color) => color.toLowerCase());
+  });
   function getColor(
     series: SeriesLayer[],
     chartConfiguration: ChartColorConfiguration = { behindText: false }
   ) {
-    const outputColor = chartConfiguration.behindText
-      ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
-      : colors[series[0].rankAtDepth % colors.length];
+    let outputColor: string;
+    if (chartConfiguration.syncColors) {
+      const colorKey = series[0].name;
+      mappedColors.mapKeys([colorKey]);
+      const mappedColor = mappedColors.get(colorKey);
+      outputColor = chartConfiguration.behindText ? behindTextColorMap[mappedColor] : mappedColor;
+    } else {
+      outputColor = chartConfiguration.behindText
+        ? behindTextColors[series[0].rankAtDepth % behindTextColors.length]
+        : colors[series[0].rankAtDepth % colors.length];
+    }
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;
@@ -115,9 +134,15 @@ function buildGradient(
 function buildSyncedKibanaPalette(
   colors: ChartsPluginSetup['legacyColors']
 ): Omit<PaletteDefinition, 'title'> {
+  const staticColors = createLegacyColorPalette(20);
   function getColor(series: SeriesLayer[], chartConfiguration: ChartColorConfiguration = {}) {
-    colors.mappedColors.mapKeys([series[0].name]);
-    const outputColor = colors.mappedColors.get(series[0].name);
+    let outputColor: string;
+    if (chartConfiguration.syncColors) {
+      colors.mappedColors.mapKeys([series[0].name]);
+      outputColor = colors.mappedColors.get(series[0].name);
+    } else {
+      outputColor = staticColors[series[0].rankAtDepth % staticColors.length];
+    }
 
     if (!chartConfiguration.maxDepth || chartConfiguration.maxDepth === 1) {
       return outputColor;

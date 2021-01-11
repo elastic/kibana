@@ -45,6 +45,7 @@ import { removeQueryParam } from '../services/kibana_utils';
 import { IndexPattern } from '../services/data';
 import { EmbeddableRenderer } from '../services/embeddable';
 import { DashboardContainerInput } from '.';
+import { leaveConfirmStrings } from '../dashboard_strings';
 
 export interface DashboardAppProps {
   history: History;
@@ -64,15 +65,19 @@ export function DashboardApp({
     core,
     onAppLeave,
     uiSettings,
-    indexPatterns: indexPatternService,
+    embeddable,
     dashboardCapabilities,
+    indexPatterns: indexPatternService,
   } = useKibana<DashboardAppServices>().services;
 
   const [lastReloadTime, setLastReloadTime] = useState(0);
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[]>([]);
 
   const savedDashboard = useSavedDashboard(savedDashboardId, history);
-  const dashboardStateManager = useDashboardStateManager(savedDashboard, history);
+  const { dashboardStateManager, viewMode, setViewMode } = useDashboardStateManager(
+    savedDashboard,
+    history
+  );
   const dashboardContainer = useDashboardContainer(dashboardStateManager, history, false);
 
   const refreshDashboardContainer = useCallback(
@@ -111,6 +116,10 @@ export function DashboardApp({
           removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
         }
 
+        if (changes.viewMode) {
+          setViewMode(changes.viewMode);
+        }
+
         dashboardContainer.updateInput({
           ...changes,
           // do not start a new session if this is irrelevant state change to prevent excessive searches
@@ -121,6 +130,7 @@ export function DashboardApp({
     [
       history,
       data.query,
+      setViewMode,
       embedSettings,
       dashboardContainer,
       data.search.session,
@@ -196,9 +206,14 @@ export function DashboardApp({
       return;
     }
     onAppLeave((actions) => {
-      if (dashboardStateManager?.getIsDirty()) {
-        // TODO: Finish App leave handler with overrides when redirecting to an editor.
-        // return actions.confirm(leaveConfirmStrings.leaveSubtitle, leaveConfirmStrings.leaveTitle);
+      if (
+        dashboardStateManager?.getIsDirty() &&
+        !embeddable.getStateTransfer().isTransferInProgress
+      ) {
+        return actions.confirm(
+          leaveConfirmStrings.getLeaveSubtitle(),
+          leaveConfirmStrings.getLeaveTitle()
+        );
       }
       return actions.default();
     });
@@ -206,7 +221,7 @@ export function DashboardApp({
       // reset on app leave handler so leaving from the listing page doesn't trigger a confirmation
       onAppLeave((actions) => actions.default());
     };
-  }, [dashboardStateManager, dashboardContainer, onAppLeave]);
+  }, [dashboardStateManager, dashboardContainer, onAppLeave, embeddable]);
 
   // Refresh the dashboard container when lastReloadTime changes
   useEffect(() => {
@@ -215,7 +230,7 @@ export function DashboardApp({
 
   return (
     <div className="app-container dshAppContainer">
-      {savedDashboard && dashboardStateManager && dashboardContainer && (
+      {savedDashboard && dashboardStateManager && dashboardContainer && viewMode && (
         <>
           <DashboardTopNav
             {...{
@@ -226,6 +241,7 @@ export function DashboardApp({
               dashboardContainer,
               dashboardStateManager,
             }}
+            viewMode={viewMode}
             lastDashboardId={savedDashboardId}
             timefilter={data.query.timefilter.timefilter}
             onQuerySubmit={(_payload, isUpdate) => {

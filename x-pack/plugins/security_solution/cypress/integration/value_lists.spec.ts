@@ -26,17 +26,10 @@ import {
   exportValueList,
 } from '../tasks/lists';
 import { VALUE_LISTS_TABLE, VALUE_LISTS_ROW, VALUE_LISTS_MODAL_ACTIVATOR } from '../screens/lists';
-import { removeSignalsIndex } from '../tasks/api_calls/rules';
-import { cleanKibana } from '../tasks/common';
 
 describe('value lists', () => {
   describe('management modal', () => {
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
-      removeSignalsIndex();
       loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
       waitForAlertsPanelToBeLoaded();
       waitForAlertsIndexToBeCreated();
@@ -46,7 +39,6 @@ describe('value lists', () => {
     });
 
     afterEach(() => {
-      removeSignalsIndex();
       deleteAllValueListsFromUI();
     });
 

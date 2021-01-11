@@ -122,7 +122,7 @@ export async function handleInstallPackageFailure({
   callCluster,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  error: IngestManagerError | Boom | Error;
+  error: IngestManagerError | Boom.Boom | Error;
   pkgName: string;
   pkgVersion: string;
   installedPkg: SavedObject<Installation> | undefined;
@@ -379,6 +379,7 @@ export async function createInstallation(options: {
     {
       installed_kibana: [],
       installed_es: [],
+      package_assets: [],
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,

@@ -28,6 +28,7 @@ import { EventDetails } from '../event_details';
 import { ToggleExpandedEvent } from '../../../store/timeline/actions';
 import { State } from '../../../../common/store';
 import { calculateTotalPages } from '../helpers';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 
 const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
   overflow-y: hidden;
@@ -167,15 +168,18 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   });
 
   const handleOnEventClosed = useCallback(() => {
-    onEventClosed({ timelineId });
+    onEventClosed({ tabType: TimelineTabs.pinned, timelineId });
   }, [timelineId, onEventClosed]);
 
   return (
     <>
-      <FullWidthFlexGroup>
+      <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
         <ScrollableFlexItem grow={2}>
           <EventDetailsWidthProvider>
-            <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+            <StyledEuiFlyoutBody
+              data-test-subj={`${TimelineTabs.pinned}-tab-flyout-body`}
+              className="timeline-flyout-body"
+            >
               <StatefulBody
                 activePage={pageInfo.activePage}
                 browserFields={browserFields}
@@ -183,6 +187,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
                 id={timelineId}
                 refetch={refetch}
                 sort={sort}
+                tabType={TimelineTabs.pinned}
                 totalPages={calculateTotalPages({
                   itemsCount: totalCount,
                   itemsPerPage,
@@ -190,7 +195,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
               />
             </StyledEuiFlyoutBody>
             <StyledEuiFlyoutFooter
-              data-test-subj="eui-flyout-footer"
+              data-test-subj={`${TimelineTabs.pinned}-tab-flyout-footer`}
               className="timeline-flyout-footer"
             >
               <Footer
@@ -217,6 +222,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
               <EventDetails
                 browserFields={browserFields}
                 docValueFields={docValueFields}
+                tabType={TimelineTabs.pinned}
                 timelineId={timelineId}
                 handleOnEventClosed={handleOnEventClosed}
               />
@@ -247,7 +253,7 @@ const makeMapStateToProps = () => {
       itemsPerPage,
       itemsPerPageOptions,
       pinnedEventIds,
-      showEventDetails: !!expandedEvent.eventId,
+      showEventDetails: !!expandedEvent[TimelineTabs.pinned]?.eventId,
       sort,
     };
   };
