@@ -8,7 +8,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 
 import { isAgentUpgradeable } from '../../../common';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
-import { AgentSOAttributes, Agent, AgentEventSOAttributes, ListWithKuery } from '../../types';
+import { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { escapeSearchQueryPhrase, normalizeKuery, findAllSOs } from '../saved_object';
 import { savedObjectToAgent } from './saved_objects';
 import { appContextService } from '../../services';
