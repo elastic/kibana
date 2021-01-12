@@ -163,7 +163,6 @@ export async function getRegistryPackage(
   }
 
   const packageInfo = await getInfo(name, version);
-
   return { paths, packageInfo };
 }
 
