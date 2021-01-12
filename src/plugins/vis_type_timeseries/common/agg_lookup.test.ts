@@ -17,10 +17,16 @@
  * under the License.
  */
 
-export const FIELD_TYPES = {
-  BOOLEAN: 'boolean',
-  DATE: 'date',
-  GEO: 'geo_point',
-  NUMBER: 'number',
-  STRING: 'string',
-};
+import { isBasicAgg } from './agg_lookup';
+import { MetricsItemsSchema } from './types';
+
+describe('aggLookup', () => {
+  describe('isBasicAgg(metric)', () => {
+    test('returns true for a basic metric (count)', () => {
+      expect(isBasicAgg({ type: 'count' } as MetricsItemsSchema)).toEqual(true);
+    });
+    test('returns false for a pipeline metric (derivative)', () => {
+      expect(isBasicAgg({ type: 'derivative' } as MetricsItemsSchema)).toEqual(false);
+    });
+  });
+});

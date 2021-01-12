@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-export const MODEL_TYPES = {
-  UNWEIGHTED: 'simple',
-  WEIGHTED_EXPONENTIAL: 'ewma',
-  WEIGHTED_EXPONENTIAL_DOUBLE: 'holt',
-  WEIGHTED_EXPONENTIAL_TRIPLE: 'holt_winters',
-  WEIGHTED_LINEAR: 'linear',
-};
+export type HandleChange = (partialModel: Record<string, any>) => void;
+
+export const createSelectHandler = (handleChange: HandleChange) => (name: string) => (
+  selected: EuiComboBoxOptionOption[] = []
+) =>
+  handleChange?.({
+    [name]: selected[0]?.value ?? null,
+  });

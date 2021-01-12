@@ -22,8 +22,8 @@ import _ from 'lodash';
 import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { calculateLabel } from '../../../../../common/calculate_label';
 
-export function seriesAgg(resp, panel, series) {
-  return (next) => (results) => {
+export function seriesAgg(resp, panel, series, meta, extractFields) {
+  return (next) => async (results) => {
     if (series.metrics.some((m) => m.type === 'series_agg')) {
       const decoration = getDefaultDecoration(series);
 
@@ -43,9 +43,14 @@ export function seriesAgg(resp, panel, series) {
           const fn = SeriesAgg[m.function];
           return (fn && fn(acc)) || acc;
         }, targetSeries);
+
+      const fieldsForMetaIndex = meta.index ? await extractFields(meta.index) : [];
+
       results.push({
         id: `${series.id}`,
-        label: series.label || calculateLabel(_.last(series.metrics), series.metrics),
+        label:
+          series.label ||
+          calculateLabel(_.last(series.metrics), series.metrics, fieldsForMetaIndex),
         color: series.color,
         data: _.first(data),
         ...decoration,
