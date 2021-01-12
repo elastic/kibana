@@ -135,7 +135,7 @@ export class SearchInterceptor {
         request,
         options: {
           ...requestOptions,
-          ...this.deps.session.getSearchOptions(options?.sessionId),
+          ...(options?.sessionId && this.deps.session.getSearchOptions(options.sessionId)),
         },
       },
       abortSignal

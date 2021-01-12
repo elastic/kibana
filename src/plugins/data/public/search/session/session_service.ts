@@ -258,8 +258,8 @@ export class SessionService {
    * @param sessionId
    */
   public getSearchOptions(
-    sessionId?: string
-  ): Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'> {
+    sessionId: string
+  ): Required<Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'>> {
     const isCurrentSession = this.isCurrentSession(sessionId);
     return {
       sessionId,

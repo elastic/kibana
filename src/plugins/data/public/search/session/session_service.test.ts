@@ -105,11 +105,7 @@ describe('Session service', () => {
   test('getSearchOptions infers isRestore & isStored from state', async () => {
     const sessionId = sessionService.start();
     const someOtherId = 'some-other-id';
-    expect(sessionService.getSearchOptions()).toEqual({
-      isStored: false,
-      isRestore: false,
-      sessionId: undefined,
-    });
+
     expect(sessionService.getSearchOptions(someOtherId)).toEqual({
       isStored: false,
       isRestore: false,
@@ -131,11 +127,6 @@ describe('Session service', () => {
     });
     await sessionService.save();
 
-    expect(sessionService.getSearchOptions()).toEqual({
-      isStored: false,
-      isRestore: false,
-      sessionId: undefined,
-    });
     expect(sessionService.getSearchOptions(someOtherId)).toEqual({
       isStored: false,
       isRestore: false,
@@ -149,11 +140,6 @@ describe('Session service', () => {
 
     await sessionService.restore(sessionId);
 
-    expect(sessionService.getSearchOptions()).toEqual({
-      isStored: false,
-      isRestore: false,
-      sessionId: undefined,
-    });
     expect(sessionService.getSearchOptions(someOtherId)).toEqual({
       isStored: false,
       isRestore: false,

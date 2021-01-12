@@ -115,7 +115,7 @@ describe('SearchInterceptor', () => {
       }: {
         isRestore?: boolean;
         isStored?: boolean;
-        sessionId?: string;
+        sessionId: string;
       }) => {
         const sessionServiceMock = searchMock.session as jest.Mocked<ISessionService>;
         sessionServiceMock.getSearchOptions.mockImplementation(() => ({

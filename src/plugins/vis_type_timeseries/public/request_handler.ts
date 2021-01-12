@@ -69,7 +69,9 @@ export const metricsRequestHandler = async ({
           filters: input?.filters,
           panels: [visParams],
           state: uiStateObj,
-          searchSession: dataSearch.session.getSearchOptions(searchSessionId),
+          ...(searchSessionId && {
+            searchSession: dataSearch.session.getSearchOptions(searchSessionId),
+          }),
         }),
       });
     } finally {

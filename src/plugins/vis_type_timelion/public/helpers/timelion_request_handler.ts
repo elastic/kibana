@@ -119,7 +119,9 @@ export function getTimelionRequestHandler({
             interval: visParams.interval,
             timezone,
           },
-          searchSession: dataSearch.session.getSearchOptions(searchSessionId),
+          ...(searchSessionId && {
+            searchSession: dataSearch.session.getSearchOptions(searchSessionId),
+          }),
         }),
       });
     } catch (e) {
