@@ -46,7 +46,7 @@ function getScaleDistance(value: number) {
   return Math.floor(distance) * pow10;
 }
 
-export class ScaleControl extends React.Component {
+export class ScaleControl extends Component<Props, State> {
   private _isMounted: boolean = false;
 
   state: State = { label: '', width: 0 };
