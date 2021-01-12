@@ -16,7 +16,7 @@ import {
   GetFleetStatusResponse,
   GetInfoResponse,
   GetPackagePoliciesResponse,
-  GetSummaryResponse,
+  GetStatsResponse,
   KibanaAssetType,
   packagePolicyRouteService,
 } from '../../../../../common';
@@ -485,7 +485,7 @@ export const agentPoliciesResponse = (): GetAgentPoliciesResponse => ({
   perPage: 100,
 });
 
-export const epmGetSummaryResponse = (): GetSummaryResponse => ({
+export const epmGetStatsResponse = (): GetStatsResponse => ({
   response: {
     agent_policy_count: 2,
   },
@@ -494,7 +494,7 @@ export const epmGetSummaryResponse = (): GetSummaryResponse => ({
 export type EpmPackageDetailsResponseProvidersMock = ResponseProvidersInterface<{
   epmGetInfo: () => GetInfoResponse;
   epmGetFile: () => string;
-  epmGetSummary: () => GetSummaryResponse;
+  epmGetSummary: () => GetStatsResponse;
   packagePolicyList: () => GetPackagePoliciesResponse;
   agentPolicyList: () => GetAgentPoliciesResponse;
 }>;
@@ -515,8 +515,8 @@ const epmDetailsApiOnlyMocks = httpHandlerMockFactory<EpmPackageDetailsResponseP
   {
     id: 'epmGetSummary',
     method: 'get',
-    path: epmRouteService.getSummaryPath('nginx'),
-    handler: epmGetSummaryResponse,
+    path: epmRouteService.getStatsPath('nginx'),
+    handler: epmGetStatsResponse,
   },
   {
     id: 'packagePolicyList',
