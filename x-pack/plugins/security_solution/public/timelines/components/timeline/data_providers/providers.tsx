@@ -251,6 +251,15 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
       openPopover,
     });
 
+    const keyDownHandler = useCallback(
+      (keyboardEvent: React.KeyboardEvent<Element>) => {
+        if (keyboardHandlerRef.current === document.activeElement) {
+          onKeyDown(keyboardEvent);
+        }
+      },
+      [onKeyDown]
+    );
+
     const DraggableContent = useCallback(
       (provided, snapshot) => (
         <div
@@ -330,7 +339,7 @@ export const DataProvidersGroupItem = React.memo<DataProvidersGroupItem>(
         data-test-subj="draggableWrapperKeyboardHandler"
         onClick={onFocus}
         onBlur={onBlur}
-        onKeyDown={onKeyDown}
+        onKeyDown={keyDownHandler}
         ref={keyboardHandlerRef}
         role="button"
         tabIndex={0}
