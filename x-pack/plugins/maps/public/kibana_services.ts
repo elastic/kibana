@@ -83,6 +83,21 @@ export const getShareService = () => pluginsStart.share;
 export const getIsAllowByValueEmbeddables = () =>
   pluginsStart.dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
 
-export async function getPaletteRegistry(): Promise<PaletteRegistry | null> {
-  return pluginsStart.charts ? await pluginsStart.charts.palettes.getPalettes() : null;
+export async function getChartsPaletteServiceGetColor(): Promise<
+  ((value: string) => string) | null
+> {
+  const paletteRegistry: PaletteRegistry = pluginsStart.charts
+    ? await pluginsStart.charts.palettes.getPalettes()
+    : null;
+  if (!paletteRegistry) {
+    return null;
+  }
+
+  const paletteDefinition = paletteRegistry.get('default');
+  const chartConfiguration = { syncColors: true };
+  return (value: string) => {
+    const series = [{ name: value, rankAtDepth: 0, totalSeriesAtDepth: 1 }];
+    const color = paletteDefinition.getColor(series, chartConfiguration);
+    return color ? color : '#3d3d3d';
+  };
 }

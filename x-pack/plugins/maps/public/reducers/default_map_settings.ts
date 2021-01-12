@@ -26,6 +26,5 @@ export function getDefaultMapSettings(): MapSettings {
     spatialFiltersAlpa: 0.3,
     spatialFiltersFillColor: '#DA8B45',
     spatialFiltersLineColor: '#DA8B45',
-    syncColors: false,
   };
 }

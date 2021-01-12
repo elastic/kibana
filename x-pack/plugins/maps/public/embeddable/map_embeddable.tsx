@@ -32,11 +32,11 @@ import {
   setRefreshConfig,
   disableScrollZoom,
   setReadOnly,
-  setMapSettings,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getInspectorAdapters,
+  setChartsPaletteServiceGetColor,
   setEventHandlers,
   EventHandlers,
 } from '../reducers/non_serializable_instances';
@@ -45,7 +45,6 @@ import {
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
-  getMapSettings,
 } from '../selectors/map_selectors';
 import {
   APP_ID,
@@ -55,7 +54,12 @@ import {
   RawValue,
 } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
-import { getUiActions, getCoreI18n, getHttp } from '../kibana_services';
+import {
+  getUiActions,
+  getCoreI18n,
+  getHttp,
+  getChartsPaletteServiceGetColor,
+} from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_page';
@@ -84,6 +88,7 @@ export class MapEmbeddable
   private _prevQuery?: Query;
   private _prevRefreshConfig?: RefreshInterval;
   private _prevFilters?: Filter[];
+  private _prevSyncColors?: boolean;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
@@ -120,6 +125,8 @@ export class MapEmbeddable
   }
 
   private async _initializeStore() {
+    this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
+
     const store = this._savedMap.getStore();
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
@@ -213,12 +220,8 @@ export class MapEmbeddable
       this._dispatchSetRefreshConfig(this.input.refreshConfig);
     }
 
-    if (this.input.syncColors !== getMapSettings(this._savedMap.getStore().getState()).syncColors) {
-      this._savedMap.getStore().dispatch(
-        setMapSettings({
-          syncColors: this.input.syncColors,
-        })
-      );
+    if (this.input.syncColors !== this._prevSyncColors) {
+      this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
   }
 
@@ -254,6 +257,19 @@ export class MapEmbeddable
         interval: refreshConfig.value,
       })
     );
+  }
+
+  async _dispatchSetChartsPaletteServiceGetColor(syncColors: boolean) {
+    this._prevSyncColors = syncColors;
+    const chartsPaletteServiceGetColor = syncColors
+      ? await getChartsPaletteServiceGetColor()
+      : null;
+    if (syncColors !== this._prevSyncColors) {
+      return;
+    }
+    this._savedMap
+      .getStore()
+      .dispatch(setChartsPaletteServiceGetColor(chartsPaletteServiceGetColor));
   }
 
   /**

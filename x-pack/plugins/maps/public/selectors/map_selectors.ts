@@ -17,7 +17,10 @@ import { VectorStyle } from '../classes/styles/vector/vector_style';
 import { HeatmapLayer } from '../classes/layers/heatmap_layer/heatmap_layer';
 import { BlendedVectorLayer } from '../classes/layers/blended_vector_layer/blended_vector_layer';
 import { getTimeFilter } from '../kibana_services';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+import {
+  getChartsPaletteServiceGetColor,
+  getInspectorAdapters,
+} from '../reducers/non_serializable_instances';
 import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/util';
 import { InnerJoin } from '../classes/joins/inner_join';
@@ -54,7 +57,8 @@ import { ILayer } from '../classes/layers/layer';
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
-  inspectorAdapters?: Adapters
+  inspectorAdapters?: Adapters,
+  chartsPaletteServiceGetColor?: (value: string) => string | null
 ): ILayer {
   const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
 
@@ -280,13 +284,10 @@ export const getSpatialFiltersLayer = createSelector(
 export const getLayerList = createSelector(
   getLayerListRaw,
   getInspectorAdapters,
-  getMapSettings,
-  (layerDescriptorList, inspectorAdapters, mapSettings) => {
-    console.log(mapSettings.syncColors);
-    // const getSyncColor = mapSettings.syncColors ?
-    // const getSyncColor =
+  getChartsPaletteServiceGetColor,
+  (layerDescriptorList, inspectorAdapters, chartsPaletteServiceGetColor) => {
     return layerDescriptorList.map((layerDescriptor) =>
-      createLayerInstance(layerDescriptor, inspectorAdapters)
+      createLayerInstance(layerDescriptor, inspectorAdapters, chartsPaletteServiceGetColor)
     );
   }
 );
