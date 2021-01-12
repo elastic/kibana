@@ -1,5 +1,6 @@
 package builds
 
+import builds.default.DefaultSavedObjectFieldMetrics
 import dependsOn
 import getProjectBranch
 import jetbrains.buildServer.configs.kotlin.v2019_2.BuildType
@@ -72,5 +73,8 @@ object PullRequestCi : BuildType({
     }
   }
 
-  dependsOn(FullCi)
+  dependsOn(
+    FullCi,
+    DefaultSavedObjectFieldMetrics
+  )
 })
