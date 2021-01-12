@@ -70,7 +70,7 @@ export const WaterfallChartWrapper: React.FC<Props> = ({ data }) => {
       sidebarItems={sidebarItems}
       legendItems={legendItems}
       renderTooltipItem={(tooltipProps) => {
-        return <EuiHealth color={String(tooltipProps.colour)}>{tooltipProps.value}</EuiHealth>;
+        return <EuiHealth color={String(tooltipProps?.colour)}>{tooltipProps?.value}</EuiHealth>;
       }}
     >
       <WaterfallChart
