@@ -94,54 +94,6 @@ describe('TaskPoller', () => {
     })
   );
 
-  // test(
-  //   'poller adapts to pollIntervalDelay changes',
-  //   fakeSchedulers(async (advance) => {
-  //     const pollInterval = 100;
-  //     const pollIntervalDelay$ = new BehaviorSubject(0);
-  //     const bufferCapacity = 5;
-
-  //     const work = jest.fn(async () => true);
-  //     createTaskPoller<void, boolean>({
-  //       logger: loggingSystemMock.create().get(),
-  //       pollInterval$: of(pollInterval),
-  //       pollIntervalDelay$,
-  //       bufferCapacity,
-  //       getCapacity: () => 1,
-  //       work,
-  //       workTimeout: pollInterval * 5,
-  //       pollRequests$: new Subject<Option<void>>(),
-  //     }).subscribe(() => {});
-
-  //     // `work` is async, we have to force a node `tick`
-  //     await sleep(0);
-  //     advance(pollInterval);
-  //     expect(work).toHaveBeenCalledTimes(1);
-
-  //     const delay = pollInterval / 2;
-  //     pollIntervalDelay$.next(delay);
-
-  //     // `work` is async, we have to force a node `tick`
-  //     await sleep(0);
-  //     advance(pollInterval);
-  //     expect(work).toHaveBeenCalledTimes(1);
-  //     advance(delay);
-  //     expect(work).toHaveBeenCalledTimes(2);
-
-  //     await sleep(0);
-  //     advance(pollInterval + delay);
-  //     expect(work).toHaveBeenCalledTimes(3);
-
-  //     // shift by whoile interval, which is the same as 0
-  //     pollIntervalDelay$.next(pollInterval);
-
-  //     // `work` is async, we have to force a node `tick`
-  //     await sleep(0);
-  //     advance(pollInterval);
-  //     expect(work).toHaveBeenCalledTimes(4);
-  //   })
-  // );
-
   test(
     'filters interval polling on capacity',
     fakeSchedulers(async (advance) => {
