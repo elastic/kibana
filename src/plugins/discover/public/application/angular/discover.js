@@ -295,15 +295,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     createSearchSessionRestorationDataProvider({
       appStateContainer,
       data,
-      getSavedSearchId: () => savedSearch.id,
-      getSessionName: () => {
-        return (
-          (savedSearch.id && savedSearch.title) ||
-          i18n.translate('discover.discoverDefaultSearchSessionName', {
-            defaultMessage: 'Discover',
-          })
-        );
-      },
+      getSavedSearch: () => savedSearch,
     })
   );
 
