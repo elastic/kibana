@@ -130,16 +130,12 @@ export class SearchInterceptor {
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal, ...requestOptions } = options || {};
 
-    const isCurrentSession =
-      options?.sessionId && this.deps.session.getSessionId() === options.sessionId;
-
     return this.batchedFetch(
       {
         request,
         options: {
           ...requestOptions,
-          isStored: isCurrentSession ? this.deps.session.isStored() : false,
-          isRestore: isCurrentSession ? this.deps.session.isRestore() : false,
+          ...this.deps.session.getSearchOptions(options?.sessionId),
         },
       },
       abortSignal

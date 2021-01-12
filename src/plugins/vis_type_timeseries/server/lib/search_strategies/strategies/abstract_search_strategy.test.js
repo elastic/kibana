@@ -62,7 +62,11 @@ describe('AbstractSearchStrategy', () => {
     const responses = await abstractSearchStrategy.search(
       {
         payload: {
-          sessionId: 1,
+          searchSession: {
+            sessionId: '1',
+            isRestore: false,
+            isStored: true,
+          },
         },
         requestContext: {
           search: { search: searchFn },
@@ -81,7 +85,9 @@ describe('AbstractSearchStrategy', () => {
         indexType: undefined,
       },
       {
-        sessionId: 1,
+        sessionId: '1',
+        isRestore: false,
+        isStored: true,
       }
     );
   });

@@ -133,9 +133,7 @@ export default new Datasource('es', {
       .search(
         body,
         {
-          sessionId: tlConfig.request?.body.sessionId,
-          isRestore: tlConfig.request?.body.isRestore,
-          isStored: tlConfig.request?.body.isStored,
+          ...tlConfig.request?.body.searchSession,
         },
         tlConfig.context
       )

@@ -65,9 +65,11 @@ describe('es', () => {
         ...stubRequestAndServer({ rawResponse: esResponse }),
         request: {
           body: {
-            sessionId: '1',
-            isRestore: true,
-            isStored: false,
+            searchSession: {
+              sessionId: '1',
+              isRestore: true,
+              isStored: false,
+            },
           },
         },
       };

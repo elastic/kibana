@@ -75,9 +75,13 @@ export function runRoute(
               to: schema.maybe(schema.string()),
             })
           ),
-          sessionId: schema.maybe(schema.string()),
-          isRestore: schema.maybe(schema.boolean()),
-          isStored: schema.maybe(schema.boolean()),
+          searchSession: schema.maybe(
+            schema.object({
+              sessionId: schema.maybe(schema.string()),
+              isRestore: schema.maybe(schema.boolean()),
+              isStored: schema.maybe(schema.boolean()),
+            })
+          ),
         }),
       },
     },

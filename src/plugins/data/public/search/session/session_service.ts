@@ -29,6 +29,7 @@ import {
   SessionStateContainer,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
+import { ISearchOptions } from '../../../common';
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -242,5 +243,28 @@ export class SessionService {
     if (this.getSessionId() === sessionId) {
       this.state.transitions.store();
     }
+  }
+
+  /**
+   * Checks if passed sessionId is a current sessionId
+   * @param sessionId
+   */
+  public isCurrentSession(sessionId?: string): boolean {
+    return !!sessionId && this.getSessionId() === sessionId;
+  }
+
+  /**
+   * Infers search session options for sessionId using current session state
+   * @param sessionId
+   */
+  public getSearchOptions(
+    sessionId?: string
+  ): Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'> {
+    const currentSessionId = this.getSessionId();
+    return {
+      sessionId,
+      isRestore: currentSessionId ? this.isRestore() : false,
+      isStored: currentSessionId ? this.isStored() : false,
+    };
   }
 }

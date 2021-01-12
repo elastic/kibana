@@ -41,19 +41,18 @@ export const metricsRequestHandler = async ({
   const config = getUISettings();
   const timezone = getTimezone(config);
   const uiStateObj = uiState[visParams.type] ?? {};
-  const dataSearch = getDataStart();
-  const parsedTimeRange = dataSearch.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
+  const data = getDataStart();
+  const dataSearch = getDataStart().search;
+  const parsedTimeRange = data.query.timefilter.timefilter.calculateBounds(input?.timeRange!);
 
   if (visParams && visParams.id && !visParams.isModelInvalid) {
     const maxBuckets = config.get(MAX_BUCKETS_SETTING);
 
     validateInterval(parsedTimeRange, visParams, maxBuckets);
 
-    const isCurrentSession = () =>
-      !!searchSessionId && searchSessionId === dataSearch.search.session.getSessionId();
     const untrackSearch =
-      isCurrentSession() &&
-      dataSearch.search.session.trackSearch({
+      dataSearch.session.isCurrentSession(searchSessionId) &&
+      dataSearch.session.trackSearch({
         abort: () => {
           // TODO: support search cancellations
         },
@@ -70,13 +69,12 @@ export const metricsRequestHandler = async ({
           filters: input?.filters,
           panels: [visParams],
           state: uiStateObj,
-          sessionId: searchSessionId,
-          isRestore: isCurrentSession() ? dataSearch.search.session.isRestore() : false,
-          isStored: isCurrentSession() ? dataSearch.search.session.isStored() : false,
+          searchSession: dataSearch.session.getSearchOptions(searchSessionId),
         }),
       });
     } finally {
-      if (untrackSearch && isCurrentSession()) {
+      if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
+        // untrack if this search still belongs to current session
         untrackSearch();
       }
     }

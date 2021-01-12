@@ -96,10 +96,8 @@ export function getTimelionRequestHandler({
 
     // parse the time range client side to make sure it behaves like other charts
     const timeRangeBounds = timefilter.calculateBounds(timeRange);
-    const isCurrentSession = () =>
-      !!searchSessionId && searchSessionId === dataSearch.session.getSessionId();
     const untrackSearch =
-      isCurrentSession() &&
+      dataSearch.session.isCurrentSession(searchSessionId) &&
       dataSearch.session.trackSearch({
         abort: () => {
           // TODO: support search cancellations
@@ -121,9 +119,7 @@ export function getTimelionRequestHandler({
             interval: visParams.interval,
             timezone,
           },
-          sessionId: searchSessionId,
-          isRestore: isCurrentSession() ? dataSearch.session.isRestore() : false,
-          isStored: isCurrentSession() ? dataSearch.session.isStored() : false,
+          searchSession: dataSearch.session.getSearchOptions(searchSessionId),
         }),
       });
     } catch (e) {
@@ -139,7 +135,8 @@ export function getTimelionRequestHandler({
         throw e;
       }
     } finally {
-      if (untrackSearch && isCurrentSession()) {
+      if (untrackSearch && dataSearch.session.isCurrentSession(searchSessionId)) {
+        // call `untrack` if this search still belongs to current session
         untrackSearch();
       }
     }
