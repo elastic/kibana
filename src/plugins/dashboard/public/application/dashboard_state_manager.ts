@@ -179,6 +179,9 @@ export class DashboardStateManager {
 
     this.stateContainerChangeSub = this.stateContainer.state$.subscribe(() => {
       this.isDirty = this.checkIsDirty();
+      if (!this.isDirty && this.getIsViewMode()) {
+        this.clearUnsavedPanels();
+      }
       this.changeListeners.forEach((listener) => listener({ dirty: this.isDirty }));
     });
 
@@ -504,11 +507,13 @@ export class DashboardStateManager {
     if (this.hideWriteControls) {
       return ViewMode.VIEW;
     }
+    if (this.stateContainer) {
+      return this.appState.viewMode;
+    }
     // get viewMode should work properly even before the state container is created
-    return this.stateContainer
-      ? this.appState.viewMode
-      : this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY)?.viewMode ??
-          ViewMode.VIEW;
+    return this.savedDashboard.id
+      ? this.kbnUrlStateStorage.get<DashboardAppState>(STATE_STORAGE_KEY)?.viewMode ?? ViewMode.VIEW
+      : ViewMode.EDIT;
   }
 
   public getIsViewMode() {

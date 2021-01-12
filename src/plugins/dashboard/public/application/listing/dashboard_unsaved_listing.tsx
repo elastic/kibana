@@ -33,7 +33,7 @@ import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dash
 import { useKibana } from '../../services/kibana_react';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';
 import { DashboardAppServices, DashboardRedirect } from '../types';
-import { confirmDiscardUnsavedChanges } from './discard_changes_confirm';
+import { confirmDiscardUnsavedChanges } from './confirm_overlays';
 
 const DashboardUnsavedItem = ({
   dashboard,
@@ -46,29 +46,6 @@ const DashboardUnsavedItem = ({
 }) => {
   return (
     <>
-      {/* <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="pencil" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h3>{dashboard?.title ?? getNewDashboardTitle()}</h3>
-          </EuiTitle>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty flush="left" size="xs" color="primary" onClick={onOpenClick}>
-                {dashboardUnsavedListingStrings.getEditTitle()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" color="danger" onClick={onDiscardClick}>
-                {dashboardUnsavedListingStrings.getDiscardTitle()}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup> */}
-
       <EuiTitle size="xxs" className="dshUnsavedListingItemTitle">
         <h3 className="dshUnsavedListingItemTitle">
           <EuiIcon type="pencil" /> {dashboard?.title ?? getNewDashboardTitle()}

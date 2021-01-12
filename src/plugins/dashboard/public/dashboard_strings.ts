@@ -255,6 +255,25 @@ export const leaveConfirmStrings = {
     }),
 };
 
+export const createConfirmStrings = {
+  getCreateTitle: () =>
+    i18n.translate('dashboard.createConfirmModal.unsavedChangesTitle', {
+      defaultMessage: 'New dashboard already in progress',
+    }),
+  getCreateSubtitle: () =>
+    i18n.translate('dashboard.createConfirmModal.unsavedChangesSubtitle', {
+      defaultMessage: 'You can continue editing or start with a blank dashboard.',
+    }),
+  getConfirmButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.confirmButtonLabel', {
+      defaultMessage: 'Start over',
+    }),
+  getCancelButtonText: () =>
+    i18n.translate('dashboard.createConfirmModal.cancelButtonLabel', {
+      defaultMessage: 'Continue editing',
+    }),
+};
+
 /*
   Empty Screen
 */

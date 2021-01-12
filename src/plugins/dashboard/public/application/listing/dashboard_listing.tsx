@@ -31,6 +31,7 @@ import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { TableListView, useKibana } from '../../services/kibana_react';
 import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { confirmCreateWithUnsaved } from './confirm_overlays';
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -54,6 +55,7 @@ export const DashboardListing = ({
       savedObjectsClient,
       savedObjectsTagging,
       dashboardCapabilities,
+      dashboardPanelStorage,
       chrome: { setBreadcrumbs },
     },
   } = useKibana<DashboardAppServices>();
@@ -95,8 +97,16 @@ export const DashboardListing = ({
 
   const tableColumns = useMemo(
     () =>
-      getTableColumns((id) => redirectTo({ destination: 'dashboard', id }), savedObjectsTagging),
-    [savedObjectsTagging, redirectTo]
+      getTableColumns(
+        (id) =>
+          redirectTo({
+            destination: 'dashboard',
+            id,
+            editMode: dashboardPanelStorage.dashboardHasUnsavedEdits(id),
+          }),
+        savedObjectsTagging
+      ),
+    [savedObjectsTagging, redirectTo, dashboardPanelStorage]
   );
 
   const noItemsFragment = useMemo(
@@ -134,9 +144,25 @@ export const DashboardListing = ({
   );
 
   const editItem = useCallback(
-    ({ id }: { id: string | undefined }) => redirectTo({ destination: 'dashboard', id }),
+    ({ id }: { id: string | undefined }) =>
+      redirectTo({ destination: 'dashboard', id, editMode: true }),
     [redirectTo]
   );
+
+  const createItem = useCallback(() => {
+    if (dashboardPanelStorage.dashboardHasUnsavedEdits()) {
+      redirectTo({ destination: 'dashboard' });
+    } else {
+      confirmCreateWithUnsaved(
+        core.overlays,
+        () => {
+          dashboardPanelStorage.clearPanels();
+          redirectTo({ destination: 'dashboard' });
+        },
+        () => redirectTo({ destination: 'dashboard' })
+      );
+    }
+  }, [dashboardPanelStorage, redirectTo, core.overlays]);
 
   const searchFilters = useMemo(() => {
     return savedObjectsTagging
@@ -152,7 +178,7 @@ export const DashboardListing = ({
   } = dashboardListingTable;
   return (
     <TableListView
-      createItem={hideWriteControls ? undefined : () => redirectTo({ destination: 'dashboard' })}
+      createItem={hideWriteControls ? undefined : createItem}
       deleteItems={hideWriteControls ? undefined : deleteItems}
       initialPageSize={savedObjects.settings.getPerPage()}
       editItem={hideWriteControls ? undefined : editItem}

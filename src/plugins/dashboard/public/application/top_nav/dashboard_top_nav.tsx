@@ -54,7 +54,7 @@ import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
 import { PanelToolbar } from './panel_toolbar';
-import { confirmDiscardUnsavedChanges } from '../listing/discard_changes_confirm';
+import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
 import { DashboardContainer } from '..';
 

@@ -32,8 +32,10 @@ export class DashboardPanelStorage {
 
   public clearPanels(id = DASHBOARD_PANELS_UNSAVED_ID) {
     const sessionStoragePanels = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {};
-    delete sessionStoragePanels[id];
-    this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStoragePanels);
+    if (sessionStoragePanels[id]) {
+      delete sessionStoragePanels[id];
+      this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, sessionStoragePanels);
+    }
   }
 
   public getPanels(id = DASHBOARD_PANELS_UNSAVED_ID): SavedDashboardPanel[] | undefined {
@@ -48,5 +50,9 @@ export class DashboardPanelStorage {
 
   public getDashboardIdsWithUnsavedChanges() {
     return Object.keys(this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) || {});
+  }
+
+  public dashboardHasUnsavedEdits(id = DASHBOARD_PANELS_UNSAVED_ID) {
+    return this.getDashboardIdsWithUnsavedChanges().indexOf(id) !== -1;
   }
 }

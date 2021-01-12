@@ -19,7 +19,7 @@
 
 import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import { OverlayStart } from '../../../../../core/public';
-import { leaveConfirmStrings } from '../../dashboard_strings';
+import { createConfirmStrings, leaveConfirmStrings } from '../../dashboard_strings';
 
 export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCallback: () => void) =>
   overlays
@@ -34,4 +34,23 @@ export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCall
       if (isConfirmed) {
         discardCallback();
       }
+    });
+
+export const confirmCreateWithUnsaved = (
+  overlays: OverlayStart,
+  startBlankCallback: () => void,
+  contineCallback: () => void
+) =>
+  overlays
+    .openConfirm(leaveConfirmStrings.getDiscardSubtitle(), {
+      confirmButtonText: createConfirmStrings.getConfirmButtonText(),
+      cancelButtonText: createConfirmStrings.getCancelButtonText(),
+      defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+      title: createConfirmStrings.getCreateTitle(),
+    })
+    .then((isConfirmed) => {
+      if (isConfirmed) {
+        startBlankCallback();
+      }
+      contineCallback();
     });
