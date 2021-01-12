@@ -267,7 +267,8 @@ describe('MonitorListStatusColumn', () => {
 
     fireEvent.mouseOver(locationsContainer);
 
-    await waitFor(() => screen.getByText('Up in BerlinDown in Islamabad, st-paul'));
+    await waitFor(() => screen.getByText('Up in Berlin'));
+    await waitFor(() => screen.getByText('Down in Islamabad, st-paul'));
   });
 
   it('will render display location status', async () => {
