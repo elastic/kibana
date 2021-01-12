@@ -14,6 +14,7 @@ import { shallow } from 'enzyme';
 
 import { EuiModal, EuiForm } from '@elastic/eui';
 
+import { oauthApplication } from '../../../__mocks__/content_sources.mock';
 import { OAUTH_DESCRIPTION, REDIRECT_INSECURE_ERROR_TEXT } from '../../../constants';
 
 import { CredentialItem } from '../../../components/shared/credential_item';
@@ -23,14 +24,6 @@ import { OauthApplication } from './oauth_application';
 describe('OauthApplication', () => {
   const setOauthApplication = jest.fn();
   const updateOauthApplication = jest.fn();
-  const oauthApplication = {
-    name: 'app',
-    uid: '123uid123',
-    secret: 'shhhhhhhhh',
-    redirectUri: 'https://foo',
-    confidential: false,
-    nativeRedirectUri: 'https://bar',
-  };
 
   beforeEach(() => {
     setMockValues({ hasPlatinumLicense: true, oauthApplication });

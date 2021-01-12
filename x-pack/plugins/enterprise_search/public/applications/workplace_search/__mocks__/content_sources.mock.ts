@@ -226,3 +226,12 @@ export const sourceConfigData = {
     consumerKey: 'elastic_enterprise_search_123',
   },
 };
+
+export const oauthApplication = {
+  name: 'app',
+  uid: '123uid123',
+  secret: 'shhhhhhhhh',
+  redirectUri: 'https://foo',
+  confidential: false,
+  nativeRedirectUri: 'https://bar',
+};
