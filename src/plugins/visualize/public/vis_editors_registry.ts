@@ -17,9 +17,24 @@
  * under the License.
  */
 
-export * from './types_service';
-export { Schemas } from './schemas';
-export { VisGroups } from './types';
-export type { VisType, ISchemas, Schema } from './types';
-export type { BaseVisTypeOptions } from './base_vis_type';
-export type { ReactVisTypeOptions } from './react_vis_type';
+import { VisEditorConstructor } from './application/types';
+
+const DEFAULT_NAME = 'default';
+
+export const createVisEditorsRegistry = () => {
+  const map = new Map();
+
+  return {
+    registerDefault: (editor: VisEditorConstructor) => {
+      map.set(DEFAULT_NAME, editor);
+    },
+    register: (name: string, editor: VisEditorConstructor) => {
+      if (name) {
+        map.set(name, editor);
+      }
+    },
+    get: (name: string) => map.get(name || DEFAULT_NAME),
+  };
+};
+
+export type VisEditorsRegistry = ReturnType<typeof createVisEditorsRegistry>;

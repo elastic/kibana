@@ -21,10 +21,10 @@ import { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
 import { VisualizeInput } from 'src/plugins/visualizations/public';
 import { ByValueVisInstance, VisualizeServices } from '../../types';
-import type { IEditorController } from '../../../../../visualizations/public';
+import type { IEditorController } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 import { getEditBreadcrumbs } from '../breadcrumbs';
-import { getDefaultEditor } from '../../../services';
+import { getVisEditorsRegistry } from '../../../services';
 
 export const useVisByValue = (
   services: VisualizeServices,
@@ -52,7 +52,7 @@ export const useVisByValue = (
       const byValueVisInstance = await getVisualizationInstanceFromInput(services, valueInput);
       const { embeddableHandler, vis } = byValueVisInstance;
 
-      const Editor = vis.type.editor || getDefaultEditor();
+      const Editor = getVisEditorsRegistry().get(vis.type.editorConfig?.editor);
       const visEditorController = new Editor(
         visEditorRef.current,
         vis,

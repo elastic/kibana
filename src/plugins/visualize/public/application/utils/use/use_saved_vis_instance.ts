@@ -28,8 +28,8 @@ import { getVisualizationInstance } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { SavedVisInstance, VisualizeServices } from '../../types';
 import { VisualizeConstants } from '../../visualize_constants';
-import { getDefaultEditor } from '../../../services';
-import type { IEditorController } from '../../../../../visualizations/public';
+import { getVisEditorsRegistry } from '../../../services';
+import type { IEditorController } from '../../types';
 
 /**
  * This effect is responsible for instantiating a saved vis or creating a new one
@@ -123,7 +123,7 @@ export const useSavedVisInstance = (
         // do not create editor in embeded mode
         if (visEditorRef.current) {
           if (isChromeVisible) {
-            const Editor = vis.type.editor || getDefaultEditor();
+            const Editor = getVisEditorsRegistry().get(vis.type.editorConfig?.editor);
             visEditorController = new Editor(
               visEditorRef.current,
               vis,
