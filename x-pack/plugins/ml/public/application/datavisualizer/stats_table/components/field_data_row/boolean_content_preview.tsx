@@ -3,51 +3,38 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { Chart, Settings, BarSeries, ScaleType } from '@elastic/charts';
-import { FileBasedFieldVisConfig } from '../../types';
+import React, { useMemo } from 'react';
+import { EuiDataGridColumn } from '@elastic/eui';
+import { FieldVisConfig } from '../../types';
 import { getTFPercentage } from '../../utils';
+import { ColumnChart } from '../../../../components/data_grid/column_chart';
+import { OrdinalChartData } from '../../../../components/data_grid/use_column_chart';
 
-export const BooleanContentPreview = ({ config }: { config: FileBasedFieldVisConfig }) => {
-  const formattedPercentages = getTFPercentage(config);
-  if (!formattedPercentages) return null;
+export const BooleanContentPreview = ({ config }: { config: FieldVisConfig }) => {
+  const chartData = useMemo(() => {
+    const results = getTFPercentage(config);
+    if (results) {
+      const data = [
+        { key: 'true', key_as_string: 'true', doc_count: results.trueCount },
+        { key: 'false', key_as_string: 'false', doc_count: results.falseCount },
+      ];
+      return { id: config.fieldName, cardinality: 2, data, type: 'boolean' } as OrdinalChartData;
+    }
+  }, [config]);
+  if (!chartData || config.fieldName === undefined) return null;
+
+  const columnType: EuiDataGridColumn = {
+    id: config.fieldName,
+    schema: undefined,
+  };
+  const dataTestSubj = `mlDataGridChart-${config.fieldName}`;
+
   return (
-    <div className="mlDataGridChart__histogram">
-      <Chart className="story-chart">
-        <Settings
-          showLegend={false}
-          rotation={90}
-          theme={{
-            background: { color: 'transparent' },
-            chartMargins: {
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 0,
-            },
-            chartPaddings: {
-              left: 0,
-              right: 0,
-              top: 4,
-              bottom: 0,
-            },
-            scales: { barsPadding: 0.1 },
-          }}
-        />
-        <BarSeries
-          id={'filebased-boolean-preview'}
-          xScaleType={ScaleType.Linear}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          stackAccessors={['x']}
-          splitSeriesAccessors={['g']}
-          data={[
-            { x: 1, y: formattedPercentages.truePercentage, g: 'true' },
-            { x: 1, y: formattedPercentages.falsePercentage, g: 'false' },
-          ]}
-        />
-      </Chart>
-    </div>
+    <ColumnChart
+      dataTestSubj={dataTestSubj}
+      chartData={chartData}
+      columnType={columnType}
+      hideLabel={true}
+    />
   );
 };

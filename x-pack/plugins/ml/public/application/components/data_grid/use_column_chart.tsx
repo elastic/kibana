@@ -20,7 +20,7 @@ import { NON_AGGREGATABLE } from './common';
 
 export const hoveredRow$ = new BehaviorSubject<any | null>(null);
 
-const BAR_COLOR = euiPaletteColorBlind()[0];
+export const BAR_COLOR = euiPaletteColorBlind()[0];
 const BAR_COLOR_BLUR = euiPaletteColorBlind({ rotations: 2 })[10];
 const MAX_CHART_COLUMNS = 20;
 

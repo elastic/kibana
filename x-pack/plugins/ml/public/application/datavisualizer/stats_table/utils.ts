@@ -5,7 +5,6 @@
  */
 
 import { FileBasedFieldVisConfig } from './types';
-import { roundToDecimalPlace } from '../../formatters/round_to_decimal_place';
 
 export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
   const { stats } = config;
@@ -19,10 +18,10 @@ export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
     if (config?.stats?.topValues) {
       config.stats.topValues.forEach((doc) => {
         if (doc.doc_count !== undefined) {
-          if (doc.key === 'false') {
+          if (doc.key.toString().toLowerCase() === 'false') {
             falseCount = doc.doc_count;
           }
-          if (doc.key === 'true') {
+          if (doc.key.toString().toLowerCase() === 'true') {
             trueCount = doc.doc_count;
           }
         }
@@ -31,7 +30,8 @@ export const getTFPercentage = (config: FileBasedFieldVisConfig) => {
   }
   if (count === undefined || trueCount === undefined || falseCount === undefined) return null;
   return {
-    truePercentage: roundToDecimalPlace((trueCount / count) * 100),
-    falsePercentage: roundToDecimalPlace((falseCount / count) * 100),
+    count,
+    trueCount,
+    falseCount,
   };
 };
