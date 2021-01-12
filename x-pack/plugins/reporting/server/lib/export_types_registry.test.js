@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { ExportTypesRegistry } from '../export_types_registry';
+import { ExportTypesRegistry } from './export_types_registry';
 
 describe('ExportTypesRegistry', function () {
   let exportTypesRegistry;
@@ -17,30 +16,30 @@ describe('ExportTypesRegistry', function () {
     it(`doesn't throw an Error when using a new type with a string id`, function () {
       expect(() => {
         exportTypesRegistry.register({ id: 'foo' });
-      }).to.not.throwError();
+      }).not.toThrow();
     });
 
     it('throws an Error when registering a type without an id', function () {
       expect(() => {
         exportTypesRegistry.register({});
-      }).to.throwError();
+      }).toThrow();
     });
 
     it('throws an Error when registering a type with an integer id', function () {
       expect(() => {
         exportTypesRegistry.register({ id: 1 });
-      }).to.throwError();
+      }).toThrow();
     });
 
     it('throws an Error when registering the same id twice', function () {
       const id = 'foo';
       expect(() => {
         exportTypesRegistry.register({ id });
-      }).to.not.throwError();
+      }).not.toThrow();
 
       expect(() => {
         exportTypesRegistry.register({ id });
-      }).to.throwError();
+      }).toThrow();
     });
   });
 
@@ -50,20 +49,20 @@ describe('ExportTypesRegistry', function () {
       const obj = { id };
       exportTypesRegistry.register(obj);
       exportTypesRegistry.register({ id: 'bar' });
-      expect(exportTypesRegistry.getById(id)).to.be(obj);
+      expect(exportTypesRegistry.getById(id)).toBe(obj);
     });
 
     it(`throws an Error if the id isn't found`, function () {
       expect(() => {
         exportTypesRegistry.getById('foo');
-      }).to.throwError();
+      }).toThrow();
     });
   });
 
   describe('getAll', function () {
     it('returns an empty Iterator if no objects have been registered', function () {
       const array = Array.from(exportTypesRegistry.getAll());
-      expect(array.length).to.be(0);
+      expect(array.length).toBe(0);
     });
 
     it('returns all objects that have been registered', function () {
@@ -72,15 +71,15 @@ describe('ExportTypesRegistry', function () {
       const objs = [obj1, obj2];
       objs.forEach((obj) => exportTypesRegistry.register(obj));
       const all = Array.from(exportTypesRegistry.getAll());
-      expect(all).to.contain(obj1);
-      expect(all).to.contain(obj2);
+      expect(all).toContain(obj1);
+      expect(all).toContain(obj2);
     });
   });
 
   describe('getSize', function () {
     it('returns 0 initially', function () {
       const size = exportTypesRegistry.getSize();
-      expect(size).to.be(0);
+      expect(size).toBe(0);
     });
 
     it('returns the number of objects that have been added', function () {
@@ -88,7 +87,7 @@ describe('ExportTypesRegistry', function () {
       exportTypesRegistry.register({ id: 'bar' });
       exportTypesRegistry.register({ id: 'baz' });
       const size = exportTypesRegistry.getSize();
-      expect(size).to.be(3);
+      expect(size).toBe(3);
     });
   });
 
@@ -97,7 +96,7 @@ describe('ExportTypesRegistry', function () {
       const prop = 'fooProp';
       const match = { id: 'foo', prop };
       [match, { id: 'bar' }, { id: 'baz' }].forEach((obj) => exportTypesRegistry.register(obj));
-      expect(exportTypesRegistry.get((item) => item.prop === prop)).to.be(match);
+      expect(exportTypesRegistry.get((item) => item.prop === prop)).toBe(match);
     });
 
     it('throws Error if multiple items match predicate', function () {
@@ -108,7 +107,7 @@ describe('ExportTypesRegistry', function () {
       ].forEach((obj) => exportTypesRegistry.register(obj));
       expect(() => {
         exportTypesRegistry.get((item) => item.prop === prop);
-      }).to.throwError();
+      }).toThrow();
     });
 
     it('throws Error if no items match predicate', function () {
@@ -119,7 +118,7 @@ describe('ExportTypesRegistry', function () {
       ].forEach((obj) => exportTypesRegistry.register(obj));
       expect(() => {
         exportTypesRegistry.get((item) => item.prop !== prop);
-      }).to.throwError();
+      }).toThrow();
     });
   });
 });
