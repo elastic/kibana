@@ -24,7 +24,7 @@ import { ENGINE_ANALYTICS_PATH, ENGINE_API_LOGS_PATH, getEngineRoute } from '../
 import { TOTAL_QUERIES, TOTAL_API_OPERATIONS } from '../../analytics/constants';
 import { VIEW_ANALYTICS, VIEW_API_LOGS, LAST_7_DAYS } from '../constants';
 
-import { AnalyticsChart, convertToChartsData } from '../../analytics';
+import { AnalyticsChart, convertToChartData } from '../../analytics';
 
 import { EngineLogic } from '../../engine';
 import { EngineOverviewLogic } from '../';
@@ -59,7 +59,7 @@ export const TotalCharts: React.FC = () => {
               lines={[
                 {
                   id: TOTAL_QUERIES,
-                  data: convertToChartsData({ startDate, data: queriesPerDay }),
+                  data: convertToChartData({ startDate, data: queriesPerDay }),
                 },
               ]}
             />
@@ -88,7 +88,7 @@ export const TotalCharts: React.FC = () => {
               lines={[
                 {
                   id: TOTAL_API_OPERATIONS,
-                  data: convertToChartsData({ startDate, data: operationsPerDay }),
+                  data: convertToChartData({ startDate, data: operationsPerDay }),
                 },
               ]}
             />

@@ -6,4 +6,4 @@
 
 export { ANALYTICS_TITLE } from './constants';
 export { AnalyticsChart } from './components';
-export { convertToChartsData } from './utils';
+export { convertToChartData } from './utils';

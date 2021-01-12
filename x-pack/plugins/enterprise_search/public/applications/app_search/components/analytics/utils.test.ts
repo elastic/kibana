@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { convertToChartsData } from './utils';
+import { convertToChartData } from './utils';
 
-describe('convertToChartsData', () => {
+describe('convertToChartData', () => {
   it('converts server-side analytics data into an array of objects that Elastic Charts can consume', () => {
     expect(
-      convertToChartsData({
+      convertToChartData({
         startDate: '1970-01-01',
         data: [0, 1, 5, 50, 25],
       })
