@@ -59,8 +59,8 @@ export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
   const promises = registry.map(async (layerWizard: LayerWizard) => {
     return {
       ...layerWizard,
-      isVisible: await layerWizard.checkVisibility(),
-      isDisabled: await layerWizard.getIsDisabled(),
+      isVisible: await layerWizard.checkVisibility!(),
+      isDisabled: await layerWizard.getIsDisabled!(),
     };
   });
   return (await Promise.all(promises)).filter(({ isVisible }) => {
