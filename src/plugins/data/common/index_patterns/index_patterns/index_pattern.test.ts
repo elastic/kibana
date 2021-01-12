@@ -101,6 +101,7 @@ describe('IndexPattern', () => {
 
     test('should request date fields as docvalue_fields', () => {
       const { docvalueFields } = indexPattern.getComputedFields();
+      // @ts-ignore
       const docValueFieldNames = docvalueFields.map((field) => field.field);
 
       expect(Object.keys(docValueFieldNames).length).toBe(3);

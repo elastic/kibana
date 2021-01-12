@@ -74,7 +74,7 @@ import { uniqueId, keyBy, pick, difference, omit, isObject, isFunction } from 'l
 import { map } from 'rxjs/operators';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern } from '../../index_patterns';
+import { IIndexPattern, IndexPatternField } from '../../index_patterns';
 import { ISearchGeneric, ISearchOptions } from '../..';
 import type {
   ISearchSource,
@@ -494,16 +494,22 @@ export class SearchSource {
     body.stored_fields = storedFields;
 
     body.runtime_mappings = index.fields
-      .filter((field) => field.runtimeField)
-      .reduce((col, field) => {
-        col[field.name] = {
-          type: field.runtimeField.type,
-          script: {
-            source: field.runtimeField.script.source,
-          },
-        };
-        return col;
-      }, {});
+      .filter((field: IndexPatternField) => field.runtimeField)
+      .reduce(
+        (
+          col: Record<string, { type: string; script: { source: string } }>,
+          field: IndexPatternField
+        ) => {
+          col[field.name] = {
+            type: field.runtimeField!.type,
+            script: {
+              source: field.runtimeField!.script.source,
+            },
+          };
+          return col;
+        },
+        {}
+      );
 
     // apply source filters from index pattern if specified by the user
     let filteredDocvalueFields = docvalueFields;

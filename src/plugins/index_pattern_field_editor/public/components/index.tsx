@@ -23,7 +23,7 @@ import { EuiButton, EuiFieldText } from '@elastic/eui';
 import type { DocLinksStart } from 'src/core/public';
 import { IndexPattern, IndexPatternField, DataPublicPluginStart } from '../../../data/public';
 import { createKibanaReactContext, toMountPoint } from '../../../kibana_react/public';
-import type { RuntimeField } from '../types';
+// import type { RuntimeField } from '../types';
 
 // eslint-disable-next-line
 import type { RuntimeFieldStart } from '../../../../../x-pack/plugins/runtime_field_editor/public';
@@ -36,11 +36,11 @@ export const indexPatternFieldEditorFlyoutContent = (
   openFlyout: OverlayStart['openFlyout'],
   indexPattern: IndexPattern,
   indexPatternsService: DataPublicPluginStart['indexPatterns'],
+  refreshFields: () => void,
   indexPatternField?: IndexPatternField
 ) => {
-  console.log('flyout setup', RuntimeFields);
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({ uiSettings });
-  openFlyout(
+  const flyout = openFlyout(
     toMountPoint(
       <KibanaReactContextProvider>
         <Content
@@ -48,20 +48,14 @@ export const indexPatternFieldEditorFlyoutContent = (
           indexPatternField={indexPatternField}
           RuntimeFields={RuntimeFields}
           docLinks={docLinks}
-          onSave={() => {
-            console.log('onSave');
-            indexPatternsService.updateSavedObject(indexPattern);
-            console.log(indexPattern);
+          onSave={async () => {
+            await indexPatternsService.updateSavedObject(indexPattern);
+            refreshFields();
+            flyout.close();
           }}
         />
       </KibanaReactContextProvider>
     )
-  );
-  console.log(
-    'hello from async loaded component',
-    indexPattern,
-    indexPatternField,
-    indexPatternField?.isMapped
   );
 };
 
@@ -78,40 +72,57 @@ const Content = ({
   RuntimeFields?: RuntimeFieldStart['RuntimeFieldEditor'];
   docLinks: DocLinksStart;
 }) => {
-  const [fieldName, setFieldName] = useState<string>('');
-  const [runtimeField, setRuntimeField] = useState<RuntimeField>();
+  const isNewField = !!indexPatternField?.name;
+  const a = 0;
+  let getrf: any;
+  const [fieldName, setFieldName] = useState<string>(indexPatternField?.name || '');
+  // const [getRuntimeField, setGetRuntimeField] = useState<any>();
   const runtimeContent = RuntimeFields && (
     <RuntimeFields
-      defaultValue={runtimeField}
-      onChange={(rf) => {
-        // setRuntimeField(rf)}
-        console.log('onChange', rf);
+      defaultValue={indexPatternField?.runtimeField}
+      onChange={async (rf) => {
+        // console.log('a', a++);
+        getrf = rf.submit;
       }}
       docLinks={docLinks}
     />
   );
 
-  console.log('RuntimeFields', RuntimeFields, runtimeContent);
-
   return (
     <>
-      <div>hello {indexPatternField?.name}</div>
-      <EuiFieldText value={fieldName} onChange={(e) => setFieldName(e.target.value)} />
+      <div>Name</div>
+      <EuiFieldText
+        readOnly={isNewField}
+        defaultValue={fieldName}
+        onChange={(e) => {
+          setFieldName(e.target.value);
+        }}
+      />
       {runtimeContent}
       <EuiButton
-        onClick={() => {
+        disabled={!fieldName}
+        onClick={async () => {
           const field = indexPattern.getFieldByName(fieldName);
+          const {
+            data: { script, type },
+          } = await getrf();
           if (!field) {
             indexPattern.saveRuntimeField(fieldName, {
               name: fieldName,
-              type: 'keyword',
-              script: { source: `emit('${fieldName}')` },
+              type,
+              script,
             });
-            onSave();
+          } else {
+            field.runtimeField = {
+              name: fieldName,
+              type,
+              script,
+            };
           }
+          onSave();
         }}
       >
-        Add new field
+        {!!isNewField ? 'Save field' : 'Create new field'}
       </EuiButton>
     </>
   );
