@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import React, { BaseSyntheticEvent, useCallback, useMemo, useRef } from 'react';
+import React, { BaseSyntheticEvent, useCallback, useMemo } from 'react';
 
 import { LegendColorPicker, Position, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
-import { EuiEvent } from '@elastic/eui/src/components/outside_click_detector/outside_click_detector';
 
 import { ColorPicker } from '../../../charts/public';
 
@@ -49,8 +48,6 @@ export const useColorPicker = (
 ): LegendColorPicker =>
   useMemo(
     () => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const ref = useRef<HTMLDivElement | null>(null);
       const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
       const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
         if (!seriesName) {
@@ -65,19 +62,13 @@ export const useColorPicker = (
       };
 
       // eslint-disable-next-line react-hooks/rules-of-hooks
-      const handleOutsideClick = useCallback(
-        (e: EuiEvent) => {
-          if (ref.current && !(ref.current! as any).contains(e.target)) {
-            onClose?.();
-          }
-        },
-        [onClose]
-      );
+      const handleOutsideClick = useCallback(() => {
+        onClose?.();
+      }, [onClose]);
 
       return (
         <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
           <EuiWrappingPopover
-            popoverRef={ref}
             isOpen
             ownFocus
             display="block"
