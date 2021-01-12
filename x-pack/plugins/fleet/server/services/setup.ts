@@ -157,7 +157,6 @@ export async function setupFleet(
   if (options?.forceRecreate !== true && res.role.created === false) {
     return;
   }
-
   const password = generateRandomPassword();
   // Create fleet enroll user
   await callCluster('transport.request', {
