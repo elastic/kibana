@@ -18,7 +18,7 @@ interface Props {
   options?: Partial<InfraWaffleMapOptions>;
   nodeType?: InventoryItemType;
   filter?: string;
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setVisible(val: boolean): void;
 }
 
 export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: Props) => {

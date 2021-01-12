@@ -5,7 +5,6 @@
  */
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { getSearchSessionIdByPanelProvider } from './get_search_session_id_by_panel';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -19,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'security',
     'timePicker',
   ]);
-  const getSearchSessionIdByPanel = getSearchSessionIdByPanelProvider(getService);
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const browser = getService('browser');
   const sendToBackground = getService('sendToBackground');
 
@@ -77,7 +76,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await sendToBackground.expectState('completed');
         await sendToBackground.save();
         await sendToBackground.expectState('backgroundCompleted');
-        const savedSessionId = await getSearchSessionIdByPanel('A Pie in another space');
+        const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
+          'A Pie in another space'
+        );
 
         // load URL to restore a saved session
         const url = await browser.getCurrentUrl();
