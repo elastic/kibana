@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getPaginatedNodes } from '../get_paginated_nodes';
+import { getPaginatedNodes } from './get_paginated_nodes';
 
-jest.mock('../get_node_ids', () => ({
+jest.mock('./get_node_ids', () => ({
   getNodeIds: () => [
     {
       name: 'one',
@@ -18,7 +18,7 @@ jest.mock('../get_node_ids', () => ({
   ],
 }));
 
-jest.mock('../../../../details/get_metrics', () => ({
+jest.mock('../../../details/get_metrics', () => ({
   getMetrics: () => {
     return {
       foo: [

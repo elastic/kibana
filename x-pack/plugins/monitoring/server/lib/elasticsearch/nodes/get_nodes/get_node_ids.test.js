@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getNodeIds } from '../get_node_ids';
+import { getNodeIds } from './get_node_ids';
 
 describe('getNodeIds', () => {
   it('should return a list of ids and uuids', async () => {

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mapNodesInfo } from '../map_nodes_info';
+import { mapNodesInfo } from './map_nodes_info';
 
 describe('map nodes info', () => {
   it('should summarize the info', () => {
