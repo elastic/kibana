@@ -35,6 +35,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
+import { AliasCollection } from '../alias_collection';
 import { IndexPatternManagmentContext } from '../../types';
 import { CreateButton } from '../create_button';
 import { IndexPatternTableItem, IndexPatternCreationOption } from '../types';
@@ -178,17 +179,16 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     {
       align: 'right' as HorizontalAlignment,
       className: 'inpBlockColumn',
-      field: 'aliasCollection',
       name: '',
-      render: (no?: string[]) =>
-        no ? (
-          <>
-            {no.map((label) => (
-              <EuiBadge color="hollow" key={label}>
-                {label}
-              </EuiBadge>
-            ))}
-          </>
+      render: ({
+        aliasCollection,
+        activeCollection,
+      }: {
+        aliasCollection?: string[];
+        activeCollection?: string[];
+      }) =>
+        aliasCollection && activeCollection ? (
+          <AliasCollection aliasCollection={aliasCollection} activeCollection={activeCollection} />
         ) : null,
     },
   ];

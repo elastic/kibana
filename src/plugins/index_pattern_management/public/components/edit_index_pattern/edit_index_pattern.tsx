@@ -30,8 +30,6 @@ import {
   EuiLink,
   EuiCallOut,
   EuiPanel,
-  EuiToolTip,
-  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -40,6 +38,7 @@ import { useKibana } from '../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
+import { AliasCollection } from '../alias_collection';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 
@@ -166,34 +165,18 @@ export const EditIndexPattern = withRouter(
 
     const indexPatternCollections = useMemo(
       () =>
-        indexPattern.aliasCollection ? (
-          <>
-            <div>
-              <FormattedMessage
-                id="indexPatternManagement.editIndexPattern.indexPatternCollections.aliasCollection"
-                defaultMessage="Index Aliases in Pattern: "
-              />
-              {indexPattern.aliasCollection.map((label) => {
-                const isActive = indexPattern.activeCollection
-                  ? indexPattern.activeCollection.includes(label)
-                  : false;
-                const badgeContent = isActive ? 'Active' : 'Inactive';
-                return (
-                  <EuiToolTip content={badgeContent} key={label} position="top">
-                    <EuiBadge
-                      aria-label={badgeContent}
-                      className="right-spacer"
-                      color={'hollow'}
-                      isDisabled={!isActive}
-                    >
-                      {label}
-                    </EuiBadge>
-                  </EuiToolTip>
-                );
-              })}
-            </div>
+        indexPattern.aliasCollection && indexPattern.activeCollection ? (
+          <div>
+            <FormattedMessage
+              id="indexPatternManagement.editIndexPattern.indexAliasCollections.aliasCollection"
+              defaultMessage="Index Aliases in Pattern: "
+            />
+            <AliasCollection
+              aliasCollection={indexPattern.aliasCollection}
+              activeCollection={indexPattern.activeCollection}
+            />
             <EuiSpacer size="m" />
-          </>
+          </div>
         ) : null,
       [indexPattern.activeCollection, indexPattern.aliasCollection]
     );
