@@ -44,30 +44,36 @@ const gridStyle: EuiDataGridStyle = {
 };
 
 export const DatatableComponent = (props: DatatableRenderProps) => {
+  const [firstTable] = Object.values(props.data.tables);
+
   const [columnConfig, setColumnConfig] = useState(props.args.columns);
+  const [firstLocalTable, updateTable] = useState(firstTable);
 
   useDeepCompareEffect(() => {
     setColumnConfig(props.args.columns);
   }, [props.args.columns]);
 
-  const [firstTable] = Object.values(props.data.tables);
+  useDeepCompareEffect(() => {
+    updateTable(firstTable);
+  }, [firstTable]);
 
-  const firstTableRef = useRef(firstTable);
-  firstTableRef.current = firstTable;
+  const firstTableRef = useRef(firstLocalTable);
+  firstTableRef.current = firstLocalTable;
 
   const hasAtLeastOneRowClickAction = props.rowHasRowClickTriggerActions?.some((x) => x);
 
   const { getType, dispatchEvent, renderMode, formatFactory } = props;
 
-  const formatters: Record<
-    string,
-    ReturnType<FormatFactory>
-  > = firstTableRef.current.columns.reduce(
-    (map, column) => ({
-      ...map,
-      [column.id]: formatFactory(column.meta?.params),
-    }),
-    {}
+  const formatters: Record<string, ReturnType<FormatFactory>> = useMemo(
+    () =>
+      firstLocalTable.columns.reduce(
+        (map, column) => ({
+          ...map,
+          [column.id]: formatFactory(column.meta?.params),
+        }),
+        {}
+      ),
+    [firstLocalTable, formatFactory]
   );
 
   const onClickValue = useCallback(
@@ -110,11 +116,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   );
 
   const isEmpty =
-    firstTable.rows.length === 0 ||
+    firstLocalTable.rows.length === 0 ||
     (bucketColumns.length &&
-      firstTable.rows.every((row) =>
-        bucketColumns.every((col) => typeof row[col] === 'undefined')
-      ));
+      firstTable.rows.every((row) => bucketColumns.every((col) => row[col] == null)));
 
   const visibleColumns = useMemo(() => columnConfig.columnIds.filter((field) => !!field), [
     columnConfig,
@@ -128,7 +132,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     () =>
       createGridColumns(
         bucketColumns,
-        firstTableRef,
+        firstLocalTable,
         handleFilterClick,
         isReadOnlySorted,
         columnConfig,
@@ -137,7 +141,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       ),
     [
       bucketColumns,
-      firstTableRef,
+      firstLocalTable,
       handleFilterClick,
       isReadOnlySorted,
       columnConfig,
@@ -215,7 +219,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     >
       <DataContext.Provider
         value={{
-          table: firstTable,
+          table: firstLocalTable,
           rowHasRowClickTriggerActions: props.rowHasRowClickTriggerActions,
         }}
       >
@@ -224,7 +228,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           columns={columns}
           columnVisibility={columnVisibility}
           trailingControlColumns={trailingControlColumns}
-          rowCount={firstTable.rows.length}
+          rowCount={firstLocalTable.rows.length}
           renderCellValue={renderCellValue}
           gridStyle={gridStyle}
           sorting={sorting}

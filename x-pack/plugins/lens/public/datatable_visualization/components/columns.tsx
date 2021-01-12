@@ -13,34 +13,42 @@ import type { DatatableColumns } from './types';
 
 export const createGridColumns = (
   bucketColumns: string[],
-  tableRef: React.MutableRefObject<Datatable>,
-  handleFilterClick: (field: string, value: unknown, colIndex: number, negate?: boolean) => void,
+  table: Datatable,
+  handleFilterClick: (
+    field: string,
+    value: unknown,
+    colIndex: number,
+    rowIndex: number,
+    negate?: boolean
+  ) => void,
   isReadOnlySorted: boolean,
   columnConfig: DatatableColumns & { type: 'lens_datatable_columns' },
   visibleColumns: string[],
   formatFactory: FormatFactory
 ) => {
-  const columnsReverseLookup = tableRef.current.columns.reduce<
+  const columnsReverseLookup = table.columns.reduce<
     Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
   >((memo, { id, name, meta }, i) => {
     memo[id] = { name, index: i, meta };
     return memo;
   }, {});
 
+  const bucketLookup = new Set(bucketColumns);
+
   const getContentData = ({
     rowIndex,
     columnId,
   }: Pick<EuiDataGridColumnCellActionProps, 'rowIndex' | 'columnId'>) => {
-    const rowValue = tableRef.current.rows[rowIndex][columnId];
-    const column = tableRef.current.columns.find(({ id }) => id === columnId);
-    const contentsIsDefined = rowValue !== null && rowValue !== undefined;
+    const rowValue = table.rows[rowIndex][columnId];
+    const column = columnsReverseLookup[columnId];
+    const contentsIsDefined = rowValue != null;
 
     const cellContent = formatFactory(column?.meta?.params).convert(rowValue);
     return { rowValue, contentsIsDefined, cellContent };
   };
 
   return visibleColumns.map((field) => {
-    const filterable = bucketColumns.includes(field);
+    const filterable = bucketLookup.has(field);
     const { name, index: colIndex } = columnsReverseLookup[field];
 
     const cellActions = filterable
@@ -73,7 +81,7 @@ export const createGridColumns = (
                   aria-label={filterForAriaLabel}
                   data-test-subj="lensDatatableFilterFor"
                   onClick={() => {
-                    handleFilterClick(field, rowValue, colIndex);
+                    handleFilterClick(field, rowValue, colIndex, rowIndex);
                     closePopover();
                   }}
                   iconType="plusInCircle"
@@ -108,7 +116,7 @@ export const createGridColumns = (
                   data-test-subj="lensDatatableFilterOut"
                   aria-label={filterOutAriaLabel}
                   onClick={() => {
-                    handleFilterClick(field, rowValue, colIndex, true);
+                    handleFilterClick(field, rowValue, colIndex, rowIndex, true);
                     closePopover();
                   }}
                   iconType="minusInCircle"

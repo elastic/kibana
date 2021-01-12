@@ -380,4 +380,28 @@ describe('DatatableComponent', () => {
       { id: 'b', direction: 'desc' },
     ]);
   });
+
+  test('it should refresh the table header when the datatable data changes', () => {
+    const { data, args } = sampleArgs();
+
+    const wrapper = mountWithIntl(
+      <DatatableComponent
+        data={data}
+        args={args}
+        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        dispatchEvent={onDispatchEvent}
+        getType={jest.fn()}
+        renderMode="edit"
+      />
+    );
+    // mnake a copy of the data, changing only the name of the first column
+    const newData = copyData(data);
+    newData.tables.l1.columns[0].name = 'new a';
+    wrapper.setProps({ data: newData });
+    wrapper.update();
+
+    expect(wrapper.find('[data-test-subj="dataGridHeader"]').children().first().text()).toEqual(
+      'new a'
+    );
+  });
 });

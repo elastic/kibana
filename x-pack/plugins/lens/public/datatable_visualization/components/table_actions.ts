@@ -54,11 +54,16 @@ export const createGridResizeHandler = (
 export const createGridFilterHandler = (
   tableRef: React.MutableRefObject<Datatable>,
   onClickValue: (data: LensFilterEvent['data']) => void
-) => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
+) => (
+  field: string,
+  value: unknown,
+  colIndex: number,
+  rowIndex: number,
+  negate: boolean = false
+) => {
   const col = tableRef.current.columns[colIndex];
   const isDate = col.meta?.type === 'date';
   const timeFieldName = negate && isDate ? undefined : col?.meta?.field;
-  const rowIndex = tableRef.current.rows.findIndex((row) => row[field] === value);
 
   const data: LensFilterEvent['data'] = {
     negate,
