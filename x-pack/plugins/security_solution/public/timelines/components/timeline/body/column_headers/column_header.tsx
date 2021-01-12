@@ -125,6 +125,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
               ...sort,
               {
                 columnId,
+                columnType: `${header.type}`,
                 sortDirection,
               },
             ]
@@ -132,6 +133,7 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
               ...sort.slice(0, headerIndex),
               {
                 columnId,
+                columnType: `${header.type}`,
                 sortDirection,
               },
               ...sort.slice(headerIndex + 1),
