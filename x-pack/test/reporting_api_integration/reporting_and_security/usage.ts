@@ -178,7 +178,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       /* Layout Param is optional for PDF from Visualize
        * These PDFs show up in total PDF, not in per-layout type
        */
-      it('should handle undefined layout', async () => {
+      it('allows undefined layout', async () => {
         await reportingAPI.expectAllJobsToFinishSuccessfully(
           await Promise.all([reportingAPI.postJob(GenerationUrls.PDF_VISUALIZE_NO_LAYOUT_7_11)])
         );
