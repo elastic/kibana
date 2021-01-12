@@ -36,7 +36,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./creation_index_pattern'));
     loadTestFile(require.resolve('./creation_saved_search'));
-    loadTestFile(require.resolve('./cloning'));
+    // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
+    // loadTestFile(require.resolve('./cloning'));
     loadTestFile(require.resolve('./editing'));
     loadTestFile(require.resolve('./feature_controls'));
   });
