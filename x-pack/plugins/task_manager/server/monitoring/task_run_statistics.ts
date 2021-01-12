@@ -161,6 +161,10 @@ export function createTaskRunAggregator(
     ),
     // get DateTime of latest polling delay refresh
     merge(
+      /**
+       * as `combineLatest` hangs until it has its first value and we're not likely to reconfigure the delay in normal deployments, we needed some initial value.
+        I've used _now_ (`new Date().toISOString()`) as it made the most sense (it would be the time Kibana started), but it _could_ be confusing in the future.
+       */
       of(new Date().toISOString()),
       taskPollingLifecycle.events.pipe(
         filter(
