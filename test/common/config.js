@@ -44,7 +44,14 @@ export default function () {
         '--logging.json=false',
         `--server.port=${kbnTestConfig.getPort()}`,
         '--status.allowAnonymous=true',
-        `--elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
+        // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should
+        // either include `kibanaServerTestUser` credentials, or credentials provided by the test
+        // user, or none at all in case anonymous access is used.
+        `--elasticsearch.hosts=${formatUrl(
+          Object.fromEntries(
+            Object.entries(servers.elasticsearch).filter(([key]) => key.toLowerCase() !== 'auth')
+          )
+        )}`,
         `--elasticsearch.username=${kibanaServerTestUser.username}`,
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
         `--home.disableWelcomeScreen=true`,
