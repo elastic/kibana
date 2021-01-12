@@ -175,6 +175,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         reportingAPI.expectAllTimeJobTypeTotalStats(usage, 'printable_pdf', 2);
       });
 
+      /* Layout Param is optional for PDF from Visualize
+       * These PDFs show up in total PDF, not in per-layout type
+       */
+      it('should handle undefined layout', async () => {
+        await reportingAPI.expectAllJobsToFinishSuccessfully(
+          await Promise.all([reportingAPI.postJob(GenerationUrls.PDF_VISUALIZE_NO_LAYOUT_7_11)])
+        );
+
+        const usage = await usageAPI.getUsageStats();
+
+        reportingAPI.expectRecentJobTypeTotalStats(usage, 'printable_pdf', 1);
+        reportingAPI.expectRecentPdfAppStats(usage, 'visualization', 1);
+        reportingAPI.expectRecentPdfLayoutStats(usage, 'preserve_layout', 0);
+      });
+
       it('should handle multiple export types and layouts', async () => {
         // Data from the dashboards/current archive
         await reportingAPI.expectAllJobsToFinishSuccessfully(
