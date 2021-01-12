@@ -126,7 +126,17 @@ export class HeadlessChromiumDriverFactory {
       );
 
       const processRequestFailed$ = Rx.fromEvent(page, 'requestfailed').pipe(
-        mergeMap((err) => Rx.throwError(new Error(`Request failed: ${err}`))),
+        mergeMap((req) => {
+          const failure = req.failure && req.failure();
+          let errorMessage = '';
+          if (failure) {
+            errorMessage = `Request to [${req.url()}] failed! [${failure.errorText}].`;
+          } else {
+            errorMessage = `Request to [${req.url()}] failed!`;
+          }
+
+          return Rx.throwError(new Error(errorMessage));
+        })
       );
 
       const processExit$ = Rx.fromEvent(browser, 'disconnected').pipe(
