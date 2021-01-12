@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import { getTime } from './get_time';
+import { getTime, getAbsoluteTimeRange } from './get_time';
 
 describe('get_time', () => {
   describe('getTime', () => {
@@ -87,6 +87,21 @@ describe('get_time', () => {
         lte: '2000-02-01T00:00:00.000Z',
         format: 'strict_date_optional_time',
       });
+      clock.restore();
+    });
+  });
+  describe('getAbsoluteTimeRange', () => {
+    test('should forward absolute timerange as is', () => {
+      const from = '2000-01-01T00:00:00.000Z';
+      const to = '2000-02-01T00:00:00.000Z';
+      expect(getAbsoluteTimeRange({ from, to })).toEqual({ from, to });
+    });
+
+    test('should convert relative to absolute', () => {
+      const clock = sinon.useFakeTimers(moment.utc([2000, 1, 0, 0, 0, 0, 0]).valueOf());
+      const from = '2000-01-01T00:00:00.000Z';
+      const to = moment.utc(clock.now).toISOString();
+      expect(getAbsoluteTimeRange({ from, to: 'now' })).toEqual({ from, to });
       clock.restore();
     });
   });

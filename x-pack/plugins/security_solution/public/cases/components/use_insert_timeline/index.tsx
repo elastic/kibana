@@ -14,7 +14,7 @@ import { timelineSelectors, timelineActions } from '../../../timelines/store/tim
 import { SecurityPageName } from '../../../app/types';
 import { setInsertTimeline } from '../../../timelines/store/timeline/actions';
 
-interface UseInsertTimelineReturn {
+export interface UseInsertTimelineReturn {
   handleOnTimelineChange: (title: string, id: string | null, graphEventId?: string) => void;
 }
 
