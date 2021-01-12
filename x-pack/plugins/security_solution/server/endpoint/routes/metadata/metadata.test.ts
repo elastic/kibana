@@ -256,7 +256,7 @@ describe('test endpoint route', () => {
         bool: {
           must_not: {
             terms: {
-              'HostDetails.elastic.agent.id': [
+              'elastic.agent.id': [
                 '00000000-0000-0000-0000-000000000000',
                 '11111111-1111-1111-1111-111111111111',
               ],
@@ -318,7 +318,7 @@ describe('test endpoint route', () => {
               bool: {
                 must_not: {
                   terms: {
-                    'HostDetails.elastic.agent.id': [
+                    'elastic.agent.id': [
                       '00000000-0000-0000-0000-000000000000',
                       '11111111-1111-1111-1111-111111111111',
                     ],

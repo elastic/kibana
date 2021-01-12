@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SearchResponse } from 'elasticsearch';
-import { HostMetadata, HostMetadataDetails } from '../../../../../common/endpoint/types';
+import { HostMetadata } from '../../../../../common/endpoint/types';
 
 export function createV1SearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostMetadata> {
   return ({
@@ -62,9 +62,7 @@ export function createV1SearchResponse(hostMetadata?: HostMetadata): SearchRespo
   } as unknown) as SearchResponse<HostMetadata>;
 }
 
-export function createV2SearchResponse(
-  hostMetadata?: HostMetadata
-): SearchResponse<HostMetadataDetails> {
+export function createV2SearchResponse(hostMetadata?: HostMetadata): SearchResponse<HostMetadata> {
   return ({
     took: 15,
     timed_out: false,
@@ -87,17 +85,12 @@ export function createV2SearchResponse(
               _id: '8FhM0HEBYyRTvb6lOQnw',
               _score: null,
               _source: {
-                agent: {
-                  id: '1e3472bb-5c20-4946-b469-b5af1a809e4f',
-                },
-                HostDetails: {
-                  ...hostMetadata,
-                },
+                ...hostMetadata,
               },
               sort: [1588337587997],
             },
           ]
         : [],
     },
-  } as unknown) as SearchResponse<HostMetadataDetails>;
+  } as unknown) as SearchResponse<HostMetadata>;
 }

@@ -8,11 +8,7 @@ import {
   metadataCurrentIndexPattern,
   metadataIndexPattern,
 } from '../../../../../common/endpoint/constants';
-import {
-  HostMetadata,
-  HostMetadataDetails,
-  MetadataQueryStrategyVersions,
-} from '../../../../../common/endpoint/types';
+import { HostMetadata, MetadataQueryStrategyVersions } from '../../../../../common/endpoint/types';
 import { HostListQueryResult, HostQueryResult, MetadataQueryStrategy } from '../../../types';
 
 interface HitSource {
@@ -49,7 +45,7 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
       },
     },
     queryResponseToHostListResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
+      searchResponse: SearchResponse<HostMetadata>
     ): HostListQueryResult => {
       const response = searchResponse as SearchResponse<HostMetadata>;
       return {
@@ -61,9 +57,7 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
         queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_1,
       };
     },
-    queryResponseToHostResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
-    ): HostQueryResult => {
+    queryResponseToHostResult: (searchResponse: SearchResponse<HostMetadata>): HostQueryResult => {
       const response = searchResponse as SearchResponse<HostMetadata>;
       return {
         resultLength: response.hits.hits.length,
@@ -77,11 +71,11 @@ export function metadataQueryStrategyV1(): MetadataQueryStrategy {
 export function metadataQueryStrategyV2(): MetadataQueryStrategy {
   return {
     index: metadataCurrentIndexPattern,
-    elasticAgentIdProperty: 'HostDetails.elastic.agent.id',
-    hostIdProperty: 'HostDetails.agent.id',
+    elasticAgentIdProperty: 'elastic.agent.id',
+    hostIdProperty: 'agent.id',
     sortProperty: [
       {
-        'HostDetails.event.created': {
+        'event.created': {
           order: 'desc',
         },
       },
@@ -90,27 +84,22 @@ export function metadataQueryStrategyV2(): MetadataQueryStrategy {
       track_total_hits: true,
     },
     queryResponseToHostListResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
+      searchResponse: SearchResponse<HostMetadata>
     ): HostListQueryResult => {
-      const response = searchResponse as SearchResponse<HostMetadataDetails>;
+      const response = searchResponse as SearchResponse<HostMetadata>;
       return {
         resultLength:
           ((response.hits?.total as unknown) as { value: number; relation: string }).value || 0,
         resultList:
-          response.hits.hits.length > 0
-            ? response.hits.hits.map((entry) => entry._source.HostDetails)
-            : [],
+          response.hits.hits.length > 0 ? response.hits.hits.map((entry) => entry._source) : [],
         queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_2,
       };
     },
-    queryResponseToHostResult: (
-      searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
-    ): HostQueryResult => {
-      const response = searchResponse as SearchResponse<HostMetadataDetails>;
+    queryResponseToHostResult: (searchResponse: SearchResponse<HostMetadata>): HostQueryResult => {
+      const response = searchResponse as SearchResponse<HostMetadata>;
       return {
         resultLength: response.hits.hits.length,
-        result:
-          response.hits.hits.length > 0 ? response.hits.hits[0]._source.HostDetails : undefined,
+        result: response.hits.hits.length > 0 ? response.hits.hits[0]._source : undefined,
         queryStrategyVersion: MetadataQueryStrategyVersions.VERSION_2,
       };
     },
