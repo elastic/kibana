@@ -85,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
                   createConflictError(visualization),
                   createConflictError(dashboard),
                 ],
+                warnings: [],
               });
             });
         });
@@ -104,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
                   { ...visualization, overwrite: true },
                   { ...dashboard, overwrite: true },
                 ],
+                warnings: [],
               });
             });
         });
@@ -130,6 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
                     error: { type: 'unsupported_type' },
                   },
                 ],
+                warnings: [],
               });
             });
         });
@@ -168,6 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'dashboard',
               },
             ],
+            warnings: [],
           });
         });
 
@@ -238,6 +242,7 @@ export default function ({ getService }: FtrProviderContext) {
                     },
                   },
                 ],
+                warnings: [],
               });
             });
         });
