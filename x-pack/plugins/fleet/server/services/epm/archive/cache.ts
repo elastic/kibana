@@ -39,6 +39,7 @@ export const getPackageInfo = (args: SharedKey) => {
 export const getArchivePackage = (args: SharedKey) => {
   const packageInfo = getPackageInfo(args);
   const paths = getArchiveFilelist(args);
+  if (!paths || !packageInfo) return undefined;
   return {
     paths,
     packageInfo,

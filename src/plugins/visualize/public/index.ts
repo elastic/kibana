@@ -20,11 +20,6 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { VisualizePlugin, VisualizePluginSetup } from './plugin';
 
-export type {
-  EditorRenderProps,
-  IEditorController,
-  VisEditorConstructor,
-} from './application/types';
 export { VisualizeConstants } from './application/visualize_constants';
 
 export { VisualizePluginSetup };

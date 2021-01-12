@@ -20,7 +20,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { convertToGeoJson, MapTypes } from '../../maps_legacy/public';
-import { Schemas } from '../../vis_default_editor/public';
 import { createTileMapVisualization } from './tile_map_visualization';
 import { TileMapOptions } from './components/tile_map_options';
 import { supportsCssFilters } from './css_filters';
@@ -115,7 +114,7 @@ export function createTileMapTypeDefinition(dependencies) {
         tmsLayers: [],
       },
       optionsTemplate: (props) => <TileMapOptions {...props} />,
-      schemas: new Schemas([
+      schemas: [
         {
           group: 'metrics',
           name: 'metric',
@@ -137,7 +136,7 @@ export function createTileMapTypeDefinition(dependencies) {
           min: 1,
           max: 1,
         },
-      ]),
+      ],
     },
     setup: async (vis) => {
       let tmsLayers;
