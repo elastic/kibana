@@ -45,6 +45,7 @@ import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
+import { ExplorerMapContainer } from './components/explorer_map_container';
 import {
   ExplorerQueryBar,
   getKqlQueryValues,
@@ -405,6 +406,8 @@ export class Explorer extends React.Component {
                 <EuiSpacer size="m" />
               </>
             )}
+            {/* TODO: only for jobs with geo data and if there are anomalies present */}
+            {selectedCells !== undefined && <ExplorerMapContainer tableData={tableData} />}
             {loading === false && (
               <EuiPanel>
                 <EuiTitle className="panel-title">
