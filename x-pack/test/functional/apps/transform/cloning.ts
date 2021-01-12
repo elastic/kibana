@@ -10,7 +10,16 @@ import {
   isPivotTransform,
   TransformPivotConfig,
 } from '../../../../plugins/transform/common/types/transform';
-import { getLatestTransformConfig } from './index';
+
+interface TestData {
+  type: 'pivot' | 'latest';
+  suiteTitle: string;
+  originalConfig: any;
+  transformId: string;
+  transformDescription: string;
+  destinationIndex: string;
+  expected: any;
+}
 
 function getTransformConfig(): TransformPivotConfig {
   const date = Date.now();
@@ -37,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
-    const transformConfigWithLatest = getLatestTransformConfig();
+    // const transformConfigWithLatest = getLatestTransformConfig();
 
     before(async () => {
       await esArchiver.loadIfNeeded('ml/ecommerce');
@@ -46,10 +55,10 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithPivot.id,
         transformConfigWithPivot
       );
-      await transform.api.createAndRunTransform(
-        transformConfigWithLatest.id,
-        transformConfigWithLatest
-      );
+      // await transform.api.createAndRunTransform(
+      //   transformConfigWithLatest.id,
+      //   transformConfigWithLatest
+      // );
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -57,13 +66,13 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      // await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
-      await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
+      // await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
     });
 
-    const testDataList = [
+    const testDataList: TestData[] = [
       {
         type: 'pivot' as const,
         suiteTitle: 'clone transform',
@@ -98,32 +107,33 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
       },
-      {
-        type: 'latest' as const,
-        suiteTitle: 'clone transform with latest function',
-        originalConfig: transformConfigWithLatest,
-        transformId: `clone_${transformConfigWithLatest.id}`,
-        transformDescription: `a cloned transform`,
-        get destinationIndex(): string {
-          return `user-${this.transformId}`;
-        },
-        expected: {
-          indexPreview: {
-            columns: 10,
-            rows: 5,
-          },
-          transformPreview: {
-            column: 0,
-            values: [
-              'July 12th 2019, 22:16:19',
-              'July 12th 2019, 22:50:53',
-              'July 12th 2019, 23:06:43',
-              'July 12th 2019, 23:15:22',
-              'July 12th 2019, 23:31:12',
-            ],
-          },
-        },
-      },
+      // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
+      // {
+      //   type: 'latest' as const,
+      //   suiteTitle: 'clone transform with latest function',
+      //   originalConfig: transformConfigWithLatest,
+      //   transformId: `clone_${transformConfigWithLatest.id}`,
+      //   transformDescription: `a cloned transform`,
+      //   get destinationIndex(): string {
+      //     return `user-${this.transformId}`;
+      //   },
+      //   expected: {
+      //     indexPreview: {
+      //       columns: 10,
+      //       rows: 5,
+      //     },
+      //     transformPreview: {
+      //       column: 0,
+      //       values: [
+      //         'July 12th 2019, 22:16:19',
+      //         'July 12th 2019, 22:50:53',
+      //         'July 12th 2019, 23:06:43',
+      //         'July 12th 2019, 23:15:22',
+      //         'July 12th 2019, 23:31:12',
+      //       ],
+      //     },
+      //   },
+      // },
     ];
 
     for (const testData of testDataList) {
@@ -176,9 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
               'should show the pre-filled group-by configuration'
             );
             await transform.wizard.assertGroupByEntryExists(
-              // @ts-ignore
               testData.expected.groupBy.index,
-              // @ts-ignore
               testData.expected.groupBy.label
             );
 
@@ -186,9 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
               'should show the pre-filled aggs configuration'
             );
             await transform.wizard.assertAggregationEntryExists(
-              // @ts-ignore
               testData.expected.aggs.index,
-              // @ts-ignore
               testData.expected.aggs.label
             );
           } else if (isLatestTransform(testData.originalConfig)) {

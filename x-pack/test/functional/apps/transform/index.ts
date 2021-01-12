@@ -36,9 +36,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./creation_index_pattern'));
     loadTestFile(require.resolve('./creation_saved_search'));
-    // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
-    // loadTestFile(require.resolve('./cloning'));
-    // loadTestFile(require.resolve('./editing'));
+    loadTestFile(require.resolve('./cloning'));
+    loadTestFile(require.resolve('./editing'));
     loadTestFile(require.resolve('./feature_controls'));
   });
 }
@@ -51,7 +50,7 @@ export interface GroupByEntry extends ComboboxOption {
   intervalLabel?: string;
 }
 
-interface BaseTransformTestData {
+export interface BaseTransformTestData {
   type: 'pivot' | 'latest';
   suiteTitle: string;
   source: string;
