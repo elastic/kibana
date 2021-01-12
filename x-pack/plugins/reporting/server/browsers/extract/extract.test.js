@@ -6,11 +6,10 @@
 
 import fs from 'fs';
 import crypto from 'crypto';
-import expect from '@kbn/expect';
 import { resolve } from 'path';
 
-import { extract } from '../extract';
-import { ExtractError } from '../extract_error';
+import { extract } from './extract';
+import { ExtractError } from './extract_error';
 import { promisify } from 'util';
 
 const FIXTURES_FOLDER = resolve(__dirname, '__fixtures__');
@@ -71,18 +70,18 @@ describe('extract', () => {
         thrownException = e;
       }
 
-      expect(thrownException).to.be.an(ExtractError);
+      expect(thrownException).toBeInstanceOf(ExtractError);
     });
 
     it('successfully extracts a valid zip file to the given target', async () => {
       await extract(SRC_FILE_COMPRESSED_ZIP, EXTRACT_TARGET_FOLDER);
 
       const stats = fs.statSync(EXTRACT_TARGET_FILE);
-      expect(stats).to.be.an(Object);
+      expect(stats).toBeInstanceOf(fs.Stats);
 
       const srcFileHash = await fileHash(SRC_FILE_UNCOMPRESSED);
       const targetFileHash = await fileHash(EXTRACT_TARGET_FILE);
-      expect(targetFileHash).to.eql(srcFileHash);
+      expect(targetFileHash).toEqual(srcFileHash);
     });
 
     if (isWindows) {
@@ -100,8 +99,8 @@ describe('extract', () => {
           thrownException = e;
         }
 
-        expect(thrownException).to.be.an(ExtractError);
-        expect(thrownException.cause.code).to.eql('EACCES');
+        expect(thrownException).toBeInstanceOf(ExtractError);
+        expect(thrownException.cause.code).toEqual('EACCES');
       });
     }
   });
