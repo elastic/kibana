@@ -5,13 +5,12 @@
  */
 
 import React, { ReactElement } from 'react';
-
 import { Router } from 'react-router-dom';
 import { MemoryHistory } from 'history/createMemoryHistory';
 import { createMemoryHistory } from 'history';
 import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
-import { AppState } from '../../state';
 import { MountWithReduxProvider } from './helper_with_redux';
+import { AppState } from '../../state';
 
 const helperWithRouter: <R>(
   helper: (node: ReactElement) => R,
@@ -28,7 +27,7 @@ const helperWithRouter: <R>(
 
   if (wrapReduxStore) {
     return helper(
-      <MountWithReduxProvider store={storeState}>{routerWrapper}</MountWithReduxProvider>
+      <MountWithReduxProvider state={storeState}>{routerWrapper}</MountWithReduxProvider>
     );
   }
 
