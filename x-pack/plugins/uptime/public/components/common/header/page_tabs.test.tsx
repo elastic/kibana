@@ -5,38 +5,11 @@
  */
 
 import React from 'react';
-import moment from 'moment';
-import { Ping } from '../../../../common/runtime_types';
-import { mockReduxHooks } from '../../../lib/helper/test_helpers';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { PageTabs } from './page_tabs';
 import { createMemoryHistory } from 'history';
 
 describe('PageTabs', () => {
-  const monitorName = 'sample monitor';
-  const defaultMonitorId = 'always-down';
-
-  const defaultMonitorStatus: Ping = {
-    docId: 'few213kl',
-    timestamp: moment(new Date()).subtract(15, 'm').toString(),
-    monitor: {
-      duration: {
-        us: 1234567,
-      },
-      id: defaultMonitorId,
-      status: 'up',
-      type: 'http',
-      name: monitorName,
-    },
-    url: {
-      full: 'https://www.elastic.co/',
-    },
-  };
-
-  beforeEach(() => {
-    mockReduxHooks(defaultMonitorStatus);
-  });
-
   it('it renders all tabs', () => {
     const { getByText } = render(<PageTabs />);
     expect(getByText('Overview')).toBeInTheDocument();
