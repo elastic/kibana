@@ -8,6 +8,7 @@
     "plugins/global_search/**/*",
     "plugins/features/**/*",
     "plugins/embeddable_enhanced/**/*",
+    "plugins/event_log/**/*",
     "plugins/licensing/**/*",
     "plugins/security_solution/cypress/**/*",
     "plugins/task_manager/**/*",
