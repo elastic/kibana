@@ -80,7 +80,7 @@ function getItemsWithRelativeImpact(
     return {
       key: item.key,
       averageResponseTime: item.avg,
-      transactionsPerMinute: (item.count ?? 0) / minutes,
+      trafficPerMinute: (item.count ?? 0) / minutes,
       transactionType: item.transactionType || '',
       impact:
         item.sum !== null && item.sum !== undefined
@@ -210,7 +210,7 @@ interface TransactionGroup {
   transactionName: string;
   transactionType: string;
   averageResponseTime: number | null | undefined;
-  transactionsPerMinute: number;
+  trafficPerMinute: number;
   p95: number | null | undefined;
   impact: number;
 }

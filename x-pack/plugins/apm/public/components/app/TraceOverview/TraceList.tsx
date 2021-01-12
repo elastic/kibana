@@ -75,7 +75,7 @@ const traceListColumns: Array<ITableColumn<TraceGroup>> = [
     render: (time: number) => asMillisecondDuration(time),
   },
   {
-    field: 'transactionsPerMinute',
+    field: 'trafficPerMinute',
     name: i18n.translate('xpack.apm.tracesTable.tracesPerMinuteColumnLabel', {
       defaultMessage: 'Traces per minute',
     }),

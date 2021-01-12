@@ -137,9 +137,7 @@ export function getServiceColumns({
             field: 'transactionType',
             name: i18n.translate(
               'xpack.apm.servicesTable.transactionColumnLabel',
-              {
-                defaultMessage: 'Transaction type',
-              }
+              { defaultMessage: 'Transaction type' }
             ),
             width: px(unit * 10),
             sortable: true,
@@ -148,12 +146,9 @@ export function getServiceColumns({
       : []),
     {
       field: 'avgResponseTime',
-      name: i18n.translate(
-        'xpack.apm.servicesTable.avgResponseTimeColumnLabel',
-        {
-          defaultMessage: 'Avg. response time',
-        }
-      ),
+      name: i18n.translate('xpack.apm.servicesTable.avgLatencyColumnLabel', {
+        defaultMessage: 'Avg. latency',
+      }),
       sortable: true,
       dataType: 'number',
       render: (_, { avgResponseTime }) => (
@@ -167,20 +162,18 @@ export function getServiceColumns({
       width: px(unit * 10),
     },
     {
-      field: 'transactionsPerMinute',
+      field: 'trafficPerMinute',
       name: i18n.translate(
-        'xpack.apm.servicesTable.transactionsPerMinuteColumnLabel',
-        {
-          defaultMessage: 'Trans. per minute',
-        }
+        'xpack.apm.servicesTable.trafficPerMinuteColumnLabel',
+        { defaultMessage: 'Traffic (per min)' }
       ),
       sortable: true,
       dataType: 'number',
-      render: (_, { transactionsPerMinute }) => (
+      render: (_, { trafficPerMinute }) => (
         <ServiceListMetric
-          series={transactionsPerMinute?.timeseries}
+          series={trafficPerMinute?.timeseries}
           color="euiColorVis0"
-          valueLabel={asTransactionRate(transactionsPerMinute?.value)}
+          valueLabel={asTransactionRate(trafficPerMinute?.value)}
         />
       ),
       align: 'left',
@@ -231,7 +224,7 @@ export function ServiceList({ items, noItemsMessage }: Props) {
     : serviceColumns.filter((column) => column.field !== 'healthStatus');
   const initialSortField = displayHealthStatus
     ? 'healthStatus'
-    : 'transactionsPerMinute';
+    : 'trafficPerMinute';
 
   return (
     <EuiFlexGroup
@@ -285,7 +278,7 @@ export function ServiceList({ items, noItemsMessage }: Props) {
                         ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus)
                         : -1;
                     },
-                    (item) => item.transactionsPerMinute?.value ?? 0,
+                    (item) => item.trafficPerMinute?.value ?? 0,
                   ],
                   [sortDirection, sortDirection]
                 )
@@ -298,8 +291,8 @@ export function ServiceList({ items, noItemsMessage }: Props) {
                       // bottom/top.
                       case 'avgResponseTime':
                         return item.avgResponseTime?.value ?? -1;
-                      case 'transactionsPerMinute':
-                        return item.transactionsPerMinute?.value ?? -1;
+                      case 'trafficPerMinute':
+                        return item.trafficPerMinute?.value ?? -1;
                       case 'transactionErrorRate':
                         return item.transactionErrorRate?.value ?? -1;
                       default:

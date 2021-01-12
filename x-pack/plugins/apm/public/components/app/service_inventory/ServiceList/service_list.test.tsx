@@ -41,7 +41,7 @@ describe('ServiceList', () => {
     const service: any = {
       serviceName: 'opbeans-python',
       agentName: 'python',
-      transactionsPerMinute: {
+      trafficPerMinute: {
         value: 86.93333333333334,
         timeseries: [],
       },
@@ -76,13 +76,13 @@ describe('ServiceList', () => {
       expect(healthHeading).toBeNull();
     });
 
-    it('sorts by transactions per minute', async () => {
+    it('sorts by traffic per min', async () => {
       const { findByTitle } = renderWithTheme(<ServiceList items={items} />, {
         wrapper: Wrapper,
       });
 
       expect(
-        await findByTitle('Trans. per minute; Sorted in descending order')
+        await findByTitle('Traffic (per min); Sorted in descending order')
       ).toBeInTheDocument();
     });
   });
