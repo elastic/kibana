@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datatable_expression DatatableComponent it renders actions column when there are row actions 1`] = `
+exports[`DatatableComponent it renders actions column when there are row actions 1`] = `
 <VisualizationContainer
   reportTitle="My fanci metric chart"
 >
@@ -164,7 +164,7 @@ exports[`datatable_expression DatatableComponent it renders actions column when 
 </VisualizationContainer>
 `;
 
-exports[`datatable_expression DatatableComponent it renders the title and value 1`] = `
+exports[`DatatableComponent it renders the title and value 1`] = `
 <VisualizationContainer
   reportTitle="My fanci metric chart"
 >
