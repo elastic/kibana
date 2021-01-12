@@ -178,7 +178,7 @@ export class CapabilitiesService {
   public start(): CapabilitiesStart {
     return {
       resolveCapabilities: (request, options) =>
-        this.resolveCapabilities(request, [], !!options?.useDefaultCapabilities),
+        this.resolveCapabilities(request, [], options?.useDefaultCapabilities ?? false),
     };
   }
 }

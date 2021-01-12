@@ -8,8 +8,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const config = getService('config');
   const security = getService('security');
   const spaces = getService('spaces');
+
+  const isElasticsearchAnonymousAccessEnabled = (config.get(
+    'esTestCluster.serverArgs'
+  ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
 
   async function getAnonymousCapabilities(spaceId?: string) {
     const apiResponse = await supertest
@@ -36,21 +41,11 @@ export default function ({ getService }: FtrProviderContext) {
         name: 'space-b',
         disabledFeatures: ['dashboard', 'maps'],
       });
-
-      await security.role.create('anonymous_role', {
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [
-          { spaces: ['default'], base: ['read'], feature: {} },
-          { spaces: ['space-a'], base: [], feature: { discover: ['read'], maps: ['read'] } },
-          { spaces: ['space-b'], base: [], feature: { dashboard: ['read'], visualize: ['read'] } },
-        ],
-      });
     });
 
     after(async () => {
       await spaces.delete('space-a');
       await spaces.delete('space-b');
-      await security.role.delete('anonymous_role');
     });
 
     describe('without anonymous service account', () => {
@@ -152,17 +147,19 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with anonymous service account without roles', () => {
-      before(async () => {
-        await security.user.create('anonymous_user', {
-          password: 'changeme',
-          roles: [],
-          full_name: 'Guest',
+      if (!isElasticsearchAnonymousAccessEnabled) {
+        before(async () => {
+          await security.user.create('anonymous_user', {
+            password: 'changeme',
+            roles: [],
+            full_name: 'Guest',
+          });
         });
-      });
 
-      after(async () => {
-        await security.user.delete('anonymous_user');
-      });
+        after(async () => {
+          await security.user.delete('anonymous_user');
+        });
+      }
 
       it('all capabilities should be disabled', async () => {
         expectSnapshot(await getAnonymousCapabilities()).toMatchInline(`
@@ -263,15 +260,34 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('with properly configured anonymous service account', () => {
       before(async () => {
-        await security.user.create('anonymous_user', {
-          password: 'changeme',
-          roles: ['anonymous_role'],
-          full_name: 'Guest',
+        await security.role.create('anonymous_role', {
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
+          kibana: [
+            { spaces: ['default'], base: ['read'], feature: {} },
+            { spaces: ['space-a'], base: [], feature: { discover: ['read'], maps: ['read'] } },
+            {
+              spaces: ['space-b'],
+              base: [],
+              feature: { dashboard: ['read'], visualize: ['read'] },
+            },
+          ],
         });
+
+        if (!isElasticsearchAnonymousAccessEnabled) {
+          await security.user.create('anonymous_user', {
+            password: 'changeme',
+            roles: ['anonymous_role'],
+            full_name: 'Guest',
+          });
+        }
       });
 
       after(async () => {
-        await security.user.delete('anonymous_user');
+        await security.role.delete('anonymous_role');
+
+        if (!isElasticsearchAnonymousAccessEnabled) {
+          await security.user.delete('anonymous_user');
+        }
       });
 
       it('capabilities should be properly defined', async () => {
