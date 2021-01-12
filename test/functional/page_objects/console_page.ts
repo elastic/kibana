@@ -21,11 +21,10 @@ import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
-export function ConsolePageProvider({ getService, getPageObjects }: FtrProviderContext) {
+export function ConsolePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
-  const PageObjects = getPageObjects(['common']);
 
   class ConsolePage {
     public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
