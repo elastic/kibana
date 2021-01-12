@@ -6,11 +6,11 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { JestContext } from '../../../test/context_jest';
-import { getScrubber as scrubber, getPageControlsCenter as center } from '../../../test/selectors';
-import { Footer } from '../footer';
+import { JestContext } from '../../test/context_jest';
+import { getScrubber as scrubber, getPageControlsCenter as center } from '../../test/selectors';
+import { Footer } from './footer';
 
-jest.mock('../../../supported_renderers');
+jest.mock('../../supported_renderers');
 
 describe('<Footer />', () => {
   test('null workpad renders nothing', () => {
