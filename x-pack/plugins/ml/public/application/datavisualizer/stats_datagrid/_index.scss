@@ -7,7 +7,13 @@
     text-align: left;
     color: $euiColorDarkShade;
     font-weight: bold;
+    padding-bottom: $euiSizeS;
   }
+  .mlFieldDataCard__valuesTitle .smallPadding{
+    padding-bottom: $euiSizeXS;
+  }
+
+
   .mlFieldDataCard__codeContent {
     @include euiCodeFont;
   }
@@ -33,6 +39,9 @@
   .mlDataVisualizerSummaryTable {
     .euiTableRow > .euiTableRowCell{
       border-bottom: 0px;
+    }
+    .euiTableHeaderCell {
+      display: none;
     }
   }
 }
