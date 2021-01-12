@@ -120,7 +120,12 @@ describe('TaskPollingLifecycle', () => {
   describe('claimAvailableTasks', () => {
     test('should claim Available Tasks when there are available workers', () => {
       const logger = mockLogger();
-      const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
+      const claim = jest.fn(() =>
+        Promise.resolve({
+          docs: [],
+          stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
+        })
+      );
 
       const availableWorkers = 1;
 
@@ -131,7 +136,12 @@ describe('TaskPollingLifecycle', () => {
 
     test('should not claim Available Tasks when there are no available workers', () => {
       const logger = mockLogger();
-      const claim = jest.fn(() => Promise.resolve({ docs: [], claimedTasks: 0 }));
+      const claim = jest.fn(() =>
+        Promise.resolve({
+          docs: [],
+          stats: { tasksUpdated: 0, tasksConflicted: 0, tasksClaimed: 0 },
+        })
+      );
 
       const availableWorkers = 0;
 

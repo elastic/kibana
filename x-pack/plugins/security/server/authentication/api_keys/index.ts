@@ -9,6 +9,6 @@ export {
   CreateAPIKeyResult,
   InvalidateAPIKeyResult,
   CreateAPIKeyParams,
-  InvalidateAPIKeyParams,
+  InvalidateAPIKeysParams,
   GrantAPIKeyResult,
 } from './api_keys';
