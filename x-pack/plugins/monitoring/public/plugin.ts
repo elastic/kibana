@@ -18,7 +18,6 @@ import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
-import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
@@ -97,8 +96,6 @@ export class MonitoringPlugin
           usageCollection: plugins.usageCollection,
         };
 
-        this.setInitialTimefilter(deps);
-
         const monitoringApp = new AngularApp(deps);
         const removeHistoryListener = params.history.listen((location) => {
           if (location.pathname === '' && location.hash === '') {
@@ -120,20 +117,6 @@ export class MonitoringPlugin
   public start(core: CoreStart, plugins: any) {}
 
   public stop() {}
-
-  private setInitialTimefilter({ core: coreContext, data }: MonitoringStartPluginDependencies) {
-    const { timefilter } = data.query.timefilter;
-    const { uiSettings } = coreContext;
-    const refreshInterval = { value: 10000, pause: false };
-    const time = { from: 'now-1h', to: 'now' };
-    timefilter.setRefreshInterval(refreshInterval);
-    timefilter.setTime(time);
-    uiSettings.overrideLocalDefault(
-      UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS,
-      JSON.stringify(refreshInterval)
-    );
-    uiSettings.overrideLocalDefault(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS, JSON.stringify(time));
-  }
 
   private getExternalConfig() {
     const monitoring = this.initializerContext.config.get();
