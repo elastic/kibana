@@ -28,6 +28,7 @@ export function buildConfigFromDetector(job, detectorIndex) {
     timeField: job.data_description.time_field,
     interval: job.analysis_config.bucket_span,
     datafeedConfig: job.datafeed_config,
+    summaryCountFieldName: job.analysis_config.summary_count_field_name,
   };
 
   if (detector.field_name !== undefined) {
@@ -63,8 +64,15 @@ export function buildConfigFromDetector(job, detectorIndex) {
           'field',
         ]);
     }
-
-    if (detector.function !== ML_JOB_AGGREGATION.NON_ZERO_COUNT && cardinalityField === undefined) {
+    if (
+      (detector.function === ML_JOB_AGGREGATION.NON_ZERO_COUNT ||
+        detector.function === ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT ||
+        detector.function === ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT) &&
+      cardinalityField !== undefined
+    ) {
+      config.metricFunction = ES_AGGREGATION.CARDINALITY;
+      config.metricFieldName = undefined;
+    } else {
       // For count detectors using summary_count_field, plot sum(summary_count_field_name)
       config.metricFunction = ES_AGGREGATION.SUM;
       config.metricFieldName = summaryCountFieldName;
