@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
-import { handleResponse } from '../get_node_summary';
+import { handleResponse } from './get_node_summary';
 
-describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
+// TODO: tests were not running and are not up to date
+describe.skip('Elasticsearch Node Summary get_node_summary handleResponse', () => {
   it('should return undefined fields in result for empty response', () => {
     const clusterState = {};
     const shardStats = {};
@@ -17,7 +17,7 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
     const response = {};
 
     const result = handleFn(response);
-    expect(result).to.be.eql({
+    expect(result).toBe({
       attributes: {},
       resolver: null,
       name: null,
@@ -48,7 +48,7 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
       const response = {};
 
       const result = handleFn(response);
-      expect(result).to.be.eql({
+      expect(result).toBe({
         attributes: {},
         resolver: 'fooNode',
         name: 'fooNode',
@@ -126,7 +126,7 @@ describe('Elasticsearch Node Summary get_node_summary handleResponse', () => {
       };
 
       const result = handleFn(response);
-      expect(result).to.be.eql({
+      expect(result).toBe({
         attributes: {},
         resolver: 'fooNode-Uuid',
         name: 'fooNode-Name',

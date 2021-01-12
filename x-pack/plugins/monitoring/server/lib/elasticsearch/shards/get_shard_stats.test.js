@@ -5,9 +5,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import expect from '@kbn/expect';
-import { handleResponse } from '../get_shard_stats';
-import { shardStatsFixture, clusterFixture } from './fixtures';
+import { handleResponse } from './get_shard_stats';
+import { shardStatsFixture, clusterFixture } from './__fixtures__';
 
 let resp;
 let cluster;
@@ -25,7 +24,7 @@ describe('getShardStats handler', () => {
 
   it('returns a default if response is empty', () => {
     const result = handleResponse({}, includeNodes, includeNodes, {});
-    expect(result).to.eql({
+    expect(result).toEqual({
       indicesTotals: undefined,
       indices: undefined,
       nodes: undefined,
@@ -35,7 +34,7 @@ describe('getShardStats handler', () => {
   describe('calculates indicesTotals', () => {
     it('for green cluster status - no unassigned', () => {
       const result = handleResponse(resp, includeNodes, includeNodes, cluster);
-      expect(result).to.eql({
+      expect(result).toEqual({
         indicesTotals: {
           primary: 26,
           replica: 26,
@@ -84,7 +83,7 @@ describe('getShardStats handler', () => {
         },
       ];
       const result = handleResponse(resp, includeNodes, includeNodes, cluster);
-      expect(result).to.eql({
+      expect(result).toEqual({
         indicesTotals: {
           primary: 26,
           replica: 21,
@@ -118,7 +117,7 @@ describe('getShardStats handler', () => {
         },
       ];
       const result = handleResponse(resp, includeNodes, includeNodes, cluster);
-      expect(result).to.eql({
+      expect(result).toEqual({
         indicesTotals: {
           primary: 26,
           replica: 21,
@@ -136,7 +135,7 @@ describe('getShardStats handler', () => {
   it('returns nodes info and indicesTotals calculation', () => {
     includeNodes = true;
     const result = handleResponse(resp, includeNodes, includeIndices, cluster);
-    expect(result).to.eql({
+    expect(result).toEqual({
       indicesTotals: { primary: 26, replica: 26, unassigned: { primary: 0, replica: 0 } },
       indices: undefined,
       nodes: {
@@ -161,7 +160,7 @@ describe('getShardStats handler', () => {
   it('returns indices info and indicesTotals calculation', () => {
     includeIndices = true;
     const result = handleResponse(resp, includeNodes, includeIndices, cluster);
-    expect(result).to.eql({
+    expect(result).toEqual({
       indicesTotals: { primary: 26, replica: 26, unassigned: { primary: 0, replica: 0 } },
       indices: {
         '.ml-anomalies-shared': {

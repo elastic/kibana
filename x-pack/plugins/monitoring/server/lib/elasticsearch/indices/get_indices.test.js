@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { handleResponse } from '../get_indices';
-import expect from '@kbn/expect';
+import { handleResponse } from './get_indices';
 
 describe('Get Elasticsearch Indices', () => {
   it('handle an empty response', () => {
     const result = handleResponse();
-    expect(result).to.eql([]);
+    expect(result).toEqual([]);
   });
 
   it('should handle a simple response', () => {
@@ -26,7 +25,7 @@ describe('Get Elasticsearch Indices', () => {
       },
     };
     const result = handleResponse(resp, 0, 0);
-    expect(result).to.eql([
+    expect(result).toEqual([
       {
         name: 'My Cool Test Index',
         doc_count: undefined,
@@ -102,7 +101,7 @@ describe('Get Elasticsearch Indices', () => {
       },
     };
     const result = handleResponse(resp, 0, 604800);
-    expect(result).to.eql([
+    expect(result).toEqual([
       {
         name: 'avocado-tweets-2017.08.08',
         doc_count: 381,
@@ -218,7 +217,7 @@ describe('Get Elasticsearch Indices', () => {
     };
 
     const result = handleResponse(resp, 0, 604800, shardStats);
-    expect(result).to.eql([
+    expect(result).toEqual([
       {
         name: 'avocado-tweets-2017.08.08',
         doc_count: 381,
