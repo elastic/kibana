@@ -490,6 +490,7 @@ describe('CopyToSpaceFlyout', () => {
           },
         ],
         successResults: [{ type: savedObjectToCopy.type, id: savedObjectToCopy.id, meta: {} }],
+        warnings: [],
       },
     });
 

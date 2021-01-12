@@ -30,6 +30,7 @@ describe('processImportResponse()', () => {
     const response = {
       success: true,
       successCount: 0,
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.status).toBe('success');
@@ -50,6 +51,7 @@ describe('processImportResponse()', () => {
           meta: {},
         },
       ],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.failedImports).toMatchInlineSnapshot(`
@@ -83,6 +85,7 @@ describe('processImportResponse()', () => {
           meta: {},
         },
       ],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.failedImports).toMatchInlineSnapshot(`
@@ -116,6 +119,7 @@ describe('processImportResponse()', () => {
           meta: {},
         },
       ],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.failedImports).toMatchInlineSnapshot(`
@@ -155,6 +159,7 @@ describe('processImportResponse()', () => {
           meta: {},
         },
       ],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.failedImports).toMatchInlineSnapshot(`
@@ -199,6 +204,7 @@ describe('processImportResponse()', () => {
           meta: {},
         },
       ],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.unmatchedReferences).toEqual([
@@ -212,6 +218,7 @@ describe('processImportResponse()', () => {
       success: true,
       successCount: 1,
       successResults: [{ type: 'a', id: '1', meta: {} }],
+      warnings: [],
     };
     const result = processImportResponse(response);
     expect(result.successfulImports).toMatchInlineSnapshot(`

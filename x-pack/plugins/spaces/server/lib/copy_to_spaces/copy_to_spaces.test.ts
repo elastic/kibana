@@ -109,6 +109,7 @@ describe('copySavedObjectsToSpaces', () => {
           success: true,
           successCount: filteredObjects.length,
           successResults: [('Some success(es) occurred!' as unknown) as SavedObjectsImportSuccess],
+          warnings: [],
         };
 
         return Promise.resolve(response);
