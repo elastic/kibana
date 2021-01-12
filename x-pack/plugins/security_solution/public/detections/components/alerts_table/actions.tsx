@@ -117,13 +117,14 @@ export const determineToAndFrom = ({ ecsData }: { ecsData: Ecs }) => {
 };
 
 const getFiltersFromRule = (filters: string[]): Filter[] =>
-  filters.map((filterString) => {
+  filters.reduce((acc, filterString) => {
     try {
-      return JSON.parse(filterString);
+      const objFilter: Filter = JSON.parse(filterString);
+      return [...acc, objFilter];
     } catch (e) {
-      return filterString;
+      return acc;
     }
-  });
+  }, [] as Filter[]);
 
 export const getThresholdAggregationDataProvider = (
   ecsData: Ecs,
