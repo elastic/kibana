@@ -78,9 +78,10 @@ These are "Cold" stat which are updated at a regular cadence, configured by the 
 #### The Runtime Section
 The `runtime` tracks Task Manager's performance as it runs, making note of task execution time, _drift_ etc.
 These include:
-  - The time it takes a task to run (mean and median, using a configurable running average window, `50` by default)
-  - The average _drift_ that tasks experience (mean and median, using the same configurable running average window as above). Drift tells us how long after a task's scheduled a task typically executes.
-  - The polling rate (the timestamp of the last time a polling cycle completed) and the result [`No tasks | Filled task pool | Unexpectedly ran out of workers`] frequency the past 50 polling cycles (using the same window size as the one used for running averages)
+  - The time it takes a task to run (p50, p90, p95 & p99, using a configurable running average window, `50` by default)
+  - The average _drift_ that tasks experience (p50, p90, p95 & p99, using the same configurable running average window as above). Drift tells us how long after a task's scheduled a task typically executes.
+  - The average _load_ (p50, p90, p95 & p99, using the same configurable running average window as above). Load tells us what percentage of workers is in use at the end of each polling cycle.
+  - The polling rate (the timestamp of the last time a polling cycle completed), the polling health stats (number of version clashes and mismatches) and the result [`No tasks | Filled task pool | Unexpectedly ran out of workers`] frequency the past 50 polling cycles (using the same window size as the one used for running averages)
   - The `Success | Retry | Failure ratio` by task type. This is different than the workload stats which tell you what's in the queue, but ca't keep track of retries and of non recurring tasks as they're wiped off the index when completed.
 
 These are "Hot" stats which are updated reactively as Tasks are executed and interacted with.
@@ -174,10 +175,34 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
             "status": "OK",
             "value": {
                 "polling": {
-                        /* When was the last polling cycle? */
+                    /* When was the last polling cycle? */
                     "last_successful_poll": "2020-10-05T17:57:55.411Z",
-                        /* What is the frequency of polling cycle result?
-                            Here we see 94% of "NoTasksClaimed" and 6%  "PoolFilled" */
+                    /* Running average of polling duration measuring the time from the scheduled polling cycle
+                        start until all claimed tasks are marked as running */
+                    "duration": {
+                        "p50": 4,
+                        "p90": 12,
+                        "p95": 12,
+                        "p99": 12
+                    },
+                    /* Running average of number of version clashes caused by the markAvailableTasksAsClaimed stage
+                        of the polling cycle */
+                    "claim_conflicts": {
+                        "p50": 0,
+                        "p90": 0,
+                        "p95": 0,
+                        "p99": 0
+                    },
+                    /* Running average of mismatch between the number of tasks updated by the markAvailableTasksAsClaimed stage
+                        of the polling cycle and the number of docs found by the sweepForClaimedTasks stage */
+                    "claim_mismatches": {
+                        "p50": 0,
+                        "p90": 0,
+                        "p95": 0,
+                        "p99": 0
+                    },
+                    /* What is the frequency of polling cycle result?
+                        Here we see 94% of "NoTasksClaimed" and 6%  "PoolFilled" */
                     "result_frequency_percent_as_number": {
                         /* This tells us that the polling cycle didnt claim any new tasks */
                         "NoTasksClaimed": 94,
@@ -196,14 +221,25 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
                         "Failed": 0
                     }
                 },
-                /* on average, the tasks in this deployment run 1.7s after their scheduled time */
+                /* on average, 50% of the tasks in this deployment run at most 1.7s after their scheduled time */
                 "drift": {
-                    "mean": 1720,
-                    "median": 2276
+                    "p50": 1720,
+                    "p90": 2274,
+                    "p95": 2574,
+                    "p99": 3221
+                },
+                /* on average, 50% of the tasks polling cycles in this deployment result at most in 25% of workers being in use.
+                    We track this in percentages rather than absolute count as max_workers can change over time in response
+                    to changing circumstance. */
+                "load": {
+                    "p50": 25,
+                    "p90": 80,
+                    "p95": 100,
+                    "p99": 100
                 },
                 "execution": {
                     "duration": {
-                               /* on average, the `endpoint:user-artifact-packager` tasks take 15ms to run */
+                        /* on average, the `endpoint:user-artifact-packager` tasks take 15ms to run */
                         "endpoint:user-artifact-packager": {
                             "mean": 15,
                             "median": 14.5
@@ -230,7 +266,8 @@ For example, if you _curl_ the `/api/task_manager/_health` endpoint, you might g
                         }
                     },
                     "result_frequency_percent_as_number": {
-                               /* and 100% of `endpoint:user-artifact-packager` have completed in success (within the running average window, so the past 50 runs (by default, configrable by `monitored_stats_running_average_window`) */
+                        /* and 100% of `endpoint:user-artifact-packager` have completed in success (within the running average window,
+                            so the past 50 runs (by default, configrable by `monitored_stats_running_average_window`) */
                         "endpoint:user-artifact-packager": {
                             "status": "OK",
                             "Success": 100,
