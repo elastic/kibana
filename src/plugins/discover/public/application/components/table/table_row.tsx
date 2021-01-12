@@ -28,7 +28,7 @@ import { DocViewTableRowIconUnderscore } from './table_row_icon_underscore';
 import { FieldName } from '../field_name/field_name';
 
 export interface Props {
-  field: string;
+  field?: string;
   fieldMapping?: FieldMapping;
   fieldType: string;
   displayUnderscoreWarning: boolean;
@@ -81,11 +81,7 @@ export function DocViewTableRow({
           <DocViewTableRowBtnCollapse onClick={onToggleCollapse} isCollapsed={isCollapsed} />
         )}
         {displayUnderscoreWarning && <DocViewTableRowIconUnderscore />}
-        {field ? null : (
-          <div className={valueClassName}>
-            <b>{fieldMapping?.displayName}:&nbsp;</b>
-          </div>
-        )}
+        {field ? null : <div className={valueClassName}>{fieldMapping?.displayName}:&nbsp;</div>}
         <div
           className={valueClassName}
           data-test-subj={`tableDocViewRow-${field}-value`}

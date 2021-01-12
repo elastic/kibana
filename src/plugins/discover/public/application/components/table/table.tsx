@@ -18,10 +18,12 @@
  */
 import React, { useEffect, useState } from 'react';
 import { escapeRegExp } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { DocViewTableRow } from './table_row';
 import { trimAngularSpan } from './table_helper';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 import { mult } from '../../../../../expressions/common/test_helpers/expression_functions/mult';
+import { FieldName } from '../field_name/field_name';
 
 const COLLAPSE_LINE_LENGTH = 350;
 
@@ -167,6 +169,20 @@ export function DocViewTable({
                   value={value}
                   valueRaw={valueRaw}
                 />
+                {multiFields[field] ? (
+                  <tr key={`${field}-multifield-title`}>
+                    <td className="kbnDocViewer__field">
+                      <span>&nbsp;</span>
+                    </td>
+                    <td>
+                      <b>
+                        {i18n.translate('discover.fieldChooser.discoverField.multiFields', {
+                          defaultMessage: 'Multi fields',
+                        })}
+                      </b>
+                    </td>
+                  </tr>
+                ) : null}
                 {multiFields[field]
                   ? multiFields[field].map((multiField) => {
                       return (
