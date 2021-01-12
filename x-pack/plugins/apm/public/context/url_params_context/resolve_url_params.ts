@@ -5,6 +5,7 @@
  */
 
 import { Location } from 'history';
+import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
 import { pickKeys } from '../../../common/utils/pick_keys';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
@@ -48,7 +49,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     environment,
     searchTerm,
     percentile,
-    latencyAggregationType,
+    latencyAggregationType = LatencyAggregationType.avg,
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);

@@ -7,6 +7,8 @@
   "exclude": [
     "src/**/__fixtures__/**/*",
     "src/core/**/*",
+    "src/plugins/management/**/*",
+    "src/plugins/apm_oss/**/*",
     "src/plugins/bfetch/**/*",
     "src/plugins/data/**/*",
     "src/plugins/dev_tools/**/*",
@@ -28,7 +30,7 @@
     "src/plugins/telemetry_collection_manager/**/*",
     "src/plugins/ui_actions/**/*",
     "src/plugins/url_forwarding/**/*",
-    "src/plugins/usage_collection/**/*",
+    "src/plugins/usage_collection/**/*"
     // In the build we actually exclude **/public/**/* from this config so that
     // we can run the TSC on both this and the .browser version of this config
     // file, but if we did it during development IDEs would not be able to find
@@ -37,6 +39,8 @@
   ],
   "references": [
     { "path": "./src/core/tsconfig.json" },
+    { "path": "./src/plugins/management/tsconfig.json"},
+    { "path": "./src/plugins/apm_oss/tsconfig.json" },
     { "path": "./src/plugins/bfetch/tsconfig.json" },
     { "path": "./src/plugins/data/tsconfig.json" },
     { "path": "./src/plugins/dev_tools/tsconfig.json" },
@@ -58,6 +62,6 @@
     { "path": "./src/plugins/telemetry_collection_manager/tsconfig.json" },
     { "path": "./src/plugins/ui_actions/tsconfig.json" },
     { "path": "./src/plugins/url_forwarding/tsconfig.json" },
-    { "path": "./src/plugins/usage_collection/tsconfig.json" },
+    { "path": "./src/plugins/usage_collection/tsconfig.json" }
   ]
 }
