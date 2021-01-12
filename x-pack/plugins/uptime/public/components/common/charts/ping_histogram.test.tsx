@@ -7,7 +7,7 @@
 import React from 'react';
 import DateMath from '@elastic/datemath';
 import { PingHistogramComponent, PingHistogramComponentProps } from './ping_histogram';
-import { render } from '../../../lib';
+import { render } from '../../../lib/helper/rtl_helpers';
 import { mockDataPlugin, mockMoment, mockMomentTimezone } from '../../../lib/helper/test_helpers';
 
 describe('PingHistogram component', () => {
