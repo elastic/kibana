@@ -6,15 +6,15 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { JestContext } from '../../../../test/context_jest';
+import { JestContext } from '../../../test/context_jest';
 import {
   getAutoplayTextField as input,
   getAutoplayCheckbox as checkbox,
   getAutoplaySubmit as submit,
-} from '../../../../test/selectors';
-import { AutoplaySettings } from '../autoplay_settings';
+} from '../../../test/selectors';
+import { AutoplaySettings } from './autoplay_settings';
 
-jest.mock('../../../../supported_renderers');
+jest.mock('../../../supported_renderers');
 
 describe('<AutoplaySettings />', () => {
   const wrapper = mount(

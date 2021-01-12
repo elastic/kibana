@@ -6,18 +6,18 @@
 
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { JestContext } from '../../../../test/context_jest';
-import { takeMountedSnapshot } from '../../../../test';
-import { openSettings, selectMenuItem } from '../../../../test/interactions';
+import { JestContext } from '../../../test/context_jest';
+import { takeMountedSnapshot } from '../../../test';
+import { openSettings, selectMenuItem } from '../../../test/interactions';
 import {
   getSettingsTrigger as trigger,
   getPopover as popover,
   getPortal as portal,
   getContextMenuItems as menuItems,
-} from '../../../../test/selectors';
-import { Settings } from '../settings';
+} from '../../../test/selectors';
+import { Settings } from './settings';
 
-jest.mock('../../../../supported_renderers');
+jest.mock('../../../supported_renderers');
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 jest.mock('@elastic/eui/lib/services/accessibility', () => {
   return {
