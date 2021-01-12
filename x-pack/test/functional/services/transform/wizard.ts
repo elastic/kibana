@@ -157,7 +157,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       await this.assertPivotPreviewExists('loaded');
     },
 
-    async assertPivotPreviewEmpty() {
+    async assertTransformPreviewEmpty() {
       await this.assertPivotPreviewExists('empty');
     },
 

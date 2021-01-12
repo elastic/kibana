@@ -138,6 +138,9 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep('displays the define pivot step');
           await transform.wizard.assertDefineStepActive();
 
+          await transform.testExecution.logTestStep('has correct transform function selected');
+          await transform.wizard.assertSelectedTransformFunction('pivot');
+
           await transform.testExecution.logTestStep('loads the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
 
@@ -147,8 +150,8 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.indexPreview.values
           );
 
-          await transform.testExecution.logTestStep('displays an empty pivot preview');
-          await transform.wizard.assertPivotPreviewEmpty();
+          await transform.testExecution.logTestStep('displays an empty transform preview');
+          await transform.wizard.assertTransformPreviewEmpty();
 
           await transform.testExecution.logTestStep('hides the query input');
           await transform.wizard.assertQueryInputMissing();
