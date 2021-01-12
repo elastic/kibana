@@ -6,7 +6,7 @@
 
 import { pick } from '@kbn/std';
 import * as rt from 'io-ts';
-import { concat, defer, of } from 'rxjs';
+import { concat, defer, forkJoin, of } from 'rxjs';
 import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
 import type {
   IEsSearchRequest,
@@ -17,12 +17,16 @@ import type {
   ISearchStrategy,
   PluginStart as DataPluginStart,
 } from '../../../../../../src/plugins/data/server';
+import { LogSourceColumnConfiguration } from '../../../common/http_api/log_sources';
 import {
   getLogEntryCursorFromHit,
+  LogColumn,
+  LogEntry,
   LogEntryAfterCursor,
   logEntryAfterCursorRT,
   LogEntryBeforeCursor,
   logEntryBeforeCursorRT,
+  LogEntryContext,
 } from '../../../common/log_entry';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
@@ -37,6 +41,11 @@ import {
   createErrorFromShardFailure,
   jsonFromBase64StringRT,
 } from '../../utils/typed_search_strategy';
+import {
+  CompiledLogMessageFormattingRule,
+  compileFormattingRules,
+  getBuiltinRules,
+} from './message';
 import {
   createGetLogEntriesQuery,
   getLogEntriesResponseRT,
@@ -62,7 +71,15 @@ export const logEntriesSearchStrategyProvider = ({
 
         const sourceConfiguration$ = defer(() =>
           sources.getSourceConfiguration(dependencies.savedObjectsClient, request.params.sourceId)
-        ).pipe(shareReplay(1));
+        ).pipe(take(1), shareReplay(1));
+
+        const messageFormattingRules$ = defer(() =>
+          sourceConfiguration$.pipe(
+            map(({ configuration }) =>
+              compileFormattingRules(getBuiltinRules(configuration.fields.message))
+            )
+          )
+        ).pipe(take(1), shareReplay(1));
 
         const recoveredRequest$ = of(request).pipe(
           filter(asyncRecoveredRequestRT.is),
@@ -72,9 +89,9 @@ export const logEntriesSearchStrategyProvider = ({
         const initialRequest$ = of(request).pipe(
           filter(asyncInitialRequestRT.is),
           concatMap(({ params }) =>
-            sourceConfiguration$.pipe(
+            forkJoin([sourceConfiguration$, messageFormattingRules$]).pipe(
               map(
-                ({ configuration }): IEsSearchRequest => {
+                ([{ configuration }, messageFormattingRules]): IEsSearchRequest => {
                   return {
                     params: createGetLogEntriesQuery(
                       configuration.logAlias,
@@ -84,9 +101,9 @@ export const logEntriesSearchStrategyProvider = ({
                       params.size,
                       configuration.fields.timestamp,
                       configuration.fields.tiebreaker,
-                      [], // TODO: determine fields list
+                      messageFormattingRules.requiredFields,
                       params.query,
-                      undefined // TODO: map over highlight terms OR reduce to one term in request
+                      params.highlightPhrase
                     ),
                   };
                 }
@@ -102,19 +119,31 @@ export const logEntriesSearchStrategyProvider = ({
             ...esResponse,
             rawResponse: decodeOrThrow(getLogEntriesResponseRT)(esResponse.rawResponse),
           })),
-          map((esResponse) => ({
-            ...esResponse,
-            ...(esResponse.id
-              ? { id: logEntriesSearchRequestStateRT.encode({ esRequestId: esResponse.id }) }
-              : {}),
-            rawResponse: logEntriesSearchResponsePayloadRT.encode({
-              data: { entries: [], topCursor: null, bottomCursor: null },
-              // data: esResponse.rawResponse.hits.hits.map(createLogEntryFromHit)[0] ?? null,
-              errors: (esResponse.rawResponse._shards.failures ?? []).map(
-                createErrorFromShardFailure
-              ),
-            }),
-          }))
+          concatMap((esResponse) =>
+            forkJoin([sourceConfiguration$, messageFormattingRules$]).pipe(
+              map(([{ configuration }, messageFormattingRules]) => {
+                const entries = esResponse.rawResponse.hits.hits.map(
+                  createLogEntryFromHit(configuration.logColumns, messageFormattingRules)
+                );
+                const topCursor = null;
+                const bottomCursor = null;
+
+                return {
+                  ...esResponse,
+                  ...(esResponse.id
+                    ? { id: logEntriesSearchRequestStateRT.encode({ esRequestId: esResponse.id }) }
+                    : {}),
+                  rawResponse: logEntriesSearchResponsePayloadRT.encode({
+                    data: { entries, topCursor, bottomCursor },
+                    // data: esResponse.rawResponse.hits.hits.map(createLogEntryFromHit)[0] ?? null,
+                    errors: (esResponse.rawResponse._shards.failures ?? []).map(
+                      createErrorFromShardFailure
+                    ),
+                  }),
+                };
+              })
+            )
+          )
         );
       }),
     cancel: async (id, options, dependencies) => {
@@ -136,12 +165,41 @@ const { asyncInitialRequestRT, asyncRecoveredRequestRT, asyncRequestRT } = creat
   logEntriesSearchRequestParamsRT
 );
 
-const createLogEntryFromHit = (hit: LogEntryHit) => ({
-  id: hit._id,
-  index: hit._index,
-  cursor: getLogEntryCursorFromHit(hit),
-  fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
-});
+const createLogEntryFromHit = (
+  columnDefinitions: LogSourceColumnConfiguration[],
+  messageFormattingRules: CompiledLogMessageFormattingRule
+) => (hit: LogEntryHit): LogEntry => {
+  const cursor = getLogEntryCursorFromHit(hit);
+  return {
+    id: hit._id,
+    index: hit._index,
+    cursor,
+    columns: columnDefinitions.map(
+      (column): LogColumn => {
+        if ('timestampColumn' in column) {
+          return {
+            columnId: column.timestampColumn.id,
+            timestamp: cursor.time,
+          };
+        } else if ('messageColumn' in column) {
+          return {
+            columnId: column.messageColumn.id,
+            message: messageFormattingRules.format(hit.fields, hit.highlight || {}),
+          };
+        } else {
+          return {
+            columnId: column.fieldColumn.id,
+            field: column.fieldColumn.field,
+            value: hit.fields[column.fieldColumn.field] ?? [],
+            highlights: hit.highlight?.[column.fieldColumn.field] ?? [],
+          };
+        }
+      }
+    ),
+    context: getContextFromHit(hit),
+    // fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
+  };
+};
 
 const pickCursor = (
   params: LogEntriesSearchRequestParams
@@ -153,4 +211,21 @@ const pickCursor = (
   }
 
   return null;
+};
+
+const getContextFromHit = (hit: LogEntryHit): LogEntryContext => {
+  // Get all context fields, then test for the presence and type of the ones that go together
+  const containerId = hit.fields['container.id']?.[0];
+  const hostName = hit.fields['host.name']?.[0];
+  const logFilePath = hit.fields['log.file.path']?.[0];
+
+  if (typeof containerId === 'string') {
+    return { 'container.id': containerId };
+  }
+
+  if (typeof hostName === 'string' && typeof logFilePath === 'string') {
+    return { 'host.name': hostName, 'log.file.path': logFilePath };
+  }
+
+  return {};
 };

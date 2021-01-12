@@ -28,7 +28,7 @@ const logEntriesBaseSearchRequestParamsRT = rt.intersection([
   rt.partial({
     query: jsonObjectRT,
     columns: rt.array(logSourceColumnConfigurationRT),
-    highlightTerms: rt.array(rt.string),
+    highlightPhrase: rt.string,
   }),
 ]);
 

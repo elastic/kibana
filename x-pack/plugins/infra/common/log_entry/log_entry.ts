@@ -76,6 +76,7 @@ export type LogEntryField = rt.TypeOf<typeof logEntryFieldRT>;
 
 export const logEntryRT = rt.type({
   id: rt.string,
+  index: rt.string,
   cursor: logEntryCursorRT,
   columns: rt.array(logColumnRT),
   context: logEntryContextRT,
