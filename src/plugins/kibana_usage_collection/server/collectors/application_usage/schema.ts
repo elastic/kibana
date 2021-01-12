@@ -48,8 +48,7 @@ const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
   },
 };
 
-// These keys obtained by searching for `/application\w*\.register\(/` and checking the value of the attr `id`.
-// TODO: Find a way to update these keys automatically.
+// There is a test in x-pack/test/usage_collection that validates that the keys in here match all the registered apps
 export const applicationUsageSchema = {
   // OSS
   dashboards: commonSchema,
@@ -61,10 +60,12 @@ export const applicationUsageSchema = {
   short_url_redirect: commonSchema, // It's a forward app so we'll likely never report it
   timelion: commonSchema,
   visualize: commonSchema,
+  error: commonSchema,
+  status: commonSchema,
+  kibanaOverview: commonSchema,
 
   // X-Pack
   apm: commonSchema,
-  csm: commonSchema,
   canvas: commonSchema,
   dashboard_mode: commonSchema, // It's a forward app so we'll likely never report it
   enterpriseSearch: commonSchema,
@@ -75,6 +76,7 @@ export const applicationUsageSchema = {
   metrics: commonSchema,
   infra: commonSchema, // It's a forward app so we'll likely never report it
   fleet: commonSchema,
+  ingestManager: commonSchema,
   lens: commonSchema,
   maps: commonSchema,
   ml: commonSchema,
@@ -98,4 +100,5 @@ export const applicationUsageSchema = {
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,
+  ux: commonSchema,
 };

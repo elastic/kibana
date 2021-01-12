@@ -1,0 +1,11 @@
+{
+  "id": "application_usage_test",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["xpack", "applicationUsageTest"],
+  "requiredPlugins": [
+    "kibanaUsageCollection"
+  ],
+  "server": false,
+  "ui": true
+}
