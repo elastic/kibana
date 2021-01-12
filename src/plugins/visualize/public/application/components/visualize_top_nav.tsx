@@ -190,6 +190,17 @@ const TopNav = ({
     }
   }, [vis.params, vis.type, services.data.indexPatterns, vis.data.indexPattern]);
 
+  useEffect(() => {
+    const autoRefreshFetchSub = services.data.query.timefilter.timefilter
+      .getAutoRefreshFetch$()
+      .subscribe(() => {
+        visInstance.embeddableHandler.reload();
+      });
+    return () => {
+      autoRefreshFetchSub.unsubscribe();
+    };
+  }, [services.data.query.timefilter.timefilter, visInstance.embeddableHandler]);
+
   return isChromeVisible ? (
     /**
      * Most visualizations have all search bar components enabled.
