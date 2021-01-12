@@ -14,6 +14,7 @@ export interface GetSnapshotCountParams {
   dateRangeStart: string;
   dateRangeEnd: string;
   filters?: string | null;
+  query?: string;
 }
 
 export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Snapshot> = async ({
@@ -21,6 +22,7 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
   dateRangeStart,
   dateRangeEnd,
   filters,
+  query,
 }): Promise<Snapshot> => {
   const context = new QueryContext(
     uptimeEsClient,
@@ -28,7 +30,9 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
     dateRangeEnd,
     CONTEXT_DEFAULTS.CURSOR_PAGINATION,
     filters && filters !== '' ? JSON.parse(filters) : null,
-    Infinity
+    Infinity,
+    undefined,
+    query
   );
 
   // Calculate the total, up, and down counts.
@@ -39,7 +43,7 @@ export const getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Sn
 
 const statusCount = async (context: QueryContext): Promise<Snapshot> => {
   const { body: res } = await context.search({
-    body: statusCountBody(await context.dateAndCustomFilters()),
+    body: statusCountBody(await context.dateAndCustomFilters(), context),
   });
 
   return (
@@ -51,17 +55,32 @@ const statusCount = async (context: QueryContext): Promise<Snapshot> => {
   );
 };
 
-const statusCountBody = (filters: ESFilter[]) => {
+const statusCountBody = (filters: ESFilter[], context: QueryContext) => {
   return {
     size: 0,
     query: {
       bool: {
+        ...(context.query
+          ? {
+              minimum_should_match: 1,
+              should: [
+                {
+                  multi_match: {
+                    query: escape(context.query),
+                    type: 'phrase_prefix',
+                    fields: ['monitor.id.text', 'monitor.name.text', 'url.full.text'],
+                  },
+                },
+              ],
+            }
+          : {}),
         filter: [
           {
             exists: {
               field: 'summary',
             },
           },
+
           ...filters,
         ],
       },

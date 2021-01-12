@@ -18,17 +18,18 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useUrlParams } from '../../../../hooks';
+import { euiStyled } from '../../../../../../observability/public';
 
-const btnStyle = {
-  padding: '10px 8px 0 8px',
-  borderRadius: 0,
-  height: 38,
-  width: 32,
-  backgroundColor: '#e9edf3',
-  paddingTop: 8,
-  paddingBottom: 8,
-  cursor: 'pointer',
-};
+const BoxesVerticalIcon = euiStyled(EuiIcon)`
+  padding: 10px 8px 0 8px;
+  border-radius: 0;
+  height: 38px;
+  width: 32px;
+  background-color: ${(props) => props.theme.eui.euiColorLightShade};
+  padding-top: 8px;
+  padding-bottom: 8px;
+  cursor: pointer;
+`;
 
 interface Props {
   kqlSyntax: boolean;
@@ -65,7 +66,7 @@ export const SearchType = ({ kqlSyntax, setKqlSyntax }: Props) => {
   const button = kqlSyntax ? (
     <EuiButtonEmpty onClick={onButtonClick}>KQL</EuiButtonEmpty>
   ) : (
-    <EuiIcon style={btnStyle} type="boxesVertical" onClick={onButtonClick} />
+    <BoxesVerticalIcon type="boxesVertical" onClick={onButtonClick} />
   );
 
   return (

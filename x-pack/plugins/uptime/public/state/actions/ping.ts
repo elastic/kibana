@@ -11,10 +11,11 @@ import {
   PingsResponse,
   GetPingsParams,
 } from '../../../common/runtime_types';
+import { createAsyncAction } from './utils';
 
-export const getPingHistogram = createAction<GetPingHistogramParams>('GET_PING_HISTOGRAM');
-export const getPingHistogramSuccess = createAction<HistogramResult>('GET_PING_HISTOGRAM_SUCCESS');
-export const getPingHistogramFail = createAction<Error>('GET_PING_HISTOGRAM_FAIL');
+export const getPingHistogram = createAsyncAction<GetPingHistogramParams, HistogramResult>(
+  'GET_PING_HISTOGRAM'
+);
 
 export const getPings = createAction<GetPingsParams>('GET PINGS');
 export const getPingsSuccess = createAction<PingsResponse>('GET PINGS SUCCESS');
