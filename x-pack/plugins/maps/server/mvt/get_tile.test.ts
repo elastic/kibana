@@ -5,7 +5,7 @@
  */
 
 import { getGridTile, getTile } from './get_tile';
-import { TILE_GRIDAGGS, TILE_SEARCHES } from './__tests__/tile_es_responses';
+import { TILE_GRIDAGGS, TILE_SEARCHES } from './__fixtures__/tile_es_responses';
 import { Logger } from 'src/core/server';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -53,7 +53,7 @@ describe('getTile', () => {
       geoFieldType: ES_GEO_FIELD_TYPE.GEO_SHAPE,
     });
 
-    compareTiles('./__tests__/pbf/0_0_0_docs.pbf', tile);
+    compareTiles('./__fixtures__/pbf/0_0_0_docs.pbf', tile);
   });
 });
 
@@ -116,12 +116,12 @@ describe('getGridTile', () => {
 
   test('0.0.0 tile (clusters)', async () => {
     const tile = await getGridTile(defaultParams);
-    compareTiles('./__tests__/pbf/0_0_0_grid_aspoint.pbf', tile);
+    compareTiles('./__fixtures__/pbf/0_0_0_grid_aspoint.pbf', tile);
   });
 
   test('0.0.0 tile (grids)', async () => {
     const tile = await getGridTile({ ...defaultParams, requestType: RENDER_AS.GRID });
-    compareTiles('./__tests__/pbf/0_0_0_grid_asgrid.pbf', tile);
+    compareTiles('./__fixtures__/pbf/0_0_0_grid_asgrid.pbf', tile);
   });
 });
 
