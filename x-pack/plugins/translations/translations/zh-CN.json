@@ -10062,7 +10062,6 @@
     "xpack.infra.homePage.settingsTabTitle": "设置",
     "xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder": "搜索基础设施数据……（例如 host.name:host-1）",
     "xpack.infra.homePage.toolbar.showingLastOneMinuteDataText": "选定时间过去 {duration}的数据",
-    "xpack.infra.infra.nodeDetails.close": "关闭",
     "xpack.infra.infra.nodeDetails.openAsPage": "以页面形式打开",
     "xpack.infra.infrastructureMetricsExplorerPage.documentTitle": "{previousTitle} | 指标浏览器",
     "xpack.infra.infrastructureSnapshotPage.documentTitle": "{previousTitle} | 库存",
