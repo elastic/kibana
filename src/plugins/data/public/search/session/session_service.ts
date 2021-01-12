@@ -260,11 +260,11 @@ export class SessionService {
   public getSearchOptions(
     sessionId?: string
   ): Pick<ISearchOptions, 'sessionId' | 'isRestore' | 'isStored'> {
-    const currentSessionId = this.getSessionId();
+    const isCurrentSession = this.isCurrentSession(sessionId);
     return {
       sessionId,
-      isRestore: currentSessionId ? this.isRestore() : false,
-      isStored: currentSessionId ? this.isStored() : false,
+      isRestore: isCurrentSession ? this.isRestore() : false,
+      isStored: isCurrentSession ? this.isStored() : false,
     };
   }
 }

@@ -118,9 +118,11 @@ describe('SearchInterceptor', () => {
         sessionId?: string;
       }) => {
         const sessionServiceMock = searchMock.session as jest.Mocked<ISessionService>;
-        sessionServiceMock.getSessionId.mockImplementation(() => sessionId);
-        sessionServiceMock.isRestore.mockImplementation(() => isRestore);
-        sessionServiceMock.isStored.mockImplementation(() => isStored);
+        sessionServiceMock.getSearchOptions.mockImplementation(() => ({
+          sessionId,
+          isRestore,
+          isStored,
+        }));
         fetchMock.mockResolvedValue({ result: 200 });
       };
 
@@ -130,30 +132,14 @@ describe('SearchInterceptor', () => {
 
       afterEach(() => {
         const sessionServiceMock = searchMock.session as jest.Mocked<ISessionService>;
-        sessionServiceMock.getSessionId.mockReset();
-        sessionServiceMock.isRestore.mockReset();
-        sessionServiceMock.isStored.mockReset();
+        sessionServiceMock.getSearchOptions.mockReset();
         fetchMock.mockReset();
       });
 
-      test('infers isRestore from session service state', async () => {
+      test('gets session search options from session service', async () => {
         const sessionId = 'sid';
         setup({
           isRestore: true,
-          sessionId,
-        });
-
-        await searchInterceptor.search(mockRequest, { sessionId }).toPromise();
-        expect(fetchMock.mock.calls[0][0]).toEqual(
-          expect.objectContaining({
-            options: { sessionId: 'sid', isStored: false, isRestore: true },
-          })
-        );
-      });
-
-      test('infers isStored from session service state', async () => {
-        const sessionId = 'sid';
-        setup({
           isStored: true,
           sessionId,
         });
@@ -161,41 +147,13 @@ describe('SearchInterceptor', () => {
         await searchInterceptor.search(mockRequest, { sessionId }).toPromise();
         expect(fetchMock.mock.calls[0][0]).toEqual(
           expect.objectContaining({
-            options: { sessionId: 'sid', isStored: true, isRestore: false },
+            options: { sessionId, isStored: true, isRestore: true },
           })
         );
-      });
 
-      test('skips isRestore & isStore in case not a current session Id', async () => {
-        setup({
-          isStored: true,
-          isRestore: true,
-          sessionId: 'session id',
-        });
-
-        await searchInterceptor
-          .search(mockRequest, { sessionId: 'different session id' })
-          .toPromise();
-        expect(fetchMock.mock.calls[0][0]).toEqual(
-          expect.objectContaining({
-            options: { sessionId: 'different session id', isStored: false, isRestore: false },
-          })
-        );
-      });
-
-      test('skips isRestore & isStore in case no session Id', async () => {
-        setup({
-          isStored: true,
-          isRestore: true,
-          sessionId: undefined,
-        });
-
-        await searchInterceptor.search(mockRequest, { sessionId: 'sessionId' }).toPromise();
-        expect(fetchMock.mock.calls[0][0]).toEqual(
-          expect.objectContaining({
-            options: { sessionId: 'sessionId', isStored: false, isRestore: false },
-          })
-        );
+        expect(
+          (searchMock.session as jest.Mocked<ISessionService>).getSearchOptions
+        ).toHaveBeenCalledWith(sessionId);
       });
     });
 
