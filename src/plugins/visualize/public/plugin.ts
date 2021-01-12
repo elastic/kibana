@@ -41,10 +41,10 @@ import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../d
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { SharePluginStart, SharePluginSetup } from '../../share/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
-import { VisualizationsStart } from '../../visualizations/public';
+import { VisualizationsStart, VisEditorConstructor } from '../../visualizations/public';
 import { VisualizeConstants } from './application/visualize_constants';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
-import { VisEditorConstructor, VisualizeServices } from './application/types';
+import { VisualizeServices } from './application/types';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';

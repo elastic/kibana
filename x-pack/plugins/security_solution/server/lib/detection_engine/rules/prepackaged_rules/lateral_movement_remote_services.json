@@ -33,9 +33,9 @@
       },
       "technique": [
         {
-          "id": "T1035",
-          "name": "Service Execution",
-          "reference": "https://attack.mitre.org/techniques/T1035/"
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/"
         }
       ]
     }

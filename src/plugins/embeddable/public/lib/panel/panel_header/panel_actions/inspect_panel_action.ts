@@ -55,9 +55,18 @@ export class InspectPanelAction implements Action<ActionContext> {
     if (!(await this.isCompatible({ embeddable })) || adapters === undefined) {
       throw new Error('Action not compatible with context');
     }
-
     const session = this.inspector.open(adapters, {
       title: embeddable.getTitle(),
+      options: {
+        fileName:
+          embeddable.getTitle() || // pick the visible title
+          embeddable.getInput().title || // or the custom title if used, but currently hidden
+          embeddable.getOutput().defaultTitle || // or the saved title
+          // in the very last resort use "untitled"
+          i18n.translate('embeddableApi.panel.inspectPanel.untitledEmbeddableFilename', {
+            defaultMessage: 'untitled',
+          }),
+      },
     });
     // Overwrite the embeddables.destroy() function to close the inspector
     // before calling the original destroy method

@@ -32,13 +32,20 @@
       },
       "technique": [
         {
-          "id": "T1170",
-          "name": "Mshta",
-          "reference": "https://attack.mitre.org/techniques/T1170/"
+          "id": "T1218",
+          "name": "Signed Binary Proxy Execution",
+          "reference": "https://attack.mitre.org/techniques/T1218/",
+          "subtechnique": [
+            {
+              "id": "T1218.005",
+              "name": "Mshta",
+              "reference": "https://attack.mitre.org/techniques/T1218/005/"
+            }
+          ]
         }
       ]
     }
   ],
   "type": "eql",
-  "version": 1
+  "version": 2
 }
