@@ -20,7 +20,11 @@ export { addSpaceIdToPath } from '../common';
 export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
 export { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
 export { ISpacesClient } from './spaces_client';
-export { Space } from '../common/model/space';
+
+export { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult } from '../common';
+
+// re-export types from oss definition
+export { Space } from '../../../../src/plugins/spaces_oss/common';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
