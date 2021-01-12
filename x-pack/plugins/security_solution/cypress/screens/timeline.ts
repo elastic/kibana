@@ -111,6 +111,8 @@ export const TIMELINE_COLUMN_SPINNER = '[data-test-subj="timeline-loading-spinne
 
 export const TIMELINE_DATA_PROVIDERS = '[data-test-subj="dataProviders"]';
 
+export const TIMELINE_DATA_PROVIDERS_ACTION_MENU = '[data-test-subj="providerActions"]';
+
 export const TIMELINE_DATA_PROVIDERS_EMPTY =
   '[data-test-subj="dataProviders"] [data-test-subj="empty"]';
 

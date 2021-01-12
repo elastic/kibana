@@ -6,8 +6,8 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { expectTextsInDocument } from '../../../../../utils/testHelpers';
-import { ErrorCount } from '../ErrorCount';
+import { expectTextsInDocument } from '../../../../utils/testHelpers';
+import { ErrorCount } from './ErrorCount';
 
 describe('ErrorCount', () => {
   it('shows singular error message', () => {
