@@ -45,7 +45,6 @@
     "es": "node scripts/es",
     "test:jest": "node scripts/jest",
     "test:jest_integration": "node scripts/jest_integration",
-    "test:mocha": "node scripts/mocha",
     "test:ftr": "node scripts/functional_tests",
     "test:ftr:server": "node scripts/functional_tests_server",
     "test:ftr:runner": "node scripts/functional_test_runner",

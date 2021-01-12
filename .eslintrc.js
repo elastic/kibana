@@ -542,7 +542,6 @@ module.exports = {
         'packages/kbn-eslint-import-resolver-kibana/**/*.js',
         'packages/kbn-eslint-plugin-eslint/**/*',
         'x-pack/gulpfile.js',
-        'x-pack/dev-tools/mocha/setup_mocha.js',
         'x-pack/scripts/*.js',
       ],
       excludedFiles: ['**/integration_tests/**/*'],
@@ -794,7 +793,6 @@ module.exports = {
       files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
-        mocha: true,
         jest: true,
       },
       rules: {
@@ -930,7 +928,6 @@ module.exports = {
       files: ['x-pack/plugins/lists/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node'],
       env: {
-        mocha: true,
         jest: true,
       },
       rules: {
