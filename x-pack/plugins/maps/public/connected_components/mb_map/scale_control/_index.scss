@@ -9,3 +9,7 @@
   border: 2px solid $euiTextColor;
   border-top: $euiTextColor;
 }
+
+.mapScaleControlFullScreen {
+  bottom: $euiSizeL * 2;
+}

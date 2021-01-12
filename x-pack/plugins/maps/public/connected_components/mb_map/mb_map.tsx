@@ -56,6 +56,7 @@ interface Props {
   spatialFiltersLayer: ILayer;
   goto?: Goto | null;
   inspectorAdapters: Adapters;
+  isFullScreen: boolean;
   scrollZoom: boolean;
   extentChanged: (mapExtentState: MapExtentState) => void;
   onMapReady: (mapExtentState: MapExtentState) => void;
@@ -397,7 +398,7 @@ export class MBMap extends Component<Props, State> {
         />
       ) : null;
       scaleControl = this.props.settings.showScaleControl ? (
-        <ScaleControl mbMap={this.state.mbMap} />
+        <ScaleControl mbMap={this.state.mbMap} isFullScreen={this.props.isFullScreen} />
       ) : null;
     }
     return (

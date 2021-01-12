@@ -5,12 +5,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 import React, { Component } from 'react';
 import { Map as MapboxMap } from 'mapbox-gl';
 
 const MAX_WIDTH = 100;
 
 interface Props {
+  isFullScreen: boolean;
   mbMap: MapboxMap;
 }
 
@@ -97,7 +99,12 @@ export class ScaleControl extends Component<Props, State> {
 
   render() {
     return (
-      <div className="mapScaleControl" style={{ width: `${this.state.width}px` }}>
+      <div
+        className={classNames('mapScaleControl', {
+          mapScaleControlFullScreen: this.props.isFullScreen,
+        })}
+        style={{ width: `${this.state.width}px` }}
+      >
         {this.state.label}
       </div>
     );
