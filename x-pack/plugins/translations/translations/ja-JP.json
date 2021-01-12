@@ -9862,7 +9862,6 @@
     "xpack.infra.homePage.settingsTabTitle": "設定",
     "xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder": "インフラストラクチャーデータを検索… (例: host.name:host-1)",
     "xpack.infra.homePage.toolbar.showingLastOneMinuteDataText": "指定期間のデータの最後の{duration}",
-    "xpack.infra.infra.nodeDetails.close": "閉じる",
     "xpack.infra.infra.nodeDetails.openAsPage": "ページとして開く",
     "xpack.infra.infrastructureMetricsExplorerPage.documentTitle": "{previousTitle} | メトリックエクスプローラー",
     "xpack.infra.infrastructureSnapshotPage.documentTitle": "{previousTitle} | インベントリ",
