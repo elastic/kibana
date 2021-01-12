@@ -6,6 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ANALYTICS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.analytics.title',
+  { defaultMessage: 'Analytics' }
+);
+
 export const TOTAL_DOCUMENTS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalDocuments',
   { defaultMessage: 'Total documents' }
