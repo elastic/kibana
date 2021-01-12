@@ -20,46 +20,46 @@ interface EnginesValues {
   metaEnginesPage: number;
 }
 
-interface OnEnginesFetch {
+interface OnEnginesLoad {
   engines: EngineDetails[];
   total: number;
 }
 interface EnginesActions {
-  onEnginesFetch({ engines, total }: OnEnginesFetch): OnEnginesFetch;
-  onMetaEnginesFetch({ engines, total }: OnEnginesFetch): OnEnginesFetch;
+  onEnginesLoad({ engines, total }: OnEnginesLoad): OnEnginesLoad;
+  onMetaEnginesLoad({ engines, total }: OnEnginesLoad): OnEnginesLoad;
   onEnginesPagination(page: number): { page: number };
   onMetaEnginesPagination(page: number): { page: number };
-  fetchEngines(): void;
-  fetchMetaEngines(): void;
+  loadEngines(): void;
+  loadMetaEngines(): void;
 }
 
 export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
   path: ['enterprise_search', 'app_search', 'engines_logic'],
   actions: {
-    onEnginesFetch: ({ engines, total }) => ({ engines, total }),
-    onMetaEnginesFetch: ({ engines, total }) => ({ engines, total }),
+    onEnginesLoad: ({ engines, total }) => ({ engines, total }),
+    onMetaEnginesLoad: ({ engines, total }) => ({ engines, total }),
     onEnginesPagination: (page) => ({ page }),
     onMetaEnginesPagination: (page) => ({ page }),
-    fetchEngines: true,
-    fetchMetaEngines: true,
+    loadEngines: true,
+    loadMetaEngines: true,
   },
   reducers: {
     dataLoading: [
       true,
       {
-        onEnginesFetch: () => false,
+        onEnginesLoad: () => false,
       },
     ],
     engines: [
       [],
       {
-        onEnginesFetch: (_, { engines }) => engines,
+        onEnginesLoad: (_, { engines }) => engines,
       },
     ],
     enginesTotal: [
       0,
       {
-        onEnginesFetch: (_, { total }) => total,
+        onEnginesLoad: (_, { total }) => total,
       },
     ],
     enginesPage: [
@@ -71,13 +71,13 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
     metaEngines: [
       [],
       {
-        onMetaEnginesFetch: (_, { engines }) => engines,
+        onMetaEnginesLoad: (_, { engines }) => engines,
       },
     ],
     metaEnginesTotal: [
       0,
       {
-        onMetaEnginesFetch: (_, { total }) => total,
+        onMetaEnginesLoad: (_, { total }) => total,
       },
     ],
     metaEnginesPage: [
@@ -88,26 +88,26 @@ export const EnginesLogic = kea<MakeLogicType<EnginesValues, EnginesActions>>({
     ],
   },
   listeners: ({ actions, values }) => ({
-    fetchEngines: async () => {
+    loadEngines: async () => {
       const { http } = HttpLogic.values;
       const { enginesPage } = values;
 
       const response = await http.get('/api/app_search/engines', {
         query: { type: 'indexed', pageIndex: enginesPage },
       });
-      actions.onEnginesFetch({
+      actions.onEnginesLoad({
         engines: response.results,
         total: response.meta.page.total_results,
       });
     },
-    fetchMetaEngines: async () => {
+    loadMetaEngines: async () => {
       const { http } = HttpLogic.values;
       const { metaEnginesPage } = values;
 
       const response = await http.get('/api/app_search/engines', {
         query: { type: 'meta', pageIndex: metaEnginesPage },
       });
-      actions.onMetaEnginesFetch({
+      actions.onMetaEnginesLoad({
         engines: response.results,
         total: response.meta.page.total_results,
       });

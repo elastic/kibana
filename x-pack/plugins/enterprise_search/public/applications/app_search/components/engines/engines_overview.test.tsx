@@ -28,8 +28,8 @@ describe('EnginesOverview', () => {
     metaEnginesPage: 1,
   };
   const actions = {
-    fetchEngines: jest.fn(),
-    fetchMetaEngines: jest.fn(),
+    loadEngines: jest.fn(),
+    loadMetaEngines: jest.fn(),
     onEnginesPagination: jest.fn(),
     onMetaEnginesPagination: jest.fn(),
   };
@@ -73,7 +73,7 @@ describe('EnginesOverview', () => {
       const wrapper = shallow(<EnginesOverview />);
 
       expect(wrapper.find(EnginesTable)).toHaveLength(1);
-      expect(actions.fetchEngines).toHaveBeenCalled();
+      expect(actions.loadEngines).toHaveBeenCalled();
     });
 
     describe('when on a platinum license', () => {
@@ -86,7 +86,7 @@ describe('EnginesOverview', () => {
         const wrapper = shallow(<EnginesOverview />);
 
         expect(wrapper.find(EnginesTable)).toHaveLength(2);
-        expect(actions.fetchMetaEngines).toHaveBeenCalled();
+        expect(actions.loadMetaEngines).toHaveBeenCalled();
       });
     });
 
@@ -108,7 +108,7 @@ describe('EnginesOverview', () => {
         setMockValues({ ...valuesWithEngines, enginesPage: 51 });
         rerender(wrapper);
 
-        expect(actions.fetchEngines).toHaveBeenCalledTimes(2);
+        expect(actions.loadEngines).toHaveBeenCalledTimes(2);
         expect(getTablePagination(wrapper).pageIndex).toEqual(50);
       });
     });

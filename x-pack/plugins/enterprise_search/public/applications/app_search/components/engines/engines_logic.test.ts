@@ -55,11 +55,11 @@ describe('EnginesLogic', () => {
   });
 
   describe('actions', () => {
-    describe('onEnginesFetch', () => {
+    describe('onEnginesLoad', () => {
       describe('dataLoading', () => {
         it('should be set to false', () => {
           mount();
-          EnginesLogic.actions.onEnginesFetch({ engines: [], total: 0 });
+          EnginesLogic.actions.onEnginesLoad({ engines: [], total: 0 });
 
           expect(EnginesLogic.values).toEqual({
             ...DEFAULT_VALUES,
@@ -71,7 +71,7 @@ describe('EnginesLogic', () => {
       describe('engines & enginesTotal', () => {
         it('should be set to the provided value', () => {
           mount();
-          EnginesLogic.actions.onEnginesFetch({ engines: [MOCK_ENGINE], total: 100 });
+          EnginesLogic.actions.onEnginesLoad({ engines: [MOCK_ENGINE], total: 100 });
 
           expect(EnginesLogic.values).toEqual({
             ...DEFAULT_VALUES,
@@ -83,11 +83,11 @@ describe('EnginesLogic', () => {
       });
     });
 
-    describe('onMetaEnginesFetch', () => {
+    describe('onMetaEnginesLoad', () => {
       describe('engines & enginesTotal', () => {
         it('should be set to the provided value', () => {
           mount();
-          EnginesLogic.actions.onMetaEnginesFetch({ engines: [MOCK_ENGINE], total: 1 });
+          EnginesLogic.actions.onMetaEnginesLoad({ engines: [MOCK_ENGINE], total: 1 });
 
           expect(EnginesLogic.values).toEqual({
             ...DEFAULT_VALUES,
@@ -126,40 +126,40 @@ describe('EnginesLogic', () => {
       });
     });
 
-    describe('fetchEngines', () => {
+    describe('loadEngines', () => {
       it('should call the engines API endpoint and set state based on the results', async () => {
         const promise = Promise.resolve(MOCK_ENGINES_API_RESPONSE);
         (HttpLogic.values.http.get as jest.Mock).mockReturnValueOnce(promise);
         mount({ enginesPage: 10 });
-        jest.spyOn(EnginesLogic.actions, 'onEnginesFetch');
+        jest.spyOn(EnginesLogic.actions, 'onEnginesLoad');
 
-        EnginesLogic.actions.fetchEngines();
+        EnginesLogic.actions.loadEngines();
         await promise;
 
         expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/engines', {
           query: { type: 'indexed', pageIndex: 10 },
         });
-        expect(EnginesLogic.actions.onEnginesFetch).toHaveBeenCalledWith({
+        expect(EnginesLogic.actions.onEnginesLoad).toHaveBeenCalledWith({
           engines: [MOCK_ENGINE],
           total: 100,
         });
       });
     });
 
-    describe('fetchMetaEngines', () => {
+    describe('loadMetaEngines', () => {
       it('should call the engines API endpoint and set state based on the results', async () => {
         const promise = Promise.resolve(MOCK_ENGINES_API_RESPONSE);
         (HttpLogic.values.http.get as jest.Mock).mockReturnValueOnce(promise);
         mount({ metaEnginesPage: 99 });
-        jest.spyOn(EnginesLogic.actions, 'onMetaEnginesFetch');
+        jest.spyOn(EnginesLogic.actions, 'onMetaEnginesLoad');
 
-        EnginesLogic.actions.fetchMetaEngines();
+        EnginesLogic.actions.loadMetaEngines();
         await promise;
 
         expect(HttpLogic.values.http.get).toHaveBeenCalledWith('/api/app_search/engines', {
           query: { type: 'meta', pageIndex: 99 },
         });
-        expect(EnginesLogic.actions.onMetaEnginesFetch).toHaveBeenCalledWith({
+        expect(EnginesLogic.actions.onMetaEnginesLoad).toHaveBeenCalledWith({
           engines: [MOCK_ENGINE],
           total: 100,
         });

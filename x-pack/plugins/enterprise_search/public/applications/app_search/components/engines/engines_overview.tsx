@@ -39,19 +39,16 @@ export const EnginesOverview: React.FC = () => {
     metaEnginesTotal,
     metaEnginesPage,
   } = useValues(EnginesLogic);
-  const {
-    fetchEngines,
-    fetchMetaEngines,
-    onEnginesPagination,
-    onMetaEnginesPagination,
-  } = useActions(EnginesLogic);
+  const { loadEngines, loadMetaEngines, onEnginesPagination, onMetaEnginesPagination } = useActions(
+    EnginesLogic
+  );
 
   useEffect(() => {
-    fetchEngines();
+    loadEngines();
   }, [enginesPage]);
 
   useEffect(() => {
-    if (hasPlatinumLicense) fetchMetaEngines();
+    if (hasPlatinumLicense) loadMetaEngines();
   }, [hasPlatinumLicense, metaEnginesPage]);
 
   if (dataLoading) return <LoadingState />;
