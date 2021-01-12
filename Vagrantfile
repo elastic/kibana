@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "rpm" do |rpm|
-    rpm.vm.box = 'generic/rhel8'
+    rpm.vm.box = 'generic/centos8'
     rpm.vm.provision "ansible" do |ansible|
       ansible.playbook = "test/package/rpm/playbook.yml"
     end

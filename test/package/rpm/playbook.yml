@@ -6,30 +6,39 @@
       yum:
         name: '*'
         state: latest
+
+    - name: install dependencies
+      become: yes
+      yum:
+        name:
+          - nss
+          - fontconfig
+          - freetype
+        state: latest
+
     - name: install kibana from local file
       become: yes
       yum:
         name: /packages/kibana-8.0.0-SNAPSHOT-x86_64.rpm
         state: present
         disable_gpg_check: yes
+
     - name: copy kibana configuration
       become: yes
       copy:
         src: ./files/kibana.yml
         dest: /etc/kibana/kibana.yml
       register: config
+
+    - name: open port 5601/tcp
+      become: yes
+      ansible.posix.firewalld:
+        port: 5601/tcp
+        state: enabled
+
     - name: start kibana
       become: yes
       systemd:
         state: started
         name: kibana
-    - name: restart kibana
-      service:
-        name: kibana
-        state: restarted
-      when: config.changed
-    - name: disable firewall
-      service:
-        name: firewalld
-        state: stopped
     - wait_for: host=localhost port=5601 timeout=60
