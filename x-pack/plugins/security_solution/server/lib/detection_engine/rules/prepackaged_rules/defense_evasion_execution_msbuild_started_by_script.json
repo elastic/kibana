@@ -48,15 +48,9 @@
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
-      "technique": [
-        {
-          "id": "T1127",
-          "name": "Trusted Developer Utilities Proxy Execution",
-          "reference": "https://attack.mitre.org/techniques/T1127/"
-        }
-      ]
+      "technique": []
     }
   ],
   "type": "query",
-  "version": 4
+  "version": 5
 }

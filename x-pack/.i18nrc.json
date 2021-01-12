@@ -42,7 +42,7 @@
     "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.reporting": ["plugins/reporting"],
     "xpack.rollupJobs": ["plugins/rollup"],
-    "xpack.runtimeFields": "plugins/runtime_fields",
+    "xpack.runtimeFields": "plugins/runtime_field_editor",
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": "plugins/security",
     "xpack.server": "legacy/server",

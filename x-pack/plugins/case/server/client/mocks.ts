@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { omit } from 'lodash/fp';
 import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
-import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock } from '../../../../../src/core/server/mocks';
 import { actionsClientMock } from '../../../actions/server/mocks';
 import {
-  AlertService,
+  AlertServiceContract,
   CaseConfigureService,
   CaseService,
   CaseUserActionServiceSetup,
@@ -29,17 +30,24 @@ export const createCaseClientMock = (): CaseClientMock => ({
   updateAlertsStatus: jest.fn(),
 });
 
-export const createCaseClientWithMockSavedObjectsClient = async (
-  savedObjectsClient: any,
-  badAuth: boolean = false
-): Promise<{
+export const createCaseClientWithMockSavedObjectsClient = async ({
+  savedObjectsClient,
+  badAuth = false,
+  omitFromContext = [],
+}: {
+  savedObjectsClient: any;
+  badAuth?: boolean;
+  omitFromContext?: string[];
+}): Promise<{
   client: CaseClient;
-  services: { userActionService: jest.Mocked<CaseUserActionServiceSetup> };
+  services: {
+    userActionService: jest.Mocked<CaseUserActionServiceSetup>;
+    alertsService: jest.Mocked<AlertServiceContract>;
+  };
 }> => {
   const actionsMock = actionsClientMock.create();
   actionsMock.getAll.mockImplementation(() => Promise.resolve(getActions()));
   const log = loggingSystemMock.create().get('case');
-  const esClientMock = elasticsearchServiceMock.createClusterClient();
   const request = {} as KibanaRequest;
 
   const caseServicePlugin = new CaseService(log);
@@ -56,10 +64,10 @@ export const createCaseClientWithMockSavedObjectsClient = async (
     postUserActions: jest.fn(),
     getUserActions: jest.fn(),
   };
-  const alertsService = new AlertService();
-  alertsService.initialize(esClientMock);
 
-  const context = ({
+  const alertsService = { initialize: jest.fn(), updateAlertsStatus: jest.fn() };
+
+  const context = {
     core: {
       savedObjects: {
         client: savedObjectsClient,
@@ -74,7 +82,7 @@ export const createCaseClientWithMockSavedObjectsClient = async (
         getSignalsIndex: () => '.siem-signals',
       }),
     },
-  } as unknown) as RequestHandlerContext;
+  };
 
   const caseClient = createCaseClient({
     savedObjectsClient,
@@ -84,10 +92,10 @@ export const createCaseClientWithMockSavedObjectsClient = async (
     connectorMappingsService,
     userActionService,
     alertsService,
-    context,
+    context: (omit(omitFromContext, context) as unknown) as RequestHandlerContext,
   });
   return {
     client: caseClient,
-    services: { userActionService },
+    services: { userActionService, alertsService },
   };
 };
