@@ -17,31 +17,43 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { extractIndexPatterns } from '../../../common/extract_index_patterns';
-import { getCoreStart } from '../../services';
+import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
+import { SanitizedFieldType } from '../../../common/types';
 
-export async function fetchFields(indexPatterns = [], signal) {
-  const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];
+export async function fetchFields(
+  indexes: string[] = [],
+  signal?: AbortSignal
+): Promise<Record<string, SanitizedFieldType[]>> {
+  const patterns = Array.isArray(indexes) ? indexes : [indexes];
+  const coreStart = getCoreStart();
+  const dataStart = getDataStart();
+
   try {
+    const defaultIndexPattern = await dataStart.indexPatterns.getDefault();
     const indexFields = await Promise.all(
-      patterns.map((pattern) =>
-        getCoreStart().http.get(ROUTES.FIELDS, {
+      patterns.map(async (pattern) => {
+        return coreStart.http.get(ROUTES.FIELDS, {
           query: {
             index: pattern,
           },
           signal,
-        })
-      )
+        });
+      })
     );
 
-    return patterns.reduce(
+    const fields: Record<string, SanitizedFieldType[]> = patterns.reduce(
       (cumulatedFields, currentPattern, index) => ({
         ...cumulatedFields,
         [currentPattern]: indexFields[index],
       }),
       {}
     );
+
+    if (defaultIndexPattern?.title && patterns.includes(defaultIndexPattern.title)) {
+      fields[''] = fields[defaultIndexPattern.title];
+    }
+    return fields;
   } catch (error) {
     if (error.name !== 'AbortError') {
       getCoreStart().notifications.toasts.addDanger({
@@ -52,11 +64,5 @@ export async function fetchFields(indexPatterns = [], signal) {
       });
     }
   }
-  return [];
-}
-
-export async function fetchIndexPatternFields({ params, fields = {} }) {
-  const indexPatterns = extractIndexPatterns(params, fields);
-
-  return await fetchFields(indexPatterns);
+  return {};
 }

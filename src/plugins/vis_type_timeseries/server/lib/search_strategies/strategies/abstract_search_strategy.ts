@@ -17,16 +17,19 @@
  * under the License.
  */
 
-import {
+import type {
   RequestHandlerContext,
   FakeRequest,
   IUiSettingsClient,
   SavedObjectsClientContract,
 } from 'kibana/server';
 
-import { Framework } from '../../../plugin';
-import { IndexPatternsFetcher } from '../../../../../data/server';
-import { VisPayload } from '../../../../common/types';
+import type { Framework } from '../../../plugin';
+import type { IndexPatternsFetcher, IFieldType } from '../../../../../data/server';
+import type { VisPayload } from '../../../../common/types';
+import type { IndexPatternsService } from '../../../../../data/common';
+import { indexPatterns } from '../../../../../data/server';
+import { SanitizedFieldType } from '../../../../common/types';
 
 /**
  * ReqFacade is a regular KibanaRequest object extended with additional service
@@ -39,12 +42,26 @@ export interface ReqFacade<T = unknown> extends FakeRequest {
   framework: Framework;
   payload: T;
   pre: {
-    indexPatternsService?: IndexPatternsFetcher;
+    indexPatternsFetcher?: IndexPatternsFetcher;
   };
   getUiSettingsService: () => IUiSettingsClient;
   getSavedObjectsClient: () => SavedObjectsClientContract;
   getEsShardTimeout: () => Promise<number>;
+  getIndexPatternsService: () => Promise<IndexPatternsService>;
 }
+
+const toSanitizedFieldType = (fields: IFieldType[]) => {
+  return fields
+    .filter((field) => field.aggregatable && !indexPatterns.isNestedField(field))
+    .map(
+      (field: IFieldType) =>
+        ({
+          name: field.name,
+          label: field.customLabel ?? field.name,
+          type: field.type,
+        } as SanitizedFieldType)
+    );
+};
 
 export abstract class AbstractSearchStrategy {
   async search(req: ReqFacade<VisPayload>, bodies: any[], indexType?: string) {
@@ -81,13 +98,27 @@ export abstract class AbstractSearchStrategy {
   async getFieldsForWildcard<TPayload = unknown>(
     req: ReqFacade<TPayload>,
     indexPattern: string,
-    capabilities?: unknown
+    capabilities?: unknown,
+    options?: Partial<{
+      type: string;
+      rollupIndex: string;
+    }>
   ) {
-    const { indexPatternsService } = req.pre;
+    const { indexPatternsFetcher } = req.pre;
+    const indexPatternsService = await req.getIndexPatternsService();
+    const kibanaIndexPattern = (await indexPatternsService.find(indexPattern)).find(
+      (index) => index.title === indexPattern
+    );
 
-    return await indexPatternsService!.getFieldsForWildcard({
-      pattern: indexPattern,
-      fieldCapsOptions: { allow_no_indices: true },
-    });
+    return toSanitizedFieldType(
+      kibanaIndexPattern
+        ? kibanaIndexPattern.fields.getAll()
+        : await indexPatternsFetcher!.getFieldsForWildcard({
+            pattern: indexPattern,
+            fieldCapsOptions: { allow_no_indices: true },
+            metaFields: [],
+            ...options,
+          })
+    );
   }
 }
