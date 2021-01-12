@@ -177,6 +177,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
       'space-2': {
         success: false,
@@ -195,6 +196,7 @@ describe('CopyToSpaceFlyout', () => {
             meta: {},
           },
         ],
+        warnings: [],
       },
     });
 
@@ -259,10 +261,12 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
       'space-2': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
     });
 
@@ -319,6 +323,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 5,
+        warnings: [],
       },
       'space-2': {
         success: false,
@@ -359,6 +364,7 @@ describe('CopyToSpaceFlyout', () => {
             meta: {},
           },
         ],
+        warnings: [],
       },
     });
 
@@ -366,6 +372,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-2': {
         success: true,
         successCount: 2,
+        warnings: [],
       },
     });
 
@@ -572,6 +579,7 @@ describe('CopyToSpaceFlyout', () => {
       'space-1': {
         success: true,
         successCount: 3,
+        warnings: [],
       },
       'space-2': {
         success: false,
@@ -584,6 +592,7 @@ describe('CopyToSpaceFlyout', () => {
             meta: {},
           },
         ],
+        warnings: [],
       },
     });
 
