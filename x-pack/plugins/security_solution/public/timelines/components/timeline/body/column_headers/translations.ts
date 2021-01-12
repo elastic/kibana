@@ -22,8 +22,20 @@ export const FULL_SCREEN = i18n.translate('xpack.securitySolution.timeline.fullS
   defaultMessage: 'Full screen',
 });
 
+export const HIDE_COLUMN = i18n.translate('xpack.securitySolution.timeline.hideColumnLabel', {
+  defaultMessage: 'Hide column',
+});
+
+export const SORT_AZ = i18n.translate('xpack.securitySolution.timeline.sortAZLabel', {
+  defaultMessage: 'Sort A-Z',
+});
+
 export const SORT_FIELDS = i18n.translate('xpack.securitySolution.timeline.sortFieldsButton', {
   defaultMessage: 'Sort fields',
+});
+
+export const SORT_ZA = i18n.translate('xpack.securitySolution.timeline.sortZALabel', {
+  defaultMessage: 'Sort Z-A',
 });
 
 export const TYPE = i18n.translate('xpack.securitySolution.timeline.typeTooltip', {

@@ -20,7 +20,8 @@
 import { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
 import { VisualizeInput } from 'src/plugins/visualizations/public';
-import { ByValueVisInstance, IEditorController, VisualizeServices } from '../../types';
+import { ByValueVisInstance, VisualizeServices } from '../../types';
+import type { IEditorController } from '../../../../../visualizations/public';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { getDefaultEditor } from '../../../services';

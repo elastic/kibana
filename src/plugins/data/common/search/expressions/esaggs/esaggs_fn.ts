@@ -62,6 +62,7 @@ export interface EsaggsStartDependencies {
   deserializeFieldFormat: FormatFactory;
   indexPatterns: IndexPatternsContract;
   searchSource: ISearchStartSearchSource;
+  getNow?: () => Date;
 }
 
 /** @internal */
@@ -118,7 +119,8 @@ export async function handleEsaggsRequest(
   args: Arguments,
   params: RequestHandlerParams
 ): Promise<Datatable> {
-  const resolvedTimeRange = input?.timeRange && calculateBounds(input.timeRange);
+  const resolvedTimeRange =
+    input?.timeRange && calculateBounds(input.timeRange, { forceNow: params.getNow?.() });
 
   const response = await handleRequest(params);
 
