@@ -73,10 +73,14 @@ export class SearchSessionService implements ISessionService {
   private monitorTimer!: NodeJS.Timeout;
   private config!: ConfigSchema['search']['sessions'];
 
-  constructor(
-    private readonly logger: Logger,
-    private readonly config$: Observable<ConfigSchema>
-  ) {}
+  constructor(private readonly logger: Logger, private readonly config$: Observable<ConfigSchema>) {
+    this.fetchConfig();
+  }
+
+  private async fetchConfig() {
+    const config = await this.config$.pipe(first()).toPromise();
+    this.config = config.search.sessions;
+  }
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
     registerSearchSessionsTask(core, {
@@ -96,8 +100,6 @@ export class SearchSessionService implements ISessionService {
   }
 
   private setupMonitoring = async (core: CoreStart, deps: StartDependencies) => {
-    const config = await this.config$.pipe(first()).toPromise();
-    this.config = config.search.sessions;
     if (this.config.enabled) {
       scheduleSearchSessionsTasks(deps.taskManager, this.logger, this.config.trackingInterval);
       this.logger.debug(`setupMonitoring | Enabling monitoring`);
