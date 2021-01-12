@@ -252,6 +252,24 @@ describe('MonitorListStatusColumn', () => {
     );
   });
 
+  it('displays single location status', async () => {
+    const { getByText } = render(
+      <EuiThemeProvider darkMode={false}>
+        <MonitorListStatusColumn
+          status="up"
+          timestamp={new Date().toString()}
+          summaryPings={summaryPings.filter((ping) => ping.observer!.geo!.name! === 'Islamabad')}
+        />
+      </EuiThemeProvider>
+    );
+
+    const locationsContainer = getByText('in 0/1 location', { exact: false });
+
+    fireEvent.mouseOver(locationsContainer);
+
+    await waitFor(() => screen.getByText('Down in Islamabad'));
+  });
+
   it('will display location status', async () => {
     const { getByText } = render(
       <EuiThemeProvider darkMode={false}>
