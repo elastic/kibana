@@ -580,6 +580,10 @@ export interface DataPublicPluginStart {
     autocomplete: AutocompleteStart;
     fieldFormats: FieldFormatsStart;
     indexPatterns: IndexPatternsContract;
+    // Warning: (ae-forgotten-export) The symbol "NowProviderPublicContract" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    nowProvider: NowProviderPublicContract;
     query: QueryStart;
     search: ISearchStart;
     ui: DataPublicPluginStartUi;
