@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
@@ -55,17 +56,24 @@ export class TelemetryManagementSectionPlugin
     core: CoreSetup,
     {
       advancedSettings,
-      usageCollection,
       telemetry: { telemetryService },
+      usageCollection,
     }: TelemetryManagementSectionPluginDepsSetup
   ) {
+    const ApplicationUsageTrackingProvider =
+      usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
     advancedSettings.component.register(
       advancedSettings.component.componentType.PAGE_FOOTER_COMPONENT,
-      telemetryManagementSectionWrapper(
-        telemetryService,
-        this.shouldShowSecuritySolutionExample,
-        usageCollection?.applicationUsageTracker
-      ),
+      (props) => {
+        return (
+          <ApplicationUsageTrackingProvider>
+            {telemetryManagementSectionWrapper(
+              telemetryService,
+              this.shouldShowSecuritySolutionExample
+            )(props)}
+          </ApplicationUsageTrackingProvider>
+        );
+      },
       true
     );
 

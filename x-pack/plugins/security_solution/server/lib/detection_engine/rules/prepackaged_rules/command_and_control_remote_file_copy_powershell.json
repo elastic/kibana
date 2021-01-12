@@ -47,9 +47,16 @@
       },
       "technique": [
         {
-          "id": "T1086",
-          "name": "PowerShell",
-          "reference": "https://attack.mitre.org/techniques/T1086/"
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "reference": "https://attack.mitre.org/techniques/T1059/",
+          "subtechnique": [
+            {
+              "id": "T1059.001",
+              "name": "PowerShell",
+              "reference": "https://attack.mitre.org/techniques/T1059/001/"
+            }
+          ]
         }
       ]
     }

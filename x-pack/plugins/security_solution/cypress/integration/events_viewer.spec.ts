@@ -44,7 +44,7 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe.skip('Events Viewer', () => {
+describe('Events Viewer', () => {
   context('Fields rendering', () => {
     before(() => {
       cleanKibana();
@@ -118,7 +118,7 @@ describe.skip('Events Viewer', () => {
     });
   });
 
-  context('Events behaviour', () => {
+  context('Events behavior', () => {
     before(() => {
       cleanKibana();
       loginAndWaitForPage(HOSTS_URL);
