@@ -19,19 +19,16 @@
 
 import {
   EuiButtonEmpty,
-  EuiButtonIconPropsForButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiListGroup,
-  EuiListGroupItemProps,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { createDashboardEditUrl, DashboardConstants, DashboardSavedObject } from '../..';
+import { DashboardSavedObject } from '../..';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
 import { useKibana } from '../../services/kibana_react';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_panel_storage';

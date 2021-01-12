@@ -40,6 +40,7 @@ import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
 import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
 import { UrlForwardingStart } from '../../../../url_forwarding/public';
+import { DashboardPanelStorage } from '../lib';
 
 function makeDefaultServices(): DashboardAppServices {
   const core = coreMock.createStart();
@@ -63,6 +64,7 @@ function makeDefaultServices(): DashboardAppServices {
     savedObjects: savedObjectsPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createInstance().doStart(),
     dashboardCapabilities: {} as DashboardCapabilities,
+    dashboardPanelStorage: {} as DashboardPanelStorage,
     initializerContext: {} as PluginInitializerContext,
     chrome: chromeServiceMock.createStartContract(),
     navigation: {} as NavigationPublicPluginStart,
