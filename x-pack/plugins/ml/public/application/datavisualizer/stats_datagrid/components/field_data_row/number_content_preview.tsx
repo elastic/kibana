@@ -22,7 +22,7 @@ export interface NumberContentPreviewProps {
   config: FieldVisConfig;
 }
 
-export const NumberContentPreview: FC<NumberContentPreviewProps> = ({ config }) => {
+export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ config }) => {
   const { stats, fieldFormat, fieldName } = config;
   const defaultChartData: MetricDistributionChartData[] = [];
   const [distributionChartData, setDistributionChartData] = useState(defaultChartData);

@@ -19,10 +19,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiTableComputedColumnType } from '@elastic/eui/src/components/basic_table/table_types';
+import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { FieldTypeIcon } from '../../components/field_type_icon';
 import { DocumentStat } from './components/field_data_row/document_stats';
 import { DistinctValues } from './components/field_data_row/distinct_values';
-import { NumberContentPreview } from './components/field_data_row/number_content_preview';
+import { IndexBasedNumberContentPreview } from './components/field_data_row/number_content_preview';
 import {
   DataVisualizerFileBasedAppState,
   DataVisualizerIndexBasedAppState,
@@ -35,6 +36,9 @@ import {
   FileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
 } from './types/field_vis_config';
+import { FileBasedNumberContentPreview } from '../file_based/components/field_data_row';
+import { BooleanContentPreview } from './components/field_data_row';
+
 const FIELD_NAME = 'fieldName';
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
@@ -208,10 +212,16 @@ export const DataVisualizerDataGrid = <T extends DataVisualizerDataGridItem>({
             return <TopValuesPreview config={item} />;
           }
 
-          if (isIndexBasedFieldVisConfig(item)) {
-            if (item.type === 'number' && item.stats?.distribution !== undefined) {
-              return <NumberContentPreview config={item} />;
+          if (item.type === ML_JOB_FIELD_TYPES.NUMBER && item.stats?.distribution !== undefined) {
+            if (isIndexBasedFieldVisConfig(item)) {
+              return <IndexBasedNumberContentPreview config={item} />;
+            } else {
+              return <FileBasedNumberContentPreview config={item} />;
             }
+          }
+
+          if (item.type === ML_JOB_FIELD_TYPES.BOOLEAN) {
+            return <BooleanContentPreview config={item} />;
           }
           return null;
         },

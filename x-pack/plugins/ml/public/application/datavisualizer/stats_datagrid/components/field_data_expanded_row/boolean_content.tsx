@@ -11,8 +11,8 @@ import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
-import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+import { getTFPercentage } from '../../utils';
 
 function getPercentLabel(value: number): string {
   if (value === 0) {
@@ -26,30 +26,9 @@ function getPercentLabel(value: number): string {
 }
 
 export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
-  const { stats } = config;
-  if (stats === undefined) return null;
-  const { count } = stats;
-  // use stats from index based config
-  let { trueCount, falseCount } = stats;
-
-  // use stats from file based find structure results
-  if (trueCount === undefined || falseCount === undefined) {
-    const modifiedConfig = config;
-    if (modifiedConfig?.stats?.topValues) {
-      modifiedConfig.stats.topValues.forEach((doc) => {
-        if (doc.doc_count !== undefined) {
-          if (doc.key === 'false') {
-            falseCount = doc.doc_count;
-          }
-          if (doc.key === 'true') {
-            trueCount = doc.doc_count;
-          }
-        }
-      });
-    }
-  }
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
-  if (count === undefined || trueCount === undefined || falseCount === undefined) return null;
+  const formattedPercentages = getTFPercentage(config);
+  if (!formattedPercentages) return null;
 
   return (
     <div className="mlFieldDataCard__stats">
@@ -80,8 +59,8 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config }) => {
         <BarSeries
           id={config.fieldName || fieldFormat}
           data={[
-            { x: 'true', y: roundToDecimalPlace((trueCount / count) * 100) },
-            { x: 'false', y: roundToDecimalPlace((falseCount / count) * 100) },
+            { x: 'true', y: formattedPercentages.truePercentage },
+            { x: 'false', y: formattedPercentages.falsePercentage },
           ]}
           displayValueSettings={{
             hideClippedValue: true,
