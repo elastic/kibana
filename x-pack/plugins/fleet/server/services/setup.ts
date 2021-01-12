@@ -57,6 +57,7 @@ async function createSetupSideEffects(
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient),
+    setupFleet(soClient, callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -156,6 +157,7 @@ export async function setupFleet(
   if (options?.forceRecreate !== true && res.role.created === false) {
     return;
   }
+
   const password = generateRandomPassword();
   // Create fleet enroll user
   await callCluster('transport.request', {
