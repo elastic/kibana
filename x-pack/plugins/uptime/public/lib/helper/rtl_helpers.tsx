@@ -18,6 +18,7 @@ import {
 } from '../../../../../../src/plugins/kibana_react/public';
 import { MountWithReduxProvider } from './helper_with_redux';
 import { AppState } from '../../state';
+import { EuiThemeProvider } from '../../../../observability/public';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -68,7 +69,9 @@ export function MockKibanaProvider<ExtraCore>({
   };
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
-      <I18nProvider>{children}</I18nProvider>
+      <EuiThemeProvider darkMode={false}>
+        <I18nProvider>{children}</I18nProvider>
+      </EuiThemeProvider>
     </KibanaContextProvider>
   );
 }
