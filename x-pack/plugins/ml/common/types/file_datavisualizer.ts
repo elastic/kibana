@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+
 export interface InputOverrides {
   [key: string]: string;
 }
@@ -18,60 +20,6 @@ export interface AnalysisResult {
   results: FindFileStructureResponse;
   overrides?: FormattedOverrides;
 }
-
-type NumericType =
-  | 'long'
-  | 'integer'
-  | 'short'
-  | 'byte'
-  | 'double'
-  | 'float'
-  | 'half_float'
-  | 'scaled_float';
-
-type RangeType =
-  | 'integer_range'
-  | 'float_range'
-  | 'long_range'
-  | 'ip_range'
-  | 'double_range'
-  | 'date_range';
-
-// including all possible Elasticsearch types
-// since find_file_structure API can be enhanced to include new fields in the future
-export type EsMappingType =
-  | 'text'
-  | 'keyword'
-  | 'numeric'
-  | 'binary'
-  | 'boolean'
-  | 'range'
-  | 'object'
-  | 'nested'
-  | 'alias'
-  | 'completion'
-  | 'dense_vector'
-  | 'flattened'
-  | 'ip'
-  | 'join'
-  | 'percolator'
-  | 'rank_feature'
-  | 'rank_features'
-  | 'shape'
-  | 'search_as_you_type'
-  | 'date'
-  | 'date_nanos'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'token_count'
-  | 'point'
-  | 'histogram'
-  | 'constant_keyword'
-  | 'version'
-  | 'wildcard'
-  | NumericType
-  | RangeType
-  | 'unknown';
 
 export interface FindFileStructureResponse {
   charset: string;
@@ -96,7 +44,12 @@ export interface FindFileStructureResponse {
   mappings: {
     properties: {
       [fieldName: string]: {
-        type: EsMappingType;
+        // including all possible Elasticsearch types
+        // since find_file_structure API can be enhanced to include new fields in the future
+        type: Omit<
+          ES_FIELD_TYPES,
+          ES_FIELD_TYPES._ID | ES_FIELD_TYPES._INDEX | ES_FIELD_TYPES._SOURCE | ES_FIELD_TYPES._TYPE
+        >;
         format?: string;
       };
     };

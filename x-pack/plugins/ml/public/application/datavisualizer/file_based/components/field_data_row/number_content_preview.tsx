@@ -18,7 +18,7 @@ export const FileBasedNumberContentPreview = ({ config }: { config: FileBasedFie
   )
     return null;
   return (
-    <EuiFlexGroup direction={'column'}>
+    <EuiFlexGroup direction={'column'} gutterSize={'xs'}>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem>
           <b>
