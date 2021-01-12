@@ -15,6 +15,9 @@ getFieldsForWildcard(options: {
         fieldCapsOptions?: {
             allow_no_indices: boolean;
         };
+        filters?: {
+            aggregatable?: boolean;
+        };
         type?: string;
         rollupIndex?: string;
     }): Promise<FieldDescriptor[]>;
@@ -24,7 +27,7 @@ getFieldsForWildcard(options: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>{</code><br/><code>        pattern: string &#124; string[];</code><br/><code>        metaFields?: string[];</code><br/><code>        fieldCapsOptions?: {</code><br/><code>            allow_no_indices: boolean;</code><br/><code>        };</code><br/><code>        type?: string;</code><br/><code>        rollupIndex?: string;</code><br/><code>    }</code> |  |
+|  options | <code>{</code><br/><code>        pattern: string &#124; string[];</code><br/><code>        metaFields?: string[];</code><br/><code>        fieldCapsOptions?: {</code><br/><code>            allow_no_indices: boolean;</code><br/><code>        };</code><br/><code>        filters?: {</code><br/><code>            aggregatable?: boolean;</code><br/><code>        };</code><br/><code>        type?: string;</code><br/><code>        rollupIndex?: string;</code><br/><code>    }</code> |  |
 
 <b>Returns:</b>
 
