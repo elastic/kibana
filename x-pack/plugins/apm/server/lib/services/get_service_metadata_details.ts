@@ -21,7 +21,10 @@ import {
 import { ContainerType } from '../../../common/service_metadata';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 type ServiceMetadataDetailsRaw = Pick<
@@ -71,6 +74,9 @@ export async function getServiceMetadataDetails({
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
     ...setup.esFilter,
+    ...getDocumentTypeFilterForAggregatedTransactions(
+      searchAggregatedTransactions
+    ),
   ];
 
   const should = [
