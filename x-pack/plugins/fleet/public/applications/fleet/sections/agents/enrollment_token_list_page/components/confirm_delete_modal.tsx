@@ -36,8 +36,7 @@ export const ConfirmEnrollmentTokenDelete = (props: Props) => {
       >
         <EuiCallOut
           title={i18n.translate('xpack.fleet.enrollmentTokenDeleteModal.description', {
-            defaultMessage:
-              'Are your sure you want to revoke {keyName}? Agents that use this token will no longer be able to access policies or send data. ',
+            defaultMessage: 'Are your sure you want to revoke {keyName}?',
             values: {
               keyName: enrollmentKey.name,
             },
