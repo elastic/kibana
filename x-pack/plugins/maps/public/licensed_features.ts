@@ -36,7 +36,6 @@ export const LICENCED_FEATURES_DETAILS: Record<LICENSED_FEATURES, LicensedFeatur
 
 let licenseId: string | undefined;
 let isGoldPlus: boolean = false;
-
 let isEnterprisePlus: boolean = false;
 
 export const getLicenseId = () => licenseId;
