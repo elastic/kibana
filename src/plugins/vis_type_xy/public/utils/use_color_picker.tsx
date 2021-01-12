@@ -17,10 +17,11 @@
  * under the License.
  */
 
-import React, { BaseSyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { BaseSyntheticEvent, useCallback, useMemo, useRef } from 'react';
 
 import { LegendColorPicker, Position, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
-import { PopoverAnchorPosition, EuiWrappingPopover } from '@elastic/eui';
+import { PopoverAnchorPosition, EuiWrappingPopover, EuiOutsideClickDetector } from '@elastic/eui';
+import { EuiEvent } from '@elastic/eui/src/components/outside_click_detector/outside_click_detector';
 
 import { ColorPicker } from '../../../charts/public';
 
@@ -65,7 +66,7 @@ export const useColorPicker = (
 
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const handleOutsideClick = useCallback(
-        (e: MouseEvent) => {
+        (e: EuiEvent) => {
           if (ref.current && !(ref.current! as any).contains(e.target)) {
             onClose?.();
           }
@@ -73,27 +74,21 @@ export const useColorPicker = (
         [onClose]
       );
 
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      useEffect(() => {
-        document.addEventListener('click', handleOutsideClick);
-        return () => {
-          document.removeEventListener('click', handleOutsideClick);
-        };
-      }, [handleOutsideClick]);
-
       return (
-        <EuiWrappingPopover
-          popoverRef={ref}
-          isOpen
-          ownFocus
-          display="block"
-          button={anchor}
-          anchorPosition={getAnchorPosition(legendPosition)}
-          closePopover={onClose}
-          panelPaddingSize="s"
-        >
-          <ColorPicker color={color} onChange={handlChange} label={seriesName} />
-        </EuiWrappingPopover>
+        <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
+          <EuiWrappingPopover
+            popoverRef={ref}
+            isOpen
+            ownFocus
+            display="block"
+            button={anchor}
+            anchorPosition={getAnchorPosition(legendPosition)}
+            closePopover={onClose}
+            panelPaddingSize="s"
+          >
+            <ColorPicker color={color} onChange={handlChange} label={seriesName} />
+          </EuiWrappingPopover>
+        </EuiOutsideClickDetector>
       );
     },
     [getSeriesName, legendPosition, setColor]
