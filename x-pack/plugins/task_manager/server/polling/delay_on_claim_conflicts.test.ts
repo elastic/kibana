@@ -117,6 +117,7 @@ describe('delayOnClaimConflicts', () => {
       expect(handler.mock.calls[1][0]).toBeGreaterThanOrEqual(pollInterval * 0.25);
       expect(handler.mock.calls[1][0]).toBeLessThanOrEqual(pollInterval * 0.75);
 
+      // shift average below threshold
       taskLifecycleEvents$.next(
         asTaskPollingCycleEvent(
           asOk({
@@ -134,6 +135,7 @@ describe('delayOnClaimConflicts', () => {
       await sleep(0);
       expect(handler.mock.calls.length).toEqual(2);
 
+      // shift average back up to threshold (70 + 90) / 2 = 80
       taskLifecycleEvents$.next(
         asTaskPollingCycleEvent(
           asOk({

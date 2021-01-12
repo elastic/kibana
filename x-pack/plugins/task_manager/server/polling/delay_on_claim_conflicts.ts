@@ -34,7 +34,7 @@ export function delayOnClaimConflicts(
   function pushIntoQueue(claimClashes: number): Option<number> {
     // add latest claimConflict count to queue
     claimConflictQueue(claimClashes);
-    // emit value if above or equal to Threshold in orderto recompute average
+    // emit value if above or equal to Threshold in order to recompute average
     return claimClashes >= claimClashesPercentageThreshold
       ? some(stats.percentile(claimConflictQueue(), 0.5))
       : none;
