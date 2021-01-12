@@ -19,8 +19,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { fetchIndexPatternFields } from './lib/fetch_fields';
-import { getSavedObjectsClient, getUISettings, getI18n } from '../services';
+import { getUISettings, getI18n } from '../services';
 import { VisEditor } from './components/vis_editor_lazy';
 
 export class EditorController {
@@ -31,42 +30,18 @@ export class EditorController {
     this.eventEmitter = eventEmitter;
 
     this.state = {
-      fields: [],
       vis: vis,
-      isLoaded: false,
     };
   }
 
-  fetchDefaultIndexPattern = async () => {
-    const indexPattern = await getSavedObjectsClient().client.get(
-      'index-pattern',
-      getUISettings().get('defaultIndex')
-    );
-
-    return indexPattern.attributes;
-  };
-
-  fetchDefaultParams = async () => {
-    const { title, timeFieldName } = await this.fetchDefaultIndexPattern();
-
-    this.state.vis.params.default_index_pattern = title;
-    this.state.vis.params.default_timefield = timeFieldName;
-    this.state.fields = await fetchIndexPatternFields(this.state.vis);
-
-    this.state.isLoaded = true;
-  };
-
   async render(params) {
     const I18nContext = getI18n().Context;
-
-    !this.state.isLoaded && (await this.fetchDefaultParams());
 
     render(
       <I18nContext>
         <VisEditor
           config={getUISettings()}
           vis={this.state.vis}
-          visFields={this.state.fields}
           visParams={this.state.vis.params}
           timeRange={params.timeRange}
           renderComplete={() => {}}

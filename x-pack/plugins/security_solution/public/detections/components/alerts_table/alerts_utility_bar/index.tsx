@@ -220,7 +220,7 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
               disabled={areEventsLoading}
               iconType="arrowDown"
               iconSide="right"
-              ownFocus={false}
+              ownFocus={true}
               popoverContent={UtilityBarAdditionalFiltersContent}
             >
               {i18n.ADDITIONAL_FILTERS_ACTIONS}
