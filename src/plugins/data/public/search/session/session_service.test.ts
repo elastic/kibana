@@ -36,10 +36,8 @@ describe('Session service', () => {
       () =>
         startService().then(([coreStart, ...rest]) => [
           {
-            ...{
-              ...coreStart,
-              application: { ...coreStart.application, currentAppId$: new BehaviorSubject('app') },
-            },
+            ...coreStart,
+            application: { ...coreStart.application, currentAppId$: new BehaviorSubject('app') },
           },
           ...rest,
         ]),
