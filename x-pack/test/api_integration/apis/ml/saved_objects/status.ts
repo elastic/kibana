@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.have.property('jobs');
 
       expect(body.jobs).to.have.property('anomaly-detector');
-      expect(sortBy(body.jobs['anomaly-detector'], 'id')).to.eql([
+      expect(sortBy(body.jobs['anomaly-detector'], 'jobId')).to.eql([
         {
           checks: { savedObjectExits: true },
           datafeedId: null,
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
 
       expect(body.jobs).to.have.property('data-frame-analytics');
-      expect(sortBy(body.jobs['data-frame-analytics'], 'id')).to.eql([
+      expect(sortBy(body.jobs['data-frame-analytics'], 'jobId')).to.eql([
         {
           checks: { savedObjectExits: true },
           datafeedId: null,
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body).to.have.property('savedObjects');
 
       expect(body.savedObjects).to.have.property('anomaly-detector');
-      expect(sortBy(body.savedObjects['anomaly-detector'], 'id')).to.eql([
+      expect(sortBy(body.savedObjects['anomaly-detector'], 'jobId')).to.eql([
         {
           checks: { datafeedExists: false, jobExists: true },
           datafeedId: null,
@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
 
       expect(body.savedObjects).to.have.property('data-frame-analytics');
-      expect(sortBy(body.savedObjects['data-frame-analytics'], 'id')).to.eql([
+      expect(sortBy(body.savedObjects['data-frame-analytics'], 'jobId')).to.eql([
         {
           checks: { jobExists: true },
           jobId: dfaJobIdSpace1,
