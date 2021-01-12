@@ -12,11 +12,8 @@ import React from 'react';
 import { euiStyled } from '../../../../../../../observability/public';
 
 export const SingleMetricComparison: React.FunctionComponent<{
-  currentValue: number;
-  previousValue: number;
-}> = ({ currentValue, previousValue }) => {
-  const changeFactor = currentValue / previousValue - 1;
-
+  changeFactor: number;
+}> = ({ changeFactor }) => {
   if (changeFactor < 0) {
     return (
       <NoWrapSpan>

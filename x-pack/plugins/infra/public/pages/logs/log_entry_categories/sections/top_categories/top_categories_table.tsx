@@ -7,7 +7,7 @@
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import useSet from 'react-use/lib/useSet';
 
 import { euiStyled } from '../../../../../../../observability/public';
@@ -24,6 +24,12 @@ import { RegularExpressionRepresentation } from './category_expression';
 import { DatasetActionsList } from './datasets_action_list';
 import { DatasetsList } from './datasets_list';
 import { LogEntryCountSparkline } from './log_entry_count_sparkline';
+import { getReferenceCount, getChangeFactor } from './log_entry_count_sparkline';
+
+interface SortOptions {
+  field: 'maximumAnomalyScore' | 'logEntryCount' | 'histograms';
+  direction: 'asc' | 'desc';
+}
 
 export const TopCategoriesTable = euiStyled(
   ({
@@ -39,6 +45,71 @@ export const TopCategoriesTable = euiStyled(
     timeRange: TimeRange;
     topCategories: LogEntryCategory[];
   }) => {
+    const [sortOptions, setSortOptions] = useState<SortOptions>({
+      field: 'maximumAnomalyScore',
+      direction: 'desc',
+    });
+
+    const tableSortOptions = useMemo(() => {
+      return { sort: sortOptions };
+    }, [sortOptions]);
+
+    const handleTableChange = useCallback(
+      ({ sort = {} }) => {
+        setSortOptions(sort);
+      },
+      [setSortOptions]
+    );
+
+    const sortedCategories = useMemo(() => {
+      const { field, direction } = sortOptions;
+
+      if (field === 'maximumAnomalyScore' || field === 'logEntryCount') {
+        return topCategories.sort((itemA, itemB) => {
+          return direction === 'asc' ? itemA[field] - itemB[field] : itemB[field] - itemA[field];
+        });
+      } else if (field === 'histograms') {
+        // NOTE: "New" items won't have a change factor, so these should be appended or prepended to the list
+        const categoriesWithAChangeFactor = topCategories.filter((item) => {
+          const changeFactor = getChangeFactor(
+            item.logEntryCount,
+            getReferenceCount(item.histograms)
+          );
+          return Number.isFinite(changeFactor);
+        });
+
+        const categoriesWithoutAChangeFactor = topCategories.filter((item) => {
+          const changeFactor = getChangeFactor(
+            item.logEntryCount,
+            getReferenceCount(item.histograms)
+          );
+          return !Number.isFinite(changeFactor);
+        });
+
+        const sortedCategoriesWithAChangeFactor = categoriesWithAChangeFactor.sort(
+          (itemA, itemB) => {
+            const itemAChangeFactor = getChangeFactor(
+              itemA.logEntryCount,
+              getReferenceCount(itemA.histograms)
+            );
+            const itemBChangeFactor = getChangeFactor(
+              itemB.logEntryCount,
+              getReferenceCount(itemB.histograms)
+            );
+            return direction === 'asc'
+              ? itemAChangeFactor - itemBChangeFactor
+              : itemBChangeFactor - itemAChangeFactor;
+          }
+        );
+
+        return direction === 'asc'
+          ? [...categoriesWithoutAChangeFactor, ...sortedCategoriesWithAChangeFactor]
+          : [...sortedCategoriesWithAChangeFactor, ...categoriesWithoutAChangeFactor];
+      } else {
+        return topCategories;
+      }
+    }, [topCategories, sortOptions]);
+
     const [expandedCategories, { add: expandCategory, remove: collapseCategory }] = useSet<number>(
       new Set()
     );
@@ -78,8 +149,10 @@ export const TopCategoriesTable = euiStyled(
         columns={columns}
         itemIdToExpandedRowMap={expandedRowContentsById}
         itemId="categoryId"
-        items={topCategories}
+        items={sortedCategories}
         rowProps={{ className: `${className} euiTableRow--topAligned` }}
+        onChange={handleTableChange}
+        sorting={tableSortOptions}
       />
     );
   }
@@ -102,6 +175,7 @@ const createColumns = (
     name: i18n.translate('xpack.infra.logs.logEntryCategories.countColumnTitle', {
       defaultMessage: 'Message count',
     }),
+    sortable: true,
     render: (logEntryCount: number) => {
       return numeral(logEntryCount).format('0,0');
     },
@@ -112,6 +186,7 @@ const createColumns = (
     name: i18n.translate('xpack.infra.logs.logEntryCategories.trendColumnTitle', {
       defaultMessage: 'Trend',
     }),
+    sortable: true,
     render: (histograms: LogEntryCategoryHistogram[], item) => {
       return (
         <LogEntryCountSparkline
@@ -147,6 +222,7 @@ const createColumns = (
     name: i18n.translate('xpack.infra.logs.logEntryCategories.maximumAnomalyScoreColumnTitle', {
       defaultMessage: 'Maximum anomaly score',
     }),
+    sortable: true,
     render: (_maximumAnomalyScore: number, item) => (
       <AnomalySeverityIndicatorList datasets={item.datasets} />
     ),

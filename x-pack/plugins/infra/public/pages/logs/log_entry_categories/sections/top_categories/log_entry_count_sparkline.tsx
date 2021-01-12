@@ -11,6 +11,16 @@ import { TimeRange } from '../../../../../../common/http_api/shared';
 import { SingleMetricComparison } from './single_metric_comparison';
 import { SingleMetricSparkline } from './single_metric_sparkline';
 
+export const getReferenceCount = (histograms: LogEntryCategoryHistogram[]) => {
+  return (
+    histograms.find((histogram) => histogram.histogramId === 'reference')?.buckets?.[0]
+      ?.logEntryCount ?? 0
+  );
+};
+
+export const getChangeFactor = (currentValue: number, previousValue: number) =>
+  currentValue / previousValue - 1;
+
 export const LogEntryCountSparkline: React.FunctionComponent<{
   currentCount: number;
   histograms: LogEntryCategoryHistogram[];
@@ -26,12 +36,7 @@ export const LogEntryCountSparkline: React.FunctionComponent<{
         })) ?? [],
     [histograms]
   );
-  const referenceCount = useMemo(
-    () =>
-      histograms.find((histogram) => histogram.histogramId === 'reference')?.buckets?.[0]
-        ?.logEntryCount ?? 0,
-    [histograms]
-  );
+  const referenceCount = useMemo(() => getReferenceCount(histograms), [histograms]);
 
   const overallTimeRange = useMemo(
     () => ({
@@ -41,10 +46,14 @@ export const LogEntryCountSparkline: React.FunctionComponent<{
     [timeRange.endTime, timeRange.startTime]
   );
 
+  const changeFactor = useMemo(() => {
+    return getChangeFactor(currentCount, referenceCount);
+  }, [currentCount, referenceCount]);
+
   return (
     <>
       <SingleMetricSparkline metric={metric} timeRange={overallTimeRange} />
-      <SingleMetricComparison previousValue={referenceCount} currentValue={currentCount} />
+      <SingleMetricComparison changeFactor={changeFactor} />
     </>
   );
 };
