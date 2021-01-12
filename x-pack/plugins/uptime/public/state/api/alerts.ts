@@ -14,7 +14,6 @@ import { API_URLS } from '../../../common/constants';
 import { Alert, AlertTypeParams } from '../../../../alerts/common';
 import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
-const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 import { populateAlertActions } from './alert_actions';
 
 const UPTIME_AUTO_ALERT = 'UPTIME_AUTO';
@@ -68,6 +67,8 @@ export const createAlert = async ({
     notifyWhen: 'onActionGroupChange',
     tags: [UPTIME_AUTO_ALERT],
     name: `${monitorName} (Simple status alert)`,
+    enabled: true,
+    throttle: null,
   };
 
   return await apiService.post(API_URLS.CREATE_ALERT, data);
