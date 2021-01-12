@@ -21172,7 +21172,6 @@
     "xpack.transform.pivotPreview.copyClipboardTooltip": "将透视预览的开发控制台语句复制到剪贴板。",
     "xpack.transform.pivotPreview.PivotPreviewIncompleteConfigCalloutBody": "请至少选择一个分组依据字段和聚合。",
     "xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody": "预览请求未返回任何数据。请确保可选查询返回数据且存在分组依据和聚合字段使用的字段的值。",
-    "xpack.transform.pivotPreview.PivotPreviewTitle": "转换数据透视表预览",
     "xpack.transform.progress": "进度",
     "xpack.transform.statsBar.batchTransformsLabel": "批量",
     "xpack.transform.statsBar.continuousTransformsLabel": "连续",
