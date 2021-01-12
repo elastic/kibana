@@ -22,7 +22,7 @@ import { VisEditorConstructor } from './application/types';
 const DEFAULT_NAME = 'default';
 
 export const createVisEditorsRegistry = () => {
-  const map = new Map();
+  const map = new Map<string, VisEditorConstructor>();
 
   return {
     registerDefault: (editor: VisEditorConstructor) => {
