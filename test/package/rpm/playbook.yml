@@ -11,6 +11,7 @@
       yum:
         name: /packages/kibana-8.0.0-SNAPSHOT-x86_64.rpm
         state: present
+        disable_gpg_check: yes
     - name: copy kibana configuration
       become: yes
       copy:
@@ -27,5 +28,8 @@
         name: kibana
         state: restarted
       when: config.changed
-
+    - name: disable firewall
+      service:
+        name: firewalld
+        state: stopped
     - wait_for: host=localhost port=5601 timeout=60
