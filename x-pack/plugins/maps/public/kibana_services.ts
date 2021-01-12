@@ -10,6 +10,7 @@ import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
 import { EMSSettings } from '../common/ems_settings';
+import { PaletteRegistry } from '../../../../src/plugins/charts/public';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);
@@ -81,3 +82,7 @@ export const getShareService = () => pluginsStart.share;
 
 export const getIsAllowByValueEmbeddables = () =>
   pluginsStart.dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
+
+export async function getPaletteRegistry(): Promise<PaletteRegistry | null> {
+  return pluginsStart.charts ? await pluginsStart.charts.palettes.getPalettes() : null;
+}

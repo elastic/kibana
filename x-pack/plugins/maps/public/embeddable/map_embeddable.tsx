@@ -37,6 +37,7 @@ import {
   hideLayerControl,
   hideViewControl,
   setReadOnly,
+  setMapSettings,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -49,6 +50,7 @@ import {
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
+  getMapSettings,
 } from '../selectors/map_selectors';
 import {
   APP_ID,
@@ -104,9 +106,7 @@ export class MapEmbeddable
 
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscription = this.getUpdated$().subscribe(() =>
-      this.onContainerStateChanged(this.input)
-    );
+    this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
   }
 
   private async _initializeSaveMap() {
@@ -219,25 +219,30 @@ export class MapEmbeddable
     return getInspectorAdapters(this._savedMap.getStore().getState());
   }
 
-  onContainerStateChanged(containerState: MapEmbeddableInput) {
+  onUpdate() {
     if (
-      !_.isEqual(containerState.timeRange, this._prevTimeRange) ||
-      !_.isEqual(containerState.query, this._prevQuery) ||
-      !esFilters.onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)
+      !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
+      !_.isEqual(this.input.query, this._prevQuery) ||
+      !esFilters.onlyDisabledFiltersChanged(this.input.filters, this._prevFilters)
     ) {
       this._dispatchSetQuery({
-        query: containerState.query,
-        timeRange: containerState.timeRange,
-        filters: containerState.filters,
+        query: this.input.query,
+        timeRange: this.input.timeRange,
+        filters: this.input.filters,
         forceRefresh: false,
       });
     }
 
-    if (
-      containerState.refreshConfig &&
-      !_.isEqual(containerState.refreshConfig, this._prevRefreshConfig)
-    ) {
-      this._dispatchSetRefreshConfig(containerState.refreshConfig);
+    if (this.input.refreshConfig && !_.isEqual(this.input.refreshConfig, this._prevRefreshConfig)) {
+      this._dispatchSetRefreshConfig(this.input.refreshConfig);
+    }
+
+    if (this.input.syncColors !== getMapSettings(this._savedMap.getStore().getState()).syncColors) {
+      this._savedMap.getStore().dispatch(
+        setMapSettings({
+          syncColors: this.input.syncColors,
+        })
+      );
     }
   }
 

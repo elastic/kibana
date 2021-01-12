@@ -295,7 +295,11 @@ export const getSpatialFiltersLayer = createSelector(
 export const getLayerList = createSelector(
   getLayerListRaw,
   getInspectorAdapters,
-  (layerDescriptorList, inspectorAdapters) => {
+  getMapSettings,
+  (layerDescriptorList, inspectorAdapters, mapSettings) => {
+    console.log(mapSettings.syncColors);
+    // const getSyncColor = mapSettings.syncColors ?
+    // const getSyncColor =
     return layerDescriptorList.map((layerDescriptor) =>
       createLayerInstance(layerDescriptor, inspectorAdapters)
     );

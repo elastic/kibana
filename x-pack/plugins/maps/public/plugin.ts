@@ -63,6 +63,7 @@ import {
 } from './licensed_features';
 import { EMSSettings } from '../common/ems_settings';
 import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -75,6 +76,7 @@ export interface MapsPluginSetupDependencies {
 }
 
 export interface MapsPluginStartDependencies {
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   fileUpload: FileUploadStartContract;

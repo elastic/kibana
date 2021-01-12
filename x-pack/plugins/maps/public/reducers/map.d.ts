@@ -59,6 +59,7 @@ export type MapSettings = {
   spatialFiltersAlpa: number;
   spatialFiltersFillColor: string;
   spatialFiltersLineColor: string;
+  syncColors: boolean;
 };
 
 export type MapState = {
