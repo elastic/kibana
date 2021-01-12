@@ -27,8 +27,6 @@ import {
   EuiPopover,
   EuiContextMenu,
   IconType,
-  EuiButtonIcon,
-  EuiToolTip,
 } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
@@ -126,21 +124,18 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, quickButtons = []
     </EuiButton>
   );
 
-  const buttonGroupOptions = [];
-
-  quickButtons.map(({ iconType, tooltip, action }: QuickButtons, index) => {
-    const quickButton = {
+  const buttonGroupOptions = quickButtons.map(
+    ({ iconType, tooltip, action }: QuickButtons, index) => ({
       iconType,
       action,
       id: `${htmlIdGenerator()()}${index}`,
       label: tooltip,
-    };
-    quickButton['aria-label'] = `Create new ${tooltip}`;
-    buttonGroupOptions.push(quickButton);
-  });
+      'aria-label': `Create new ${tooltip}`,
+    })
+  );
 
-  const onChangeIconsMulti = (optionId) => {
-    buttonGroupOptions.find((x) => x.id === optionId).action();
+  const onChangeIconsMulti = (optionId: string) => {
+    buttonGroupOptions.find((x) => x.id === optionId)?.action();
   };
 
   return (
@@ -152,7 +147,7 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, quickButtons = []
             <EuiButtonGroup
               legend="Quick buttons"
               options={buttonGroupOptions}
-              onChange={(id) => onChangeIconsMulti(id)}
+              onChange={onChangeIconsMulti}
               type="multi"
               isIconOnly
             />

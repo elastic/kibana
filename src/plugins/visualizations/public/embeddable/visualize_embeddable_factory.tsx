@@ -38,7 +38,7 @@ import {
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { SerializedVis, Vis } from '../vis';
+import { Vis } from '../vis';
 import {
   getCapabilities,
   getTypes,
