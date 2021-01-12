@@ -270,6 +270,12 @@ export class Explorer extends React.Component {
     const timefilter = getTimefilter();
     const bounds = timefilter.getActiveBounds();
     const selectedJobIds = Array.isArray(selectedJobs) ? selectedJobs.map((job) => job.id) : [];
+    const showAnomaliesMap =
+      selectedCells !== undefined &&
+      tableData.anomalies?.length &&
+      typeof tableData.anomalies[0].detector === 'string' &&
+      tableData.anomalies[0].detector.includes('lat_long');
+
     return (
       <ExplorerPage
         jobSelectorProps={jobSelectorProps}
@@ -406,8 +412,7 @@ export class Explorer extends React.Component {
                 <EuiSpacer size="m" />
               </>
             )}
-            {/* TODO: only for jobs with geo data and if there are anomalies present */}
-            {selectedCells !== undefined && <ExplorerMapContainer tableData={tableData} />}
+            {showAnomaliesMap && <ExplorerMapContainer anomalies={tableData.anomalies} />}
             {loading === false && (
               <EuiPanel>
                 <EuiTitle className="panel-title">
