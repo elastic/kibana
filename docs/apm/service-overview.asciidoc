@@ -2,9 +2,9 @@
 [[service-overview]]
 === Service overview
 
-The *Service overview* page contains a wide variety of charts and tables that provide
-visibility into how a service performs across your infrastructure. To help you isolate
-potential issues, select a <<services,*service*>> to bring you to the *Service overview* page.
+Selecting a <<services,*service*>> brings you to the *Service overview*.
+The *Service overview* contains a wide variety of charts and tables that provide
+visibility into how a service performs across your infrastructure.
 
 [discrete]
 [[service-latency]]
@@ -38,7 +38,6 @@ image::apm/images/traffic-transactions.png[Traffic and transactions]
 === Error rate and errors
 
 The *Error rate* chart displays the average error rates relating to the service, within a specific time range.
-The value displayed is based on the `event.outcome` field and is the relative number of failed transactions.
 
 The *Errors* table provides a high-level view of each error message when it first and last occurred,
 along with the total number of occurrences. This makes it very easy to quickly see which errors affect
@@ -54,7 +53,7 @@ image::apm/images/error-rate.png[Error rate and errors]
 The *Average duration by span type* chart visualizes each span type's average duration and helps you determine
 which spans could be slowing down transactions. The "app" label displayed under the
 chart indicates that something was happening within the application. This could signal that the
-agent does not have auto-instrumentation for whatever was happening during that time or the time was spent in the
+agent does not have auto-instrumentation for whatever was happening during that time or that the time was spent in the
 application code and not in database or external requests.
 
 The *Dependencies* table displays a list of downstream services or external connections relevant
