@@ -48,6 +48,7 @@ import { VisDataContext } from '../contexts/vis_data_context';
 import { getUISettings } from '../../services';
 import { AUTO_INTERVAL } from '../../../common/constants';
 import { UI_SETTINGS } from '../../../../data/common';
+import { IndexPatternSuggest } from './index_pattern_suggest';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const LEVEL_OF_DETAIL_STEPS = 10;
@@ -186,12 +187,12 @@ export const IndexPattern = ({
               })
             }
           >
-            <EuiFieldText
-              data-test-subj="metricsIndexPatternInput"
-              disabled={disabled}
-              placeholder={model.default_index_pattern}
-              onChange={handleTextChange(indexPatternName)}
+            <IndexPatternSuggest
               value={model[indexPatternName]}
+              indexPatternName={indexPatternName}
+              onChange={onChange}
+              defaultIndexPattern={model.default_index_pattern}
+              disabled={disabled}
             />
           </EuiFormRow>
         </EuiFlexItem>
