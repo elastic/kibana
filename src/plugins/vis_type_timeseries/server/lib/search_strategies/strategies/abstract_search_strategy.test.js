@@ -26,14 +26,17 @@ describe('AbstractSearchStrategy', () => {
   let indexPattern;
 
   beforeEach(() => {
-    mockedFields = {};
+    mockedFields = [];
     req = {
       payload: {},
       pre: {
-        indexPatternsService: {
+        indexPatternsFetcher: {
           getFieldsForWildcard: jest.fn().mockReturnValue(mockedFields),
         },
       },
+      getIndexPatternsService: jest.fn(() => ({
+        find: jest.fn(() => []),
+      })),
     };
 
     abstractSearchStrategy = new AbstractSearchStrategy();
@@ -48,9 +51,10 @@ describe('AbstractSearchStrategy', () => {
   test('should return fields for wildcard', async () => {
     const fields = await abstractSearchStrategy.getFieldsForWildcard(req, indexPattern);
 
-    expect(fields).toBe(mockedFields);
-    expect(req.pre.indexPatternsService.getFieldsForWildcard).toHaveBeenCalledWith({
+    expect(fields).toEqual(mockedFields);
+    expect(req.pre.indexPatternsFetcher.getFieldsForWildcard).toHaveBeenCalledWith({
       pattern: indexPattern,
+      metaFields: [],
       fieldCapsOptions: { allow_no_indices: true },
     });
   });
