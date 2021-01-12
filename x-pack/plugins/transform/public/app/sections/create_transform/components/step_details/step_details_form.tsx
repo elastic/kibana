@@ -454,7 +454,7 @@ export const StepDetailsForm: FC<Props> = React.memo(
                 <p>
                   <FormattedMessage
                     id="xpack.transform.stepDetailsForm.destinationIndexWarning"
-                    defaultMessage="Before you start the transform, use index templates or the {docsLink} to ensure the mappings for your destination index match the source index. If the transform fails, check the messages tab on the Stack Management page for errors."
+                    defaultMessage="Before you start the transform, use index templates or the {docsLink} to ensure the mappings for your destination index match the source index. Otherwise, the destination index is created with dynamic mappings. If the transform fails, check the messages tab on the Stack Management page for errors."
                     values={{
                       docsLink: (
                         <EuiLink href={esIndicesCreateIndex} target="_blank">
