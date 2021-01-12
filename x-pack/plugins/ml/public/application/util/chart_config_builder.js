@@ -67,7 +67,10 @@ export function buildConfigFromDetector(job, detectorIndex) {
     if (
       (detector.function === ML_JOB_AGGREGATION.NON_ZERO_COUNT ||
         detector.function === ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT ||
-        detector.function === ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT) &&
+        detector.function === ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT ||
+        detector.function === ML_JOB_AGGREGATION.COUNT ||
+        detector.function === ML_JOB_AGGREGATION.HIGH_COUNT ||
+        detector.function === ML_JOB_AGGREGATION.LOW_COUNT) &&
       cardinalityField !== undefined
     ) {
       config.metricFunction = ES_AGGREGATION.CARDINALITY;
