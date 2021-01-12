@@ -212,8 +212,8 @@ export const DataVisualizerDataGrid = <T extends DataVisualizerDataGridItem>({
             return <TopValuesPreview config={item} />;
           }
 
-          if (item.type === ML_JOB_FIELD_TYPES.NUMBER && item.stats?.distribution !== undefined) {
-            if (isIndexBasedFieldVisConfig(item)) {
+          if (item.type === ML_JOB_FIELD_TYPES.NUMBER) {
+            if (isIndexBasedFieldVisConfig(item) && item.stats?.distribution !== undefined) {
               return <IndexBasedNumberContentPreview config={item} />;
             } else {
               return <FileBasedNumberContentPreview config={item} />;
