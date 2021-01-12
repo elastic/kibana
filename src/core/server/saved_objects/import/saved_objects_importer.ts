@@ -26,6 +26,7 @@ import {
   SavedObjectsImportResponse,
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
+  SavedObjectsImportHook,
 } from './types';
 
 /**
@@ -40,19 +41,23 @@ export class SavedObjectsImporter {
   readonly #savedObjectsClient: SavedObjectsClientContract;
   readonly #typeRegistry: ISavedObjectTypeRegistry;
   readonly #importSizeLimit: number;
+  readonly #importHooks: Record<string, SavedObjectsImportHook[]>;
 
   constructor({
     savedObjectsClient,
     typeRegistry,
     importSizeLimit,
+    importHooks,
   }: {
     savedObjectsClient: SavedObjectsClientContract;
     typeRegistry: ISavedObjectTypeRegistry;
     importSizeLimit: number;
+    importHooks: Record<string, SavedObjectsImportHook[]>;
   }) {
     this.#savedObjectsClient = savedObjectsClient;
     this.#typeRegistry = typeRegistry;
     this.#importSizeLimit = importSizeLimit;
+    this.#importHooks = importHooks;
   }
 
   /**
@@ -75,6 +80,7 @@ export class SavedObjectsImporter {
       objectLimit: this.#importSizeLimit,
       savedObjectsClient: this.#savedObjectsClient,
       typeRegistry: this.#typeRegistry,
+      importHooks: this.#importHooks,
     });
   }
 

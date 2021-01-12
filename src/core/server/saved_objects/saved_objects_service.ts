@@ -50,7 +50,7 @@ import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
 import { SavedObjectsExporter, ISavedObjectsExporter } from './export';
-import { SavedObjectsImporter, ISavedObjectsImporter } from './import';
+import { SavedObjectsImporter, ISavedObjectsImporter, SavedObjectsImportHook } from './import';
 import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
@@ -151,6 +151,11 @@ export interface SavedObjectsServiceSetup {
    * ```
    */
   registerType: (type: SavedObjectsType) => void;
+
+  /**
+   * TODO: documentation
+   */
+  registerImportHook: (type: string, hook: SavedObjectsImportHook) => void;
 }
 
 /**
@@ -280,6 +285,7 @@ export class SavedObjectsService
   private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
   private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
+  private importHooks: Map<string, SavedObjectsImportHook[]> = new Map();
 
   private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
@@ -344,6 +350,12 @@ export class SavedObjectsService
           throw new Error('cannot call `registerType` after service startup.');
         }
         this.typeRegistry.registerType(type);
+      },
+      registerImportHook: (type, hook) => {
+        if (this.started) {
+          throw new Error('cannot call `registerImportHook` after service startup.');
+        }
+        this.importHooks.set(type, [...(this.importHooks.get(type) ?? []), hook]);
       },
     };
   }
@@ -465,6 +477,7 @@ export class SavedObjectsService
           savedObjectsClient,
           typeRegistry: this.typeRegistry,
           importSizeLimit: this.config!.maxImportExportSize,
+          importHooks: Object.fromEntries(this.importHooks),
         }),
       getTypeRegistry: () => this.typeRegistry,
     };

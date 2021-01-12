@@ -72,6 +72,7 @@ const createSetupContractMock = () => {
     setClientFactoryProvider: jest.fn(),
     addClientWrapper: jest.fn(),
     registerType: jest.fn(),
+    registerImportHook: jest.fn(),
   };
 
   return setupContract;

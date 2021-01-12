@@ -29,6 +29,7 @@ import { savedObjectsClientMock } from '../../mocks';
 import { ISavedObjectTypeRegistry } from '..';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { importSavedObjectsFromStream, ImportSavedObjectsOptions } from './import_saved_objects';
+import { SavedObjectsImportHook } from './types';
 
 import {
   collectSavedObjects,
@@ -81,14 +82,19 @@ describe('#importSavedObjectsFromStream', () => {
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
 
-  const setupOptions = (
-    createNewCopies: boolean = false,
-    getTypeImpl: (name: string) => any = (type: string) =>
+  const setupOptions = ({
+    createNewCopies = false,
+    getTypeImpl = (type: string) =>
       ({
         // other attributes aren't needed for the purposes of injecting metadata
         management: { icon: `${type}-icon` },
-      } as any)
-  ): ImportSavedObjectsOptions => {
+      } as any),
+    importHooks = {},
+  }: {
+    createNewCopies?: boolean;
+    getTypeImpl?: (name: string) => any;
+    importHooks?: Record<string, SavedObjectsImportHook[]>;
+  } = {}): ImportSavedObjectsOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
     typeRegistry = typeRegistryMock.create();
@@ -101,6 +107,7 @@ describe('#importSavedObjectsFromStream', () => {
       typeRegistry,
       namespace,
       createNewCopies,
+      importHooks,
     };
   };
   const createObject = ({
@@ -267,7 +274,7 @@ describe('#importSavedObjectsFromStream', () => {
 
     describe('with createNewCopies enabled', () => {
       test('regenerates object IDs', async () => {
-        const options = setupOptions(true);
+        const options = setupOptions({ createNewCopies: true });
         const collectedObjects = [createObject()];
         getMockFn(collectSavedObjects).mockResolvedValue({
           errors: [],
@@ -280,7 +287,7 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       test('does not check conflicts or check origin conflicts', async () => {
-        const options = setupOptions(true);
+        const options = setupOptions({ createNewCopies: true });
         getMockFn(validateReferences).mockResolvedValue([]);
 
         await importSavedObjectsFromStream(options);
@@ -289,7 +296,7 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       test('creates saved objects', async () => {
-        const options = setupOptions(true);
+        const options = setupOptions({ createNewCopies: true });
         const collectedObjects = [createObject()];
         const errors = [createError(), createError()];
         getMockFn(collectSavedObjects).mockResolvedValue({
@@ -405,7 +412,7 @@ describe('#importSavedObjectsFromStream', () => {
 
       test('with createNewCopies enabled', async () => {
         // however, we include it here for posterity
-        const options = setupOptions(true);
+        const options = setupOptions({ createNewCopies: true });
         getMockFn(createSavedObjects).mockResolvedValue({ errors, createdObjects });
 
         const result = await importSavedObjectsFromStream(options);
@@ -429,15 +436,18 @@ describe('#importSavedObjectsFromStream', () => {
       const obj1 = createObject({ type: 'foo' });
       const obj2 = createObject({ type: 'bar', title: 'bar-title' });
 
-      const options = setupOptions(false, (type) => {
-        if (type === 'foo') {
+      const options = setupOptions({
+        createNewCopies: false,
+        getTypeImpl: (type) => {
+          if (type === 'foo') {
+            return {
+              management: { getTitle: () => 'getTitle-foo', icon: `${type}-icon` },
+            };
+          }
           return {
-            management: { getTitle: () => 'getTitle-foo', icon: `${type}-icon` },
+            management: { icon: `${type}-icon` },
           };
-        }
-        return {
-          management: { icon: `${type}-icon` },
-        };
+        },
       });
 
       getMockFn(checkConflicts).mockResolvedValue({

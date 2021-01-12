@@ -153,6 +153,7 @@ export interface SavedObjectsImportResponse {
   success: boolean;
   successCount: number;
   successResults?: SavedObjectsImportSuccess[];
+  warnings: SavedObjectsImportWarning[];
   errors?: SavedObjectsImportFailure[];
 }
 
@@ -187,3 +188,31 @@ export interface SavedObjectsResolveImportErrorsOptions {
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
+
+/////
+
+export interface SavedObjectsImportSimpleWarning {
+  type: 'simple';
+  message: string;
+}
+
+export interface SavedObjectsImportActionRequiredWarning {
+  type: 'action_required';
+  message: string;
+  /**
+   * The path (without the basePath) that the user should be redirect to to address this warning.
+   */
+  actionUrl: string;
+}
+
+export type SavedObjectsImportWarning =
+  | SavedObjectsImportSimpleWarning
+  | SavedObjectsImportActionRequiredWarning;
+
+export interface SavedObjectsImportHookResult {
+  warnings?: SavedObjectsImportWarning[];
+}
+
+export type SavedObjectsImportHook<T = unknown> = (
+  objects: Array<SavedObject<T>>
+) => SavedObjectsImportHookResult | Promise<SavedObjectsImportHookResult>;

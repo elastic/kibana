@@ -30,5 +30,10 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportRetry,
+  SavedObjectsImportHook,
+  SavedObjectsImportHookResult,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
 } from './types';
 export { SavedObjectsImportError } from './errors';

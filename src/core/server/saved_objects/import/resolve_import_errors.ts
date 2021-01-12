@@ -214,6 +214,7 @@ export async function resolveSavedObjectsImportErrors({
   return {
     successCount,
     success: errorAccumulator.length === 0,
+    warnings: [],
     ...(successResults.length && { successResults }),
     ...(errorResults.length && { errors: errorResults }),
   };
