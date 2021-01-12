@@ -43,24 +43,24 @@ const FIELD_NAME = 'fieldName';
 
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
-type DataVisualizerDataGridItem = FieldVisConfig | FileBasedFieldVisConfig;
-interface DataVisualizerDataGridProps<T> {
+type DataVisualizerTableItem = FieldVisConfig | FileBasedFieldVisConfig;
+interface DataVisualizerTableProps<T> {
   items: T[];
   pageState: DataVisualizerIndexBasedAppState | DataVisualizerFileBasedAppState;
   updatePageState: (update: any) => void;
   getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
 }
 
-export const DataVisualizerTable = <T extends DataVisualizerDataGridItem>({
+export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   items,
   pageState,
   updatePageState,
   getItemIdToExpandedRowMap,
-}: DataVisualizerDataGridProps<T>) => {
+}: DataVisualizerTableProps<T>) => {
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<string[]>([]);
   const [expandAll, toggleExpandAll] = useState<boolean>(false);
 
-  const { onTableChange, pagination, sorting } = useTableSettings<DataVisualizerDataGridItem>(
+  const { onTableChange, pagination, sorting } = useTableSettings<DataVisualizerTableItem>(
     items,
     pageState,
     updatePageState
@@ -74,7 +74,7 @@ export const DataVisualizerTable = <T extends DataVisualizerDataGridItem>({
     });
   };
 
-  function toggleDetails(item: DataVisualizerDataGridItem) {
+  function toggleDetails(item: DataVisualizerTableItem) {
     if (item.fieldName === undefined) return;
     const index = expandedRowItemIds.indexOf(item.fieldName);
     if (index !== -1) {
@@ -88,7 +88,7 @@ export const DataVisualizerTable = <T extends DataVisualizerDataGridItem>({
   }
 
   const columns = useMemo(() => {
-    const expanderColumn: EuiTableComputedColumnType<DataVisualizerDataGridItem> = {
+    const expanderColumn: EuiTableComputedColumnType<DataVisualizerTableItem> = {
       name: (
         <EuiButtonIcon
           data-test-subj={`mlToggleDetailsForAllRowsButton ${expandAll ? 'expanded' : 'collapsed'}`}
@@ -108,7 +108,7 @@ export const DataVisualizerTable = <T extends DataVisualizerDataGridItem>({
       align: RIGHT_ALIGNMENT,
       width: '40px',
       isExpander: true,
-      render: (item: DataVisualizerDataGridItem) => {
+      render: (item: DataVisualizerTableItem) => {
         if (item.fieldName === undefined) return null;
         const direction = expandedRowItemIds.includes(item.fieldName) ? 'arrowUp' : 'arrowDown';
         return (
@@ -168,10 +168,10 @@ export const DataVisualizerTable = <T extends DataVisualizerDataGridItem>({
         name: i18n.translate('xpack.ml.datavisualizer.dataGrid.documentsCountColumnName', {
           defaultMessage: 'Documents (%)',
         }),
-        render: (value: number | undefined, item: DataVisualizerDataGridItem) => (
+        render: (value: number | undefined, item: DataVisualizerTableItem) => (
           <DocumentStat config={item} />
         ),
-        sortable: (item: DataVisualizerDataGridItem) => item?.stats?.count,
+        sortable: (item: DataVisualizerTableItem) => item?.stats?.count,
         align: LEFT_ALIGNMENT as HorizontalAlignment,
         'data-test-subj': 'mlDataVisualizerTableColumnDocumentsCount',
       },
@@ -206,7 +206,7 @@ export const DataVisualizerTable = <T extends DataVisualizerDataGridItem>({
             />
           </div>
         ),
-        render: (item: DataVisualizerDataGridItem) => {
+        render: (item: DataVisualizerTableItem) => {
           if (item === undefined || showDistributions === false) return null;
           if (item.type === 'keyword' && item.stats?.topValues !== undefined) {
             return <TopValuesPreview config={item} />;
@@ -241,7 +241,7 @@ export const DataVisualizerTable = <T extends DataVisualizerDataGridItem>({
 
   return (
     <EuiFlexItem data-test-subj="mlDataVisualizerTableContainer">
-      <EuiInMemoryTable<DataVisualizerDataGridItem>
+      <EuiInMemoryTable<DataVisualizerTableItem>
         className={'mlDataVisualizer'}
         items={items}
         itemId={FIELD_NAME}
