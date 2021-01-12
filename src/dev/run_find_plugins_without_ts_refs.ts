@@ -19,6 +19,7 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import JSON5 from 'json5';
 import { get } from 'lodash';
 import { run } from '@kbn/dev-utils';
 import { getPluginDeps, findPlugins } from './plugin_discovery';
@@ -88,7 +89,7 @@ function isMigratedToTsProjectRefs(dir: string): boolean {
   try {
     const path = Path.join(dir, 'tsconfig.json');
     const content = Fs.readFileSync(path, { encoding: 'utf8' });
-    return get(JSON.parse(content), 'compilerOptions.composite', false);
+    return get(JSON5.parse(content), 'compilerOptions.composite', false);
   } catch (e) {
     return false;
   }

@@ -20,8 +20,8 @@
 import { ApplicationStart, IUiSettingsClient } from '../../../core/public';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 import { IndexPatternsContract, DataPublicPluginStart } from '../../../plugins/data/public';
+import { VisEditorConstructor } from '../../../plugins/visualizations/public';
 import { SharePluginStart } from '../../../plugins/share/public';
-import { VisEditorConstructor } from './application/types';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

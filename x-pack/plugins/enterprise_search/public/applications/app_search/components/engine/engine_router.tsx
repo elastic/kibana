@@ -33,18 +33,7 @@ import {
 } from '../../routes';
 import { ENGINES_TITLE } from '../engines';
 import { OVERVIEW_TITLE } from '../engine_overview';
-import {
-  ANALYTICS_TITLE,
-  // DOCUMENTS_TITLE,
-  // SCHEMA_TITLE,
-  // CRAWLER_TITLE,
-  // RELEVANCE_TUNING_TITLE,
-  // SYNONYMS_TITLE,
-  // CURATIONS_TITLE,
-  // RESULT_SETTINGS_TITLE,
-  // SEARCH_UI_TITLE,
-  // API_LOGS_TITLE,
-} from './constants';
+import { ANALYTICS_TITLE } from '../analytics';
 
 import { Loading } from '../../../shared/loading';
 import { EngineOverview } from '../engine_overview';
@@ -69,31 +58,30 @@ export const EngineRouter: React.FC = () => {
     },
   } = useValues(AppLogic);
 
+  const { engineName: engineNameFromUrl } = useParams() as { engineName: string };
   const { engineName, dataLoading, engineNotFound } = useValues(EngineLogic);
   const { setEngineName, initializeEngine, clearEngine } = useActions(EngineLogic);
 
-  const { engineName: engineNameParam } = useParams() as { engineName: string };
-  const engineBreadcrumb = [ENGINES_TITLE, engineNameParam];
-
-  const isEngineInStateStale = () => engineName !== engineNameParam;
-
   useEffect(() => {
-    setEngineName(engineNameParam);
+    setEngineName(engineNameFromUrl);
     initializeEngine();
     return clearEngine;
-  }, [engineNameParam]);
+  }, [engineNameFromUrl]);
 
   if (engineNotFound) {
     setQueuedErrorMessage(
       i18n.translate('xpack.enterpriseSearch.appSearch.engine.notFound', {
-        defaultMessage: "No engine with name '{engineNameParam}' could be found.",
-        values: { engineNameParam },
+        defaultMessage: "No engine with name '{engineName}' could be found.",
+        values: { engineName },
       })
     );
     return <Redirect to={ENGINES_PATH} />;
   }
 
-  if (isEngineInStateStale() || dataLoading) return <Loading />;
+  const isLoadingNewEngine = engineName !== engineNameFromUrl;
+  if (isLoadingNewEngine || dataLoading) return <Loading />;
+
+  const engineBreadcrumb = [ENGINES_TITLE, engineName];
 
   return (
     <Switch>
