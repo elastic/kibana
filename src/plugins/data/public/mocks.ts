@@ -22,6 +22,7 @@ import { fieldFormatsServiceMock } from './field_formats/mocks';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
+import { createNowProviderMock } from './now_provider/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
@@ -76,6 +77,7 @@ const createStartContract = (): Start => {
       get: jest.fn().mockReturnValue(Promise.resolve({})),
       clearCache: jest.fn(),
     } as unknown) as IndexPatternsContract,
+    nowProvider: createNowProviderMock(),
   };
 };
 

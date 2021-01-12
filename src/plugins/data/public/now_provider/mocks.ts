@@ -16,16 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { parse } from 'query-string';
 
-/** @internal */
-export function parseQueryString() {
-  // window.location.search is an empty string
-  // get search from href
-  const hrefSplit = window.location.href.split('?');
-  if (hrefSplit.length <= 1) {
-    return {};
-  }
+import { NowProviderInternalContract } from './now_provider';
 
-  return parse(hrefSplit[1], { sort: false });
-}
+export const createNowProviderMock = (): jest.Mocked<NowProviderInternalContract> => {
+  return {
+    get: jest.fn(() => new Date()),
+    set: jest.fn(),
+    reset: jest.fn(),
+  };
+};
