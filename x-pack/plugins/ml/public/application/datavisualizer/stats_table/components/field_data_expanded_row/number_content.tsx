@@ -17,7 +17,7 @@ import {
   MetricDistributionChart,
   MetricDistributionChartData,
   buildChartDataFromStats,
-} from '../../../index_based/components/field_data_row/metric_distribution_chart';
+} from '../metric_distribution_chart';
 import { TopValues } from '../../../index_based/components/field_data_row/top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 

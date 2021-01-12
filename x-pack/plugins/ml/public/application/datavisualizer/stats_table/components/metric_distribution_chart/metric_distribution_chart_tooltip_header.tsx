@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { MetricDistributionChartData } from './metric_distribution_chart';
-import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
+import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 
 interface Props {
   chartPoint: MetricDistributionChartData | undefined;

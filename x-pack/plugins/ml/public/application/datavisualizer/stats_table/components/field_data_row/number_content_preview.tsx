@@ -11,7 +11,7 @@ import {
   MetricDistributionChart,
   MetricDistributionChartData,
   buildChartDataFromStats,
-} from '../../../index_based/components/field_data_row/metric_distribution_chart';
+} from '../metric_distribution_chart';
 import { formatSingleValue } from '../../../../formatters/format_value';
 import { FieldVisConfig } from '../../types';
 

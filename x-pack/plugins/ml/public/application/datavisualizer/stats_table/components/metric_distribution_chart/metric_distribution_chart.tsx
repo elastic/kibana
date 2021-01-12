@@ -23,9 +23,9 @@ import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
-import { useUiSettings } from '../../../../../contexts/kibana/use_ui_settings_context';
-import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
-import type { ChartTooltipValue } from '../../../../../components/chart_tooltip/chart_tooltip_service';
+import { useUiSettings } from '../../../../contexts/kibana/use_ui_settings_context';
+import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
+import type { ChartTooltipValue } from '../../../../components/chart_tooltip/chart_tooltip_service';
 
 export interface MetricDistributionChartData {
   x: number;
