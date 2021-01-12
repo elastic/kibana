@@ -226,6 +226,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
             "createNewCopies": false,
             "overwrite": true,
           },
+          "importWarnings": undefined,
           "indexPatterns": Array [
             Object {
               "id": "1",

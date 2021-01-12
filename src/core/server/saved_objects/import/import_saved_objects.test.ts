@@ -331,7 +331,7 @@ describe('#importSavedObjectsFromStream', () => {
       const options = setupOptions();
 
       const result = await importSavedObjectsFromStream(options);
-      expect(result).toEqual({ success: true, successCount: 0 });
+      expect(result).toEqual({ success: true, successCount: 0, warnings: [] });
     });
 
     test('returns success=false if an error occurred', async () => {
@@ -343,7 +343,12 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       const result = await importSavedObjectsFromStream(options);
-      expect(result).toEqual({ success: false, successCount: 0, errors: [expect.any(Object)] });
+      expect(result).toEqual({
+        success: false,
+        successCount: 0,
+        errors: [expect.any(Object)],
+        warnings: [],
+      });
     });
 
     describe('handles a mix of successes and errors and injects metadata', () => {
@@ -407,6 +412,7 @@ describe('#importSavedObjectsFromStream', () => {
           successCount: 3,
           successResults,
           errors: errorResults,
+          warnings: [],
         });
       });
 
@@ -428,6 +434,7 @@ describe('#importSavedObjectsFromStream', () => {
           successCount: 3,
           successResults,
           errors: errorResults,
+          warnings: [],
         });
       });
     });
@@ -477,6 +484,7 @@ describe('#importSavedObjectsFromStream', () => {
         success: true,
         successCount: 2,
         successResults,
+        warnings: [],
       });
     });
 
@@ -504,7 +512,12 @@ describe('#importSavedObjectsFromStream', () => {
 
       const result = await importSavedObjectsFromStream(options);
       const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
-      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
+      expect(result).toEqual({
+        success: false,
+        successCount: 0,
+        errors: expectedErrors,
+        warnings: [],
+      });
     });
   });
 });

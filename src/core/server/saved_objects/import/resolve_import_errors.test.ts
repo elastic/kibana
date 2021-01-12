@@ -433,7 +433,7 @@ describe('#importSavedObjectsFromStream', () => {
       const options = setupOptions();
 
       const result = await resolveSavedObjectsImportErrors(options);
-      expect(result).toEqual({ success: true, successCount: 0 });
+      expect(result).toEqual({ success: true, successCount: 0, warnings: [] });
     });
 
     test('returns success=false if an error occurred', async () => {
@@ -445,7 +445,12 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       const result = await resolveSavedObjectsImportErrors(options);
-      expect(result).toEqual({ success: false, successCount: 0, errors: [expect.any(Object)] });
+      expect(result).toEqual({
+        success: false,
+        successCount: 0,
+        errors: [expect.any(Object)],
+        warnings: [],
+      });
     });
 
     test('handles a mix of successes and errors and injects metadata', async () => {
@@ -494,7 +499,13 @@ describe('#importSavedObjectsFromStream', () => {
         { ...error1, meta: { ...error1.meta, icon: `${error1.type}-icon` } },
         { ...error2, meta: { ...error2.meta, icon: `${error2.type}-icon` }, overwrite: true },
       ];
-      expect(result).toEqual({ success: false, successCount: 3, successResults, errors });
+      expect(result).toEqual({
+        success: false,
+        successCount: 3,
+        successResults,
+        errors,
+        warnings: [],
+      });
     });
 
     test('uses `type.management.getTitle` to resolve the titles', async () => {
@@ -543,6 +554,7 @@ describe('#importSavedObjectsFromStream', () => {
         success: true,
         successCount: 2,
         successResults,
+        warnings: [],
       });
     });
 
@@ -566,7 +578,12 @@ describe('#importSavedObjectsFromStream', () => {
 
       const result = await resolveSavedObjectsImportErrors(options);
       const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
-      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
+      expect(result).toEqual({
+        success: false,
+        successCount: 0,
+        errors: expectedErrors,
+        warnings: [],
+      });
     });
   });
 });
