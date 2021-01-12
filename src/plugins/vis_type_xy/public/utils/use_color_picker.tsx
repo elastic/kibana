@@ -61,6 +61,7 @@ export const useColorPicker = (
         onClose();
       };
 
+      // rule doesn't know this is inside a functional component
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const handleOutsideClick = useCallback(() => {
         onClose?.();
