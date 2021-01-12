@@ -16,34 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { uniq } from 'lodash';
 
-export function extractIndexPatterns(panel, excludedFields = {}) {
-  const patterns = [];
-
-  if (!excludedFields[panel.index_pattern]) {
-    patterns.push(panel.index_pattern);
-  }
-
-  panel.series.forEach((series) => {
-    const indexPattern = series.series_index_pattern;
-    if (indexPattern && series.override_index_pattern && !excludedFields[indexPattern]) {
-      patterns.push(indexPattern);
-    }
-  });
-
-  if (panel.annotations) {
-    panel.annotations.forEach((item) => {
-      const indexPattern = item.index_pattern;
-      if (indexPattern && !excludedFields[indexPattern]) {
-        patterns.push(indexPattern);
-      }
-    });
-  }
-
-  if (patterns.length === 0) {
-    patterns.push('');
-  }
-
-  return uniq(patterns).sort();
+export enum MODEL_TYPES {
+  UNWEIGHTED = 'simple',
+  WEIGHTED_EXPONENTIAL = 'ewma',
+  WEIGHTED_EXPONENTIAL_DOUBLE = 'holt',
+  WEIGHTED_EXPONENTIAL_TRIPLE = 'holt_winters',
+  WEIGHTED_LINEAR = 'linear',
 }
