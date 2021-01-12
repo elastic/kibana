@@ -6,15 +6,15 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
   Operation,
   DatasourcePublicAPI,
 } from '../types';
+import type { DatatableColumnWidth } from './components/types';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
-import { DatatableColumnWidth } from './expression';
 
 export interface LayerState {
   layerId: string;

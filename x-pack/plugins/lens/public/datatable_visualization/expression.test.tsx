@@ -7,15 +7,15 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test/jest';
-import { getDatatable, DatatableComponent } from './expression';
+import { DatatableProps, getDatatable } from './expression';
 import { LensMultiTable } from '../types';
-import { DatatableProps } from './expression';
 import { createMockExecutionContext } from '../../../../../src/plugins/expressions/common/mocks';
 import { IFieldFormat } from '../../../../../src/plugins/data/public';
 import { IAggType } from 'src/plugins/data/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { EuiDataGrid } from '@elastic/eui';
+import { DatatableComponent } from './components/tableBasic';
 
 function sampleArgs() {
   const indexPatternId = 'indexPatternId';

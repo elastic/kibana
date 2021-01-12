@@ -22,12 +22,14 @@ import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../src/plugins/ui_actions/public';
 import { RangeSelectContext, ValueClickContext } from '../../../../src/plugins/embeddable/public';
-import type {
-  LensSortActionData,
+import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
+} from './datatable_visualization/components/constants';
+import type {
+  LensSortActionData,
   LensResizeActionData,
-} from './datatable_visualization/expression';
+} from './datatable_visualization/components/types';
 
 export type ErrorCallback = (e: { message: string }) => void;
 
