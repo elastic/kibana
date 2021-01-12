@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { BaseSyntheticEvent, useMemo } from 'react';
+import React, { BaseSyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { LegendColorPicker, Position, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover } from '@elastic/eui';
@@ -48,6 +48,8 @@ export const useColorPicker = (
 ): LegendColorPicker =>
   useMemo(
     () => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const ref = useRef<HTMLDivElement | null>(null);
       const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
       const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
         if (!seriesName) {
@@ -61,8 +63,27 @@ export const useColorPicker = (
         onClose();
       };
 
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const handleOutsideClick = useCallback(
+        (e: MouseEvent) => {
+          if (ref.current && !(ref.current! as any).contains(e.target)) {
+            onClose?.();
+          }
+        },
+        [onClose]
+      );
+
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useEffect(() => {
+        document.addEventListener('click', handleOutsideClick);
+        return () => {
+          document.removeEventListener('click', handleOutsideClick);
+        };
+      }, [handleOutsideClick]);
+
       return (
         <EuiWrappingPopover
+          popoverRef={ref}
           isOpen
           ownFocus
           display="block"
