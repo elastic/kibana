@@ -20,6 +20,7 @@ export interface DataPublicPluginStart
 |  [autocomplete](./kibana-plugin-plugins-data-public.datapublicpluginstart.autocomplete.md) | <code>AutocompleteStart</code> | autocomplete service [AutocompleteStart](./kibana-plugin-plugins-data-public.autocompletestart.md) |
 |  [fieldFormats](./kibana-plugin-plugins-data-public.datapublicpluginstart.fieldformats.md) | <code>FieldFormatsStart</code> | field formats service [FieldFormatsStart](./kibana-plugin-plugins-data-public.fieldformatsstart.md) |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.datapublicpluginstart.indexpatterns.md) | <code>IndexPatternsContract</code> | index patterns service [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |
+|  [nowProvider](./kibana-plugin-plugins-data-public.datapublicpluginstart.nowprovider.md) | <code>NowProviderPublicContract</code> |  |
 |  [query](./kibana-plugin-plugins-data-public.datapublicpluginstart.query.md) | <code>QueryStart</code> | query service [QueryStart](./kibana-plugin-plugins-data-public.querystart.md) |
 |  [search](./kibana-plugin-plugins-data-public.datapublicpluginstart.search.md) | <code>ISearchStart</code> | search service [ISearchStart](./kibana-plugin-plugins-data-public.isearchstart.md) |
 |  [ui](./kibana-plugin-plugins-data-public.datapublicpluginstart.ui.md) | <code>DataPublicPluginStartUi</code> | prewired UI components [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md) |
