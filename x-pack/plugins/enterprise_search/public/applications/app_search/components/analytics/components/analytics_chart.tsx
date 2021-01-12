@@ -14,14 +14,17 @@ import { KibanaLogic } from '../../../../shared/kibana';
 
 import { X_AXIS_DATE_FORMAT, TOOLTIP_DATE_FORMAT } from '../constants';
 
+interface ChartPoint {
+  x: string; // Date string
+  y: number; // # of clicks, queries, etc.
+}
+export type ChartData = ChartPoint[];
+
 interface Props {
   height?: number;
   lines: Array<{
     id: string;
-    data: Array<{
-      x: string;
-      y: number;
-    }>;
+    data: ChartData;
   }>;
 }
 export const AnalyticsChart: React.FC<Props> = ({ height = 300, lines }) => {
