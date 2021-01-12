@@ -32,7 +32,7 @@ const userMock = {
 };
 
 describe('EditUserPage', () => {
-  it('warns when viewing disabled user', async () => {
+  it('warns when viewing deactivated user', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
     const authc = securityMock.createSetup().authc;
@@ -49,7 +49,7 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    await findByText(/User is blocked/i);
+    await findByText(/User has been deactivated/i);
   });
 
   it('warns when viewing deprecated user', async () => {
@@ -81,7 +81,7 @@ describe('EditUserPage', () => {
     await waitFor(() => expect(history.location.pathname).toBe('/'));
   });
 
-  it('warns when viewing reserved user', async () => {
+  it('warns when viewing built-in user', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
     const authc = securityMock.createSetup().authc;
@@ -246,7 +246,7 @@ describe('EditUserPage', () => {
     });
   });
 
-  it('disables user when confirming and closes dialog', async () => {
+  it('deactivates user when confirming and closes dialog', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
     const authc = securityMock.createSetup().authc;
@@ -261,16 +261,16 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    fireEvent.click(await findByRole('button', { name: 'Block user' }));
+    fireEvent.click(await findByRole('button', { name: 'Deactivate user' }));
 
     const dialog = getByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Block user' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Deactivate user' }));
 
     await waitForElementToBeRemoved(() => getByRole('dialog'));
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/disable');
   });
 
-  it('enables user when confirming and closes dialog', async () => {
+  it('activates user when confirming and closes dialog', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/edit/jdoe'] });
     const authc = securityMock.createSetup().authc;
@@ -285,11 +285,11 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    const [enableButton] = await findAllByRole('button', { name: 'Unblock user' });
+    const [enableButton] = await findAllByRole('button', { name: 'Activate user' });
     fireEvent.click(enableButton);
 
     const dialog = getByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Unblock user' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Activate user' }));
 
     await waitForElementToBeRemoved(() => getByRole('dialog'));
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/enable');
