@@ -14,14 +14,15 @@
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../../src/plugins/charts/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../features/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     //
     // The following are dependencies that have not been typed yet.
-    // { "path": "../features/tsconfig.json" },
+    // { "path": "../cloud/tsconfig.json" },
     // { "path": "../security/tsconfig.json" },
     // { "path": "../spaces/tsconfig.json" },
-    // { "path": "../cloud/tsconfig.json" },
   ]
 }
