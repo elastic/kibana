@@ -44,8 +44,4 @@ else
   rename_coverage_file "oss-integration"
   echo ""
   echo ""
-  echo " -> Running mocha tests with coverage"
-  ./test/scripts/checks/mocha_coverage.sh
-  echo ""
-  echo ""
 fi

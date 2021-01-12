@@ -63,20 +63,20 @@ describe('metricBuckets(req, panel, series)', () => {
       {},
       undefined,
       {
-        barTargetUiSettings: 50,
+        get: async () => 50,
       }
     );
   });
 
-  test('calls next when finished', () => {
+  test('calls next when finished', async () => {
     const next = jest.fn();
-    metricBucketsProcessor(next)({});
+    await metricBucketsProcessor(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
-  test('returns metric aggs', () => {
+  test('returns metric aggs', async () => {
     const next = (doc) => doc;
-    const doc = metricBucketsProcessor(next)({});
+    const doc = await metricBucketsProcessor(next)({});
 
     expect(doc).toEqual({
       aggs: {

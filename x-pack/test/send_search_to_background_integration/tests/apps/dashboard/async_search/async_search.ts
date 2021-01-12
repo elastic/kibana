@@ -6,17 +6,14 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { getSearchSessionIdByPanelProvider } from './get_search_session_id_by_panel';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
-  const getSearchSessionIdByPanel = getSearchSessionIdByPanelProvider(getService);
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const queryBar = getService('queryBar');
-  const browser = getService('browser');
-  const sendToBackground = getService('sendToBackground');
 
   describe('dashboard with async search', () => {
     before(async function () {
@@ -63,74 +60,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // but only single error toast because searches are grouped
       expect((await testSubjects.findAll('searchTimeoutError')).length).to.be(1);
 
-      const panel1SessionId1 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
-      const panel2SessionId1 = await getSearchSessionIdByPanel(
+      const panel1SessionId1 = await dashboardPanelActions.getSearchSessionIdByTitle(
+        'Sum of Bytes by Extension'
+      );
+      const panel2SessionId1 = await dashboardPanelActions.getSearchSessionIdByTitle(
         'Sum of Bytes by Extension (Delayed 5s)'
       );
       expect(panel1SessionId1).to.be(panel2SessionId1);
 
       await queryBar.clickQuerySubmitButton();
 
-      const panel1SessionId2 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
-      const panel2SessionId2 = await getSearchSessionIdByPanel(
+      const panel1SessionId2 = await dashboardPanelActions.getSearchSessionIdByTitle(
+        'Sum of Bytes by Extension'
+      );
+      const panel2SessionId2 = await dashboardPanelActions.getSearchSessionIdByTitle(
         'Sum of Bytes by Extension (Delayed 5s)'
       );
       expect(panel1SessionId2).to.be(panel2SessionId2);
       expect(panel1SessionId1).not.to.be(panel1SessionId2);
-    });
-
-    describe('Send to background', () => {
-      before(async () => {
-        await PageObjects.common.navigateToApp('dashboard');
-      });
-
-      it('Restore using non-existing sessionId errors out. Refresh starts a new session and completes.', async () => {
-        await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
-        const url = await browser.getCurrentUrl();
-        const fakeSessionId = '__fake__';
-        const savedSessionURL = `${url}&searchSessionId=${fakeSessionId}`;
-        await browser.get(savedSessionURL);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await sendToBackground.expectState('restored');
-        await testSubjects.existOrFail('embeddableErrorLabel'); // expected that panel errors out because of non existing session
-
-        const session1 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
-        expect(session1).to.be(fakeSessionId);
-
-        await sendToBackground.refresh();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await sendToBackground.expectState('completed');
-        await testSubjects.missingOrFail('embeddableErrorLabel');
-        const session2 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
-        expect(session2).not.to.be(fakeSessionId);
-      });
-
-      it('Saves and restores a session', async () => {
-        await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
-        await PageObjects.dashboard.waitForRenderComplete();
-        await sendToBackground.expectState('completed');
-        await sendToBackground.save();
-        await sendToBackground.expectState('backgroundCompleted');
-        const savedSessionId = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
-
-        // load URL to restore a saved session
-        const url = await browser.getCurrentUrl();
-        const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`;
-        await browser.get(savedSessionURL);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.dashboard.waitForRenderComplete();
-
-        // Check that session is restored
-        await sendToBackground.expectState('restored');
-        await testSubjects.missingOrFail('embeddableErrorLabel');
-        const data = await PageObjects.visChart.getBarChartData('Sum of bytes');
-        expect(data.length).to.be(5);
-
-        // switching dashboard to edit mode (or any other non-fetch required) state change
-        // should leave session state untouched
-        await PageObjects.dashboard.switchToEditMode();
-        await sendToBackground.expectState('restored');
-      });
     });
   });
 }

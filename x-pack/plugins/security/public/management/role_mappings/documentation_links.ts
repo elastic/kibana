@@ -7,25 +7,31 @@
 import { DocLinksStart } from 'src/core/public';
 
 export class DocumentationLinksService {
-  private readonly esDocBasePath: string;
+  private readonly mappingRoles: string;
+  private readonly createRoleMapping: string;
+  private readonly createRoleMappingTemplates: string;
+  private readonly roleMappingFieldRules: string;
 
   constructor(docLinks: DocLinksStart) {
-    this.esDocBasePath = `${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/`;
+    this.mappingRoles = `${docLinks.links.security.mappingRoles}`;
+    this.createRoleMapping = `${docLinks.links.apis.createRoleMapping}`;
+    this.createRoleMappingTemplates = `${docLinks.links.apis.createRoleMappingTemplates}`;
+    this.roleMappingFieldRules = `${docLinks.links.security.mappingRolesFieldRules}`;
   }
 
   public getRoleMappingDocUrl() {
-    return `${this.esDocBasePath}/mapping-roles.html`;
+    return `${this.mappingRoles}`;
   }
 
   public getRoleMappingAPIDocUrl() {
-    return `${this.esDocBasePath}/security-api-put-role-mapping.html`;
+    return `${this.createRoleMapping}`;
   }
 
   public getRoleMappingTemplateDocUrl() {
-    return `${this.esDocBasePath}/security-api-put-role-mapping.html#_role_templates`;
+    return `${this.createRoleMappingTemplates}`;
   }
 
   public getRoleMappingFieldRulesDocUrl() {
-    return `${this.esDocBasePath}/role-mapping-resources.html#mapping-roles-rule-field`;
+    return `${this.roleMappingFieldRules}`;
   }
 }
