@@ -28,6 +28,7 @@ import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
   EmbeddableFactoryNotFoundError,
+  EmbeddableInput,
   isErrorEmbeddable,
   openAddPanelFlyout,
   ViewMode,
@@ -137,29 +138,41 @@ export function DashboardTopNav({
 
   const createNew = useCallback(async () => {
     const type = 'visualization';
-    const factory = embeddable.getEmbeddableFactory<VisualizeInput>(type);
+    // falls back to new vis modal when Lens is not available
+    let factory = embeddable.getEmbeddableFactory<EmbeddableInput>('lens');
+
     if (!factory) {
-      throw new EmbeddableFactoryNotFoundError(type);
+      factory = embeddable.getEmbeddableFactory<VisualizeInput>(type);
+
+      if (!factory) {
+        throw new EmbeddableFactoryNotFoundError(type);
+      }
+
+      await factory.create({} as VisualizeInput, dashboardContainer);
     }
 
-    await factory.create({} as VisualizeInput, dashboardContainer);
+    await factory.create({} as EmbeddableInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
 
   const createNewMarkdown = useCallback(async () => {
     const type = 'visualization';
     const factory = embeddable.getEmbeddableFactory<VisualizeInput>(type);
+
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }
+
     await factory.create({ visType: 'markdown' } as VisualizeInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
 
   const createNewInputControl = useCallback(async () => {
     const type = 'visualization';
     const factory = embeddable.getEmbeddableFactory(type);
+
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }
+
     await factory.create({ visType: 'input_control_vis' } as VisualizeInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
 
@@ -501,8 +514,18 @@ export function DashboardTopNav({
   );
 
   const quickButtons = [
-    { iconType: 'visText', tooltip: 'Markdown', action: createNewMarkdown },
-    { iconType: 'controlsHorizontal', tooltip: 'Input control', action: createNewInputControl },
+    {
+      iconType: 'visText',
+      tooltip: 'Markdown',
+      action: createNewMarkdown,
+      ariaLabel: 'Create new markdown',
+    },
+    {
+      iconType: 'controlsHorizontal',
+      tooltip: 'Input control',
+      action: createNewInputControl,
+      ariaLabel: 'Create new input control',
+    },
   ];
 
   return (

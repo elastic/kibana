@@ -21,14 +21,14 @@ import './panel_toolbar.scss';
 import React, { FC, useState, useCallback } from 'react';
 import {
   EuiButton,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiContextMenu,
   IconType,
-  EuiButtonIcon,
-  EuiToolTip,
 } from '@elastic/eui';
+import { htmlIdGenerator } from '@elastic/eui';
 import { CoreStart } from 'kibana/public';
 import { useKibana } from '../../../../kibana_react/public';
 import {
@@ -124,24 +124,33 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, quickButtons = []
     </EuiButton>
   );
 
+  const buttonGroupOptions = quickButtons.map(
+    ({ iconType, tooltip, action }: QuickButtons, index) => ({
+      iconType,
+      action,
+      id: `${htmlIdGenerator()()}${index}`,
+      label: tooltip,
+      'aria-label': `Create new ${tooltip}`,
+    })
+  );
+
+  const onChangeIconsMulti = (optionId: string) => {
+    buttonGroupOptions.find((x) => x.id === optionId)?.action();
+  };
+
   return (
     <EuiFlexGroup className="panelToolbar" id="kbnPresentationToolbar__panelToolbar" gutterSize="s">
       <EuiFlexItem grow={false}>{primaryActionButton}</EuiFlexItem>
       {quickButtons.length ? (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">
-            {quickButtons.map(({ iconType, tooltip, action }: QuickButtons) => (
-              <EuiFlexItem id={tooltip}>
-                <EuiToolTip content={tooltip}>
-                  <EuiButtonIcon
-                    className="panelToolbarButton"
-                    iconType={iconType}
-                    onClick={action}
-                    aria-label={`Create new ${tooltip}`}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            ))}
+            <EuiButtonGroup
+              legend="Quick buttons"
+              options={buttonGroupOptions}
+              onChange={onChangeIconsMulti}
+              type="multi"
+              isIconOnly
+            />
           </EuiFlexGroup>
         </EuiFlexItem>
       ) : null}

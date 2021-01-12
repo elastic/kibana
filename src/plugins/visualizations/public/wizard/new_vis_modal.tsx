@@ -97,8 +97,14 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     }
 
     if (this.props.visType) {
-      this.onVisTypeSelected(this.props.visTypesRegistry.get(this.props.visType));
-      return null;
+      const visType =
+        this.props.visTypesRegistry.get(this.props.visType) ||
+        this.props.visTypesRegistry.getAliases().find((alias) => this.props.visType === alias.name);
+
+      if (visType) {
+        this.onVisTypeSelected(visType);
+        return null;
+      }
     }
 
     const visNewVisDialogAriaLabel = i18n.translate(
