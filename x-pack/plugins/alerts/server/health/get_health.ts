@@ -7,7 +7,7 @@ import { ISavedObjectsRepository } from 'src/core/server';
 import { AlertsHealth, HealthStatus, RawAlert, AlertExecutionStatusErrorReasons } from '../types';
 
 export const getHealth = async (
-  internalSavedObjectsRepository: ISavedObjectsRepository
+  internalSavedObjectsRepository?: ISavedObjectsRepository
 ): Promise<AlertsHealth> => {
   const healthStatuses = {
     decryptionHealth: {
@@ -23,6 +23,14 @@ export const getHealth = async (
       timestamp: '',
     },
   };
+
+  if (!internalSavedObjectsRepository) {
+    healthStatuses.decryptionHealth = {
+      status: HealthStatus.Warning,
+      timestamp: new Date().toISOString(),
+    };
+    return healthStatuses;
+  }
 
   const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
     filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Decrypt}`,

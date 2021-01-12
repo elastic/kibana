@@ -383,14 +383,16 @@ export class AlertingPlugin {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertsClientWithRequest,
       getFrameworkHealth: async () =>
-        await getHealth(core.savedObjects.createInternalRepository(['alert'])),
+        await getHealth(
+          isESOAvailable ? core.savedObjects.createInternalRepository(['alert']) : undefined
+        ),
     };
   }
 
   private createRouteHandlerContext = (
     core: CoreSetup
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'alerting'> => {
-    const { alertTypeRegistry, alertsClientFactory } = this;
+    const { alertTypeRegistry, alertsClientFactory, isESOAvailable } = this;
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
@@ -399,7 +401,9 @@ export class AlertingPlugin {
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
         getFrameworkHealth: async () =>
-          await getHealth(savedObjects.createInternalRepository(['alert'])),
+          await getHealth(
+            isESOAvailable ? savedObjects.createInternalRepository(['alert']) : undefined
+          ),
       };
     };
   };

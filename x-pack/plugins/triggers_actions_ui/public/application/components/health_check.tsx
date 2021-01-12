@@ -134,7 +134,7 @@ const EncryptionError = ({
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.healthCheck.encryptionErrorTitle"
-          defaultMessage="You must set an encryption key"
+          defaultMessage="Encrypted saved objects are not available"
         />
       </h2>
     }
@@ -151,7 +151,8 @@ const EncryptionError = ({
           {i18n.translate(
             'xpack.triggersActionsUI.components.healthCheck.encryptionErrorAfterKey',
             {
-              defaultMessage: ' in your kibana.yml file. ',
+              defaultMessage:
+                ' in your kibana.yml file and ensure the Encrypted Saved Objects plugin is enabled. ',
             }
           )}
           <EuiLink
