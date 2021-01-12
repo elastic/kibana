@@ -77,7 +77,7 @@ describe('ExecutedStep', () => {
     expect(getByText(`const someVar = "the var"`));
   });
 
-  it('renders accordions for step, error message, and error stack script', () => {
+  it('renders accordions for error message, and stack trace', () => {
     step.synthetics = {
       error: {
         message: 'There was an error executing the step.',
