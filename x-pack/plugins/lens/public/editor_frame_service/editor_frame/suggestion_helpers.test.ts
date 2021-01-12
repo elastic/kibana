@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSuggestions } from './suggestion_helpers';
+import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
 import { createMockVisualization, createMockDatasource, DatasourceMock } from '../mocks';
-import { TableSuggestion, DatasourceSuggestion } from '../../types';
+import { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
 import { PaletteOutput } from 'src/plugins/charts/public';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
@@ -471,5 +471,119 @@ describe('suggestion helpers', () => {
         mainPalette,
       })
     );
+  });
+
+  describe('getTopSuggestionForField', () => {
+    let mockVisualization1: jest.Mocked<Visualization>;
+    let mockVisualization2: jest.Mocked<Visualization>;
+    let mockDatasourceState: unknown;
+    beforeEach(() => {
+      datasourceMap.mock.getDatasourceSuggestionsForField.mockReturnValueOnce([
+        {
+          state: {},
+          table: {
+            isMultiRow: true,
+            layerId: '1',
+            columns: [],
+            changeType: 'unchanged',
+          },
+          keptLayerIds: [],
+        },
+      ]);
+      mockVisualization1 = createMockVisualization();
+      mockVisualization1.getSuggestions.mockReturnValueOnce([
+        {
+          score: 0.3,
+          title: 'second suggestion',
+          state: { second: true },
+          previewIcon: 'empty',
+        },
+        {
+          score: 0.5,
+          title: 'top suggestion',
+          state: { first: true },
+          previewIcon: 'empty',
+        },
+      ]);
+      mockVisualization2 = createMockVisualization();
+      mockVisualization2.getSuggestions.mockReturnValueOnce([
+        {
+          score: 0.8,
+          title: 'other vis suggestion',
+          state: {},
+          previewIcon: 'empty',
+        },
+      ]);
+      mockDatasourceState = { myDatasourceState: true };
+    });
+
+    it('should return top suggestion for field', () => {
+      const result = getTopSuggestionForField(
+        {
+          '1': {
+            getTableSpec: () => [{ columnId: 'col1' }],
+            datasourceId: '',
+            getOperationForColumnId: jest.fn(),
+          },
+        },
+        'vis1',
+        { vis1: mockVisualization1 },
+        {},
+        datasourceMap.mock,
+        {
+          mockindexpattern: { state: mockDatasourceState, isLoading: false },
+        },
+        { id: 'myfield' }
+      );
+      expect(result!.title).toEqual('top suggestion');
+      expect(datasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
+        mockDatasourceState,
+        {
+          id: 'myfield',
+        }
+      );
+    });
+
+    it('should not consider suggestion from other visualization if there is data', () => {
+      const result = getTopSuggestionForField(
+        {
+          '1': {
+            getTableSpec: () => [{ columnId: 'col1' }],
+            datasourceId: '',
+            getOperationForColumnId: jest.fn(),
+          },
+        },
+        'vis1',
+        { vis1: { ...mockVisualization1, getSuggestions: () => [] }, vis2: mockVisualization2 },
+        {},
+        datasourceMap.mock,
+        {
+          mockindexpattern: { state: mockDatasourceState, isLoading: false },
+        },
+        { id: 'myfield' }
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should consider suggestion from other visualization if there is no data', () => {
+      const result = getTopSuggestionForField(
+        {
+          '1': {
+            getTableSpec: () => [],
+            datasourceId: '',
+            getOperationForColumnId: jest.fn(),
+          },
+        },
+        'vis1',
+        { vis1: { ...mockVisualization1, getSuggestions: () => [] }, vis2: mockVisualization2 },
+        {},
+        datasourceMap.mock,
+        {
+          mockindexpattern: { state: mockDatasourceState, isLoading: false },
+        },
+        { id: 'myfield' }
+      );
+      expect(result!.title).toEqual('other vis suggestion');
+    });
   });
 });

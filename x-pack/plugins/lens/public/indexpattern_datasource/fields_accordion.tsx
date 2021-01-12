@@ -50,6 +50,8 @@ export interface FieldsAccordionProps {
   exists: (field: IndexPatternField) => boolean;
   showExistenceFetchError?: boolean;
   hideDetails?: boolean;
+  dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }
 
 export const InnerFieldsAccordion = function InnerFieldsAccordion({
@@ -68,7 +70,7 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   hideDetails,
   showExistenceFetchError,
   dropOntoWorkspace,
-  getSuggestionForField,
+  hasSuggestionForField,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
     (field: IndexPatternField) => (
@@ -79,10 +81,10 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
         exists={exists(field)}
         hideDetails={hideDetails}
         dropOntoWorkspace={dropOntoWorkspace}
-        getSuggestionForField={getSuggestionForField}
+        hasSuggestionForField={hasSuggestionForField}
       />
     ),
-    [fieldProps, exists, hideDetails, dropOntoWorkspace, getSuggestionForField]
+    [fieldProps, exists, hideDetails, dropOntoWorkspace, hasSuggestionForField]
   );
 
   const titleClassname = classNames({

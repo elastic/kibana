@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useReducer, useState, useContext, useCallback } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ReactExpressionRendererType } from '../../../../../../src/plugins/expressions/public';
@@ -16,7 +16,7 @@ import { FrameLayout } from './frame_layout';
 import { SuggestionPanel } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
 import { Document } from '../../persistence/saved_object_store';
-import { RootDragDropProvider } from '../../drag_drop';
+import { Dragging, RootDragDropProvider } from '../../drag_drop';
 import { getSavedObjectFormat } from './save';
 import { generateId } from '../../id_generator';
 import { Filter, Query, SavedQuery } from '../../../../../../src/plugins/data/public';
@@ -25,7 +25,7 @@ import { EditorFrameStartPlugins } from '../service';
 import { initializeDatasources, createDatasourceLayers } from './state_helpers';
 import {
   applyVisualizeFieldSuggestions,
-  getSuggestions,
+  getTopSuggestionForField,
   switchToSuggestion,
 } from './suggestion_helpers';
 import { trackUiEvent } from '../../lens_ui_telemetry';
@@ -260,40 +260,39 @@ export function EditorFrame(props: EditorFrameProps) {
   );
 
   const getSuggestionForField = React.useCallback(
-    (field) => {
+    (field: Dragging) => {
       const { activeDatasourceId, datasourceStates } = state;
       const activeVisualizationId = state.visualization.activeId;
       const visualizationState = state.visualization.state;
-      const { visualizationMap } = props;
+      const { visualizationMap, datasourceMap } = props;
 
       if (!field || !activeDatasourceId) {
         return;
       }
 
-      const hasData = Object.values(datasourceLayers).some(
-        (datasource) => datasource.getTableSpec().length > 0
-      );
-
-      const mainPalette =
-        activeVisualizationId && visualizationMap[activeVisualizationId]?.getMainPalette
-          ? visualizationMap[activeVisualizationId].getMainPalette?.(visualizationState)
-          : undefined;
-      const suggestions = getSuggestions({
-        datasourceMap: { [activeDatasourceId]: props.datasourceMap[activeDatasourceId] },
-        datasourceStates,
-        visualizationMap:
-          hasData && activeVisualizationId
-            ? { [activeVisualizationId]: visualizationMap[activeVisualizationId] }
-            : visualizationMap,
+      return getTopSuggestionForField(
+        datasourceLayers,
         activeVisualizationId,
+        visualizationMap,
         visualizationState,
-        field,
-        mainPalette,
-      });
-      return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];
+        datasourceMap[activeDatasourceId],
+        datasourceStates,
+        field
+      );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.visualization.state]
+    [
+      state.visualization.state,
+      props.datasourceMap,
+      props.visualizationMap,
+      state.activeDatasourceId,
+      state.datasourceStates,
+    ]
+  );
+
+  const hasSuggestionForField = React.useCallback(
+    (field: Dragging) => getSuggestionForField(field) !== undefined,
+    [getSuggestionForField]
   );
 
   const dropOntoWorkspace = React.useCallback(
@@ -331,7 +330,7 @@ export function EditorFrame(props: EditorFrameProps) {
             filters={props.filters}
             showNoDataPopover={props.showNoDataPopover}
             dropOntoWorkspace={dropOntoWorkspace}
-            getSuggestionForField={getSuggestionForField}
+            hasSuggestionForField={hasSuggestionForField}
           />
         }
         configPanel={

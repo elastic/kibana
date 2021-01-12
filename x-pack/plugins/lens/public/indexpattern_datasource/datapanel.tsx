@@ -101,7 +101,7 @@ export function IndexPatternDataPanel({
   charts,
   showNoDataPopover,
   dropOntoWorkspace,
-  getSuggestionForField,
+  hasSuggestionForField,
 }: Props) {
   const { indexPatternRefs, indexPatterns, currentIndexPatternId } = state;
   const onChangeIndexPattern = useCallback(
@@ -196,7 +196,7 @@ export function IndexPatternDataPanel({
           existingFields={state.existingFields}
           existenceFetchFailed={state.existenceFetchFailed}
           dropOntoWorkspace={dropOntoWorkspace}
-          getSuggestionForField={getSuggestionForField}
+          hasSuggestionForField={hasSuggestionForField}
         />
       )}
     </>
@@ -246,7 +246,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
   existingFields,
   charts,
   dropOntoWorkspace,
-  getSuggestionForField,
+  hasSuggestionForField,
 }: Omit<DatasourceDataPanelProps, 'state' | 'setState' | 'showNoDataPopover'> & {
   data: DataPublicPluginStart;
   currentIndexPatternId: string;
@@ -600,7 +600,7 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
             existenceFetchFailed={existenceFetchFailed}
             existFieldsInIndex={!!allFields.length}
             dropOntoWorkspace={dropOntoWorkspace}
-            getSuggestionForField={getSuggestionForField}
+            hasSuggestionForField={hasSuggestionForField}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

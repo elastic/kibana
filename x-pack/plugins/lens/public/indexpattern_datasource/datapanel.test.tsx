@@ -260,6 +260,8 @@ describe('IndexPattern Data Panel', () => {
       query: { query: '', language: 'lucene' },
       filters: [],
       showNoDataPopover: jest.fn(),
+      dropOntoWorkspace: jest.fn(),
+      hasSuggestionForField: jest.fn(() => false),
     };
   });
 

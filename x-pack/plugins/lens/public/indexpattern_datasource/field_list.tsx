@@ -12,6 +12,7 @@ import { FieldItem } from './field_item';
 import { NoFieldsCallout } from './no_fields_callout';
 import { IndexPatternField } from './types';
 import { FieldItemSharedProps, FieldsAccordion } from './fields_accordion';
+import { DatasourceDataPanelProps } from '../types';
 const PAGINATION_SIZE = 50;
 
 export type FieldGroups = Record<
@@ -49,7 +50,7 @@ export function FieldList({
   currentIndexPatternId,
   existFieldsInIndex,
   dropOntoWorkspace,
-  getSuggestionForField,
+  hasSuggestionForField,
 }: {
   exists: (field: IndexPatternField) => boolean;
   fieldGroups: FieldGroups;
@@ -62,6 +63,8 @@ export function FieldList({
   };
   currentIndexPatternId: string;
   existFieldsInIndex: boolean;
+  dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }) {
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
@@ -140,7 +143,7 @@ export function FieldList({
                   hideDetails={true}
                   key={field.name}
                   dropOntoWorkspace={dropOntoWorkspace}
-                  getSuggestionForField={getSuggestionForField}
+                  hasSuggestionForField={hasSuggestionForField}
                 />
               ))
             )}
@@ -152,7 +155,7 @@ export function FieldList({
             <Fragment key={key}>
               <FieldsAccordion
                 dropOntoWorkspace={dropOntoWorkspace}
-                getSuggestionForField={getSuggestionForField}
+                hasSuggestionForField={hasSuggestionForField}
                 initialIsOpen={Boolean(accordionState[key])}
                 key={key}
                 id={`lnsIndexPattern${key}`}

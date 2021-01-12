@@ -39,8 +39,8 @@ import {
   isLensFilterEvent,
   isLensEditEvent,
 } from '../../../types';
-import { DragDrop, DragContext } from '../../../drag_drop';
-import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
+import { DragDrop, DragContext, Dragging } from '../../../drag_drop';
+import { Suggestion, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
@@ -75,6 +75,7 @@ export interface WorkspacePanelProps {
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
+  getSuggestionForField: (field: Dragging) => Suggestion | undefined;
 }
 
 interface WorkspaceState {

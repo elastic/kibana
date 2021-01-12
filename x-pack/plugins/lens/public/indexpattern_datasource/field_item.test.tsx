@@ -95,6 +95,8 @@ describe('IndexPattern Field Item', () => {
       },
       exists: true,
       chartsThemeService,
+      dropOntoWorkspace: () => {},
+      hasSuggestionForField: () => false,
     };
 
     data.fieldFormats = ({

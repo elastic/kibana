@@ -48,7 +48,7 @@ import {
 import { FieldButton } from '../../../../../src/plugins/kibana_react/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import { DraggedField } from './indexpattern';
-import { DragDrop } from '../drag_drop';
+import { DragDrop, Dragging } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
 import { BucketedAggregation, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField } from './types';
@@ -69,6 +69,8 @@ export interface FieldItemProps {
   chartsThemeService: ChartsPluginSetup['theme'];
   filters: Filter[];
   hideDetails?: boolean;
+  dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }
 
 interface State {
@@ -235,6 +237,40 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
 export const FieldItem = debouncedComponent(InnerFieldItem);
 
+function FieldPanelHeader({
+  indexPatternId,
+  field,
+  hasSuggestionForField,
+  dropOntoWorkspace,
+}: {
+  field: IndexPatternField;
+  indexPatternId: string;
+  hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
+  dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+}) {
+  const draggableField = {
+    indexPatternId,
+    id: field.name,
+    field,
+  };
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+      <EuiFlexItem>
+        <EuiTitle size="xxs">
+          <h5 className="lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
+        </EuiTitle>
+      </EuiFlexItem>
+
+      <DragToWorkspaceButton
+        isEnabled={hasSuggestionForField(draggableField)}
+        dropOntoWorkspace={dropOntoWorkspace}
+        field={draggableField}
+      />
+    </EuiFlexGroup>
+  );
+}
+
 function FieldItemPopoverContents(props: State & FieldItemProps) {
   const {
     histogram,
@@ -247,7 +283,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     chartsThemeService,
     data: { fieldFormats },
     dropOntoWorkspace,
-    getSuggestionForField,
+    hasSuggestionForField,
     hideDetails,
   } = props;
 
@@ -272,28 +308,17 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   const [showingHistogram, setShowingHistogram] = useState(histogramDefault);
 
-  const FieldPanelHeader = () => (
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-      <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h5 className="lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
-        </EuiTitle>
-      </EuiFlexItem>
-
-      <DragToWorkspaceButton
-        getSuggestionForField={getSuggestionForField}
-        dropOntoWorkspace={dropOntoWorkspace}
-        field={{
-          indexPatternId: indexPattern.id,
-          id: field.name,
-          field,
-        }}
-      />
-    </EuiFlexGroup>
+  const panelHeader = (
+    <FieldPanelHeader
+      indexPatternId={indexPattern.id}
+      field={field}
+      dropOntoWorkspace={dropOntoWorkspace}
+      hasSuggestionForField={hasSuggestionForField}
+    />
   );
 
   if (hideDetails) {
-    return <FieldPanelHeader />;
+    return panelHeader;
   }
 
   let formatter: { convert: (data: unknown) => string };
@@ -327,9 +352,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   ) {
     return (
       <>
-        <EuiPopoverTitle>
-          <FieldPanelHeader />
-        </EuiPopoverTitle>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
 
         <EuiText size="s">
           {i18n.translate('xpack.lens.indexPattern.fieldStatsNoData', {
@@ -395,9 +418,7 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   function wrapInPopover(el: React.ReactElement) {
     return (
       <>
-        <EuiPopoverTitle>
-          <FieldPanelHeader />
-        </EuiPopoverTitle>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
 
         {title ? title : <></>}
 
@@ -587,12 +608,20 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
   return <></>;
 }
 
-const DragToWorkspaceButton = ({ field, getSuggestionForField, dropOntoWorkspace }) => {
+const DragToWorkspaceButton = ({
+  field,
+  dropOntoWorkspace,
+  isEnabled,
+}: {
+  field: Dragging;
+  dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  isEnabled: boolean;
+}) => {
   const buttonTitle = i18n.translate('xpack.lens.indexPattern.moveToWorkspace', {
     defaultMessage: 'Add field to workspace',
   });
 
-  if (getSuggestionForField(field)) {
+  if (isEnabled) {
     return (
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
