@@ -70,12 +70,6 @@ function sampleArgs() {
 }
 
 describe('datatable_expression', () => {
-  let onDispatchEvent: jest.Mock;
-
-  beforeEach(() => {
-    onDispatchEvent = jest.fn();
-  });
-
   describe('datatable renders', () => {
     test('it renders with the specified data and args', () => {
       const { data, args } = sampleArgs();
