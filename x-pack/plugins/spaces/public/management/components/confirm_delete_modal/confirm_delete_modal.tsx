@@ -24,8 +24,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { ChangeEvent, Component } from 'react';
+import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
 import { SpacesManager } from '../../../spaces_manager';
-import { Space } from '../../../../../../plugins/spaces/common/model/space';
 
 interface Props {
   space: Space;

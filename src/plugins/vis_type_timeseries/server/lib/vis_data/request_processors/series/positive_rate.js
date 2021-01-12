@@ -21,6 +21,7 @@ import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
 import { bucketTransform } from '../../helpers/bucket_transform';
 import { overwrite } from '../../helpers';
+import { UI_SETTINGS } from '../../../../../../data/common';
 
 export const filter = (metric) => metric.type === 'positive_rate';
 
@@ -29,7 +30,11 @@ export const createPositiveRate = (doc, intervalString, aggRoot) => (metric) => 
   const derivativeFn = bucketTransform.derivative;
   const positiveOnlyFn = bucketTransform.positive_only;
 
-  const maxMetric = { id: `${metric.id}-positive-rate-max`, type: 'max', field: metric.field };
+  const maxMetric = {
+    id: `${metric.id}-positive-rate-max`,
+    type: 'max',
+    field: metric.field,
+  };
   const derivativeMetric = {
     id: `${metric.id}-positive-rate-derivative`,
     type: 'derivative',
@@ -64,9 +69,11 @@ export function positiveRate(
   esQueryConfig,
   indexPatternObject,
   capabilities,
-  { barTargetUiSettings }
+  uiSettings
 ) {
-  return (next) => (doc) => {
+  return (next) => async (doc) => {
+    const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
+
     const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
     const { intervalString } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
 

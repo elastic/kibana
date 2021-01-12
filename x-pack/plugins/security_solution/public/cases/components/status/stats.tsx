@@ -21,10 +21,14 @@ const StatsComponent: React.FC<Props> = ({ caseCount, caseStatus, isLoading, dat
     () => [
       {
         title: statuses[caseStatus].stats.title,
-        description: isLoading ? <EuiLoadingSpinner /> : caseCount ?? 'N/A',
+        description: isLoading ? (
+          <EuiLoadingSpinner data-test-subj={`${dataTestSubj}-loading-spinner`} />
+        ) : (
+          caseCount ?? 'N/A'
+        ),
       },
     ],
-    [caseCount, caseStatus, isLoading]
+    [caseCount, caseStatus, dataTestSubj, isLoading]
   );
   return (
     <EuiDescriptionList data-test-subj={dataTestSubj} textStyle="reverse" listItems={statusStats} />
