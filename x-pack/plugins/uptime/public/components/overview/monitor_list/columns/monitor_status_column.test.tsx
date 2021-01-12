@@ -10,7 +10,8 @@ import { Ping } from '../../../../../common/runtime_types';
 import { STATUS } from '../../../../../common/constants';
 import { EuiThemeProvider } from '../../../../../../observability/public';
 import { mockDate, mockMoment } from '../../../../lib/helper/test_helpers';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render } from '../../../../lib/helper/rtl_helpers';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 
 describe('MonitorListStatusColumn', () => {
   beforeAll(() => {
