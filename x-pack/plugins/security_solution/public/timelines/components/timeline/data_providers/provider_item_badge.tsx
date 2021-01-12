@@ -28,10 +28,12 @@ interface ProviderItemBadgeProps {
   kqlQuery: string;
   isEnabled: boolean;
   isExcluded: boolean;
+  isPopoverOpen: boolean;
   onDataProviderEdited?: OnDataProviderEdited;
   operator: QueryOperator;
   providerId: string;
   register?: DataProvidersAnd;
+  setIsPopoverOpen: (isPopoverOpen: boolean) => void;
   timelineId?: string;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
@@ -50,10 +52,12 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     kqlQuery,
     isEnabled,
     isExcluded,
+    isPopoverOpen,
     onDataProviderEdited,
     operator,
     providerId,
     register,
+    setIsPopoverOpen,
     timelineId,
     toggleEnabledProvider,
     toggleExcludedProvider,
@@ -75,16 +79,15 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       getManageTimelineById,
       timelineId,
     ]);
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
     const togglePopover = useCallback(() => {
       setIsPopoverOpen(!isPopoverOpen);
-    }, [isPopoverOpen]);
+    }, [isPopoverOpen, setIsPopoverOpen]);
 
     const closePopover = useCallback(() => {
       setIsPopoverOpen(false);
       wrapperRef?.current?.focus();
-    }, [wrapperRef]);
+    }, [wrapperRef, setIsPopoverOpen]);
 
     const onToggleEnabledProvider = useCallback(() => {
       toggleEnabledProvider();
