@@ -20,6 +20,7 @@
 import { ApplicationStart, IUiSettingsClient } from '../../../core/public';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 import { IndexPatternsContract, DataPublicPluginStart } from '../../../plugins/data/public';
+import { VisEditorConstructor } from '../../../plugins/visualizations/public';
 import { SharePluginStart } from '../../../plugins/share/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
@@ -30,6 +31,10 @@ export const [getShareService, setShareService] = createGetterSetter<SharePlugin
 
 export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
   'IndexPatterns'
+);
+
+export const [getDefaultEditor, setDefaultEditor] = createGetterSetter<VisEditorConstructor>(
+  'DefaultEditor'
 );
 
 export const [getQueryService, setQueryService] = createGetterSetter<

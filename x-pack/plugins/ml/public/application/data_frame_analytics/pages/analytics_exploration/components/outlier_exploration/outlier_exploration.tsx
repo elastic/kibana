@@ -20,7 +20,11 @@ import { SavedSearchQuery } from '../../../../../contexts/ml';
 import { defaultSearchQuery, isOutlierAnalysis, useResultsViewConfig } from '../../../../common';
 import { FEATURE_INFLUENCE } from '../../../../common/constants';
 
-import { ExpandableSectionAnalytics, ExpandableSectionResults } from '../expandable_section';
+import {
+  ExpandableSectionSplom,
+  ExpandableSectionAnalytics,
+  ExpandableSectionResults,
+} from '../expandable_section';
 import { ExplorationQueryBar } from '../exploration_query_bar';
 
 import { getFeatureCount } from './common';
@@ -122,6 +126,13 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           </>
         )}
       {typeof jobConfig?.id === 'string' && <ExpandableSectionAnalytics jobId={jobConfig?.id} />}
+      {typeof jobConfig?.id === 'string' && jobConfig?.analyzed_fields.includes.length > 1 && (
+        <ExpandableSectionSplom
+          fields={jobConfig?.analyzed_fields.includes}
+          index={jobConfig?.dest.index}
+          resultsField={jobConfig?.dest.results_field}
+        />
+      )}
       {showLegacyFeatureInfluenceFormatCallout && (
         <>
           <EuiCallOut

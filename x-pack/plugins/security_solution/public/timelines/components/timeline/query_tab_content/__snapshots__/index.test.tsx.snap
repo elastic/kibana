@@ -2,6 +2,7 @@
 
 exports[`Timeline rendering renders correctly against snapshot 1`] = `
 <QueryTabContentComponent
+  activeTab="query"
   columns={
     Array [
       Object {
@@ -275,12 +276,14 @@ In other use cases the message field can be used to concatenate different values
   kqlMode="search"
   kqlQueryExpression=""
   onEventClosed={[MockFunction]}
+  show={true}
   showCallOutUnauthorizedMsg={false}
   showEventDetails={false}
   sort={
     Array [
       Object {
         "columnId": "@timestamp",
+        "columnType": "number",
         "sortDirection": "desc",
       },
     ]

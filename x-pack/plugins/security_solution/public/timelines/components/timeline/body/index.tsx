@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { RowRendererId, TimelineId } from '../../../../../common/types/timeline';
+import { RowRendererId, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import {
+  FIRST_ARIA_INDEX,
+  ARIA_COLINDEX_ATTRIBUTE,
+  ARIA_ROWINDEX_ATTRIBUTE,
+  onKeyDownFocusHandler,
+} from '../../../../common/components/accessibility/helpers';
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { inputsModel, State } from '../../../../common/store';
@@ -29,12 +36,15 @@ import { Events } from './events';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 
 interface OwnProps {
+  activePage: number;
   browserFields: BrowserFields;
   data: TimelineItem[];
   id: string;
   isEventViewer?: boolean;
   sort: Sort[];
   refetch: inputsModel.Refetch;
+  tabType: TimelineTabs;
+  totalPages: number;
   onRuleChange?: () => void;
 }
 
@@ -51,6 +61,7 @@ export type StatefulBodyProps = OwnProps & PropsFromRedux;
 
 export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
+    activePage,
     browserFields,
     columnHeaders,
     data,
@@ -68,7 +79,10 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     showCheckboxes,
     refetch,
     sort,
+    tabType,
+    totalPages,
   }) => {
+    const containerRef = useRef<HTMLDivElement | null>(null);
     const { getManageTimelineById } = useManageTimeline();
     const { queryFields, selectAll } = useMemo(() => getManageTimelineById(id), [
       getManageTimelineById,
@@ -142,10 +156,35 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [actionsColumnWidth, columnHeaders]
     );
 
+    const [lastFocusedAriaColindex] = useState(FIRST_ARIA_INDEX);
+
+    const onKeyDown = useCallback(
+      (e: React.KeyboardEvent) => {
+        onKeyDownFocusHandler({
+          colindexAttribute: ARIA_COLINDEX_ATTRIBUTE,
+          containerElement: containerRef.current,
+          event: e,
+          maxAriaColindex: columnHeaders.length + 1,
+          maxAriaRowindex: data.length + 1,
+          onColumnFocused: noop,
+          rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
+        });
+      },
+      [columnHeaders.length, containerRef, data.length]
+    );
+
     return (
       <>
-        <TimelineBody data-test-subj="timeline-body">
-          <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
+        <TimelineBody data-test-subj="timeline-body" ref={containerRef}>
+          <EventsTable
+            $activePage={activePage}
+            $columnCount={columnHeaders.length + 1}
+            data-test-subj={`${tabType}-events-table`}
+            columnWidths={columnWidths}
+            onKeyDown={onKeyDown}
+            $rowCount={data.length}
+            $totalPages={totalPages}
+          >
             <ColumnHeaders
               actionsColumnWidth={actionsColumnWidth}
               browserFields={browserFields}
@@ -156,10 +195,12 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               showEventsSelect={false}
               showSelectAllCheckbox={showCheckboxes}
               sort={sort}
+              tabType={tabType}
               timelineId={id}
             />
 
             <Events
+              containerRef={containerRef}
               actionsColumnWidth={actionsColumnWidth}
               browserFields={browserFields}
               columnHeaders={columnHeaders}
@@ -168,6 +209,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               eventIdToNoteIds={eventIdToNoteIds}
               id={id}
               isEventViewer={isEventViewer}
+              lastFocusedAriaColindex={lastFocusedAriaColindex}
               loadingEventIds={loadingEventIds}
               onRowSelected={onRowSelected}
               pinnedEventIds={pinnedEventIds}
@@ -176,6 +218,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
+              tabType={tabType}
             />
           </EventsTable>
         </TimelineBody>
@@ -196,7 +239,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     prevProps.id === nextProps.id &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-    prevProps.showCheckboxes === nextProps.showCheckboxes
+    prevProps.showCheckboxes === nextProps.showCheckboxes &&
+    prevProps.tabType === nextProps.tabType
 );
 
 BodyComponent.displayName = 'BodyComponent';

@@ -31,7 +31,7 @@ export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksSt
     links: [
       {
         linkType: 'documentation',
-        href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/visualize.html`,
+        href: `${docLinks.links.visualize.guide}`,
       },
     ],
   });

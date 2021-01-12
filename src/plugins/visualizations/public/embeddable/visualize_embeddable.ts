@@ -49,7 +49,6 @@ import { Vis, SerializedVis } from '../vis';
 import { getExpressions, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { TriggerId } from '../../../ui_actions/public';
 import { SavedObjectAttributes } from '../../../../core/types';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
 import { VisSavedObject } from '../types';
@@ -71,6 +70,9 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
+  query?: Query;
+  filters?: Filter[];
+  timeRange?: TimeRange;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -106,7 +108,6 @@ export class VisualizeEmbeddable
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
@@ -149,10 +150,6 @@ export class VisualizeEmbeddable
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
-
-    this.autoRefreshFetchSubscription = timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.updateHandler.bind(this));
 
     this.subscriptions.push(
       this.getUpdated$().subscribe(() => {
@@ -366,7 +363,6 @@ export class VisualizeEmbeddable
       this.handler.destroy();
       this.handler.getElement().remove();
     }
-    this.autoRefreshFetchSubscription.unsubscribe();
   }
 
   public reload = () => {
@@ -411,7 +407,7 @@ export class VisualizeEmbeddable
     });
   };
 
-  public supportedTriggers(): TriggerId[] {
+  public supportedTriggers(): string[] {
     return this.vis.type.getSupportedTriggers?.() ?? [];
   }
 

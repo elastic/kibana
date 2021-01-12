@@ -36,6 +36,7 @@ import {
   SearchSessionInfoProvider,
 } from '../../../../data/public';
 import { migrateLegacyQuery } from '../helpers/migrate_legacy_query';
+import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DISCOVER_APP_URL_GENERATOR, DiscoverUrlGeneratorState } from '../../url_generator';
 
 export interface AppState {
@@ -47,6 +48,10 @@ export interface AppState {
    * Array of applied filters
    */
   filters?: Filter[];
+  /**
+   * Data Grid related state
+   */
+  grid?: DiscoverGridSettings;
   /**
    * id of the used index pattern
    */
@@ -277,11 +282,14 @@ function createUrlGeneratorState({
   appStateContainer,
   data,
   getSavedSearchId,
-  forceAbsoluteTime, // TODO: not implemented
+  forceAbsoluteTime,
 }: {
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
+  /**
+   * Can force time range from time filter to convert from relative to absolute time range
+   */
   forceAbsoluteTime: boolean;
 }): DiscoverUrlGeneratorState {
   const appState = appStateContainer.get();
@@ -290,7 +298,9 @@ function createUrlGeneratorState({
     indexPatternId: appState.index,
     query: appState.query,
     savedSearchId: getSavedSearchId(),
-    timeRange: data.query.timefilter.timefilter.getTime(), // TODO: handle relative time range
+    timeRange: forceAbsoluteTime
+      ? data.query.timefilter.timefilter.getAbsoluteTime()
+      : data.query.timefilter.timefilter.getTime(),
     searchSessionId: data.search.session.getSessionId(),
     columns: appState.columns,
     sort: appState.sort,

@@ -117,7 +117,10 @@ export class VectorStyleEditor extends Component<Props, State> {
       await this.props.layer.getStyleEditorFields()
     );
     const styleFields = styleFieldsHelper.getStyleFields();
-    if (!this._isMounted || _.isEqual(styleFields, this.state.styleFields)) {
+    if (
+      !this._isMounted ||
+      (_.isEqual(styleFields, this.state.styleFields) && this.state.styleFieldsHelper !== undefined)
+    ) {
       return;
     }
 
@@ -464,6 +467,9 @@ export class VectorStyleEditor extends Component<Props, State> {
         <EuiSpacer size="m" />
 
         {this._renderLineWidth()}
+        <EuiSpacer size="m" />
+
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }
@@ -478,6 +484,9 @@ export class VectorStyleEditor extends Component<Props, State> {
         <EuiSpacer size="m" />
 
         {this._renderLineWidth()}
+        <EuiSpacer size="m" />
+
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }

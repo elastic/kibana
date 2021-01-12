@@ -5,7 +5,6 @@
  */
 
 import {
-  EuiTabbedContent,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutHeader,
@@ -15,7 +14,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps } from 'react-redux';
@@ -30,11 +29,11 @@ import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
-import { combineQueries } from '../helpers';
+import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
 import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { useManageTimeline } from '../../manage_timeline';
-import { TimelineEventsType, TimelineId } from '../../../../../common/types/timeline';
+import { TimelineEventsType, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
@@ -116,22 +115,6 @@ const VerticalRule = styled.div`
 
 VerticalRule.displayName = 'VerticalRule';
 
-const StyledEuiTabbedContent = styled(EuiTabbedContent)`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-
-  > [role='tabpanel'] {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-  }
-`;
-
-StyledEuiTabbedContent.displayName = 'StyledEuiTabbedContent';
-
 const EventsCountBadge = styled(EuiBadge)`
   margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
 `;
@@ -150,6 +133,7 @@ const EMPTY_EVENTS: TimelineItem[] = [];
 export type Props = OwnProps & PropsFromRedux;
 
 export const QueryTabContentComponent: React.FC<Props> = ({
+  activeTab,
   columns,
   dataProviders,
   end,
@@ -163,6 +147,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   kqlMode,
   kqlQueryExpression,
   onEventClosed,
+  show,
   showCallOutUnauthorizedMsg,
   showEventDetails,
   start,
@@ -188,9 +173,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     kqlQueryExpression,
   ]);
 
-  const prevCombinedQueries = useRef<{
-    filterQuery: string;
-  } | null>(null);
   const combinedQueries = useMemo(
     () =>
       combineQueries({
@@ -229,9 +211,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const timelineQuerySortField = useMemo(
     () =>
-      sort.map(({ columnId, sortDirection }) => ({
+      sort.map(({ columnId, columnType, sortDirection }) => ({
         field: columnId,
         direction: sortDirection as Direction,
+        type: columnType,
       })),
     [sort]
   );
@@ -262,7 +245,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   });
 
   const handleOnEventClosed = useCallback(() => {
-    onEventClosed({ timelineId });
+    onEventClosed({ tabType: TimelineTabs.query, timelineId });
 
     if (timelineId === TimelineId.active) {
       activeTimeline.toggleExpandedEvent({
@@ -275,13 +258,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   useEffect(() => {
     setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
   }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
-
-  useEffect(() => {
-    if (!deepEqual(prevCombinedQueries.current, combinedQueries)) {
-      prevCombinedQueries.current = combinedQueries;
-      handleOnEventClosed();
-    }
-  }, [combinedQueries, handleOnEventClosed]);
 
   return (
     <>
@@ -298,7 +274,10 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       <FullWidthFlexGroup>
         <ScrollableFlexItem grow={2}>
           <HideShowContainer $isVisible={!timelineFullScreen}>
-            <StyledEuiFlyoutHeader data-test-subj="eui-flyout-header" hasBorder={false}>
+            <StyledEuiFlyoutHeader
+              data-test-subj={`${activeTab}-tab-flyout-header`}
+              hasBorder={false}
+            >
               <EuiFlexGroup gutterSize="s" data-test-subj="timeline-date-picker-container">
                 <DatePicker grow={1}>
                   <SuperDatePicker id="timeline" timelineId={timelineId} />
@@ -318,25 +297,37 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <TimelineHeaderContainer data-test-subj="timelineHeader">
                 <TimelineHeader
                   filterManager={filterManager}
+                  show={show && activeTab === TimelineTabs.query}
                   showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-                  timelineId={timelineId}
                   status={status}
+                  timelineId={timelineId}
                 />
               </TimelineHeaderContainer>
             </StyledEuiFlyoutHeader>
           </HideShowContainer>
+
           <EventDetailsWidthProvider>
-            <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
+            <StyledEuiFlyoutBody
+              data-test-subj={`${TimelineTabs.query}-tab-flyout-body`}
+              className="timeline-flyout-body"
+            >
               <StatefulBody
+                activePage={pageInfo.activePage}
                 browserFields={browserFields}
                 data={isBlankTimeline ? EMPTY_EVENTS : events}
                 id={timelineId}
                 refetch={refetch}
                 sort={sort}
+                tabType={TimelineTabs.query}
+                totalPages={calculateTotalPages({
+                  itemsCount: totalCount,
+                  itemsPerPage,
+                })}
               />
             </StyledEuiFlyoutBody>
+
             <StyledEuiFlyoutFooter
-              data-test-subj="eui-flyout-footer"
+              data-test-subj={`${TimelineTabs.query}-tab-flyout-footer`}
               className="timeline-flyout-footer"
             >
               {!isBlankTimeline && (
@@ -365,6 +356,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <EventDetails
                 browserFields={browserFields}
                 docValueFields={docValueFields}
+                tabType={TimelineTabs.query}
                 timelineId={timelineId}
                 handleOnEventClosed={handleOnEventClosed}
               />
@@ -385,6 +377,7 @@ const makeMapStateToProps = () => {
     const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
+      activeTab,
       columns,
       dataProviders,
       eventType,
@@ -393,6 +386,7 @@ const makeMapStateToProps = () => {
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
+      show,
       sort,
       status,
       timelineType,
@@ -406,11 +400,12 @@ const makeMapStateToProps = () => {
         ? ' '
         : kqlQueryTimeline;
     return {
+      activeTab,
       columns,
       dataProviders,
       eventType: eventType ?? 'raw',
       end: input.timerange.to,
-      expandedEvent,
+      expandedEvent: expandedEvent[TimelineTabs.query] ?? {},
       filters: timelineFilter,
       timelineId,
       isLive: input.policy.kind === 'interval',
@@ -419,7 +414,8 @@ const makeMapStateToProps = () => {
       kqlMode,
       kqlQueryExpression,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
-      showEventDetails: !!expandedEvent.eventId,
+      showEventDetails: !!expandedEvent[TimelineTabs.query]?.eventId,
+      show,
       sort,
       start: input.timerange.from,
       status,
@@ -453,6 +449,7 @@ const QueryTabContent = connector(
   React.memo(
     QueryTabContentComponent,
     (prevProps, nextProps) =>
+      prevProps.activeTab === nextProps.activeTab &&
       isTimerangeSame(prevProps, nextProps) &&
       prevProps.eventType === nextProps.eventType &&
       prevProps.isLive === nextProps.isLive &&
@@ -460,6 +457,7 @@ const QueryTabContent = connector(
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
       prevProps.onEventClosed === nextProps.onEventClosed &&
+      prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
       prevProps.showEventDetails === nextProps.showEventDetails &&
       prevProps.status === nextProps.status &&

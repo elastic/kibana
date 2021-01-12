@@ -146,6 +146,7 @@ const SavedFavoriteRuntimeType = runtimeTypes.partial({
 
 const SavedSortObject = runtimeTypes.partial({
   columnId: unionWithNullType(runtimeTypes.string),
+  columnType: unionWithNullType(runtimeTypes.string),
   sortDirection: unionWithNullType(runtimeTypes.string),
 });
 const SavedSortRuntimeType = runtimeTypes.union([
@@ -408,12 +409,23 @@ export type ImportTimelineResultSchema = runtimeTypes.TypeOf<typeof importTimeli
 
 export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom';
 
-export interface TimelineExpandedEventType {
-  eventId: string;
-  indexName: string;
+export enum TimelineTabs {
+  query = 'query',
+  graph = 'graph',
+  notes = 'notes',
+  pinned = 'pinned',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EmptyObject = Record<any, never>;
 
-export type TimelineExpandedEvent = TimelineExpandedEventType | EmptyObject;
+export type TimelineExpandedEventType =
+  | {
+      eventId: string;
+      indexName: string;
+    }
+  | EmptyObject;
+
+export type TimelineExpandedEvent = {
+  [tab in TimelineTabs]?: TimelineExpandedEventType;
+};

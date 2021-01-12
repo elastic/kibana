@@ -49,35 +49,19 @@ import {
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
 import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  APPLY_FILTER_TRIGGER,
-} from '../../ui_actions/public';
-import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,
   createFiltersFromValueClickAction,
   createFiltersFromRangeSelectAction,
-  ApplyGlobalFilterActionContext,
-  ACTION_SELECT_RANGE,
-  ACTION_VALUE_CLICK,
-  SelectRangeActionContext,
-  ValueClickActionContext,
   createValueClickAction,
   createSelectRangeAction,
 } from './actions';
-
+import { APPLY_FILTER_TRIGGER, applyFilterTrigger } from './triggers';
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { getIndexPatternLoad } from './index_patterns/expressions';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-
-declare module '../../ui_actions/public' {
-  export interface ActionContextMapping {
-    [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
-    [ACTION_SELECT_RANGE]: SelectRangeActionContext;
-    [ACTION_VALUE_CLICK]: ValueClickActionContext;
-  }
-}
+import { getTableViewDescription } from './utils/table_inspector_view';
+import { NowProvider, NowProviderInternalContract } from './now_provider';
 
 export class DataPublicPlugin
   implements
@@ -93,6 +77,7 @@ export class DataPublicPlugin
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
   private usageCollection: UsageCollectionSetup | undefined;
+  private readonly nowProvider: NowProviderInternalContract;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -100,11 +85,12 @@ export class DataPublicPlugin
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
+    this.nowProvider = new NowProvider();
   }
 
   public setup(
     core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
-    { bfetch, expressions, uiActions, usageCollection }: DataSetupDependencies
+    { bfetch, expressions, uiActions, usageCollection, inspector }: DataSetupDependencies
   ): DataPublicPluginSetup {
     const startServices = createStartServicesGetter(core.getStartServices);
 
@@ -112,34 +98,47 @@ export class DataPublicPlugin
 
     this.usageCollection = usageCollection;
 
+    const searchService = this.searchService.setup(core, {
+      bfetch,
+      usageCollection,
+      expressions,
+      nowProvider: this.nowProvider,
+    });
+
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
       storage: this.storage,
+      nowProvider: this.nowProvider,
     });
+
+    uiActions.registerTrigger(applyFilterTrigger);
 
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
     );
 
     uiActions.addTriggerAction(
-      SELECT_RANGE_TRIGGER,
+      'SELECT_RANGE_TRIGGER',
       createSelectRangeAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
     );
 
     uiActions.addTriggerAction(
-      VALUE_CLICK_TRIGGER,
+      'VALUE_CLICK_TRIGGER',
       createValueClickAction(() => ({
         uiActions: startServices().plugins.uiActions,
       }))
     );
 
-    const searchService = this.searchService.setup(core, {
-      bfetch,
-      usageCollection,
-      expressions,
-    });
+    inspector.registerView(
+      getTableViewDescription(() => ({
+        uiActions: startServices().plugins.uiActions,
+        uiSettings: startServices().core.uiSettings,
+        fieldFormats: startServices().self.fieldFormats,
+        isFilterable: startServices().self.search.aggs.datatableUtilities.isFilterable,
+      }))
+    );
 
     return {
       autocomplete: this.autocomplete.setup(core, { timefilter: queryService.timefilter }),
@@ -201,6 +200,7 @@ export class DataPublicPlugin
       indexPatterns,
       query,
       search,
+      nowProvider: this.nowProvider,
     };
 
     const SearchBar = createSearchBar({

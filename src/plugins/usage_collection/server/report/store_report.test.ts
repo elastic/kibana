@@ -30,7 +30,7 @@ describe('store_report', () => {
   test('stores report for all types of data', async () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
     const report: ReportSchemaType = {
-      reportVersion: 2,
+      reportVersion: 3,
       userAgent: {
         'key-user-agent': {
           key: 'test-key',
@@ -57,6 +57,8 @@ describe('store_report', () => {
       },
       application_usage: {
         appId: {
+          appId: 'appId',
+          viewId: 'appId_view',
           numberOfClicks: 3,
           minutesOnScreen: 10,
         },
@@ -97,6 +99,7 @@ describe('store_report', () => {
           numberOfClicks: 3,
           minutesOnScreen: 10,
           appId: 'appId',
+          viewId: 'appId_view',
           timestamp: expect.any(Date),
         },
       },
@@ -106,7 +109,7 @@ describe('store_report', () => {
   test('it should not fail if nothing to store', async () => {
     const savedObjectClient = savedObjectsRepositoryMock.create();
     const report: ReportSchemaType = {
-      reportVersion: 1,
+      reportVersion: 3,
       userAgent: void 0,
       uiCounter: void 0,
       application_usage: void 0,

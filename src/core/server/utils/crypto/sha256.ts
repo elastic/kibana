@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import crypto, { HexBase64Latin1Encoding } from 'crypto';
+import crypto, { BinaryToTextEncoding } from 'crypto';
 
 export const createSHA256Hash = (
   input: string | Buffer,
-  outputEncoding: HexBase64Latin1Encoding = 'hex'
+  outputEncoding: BinaryToTextEncoding = 'hex'
 ) => {
   let data: Buffer;
   if (typeof input === 'string') {

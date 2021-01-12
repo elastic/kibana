@@ -16,15 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { EventEmitter } from 'events';
 import { IconType } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Adapters } from 'src/plugins/inspector';
-import { IndexPattern } from 'src/plugins/data/public';
-import { VisEditorConstructor } from 'src/plugins/visualize/public';
-import { ISchemas } from 'src/plugins/vis_default_editor/public';
-import { TriggerContextMapping } from '../../../ui_actions/public';
+import { CoreStart } from 'src/core/public';
+import { SavedObject } from 'src/plugins/saved_objects/public';
+import {
+  IndexPattern,
+  AggGroupNames,
+  AggParam,
+  AggGroupName,
+  DataPublicPluginStart,
+  Filter,
+  TimeRange,
+  Query,
+} from '../../../data/public';
 import { Vis, VisParams, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
+import { PersistedState, VisualizeEmbeddableContract } from '../index';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;
@@ -38,6 +47,29 @@ export enum VisGroups {
   PROMOTED = 'promoted',
   TOOLS = 'tools',
   AGGBASED = 'aggbased',
+}
+
+export interface ISchemas {
+  [AggGroupNames.Buckets]: Schema[];
+  [AggGroupNames.Metrics]: Schema[];
+  all: Schema[];
+}
+
+export interface Schema {
+  aggFilter: string[];
+  editor: boolean | string;
+  group: AggGroupName;
+  max: number;
+  min: number;
+  name: string;
+  params: AggParam[];
+  title: string;
+  defaults: unknown;
+  hideCustomLabel?: boolean;
+  mustBeFirst?: boolean;
+  aggSettings?: any;
+  disabled?: boolean;
+  tooltip?: ReactNode;
 }
 
 /**
@@ -64,7 +96,7 @@ export interface VisType<TVisParams = unknown> {
   /**
    * If given, it will return the supported triggers for this vis.
    */
-  readonly getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
+  readonly getSupportedTriggers?: () => string[];
 
   /**
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.
@@ -130,4 +162,30 @@ export interface VisType<TVisParams = unknown> {
   // TODO: The following types still need to be refined properly.
   readonly editorConfig: Record<string, any>;
   readonly visConfig: Record<string, any>;
+}
+
+export type VisEditorConstructor = new (
+  element: HTMLElement,
+  vis: Vis,
+  eventEmitter: EventEmitter,
+  embeddableHandler: VisualizeEmbeddableContract
+) => IEditorController;
+
+export interface IEditorController {
+  render(props: EditorRenderProps): Promise<void> | void;
+  destroy(): void;
+}
+
+export interface EditorRenderProps {
+  core: CoreStart;
+  data: DataPublicPluginStart;
+  filters: Filter[];
+  timeRange: TimeRange;
+  query?: Query;
+  savedSearch?: SavedObject;
+  uiState: PersistedState;
+  /**
+   * Flag to determine if visualiztion is linked to the saved search
+   */
+  linked: boolean;
 }

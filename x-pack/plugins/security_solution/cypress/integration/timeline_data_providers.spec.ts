@@ -8,6 +8,7 @@ import {
   TIMELINE_DATA_PROVIDERS,
   TIMELINE_DATA_PROVIDERS_EMPTY,
   TIMELINE_DROPPED_DATA_PROVIDERS,
+  TIMELINE_DATA_PROVIDERS_ACTION_MENU,
 } from '../screens/timeline';
 import { HOSTS_NAMES_DRAGGABLE } from '../screens/hosts/all_hosts';
 
@@ -23,11 +24,11 @@ import { openTimelineUsingToggle } from '../tasks/security_main';
 import { closeTimeline, createNewTimeline } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
+import { cleanKibana } from '../tasks/common';
 
-// FLAKY: https://github.com/elastic/kibana/issues/85098
-// FLAKY: https://github.com/elastic/kibana/issues/62060
-describe.skip('timeline data providers', () => {
+describe('timeline data providers', () => {
   before(() => {
+    cleanKibana();
     loginAndWaitForPage(HOSTS_URL);
     waitForAllHostsToBeLoaded();
   });
@@ -51,6 +52,17 @@ describe.skip('timeline data providers', () => {
             expect(dataProviderText).to.eq(`host.name: "${hostname}"AND`);
           });
       });
+  });
+
+  it('displays the data provider action menu when Enter is pressed', () => {
+    dragAndDropFirstHostToTimeline();
+    openTimelineUsingToggle();
+    cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
+
+    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS).first().focus();
+    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS).first().parent().type('{enter}');
+
+    cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
   });
 
   it('sets the background to euiColorSuccess with a 10% alpha channel when the user starts dragging a host, but is not hovering over the data providers', () => {

@@ -49,11 +49,11 @@ export function getFunctionDefinition({
     ...getEsaggsMeta(),
     async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
       const {
-        addFilters,
         aggs,
         deserializeFieldFormat,
         indexPatterns,
         searchSource,
+        getNow,
       } = await getStartDependencies();
 
       const indexPattern = await indexPatterns.create(args.index.value, true);
@@ -64,7 +64,6 @@ export function getFunctionDefinition({
 
       return await handleEsaggsRequest(input, args, {
         abortSignal: (abortSignal as unknown) as AbortSignal,
-        addFilters,
         aggs: aggConfigs,
         deserializeFieldFormat,
         filters: get(input, 'filters', undefined),
@@ -77,6 +76,7 @@ export function getFunctionDefinition({
         searchSourceService: searchSource,
         timeFields: args.timeFields,
         timeRange: get(input, 'timeRange', undefined),
+        getNow,
       });
     },
   });
@@ -104,13 +104,13 @@ export function getEsaggs({
   return getFunctionDefinition({
     getStartDependencies: async () => {
       const [, , self] = await getStartServices();
-      const { fieldFormats, indexPatterns, query, search } = self;
+      const { fieldFormats, indexPatterns, search, nowProvider } = self;
       return {
-        addFilters: query.filterManager.addFilters.bind(query.filterManager),
         aggs: search.aggs,
         deserializeFieldFormat: fieldFormats.deserialize.bind(fieldFormats),
         indexPatterns,
         searchSource: search.searchSource,
+        getNow: () => nowProvider.get(),
       };
     },
   });

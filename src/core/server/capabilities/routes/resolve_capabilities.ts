@@ -29,14 +29,18 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
         authRequired: 'optional',
       },
       validate: {
+        query: schema.object({
+          useDefaultCapabilities: schema.boolean({ defaultValue: false }),
+        }),
         body: schema.object({
           applications: schema.arrayOf(schema.string()),
         }),
       },
     },
     async (ctx, req, res) => {
+      const { useDefaultCapabilities } = req.query;
       const { applications } = req.body;
-      const capabilities = await resolver(req, applications);
+      const capabilities = await resolver(req, applications, useDefaultCapabilities);
       return res.ok({
         body: capabilities,
       });

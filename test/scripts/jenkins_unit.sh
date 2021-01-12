@@ -34,18 +34,14 @@ if [[ -z "$CODE_COVERAGE" ]] ; then
   ./test/scripts/checks/test_projects.sh
   ./test/scripts/checks/test_hardening.sh
 else
-  # echo " -> Running jest tests with coverage"
-  # node scripts/jest --ci --verbose --coverage --config jest.config.oss.js
-  # rename_coverage_file "oss"
-  # echo ""
-  # echo ""
-  # echo " -> Running jest integration tests with coverage"
-  # node --max-old-space-size=8192 scripts/jest_integration --ci --verbose --coverage || true;
-  # rename_coverage_file "oss-integration"
-  # echo ""
-  # echo ""
-  echo " -> Running mocha tests with coverage"
-  ./test/scripts/checks/mocha_coverage.sh
+  echo " -> Running jest tests with coverage"
+  node scripts/jest --ci --verbose --coverage --config jest.config.oss.js || true;
+  rename_coverage_file "oss"
+  echo ""
+  echo ""
+  echo " -> Running jest integration tests with coverage"
+  node --max-old-space-size=8192 scripts/jest_integration --ci --verbose --coverage || true;
+  rename_coverage_file "oss-integration"
   echo ""
   echo ""
 fi

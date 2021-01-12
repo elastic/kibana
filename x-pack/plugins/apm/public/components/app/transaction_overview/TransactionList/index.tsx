@@ -8,6 +8,7 @@ import { EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import {
   asMillisecondDuration,
@@ -18,7 +19,7 @@ import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 
 type TransactionGroup = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups'>['items'][0];
 
@@ -40,6 +41,9 @@ interface Props {
 }
 
 export function TransactionList({ items, isLoading }: Props) {
+  const {
+    urlParams: { latencyAggregationType },
+  } = useUrlParams();
   const columns: Array<ITableColumn<TransactionGroup>> = useMemo(
     () => [
       {
@@ -58,6 +62,7 @@ export function TransactionList({ items, isLoading }: Props) {
               serviceName={serviceName}
               transactionName={transactionName}
               transactionType={transactionType}
+              latencyAggregationType={latencyAggregationType}
             >
               <EuiToolTip
                 id="transaction-name-link-tooltip"
@@ -134,7 +139,7 @@ export function TransactionList({ items, isLoading }: Props) {
         render: (value: number) => <ImpactBar value={value} />,
       },
     ],
-    []
+    [latencyAggregationType]
   );
 
   const noItemsMessage = (

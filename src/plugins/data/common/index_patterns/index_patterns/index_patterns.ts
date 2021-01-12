@@ -46,7 +46,6 @@ import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';
 
-const indexPatternCache = createIndexPatternCache();
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 const savedObjectType = 'index-pattern';
 
@@ -72,6 +71,8 @@ export class IndexPatternsService {
   private fieldFormats: FieldFormatsStartCommon;
   private onNotification: OnNotification;
   private onError: OnError;
+  private indexPatternCache: ReturnType<typeof createIndexPatternCache>;
+
   ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
 
   constructor({
@@ -93,6 +94,8 @@ export class IndexPatternsService {
       uiSettings,
       onRedirectNoIndexPattern
     );
+
+    this.indexPatternCache = createIndexPatternCache();
   }
 
   /**
@@ -175,9 +178,9 @@ export class IndexPatternsService {
   clearCache = (id?: string) => {
     this.savedObjectsCache = null;
     if (id) {
-      indexPatternCache.clear(id);
+      this.indexPatternCache.clear(id);
     } else {
-      indexPatternCache.clearAll();
+      this.indexPatternCache.clearAll();
     }
   };
 
@@ -222,6 +225,7 @@ export class IndexPatternsService {
       metaFields,
       type: options.type,
       rollupIndex: options.rollupIndex,
+      allowNoIndex: options.allowNoIndex,
     });
   };
 
@@ -281,10 +285,21 @@ export class IndexPatternsService {
     options: GetFieldsOptions,
     fieldAttrs: FieldAttrs = {}
   ) => {
-    const scriptedFields = Object.values(fields).filter((field) => field.scripted);
+    const fieldsAsArr = Object.values(fields);
+    const scriptedFields = fieldsAsArr.filter((field) => field.scripted);
     try {
+      let updatedFieldList: FieldSpec[];
       const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
-      return this.fieldArrayToMap([...newFields, ...scriptedFields], fieldAttrs);
+
+      // If allowNoIndex, only update field list if field caps finds fields. To support
+      // beats creating index pattern and dashboard before docs
+      if (!options.allowNoIndex || (newFields && newFields.length > 5)) {
+        updatedFieldList = [...newFields, ...scriptedFields];
+      } else {
+        updatedFieldList = fieldsAsArr;
+      }
+
+      return this.fieldArrayToMap(updatedFieldList, fieldAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -334,6 +349,7 @@ export class IndexPatternsService {
         typeMeta,
         type,
         fieldAttrs,
+        allowNoIndex,
       },
     } = savedObject;
 
@@ -355,6 +371,7 @@ export class IndexPatternsService {
       type,
       fieldFormats: parsedFieldFormatMap,
       fieldAttrs: parsedFieldAttrs,
+      allowNoIndex,
     };
   };
 
@@ -384,6 +401,7 @@ export class IndexPatternsService {
           metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
           type,
           rollupIndex: typeMeta?.params?.rollup_index,
+          allowNoIndex: spec.allowNoIndex,
         },
         spec.fieldAttrs
       );
@@ -420,11 +438,12 @@ export class IndexPatternsService {
 
   get = async (id: string): Promise<IndexPattern> => {
     const indexPatternPromise =
-      indexPatternCache.get(id) || indexPatternCache.set(id, this.getSavedObjectAndInit(id));
+      this.indexPatternCache.get(id) ||
+      this.indexPatternCache.set(id, this.getSavedObjectAndInit(id));
 
     // don't cache failed requests
     indexPatternPromise.catch(() => {
-      indexPatternCache.clear(id);
+      this.indexPatternCache.clear(id);
     });
 
     return indexPatternPromise;
@@ -488,7 +507,7 @@ export class IndexPatternsService {
       id: indexPattern.id,
     });
     indexPattern.id = response.id;
-    indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
+    this.indexPatternCache.set(indexPattern.id, Promise.resolve(indexPattern));
     return indexPattern;
   }
 
@@ -571,7 +590,7 @@ export class IndexPatternsService {
           indexPattern.version = samePattern.version;
 
           // Clear cache
-          indexPatternCache.clear(indexPattern.id!);
+          this.indexPatternCache.clear(indexPattern.id!);
 
           // Try the save again
           return this.updateSavedObject(indexPattern, saveAttempts, ignoreErrors);
@@ -585,7 +604,7 @@ export class IndexPatternsService {
    * @param indexPatternId: Id of kibana Index Pattern to delete
    */
   async delete(indexPatternId: string) {
-    indexPatternCache.clear(indexPatternId);
+    this.indexPatternCache.clear(indexPatternId);
     return this.savedObjectsClient.delete('index-pattern', indexPatternId);
   }
 }

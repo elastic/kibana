@@ -20,7 +20,7 @@
 import { defaults } from 'lodash';
 import { IndexPatternsService, IndexPattern } from '.';
 import { fieldFormatsMock } from '../../field_formats/mocks';
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
@@ -112,6 +112,21 @@ describe('IndexPatterns', () => {
 
     expect(await indexPatternPromise).toBe(await indexPatterns.get(id));
     SOClientGetDelay = 0;
+  });
+
+  test('allowNoIndex flag preserves existing fields when index is missing', async () => {
+    const id = '2';
+    setDocsourcePayload(id, {
+      id: 'foo',
+      version: 'foo',
+      attributes: {
+        title: 'something',
+        allowNoIndex: true,
+        fields: '[{"name":"field"}]',
+      },
+    });
+
+    expect((await indexPatterns.get(id)).fields.length).toBe(1);
   });
 
   test('savedObjectCache pre-fetches only title', async () => {

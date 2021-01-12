@@ -19,24 +19,25 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { RangeValues, Schemas } from '../../vis_default_editor/public';
+import { ColorMode, ColorSchemas, ColorSchemaParams, Labels, Style } from '../../charts/public';
+import { RangeValues } from '../../vis_default_editor/public';
 import { AggGroupNames } from '../../data/public';
-import { GaugeOptions } from './components/options';
-import { getGaugeCollections, Alignments, GaugeTypes } from './utils/collections';
-import { ColorModes, ColorSchemas, ColorSchemaParams, Labels, Style } from '../../charts/public';
-import { toExpressionAst } from './to_ast';
 import { BaseVisTypeOptions, VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
-import { BasicVislibParams } from './types';
+
+import { Alignment, GaugeType, BasicVislibParams, VislibChartType } from './types';
+import { getGaugeCollections } from './editor';
+import { toExpressionAst } from './to_ast';
+import { GaugeOptions } from './editor/components';
 
 export interface Gauge extends ColorSchemaParams {
   backStyle: 'Full';
   gaugeStyle: 'Full';
   orientation: 'vertical';
   type: 'meter';
-  alignment: Alignments;
+  alignment: Alignment;
   colorsRange: RangeValues[];
   extendRange: boolean;
-  gaugeType: GaugeTypes;
+  gaugeType: GaugeType;
   labels: Labels;
   percentageMode: boolean;
   outline?: boolean;
@@ -67,20 +68,20 @@ export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   toExpressionAst,
   visConfig: {
     defaults: {
-      type: 'gauge',
+      type: VislibChartType.Gauge,
       addTooltip: true,
       addLegend: true,
       isDisplayWarning: false,
       gauge: {
-        alignment: Alignments.AUTOMATIC,
+        alignment: Alignment.Automatic,
         extendRange: true,
         percentageMode: false,
-        gaugeType: GaugeTypes.ARC,
+        gaugeType: GaugeType.Arc,
         gaugeStyle: 'Full',
         backStyle: 'Full',
         orientation: 'vertical',
         colorSchema: ColorSchemas.GreenToRed,
-        gaugeColorMode: ColorModes.LABELS,
+        gaugeColorMode: ColorMode.Labels,
         colorsRange: [
           { from: 0, to: 50 },
           { from: 50, to: 75 },
@@ -114,7 +115,7 @@ export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   editorConfig: {
     collections: getGaugeCollections(),
     optionsTemplate: GaugeOptions,
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -143,7 +144,7 @@ export const gaugeVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
       },
-    ]),
+    ],
   },
   useCustomNoDataScreen: true,
 };

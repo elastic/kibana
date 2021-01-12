@@ -99,6 +99,7 @@ export interface AggregationOptionsByType {
   extended_stats: {
     field: string;
   };
+  string_stats: { field: string };
   top_hits: {
     from?: number;
     size?: number;
@@ -182,6 +183,11 @@ export interface AggregationOptionsByType {
   top_metrics: {
     metrics: { field: string } | MaybeReadonlyArray<{ field: string }>;
     sort: SortOptions;
+  };
+  avg_bucket: {
+    buckets_path: string;
+    gap_policy?: 'skip' | 'insert_zeros';
+    format?: string;
   };
 }
 
@@ -268,6 +274,13 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
       upper: number | null;
       lower: number | null;
     };
+  };
+  string_stats: {
+    count: number;
+    min_length: number;
+    max_length: number;
+    avg_length: number;
+    entropy: number;
   };
   top_hits: {
     hits: {
@@ -390,6 +403,9 @@ interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOpti
       >;
     }
   ];
+  avg_bucket: {
+    value: number | null;
+  };
 }
 
 type TopMetricsMap<TFieldName> = TFieldName extends string

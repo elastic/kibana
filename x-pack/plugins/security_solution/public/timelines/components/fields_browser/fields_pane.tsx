@@ -116,6 +116,7 @@ export const FieldsPane = React.memo<Props>(
           })}
           width={width}
           onCategorySelected={onCategorySelected}
+          onUpdateColumns={onUpdateColumns}
           timelineId={timelineId}
         />
       );

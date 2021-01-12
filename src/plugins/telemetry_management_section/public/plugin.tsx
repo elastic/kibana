@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { Plugin, CoreStart, CoreSetup } from '../../../core/public';
 
 import { telemetryManagementSectionWrapper } from './components/telemetry_management_section_wrapper';
@@ -36,6 +38,7 @@ export interface TelemetryPluginConfig {
 export interface TelemetryManagementSectionPluginDepsSetup {
   telemetry: TelemetryPluginSetup;
   advancedSettings: AdvancedSettingsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface TelemetryManagementSectionPluginSetup {
@@ -51,11 +54,26 @@ export class TelemetryManagementSectionPlugin
 
   public setup(
     core: CoreSetup,
-    { advancedSettings, telemetry: { telemetryService } }: TelemetryManagementSectionPluginDepsSetup
+    {
+      advancedSettings,
+      telemetry: { telemetryService },
+      usageCollection,
+    }: TelemetryManagementSectionPluginDepsSetup
   ) {
+    const ApplicationUsageTrackingProvider =
+      usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
     advancedSettings.component.register(
       advancedSettings.component.componentType.PAGE_FOOTER_COMPONENT,
-      telemetryManagementSectionWrapper(telemetryService, this.shouldShowSecuritySolutionExample),
+      (props) => {
+        return (
+          <ApplicationUsageTrackingProvider>
+            {telemetryManagementSectionWrapper(
+              telemetryService,
+              this.shouldShowSecuritySolutionExample
+            )(props)}
+          </ApplicationUsageTrackingProvider>
+        );
+      },
       true
     );
 

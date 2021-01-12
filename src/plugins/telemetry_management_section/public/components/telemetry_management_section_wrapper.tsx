@@ -20,7 +20,6 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
-
 // It should be this but the types are way too vague in the AdvancedSettings plugin `Record<string, any>`
 // type Props = Omit<TelemetryManagementSection['props'], 'telemetryService'>;
 type Props = any;
