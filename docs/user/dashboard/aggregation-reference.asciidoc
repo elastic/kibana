@@ -1,5 +1,5 @@
 [[aggregation-reference]]
-== Feature comparison
+== Supported features by panel type
 
 Each panel type in {kib} supports different features and {ref}/search-aggregations.html[{es} aggregations].
 This reference can help simplify the comparison if you need a specific feature.
@@ -104,6 +104,8 @@ This reference can help simplify the comparison if you need a specific feature.
 [[bucket-aggregations]]
 === Bucket aggregations
 
+Vega supports all bucket aggregations because it allows custom queries.
+
 For information about {es} bucket aggregations, refer to {ref}/search-aggregations-bucket.html[Bucket aggregations].
 
 [options="header"]
@@ -177,6 +179,8 @@ For information about {es} bucket aggregations, refer to {ref}/search-aggregatio
 [[metrics-aggregations]]
 === Metrics aggregations
 
+Vega supports all metric aggregations because it allows custom queries.
+
 For information about {es} metrics aggregations, refer to {ref}/search-aggregations-metrics.html[Metrics aggregations].
 
 [options="header"]
@@ -243,6 +247,8 @@ For information about {es} metrics aggregations, refer to {ref}/search-aggregati
 [float]
 [[pipeline-aggregations]]
 === Pipeline aggregations
+
+Vega supports all pipeline aggregations because it allows custom queries.
 
 For information about {es} pipeline aggregations, refer to {ref}/search-aggregations-pipeline.html[Pipeline aggregations].
 

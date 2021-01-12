@@ -220,7 +220,7 @@ for *Lens* panels.
 
 [role="xpack"]
 Lens::
-. Open the *Lens* panel menu, then select *More > Download as CSV*.
+Open the *Lens* panel menu, then select *More > Download as CSV*.
 +
 [role="screenshot"]
 image::images/download_csv_context_menu.png[Download as CSV from panel context menu]

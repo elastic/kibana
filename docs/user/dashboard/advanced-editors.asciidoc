@@ -54,7 +54,7 @@ For detailed *Vega* and *Vega-Lite* information and examples, refer to <<resourc
 *Timelion* is driven by a simple expression language that you use to:
 
 * Retrieve time series data from one or more indices
-* Perform math across time series
+* Perform math across two or more time series
 * Visualize the results
 
 image:dashboard/images/timelion.png[Timelion]
