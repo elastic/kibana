@@ -2,7 +2,7 @@
   position: absolute;
   z-index: $euiZLevel1;
   left: $euiSizeM;
-  bottom: $euiSizeM * 4;
+  bottom: $euiSizeM;
   pointer-events: none; /* 1 */
   background-color: $euiColorEmptyShade;
   color: $euiTextColor;

@@ -4,12 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { connect } from 'react-redux';
-import { ScaleControl } from './scale_control';
-
-function mapStateToProps() {
-  return {};
-}
-
-const connectedComponent = connect(mapStateToProps, null)(ScaleControl);
-export { connectedComponent as ScaleControl };
+export { ScaleControl } from './scale_control';

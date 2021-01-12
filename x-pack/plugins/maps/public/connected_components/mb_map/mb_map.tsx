@@ -222,7 +222,6 @@ export class MBMap extends Component<Props, State> {
         emptyImage.crossOrigin = 'anonymous';
         resolve(mbMap);
       });
-      mbMap.addControl(new mapboxgl.ScaleControl());
     });
   }
 
@@ -397,8 +396,9 @@ export class MBMap extends Component<Props, State> {
           renderTooltipContent={this.props.renderTooltipContent}
         />
       ) : null;
-      const showScaling = true;
-      scaleControl = showScaling ? <ScaleControl mbMap={this.state.mbMap} /> : null;
+      scaleControl = this.props.settings.showScaleControl ? (
+        <ScaleControl mbMap={this.state.mbMap} />
+      ) : null;
     }
     return (
       <div
