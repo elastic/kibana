@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
-import { FieldVisConfig } from '../../types';
+import { FieldDataRowProps } from '../../types';
 import { getTFPercentage } from '../../utils';
 import { ColumnChart } from '../../../../components/data_grid/column_chart';
 import { OrdinalChartData } from '../../../../components/data_grid/use_column_chart';
 
-export const BooleanContentPreview = ({ config }: { config: FieldVisConfig }) => {
+export const BooleanContentPreview: FC<FieldDataRowProps> = ({ config }) => {
   const chartData = useMemo(() => {
     const results = getTFPercentage(config);
     if (results) {

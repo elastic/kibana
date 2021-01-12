@@ -208,7 +208,10 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
         ),
         render: (item: DataVisualizerTableItem) => {
           if (item === undefined || showDistributions === false) return null;
-          if (item.type === 'keyword' && item.stats?.topValues !== undefined) {
+          if (
+            (item.type === ML_JOB_FIELD_TYPES.KEYWORD || item.type === ML_JOB_FIELD_TYPES.IP) &&
+            item.stats?.topValues !== undefined
+          ) {
             return <TopValuesPreview config={item} />;
           }
 
@@ -223,6 +226,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
           if (item.type === ML_JOB_FIELD_TYPES.BOOLEAN) {
             return <BooleanContentPreview config={item} />;
           }
+
           return null;
         },
         align: LEFT_ALIGNMENT as HorizontalAlignment,
