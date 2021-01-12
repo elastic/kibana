@@ -149,11 +149,16 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
           caption={ImageCaption}
           alt="No image available"
           url={imgSrc}
+          data-test-subj="pingTimestampImage"
         />
       ) : (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>
-            {isLoading || isPending ? <EuiLoadingSpinner size="xl" /> : <NoImageAvailable />}
+            {isLoading || isPending ? (
+              <EuiLoadingSpinner size="xl" data-test-subj="pingTimestampSpinner" />
+            ) : (
+              <NoImageAvailable />
+            )}
           </EuiFlexItem>
           <EuiFlexItem>{ImageCaption}</EuiFlexItem>
         </EuiFlexGroup>
@@ -201,7 +206,7 @@ const BorderedText = euiStyled(EuiText)`
 
 export const NoImageAvailable = () => {
   return (
-    <BorderedText>
+    <BorderedText data-test-subj="pingTimestampNoImageAvailable">
       <strong>
         <FormattedMessage
           id="xpack.uptime.synthetics.screenshot.noImageMessage"
