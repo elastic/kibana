@@ -26,6 +26,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
+    after(async function () {
+      await sendToBackground.deleteAllSearchSessions();
+    });
+
     it('Restore using non-existing sessionId errors out. Refresh starts a new session and completes.', async () => {
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       const url = await browser.getCurrentUrl();
