@@ -20,7 +20,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { Schemas } from '../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../data/public';
 import { PaletteRegistry } from '../../../charts/public';
 import { VIS_EVENT_TO_TRIGGER, BaseVisTypeOptions } from '../../../visualizations/public';
@@ -71,7 +70,7 @@ export const getPieVisTypeDefinition = (
       legendPositions: getLegendPositions(),
     },
     optionsTemplate: getPieOptions(palettes, showElasticChartsOptions, trackUiMetric),
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -109,7 +108,7 @@ export const getPieVisTypeDefinition = (
           tooltip: <SplitTooltip />,
         }),
       },
-    ]),
+    ],
   },
   hierarchicalData: true,
 });

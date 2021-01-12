@@ -432,6 +432,7 @@ export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
  */
 
 export const EventsLoading = styled(EuiLoadingSpinner)`
+  margin: 0 2px;
   vertical-align: middle;
 `;
 

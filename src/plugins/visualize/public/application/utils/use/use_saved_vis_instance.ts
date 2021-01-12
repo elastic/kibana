@@ -26,9 +26,10 @@ import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 
 import { getVisualizationInstance } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { SavedVisInstance, IEditorController, VisualizeServices } from '../../types';
+import { SavedVisInstance, VisualizeServices } from '../../types';
 import { VisualizeConstants } from '../../visualize_constants';
 import { getDefaultEditor } from '../../../services';
+import type { IEditorController } from '../../../../../visualizations/public';
 
 /**
  * This effect is responsible for instantiating a saved vis or creating a new one
