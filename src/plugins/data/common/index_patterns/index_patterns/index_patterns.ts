@@ -19,6 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import { FieldDescriptor } from 'src/plugins/data/server';
 import { GetCollectionFieldsOptions, IndexField, SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
@@ -45,7 +46,6 @@ import { SavedObjectNotFound } from '../../../../kibana_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateIndexPatternError } from '../errors';
-import { FieldDescriptor } from '../../../server/index_patterns/fetcher';
 import { formatIndexFields } from './utils';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -264,6 +264,7 @@ export class IndexPatternsService {
 
   /**
    * Get field list by providing an index patttern (or spec)
+   * @param indexPattern
    * @param options
    */
   getFieldsForIndexPattern = async (

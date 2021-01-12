@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import './badge.scss';
 import { filter } from 'lodash';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -29,6 +30,8 @@ import {
   EuiLink,
   EuiCallOut,
   EuiPanel,
+  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -162,39 +165,36 @@ export const EditIndexPattern = withRouter(
     const showTagsSection = Boolean(indexPattern.timeFieldName || (tags && tags.length > 0));
 
     const indexPatternCollections = useMemo(
-      () => (
-        <>
-          {indexPattern.aliasCollection && (
+      () =>
+        indexPattern.aliasCollection ? (
+          <>
             <div>
               <FormattedMessage
                 id="indexPatternManagement.editIndexPattern.indexPatternCollections.aliasCollection"
-                defaultMessage="Active Aliases in Collection: "
+                defaultMessage="Index Aliases in Pattern: "
               />
-              {indexPattern.aliasCollection.map((label) => (
-                <EuiBadge color="hollow" key={label}>
-                  {label}
-                </EuiBadge>
-              ))}
+              {indexPattern.aliasCollection.map((label) => {
+                const isActive = indexPattern.activeCollection
+                  ? indexPattern.activeCollection.includes(label)
+                  : false;
+                const badgeContent = isActive ? 'Active' : 'Inactive';
+                return (
+                  <EuiToolTip content={badgeContent} key={label} position="top">
+                    <EuiBadge
+                      aria-label={badgeContent}
+                      className="right-spacer"
+                      color={'hollow'}
+                      isDisabled={!isActive}
+                    >
+                      {label}
+                    </EuiBadge>
+                  </EuiToolTip>
+                );
+              })}
             </div>
-          )}
-          {indexPattern.activeCollection && (
-            <div>
-              <FormattedMessage
-                id="indexPatternManagement.editIndexPattern.indexPatternCollections.activeCollection"
-                defaultMessage="All Aliases in Collection: "
-              />
-              {indexPattern.activeCollection.map((label) => (
-                <EuiBadge color="hollow" key={label}>
-                  {label}
-                </EuiBadge>
-              ))}
-            </div>
-          )}
-          {(indexPattern.aliasCollection || indexPattern.activeCollection) && (
             <EuiSpacer size="m" />
-          )}
-        </>
-      ),
+          </>
+        ) : null,
       [indexPattern.activeCollection, indexPattern.aliasCollection]
     );
 

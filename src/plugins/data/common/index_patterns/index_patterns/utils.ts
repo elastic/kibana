@@ -49,6 +49,7 @@ const missingFields: FieldDescriptor[] = [
  * in size at a time calling this function repeatedly. This function should be as optimized as possible
  * and should avoid any and all creation of new arrays, iterating over the arrays or performing
  * any n^2 operations.
+ * @param beatFields The beat fields reference
  * @param indexesAlias The index alias
  * @param index The index its self
  * @param indexesAliasIdx The index within the alias
@@ -86,6 +87,7 @@ export const createFieldItem = (
  * This intentionally waits for the next tick on the event loop to process as the large 4.7 megs
  * has already consumed a lot of the event loop processing up to this function and we want to give
  * I/O opportunity to occur by scheduling this on the next loop.
+ * @param beatFields The beatFields to reference
  * @param responsesIndexFields The response index fields to loop over
  * @param indexesAlias The index aliases such as filebeat-*
  */
@@ -99,11 +101,7 @@ export const formatFirstFields = async (
       resolve(
         responsesIndexFields.reduce(
           (accumulator: IndexField[], indexFields: FieldDescriptor[], indexesAliasIdx: number) => {
-            missingFields.forEach((index) => {
-              const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
-              accumulator.push(item);
-            });
-            indexFields.forEach((index) => {
+            [...missingFields, ...indexFields].forEach((index) => {
               const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
               accumulator.push(item);
             });
@@ -170,6 +168,5 @@ export const formatIndexFields = async (
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const beatFields: BeatFields = require('./fields').fieldsBeat;
   const fields = await formatFirstFields(beatFields, responsesIndexFields, indexesAlias);
-  const secondFields = await formatSecondFields(fields);
-  return secondFields;
+  return await formatSecondFields(fields);
 };
