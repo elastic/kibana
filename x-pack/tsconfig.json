@@ -4,6 +4,7 @@
   "exclude": [
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/scripts/**/*",
+    "plugins/console_extensions/**/*",
     "plugins/data_enhanced/**/*",
     "plugins/global_search/**/*",
     "plugins/features/**/*",
@@ -47,6 +48,7 @@
     { "path": "../src/plugins/ui_actions/tsconfig.json" },
     { "path": "../src/plugins/usage_collection/tsconfig.json" },
 
+    { "path": "./plugins/console_extensions/tsconfig.json" },
     { "path": "./plugins/data_enhanced/tsconfig.json" },
     { "path": "./plugins/global_search/tsconfig.json" },
     { "path": "./plugins/features/tsconfig.json" },
