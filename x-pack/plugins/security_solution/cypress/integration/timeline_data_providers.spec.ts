@@ -60,7 +60,7 @@ describe('timeline data providers', () => {
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('not.exist');
 
     cy.get(TIMELINE_DROPPED_DATA_PROVIDERS).first().focus();
-    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS).first().type('{enter}');
+    cy.get(TIMELINE_DROPPED_DATA_PROVIDERS).first().parent().type('{enter}');
 
     cy.get(TIMELINE_DATA_PROVIDERS_ACTION_MENU).should('exist');
   });
