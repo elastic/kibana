@@ -871,6 +871,7 @@ export class IndexPatternsFetcher {
     }): Promise<FieldDescriptor[]>;
     getFieldsForWildcard(options: {
         pattern: string | string[];
+        filters?: { aggregatable?: boolean; };
         metaFields?: string[];
         fieldCapsOptions?: {
             allow_no_indices: boolean;
