@@ -140,6 +140,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       layer: layerDescriptor,
     });
     dispatch(syncDataForLayerId(layerDescriptor.id));
+
     const layer = createLayerInstance(layerDescriptor);
     const features = await layer.getLicensedFeatures();
     features.forEach(notifyLicensedFeatureUsage);
