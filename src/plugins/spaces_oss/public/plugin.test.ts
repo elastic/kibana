@@ -27,6 +27,19 @@ describe('SpacesOssPlugin', () => {
     plugin = new SpacesOssPlugin();
   });
 
+  describe('#setup', () => {
+    it('only allows the API to be registered once', async () => {
+      const spacesApi = spacesApiMock.create();
+      const { registerSpacesApi } = plugin.setup();
+
+      expect(() => registerSpacesApi(spacesApi)).not.toThrow();
+
+      expect(() => registerSpacesApi(spacesApi)).toThrowErrorMatchingInlineSnapshot(
+        `"Spaces API can only be registered once"`
+      );
+    });
+  });
+
   describe('#start', () => {
     it('returns the spaces API if registered', async () => {
       const spacesApi = spacesApiMock.create();

@@ -22,7 +22,6 @@ import { SpacesOssPluginSetup, SpacesOssPluginStart } from './types';
 import { SpacesApi } from './api';
 
 export class SpacesOssPlugin implements Plugin<SpacesOssPluginSetup, SpacesOssPluginStart, {}, {}> {
-  private apiRegistered = false;
   private api?: SpacesApi;
 
   constructor() {}
@@ -30,24 +29,23 @@ export class SpacesOssPlugin implements Plugin<SpacesOssPluginSetup, SpacesOssPl
   public setup() {
     return {
       registerSpacesApi: (provider: SpacesApi) => {
-        if (this.apiRegistered) {
+        if (this.api) {
           throw new Error('Spaces API can only be registered once');
         }
-        this.apiRegistered = true;
         this.api = provider;
       },
     };
   }
 
   public start() {
-    if (this.apiRegistered) {
+    if (this.api) {
       return {
-        isSpacesAvailable: this.apiRegistered,
+        isSpacesAvailable: true as true,
         ...this.api!,
       };
     } else {
       return {
-        isSpacesAvailable: this.apiRegistered,
+        isSpacesAvailable: false as false,
       };
     }
   }
