@@ -59,6 +59,14 @@ describe('ExecutedStep', () => {
     expect(getByText(expectedStatus));
   });
 
+  it('renders a null string for bad status input', () => {
+    step.synthetics = {
+      payload: { status: 'somegarbage' },
+    };
+    const { getByText } = render(<ExecutedStep index={3} step={step} checkGroup={'fake-group'} />);
+    expect(getByText('4.'));
+  });
+
   it('renders accordion for step', () => {
     step.synthetics = {
       payload: {
