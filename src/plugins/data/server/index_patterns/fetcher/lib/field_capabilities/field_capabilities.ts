@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defaults, isEmpty, keyBy, sortBy } from 'lodash';
+import { defaults, keyBy, sortBy } from 'lodash';
 
 import { ElasticsearchClient } from 'kibana/server';
 import { callFieldCapsApi } from '../es_api';
@@ -72,11 +72,10 @@ export async function getFieldCapabilities(
     )
     .map(mergeOverrides);
 
-  const filteredFields = !isEmpty(filters)
-    ? filters?.aggregatable === true
-      ? allFieldsUnsorted.filter((field) => field.aggregatable === true)
-      : allFieldsUnsorted
-    : allFieldsUnsorted;
+  const filteredFields =
+    filters?.aggregatable != null
+      ? allFieldsUnsorted.filter((field) => field.aggregatable === filters.aggregatable)
+      : allFieldsUnsorted;
 
   return sortBy(filteredFields, 'name');
 }

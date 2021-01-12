@@ -199,6 +199,27 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
       ]);
     });
 
+    it('filters non-aggregatable fields', async () => {
+      const fieldsFromFieldCaps = [
+        { name: 'foo', aggregatable: true },
+        { name: 'bar', aggregatable: false },
+      ];
+
+      stubDeps({ fieldsFromFieldCaps });
+
+      expect(
+        await getFieldCapabilities(undefined, undefined, undefined, { aggregatable: false })
+      ).toEqual([
+        {
+          name: 'bar',
+          aggregatable: false,
+          type: 'string',
+          searchable: false,
+          readFromDocValues: false,
+        },
+      ]);
+    });
+
     it('ignores empty filters', async () => {
       const fieldsFromFieldCaps = [
         { name: 'foo', aggregatable: true },
