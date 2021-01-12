@@ -8,16 +8,16 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
-import { orderBy } from 'lodash';
-import type { Direction } from '@elastic/eui';
+
 import type { IAggType } from 'src/plugins/data/public';
 import type {
   DatatableColumnMeta,
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
 } from 'src/plugins/expressions';
+import { getSortingCriteria } from './sorting';
 
-import { DatatableComponent } from './components/tableBasic';
+import { DatatableComponent } from './components/table_basic';
 
 import type { FormatFactory, ILensInterpreterRenderHandlers, LensMultiTable } from '../types';
 import type {
@@ -36,6 +36,10 @@ interface Args {
 export interface DatatableProps {
   data: LensMultiTable;
   args: Args;
+}
+
+function isRange(meta: { params?: { id?: string } } | undefined) {
+  return meta?.params?.id === 'range';
 }
 
 export const getDatatable = ({
@@ -85,17 +89,18 @@ export const getDatatable = ({
 
     if (sortBy && sortDirection !== 'none') {
       // Sort on raw values for these types, while use the formatted value for the rest
-      const sortingCriteria = ['number', 'date'].includes(
-        columnsReverseLookup[sortBy]?.meta?.type || ''
-      )
-        ? sortBy
-        : (row: Record<string, unknown>) => formatters[sortBy]?.convert(row[sortBy]);
-      // replace the table here
-      context.inspectorAdapters.tables[layerId].rows = orderBy(
-        firstTable.rows || [],
-        [sortingCriteria],
-        sortDirection as Direction
+      const sortingCriteria = getSortingCriteria(
+        isRange(columnsReverseLookup[sortBy]?.meta)
+          ? 'range'
+          : columnsReverseLookup[sortBy]?.meta?.type,
+        sortBy,
+        formatters[sortBy],
+        sortDirection
       );
+      // replace the table here
+      context.inspectorAdapters.tables[layerId].rows = (firstTable.rows || [])
+        .slice()
+        .sort(sortingCriteria);
       // replace also the local copy
       firstTable.rows = context.inspectorAdapters.tables[layerId].rows;
     }

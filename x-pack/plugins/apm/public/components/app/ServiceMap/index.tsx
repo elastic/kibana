@@ -39,21 +39,34 @@ const ServiceMapDatePickerFlexGroup = styled(EuiFlexGroup)`
   margin: 0;
 `;
 
+function DatePickerSection() {
+  return (
+    <ServiceMapDatePickerFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <DatePicker />
+      </EuiFlexItem>
+    </ServiceMapDatePickerFlexGroup>
+  );
+}
+
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      justifyContent="spaceAround"
-      // Set the height to give it some top margin
-      style={{ height: '60vh' }}
-    >
-      <EuiFlexItem
-        grow={false}
-        style={{ width: 600, textAlign: 'center' as const }}
+    <>
+      <DatePickerSection />
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceAround"
+        // Set the height to give it some top margin
+        style={{ height: '60vh' }}
       >
-        {children}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        <EuiFlexItem
+          grow={false}
+          style={{ width: 600, textAlign: 'center' as const }}
+        >
+          {children}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }
 
@@ -137,11 +150,7 @@ export function ServiceMap({
 
   return (
     <>
-      <ServiceMapDatePickerFlexGroup justifyContent="flexEnd" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <DatePicker />
-        </EuiFlexItem>
-      </ServiceMapDatePickerFlexGroup>
+      <DatePickerSection />
       <div data-test-subj="ServiceMap" style={{ height }} ref={ref}>
         <Cytoscape
           elements={data.elements}

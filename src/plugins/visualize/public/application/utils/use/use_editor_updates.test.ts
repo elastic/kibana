@@ -21,12 +21,8 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
 
 import { useEditorUpdates } from './use_editor_updates';
-import {
-  VisualizeServices,
-  VisualizeAppStateContainer,
-  SavedVisInstance,
-  IEditorController,
-} from '../../types';
+import { VisualizeServices, VisualizeAppStateContainer, SavedVisInstance } from '../../types';
+import type { IEditorController } from '../../../../../visualizations/public';
 import { visualizeAppStateStub } from '../stubs';
 import { createVisualizeServicesMock } from '../mocks';
 

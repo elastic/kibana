@@ -23,8 +23,11 @@ import 'brace/mode/json';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';
 
-import { EditorRenderProps } from 'src/plugins/visualize/public';
-import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
+import {
+  Vis,
+  VisualizeEmbeddableContract,
+  EditorRenderProps,
+} from 'src/plugins/visualizations/public';
 import { KibanaContextProvider, PanelsContainer, Panel } from '../../kibana_react/public';
 import { Storage } from '../../kibana_utils/public';
 

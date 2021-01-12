@@ -494,6 +494,7 @@ export interface DocLinksStart {
             readonly urlDrilldownTemplateSyntax: string;
             readonly urlDrilldownVariables: string;
         };
+        readonly discover: Record<string, string>;
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;
@@ -1245,7 +1246,7 @@ export interface SavedObjectsImportConflictError {
 }
 
 // @public
-export interface SavedObjectsImportError {
+export interface SavedObjectsImportFailure {
     // (undocumented)
     error: SavedObjectsImportConflictError | SavedObjectsImportAmbiguousConflictError | SavedObjectsImportUnsupportedTypeError | SavedObjectsImportMissingReferencesError | SavedObjectsImportUnknownError;
     // (undocumented)
@@ -1276,7 +1277,7 @@ export interface SavedObjectsImportMissingReferencesError {
 // @public
 export interface SavedObjectsImportResponse {
     // (undocumented)
-    errors?: SavedObjectsImportError[];
+    errors?: SavedObjectsImportFailure[];
     // (undocumented)
     success: boolean;
     // (undocumented)

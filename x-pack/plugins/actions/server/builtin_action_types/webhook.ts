@@ -71,6 +71,7 @@ const ParamsSchema = schema.object({
   body: schema.maybe(schema.string()),
 });
 
+export const ActionTypeId = '.webhook';
 // action type definition
 export function getActionType({
   logger,
@@ -80,7 +81,7 @@ export function getActionType({
   configurationUtilities: ActionsConfigurationUtilities;
 }): WebhookActionType {
   return {
-    id: '.webhook',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.webhookTitle', {
       defaultMessage: 'Webhook',
