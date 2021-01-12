@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { FieldVisConfig } from '../../../stats_datagrid/types';
+import { FieldVisConfig } from '../../../stats_table/types';
 import {
   BooleanContent,
   DateContent,
@@ -16,7 +16,7 @@ import {
   NumberContent,
   OtherContent,
   TextContent,
-} from '../../../stats_datagrid/components/field_data_expanded_row';
+} from '../../../stats_table/components/field_data_expanded_row';
 
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { LoadingIndicator } from '../field_data_row/loading_indicator';

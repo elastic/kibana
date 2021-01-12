@@ -14,9 +14,9 @@ import {
   OtherContent,
   TextContent,
   NumberContent,
-} from '../../../stats_datagrid/components/field_data_expanded_row';
+} from '../../../stats_table/components/field_data_expanded_row';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
-import type { FileBasedFieldVisConfig } from '../../../stats_datagrid/types/field_vis_config';
+import type { FileBasedFieldVisConfig } from '../../../stats_table/types/field_vis_config';
 
 export const FileBasedDataVisualizerExpandedRow = ({ item }: { item: FileBasedFieldVisConfig }) => {
   const config = item;

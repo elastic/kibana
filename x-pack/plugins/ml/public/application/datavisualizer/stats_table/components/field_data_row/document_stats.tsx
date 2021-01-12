@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
 import React from 'react';
-import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
+import type { FieldDataRowProps } from '../../types/field_data_row';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 
 export const DocumentStat = ({ config }: FieldDataRowProps) => {

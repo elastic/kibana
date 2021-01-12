@@ -13,7 +13,7 @@ import {
   buildChartDataFromStats,
 } from '../../../index_based/components/field_data_row/metric_distribution_chart';
 import { formatSingleValue } from '../../../../formatters/format_value';
-import { FieldVisConfig } from '../../../stats_datagrid/types';
+import { FieldVisConfig } from '../../types';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 150;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 80;

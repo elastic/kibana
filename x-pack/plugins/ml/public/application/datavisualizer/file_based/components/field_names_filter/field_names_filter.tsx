@@ -6,7 +6,7 @@
 import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { MultiSelectPicker } from '../../../../components/multi_select_picker';
-import { FileBasedFieldVisConfig } from '../../../stats_datagrid/types';
+import { FileBasedFieldVisConfig } from '../../../stats_table/types';
 
 interface Props {
   fields: Array<

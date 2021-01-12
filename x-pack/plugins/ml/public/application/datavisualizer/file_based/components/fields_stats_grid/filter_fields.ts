@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FileBasedFieldVisConfig } from '../../../stats_datagrid/types';
+import { FileBasedFieldVisConfig } from '../../../stats_table/types';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 
 export function filterFields(

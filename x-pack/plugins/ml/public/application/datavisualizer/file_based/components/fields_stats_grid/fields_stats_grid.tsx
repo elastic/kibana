@@ -8,8 +8,8 @@ import React, { useMemo, FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
-import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../../../stats_datagrid';
-import type { FileBasedFieldVisConfig } from '../../../stats_datagrid/types/field_vis_config';
+import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../../../stats_table';
+import type { FileBasedFieldVisConfig } from '../../../stats_table/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../expanded_row';
 
 import { DataVisualizerFieldNamesFilter } from '../field_names_filter';

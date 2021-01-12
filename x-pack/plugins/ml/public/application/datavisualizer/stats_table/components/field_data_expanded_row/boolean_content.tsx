@@ -10,7 +10,7 @@ import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
+import type { FieldDataRowProps } from '../../types/field_data_row';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 import { getTFPercentage } from '../../utils';
 

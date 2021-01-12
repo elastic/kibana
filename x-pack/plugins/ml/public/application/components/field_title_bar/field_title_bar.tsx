@@ -16,7 +16,7 @@ import {
   FieldVisConfig,
   FileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,
-} from '../../datavisualizer/stats_datagrid/types/field_vis_config';
+} from '../../datavisualizer/stats_table/types/field_vis_config';
 
 interface Props {
   card: FieldVisConfig | FileBasedFieldVisConfig;

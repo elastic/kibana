@@ -7,7 +7,7 @@ import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MultiSelectPicker, Option } from '../../../../components/multi_select_picker';
-import { FileBasedFieldVisConfig } from '../../../stats_datagrid/types';
+import { FileBasedFieldVisConfig } from '../../../stats_table/types';
 import { FieldTypeIcon } from '../../../../components/field_type_icon';
 import { ML_JOB_FIELD_TYPES_OPTIONS } from '../../../index_based/components/search_panel/field_type_filter';
 

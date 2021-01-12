@@ -6,7 +6,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FileBasedFieldVisConfig } from '../../../stats_datagrid/types';
+import { FileBasedFieldVisConfig } from '../../../stats_table/types';
 
 export const FileBasedNumberContentPreview = ({ config }: { config: FileBasedFieldVisConfig }) => {
   const stats = config.stats;

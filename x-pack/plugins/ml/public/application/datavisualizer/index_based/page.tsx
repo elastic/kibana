@@ -46,7 +46,7 @@ import { usePageUrlState, useUrlState } from '../../util/url_state';
 import { ActionsPanel } from './components/actions_panel';
 import { SearchPanel } from './components/search_panel';
 import { DocumentCountContent } from './components/field_data_row/content_types/document_count_content';
-import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_datagrid';
+import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../stats_table';
 import { FieldCountPanel } from './components/field_count_panel';
 import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
 import { DataLoader } from './data_loader';
@@ -57,7 +57,7 @@ import { MlJobFieldType } from '../../../../common/types/field_types';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana } from '../../contexts/kibana';
 import { IndexBasedDataVisualizerExpandedRow } from './components/expanded_row';
-import { FieldVisConfig } from '../stats_datagrid/types';
+import { FieldVisConfig } from '../stats_table/types';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;

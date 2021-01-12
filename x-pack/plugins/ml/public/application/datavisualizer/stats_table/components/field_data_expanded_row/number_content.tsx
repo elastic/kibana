@@ -10,7 +10,7 @@ import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
+import type { FieldDataRowProps } from '../../types/field_data_row';
 import { kibanaFieldFormat } from '../../../../formatters/kibana_field_format';
 import { numberAsOrdinal } from '../../../../formatters/number_as_ordinal';
 import {

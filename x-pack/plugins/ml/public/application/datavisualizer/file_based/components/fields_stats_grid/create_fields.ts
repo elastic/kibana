@@ -6,7 +6,7 @@
 
 import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
 import { getFieldNames, getSupportedFieldType } from './get_field_names';
-import { FileBasedFieldVisConfig } from '../../../stats_datagrid/types';
+import { FileBasedFieldVisConfig } from '../../../stats_table/types';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 

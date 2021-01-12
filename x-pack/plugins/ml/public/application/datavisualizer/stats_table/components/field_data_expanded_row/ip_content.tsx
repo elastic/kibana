@@ -9,7 +9,7 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
+import type { FieldDataRowProps } from '../../types/field_data_row';
 import { TopValues } from '../../../index_based/components/field_data_row/top_values';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
 

@@ -9,7 +9,7 @@ import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type { FieldDataRowProps } from '../../../stats_datagrid/types/field_data_row';
+import type { FieldDataRowProps } from '../../types/field_data_row';
 import { roundToDecimalPlace } from '../../../../formatters/round_to_decimal_place';
 import { ExamplesList } from '../../../index_based/components/field_data_row/examples_list';
 

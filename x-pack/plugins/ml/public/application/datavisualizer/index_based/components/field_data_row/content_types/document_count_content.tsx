@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import type { FieldDataRowProps } from '../../../../stats_datagrid/types/field_data_row';
+import type { FieldDataRowProps } from '../../../../stats_table/types/field_data_row';
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../../total_count_header';
 
