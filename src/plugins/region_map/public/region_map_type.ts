@@ -17,15 +17,17 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { mapToLayerWithId } from './util';
+
 import { BaseVisTypeOptions } from '../../visualizations/public';
 import { truncatedColorSchemas } from '../../charts/public';
 import { ORIGIN } from '../../maps_legacy/public';
+
 import { getDeprecationMessage } from './get_deprecation_message';
 import { RegionMapVisualizationDependencies } from './plugin';
 import { createRegionMapOptions } from './components';
 import { toExpressionAst } from './to_ast';
 import { RegionMapVisParams } from './region_map_types';
+import { mapToLayerWithId } from './util';
 
 export function createRegionMapTypeDefinition({
   uiSettings,

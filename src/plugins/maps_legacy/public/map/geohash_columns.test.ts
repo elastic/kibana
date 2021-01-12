@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { geohashColumns } from './decode_geo_hash';
+import { geohashColumns } from './geohash_columns';
 
 test('geohashColumns', () => {
   expect(geohashColumns(1)).toBe(8);

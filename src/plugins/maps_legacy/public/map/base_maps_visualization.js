@@ -70,7 +70,7 @@ export function BaseMapsVisualizationProvider() {
         return;
       }
 
-      this._kibanaMap.resize();
+      this.resize();
       this._params = visParams;
       await this._updateParams();
 

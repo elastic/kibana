@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { convertToGeoJson, MapTypes } from '../../maps_legacy/public';
+import { BaseVisTypeOptions } from 'src/plugins/visualizations/public';
 import { truncatedColorSchemas } from '../../charts/public';
 
 // @ts-expect-error
