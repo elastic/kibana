@@ -23,12 +23,13 @@ import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
-import { DefaultEditorController } from '../../../../../vis_default_editor/public';
 
 import { getVisualizationInstance } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { SavedVisInstance, IEditorController, VisualizeServices } from '../../types';
+import { SavedVisInstance, VisualizeServices } from '../../types';
 import { VisualizeConstants } from '../../visualize_constants';
+import { getDefaultEditor } from '../../../services';
+import type { IEditorController } from '../../../../../visualizations/public';
 
 /**
  * This effect is responsible for instantiating a saved vis or creating a new one
@@ -38,23 +39,27 @@ export const useSavedVisInstance = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
+  originatingApp: string | undefined,
   visualizationIdFromUrl: string | undefined
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
     visEditorController?: IEditorController;
   }>({});
+
   const visEditorRef = useRef<HTMLDivElement | null>(null);
   const visId = useRef('');
 
   useEffect(() => {
     const {
-      application: { navigateToApp },
       chrome,
       history,
-      http: { basePath },
+      dashboard,
       setActiveUrl,
       toastNotifications,
+      http: { basePath },
+      stateTransferService,
+      application: { navigateToApp },
     } = services;
     const getSavedVisInstance = async () => {
       try {
@@ -93,18 +98,32 @@ export const useSavedVisInstance = (
 
         const { embeddableHandler, savedVis, vis } = savedVisInstance;
 
+        const originatingAppName = originatingApp
+          ? stateTransferService.getAppNameFromId(originatingApp)
+          : undefined;
+        const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
+        const byValueCreateMode = dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
+
         if (savedVis.id) {
-          chrome.setBreadcrumbs(getEditBreadcrumbs(savedVis.title));
+          chrome.setBreadcrumbs(
+            getEditBreadcrumbs({ originatingAppName, redirectToOrigin }, savedVis.title)
+          );
           chrome.docTitle.change(savedVis.title);
         } else {
-          chrome.setBreadcrumbs(getCreateBreadcrumbs());
+          chrome.setBreadcrumbs(
+            getCreateBreadcrumbs({
+              byValue: byValueCreateMode,
+              originatingAppName,
+              redirectToOrigin,
+            })
+          );
         }
 
         let visEditorController;
         // do not create editor in embeded mode
         if (visEditorRef.current) {
           if (isChromeVisible) {
-            const Editor = vis.type.editor || DefaultEditorController;
+            const Editor = vis.type.editor || getDefaultEditor();
             visEditorController = new Editor(
               visEditorRef.current,
               vis,
@@ -115,7 +134,6 @@ export const useSavedVisInstance = (
             embeddableHandler.render(visEditorRef.current);
           }
         }
-
         setState({
           savedVisInstance,
           visEditorController,
@@ -172,12 +190,13 @@ export const useSavedVisInstance = (
       getSavedVisInstance();
     }
   }, [
-    eventEmitter,
-    isChromeVisible,
     services,
+    eventEmitter,
+    originatingApp,
+    isChromeVisible,
+    visualizationIdFromUrl,
     state.savedVisInstance,
     state.visEditorController,
-    visualizationIdFromUrl,
   ]);
 
   useEffect(() => {

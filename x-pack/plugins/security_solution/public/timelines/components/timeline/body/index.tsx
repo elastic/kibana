@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { RowRendererId, TimelineId } from '../../../../../common/types/timeline';
+import { RowRendererId, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import {
   FIRST_ARIA_INDEX,
   ARIA_COLINDEX_ATTRIBUTE,
@@ -21,7 +21,7 @@ import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineItem } from '../../../../../common/search_strategy/timeline';
 import { inputsModel, State } from '../../../../common/store';
 import { useManageTimeline } from '../../manage_timeline';
-import { ColumnHeaderOptions, TimelineModel, TimelineTabs } from '../../../store/timeline/model';
+import { ColumnHeaderOptions, TimelineModel } from '../../../store/timeline/model';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { OnRowSelected, OnSelectAll } from '../events';
@@ -179,7 +179,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           <EventsTable
             $activePage={activePage}
             $columnCount={columnHeaders.length + 1}
-            data-test-subj="events-table"
+            data-test-subj={`${tabType}-events-table`}
             columnWidths={columnWidths}
             onKeyDown={onKeyDown}
             $rowCount={data.length}
@@ -195,6 +195,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               showEventsSelect={false}
               showSelectAllCheckbox={showCheckboxes}
               sort={sort}
+              tabType={tabType}
               timelineId={id}
             />
 

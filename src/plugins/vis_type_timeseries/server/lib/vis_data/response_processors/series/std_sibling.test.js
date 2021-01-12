@@ -72,23 +72,23 @@ describe('stdSibling(resp, panel, series)', () => {
     };
   });
 
-  test('calls next when finished', () => {
+  test('calls next when finished', async () => {
     const next = jest.fn();
-    stdSibling(resp, panel, series)(next)([]);
+    await stdSibling(resp, panel, series, {})(next)([]);
     expect(next.mock.calls.length).toEqual(1);
   });
 
-  test('calls next when std. deviation bands set', () => {
+  test('calls next when std. deviation bands set', async () => {
     series.metrics[1].mode = 'band';
     const next = jest.fn((results) => results);
-    const results = stdSibling(resp, panel, series)(next)([]);
+    const results = await stdSibling(resp, panel, series, {})(next)([]);
     expect(next.mock.calls.length).toEqual(1);
     expect(results).toHaveLength(0);
   });
 
-  test('creates a series', () => {
+  test('creates a series', async () => {
     const next = (results) => results;
-    const results = stdSibling(resp, panel, series)(next)([]);
+    const results = await stdSibling(resp, panel, series, {})(next)([]);
     expect(results).toHaveLength(1);
 
     expect(results[0]).toEqual({

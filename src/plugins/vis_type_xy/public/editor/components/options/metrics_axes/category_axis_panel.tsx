@@ -24,8 +24,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 
-import { SelectOption, SwitchOption } from '../../../../../../charts/public';
-import { VisOptionsProps } from '../../../../../../vis_default_editor/public';
+import {
+  SelectOption,
+  SwitchOption,
+  VisOptionsProps,
+} from '../../../../../../vis_default_editor/public';
 
 import { LabelOptions, SetAxisLabel } from './label_options';
 import { CategoryAxis } from '../../../../types';

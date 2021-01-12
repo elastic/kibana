@@ -26,32 +26,26 @@ interface Props {
   groupsSubNav?: React.ReactNode;
 }
 
-export const WorkplaceSearchNav: React.FC<Props> = ({ sourcesSubNav, groupsSubNav }) => {
-  // TODO: icons
-  return (
-    <SideNav product={WORKPLACE_SEARCH_PLUGIN}>
-      <SideNavLink to="/" isRoot>
-        {NAV.OVERVIEW}
-      </SideNavLink>
-      <SideNavLink to={SOURCES_PATH} subNav={sourcesSubNav}>
-        {NAV.SOURCES}
-      </SideNavLink>
-      <SideNavLink to={GROUPS_PATH} subNav={groupsSubNav}>
-        {NAV.GROUPS}
-      </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${ROLE_MAPPINGS_PATH}`)}>
-        {NAV.ROLE_MAPPINGS}
-      </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${SECURITY_PATH}`)}>
-        {NAV.SECURITY}
-      </SideNavLink>
-      <SideNavLink isExternal to={getWorkplaceSearchUrl(ORG_SETTINGS_PATH)}>
-        {NAV.SETTINGS}
-      </SideNavLink>
-      <EuiSpacer />
-      <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${SOURCES_PATH}`)}>
-        {NAV.PERSONAL_DASHBOARD}
-      </SideNavLink>
-    </SideNav>
-  );
-};
+export const WorkplaceSearchNav: React.FC<Props> = ({ sourcesSubNav, groupsSubNav }) => (
+  <SideNav product={WORKPLACE_SEARCH_PLUGIN}>
+    <SideNavLink to="/" isRoot>
+      {NAV.OVERVIEW}
+    </SideNavLink>
+    <SideNavLink to={SOURCES_PATH} subNav={sourcesSubNav}>
+      {NAV.SOURCES}
+    </SideNavLink>
+    <SideNavLink to={GROUPS_PATH} subNav={groupsSubNav}>
+      {NAV.GROUPS}
+    </SideNavLink>
+    <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${ROLE_MAPPINGS_PATH}`)}>
+      {NAV.ROLE_MAPPINGS}
+    </SideNavLink>
+    <SideNavLink isExternal to={getWorkplaceSearchUrl(`#${SECURITY_PATH}`)}>
+      {NAV.SECURITY}
+    </SideNavLink>
+    <SideNavLink isExternal to={getWorkplaceSearchUrl(ORG_SETTINGS_PATH)}>
+      {NAV.SETTINGS}
+    </SideNavLink>
+    <EuiSpacer />
+  </SideNav>
+);

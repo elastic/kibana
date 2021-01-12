@@ -29,6 +29,7 @@ describe('Cases connectors', () => {
     closure_type: 'close-by-user',
     created_at: '2020-12-01T16:28:09.219Z',
     created_by: { email: null, full_name: null, username: 'elastic' },
+    error: null,
     updated_at: null,
     updated_by: null,
     mappings: [
@@ -38,7 +39,7 @@ describe('Cases connectors', () => {
     ],
     version: 'WzEwNCwxXQ==',
   };
-  before(() => {
+  beforeEach(() => {
     cleanKibana();
     cy.intercept('POST', '/api/actions/action').as('createConnector');
     cy.intercept('POST', '/api/cases/configure', (req) => {
@@ -47,6 +48,23 @@ describe('Cases connectors', () => {
         res.send(200, { ...configureResult, connector });
       });
     }).as('saveConnector');
+    cy.intercept('GET', '/api/cases/configure', (req) => {
+      req.reply((res) => {
+        const resBody =
+          res.body.version != null
+            ? {
+                ...res.body,
+                error: null,
+                mappings: [
+                  { source: 'title', target: 'short_description', action_type: 'overwrite' },
+                  { source: 'description', target: 'description', action_type: 'overwrite' },
+                  { source: 'comments', target: 'comments', action_type: 'append' },
+                ],
+              }
+            : res.body;
+        res.send(200, resBody);
+      });
+    });
   });
 
   it('Configures a new connector', () => {
