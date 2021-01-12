@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { DataVisualizerDataGrid, ItemIdToExpandedRowMap } from './stats_datagrid';
+export { DataVisualizerTable, ItemIdToExpandedRowMap } from './stats_datagrid';

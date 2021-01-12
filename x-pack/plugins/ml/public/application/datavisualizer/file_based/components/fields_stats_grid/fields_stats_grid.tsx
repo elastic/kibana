@@ -8,7 +8,7 @@ import React, { useMemo, FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
-import { DataVisualizerDataGrid, ItemIdToExpandedRowMap } from '../../../stats_datagrid';
+import { DataVisualizerTable, ItemIdToExpandedRowMap } from '../../../stats_datagrid';
 import type { FileBasedFieldVisConfig } from '../../../stats_datagrid/types/field_vis_config';
 import { FileBasedDataVisualizerExpandedRow } from '../expanded_row';
 
@@ -191,7 +191,7 @@ export const FieldsStatsGrid: FC<Props> = ({ results }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <DataVisualizerDataGrid<FileBasedFieldVisConfig>
+      <DataVisualizerTable<FileBasedFieldVisConfig>
         items={filteredFields}
         pageState={dataVisualizerListState}
         updatePageState={setDataVisualizerListState}

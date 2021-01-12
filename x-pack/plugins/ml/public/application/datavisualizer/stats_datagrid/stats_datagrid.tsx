@@ -51,7 +51,7 @@ interface DataVisualizerDataGridProps<T> {
   getItemIdToExpandedRowMap: (itemIds: string[], items: T[]) => ItemIdToExpandedRowMap;
 }
 
-export const DataVisualizerDataGrid = <T extends DataVisualizerDataGridItem>({
+export const DataVisualizerTable = <T extends DataVisualizerDataGridItem>({
   items,
   pageState,
   updatePageState,
