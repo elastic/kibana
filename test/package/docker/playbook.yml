@@ -75,4 +75,4 @@
       image: kibana
       env:
         SERVER_HOST: 0.0.0.0
-        ELASTICSEARCH_HOSTS: 192.168.50.5
+        ELASTICSEARCH_HOSTS: 192.168.50.1
