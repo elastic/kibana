@@ -205,13 +205,13 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(({ agen
         title={
           <FormattedMessage
             id="xpack.fleet.agentLogs.oldAgentWarningTitle"
-            defaultMessage="The logs viewer is only compatible with Elastic Agents version 7.11 and higher. Please upgrade your Elastic Agent on the Agents details page, or by {downloadLink} a newer version."
+            defaultMessage="The logs viewer requires Elastic Agent 7.11 or higher. To upgrade an agent, go to the Agents page, or {downloadLink} a newer version."
             values={{
               downloadLink: (
                 <EuiLink href="https://ela.st/download-elastic-agent" external target="_blank">
                   <FormattedMessage
                     id="xpack.fleet.agentLogs.downloadLink"
-                    defaultMessage="downloading"
+                    defaultMessage="download"
                   />
                 </EuiLink>
               ),
