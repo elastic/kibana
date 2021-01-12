@@ -13,7 +13,10 @@ import {
   UpdateDataFrameAnalyticsConfig,
 } from '../../data_frame_analytics/common';
 import { DeepPartial } from '../../../../common/types/common';
-import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../../../common/types/data_frame_analytics';
+import {
+  DeleteDataFrameAnalyticsWithIndexStatus,
+  AnalyticsMapReturnType,
+} from '../../../../common/types/data_frame_analytics';
 
 export interface GetDataFrameAnalyticsStatsResponseOk {
   node_failures?: object;
@@ -83,6 +86,18 @@ export const dataFrameAnalytics = {
       body,
     });
   },
+  getDataFrameAnalyticsMap(
+    id: string,
+    treatAsRoot: boolean,
+    type?: string
+  ): Promise<AnalyticsMapReturnType> {
+    const idString = id !== undefined ? `/${id}` : '';
+    return http({
+      path: `${basePath()}/data_frame/analytics/map${idString}`,
+      method: 'GET',
+      query: { treatAsRoot, type },
+    });
+  },
   evaluateDataFrameAnalytics(evaluateConfig: any) {
     const body = JSON.stringify(evaluateConfig);
     return http<any>({
@@ -133,12 +148,6 @@ export const dataFrameAnalytics = {
     return http<any>({
       path: `${basePath()}/data_frame/analytics/${analyticsId}/messages`,
       method: 'GET',
-    });
-  },
-  getAnalyticsBaseline(analyticsId: string) {
-    return http<any>({
-      path: `${basePath()}/data_frame/analytics/${analyticsId}/baseline`,
-      method: 'POST',
     });
   },
 };

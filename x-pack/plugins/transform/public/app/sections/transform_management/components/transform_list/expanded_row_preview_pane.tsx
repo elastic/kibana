@@ -6,7 +6,7 @@
 
 import React, { useMemo, FC } from 'react';
 
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { getPivotQuery } from '../../../../common';
@@ -19,7 +19,7 @@ import {
 } from '../../../create_transform/components/step_define/';
 
 interface ExpandedRowPreviewPaneProps {
-  transformConfig: TransformPivotConfig;
+  transformConfig: TransformConfigUnion;
 }
 
 export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transformConfig }) => {
@@ -28,7 +28,7 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
   } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
-  const { aggList, groupByList, searchQuery } = useMemo(
+  const { searchQuery, validationStatus, previewRequest } = useMemo(
     () =>
       applyTransformConfigToDefineState(
         getDefaultStepDefineState({} as SearchItems),
@@ -43,7 +43,12 @@ export const ExpandedRowPreviewPane: FC<ExpandedRowPreviewPaneProps> = ({ transf
     ? transformConfig.source.index.join(',')
     : transformConfig.source.index;
 
-  const pivotPreviewProps = usePivotData(indexPatternTitle, pivotQuery, aggList, groupByList);
+  const pivotPreviewProps = usePivotData(
+    indexPatternTitle,
+    pivotQuery,
+    validationStatus,
+    previewRequest
+  );
 
   return (
     <DataGrid

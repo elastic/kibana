@@ -22,33 +22,37 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       await esArchiver.unload('actions');
     });
 
-    it('7.10.0 migrates the `casesConfiguration` to be the `incidentConfiguration` in `config`', async () => {
+    it('7.10.0 migrates the `casesConfiguration` to be the `incidentConfiguration` in `config`, then 7.11.0 removes `incidentConfiguration`', async () => {
       const response = await supertest.get(
         `${getUrlPrefix(``)}/api/actions/action/791a2ab1-784a-46ea-aa68-04c837e5da2d`
       );
 
       expect(response.status).to.eql(200);
-      expect(response.body.config).key('incidentConfiguration');
+      expect(response.body.config).not.key('incidentConfiguration');
       expect(response.body.config).not.key('casesConfiguration');
-      expect(response.body.config.incidentConfiguration).to.eql({
-        mapping: [
-          {
-            actionType: 'overwrite',
-            source: 'title',
-            target: 'summary',
-          },
-          {
-            actionType: 'overwrite',
-            source: 'description',
-            target: 'description',
-          },
-          {
-            actionType: 'append',
-            source: 'comments',
-            target: 'comments',
-          },
-        ],
+      expect(response.body.config).not.key('isCaseOwned');
+      expect(response.body.config).to.eql({
+        apiUrl:
+          'http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira',
+        projectKey: 'CK',
       });
+    });
+
+    it('7.11.0 migrates webhook connector configurations to have `hasAuth` property', async () => {
+      const responseWithAuth = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/949f909b-20a0-46e3-aadb-6a4d117bb592`
+      );
+
+      expect(responseWithAuth.status).to.eql(200);
+      expect(responseWithAuth.body.config).key('hasAuth');
+      expect(responseWithAuth.body.config.hasAuth).to.eql(true);
+
+      const responseNoAuth = await supertest.get(
+        `${getUrlPrefix(``)}/api/actions/action/7434121e-045a-47d6-a0a6-0b6da752397a`
+      );
+      expect(responseNoAuth.status).to.eql(200);
+      expect(responseNoAuth.body.config).key('hasAuth');
+      expect(responseNoAuth.body.config.hasAuth).to.eql(false);
     });
   });
 }

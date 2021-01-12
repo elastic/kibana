@@ -15,7 +15,7 @@ interface EmptyStateErrorProps {
 
 export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
   const unauthorized = errors.find(
-    (error: Error) => error.message && error.message.includes('unauthorized')
+    (error: IHttpFetchError) => error.message && error.message.includes('unauthorized')
   );
 
   return (
@@ -46,7 +46,11 @@ export const EmptyStateError = ({ errors }: EmptyStateErrorProps) => {
             body={
               <Fragment>
                 {!unauthorized &&
-                  errors.map((error: Error) => <p key={error.message}>{error.message}</p>)}
+                  errors.map((error: IHttpFetchError) => (
+                    <p key={error.body.message || error.message}>
+                      {error.body.message || error.message}
+                    </p>
+                  ))}
               </Fragment>
             }
           />

@@ -59,15 +59,11 @@ describe('registerVegaUsageCollector', () => {
   it('makeUsageCollector config.fetch calls getStats', async () => {
     const mockCollectorSet = createUsageCollectionSetupMock();
     registerVegaUsageCollector(mockCollectorSet, mockConfig, mockDeps);
-    const usageCollectorConfig = mockCollectorSet.makeUsageCollector.mock.calls[0][0];
+    const usageCollector = mockCollectorSet.makeUsageCollector.mock.results[0].value;
     const mockedCollectorFetchContext = createCollectorFetchContextMock();
-    const fetchResult = await usageCollectorConfig.fetch(mockedCollectorFetchContext);
+    const fetchResult = await usageCollector.fetch(mockedCollectorFetchContext);
     expect(mockGetStats).toBeCalledTimes(1);
-    expect(mockGetStats).toBeCalledWith(
-      mockedCollectorFetchContext.callCluster,
-      mockIndex,
-      mockDeps
-    );
+    expect(mockGetStats).toBeCalledWith(mockedCollectorFetchContext.esClient, mockIndex, mockDeps);
     expect(fetchResult).toBe(mockStats);
   });
 });

@@ -20,6 +20,7 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
+import { aggStdDeviationFnName } from './std_deviation_fn';
 import { METRIC_TYPES } from './metric_agg_types';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { KBN_FIELD_TYPES } from '../../../../common';
@@ -83,6 +84,7 @@ const responseAggConfigProps = {
 export const getStdDeviationMetricAgg = () => {
   return new MetricAggType<IStdDevAggConfig>({
     name: METRIC_TYPES.STD_DEV,
+    expressionName: aggStdDeviationFnName,
     dslName: 'extended_stats',
     title: i18n.translate('data.search.aggs.metrics.standardDeviationTitle', {
       defaultMessage: 'Standard Deviation',

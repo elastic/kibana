@@ -36,7 +36,8 @@ export {
   useCursor,
   useApi,
   useAsync,
-  useExceptionList,
+  useExceptionListItems,
+  useExceptionLists,
   usePersistExceptionItem,
   usePersistExceptionList,
   useFindLists,
@@ -52,7 +53,7 @@ export {
   ExceptionListIdentifiers,
   ExceptionList,
   Pagination,
-  UseExceptionListSuccess,
+  UseExceptionListItemsSuccess,
   addEndpointExceptionList,
   withOptionalSignal,
 } from '../../lists/public';

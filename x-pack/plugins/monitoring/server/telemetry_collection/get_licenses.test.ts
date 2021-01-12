@@ -19,7 +19,7 @@ describe('get_licenses', () => {
     },
   };
   const expectedClusters = response.hits.hits.map((hit) => hit._source);
-  const clusterUuids = expectedClusters.map((cluster) => ({ clusterUuid: cluster.cluster_uuid }));
+  const clusterUuids = expectedClusters.map((cluster) => cluster.cluster_uuid);
   const expectedLicenses = {
     abc: { type: 'basic' },
     xyz: { type: 'basic' },
@@ -30,13 +30,7 @@ describe('get_licenses', () => {
     it('returns clusters', async () => {
       callWith.withArgs('search').returns(Promise.resolve(response));
 
-      expect(
-        await getLicenses(
-          clusterUuids,
-          { callCluster: callWith } as any,
-          { maxBucketSize: 1 } as any
-        )
-      ).toStrictEqual(expectedLicenses);
+      expect(await getLicenses(clusterUuids, callWith, 1)).toStrictEqual(expectedLicenses);
     });
   });
 
@@ -44,13 +38,7 @@ describe('get_licenses', () => {
     it('searches for clusters', async () => {
       callWith.returns(response);
 
-      expect(
-        await fetchLicenses(
-          callWith,
-          clusterUuids.map(({ clusterUuid }) => clusterUuid),
-          { maxBucketSize: 1 } as any
-        )
-      ).toStrictEqual(response);
+      expect(await fetchLicenses(callWith, clusterUuids, 1)).toStrictEqual(response);
     });
   });
 

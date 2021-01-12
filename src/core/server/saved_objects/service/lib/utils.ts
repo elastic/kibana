@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import uuid from 'uuid';
 import { SavedObjectsFindOptions } from '../../types';
 import { SavedObjectsFindResponse } from '..';
 
@@ -24,6 +25,7 @@ export const DEFAULT_NAMESPACE_STRING = 'default';
 export const ALL_NAMESPACES_STRING = '*';
 export const FIND_DEFAULT_PAGE = 1;
 export const FIND_DEFAULT_PER_PAGE = 20;
+const UUID_REGEX = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000)$/i;
 
 /**
  * @public
@@ -69,4 +71,21 @@ export class SavedObjectsUtils {
     total: 0,
     saved_objects: [],
   });
+
+  /**
+   * Generates a random ID for a saved objects.
+   */
+  public static generateId() {
+    return uuid.v1();
+  }
+
+  /**
+   * Validates that a saved object ID has been randomly generated.
+   *
+   * @param {string} id The ID of a saved object.
+   * @todo Use `uuid.validate` once upgraded to v5.3+
+   */
+  public static isRandomId(id: string | undefined) {
+    return typeof id === 'string' && UUID_REGEX.test(id);
+  }
 }

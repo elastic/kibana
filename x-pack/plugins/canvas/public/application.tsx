@@ -86,6 +86,7 @@ export const initializeCanvas = async (
     timefilter: setupPlugins.data.query.timefilter.timefilter,
     prependBasePath: coreSetup.http.basePath.prepend,
     types: setupPlugins.expressions.getTypes(),
+    paletteService: await setupPlugins.charts.palettes.getPalettes(),
   });
 
   for (const fn of canvasFunctions) {
@@ -102,7 +103,7 @@ export const initializeCanvas = async (
 
   // Init Registries
   initRegistries();
-  populateRegistries(registries);
+  await populateRegistries(registries);
 
   // Set Badge
   coreStart.chrome.setBadge(
@@ -136,7 +137,7 @@ export const initializeCanvas = async (
   });
 
   if (setupPlugins.usageCollection) {
-    initStatsReporter(setupPlugins.usageCollection.reportUiStats);
+    initStatsReporter(setupPlugins.usageCollection.reportUiCounter);
   }
 
   return canvasStore;

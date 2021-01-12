@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 import React from 'react';
 
 import { CalendarsListHeader } from './header';
@@ -24,8 +24,11 @@ describe('CalendarListsHeader', () => {
     kibana: {
       services: {
         docLinks: {
-          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-          DOC_LINK_VERSION: 'jest-metadata-mock-branch',
+          links: {
+            ml: {
+              calendars: 'jest-metadata-mock-url',
+            },
+          },
         },
       },
     },

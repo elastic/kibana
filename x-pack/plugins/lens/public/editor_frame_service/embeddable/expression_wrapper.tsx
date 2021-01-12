@@ -11,22 +11,39 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
+  ReactExpressionRendererProps,
 } from 'src/plugins/expressions/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
+import { ExecutionContextSearch } from 'src/plugins/data/public';
+import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
 import { getOriginalRequestErrorMessage } from '../error_helper';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
   expression: string | null;
+  variables?: Record<string, unknown>;
   searchContext: ExecutionContextSearch;
+  searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
+  onData$: (
+    data: unknown,
+    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
+  ) => void;
+  renderMode?: RenderMode;
+  syncColors?: boolean;
+  hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
 }
 
 export function ExpressionWrapper({
   ExpressionRenderer: ExpressionRendererComponent,
   expression,
   searchContext,
+  variables,
   handleEvent,
+  searchSessionId,
+  onData$,
+  renderMode,
+  syncColors,
+  hasCompatibleActions,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -48,9 +65,14 @@ export function ExpressionWrapper({
         <div className="lnsExpressionRenderer">
           <ExpressionRendererComponent
             className="lnsExpressionRenderer__component"
-            padding="m"
+            padding="s"
+            variables={variables}
             expression={expression}
             searchContext={searchContext}
+            searchSessionId={searchSessionId}
+            onData$={onData$}
+            renderMode={renderMode}
+            syncColors={syncColors}
             renderError={(errorMessage, error) => (
               <div data-test-subj="expression-renderer-error">
                 <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
@@ -66,6 +88,7 @@ export function ExpressionWrapper({
               </div>
             )}
             onEvent={handleEvent}
+            hasCompatibleActions={hasCompatibleActions}
           />
         </div>
       )}

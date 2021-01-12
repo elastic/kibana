@@ -25,20 +25,29 @@ export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, st
   if (isEmpty(newSelectedPatterns)) {
     let defaultIndexPatterns = state.configIndexPatterns;
     if (id === SourcererScopeName.timeline && isEmpty(newSelectedPatterns)) {
-      if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
-        defaultIndexPatterns = [...state.configIndexPatterns, state.signalIndexName ?? ''];
-      } else if (eventType === 'raw') {
-        defaultIndexPatterns = state.configIndexPatterns;
-      } else if (
-        !isEmpty(state.signalIndexName) &&
-        (eventType === 'signal' || eventType === 'alert')
-      ) {
-        defaultIndexPatterns = [state.signalIndexName ?? ''];
-      }
+      defaultIndexPatterns = defaultIndexPatternByEventType({ state, eventType });
     } else if (id === SourcererScopeName.detections && isEmpty(newSelectedPatterns)) {
       defaultIndexPatterns = [state.signalIndexName ?? ''];
     }
     return defaultIndexPatterns;
   }
   return newSelectedPatterns;
+};
+
+export const defaultIndexPatternByEventType = ({
+  state,
+  eventType,
+}: {
+  state: SourcererModel;
+  eventType?: TimelineEventsType;
+}) => {
+  let defaultIndexPatterns = state.configIndexPatterns;
+  if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
+    defaultIndexPatterns = [...state.configIndexPatterns, state.signalIndexName ?? ''];
+  } else if (eventType === 'raw') {
+    defaultIndexPatterns = state.configIndexPatterns;
+  } else if (!isEmpty(state.signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
+    defaultIndexPatterns = [state.signalIndexName ?? ''];
+  }
+  return defaultIndexPatterns;
 };

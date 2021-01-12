@@ -8,7 +8,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { EuiSelect } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { I18LABELS } from '../translations';
 
@@ -45,13 +45,11 @@ export function UserPercentile() {
     {
       value: '50',
       text: I18LABELS.percentile50thMedian,
-      dropdownDisplay: I18LABELS.percentile50thMedian,
       'data-test-subj': 'p50Percentile',
     },
     {
       value: '75',
       text: I18LABELS.percentile75th,
-      dropdownDisplay: I18LABELS.percentile75th,
       'data-test-subj': 'p75Percentile',
     },
     {

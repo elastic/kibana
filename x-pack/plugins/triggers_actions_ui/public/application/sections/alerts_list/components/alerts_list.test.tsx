@@ -5,19 +5,19 @@
  */
 import * as React from 'react';
 
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/public/mocks';
+import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
 import { AlertsList } from './alerts_list';
 import { ValidationResult } from '../../../../types';
-import { AppContextProvider } from '../../../app_context';
-import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
-import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
-import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
-import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+import {
+  AlertExecutionStatusErrorReasons,
+  ALERTS_FEATURE_ID,
+} from '../../../../../../alerts/common';
+import { useKibana } from '../../../../common/lib/kibana';
+jest.mock('../../../../common/lib/kibana');
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
@@ -26,6 +26,7 @@ jest.mock('../../../lib/action_connector_api', () => ({
 jest.mock('../../../lib/alert_api', () => ({
   loadAlerts: jest.fn(),
   loadAlertTypes: jest.fn(),
+  health: jest.fn(() => ({ isSufficientlySecure: true, hasPermanentEncryptionKey: true })),
 }));
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
@@ -35,13 +36,16 @@ jest.mock('react-router-dom', () => ({
     pathname: '/triggersActions/alerts/',
   }),
 }));
+const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
+const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 
 const alertType = {
   id: 'test_alert_type',
-  name: 'some alert type',
+  description: 'test',
   iconClass: 'test',
+  documentationUrl: null,
   validate: (): ValidationResult => {
     return { errors: {} };
   },
@@ -52,23 +56,22 @@ const alertTypeFromApi = {
   id: 'test_alert_type',
   name: 'some alert type',
   actionGroups: [{ id: 'default', name: 'Default' }],
+  recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
   actionVariables: { context: [], state: [] },
   defaultActionGroupId: 'default',
   producer: ALERTS_FEATURE_ID,
+  minimumLicenseRequired: 'basic',
   authorizedConsumers: {
     [ALERTS_FEATURE_ID]: { read: true, all: true },
   },
 };
 alertTypeRegistry.list.mockReturnValue([alertType]);
 actionTypeRegistry.list.mockReturnValue([]);
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('alerts_list component empty', () => {
   let wrapper: ReactWrapper<any>;
   async function setup() {
-    const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
-    const { loadActionTypes, loadAllActions } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAlerts.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -88,36 +91,13 @@ describe('alerts_list component empty', () => {
     loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
 
-    const mockes = coreMock.createSetup();
-    const [
-      {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
-      },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities,
-      history: scopedHistoryMock.create(),
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
-    };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <AlertsList />
-      </AppContextProvider>
-    );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+
+    wrapper = mountWithIntl(<AlertsList />);
 
     await act(async () => {
       await nextTick();
@@ -135,7 +115,16 @@ describe('alerts_list component empty', () => {
     expect(
       wrapper.find('[data-test-subj="createFirstAlertButton"]').find('EuiButton')
     ).toHaveLength(1);
-    expect(wrapper.find('AlertAdd')).toHaveLength(1);
+    expect(wrapper.find('AlertAdd').exists()).toBeFalsy();
+
+    wrapper.find('button[data-test-subj="createFirstAlertButton"]').simulate('click');
+
+    // When the AlertAdd component is rendered, it waits for the healthcheck to resolve
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
+    wrapper.update();
+    expect(wrapper.find('AlertAdd').exists()).toEqual(true);
   });
 });
 
@@ -143,10 +132,6 @@ describe('alerts_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
-    const { loadActionTypes, loadAllActions } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAlerts.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -238,7 +223,7 @@ describe('alerts_list component with items', () => {
             status: 'error',
             lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
             error: {
-              reason: 'unknown',
+              reason: AlertExecutionStatusErrorReasons.Unknown,
               message: 'test',
             },
           },
@@ -257,38 +242,14 @@ describe('alerts_list component with items', () => {
     ]);
     loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
-    const mockes = coreMock.createSetup();
-    const [
-      {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
-      },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities,
-      history: scopedHistoryMock.create(),
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
-    };
 
     alertTypeRegistry.has.mockReturnValue(true);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <AlertsList />
-      </AppContextProvider>
-    );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(<AlertsList />);
 
     await act(async () => {
       await nextTick();
@@ -316,10 +277,6 @@ describe('alerts_list component empty with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
-    const { loadActionTypes, loadAllActions } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAlerts.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -338,40 +295,12 @@ describe('alerts_list component empty with show only capability', () => {
     ]);
     loadAlertTypes.mockResolvedValue([{ id: 'test_alert_type', name: 'some alert type' }]);
     loadAllActions.mockResolvedValue([]);
-    const mockes = coreMock.createSetup();
-    const [
-      {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
-      },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities,
-      history: scopedHistoryMock.create(),
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: {
-        get() {
-          return null;
-        },
-      } as any,
-      alertTypeRegistry: {} as any,
-    };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <AlertsList />
-      </AppContextProvider>
-    );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(<AlertsList />);
 
     await act(async () => {
       await nextTick();
@@ -389,10 +318,6 @@ describe('alerts_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup() {
-    const { loadAlerts, loadAlertTypes } = jest.requireMock('../../../lib/alert_api');
-    const { loadActionTypes, loadAllActions } = jest.requireMock(
-      '../../../lib/action_connector_api'
-    );
     loadAlerts.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -457,38 +382,14 @@ describe('alerts_list with show only capability', () => {
 
     loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
-    const mockes = coreMock.createSetup();
-    const [
-      {
-        chrome,
-        docLinks,
-        application: { capabilities, navigateToApp },
-      },
-    ] = await mockes.getStartServices();
-    const deps = {
-      chrome,
-      docLinks,
-      dataPlugin: dataPluginMock.createStartContract(),
-      charts: chartPluginMock.createStartContract(),
-      alerting: alertingPluginMock.createStartContract(),
-      toastNotifications: mockes.notifications.toasts,
-      http: mockes.http,
-      uiSettings: mockes.uiSettings,
-      navigateToApp,
-      capabilities,
-      history: scopedHistoryMock.create(),
-      setBreadcrumbs: jest.fn(),
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
-    };
 
     alertTypeRegistry.has.mockReturnValue(false);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.alertTypeRegistry = alertTypeRegistry;
 
-    wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
-        <AlertsList />
-      </AppContextProvider>
-    );
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(<AlertsList />);
 
     await act(async () => {
       await nextTick();

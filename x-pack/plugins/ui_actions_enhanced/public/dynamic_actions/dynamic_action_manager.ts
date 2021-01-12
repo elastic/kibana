@@ -7,10 +7,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Subscription } from 'rxjs';
 import { ActionStorage } from './dynamic_action_storage';
-import {
-  TriggerContextMapping,
-  UiActionsActionDefinition as ActionDefinition,
-} from '../../../../../src/plugins/ui_actions/public';
+import { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
 import { defaultState, transitions, selectors, State } from './dynamic_action_manager_state';
 import {
   StateContainer,
@@ -18,6 +15,7 @@ import {
 } from '../../../../../src/plugins/kibana_utils/common';
 import { StartContract } from '../plugin';
 import { SerializedAction, SerializedEvent } from './types';
+import { dynamicActionGrouping } from './dynamic_action_grouping';
 
 const compareEvents = (
   a: ReadonlyArray<{ eventId: string }>,
@@ -93,6 +91,7 @@ export class DynamicActionManager {
     uiActions.registerAction({
       ...actionDefinition,
       id: actionId,
+      grouping: dynamicActionGrouping,
       isCompatible: async (context) => {
         if (!(await isCompatible(context))) return false;
         if (!actionDefinition.isCompatible) return true;
@@ -212,7 +211,7 @@ export class DynamicActionManager {
    * @param action Dynamic action for which to create an event.
    * @param triggers List of triggers to which action should react.
    */
-  public async createEvent(action: SerializedAction, triggers: Array<keyof TriggerContextMapping>) {
+  public async createEvent(action: SerializedAction, triggers: string[]) {
     const event: SerializedEvent = {
       eventId: uuidv4(),
       triggers,
@@ -243,11 +242,7 @@ export class DynamicActionManager {
    * @param action New action for which to create the event.
    * @param triggers List of triggers to which action should react.
    */
-  public async updateEvent(
-    eventId: string,
-    action: SerializedAction,
-    triggers: Array<keyof TriggerContextMapping>
-  ) {
+  public async updateEvent(eventId: string, action: SerializedAction, triggers: string[]) {
     const event: SerializedEvent = {
       eventId,
       triggers,

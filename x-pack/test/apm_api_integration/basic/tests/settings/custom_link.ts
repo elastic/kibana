@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { CustomLink } from '../../../../../plugins/apm/common/custom_link/custom_link_types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 

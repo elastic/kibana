@@ -20,7 +20,6 @@
 import { Observable } from 'rxjs';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
-import { TriggerContextMapping } from '../../../../ui_actions/public';
 import { EmbeddableInput } from '../../../common/types';
 
 export interface EmbeddableError {
@@ -33,7 +32,7 @@ export { EmbeddableInput };
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
   loading?: boolean;
-  // Whether the embeddable finshed loading with an error.
+  // Whether the embeddable finished loading with an error.
   error?: EmbeddableError;
   editUrl?: string;
   editApp?: string;
@@ -84,6 +83,11 @@ export interface IEmbeddable<
    * Extra abilities added to Embeddable by `*_enhanced` plugins.
    */
   enhancements?: object;
+
+  /**
+   * If this embeddable has encountered a fatal error, that error will be stored here
+   **/
+  fatalError?: Error;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to
@@ -168,5 +172,5 @@ export interface IEmbeddable<
   /**
    * List of triggers that this embeddable will execute.
    */
-  supportedTriggers(): Array<keyof TriggerContextMapping>;
+  supportedTriggers(): string[];
 }

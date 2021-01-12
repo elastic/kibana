@@ -7,3 +7,5 @@
 export * from './determine_allocation_type';
 
 export * from './get_available_node_roles_for_phase';
+
+export * from './is_node_role_first_preference';

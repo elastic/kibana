@@ -17,17 +17,20 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPanel, EuiText } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { EuiHorizontalRule, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
+import { ContextErrorMessage } from '../context_error_message';
 import {
   DocTableLegacy,
   DocTableLegacyProps,
 } from '../../angular/doc_table/create_doc_table_react';
 import { IIndexPattern, IndexPatternField } from '../../../../../data/common/index_patterns';
 import { LOADING_STATUS } from './constants';
+import { ActionBar, ActionBarProps } from '../../angular/context/components/action_bar/action_bar';
+import { TopNavMenuProps } from '../../../../../navigation/public';
 
 export interface ContextAppProps {
+  topNavMenu: React.ComponentType<TopNavMenuProps>;
   columns: string[];
   hits: Array<Record<string, unknown>>;
   indexPattern: IIndexPattern;
@@ -35,42 +38,114 @@ export interface ContextAppProps {
   minimumVisibleRows: number;
   sorting: string[];
   status: string;
+  reason: string;
+  defaultStepSize: number;
+  predecessorCount: number;
+  successorCount: number;
+  predecessorAvailable: number;
+  successorAvailable: number;
+  onChangePredecessorCount: (count: number) => void;
+  onChangeSuccessorCount: (count: number) => void;
+  predecessorStatus: string;
+  successorStatus: string;
+}
+
+const PREDECESSOR_TYPE = 'predecessors';
+const SUCCESSOR_TYPE = 'successors';
+
+function isLoading(status: string) {
+  return status !== LOADING_STATUS.LOADED && status !== LOADING_STATUS.FAILED;
 }
 
 export function ContextAppLegacy(renderProps: ContextAppProps) {
-  const { hits, filter, sorting, status } = renderProps;
-  const props = ({ ...renderProps } as unknown) as DocTableLegacyProps;
-  props.rows = hits;
-  props.onFilter = filter;
-  props.sort = sorting.map((el) => [el]);
+  const status = renderProps.status;
   const isLoaded = status === LOADING_STATUS.LOADED;
+  const isFailed = status === LOADING_STATUS.FAILED;
+
+  const actionBarProps = (type: string) => {
+    const {
+      defaultStepSize,
+      successorCount,
+      predecessorCount,
+      predecessorAvailable,
+      successorAvailable,
+      predecessorStatus,
+      successorStatus,
+      onChangePredecessorCount,
+      onChangeSuccessorCount,
+    } = renderProps;
+    const isPredecessorType = type === PREDECESSOR_TYPE;
+    return {
+      defaultStepSize,
+      docCount: isPredecessorType ? predecessorCount : successorCount,
+      docCountAvailable: isPredecessorType ? predecessorAvailable : successorAvailable,
+      onChangeCount: isPredecessorType ? onChangePredecessorCount : onChangeSuccessorCount,
+      isLoading: isPredecessorType ? isLoading(predecessorStatus) : isLoading(successorStatus),
+      type,
+      isDisabled: !isLoaded,
+    } as ActionBarProps;
+  };
+
+  const docTableProps = () => {
+    const { hits, filter, sorting, columns, indexPattern, minimumVisibleRows } = renderProps;
+    return {
+      columns,
+      indexPattern,
+      minimumVisibleRows,
+      rows: hits,
+      onFilter: filter,
+      sort: sorting.map((el) => [el]),
+    } as DocTableLegacyProps;
+  };
+
+  const TopNavMenu = renderProps.topNavMenu;
+  const getNavBarProps = () => {
+    return {
+      appName: 'context',
+      showSearchBar: true,
+      showQueryBar: false,
+      showFilterBar: true,
+      showSaveQuery: false,
+      showDatePicker: false,
+      indexPatterns: [renderProps.indexPattern],
+      useDefaultBehaviors: true,
+    };
+  };
+
   const loadingFeedback = () => {
     if (status === LOADING_STATUS.UNINITIALIZED || status === LOADING_STATUS.LOADING) {
       return (
-        <EuiPanel paddingSize="l" data-test-subj="contextApp_loadingIndicator">
-          <EuiText textAlign="center">
-            <FormattedMessage
-              id="discover.context.loadingDescription"
-              defaultMessage="Loading..."
-            />
-          </EuiText>
-        </EuiPanel>
+        <EuiText textAlign="center" data-test-subj="contextApp_loadingIndicator">
+          <FormattedMessage id="discover.context.loadingDescription" defaultMessage="Loading..." />
+        </EuiText>
       );
     }
     return null;
   };
+
   return (
     <I18nProvider>
-      <React.Fragment>
-        {loadingFeedback()}
-        {isLoaded ? (
-          <EuiPanel paddingSize="none">
-            <div className="discover-table">
-              <DocTableLegacy {...props} />
-            </div>
-          </EuiPanel>
-        ) : null}
-      </React.Fragment>
+      {isFailed ? (
+        <ContextErrorMessage status={status} reason={renderProps.reason} />
+      ) : (
+        <div>
+          <TopNavMenu {...getNavBarProps()} />
+          <EuiPage>
+            <EuiPageContent paddingSize="s" className="dscCxtAppContent">
+              <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
+              {loadingFeedback()}
+              <EuiHorizontalRule margin="xs" />
+              {isLoaded ? (
+                <div className="discover-table">
+                  <DocTableLegacy {...docTableProps()} />
+                </div>
+              ) : null}
+              <EuiHorizontalRule margin="xs" />
+              <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
+            </EuiPageContent>
+          </EuiPage>
+        </div>
+      )}
     </I18nProvider>
   );
 }

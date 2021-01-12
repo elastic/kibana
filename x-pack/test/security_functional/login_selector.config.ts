@@ -42,7 +42,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       from: 'snapshot',
       serverArgs: [
         'xpack.security.authc.token.enabled=true',
-        'xpack.security.authc.realms.saml.saml1.order=0',
+        'xpack.security.authc.realms.native.native1.order=0',
+        'xpack.security.authc.realms.saml.saml1.order=1',
         `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${idpPath}`,
         'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co/saml1',
         `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
@@ -60,15 +61,29 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
         `--xpack.security.loginHelp="Some-login-help."`,
-        '--xpack.security.authc.providers.basic.basic1.order=0',
-        '--xpack.security.authc.providers.saml.saml1.order=1',
-        '--xpack.security.authc.providers.saml.saml1.realm=saml1',
-        '--xpack.security.authc.providers.saml.saml1.description="Log-in-with-SAML"',
-        '--xpack.security.authc.providers.saml.saml1.icon=logoKibana',
-        '--xpack.security.authc.providers.saml.unknown_saml.order=2',
-        '--xpack.security.authc.providers.saml.unknown_saml.realm=unknown_realm',
-        '--xpack.security.authc.providers.saml.unknown_saml.description="Do-not-log-in-with-THIS-SAML"',
-        '--xpack.security.authc.providers.saml.unknown_saml.icon=logoAWS',
+        `--xpack.security.authc.providers=${JSON.stringify({
+          basic: { basic1: { order: 0 } },
+          saml: {
+            saml1: {
+              order: 1,
+              realm: 'saml1',
+              description: 'Log-in-with-SAML',
+              icon: 'logoKibana',
+            },
+            unknown_saml: {
+              order: 2,
+              realm: 'unknown_realm',
+              description: 'Do-not-log-in-with-THIS-SAML',
+              icon: 'logoAWS',
+            },
+          },
+          anonymous: {
+            anonymous1: {
+              order: 3,
+              credentials: { username: 'anonymous_user', password: 'changeme' },
+            },
+          },
+        })}`,
       ],
     },
     uiSettings: {

@@ -11,12 +11,12 @@ import { shallow } from 'enzyme';
 import { EuiFlyoutHeader } from '@elastic/eui';
 
 import { ApiTokenTypes } from '../constants';
-import { IApiToken } from '../types';
+import { ApiToken } from '../types';
 
 import { CredentialsFlyoutHeader } from './header';
 
 describe('CredentialsFlyoutHeader', () => {
-  const apiToken: IApiToken = {
+  const apiToken: ApiToken = {
     name: '',
     type: ApiTokenTypes.Private,
     read: true,

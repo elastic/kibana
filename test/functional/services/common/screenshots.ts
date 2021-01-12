@@ -61,6 +61,8 @@ export async function ScreenshotsProvider({ getService }: FtrProviderContext) {
 
       if (updateBaselines) {
         log.debug('Updating baseline snapshot');
+        // Make the directory if it doesn't exist
+        await mkdirAsync(dirname(baselinePath), { recursive: true });
         await writeFileAsync(baselinePath, readFileSync(sessionPath));
         return 0;
       } else {

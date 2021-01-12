@@ -2231,7 +2231,7 @@
             "name": "sort",
             "description": "",
             "args": [],
-            "type": { "kind": "OBJECT", "name": "SortTimelineResult", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2954,33 +2954,6 @@
         "possibleTypes": null
       },
       {
-        "kind": "OBJECT",
-        "name": "SortTimelineResult",
-        "description": "",
-        "fields": [
-          {
-            "name": "columnId",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sortDirection",
-            "description": "",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
-        ],
-        "inputFields": null,
-        "interfaces": [],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "ENUM",
         "name": "TimelineStatus",
         "description": "",
@@ -3650,7 +3623,15 @@
           {
             "name": "sort",
             "description": "",
-            "type": { "kind": "INPUT_OBJECT", "name": "SortTimelineInput", "ofType": null },
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": { "kind": "INPUT_OBJECT", "name": "SortTimelineInput", "ofType": null }
+              }
+            },
             "defaultValue": null
           },
           {

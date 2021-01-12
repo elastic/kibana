@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import moment from 'moment';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
@@ -86,8 +85,6 @@ export function registerTelemetryOptInRoutes({
       }
 
       const statsGetterConfig: StatsGetterConfig = {
-        start: moment().subtract(20, 'minutes').toISOString(),
-        end: moment().toISOString(),
         unencrypted: false,
       };
 

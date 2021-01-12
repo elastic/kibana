@@ -17,34 +17,18 @@
  * under the License.
  */
 
-import { Observable, from } from 'rxjs';
-
-import {
-  CoreSetup,
-  RequestHandlerContext,
-  SharedGlobalConfig,
-  StartServicesAccessor,
-} from 'src/core/server';
-import {
-  coreMock,
-  httpServerMock,
-  pluginInitializerContextConfigMock,
-} from '../../../../../../src/core/server/mocks';
+import type { MockedKeys } from '@kbn/utility-types/jest';
+import { from } from 'rxjs';
+import { CoreSetup, RequestHandlerContext } from 'src/core/server';
+import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { registerSearchRoute } from './search';
 import { DataPluginStart } from '../../plugin';
-import { dataPluginMock } from '../../mocks';
 
 describe('Search service', () => {
-  let mockDataStart: MockedKeys<DataPluginStart>;
   let mockCoreSetup: MockedKeys<CoreSetup<{}, DataPluginStart>>;
-  let getStartServices: jest.Mocked<StartServicesAccessor<{}, DataPluginStart>>;
-  let globalConfig$: Observable<SharedGlobalConfig>;
 
   beforeEach(() => {
-    mockDataStart = dataPluginMock.createStartContract();
-    mockCoreSetup = coreMock.createSetup({ pluginStartContract: mockDataStart });
-    getStartServices = mockCoreSetup.getStartServices;
-    globalConfig$ = pluginInitializerContextConfigMock({}).legacy.globalConfig$;
+    mockCoreSetup = coreMock.createSetup();
   });
 
   it('handler calls context.search.search with the given request and strategy', async () => {
@@ -67,8 +51,12 @@ describe('Search service', () => {
       },
     };
 
-    mockDataStart.search.search.mockReturnValue(from(Promise.resolve(response)));
-    const mockContext = {};
+    const mockContext = {
+      search: {
+        search: jest.fn().mockReturnValue(from(Promise.resolve(response))),
+      },
+    };
+
     const mockBody = { id: undefined, params: {} };
     const mockParams = { strategy: 'foo' };
     const mockRequest = httpServerMock.createKibanaRequest({
@@ -77,14 +65,14 @@ describe('Search service', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    registerSearchRoute(mockCoreSetup.http.createRouter(), { getStartServices, globalConfig$ });
+    registerSearchRoute(mockCoreSetup.http.createRouter());
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
     await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockDataStart.search.search).toBeCalled();
-    expect(mockDataStart.search.search.mock.calls[0][0]).toStrictEqual(mockBody);
+    expect(mockContext.search.search).toBeCalled();
+    expect(mockContext.search.search.mock.calls[0][0]).toStrictEqual(mockBody);
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: response,
@@ -101,9 +89,12 @@ describe('Search service', () => {
       })
     );
 
-    mockDataStart.search.search.mockReturnValue(rejectedValue);
+    const mockContext = {
+      search: {
+        search: jest.fn().mockReturnValue(rejectedValue),
+      },
+    };
 
-    const mockContext = {};
     const mockBody = { id: undefined, params: {} };
     const mockParams = { strategy: 'foo' };
     const mockRequest = httpServerMock.createKibanaRequest({
@@ -112,14 +103,14 @@ describe('Search service', () => {
     });
     const mockResponse = httpServerMock.createResponseFactory();
 
-    registerSearchRoute(mockCoreSetup.http.createRouter(), { getStartServices, globalConfig$ });
+    registerSearchRoute(mockCoreSetup.http.createRouter());
 
     const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
     const handler = mockRouter.post.mock.calls[0][1];
     await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
 
-    expect(mockDataStart.search.search).toBeCalled();
-    expect(mockDataStart.search.search.mock.calls[0][0]).toStrictEqual(mockBody);
+    expect(mockContext.search.search).toBeCalled();
+    expect(mockContext.search.search.mock.calls[0][0]).toStrictEqual(mockBody);
     expect(mockResponse.customError).toBeCalled();
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.body.message).toBe('oh no');

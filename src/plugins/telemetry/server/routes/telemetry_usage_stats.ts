@@ -17,22 +17,12 @@
  * under the License.
  */
 
-import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { TypeOptions } from '@kbn/config-schema/target/types/types';
 import { IRouter } from 'kibana/server';
 import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
 } from 'src/plugins/telemetry_collection_manager/server';
-
-const validate: TypeOptions<string | number>['validate'] = (value) => {
-  if (!moment(value).isValid()) {
-    return `${value} is not a valid date`;
-  }
-};
-
-const dateSchema = schema.oneOf([schema.string({ validate }), schema.number({ validate })]);
 
 export function registerTelemetryUsageStatsRoutes(
   router: IRouter,
@@ -45,25 +35,18 @@ export function registerTelemetryUsageStatsRoutes(
       validate: {
         body: schema.object({
           unencrypted: schema.boolean({ defaultValue: false }),
-          timeRange: schema.object({
-            min: dateSchema,
-            max: dateSchema,
-          }),
         }),
       },
     },
     async (context, req, res) => {
-      const start = moment(req.body.timeRange.min).toISOString();
-      const end = moment(req.body.timeRange.max).toISOString();
-      const unencrypted = req.body.unencrypted;
+      const { unencrypted } = req.body;
 
       try {
         const statsConfig: StatsGetterConfig = {
-          unencrypted,
-          start,
-          end,
           request: req,
+          unencrypted,
         };
+
         const stats = await telemetryCollectionManager.getStats(statsConfig);
         return res.ok({ body: stats });
       } catch (err) {

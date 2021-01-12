@@ -53,6 +53,7 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
   createAction({
     getDisplayName: () =>
       i18n.translate('embeddableExamples.book.edit', { defaultMessage: 'Edit Book' }),
+    id: ACTION_EDIT_BOOK,
     type: ACTION_EDIT_BOOK,
     order: 100,
     getIconType: () => 'documents',
@@ -64,15 +65,11 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
     execute: async ({ embeddable }: ActionContext) => {
       const { openModal, getAttributeService, savedObjectsClient } = await getStartServices();
       const attributeService = getAttributeService<BookSavedObjectAttributes>(BOOK_SAVED_OBJECT, {
-        saveMethod: async (
-          type: string,
-          attributes: BookSavedObjectAttributes,
-          savedObjectId?: string
-        ) => {
+        saveMethod: async (attributes: BookSavedObjectAttributes, savedObjectId?: string) => {
           if (savedObjectId) {
-            return savedObjectsClient.update(type, savedObjectId, attributes);
+            return savedObjectsClient.update(BOOK_EMBEDDABLE, savedObjectId, attributes);
           }
-          return savedObjectsClient.create(type, attributes);
+          return savedObjectsClient.create(BOOK_EMBEDDABLE, attributes);
         },
         checkForDuplicateTitle: (props: OnSaveProps) => {
           return new Promise(() => {

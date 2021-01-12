@@ -7,14 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class PainlessError extends KbnError 
+export declare class PainlessError extends EsError 
 ```
 
 ## Constructors
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(err, request)](./kibana-plugin-plugins-data-public.painlesserror._constructor_.md) |  | Constructs a new instance of the <code>PainlessError</code> class |
+|  [(constructor)(err)](./kibana-plugin-plugins-data-public.painlesserror._constructor_.md) |  | Constructs a new instance of the <code>PainlessError</code> class |
 
 ## Properties
 

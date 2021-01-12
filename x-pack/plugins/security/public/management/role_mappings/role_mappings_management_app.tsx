@@ -12,6 +12,7 @@ import { StartServicesAccessor } from 'src/core/public';
 import { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import { PluginStartDependencies } from '../../plugin';
 import { DocumentationLinksService } from './documentation_links';
+import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
@@ -70,10 +71,14 @@ export const roleMappingsManagementApp = Object.freeze({
         const EditRoleMappingsPageWithBreadcrumbs = () => {
           const { name } = useParams<{ name?: string }>();
 
+          // Additional decoding is a workaround for a bug in react-router's version of the `history` module.
+          // See https://github.com/elastic/kibana/issues/82440
+          const decodedName = name ? tryDecodeURIComponent(name) : undefined;
+
           setBreadcrumbs([
             ...roleMappingsBreadcrumbs,
             name
-              ? { text: name, href: `/edit/${encodeURIComponent(name)}` }
+              ? { text: decodedName, href: `/edit/${encodeURIComponent(name)}` }
               : {
                   text: i18n.translate('xpack.security.roleMappings.createBreadcrumb', {
                     defaultMessage: 'Create',
@@ -83,7 +88,7 @@ export const roleMappingsManagementApp = Object.freeze({
 
           return (
             <EditRoleMappingPage
-              name={name}
+              name={decodedName}
               roleMappingsAPI={roleMappingsAPIClient}
               rolesAPIClient={new RolesAPIClient(http)}
               notifications={notifications}

@@ -6,53 +6,29 @@
 
 import {
   SerializedPhase,
-  ColdPhase,
   DeletePhase,
-  WarmPhase,
   SerializedPolicy,
+  RolloverAction,
 } from '../../../common/types';
 
 export const defaultSetPriority: string = '100';
+
+export const defaultPhaseIndexPriority: string = '50';
+
+export const defaultRolloverAction: RolloverAction = {
+  max_age: '30d',
+  max_size: '50gb',
+};
 
 export const defaultPolicy: SerializedPolicy = {
   name: '',
   phases: {
     hot: {
       actions: {
-        rollover: {
-          max_age: '30d',
-          max_size: '50gb',
-        },
+        rollover: defaultRolloverAction,
       },
     },
   },
-};
-
-export const defaultNewWarmPhase: WarmPhase = {
-  phaseEnabled: false,
-  forceMergeEnabled: false,
-  selectedForceMergeSegments: '',
-  bestCompressionEnabled: false,
-  selectedMinimumAge: '0',
-  selectedMinimumAgeUnits: 'd',
-  selectedNodeAttrs: '',
-  shrinkEnabled: false,
-  selectedPrimaryShardCount: '',
-  selectedReplicaCount: '',
-  warmPhaseOnRollover: true,
-  phaseIndexPriority: '50',
-  dataTierAllocationType: 'default',
-};
-
-export const defaultNewColdPhase: ColdPhase = {
-  phaseEnabled: false,
-  selectedMinimumAge: '0',
-  selectedMinimumAgeUnits: 'd',
-  selectedNodeAttrs: '',
-  selectedReplicaCount: '',
-  freezeEnabled: false,
-  phaseIndexPriority: '0',
-  dataTierAllocationType: 'default',
 };
 
 export const defaultNewDeletePhase: DeletePhase = {

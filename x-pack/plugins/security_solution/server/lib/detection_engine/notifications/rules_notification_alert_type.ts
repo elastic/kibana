@@ -6,15 +6,19 @@
 
 import { Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
-import { NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../../common/constants';
+import {
+  DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
+  NOTIFICATIONS_ID,
+  SERVER_APP_ID,
+} from '../../../../common/constants';
 
 import { NotificationAlertTypeDefinition } from './types';
-import { getSignalsCount } from './get_signals_count';
 import { RuleAlertAttributes } from '../signals/types';
 import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
+import { getSignals } from './get_signals';
 
 export const rulesNotificationAlertType = ({
   logger,
@@ -31,6 +35,7 @@ export const rulesNotificationAlertType = ({
       ruleAlertId: schema.string(),
     }),
   },
+  minimumLicenseRequired: 'basic',
   async executor({ startedAt, previousStartedAt, alertId, services, params }) {
     const ruleAlertSavedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
       'alert',
@@ -52,13 +57,19 @@ export const rulesNotificationAlertType = ({
     )?.format('x');
     const toInMs = parseScheduleDates(startedAt.toISOString())?.format('x');
 
-    const signalsCount = await getSignalsCount({
+    const results = await getSignals({
       from: fromInMs,
       to: toInMs,
+      size: DEFAULT_RULE_NOTIFICATION_QUERY_SIZE,
       index: ruleParams.outputIndex,
       ruleId: ruleParams.ruleId,
       callCluster: services.callCluster,
     });
+
+    const signals = results.hits.hits.map((hit) => hit._source);
+
+    const signalsCount =
+      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
 
     const resultsLink = getNotificationResultsLink({
       from: fromInMs,
@@ -74,7 +85,13 @@ export const rulesNotificationAlertType = ({
 
     if (signalsCount !== 0) {
       const alertInstance = services.alertInstanceFactory(alertId);
-      scheduleNotificationActions({ alertInstance, signalsCount, resultsLink, ruleParams });
+      scheduleNotificationActions({
+        alertInstance,
+        signalsCount,
+        resultsLink,
+        ruleParams,
+        signals,
+      });
     }
   },
 });

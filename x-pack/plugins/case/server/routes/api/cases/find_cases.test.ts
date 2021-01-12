@@ -29,7 +29,7 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
@@ -38,6 +38,10 @@ describe('FIND all cases', () => {
     const response = await routeHandler(theContext, request, kibanaResponseFactory);
     expect(response.status).toEqual(200);
     expect(response.payload.cases).toHaveLength(4);
+    // mockSavedObjectsRepository do not support filters and returns all cases every time.
+    expect(response.payload.count_open_cases).toEqual(4);
+    expect(response.payload.count_closed_cases).toEqual(4);
+    expect(response.payload.count_in_progress_cases).toEqual(4);
   });
 
   it(`has proper connector id on cases with configured connector`, async () => {
@@ -46,7 +50,7 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: mockCases,
       })
@@ -63,7 +67,7 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
       })
@@ -80,7 +84,7 @@ describe('FIND all cases', () => {
       method: 'get',
     });
 
-    const theContext = createRouteContext(
+    const theContext = await createRouteContext(
       createMockSavedObjectsRepository({
         caseSavedObject: [mockCaseNoConnectorId],
         caseConfigureSavedObject: mockCaseConfigure,

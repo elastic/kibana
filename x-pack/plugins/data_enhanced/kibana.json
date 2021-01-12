@@ -6,11 +6,13 @@
     "xpack", "data_enhanced"
   ],
   "requiredPlugins": [
+    "bfetch",
     "data",
-    "features"
+    "features",
+    "taskManager"
   ],
   "optionalPlugins": ["kibanaUtils", "usageCollection"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaUtils"]
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
 }

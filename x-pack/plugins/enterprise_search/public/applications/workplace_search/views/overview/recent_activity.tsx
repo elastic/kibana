@@ -7,14 +7,13 @@
 import React from 'react';
 
 import moment from 'moment';
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiSpacer, EuiLinkProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ContentSection } from '../../components/shared/content_section';
-import { sendTelemetry } from '../../../shared/telemetry';
-import { HttpLogic } from '../../../shared/http';
+import { TelemetryLogic } from '../../../shared/telemetry';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { SOURCE_DETAILS_PATH, getContentSourcePath } from '../../routes';
 
@@ -23,7 +22,7 @@ import { OverviewLogic } from './overview_logic';
 
 import './recent_activity.scss';
 
-export interface IFeedActivity {
+export interface FeedActivity {
   status?: string;
   id: string;
   message: string;
@@ -51,7 +50,7 @@ export const RecentActivity: React.FC = () => {
       <EuiPanel>
         {activityFeed.length > 0 ? (
           <>
-            {activityFeed.map((props: IFeedActivity, index) => (
+            {activityFeed.map((props: FeedActivity, index) => (
               <RecentActivityItem {...props} key={index} />
             ))}
           </>
@@ -87,19 +86,17 @@ export const RecentActivity: React.FC = () => {
   );
 };
 
-export const RecentActivityItem: React.FC<IFeedActivity> = ({
+export const RecentActivityItem: React.FC<FeedActivity> = ({
   id,
   status,
   message,
   timestamp,
   sourceId,
 }) => {
-  const { http } = useValues(HttpLogic);
+  const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const onClick = () =>
-    sendTelemetry({
-      http,
-      product: 'workplace_search',
+    sendWorkplaceSearchTelemetry({
       action: 'clicked',
       metric: 'recent_activity_source_details_link',
     });

@@ -6,7 +6,7 @@
 import { act } from 'react-dom/test-utils';
 import React from 'react';
 
-import { registerTestBed, TestBed } from '../../../../../../../test_utils';
+import { registerTestBed, TestBed } from '@kbn/test/jest';
 import { Props } from '../';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 
@@ -105,7 +105,7 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 
     moveProcessor(processorSelector: string, dropZoneSelector: string) {
       act(() => {
-        find(`${processorSelector}.moveItemButton`).simulate('change');
+        find(`${processorSelector}.moveItemButton`).simulate('click');
       });
       component.update();
       act(() => {
@@ -137,11 +137,11 @@ const createActions = (testBed: TestBed<TestSubject>) => {
 
     startAndCancelMove(processorSelector: string) {
       act(() => {
-        find(`${processorSelector}.moveItemButton`).simulate('change');
+        find(`${processorSelector}.moveItemButton`).simulate('click');
       });
       component.update();
       act(() => {
-        find(`${processorSelector}.cancelMoveItemButton`).simulate('change');
+        find(`${processorSelector}.cancelMoveItemButton`).simulate('click');
       });
       component.update();
     },

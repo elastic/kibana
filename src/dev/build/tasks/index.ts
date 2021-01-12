@@ -25,19 +25,20 @@ export * from './copy_source_task';
 export * from './create_archives_sources_task';
 export * from './create_archives_task';
 export * from './create_empty_dirs_and_files_task';
-export * from './create_package_json_task';
 export * from './create_readme_task';
 export * from './install_dependencies_task';
 export * from './license_file_task';
 export * from './nodejs';
 export * from './notice_file_task';
 export * from './os_packages';
+export * from './package_json';
 export * from './patch_native_modules_task';
 export * from './path_length_task';
 export * from './transpile_babel_task';
 export * from './uuid_verification_task';
 export * from './verify_env_task';
 export * from './write_sha_sums_task';
+export * from './replace_favicon';
 
 // @ts-expect-error this module can't be TS because it ends up pulling x-pack into Kibana
 export { InstallChromium } from './install_chromium';

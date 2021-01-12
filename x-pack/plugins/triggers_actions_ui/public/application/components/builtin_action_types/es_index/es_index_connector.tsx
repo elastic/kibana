@@ -26,10 +26,12 @@ import {
   getIndexOptions,
   getIndexPatterns,
 } from '../../../../common/index_controls';
+import { useKibana } from '../../../../common/lib/kibana';
 
-const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps<
-  EsIndexActionConnector
->> = ({ action, editActionConfig, errors, http, readOnly, docLinks }) => {
+const IndexActionConnectorFields: React.FunctionComponent<
+  ActionConnectorFieldsProps<EsIndexActionConnector>
+> = ({ action, editActionConfig, errors, readOnly }) => {
+  const { http, docLinks } = useKibana().services;
   const { index, refresh, executionTimeField } = action.config;
   const [hasTimeFieldCheckbox, setTimeFieldCheckboxState] = useState<boolean>(
     executionTimeField != null

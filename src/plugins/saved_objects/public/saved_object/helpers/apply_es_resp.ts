@@ -36,12 +36,11 @@ export async function applyESResp(
   config: SavedObjectConfig,
   dependencies: SavedObjectKibanaServices
 ) {
-  const mapping = expandShorthand(config.mapping);
-  const esType = config.type || '';
+  const mapping = expandShorthand(config.mapping ?? {});
+  const savedObjectType = config.type || '';
   savedObject._source = _.cloneDeep(resp._source);
-  const injectReferences = config.injectReferences;
   if (typeof resp.found === 'boolean' && !resp.found) {
-    throw new SavedObjectNotFound(esType, savedObject.id || '');
+    throw new SavedObjectNotFound(savedObjectType, savedObject.id || '');
   }
 
   const meta = resp._source.kibanaSavedObjectMeta || {};
@@ -101,6 +100,7 @@ export async function applyESResp(
     }
   }
 
+  const injectReferences = config.injectReferences;
   if (injectReferences && resp.references && resp.references.length > 0) {
     injectReferences(savedObject, resp.references);
   }

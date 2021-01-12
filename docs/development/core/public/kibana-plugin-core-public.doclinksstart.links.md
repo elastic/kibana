@@ -9,11 +9,13 @@
 ```typescript
 readonly links: {
         readonly dashboard: {
+            readonly guide: string;
             readonly drilldowns: string;
             readonly drilldownsTriggerPicker: string;
             readonly urlDrilldownTemplateSyntax: string;
             readonly urlDrilldownVariables: string;
         };
+        readonly discover: Record<string, string>;
         readonly filebeat: {
             readonly base: string;
             readonly installation: string;
@@ -43,6 +45,7 @@ readonly links: {
         readonly aggs: {
             readonly date_histogram: string;
             readonly date_range: string;
+            readonly date_format_pattern: string;
             readonly filter: string;
             readonly filters: string;
             readonly geohash_grid: string;
@@ -72,6 +75,7 @@ readonly links: {
             readonly sum: string;
             readonly top_hits: string;
         };
+        readonly runtimeFields: string;
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -86,6 +90,7 @@ readonly links: {
         };
         readonly addData: string;
         readonly kibana: string;
+        readonly elasticsearch: Record<string, string>;
         readonly siem: {
             readonly guide: string;
             readonly gettingStarted: string;
@@ -100,6 +105,16 @@ readonly links: {
             readonly dateMath: string;
         };
         readonly management: Record<string, string>;
+        readonly ml: Record<string, string>;
+        readonly transforms: Record<string, string>;
         readonly visualize: Record<string, string>;
+        readonly apis: Record<string, string>;
+        readonly observability: Record<string, string>;
+        readonly alerting: Record<string, string>;
+        readonly maps: Record<string, string>;
+        readonly monitoring: Record<string, string>;
+        readonly security: Record<string, string>;
+        readonly watcher: Record<string, string>;
+        readonly ccs: Record<string, string>;
     };
 ```

@@ -18,6 +18,8 @@ export interface QueryStringInputProps
 |  [className](./kibana-plugin-plugins-data-public.querystringinputprops.classname.md) | <code>string</code> |  |
 |  [dataTestSubj](./kibana-plugin-plugins-data-public.querystringinputprops.datatestsubj.md) | <code>string</code> |  |
 |  [disableAutoFocus](./kibana-plugin-plugins-data-public.querystringinputprops.disableautofocus.md) | <code>boolean</code> |  |
+|  [disableLanguageSwitcher](./kibana-plugin-plugins-data-public.querystringinputprops.disablelanguageswitcher.md) | <code>boolean</code> |  |
+|  [iconType](./kibana-plugin-plugins-data-public.querystringinputprops.icontype.md) | <code>string</code> |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-public.querystringinputprops.indexpatterns.md) | <code>Array&lt;IIndexPattern &#124; string&gt;</code> |  |
 |  [isInvalid](./kibana-plugin-plugins-data-public.querystringinputprops.isinvalid.md) | <code>boolean</code> |  |
 |  [languageSwitcherPopoverAnchorPosition](./kibana-plugin-plugins-data-public.querystringinputprops.languageswitcherpopoveranchorposition.md) | <code>PopoverAnchorPosition</code> |  |

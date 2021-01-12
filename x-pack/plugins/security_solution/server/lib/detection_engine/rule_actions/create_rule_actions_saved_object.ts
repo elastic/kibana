@@ -24,13 +24,14 @@ export const createRuleActionsSavedObject = async ({
   actions = [],
   throttle,
 }: CreateRuleActionsSavedObject): Promise<RulesActionsSavedObject> => {
-  const ruleActionsSavedObject = await savedObjectsClient.create<
-    IRuleActionsAttributesSavedObjectAttributes
-  >(ruleActionsSavedObjectType, {
-    ruleAlertId,
-    actions,
-    ...getThrottleOptions(throttle),
-  });
+  const ruleActionsSavedObject = await savedObjectsClient.create<IRuleActionsAttributesSavedObjectAttributes>(
+    ruleActionsSavedObjectType,
+    {
+      ruleAlertId,
+      actions,
+      ...getThrottleOptions(throttle),
+    }
+  );
 
   return getRuleActionsFromSavedObject(ruleActionsSavedObject);
 };

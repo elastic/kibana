@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { uiToReactComponent } from '../../../kibana_react/public';
 import { Action, ActionExecutionContext } from '../actions';
 import { Trigger } from '../triggers';
-import { BaseContext } from '../types';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',
@@ -34,7 +33,7 @@ export const txtMore = i18n.translate('uiActions.actionPanel.more', {
   defaultMessage: 'More',
 });
 
-interface ActionWithContext<Context extends BaseContext = BaseContext> {
+interface ActionWithContext<Context extends object = object> {
   action: Action<Context>;
   context: Context;
 
@@ -201,10 +200,12 @@ export async function buildContextMenuForActions({
 
   for (const panel of Object.values(panels)) {
     if (panel._level === 0) {
-      panels.mainMenu.items.push({
-        isSeparator: true,
-        key: panel.id + '__separator',
-      });
+      if (panels.mainMenu.items.length > 0) {
+        panels.mainMenu.items.push({
+          isSeparator: true,
+          key: panel.id + '__separator',
+        });
+      }
       if (panel.items.length > 3) {
         panels.mainMenu.items.push({
           name: panel.title || panel.id,

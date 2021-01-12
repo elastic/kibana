@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { HttpResourcesRequestHandler, RouteConfig } from '../../../../../../src/core/server';
 import { Session } from '../../session_management';
 import { defineLoggedOutRoutes } from './logged_out';

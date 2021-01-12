@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 import { Groups } from './groups';
 
 import { ViewContentHeader } from '../../components/shared/view_content_header';
-import { Loading } from '../../components/shared/loading';
+import { Loading } from '../../../shared/loading';
 import { FlashMessages } from '../../../shared/flash_messages';
 
 import { AddGroupModal } from './components/add_group_modal';
@@ -27,7 +27,7 @@ import { TableFilters } from './components/table_filters';
 import { DEFAULT_META } from '../../../shared/constants';
 
 import { EuiFieldSearch, EuiLoadingSpinner } from '@elastic/eui';
-import { EuiButton as EuiLinkButton } from '../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 
 const getSearchResults = jest.fn();
 const openNewGroupModal = jest.fn();
@@ -138,7 +138,7 @@ describe('GroupOverview', () => {
     const action = shallow(<Action />);
 
     expect(action.find('[data-test-subj="InviteUsersButton"]')).toHaveLength(1);
-    expect(action.find(EuiLinkButton)).toHaveLength(1);
+    expect(action.find(EuiButtonTo)).toHaveLength(1);
   });
 
   it('does not render inviteUsersButton when federated auth', () => {

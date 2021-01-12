@@ -28,11 +28,12 @@
   "rule_id": "227dc608-e558-43d9-b521-150772250bae",
   "severity": "low",
   "tags": [
-    "AWS",
     "Elastic",
+    "Cloud",
+    "AWS",
+    "Continuous Monitoring",
     "SecOps",
-    "Asset Visibility",
-    "Continuous Monitoring"
+    "Asset Visibility"
   ],
   "threat": [
     {

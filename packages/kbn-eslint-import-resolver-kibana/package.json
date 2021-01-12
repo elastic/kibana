@@ -11,14 +11,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/elastic/kibana/tree/master/packages/kbn-eslint-import-resolver-kibana"
-  },
-  "dependencies": {
-    "debug": "^2.6.9",
-    "eslint-import-resolver-node": "0.3.2",
-    "eslint-import-resolver-webpack": "0.11.1",
-    "glob-all": "^3.2.1",
-    "lru-cache": "^4.1.5",
-    "resolve": "^1.7.1",
-    "webpack": "^4.41.5"
   }
 }

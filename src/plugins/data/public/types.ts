@@ -19,6 +19,7 @@
 
 import React from 'react';
 import { CoreStart } from 'src/core/public';
+import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
@@ -30,14 +31,17 @@ import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { Setup as InspectorSetup } from '../../inspector/public';
 
 export interface DataPublicPluginEnhancements {
   search: SearchEnhancements;
 }
 
 export interface DataSetupDependencies {
+  bfetch: BfetchPublicSetup;
   expressions: ExpressionsSetup;
   uiActions: UiActionsSetup;
+  inspector: InspectorSetup;
   usageCollection?: UsageCollectionSetup;
 }
 

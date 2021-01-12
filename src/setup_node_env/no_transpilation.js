@@ -24,5 +24,4 @@ require('./harden');
 
 require('symbol-observable');
 require('source-map-support/register');
-require('./root');
 require('./node_version_validator');

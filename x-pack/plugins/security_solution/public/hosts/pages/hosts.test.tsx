@@ -21,7 +21,6 @@ import {
 import { SiemNavigation } from '../../common/components/navigation';
 import { inputsActions } from '../../common/store/inputs';
 import { State, createStore } from '../../common/store';
-import { HostsComponentProps } from './types';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
 import { useSourcererScope } from '../../common/containers/sourcerer';
@@ -60,10 +59,6 @@ const mockHistory = {
 };
 const mockUseSourcererScope = useSourcererScope as jest.Mock;
 describe('Hosts - rendering', () => {
-  const hostProps: HostsComponentProps = {
-    hostsPagePath: '',
-  };
-
   test('it renders the Setup Instructions text when no index is available', async () => {
     mockUseSourcererScope.mockReturnValue({
       indicesExist: false,
@@ -72,7 +67,7 @@ describe('Hosts - rendering', () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <Hosts {...hostProps} />
+          <Hosts />
         </Router>
       </TestProviders>
     );
@@ -87,7 +82,7 @@ describe('Hosts - rendering', () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <Hosts {...hostProps} />
+          <Hosts />
         </Router>
       </TestProviders>
     );
@@ -103,7 +98,7 @@ describe('Hosts - rendering', () => {
     const wrapper = mount(
       <TestProviders>
         <Router history={mockHistory}>
-          <Hosts {...hostProps} />
+          <Hosts />
         </Router>
       </TestProviders>
     );
@@ -158,7 +153,7 @@ describe('Hosts - rendering', () => {
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
-          <Hosts {...hostProps} />
+          <Hosts />
         </Router>
       </TestProviders>
     );

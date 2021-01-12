@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/server';
-import { Usage } from './register';
+import type { CoreSetup, Logger } from 'kibana/server';
+import type { IEsSearchResponse } from '../../../common';
+import type { Usage } from './register';
 
 const SAVED_OBJECT_ID = 'search-telemetry';
 
@@ -72,5 +73,21 @@ export function usageProvider(core: CoreSetup): SearchUsage {
   return {
     trackError: () => getTracker('errorCount')(),
     trackSuccess: getTracker('successCount'),
+  };
+}
+
+/**
+ * Rxjs observer for easily doing `tap(searchUsageObserver(logger, usage))` in an rxjs chain.
+ */
+export function searchUsageObserver(logger: Logger, usage?: SearchUsage) {
+  return {
+    next(response: IEsSearchResponse) {
+      logger.debug(`trackSearchStatus:next  ${response.rawResponse.took}`);
+      usage?.trackSuccess(response.rawResponse.took);
+    },
+    error() {
+      logger.debug(`trackSearchStatus:error`);
+      usage?.trackError();
+    },
   };
 }

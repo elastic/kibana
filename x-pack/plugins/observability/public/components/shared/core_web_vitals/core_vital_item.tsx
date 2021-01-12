@@ -34,7 +34,7 @@ export interface Thresholds {
 
 interface Props {
   title: string;
-  value?: string;
+  value?: string | null;
   ranks?: number[];
   loading: boolean;
   thresholds: Thresholds;
@@ -88,14 +88,16 @@ export function CoreVitalItem({
 
   const biggestValIndex = ranks.indexOf(Math.max(...ranks));
 
-  if (value === undefined && ranks[0] === 100 && !loading) {
+  if (!value && !loading) {
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
+
   return (
     <>
       <EuiStat
+        aria-label={`${title} ${value}`} // aria-label is required when passing a component, instead of a string, as the description
         titleSize="s"
-        title={value}
+        title={value ?? ''}
         description={
           <>
             {title}

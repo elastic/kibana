@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from 'src/core/server';
+import { ISavedObjectsRepository, SavedObjectsErrorHelpers } from 'src/core/server';
 
 export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
   const mockSavedObjectsClientContract = ({
@@ -37,7 +37,7 @@ export const createMockSavedObjectsRepository = (spaces: any[] = []) => {
       return {};
     }),
     deleteByNamespace: jest.fn(),
-  } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+  } as unknown) as jest.Mocked<ISavedObjectsRepository>;
 
   return mockSavedObjectsClientContract;
 };

@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiButtonToggle,
+  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FilterAggConfigRange } from '../types';
@@ -60,18 +60,17 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               onChange={(e) => {
                 updateConfig({ from: e.target.value === '' ? undefined : Number(e.target.value) });
               }}
-              // @ts-ignore
               step="any"
               prepend={
-                <EuiButtonToggle
+                <EuiButton
                   style={{ minWidth: '40px' }}
-                  label={includeFrom ? '≥' : '>'}
                   onChange={(e: any) => {
                     updateConfig({ includeFrom: e.target.checked });
                   }}
-                  isSelected={includeFrom}
-                  isEmpty={!includeFrom}
-                />
+                  fill={includeFrom}
+                >
+                  {includeFrom ? '≥' : '>'}
+                </EuiButton>
               }
             />
           </EuiFormRow>
@@ -91,18 +90,17 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               onChange={(e) => {
                 updateConfig({ to: e.target.value === '' ? undefined : Number(e.target.value) });
               }}
-              // @ts-ignore
               step="any"
               append={
-                <EuiButtonToggle
+                <EuiButton
                   style={{ minWidth: '40px' }}
-                  label={includeTo ? '≤' : '<'}
-                  onChange={(e: any) => {
-                    updateConfig({ includeTo: e.target.checked });
+                  onClick={() => {
+                    updateConfig({ includeTo: !includeTo });
                   }}
-                  isSelected={includeTo}
-                  isEmpty={!includeTo}
-                />
+                  fill={includeTo}
+                >
+                  {includeTo ? '≤' : '<'}s
+                </EuiButton>
               }
             />
           </EuiFormRow>

@@ -286,7 +286,8 @@ CORS configuration of the server permits requests from the Kibana application on
     showAllData,
     meta,
     layerConfig,
-    serviceSettings
+    serviceSettings,
+    leaflet
   ) {
     const clonedLayer = new ChoroplethLayer(
       name,
@@ -295,7 +296,8 @@ CORS configuration of the server permits requests from the Kibana application on
       showAllData,
       meta,
       layerConfig,
-      serviceSettings
+      serviceSettings,
+      leaflet
     );
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);

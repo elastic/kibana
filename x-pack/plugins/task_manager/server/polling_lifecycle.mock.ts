@@ -10,7 +10,6 @@ import { of, Observable } from 'rxjs';
 export const taskPollingLifecycleMock = {
   create(opts: { isStarted?: boolean; events$?: Observable<TaskLifecycleEvent> }) {
     return ({
-      start: jest.fn(),
       attemptToRun: jest.fn(),
       get isStarted() {
         return opts.isStarted ?? true;
@@ -18,7 +17,6 @@ export const taskPollingLifecycleMock = {
       get events() {
         return opts.events$ ?? of();
       },
-      stop: jest.fn(),
     } as unknown) as jest.Mocked<TaskPollingLifecycle>;
   },
 };

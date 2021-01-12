@@ -6,20 +6,25 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useUrlParams } from '../../../../../../context/url_params_context/use_url_params';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
-import { TransactionDetailLink } from '../../../../../shared/Links/apm/TransactionDetailLink';
+import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview_link';
+import { TransactionDetailLink } from '../../../../../shared/Links/apm/transaction_detail_link';
 import { StickyProperties } from '../../../../../shared/StickyProperties';
-import { TransactionOverviewLink } from '../../../../../shared/Links/apm/TransactionOverviewLink';
 
 interface Props {
   transaction?: Transaction;
 }
 
 export function FlyoutTopLevelProperties({ transaction }: Props) {
+  const {
+    urlParams: { latencyAggregationType },
+  } = useUrlParams();
+
   if (!transaction) {
     return null;
   }
@@ -31,9 +36,11 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       }),
       fieldName: SERVICE_NAME,
       val: (
-        <TransactionOverviewLink serviceName={transaction.service.name}>
+        <ServiceOrTransactionsOverviewLink
+          serviceName={transaction.service.name}
+        >
           {transaction.service.name}
-        </TransactionOverviewLink>
+        </ServiceOrTransactionsOverviewLink>
       ),
       width: '25%',
     },
@@ -49,6 +56,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           traceId={transaction.trace.id}
           transactionName={transaction.transaction.name}
           transactionType={transaction.transaction.type}
+          latencyAggregationType={latencyAggregationType}
         >
           {transaction.transaction.name}
         </TransactionDetailLink>

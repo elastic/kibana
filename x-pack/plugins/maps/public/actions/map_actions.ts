@@ -24,16 +24,11 @@ import {
   CLEAR_GOTO,
   CLEAR_MOUSE_COORDINATES,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
-  DISABLE_TOOLTIP_CONTROL,
-  HIDE_LAYER_CONTROL,
-  HIDE_TOOLBAR_OVERLAY,
-  HIDE_VIEW_CONTROL,
   MAP_DESTROYED,
   MAP_EXTENT_CHANGED,
   MAP_READY,
   ROLLBACK_MAP_SETTINGS,
   SET_GOTO,
-  SET_INTERACTIVE,
   SET_MAP_INIT_ERROR,
   SET_MAP_SETTINGS,
   SET_MOUSE_COORDINATES,
@@ -51,6 +46,7 @@ import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import { MapSettings } from '../reducers/map';
 import {
   DrawState,
+  MapCenter,
   MapCenterAndZoom,
   MapExtent,
   MapRefreshConfig,
@@ -59,6 +55,12 @@ import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
 
+export interface MapExtentState {
+  zoom: number;
+  extent: MapExtent;
+  center: MapCenter;
+}
+
 export function setMapInitError(errorMessage: string) {
   return {
     type: SET_MAP_INIT_ERROR,
@@ -66,7 +68,7 @@ export function setMapInitError(errorMessage: string) {
   };
 }
 
-export function setMapSettings(settings: MapSettings) {
+export function setMapSettings(settings: Partial<MapSettings>) {
   return {
     type: SET_MAP_SETTINGS,
     settings,
@@ -125,13 +127,13 @@ export function mapDestroyed() {
   };
 }
 
-export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExtent }) {
+export function mapExtentChanged(mapExtentState: MapExtentState) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
     const dataFilters = getDataFilters(getState());
-    const { extent, zoom: newZoom } = newMapConstants;
+    const { extent, zoom: newZoom } = mapExtentState;
     const { buffer, zoom: currentZoom } = dataFilters;
 
     if (extent) {
@@ -162,7 +164,7 @@ export function mapExtentChanged(newMapConstants: { zoom: number; extent: MapExt
       type: MAP_EXTENT_CHANGED,
       mapState: {
         ...dataFilters,
-        ...newMapConstants,
+        ...mapExtentState,
       },
     });
 
@@ -282,12 +284,19 @@ export function setRefreshConfig({ isPaused, interval }: MapRefreshConfig) {
 }
 
 export function triggerRefreshTimer() {
-  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
     dispatch({
       type: TRIGGER_REFRESH_TIMER,
     });
 
-    await dispatch(syncDataForAllLayers());
+    if (getMapSettings(getState()).autoFitToDataBounds) {
+      dispatch(autoFitToBounds());
+    } else {
+      await dispatch(syncDataForAllLayers());
+    }
   };
 }
 
@@ -301,23 +310,4 @@ export function updateDrawState(drawState: DrawState | null) {
       drawState,
     });
   };
-}
-
-export function disableInteractive() {
-  return { type: SET_INTERACTIVE, disableInteractive: true };
-}
-
-export function disableTooltipControl() {
-  return { type: DISABLE_TOOLTIP_CONTROL, disableTooltipControl: true };
-}
-
-export function hideToolbarOverlay() {
-  return { type: HIDE_TOOLBAR_OVERLAY, hideToolbarOverlay: true };
-}
-
-export function hideLayerControl() {
-  return { type: HIDE_LAYER_CONTROL, hideLayerControl: true };
-}
-export function hideViewControl() {
-  return { type: HIDE_VIEW_CONTROL, hideViewControl: true };
 }

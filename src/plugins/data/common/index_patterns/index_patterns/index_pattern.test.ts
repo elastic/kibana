@@ -23,8 +23,8 @@ import { IndexPattern } from './index_pattern';
 
 import { DuplicateField } from '../../../../kibana_utils/common';
 // @ts-expect-error
-import mockLogStashFields from '../../../../../fixtures/logstash_fields';
-import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
+import mockLogStashFields from './fixtures/logstash_fields';
+import { stubbedSavedObjectIndexPattern } from './fixtures/stubbed_saved_object_index_pattern';
 import { IndexPatternField } from '../fields';
 
 import { fieldFormatsMock } from '../../field_formats/mocks';
@@ -193,6 +193,24 @@ describe('IndexPattern', () => {
 
       indexPattern.deleteFieldFormat('bytes');
       expect(indexPattern.toSpec().fieldFormats).toEqual({});
+    });
+  });
+
+  describe('getFormatterForField', () => {
+    test('should return the default one for empty objects', () => {
+      indexPattern.setFieldFormat('scriptedFieldWithEmptyFormatter', {});
+      expect(
+        indexPattern.getFormatterForField({
+          name: 'scriptedFieldWithEmptyFormatter',
+          type: 'number',
+          esTypes: ['long'],
+        })
+      ).toEqual(
+        expect.objectContaining({
+          convert: expect.any(Function),
+          getConverterFor: expect.any(Function),
+        })
+      );
     });
   });
 

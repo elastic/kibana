@@ -32,6 +32,7 @@ import {
   AggTypesDependencies,
 } from '../../../common/search/aggs';
 import { AggsSetup, AggsStart } from './types';
+import { IndexPatternsContract } from '../../index_patterns';
 
 /**
  * Aggs needs synchronous access to specific uiSettings. Since settings can change
@@ -68,6 +69,7 @@ export interface AggsSetupDependencies {
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
   uiSettings: IUiSettingsClient;
+  indexPatterns: IndexPatternsContract;
 }
 
 /**
@@ -94,9 +96,18 @@ export class AggsService {
     return this.aggsCommonService.setup({ registerFunction });
   }
 
-  public start({ fieldFormats, uiSettings }: AggsStartDependencies): AggsStart {
-    const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
+  public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
+    const isDefaultTimezone = () => uiSettings.isDefault('dateFormat:tz');
+
+    const {
+      calculateAutoTimeExpression,
+      getDateMetaByDatatableColumn,
+      datatableUtilities,
+      types,
+    } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
+      getIndexPattern: indexPatterns.get,
+      isDefaultTimezone,
     });
 
     const aggTypesDependencies: AggTypesDependencies = {
@@ -106,7 +117,7 @@ export class AggsService {
         deserialize: fieldFormats.deserialize,
         getDefaultInstance: fieldFormats.getDefaultInstance,
       }),
-      isDefaultTimezone: () => uiSettings.isDefault('dateFormat:tz'),
+      isDefaultTimezone,
     };
 
     // initialize each agg type and store in memory
@@ -137,7 +148,9 @@ export class AggsService {
 
     return {
       calculateAutoTimeExpression,
-      createAggConfigs: (indexPattern, configStates = [], schemas) => {
+      getDateMetaByDatatableColumn,
+      datatableUtilities,
+      createAggConfigs: (indexPattern, configStates = []) => {
         return new AggConfigs(indexPattern, configStates, { typesRegistry });
       },
       types: typesRegistry,

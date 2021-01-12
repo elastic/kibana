@@ -53,7 +53,7 @@ to authenticate to a <<api, Kibana API>>.
 [source,js]
 POST /_security/api_key
 {
-  "name": "kibana_api_key",
+  "name": "kibana_api_key"
 }
 
 This creates an API key with the

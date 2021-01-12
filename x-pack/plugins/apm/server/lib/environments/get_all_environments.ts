@@ -24,7 +24,8 @@ export async function getAllEnvironments({
   searchAggregatedTransactions: boolean;
   includeMissing?: boolean;
 }) {
-  const { apmEventClient } = setup;
+  const { apmEventClient, config } = setup;
+  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
   // omit filter for service.name if "All" option is selected
   const serviceNameFilter = serviceName
@@ -55,7 +56,7 @@ export async function getAllEnvironments({
         environments: {
           terms: {
             field: SERVICE_ENVIRONMENT,
-            size: 100,
+            size: maxServiceEnvironments,
             ...(!serviceName ? { min_doc_count: 0 } : {}),
             missing: includeMissing ? ENVIRONMENT_NOT_DEFINED.value : undefined,
           },

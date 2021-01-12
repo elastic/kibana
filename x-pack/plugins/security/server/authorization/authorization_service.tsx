@@ -16,10 +16,10 @@ import type { Capabilities as UICapabilities } from '../../../../../src/core/typ
 import {
   LoggerFactory,
   KibanaRequest,
-  ILegacyClusterClient,
   Logger,
   HttpServiceSetup,
   CapabilitiesSetup,
+  IClusterClient,
 } from '../../../../../src/core/server';
 
 import {
@@ -63,7 +63,7 @@ interface AuthorizationServiceSetupParams {
   buildNumber: number;
   http: HttpServiceSetup;
   capabilities: CapabilitiesSetup;
-  clusterClient: ILegacyClusterClient;
+  getClusterClient: () => Promise<IClusterClient>;
   license: SecurityLicense;
   loggers: LoggerFactory;
   features: FeaturesPluginSetup;
@@ -74,7 +74,7 @@ interface AuthorizationServiceSetupParams {
 
 interface AuthorizationServiceStartParams {
   features: FeaturesPluginStart;
-  clusterClient: ILegacyClusterClient;
+  clusterClient: IClusterClient;
   online$: Observable<OnlineStatusRetryScheduler>;
 }
 
@@ -100,7 +100,7 @@ export class AuthorizationService {
     capabilities,
     packageVersion,
     buildNumber,
-    clusterClient,
+    getClusterClient,
     license,
     loggers,
     features,
@@ -117,7 +117,7 @@ export class AuthorizationService {
 
     const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
       actions,
-      clusterClient,
+      getClusterClient,
       this.applicationName
     );
 
@@ -168,7 +168,7 @@ export class AuthorizationService {
     http.registerOnPreResponse((request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
         const basePath = http.basePath.get(request);
-        const next = `${basePath}${request.url.path}`;
+        const next = `${basePath}${request.url.pathname}${request.url.search}`;
         const regularBundlePath = `${basePath}/${buildNumber}/bundles`;
 
         const logoutUrl = http.basePath.prepend(

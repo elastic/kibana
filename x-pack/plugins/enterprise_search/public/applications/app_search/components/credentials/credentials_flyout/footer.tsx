@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { CredentialsLogic } from '../credentials_logic';
 
 export const CredentialsFlyoutFooter: React.FC = () => {
-  const { hideCredentialsForm } = useActions(CredentialsLogic);
+  const { hideCredentialsForm, onApiTokenChange } = useActions(CredentialsLogic);
   const { activeApiTokenExists } = useValues(CredentialsLogic);
 
   return (
@@ -33,7 +33,7 @@ export const CredentialsFlyoutFooter: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            onClick={() => window.alert('submit')}
+            onClick={onApiTokenChange}
             fill={true}
             color="secondary"
             iconType="check"

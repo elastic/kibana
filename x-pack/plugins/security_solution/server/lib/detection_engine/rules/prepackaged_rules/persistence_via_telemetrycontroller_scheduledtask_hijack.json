@@ -11,7 +11,7 @@
   "language": "kuery",
   "license": "Elastic License",
   "name": "Persistence via TelemetryController Scheduled Task Hijack",
-  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:(CompatTelRunner.exe or compattelrunner.exe) and not process.name:(conhost.exe or DeviceCensus.exe or devicecensus.exe or CompatTelRunner.exe or compattelrunner.exe or DismHost.exe or dismhost.exe or rundll32.exe)",
+  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:(CompatTelRunner.exe or compattelrunner.exe) and process.args:-cv* and not process.name:(conhost.exe or DeviceCensus.exe or devicecensus.exe or CompatTelRunner.exe or compattelrunner.exe or DismHost.exe or dismhost.exe or rundll32.exe or powershell.exe)",
   "references": [
     "https://www.trustedsec.com/blog/abusing-windows-telemetry-for-persistence/?utm_content=131234033&utm_medium=social&utm_source=twitter&hss_channel=tw-403811306"
   ],
@@ -20,7 +20,10 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
   ],
   "threat": [
     {
@@ -40,5 +43,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

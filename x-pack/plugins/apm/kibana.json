@@ -8,7 +8,8 @@
     "data",
     "licensing",
     "triggersActionsUi",
-    "embeddable"
+    "embeddable",
+    "infra"
   ],
   "optionalPlugins": [
     "cloud",
@@ -19,7 +20,8 @@
     "observability",
     "security",
     "ml",
-    "home"
+    "home",
+    "maps"
   ],
   "server": true,
   "ui": true,

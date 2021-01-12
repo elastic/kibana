@@ -59,18 +59,26 @@ exports[`Intro component renders correctly 1`] = `
                     size="s"
                   >
                     <EuiButtonDisplay
+                      baseClassName="euiButton"
                       data-test-subj="savedObjectEditViewInApp"
                       element="a"
                       href="/some-url"
                       iconType="eye"
+                      isDisabled={false}
                       rel="noreferrer"
                       size="s"
                     >
                       <a
                         className="euiButton euiButton--primary euiButton--small"
                         data-test-subj="savedObjectEditViewInApp"
+                        disabled={false}
                         href="/some-url"
                         rel="noreferrer"
+                        style={
+                          Object {
+                            "minWidth": undefined,
+                          }
+                        }
                       >
                         <EuiButtonContent
                           className="euiButton__content"
@@ -132,10 +140,13 @@ exports[`Intro component renders correctly 1`] = `
                     size="s"
                   >
                     <EuiButtonDisplay
+                      baseClassName="euiButton"
                       color="danger"
                       data-test-subj="savedObjectEditDelete"
+                      disabled={false}
                       element="button"
                       iconType="trash"
+                      isDisabled={false}
                       onClick={[Function]}
                       size="s"
                       type="button"
@@ -143,7 +154,13 @@ exports[`Intro component renders correctly 1`] = `
                       <button
                         className="euiButton euiButton--danger euiButton--small"
                         data-test-subj="savedObjectEditDelete"
+                        disabled={false}
                         onClick={[Function]}
+                        style={
+                          Object {
+                            "minWidth": undefined,
+                          }
+                        }
                         type="button"
                       >
                         <EuiButtonContent

@@ -27,9 +27,10 @@ import {
   importFileBodySchema,
   importFileQuerySchema,
 } from './schemas/file_data_visualizer_schema';
+import type { MlClient } from '../lib/ml_client';
 
-function analyzeFiles(client: IScopedClusterClient, data: InputData, overrides: InputOverrides) {
-  const { analyzeFile } = fileDataVisualizerProvider(client);
+function analyzeFiles(mlClient: MlClient, data: InputData, overrides: InputOverrides) {
+  const { analyzeFile } = fileDataVisualizerProvider(mlClient);
   return analyzeFile(data, overrides);
 }
 
@@ -49,7 +50,7 @@ function importData(
 /**
  * Routes for the file data visualizer.
  */
-export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitialization) {
+export function fileDataVisualizerRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup FileDataVisualizer
    *
@@ -74,9 +75,9 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canFindFileStructure'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const result = await analyzeFiles(client, request.body, request.query);
+        const result = await analyzeFiles(mlClient, request.body, request.query);
         return response.ok({ body: result });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -109,7 +110,7 @@ export function fileDataVisualizerRoutes({ router, mlLicense }: RouteInitializat
         tags: ['access:ml:canFindFileStructure'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { id } = request.query;
         const { index, data, settings, mappings, ingestPipeline } = request.body;

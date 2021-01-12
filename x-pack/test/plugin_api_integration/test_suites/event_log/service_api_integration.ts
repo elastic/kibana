@@ -79,18 +79,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(providerActions.body.actions).to.be.eql(['action1', 'action2']);
     });
 
-    it('should allow to get event logger event log service', async () => {
-      const initResult = await isProviderActionRegistered('provider2', 'action1');
-
-      if (!initResult.body.isProviderActionRegistered) {
-        await registerProviderActions('provider2', ['action1', 'action2']);
-      }
-      const eventLogger = await getEventLogger('provider2');
-      expect(eventLogger.body.eventLogger.initialProperties).to.be.eql({
-        event: { provider: 'provider2' },
-      });
-    });
-
     it('should allow write an event to index document if indexing entries is enabled', async () => {
       const initResult = await isProviderActionRegistered('provider4', 'action1');
 
@@ -135,14 +123,6 @@ export default function ({ getService }: FtrProviderContext) {
     return await supertest
       .get(`/api/log_event_fixture/${provider}/getProviderActions`)
       .set('kbn-xsrf', 'xxx')
-      .expect(200);
-  }
-
-  async function getEventLogger(event: string) {
-    log.debug(`isProviderActionRegistered for event ${event}`);
-    return await supertest
-      .get(`/api/log_event_fixture/getEventLogger/${event}`)
-      .set('kbn-xsrf', 'foo')
       .expect(200);
   }
 

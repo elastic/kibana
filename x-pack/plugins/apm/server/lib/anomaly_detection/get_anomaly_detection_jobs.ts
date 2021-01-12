@@ -5,7 +5,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { Setup } from '../helpers/setup_request';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-searchContext?: ExecutionContextSearch;
+searchContext?: SerializableState;
 ```

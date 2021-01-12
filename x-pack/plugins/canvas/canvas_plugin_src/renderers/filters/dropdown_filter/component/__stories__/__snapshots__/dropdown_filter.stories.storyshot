@@ -6,6 +6,7 @@ exports[`Storyshots renderers/DropdownFilter default 1`] = `
 >
   <select
     className="canvasDropdownFilter__select"
+    data-test-subj="canvasDropdownFilter__select"
     onChange={[Function]}
   >
     <option
@@ -28,6 +29,7 @@ exports[`Storyshots renderers/DropdownFilter with choices 1`] = `
 >
   <select
     className="canvasDropdownFilter__select"
+    data-test-subj="canvasDropdownFilter__select"
     onChange={[Function]}
   >
     <option
@@ -68,6 +70,7 @@ exports[`Storyshots renderers/DropdownFilter with choices and new value 1`] = `
 >
   <select
     className="canvasDropdownFilter__select"
+    data-test-subj="canvasDropdownFilter__select"
     onChange={[Function]}
     value="selectedValue"
   >
@@ -109,6 +112,7 @@ exports[`Storyshots renderers/DropdownFilter with choices and value 1`] = `
 >
   <select
     className="canvasDropdownFilter__select"
+    data-test-subj="canvasDropdownFilter__select"
     onChange={[Function]}
     value="Item Two"
   >
@@ -150,6 +154,7 @@ exports[`Storyshots renderers/DropdownFilter with new value 1`] = `
 >
   <select
     className="canvasDropdownFilter__select"
+    data-test-subj="canvasDropdownFilter__select"
     onChange={[Function]}
     value="selectedValue"
   >

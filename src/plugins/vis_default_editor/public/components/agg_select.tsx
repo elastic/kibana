@@ -77,15 +77,15 @@ function DefaultEditorAggSelect({
   }
 
   const helpLink = value && aggHelpLink && (
-    <EuiLink href={aggHelpLink} target="_blank" rel="noopener">
-      <EuiText size="xs">
+    <EuiText size="xs">
+      <EuiLink href={aggHelpLink} target="_blank" rel="noopener">
         <FormattedMessage
           id="visDefaultEditor.aggSelect.helpLinkLabel"
           defaultMessage="{aggTitle} help"
           values={{ aggTitle: value ? value.title : '' }}
         />
-      </EuiText>
-    </EuiLink>
+      </EuiLink>
+    </EuiText>
   );
 
   const errors = aggError ? [aggError] : [];
@@ -141,7 +141,7 @@ function DefaultEditorAggSelect({
       error={errors}
       isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
-      compressed
+      display="rowCompressed"
     >
       <EuiComboBox
         placeholder={i18n.translate('visDefaultEditor.aggSelect.selectAggPlaceholder', {

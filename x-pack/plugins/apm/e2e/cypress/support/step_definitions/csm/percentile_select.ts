@@ -6,17 +6,16 @@
 
 import { When, Then } from 'cypress-cucumber-preprocessor/steps';
 import { verifyClientMetrics } from './client_metrics_helper';
-import { getDataTestSubj } from './utils';
+import { getDataTestSubj, waitForLoadingToFinish } from './utils';
 
 When('the user changes the selected percentile', () => {
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
+  waitForLoadingToFinish();
 
   getDataTestSubj('uxPercentileSelect').select('95');
 });
 
 Then(`it displays client metric related to that percentile`, () => {
-  const metrics = ['14 ms', '131 ms', '55'];
+  const metrics = ['165 ms', '14 ms', '151 ms', '55'];
 
   verifyClientMetrics(metrics, false);
 

@@ -270,7 +270,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
             paddingSize="l"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             >
               <EuiPageContentBody>
                 <div
@@ -454,6 +454,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     <button
                                       aria-label="Closes this modal window"
                                       className="euiButtonIcon euiButtonIcon--text euiModal__closeIcon"
+                                      disabled={false}
                                       onClick={[Function]}
                                       type="button"
                                     >
@@ -551,6 +552,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                         <button
                                           className="euiButtonEmpty euiButtonEmpty--primary"
                                           data-test-subj="confirmModalCancelButton"
+                                          disabled={false}
                                           onClick={[Function]}
                                           type="button"
                                         >
@@ -589,17 +591,26 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                         onClick={[Function]}
                                       >
                                         <EuiButtonDisplay
+                                          baseClassName="euiButton"
                                           color="primary"
                                           data-test-subj="confirmModalConfirmButton"
+                                          disabled={false}
                                           element="button"
                                           fill={true}
+                                          isDisabled={false}
                                           onClick={[Function]}
                                           type="button"
                                         >
                                           <button
                                             className="euiButton euiButton--primary euiButton--fill"
                                             data-test-subj="confirmModalConfirmButton"
+                                            disabled={false}
                                             onClick={[Function]}
+                                            style={
+                                              Object {
+                                                "minWidth": undefined,
+                                              }
+                                            }
                                             type="button"
                                           >
                                             <EuiButtonContent
@@ -862,9 +873,12 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                 onClick={[Function]}
                               >
                                 <EuiButtonDisplay
+                                  baseClassName="euiButton"
                                   data-test-subj="uploadLicenseButton"
+                                  disabled={false}
                                   element="button"
                                   fill={true}
+                                  isDisabled={false}
                                   isLoading={false}
                                   onClick={[Function]}
                                   type="button"
@@ -872,7 +886,13 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                   <button
                                     className="euiButton euiButton--primary euiButton--fill"
                                     data-test-subj="uploadLicenseButton"
+                                    disabled={false}
                                     onClick={[Function]}
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                     type="button"
                                   >
                                     <EuiButtonContent
@@ -1282,7 +1302,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
             paddingSize="l"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             >
               <EuiPageContentBody>
                 <div
@@ -1361,12 +1381,16 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
+                          aria-live="assertive"
                           className="euiForm__errors"
                           color="danger"
+                          role="alert"
                           title="Please address the highlighted errors."
                         >
                           <div
+                            aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
+                            role="alert"
                           >
                             <div
                               className="euiCallOutHeader"
@@ -1574,9 +1598,12 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                 onClick={[Function]}
                               >
                                 <EuiButtonDisplay
+                                  baseClassName="euiButton"
                                   data-test-subj="uploadLicenseButton"
+                                  disabled={false}
                                   element="button"
                                   fill={true}
+                                  isDisabled={false}
                                   isLoading={false}
                                   onClick={[Function]}
                                   type="button"
@@ -1584,7 +1611,13 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                                   <button
                                     className="euiButton euiButton--primary euiButton--fill"
                                     data-test-subj="uploadLicenseButton"
+                                    disabled={false}
                                     onClick={[Function]}
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                     type="button"
                                   >
                                     <EuiButtonContent
@@ -1994,7 +2027,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
             paddingSize="l"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             >
               <EuiPageContentBody>
                 <div
@@ -2073,12 +2106,16 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
+                          aria-live="assertive"
                           className="euiForm__errors"
                           color="danger"
+                          role="alert"
                           title="Please address the highlighted errors."
                         >
                           <div
+                            aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
+                            role="alert"
                           >
                             <div
                               className="euiCallOutHeader"
@@ -2286,9 +2323,12 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                 onClick={[Function]}
                               >
                                 <EuiButtonDisplay
+                                  baseClassName="euiButton"
                                   data-test-subj="uploadLicenseButton"
+                                  disabled={false}
                                   element="button"
                                   fill={true}
+                                  isDisabled={false}
                                   isLoading={false}
                                   onClick={[Function]}
                                   type="button"
@@ -2296,7 +2336,13 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                                   <button
                                     className="euiButton euiButton--primary euiButton--fill"
                                     data-test-subj="uploadLicenseButton"
+                                    disabled={false}
                                     onClick={[Function]}
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                     type="button"
                                   >
                                     <EuiButtonContent
@@ -2706,7 +2752,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
             paddingSize="l"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             >
               <EuiPageContentBody>
                 <div
@@ -2785,12 +2831,16 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
+                          aria-live="assertive"
                           className="euiForm__errors"
                           color="danger"
+                          role="alert"
                           title="Please address the highlighted errors."
                         >
                           <div
+                            aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
+                            role="alert"
                           >
                             <div
                               className="euiCallOutHeader"
@@ -2998,9 +3048,12 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                 onClick={[Function]}
                               >
                                 <EuiButtonDisplay
+                                  baseClassName="euiButton"
                                   data-test-subj="uploadLicenseButton"
+                                  disabled={false}
                                   element="button"
                                   fill={true}
+                                  isDisabled={false}
                                   isLoading={false}
                                   onClick={[Function]}
                                   type="button"
@@ -3008,7 +3061,13 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                                   <button
                                     className="euiButton euiButton--primary euiButton--fill"
                                     data-test-subj="uploadLicenseButton"
+                                    disabled={false}
                                     onClick={[Function]}
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                     type="button"
                                   >
                                     <EuiButtonContent
@@ -3418,7 +3477,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
             paddingSize="l"
           >
             <div
-              className="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
             >
               <EuiPageContentBody>
                 <div
@@ -3497,12 +3556,16 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                         token="euiForm.addressFormErrors"
                       >
                         <EuiCallOut
+                          aria-live="assertive"
                           className="euiForm__errors"
                           color="danger"
+                          role="alert"
                           title="Please address the highlighted errors."
                         >
                           <div
+                            aria-live="assertive"
                             className="euiCallOut euiCallOut--danger euiForm__errors"
+                            role="alert"
                           >
                             <div
                               className="euiCallOutHeader"
@@ -3710,9 +3773,12 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                 onClick={[Function]}
                               >
                                 <EuiButtonDisplay
+                                  baseClassName="euiButton"
                                   data-test-subj="uploadLicenseButton"
+                                  disabled={false}
                                   element="button"
                                   fill={true}
+                                  isDisabled={false}
                                   isLoading={false}
                                   onClick={[Function]}
                                   type="button"
@@ -3720,7 +3786,13 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                                   <button
                                     className="euiButton euiButton--primary euiButton--fill"
                                     data-test-subj="uploadLicenseButton"
+                                    disabled={false}
                                     onClick={[Function]}
+                                    style={
+                                      Object {
+                                        "minWidth": undefined,
+                                      }
+                                    }
                                     type="button"
                                   >
                                     <EuiButtonContent

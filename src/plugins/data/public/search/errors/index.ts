@@ -17,5 +17,9 @@
  * under the License.
  */
 
+export * from './es_error';
 export * from './painless_error';
 export * from './timeout_error';
+export * from './utils';
+export * from './types';
+export * from './http_error';

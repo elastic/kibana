@@ -14,9 +14,7 @@ import { pageObjects } from './page_objects';
 // that returns an object with the projects config values
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../security_solution_endpoint/config.ts')
-  );
+  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(resolve(__dirname, 'plugins'));
@@ -42,13 +40,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
         `--plugin-path=${resolve(
           KIBANA_ROOT,
           'test/plugin_functional/plugins/core_provider_plugin'
         )}`,
-        // Required to load new platform plugins via `--plugin-path` flag.
-        '--env.name=development',
+        ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
       ],
     },
     uiSettings: xpackFunctionalConfig.get('uiSettings'),
@@ -59,7 +55,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     apps: {
       ...xpackFunctionalConfig.get('apps'),
       resolverTest: {
-        pathname: '/app/resolver_test',
+        pathname: '/app/resolverTest',
       },
     },
 

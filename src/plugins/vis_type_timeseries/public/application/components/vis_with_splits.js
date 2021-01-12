@@ -21,7 +21,7 @@ import React from 'react';
 import { getDisplayName } from './lib/get_display_name';
 import { labelDateFormatter } from './lib/label_date_formatter';
 import { last, findIndex, first } from 'lodash';
-import { calculateLabel } from '../../../../../plugins/vis_type_timeseries/common/calculate_label';
+import { calculateLabel } from '../../../common/calculate_label';
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
@@ -46,11 +46,13 @@ export function visWithSplits(WrappedComponent) {
         };
       }
 
+      const labelHasKeyPlaceholder = /{{\s*key\s*}}/.test(seriesModel.label);
+
       acc[splitId].series.push({
         ...series,
         id: seriesId,
         color: series.color || seriesModel.color,
-        label: seriesModel.label || label,
+        label: seriesModel.label && !labelHasKeyPlaceholder ? seriesModel.label : label,
       });
       return acc;
     }, {});

@@ -127,22 +127,19 @@ export class BookEmbeddableFactoryDefinition
 
   private async unwrapMethod(savedObjectId: string): Promise<BookSavedObjectAttributes> {
     const { savedObjectsClient } = await this.getStartServices();
-    const savedObject: SimpleSavedObject<BookSavedObjectAttributes> = await savedObjectsClient.get<
-      BookSavedObjectAttributes
-    >(this.type, savedObjectId);
+    const savedObject: SimpleSavedObject<BookSavedObjectAttributes> = await savedObjectsClient.get<BookSavedObjectAttributes>(
+      this.type,
+      savedObjectId
+    );
     return { ...savedObject.attributes };
   }
 
-  private async saveMethod(
-    type: string,
-    attributes: BookSavedObjectAttributes,
-    savedObjectId?: string
-  ) {
+  private async saveMethod(attributes: BookSavedObjectAttributes, savedObjectId?: string) {
     const { savedObjectsClient } = await this.getStartServices();
     if (savedObjectId) {
-      return savedObjectsClient.update(type, savedObjectId, attributes);
+      return savedObjectsClient.update(this.type, savedObjectId, attributes);
     }
-    return savedObjectsClient.create(type, attributes);
+    return savedObjectsClient.create(this.type, attributes);
   }
 
   private async checkForDuplicateTitleMethod(props: OnSaveProps): Promise<true> {
@@ -167,9 +164,9 @@ export class BookEmbeddableFactoryDefinition
 
   private async getAttributeService() {
     if (!this.attributeService) {
-      this.attributeService = (await this.getStartServices()).getAttributeService<
-        BookSavedObjectAttributes
-      >(this.type, {
+      this.attributeService = (
+        await this.getStartServices()
+      ).getAttributeService<BookSavedObjectAttributes>(this.type, {
         saveMethod: this.saveMethod.bind(this),
         unwrapMethod: this.unwrapMethod.bind(this),
         checkForDuplicateTitle: this.checkForDuplicateTitleMethod.bind(this),

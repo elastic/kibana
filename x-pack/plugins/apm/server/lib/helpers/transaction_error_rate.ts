@@ -9,7 +9,7 @@ import { EventOutcome } from '../../../common/event_outcome';
 import {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../typings/elasticsearch/aggregations';
+} from '../../../../../typings/elasticsearch/aggregations';
 import { getTransactionDurationFieldForAggregatedTransactions } from './aggregated_transactions';
 
 export function getOutcomeAggregation({
@@ -18,8 +18,13 @@ export function getOutcomeAggregation({
   searchAggregatedTransactions: boolean;
 }) {
   return {
-    terms: { field: EVENT_OUTCOME },
+    terms: {
+      field: EVENT_OUTCOME,
+      include: [EventOutcome.failure, EventOutcome.success],
+    },
     aggs: {
+      // simply using the doc count to get the number of requests is not possible for transaction metrics (histograms)
+      // to work around this we get the number of transactions by counting the number of latency values
       count: {
         value_count: {
           field: getTransactionDurationFieldForAggregatedTransactions(

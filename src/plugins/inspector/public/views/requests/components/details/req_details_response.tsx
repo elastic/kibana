@@ -19,9 +19,9 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiCodeBlock } from '@elastic/eui';
 import { Request } from '../../../../../common/adapters/request/types';
 import { RequestDetailsProps } from '../types';
+import { RequestCodeViewer } from './req_code_viewer';
 
 export class RequestDetailsResponse extends Component<RequestDetailsProps> {
   static propTypes = {
@@ -40,15 +40,6 @@ export class RequestDetailsResponse extends Component<RequestDetailsProps> {
       return null;
     }
 
-    return (
-      <EuiCodeBlock
-        language="json"
-        paddingSize="s"
-        isCopyable
-        data-test-subj="inspectorResponseBody"
-      >
-        {JSON.stringify(responseJSON, null, 2)}
-      </EuiCodeBlock>
-    );
+    return <RequestCodeViewer json={JSON.stringify(responseJSON, null, 2)} />;
   }
 }

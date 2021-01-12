@@ -130,7 +130,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       const coverageJson = await driver
         .executeScript('return window.__coverage__')
         .catch(() => undefined)
-        .then((coverage) => coverage && JSON.stringify(coverage));
+        .then((coverage) => (coverage ? JSON.stringify(coverage) : undefined));
       if (coverageJson) {
         writeCoverage(coverageJson);
       }

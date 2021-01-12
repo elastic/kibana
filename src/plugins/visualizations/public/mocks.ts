@@ -18,7 +18,8 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
-import { VisualizationsSetup, VisualizationsStart } from './';
+import { Schema, VisualizationsSetup, VisualizationsStart } from './';
+import { Schemas } from './vis_types';
 import { VisualizationsPlugin } from './plugin';
 import { coreMock, applicationServiceMock } from '../../../core/public/mocks';
 import { embeddablePluginMock } from '../../../plugins/embeddable/public/mocks';
@@ -41,6 +42,8 @@ const createStartContract = (): VisualizationsStart => ({
   get: jest.fn(),
   all: jest.fn(),
   getAliases: jest.fn(),
+  getByGroup: jest.fn(),
+  unRegisterAlias: jest.fn(),
   savedVisualizationsLoader: {
     get: jest.fn(),
   } as any,
@@ -83,6 +86,9 @@ const createInstance = async () => {
     doStart,
   };
 };
+
+export const createMockedVisEditorSchemas = (schemas: Array<Partial<Schema>>) =>
+  new Schemas(schemas);
 
 export const visualizationsPluginMock = {
   createSetupContract,

@@ -7,7 +7,7 @@
 import classNames from 'classnames';
 import React, { FunctionComponent, memo, useCallback } from 'react';
 import {
-  EuiButtonToggle,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -127,17 +127,14 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
       const icon = isMovingThisProcessor ? 'cross' : 'sortable';
       const disabled = isEditorNotInIdleMode && !isMovingThisProcessor;
       const moveButton = (
-        <EuiButtonToggle
-          isEmpty={!isMovingThisProcessor}
-          fill={isMovingThisProcessor}
-          isIconOnly
+        <EuiButtonIcon
+          color={isMovingThisProcessor ? 'primary' : 'subdued'}
           iconType={icon}
           data-test-subj={dataTestSubj}
           size="s"
           isDisabled={disabled}
-          label={label}
           aria-label={label}
-          onChange={() => {
+          onClick={() => {
             if (isMovingThisProcessor) {
               onCancelMove();
             } else {

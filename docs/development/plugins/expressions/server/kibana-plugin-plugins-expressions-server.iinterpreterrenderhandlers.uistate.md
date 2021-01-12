@@ -4,8 +4,10 @@
 
 ## IInterpreterRenderHandlers.uiState property
 
+This uiState interface is actually `PersistedState` from the visualizations plugin, but expressions cannot know about vis or it creates a mess of circular dependencies. Downstream consumers of the uiState handler will need to cast for now.
+
 <b>Signature:</b>
 
 ```typescript
-uiState?: PersistedState;
+uiState?: unknown;
 ```

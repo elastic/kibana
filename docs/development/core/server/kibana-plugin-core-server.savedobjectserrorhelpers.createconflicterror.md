@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-static createConflictError(type: string, id: string): DecoratedError;
+static createConflictError(type: string, id: string, reason?: string): DecoratedError;
 ```
 
 ## Parameters
@@ -16,6 +16,7 @@ static createConflictError(type: string, id: string): DecoratedError;
 |  --- | --- | --- |
 |  type | <code>string</code> |  |
 |  id | <code>string</code> |  |
+|  reason | <code>string</code> |  |
 
 <b>Returns:</b>
 

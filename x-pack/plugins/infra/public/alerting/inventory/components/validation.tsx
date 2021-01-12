@@ -6,14 +6,14 @@
 
 import { i18n } from '@kbn/i18n';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { MetricExpressionParams } from '../../../../server/lib/alerting/metric_threshold/types';
+import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ValidationResult } from '../../../../../triggers_actions_ui/public/types';
 
 export function validateMetricThreshold({
   criteria,
 }: {
-  criteria: MetricExpressionParams[];
+  criteria: InventoryMetricConditions[];
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {
@@ -81,11 +81,17 @@ export function validateMetricThreshold({
         })
       );
     }
-
-    if (!c.metric && c.aggType !== 'count') {
+    if (!c.metric) {
       errors[id].metric.push(
         i18n.translate('xpack.infra.metrics.alertFlyout.error.metricRequired', {
           defaultMessage: 'Metric is required.',
+        })
+      );
+    }
+    if (c.metric === 'custom' && !c.customMetric?.field) {
+      errors[id].metric.push(
+        i18n.translate('xpack.infra.metrics.alertFlyout.error.customMetricFieldRequired', {
+          defaultMessage: 'Field is required.',
         })
       );
     }

@@ -193,6 +193,15 @@ export function populateValidationMessages(
     basicValidations.frequency.valid = false;
     basicValidations.frequency.message = invalidTimeIntervalMessage(datafeedConfig.frequency);
   }
+  if (validationResults.contains('missing_summary_count_field_name')) {
+    basicValidations.summaryCountField.valid = false;
+    basicValidations.summaryCountField.message = i18n.translate(
+      'xpack.ml.newJob.wizard.validateJob.summaryCountFieldMissing',
+      {
+        defaultMessage: 'Required field as the datafeed uses aggregations.',
+      }
+    );
+  }
 }
 
 export function checkForExistingJobAndGroupIds(

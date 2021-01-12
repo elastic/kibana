@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   RequestHandler,
   RouteConfig,
@@ -14,7 +14,7 @@ import {
   RequestHandlerContext,
 } from '../../../../../../src/core/server';
 import { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
-import { AuthenticationProvider } from '../../../common/types';
+import type { AuthenticationProvider } from '../../../common/model';
 import { ConfigType } from '../../config';
 import { Session } from '../../session_management';
 import { defineAccessAgreementRoutes } from './access_agreement';

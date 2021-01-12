@@ -5,7 +5,6 @@
  */
 
 import expect from '@kbn/expect';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import archives_metadata from '../../../common/archives_metadata';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 

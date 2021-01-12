@@ -19,7 +19,6 @@ import { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
-import EqlSearchIcon from './eql_search_icon.svg';
 
 interface SelectRuleTypeProps {
   describedByIds: string[];
@@ -156,7 +155,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               title={i18n.EQL_TYPE_TITLE}
               titleSize="xs"
               description={i18n.EQL_TYPE_DESCRIPTION}
-              icon={<EuiIcon size="l" type={EqlSearchIcon} />}
+              icon={<EuiIcon size="l" type="eql" />}
               selectable={eqlSelectableConfig}
               layout="horizontal"
               textAlign="left"

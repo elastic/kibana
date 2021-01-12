@@ -86,6 +86,9 @@ export function metadataQueryStrategyV2(): MetadataQueryStrategy {
         },
       },
     ],
+    extraBodyProperties: {
+      track_total_hits: true,
+    },
     queryResponseToHostListResult: (
       searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
     ): HostListQueryResult => {

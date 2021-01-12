@@ -10,18 +10,21 @@ import { pick } from 'lodash';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import url from 'url';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
+import { pickKeys } from '../../../../../common/utils/pick_keys';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APMQueryParams, fromQuery, toQuery } from '../url_helpers';
 
 interface Props extends EuiLinkAnchorProps {
   path?: string;
   query?: APMQueryParams;
+  mergeQuery?: (query: APMQueryParams) => APMQueryParams;
   children?: React.ReactNode;
 }
 
 export type APMLinkExtendProps = Omit<Props, 'path'>;
 
-export const PERSISTENT_APM_PARAMS = [
+export const PERSISTENT_APM_PARAMS: Array<keyof APMQueryParams> = [
   'kuery',
   'rangeFrom',
   'rangeTo',
@@ -29,6 +32,21 @@ export const PERSISTENT_APM_PARAMS = [
   'refreshInterval',
   'environment',
 ];
+
+/**
+ * Hook to get a link for a path with persisted filters
+ */
+export function useAPMHref(
+  path: string,
+  persistentFilters: Array<keyof APMQueryParams> = []
+) {
+  const { urlParams } = useUrlParams();
+  const { basePath } = useApmPluginContext().core.http;
+  const { search } = useLocation();
+  const query = pickKeys(urlParams as APMQueryParams, ...persistentFilters);
+
+  return getAPMHref({ basePath, path, query, search });
+}
 
 /**
  * Get an APM link for a path.
@@ -57,11 +75,14 @@ export function getAPMHref({
   });
 }
 
-export function APMLink({ path = '', query, ...rest }: Props) {
+export function APMLink({ path = '', query, mergeQuery, ...rest }: Props) {
   const { core } = useApmPluginContext();
   const { search } = useLocation();
   const { basePath } = core.http;
-  const href = getAPMHref({ basePath, path, search, query });
+
+  const mergedQuery = mergeQuery ? mergeQuery(query ?? {}) : query;
+
+  const href = getAPMHref({ basePath, path, search, query: mergedQuery });
 
   return <EuiLink {...rest} href={href} />;
 }

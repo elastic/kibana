@@ -1,5 +1,5 @@
 Kibana source code with Kibana X-Pack source code
-Copyright 2012-2020 Elasticsearch B.V.
+Copyright 2012-2021 Elasticsearch B.V.
 
 ---
 Pretty handling of logarithmic axes.
@@ -25,6 +25,9 @@ For details,  see https://github.com/flot/flot/pull/1328
 This module was heavily inspired by the externals plugin that ships with webpack@97d58d31
 MIT License http://www.opensource.org/licenses/mit-license.php
 Author Tobias Koppers @sokra
+
+---
+This product has relied on ASTExplorer that is licensed under MIT.
 
 ---
 This product includes code that is based on Ace editor, which was available

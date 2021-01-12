@@ -7,7 +7,7 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import '../../../../common/mock/formatted_relative';
@@ -104,7 +104,7 @@ describe('NotePreviews', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find(`[data-test-subj="updated-by"]`).at(2).text()).toEqual('bob');
+    expect(wrapper.find('.euiCommentEvent__headerUsername').at(1).text()).toEqual('bob');
   });
 
   test('it filters-out null savedObjectIds', () => {
@@ -135,7 +135,7 @@ describe('NotePreviews', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find(`[data-test-subj="updated-by"]`).at(2).text()).toEqual('bob');
+    expect(wrapper.find(`.euiCommentEvent__headerUsername`).at(2).text()).toEqual('bob');
   });
 
   test('it filters-out undefined savedObjectIds', () => {
@@ -165,6 +165,6 @@ describe('NotePreviews', () => {
       </ThemeProvider>
     );
 
-    expect(wrapper.find(`[data-test-subj="updated-by"]`).at(2).text()).toEqual('bob');
+    expect(wrapper.find(`.euiCommentEvent__headerUsername`).at(2).text()).toEqual('bob');
   });
 });

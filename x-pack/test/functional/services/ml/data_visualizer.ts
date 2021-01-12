@@ -20,6 +20,10 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
       await testSubjects.existOrFail('mlDataVisualizerCardIndexData');
     },
 
+    async assertDataVisualizerStartTrialCardExists() {
+      await testSubjects.existOrFail('mlDataVisualizerCardStartTrial');
+    },
+
     async assertSelectIndexButtonEnabled(expectedValue: boolean) {
       const isEnabled = await testSubjects.isEnabled('mlDataVisualizerSelectIndexButton');
       expect(isEnabled).to.eql(
@@ -35,6 +39,16 @@ export function MachineLearningDataVisualizerProvider({ getService }: FtrProvide
       expect(isEnabled).to.eql(
         expectedValue,
         `Expected "upload file" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
+    async assertStartTrialButtonEnabled(expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled('mlDataVisualizerStartTrialButton');
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected "start trial" button to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
           isEnabled ? 'enabled' : 'disabled'
         }')`
       );

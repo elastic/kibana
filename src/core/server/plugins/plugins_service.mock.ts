@@ -17,7 +17,7 @@
  * under the License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginsService, PluginsServiceSetup } from './plugins_service';
+import type { PluginsService, PluginsServiceSetup } from './plugins_service';
 
 type PluginsServiceMock = jest.Mocked<PublicMethodsOf<PluginsService>>;
 

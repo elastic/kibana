@@ -7,11 +7,11 @@
 import { When, Then } from 'cypress-cucumber-preprocessor/steps';
 import { DEFAULT_TIMEOUT } from './csm_dashboard';
 import { verifyClientMetrics } from './client_metrics_helper';
+import { waitForLoadingToFinish } from './utils';
 
 When(/^the user filters by "([^"]*)"$/, (filterName) => {
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  waitForLoadingToFinish();
+  cy.get('.euiStat__title-isLoading').should('not.exist');
   cy.get(`#local-filter-${filterName}`).click();
 
   cy.get(`#local-filter-popover-${filterName}`, DEFAULT_TIMEOUT).within(() => {
@@ -51,12 +51,13 @@ When(/^the user filters by "([^"]*)"$/, (filterName) => {
 });
 
 Then(/^it filters the client metrics "([^"]*)"$/, (filterName) => {
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
-  cy.get('.euiStat__title-isLoading').should('not.be.visible');
+  waitForLoadingToFinish();
+  cy.get('.euiStat__title-isLoading').should('not.exist');
 
   const data =
-    filterName === 'os' ? ['5 ms', '64 ms', '8'] : ['4 ms', '55 ms', '28'];
+    filterName === 'os'
+      ? ['82 ms', '5 ms', '77 ms', '8']
+      : ['75 ms', '4 ms', '71 ms', '28'];
 
   verifyClientMetrics(data, true);
 

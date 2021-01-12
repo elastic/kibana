@@ -18,7 +18,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { FC, memo, useState, useEffect, ComponentType } from 'react';
+import React, { FC, memo, useState, useMemo, useEffect, ComponentType } from 'react';
 import styled from 'styled-components';
 
 import { Direction } from '../../../../common/search_strategy';
@@ -228,6 +228,19 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     ));
   const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
 
+  const tableSorting = useMemo(
+    () =>
+      sorting
+        ? {
+            sort: {
+              field: sorting.field,
+              direction: sorting.direction,
+            },
+          }
+        : undefined,
+    [sorting]
+  );
+
   return (
     <InspectButtonContainer show={!loadingInitial}>
       <Panel data-test-subj={`${dataTestSubj}-loading-${loading}`} loading={loading}>
@@ -251,16 +264,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
               columns={columns}
               items={pageOfItems}
               onChange={onChange}
-              sorting={
-                sorting
-                  ? {
-                      sort: {
-                        field: sorting.field,
-                        direction: sorting.direction,
-                      },
-                    }
-                  : undefined
-              }
+              sorting={tableSorting}
             />
             <FooterAction>
               <EuiFlexItem>

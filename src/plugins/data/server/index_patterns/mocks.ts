@@ -19,6 +19,6 @@
 
 export function createIndexPatternsStartMock() {
   return {
-    indexPatternsServiceFactory: jest.fn(),
+    indexPatternsServiceFactory: jest.fn().mockResolvedValue({ get: jest.fn() }),
   };
 }

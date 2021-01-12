@@ -25,7 +25,7 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
 import { useUiSettings } from '../../../../../contexts/kibana/use_ui_settings_context';
 import { kibanaFieldFormat } from '../../../../../formatters/kibana_field_format';
-import { ChartTooltipValue } from '../../../../../components/chart_tooltip/chart_tooltip_service';
+import type { ChartTooltipValue } from '../../../../../components/chart_tooltip/chart_tooltip_service';
 
 export interface MetricDistributionChartData {
   x: number;
@@ -40,11 +40,18 @@ interface Props {
   height: number;
   chartData: MetricDistributionChartData[];
   fieldFormat?: any; // Kibana formatter for field being viewed
+  hideXAxis?: boolean;
 }
 
 const SPEC_ID = 'metric_distribution';
 
-export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, fieldFormat }) => {
+export const MetricDistributionChart: FC<Props> = ({
+  width,
+  height,
+  chartData,
+  fieldFormat,
+  hideXAxis,
+}) => {
   // This value is shown to label the y axis values in the tooltip.
   // Ideally we wouldn't show these values at all in the tooltip,
   // but this is not yet possible with Elastic charts.
@@ -54,7 +61,7 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
 
   const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
   const themeName = IS_DARK_THEME ? darkTheme : lightTheme;
-  const AREA_SERIES_COLOR = themeName.euiColorVis1;
+  const AREA_SERIES_COLOR = themeName.euiColorVis0;
 
   const headerFormatter: TooltipValueFormatter = (tooltipData: ChartTooltipValue) => {
     const xValue = tooltipData.value;
@@ -72,10 +79,31 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
   };
 
   return (
-    <div style={{ width, height }}>
-      <Chart>
+    <div data-test-subj="mlFieldDataMetricDistributionChart">
+      <Chart size={{ width, height }}>
         <Settings
           theme={{
+            axes: {
+              tickLabel: {
+                fontSize: parseInt(themeName.euiFontSizeXS, 10),
+                fontFamily: themeName.euiFontFamily,
+                fontStyle: 'italic',
+              },
+            },
+            background: { color: 'transparent' },
+            chartMargins: {
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+            },
+            chartPaddings: {
+              left: 0,
+              right: 0,
+              top: 4,
+              bottom: 0,
+            },
+            scales: { barsPadding: 0.1 },
             colors: {
               vizColors: [AREA_SERIES_COLOR],
             },
@@ -98,6 +126,7 @@ export const MetricDistributionChart: FC<Props> = ({ width, height, chartData, f
           id="bottom"
           position={Position.Bottom}
           tickFormat={(d) => kibanaFieldFormat(d, fieldFormat)}
+          hide={hideXAxis === true}
         />
         <Axis id="left" position={Position.Left} tickFormat={(d) => d.toFixed(3)} hide={true} />
         <AreaSeries

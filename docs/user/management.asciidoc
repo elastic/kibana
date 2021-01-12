@@ -6,6 +6,10 @@
 *Stack Management* is home to UIs for managing all things Elastic Stack&mdash;
 indices, clusters, licenses, UI settings, index patterns, spaces, and more.
 
+
+Access to individual features is governed by {es} and {kib} privileges.
+Consult your administrator if you do not have the appropriate access.
+
 [float]
 [[manage-ingest]]
 == Ingest
@@ -35,7 +39,7 @@ quickly deploy configuration changes to all Beats running across your enterprise
 [cols="50, 50"]
 |===
 
-a| <<managing-indices, Index Management>>
+a| {ref}/index-mgmt.html[Index Management]
 | View index settings, mappings, and statistics and perform operations, such as refreshing,
 flushing, and clearing the cache. Practicing good index management ensures
 that your data is stored cost effectively.
@@ -128,12 +132,15 @@ Kerberos, PKI, OIDC, and SAML.
 [cols="50, 50"]
 |===
 
-a| <<managing-fields, Index Patterns>>
+a| <<index-patterns, Index Patterns>>
 |Create and manage the index patterns that retrieve your data from {es}.
 
 | <<managing-saved-objects, Saved Objects>>
 | Copy, edit, delete, import, and export your saved objects.
 These include dashboards, visualizations, maps, index patterns, Canvas workpads, and more.
+
+| <<managing-tags, Tags>>
+|Create, manage, and assign tags to your saved objects.
 
 | <<xpack-spaces, Spaces>>
 | Create spaces to organize your dashboards and other saved objects into categories.
@@ -180,8 +187,6 @@ include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-beats.asciidoc[]
 
-include::{kib-repo-dir}/management/managing-indices.asciidoc[]
-
 include::{kib-repo-dir}/management/ingest-pipelines/ingest-pipelines.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-fields.asciidoc[]
@@ -193,6 +198,8 @@ include::{kib-repo-dir}/management/numeral.asciidoc[]
 include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-tags.asciidoc[]
 
 include::security/index.asciidoc[]
 

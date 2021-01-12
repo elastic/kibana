@@ -9,17 +9,10 @@
     "devOnly": true
   },
   "scripts": {
-    "build": "tsc",
-    "kbn:bootstrap": "tsc",
-    "kbn:watch": "tsc --watch",
-    "test": "tsd",
-    "clean": "del target"
-  },
-  "dependencies": {
-    "utility-types": "^3.10.0"
-  },
-  "devDependencies": {
-    "del-cli": "^3.0.1",
-    "tsd": "^0.13.1"
+    "build": "../../node_modules/.bin/tsc",
+    "kbn:bootstrap": "../../node_modules/.bin/tsc",
+    "kbn:watch": "../../node_modules/.bin/tsc --watch",
+    "test": "../../node_modules/.bin/tsd",
+    "clean": "../../node_modules/.bin/del target"
   }
 }

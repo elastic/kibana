@@ -85,7 +85,7 @@ export const myCollector = makeUsageCollector<Usage>({
     },
     my_objects: {
       total: {
-        type: 'number',
+        type: 'long',
       },
       type: { type: 'boolean' },
     },
@@ -93,17 +93,17 @@ export const myCollector = makeUsageCollector<Usage>({
       type: 'array',
       items: {
         total: {
-          type: 'number',
+          type: 'long',
         },
         type: { type: 'boolean' },
       },
     },
     my_str_array: { type: 'array', items: { type: 'keyword' } },
     my_index_signature_prop: {
-      count: { type: 'number' },
-      avg: { type: 'number' },
-      max: { type: 'number' },
-      min: { type: 'number' },
+      count: { type: 'long' },
+      avg: { type: 'float' },
+      max: { type: 'long' },
+      min: { type: 'long' },
     },
   },
 });

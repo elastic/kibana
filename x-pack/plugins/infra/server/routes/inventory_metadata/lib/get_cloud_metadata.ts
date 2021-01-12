@@ -25,9 +25,18 @@ export const getCloudMetadata = async (
   framework: KibanaFramework,
   req: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
-  nodeType: InventoryItemType
+  nodeType: InventoryItemType,
+  currentTime: number
 ): Promise<CloudMetaData> => {
   const model = findInventoryModel(nodeType);
+  // Only run this for AWS modules, eventually we might have more.
+  if (model.requiredModule !== 'aws') {
+    return {
+      accounts: [],
+      projects: [],
+      regions: [],
+    };
+  }
 
   const metricQuery = {
     allowNoIndices: true,
@@ -36,7 +45,18 @@ export const getCloudMetadata = async (
     body: {
       query: {
         bool: {
-          must: [{ match: { 'event.module': model.requiredModule } }],
+          must: [
+            {
+              range: {
+                [sourceConfiguration.fields.timestamp]: {
+                  gte: currentTime - 86400000, // 24 hours ago
+                  lte: currentTime,
+                  format: 'epoch_millis',
+                },
+              },
+            },
+            { match: { 'event.module': model.requiredModule } },
+          ],
         },
       },
       size: 0,

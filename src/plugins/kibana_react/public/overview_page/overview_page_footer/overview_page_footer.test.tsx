@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { OverviewPageFooter } from './overview_page_footer';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from '@kbn/test/jest';
 
 jest.mock('../../app_links', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
@@ -28,7 +28,7 @@ jest.mock('../../app_links', () => ({
 jest.mock('../../context', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
-      application: { capabilities: { advancedSettings: { show: true } } },
+      application: { capabilities: { advancedSettings: { show: true, save: true } } },
       notifications: { toast: { addSuccess: jest.fn() } },
     },
   }),

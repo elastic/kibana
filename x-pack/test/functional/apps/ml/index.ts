@@ -29,6 +29,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
       await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
       await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_ecommerce');
       await esArchiver.unload('ml/farequote');
       await esArchiver.unload('ml/ecommerce');
       await esArchiver.unload('ml/categorization');
@@ -36,6 +37,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('ml/bm_classification');
       await esArchiver.unload('ml/ihp_outlier');
       await esArchiver.unload('ml/egs_regression');
+      await esArchiver.unload('ml/module_sample_ecommerce');
       await ml.testResources.resetKibanaTimeZone();
       await ml.securityUI.logout();
     });

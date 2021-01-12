@@ -11,12 +11,14 @@ import {
   createMockSavedObjectsRepository,
   createRoute,
   createRouteContext,
+  mockCaseMappings,
 } from '../../__fixtures__';
 
 import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initPatchCaseConfigure } from './patch_configure';
 import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
 import { ConnectorTypes } from '../../../../../common/api/connectors';
+import { CaseClient } from '../../../../client';
 
 describe('PATCH configuration', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -39,9 +41,10 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
@@ -72,9 +75,10 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
@@ -110,9 +114,10 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
@@ -131,6 +136,52 @@ describe('PATCH configuration', () => {
     );
   });
 
+  it('patch configuration with error message for getMappings throw', async () => {
+    const req = httpServerMock.createKibanaRequest({
+      path: CASE_CONFIGURE_URL,
+      method: 'patch',
+      body: {
+        closure_type: 'close-by-pushing',
+        connector: {
+          id: 'connector-new',
+          name: 'New connector',
+          type: '.jira',
+          fields: null,
+        },
+        version: mockCaseConfigure[0].version,
+      },
+    });
+
+    const context = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: [],
+      })
+    );
+    const mockThrowContext = {
+      ...context,
+      case: {
+        ...context.case,
+        getCaseClient: () =>
+          ({
+            ...context?.case?.getCaseClient(),
+            getMappings: () => {
+              throw new Error();
+            },
+          } as CaseClient),
+      },
+    };
+
+    const res = await routeHandler(mockThrowContext, req, kibanaResponseFactory);
+
+    expect(res.status).toEqual(200);
+    expect(res.payload).toEqual(
+      expect.objectContaining({
+        mappings: [],
+        error: 'Error connecting to New connector instance',
+      })
+    );
+  });
   it('throw error when configuration have not being created', async () => {
     const req = httpServerMock.createKibanaRequest({
       path: CASE_CONFIGURE_URL,
@@ -141,7 +192,7 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [],
       })
@@ -163,9 +214,10 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 
@@ -190,9 +242,10 @@ describe('PATCH configuration', () => {
       },
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
+        caseMappingsSavedObject: mockCaseMappings,
       })
     );
 

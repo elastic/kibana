@@ -3,7 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
+import { DOCS_PREFIX } from '../../routes';
+
+export const CREDENTIALS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.credentials.title',
+  { defaultMessage: 'Credentials' }
+);
 
 export enum ApiTokenTypes {
   Admin = 'admin',
@@ -93,3 +100,5 @@ export const TOKEN_TYPE_INFO = [
 ];
 
 export const FLYOUT_ARIA_LABEL_ID = 'credentialsFlyoutTitle';
+
+export const DOCS_HREF = `${DOCS_PREFIX}/authentication.html`;

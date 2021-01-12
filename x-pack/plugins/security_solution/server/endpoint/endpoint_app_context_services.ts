@@ -12,11 +12,16 @@ import {
 import { SecurityPluginSetup } from '../../../security/server';
 import {
   AgentService,
-  IngestManagerStartContract,
+  FleetStartContract,
   PackageService,
-} from '../../../ingest_manager/server';
+  AgentPolicyServiceInterface,
+  PackagePolicyServiceInterface,
+} from '../../../fleet/server';
 import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
-import { getPackagePolicyCreateCallback } from './ingest_integration';
+import {
+  getPackagePolicyCreateCallback,
+  getPackagePolicyUpdateCallback,
+} from './ingest_integration';
 import { ManifestManager } from './services/artifacts';
 import { MetadataQueryStrategy } from './types';
 import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
@@ -24,10 +29,11 @@ import {
   metadataQueryStrategyV1,
   metadataQueryStrategyV2,
 } from './routes/metadata/support/query_strategies';
-import { ElasticsearchAssetType } from '../../../ingest_manager/common/types/models';
+import { ElasticsearchAssetType } from '../../../fleet/common/types/models';
 import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
+import { LicenseService } from '../../common/license/license';
 
 export interface MetadataService {
   queryStrategy(
@@ -70,7 +76,10 @@ export const createMetadataService = (packageService: PackageService): MetadataS
 };
 
 export type EndpointAppContextServiceStartContract = Partial<
-  Pick<IngestManagerStartContract, 'agentService' | 'packageService'>
+  Pick<
+    FleetStartContract,
+    'agentService' | 'packageService' | 'packagePolicyService' | 'agentPolicyService'
+  >
 > & {
   logger: Logger;
   manifestManager?: ManifestManager;
@@ -78,8 +87,9 @@ export type EndpointAppContextServiceStartContract = Partial<
   security: SecurityPluginSetup;
   alerts: AlertsPluginStartContract;
   config: ConfigType;
-  registerIngestCallback?: IngestManagerStartContract['registerExternalCallback'];
+  registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
+  licenseService: LicenseService;
 };
 
 /**
@@ -89,11 +99,15 @@ export type EndpointAppContextServiceStartContract = Partial<
 export class EndpointAppContextService {
   private agentService: AgentService | undefined;
   private manifestManager: ManifestManager | undefined;
+  private packagePolicyService: PackagePolicyServiceInterface | undefined;
+  private agentPolicyService: AgentPolicyServiceInterface | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private metadataService: MetadataService | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
+    this.packagePolicyService = dependencies.packagePolicyService;
+    this.agentPolicyService = dependencies.agentPolicyService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
     this.metadataService = createMetadataService(dependencies.packageService!);
@@ -110,6 +124,11 @@ export class EndpointAppContextService {
           dependencies.alerts
         )
       );
+
+      dependencies.registerIngestCallback(
+        'packagePolicyUpdate',
+        getPackagePolicyUpdateCallback(dependencies.logger, dependencies.licenseService)
+      );
     }
   }
 
@@ -117,6 +136,14 @@ export class EndpointAppContextService {
 
   public getAgentService(): AgentService | undefined {
     return this.agentService;
+  }
+
+  public getPackagePolicyService(): PackagePolicyServiceInterface | undefined {
+    return this.packagePolicyService;
+  }
+
+  public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
+    return this.agentPolicyService;
   }
 
   public getMetadataService(): MetadataService | undefined {

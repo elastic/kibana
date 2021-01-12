@@ -83,6 +83,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         updatedBy: null,
         apiKeyOwner: null,
         throttle: '1m',
+        notifyWhen: 'onThrottleInterval',
         muteAll: false,
         mutedInstanceIds: [],
         createdAt: response.body.createdAt,
@@ -91,6 +92,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
       expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+      expect(Date.parse(response.body.updatedAt)).to.eql(Date.parse(response.body.createdAt));
 
       expect(typeof response.body.scheduledTaskId).to.be('string');
       const { _source: taskRecord } = await getScheduledTask(response.body.scheduledTaskId);

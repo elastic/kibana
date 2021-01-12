@@ -8,16 +8,12 @@ import path from 'path';
 import { PageOrientation, PredefinedPageSize } from 'pdfmake/interfaces';
 import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { LevelLogger } from '../';
+import { getDefaultLayoutSelectors } from '../../../common';
+import { LAYOUT_TYPES } from '../../../common/constants';
+import { LayoutSelectorDictionary, Size } from '../../../common/types';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { CaptureConfig } from '../../types';
-import {
-  getDefaultLayoutSelectors,
-  LayoutInstance,
-  LayoutSelectorDictionary,
-  LayoutTypes,
-  Size,
-} from './';
-import { Layout } from './layout';
+import { Layout, LayoutInstance } from './';
 
 export class PrintLayout extends Layout implements LayoutInstance {
   public readonly selectors: LayoutSelectorDictionary = {
@@ -28,7 +24,7 @@ export class PrintLayout extends Layout implements LayoutInstance {
   private captureConfig: CaptureConfig;
 
   constructor(captureConfig: CaptureConfig) {
-    super(LayoutTypes.PRINT);
+    super(LAYOUT_TYPES.PRINT);
     this.captureConfig = captureConfig;
   }
 

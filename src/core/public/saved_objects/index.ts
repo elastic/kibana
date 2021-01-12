@@ -34,6 +34,7 @@ export { SavedObjectsStart, SavedObjectsService } from './saved_objects_service'
 export {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
@@ -42,7 +43,7 @@ export {
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
-  SavedObjectsImportError,
+  SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectsNamespaceType,
 } from '../../server/types';

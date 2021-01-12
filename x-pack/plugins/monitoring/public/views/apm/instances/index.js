@@ -14,11 +14,7 @@ import { ApmServerInstances } from '../../../components/apm/instances';
 import { MonitoringViewBaseEuiTableController } from '../..';
 import { SetupModeRenderer } from '../../../components/renderers';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
-import {
-  APM_SYSTEM_ID,
-  CODE_PATH_APM,
-  ALERT_MISSING_MONITORING_DATA,
-} from '../../../../common/constants';
+import { APM_SYSTEM_ID, CODE_PATH_APM } from '../../../../common/constants';
 
 uiRoutes.when('/apm/instances', {
   template,
@@ -52,53 +48,44 @@ uiRoutes.when('/apm/instances', {
         reactNodeId: 'apmInstancesReact',
         $scope,
         $injector,
-        alerts: {
-          shouldFetch: true,
-          options: {
-            alertTypeIds: [ALERT_MISSING_MONITORING_DATA],
-            filters: [
-              {
-                stackProduct: APM_SYSTEM_ID,
-              },
-            ],
-          },
-        },
       });
 
       this.scope = $scope;
       this.injector = $injector;
+      this.onTableChangeRender = this.renderComponent;
 
       $scope.$watch(
         () => this.data,
-        (data) => {
-          const { pagination, sorting, onTableChange } = this;
-
-          const component = (
-            <SetupModeRenderer
-              scope={this.scope}
-              injector={this.injector}
-              productName={APM_SYSTEM_ID}
-              render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
-                  {flyoutComponent}
-                  <ApmServerInstances
-                    setupMode={setupMode}
-                    alerts={this.alerts}
-                    apms={{
-                      pagination,
-                      sorting,
-                      onTableChange,
-                      data,
-                    }}
-                  />
-                  {bottomBarComponent}
-                </SetupModeContext.Provider>
-              )}
-            />
-          );
-          this.renderReact(component);
-        }
+        () => this.renderComponent()
       );
+    }
+
+    renderComponent() {
+      const { pagination, sorting, onTableChange } = this;
+
+      const component = (
+        <SetupModeRenderer
+          scope={this.scope}
+          injector={this.injector}
+          productName={APM_SYSTEM_ID}
+          render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
+            <SetupModeContext.Provider value={{ setupModeSupported: true }}>
+              {flyoutComponent}
+              <ApmServerInstances
+                setupMode={setupMode}
+                apms={{
+                  pagination,
+                  sorting,
+                  onTableChange,
+                  data: this.data,
+                }}
+              />
+              {bottomBarComponent}
+            </SetupModeContext.Provider>
+          )}
+        />
+      );
+      this.renderReact(component);
     }
   },
 });

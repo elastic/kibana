@@ -124,7 +124,13 @@ describe('OnPreRouting', () => {
     const router = createRouter('/');
 
     router.get({ path: '/login', validate: false }, (context, req, res) => {
-      return res.ok({ body: { rewrittenUrl: req.rewrittenUrl?.path } });
+      return res.ok({
+        body: {
+          rewrittenUrl: req.rewrittenUrl
+            ? `${req.rewrittenUrl.pathname}${req.rewrittenUrl.search}`
+            : undefined,
+        },
+      });
     });
 
     registerOnPreRouting((req, res, t) => t.rewriteUrl('/login'));
@@ -143,7 +149,13 @@ describe('OnPreRouting', () => {
     const router = createRouter('/');
 
     router.get({ path: '/reroute-2', validate: false }, (context, req, res) => {
-      return res.ok({ body: { rewrittenUrl: req.rewrittenUrl?.path } });
+      return res.ok({
+        body: {
+          rewrittenUrl: req.rewrittenUrl
+            ? `${req.rewrittenUrl.pathname}${req.rewrittenUrl.search}`
+            : undefined,
+        },
+      });
     });
 
     registerOnPreRouting((req, res, t) => t.rewriteUrl('/reroute-1'));
@@ -163,7 +175,13 @@ describe('OnPreRouting', () => {
     const router = createRouter('/');
 
     router.get({ path: '/login', validate: false }, (context, req, res) => {
-      return res.ok({ body: { rewrittenUrl: req.rewrittenUrl?.path } });
+      return res.ok({
+        body: {
+          rewrittenUrl: req.rewrittenUrl
+            ? `${req.rewrittenUrl.pathname}${req.rewrittenUrl.search}`
+            : undefined,
+        },
+      });
     });
 
     registerOnPreRouting((req, res, t) => t.next());

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH,

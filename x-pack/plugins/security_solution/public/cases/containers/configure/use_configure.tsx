@@ -13,7 +13,7 @@ import {
   displaySuccessToast,
 } from '../../../common/components/toasters';
 import * as i18n from './translations';
-import { CasesConfigurationMapping, ClosureType, CaseConfigure, CaseConnector } from './types';
+import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
 import { ConnectorTypes } from '../../../../../case/common/api/connectors';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
@@ -24,7 +24,7 @@ export interface State extends ConnectorConfiguration {
   currentConfiguration: ConnectorConfiguration;
   firstLoad: boolean;
   loading: boolean;
-  mapping: CasesConfigurationMapping[] | null;
+  mappings: CaseConnectorMapping[];
   persistLoading: boolean;
   version: string;
 }
@@ -58,8 +58,8 @@ export type Action =
       closureType: ClosureType;
     }
   | {
-      type: 'setMapping';
-      mapping: CasesConfigurationMapping[];
+      type: 'setMappings';
+      mappings: CaseConnectorMapping[];
     };
 
 export const configureCasesReducer = (state: State, action: Action) => {
@@ -102,10 +102,10 @@ export const configureCasesReducer = (state: State, action: Action) => {
         closureType: action.closureType,
       };
     }
-    case 'setMapping': {
+    case 'setMappings': {
       return {
         ...state,
-        mapping: action.mapping,
+        mappings: action.mappings,
       };
     }
     default:
@@ -119,7 +119,7 @@ export interface ReturnUseCaseConfigure extends State {
   setClosureType: (closureType: ClosureType) => void;
   setConnector: (connector: CaseConnector) => void;
   setCurrentConfiguration: (configuration: ConnectorConfiguration) => void;
-  setMapping: (newMapping: CasesConfigurationMapping[]) => void;
+  setMappings: (newMapping: CaseConnectorMapping[]) => void;
 }
 
 export const initialState: State = {
@@ -141,7 +141,7 @@ export const initialState: State = {
   },
   firstLoad: false,
   loading: true,
-  mapping: null,
+  mappings: [],
   persistLoading: false,
   version: '',
 };
@@ -170,10 +170,10 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     });
   }, []);
 
-  const setMapping = useCallback((newMapping: CasesConfigurationMapping[]) => {
+  const setMappings = useCallback((mappings: CaseConnectorMapping[]) => {
     dispatch({
-      mapping: newMapping,
-      type: 'setMapping',
+      mappings,
+      type: 'setMappings',
     });
   }, []);
 
@@ -222,6 +222,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
               setClosureType(res.closureType);
             }
             setVersion(res.version);
+            setMappings(res.mappings);
 
             if (!state.firstLoad) {
               setFirstLoad(true);
@@ -233,6 +234,13 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
                   },
                 });
               }
+            }
+            if (res.error != null) {
+              errorToToaster({
+                dispatchToaster,
+                error: new Error(res.error),
+                title: i18n.ERROR_TITLE,
+              });
             }
           }
           setLoading(false);
@@ -285,6 +293,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
               setClosureType(res.closureType);
             }
             setVersion(res.version);
+            setMappings(res.mappings);
             if (setCurrentConfiguration != null) {
               setCurrentConfiguration({
                 closureType: res.closureType,
@@ -293,12 +302,19 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
                 },
               });
             }
-
+            if (res.error != null) {
+              errorToToaster({
+                dispatchToaster,
+                error: new Error(res.error),
+                title: i18n.ERROR_TITLE,
+              });
+            }
             displaySuccessToast(i18n.SUCCESS_CONFIGURE, dispatchToaster);
             setPersistLoading(false);
           }
         } catch (error) {
           if (!didCancel) {
+            setConnector(state.currentConfiguration.connector);
             setPersistLoading(false);
             errorToToaster({
               title: i18n.ERROR_TITLE,
@@ -314,8 +330,16 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
         abortCtrl.abort();
       };
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.version]
+    [
+      dispatchToaster,
+      setClosureType,
+      setConnector,
+      setCurrentConfiguration,
+      setMappings,
+      setPersistLoading,
+      setVersion,
+      state,
+    ]
   );
 
   useEffect(() => {
@@ -330,6 +354,6 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     setCurrentConfiguration,
     setConnector,
     setClosureType,
-    setMapping,
+    setMappings,
   };
 };

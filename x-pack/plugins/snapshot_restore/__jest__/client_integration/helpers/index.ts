@@ -11,7 +11,7 @@ import { setup as policyAddSetup } from './policy_add.helpers';
 import { setup as policyEditSetup } from './policy_edit.helpers';
 import { setup as restoreSnapshotSetup } from './restore_snapshot.helpers';
 
-export { nextTick, getRandomString, findTestSubject, TestBed } from '../../../../../test_utils';
+export { nextTick, getRandomString, findTestSubject, TestBed, delay } from '@kbn/test/jest';
 
 export { setupEnvironment } from './setup_environment';
 

@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiNetwork uniqueFlows data', async () => {
         const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/networkKpiUniqueFlowsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: NetworkKpiQueries.uniqueFlows,
@@ -86,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiNetwork networkEvents data', async () => {
         const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/networkKpiNetworkEventsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: NetworkKpiQueries.networkEvents,
@@ -106,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiNetwork DNS data', async () => {
         const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/networkKpiDnsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: NetworkKpiQueries.dns,
@@ -126,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiNetwork networkEvents data', async () => {
         const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/networkKpiNetworkEventsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: NetworkKpiQueries.networkEvents,
@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiNetwork tlsHandshakes data', async () => {
         const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/networkKpiTlsHandshakesQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: NetworkKpiQueries.tlsHandshakes,
@@ -166,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiNetwork uniquePrivateIps data', async () => {
         const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/networkKpiUniquePrivateIpsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: NetworkKpiQueries.uniquePrivateIps,
@@ -213,7 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiNetwork uniqueFlows data', async () => {
         const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/networkKpiUniqueFlowsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: NetworkKpiQueries.uniqueFlows,
@@ -233,7 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiNetwork DNS data', async () => {
         const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/networkKpiDnsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: NetworkKpiQueries.dns,
@@ -253,7 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiNetwork networkEvents data', async () => {
         const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/networkKpiNetworkEventsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: NetworkKpiQueries.networkEvents,
@@ -273,7 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiNetwork tlsHandshakes data', async () => {
         const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/networkKpiTlsHandshakesQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: NetworkKpiQueries.tlsHandshakes,
@@ -293,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('Make sure that we get KpiNetwork uniquePrivateIps data', async () => {
         const { body: kpiNetwork } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/networkKpiUniquePrivateIpsQuery')
+          .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
             factoryQueryType: NetworkKpiQueries.uniquePrivateIps,

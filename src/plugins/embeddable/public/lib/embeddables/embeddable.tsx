@@ -19,12 +19,12 @@
 
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
-import { distinctUntilChanged, map } from 'rxjs/operators';
+import { merge } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, mapTo, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { EmbeddableOutput, IEmbeddable } from './i_embeddable';
-import { TriggerContextMapping } from '../ui_actions';
 import { EmbeddableInput, ViewMode } from '../../../common/types';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
@@ -43,6 +43,7 @@ export abstract class Embeddable<
   public readonly isContainer: boolean = false;
   public abstract readonly type: string;
   public readonly id: string;
+  public fatalError?: Error;
 
   protected output: TEmbeddableOutput;
   protected input: TEmbeddableInput;
@@ -88,9 +89,12 @@ export abstract class Embeddable<
         map(({ title }) => title || ''),
         distinctUntilChanged()
       )
-      .subscribe((title) => {
-        this.renderComplete.setTitle(title);
-      });
+      .subscribe(
+        (title) => {
+          this.renderComplete.setTitle(title);
+        },
+        () => {}
+      );
   }
 
   public getIsContainer(): this is IContainer {
@@ -100,8 +104,30 @@ export abstract class Embeddable<
   /**
    * Reload will be called when there is a request to refresh the data or view, even if the
    * input data did not change.
+   *
+   * In case if input data did change and reload is requested input$ and output$ would still emit before `reload` is called
+   *
+   * The order would be as follows:
+   * input$
+   * output$
+   * reload()
+   * ----
+   * updated$
    */
   public abstract reload(): void;
+
+  /**
+   * Merges input$ and output$ streams and debounces emit till next macro-task.
+   * Could be useful to batch reactions to input$ and output$ updates that happen separately but synchronously.
+   * In case corresponding state change triggered `reload` this stream is guarantied to emit later,
+   * which allows to skip any state handling in case `reload` already handled it.
+   */
+  public getUpdated$(): Readonly<Rx.Observable<void>> {
+    return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
+      debounceTime(0),
+      mapTo(undefined)
+    );
+  }
 
   public getInput$(): Readonly<Rx.Observable<TEmbeddableInput>> {
     return this.input$.asObservable();
@@ -193,16 +219,22 @@ export abstract class Embeddable<
     }
   }
 
+  protected onFatalError(e: Error) {
+    this.fatalError = e;
+    this.output$.error(e);
+  }
+
   private onResetInput(newInput: TEmbeddableInput) {
     if (!isEqual(this.input, newInput)) {
-      if (this.input.lastReloadRequestTime !== newInput.lastReloadRequestTime) {
-        this.reload();
-      }
+      const oldLastReloadRequestTime = this.input.lastReloadRequestTime;
       this.input = newInput;
       this.input$.next(newInput);
       this.updateOutput({
         title: getPanelTitle(this.input, this.output),
       } as Partial<TEmbeddableOutput>);
+      if (oldLastReloadRequestTime !== newInput.lastReloadRequestTime) {
+        this.reload();
+      }
     }
   }
 
@@ -215,7 +247,7 @@ export abstract class Embeddable<
     this.onResetInput(newInput);
   }
 
-  public supportedTriggers(): Array<keyof TriggerContextMapping> {
+  public supportedTriggers(): string[] {
     return [];
   }
 }

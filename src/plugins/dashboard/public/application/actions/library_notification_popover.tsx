@@ -27,8 +27,8 @@ import {
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { LibraryNotificationActionContext, UnlinkFromLibraryAction } from '.';
+import { dashboardLibraryNotification } from '../../dashboard_strings';
 
 export interface LibraryNotificationProps {
   context: LibraryNotificationActionContext;
@@ -50,16 +50,13 @@ export function LibraryNotificationPopover({
 
   return (
     <EuiPopover
-      ownFocus
       button={
         <EuiButtonIcon
-          data-test-subj={`embeddablePanelNotification-${id}`}
-          iconType={icon}
-          aria-label={i18n.translate('dashboard.panel.libraryNotification.ariaLabel', {
-            defaultMessage: 'View library information and unlink this panel',
-          })}
           color="text"
+          iconType={icon}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          data-test-subj={`embeddablePanelNotification-${id}`}
+          aria-label={dashboardLibraryNotification.getPopoverAriaLabel()}
         />
       }
       isOpen={isPopoverOpen}
@@ -69,12 +66,7 @@ export function LibraryNotificationPopover({
       <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
       <div style={{ width: '300px' }}>
         <EuiText>
-          <p>
-            {i18n.translate('dashboard.panel.libraryNotification.toolTip', {
-              defaultMessage:
-                'This panel is linked to a library item. Editing the panel might affect other dashboards.',
-            })}
-          </p>
+          <p>{dashboardLibraryNotification.getTooltip()}</p>
         </EuiText>
       </div>
       <EuiPopoverFooter>

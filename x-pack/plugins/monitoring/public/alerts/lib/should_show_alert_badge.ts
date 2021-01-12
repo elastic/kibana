@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isInSetupMode } from '../../lib/setup_mode';
-import { CommonAlertStatus } from '../../../common/types';
+import { CommonAlertStatus } from '../../../common/types/alerts';
 import { ISetupModeContext } from '../../components/setup_mode/setup_mode_context';
 
 export function shouldShowAlertBadge(

@@ -19,7 +19,7 @@
 
 import { get } from 'lodash';
 import React, { useState, useCallback } from 'react';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -52,7 +52,7 @@ function FieldParamEditor({
 }: FieldParamEditorProps) {
   const [isDirty, setIsDirty] = useState(false);
   const selectedOptions: ComboBoxGroupedOptions<IndexPatternField> = value
-    ? [{ label: value.displayName || value.name, target: value }]
+    ? [{ label: value.displayName, target: value, key: value.name }]
     : [];
 
   const onChange = (options: EuiComboBoxOptionOption[]) => {
@@ -108,7 +108,7 @@ function FieldParamEditor({
       isInvalid={showErrorMessage}
       fullWidth={true}
       error={errors}
-      compressed
+      display="rowCompressed"
     >
       <EuiComboBox
         compressed

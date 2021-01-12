@@ -17,13 +17,20 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { IEmbeddable, ViewMode, isReferenceOrValueEmbeddable } from '../../embeddable_plugin';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
-import { reactToUiComponent } from '../../../../kibana_react/public';
+
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
+import { reactToUiComponent } from '../../services/kibana_react';
+import {
+  IEmbeddable,
+  ViewMode,
+  isReferenceOrValueEmbeddable,
+  isErrorEmbeddable,
+} from '../../services/embeddable';
+
 import { UnlinkFromLibraryAction } from '.';
 import { LibraryNotificationPopover } from './library_notification_popover';
+import { dashboardLibraryNotification } from '../../dashboard_strings';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
@@ -31,16 +38,14 @@ export interface LibraryNotificationActionContext {
   embeddable: IEmbeddable;
 }
 
-export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIBRARY_NOTIFICATION> {
+export class LibraryNotificationAction implements Action<LibraryNotificationActionContext> {
   public readonly id = ACTION_LIBRARY_NOTIFICATION;
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
 
   constructor(private unlinkAction: UnlinkFromLibraryAction) {}
 
-  private displayName = i18n.translate('dashboard.panel.LibraryNotification', {
-    defaultMessage: 'Visualize Library',
-  });
+  private displayName = dashboardLibraryNotification.getDisplayName();
 
   private icon = 'folderCheck';
 
@@ -79,6 +84,7 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
 
   public isCompatible = async ({ embeddable }: LibraryNotificationActionContext) => {
     return (
+      !isErrorEmbeddable(embeddable) &&
       embeddable.getRoot().isContainer &&
       embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
       isReferenceOrValueEmbeddable(embeddable) &&

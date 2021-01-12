@@ -41,25 +41,22 @@ import {
   shouldBeOneOf,
   mustBeAllOf,
   filterDownBy,
-  ExistsFilter,
-  TermFilter,
-  RangeFilter,
   asPinnedQuery,
   matchesClauses,
   SortOptions,
 } from './queries/query_clauses';
 
 import {
-  updateFields,
+  updateFieldsAndMarkAsFailed,
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  TaskWithSchedule,
-  taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
 import { TaskTypeDictionary } from './task_type_dictionary';
+
+import { ESSearchResponse, ESSearchBody } from '../../../typings/elasticsearch';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -78,6 +75,9 @@ export interface SearchOpts {
   seq_no_primary_term?: boolean;
   search_after?: unknown[];
 }
+
+export type AggregationOpts = Pick<Required<ESSearchBody>, 'aggs'> &
+  Pick<ESSearchBody, 'query' | 'size'>;
 
 export interface UpdateByQuerySearchOpts extends SearchOpts {
   script?: object;
@@ -98,7 +98,11 @@ export interface FetchResult {
 }
 
 export interface ClaimOwnershipResult {
-  claimedTasks: number;
+  stats: {
+    tasksUpdated: number;
+    tasksConflicted: number;
+    tasksClaimed: number;
+  };
   docs: ConcreteTaskInstance[];
 }
 
@@ -186,9 +190,10 @@ export class TaskStore {
    *
    * @param opts - The query options used to filter tasks
    */
-  public async fetch({ sort = [{ 'task.runAt': 'asc' }], ...opts }: SearchOpts = {}): Promise<
-    FetchResult
-  > {
+  public async fetch({
+    sort = [{ 'task.runAt': 'asc' }],
+    ...opts
+  }: SearchOpts = {}): Promise<FetchResult> {
     return this.search({
       ...opts,
       sort,
@@ -213,16 +218,13 @@ export class TaskStore {
       this.serializer.generateRawId(undefined, 'task', id)
     );
 
-    const numberOfTasksClaimed = await this.markAvailableTasksAsClaimed(
-      claimOwnershipUntil,
-      claimTasksByIdWithRawIds,
-      size
-    );
+    const {
+      updated: tasksUpdated,
+      version_conflicts: tasksConflicted,
+    } = await this.markAvailableTasksAsClaimed(claimOwnershipUntil, claimTasksByIdWithRawIds, size);
 
     const docs =
-      numberOfTasksClaimed > 0
-        ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, size)
-        : [];
+      tasksUpdated > 0 ? await this.sweepForClaimedTasks(claimTasksByIdWithRawIds, size) : [];
 
     const [documentsReturnedById, documentsClaimedBySchedule] = partition(docs, (doc) =>
       claimTasksById.includes(doc.id)
@@ -249,7 +251,11 @@ export class TaskStore {
     ]);
 
     return {
-      claimedTasks: documentsClaimedById.length + documentsClaimedBySchedule.length,
+      stats: {
+        tasksUpdated,
+        tasksConflicted,
+        tasksClaimed: documentsClaimedById.length + documentsClaimedBySchedule.length,
+      },
       docs: docs.filter((doc) => doc.status === TaskStatus.Claiming),
     };
   };
@@ -258,19 +264,15 @@ export class TaskStore {
     claimOwnershipUntil: OwnershipClaimingOpts['claimOwnershipUntil'],
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
-  ): Promise<number> {
-    const tasksWithRemainingAttempts = [...this.definitions].map(([type, { maxAttempts }]) =>
-      taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
-    );
+  ): Promise<UpdateByQueryResult> {
+    const registeredTaskTypes = this.definitions.getAllTypes();
+    const taskMaxAttempts = [...this.definitions].reduce((accumulator, [type, { maxAttempts }]) => {
+      return { ...accumulator, [type]: maxAttempts || this.maxAttempts };
+    }, {});
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
-      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-      // Either task has a schedule or the attempts < the maximum configured
-      shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
-        TaskWithSchedule,
-        ...tasksWithRemainingAttempts
-      )
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
     );
 
     // The documents should be sorted by runAt/retryAt, unless there are pinned
@@ -285,7 +287,7 @@ export class TaskStore {
     }
 
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
-    const { updated } = await this.updateByQuery(
+    const result = await this.updateByQuery(
       asUpdateByQuery({
         query: matchesClauses(
           mustBeAllOf(
@@ -295,11 +297,15 @@ export class TaskStore {
           ),
           filterDownBy(InactiveTasks)
         ),
-        update: updateFields({
-          ownerId: this.taskManagerId,
-          status: 'claiming',
-          retryAt: claimOwnershipUntil,
-        }),
+        update: updateFieldsAndMarkAsFailed(
+          {
+            ownerId: this.taskManagerId,
+            retryAt: claimOwnershipUntil,
+          },
+          claimTasksById || [],
+          registeredTaskTypes,
+          taskMaxAttempts
+        ),
         sort,
       }),
       {
@@ -308,7 +314,7 @@ export class TaskStore {
     );
 
     if (apmTrans) apmTrans.end();
-    return updated;
+    return result;
   }
 
   /**
@@ -382,9 +388,9 @@ export class TaskStore {
 
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
     try {
-      ({ saved_objects: updatedSavedObjects } = await this.savedObjectsRepository.bulkUpdate<
-        SerializedConcreteTaskInstance
-      >(
+      ({
+        saved_objects: updatedSavedObjects,
+      } = await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
         docs.map((doc) => ({
           type: 'task',
           id: doc.id,
@@ -501,6 +507,25 @@ export class TaskStore {
     }
   }
 
+  public async aggregate<TSearchRequest extends AggregationOpts>({
+    aggs,
+    query,
+    size = 0,
+  }: TSearchRequest): Promise<ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>> {
+    const { body } = await this.esClient.search<
+      ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>
+    >({
+      index: this.index,
+      ignore_unavailable: true,
+      body: ensureAggregationOnlyReturnsTaskObjects({
+        query,
+        aggs,
+        size,
+      }),
+    });
+    return body;
+  }
+
   private async updateByQuery(
     opts: UpdateByQuerySearchOpts = {},
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -580,6 +605,22 @@ function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
     ? { bool: { must: [queryOnlyTasks, originalQuery] } }
     : queryOnlyTasks;
 
+  return {
+    ...opts,
+    query,
+  };
+}
+
+function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): AggregationOpts {
+  const originalQuery = opts.query;
+  const filterToOnlyTasks = {
+    bool: {
+      filter: [{ term: { type: 'task' } }],
+    },
+  };
+  const query = originalQuery
+    ? { bool: { must: [filterToOnlyTasks, originalQuery] } }
+    : filterToOnlyTasks;
   return {
     ...opts,
     query,

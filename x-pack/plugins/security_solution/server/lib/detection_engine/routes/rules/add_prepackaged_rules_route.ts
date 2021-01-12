@@ -115,12 +115,15 @@ export const createPrepackagedRules = async (
       );
     }
   }
-  const result = await Promise.all([
-    installPrepackagedRules(alertsClient, rulesToInstall, signalsIndex),
-    installPrepackagedTimelines(maxTimelineImportExportSize, frameworkRequest, true),
-  ]);
+
+  await Promise.all(installPrepackagedRules(alertsClient, rulesToInstall, signalsIndex));
+  const timeline = await installPrepackagedTimelines(
+    maxTimelineImportExportSize,
+    frameworkRequest,
+    true
+  );
   const [prepackagedTimelinesResult, timelinesErrors] = validate(
-    result[1],
+    timeline,
     importTimelineResultSchema
   );
   await updatePrepackagedRules(alertsClient, savedObjectsClient, rulesToUpdate, signalsIndex);

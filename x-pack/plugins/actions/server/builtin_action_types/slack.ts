@@ -15,6 +15,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '../../../../../src/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
+import { renderMustacheString } from '../lib/mustache_renderer';
 
 import {
   ActionType,
@@ -51,6 +52,7 @@ const ParamsSchema = schema.object({
 
 // action type definition
 
+export const ActionTypeId = '.slack';
 // customizing executor is only used for tests
 export function getActionType({
   logger,
@@ -62,7 +64,7 @@ export function getActionType({
   executor?: ExecutorType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 }): SlackActionType {
   return {
-    id: '.slack',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.slackTitle', {
       defaultMessage: 'Slack',
@@ -73,7 +75,17 @@ export function getActionType({
       }),
       params: ParamsSchema,
     },
+    renderParameterTemplates,
     executor,
+  };
+}
+
+function renderParameterTemplates(
+  params: ActionParamsType,
+  variables: Record<string, unknown>
+): ActionParamsType {
+  return {
+    message: renderMustacheString(params.message, variables, 'slack'),
   };
 }
 
@@ -126,6 +138,7 @@ async function slackExecutor(
     // https://slack.dev/node-slack-sdk/webhook
     // node-slack-sdk use Axios inside :)
     const webhook = new IncomingWebhook(webhookUrl, {
+      // @ts-expect-error The types exposed by 'HttpsProxyAgent' isn't up to date with 'Agent'
       agent: proxyAgent,
     });
     result = await webhook.send(message);

@@ -9,8 +9,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
-import { ComponentTemplateDeserialized, SectionLoading } from '../../shared_imports';
-import { attemptToDecodeURI } from '../../lib';
+import {
+  ComponentTemplateDeserialized,
+  SectionLoading,
+  attemptToURIDecode,
+} from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
 
 interface MatchParams {
@@ -28,7 +31,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
 
-  const decodedName = attemptToDecodeURI(name);
+  const decodedName = attemptToURIDecode(name)!;
 
   const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(decodedName);
 
@@ -50,7 +53,9 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
     }
 
     history.push({
-      pathname: encodeURI(`/component_templates/${encodeURIComponent(name)}`),
+      pathname: encodeURI(
+        `/component_templates/${encodeURIComponent(updatedComponentTemplate.name)}`
+      ),
     });
   };
 

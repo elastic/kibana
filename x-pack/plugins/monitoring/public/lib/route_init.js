@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { isInSetupMode } from './setup_mode';
 import { getClusterFromClusters } from './get_cluster_from_clusters';
@@ -13,7 +12,7 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
   const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
 
   function isOnPage(hash) {
-    return _.includes(window.location.hash, hash);
+    return window.location.hash.includes(hash);
   }
 
   /*

@@ -11,6 +11,7 @@ import * as utils from '../lib/axios_utils';
 import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { serviceNowCommonFields } from './mocks';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('axios');
@@ -33,7 +34,9 @@ describe('ServiceNow service', () => {
   beforeAll(() => {
     service = createExternalService(
       {
-        config: { apiUrl: 'https://dev102283.service-now.com' },
+        // The trailing slash at the end of the url is intended.
+        // All API calls need to have the trailing slash removed.
+        config: { apiUrl: 'https://dev102283.service-now.com/' },
         secrets: { username: 'admin', password: 'admin' },
       },
       logger
@@ -108,7 +111,7 @@ describe('ServiceNow service', () => {
       requestMock.mockImplementation(() => {
         throw new Error('An error has occurred');
       });
-      expect(service.getIncident('1')).rejects.toThrow(
+      await expect(service.getIncident('1')).rejects.toThrow(
         'Unable to get incident with id 1. Error: An error has occurred'
       );
     });
@@ -155,7 +158,7 @@ describe('ServiceNow service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(
+      await expect(
         service.createIncident({
           incident: { short_description: 'title', description: 'desc' },
         })
@@ -207,7 +210,7 @@ describe('ServiceNow service', () => {
         throw new Error('An error has occurred');
       });
 
-      expect(
+      await expect(
         service.updateIncident({
           incidentId: '1',
           incident: { short_description: 'title', description: 'desc' },
@@ -232,6 +235,38 @@ describe('ServiceNow service', () => {
         pushedDate: '2020-03-10T12:24:20.000Z',
         url: 'https://dev102283.service-now.com/nav_to.do?uri=incident.do?sys_id=11',
       });
+    });
+  });
+
+  describe('getFields', () => {
+    test('it should call request with correct arguments', async () => {
+      requestMock.mockImplementation(() => ({
+        data: { result: serviceNowCommonFields },
+      }));
+      await service.getFields();
+
+      expect(requestMock).toHaveBeenCalledWith({
+        axios,
+        logger,
+        url:
+          'https://dev102283.service-now.com/api/now/v2/table/sys_dictionary?sysparm_query=name=task^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory',
+      });
+    });
+    test('it returns common fields correctly', async () => {
+      requestMock.mockImplementation(() => ({
+        data: { result: serviceNowCommonFields },
+      }));
+      const res = await service.getFields();
+      expect(res).toEqual(serviceNowCommonFields);
+    });
+
+    test('it should throw an error', async () => {
+      requestMock.mockImplementation(() => {
+        throw new Error('An error has occurred');
+      });
+      await expect(service.getFields()).rejects.toThrow(
+        '[Action][ServiceNow]: Unable to get fields. Error: An error has occurred'
+      );
     });
   });
 });

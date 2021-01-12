@@ -6,7 +6,7 @@
 
 import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { cloneDeep } from 'lodash';
-import { PackagePolicy } from '../../../../../ingest_manager/common';
+import { PackagePolicy } from '../../../../../fleet/common';
 
 export const migratePackagePolicyToV7110: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc
@@ -23,8 +23,13 @@ export const migratePackagePolicyToV7110: SavedObjectMigrationFn<PackagePolicy, 
       },
     };
     if (input && input.config) {
-      input.config.policy.value.windows.popup = popup;
-      input.config.policy.value.mac.popup = popup;
+      const policy = input.config.policy.value;
+
+      policy.windows.antivirus_registration = policy.windows.antivirus_registration || {
+        enabled: false,
+      };
+      policy.windows.popup = popup;
+      policy.mac.popup = popup;
     }
   }
 

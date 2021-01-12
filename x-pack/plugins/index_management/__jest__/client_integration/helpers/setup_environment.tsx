@@ -39,7 +39,7 @@ export const services = {
   uiMetricService: new UiMetricService('index_management'),
 };
 
-services.uiMetricService.setup({ reportUiStats() {} } as any);
+services.uiMetricService.setup({ reportUiCounter() {} } as any);
 setExtensionsService(services.extensionsService);
 setUiMetricService(services.uiMetricService);
 

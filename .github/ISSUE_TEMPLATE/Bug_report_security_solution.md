@@ -2,7 +2,7 @@
 name: Bug report for Security Solution
 about: Help us identify bugs in Elastic Security, SIEM, and Endpoint so we can fix them!
 title: '[Security Solution]'
-labels: 'Team: SecuritySolution'
+labels: 'bug, Team: SecuritySolution'
 ---
 
 **Describe the bug:**

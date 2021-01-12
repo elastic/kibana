@@ -12,6 +12,7 @@ import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AbstractLayer } from '../layer';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
+import { getCentroidFeatures } from '../../../../common/get_centroid_features';
 import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_REQUEST_ID,
@@ -26,6 +27,7 @@ import {
   LAYER_STYLE_TYPE,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   FieldFormatter,
+  VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import { JoinTooltipProperty } from '../../tooltips/join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
@@ -37,6 +39,7 @@ import {
 import { assignFeatureIds } from '../../util/assign_feature_ids';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import {
+  getCentroidFilterExpression,
   getFillFilterExpression,
   getLineFilterExpression,
   getPointFilterExpression,
@@ -46,18 +49,20 @@ import {
   DynamicStylePropertyOptions,
   MapFilters,
   MapQuery,
+  VectorJoinSourceRequestMeta,
   VectorLayerDescriptor,
   VectorSourceRequestMeta,
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
 import { CustomIconAndTooltipContent, ILayer } from '../layer';
-import { IJoin, PropertiesMap } from '../../joins/join';
+import { InnerJoin } from '../../joins/inner_join';
 import { IField } from '../../fields/field';
 import { DataRequestContext } from '../../../actions';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IESSource } from '../../sources/es_source';
+import { PropertiesMap } from '../../../../common/elasticsearch_util';
 
 interface SourceResult {
   refreshed: boolean;
@@ -66,21 +71,21 @@ interface SourceResult {
 
 interface JoinState {
   dataHasChanged: boolean;
-  join: IJoin;
+  join: InnerJoin;
   propertiesMap?: PropertiesMap;
 }
 
 export interface VectorLayerArguments {
   source: IVectorSource;
-  joins?: IJoin[];
+  joins?: InnerJoin[];
   layerDescriptor: VectorLayerDescriptor;
 }
 
 export interface IVectorLayer extends ILayer {
   getFields(): Promise<IField[]>;
   getStyleEditorFields(): Promise<IField[]>;
-  getJoins(): IJoin[];
-  getValidJoins(): IJoin[];
+  getJoins(): InnerJoin[];
+  getValidJoins(): InnerJoin[];
   getSource(): IVectorSource;
   getFeatureById(id: string | number): Feature | null;
   getPropertiesForTooltip(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
@@ -91,7 +96,7 @@ export class VectorLayer extends AbstractLayer {
   static type = LAYER_TYPE.VECTOR;
 
   protected readonly _style: IVectorStyle;
-  private readonly _joins: IJoin[];
+  private readonly _joins: InnerJoin[];
 
   static createDescriptor(
     options: Partial<VectorLayerDescriptor>,
@@ -239,7 +244,7 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const requestToken = Symbol(`${SOURCE_BOUNDS_DATA_REQUEST_ID}-${this.getId()}`);
-    const searchFilters = this._getSearchFilters(
+    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
       dataFilters,
       this.getSource(),
       this.getCurrentStyle()
@@ -252,6 +257,7 @@ export class VectorLayer extends AbstractLayer {
       timeFilters: searchFilters.timeFilters,
       filters: searchFilters.filters,
       applyGlobalQuery: searchFilters.applyGlobalQuery,
+      applyGlobalTime: searchFilters.applyGlobalTime,
     };
 
     let bounds = null;
@@ -313,6 +319,22 @@ export class VectorLayer extends AbstractLayer {
     return indexPatternIds;
   }
 
+  async isFilteredByGlobalTime(): Promise<boolean> {
+    if (this.getSource().getApplyGlobalTime() && (await this.getSource().isTimeAware())) {
+      return true;
+    }
+
+    const joinPromises = this.getValidJoins().map(async (join) => {
+      return (
+        join.getRightJoinSource().getApplyGlobalTime() &&
+        (await join.getRightJoinSource().isTimeAware())
+      );
+    });
+    return (await Promise.all(joinPromises)).some((isJoinTimeAware: boolean) => {
+      return isJoinTimeAware;
+    });
+  }
+
   async _syncJoin({
     join,
     startLoading,
@@ -320,15 +342,17 @@ export class VectorLayer extends AbstractLayer {
     onLoadError,
     registerCancelCallback,
     dataFilters,
-  }: { join: IJoin } & DataRequestContext): Promise<JoinState> {
+  }: { join: InnerJoin } & DataRequestContext): Promise<JoinState> {
     const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
-    const searchFilters = {
+    const searchFilters: VectorJoinSourceRequestMeta = {
       ...dataFilters,
       fieldNames: joinSource.getFieldNames(),
       sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: joinSource.getApplyGlobalQuery(),
+      applyGlobalTime: joinSource.getApplyGlobalTime(),
+      sourceMeta: joinSource.getSyncMeta(),
     };
     const prevDataRequest = this.getDataRequest(sourceDataId);
 
@@ -360,14 +384,11 @@ export class VectorLayer extends AbstractLayer {
         join,
         propertiesMap,
       };
-    } catch (e) {
-      if (!(e instanceof DataRequestAbortError)) {
-        onLoadError(sourceDataId, requestToken, `Join error: ${e.message}`);
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
+        onLoadError(sourceDataId, requestToken, `Join error: ${error.message}`);
       }
-      return {
-        dataHasChanged: true,
-        join,
-      };
+      throw error;
     }
   }
 
@@ -386,9 +407,11 @@ export class VectorLayer extends AbstractLayer {
     source: IVectorSource,
     style: IVectorStyle
   ): VectorSourceRequestMeta {
+    const styleFieldNames =
+      style.getType() === LAYER_STYLE_TYPE.VECTOR ? style.getSourceFieldNames() : [];
     const fieldNames = [
       ...source.getFieldNames(),
-      ...(style.getType() === LAYER_STYLE_TYPE.VECTOR ? style.getSourceFieldNames() : []),
+      ...styleFieldNames,
       ...this.getValidJoins().map((join) => join.getLeftField().getName()),
     ];
 
@@ -399,11 +422,12 @@ export class VectorLayer extends AbstractLayer {
       geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
       sourceQuery: sourceQuery ? sourceQuery : undefined,
       applyGlobalQuery: source.getApplyGlobalQuery(),
+      applyGlobalTime: source.getApplyGlobalTime(),
       sourceMeta: source.getSyncMeta(),
     };
   }
 
-  async _performInnerJoins(
+  _performInnerJoins(
     sourceResult: SourceResult,
     joinStates: JoinState[],
     updateSourceData: DataRequestContext['updateSourceData']
@@ -430,10 +454,9 @@ export class VectorLayer extends AbstractLayer {
       for (let j = 0; j < joinStates.length; j++) {
         const joinState = joinStates[j];
         const innerJoin = joinState.join;
-        const canJoinOnCurrent = innerJoin.joinPropertiesToFeature(
-          feature,
-          joinState.propertiesMap
-        );
+        const canJoinOnCurrent = joinState.propertiesMap
+          ? innerJoin.joinPropertiesToFeature(feature, joinState.propertiesMap)
+          : false;
         isFeatureVisible = isFeatureVisible && canJoinOnCurrent;
       }
 
@@ -464,7 +487,11 @@ export class VectorLayer extends AbstractLayer {
     } = syncContext;
     const dataRequestId = SOURCE_DATA_REQUEST_ID;
     const requestToken = Symbol(`layer-${this.getId()}-${dataRequestId}`);
-    const searchFilters = this._getSearchFilters(dataFilters, source, style);
+    const searchFilters: VectorSourceRequestMeta = this._getSearchFilters(
+      dataFilters,
+      source,
+      style
+    );
     const prevDataRequest = this.getSourceDataRequest();
     const canSkipFetch = await canSkipSourceUpdate({
       source,
@@ -492,6 +519,13 @@ export class VectorLayer extends AbstractLayer {
         }
       );
       const layerFeatureCollection = assignFeatureIds(sourceFeatureCollection);
+      const supportedShapes = await source.getSupportedShapeTypes();
+      if (
+        supportedShapes.includes(VECTOR_SHAPE_TYPE.LINE) ||
+        supportedShapes.includes(VECTOR_SHAPE_TYPE.POLYGON)
+      ) {
+        layerFeatureCollection.features.push(...getCentroidFeatures(layerFeatureCollection));
+      }
       stopLoading(dataRequestId, requestToken, layerFeatureCollection, meta);
       return {
         refreshed: true,
@@ -501,9 +535,7 @@ export class VectorLayer extends AbstractLayer {
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(dataRequestId, requestToken, error.message);
       }
-      return {
-        refreshed: false,
-      };
+      throw error;
     }
   }
 
@@ -532,7 +564,7 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  async _syncJoinStyleMeta(syncContext: DataRequestContext, join: IJoin, style: IVectorStyle) {
+  async _syncJoinStyleMeta(syncContext: DataRequestContext, join: InnerJoin, style: IVectorStyle) {
     const joinSource = join.getRightJoinSource();
     return this._syncStyleMeta({
       source: joinSource,
@@ -576,7 +608,7 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const dynamicStyleFields = dynamicStyleProps.map((dynamicStyleProp) => {
-      return `${dynamicStyleProp.getFieldName()}${dynamicStyleProp.getNumberOfCategories()}`;
+      return `${dynamicStyleProp.getFieldName()}${dynamicStyleProp.getStyleMetaHash()}`;
     });
 
     const nextMeta = {
@@ -609,6 +641,7 @@ export class VectorLayer extends AbstractLayer {
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(dataRequestId, requestToken, error.message);
       }
+      throw error;
     }
   }
 
@@ -636,7 +669,7 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  async _syncJoinFormatters(syncContext: DataRequestContext, join: IJoin, style: IVectorStyle) {
+  async _syncJoinFormatters(syncContext: DataRequestContext, join: InnerJoin, style: IVectorStyle) {
     const joinSource = join.getRightJoinSource();
     return this._syncFormatters({
       source: joinSource,
@@ -699,6 +732,7 @@ export class VectorLayer extends AbstractLayer {
       stopLoading(dataRequestId, requestToken, formatters, nextMeta);
     } catch (error) {
       onLoadError(dataRequestId, requestToken, error.message);
+      throw error;
     }
   }
 
@@ -720,19 +754,26 @@ export class VectorLayer extends AbstractLayer {
     if (this.isLoadingBounds()) {
       return;
     }
-    await this._syncSourceStyleMeta(syncContext, source, style);
-    await this._syncSourceFormatters(syncContext, source, style);
-    const sourceResult = await this._syncSource(syncContext, source, style);
-    if (
-      !sourceResult.featureCollection ||
-      !sourceResult.featureCollection.features.length ||
-      !this.hasJoins()
-    ) {
-      return;
-    }
 
-    const joinStates = await this._syncJoins(syncContext, style);
-    await this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
+    try {
+      await this._syncSourceStyleMeta(syncContext, source, style);
+      await this._syncSourceFormatters(syncContext, source, style);
+      const sourceResult = await this._syncSource(syncContext, source, style);
+      if (
+        !sourceResult.featureCollection ||
+        !sourceResult.featureCollection.features.length ||
+        !this.hasJoins()
+      ) {
+        return;
+      }
+
+      const joinStates = await this._syncJoins(syncContext, style);
+      this._performInnerJoins(sourceResult, joinStates, syncContext.updateSourceData);
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
+        throw error;
+      }
+    }
   }
 
   _getSourceFeatureCollection() {
@@ -968,9 +1009,41 @@ export class VectorLayer extends AbstractLayer {
     mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
+  _setMbCentroidProperties(mbMap: MbMap, mvtSourceLayer?: string) {
+    const centroidLayerId = this._getMbCentroidLayerId();
+    const centroidLayer = mbMap.getLayer(centroidLayerId);
+    if (!centroidLayer) {
+      const mbLayer: MbLayer = {
+        id: centroidLayerId,
+        type: 'symbol',
+        source: this.getId(),
+      };
+      if (mvtSourceLayer) {
+        mbLayer['source-layer'] = mvtSourceLayer;
+      }
+      mbMap.addLayer(mbLayer);
+    }
+
+    const filterExpr = getCentroidFilterExpression(this.hasJoins());
+    if (filterExpr !== mbMap.getFilter(centroidLayerId)) {
+      mbMap.setFilter(centroidLayerId, filterExpr);
+    }
+
+    this.getCurrentStyle().setMBPropertiesForLabelText({
+      alpha: this.getAlpha(),
+      mbMap,
+      textLayerId: centroidLayerId,
+    });
+
+    this.syncVisibilityWithMb(mbMap, centroidLayerId);
+    mbMap.setLayerZoomRange(centroidLayerId, this.getMinZoom(), this.getMaxZoom());
+  }
+
   _syncStylePropertiesWithMb(mbMap: MbMap) {
     this._setMbPointsProperties(mbMap);
     this._setMbLinePolygonProperties(mbMap);
+    // centroid layers added after polygon layers to ensure they are on top of polygon layers
+    this._setMbCentroidProperties(mbMap);
   }
 
   _syncSourceBindingWithMb(mbMap: MbMap) {
@@ -1010,6 +1083,10 @@ export class VectorLayer extends AbstractLayer {
     return this.makeMbLayerId('text');
   }
 
+  _getMbCentroidLayerId() {
+    return this.makeMbLayerId('centroid');
+  }
+
   _getMbSymbolLayerId() {
     return this.makeMbLayerId('symbol');
   }
@@ -1030,6 +1107,7 @@ export class VectorLayer extends AbstractLayer {
     return [
       this._getMbPointLayerId(),
       this._getMbTextLayerId(),
+      this._getMbCentroidLayerId(),
       this._getMbSymbolLayerId(),
       this._getMbLineLayerId(),
       this._getMbPolygonLayerId(),

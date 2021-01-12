@@ -59,11 +59,17 @@ describe('with randomness', () => {
     );
 
     await phase.trigger();
+
+    // `phase.trigger()` uses `Math.random` to sort the internal array of
+    // handlers. But since the sorting algorithm used internally in
+    // `Array.prototype.sort` is not spec'ed, it can change between Node.js
+    // versions, and as a result the expected output below might not match if
+    // you up/downgrade Node.js.
     expect(order).toMatchInlineSnapshot(`
       Array [
-        "one",
         "three",
         "two",
+        "one",
       ]
     `);
   });

@@ -5,7 +5,7 @@
  */
 
 import { curry } from 'lodash';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { validate } from './validators';
 import {
@@ -25,16 +25,18 @@ import {
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
   PushToServiceResponse,
+  ExecutorSubActionCommonFieldsParams,
+  ServiceNowExecutorResultData,
 } from './types';
 
-// TODO: to remove, need to support Case
-import { buildMap, mapParams } from '../case/utils';
+export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }
 
+export const ActionTypeId = '.servicenow';
 // action type definition
 export function getActionType(
   params: GetActionTypeParams
@@ -46,7 +48,7 @@ export function getActionType(
 > {
   const { logger, configurationUtilities } = params;
   return {
-    id: '.servicenow',
+    id: ActionTypeId,
     minimumLicenseRequired: 'platinum',
     name: i18n.NAME,
     validate: {
@@ -63,7 +65,7 @@ export function getActionType(
 }
 
 // action executor
-
+const supportedSubActions: string[] = ['getFields', 'pushToService'];
 async function executor(
   { logger }: { logger: Logger },
   execOptions: ActionTypeExecutorOptions<
@@ -71,10 +73,10 @@ async function executor(
     ServiceNowSecretConfigurationType,
     ExecutorParams
   >
-): Promise<ActionTypeExecutorResult<PushToServiceResponse | {}>> {
+): Promise<ActionTypeExecutorResult<ServiceNowExecutorResultData | {}>> {
   const { actionId, config, params, secrets } = execOptions;
   const { subAction, subActionParams } = params;
-  let data: PushToServiceResponse | null = null;
+  let data: ServiceNowExecutorResultData | null = null;
 
   const externalService = createExternalService(
     {
@@ -91,7 +93,7 @@ async function executor(
     throw new Error(errorMessage);
   }
 
-  if (subAction !== 'pushToService') {
+  if (!supportedSubActions.includes(subAction)) {
     const errorMessage = `[Action][ExternalService] subAction ${subAction} not implemented.`;
     logger.error(errorMessage);
     throw new Error(errorMessage);
@@ -99,22 +101,22 @@ async function executor(
 
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
-
-    const { comments, externalId, ...restParams } = pushToServiceParams;
-    const incidentConfiguration = config.incidentConfiguration;
-    const mapping = incidentConfiguration ? buildMap(incidentConfiguration.mapping) : null;
-    const externalObject =
-      config.incidentConfiguration && mapping ? mapParams(restParams, mapping) : {};
-
     data = await api.pushToService({
       externalService,
-      mapping,
-      params: { ...pushToServiceParams, externalObject },
+      params: pushToServiceParams,
       secrets,
       logger,
     });
 
     logger.debug(`response push to service for incident id: ${data.id}`);
+  }
+
+  if (subAction === 'getFields') {
+    const getFieldsParams = subActionParams as ExecutorSubActionCommonFieldsParams;
+    data = await api.getFields({
+      externalService,
+      params: getFieldsParams,
+    });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

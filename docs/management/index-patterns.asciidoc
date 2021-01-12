@@ -1,91 +1,128 @@
 [[index-patterns]]
 == Create an index pattern
 
-To explore and visualize data in {kib}, you must create an index pattern.
-An index pattern tells {kib} which {es} indices contain the data that
-you want to work with.
-Once you create an index pattern, you're ready to:
+{kib} requires an index pattern to access the {es} data that you want to explore.
+An index pattern selects the data to use and allows you to define properties of the fields.
 
-* Interactively explore your data in <<discover, Discover>>.
-* Analyze your data in charts, tables, gauges, tag clouds, and more in <<dashboard, Dashboard>>.
-* Show off your data in a <<canvas, Canvas>> workpad.
-* If your data includes geo data, visualize it with <<maps, Maps>>.
+An index pattern can point to a specific index, for example, your log data from yesterday,
+or all indices that contain your data.  It can also point to a
+{ref}/data-streams.html[data stream] or {ref}/indices-aliases.html[index alias].
+
+You’ll learn how to:
+
+* Create an index pattern
+* Explore and configure the data fields
+* Set the default index pattern
+* Delete an index pattern
 
 [float]
 [[index-patterns-read-only-access]]
-=== [xpack]#Read-only access#
-If you have insufficient privileges to create or save index patterns, a read-only
-indicator appears in Kibana. The buttons to create new index patterns or save
-existing index patterns are not visible. For more information, see <<xpack-security-authorization>>.
+=== Before you begin
 
-[role="screenshot"]
-image::images/management-index-read-only-badge.png[Example of Index Pattern Management's read only access indicator in Kibana's header]
+* To access *Index Patterns*, you must have the {kib} privilege
+`Index Pattern Management`.  To add the privilege, open the main menu, then click *Stack Management > Roles*.
+
+* If a read-only indicator appears in {kib}, you have insufficient privileges
+to create or save index patterns. The buttons to create new index patterns or
+save existing index patterns are not visible. For more information,
+refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [float]
 [[settings-create-pattern]]
 === Create an index pattern
 
-When you don't have an index pattern, {kib} prompts you to create one. Or, you can open the main menu, 
-then click *Stack Management > Index Patterns*.
+If you collected data using one of the {kib} <<connect-to-elasticsearch,ingest options>>, uploaded a file, or added sample data,
+you get an index pattern for free, and can start exploring your data.
+If you loaded your own data, follow these steps to create an index pattern.
 
-[role="screenshot"]
-image:management/index-patterns/images/rollup-index-pattern.png["Menu with rollup index pattern"]
+. Open the main menu, then click to *Stack Management > Index Patterns*.
 
-[float]
-==== Standard index pattern
-
-Just start typing in the *Index pattern* field, and {kib} looks for
-the names of {es} indices that match your input. Make sure that the name of the
-index pattern is unique.
-
+. Click *Create index pattern*.
++
 [role="screenshot"]
 image:management/index-patterns/images/create-index-pattern.png["Create index pattern"]
 
-Your index pattern can match multiple {es} indices.
-Use a comma to separate the names, with no space after the comma. The notation for
-wildcards (`*`) and the ability to "exclude" (`-`) also apply
-(for example, `test*,-test3`).
+. Start typing in the *Index pattern* field, and {kib} looks for the names of
+{es} indices that match your input.
+** Use a wildcard (*) to match multiple indices.
+For example, suppose your system creates indices for Apache data
+using the naming scheme `filebeat-apache-a`, `filebeat-apache-b`, and so on.
+An index pattern named `filebeat-a` matches a single source, and `filebeat-*` matches multiple data sources.
+Using a wildcard is the most popular approach.
 
-If {kib} detects an index with a timestamp, you’re asked to choose a field to
-filter your data by time. If you don’t specify a field, you won’t be able
-to use the time filter.
+** Select multiple indices by entering multiple strings,
+separated with a comma. Make sure there is no space after the comma.
+For example, `filebeat-a,filebeat-b` matches two indices, but not other indices
+you might have afterwards (filebeat-c).
+
+** Use a minus sign (-) to exclude an index, for example, test*,-test3.
+
+. Click *Next step*.
+
+. If {kib} detects an index with a timestamp, expand the *Time field* menu,
+and then specify the default field for filtering your data by time.
++
+If your index doesn’t have time-based data, or if you don’t want to select
+the default timestamp field, choose *I don’t want to use the Time Filter*.
++
+NOTE: If you don’t set a default time field, you will not be able to use
+global time filters on your dashboards. This is useful if
+you have multiple time fields and want to create dashboards that combine visualizations
+based on different timestamps.
+
+. Click *Create index pattern*.
++
+{kib} is now configured to use your {es} data.
+
+. Select this index pattern when you search and visualize your data.
 
 [float]
 [[rollup-index-pattern]]
-==== Rollup index pattern
+==== Create an index pattern for rolled up data
 
-If a rollup index is detected in the cluster, clicking *Create index pattern*
-includes an item for creating a rollup index pattern.
-You can match an index pattern to only rolled up data, or mix both rolled
-up and raw data to explore and visualize all data together.
-An index pattern can match
-only one rollup index. When matching multiple indices,
-use a comma to separate the names, with no space after the comma.
+An index pattern can match one rollup index.  For a combination rollup
+index pattern with both raw and rolled up data, use the standard notation:
 
-For specific fields, the data in a rollup index includes only summarized metrics.
-From the original raw data, you are unable to search any other field.
+```ts
+rollup_logstash,kibana_sample_data_logs
+```
+For an example, refer to <<rollup-data-tutorial,Create and visualize rolled up data>>.
 
 [float]
 [[management-cross-cluster-search]]
-==== {ccs-cap} index pattern
+==== Create an index pattern that searches across clusters
 
-If your {es} clusters are configured for {ref}/modules-cross-cluster-search.html[{ccs}], you can create
-index patterns to search across the clusters of your choosing. Using the
-same syntax that you'd use in a raw {ccs} request in {es}, create your
-index pattern with the convention `<cluster-names>:<pattern>`.
+If your {es} clusters are configured for {ref}/modules-cross-cluster-search.html[{ccs}],
+you can create an index pattern to search across the clusters of your choosing. Use the
+same syntax that you'd use in a raw {ccs} request in {es}:
+
+```ts
+<cluster-names>:<pattern>
+```
 
 For example, to query {ls} indices across two {es} clusters
-that you set up for {ccs}, which are named `cluster_one` and `cluster_two`,
-you would use `cluster_one:logstash-*,cluster_two:logstash-*` as your index pattern.
+that you set up for {ccs}, named `cluster_one` and `cluster_two`,
+use this for your index pattern:
+
+```ts
+ cluster_one:logstash-*,cluster_two:logstash-*
+```
 
 You can use wildcards in your cluster names
-to match any number of clusters, so if you want to search {ls} indices across
-clusters named `cluster_foo`, `cluster_bar`, and so on, you would use `cluster_*:logstash-*`
-as your index pattern.
+to match any number of clusters.  For example, to search {ls} indices across
+clusters named `cluster_foo`, `cluster_bar`, and so on, create this index pattern:
+
+```ts
+cluster_*:logstash-*
+```
 
 To query across all {es} clusters that have been configured for {ccs},
 use a standalone wildcard for your cluster name in your index
-pattern: `*:logstash-*`.
+pattern:
+
+```ts
+*:logstash-*
+```
 
 Once an index pattern is configured using the {ccs} syntax, all searches and
 aggregations using that index pattern in {kib} take advantage of {ccs}.
@@ -93,8 +130,74 @@ aggregations using that index pattern in {kib} take advantage of {ccs}.
 
 [float]
 [[reload-fields]]
-=== Manage your index pattern
+=== Explore and configure the data fields
 
-To drill down into the fields and associated data types in an index pattern,
-click its name in the *Index patterns* overview page.
-For more information, refer to <<managing-fields, Index Patterns and Fields>>.
+To explore and configure the data fields in your index pattern, open the main menu, then click
+*Stack Management > Index Patterns*.  Each field has a {ref}/mapping.html[mapping],
+which indicates the type of data the field contains in {es},
+such as strings or boolean values. The field mapping also determines
+how you can use the field, such as whether it can be searched or aggregated.
+
+[role="screenshot"]
+image:management/index-patterns/images/new-index-pattern.png["Create index pattern"]
+
+[float]
+==== Format the display of common field types
+
+Whenever possible, {kib} uses the same field type for display as
+{es}. However, some field types that {es} supports are not available
+in {kib}. Using field formatters, you can manually change the field type in {kib} to display your data the way you prefer
+to see it, regardless of how it is stored in {es}.
+
+For example, if you store
+date values in {es}, you can use a {kib} field formatter to change the display to mm/dd/yyyy format.
+{kib} has field formatters for
+<<field-formatters-string, strings>>,
+<<field-formatters-date, dates>>,
+<<field-formatters-geopoint, geopoints>>,
+and <<field-formatters-numeric, numbers>>.
+
+A popularity counter keeps track of the fields you use most often.
+The top five most popular fields and their values are displayed in <<discover,*Discover*>>.
+
+To edit the field format and popularity counter, click the edit icon
+(image:management/index-patterns/images/edit_icon.png[]) in the index pattern detail view.
+
+[role="screenshot"]
+image:management/index-patterns/images/edit-field-format.png["Edit field format"]
+
+[float]
+==== Refresh the data fields
+
+To pick up newly-added fields,
+refresh (image:management/index-patterns/images/refresh-icon.png[Refresh icon]) the index fields list.
+This action also resets the {kib} popularity counters for the fields.
+
+[float]
+[[default-index-pattern]]
+=== Set the default index pattern
+
+The first index pattern you create is automatically designated as the default pattern,
+but you can set any index pattern as the default.  The default index pattern is automatically selected when you first open <<discover,*Discover*>> or create a visualization from scratch.
+
+. In *Index patterns*, click the index pattern name.
+. Click the star icon (image:management/index-patterns/images/star.png[Star icon]).
+
+[float]
+[[delete-index-pattern]]
+=== Delete an index pattern
+
+This action removes the pattern from the list of saved objects in {kib}.
+You will not be able to recover field formatters, scripted fields, source filters,
+and field popularity data associated with the index pattern. Deleting an
+index pattern does not remove any indices or data documents from {es}.
+
+WARNING:  Deleting an index pattern breaks all visualizations, saved searches, and other saved objects that reference the pattern.
+
+. In *Index patterns*, click the index pattern name.
+. Click the delete icon (image:management/index-patterns/images/delete.png[Delete icon]).
+
+[float]
+=== What’s next
+
+* Learn about <<scripted-fields,scripted fields>> and how to create data on the fly.

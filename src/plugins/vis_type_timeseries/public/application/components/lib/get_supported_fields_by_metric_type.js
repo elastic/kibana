@@ -18,7 +18,7 @@
  */
 
 import { KBN_FIELD_TYPES } from '../../../../../../plugins/data/public';
-import { METRIC_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/metric_types';
+import { METRIC_TYPES } from '../../../../common/metric_types';
 
 export function getSupportedFieldsByMetricType(type) {
   switch (type) {

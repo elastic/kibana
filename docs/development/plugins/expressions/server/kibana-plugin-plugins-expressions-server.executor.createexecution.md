@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-createExecution<ExtraContext extends Record<string, unknown> = Record<string, unknown>, Input = unknown, Output = unknown>(ast: string | ExpressionAstExpression, context?: ExtraContext, { debug }?: ExpressionExecOptions): Execution<Context & ExtraContext, Input, Output>;
+createExecution<Input = unknown, Output = unknown>(ast: string | ExpressionAstExpression, params?: ExpressionExecutionParams): Execution<Input, Output>;
 ```
 
 ## Parameters
@@ -15,10 +15,9 @@ createExecution<ExtraContext extends Record<string, unknown> = Record<string, un
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  ast | <code>string &#124; ExpressionAstExpression</code> |  |
-|  context | <code>ExtraContext</code> |  |
-|  { debug } | <code>ExpressionExecOptions</code> |  |
+|  params | <code>ExpressionExecutionParams</code> |  |
 
 <b>Returns:</b>
 
-`Execution<Context & ExtraContext, Input, Output>`
+`Execution<Input, Output>`
 

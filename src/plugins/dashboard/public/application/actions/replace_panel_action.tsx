@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'src/core/public';
-import { IEmbeddable, ViewMode, EmbeddableStart } from '../../embeddable_plugin';
+import { IEmbeddable, ViewMode, EmbeddableStart } from '../../services/embeddable';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
+import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
+import { dashboardReplacePanelAction } from '../../dashboard_strings';
 
 export const ACTION_REPLACE_PANEL = 'replacePanel';
 
@@ -34,7 +34,7 @@ export interface ReplacePanelActionContext {
   embeddable: IEmbeddable;
 }
 
-export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PANEL> {
+export class ReplacePanelAction implements Action<ReplacePanelActionContext> {
   public readonly type = ACTION_REPLACE_PANEL;
   public readonly id = ACTION_REPLACE_PANEL;
   public order = 3;
@@ -50,9 +50,7 @@ export class ReplacePanelAction implements ActionByType<typeof ACTION_REPLACE_PA
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-    return i18n.translate('dashboard.panel.removePanel.replacePanel', {
-      defaultMessage: 'Replace panel',
-    });
+    return dashboardReplacePanelAction.getDisplayName();
   }
 
   public getIconType({ embeddable }: ReplacePanelActionContext) {
