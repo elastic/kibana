@@ -8,10 +8,11 @@ import { timeline } from '../objects/timeline';
 import {
   FAVORITE_TIMELINE,
   LOCKED_ICON,
+  UNLOCKED_ICON,
   NOTES_TAB_BUTTON,
+  NOTES_TEXT,
   // NOTES_COUNT,
   NOTES_TEXT_AREA,
-  NOTE_BY_NOTE_ID,
   PIN_EVENT,
   TIMELINE_DESCRIPTION,
   TIMELINE_FILTER,
@@ -25,7 +26,7 @@ import {
   TIMELINES_NOTES_COUNT,
   TIMELINES_FAVORITE,
 } from '../screens/timelines';
-import { deleteTimeline, getTimelineById } from '../tasks/api_calls/timelines';
+import { cleanKibana } from '../tasks/common';
 
 import { loginAndWaitForPage } from '../tasks/login';
 import { openTimelineUsingToggle } from '../tasks/security_main';
@@ -46,12 +47,9 @@ import { openTimeline } from '../tasks/timelines';
 
 import { OVERVIEW_URL } from '../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/79389
-describe.skip('Timelines', () => {
-  let timelineId: string;
-
-  after(() => {
-    if (timelineId) deleteTimeline(timelineId);
+describe('Timelines', () => {
+  beforeEach(() => {
+    cleanKibana();
   });
 
   it('Creates a timeline', () => {
@@ -71,7 +69,7 @@ describe.skip('Timelines', () => {
     addNameToTimeline(timeline.title);
 
     cy.wait('@timeline').then(({ response }) => {
-      timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
+      const timelineId = response!.body.data.persistTimeline.timeline.savedObjectId;
 
       addDescriptionToTimeline(timeline.description);
       addNotesToTimeline(timeline.notes);
@@ -97,15 +95,11 @@ describe.skip('Timelines', () => {
       cy.get(PIN_EVENT)
         .should('have.attr', 'aria-label')
         .and('match', /Unpin the event in row 2/);
-      cy.get(LOCKED_ICON).should('be.visible');
+      cy.get(UNLOCKED_ICON).should('be.visible');
       cy.get(NOTES_TAB_BUTTON).click();
       cy.get(NOTES_TEXT_AREA).should('exist');
 
-      getTimelineById(timelineId).then((singleTimeline) => {
-        const noteId = singleTimeline!.body.data.getOneTimeline.notes[0].noteId;
-
-        cy.get(`${NOTE_BY_NOTE_ID(noteId)} p`).should('have.text', timeline.notes);
-      });
+      cy.get(NOTES_TEXT).should('have.text', timeline.notes);
     });
   });
 });

@@ -62,14 +62,17 @@ describe('Vislib Color Service', () => {
 
   it('should throw an error if input is not an array', () => {
     expect(() => {
+      // @ts-expect-error
       colors.createColorLookupFunction(200);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       colors.createColorLookupFunction('help');
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       colors.createColorLookupFunction(true);
     }).toThrowError();
 
@@ -78,10 +81,12 @@ describe('Vislib Color Service', () => {
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       colors.createColorLookupFunction(nullValue);
     }).toThrowError();
 
     expect(() => {
+      // @ts-expect-error
       colors.createColorLookupFunction(emptyObject);
     }).toThrowError();
   });
@@ -89,14 +94,17 @@ describe('Vislib Color Service', () => {
   describe('when array is not composed of numbers, strings, or undefined values', () => {
     it('should throw an error', () => {
       expect(() => {
+        // @ts-expect-error
         colors.createColorLookupFunction(arrayOfObjects);
       }).toThrowError();
 
       expect(() => {
+        // @ts-expect-error
         colors.createColorLookupFunction(arrayOfBooleans);
       }).toThrowError();
 
       expect(() => {
+        // @ts-expect-error
         colors.createColorLookupFunction(arrayOfNullValues);
       }).toThrowError();
     });
@@ -113,6 +121,7 @@ describe('Vislib Color Service', () => {
       }).not.toThrowError();
 
       expect(() => {
+        // @ts-expect-error
         colors.createColorLookupFunction(arrayOfUndefinedValues);
       }).not.toThrowError();
     });

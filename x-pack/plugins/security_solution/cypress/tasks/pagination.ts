@@ -7,9 +7,9 @@
 import { FIRST_PAGE_SELECTOR, THIRD_PAGE_SELECTOR } from '../screens/pagination';
 
 export const goToFirstPage = () => {
-  cy.get(FIRST_PAGE_SELECTOR).click({ force: true });
+  cy.get(FIRST_PAGE_SELECTOR).last().click({ force: true });
 };
 
 export const goToThirdPage = () => {
-  cy.get(THIRD_PAGE_SELECTOR).click({ force: true });
+  cy.get(THIRD_PAGE_SELECTOR).last().click({ force: true });
 };

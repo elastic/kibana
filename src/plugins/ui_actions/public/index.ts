@@ -39,13 +39,6 @@ export {
 } from './util';
 export {
   Trigger,
-  TriggerContext,
-  SELECT_RANGE_TRIGGER,
-  selectRangeTrigger,
-  VALUE_CLICK_TRIGGER,
-  valueClickTrigger,
-  APPLY_FILTER_TRIGGER,
-  applyFilterTrigger,
   VISUALIZE_FIELD_TRIGGER,
   visualizeFieldTrigger,
   VISUALIZE_GEO_FIELD_TRIGGER,
@@ -55,18 +48,9 @@ export {
   RowClickContext,
 } from './triggers';
 export {
-  TriggerContextMapping,
-  TriggerId,
-  ActionContextMapping,
-  ActionType,
   VisualizeFieldContext,
   ACTION_VISUALIZE_FIELD,
   ACTION_VISUALIZE_GEO_FIELD,
   ACTION_VISUALIZE_LENS_FIELD,
 } from './types';
-export {
-  ActionByType,
-  ActionDefinitionByType,
-  ActionExecutionContext,
-  ActionExecutionMeta,
-} from './actions';
+export { ActionExecutionContext, ActionExecutionMeta } from './actions';

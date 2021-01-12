@@ -26,11 +26,18 @@ import {
 import { openTimelineUsingToggle } from '../tasks/security_main';
 import { populateTimeline } from '../tasks/timeline';
 import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
+import { cleanKibana } from '../tasks/common';
 
-describe('Sourcerer', () => {
+describe.skip('Sourcerer', () => {
+  before(() => {
+    cleanKibana();
+  });
+
   beforeEach(() => {
+    cy.clearLocalStorage();
     loginAndWaitForPage(HOSTS_URL);
   });
+
   describe('Default scope', () => {
     it('has SIEM index patterns selected on initial load', () => {
       openSourcerer();
@@ -41,6 +48,7 @@ describe('Sourcerer', () => {
       openSourcerer();
       isSourcererOptions([`metrics-*`, `logs-*`]);
     });
+
     it('selected KIP gets added to sourcerer', () => {
       setSourcererOption(`metrics-*`);
       openSourcerer();
@@ -64,10 +72,12 @@ describe('Sourcerer', () => {
       isNotSourcererSelection(`metrics-*`);
     });
   });
+
   describe('Timeline scope', () => {
     const alertPatterns = ['.siem-signals-default'];
     const rawPatterns = ['auditbeat-*'];
     const allPatterns = [...alertPatterns, ...rawPatterns];
+
     it('Radio buttons select correct sourcerer patterns', () => {
       openTimelineUsingToggle();
       openSourcerer('timeline');
@@ -79,6 +89,7 @@ describe('Sourcerer', () => {
       alertPatterns.forEach((ss) => isSourcererSelection(ss, 'timeline'));
       rawPatterns.forEach((ss) => isNotSourcererSelection(ss, 'timeline'));
     });
+
     it('Adding an option results in the custom radio becoming active', () => {
       openTimelineUsingToggle();
       openSourcerer('timeline');
@@ -89,17 +100,13 @@ describe('Sourcerer', () => {
       openSourcerer('timeline');
       isCustomRadio();
     });
+
     it('Selected index patterns are properly queried', () => {
       openTimelineUsingToggle();
       populateTimeline();
       openSourcerer('timeline');
       deselectSourcererOptions(rawPatterns, 'timeline');
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((strCount) => {
-          const intCount = +strCount;
-          cy.wrap(intCount).should('eq', 0);
-        });
+      cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.eql(0));
     });
   });
 });

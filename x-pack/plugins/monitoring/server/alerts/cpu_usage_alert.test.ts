@@ -125,6 +125,13 @@ describe('CpuUsageAlert', () => {
             ccs: undefined,
             cluster: { clusterUuid, clusterName },
             cpuUsage,
+            itemLabel: undefined,
+            meta: {
+              clusterUuid,
+              cpuUsage,
+              nodeId,
+              nodeName,
+            },
             nodeId,
             nodeName,
             ui: {

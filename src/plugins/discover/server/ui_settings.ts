@@ -33,6 +33,7 @@ import {
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
+  DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../common';
@@ -166,6 +167,23 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
   },
+  [DOC_TABLE_LEGACY]: {
+    name: i18n.translate('discover.advancedSettings.docTableVersionName', {
+      defaultMessage: 'Use legacy table',
+    }),
+    value: true,
+    description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
+      defaultMessage:
+        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen ' +
+        'view. Enable this option if you prefer to fall back to the legacy table.',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:useLegacyDataGrid',
+    },
+  },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
       defaultMessage: 'Modify columns when changing index patterns',
@@ -183,10 +201,8 @@ export const uiSettings: Record<string, UiSettingsParams> = {
   },
   [SEARCH_FIELDS_FROM_SOURCE]: {
     name: 'Read fields from _source',
-    description: `Disable to retrieve fields via the new <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-fields.html#search-fields"
-        target="_blank" rel="noopener">Fields API</a> in the high-level search service. Keep this setting enabled
-        to continue retrieving fields directly from \`_source\`.`,
-    value: true,
+    description: `When enabled will load documents directly from \`_source\`. This is soon going to be deprecated. When disabled, will retrieve fields via the new Fields API in the high-level search service.`,
+    value: false,
     category: ['discover'],
     schema: schema.boolean(),
   },

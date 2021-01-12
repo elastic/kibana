@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { RowRendererId, TimelineId } from '../../../../../common/types/timeline';
+import { RowRendererId, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import {
   FIRST_ARIA_INDEX,
   ARIA_COLINDEX_ATTRIBUTE,
@@ -43,6 +43,7 @@ interface OwnProps {
   isEventViewer?: boolean;
   sort: Sort[];
   refetch: inputsModel.Refetch;
+  tabType: TimelineTabs;
   totalPages: number;
   onRuleChange?: () => void;
 }
@@ -78,6 +79,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     showCheckboxes,
     refetch,
     sort,
+    tabType,
     totalPages,
   }) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -177,7 +179,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           <EventsTable
             $activePage={activePage}
             $columnCount={columnHeaders.length + 1}
-            data-test-subj="events-table"
+            data-test-subj={`${tabType}-events-table`}
             columnWidths={columnWidths}
             onKeyDown={onKeyDown}
             $rowCount={data.length}
@@ -215,6 +217,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
+              tabType={tabType}
             />
           </EventsTable>
         </TimelineBody>
@@ -235,7 +238,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     prevProps.id === nextProps.id &&
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-    prevProps.showCheckboxes === nextProps.showCheckboxes
+    prevProps.showCheckboxes === nextProps.showCheckboxes &&
+    prevProps.tabType === nextProps.tabType
 );
 
 BodyComponent.displayName = 'BodyComponent';

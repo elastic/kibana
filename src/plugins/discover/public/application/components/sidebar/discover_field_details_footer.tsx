@@ -46,19 +46,24 @@ export function DiscoverFieldDetailsFooter({
             data-test-subj="onAddFilterButton"
           >
             <FormattedMessage
-              id="discover.fieldChooser.detailViews.existsText"
-              defaultMessage="Exists in"
-            />{' '}
-            {details.exists}
+              id="discover.fieldChooser.detailViews.existsInRecordsText"
+              defaultMessage="Exists in {value} / {totalValue} records"
+              values={{
+                value: details.exists,
+                totalValue: details.total,
+              }}
+            />
           </EuiLink>
         ) : (
-          <span>{details.exists}</span>
-        )}{' '}
-        / {details.total}{' '}
-        <FormattedMessage
-          id="discover.fieldChooser.detailViews.recordsText"
-          defaultMessage="records"
-        />
+          <FormattedMessage
+            id="discover.fieldChooser.detailViews.valueOfRecordsText"
+            defaultMessage="{value} / {totalValue} records"
+            values={{
+              value: details.exists,
+              totalValue: details.total,
+            }}
+          />
+        )}
       </EuiText>
     </EuiPopoverFooter>
   );

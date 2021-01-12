@@ -39,10 +39,14 @@ export function showOptionsPopover({
   onUseMarginsChange,
   hidePanelTitles,
   onHidePanelTitlesChange,
+  syncColors,
+  onSyncColorsChange,
 }: {
   anchorElement: HTMLElement;
   useMargins: boolean;
   onUseMarginsChange: (useMargins: boolean) => void;
+  syncColors: boolean;
+  onSyncColorsChange: (syncColors: boolean) => void;
   hidePanelTitles: boolean;
   onHidePanelTitlesChange: (hideTitles: boolean) => void;
 }) {
@@ -62,6 +66,8 @@ export function showOptionsPopover({
           onUseMarginsChange={onUseMarginsChange}
           hidePanelTitles={hidePanelTitles}
           onHidePanelTitlesChange={onHidePanelTitlesChange}
+          syncColors={syncColors}
+          onSyncColorsChange={onSyncColorsChange}
         />
       </EuiWrappingPopover>
     </I18nProvider>

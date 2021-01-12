@@ -95,40 +95,6 @@ export const originID: (state: DataState) => string | undefined = createSelector
   }
 );
 
-function currentRelatedEventRequestID(state: DataState): number | undefined {
-  if (state.currentRelatedEvent) {
-    return state.currentRelatedEvent?.dataRequestID;
-  } else {
-    return undefined;
-  }
-}
-
-function currentNodeEventsInCategoryRequestID(state: DataState): number | undefined {
-  if (state.nodeEventsInCategory?.pendingRequest) {
-    return state.nodeEventsInCategory.pendingRequest?.dataRequestID;
-  } else if (state.nodeEventsInCategory) {
-    return state.nodeEventsInCategory?.dataRequestID;
-  } else {
-    return undefined;
-  }
-}
-
-export const eventsInCategoryResultIsStale = createSelector(
-  currentNodeEventsInCategoryRequestID,
-  refreshCount,
-  function eventsInCategoryResultIsStale(oldID, newID) {
-    return oldID !== undefined && oldID !== newID;
-  }
-);
-
-export const currentRelatedEventIsStale = createSelector(
-  currentRelatedEventRequestID,
-  refreshCount,
-  function currentRelatedEventIsStale(oldID, newID) {
-    return oldID !== undefined && oldID !== newID;
-  }
-);
-
 /**
  * Returns a data structure for accessing events for specific nodes in a graph. For Endpoint graphs these nodes will be
  * process lifecycle events.
@@ -260,10 +226,6 @@ export const relatedEventCountByCategory: (
   }
 );
 
-export function refreshCount(state: DataState) {
-  return state.refreshCount;
-}
-
 /**
  * Returns true if there might be more generations in the graph that we didn't get because we reached
  * the requested generations limit.
@@ -345,8 +307,11 @@ export function treeParametersToFetch(state: DataState): TreeFetcherParameters |
   }
 }
 
+/**
+ * Retrieve the time range filters if they exist, otherwise default to start of epoch to the largest future date.
+ */
 export const timeRangeFilters = createSelector(
-  treeParametersToFetch,
+  (state: DataState) => state.tree?.currentParameters,
   function timeRangeFilters(treeParameters): TimeRange {
     // Should always be provided from date picker, but provide valid defaults in any case.
     const from = new Date(0);
@@ -355,17 +320,15 @@ export const timeRangeFilters = createSelector(
       from: from.toISOString(),
       to: to.toISOString(),
     };
-    if (treeParameters !== null) {
+    if (treeParameters !== undefined) {
       if (treeParameters.filters.from) {
         timeRange.from = treeParameters.filters.from;
       }
       if (treeParameters.filters.to) {
         timeRange.to = treeParameters.filters.to;
       }
-      return timeRange;
-    } else {
-      return timeRange;
     }
+    return timeRange;
   }
 );
 

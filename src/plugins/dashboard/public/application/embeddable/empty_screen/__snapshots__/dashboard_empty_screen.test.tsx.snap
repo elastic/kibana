@@ -597,7 +597,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
           restrictWidth="500px"
         >
           <div
-            className="euiPage euiPage--restrictWidth-custom dshStartScreen"
+            className="euiPage euiPage--restrictWidth-custom euiPage--paddingMedium dshStartScreen"
             style={
               Object {
                 "maxWidth": "500px",
@@ -942,7 +942,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
           restrictWidth="500px"
         >
           <div
-            className="euiPage euiPage--restrictWidth-custom dshStartScreen"
+            className="euiPage euiPage--restrictWidth-custom euiPage--paddingMedium dshStartScreen"
             style={
               Object {
                 "maxWidth": "500px",

@@ -167,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'Bad Request',
+                message: 'Error fetching objects to export',
                 attributes: {
                   objects: [
                     {

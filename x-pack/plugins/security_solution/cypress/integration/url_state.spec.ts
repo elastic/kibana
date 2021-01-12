@@ -38,6 +38,7 @@ import { ABSOLUTE_DATE_RANGE } from '../urls/state';
 
 import { timeline } from '../objects/timeline';
 import { TIMELINE } from '../screens/create_new_case';
+import { cleanKibana } from '../tasks/common';
 
 const ABSOLUTE_DATE = {
   endTime: '2019-08-01T20:33:29.186Z',
@@ -48,8 +49,11 @@ const ABSOLUTE_DATE = {
   startTimeTimeline: '2019-08-02T20:03:29.186Z',
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/61612
-describe.skip('url state', () => {
+describe('url state', () => {
+  beforeEach(() => {
+    cleanKibana();
+  });
+
   it('sets the global start and end dates from the url', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.url);
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).should(
@@ -137,12 +141,12 @@ describe.skip('url state', () => {
 
   it('sets kql on network page', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
-    cy.get(KQL_INPUT).invoke('text').should('eq', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets kql on hosts page', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-    cy.get(KQL_INPUT).invoke('text').should('eq', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets the url state when kql is set', () => {
@@ -183,7 +187,7 @@ describe.skip('url state', () => {
       'href',
       `/app/security/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&sourcerer=(default:!(\'auditbeat-*\'))&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2020-01-01T21:33:29.186Z')))`
     );
-    cy.get(HOSTS_NAMES).first().invoke('text').should('eq', 'siem-kibana');
+    cy.get(HOSTS_NAMES).first().should('have.text', 'siem-kibana');
 
     openFirstHostDetails();
     clearSearchBar();
@@ -213,7 +217,7 @@ describe.skip('url state', () => {
   it('Do not clears kql when navigating to a new page', () => {
     loginAndWaitForPageWithoutDateRange(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     navigateFromHeaderTo(NETWORK);
-    cy.get(KQL_INPUT).invoke('text').should('eq', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets and reads the url state for timeline by id', () => {
