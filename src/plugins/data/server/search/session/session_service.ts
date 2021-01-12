@@ -23,7 +23,7 @@ import { ISearchStrategy } from '../types';
 import { ISessionService } from './types';
 
 /**
- * The OSS session service. See data_enhanced in X-Pack for the background session service.
+ * The OSS session service. See data_enhanced in X-Pack for the search session service.
  */
 export class SessionService implements ISessionService {
   constructor() {}

@@ -20,66 +20,58 @@ import { createCase } from '../tasks/api_calls/cases';
 
 // https://github.com/elastic/kibana/issues/86959
 describe.skip('attach timeline to case', () => {
-  const myTimeline = { ...timeline };
-
   context('without cases created', () => {
-    before(() => {
+    beforeEach(() => {
       cleanKibana();
-      createTimeline(timeline).then((response) => {
-        myTimeline.id = response.body.data.persistTimeline.timeline.savedObjectId;
-      });
+      createTimeline(timeline).then((response) =>
+        cy.wrap(response.body.data.persistTimeline.timeline).as('myTimeline')
+      );
     });
 
-    it('attach timeline to a new case', () => {
-      loginAndWaitForTimeline(myTimeline.id!);
+    it('attach timeline to a new case', function () {
+      loginAndWaitForTimeline(this.myTimeline.savedObjectId);
       attachTimelineToNewCase();
 
       cy.location('origin').then((origin) => {
         cy.get(DESCRIPTION_INPUT).should(
           'have.text',
-          `[${myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${myTimeline.id}%27,isOpen:!t))`
+          `[${this.myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.myTimeline.savedObjectId}%27,isOpen:!t))`
         );
       });
     });
 
-    it('attach timeline to an existing case with no case', () => {
-      loginAndWaitForTimeline(myTimeline.id!);
+    it('attach timeline to an existing case with no case', function () {
+      loginAndWaitForTimeline(this.myTimeline.savedObjectId);
       attachTimelineToExistingCase();
       addNewCase();
 
       cy.location('origin').then((origin) => {
         cy.get(DESCRIPTION_INPUT).should(
           'have.text',
-          `[${
-            myTimeline.title
-          }](${origin}/app/security/timelines?timeline=(id:%27${myTimeline.id!}%27,isOpen:!t))`
+          `[${this.myTimeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.myTimeline.savedObjectId}%27,isOpen:!t))`
         );
       });
     });
   });
 
   context('with cases created', () => {
-    let timelineId: string;
-    let caseId: string;
     before(() => {
       cleanKibana();
-      createTimeline(timeline).then((response) => {
-        timelineId = response.body.data.persistTimeline.timeline.savedObjectId;
-      });
-      createCase(case1).then((response) => {
-        caseId = response.body.id;
-      });
+      createTimeline(timeline).then((response) =>
+        cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('timelineId')
+      );
+      createCase(case1).then((response) => cy.wrap(response.body.id).as('caseId'));
     });
 
-    it('attach timeline to an existing case', () => {
-      loginAndWaitForTimeline(timelineId);
+    it('attach timeline to an existing case', function () {
+      loginAndWaitForTimeline(this.timelineId);
       attachTimelineToExistingCase();
-      selectCase(caseId);
+      selectCase(this.caseId);
 
       cy.location('origin').then((origin) => {
         cy.get(ADD_COMMENT_INPUT).should(
           'have.text',
-          `[${timeline.title}](${origin}/app/security/timelines?timeline=(id:%27${timelineId}%27,isOpen:!t))`
+          `[${timeline.title}](${origin}/app/security/timelines?timeline=(id:%27${this.timelineId}%27,isOpen:!t))`
         );
       });
     });

@@ -1,4 +1,4 @@
-@import 'field_data_row';
+@import "components/field_data_expanded_row/number_content";
 
 .mlDataVisualizerFieldExpandedRow {
   padding-left: $euiSize * 4;
@@ -9,7 +9,9 @@
     text-align: left;
     color: $euiColorDarkShade;
     font-weight: bold;
+    padding-bottom: $euiSizeS;
   }
+
   .mlFieldDataCard__codeContent {
     @include euiCodeFont;
   }
@@ -35,6 +37,9 @@
   .mlDataVisualizerSummaryTable {
     .euiTableRow > .euiTableRowCell{
       border-bottom: 0px;
+    }
+    .euiTableHeaderCell {
+      display: none;
     }
   }
 }
