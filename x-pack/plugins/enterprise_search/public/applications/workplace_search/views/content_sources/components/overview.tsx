@@ -55,6 +55,7 @@ export const Overview: React.FC = () => {
   const { isOrganization } = useValues(AppLogic);
 
   const {
+    id,
     summary,
     documentCount,
     activities,
@@ -62,7 +63,6 @@ export const Overview: React.FC = () => {
     details,
     custom,
     accessToken,
-    key,
     licenseSupportsPermissions,
     serviceTypeSupportsPermissions,
     indexPermissions,
@@ -404,9 +404,9 @@ export const Overview: React.FC = () => {
         </h6>
       </EuiText>
       <EuiSpacer size="s" />
-      <CredentialItem label="Access Token" value={accessToken} testSubj="AccessToken" />
+      <CredentialItem label="ID" value={id} testSubj="ContentSourceId" />
       <EuiSpacer size="s" />
-      <CredentialItem label="Key" value={key} testSubj="ContentSourceKey" />
+      <CredentialItem label="Access Token" value={accessToken} testSubj="AccessToken" />
     </EuiPanel>
   );
 
