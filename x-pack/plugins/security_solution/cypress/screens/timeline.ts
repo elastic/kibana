@@ -82,7 +82,7 @@ export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 export const REMOVE_COLUMN = '[data-test-subj="remove-column"]';
 
 export const RESET_FIELDS =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="reset-fields"]';
+  '[data-test-subj="fields-browser-container"] [data-test-subj="reset-fields"]';
 
 export const SAVE_FILTER_BTN = '[data-test-subj="saveFilter"]';
 
