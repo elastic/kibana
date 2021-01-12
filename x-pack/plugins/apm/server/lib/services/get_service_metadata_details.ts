@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../common/processor_event';
 import { SortOptions } from '../../../../../typings/elasticsearch';
 import {
   AGENT,
   CLOUD,
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_MACHINE_TYPE,
-  CONTAINER,
+  CONTAINER_ID,
   HOST,
   KUBERNETES,
   SERVICE,
@@ -26,6 +27,7 @@ import {
   getProcessorEventForAggregatedTransactions,
 } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { should } from './get_service_metadata_icons';
 
 type ServiceMetadataDetailsRaw = Pick<
   TransactionRaw,
@@ -78,25 +80,19 @@ export async function getServiceMetadataDetails({
     ),
   ];
 
-  const should = [
-    { exists: { field: CONTAINER } },
-    { exists: { field: KUBERNETES } },
-    { exists: { field: CLOUD } },
-    { exists: { field: HOST } },
-    { exists: { field: AGENT } },
-  ];
-
   const params = {
     apm: {
       events: [
         getProcessorEventForAggregatedTransactions(
           searchAggregatedTransactions
         ),
+        ProcessorEvent.error,
+        ProcessorEvent.span,
       ],
     },
     body: {
       size: 1,
-      _source: [SERVICE, AGENT, HOST, CONTAINER, KUBERNETES, CLOUD],
+      _source: [SERVICE, AGENT, HOST, CONTAINER_ID, KUBERNETES, CLOUD],
       query: { bool: { filter, should } },
       aggs: {
         serviceVersions: {

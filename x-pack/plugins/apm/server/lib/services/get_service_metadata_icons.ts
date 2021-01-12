@@ -4,12 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ProcessorEvent } from '../../../common/processor_event';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
   CONTAINER_ID,
   KUBERNETES,
   SERVICE_NAME,
+  POD_NAME,
+  HOST_OS_PLATFORM,
 } from '../../../common/elasticsearch_fieldnames';
 import { ContainerType } from '../../../common/service_metadata';
 import { rangeFilter } from '../../../common/utils/range_filter';
@@ -30,6 +33,14 @@ interface ServiceMetadataIcons {
   containerType?: ContainerType;
   cloudProvider?: string;
 }
+
+export const should = [
+  { exists: { field: CONTAINER_ID } },
+  { exists: { field: POD_NAME } },
+  { exists: { field: CLOUD_PROVIDER } },
+  { exists: { field: HOST_OS_PLATFORM } },
+  { exists: { field: AGENT_NAME } },
+];
 
 export async function getServiceMetadataIcons({
   serviceName,
@@ -56,13 +67,15 @@ export async function getServiceMetadataIcons({
         getProcessorEventForAggregatedTransactions(
           searchAggregatedTransactions
         ),
+        ProcessorEvent.error,
+        ProcessorEvent.span,
       ],
     },
     terminateAfter: 1,
     body: {
       size: 1,
       _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME],
-      query: { bool: { filter } },
+      query: { bool: { filter, should } },
     },
   };
 
