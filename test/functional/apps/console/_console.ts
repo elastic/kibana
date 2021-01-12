@@ -97,9 +97,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.dismissTutorial();
       const editor = await find.byCssSelector('.conApp');
       expect(await PageObjects.console.hasAutocompleter()).to.be(false);
-      // We should always have autocompletion for the GET _search endpoint
-      await PageObjects.console.appendTextToEditor(editor, browser, '\nGET _sear');
-      expect(await PageObjects.console.hasAutocompleter()).to.be(true);
+      await PageObjects.console.promptAutocomplete(editor);
+      retry.waitFor('autocomplete to be visible', () => PageObjects.console.hasAutocompleter());
     });
   });
 }
