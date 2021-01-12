@@ -163,7 +163,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           const { rowHasRowClickTriggerActions } = useContext(DataContext);
           return (
             <EuiButtonIcon
-              aria-label={i18n.translate('xpack.lens.datatable.actionsLabel', {
+              aria-label={i18n.translate('xpack.lens.table.actionsLabel', {
                 defaultMessage: 'Show actions',
               })}
               iconType={

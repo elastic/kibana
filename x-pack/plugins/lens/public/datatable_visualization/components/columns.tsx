@@ -66,7 +66,7 @@ export const createGridColumns = (
               }
             );
             const filterForAriaLabel = i18n.translate(
-              'spack.lens.table.tableCellFilter.filterForValueAriaLabel',
+              'xpack.lens.table.tableCellFilter.filterForValueAriaLabel',
               {
                 defaultMessage: 'Filter for value: {cellContent}',
                 values: {
@@ -97,11 +97,14 @@ export const createGridColumns = (
               columnId,
             });
 
-            const filterOutText = i18n.translate('xpack.lens.tableCellFilter.filterOutValueText', {
-              defaultMessage: 'Filter out value',
-            });
+            const filterOutText = i18n.translate(
+              'xpack.lens.table.tableCellFilter.filterOutValueText',
+              {
+                defaultMessage: 'Filter out value',
+              }
+            );
             const filterOutAriaLabel = i18n.translate(
-              'xpack.lens.tableCellFilter.filterOutValueAriaLabel',
+              'xpack.lens.table.tableCellFilter.filterOutValueAriaLabel',
               {
                 defaultMessage: 'Filter out value: {cellContent}',
                 values: {
@@ -141,14 +144,14 @@ export const createGridColumns = (
         showSortAsc: isReadOnlySorted
           ? false
           : {
-              label: i18n.translate('visTypeTable.sort.ascLabel', {
+              label: i18n.translate('xpack.lens.table.sort.ascLabel', {
                 defaultMessage: 'Sort asc',
               }),
             },
         showSortDesc: isReadOnlySorted
           ? false
           : {
-              label: i18n.translate('visTypeTable.sort.descLabel', {
+              label: i18n.translate('xpack.lens.table.sort.descLabel', {
                 defaultMessage: 'Sort desc',
               }),
             },
