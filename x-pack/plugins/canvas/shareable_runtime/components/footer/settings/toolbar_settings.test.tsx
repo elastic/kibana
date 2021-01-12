@@ -6,11 +6,11 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { JestContext } from '../../../../test/context_jest';
-import { getToolbarCheckbox as checkbox } from '../../../../test/selectors';
-import { ToolbarSettings } from '../toolbar_settings';
+import { JestContext } from '../../../test/context_jest';
+import { getToolbarCheckbox as checkbox } from '../../../test/selectors';
+import { ToolbarSettings } from './toolbar_settings';
 
-jest.mock('../../../../supported_renderers');
+jest.mock('../../../supported_renderers');
 
 describe('<ToolbarSettings />', () => {
   const wrapper = mount(

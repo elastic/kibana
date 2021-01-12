@@ -6,15 +6,15 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { JestContext } from '../../../test/context_jest';
+import { JestContext } from '../../test/context_jest';
 import {
   getPageControlsPrevious as previous,
   getPageControlsCenter as current,
   getPageControlsNext as next,
-} from '../../../test/selectors';
-import { PageControls } from '../page_controls';
+} from '../../test/selectors';
+import { PageControls } from './page_controls';
 
-jest.mock('../../../supported_renderers');
+jest.mock('../../supported_renderers');
 
 describe('<PageControls />', () => {
   test('null workpad renders nothing', () => {

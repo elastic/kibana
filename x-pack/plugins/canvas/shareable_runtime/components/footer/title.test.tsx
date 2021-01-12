@@ -6,10 +6,10 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { JestContext } from '../../../test/context_jest';
-import { Title } from '../title';
+import { JestContext } from '../../test/context_jest';
+import { Title } from './title';
 
-jest.mock('../../../supported_renderers');
+jest.mock('../../supported_renderers');
 
 describe('<Title />', () => {
   test('null workpad renders nothing', () => {
