@@ -113,22 +113,12 @@ describe('getLatencyChartSelector', () => {
         anomalyTimeseries: {
           boundaries: [
             {
-              color: 'rgba(0,0,255,0.5)',
-              data: [
-                {
-                  x: 1,
-                  y: 1,
-                },
-              ],
-              fit: 'lookahead',
-              hideLegend: true,
-              hideTooltipValue: true,
-              stackAccessors: ['y'],
-              title: 'anomalyBoundariesUpper',
-              type: 'area',
-            },
-            {
               color: 'rgba(0,0,0,0)',
+              areaSeriesStyle: {
+                point: {
+                  opacity: 0,
+                },
+              },
               data: [
                 {
                   x: 1,
@@ -140,6 +130,26 @@ describe('getLatencyChartSelector', () => {
               hideTooltipValue: true,
               stackAccessors: ['y'],
               title: 'anomalyBoundariesLower',
+              type: 'area',
+            },
+            {
+              color: 'rgba(0,0,255,0.5)',
+              areaSeriesStyle: {
+                point: {
+                  opacity: 0,
+                },
+              },
+              data: [
+                {
+                  x: 1,
+                  y: 1,
+                },
+              ],
+              fit: 'lookahead',
+              hideLegend: true,
+              hideTooltipValue: true,
+              stackAccessors: ['y'],
+              title: 'anomalyBoundariesUpper',
               type: 'area',
             },
           ],

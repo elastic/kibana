@@ -125,28 +125,32 @@ function getAnomalyTimeseries({
     fit: Fit.Lookahead,
     hideLegend: true,
     hideTooltipValue: true,
+    stackAccessors: ['y'],
+    areaSeriesStyle: {
+      point: {
+        opacity: 0,
+      },
+    },
   };
 
   const boundaries = [
     {
       ...boundariesConfigBase,
-      title: 'anomalyBoundariesUpper',
-      stackAccessors: ['y'],
-      data: anomalyTimeseries.anomalyBoundaries.map((coord) => ({
-        x: coord.x,
-        y: coord.y - coord.y0,
-      })),
-      color: rgba(theme.eui.euiColorVis1, 0.5),
-    },
-    {
-      ...boundariesConfigBase,
       title: 'anomalyBoundariesLower',
-      stackAccessors: ['y'],
       data: anomalyTimeseries.anomalyBoundaries.map((coord) => ({
         x: coord.x,
         y: coord.y0,
       })),
       color: rgba(0, 0, 0, 0),
+    },
+    {
+      ...boundariesConfigBase,
+      title: 'anomalyBoundariesUpper',
+      data: anomalyTimeseries.anomalyBoundaries.map((coord) => ({
+        x: coord.x,
+        y: coord.y - coord.y0,
+      })),
+      color: rgba(theme.eui.euiColorVis1, 0.5),
     },
   ];
 

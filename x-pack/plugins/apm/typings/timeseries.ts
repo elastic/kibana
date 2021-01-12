@@ -3,7 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AccessorFn, Fit } from '@elastic/charts';
+import {
+  AccessorFn,
+  AreaSeriesStyle,
+  Fit,
+  FitConfig,
+  LineSeriesStyle,
+} from '@elastic/charts';
+import { DeepPartial } from 'utility-types';
 import { Maybe } from '../typings/common';
 
 export interface Coordinate {
@@ -34,9 +41,11 @@ export interface APMChartSpec<
   type: string;
   color: string;
   areaColor?: string;
-  fit?: Exclude<Fit, 'explicit'>;
+  fit?: Exclude<Fit, 'explicit'> | FitConfig;
   stackAccessors?: Accessor;
   splitSeriesAccessors?: Accessor;
+  lineSeriesStyle?: DeepPartial<LineSeriesStyle>;
+  areaSeriesStyle?: DeepPartial<AreaSeriesStyle>;
 }
 
 export type ChartType = 'area' | 'linemark';

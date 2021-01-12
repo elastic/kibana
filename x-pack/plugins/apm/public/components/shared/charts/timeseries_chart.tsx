@@ -178,6 +178,8 @@ export function TimeseriesChart({
                 serie.hideTooltipValue ? () => false : undefined
               }
               stackAccessors={serie.stackAccessors ?? undefined}
+              areaSeriesStyle={serie.areaSeriesStyle}
+              lineSeriesStyle={serie.lineSeriesStyle}
             />
           );
         })}
