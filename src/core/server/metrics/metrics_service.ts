@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import numeral from '@elastic/numeral';
 import { ReplaySubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { CoreService } from '../../types';
@@ -78,10 +78,24 @@ export class MetricsService
 
     return this.service;
   }
+  private extractOpsLogsData({ process, os }: Partial<OpsMetrics>): string {
+    const memoryLogEntryinMB = numeral(process?.memory?.heap?.used_in_bytes ?? 0).format('0.0b');
+    // ProcessMetricsCollector converts from seconds to milliseconds. Format here is HH:mm:ss for backward compatibility
+    const uptimeLogEntry = numeral((process?.uptime_in_millis ?? 0) / 1000).format('00:00:00');
+    const loadLogEntry = [...Object.values(os?.load ?? [])]
+      .map((val: number) => {
+        return numeral(val).format('0.00');
+      })
+      .join(' ');
+    const delayLogEntry = numeral(process?.event_loop_delay ?? 0).format('0.000');
+    return `memory: ${memoryLogEntryinMB} uptime: ${uptimeLogEntry} load: [${loadLogEntry}] delay: ${delayLogEntry}`;
+  }
 
   private async refreshMetrics() {
     this.logger.debug('Refreshing metrics');
     const metrics = await this.metricsCollector!.collect();
+    const opsLogsMetrics = this.extractOpsLogsData(metrics);
+    this.logger.info(opsLogsMetrics);
     this.metricsCollector!.reset();
     this.metrics$.next(metrics);
   }

@@ -24,11 +24,14 @@ import { mockOpsCollector } from './metrics_service.test.mocks';
 import { MetricsService } from './metrics_service';
 import { mockCoreContext } from '../core_context.mock';
 import { httpServiceMock } from '../http/http_service.mock';
+import { loggingSystemMock } from '../logging/logging_system.mock';
 import { take } from 'rxjs/operators';
 
 const testInterval = 100;
 
 const dummyMetrics = { metricA: 'value', metricB: 'otherValue' };
+
+const logger = loggingSystemMock.create();
 
 describe('MetricsService', () => {
   const httpMock = httpServiceMock.createInternalSetupContract();
@@ -40,7 +43,7 @@ describe('MetricsService', () => {
     const configService = configServiceMock.create({
       atPath: { interval: moment.duration(testInterval) },
     });
-    const coreContext = mockCoreContext.create({ configService });
+    const coreContext = mockCoreContext.create({ logger, configService });
     metricsService = new MetricsService(coreContext);
   });
 
@@ -128,6 +131,57 @@ describe('MetricsService', () => {
 
       expect(await nextEmission()).toEqual({ metric: 'first' });
       expect(await nextEmission()).toEqual({ metric: 'second' });
+    });
+
+    it('logs the metrics at every interval', async () => {
+      const firstMetrics = {
+        process: {
+          memory: { heap: { used_in_bytes: 100 } },
+          uptime_in_millis: 1500,
+          event_loop_delay: 50,
+        },
+        os: {
+          load: [10, 20, 30],
+        },
+      };
+      const secondMetrics = {
+        process: {
+          memory: { heap: { used_in_bytes: 200 } },
+          uptime_in_millis: 3000,
+          event_loop_delay: 100,
+        },
+        os: {
+          load: [20, 30, 40],
+        },
+      };
+      mockOpsCollector.collect
+        .mockResolvedValueOnce(firstMetrics)
+        .mockResolvedValueOnce(secondMetrics);
+      await metricsService.setup({ http: httpMock });
+      const { getOpsMetrics$ } = await metricsService.start();
+
+      const nextEmission = async () => {
+        jest.advanceTimersByTime(testInterval);
+        const emission = await getOpsMetrics$().pipe(take(1)).toPromise();
+        await new Promise((resolve) => process.nextTick(resolve));
+        return emission;
+      };
+      expect(loggingSystemMock.collect(logger).info).toMatchSnapshot();
+      await nextEmission();
+      expect(loggingSystemMock.collect(logger).info).toMatchSnapshot();
+    });
+
+    it('logs default metrics if they are missing or malformed', async () => {
+      mockOpsCollector.collect.mockResolvedValueOnce({ secondMetrics: 'metrics' });
+      await metricsService.setup({ http: httpMock });
+      await metricsService.start();
+      expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "memory: 0.0B uptime: 0:00:00 load: [] delay: 0.000",
+          ],
+        ]
+      `);
     });
   });
 
