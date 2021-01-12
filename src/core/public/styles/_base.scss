@@ -51,3 +51,7 @@
 .euiBody--collapsibleNavIsDocked .euiBottomBar {
   margin-left: $euiCollapsibleNavWidth;
 }
+
+body {
+  @include euiScrollBar
+}
