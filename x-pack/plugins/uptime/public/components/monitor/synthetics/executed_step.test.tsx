@@ -7,7 +7,8 @@
 import React from 'react';
 import { ExecutedStep } from './executed_step';
 import { Ping } from '../../../../common/runtime_types';
-import { mountWithRouter, render } from '../../../lib';
+import { mountWithRouter } from '../../../lib';
+import { render } from '../../../lib/helper/rtl_helpers';
 
 // FLAKY: https://github.com/elastic/kibana/issues/85899
 describe.skip('ExecutedStep', () => {

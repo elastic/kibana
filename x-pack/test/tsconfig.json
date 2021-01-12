@@ -9,6 +9,7 @@
   "exclude": ["../typings/jest.d.ts"],
   "references": [
     { "path": "../../src/core/tsconfig.json" },
+    { "path": "../../src/plugins/management/tsconfig.json" },
     { "path": "../../src/plugins/bfetch/tsconfig.json" },
     { "path": "../../src/plugins/data/tsconfig.json" },
     { "path": "../../src/plugins/embeddable/tsconfig.json" },
