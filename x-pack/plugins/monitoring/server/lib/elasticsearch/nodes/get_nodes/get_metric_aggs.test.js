@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getMetricAggs } from '../get_metric_aggs';
+import { getMetricAggs } from './get_metric_aggs';
 
 describe('get metric aggs', () => {
   it('should create aggregations for "basic" metrics', () => {
