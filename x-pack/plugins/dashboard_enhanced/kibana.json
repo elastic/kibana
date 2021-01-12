@@ -4,8 +4,8 @@
   "server": true,
   "ui": true,
   "configPath": [
-    "dashboardEnhanced",
-    "xpack"
+    "xpack",
+    "dashboardEnhanced"
   ],
   "requiredPlugins": [
     "dashboard",
