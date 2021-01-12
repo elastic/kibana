@@ -5,28 +5,20 @@
  */
 
 import React from 'react';
-import { coreMock } from 'src/core/public/mocks';
-import { renderWithRouter, shallowWithRouter } from '../../../lib';
+import { render } from '../../../lib/helper/rtl_helpers';
 import { MLJobLink } from './ml_job_link';
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 
-const core = coreMock.createStart();
 describe('ML JobLink', () => {
-  it('shallow renders without errors', () => {
-    const wrapper = shallowWithRouter(
-      <MLJobLink dateRange={{ to: '', from: '' }} basePath="" monitorId="testMonitor" />
-    );
-    expect(wrapper).toMatchSnapshot();
-  });
-
   it('renders without errors', () => {
-    const wrapper = renderWithRouter(
-      <KibanaContextProvider
-        services={{ ...core, triggersActionsUi: { getEditAlertFlyout: jest.fn() } }}
-      >
-        <MLJobLink dateRange={{ to: '', from: '' }} basePath="" monitorId="testMonitor" />
-      </KibanaContextProvider>
+    const expectedHref = `/app/ml#/explorer?_g=(ml:(jobIds:!(testmonitor_high_latency_by_geo)),refreshInterval:(pause:!t,value:0),time:(from:'',to:''))&_a=(mlExplorerFilter:(filterActive:!t,filteredFields:!(monitor.id,testMonitor)),mlExplorerSwimlane:(viewByFieldName:observer.geo.name))`;
+    const { getByRole, getByText } = render(
+      <MLJobLink dateRange={{ to: '', from: '' }} basePath="" monitorId="testMonitor">
+        <div>Test link</div>
+      </MLJobLink>
     );
-    expect(wrapper).toMatchSnapshot();
+
+    const jobLink = getByRole('link');
+    expect(jobLink.getAttribute('href')).toBe(expectedHref);
+    expect(getByText('Test link'));
   });
 });
