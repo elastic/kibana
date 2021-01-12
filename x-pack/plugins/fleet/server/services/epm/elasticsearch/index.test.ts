@@ -33,5 +33,5 @@ test('getBaseName for hidden index', () => {
     hidden: true,
   };
   const name = getRegistryDataStreamAssetBaseName(dataStream);
-  expect(name).toStrictEqual('.logs-nginx.access');
+  expect(name).toStrictEqual('logs-nginx.access');
 });
