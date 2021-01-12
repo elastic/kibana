@@ -7,13 +7,19 @@
 import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import 'brace/theme/github';
+import { XJsonMode } from '@kbn/ace';
+
 import {
+  EuiCodeEditor,
   EuiFlexItem,
   EuiFlexGroup,
   EuiExpression,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
+  EuiFormRow,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiText,
@@ -21,41 +27,37 @@ import {
 } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
 import { HttpSetup } from 'kibana/public';
+import { XJson } from '../../../../../../src/plugins/es_ui_shared/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
   firstFieldOption,
   getFields,
   COMPARATORS,
   builtInComparators,
-  OfExpression,
   ThresholdExpression,
   ForLastExpression,
-  GroupByExpression,
-  WhenExpression,
-  builtInAggregationTypes,
   AlertTypeParamsExpressionProps,
 } from '../../../../triggers_actions_ui/public';
-import { ThresholdVisualization } from './visualization';
-import { IndexThresholdAlertParams } from './types';
+import { EsQueryVisualization } from './visualization';
+import { EsQueryAlertParams } from './types';
 import './expression.scss';
 import { IndexPopover } from '../components/index_popover';
 
 const DEFAULT_VALUES = {
-  AGGREGATION_TYPE: 'count',
-  TERM_SIZE: 5,
   THRESHOLD_COMPARATOR: COMPARATORS.GREATER_THAN,
+  QUERY: `{
+  "query":{
+    "match_all" : {}
+  }
+}`,
   TIME_WINDOW_SIZE: 5,
   TIME_WINDOW_UNIT: 'm',
   THRESHOLD: [1000],
-  GROUP_BY: 'all',
 };
 
 const expressionFieldsWithValidation = [
   'index',
   'timeField',
-  'aggField',
-  'termSize',
-  'termField',
   'threshold0',
   'threshold1',
   'timeWindowSize',
@@ -65,17 +67,16 @@ interface KibanaDeps {
   http: HttpSetup;
 }
 
-export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
-  AlertTypeParamsExpressionProps<IndexThresholdAlertParams>
+const { useXJsonMode } = XJson;
+const xJsonMode = new XJsonMode();
+
+export const EsQueryAlertTypeExpression: React.FunctionComponent<
+  AlertTypeParamsExpressionProps<EsQueryAlertParams>
 > = ({ alertParams, alertInterval, setAlertParams, setAlertProperty, errors, charts, data }) => {
   const {
     index,
     timeField,
-    aggType,
-    aggField,
-    groupBy,
-    termSize,
-    termField,
+    esQuery,
     thresholdComparator,
     threshold,
     timeWindowSize,
@@ -94,20 +95,21 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       aggregatable: boolean;
     }>
   >([]);
+  const { convertToJson, setXJson, xJson } = useXJsonMode(DEFAULT_VALUES.QUERY);
 
   const hasExpressionErrors = !!Object.keys(errors).find(
     (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
       errors[errorKey].length >= 1 &&
-      alertParams[errorKey as keyof IndexThresholdAlertParams] !== undefined
+      alertParams[errorKey as keyof EsQueryAlertParams] !== undefined
   );
 
-  const canShowVizualization = !!Object.keys(errors).find(
+  const hasVisualizationErrors = !!Object.keys(errors).find(
     (errorKey) => expressionFieldsWithValidation.includes(errorKey) && errors[errorKey].length >= 1
   );
 
   const expressionErrorMessage = i18n.translate(
-    'xpack.stackAlerts.threshold.ui.alertParams.fixErrorInExpressionBelowValidationMessage',
+    'xpack.stackAlerts.esQuery.ui.alertParams.fixErrorInExpressionBelowValidationMessage',
     {
       defaultMessage: 'Expression contains errors.',
     }
@@ -116,12 +118,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
   const setDefaultExpressionValues = async () => {
     setAlertProperty('params', {
       ...alertParams,
-      aggType: aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE,
-      termSize: termSize ?? DEFAULT_VALUES.TERM_SIZE,
+      esQuery: esQuery ?? DEFAULT_VALUES.QUERY,
       thresholdComparator: thresholdComparator ?? DEFAULT_VALUES.THRESHOLD_COMPARATOR,
       timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
       timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
       threshold: threshold ?? DEFAULT_VALUES.THRESHOLD,
     });
 
@@ -171,7 +171,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.selectIndex"
+            id="xpack.stackAlerts.esQuery.ui.selectIndex"
             defaultMessage="Select an index"
           />
         </h5>
@@ -183,7 +183,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           <EuiExpression
             display="columns"
             data-test-subj="selectIndexExpression"
-            description={i18n.translate('xpack.stackAlerts.threshold.ui.alertParams.indexLabel', {
+            description={i18n.translate('xpack.stackAlerts.esQuery.ui.alertParams.indexLabel', {
               defaultMessage: 'index',
             })}
             value={index && index.length > 0 ? renderIndices(index) : firstFieldOption.text}
@@ -205,7 +205,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           <EuiPopoverTitle>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem>
-                {i18n.translate('xpack.stackAlerts.threshold.ui.alertParams.indexButtonLabel', {
+                {i18n.translate('xpack.stackAlerts.esQuery.ui.alertParams.indexButtonLabel', {
                   defaultMessage: 'index',
                 })}
               </EuiFlexItem>
@@ -215,7 +215,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
                   iconType="cross"
                   color="danger"
                   aria-label={i18n.translate(
-                    'xpack.stackAlerts.threshold.ui.alertParams.closeIndexPopoverLabel',
+                    'xpack.stackAlerts.esQuery.ui.alertParams.closeIndexPopoverLabel',
                     {
                       defaultMessage: 'Close',
                     }
@@ -238,12 +238,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
                 setAlertProperty('params', {
                   ...alertParams,
                   index: indices,
-                  aggType: DEFAULT_VALUES.AGGREGATION_TYPE,
-                  termSize: DEFAULT_VALUES.TERM_SIZE,
+                  esQuery: DEFAULT_VALUES.QUERY,
                   thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
                   timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
                   timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-                  groupBy: DEFAULT_VALUES.GROUP_BY,
                   threshold: DEFAULT_VALUES.THRESHOLD,
                   timeField: '',
                 });
@@ -257,46 +255,56 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           />
         </div>
       </EuiPopover>
-      <WhenExpression
-        display="fullWidth"
-        aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
-        onChangeSelectedAggType={(selectedAggType: string) =>
-          setAlertParams('aggType', selectedAggType)
-        }
-      />
-      {aggType && builtInAggregationTypes[aggType].fieldRequired ? (
-        <OfExpression
-          aggField={aggField}
-          fields={esFields}
-          aggType={aggType}
-          errors={errors}
-          display="fullWidth"
-          onChangeSelectedAggField={(selectedAggField?: string) =>
-            setAlertParams('aggField', selectedAggField)
-          }
-        />
-      ) : null}
-      <GroupByExpression
-        groupBy={groupBy || DEFAULT_VALUES.GROUP_BY}
-        termField={termField}
-        termSize={termSize}
-        errors={errors}
-        fields={esFields}
-        display="fullWidth"
-        onChangeSelectedGroupBy={(selectedGroupBy) => setAlertParams('groupBy', selectedGroupBy)}
-        onChangeSelectedTermField={(selectedTermField) =>
-          setAlertParams('termField', selectedTermField)
-        }
-        onChangeSelectedTermSize={(selectedTermSize) =>
-          setAlertParams('termSize', selectedTermSize)
-        }
-      />
       <EuiSpacer />
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.stackAlerts.threshold.ui.conditionPrompt"
-            defaultMessage="Define the condition"
+            id="xpack.stackAlerts.esQuery.ui.queryPrompt"
+            defaultMessage="Define the ES query"
+          />
+        </h5>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiFormRow
+        id="queryEditor"
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.queryPrompt.label"
+            defaultMessage="ES query"
+          />
+        }
+        isInvalid={errors.esQuery.length > 0}
+        error={errors.esQuery}
+        helpText={
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.queryPrompt.help"
+            defaultMessage="Help meeeeee."
+          />
+        }
+      >
+        <EuiCodeEditor
+          mode={xJsonMode}
+          width="100%"
+          height="200px"
+          theme="github"
+          data-test-subj="queryJsonEditor"
+          aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.queryEditor', {
+            defaultMessage: 'Es query editor',
+          })}
+          value={xJson}
+          onChange={(xjson: string) => {
+            setXJson(xjson);
+            setAlertParams('esQuery', convertToJson(xjson));
+          }}
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiTitle size="xs">
+        <h5>
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.conditionPrompt"
+            defaultMessage="When number of matches"
           />
         </h5>
       </EuiTitle>
@@ -328,15 +336,15 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
         }
       />
       <EuiSpacer />
-      <div className="actAlertVisualization__chart">
-        {canShowVizualization ? (
+      {/* <div className="actAlertVisualization__chart">
+        {hasVisualizationErrors ? (
           <Fragment>
             <EuiEmptyPrompt
               iconType="visBarVertical"
               body={
                 <EuiText color="subdued">
                   <FormattedMessage
-                    id="xpack.stackAlerts.threshold.ui.previewAlertVisualizationDescription"
+                    id="xpack.stackAlerts.esQuery.ui.previewAlertVisualizationDescription"
                     defaultMessage="Complete the expression to generate a preview."
                   />
                 </EuiText>
@@ -345,20 +353,19 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<
           </Fragment>
         ) : (
           <Fragment>
-            <ThresholdVisualization
+            <EsQueryVisualization
               alertParams={alertParams}
               alertInterval={alertInterval}
-              aggregationTypes={builtInAggregationTypes}
               comparators={builtInComparators}
               charts={charts}
               dataFieldsFormats={data!.fieldFormats}
             />
           </Fragment>
         )}
-      </div>
+      </div> */}
     </Fragment>
   );
 };
 
 // eslint-disable-next-line import/no-default-export
-export { IndexThresholdAlertTypeExpression as default };
+export { EsQueryAlertTypeExpression as default };
