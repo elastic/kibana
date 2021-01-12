@@ -9,9 +9,10 @@ import { mount } from 'enzyme';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 
-import { useForm, Form, FormHook, FIELD_TYPES } from '../../../shared_imports';
+import { useForm, Form, FormHook } from '../../../shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
 import { Tags } from './tags';
+import { schema, FormProps } from './schema';
 
 jest.mock('../../containers/use_get_tags');
 const useGetTagsMock = useGetTags as jest.Mock;
@@ -20,10 +21,10 @@ describe('Tags', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: React.FC = ({ children }) => {
-    const { form } = useForm<{ tags: string[] }>({
+    const { form } = useForm<FormProps>({
       defaultValue: { tags: [] },
       schema: {
-        tags: { type: FIELD_TYPES.COMBO_BOX },
+        tags: schema.tags,
       },
     });
 

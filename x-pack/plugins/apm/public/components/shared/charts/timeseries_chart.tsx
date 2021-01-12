@@ -109,7 +109,7 @@ export function TimeseriesChart({
           }}
           onPointerUpdate={setPointerEvent}
           externalPointerEvents={{
-            tooltip: { visible: true, placement: Placement.Bottom },
+            tooltip: { visible: true, placement: Placement.Right },
           }}
           showLegend
           showLegendExtra

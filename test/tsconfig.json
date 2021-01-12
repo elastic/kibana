@@ -8,6 +8,7 @@
   "exclude": ["plugin_functional/plugins/**/*", "interpreter_functional/plugins/**/*"],
   "references": [
     { "path": "../src/core/tsconfig.json" },
+    { "path": "../src/plugins/management/tsconfig.json" },
     { "path": "../src/plugins/bfetch/tsconfig.json" },
     { "path": "../src/plugins/embeddable/tsconfig.json" },
     { "path": "../src/plugins/expressions/tsconfig.json" },
