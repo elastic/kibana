@@ -13,5 +13,6 @@ export type SortDirection = 'none' | Direction;
 /** Specifies which column the timeline is sorted on */
 export interface Sort {
   columnId: ColumnId;
+  columnType: string;
   sortDirection: SortDirection;
 }

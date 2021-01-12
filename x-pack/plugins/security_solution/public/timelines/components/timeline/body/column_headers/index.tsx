@@ -233,11 +233,12 @@ export const ColumnHeadersComponent = ({
           id: timelineId,
           sort: cols.map(({ id, direction }) => ({
             columnId: id,
+            columnType: columnHeaders.find((ch) => ch.id === id)?.type ?? 'text',
             sortDirection: direction as SortDirection,
           })),
         })
       ),
-    [dispatch, timelineId]
+    [columnHeaders, dispatch, timelineId]
   );
   const sortedColumns = useMemo(
     () => ({
