@@ -146,7 +146,8 @@ export class SearchSessionService implements ISessionService {
 
     this.sessionSearchMap.forEach((sessionInfo, sessionId) => {
       if (
-        moment.duration(curTime.diff(sessionInfo.insertTime)).asSeconds() > this.config.inMemTimeout
+        moment.duration(curTime.diff(sessionInfo.insertTime)).asMilliseconds() >
+        this.config.inMemTimeout
       ) {
         this.logger.debug(`clearSessions | Deleting expired session ${sessionId}`);
         this.sessionSearchMap.delete(sessionId);
