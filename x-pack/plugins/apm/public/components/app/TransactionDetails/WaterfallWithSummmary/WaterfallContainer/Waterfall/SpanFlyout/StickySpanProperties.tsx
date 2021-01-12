@@ -8,17 +8,17 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useUrlParams } from '../../../../../../../context/url_params_context/use_url_params';
 import { getEnvironmentUrlParam } from '../../../../../../../../common/environment_filter_values';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import {
+  SERVICE_NAME,
   SPAN_NAME,
   TRANSACTION_NAME,
-  SERVICE_NAME,
 } from '../../../../../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../../../common/i18n';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { StickyProperties } from '../../../../../../shared/StickyProperties';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { ServiceOrTransactionsOverviewLink } from '../../../../../../shared/Links/apm/service_transactions_overview_link';
-import { TransactionDetailLink } from '../../../../../../shared/Links/apm/TransactionDetailLink';
+import { TransactionDetailLink } from '../../../../../../shared/Links/apm/transaction_detail_link';
+import { StickyProperties } from '../../../../../../shared/StickyProperties';
 
 interface Props {
   span: Span;
@@ -27,7 +27,7 @@ interface Props {
 
 export function StickySpanProperties({ span, transaction }: Props) {
   const {
-    urlParams: { environment },
+    urlParams: { environment, latencyAggregationType },
   } = useUrlParams();
 
   const nextEnvironment = getEnvironmentUrlParam(
@@ -69,6 +69,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
               transactionName={transaction.transaction.name}
               transactionType={transaction.transaction.type}
               environment={nextEnvironment}
+              latencyAggregationType={latencyAggregationType}
             >
               {transaction.transaction.name}
             </TransactionDetailLink>

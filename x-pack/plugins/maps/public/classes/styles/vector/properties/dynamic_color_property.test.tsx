@@ -21,7 +21,7 @@ import {
   DATA_MAPPING_FUNCTION,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import { mockField, MockLayer, MockStyle } from './__tests__/test_util';
+import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
 import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
 import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 import { IField } from '../../../fields/field';

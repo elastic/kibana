@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { getEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
+import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
 export const MaybeViewTraceLink = ({
@@ -21,7 +21,7 @@ export const MaybeViewTraceLink = ({
   waterfall: IWaterfall;
 }) => {
   const {
-    urlParams: { environment },
+    urlParams: { environment, latencyAggregationType },
   } = useUrlParams();
 
   const viewFullTraceButtonLabel = i18n.translate(
@@ -89,6 +89,7 @@ export const MaybeViewTraceLink = ({
           transactionName={rootTransaction.transaction.name}
           transactionType={rootTransaction.transaction.type}
           environment={nextEnvironment}
+          latencyAggregationType={latencyAggregationType}
         >
           <EuiButton iconType="apmTrace">{viewFullTraceButtonLabel}</EuiButton>
         </TransactionDetailLink>

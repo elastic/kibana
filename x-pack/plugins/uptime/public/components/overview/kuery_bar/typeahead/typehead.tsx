@@ -236,8 +236,6 @@ export const Typeahead: React.FC<TypeaheadProps> = ({
   };
 
   const onMouseEnterSuggestion = (index: number) => {
-    setState({ ...state, index });
-
     setState((prevState) => ({
       ...prevState,
       index,

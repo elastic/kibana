@@ -13,9 +13,9 @@ import {
   TRANSACTION_NAME,
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
-import { TransactionDetailLink } from '../../../../../shared/Links/apm/TransactionDetailLink';
-import { StickyProperties } from '../../../../../shared/StickyProperties';
 import { ServiceOrTransactionsOverviewLink } from '../../../../../shared/Links/apm/service_transactions_overview_link';
+import { TransactionDetailLink } from '../../../../../shared/Links/apm/transaction_detail_link';
+import { StickyProperties } from '../../../../../shared/StickyProperties';
 
 interface Props {
   transaction?: Transaction;
@@ -23,7 +23,7 @@ interface Props {
 
 export function FlyoutTopLevelProperties({ transaction }: Props) {
   const {
-    urlParams: { environment },
+    urlParams: { environment, latencyAggregationType },
   } = useUrlParams();
 
   if (!transaction) {
@@ -64,6 +64,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
           transactionName={transaction.transaction.name}
           transactionType={transaction.transaction.type}
           environment={nextEnvironment}
+          latencyAggregationType={latencyAggregationType}
         >
           {transaction.transaction.name}
         </TransactionDetailLink>
