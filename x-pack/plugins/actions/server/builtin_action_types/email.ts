@@ -139,10 +139,11 @@ interface GetActionTypeParams {
 }
 
 // action type definition
+export const ActionTypeId = '.email';
 export function getActionType(params: GetActionTypeParams): EmailActionType {
   const { logger, publicBaseUrl, configurationUtilities } = params;
   return {
-    id: '.email',
+    id: ActionTypeId,
     minimumLicenseRequired: 'gold',
     name: i18n.translate('xpack.actions.builtin.emailTitle', {
       defaultMessage: 'Email',
