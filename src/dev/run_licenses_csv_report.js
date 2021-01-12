@@ -56,62 +56,56 @@ run(
   async ({ log, flags }) => {
     const fields = ['name', 'version', 'url', 'license', 'sourceURL'];
 
-    try {
-      const file = flags.csv;
-      const directory = flags.directory;
-      const dev = flags.dev;
+    const file = flags.csv;
+    const directory = flags.directory;
+    const dev = flags.dev;
 
-      const root = resolve(__dirname, '..', '..');
-      const packages = await getInstalledPackages({
-        directory: directory ? resolve(directory) : root,
-        licenseOverrides: LICENSE_OVERRIDES,
-        dev,
-      });
+    const root = resolve(__dirname, '..', '..');
+    const packages = await getInstalledPackages({
+      directory: directory ? resolve(directory) : root,
+      licenseOverrides: LICENSE_OVERRIDES,
+      dev,
+    });
 
-      packages.unshift(
-        {
-          name: 'Node.js',
-          version: engines.node,
-          repository: 'https://nodejs.org',
-          licenses: ['MIT'],
-        },
-        {
-          name: 'Red Hat Universal Base Image minimal',
-          version: '8',
-          repository:
-            'https://catalog.redhat.com/software/containers/ubi8/ubi-minimal/5c359a62bed8bd75a2c3fba8',
-          licenses: [
-            'Custom;https://www.redhat.com/licenses/EULA_Red_Hat_Universal_Base_Image_English_20190422.pdf',
-          ],
-          sourceURL: 'https://oss-dependencies.elastic.co/redhat/ubi/ubi-minimal-8-source.tar.gz',
-        }
-      );
-
-      const csv = packages
-        .map((pkg) => {
-          const data = {
-            name: pkg.name,
-            version: pkg.version,
-            url: pkg.repository || `https://www.npmjs.com/package/${pkg.name}`,
-            license: pkg.licenses.join(','),
-            sourceURL: pkg.sourceURL,
-          };
-
-          return formatCsvValues(fields, data);
-        })
-        .join('\n');
-
-      if (file) {
-        writeFileSync(file, `${fields.join(',')}\n${csv}`);
-        log.success(`wrote to ${file}`);
-      } else {
-        log.success(csv);
-        log.debug('\nspecify "--csv [filepath]" to write the data to a specific file');
+    packages.unshift(
+      {
+        name: 'Node.js',
+        version: engines.node,
+        repository: 'https://nodejs.org',
+        licenses: ['MIT'],
+      },
+      {
+        name: 'Red Hat Universal Base Image minimal',
+        version: '8',
+        repository:
+          'https://catalog.redhat.com/software/containers/ubi8/ubi-minimal/5c359a62bed8bd75a2c3fba8',
+        licenses: [
+          'Custom;https://www.redhat.com/licenses/EULA_Red_Hat_Universal_Base_Image_English_20190422.pdf',
+        ],
+        sourceURL: 'https://oss-dependencies.elastic.co/redhat/ubi/ubi-minimal-8-source.tar.gz',
       }
-    } catch (err) {
-      process.exitCode = 1;
-      log.error(err);
-      return err;
+    );
+
+    const csv = packages
+      .map((pkg) => {
+        const data = {
+          name: pkg.name,
+          version: pkg.version,
+          url: pkg.repository || `https://www.npmjs.com/package/${pkg.name}`,
+          license: pkg.licenses.join(','),
+          sourceURL: pkg.sourceURL,
+        };
+
+        return formatCsvValues(fields, data);
+      })
+      .join('\n');
+
+    if (file) {
+      writeFileSync(file, `${fields.join(',')}\n${csv}`);
+      log.success(`wrote to ${file}`);
+    } else {
+      log.success(csv);
+      log.debug('\nspecify "--csv [filepath]" to write the data to a specific file');
     }
   },
   {
