@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DEFAULT_SOURCE_CONFIGURATION = {
+import { GetLogSourceConfigurationSuccessResponsePayload } from '../../common/http_api/log_sources';
+
+export const DEFAULT_SOURCE_CONFIGURATION: GetLogSourceConfigurationSuccessResponsePayload = {
   data: {
     id: 'default',
     version: 'WzQwNiwxXQ==',
