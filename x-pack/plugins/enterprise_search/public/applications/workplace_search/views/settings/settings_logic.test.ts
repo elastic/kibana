@@ -1,0 +1,266 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { LogicMounter } from '../../../__mocks__/kea.mock';
+import { mockHttpValues } from '../../../__mocks__';
+jest.mock('../../../shared/http', () => ({
+  HttpLogic: {
+    values: { http: mockHttpValues.http },
+  },
+}));
+import { HttpLogic } from '../../../shared/http';
+
+jest.mock('../../../shared/kibana', () => ({
+  KibanaLogic: { values: { navigateToUrl: jest.fn() } },
+}));
+import { KibanaLogic } from '../../../shared/kibana';
+
+jest.mock('../../../shared/flash_messages', () => ({
+  clearFlashMessages: jest.fn(),
+  setQueuedSuccessMessage: jest.fn(),
+  setSuccessMessage: jest.fn(),
+  flashAPIErrors: jest.fn(),
+}));
+import {
+  clearFlashMessages,
+  setQueuedSuccessMessage,
+  setSuccessMessage,
+  flashAPIErrors,
+} from '../../../shared/flash_messages';
+
+import { configuredSources, oauthApplication } from '../../__mocks__/content_sources.mock';
+
+import { ORG_UPDATED_MESSAGE, OAUTH_APP_UPDATED_MESSAGE } from '../../constants';
+import { SettingsLogic } from './settings_logic';
+
+describe('SettingsLogic', () => {
+  const { mount } = new LogicMounter(SettingsLogic);
+  const ORG_NAME = 'myOrg';
+  const defaultValues = {
+    dataLoading: true,
+    connectors: [],
+    orgNameInputValue: '',
+    oauthApplication: null,
+  };
+  const serverProps = { organizationName: ORG_NAME, oauthApplication };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mount();
+  });
+
+  it('has expected default values', () => {
+    expect(SettingsLogic.values).toEqual(defaultValues);
+  });
+
+  describe('actions', () => {
+    it('onInitializeConnectors', () => {
+      SettingsLogic.actions.onInitializeConnectors(configuredSources);
+    });
+
+    it('onOrgNameInputChange', () => {
+      const NAME = 'foo';
+      SettingsLogic.actions.onOrgNameInputChange(NAME);
+
+      expect(SettingsLogic.values.orgNameInputValue).toEqual(NAME);
+    });
+
+    it('setUpdatedName', () => {
+      const NAME = 'bar';
+      SettingsLogic.actions.setUpdatedName({ organizationName: NAME });
+
+      expect(SettingsLogic.values.orgNameInputValue).toEqual(NAME);
+    });
+
+    it('setServerProps', () => {
+      SettingsLogic.actions.setServerProps(serverProps);
+
+      expect(SettingsLogic.values.orgNameInputValue).toEqual(ORG_NAME);
+      expect(SettingsLogic.values.oauthApplication).toEqual(oauthApplication);
+    });
+
+    it('setOauthApplication', () => {
+      SettingsLogic.actions.setOauthApplication(oauthApplication);
+
+      expect(SettingsLogic.values.oauthApplication).toEqual(oauthApplication);
+    });
+
+    it('setUpdatedOauthApplication', () => {
+      SettingsLogic.actions.setUpdatedOauthApplication({ oauthApplication });
+
+      expect(SettingsLogic.values.oauthApplication).toEqual(oauthApplication);
+    });
+  });
+
+  describe('listeners', () => {
+    describe('initializeSettings', () => {
+      it('calls API and sets values', async () => {
+        const setServerPropsSpy = jest.spyOn(SettingsLogic.actions, 'setServerProps');
+        const promise = Promise.resolve(configuredSources);
+        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        SettingsLogic.actions.initializeSettings();
+
+        expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
+          '/api/workplace_search/org/settings'
+        );
+        await promise;
+        expect(setServerPropsSpy).toHaveBeenCalledWith(configuredSources);
+      });
+
+      it('handles error', async () => {
+        const promise = Promise.reject('this is an error');
+        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+
+        SettingsLogic.actions.initializeSettings();
+        try {
+          await promise;
+        } catch {
+          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+        }
+      });
+    });
+
+    describe('initializeConnectors', () => {
+      it('calls API and sets values', async () => {
+        const onInitializeConnectorsSpy = jest.spyOn(
+          SettingsLogic.actions,
+          'onInitializeConnectors'
+        );
+        const promise = Promise.resolve(serverProps);
+        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+        SettingsLogic.actions.initializeConnectors();
+
+        expect(HttpLogic.values.http.get).toHaveBeenCalledWith(
+          '/api/workplace_search/org/settings/connectors'
+        );
+        await promise;
+        expect(onInitializeConnectorsSpy).toHaveBeenCalledWith(serverProps);
+      });
+
+      it('handles error', async () => {
+        const promise = Promise.reject('this is an error');
+        (HttpLogic.values.http.get as jest.Mock).mockReturnValue(promise);
+
+        SettingsLogic.actions.initializeConnectors();
+        try {
+          await promise;
+        } catch {
+          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+        }
+      });
+    });
+
+    describe('updateOrgName', () => {
+      it('calls API and sets values', async () => {
+        const NAME = 'updated name';
+        SettingsLogic.actions.onOrgNameInputChange(NAME);
+        const setUpdatedNameSpy = jest.spyOn(SettingsLogic.actions, 'setUpdatedName');
+        const promise = Promise.resolve({ organizationName: NAME });
+        (HttpLogic.values.http.put as jest.Mock).mockReturnValue(promise);
+
+        SettingsLogic.actions.updateOrgName();
+
+        expect(HttpLogic.values.http.put).toHaveBeenCalledWith(
+          '/api/workplace_search/org/settings/customize',
+          {
+            body: JSON.stringify({ name: NAME }),
+          }
+        );
+        await promise;
+        expect(setSuccessMessage).toHaveBeenCalledWith(ORG_UPDATED_MESSAGE);
+        expect(setUpdatedNameSpy).toHaveBeenCalledWith({ organizationName: NAME });
+      });
+
+      it('handles error', async () => {
+        const promise = Promise.reject('this is an error');
+        (HttpLogic.values.http.put as jest.Mock).mockReturnValue(promise);
+
+        SettingsLogic.actions.updateOrgName();
+        try {
+          await promise;
+        } catch {
+          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+        }
+      });
+    });
+
+    describe('updateOauthApplication', () => {
+      it('calls API and sets values', async () => {
+        const { name, redirectUri, confidential } = oauthApplication;
+        const setUpdatedOauthApplicationSpy = jest.spyOn(
+          SettingsLogic.actions,
+          'setUpdatedOauthApplication'
+        );
+        const promise = Promise.resolve({ oauthApplication });
+        (HttpLogic.values.http.put as jest.Mock).mockReturnValue(promise);
+        SettingsLogic.actions.setOauthApplication(oauthApplication);
+        SettingsLogic.actions.updateOauthApplication();
+
+        expect(clearFlashMessages).toHaveBeenCalled();
+
+        expect(HttpLogic.values.http.put).toHaveBeenCalledWith(
+          '/api/workplace_search/org/settings/oauth_application',
+          {
+            body: JSON.stringify({
+              oauth_application: { name, confidential, redirect_uri: redirectUri },
+            }),
+          }
+        );
+        await promise;
+        expect(setUpdatedOauthApplicationSpy).toHaveBeenCalledWith({ oauthApplication });
+        expect(setSuccessMessage).toHaveBeenCalledWith(OAUTH_APP_UPDATED_MESSAGE);
+      });
+
+      it('handles error', async () => {
+        const promise = Promise.reject('this is an error');
+        (HttpLogic.values.http.put as jest.Mock).mockReturnValue(promise);
+
+        SettingsLogic.actions.updateOauthApplication();
+        try {
+          await promise;
+        } catch {
+          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+        }
+      });
+    });
+
+    describe('deleteSourceConfig', () => {
+      const SERVICE_TYPE = 'github';
+      const NAME = 'baz';
+
+      it('calls API and sets values', async () => {
+        const promise = Promise.resolve({});
+        (HttpLogic.values.http.delete as jest.Mock).mockReturnValue({});
+        SettingsLogic.actions.deleteSourceConfig(SERVICE_TYPE, NAME);
+
+        await promise;
+        expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith('/settings/connectors');
+        expect(setQueuedSuccessMessage).toHaveBeenCalled();
+      });
+
+      it('handles error', async () => {
+        const promise = Promise.reject('this is an error');
+        (HttpLogic.values.http.delete as jest.Mock).mockReturnValue(promise);
+
+        SettingsLogic.actions.deleteSourceConfig(SERVICE_TYPE, NAME);
+        try {
+          await promise;
+        } catch {
+          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
+        }
+      });
+    });
+
+    it('resetSettingsState', () => {
+      // needed to set dataLoading to false
+      SettingsLogic.actions.onInitializeConnectors(configuredSources);
+      SettingsLogic.actions.resetSettingsState();
+
+      expect(clearFlashMessages).toHaveBeenCalled();
+      expect(SettingsLogic.values.dataLoading).toEqual(true);
+    });
+  });
+});
