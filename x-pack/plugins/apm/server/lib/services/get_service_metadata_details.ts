@@ -73,7 +73,6 @@ export async function getServiceMetadataDetails({
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
     { range: rangeFilter(start, end) },
-    ...setup.esFilter,
     ...getDocumentTypeFilterForAggregatedTransactions(
       searchAggregatedTransactions
     ),

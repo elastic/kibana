@@ -52,7 +52,7 @@ export const serviceMetadataDetailsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/metadata/details',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
@@ -75,7 +75,7 @@ export const serviceMetadataIconsRoute = createRoute({
   endpoint: 'GET /api/apm/services/{serviceName}/metadata/icons',
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: t.intersection([uiFiltersRt, rangeRt]),
+    query: rangeRt,
   }),
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
