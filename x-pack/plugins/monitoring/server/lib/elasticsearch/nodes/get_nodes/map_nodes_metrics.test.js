@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mapNodesMetrics } from '../map_nodes_metrics';
+import { mapNodesMetrics } from './map_nodes_metrics';
 
 describe('map nodes metrics', () => {
   it('should summarize the info', () => {
