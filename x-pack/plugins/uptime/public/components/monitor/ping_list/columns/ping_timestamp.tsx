@@ -98,6 +98,8 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
   const isLoading = status === FETCH_STATUS.LOADING;
   const isPending = status === FETCH_STATUS.PENDING;
 
+  const captionContent = `Step:${stepNo} ${data?.stepName}`;
+
   const ImageCaption = (
     <>
       <div className="stepArrowsFullScreen">
@@ -115,9 +117,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText>
-                Step:{stepNo} {data?.stepName}
-              </EuiText>
+              <EuiText>{captionContent}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
@@ -147,7 +147,7 @@ export const PingTimestamp = ({ timestamp, ping }: Props) => {
           size="s"
           hasShadow
           caption={ImageCaption}
-          alt="No image available"
+          alt={captionContent}
           url={imgSrc}
           data-test-subj="pingTimestampImage"
         />
