@@ -104,7 +104,8 @@ const eventsViewerDefaultProps = {
   sort: [
     {
       columnId: 'foo',
-      sortDirection: 'none' as SortDirection,
+      columnType: 'number',
+      sortDirection: 'asc' as SortDirection,
     },
   ],
   scopeId: SourcererScopeName.timeline,
