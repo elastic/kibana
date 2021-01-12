@@ -18853,8 +18853,6 @@
     "xpack.securitySolution.endpoint.policyDetails.malware.userNotification.placeholder": "カスタム通知メッセージを入力",
     "xpack.securitySolution.endpoint.policyDetails.supportedVersion": "エージェントバージョン {version}",
     "xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification": "通知メッセージをカスタマイズ",
-    "xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification.tooltip.a": "ユーザー通知オプションを選択すると、マルウェアが防御または検出されたときに、ホストユーザーに通知を表示します。",
-    "xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification.tooltip.b": " ユーザー通知は、以下のテキストボックスでカスタマイズできます。括弧内のタグを使用すると、該当するアクション（防御または検出など）とファイル名を動的に入力できます。",
     "xpack.securitySolution.endpoint.policyDetailsConfig.eventingEvents": "イベント",
     "xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.file": "ファイル",
     "xpack.securitySolution.endpoint.policyDetailsConfig.linux.events.network": "ネットワーク",
