@@ -33,17 +33,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await sendToBackground.openPopover();
         await sendToBackground.viewSearchSessions();
 
-        await testSubjects.existOrFail('session-mgmt-view-status-label-in_progress');
-        await testSubjects.existOrFail('session-mgmt-view-status-tooltip-in_progress');
+        // wait until completed
+        await testSubjects.existOrFail('session-mgmt-view-status-label-complete');
+        await testSubjects.existOrFail('session-mgmt-view-status-tooltip-complete');
         await testSubjects.existOrFail('session-mgmt-table-col-created');
 
         // find there is only one item in the table which is the newly saved session
-        const names = await testSubjects.findAll('session-mgmt-table-col-name');
+        const names = await testSubjects.findAll('session-mgmt-table-col-name-viewable');
         expect(names.length).to.be(1);
         expect(await Promise.all(names.map((n) => n.getVisibleText()))).to.eql(['Not Delayed']);
 
         // navigate to dashboard
-        await testSubjects.click('session-mgmt-table-col-name');
+        await testSubjects.click('session-mgmt-table-col-name-viewable');
 
         // embeddable has loaded
         await testSubjects.existOrFail('embeddablePanelHeading-SumofBytesbyExtension');
