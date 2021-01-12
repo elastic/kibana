@@ -279,6 +279,10 @@ export interface Installation extends SavedObjectAttributes {
   install_source: InstallSource;
 }
 
+export interface PackageUsageStats {
+  agent_policy_count: number;
+}
+
 export type Installable<T> = Installed<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {

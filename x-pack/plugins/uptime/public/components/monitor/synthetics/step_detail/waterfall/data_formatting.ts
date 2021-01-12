@@ -38,6 +38,23 @@ const getColourForMimeType = (mimeType?: string) => {
   return colourPalette[key];
 };
 
+const getFriendlyTooltipValue = ({
+  value,
+  timing,
+  mimeType,
+}: {
+  value: number;
+  timing: Timings;
+  mimeType?: string;
+}) => {
+  let label = FriendlyTimingLabels[timing];
+  if (timing === Timings.Receive && mimeType) {
+    const formattedMimeType: MimeType = MimeTypesMap[mimeType];
+    label += ` (${FriendlyMimetypeLabels[formattedMimeType]})`;
+  }
+  return `${label}: ${formatValueForDisplay(value)}ms`;
+};
+
 export const getSeriesAndDomain = (items: NetworkItems) => {
   const getValueForOffset = (item: NetworkItem) => {
     return item.requestSentTime;
@@ -61,16 +78,26 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
   };
 
   const series = items.reduce<WaterfallData>((acc, item, index) => {
-    if (!item.timings) return acc;
+    if (!item.timings) {
+      acc.push({
+        x: index,
+        y0: 0,
+        y: 0,
+        config: {
+          showTooltip: false,
+        },
+      });
+      return acc;
+    }
 
     const offsetValue = getValueForOffset(item);
+    const mimeTypeColour = getColourForMimeType(item.mimeType);
 
     let currentOffset = offsetValue - zeroOffset;
 
     TIMING_ORDER.forEach((timing) => {
       const value = getValue(item.timings, timing);
-      const colour =
-        timing === Timings.Receive ? getColourForMimeType(item.mimeType) : colourPalette[timing];
+      const colour = timing === Timings.Receive ? mimeTypeColour : colourPalette[timing];
       if (value && value >= 0) {
         const y = currentOffset + value;
 
@@ -80,10 +107,13 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
           y,
           config: {
             colour,
+            showTooltip: true,
             tooltipProps: {
-              value: `${FriendlyTimingLabels[timing]}: ${formatValueForDisplay(
-                y - currentOffset
-              )}ms`,
+              value: getFriendlyTooltipValue({
+                value: y - currentOffset,
+                timing,
+                mimeType: item.mimeType,
+              }),
               colour,
             },
           },
@@ -91,6 +121,33 @@ export const getSeriesAndDomain = (items: NetworkItems) => {
         currentOffset = y;
       }
     });
+
+    /* if no specific timing values are found, use the total time
+     * if total time is not available use 0, set showTooltip to false,
+     * and omit tooltip props */
+    if (!acc.find((entry) => entry.x === index)) {
+      const total = item.timings.total;
+      const hasTotal = total !== -1;
+      acc.push({
+        x: index,
+        y0: hasTotal ? currentOffset : 0,
+        y: hasTotal ? currentOffset + item.timings.total : 0,
+        config: {
+          colour: hasTotal ? mimeTypeColour : '',
+          showTooltip: hasTotal,
+          tooltipProps: hasTotal
+            ? {
+                value: getFriendlyTooltipValue({
+                  value: total,
+                  timing: Timings.Receive,
+                  mimeType: item.mimeType,
+                }),
+                colour: mimeTypeColour,
+              }
+            : undefined,
+        },
+      });
+    }
     return acc;
   }, []);
 
