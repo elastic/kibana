@@ -17,22 +17,6 @@
  * under the License.
  */
 
-import { of } from 'rxjs';
-import { SearchStrategyDependencies } from '../types';
-import { SessionService } from './session_service';
+// import { SearchSessionService } from './session_service';
 
-describe('SessionService', () => {
-  it('search invokes `strategy.search`', async () => {
-    const service = new SessionService();
-    const mockSearch = jest.fn().mockReturnValue(of({}));
-    const mockStrategy = { search: mockSearch };
-    const mockRequest = { id: 'bar' };
-    const mockOptions = { sessionId: '1234' };
-    const mockDeps = { savedObjectsClient: {} } as SearchStrategyDependencies;
-
-    await service.search(mockStrategy, mockRequest, mockOptions, mockDeps);
-
-    expect(mockSearch).toHaveBeenCalled();
-    expect(mockSearch).toHaveBeenCalledWith(mockRequest, mockOptions, mockDeps);
-  });
-});
+describe('SearchSessionService', () => {});

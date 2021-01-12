@@ -21,7 +21,7 @@ describe('registerSessionRoutes', () => {
     registerSessionRoutes(mockCoreSetup.http.createRouter());
   });
 
-  it('save calls session.save with sessionId and attributes', async () => {
+  it('save calls saveSession with sessionId and attributes', async () => {
     const sessionId = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const name = 'my saved background search session';
     const body = { sessionId, name };
@@ -34,10 +34,10 @@ describe('registerSessionRoutes', () => {
 
     saveHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.session.save).toHaveBeenCalledWith(sessionId, { name });
+    expect(mockContext.search!.saveSession).toHaveBeenCalledWith(sessionId, { name });
   });
 
-  it('get calls session.get with sessionId', async () => {
+  it('get calls getSession with sessionId', async () => {
     const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const params = { id };
 
@@ -49,10 +49,10 @@ describe('registerSessionRoutes', () => {
 
     getHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.session.get).toHaveBeenCalledWith(id);
+    expect(mockContext.search!.getSession).toHaveBeenCalledWith(id);
   });
 
-  it('find calls session.find with options', async () => {
+  it('find calls findSession with options', async () => {
     const page = 1;
     const perPage = 5;
     const sortField = 'my_field';
@@ -68,10 +68,10 @@ describe('registerSessionRoutes', () => {
 
     findHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.session.find).toHaveBeenCalledWith(body);
+    expect(mockContext.search!.findSessions).toHaveBeenCalledWith(body);
   });
 
-  it('update calls session.update with id and attributes', async () => {
+  it('update calls updateSession with id and attributes', async () => {
     const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const name = 'my saved background search session';
     const expires = new Date().toISOString();
@@ -86,10 +86,10 @@ describe('registerSessionRoutes', () => {
 
     updateHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.session.update).toHaveBeenCalledWith(id, body);
+    expect(mockContext.search!.updateSession).toHaveBeenCalledWith(id, body);
   });
 
-  it('delete calls session.delete with id', async () => {
+  it('delete calls deleteSession with id', async () => {
     const id = 'd7170a35-7e2c-48d6-8dec-9a056721b489';
     const params = { id };
 
@@ -101,6 +101,6 @@ describe('registerSessionRoutes', () => {
 
     deleteHandler(mockContext, mockRequest, mockResponse);
 
-    expect(mockContext.search!.session.delete).toHaveBeenCalledWith(id);
+    expect(mockContext.search!.deleteSession).toHaveBeenCalledWith(id);
   });
 });

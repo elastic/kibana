@@ -244,8 +244,8 @@ export {
   searchUsageObserver,
   shimAbortSignal,
   SearchUsage,
-  SessionService,
-  ISessionService,
+  SearchSessionService,
+  ISearchSessionService,
 } from './search';
 
 // Search namespace
