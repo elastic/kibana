@@ -19,6 +19,7 @@ import { CreateExceptionListItemOptions } from '../../../../../lists/server';
 import {
   ConditionEntry,
   ConditionEntryField,
+  EffectScope,
   NewTrustedApp,
   OperatingSystem,
   TrustedApp,
@@ -48,6 +49,21 @@ export const createConditionEntry = <T extends ConditionEntryField>(
   value: string
 ): ConditionEntry<T> => {
   return { field, value, type: 'match', operator: 'included' };
+};
+
+export const tagsToEffectScope = (tags: string[]): EffectScope => {
+  const policyReferenceTags = tags.filter((tag) => tag.startsWith('policy:'));
+
+  if (policyReferenceTags.some((tag) => tag === 'policy:all')) {
+    return {
+      type: 'global',
+    };
+  } else {
+    return {
+      type: 'policy',
+      policies: policyReferenceTags.map((tag) => tag.substr(7)),
+    };
+  }
 };
 
 export const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEntriesMap => {
@@ -97,7 +113,7 @@ export const exceptionListItemToTrustedApp = (
       id: exceptionListItem.id,
       name: exceptionListItem.name,
       description: exceptionListItem.description,
-      effectScope: { type: 'global' },
+      effectScope: tagsToEffectScope(exceptionListItem.tags),
       created_at: exceptionListItem.created_at,
       created_by: exceptionListItem.created_by,
       ...(os === OperatingSystem.LINUX || os === OperatingSystem.MAC
@@ -147,6 +163,14 @@ export const createEntryNested = (field: string, entries: NestedEntriesArray): E
   return { field, entries, type: 'nested' };
 };
 
+export const effectScopeToTags = (effectScope: EffectScope) => {
+  if (effectScope.type === 'policy') {
+    return effectScope.policies.map((policy) => `policy:${policy}`);
+  } else {
+    return ['policy:all'];
+  }
+};
+
 export const conditionEntriesToEntries = (conditionEntries: ConditionEntry[]): EntriesArray => {
   return conditionEntries.map((conditionEntry) => {
     if (conditionEntry.field === ConditionEntryField.HASH) {
@@ -173,6 +197,7 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
   entries,
   name,
   description = '',
+  effectScope,
 }: NewTrustedApp): CreateExceptionListItemOptions => {
   return {
     comments: [],
@@ -184,7 +209,7 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
     name,
     namespaceType: 'agnostic',
     osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
-    tags: [],
+    tags: effectScopeToTags(effectScope),
     type: 'simple',
   };
 };
