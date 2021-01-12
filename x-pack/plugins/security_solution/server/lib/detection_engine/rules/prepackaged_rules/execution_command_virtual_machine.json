@@ -8,13 +8,14 @@
   ],
   "from": "now-25m",
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-azure*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Azure Command Execution on Virtual Machine",
   "note": "The Azure Filebeat module must be enabled to use this rule.",
-  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:MICROSOFT.COMPUTE/VIRTUALMACHINES/RUNCOMMAND/ACTION and event.outcome:Success",
+  "query": "event.dataset:azure.activitylogs and azure.activitylogs.operation_name:MICROSOFT.COMPUTE/VIRTUALMACHINES/RUNCOMMAND/ACTION and event.outcome:(Success or success)",
   "references": [
     "https://adsecurity.org/?p=4277",
     "https://posts.specterops.io/attacking-azure-azure-ad-and-introducing-powerzure-ca70b330511a",
@@ -49,5 +50,5 @@
     }
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }
