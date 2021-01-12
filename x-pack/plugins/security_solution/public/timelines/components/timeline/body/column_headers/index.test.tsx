@@ -19,6 +19,7 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { ColumnHeadersComponent } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { timelineActions } from '../../../../store/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -54,6 +55,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -73,6 +75,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -93,6 +96,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -147,6 +151,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -186,6 +191,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -221,6 +227,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>

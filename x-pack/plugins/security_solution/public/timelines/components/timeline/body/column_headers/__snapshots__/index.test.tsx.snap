@@ -472,6 +472,7 @@ exports[`ColumnHeaders rendering renders correctly against snapshot 1`] = `
       },
     ]
   }
+  tabType="query"
   timelineId="test"
 />
 `;
