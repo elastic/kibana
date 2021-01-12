@@ -7,21 +7,25 @@
 import { DocLinksStart } from 'src/core/public';
 
 export class DocumentationLinksService {
-  private readonly esDocBasePath: string;
+  private readonly esClusterPrivileges: string;
+  private readonly esRunAsPrivilege: string;
+  private readonly esIndicesPrivileges: string;
 
   constructor(docLinks: DocLinksStart) {
-    this.esDocBasePath = `${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}/`;
+    this.esClusterPrivileges = `${docLinks.links.security.clusterPrivileges}`;
+    this.esRunAsPrivilege = `${docLinks.links.security.runAsPrivilege}`;
+    this.esIndicesPrivileges = `${docLinks.links.security.indicesPrivileges}`;
   }
 
   public getESClusterPrivilegesDocUrl() {
-    return `${this.esDocBasePath}security-privileges.html#privileges-list-cluster`;
+    return `${this.esClusterPrivileges}`;
   }
 
   public getESRunAsPrivilegesDocUrl() {
-    return `${this.esDocBasePath}security-privileges.html#_run_as_privilege`;
+    return `${this.esRunAsPrivilege}`;
   }
 
   public getESIndicesPrivilegesDocUrl() {
-    return `${this.esDocBasePath}security-privileges.html#privileges-list-indices`;
+    return `${this.esIndicesPrivileges}`;
   }
 }
