@@ -32,7 +32,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
         await new UserAPIClient(services.http!).enableUser(username);
         services.notifications!.toasts.addSuccess(
           i18n.translate('xpack.security.management.users.confirmEnableUsers.successMessage', {
-            defaultMessage: "Enabled user '{username}'",
+            defaultMessage: "Activated user '{username}'",
             values: { username },
           })
         );
@@ -40,7 +40,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
       } catch (error) {
         services.notifications!.toasts.addDanger({
           title: i18n.translate('xpack.security.management.users.confirmEnableUsers.errorMessage', {
-            defaultMessage: "Could not enable user '{username}'",
+            defaultMessage: "Could not activate user '{username}'",
             values: { username },
           }),
           text: (error as any).body?.message || error.message,
@@ -52,7 +52,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
   return (
     <ConfirmModal
       title={i18n.translate('xpack.security.management.users.confirmEnableUsers.title', {
-        defaultMessage: "Enable {count, plural, one{user '{username}'} other{{count} users}}?",
+        defaultMessage: "Activate {count, plural, one{user '{username}'} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },
       })}
       onCancel={onCancel}
@@ -61,7 +61,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
         'xpack.security.management.users.confirmEnableUsers.confirmButton',
         {
           defaultMessage:
-            '{isLoading, select, true{Enabling {count, plural, one{user} other{users}}…} other{Enable {count, plural, one{user} other{users}}}}',
+            '{isLoading, select, true{Activating {count, plural, one{user} other{users}}…} other{Activate {count, plural, one{user} other{users}}}}',
           values: { count: usernames.length, isLoading: state.loading },
         }
       )}
@@ -72,7 +72,7 @@ export const ConfirmEnableUsers: FunctionComponent<ConfirmEnableUsersProps> = ({
         <p>
           <FormattedMessage
             id="xpack.security.management.users.confirmEnableUsers.description"
-            defaultMessage="This action will allow {count, plural, one{the user} other{these users}} to access the stack{count, plural, one{.} other{:}}"
+            defaultMessage="This action will allow {count, plural, one{the user} other{these users}} to access Elastic{count, plural, one{.} other{:}}"
             values={{ count: usernames.length }}
           />
         </p>

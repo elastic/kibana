@@ -306,7 +306,12 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               />
             </h2>
           }
-          description="Protect your data with a strong password."
+          description={i18n.translate(
+            'xpack.security.management.users.userForm.passwordDescription',
+            {
+              defaultMessage: 'Protect your data with a strong password.',
+            }
+          )}
         >
           <EuiFormRow
             label={i18n.translate('xpack.security.management.users.userForm.passwordLabel', {

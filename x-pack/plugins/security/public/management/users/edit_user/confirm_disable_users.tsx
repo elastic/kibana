@@ -33,7 +33,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
         await new UserAPIClient(services.http!).disableUser(username);
         services.notifications!.toasts.addSuccess(
           i18n.translate('xpack.security.management.users.confirmDisableUsers.successMessage', {
-            defaultMessage: "Disabled user '{username}'",
+            defaultMessage: "Deactivated user '{username}'",
             values: { username },
           })
         );
@@ -43,7 +43,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
           title: i18n.translate(
             'xpack.security.management.users.confirmDisableUsers.errorMessage',
             {
-              defaultMessage: "Could not disable user '{username}'",
+              defaultMessage: "Could not deactivate user '{username}'",
               values: { username },
             }
           ),
@@ -56,7 +56,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
   return (
     <ConfirmModal
       title={i18n.translate('xpack.security.management.users.confirmDisableUsers.title', {
-        defaultMessage: "Disable {count, plural, one{user '{username}'} other{{count} users}}?",
+        defaultMessage: "Deactivate {count, plural, one{user '{username}'} other{{count} users}}?",
         values: { count: usernames.length, username: usernames[0] },
       })}
       onCancel={onCancel}
@@ -67,13 +67,13 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
               'xpack.security.management.users.confirmDisableUsers.confirmSystemPasswordButton',
               {
                 defaultMessage:
-                  '{isLoading, select, true{Disabling user…} other{I understand, disable this user}}',
+                  '{isLoading, select, true{Deactivating user…} other{I understand, deactivate this user}}',
                 values: { isLoading: state.loading },
               }
             )
           : i18n.translate('xpack.security.management.users.confirmDisableUsers.confirmButton', {
               defaultMessage:
-                '{isLoading, select, true{Disabling {count, plural, one{user} other{users}}…} other{Disable {count, plural, one{user} other{users}}}}',
+                '{isLoading, select, true{Deactivating {count, plural, one{user} other{users}}…} other{Deactivate {count, plural, one{user} other{users}}}}',
               values: { count: usernames.length, isLoading: state.loading },
             })
       }
@@ -86,13 +86,13 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
           <p>
             <FormattedMessage
               id="xpack.security.management.users.confirmDisableUsers.systemUserWarning"
-              defaultMessage="Disabling this user will prevent Kibana from communicating with Elasticsearch."
+              defaultMessage="Deactivating the system user will prevent Kibana from communicating with Elasticsearch."
             />
           </p>
           <p>
             <FormattedMessage
               id="xpack.security.management.users.confirmDisableUsers.systemUserDescription"
-              defaultMessage="Once disabled, you must manually update your config file with credentials for a different system user and restart Kibana."
+              defaultMessage="Once deactivated, you must manually update your config file with different user details and restart Kibana."
             />
           </p>
         </EuiText>
@@ -101,7 +101,7 @@ export const ConfirmDisableUsers: FunctionComponent<ConfirmDisableUsersProps> = 
           <p>
             <FormattedMessage
               id="xpack.security.management.users.confirmDisableUsers.description"
-              defaultMessage="This action will prevent {count, plural, one{the user} other{these users}} from accessing the stack{count, plural, one{.} other{:}}"
+              defaultMessage="This action will prevent {count, plural, one{the user} other{these users}} from accessing Elastic{count, plural, one{.} other{:}}"
               values={{ count: usernames.length }}
             />
           </p>

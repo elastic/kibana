@@ -122,6 +122,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                 />
               }
               iconType="lock"
+              color="warning"
             />
             <EuiSpacer />
           </>
@@ -131,14 +132,14 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
               title={
                 <FormattedMessage
                   id="xpack.security.management.users.editUserPage.disabledUserWarning"
-                  defaultMessage="This user is disabled and can't access the stack."
+                  defaultMessage="This user has been deactivated and can't access Elastic."
                 />
               }
             >
               <EuiButton onClick={() => setAction('enableUser')} size="s">
                 <FormattedMessage
                   id="xpack.security.management.users.editUserPage.enableUserButton"
-                  defaultMessage="Enable user"
+                  defaultMessage="Activate user"
                 />
               </EuiButton>
             </EuiCallOut>
@@ -227,13 +228,13 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                   <EuiDescriptionListTitle>
                     <FormattedMessage
                       id="xpack.security.management.users.editUserPage.enableUserTitle"
-                      defaultMessage="Enable user"
+                      defaultMessage="Activate user"
                     />
                   </EuiDescriptionListTitle>
                   <EuiDescriptionListDescription>
                     <FormattedMessage
                       id="xpack.security.management.users.editUserPage.enableUserDescription"
-                      defaultMessage="Allow the user to access the stack."
+                      defaultMessage="Allow the user to access Elastic."
                     />
                   </EuiDescriptionListDescription>
                 </EuiDescriptionList>
@@ -242,7 +243,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                 <EuiButton onClick={() => setAction('enableUser')} size="s">
                   <FormattedMessage
                     id="xpack.security.management.users.editUserPage.enableUserButton"
-                    defaultMessage="Enable user"
+                    defaultMessage="Activate user"
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -256,13 +257,13 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                   <EuiDescriptionListTitle>
                     <FormattedMessage
                       id="xpack.security.management.users.editUserPage.disableUserTitle"
-                      defaultMessage="Disable user"
+                      defaultMessage="Deactivate user"
                     />
                   </EuiDescriptionListTitle>
                   <EuiDescriptionListDescription>
                     <FormattedMessage
                       id="xpack.security.management.users.editUserPage.disableUserDescription"
-                      defaultMessage="Prevent the user from accessing the stack."
+                      defaultMessage="Prevent the user from accessing Elastic."
                     />
                   </EuiDescriptionListDescription>
                 </EuiDescriptionList>
@@ -271,7 +272,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                 <EuiButton onClick={() => setAction('disableUser')} size="s">
                   <FormattedMessage
                     id="xpack.security.management.users.editUserPage.disableUserButton"
-                    defaultMessage="Disable user"
+                    defaultMessage="Deactivate user"
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -295,7 +296,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
                     <EuiDescriptionListDescription>
                       <FormattedMessage
                         id="xpack.security.management.users.editUserPage.deleteUserDescription"
-                        defaultMessage="Permanently delete the user from the stack."
+                        defaultMessage="Permanently delete the user and remove access to Elastic."
                       />
                     </EuiDescriptionListDescription>
                   </EuiDescriptionList>

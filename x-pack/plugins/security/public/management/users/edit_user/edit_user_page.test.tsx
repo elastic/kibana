@@ -49,7 +49,7 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    await findByText(/User is disabled/i);
+    await findByText(/User is blocked/i);
   });
 
   it('warns when viewing deprecated user', async () => {
@@ -261,10 +261,10 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    fireEvent.click(await findByRole('button', { name: 'Disable user' }));
+    fireEvent.click(await findByRole('button', { name: 'Block user' }));
 
     const dialog = getByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Disable user' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Block user' }));
 
     await waitForElementToBeRemoved(() => getByRole('dialog'));
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/disable');
@@ -285,11 +285,11 @@ describe('EditUserPage', () => {
       </Providers>
     );
 
-    const [enableButton] = await findAllByRole('button', { name: 'Enable user' });
+    const [enableButton] = await findAllByRole('button', { name: 'Unblock user' });
     fireEvent.click(enableButton);
 
     const dialog = getByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Enable user' }));
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Unblock user' }));
 
     await waitForElementToBeRemoved(() => getByRole('dialog'));
     expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/users/jdoe/enable');
