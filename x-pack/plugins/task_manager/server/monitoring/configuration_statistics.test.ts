@@ -44,7 +44,6 @@ describe('Configuration Statistics Aggregator', () => {
           expect(initial.value).toEqual({
             max_workers: 10,
             poll_interval: 6000000,
-            version_conflict_threshold: 80,
             max_poll_inactivity_cycles: 10,
             request_capacity: 1000,
             monitored_aggregated_stats_refresh_rate: 5000,
@@ -61,7 +60,6 @@ describe('Configuration Statistics Aggregator', () => {
           expect(updatedWorkers.value).toEqual({
             max_workers: 8,
             poll_interval: 6000000,
-            version_conflict_threshold: 80,
             max_poll_inactivity_cycles: 10,
             request_capacity: 1000,
             monitored_aggregated_stats_refresh_rate: 5000,
