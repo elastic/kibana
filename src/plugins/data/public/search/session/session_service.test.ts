@@ -23,17 +23,22 @@ import { take, toArray } from 'rxjs/operators';
 import { getSessionsClientMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
+import { createNowProviderMock } from '../../now_provider/mocks';
+import { NowProviderInternalContract } from '../../now_provider';
 
 describe('Session service', () => {
   let sessionService: ISessionService;
   let state$: BehaviorSubject<SearchSessionState>;
+  let nowProvider: jest.Mocked<NowProviderInternalContract>;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
+    nowProvider = createNowProviderMock();
     sessionService = new SessionService(
       initializerContext,
       coreMock.createSetup().getStartServices,
       getSessionsClientMock(),
+      nowProvider,
       { freezeState: false } // needed to use mocks inside state container
     );
     state$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
@@ -44,8 +49,10 @@ describe('Session service', () => {
     it('Creates and clears a session', async () => {
       sessionService.start();
       expect(sessionService.getSessionId()).not.toBeUndefined();
+      expect(nowProvider.set).toHaveBeenCalled();
       sessionService.clear();
       expect(sessionService.getSessionId()).toBeUndefined();
+      expect(nowProvider.reset).toHaveBeenCalled();
     });
 
     it('Restores a session', async () => {
