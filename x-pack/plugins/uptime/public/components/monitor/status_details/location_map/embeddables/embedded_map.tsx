@@ -83,10 +83,12 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
       lat: 20,
       zoom: 0,
     },
-    disableInteractive: true,
-    hideToolbarOverlay: true,
-    hideLayerControl: true,
-    hideViewControl: true,
+    mapSettings: {
+      disableInteractive: true,
+      hideToolbarOverlay: true,
+      hideLayerControl: true,
+      hideViewControl: true,
+    },
   };
 
   const renderTooltipContent = ({

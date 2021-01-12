@@ -38,6 +38,7 @@ interface Props {
   event: TimelineExpandedEventType;
   isAlert: boolean;
   loading: boolean;
+  messageHeight?: number;
   timelineTabType: TimelineTabs | 'flyout';
   timelineId: string;
 }
@@ -50,6 +51,14 @@ interface ExpandableEventTitleProps {
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   flex: 0;
+`;
+
+const StyledFlexGroup = styled(EuiFlexGroup)`
+  height: 100%;
+`;
+
+const StyledEuiFlexItem = styled(EuiFlexItem)`
+  overflow: hidden;
 `;
 
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
@@ -99,9 +108,9 @@ export const ExpandableEvent = React.memo<Props>(
     }
 
     return (
-      <>
+      <StyledFlexGroup direction="column" gutterSize="none">
         {message && (
-          <>
+          <EuiFlexItem grow={false}>
             <EuiDescriptionList data-test-subj="event-message" compressed>
               <EuiDescriptionListTitle>{i18n.MESSAGE}</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
@@ -109,19 +118,21 @@ export const ExpandableEvent = React.memo<Props>(
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
             <EuiSpacer size="m" />
-          </>
+          </EuiFlexItem>
         )}
-        <EventDetails
-          browserFields={browserFields}
-          data={detailsData!}
-          id={event.eventId!}
-          isAlert={isAlert}
-          onViewSelected={setView}
-          timelineTabType={timelineTabType}
-          timelineId={timelineId}
-          view={view}
-        />
-      </>
+        <StyledEuiFlexItem grow={true}>
+          <EventDetails
+            browserFields={browserFields}
+            data={detailsData!}
+            id={event.eventId!}
+            isAlert={isAlert}
+            onViewSelected={setView}
+            timelineTabType={timelineTabType}
+            timelineId={timelineId}
+            view={view}
+          />
+        </StyledEuiFlexItem>
+      </StyledFlexGroup>
     );
   }
 );
