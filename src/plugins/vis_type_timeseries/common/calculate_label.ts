@@ -18,8 +18,9 @@
  */
 
 import { includes, startsWith } from 'lodash';
-import { lookup } from './agg_lookup';
 import { i18n } from '@kbn/i18n';
+import { lookup } from './agg_lookup';
+import { MetricsItemsSchema, SanitizedFieldType } from './types';
 
 const paths = [
   'cumulative_sum',
@@ -36,7 +37,15 @@ const paths = [
   'positive_only',
 ];
 
-export function calculateLabel(metric, metrics) {
+export const extractFieldLabel = (fields: SanitizedFieldType[], name: string) => {
+  return fields.find((f) => f.name === name)?.label ?? name;
+};
+
+export const calculateLabel = (
+  metric: MetricsItemsSchema,
+  metrics: MetricsItemsSchema[] = [],
+  fields: SanitizedFieldType[] = []
+): string => {
   if (!metric) {
     return i18n.translate('visTypeTimeseries.calculateLabel.unknownLabel', {
       defaultMessage: 'Unknown',
@@ -73,7 +82,7 @@ export function calculateLabel(metric, metrics) {
   if (metric.type === 'positive_rate') {
     return i18n.translate('visTypeTimeseries.calculateLabel.positiveRateLabel', {
       defaultMessage: 'Counter Rate of {field}',
-      values: { field: metric.field },
+      values: { field: extractFieldLabel(fields, metric.field!) },
     });
   }
   if (metric.type === 'static') {
@@ -84,15 +93,15 @@ export function calculateLabel(metric, metrics) {
   }
 
   if (includes(paths, metric.type)) {
-    const targetMetric = metrics.find((m) => startsWith(metric.field, m.id));
-    const targetLabel = calculateLabel(targetMetric, metrics);
+    const targetMetric = metrics.find((m) => startsWith(metric.field!, m.id));
+    const targetLabel = calculateLabel(targetMetric!, metrics, fields);
 
     // For percentiles we need to parse the field id to extract the percentile
     // the user configured in the percentile aggregation and specified in the
     // submetric they selected. This applies only to pipeline aggs.
     if (targetMetric && targetMetric.type === 'percentile') {
       const percentileValueMatch = /\[([0-9\.]+)\]$/;
-      const matches = metric.field.match(percentileValueMatch);
+      const matches = metric.field!.match(percentileValueMatch);
       if (matches) {
         return i18n.translate(
           'visTypeTimeseries.calculateLabel.lookupMetricTypeOfTargetWithAdditionalLabel',
@@ -115,6 +124,9 @@ export function calculateLabel(metric, metrics) {
 
   return i18n.translate('visTypeTimeseries.calculateLabel.lookupMetricTypeOfMetricFieldRankLabel', {
     defaultMessage: '{lookupMetricType} of {metricField}',
-    values: { lookupMetricType: lookup[metric.type], metricField: metric.field },
+    values: {
+      lookupMetricType: lookup[metric.type],
+      metricField: extractFieldLabel(fields, metric.field!),
+    },
   });
-}
+};

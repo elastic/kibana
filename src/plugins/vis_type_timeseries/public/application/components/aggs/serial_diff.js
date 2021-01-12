@@ -37,7 +37,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SerialDiffAgg = (props) => {
-  const { siblings } = props;
+  const { siblings, fields, indexPattern } = props;
   const defaults = { lag: '' };
   const model = { ...defaults, ...props.model };
 
@@ -87,6 +87,7 @@ export const SerialDiffAgg = (props) => {
               onChange={handleSelectChange('field')}
               metrics={siblings}
               metric={model}
+              fields={fields[indexPattern]}
               value={model.field}
               exclude={[METRIC_TYPES.TOP_HIT]}
             />
@@ -125,6 +126,7 @@ export const SerialDiffAgg = (props) => {
 SerialDiffAgg.propTypes = {
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,
+  indexPattern: PropTypes.string,
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onChange: PropTypes.func,

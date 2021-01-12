@@ -18,16 +18,13 @@
  */
 
 import { extractIndexPatterns } from './extract_index_patterns';
+import { PanelSchema } from './types';
 
 describe('extractIndexPatterns(vis)', () => {
-  let visParams;
-  let visFields;
+  let panel: PanelSchema;
 
   beforeEach(() => {
-    visFields = {
-      '*': [],
-    };
-    visParams = {
+    panel = {
       index_pattern: '*',
       series: [
         {
@@ -40,25 +37,10 @@ describe('extractIndexPatterns(vis)', () => {
         },
       ],
       annotations: [{ index_pattern: 'notes-*' }, { index_pattern: 'example-1-*' }],
-    };
+    } as PanelSchema;
   });
 
   test('should return index patterns', () => {
-    visFields = {};
-
-    expect(extractIndexPatterns(visParams, visFields)).toEqual([
-      '*',
-      'example-1-*',
-      'example-2-*',
-      'notes-*',
-    ]);
-  });
-
-  test('should return index patterns that do not exist in visFields', () => {
-    expect(extractIndexPatterns(visParams, visFields)).toEqual([
-      'example-1-*',
-      'example-2-*',
-      'notes-*',
-    ]);
+    expect(extractIndexPatterns(panel, '')).toEqual(['*', 'example-1-*', 'example-2-*', 'notes-*']);
   });
 });
