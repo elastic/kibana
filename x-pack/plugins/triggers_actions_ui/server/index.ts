@@ -14,6 +14,7 @@ export {
   CoreQueryParams,
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
+  validateTimeWindowUnits,
   MAX_INTERVALS,
   MAX_GROUPS,
   DEFAULT_GROUPS,

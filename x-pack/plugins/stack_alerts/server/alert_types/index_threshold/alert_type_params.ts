@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { ComparatorFnNames, getInvalidComparatorMessage } from './alert_type';
+import { ComparatorFnNames, getInvalidComparatorMessage } from '../lib';
 import {
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
@@ -54,5 +54,8 @@ function validateParams(anyParams: unknown): string | undefined {
 export function validateComparator(comparator: string): string | undefined {
   if (ComparatorFnNames.has(comparator)) return;
 
-  return getInvalidComparatorMessage(comparator);
+  return getInvalidComparatorMessage(
+    'xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage',
+    comparator
+  );
 }
