@@ -23,9 +23,6 @@ import {
   getMapReady,
   getGoto,
   getScrollZoom,
-  isInteractiveDisabled,
-  isTooltipControlDisabled,
-  isViewControlHidden,
   getSpatialFiltersLayer,
   getMapSettings,
 } from '../../selectors/map_selectors';
@@ -41,9 +38,6 @@ function mapStateToProps(state: MapStoreState) {
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
     scrollZoom: getScrollZoom(state),
-    disableInteractive: isInteractiveDisabled(state),
-    disableTooltipControl: isTooltipControlDisabled(state),
-    hideViewControl: isViewControlHidden(state),
   };
 }
 
