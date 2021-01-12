@@ -282,11 +282,14 @@ function createUrlGeneratorState({
   appStateContainer,
   data,
   getSavedSearchId,
-  forceAbsoluteTime, // TODO: not implemented
+  forceAbsoluteTime,
 }: {
   appStateContainer: StateContainer<AppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
+  /**
+   * Can force time range from time filter to convert from relative to absolute time range
+   */
   forceAbsoluteTime: boolean;
 }): DiscoverUrlGeneratorState {
   const appState = appStateContainer.get();
@@ -295,7 +298,9 @@ function createUrlGeneratorState({
     indexPatternId: appState.index,
     query: appState.query,
     savedSearchId: getSavedSearchId(),
-    timeRange: data.query.timefilter.timefilter.getTime(), // TODO: handle relative time range
+    timeRange: forceAbsoluteTime
+      ? data.query.timefilter.timefilter.getAbsoluteTime()
+      : data.query.timefilter.timefilter.getTime(),
     searchSessionId: data.search.session.getSessionId(),
     columns: appState.columns,
     sort: appState.sort,

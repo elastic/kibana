@@ -28,6 +28,9 @@ export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
 export const APP_ICON_SOLUTION = 'logoKibana';
+export const APP_NAME = i18n.translate('xpack.maps.visTypeAlias.title', {
+  defaultMessage: 'Maps',
+});
 export const INITIAL_LAYERS_KEY = 'initialLayers';
 
 export const MAPS_APP_PATH = `app/${APP_ID}`;
@@ -40,8 +43,13 @@ export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 export const MVT_SOURCE_LAYER_NAME = 'source_layer';
+// Identifies vector tile "too many features" feature.
+// "too many features" feature is a box showing area that contains too many features for single ES search response
 export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
 export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
+// Identifies centroid feature.
+// Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
+export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
 
 const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {
@@ -49,6 +57,9 @@ export function getNewMapPath() {
 }
 export function getExistingMapPath(id: string) {
   return `${MAP_BASE_URL}/${id}`;
+}
+export function getEditPath(id: string) {
+  return `/${MAP_PATH}/${id}`;
 }
 
 export enum LAYER_TYPE {

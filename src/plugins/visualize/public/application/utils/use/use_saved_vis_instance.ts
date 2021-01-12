@@ -26,9 +26,10 @@ import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 
 import { getVisualizationInstance } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { SavedVisInstance, IEditorController, VisualizeServices } from '../../types';
+import { SavedVisInstance, VisualizeServices } from '../../types';
 import { VisualizeConstants } from '../../visualize_constants';
 import { getDefaultEditor } from '../../../services';
+import type { IEditorController } from '../../../../../visualizations/public';
 
 /**
  * This effect is responsible for instantiating a saved vis or creating a new one
@@ -45,6 +46,7 @@ export const useSavedVisInstance = (
     savedVisInstance?: SavedVisInstance;
     visEditorController?: IEditorController;
   }>({});
+
   const visEditorRef = useRef<HTMLDivElement | null>(null);
   const visId = useRef('');
 
@@ -132,7 +134,6 @@ export const useSavedVisInstance = (
             embeddableHandler.render(visEditorRef.current);
           }
         }
-
         setState({
           savedVisInstance,
           visEditorController,
@@ -189,13 +190,13 @@ export const useSavedVisInstance = (
       getSavedVisInstance();
     }
   }, [
-    eventEmitter,
-    isChromeVisible,
-    originatingApp,
     services,
+    eventEmitter,
+    originatingApp,
+    isChromeVisible,
+    visualizationIdFromUrl,
     state.savedVisInstance,
     state.visEditorController,
-    visualizationIdFromUrl,
   ]);
 
   useEffect(() => {

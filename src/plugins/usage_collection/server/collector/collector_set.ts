@@ -20,7 +20,6 @@
 import { snakeCase } from 'lodash';
 import {
   Logger,
-  LegacyAPICaller,
   ElasticsearchClient,
   ISavedObjectsRepository,
   SavedObjectsClientContract,
@@ -171,7 +170,6 @@ export class CollectorSet {
   };
 
   public bulkFetch = async (
-    callCluster: LegacyAPICaller,
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract | ISavedObjectsRepository,
     kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
@@ -182,7 +180,6 @@ export class CollectorSet {
         this.logger.debug(`Fetching data from ${collector.type} collector`);
         try {
           const context = {
-            callCluster,
             esClient,
             soClient,
             ...(collector.extendFetchContext.kibanaRequest && { kibanaRequest }),
@@ -212,14 +209,12 @@ export class CollectorSet {
   };
 
   public bulkFetchUsage = async (
-    callCluster: LegacyAPICaller,
     esClient: ElasticsearchClient,
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository,
     kibanaRequest: KibanaRequest | undefined // intentionally `| undefined` to enforce providing the parameter
   ) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
     return await this.bulkFetch(
-      callCluster,
       esClient,
       savedObjectsClient,
       kibanaRequest,

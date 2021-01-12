@@ -18,7 +18,7 @@ import {
   CLOSE_TIMELINE_BTN,
   COMBO_BOX,
   CREATE_NEW_TIMELINE,
-  HEADER,
+  DRAGGABLE_HEADER,
   ID_FIELD,
   ID_HEADER_FIELD,
   ID_TOGGLE_FIELD,
@@ -118,7 +118,6 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click({ force: true });
-  cy.wait(1000);
   cy.get(CREATE_NEW_TIMELINE).should('be.visible');
   cy.get(CREATE_NEW_TIMELINE).click();
 };
@@ -190,8 +189,11 @@ export const dragAndDropIdToggleFieldToTimeline = () => {
 };
 
 export const removeColumn = (column: number) => {
-  cy.get(HEADER).eq(column).click();
-  cy.get(REMOVE_COLUMN).eq(column).click({ force: true });
+  cy.get(DRAGGABLE_HEADER)
+    .eq(column)
+    .within(() => {
+      cy.get(REMOVE_COLUMN).click({ force: true });
+    });
 };
 
 export const resetFields = () => {
