@@ -30,3 +30,8 @@ export const TOTAL_CLICKS = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.analytics.totalClicks',
   { defaultMessage: 'Total clicks' }
 );
+
+// Moment date format conversions
+export const SERVER_DATE_FORMAT = 'YYYY-MM-DD';
+export const TOOLTIP_DATE_FORMAT = 'MMMM D, YYYY';
+export const X_AXIS_DATE_FORMAT = 'M/D';
