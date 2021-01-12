@@ -50,14 +50,18 @@ export const useVisByValue = (
       }
       const byValueVisInstance = await getVisualizationInstanceFromInput(services, valueInput);
       const { embeddableHandler, vis } = byValueVisInstance;
+      let visEditorController;
 
       const Editor = getVisEditorsRegistry().get(vis.type.editorConfig?.editor);
-      const visEditorController = new Editor(
-        visEditorRef.current,
-        vis,
-        eventEmitter,
-        embeddableHandler
-      );
+
+      if (Editor) {
+        visEditorController = new Editor(
+          visEditorRef.current,
+          vis,
+          eventEmitter,
+          embeddableHandler
+        );
+      }
 
       const originatingAppName = originatingApp
         ? stateTransferService.getAppNameFromId(originatingApp)

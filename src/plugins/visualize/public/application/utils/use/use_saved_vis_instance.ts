@@ -123,12 +123,15 @@ export const useSavedVisInstance = (
         if (visEditorRef.current) {
           if (isChromeVisible) {
             const Editor = getVisEditorsRegistry().get(vis.type.editorConfig?.editor);
-            visEditorController = new Editor(
-              visEditorRef.current,
-              vis,
-              eventEmitter,
-              embeddableHandler
-            );
+
+            if (Editor) {
+              visEditorController = new Editor(
+                visEditorRef.current,
+                vis,
+                eventEmitter,
+                embeddableHandler
+              );
+            }
           } else {
             embeddableHandler.render(visEditorRef.current);
           }
