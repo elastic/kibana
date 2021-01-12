@@ -35,7 +35,7 @@ export async function getSeriesData(req, panel) {
   };
 
   try {
-    const bodiesPromises = getActiveSeries(panel).map(async (series) =>
+    const bodiesPromises = getActiveSeries(panel).map((series) =>
       getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities)
     );
 
