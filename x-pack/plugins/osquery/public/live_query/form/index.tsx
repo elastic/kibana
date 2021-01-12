@@ -16,18 +16,20 @@ const FORM_ID = 'liveQueryForm';
 
 const CommonUseField = getUseField({ component: Field });
 
-const LiveQueryFormComponent = () => {
+const LiveQueryFormComponent = ({ agents = [], commands = [] }) => {
   const initialState = useMemo(
     () => ({
-      agents: [],
-      commands: [],
+      agents,
+      commands,
     }),
-    []
+    [agents, commands]
   );
   const handleSubmit = useCallback((payload) => {
     console.error('payload sub,it', payload);
     return Promise.resolve();
   }, []);
+
+  console.error('initialSAtate', initialState);
 
   const { form } = useForm({
     id: FORM_ID,
