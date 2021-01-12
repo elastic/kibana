@@ -78,6 +78,7 @@ export function createLayerInstance(
         layerDescriptor: vectorLayerDescriptor,
         source: source as IVectorSource,
         joins,
+        chartsPaletteServiceGetColor,
       });
     case VectorTileLayer.type:
       return new VectorTileLayer({ layerDescriptor, source });
@@ -87,6 +88,7 @@ export function createLayerInstance(
       return new BlendedVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
+        chartsPaletteServiceGetColor,
       });
     case TiledVectorLayer.type:
       return new TiledVectorLayer({

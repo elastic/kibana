@@ -33,6 +33,20 @@ const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
 
 export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptions> {
+  private readonly _chartsPaletteServiceGetColor?: (value: string) => string | null;
+
+  constructor(
+    options: SizeDynamicOptions,
+    styleName: VECTOR_STYLES,
+    field: IField | null,
+    vectorLayer: IVectorLayer,
+    getFieldFormatter: (fieldName: string) => null | FieldFormatter,
+    chartsPaletteServiceGetColor?: (value: string) => string | null
+  ) {
+    super(options, styleName, field, vectorLayer, getFieldFormatter);
+    this._chartsPaletteServiceGetColor = chartsPaletteServiceGetColor;
+  }
+
   syncCircleColorWithMb(mbLayerId: string, mbMap: MbMap, alpha: number) {
     const color = this._getMbColor();
     mbMap.setPaintProperty(mbLayerId, 'circle-color', color);
@@ -259,12 +273,16 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
     for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
         stop: fieldMeta.categories[i].key,
-        color: colors[i],
+        color: this._chartsPaletteServiceGetColor
+          ? this._chartsPaletteServiceGetColor(fieldMeta.categories[i].key)
+          : colors[i],
       });
     }
     return {
       stops,
-      defaultColor: colors[maxLength - 1],
+      defaultColor: this._chartsPaletteServiceGetColor
+        ? this._chartsPaletteServiceGetColor('__other__')
+        : colors[maxLength - 1],
     };
   }
 
