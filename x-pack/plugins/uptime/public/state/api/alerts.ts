@@ -12,6 +12,9 @@ import { AlertsResult, MonitorIdParam } from '../actions/types';
 import { ActionType, AlertAction } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
 import { Alert, AlertTypeParams } from '../../../../alerts/common';
+import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
+
+const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
 import { populateAlertActions } from './alert_actions';
 
 const UPTIME_AUTO_ALERT = 'UPTIME_AUTO';
@@ -26,6 +29,20 @@ export interface NewAlertParams extends AlertTypeParams {
   defaultActions: ActionConnector[];
 }
 
+type NewMonitorStatusAlert = Omit<
+  Alert<AtomicStatusCheckParams>,
+  | 'id'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'apiKey'
+  | 'apiKeyOwner'
+  | 'muteAll'
+  | 'mutedInstanceIds'
+  | 'executionStatus'
+>;
+
 export const createAlert = async ({
   defaultActions,
   monitorId,
@@ -33,7 +50,7 @@ export const createAlert = async ({
 }: NewAlertParams): Promise<Alert> => {
   const actions: AlertAction[] = populateAlertActions({ defaultActions, monitorId, monitorName });
 
-  const data = {
+  const data: NewMonitorStatusAlert = {
     actions,
     params: {
       numTimes: 1,
@@ -48,6 +65,7 @@ export const createAlert = async ({
     consumer: 'uptime',
     alertTypeId: CLIENT_ALERT_TYPES.MONITOR_STATUS,
     schedule: { interval: '1m' },
+    notifyWhen: 'onActionGroupChange',
     tags: [UPTIME_AUTO_ALERT],
     name: `${monitorName} (Simple status alert)`,
   };
