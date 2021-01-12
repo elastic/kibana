@@ -56,6 +56,7 @@ export default function ({ getService }) {
             expect(resp.body).to.eql({
               success: true,
               successCount: 0,
+              warnings: [],
             });
           });
       });
@@ -94,6 +95,7 @@ export default function ({ getService }) {
                 { ...visualization, overwrite: true },
                 { ...dashboard, overwrite: true },
               ],
+              warnings: [],
             });
           });
       });
@@ -135,6 +137,7 @@ export default function ({ getService }) {
                   error: { type: 'unsupported_type' },
                 },
               ],
+              warnings: [],
             });
           });
       });
@@ -208,6 +211,7 @@ export default function ({ getService }) {
                   },
                 },
               ],
+              warnings: [],
             });
           });
       });
@@ -225,7 +229,7 @@ export default function ({ getService }) {
             .attach('file', join(__dirname, '../../fixtures/import.ndjson'))
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({ success: true, successCount: 0 });
+              expect(resp.body).to.eql({ success: true, successCount: 0, warnings: [] });
             });
         });
 
@@ -263,6 +267,7 @@ export default function ({ getService }) {
                   { ...visualization, overwrite: true },
                   { ...dashboard, overwrite: true },
                 ],
+                warnings: [],
               });
             });
         });
@@ -287,6 +292,7 @@ export default function ({ getService }) {
                 success: true,
                 successCount: 1,
                 successResults: [{ ...visualization, overwrite: true }],
+                warnings: [],
               });
             });
         });
@@ -338,6 +344,7 @@ export default function ({ getService }) {
                     meta: { title: 'My favorite vis', icon: 'visualizeApp' },
                   },
                 ],
+                warnings: [],
               });
             });
           await supertest
