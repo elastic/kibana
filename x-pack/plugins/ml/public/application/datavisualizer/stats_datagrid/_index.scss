@@ -11,10 +11,6 @@
     font-weight: bold;
     padding-bottom: $euiSizeS;
   }
-  .mlFieldDataCard__valuesTitle .smallPadding{
-    padding-bottom: $euiSizeXS;
-  }
-
 
   .mlFieldDataCard__codeContent {
     @include euiCodeFont;
