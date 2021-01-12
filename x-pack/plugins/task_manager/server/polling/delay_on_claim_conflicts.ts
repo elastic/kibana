@@ -31,15 +31,6 @@ export function delayOnClaimConflicts(
   runningAverageWindowSize: number
 ): Observable<number> {
   const claimConflictQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  function pushIntoQueue(claimClashes: number): Option<number> {
-    // add latest claimConflict count to queue
-    claimConflictQueue(claimClashes);
-    // emit value if above or equal to Threshold in order to recompute average
-    return claimClashes >= claimClashesPercentageThreshold
-      ? some(stats.percentile(claimConflictQueue(), 0.5))
-      : none;
-  }
-
   return merge(
     of(0),
     combineLatest([
@@ -50,18 +41,33 @@ export function delayOnClaimConflicts(
           isTaskPollingCycleEvent(taskEvent) &&
           isOk<ClaimAndFillPoolResult, unknown>(taskEvent.event) &&
           isNumber(taskEvent.event.value.stats?.tasksConflicted)
-            ? pushIntoQueue(taskEvent.event.value.stats!.tasksConflicted)
+            ? some(taskEvent.event.value.stats!.tasksConflicted)
             : none
         ),
         filter<Option<number>>((claimClashes) => isSome(claimClashes)),
         map((claimClashes: Option<number>) => (claimClashes as Some<number>).value)
       ),
     ]).pipe(
-      filter(
-        ([maxWorkers, , claimClashes]) =>
-          (claimClashes * 100) / maxWorkers >= claimClashesPercentageThreshold
-      ),
-      map(([, pollInterval]) => random(pollInterval * 0.25, pollInterval * 0.75, false))
+      map(([maxWorkers, pollInterval, latestClaimConflicts]) => {
+        // add latest claimConflict count to queue
+        claimConflictQueue(latestClaimConflicts);
+
+        const emitWhenExceeds = (claimClashesPercentageThreshold * maxWorkers) / 100;
+        if (
+          // avoid calculating average if the new value isn't above the Threshold
+          latestClaimConflicts >= emitWhenExceeds &&
+          // only calculate average and emit value if above or equal to Threshold
+          stats.percentile(claimConflictQueue(), 0.5) >= emitWhenExceeds
+        ) {
+          return some(pollInterval);
+        }
+        return none;
+      }),
+      filter<Option<number>>((pollInterval) => isSome(pollInterval)),
+      map<Option<number>, number>((maybePollInterval) => {
+        const pollInterval = (maybePollInterval as Some<number>).value;
+        return random(pollInterval * 0.25, pollInterval * 0.75, false);
+      })
     )
   );
 }
