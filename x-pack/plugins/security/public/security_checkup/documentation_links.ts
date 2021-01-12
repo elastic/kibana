@@ -7,13 +7,13 @@
 import { DocLinksStart } from 'src/core/public';
 
 export class DocumentationLinksService {
-  private readonly esDocBasePath: string;
+  private readonly esEnableSecurity: string;
 
   constructor(docLinks: DocLinksStart) {
-    this.esDocBasePath = `${docLinks.ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${docLinks.DOC_LINK_VERSION}`;
+    this.esEnableSecurity = `${docLinks.links.security.elasticsearchEnableSecurity}`;
   }
 
   public getEnableSecurityDocUrl() {
-    return `${this.esDocBasePath}/get-started-enable-security.html?blade=kibanasecuritymessage`;
+    return `${this.esEnableSecurity}?blade=kibanasecuritymessage`;
   }
 }

@@ -85,6 +85,14 @@ describe('JiraParamsFields renders', () => {
       },
     },
   };
+  const useGetFieldsByIssueTypeResponseNoPriority = {
+    ...useGetFieldsByIssueTypeResponse,
+    fields: {
+      summary: { allowedValues: [], defaultValue: {} },
+      labels: { allowedValues: [], defaultValue: {} },
+      description: { allowedValues: [], defaultValue: {} },
+    },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -385,6 +393,23 @@ describe('JiraParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].comments.length).toEqual(0);
       expect(comments.simulate('change', emptyComment));
       expect(editAction.mock.calls.length).toEqual(1);
+    });
+    test('Clears any left behind priority when issueType changes and hasPriority becomes false', () => {
+      useGetFieldsByIssueTypeMock
+        .mockReturnValueOnce(useGetFieldsByIssueTypeResponse)
+        .mockReturnValue(useGetFieldsByIssueTypeResponseNoPriority);
+      const wrapper = mount(<JiraParamsFields {...defaultProps} />);
+      wrapper.setProps({
+        ...{
+          ...defaultProps,
+          actionParams: {
+            ...defaultProps.actionParams,
+            incident: { issueType: '10001' },
+          },
+        },
+      });
+      expect(editAction.mock.calls[0][1].incident.priority).toEqual('Medium');
+      expect(editAction.mock.calls[1][1].incident.priority).toEqual(null);
     });
   });
 });
