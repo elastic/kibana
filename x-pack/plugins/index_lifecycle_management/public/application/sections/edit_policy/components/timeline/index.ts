@@ -3,10 +3,4 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-export {
-  absoluteTimingToRelativeTiming,
-  calculateRelativeTimingMs,
-  normalizeTimingsToHumanReadable,
-  PhaseAgeInMilliseconds,
-} from './absolute_timing_to_relative_timing';
+export { Timeline } from './timeline';
