@@ -32,23 +32,25 @@ const serializers = {
 export const schema: FormSchema<FormInternal> = {
   _meta: {
     hot: {
-      useRollover: {
-        defaultValue: true,
-        label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
-          defaultMessage: 'Enable rollover',
-        }),
-      },
       isUsingDefaultRollover: {
         defaultValue: true,
         label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.isUsingDefaultRollover', {
           defaultMessage: 'Use recommended defaults',
         }),
       },
-      maxStorageSizeUnit: {
-        defaultValue: 'gb',
-      },
-      maxAgeUnit: {
-        defaultValue: 'd',
+      customRollover: {
+        enabled: {
+          defaultValue: true,
+          label: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.enableRolloverLabel', {
+            defaultMessage: 'Enable rollover',
+          }),
+        },
+        maxStorageSizeUnit: {
+          defaultValue: 'gb',
+        },
+        maxAgeUnit: {
+          defaultValue: 'd',
+        },
       },
       bestCompression: {
         label: i18nTexts.editPolicy.bestCompressionFieldLabel,

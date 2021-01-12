@@ -52,7 +52,6 @@ export class Plugin() {
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [addClientWrapper](./kibana-plugin-core-server.savedobjectsservicesetup.addclientwrapper.md) | <code>(priority: number, id: string, factory: SavedObjectsClientWrapperFactory) =&gt; void</code> | Add a [client wrapper factory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) with the given priority. |
-|  [getImportExportObjectLimit](./kibana-plugin-core-server.savedobjectsservicesetup.getimportexportobjectlimit.md) | <code>() =&gt; number</code> | Returns the maximum number of objects allowed for import or export operations. |
 |  [registerType](./kibana-plugin-core-server.savedobjectsservicesetup.registertype.md) | <code>(type: SavedObjectsType) =&gt; void</code> | Register a [savedObjects type](./kibana-plugin-core-server.savedobjectstype.md) definition.<!-- -->See the [mappings format](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) and [migration format](./kibana-plugin-core-server.savedobjectmigrationmap.md) for more details about these. |
 |  [setClientFactoryProvider](./kibana-plugin-core-server.savedobjectsservicesetup.setclientfactoryprovider.md) | <code>(clientFactoryProvider: SavedObjectsClientFactoryProvider) =&gt; void</code> | Set the default [factory provider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) for creating Saved Objects clients. Only one provider can be set, subsequent calls to this method will fail. |
 

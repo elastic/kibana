@@ -37,7 +37,17 @@ export { getSchemas as getVisSchemas } from './legacy/build_pipeline';
 /** @public types */
 export { VisualizationsSetup, VisualizationsStart };
 export { VisGroups } from './vis_types';
-export type { VisTypeAlias, VisType, BaseVisTypeOptions, ReactVisTypeOptions } from './vis_types';
+export type {
+  VisTypeAlias,
+  VisType,
+  BaseVisTypeOptions,
+  ReactVisTypeOptions,
+  Schema,
+  ISchemas,
+  VisEditorConstructor,
+  IEditorController,
+  EditorRenderProps,
+} from './vis_types';
 export { VisParams, SerializedVis, SerializedVisData, VisData } from './vis';
 export type VisualizeEmbeddableFactoryContract = PublicContract<VisualizeEmbeddableFactory>;
 export type VisualizeEmbeddableContract = PublicContract<VisualizeEmbeddable>;
@@ -57,5 +67,5 @@ export {
   VisToExpressionAst,
 } from './types';
 export { ExprVisAPIEvents } from './expressions/vis';
-export { VisualizationListItem } from './vis_types/vis_type_alias_registry';
+export { VisualizationListItem, VisualizationStage } from './vis_types/vis_type_alias_registry';
 export { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';

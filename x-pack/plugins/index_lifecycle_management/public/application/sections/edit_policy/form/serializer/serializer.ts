@@ -5,7 +5,6 @@
  */
 
 import { produce } from 'immer';
-
 import { merge, cloneDeep } from 'lodash';
 
 import { SerializedPolicy } from '../../../../../../common/types';
@@ -29,6 +28,13 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     // Copy over all updated fields
     merge(draft, updatedPolicy);
 
+    /**
+     * Important shared values for serialization
+     */
+    const isUsingRollover = Boolean(
+      _meta.hot.isUsingDefaultRollover || _meta.hot.customRollover.enabled
+    );
+
     // Next copy over all meta fields and delete any fields that have been removed
     // by fields exposed in the form. It is very important that we do not delete
     // data that the form does not control! E.g., unfollow action in hot phase.
@@ -42,25 +48,40 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
 
     if (draft.phases.hot?.actions) {
       const hotPhaseActions = draft.phases.hot.actions;
-      if (_meta.hot.isUsingDefaultRollover) {
-        hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
-      } else if (hotPhaseActions.rollover && _meta.hot.useRollover) {
-        if (updatedPolicy.phases.hot!.actions.rollover?.max_age) {
-          hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
+
+      /**
+       * HOT PHASE ROLLOVER
+       */
+      if (isUsingRollover) {
+        if (_meta.hot.isUsingDefaultRollover) {
+          hotPhaseActions.rollover = cloneDeep(defaultRolloverAction);
         } else {
-          delete hotPhaseActions.rollover.max_age;
+          // Rollover may not exist if editing an existing policy with initially no rollover configured
+          if (!hotPhaseActions.rollover) {
+            hotPhaseActions.rollover = {};
+          }
+
+          // We are using user-defined, custom rollover settings.
+          if (updatedPolicy.phases.hot!.actions.rollover?.max_age) {
+            hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot.customRollover.maxAgeUnit}`;
+          } else {
+            delete hotPhaseActions.rollover.max_age;
+          }
+
+          if (typeof updatedPolicy.phases.hot!.actions.rollover?.max_docs !== 'number') {
+            delete hotPhaseActions.rollover.max_docs;
+          }
+
+          if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
+            hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot.customRollover.maxStorageSizeUnit}`;
+          } else {
+            delete hotPhaseActions.rollover.max_size;
+          }
         }
 
-        if (typeof updatedPolicy.phases.hot!.actions.rollover?.max_docs !== 'number') {
-          delete hotPhaseActions.rollover.max_docs;
-        }
-
-        if (updatedPolicy.phases.hot!.actions.rollover?.max_size) {
-          hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
-        } else {
-          delete hotPhaseActions.rollover.max_size;
-        }
-
+        /**
+         * HOT PHASE FORCEMERGE
+         */
         if (!updatedPolicy.phases.hot!.actions?.forcemerge) {
           delete hotPhaseActions.forcemerge;
         } else if (_meta.hot.bestCompression) {
@@ -73,6 +94,9 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
           hotPhaseActions.forcemerge.index_codec = 'best_compression';
         }
 
+        /**
+         * HOT PHASE READ-ONLY
+         */
         if (_meta.hot.readonlyEnabled) {
           hotPhaseActions.readonly = hotPhaseActions.readonly ?? {};
         } else {
@@ -84,14 +108,23 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete hotPhaseActions.readonly;
       }
 
+      /**
+       * HOT PHASE SET PRIORITY
+       */
       if (!updatedPolicy.phases.hot!.actions?.set_priority) {
         delete hotPhaseActions.set_priority;
       }
 
+      /**
+       * HOT PHASE SHRINK
+       */
       if (!updatedPolicy.phases.hot?.actions?.shrink) {
         delete hotPhaseActions.shrink;
       }
 
+      /**
+       * HOT PHASE SEARCHABLE SNAPSHOT
+       */
       if (!updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
         delete hotPhaseActions.searchable_snapshot;
       }
@@ -103,11 +136,16 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     if (_meta.warm.enabled) {
       draft.phases.warm!.actions = draft.phases.warm?.actions ?? {};
       const warmPhase = draft.phases.warm!;
-      // If warm phase on rollover is enabled, delete min age field
-      // An index lifecycle switches to warm phase when rollover occurs, so you cannot specify a warm phase time
-      // They are mutually exclusive
+
+      /**
+       * WARM PHASE MIN AGE
+       *
+       * If warm phase on rollover is enabled, delete min age field
+       * An index lifecycle switches to warm phase when rollover occurs, so you cannot specify a warm phase time
+       * They are mutually exclusive
+       */
       if (
-        (!_meta.hot.useRollover || !_meta.warm.warmPhaseOnRollover) &&
+        (!isUsingRollover || !_meta.warm.warmPhaseOnRollover) &&
         updatedPolicy.phases.warm?.min_age
       ) {
         warmPhase.min_age = `${updatedPolicy.phases.warm!.min_age}${_meta.warm.minAgeUnit}`;
@@ -115,6 +153,9 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete warmPhase.min_age;
       }
 
+      /**
+       * WARM PHASE DATA ALLOCATION
+       */
       warmPhase.actions = serializeMigrateAndAllocateActions(
         _meta.warm,
         warmPhase.actions,
@@ -122,6 +163,9 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         updatedPolicy.phases.warm?.actions?.allocate?.number_of_replicas
       );
 
+      /**
+       * WARM PHASE FORCEMERGE
+       */
       if (!updatedPolicy.phases.warm?.actions?.forcemerge) {
         delete warmPhase.actions.forcemerge;
       } else if (_meta.warm.bestCompression) {
@@ -130,16 +174,25 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete warmPhase.actions.forcemerge!.index_codec;
       }
 
+      /**
+       * WARM PHASE READ ONLY
+       */
       if (_meta.warm.readonlyEnabled) {
         warmPhase.actions.readonly = warmPhase.actions.readonly ?? {};
       } else {
         delete warmPhase.actions.readonly;
       }
 
+      /**
+       * WARM PHASE SET PRIORITY
+       */
       if (!updatedPolicy.phases.warm?.actions?.set_priority) {
         delete warmPhase.actions.set_priority;
       }
 
+      /**
+       * WARM PHASE SHRINK
+       */
       if (!updatedPolicy.phases.warm?.actions?.shrink) {
         delete warmPhase.actions.shrink;
       }
@@ -154,10 +207,16 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       draft.phases.cold!.actions = draft.phases.cold?.actions ?? {};
       const coldPhase = draft.phases.cold!;
 
+      /**
+       * COLD PHASE MIN AGE
+       */
       if (updatedPolicy.phases.cold?.min_age) {
         coldPhase.min_age = `${updatedPolicy.phases.cold!.min_age}${_meta.cold.minAgeUnit}`;
       }
 
+      /**
+       * COLD PHASE DATA ALLOCATION
+       */
       coldPhase.actions = serializeMigrateAndAllocateActions(
         _meta.cold,
         coldPhase.actions,
@@ -165,16 +224,25 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         updatedPolicy.phases.cold?.actions?.allocate?.number_of_replicas
       );
 
+      /**
+       * COLD PHASE FREEZE
+       */
       if (_meta.cold.freezeEnabled) {
         coldPhase.actions.freeze = coldPhase.actions.freeze ?? {};
       } else {
         delete coldPhase.actions.freeze;
       }
 
+      /**
+       * COLD PHASE SET PRIORITY
+       */
       if (!updatedPolicy.phases.cold?.actions?.set_priority) {
         delete coldPhase.actions.set_priority;
       }
 
+      /**
+       * COLD PHASE SEARCHABLE SNAPSHOT
+       */
       if (!updatedPolicy.phases.cold?.actions?.searchable_snapshot) {
         delete coldPhase.actions.searchable_snapshot;
       }
@@ -187,12 +255,23 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
      */
     if (_meta.delete.enabled) {
       const deletePhase = draft.phases.delete!;
+
+      /**
+       * DELETE PHASE DELETE
+       */
       deletePhase.actions = deletePhase.actions ?? {};
       deletePhase.actions.delete = deletePhase.actions.delete ?? {};
+
+      /**
+       * DELETE PHASE SEARCHABLE SNAPSHOT
+       */
       if (updatedPolicy.phases.delete?.min_age) {
         deletePhase.min_age = `${updatedPolicy.phases.delete!.min_age}${_meta.delete.minAgeUnit}`;
       }
 
+      /**
+       * DELETE PHASE WAIT FOR SNAPSHOT
+       */
       if (!updatedPolicy.phases.delete?.actions?.wait_for_snapshot) {
         delete deletePhase.actions.wait_for_snapshot;
       }
