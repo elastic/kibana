@@ -488,6 +488,7 @@
     "@types/md5": "^2.2.0",
     "@types/memoize-one": "^4.1.0",
     "@types/mime": "^2.0.1",
+    "@types/mime-types": "^2.1.0",
     "@types/minimatch": "^2.0.29",
     "@types/mocha": "^7.0.2",
     "@types/mock-fs": "^4.10.0",
