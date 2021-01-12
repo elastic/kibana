@@ -1,0 +1,10 @@
+{
+  "baseUrl": "http://localhost:5601",
+  "fileServerFolder": "new_e2e/cypress",
+  "fixturesFolder": "new_e2e/cypress/fixtures",
+  "integrationFolder": "new_e2e/cypress/integration",
+  "pluginsFile": "new_e2e/cypress/plugins/index.js",
+  "screenshotsFolder": "new_e2e/cypress/screenshots",
+  "supportFile": "new_e2e/cypress/support/index.js",
+  "videosFolder": "new_e2e/cypress/videos"
+}
