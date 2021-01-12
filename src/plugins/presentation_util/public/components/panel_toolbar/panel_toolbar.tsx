@@ -132,7 +132,6 @@ export const PanelToolbar: FC<Props> = ({ primaryActionButton, quickButtons = []
     const quickButton = {
       iconType,
       action,
-      className: 'panelToolbarButton',
       id: `${htmlIdGenerator()()}${index}`,
       label: tooltip,
     };
