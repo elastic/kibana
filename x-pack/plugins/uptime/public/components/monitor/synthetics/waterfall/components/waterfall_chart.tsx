@@ -37,12 +37,14 @@ import { BAR_HEIGHT, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE, FIXED_AXIS_HEIGHT } from
 import { Sidebar } from './sidebar';
 import { Legend } from './legend';
 
-const Tooltip = ({ header }: TooltipInfo) => {
+const Tooltip = (tooltipInfo: TooltipInfo) => {
   const { data, renderTooltipItem } = useWaterfallContext();
   const relevantItems = data.filter((item) => {
-    return item.x === header?.value;
+    return (
+      item.x === tooltipInfo.header?.value && item.config.showTooltip && item.config.tooltipProps
+    );
   });
-  return (
+  return relevantItems.length ? (
     <WaterfallChartTooltip>
       <EuiFlexGroup direction="column" gutterSize="none">
         {relevantItems.map((item, index) => {
@@ -52,7 +54,7 @@ const Tooltip = ({ header }: TooltipInfo) => {
         })}
       </EuiFlexGroup>
     </WaterfallChartTooltip>
-  );
+  ) : null;
 };
 
 export type RenderItem<I = any> = (item: I, index: number) => JSX.Element;

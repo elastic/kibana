@@ -108,7 +108,6 @@ export class VisualizeEmbeddable
   private vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
-  private autoRefreshFetchSubscription: Subscription;
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableFactoryDeps;
   private readonly inspectorAdapters?: Adapters;
@@ -151,10 +150,6 @@ export class VisualizeEmbeddable
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
-
-    this.autoRefreshFetchSubscription = timefilter
-      .getAutoRefreshFetch$()
-      .subscribe(this.updateHandler.bind(this));
 
     this.subscriptions.push(
       this.getUpdated$().subscribe(() => {
@@ -368,7 +363,6 @@ export class VisualizeEmbeddable
       this.handler.destroy();
       this.handler.getElement().remove();
     }
-    this.autoRefreshFetchSubscription.unsubscribe();
   }
 
   public reload = () => {

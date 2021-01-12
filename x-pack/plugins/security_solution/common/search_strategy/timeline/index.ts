@@ -28,10 +28,14 @@ export interface TimelineRequestBasicOptions extends IEsSearchRequest {
   factoryQueryType?: TimelineFactoryQueryTypes;
 }
 
+export interface TimelineRequestSortField<Field = string> extends SortField<Field> {
+  type: string;
+}
+
 export interface TimelineRequestOptionsPaginated<Field = string>
   extends TimelineRequestBasicOptions {
   pagination: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
-  sort: Array<SortField<Field>>;
+  sort: Array<TimelineRequestSortField<Field>>;
 }
 
 export type TimelineStrategyResponseType<
