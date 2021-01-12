@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position } from '@elastic/charts';
 
-import { Schemas } from '../../../vis_default_editor/public';
 import { AggGroupNames } from '../../../data/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../visualizations/public';
 
@@ -146,7 +145,7 @@ export const getHistogramVisTypeDefinition = (
   editorConfig: {
     collections: getConfigCollections(),
     optionTabs: getOptionTabs(showElasticChartsOptions),
-    schemas: new Schemas([
+    schemas: [
       {
         group: AggGroupNames.Metrics,
         name: 'metric',
@@ -203,6 +202,6 @@ export const getHistogramVisTypeDefinition = (
           tooltip: <SplitTooltip />,
         }),
       },
-    ]),
+    ],
   },
 });

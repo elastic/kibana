@@ -8,9 +8,9 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { dataTypes, installationStatuses } from '../../../../../common/constants';
-import { ArchivePackage, InstallSource, ValueOf } from '../../../../../common/types';
+import { ArchivePackage, Installation, InstallSource, ValueOf } from '../../../../../common/types';
 import { RegistryPackage, DataType } from '../../../../types';
-import { getPackageFromSource, getPackageSavedObjects } from '../../packages/get';
+import { getInstallation, getPackageFromSource, getPackageSavedObjects } from '../../packages/get';
 
 interface FieldFormatMap {
   [key: string]: FieldFormatMapItem;
@@ -81,18 +81,18 @@ export async function installIndexPatterns(
   );
 
   const packagesToFetch = installedPackagesSavedObjects.reduce<
-    Array<{ name: string; version: string; installSource: InstallSource }>
-  >((acc, pkgSO) => {
+    Array<{ name: string; version: string; installedPkg: Installation | undefined }>
+  >((acc, pkg) => {
     acc.push({
-      name: pkgSO.attributes.name,
-      version: pkgSO.attributes.version,
-      installSource: pkgSO.attributes.install_source,
+      name: pkg.attributes.name,
+      version: pkg.attributes.version,
+      installedPkg: pkg.attributes,
     });
     return acc;
   }, []);
 
   if (pkgName && pkgVersion && installSource) {
-    const packageToInstall = packagesToFetch.find((pkgSO) => pkgSO.name === pkgName);
+    const packageToInstall = packagesToFetch.find((pkg) => pkg.name === pkgName);
     if (packageToInstall) {
       // set the version to the one we want to install
       // if we're reinstalling the number will be the same
@@ -100,7 +100,11 @@ export async function installIndexPatterns(
       packageToInstall.version = pkgVersion;
     } else {
       // if we're installing for the first time, add to the list
-      packagesToFetch.push({ name: pkgName, version: pkgVersion, installSource });
+      packagesToFetch.push({
+        name: pkgName,
+        version: pkgVersion,
+        installedPkg: await getInstallation({ savedObjectsClient, pkgName }),
+      });
     }
   }
   // get each package's registry info
@@ -108,7 +112,8 @@ export async function installIndexPatterns(
     getPackageFromSource({
       pkgName: pkg.name,
       pkgVersion: pkg.version,
-      pkgInstallSource: pkg.installSource,
+      installedPkg: pkg.installedPkg,
+      savedObjectsClient,
     })
   );
   const packages = await Promise.all(packagesToFetchPromise);

@@ -6,10 +6,10 @@
 import { isEmpty } from 'lodash/fp';
 
 import {
-  SortField,
   TimerangeFilter,
   TimerangeInput,
   TimelineEventsAllRequestOptions,
+  TimelineRequestSortField,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
@@ -46,10 +46,15 @@ export const buildTimelineEventsAllQuery = ({
 
   const filter = [...filterClause, ...getTimerangeFilter(timerange), { match_all: {} }];
 
-  const getSortField = (sortFields: SortField[]) =>
+  const getSortField = (sortFields: TimelineRequestSortField[]) =>
     sortFields.map((item) => {
       const field: string = item.field === 'timestamp' ? '@timestamp' : item.field;
-      return { [field]: item.direction };
+      return {
+        [field]: {
+          order: item.direction,
+          unmapped_type: item.type,
+        },
+      };
     });
 
   const dslQuery = {
