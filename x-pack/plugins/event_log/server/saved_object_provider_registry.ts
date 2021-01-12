@@ -62,10 +62,7 @@ export class SavedObjectProviderRegistry {
     const scopedProviders = new Map<string, SavedObjectBulkGetter>();
     const defaultGetter = this.defaultProvider(request);
     return (type: string, ids: string[]) => {
-      const objects = ids.reduce(
-        (prev: Array<{ type: string; id: string }>, id) => [...prev, { type, id }],
-        []
-      );
+      const objects = ids.map((id: string) => ({ type, id }));
       const getter = pipe(
         fromNullable(scopedProviders.get(type)),
         getOrElse(() => {
