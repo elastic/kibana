@@ -92,6 +92,7 @@ export interface FlyoutState {
   failedImports?: ProcessedImportResponse['failedImports'];
   successfulImports?: ProcessedImportResponse['successfulImports'];
   conflictingRecord?: ConflictingRecord;
+  importWarnings?: ProcessedImportResponse['importWarnings'];
   error?: string;
   file?: File;
   importCount: number;

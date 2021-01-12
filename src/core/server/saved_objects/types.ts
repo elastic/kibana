@@ -31,6 +31,9 @@ export {
   SavedObjectsImportUnknownError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportWarning,
 } from './import/types';
 
 import { SavedObject } from '../../types';

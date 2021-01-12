@@ -26,6 +26,7 @@ import {
   SavedObjectsImportUnknownError,
   SavedObjectsImportFailure,
   SavedObjectsImportSuccess,
+  SavedObjectsImportWarning,
 } from 'src/core/public';
 
 export interface FailedImport {
@@ -52,6 +53,7 @@ export interface ProcessedImportResponse {
   importCount: number;
   conflictedSavedObjectsLinkedToSavedSearches: undefined;
   conflictedSearchDocs: undefined;
+  importWarnings: SavedObjectsImportWarning[];
 }
 
 const isAnyConflict = ({ type }: FailedImport['error']) =>
@@ -98,5 +100,6 @@ export function processImportResponse(
     importCount: response.successCount,
     conflictedSavedObjectsLinkedToSavedSearches: undefined,
     conflictedSearchDocs: undefined,
+    importWarnings: response.warnings,
   };
 }

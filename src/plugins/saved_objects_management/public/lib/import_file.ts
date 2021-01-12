@@ -17,14 +17,8 @@
  * under the License.
  */
 
-import { HttpStart, SavedObjectsImportFailure } from 'src/core/public';
+import { HttpStart, SavedObjectsImportResponse } from 'src/core/public';
 import { ImportMode } from '../management_section/objects_table/components/import_mode_control';
-
-interface ImportResponse {
-  success: boolean;
-  successCount: number;
-  errors?: SavedObjectsImportFailure[];
-}
 
 export async function importFile(
   http: HttpStart,
@@ -34,7 +28,7 @@ export async function importFile(
   const formData = new FormData();
   formData.append('file', file);
   const query = createNewCopies ? { createNewCopies } : { overwrite };
-  return await http.post<ImportResponse>('/api/saved_objects/_import', {
+  return await http.post<SavedObjectsImportResponse>('/api/saved_objects/_import', {
     body: formData,
     headers: {
       // Important to be undefined, it forces proper headers to be set for FormData

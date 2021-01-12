@@ -46,6 +46,9 @@ export {
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
   SavedObjectsNamespaceType,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
 } from '../../server/types';
 
 export {
