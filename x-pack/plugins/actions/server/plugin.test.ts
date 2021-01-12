@@ -51,6 +51,7 @@ describe('Actions Plugin', () => {
     });
 
     it('should log warning when Encrypted Saved Objects plugin is not available', async () => {
+      delete pluginsSetup.encryptedSavedObjects;
       // coreMock.createSetup doesn't support Plugin generics
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await plugin.setup(coreSetup as any, pluginsSetup);
@@ -94,7 +95,8 @@ describe('Actions Plugin', () => {
         actionsContextHandler!.getActionsClient();
       });
 
-      it('should throw error when ESO plugin using a generated key', async () => {
+      it('should throw error when ESO plugin is not available', async () => {
+        delete pluginsSetup.encryptedSavedObjects;
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await plugin.setup(coreSetup as any, pluginsSetup);
@@ -115,7 +117,7 @@ describe('Actions Plugin', () => {
           httpServerMock.createResponseFactory()
         )) as unknown) as RequestHandlerContext['actions'];
         expect(() => actionsContextHandler!.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
-          `"Unable to create actions client because the Encrypted Saved Objects plugin uses an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
+          `"Unable to create actions client because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
       });
     });
@@ -241,6 +243,7 @@ describe('Actions Plugin', () => {
       });
 
       it('should throw error when ESO plugin is not available', async () => {
+        delete pluginsSetup.encryptedSavedObjects;
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await plugin.setup(coreSetup as any, pluginsSetup);

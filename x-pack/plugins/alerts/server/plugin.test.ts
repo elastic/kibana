@@ -36,13 +36,10 @@ describe('Alerting Plugin', () => {
       });
       plugin = new AlertingPlugin(context);
 
-      const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
-
       const setupMocks = coreMock.createSetup();
       // need await to test number of calls of setupMocks.status.set, becuase it is under async function which awaiting core.getStartServices()
       await plugin.setup(setupMocks, {
         licensing: licensingMock.createSetup(),
-        encryptedSavedObjects: encryptedSavedObjectsSetup,
         taskManager: taskManagerMock.createSetup(),
         eventLog: eventLogServiceMock.create(),
         actions: actionsMock.createSetup(),
@@ -50,7 +47,6 @@ describe('Alerting Plugin', () => {
       });
 
       expect(setupMocks.status.set).toHaveBeenCalledTimes(1);
-      expect(encryptedSavedObjectsSetup).toEqual(true);
       expect(context.logger.get().warn).toHaveBeenCalledWith(
         'APIs are disabled because the Encrypted Saved Objects plugin is not available. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
       );
@@ -121,10 +117,8 @@ describe('Alerting Plugin', () => {
         });
         const plugin = new AlertingPlugin(context);
 
-        const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
         plugin.setup(coreMock.createSetup(), {
           licensing: licensingMock.createSetup(),
-          encryptedSavedObjects: encryptedSavedObjectsSetup,
           taskManager: taskManagerMock.createSetup(),
           eventLog: eventLogServiceMock.create(),
           actions: actionsMock.createSetup(),
@@ -133,14 +127,12 @@ describe('Alerting Plugin', () => {
 
         const startContract = plugin.start(coreMock.createStart(), {
           actions: actionsMock.createStart(),
-          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           features: mockFeatures(),
           licensing: licensingMock.createStart(),
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
         });
 
-        expect(encryptedSavedObjectsSetup).toBeUndefined();
         expect(() =>
           startContract.getAlertsClientWithRequest({} as KibanaRequest)
         ).toThrowErrorMatchingInlineSnapshot(
