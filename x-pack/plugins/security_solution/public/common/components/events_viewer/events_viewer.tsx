@@ -216,8 +216,9 @@ const EventsViewerComponent: React.FC<Props> = ({
 
   const sortField = useMemo(
     () =>
-      sort.map(({ columnId, sortDirection }) => ({
+      sort.map(({ columnId, columnType, sortDirection }) => ({
         field: columnId,
+        type: columnType,
         direction: sortDirection as Direction,
       })),
     [sort]
