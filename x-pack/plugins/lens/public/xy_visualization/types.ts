@@ -19,7 +19,7 @@ import { LensIconChartBarHorizontalStacked } from '../assets/chart_bar_horizonta
 import { LensIconChartBarHorizontalPercentage } from '../assets/chart_bar_horizontal_percentage';
 import { LensIconChartLine } from '../assets/chart_line';
 
-import { VisualizationType } from '../index';
+import { VisualizationType } from '../types';
 import { FittingFunction } from './fitting_functions';
 
 export interface LegendConfig {
