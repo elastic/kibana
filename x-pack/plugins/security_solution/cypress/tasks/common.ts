@@ -64,6 +64,7 @@ export const reload = () => {
 
 export const cleanKibana = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
+
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
     query: {
       bool: {
@@ -127,6 +128,17 @@ export const cleanKibana = () => {
       },
     }
   );
+
+  cy.request('GET', '/api/detection_engine/rules/_find').then((response) => {
+    const rules: string[] = response.body.data;
+
+    if (response.body.data.length > 0) {
+      rules.forEach((rule) => {
+        const jsonRule = JSON.parse(rule);
+        cy.request('DELETE', `/api/detection_engine/rules?rule_id=${jsonRule.rule_id}`);
+      });
+    }
+  });
 
   esArchiverResetKibana();
 };
