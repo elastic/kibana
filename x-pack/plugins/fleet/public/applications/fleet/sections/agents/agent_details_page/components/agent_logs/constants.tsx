@@ -36,6 +36,7 @@ export const DEFAULT_LOGS_STATE: AgentLogsState = {
   query: '',
 };
 
+export const STATE_STORAGE_KEY = '_q';
 export const STATE_DATASET_FIELD = 'datasets';
 
 export const AGENT_LOG_LEVELS = {
