@@ -832,6 +832,10 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
             ...visState,
             params: {
               ...visState.params,
+              palette: {
+                type: 'palette',
+                name: 'kibana_palette',
+              },
               categoryAxes:
                 visState.params.categoryAxes &&
                 decorateAxes(visState.params.categoryAxes, !isHorizontalBar),
