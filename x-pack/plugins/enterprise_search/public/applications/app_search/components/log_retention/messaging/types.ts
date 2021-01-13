@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ReactNode } from 'react';
 import { LogRetentionSettings } from '../types';
 
 export type TMessageStringOrFunction =
   | string
+  | ReactNode
   | ((ilmEnabled: boolean, logRetentionSettings: LogRetentionSettings) => string);
 
 export interface LogRetentionMessages {

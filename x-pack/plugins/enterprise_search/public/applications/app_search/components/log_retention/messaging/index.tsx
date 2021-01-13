@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-
 import { useValues } from 'kea';
-import moment from 'moment';
+import { FormattedDate } from '@kbn/i18n/react';
 
 import { AppLogic } from '../../../app_logic';
 import { LogRetentionLogic } from '../log_retention_logic';
@@ -16,8 +15,9 @@ import { LogRetentionOptions } from '../types';
 import { determineTooltipContent } from './determine_tooltip_content';
 import { ANALYTICS_MESSAGES, API_MESSAGES } from './constants';
 
-export const renderLogRetentionDate = (dateString: string) =>
-  moment(dateString).format('MMMM D, YYYY');
+export const renderLogRetentionDate = (dateString: string) => (
+  <FormattedDate value={new Date(dateString)} month="long" day="numeric" year="numeric" />
+);
 
 export const AnalyticsLogRetentionMessage: React.FC = () => {
   const { ilmEnabled } = useValues(AppLogic);

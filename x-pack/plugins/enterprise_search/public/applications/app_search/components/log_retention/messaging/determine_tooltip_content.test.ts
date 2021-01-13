@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { mountWithIntl } from '../../../../__mocks__';
+
 import { determineTooltipContent } from './determine_tooltip_content';
 import { ANALYTICS_MESSAGES, API_MESSAGES } from './constants';
 
@@ -55,11 +57,13 @@ describe('determineTooltipContent', () => {
       describe('and there is no disabledAt date', () => {
         it('will render a no logging message', () => {
           expect(
-            determineTooltipContent(ANALYTICS_MESSAGES, true, {
-              ...BASE_SETTINGS,
-              enabled: false,
-              disabledAt: null,
-            })
+            mountWithIntl(
+              determineTooltipContent(ANALYTICS_MESSAGES, true, {
+                ...BASE_SETTINGS,
+                enabled: false,
+                disabledAt: null,
+              })
+            ).text()
           ).toEqual(
             'Analytics collection has been disabled for all engines. There are no analytics collected.'
           );
@@ -69,11 +73,13 @@ describe('determineTooltipContent', () => {
       describe('and there is a disabledAt date', () => {
         it('will render a no logging message', () => {
           expect(
-            determineTooltipContent(ANALYTICS_MESSAGES, true, {
-              ...BASE_SETTINGS,
-              enabled: false,
-              disabledAt: 'Thu, 05 Nov 2020 18:57:28 +0000',
-            })
+            mountWithIntl(
+              determineTooltipContent(ANALYTICS_MESSAGES, true, {
+                ...BASE_SETTINGS,
+                enabled: false,
+                disabledAt: 'Thu, 05 Nov 2020 18:57:28 +0000',
+              })
+            ).text()
           ).toEqual(
             'Analytics collection has been disabled for all engines. The last date analytics were collected was November 5, 2020.'
           );
@@ -130,11 +136,13 @@ describe('determineTooltipContent', () => {
       describe('and there is no disabledAt date', () => {
         it('will render a no logging message', () => {
           expect(
-            determineTooltipContent(API_MESSAGES, true, {
-              ...BASE_SETTINGS,
-              enabled: false,
-              disabledAt: null,
-            })
+            mountWithIntl(
+              determineTooltipContent(API_MESSAGES, true, {
+                ...BASE_SETTINGS,
+                enabled: false,
+                disabledAt: null,
+              })
+            ).text()
           ).toEqual('API logging has been disabled for all engines. There are no logs collected.');
         });
       });
@@ -142,11 +150,13 @@ describe('determineTooltipContent', () => {
       describe('and there is a disabledAt date', () => {
         it('will render a no logging message', () => {
           expect(
-            determineTooltipContent(API_MESSAGES, true, {
-              ...BASE_SETTINGS,
-              enabled: false,
-              disabledAt: 'Thu, 05 Nov 2020 18:57:28 +0000',
-            })
+            mountWithIntl(
+              determineTooltipContent(API_MESSAGES, true, {
+                ...BASE_SETTINGS,
+                enabled: false,
+                disabledAt: 'Thu, 05 Nov 2020 18:57:28 +0000',
+              })
+            ).text()
           ).toEqual(
             'API logging has been disabled for all engines. The last date logs were collected was November 5, 2020.'
           );

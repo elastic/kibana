@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { LogRetentionMessages } from './types';
@@ -16,14 +18,13 @@ const ANALYTICS_NO_LOGGING = i18n.translate(
   }
 );
 
-const ANALYTICS_NO_LOGGING_COLLECTED = (disabledAt: string) =>
-  i18n.translate(
-    'xpack.enterpriseSearch.appSearch.settings.logRetention.analytics.noLogging.collected',
-    {
-      defaultMessage: 'The last date analytics were collected was {disabledAt}.',
-      values: { disabledAt },
-    }
-  );
+const ANALYTICS_NO_LOGGING_COLLECTED = (disabledAt: React.ReactElement) => (
+  <FormattedMessage
+    id="xpack.enterpriseSearch.appSearch.settings.logRetention.analytics.noLogging.collected"
+    defaultMessage="The last date analytics were collected was {disabledAt}."
+    values={{ disabledAt }}
+  />
+);
 
 const ANALYTICS_NO_LOGGING_NOT_COLLECTED = i18n.translate(
   'xpack.enterpriseSearch.appSearch.settings.logRetention.analytics.noLogging.notCollected',
@@ -59,11 +60,13 @@ const API_NO_LOGGING = i18n.translate(
   }
 );
 
-const API_NO_LOGGING_COLLECTED = (disabledAt: string) =>
-  i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.api.noLogging.collected', {
-    defaultMessage: 'The last date logs were collected was {disabledAt}.',
-    values: { disabledAt },
-  });
+const API_NO_LOGGING_COLLECTED = (disabledAt: React.ReactElement) => (
+  <FormattedMessage
+    id="xpack.enterpriseSearch.appSearch.settings.logRetention.api.noLogging.collected"
+    defaultMessage="The last date logs were collected was {disabledAt}."
+    values={{ disabledAt }}
+  />
+);
 
 const API_NO_LOGGING_NOT_COLLECTED = i18n.translate(
   'xpack.enterpriseSearch.appSearch.settings.logRetention.api.noLogging.notCollected',
@@ -93,12 +96,14 @@ const API_STORED = (minAgeDays: number | null | undefined) =>
   });
 
 export const ANALYTICS_MESSAGES: LogRetentionMessages = {
-  noLogging: (_, logRetentionSettings) =>
-    `${ANALYTICS_NO_LOGGING} ${
-      logRetentionSettings.disabledAt
+  noLogging: (_, logRetentionSettings) => (
+    <>
+      {ANALYTICS_NO_LOGGING + ' '}
+      {logRetentionSettings.disabledAt
         ? ANALYTICS_NO_LOGGING_COLLECTED(renderLogRetentionDate(logRetentionSettings.disabledAt))
-        : ANALYTICS_NO_LOGGING_NOT_COLLECTED
-    }`,
+        : ANALYTICS_NO_LOGGING_NOT_COLLECTED}
+    </>
+  ),
   ilmDisabled: ANALYTICS_ILM_DISABLED,
   customPolicy: ANALYTICS_CUSTOM_POLICY,
   defaultPolicy: (_, logRetentionSettings) =>
@@ -106,12 +111,14 @@ export const ANALYTICS_MESSAGES: LogRetentionMessages = {
 };
 
 export const API_MESSAGES: LogRetentionMessages = {
-  noLogging: (_, logRetentionSettings) =>
-    `${API_NO_LOGGING} ${
-      logRetentionSettings.disabledAt
+  noLogging: (_, logRetentionSettings) => (
+    <>
+      {API_NO_LOGGING + ' '}
+      {logRetentionSettings.disabledAt
         ? API_NO_LOGGING_COLLECTED(renderLogRetentionDate(logRetentionSettings.disabledAt))
-        : API_NO_LOGGING_NOT_COLLECTED
-    }`,
+        : API_NO_LOGGING_NOT_COLLECTED}
+    </>
+  ),
   ilmDisabled: API_ILM_DISABLED,
   customPolicy: API_CUSTOM_POLICY,
   defaultPolicy: (_, logRetentionSettings) =>

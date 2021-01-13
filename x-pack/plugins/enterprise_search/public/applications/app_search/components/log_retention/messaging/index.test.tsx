@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../__mocks__/kea.mock';
-import { setMockValues } from '../../../../__mocks__';
+import { setMockValues } from '../../../../__mocks__/kea.mock';
+import { mountWithIntl } from '../../../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -28,7 +28,8 @@ describe('LogRetentionMessaging', () => {
 
   describe('renderLogRetentionDate', () => {
     it('renders a formatted date', () => {
-      expect(renderLogRetentionDate('Thu, 05 Nov 2020 18:57:28 +0000')).toEqual('November 5, 2020');
+      const wrapper = mountWithIntl(renderLogRetentionDate('Thu, 05 Nov 2020 18:57:28 +0000'));
+      expect(wrapper.text()).toEqual('November 5, 2020');
     });
   });
 
