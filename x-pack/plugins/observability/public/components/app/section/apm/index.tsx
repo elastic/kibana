@@ -92,7 +92,7 @@ export function APMSection({ bucketSize }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <StyledStat
-            title={formatTpm(stats?.transactions.value)}
+            title={`${formatTpm(stats?.transactions.value)} tpm`}
             description={i18n.translate('xpack.observability.overview.apm.throughput', {
               defaultMessage: 'Throughput',
             })}
