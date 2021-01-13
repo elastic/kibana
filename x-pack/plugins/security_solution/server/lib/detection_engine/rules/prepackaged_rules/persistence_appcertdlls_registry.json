@@ -31,9 +31,16 @@
       },
       "technique": [
         {
-          "id": "T1182",
-          "name": "AppCert DLLs",
-          "reference": "https://attack.mitre.org/techniques/T1182/"
+          "id": "T1546",
+          "name": "Event Triggered Execution",
+          "reference": "https://attack.mitre.org/techniques/T1546/",
+          "subtechnique": [
+            {
+              "id": "T1546.009",
+              "name": "AppCert DLLs",
+              "reference": "https://attack.mitre.org/techniques/T1546/009/"
+            }
+          ]
         }
       ]
     }

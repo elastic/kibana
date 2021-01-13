@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
-import { Space } from '../../common/model/space';
+import { Space } from '../../../../../src/plugins/spaces_oss/common';
 import { AdvancedSettingsTitle, AdvancedSettingsSubtitle } from './components';
 
 interface SetupDeps {
