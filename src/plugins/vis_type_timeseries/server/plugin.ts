@@ -98,10 +98,8 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       searchStrategyRegistry,
     };
 
-    (async () => {
-      visDataRoutes(router, framework);
-      fieldsRoutes(framework);
-    })();
+    visDataRoutes(router, framework);
+    fieldsRoutes(framework);
 
     return {
       getVisData: async (
