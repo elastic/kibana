@@ -57,6 +57,9 @@ export function getAgentIconKey(agentName: string) {
   if (OPEN_TELEMETRY_AGENT_NAMES.includes(lowercasedAgentName as AgentName)) {
     return 'opentelemetry';
   }
+
+  // Undetermined, likely unsupported official language agent
+  return 'opentelemetry';
 }
 
 export function getAgentIcon(agentName?: string) {

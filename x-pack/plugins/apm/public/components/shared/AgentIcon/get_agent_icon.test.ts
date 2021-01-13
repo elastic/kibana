@@ -28,7 +28,7 @@ const examples = {
   python: 'python',
   ruby: 'ruby',
   'rum-js': 'rum',
-  'something else': undefined,
+  'something else': 'opentelemetry',
 };
 
 describe('getAgentIconKey', () => {
