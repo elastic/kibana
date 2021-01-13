@@ -1,0 +1,7 @@
+{
+  "prefix": "bar",
+  "paths": {
+    "bar": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
