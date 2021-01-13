@@ -7,9 +7,12 @@
   "exclude": [
     "src/**/__fixtures__/**/*",
     "src/core/**/*",
-    "src/plugins/management/**/*",
+    "src/plugins/advanced_settings/**/*",
     "src/plugins/apm_oss/**/*",
     "src/plugins/bfetch/**/*",
+    "src/plugins/charts/**/*",
+    "src/plugins/dashboard/**/*",
+    "src/plugins/discover/**/*",
     "src/plugins/data/**/*",
     "src/plugins/dev_tools/**/*",
     "src/plugins/embeddable/**/*",
@@ -20,6 +23,7 @@
     "src/plugins/kibana_react/**/*",
     "src/plugins/kibana_usage_collection/**/*",
     "src/plugins/kibana_utils/**/*",
+    "src/plugins/management/**/*",
     "src/plugins/navigation/**/*",
     "src/plugins/newsfeed/**/*",
     "src/plugins/saved_objects/**/*",
@@ -31,7 +35,8 @@
     "src/plugins/telemetry_collection_manager/**/*",
     "src/plugins/ui_actions/**/*",
     "src/plugins/url_forwarding/**/*",
-    "src/plugins/usage_collection/**/*"
+    "src/plugins/usage_collection/**/*",
+    "src/plugins/presentation_util/**/*"
     // In the build we actually exclude **/public/**/* from this config so that
     // we can run the TSC on both this and the .browser version of this config
     // file, but if we did it during development IDEs would not be able to find
@@ -40,9 +45,12 @@
   ],
   "references": [
     { "path": "./src/core/tsconfig.json" },
-    { "path": "./src/plugins/management/tsconfig.json"},
+    { "path": "./src/plugins/advanced_settings/tsconfig.json" },
     { "path": "./src/plugins/apm_oss/tsconfig.json" },
     { "path": "./src/plugins/bfetch/tsconfig.json" },
+    { "path": "./src/plugins/charts/tsconfig.json" },
+    { "path": "./src/plugins/dashboard/tsconfig.json" },
+    { "path": "./src/plugins/discover/tsconfig.json" },
     { "path": "./src/plugins/data/tsconfig.json" },
     { "path": "./src/plugins/dev_tools/tsconfig.json" },
     { "path": "./src/plugins/embeddable/tsconfig.json" },
@@ -53,6 +61,7 @@
     { "path": "./src/plugins/kibana_react/tsconfig.json" },
     { "path": "./src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "./src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "./src/plugins/management/tsconfig.json" },
     { "path": "./src/plugins/navigation/tsconfig.json" },
     { "path": "./src/plugins/newsfeed/tsconfig.json" },
     { "path": "./src/plugins/saved_objects/tsconfig.json" },
