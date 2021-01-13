@@ -126,6 +126,7 @@ export const Timeline: FunctionComponent = () => {
       <EuiFlexGroup gutterSize="none" responsive={false}>
         <EuiFlexItem>
           <div className="ilmTimeline__phasesContainer">
+            {/* These are the actual color bars for the timeline */}
             <div className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase">
               <div className="ilmTimeline__colorBarCommon ilmTimeline__hotPhase__colorBar" />
               <TimelinePhaseText
@@ -161,7 +162,6 @@ export const Timeline: FunctionComponent = () => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {/* These are the actual color bars for the timeline */}
     </div>
   );
 };
