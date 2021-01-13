@@ -59,8 +59,8 @@ export const SearchResults: React.FC = () => {
               label="Title"
               onMouseOver={toggleTitleFieldHover}
               onMouseOut={toggleTitleFieldHover}
-              onFocus={() => null} // FIXME
-              onBlur={() => null} // FIXME
+              onFocus={toggleTitleFieldHover}
+              onBlur={toggleTitleFieldHover}
             >
               <EuiSelect
                 options={fieldOptions}
@@ -85,20 +85,15 @@ export const SearchResults: React.FC = () => {
               />
             </EuiFormRow>
             <EuiFormRow label="Color">
-              <EuiColorPicker
-                color={color}
-                onChange={setColorField}
-                onFocus={() => null} // FIXME
-                onBlur={() => null} // FIXME
-              />
+              <EuiColorPicker color={color} onChange={setColorField} />
             </EuiFormRow>
             <EuiFormRow
               label="Subtitle"
               helpText="This area is optional"
               onMouseOver={toggleSubtitleFieldHover}
               onMouseOut={toggleSubtitleFieldHover}
-              onFocus={() => null} // FIXME
-              onBlur={() => null} // FIXME
+              onFocus={toggleSubtitleFieldHover}
+              onBlur={toggleSubtitleFieldHover}
             >
               <EuiSelect
                 options={optionalFieldOptions}
@@ -116,8 +111,8 @@ export const SearchResults: React.FC = () => {
               helpText="This area is optional"
               onMouseOver={toggleDescriptionFieldHover}
               onMouseOut={toggleDescriptionFieldHover}
-              onFocus={() => null} // FIXME
-              onBlur={() => null} // FIXME
+              onFocus={toggleDescriptionFieldHover}
+              onBlur={toggleDescriptionFieldHover}
             >
               <EuiSelect
                 options={optionalFieldOptions}
