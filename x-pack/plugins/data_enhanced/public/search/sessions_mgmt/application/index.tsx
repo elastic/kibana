@@ -64,10 +64,9 @@ export class SearchSessionsMgmtApp {
       uiSettings,
       share,
     };
-    const initialTable = await api.fetchTableData();
 
     const { element } = params;
-    const unmountAppCb = renderApp(element, dependencies, initialTable);
+    const unmountAppCb = renderApp(element, dependencies);
 
     return () => {
       docTitle.reset();

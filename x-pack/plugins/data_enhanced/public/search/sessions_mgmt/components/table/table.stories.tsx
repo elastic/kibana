@@ -57,7 +57,6 @@ storiesOf('components/SearchSessionsMgmt/Table', module)
 
     const props = {
       core: mockCoreStart,
-      initialTable: [],
       api: new SearchSessionsMgmtAPI(sessionsClient, urls, notifications, config),
       timezone: 'UTC',
       config,
@@ -145,7 +144,7 @@ storiesOf('components/SearchSessionsMgmt/Table', module)
         url: `/cool-app-${ndx}`,
         appId: appIds[ndx % 5],
         status: statuses[ndx % 5],
-        isViewable: viewability[ndx % 3],
+        isRestorable: viewability[ndx % 3],
         actions: actions[ndx % 4],
       };
     });
@@ -154,7 +153,6 @@ storiesOf('components/SearchSessionsMgmt/Table', module)
       core: mockCoreStart,
       api: new SearchSessionsMgmtAPI(sessionsClient, urls, notifications, config),
       timezone: 'UTC',
-      initialTable: mockTable,
       config,
     };
 

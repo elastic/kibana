@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from 'kibana/public';
 import moment from 'moment';
-import * as Rx from 'rxjs';
+import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs/operators';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import { SessionsMgmtConfigSchema } from '../';
@@ -32,13 +32,18 @@ const mapToUISession = (
     expires,
     status,
     urlGeneratorId,
+    initialState,
     restoreState,
   } = savedObject.attributes;
+
+  const isRestorable = status === STATUS.IN_PROGRESS || status === STATUS.COMPLETE;
 
   // derive the URL and add it in
   let url = '/';
   try {
-    url = await urls.getUrlGenerator(urlGeneratorId).createUrl(restoreState);
+    url = await urls
+      .getUrlGenerator(urlGeneratorId)
+      .createUrl(isRestorable ? restoreState : initialState);
   } catch (err) {
     // eslint-disable-next-line no-console
     console.error('Could not create URL from restoreState');
@@ -46,13 +51,9 @@ const mapToUISession = (
     console.error(err);
   }
 
-  // viewable if available
-  const isViewable =
-    status !== STATUS.CANCELLED && status !== STATUS.EXPIRED && status !== STATUS.ERROR;
-
   return {
     id: savedObject.id,
-    isViewable,
+    isRestorable,
     name,
     appId,
     created,
@@ -78,7 +79,7 @@ export class SearchSessionsMgmtAPI {
 
     const refreshTimeout = moment.duration(this.config.refreshTimeout);
 
-    const fetch$ = Rx.from(
+    const fetch$ = from(
       this.sessionsClient.find({
         page: 1,
         perPage: this.config.maxSessions,
@@ -86,7 +87,7 @@ export class SearchSessionsMgmtAPI {
         sortOrder: 'asc',
       })
     );
-    const timeout$ = Rx.timer(refreshTimeout.asMilliseconds()).pipe(
+    const timeout$ = timer(refreshTimeout.asMilliseconds()).pipe(
       tap(() => {
         this.notifications.toasts.addDanger(
           i18n.translate('xpack.data.mgmt.searchSessions.api.fetchTimeout', {
@@ -98,9 +99,9 @@ export class SearchSessionsMgmtAPI {
       mapTo(null)
     );
 
-    // fetch the background sessions before timeout triggers
+    // fetch the search sessions before timeout triggers
     try {
-      const result = await Rx.race<FetchResult | null>(fetch$, timeout$).toPromise();
+      const result = await race<FetchResult | null>(fetch$, timeout$).toPromise();
       if (result && result.saved_objects) {
         const savedObjects = result.saved_objects as SearchSessionSavedObject[];
         return await Promise.all(savedObjects.map(mapToUISession(this.urls, this.config)));
@@ -125,7 +126,7 @@ export class SearchSessionsMgmtAPI {
 
       this.notifications.toasts.addSuccess({
         title: i18n.translate('xpack.data.mgmt.searchSessions.api.deleted', {
-          defaultMessage: 'Deleted session',
+          defaultMessage: 'Deleted the session',
         }),
       });
     } catch (err) {

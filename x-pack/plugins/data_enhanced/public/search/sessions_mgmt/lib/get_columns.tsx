@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
@@ -17,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 import { capitalize } from 'lodash';
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 import { RedirectAppLinks } from '../../../../../../../src/plugins/kibana_react/public';
 import { SessionsMgmtConfigSchema } from '../';
 import { ActionComplete, STATUS, UISession } from '../../../../common/search/sessions_mgmt';
@@ -73,18 +75,31 @@ export const getColumns = (
       }),
       sortable: true,
       width: '20%',
-      render: (name: UISession['name'], { isViewable, url }) => {
-        if (isViewable) {
-          return (
-            <RedirectAppLinks application={core.application}>
-              <EuiLink href={url} data-test-subj="session-mgmt-table-col-name-viewable">
-                <TableText>{name}</TableText>
-              </EuiLink>
-            </RedirectAppLinks>
-          );
-        }
-
-        return <TableText data-test-subj="session-mgmt-table-col-name-plain">{name}</TableText>;
+      render: (name: UISession['name'], { isRestorable, url }) => {
+        const notRestorableWarning = isRestorable ? null : (
+          <>
+            {' '}
+            <EuiIconTip
+              type="alert"
+              content={
+                <FormattedMessage
+                  id="xpack.data.mgmt.searchSessions.table.notRestorableWarning"
+                  defaultMessage="The search session will be executed again. You can then save it for future use."
+                />
+              }
+            />
+          </>
+        );
+        return (
+          <RedirectAppLinks application={core.application}>
+            <EuiLink href={url} data-test-subj="session-mgmt-table-col-name">
+              <TableText>
+                {name}
+                {notRestorableWarning}
+              </TableText>
+            </EuiLink>
+          </RedirectAppLinks>
+        );
       },
     },
 
@@ -184,7 +199,7 @@ export const getColumns = (
       name: '',
       sortable: false,
       render: (actions: UISession['actions'], session) => {
-        if (session.isViewable || (actions && actions.length)) {
+        if (actions && actions.length) {
           return (
             <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" alignItems="flexEnd">
               <EuiFlexItem grow={false}>

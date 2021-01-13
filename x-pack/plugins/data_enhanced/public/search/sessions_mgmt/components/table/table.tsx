@@ -8,7 +8,7 @@ import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 import moment from 'moment';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '../';
@@ -24,25 +24,19 @@ const TABLE_ID = 'searchSessionsMgmtTable';
 interface Props {
   core: CoreStart;
   api: SearchSessionsMgmtAPI;
-  initialTable: UISession[] | null;
   timezone: string;
   config: SessionsMgmtConfigSchema;
 }
 
-export function SearchSessionsMgmtTable({
-  core,
-  api,
-  timezone,
-  initialTable,
-  config,
-  ...props
-}: Props) {
-  const [tableData, setTableData] = useState<UISession[]>(initialTable ? initialTable : []);
+export function SearchSessionsMgmtTable({ core, api, timezone, config, ...props }: Props) {
+  const [tableData, setTableData] = useState<UISession[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [debouncedIsLoading, setDebouncedIsLoading] = useState(false);
   const [pagination, setPagination] = useState({ pageIndex: 0 });
-  const [refreshInterval, setRefreshInterval] = useState<number | undefined>(undefined);
   const showLatestResultsHandler = useRef<Function>();
+  const refreshInterval = useMemo(() => moment.duration(config.refreshInterval).asMilliseconds(), [
+    config.refreshInterval,
+  ]);
 
   // Debounce rendering the state of the Refresh button
   useDebounce(
@@ -53,11 +47,6 @@ export function SearchSessionsMgmtTable({
     [isLoading]
   );
 
-  // Convert the config interval to ms
-  useEffect(() => {
-    setRefreshInterval(moment.duration(config.refreshInterval).asMilliseconds());
-  }, [config.refreshInterval]);
-
   // refresh behavior
   const doRefresh = useCallback(async () => {
     setIsLoading(true);
@@ -67,27 +56,28 @@ export function SearchSessionsMgmtTable({
       };
       showLatestResultsHandler.current = renderResults;
       const results = await api.fetchTableData();
-      if (results) {
-        // Ignore results from any but the latest api call
-        if (showLatestResultsHandler.current === renderResults) renderResults(results);
-      } else {
-        renderResults([]);
-      }
+
+      if (showLatestResultsHandler.current === renderResults) renderResults(results || []);
     } catch (e) {
       setTableData([]);
     }
     setIsLoading(false);
   }, [api]);
 
+  // initial data load
+  useEffect(() => {
+    doRefresh();
+  }, [doRefresh]);
+
   useInterval(doRefresh, refreshInterval);
 
   // When action such as cancel, delete, extend occurs, use the async return
   // value to refresh the table
-  const handleActionCompleted: ActionComplete = useCallback((results: UISession[] | null) => {
+  const handleActionCompleted: ActionComplete = (results: UISession[] | null) => {
     if (results) {
       setTableData(results);
     }
-  }, []);
+  };
 
   // table config: search / filters
   const search: EuiSearchBarProps = {

@@ -39,12 +39,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.existOrFail('session-mgmt-table-col-created');
 
         // find there is only one item in the table which is the newly saved session
-        const names = await testSubjects.findAll('session-mgmt-table-col-name-viewable');
+        const names = await testSubjects.findAll('session-mgmt-table-col-name');
         expect(names.length).to.be(1);
         expect(await Promise.all(names.map((n) => n.getVisibleText()))).to.eql(['Not Delayed']);
 
         // navigate to dashboard
-        await testSubjects.click('session-mgmt-table-col-name-viewable');
+        await testSubjects.click('session-mgmt-table-col-name');
 
         // embeddable has loaded
         await testSubjects.existOrFail('embeddablePanelHeading-SumofBytesbyExtension');
@@ -79,6 +79,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('autorefreshes and shows items on the server', async () => {
         await esArchiver.load('data/search_sessions');
+
+        const nameColumnText = await testSubjects
+          .findAll('session-mgmt-table-col-name')
+          .then((nCol) => Promise.all(nCol.map((n) => n.getVisibleText())));
+
+        expect(nameColumnText.length).to.be(10);
 
         const createdColText = await testSubjects
           .findAll('session-mgmt-table-col-created')

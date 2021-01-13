@@ -9,10 +9,10 @@ import { mount, ReactWrapper } from 'enzyme';
 import { CoreSetup, CoreStart, DocLinksStart } from 'kibana/public';
 import moment from 'moment';
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
 import { SessionsMgmtConfigSchema } from '..';
-import { STATUS, UISession } from '../../../../common/search/sessions_mgmt';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { LocaleWrapper, mockUrls } from '../__mocks__';
@@ -22,7 +22,6 @@ let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: MockedKeys<CoreStart>;
 let mockConfig: SessionsMgmtConfigSchema;
 let sessionsClient: SessionsClient;
-let initialTable: UISession[];
 let api: SearchSessionsMgmtAPI;
 
 describe('Background Search Session Management Main', () => {
@@ -44,19 +43,6 @@ describe('Background Search Session Management Main', () => {
       mockCoreSetup.notifications,
       mockConfig
     );
-
-    initialTable = [
-      {
-        name: 'very background search',
-        id: 'wtywp9u2802hahgp-flps',
-        url: '/app/great-app-url/#48',
-        appId: 'canvas',
-        status: STATUS.IN_PROGRESS,
-        created: '2020-12-02T00:19:32Z',
-        expires: '2020-12-07T00:19:32Z',
-        isViewable: true,
-      },
-    ];
   });
 
   describe('renders', () => {
@@ -68,24 +54,25 @@ describe('Background Search Session Management Main', () => {
 
     let main: ReactWrapper;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       mockCoreSetup.uiSettings.get.mockImplementation((key: string) => {
         return key === 'dateFormat:tz' ? 'UTC' : null;
       });
 
-      main = mount(
-        <LocaleWrapper>
-          <SearchSessionsMgmtMain
-            core={mockCoreStart}
-            api={api}
-            http={mockCoreSetup.http}
-            timezone="UTC"
-            initialTable={initialTable}
-            documentation={new AsyncSearchIntroDocumentation(docLinks)}
-            config={mockConfig}
-          />
-        </LocaleWrapper>
-      );
+      await act(async () => {
+        main = mount(
+          <LocaleWrapper>
+            <SearchSessionsMgmtMain
+              core={mockCoreStart}
+              api={api}
+              http={mockCoreSetup.http}
+              timezone="UTC"
+              documentation={new AsyncSearchIntroDocumentation(docLinks)}
+              config={mockConfig}
+            />
+          </LocaleWrapper>
+        );
+      });
     });
 
     test('page title', () => {

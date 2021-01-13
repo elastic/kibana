@@ -8,13 +8,11 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { AppDependencies } from '../';
 import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
-import { UISession } from '../../../../common/search/sessions_mgmt';
 import { SearchSessionsMgmtMain } from '../components/main';
 
 export const renderApp = (
   elem: HTMLElement | null,
-  { i18n, uiSettings, ...homeDeps }: AppDependencies,
-  initialTable: UISession[] | null
+  { i18n, uiSettings, ...homeDeps }: AppDependencies
 ) => {
   if (!elem) {
     return () => undefined;
@@ -29,11 +27,7 @@ export const renderApp = (
   render(
     <I18nContext>
       <KibanaReactContextProvider>
-        <SearchSessionsMgmtMain
-          initialTable={initialTable}
-          {...homeDeps}
-          timezone={uiSettings.get('dateFormat:tz')}
-        />
+        <SearchSessionsMgmtMain {...homeDeps} timezone={uiSettings.get('dateFormat:tz')} />
       </KibanaReactContextProvider>
     </I18nContext>,
     elem

@@ -14,7 +14,7 @@ export const getAppFilter: (tableData: UISession[]) => SearchFilterConfig = (tab
   name: i18n.translate('xpack.data.mgmt.searchSessions.search.filterApp', {
     defaultMessage: 'App',
   }),
-  field: 'app',
+  field: 'appId',
   multiSelect: 'or',
   options: tableData.reduce((options: FieldValueOptionType[], { appId }) => {
     const existingOption = options.find((o) => o.value === appId);

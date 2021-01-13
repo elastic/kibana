@@ -69,14 +69,20 @@ export const PopoverActionsMenu = ({ api, handleAction, session }: PopoverAction
   };
 
   const renderPopoverButton = () => (
-    <EuiButtonIcon
-      aria-label={i18n.translate('xpack.data.mgmt.searchSessions.ariaLabel.moreActions', {
+    <EuiToolTip
+      content={i18n.translate('xpack.data.mgmt.searchSessions.actions.tooltip.moreActions', {
         defaultMessage: 'More actions',
       })}
-      color="text"
-      iconType="boxesHorizontal"
-      onClick={onPopoverClick}
-    />
+    >
+      <EuiButtonIcon
+        aria-label={i18n.translate('xpack.data.mgmt.searchSessions.ariaLabel.moreActions', {
+          defaultMessage: 'More actions',
+        })}
+        color="text"
+        iconType="boxesHorizontal"
+        onClick={onPopoverClick}
+      />
+    </EuiToolTip>
   );
 
   const actions = session.actions || [];
@@ -114,20 +120,15 @@ export const PopoverActionsMenu = ({ api, handleAction, session }: PopoverAction
   const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, items }];
 
   return (
-    <EuiToolTip
-      content={i18n.translate('xpack.data.mgmt.searchSessions.actions.tooltip.moreActions', {
-        defaultMessage: 'More actions',
-      })}
+    <EuiPopover
+      id={`popover-${session.id}`}
+      button={renderPopoverButton()}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      anchorPosition="downLeft"
+      panelPaddingSize={'s'}
     >
-      <EuiPopover
-        id={`popover-${session.id}`}
-        button={renderPopoverButton()}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        anchorPosition="downLeft"
-      >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
-      </EuiPopover>
-    </EuiToolTip>
+      <EuiContextMenu initialPanelId={0} panels={panels} />
+    </EuiPopover>
   );
 };

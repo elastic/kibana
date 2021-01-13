@@ -13,7 +13,7 @@ import React from 'react';
 import { coreMock } from 'src/core/public/mocks';
 import { SessionsClient } from 'src/plugins/data/public/search';
 import { SessionsMgmtConfigSchema } from '../../';
-import { STATUS, UISession } from '../../../../../common/search/sessions_mgmt';
+import { STATUS } from '../../../../../common/search/sessions_mgmt';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { LocaleWrapper, mockUrls } from '../../__mocks__';
 import { SearchSessionsMgmtTable } from './table';
@@ -22,7 +22,6 @@ let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockCoreStart: CoreStart;
 let mockConfig: SessionsMgmtConfigSchema;
 let sessionsClient: SessionsClient;
-let initialTable: UISession[];
 let api: SearchSessionsMgmtAPI;
 
 describe('Background Search Session Management Table', () => {
@@ -34,19 +33,6 @@ describe('Background Search Session Management Table', () => {
       refreshInterval: moment.duration(1, 'seconds'),
       refreshTimeout: moment.duration(10, 'minutes'),
     };
-
-    initialTable = [
-      {
-        name: 'very background search',
-        id: 'wtywp9u2802hahgp-flps',
-        url: '/app/great-app-url/#48',
-        appId: 'canvas',
-        status: STATUS.IN_PROGRESS,
-        created: '2020-12-02T00:19:32Z',
-        expires: '2020-12-07T00:19:32Z',
-        isViewable: true,
-      },
-    ];
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
     api = new SearchSessionsMgmtAPI(
@@ -62,21 +48,44 @@ describe('Background Search Session Management Table', () => {
   describe('renders', () => {
     let table: ReactWrapper;
 
-    beforeEach(() => {
-      table = mount(
-        <LocaleWrapper>
-          <SearchSessionsMgmtTable
-            core={mockCoreStart}
-            api={api}
-            timezone="UTC"
-            initialTable={initialTable}
-            config={mockConfig}
-          />
-        </LocaleWrapper>
-      );
-    });
+    const getInitialResponse = () => {
+      return {
+        saved_objects: [
+          {
+            id: 'wtywp9u2802hahgp-flps',
+            attributes: {
+              name: 'very background search',
+              id: 'wtywp9u2802hahgp-flps',
+              url: '/app/great-app-url/#48',
+              appId: 'canvas',
+              status: STATUS.IN_PROGRESS,
+              created: '2020-12-02T00:19:32Z',
+              expires: '2020-12-07T00:19:32Z',
+              isViewable: true,
+            },
+          },
+        ],
+      };
+    };
 
-    test('table header cells', () => {
+    test('table header cells', async () => {
+      sessionsClient.find = jest.fn().mockImplementation(async () => {
+        return getInitialResponse();
+      });
+
+      await act(async () => {
+        table = mount(
+          <LocaleWrapper>
+            <SearchSessionsMgmtTable
+              core={mockCoreStart}
+              api={api}
+              timezone="UTC"
+              config={mockConfig}
+            />
+          </LocaleWrapper>
+        );
+      });
+
       expect(table.find('thead th').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
           "AppClick to sort in ascending order",
@@ -88,7 +97,25 @@ describe('Background Search Session Management Table', () => {
       `);
     });
 
-    test('table body cells', () => {
+    test('table body cells', async () => {
+      sessionsClient.find = jest.fn().mockImplementation(async () => {
+        return getInitialResponse();
+      });
+
+      await act(async () => {
+        table = mount(
+          <LocaleWrapper>
+            <SearchSessionsMgmtTable
+              core={mockCoreStart}
+              api={api}
+              timezone="UTC"
+              config={mockConfig}
+            />
+          </LocaleWrapper>
+        );
+      });
+      table.update();
+
       expect(table.find('tbody td').map((node) => node.text())).toMatchInlineSnapshot(`
         Array [
           "App",
@@ -112,23 +139,22 @@ describe('Background Search Session Management Table', () => {
         refreshInterval: moment.duration(10, 'seconds'),
       };
 
-      mount(
-        <LocaleWrapper>
-          <SearchSessionsMgmtTable
-            core={mockCoreStart}
-            api={api}
-            timezone="UTC"
-            initialTable={[]}
-            config={mockConfig}
-          />
-        </LocaleWrapper>
-      );
-
-      act(() => {
+      await act(async () => {
+        mount(
+          <LocaleWrapper>
+            <SearchSessionsMgmtTable
+              core={mockCoreStart}
+              api={api}
+              timezone="UTC"
+              config={mockConfig}
+            />
+          </LocaleWrapper>
+        );
         jest.advanceTimersByTime(20000);
       });
 
-      expect(sessionsClient.find).toBeCalledTimes(2);
+      // 1 for initial load + 2 refresh calls
+      expect(sessionsClient.find).toBeCalledTimes(3);
 
       jest.useRealTimers();
     });
@@ -142,28 +168,28 @@ describe('Background Search Session Management Table', () => {
         refreshTimeout: moment.duration(2, 'days'),
       };
 
-      const table = mount(
-        <LocaleWrapper>
-          <SearchSessionsMgmtTable
-            core={mockCoreStart}
-            api={api}
-            timezone="UTC"
-            initialTable={[]}
-            config={mockConfig}
-          />
-        </LocaleWrapper>
-      );
+      await act(async () => {
+        const table = mount(
+          <LocaleWrapper>
+            <SearchSessionsMgmtTable
+              core={mockCoreStart}
+              api={api}
+              timezone="UTC"
+              config={mockConfig}
+            />
+          </LocaleWrapper>
+        );
 
-      expect(sessionsClient.find).not.toBeCalled();
+        const buttonSelector = `[data-test-subj="session-mgmt-table-btn-refresh"] button`;
 
-      const buttonSelector = `[data-test-subj="session-mgmt-table-btn-refresh"] button`;
-
-      await waitFor(() => {
-        table.find(buttonSelector).first().simulate('click');
-        table.update();
+        await waitFor(() => {
+          table.find(buttonSelector).first().simulate('click');
+          table.update();
+        });
       });
 
-      expect(sessionsClient.find).toBeCalledTimes(1);
+      // initial call + click
+      expect(sessionsClient.find).toBeCalledTimes(2);
     });
   });
 });

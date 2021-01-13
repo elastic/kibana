@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from '@hapi/boom';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup } from 'kibana/public';
 import moment from 'moment';
-import * as Rx from 'rxjs';
-import sinon from 'sinon';
 import { coreMock } from 'src/core/public/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SavedObjectsFindResponse } from 'src/core/server';
@@ -22,7 +19,6 @@ import { SearchSessionsMgmtAPI } from './api';
 let mockCoreSetup: MockedKeys<CoreSetup>;
 let mockConfig: SessionsMgmtConfigSchema;
 let sessionsClient: SessionsClient;
-let findSessions: sinon.SinonStub;
 
 describe('Search Sessions Management API', () => {
   beforeEach(() => {
@@ -35,20 +31,21 @@ describe('Search Sessions Management API', () => {
     };
 
     sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
-    findSessions = sinon.stub(sessionsClient, 'find').callsFake(async () => {
-      return {
-        saved_objects: [
-          {
-            id: 'hello-pizza-123',
-            attributes: { name: 'Veggie', appId: 'pizza', status: 'baked' },
-          },
-        ],
-      } as SavedObjectsFindResponse;
-    });
   });
 
   describe('listing', () => {
     test('fetchDataTable calls the listing endpoint', async () => {
+      sessionsClient.find = jest.fn().mockImplementation(async () => {
+        return {
+          saved_objects: [
+            {
+              id: 'hello-pizza-123',
+              attributes: { name: 'Veggie', appId: 'pizza', status: 'complete' },
+            },
+          ],
+        } as SavedObjectsFindResponse;
+      });
+
       const api = new SearchSessionsMgmtAPI(
         sessionsClient,
         mockUrls,
@@ -65,9 +62,9 @@ describe('Search Sessions Management API', () => {
             "created": undefined,
             "expires": undefined,
             "id": "hello-pizza-123",
-            "isViewable": true,
+            "isRestorable": true,
             "name": "Veggie",
-            "status": "baked",
+            "status": "complete",
             "url": "hello-cool-undefined-url",
           },
         ]
@@ -75,7 +72,7 @@ describe('Search Sessions Management API', () => {
     });
 
     test('isViewable is calculated based on status', async () => {
-      findSessions.callsFake(async () => {
+      sessionsClient.find = jest.fn().mockImplementation(async () => {
         return {
           saved_objects: [
             {
@@ -114,7 +111,7 @@ describe('Search Sessions Management API', () => {
       expect(
         data &&
           data.map((session) => {
-            return [session.name, session.status, session.isViewable];
+            return [session.name, session.status, session.isRestorable];
           })
       ).toMatchInlineSnapshot(`
         Array [
@@ -148,9 +145,7 @@ describe('Search Sessions Management API', () => {
     });
 
     test('handle error from sessionsClient response', async () => {
-      findSessions.callsFake(async () => {
-        throw Boom.badImplementation('implementation is so bad');
-      });
+      sessionsClient.find = jest.fn().mockRejectedValue(new Error('implementation is so bad'));
 
       const api = new SearchSessionsMgmtAPI(
         sessionsClient,
@@ -173,8 +168,10 @@ describe('Search Sessions Management API', () => {
         refreshTimeout: moment.duration(1, 'seconds'),
       };
 
-      findSessions.callsFake(async () => {
-        return await Rx.timer(2000).toPromise();
+      sessionsClient.find = jest.fn().mockImplementation(async () => {
+        return new Promise((resolve) => {
+          setTimeout(resolve, 2000);
+        });
       });
 
       const api = new SearchSessionsMgmtAPI(
@@ -192,6 +189,19 @@ describe('Search Sessions Management API', () => {
   });
 
   describe('delete', () => {
+    beforeEach(() => {
+      sessionsClient.find = jest.fn().mockImplementation(async () => {
+        return {
+          saved_objects: [
+            {
+              id: 'hello-pizza-123',
+              attributes: { name: 'Veggie', appId: 'pizza', status: 'baked' },
+            },
+          ],
+        } as SavedObjectsFindResponse;
+      });
+    });
+
     test('send delete calls the delete endpoint with a session ID', async () => {
       const api = new SearchSessionsMgmtAPI(
         sessionsClient,
@@ -202,14 +212,12 @@ describe('Search Sessions Management API', () => {
       await api.sendDelete('abc-123-cool-session-ID');
 
       expect(mockCoreSetup.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Deleted session',
+        title: 'Deleted the session',
       });
     });
 
     test('error if deleting shows a toast message', async () => {
-      sinon.stub(sessionsClient, 'delete').callsFake(async () => {
-        throw Boom.badImplementation('implementation is so bad');
-      });
+      sessionsClient.delete = jest.fn().mockRejectedValue(new Error('implementation is so bad'));
 
       const api = new SearchSessionsMgmtAPI(
         sessionsClient,
