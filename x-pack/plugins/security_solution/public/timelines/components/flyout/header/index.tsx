@@ -33,6 +33,7 @@ import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import * as commonI18n from '../../timeline/properties/translations';
 import { getTimelineStatusByIdSelector } from './selectors';
+import { TimelineKPIs } from './kpis';
 
 // to hide side borders
 const StyledPanel = styled(EuiPanel)`
@@ -244,7 +245,9 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => (
       </EuiFlexGroup>
     </EuiFlexItem>
 
-    <EuiFlexItem grow={1}>{/* KPIs PLACEHOLDER */}</EuiFlexItem>
+    <EuiFlexItem grow={1}>
+      <TimelineKPIs processes={10} users={20} hosts={20} sourceIps={30} destinationIps={40} />
+    </EuiFlexItem>
 
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="s">
