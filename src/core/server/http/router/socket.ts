@@ -74,7 +74,7 @@ export class KibanaSocket implements IKibanaSocket {
     return this.socket instanceof TLSSocket ? this.socket.authorizationError : undefined;
   }
 
-  constructor(public readonly socket: Socket) {}
+  constructor(private readonly socket: Socket) {}
 
   getPeerCertificate(detailed: true): DetailedPeerCertificate | null;
   getPeerCertificate(detailed: false): PeerCertificate | null;
