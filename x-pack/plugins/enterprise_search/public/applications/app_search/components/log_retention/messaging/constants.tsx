@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { LogRetentionOptions } from '../types';
+import { LogRetentionOptions, LogRetentionSettings, LogRetentionPolicy } from '../types';
 
 export const renderLogRetentionDate = (dateString: string) => (
   <FormattedDate value={new Date(dateString)} month="long" day="numeric" year="numeric" />
@@ -39,8 +39,8 @@ const CAPITALIZATION_MAP = {
 
 interface Props {
   type: LogRetentionOptions;
-  disabledAt?: string | null;
-  minAgeDays?: number | null;
+  disabledAt?: LogRetentionSettings['disabledAt'];
+  minAgeDays?: LogRetentionPolicy['minAgeDays'];
 }
 
 export const NoLogging: React.FC<Props> = ({ type, disabledAt }) => {
