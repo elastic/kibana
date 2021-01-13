@@ -5,6 +5,7 @@
     "plugins/apm/e2e/cypress/**/*",
     "plugins/apm/scripts/**/*",
     "plugins/data_enhanced/**/*",
+    "plugins/discover_enhanced/**/*",
     "plugins/dashboard_enhanced/**/*",
     "plugins/global_search/**/*",
     "plugins/graph/**/*",
@@ -16,6 +17,7 @@
     "plugins/telemetry_collection_xpack/**/*",
     "plugins/translations/**/*",
     "plugins/ui_actions_enhanced/**/*",
+    "plugins/vis_type_timeseries_enhanced/**/*",
     "test/**/*"
   ],
   "compilerOptions": {
